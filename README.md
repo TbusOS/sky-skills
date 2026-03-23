@@ -10,6 +10,7 @@ A curated collection of **Claude Code Skills** — reusable, domain-specific pro
 |-------|----------|-------------|
 | [linux-kernel-dev](skills/linux-kernel-dev/) | EN | Linux kernel & driver development — coding standards, module/driver/chardev templates, Kconfig, Makefile, device tree bindings, debugging tools, concurrency patterns, kernel API reference |
 | [wechat-video-publisher](skills/wechat-video-publisher/) | ZH | WeChat article & video production pipeline — edge-tts narration, Playwright frame-by-frame recording, ffmpeg subtitle burning, WeChat-compatible inline-style HTML article templates |
+| [doc-to-markdown](skills/doc-to-markdown/) | EN/ZH | Document-to-Markdown converter — batch PDF/DOCX to clean Markdown with extracted images, table conversion, EMF/WMF handling, CJK support |
 
 ## What Are Claude Code Skills?
 
@@ -25,6 +26,7 @@ For example, when you start editing a kernel module, the `linux-kernel-dev` skil
 # Install a specific skill
 claude install github:TbusOS/sky-skills/skills/linux-kernel-dev
 claude install github:TbusOS/sky-skills/skills/wechat-video-publisher
+claude install github:TbusOS/sky-skills/skills/doc-to-markdown
 ```
 
 ### Method 2: Copy into Your Project
@@ -74,6 +76,19 @@ An end-to-end pipeline for creating narrated video tutorials and WeChat articles
 - **Screenshots** — automated per-step screenshots for article illustrations
 
 **Auto-triggers when:** creating narrated videos from HTML animations, adding subtitles, or writing WeChat-compatible articles.
+
+### doc-to-markdown
+
+Convert PDF and DOCX files to clean, well-formatted Markdown with images extracted and organized:
+
+- **PDF conversion** — text extraction with heading detection, embedded image extraction, scanned PDF fallback (full-page 2x PNG export)
+- **DOCX conversion** — preserves heading/list/code styles, extracts PNG/JPEG images, handles EMF/WMF diagrams via LibreOffice or PIL
+- **Table extraction** — PDF tables via PyMuPDF's find_tables, DOCX tables to markdown format
+- **Image management** — organized into per-document subdirectories, named by section (`sec{NN}_{seq}_{desc}.png`), tiny decorative images auto-filtered
+- **Batch processing** — convert single files or entire directories in one pass
+- **Post-processing guidance** — workflow for reviewing, renaming, and curating extracted images
+
+**Auto-triggers when:** converting documents to markdown, extracting content from PDFs/DOCX files, batch-converting a folder of documents, or any request involving "convert to markdown" / "转成markdown" / "文档转换".
 
 ## Contributing
 

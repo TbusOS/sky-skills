@@ -10,6 +10,7 @@
 |-------|------|------|
 | [linux-kernel-dev](skills/linux-kernel-dev/) | EN | Linux 内核与驱动开发 —— 编码规范、模块/驱动/字符设备模板、Kconfig、Makefile、设备树绑定、调试工具、并发模型、内核 API 速查 |
 | [wechat-video-publisher](skills/wechat-video-publisher/) | ZH | 微信公众号视频制作全流水线 —— edge-tts 配音、Playwright 逐帧录制、ffmpeg 字幕烧录、微信兼容 inline-style 文章模板 |
+| [doc-to-markdown](skills/doc-to-markdown/) | EN/ZH | 文档转 Markdown —— 批量 PDF/DOCX 转换为格式清晰的 Markdown，自动提取图片、表格转换、EMF/WMF 处理、中文支持 |
 
 ## 什么是 Claude Code Skills？
 
@@ -25,6 +26,7 @@
 # 安装指定 skill
 claude install github:TbusOS/sky-skills/skills/linux-kernel-dev
 claude install github:TbusOS/sky-skills/skills/wechat-video-publisher
+claude install github:TbusOS/sky-skills/skills/doc-to-markdown
 ```
 
 ### 方法二：复制到项目中
@@ -74,6 +76,19 @@ ln -s "$(pwd)/sky-skills/skills/linux-kernel-dev/SKILL.md" \
 - **自动截图** —— 每个步骤自动截取高清配图
 
 **自动触发条件：** 为 HTML 动画制作配音视频、添加字幕、编写微信公众号兼容文章时。
+
+### doc-to-markdown
+
+将 PDF 和 DOCX 文件转换为格式清晰的 Markdown，自动提取并整理图片：
+
+- **PDF 转换** —— 文本提取+标题检测、嵌入图片提取、扫描版 PDF 自动导出 2x 高清页面图片
+- **DOCX 转换** —— 保留标题/列表/代码样式、提取 PNG/JPEG 图片、通过 LibreOffice 或 PIL 处理 EMF/WMF 图表
+- **表格提取** —— PDF 表格（PyMuPDF find_tables）、DOCX 表格均转为 Markdown 格式
+- **图片管理** —— 按文档分子目录存放，按章节命名（`sec{章节号}_{序号}_{描述}.png`），自动过滤微小装饰图
+- **批量处理** —— 支持单文件或整个目录批量转换
+- **后处理指引** —— 提供审查、重命名、整理提取图片的工作流
+
+**自动触发条件：** 转换文档为 Markdown、提取 PDF/DOCX 内容、批量转换文件夹，或涉及"convert to markdown"/"转成markdown"/"文档转换"的请求。
 
 ## 贡献指南
 
