@@ -1,8 +1,10 @@
 // Screenshot an HTML file with Playwright so you can visually verify a demo.
 // Usage:
-//   node skills/apple-design/scripts/screenshot.mjs <url-or-path> [out.png]
+//   node skills/design-review/scripts/screenshot.mjs <url-or-path> [out.png]
 // Requires: `npm i playwright` (once) then `npx playwright install chromium`.
 // If given a file path, the script serves the repo root at :8787 and fetches it.
+//
+// NOTE: unified from 4 byte-identical copies (one per design skill).
 
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';

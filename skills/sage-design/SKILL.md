@@ -48,22 +48,34 @@ last-verified: 2026-04-19
 3. `assets/sage.css` — CSS 变量与组件
 4. `templates/` — 着陆页骨架（mirrors ember-design structure, sage palette）
 
-## 发布前检查（MUST — 可执行）
+## 发布前检查（MUST — 交给 design-review skill）
 
-生成完整 HTML 后，必须：
+生成完整 HTML 后, 必须:
 
 ```bash
-# 1) 结构验证
-python3 skills/sage-design/scripts/verify.py <path/to/your.html>
+# 1) 结构验证(placeholder / BEM / 未定义 class / SVG 平衡)
+python3 skills/design-review/scripts/verify.py --skill=sage <path/to/your.html>
 
-# 2) 视觉验证（Playwright 渲染 + 对比度 + 框图尺寸 + 孤儿卡检测）
-node skills/sage-design/scripts/visual-audit.mjs <path/to/your.html>
+# 2) 视觉渲染验证(对比度 + 框图尺寸 + SVG 文字 + 孤儿卡)
+node skills/design-review/scripts/visual-audit.mjs <path/to/your.html>
 
-# 3) 全页截图，肉眼审核
-node skills/sage-design/scripts/screenshot.mjs <path/to/your.html> shot.png
+# 3) 全页截图, 肉眼审核
+node skills/design-review/scripts/screenshot.mjs <path/to/your.html> shot.png
 ```
 
-verify.py 扫占位符、BEM、未定义 class、SVG 平衡。visual-audit 会用浏览器渲染，检查：**按钮/徽章在深底上的文字对比度（WCAG）**、**hero 框图渲染宽度**、**SVG 文字实际像素**、**多列网格里的孤儿卡片（一张卡独占一行左半边）**。**任一脚本 exit 非 0 = 没完成。**
+**任一脚本 exit 非 0 = 没完成**。规则与已知 bug 见
+`skills/design-review/references/cross-skill-rules.md` +
+`skills/design-review/references/known-bugs.md`。
+
+Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
+[harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)
+里的 GAN 式 discriminator。
+
+### sage 专属要点
+
+sage 绿 `#97B077` 在白底上对比度只有 2.4(fail AA), 所以
+primary CTA 用 `--sage-ink` (#393C54), sage 绿只做 accent + 大面积填充 + 白字。
+风格规则详见 `references/dos-and-donts.md`。
 
 ## 设计签名（不能漏掉的"sage 味"）
 

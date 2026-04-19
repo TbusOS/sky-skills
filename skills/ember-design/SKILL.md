@@ -32,17 +32,29 @@ last-verified: 2026-04-19
 3. `assets/ember.css` — CSS 变量与组件
 4. `templates/landing-page.html` — 着陆页骨架
 
-## 发布前检查（MUST — 三道闸都要 exit 0）
+## 发布前检查（MUST — 交给 design-review skill）
 
 ```bash
-# 1) 结构验证（placeholder / BEM / 未定义 class / SVG 平衡）
-python3 skills/ember-design/scripts/verify.py <path/to/your.html>
+# 1) 结构验证(placeholder / BEM / 未定义 class / SVG 平衡)
+python3 skills/design-review/scripts/verify.py --skill=ember <path/to/your.html>
 
-# 2) 视觉渲染验证（Playwright + WCAG 对比度 + 框图尺寸 + 孤儿卡）
-node skills/ember-design/scripts/visual-audit.mjs <path/to/your.html>
+# 2) 视觉渲染验证(Playwright + WCAG 对比度 + 框图尺寸 + 孤儿卡)
+node skills/design-review/scripts/visual-audit.mjs <path/to/your.html>
 
-# 3) 全页截图，肉眼审核
-node skills/ember-design/scripts/screenshot.mjs <path/to/your.html> shot.png
+# 3) 全页截图, 肉眼审核
+node skills/design-review/scripts/screenshot.mjs <path/to/your.html> shot.png
 ```
 
-任一条 exit 非 0 → **任务没完成**。visual-audit 专门拦这些历史坑：深底上看不清的 CTA（`.ember-button` 曾被 `.ember-nav a` 吃掉 color）、hero 框图被窄容器压到 <900px、孤儿卡独占半行。详见 `references/dos-and-donts.md` 的 "Don't 带 Why" 表。
+任一条 exit 非 0 → **任务没完成**。规则与已知 bug 见
+`skills/design-review/references/cross-skill-rules.md` +
+`skills/design-review/references/known-bugs.md`。
+
+Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
+[harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)
+里的 GAN 式 discriminator。
+
+### ember 专属要点
+
+历史坑:`.ember-button` 曾被 `.ember-nav a` 吃掉 color(选择器特异性),
+在 nav 里的 button 必须写 `.ember-nav a.ember-button { color:#ffffff }` 单独规则。
+风格规则详见 `references/dos-and-donts.md`。

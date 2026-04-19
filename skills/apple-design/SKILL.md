@@ -36,50 +36,31 @@ last-verified: 2026-04-19
 8. `references/responsive.md` — 断点与 max-width
 9. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
 
-## 发布前检查（MUST — 可执行）
+## 发布前检查（MUST — 交给 design-review skill）
 
-生成任何完整 HTML 页面后、宣布"完成"前，**必须**依次跑下面两条命令。它们不是建议，是闸口 —— exit 非 0 就是没完成。
-
-### 1. 结构验证（必跑）
+生成任何完整 HTML 页面后、宣布"完成"前,**必须**依次跑三道闸:
 
 ```bash
-python3 skills/apple-design/scripts/verify.py <path/to/your.html>
+# 1) 结构验证(静态扫描)
+python3 skills/design-review/scripts/verify.py --skill=apple <path/to/your.html>
+
+# 2) 视觉渲染验证(Playwright)
+node skills/design-review/scripts/visual-audit.mjs <path/to/your.html>
+
+# 3) 全页截图,肉眼审核
+node skills/design-review/scripts/screenshot.mjs <path/to/your.html> shot.png
 ```
 
-这个脚本自动检查：
-- 无 `[placeholder]` / `[hero]` / `[xxx.icon]` 等括号占位符
-- `<!doctype html>` + viewport meta 存在
-- Hero 段使用 `.apple-container--hero` 或 `.apple-container--wide`（**不得用窄容器**）
-- 每个 `class="apple-*"` 在 `apple.css` 都有定义（无幽灵 class）
-- `<svg>` 标签平衡
+**任一脚本 exit 非 0 = 没完成**。规则与已知 bug 见
+`skills/design-review/references/cross-skill-rules.md` +
+`skills/design-review/references/known-bugs.md`。
 
-Exit 0 = 可以宣布完成；exit 1 = 列出每条失败原因，你必须全部修完再跑一次。
+Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
+[harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)
+里的 GAN 式 discriminator。
 
-### 2. 视觉渲染验证（必跑 —— 这是最容易发现历史坑的一步）
+### apple 专属要点
 
-```bash
-# 一次性安装：npm i playwright && npx playwright install chromium
-node skills/apple-design/scripts/visual-audit.mjs <path/to/your.html>
-```
-
-visual-audit 会 headless 渲染页面，然后检查：
-- **WCAG 对比度**：所有 `.apple-link / .apple-badge / button` 在实际背景上计算 contrast ratio。< 3 是 error（阻断），3–4.5 是 warning。拦截 "cream on dark" / "dark on dark" 这类看不见的 CTA。
-- **Hero 框图尺寸**：span-2 的 figure 里的 SVG 渲染宽度 ≥ 900px，否则 warn "容器太窄"。
-- **SVG 文字像素**：hero 图里最小 `<text>` 在 1440 视口下实际渲染 ≥ 9px。
-- **孤儿卡检测**：多列 grid 里，如果一张非 hero 卡孤单在一堆 `grid-column: 1 / -1` 中间，flag warn。
-
-### 3. 全页截图，肉眼审核
-
-```bash
-node skills/apple-design/scripts/screenshot.mjs <path/to/your.html> demo-shot.png
-```
-
-**必须亲眼看这张图**再宣布完成 —— 排版 / 美感 / 文案是否说得通，这些脚本抓不出来。
-
-### 规则（reference only — 上面三条命令已覆盖大部分）
-
-详见 `references/dos-and-donts.md` 的 "Don't 带 Why" 表。简要：
-- 禁止 `[placeholder]` 字符串 —— 必须真 inline SVG
-- Hero 段必须 `class="apple-container apple-container--hero"`（**base + modifier 都要**）
-- 信息密集的 hero 框图（SoC / code-arch / multi-repo）必须用 `--hero` 容器并 `grid-column: 1 / -1`
-- 三道闸任一 exit 非 0 不算完成
+- Hero 段必须 `class="apple-container apple-container--hero"`(**base + modifier 都要**)。apple 的 base container 是窄(980px)的, hero 必须 `--hero` (1280px) 否则 SoC / multi-repo 这种信息密集框图会被压得文字 <9px
+- 信息密集的 hero 框图必须 `grid-column: 1 / -1`
+- 风格规则详见 `references/dos-and-donts.md`

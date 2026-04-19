@@ -1,14 +1,20 @@
-// Visual audit — renders the HTML in Playwright and flags the classes of bugs
+// Visual audit — renders the HTML in Playwright and flags classes of bugs
 // that static source-scanning misses:
 //   1. CTAs / buttons with low-contrast text (cream on dark-brown, etc.)
 //   2. Hero-row diagrams that render too narrow (<900px → text becomes illegible)
 //   3. SVG <text> that renders under 9px on a 1440-wide viewport
+//   4. Orphan figure cards in multi-col grids next to full-row hero siblings
 //
 // Usage:
-//   node skills/apple-design/scripts/visual-audit.mjs demos/apple-design/index.html
+//   node skills/design-review/scripts/visual-audit.mjs <html-path>
 //
-// Exit code 0 = pass, 1 = issues found. Run from repo root.
+// Exit code 0 = pass, 1 = errors found, 2 = bad CLI. Run from repo root.
 // Requires: playwright  (npm i playwright --no-save, then npx playwright install chromium)
+//
+// NOTE: this file was unified from 4 byte-identical copies (one per design skill).
+// The CTA selector list already includes every skill's button/badge classes, so
+// the audit is genuinely cross-skill. If a new design skill lands, add its CTA
+// selectors below rather than forking this file.
 
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
@@ -75,6 +81,7 @@ const findings = await page.evaluate(() => {
   };
 
   // ---------- 1) Button / CTA contrast audit ----------
+  // Cross-skill CTA selectors — add here when a new skill ships.
   const ctaSelectors = [
     '.apple-link', '.apple-badge', 'button',
     '.anth-button', '.anth-badge',
