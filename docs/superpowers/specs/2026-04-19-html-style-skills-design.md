@@ -35,9 +35,11 @@ sky-skills/skills/
 │   │   ├── design-tokens.md
 │   │   ├── typography.md
 │   │   ├── layout-patterns.md
+│   │   ├── components.md          # 全部 HTML 组件（nav/footer/form/table/tabs/carousel/...）
 │   │   ├── motion.md
 │   │   ├── imagery.md
 │   │   ├── data-display.md
+│   │   ├── responsive.md          # 断点 + 容器 max-width + grid
 │   │   └── dos-and-donts.md
 │   ├── assets/
 │   │   ├── apple.css
@@ -49,6 +51,10 @@ sky-skills/skills/
 │   │   ├── docs.html
 │   │   ├── slide-deck.html
 │   │   ├── stat-callout.html
+│   │   ├── nav-footer.html        # 独立 nav + footer 示范
+│   │   ├── form.html              # 表单组件总览
+│   │   ├── product-configurator.html  # 颜色/容量选择器 + sticky 购买栏
+│   │   ├── specs-page.html        # 技术规格/对比页
 │   │   └── diagrams/
 │   │       ├── flow.svg
 │   │       ├── architecture.svg
@@ -57,7 +63,7 @@ sky-skills/skills/
 │   └── prompts/
 │       └── example-prompts.md
 └── anthropic-design/
-    └── （与 apple-design 同构）
+    └── （与 apple-design 同构，模板换为 product-overview / pricing / data-report / enterprise）
 ```
 
 ---
@@ -216,7 +222,7 @@ body { font-family: var(--font-text); color: var(--apple-text); }
 .apple-stat { font-size: 120px; ... }
 .apple-card { border-radius: var(--radius-md); box-shadow: var(--shadow-card); }
 .apple-code { font-family: var(--font-mono); background: var(--apple-bg-alt); ... }
-/* 不定义通用"button" 类 — Apple 几乎不用实心按钮 */
+/* .apple-button 仅供 Buy/Add to Bag/付费 CTA 用，见 §10.3；其它一律 .apple-link */
 ```
 
 使用方式：`<link rel="stylesheet" href="apple.css">` + body 加 `class="apple-*"`。
@@ -412,8 +418,8 @@ description: >
 建议拆成以下顺序：
 
 1. **骨架阶段**：两个 skill 的目录结构 + 空的 SKILL.md（只有 frontmatter）+ `references/design-tokens.md`（完整 token 表）+ `assets/*.css`。
-2. **模板阶段**：Apple 5 个 HTML + 4 个 SVG；Anthropic 6 个 HTML + 4 个 SVG。
-3. **参考文档阶段**：剩余 6 个 `references/*.md` 填充。
+2. **模板阶段**：Apple 9 个 HTML + 4 个 SVG；Anthropic 9 个 HTML + 4 个 SVG（详见第 2 节结构 + 第 10 节组件清单）。
+3. **参考文档阶段**：剩余 `references/*.md` 填充（含新增 `components.md` 与 `responsive.md`，共 9 份）。
 4. **Tailwind preset 阶段**：`*.tailwind.js`。
 5. **Prompt 阶段**：`example-prompts.md`。
 6. **自检阶段**：用两个模板手工渲染，与官网截图对照校色。
@@ -442,4 +448,346 @@ description: >
 
 ## 9. 开放问题（待确认后再写 plan）
 
-目前无。结构已由用户在 brainstorming 中确认。
+目前无。结构已由用户在 brainstorming 中确认；2026-04-19 经第二轮审核补齐所有 HTML 元素与组件。
+
+---
+
+## 10. HTML 元素全量清单（审核补齐）
+
+第一版 spec 只覆盖 token + 高层布局，未定义常用 HTML 组件。本节按元素逐一给出两种风格的实现规范；`references/components.md` 将复制本节内容并附骨架代码。
+
+### 10.1 导航栏 Nav
+
+| | Apple | Anthropic |
+|---|---|---|
+| 高度 | 44px（紧凑） | 64px |
+| 背景 | `rgba(251,251,253,0.72)` + `backdrop-filter: blur(20px)` 固定 | `--anth-bg` 透明 + scroll 后加细下边框 |
+| 链接 | 12px SF Pro Text，间距 32px，hover 颜色加深 | 14px Poppins 500，间距 24px |
+| 右侧 | 搜索图标 🔍 + 购物袋 🛍（含数字角标） | `Try Claude` 橙色胶囊 CTA + `Log in` 文字链 |
+| 下拉 | 悬停触发 mega-menu（全宽白底 + 48px padding + 分栏），动画 `--duration-sm` fade+translateY | 点击下拉（不 hover）、白卡阴影 `0 10px 40px rgba(0,0,0,0.08)`、圆角 `--radius-md` |
+| 移动 | 汉堡 + 全屏 overlay 菜单 | 汉堡 + 下滑抽屉 |
+
+### 10.2 页脚 Footer
+
+| | Apple | Anthropic |
+|---|---|---|
+| 列数 | ~10 组分类（Shop/Learn/Values…），每组 9-12 链接 | 6-7 组（Products/Models/Solutions/Platform/Resources/Company） |
+| 背景 | `#F5F5F7`，上方 `--apple-divider` 细线起始 | `--anth-bg-subtle` |
+| 字号 | 12px 链接，11px 法律条款 | 13px 链接，12px 法律 |
+| 组标题 | 加粗 12px，深灰 | 加粗 13px Poppins |
+| 底部条 | 版权 + 法律链接 + **国家/地区选择器**（下拉） | 版权 + 法律链接 + **社媒图标行**（LinkedIn/X/YouTube） |
+| Newsletter | 无 | 无（订阅分散到文章） |
+
+### 10.3 按钮 Buttons（完整集）
+
+Apple：
+```css
+.apple-link { color:var(--apple-link); text-decoration:underline; text-underline-offset:0.2em; }
+.apple-link::after { content:" ›"; }                       /* 箭头接续符 */
+.apple-button { padding:8px 16px; border-radius:9999px; background:var(--apple-link); color:#fff; font-size:14px; font-weight:400; }    /* 仅 Buy/CTA 用 */
+.apple-button--secondary { background:transparent; color:var(--apple-link); border:1px solid var(--apple-link); }
+```
+
+Anthropic：
+```css
+.anth-button { padding:12px 24px; border-radius:9999px; background:var(--anth-orange); color:#faf9f5; font-family:var(--font-heading); font-weight:500; font-size:15px; }
+.anth-button--dark { background:var(--anth-text); color:#faf9f5; }
+.anth-button--ghost { background:transparent; color:var(--anth-text); border:1px solid var(--anth-text); }
+```
+
+### 10.4 表单 Forms（inputs / select / textarea / radio / checkbox / toggle）
+
+统一规则：边框 1px 灰、圆角、focus 显示 2px 品牌色 outline、28px 最小触控高度。
+
+Apple：
+```css
+.apple-input,.apple-select,.apple-textarea {
+  background:var(--apple-bg-alt); border:1px solid var(--apple-divider);
+  border-radius:var(--radius-sm); padding:10px 12px;
+  font-family:var(--font-text); font-size:14px;
+}
+.apple-input:focus { outline:2px solid var(--apple-link); outline-offset:0; }
+.apple-radio,.apple-checkbox { accent-color:var(--apple-link); }
+.apple-toggle { /* SF 风开关：34px 宽 round pill，开启 #34C759 绿 */ }
+```
+
+Anthropic：
+```css
+.anth-input,.anth-select,.anth-textarea {
+  background:#fff; border:1px solid var(--anth-light-gray);
+  border-radius:var(--radius-md); padding:12px 16px;
+  font-family:var(--font-body); font-size:15px;
+}
+.anth-input:focus { outline:2px solid var(--anth-orange); }
+.anth-radio,.anth-checkbox { accent-color:var(--anth-orange); }
+```
+
+### 10.5 选项卡组件 Option Cards（颜色/容量选择器，commerce）
+
+Apple `product-configurator.html` 用：
+- **色选 swatch**：28px 圆形，默认 `border:1px solid var(--apple-divider)`；选中 `border:2px solid var(--apple-text); padding:2px` 内圈描边。
+- **容量 card**：白底、1px 灰边、16px padding；选中 `border:2px solid var(--apple-text)`；顶部粗字号容量、下行灰色价格。
+- **carrier 分段控件**：等宽按钮组，整组 1px 灰边 pill，选中项 `background:var(--apple-text); color:#fff`。
+- **Sticky buy 栏**：底部固定条，左 summary 右 `Add to Bag` 按钮，背景 `rgba(255,255,255,0.9) + backdrop-blur`。
+
+Anthropic 不需要此模板（品牌无实体商品），但 `pricing.html` 的 plan 卡复用 Card 规则。
+
+### 10.6 表格 Tables
+
+**Apple（specs 页）：不用真表格**，用并排段落 + 分类 H3。若必须表格：无边框、行间距 16px、行间细灰横线 `border-bottom:1px solid var(--apple-divider)`。
+
+Anthropic：带表格样式
+```css
+.anth-table { width:100%; border-collapse:collapse; font-family:var(--font-body); font-size:15px; }
+.anth-table th { text-align:left; padding:12px 16px; background:var(--anth-bg-subtle); font-family:var(--font-heading); font-weight:500; }
+.anth-table td { padding:12px 16px; border-bottom:1px solid var(--anth-light-gray); }
+.anth-table tr:hover td { background:var(--anth-bg-subtle); }
+.anth-table .check { color:var(--anth-green); }  /* 对勾 */
+.anth-table .cross { color:var(--anth-mid-gray); }
+```
+
+### 10.7 标签页 Tabs
+
+两种风格都用顶部下划线式（无外框）：
+- Apple：文字链 + 选中项下方 2px 蓝色线 `var(--apple-link)`。
+- Anthropic：Poppins 14px + 选中项下方 2px 橙线 `var(--anth-orange)`；切换 fade 240ms。
+
+### 10.8 轮播 Carousel / Slider
+
+Apple（accessibility hero、events replay）：
+- 手势友好，左右箭头浮层显示在 hover 时；底部圆点 indicator（4px 直径，选中 `--apple-text`）。
+- 自动播放 5s 一切，可暂停。
+
+Anthropic（客户引用轮播，opus 4.5 发布页）：
+- 显示 `01 / 21` 形式计数；左右箭头始终可见，`--radius-pill` 白底 + 1px 灰边。
+- 卡片切换 400ms `--ease-apple-out`。
+
+### 10.9 视频容器 Video
+
+| | Apple | Anthropic |
+|---|---|---|
+| Hero 自动播放 | 静音循环，`autoplay muted loop playsinline`，首次 600ms fade-in | 同 |
+| Replay 块 | 封面图 + 中央圆形播放按钮 56px，hover 放大 1.08 | 缩略图 + 左下角三角播放 icon |
+| ASL 选项 | 显示 `ASL` badge 右下角（Apple events 页必备） | — |
+| 控件 | 使用原生 `<video controls>` 但主题覆盖（进度条色、按钮色） | 同 |
+| 圆角 | `--radius-md` | `--radius-md` |
+
+### 10.10 徽章 / 标签 / 分类 Chip
+
+Apple（newsroom category）：
+```css
+.apple-badge { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.08em; color:var(--apple-text-secondary); }
+```
+纯文字无边框，小字大间距。
+
+Anthropic（blog category）：
+```css
+.anth-badge { font-size:12px; font-family:var(--font-heading); padding:4px 10px; border-radius:9999px; background:var(--anth-light-gray); color:var(--anth-text); }
+```
+胶囊填色小标签。
+
+### 10.11 引用块 Blockquote / Pull Quote
+
+Apple：
+```css
+.apple-quote { font-family:var(--font-display); font-size:32px; font-weight:500; line-height:1.3; letter-spacing:-0.005em; max-width:720px; margin:48px auto; text-align:center; }
+.apple-quote + .apple-quote-cite { display:block; font-size:14px; color:var(--apple-text-secondary); text-align:center; margin-top:16px; }
+/* 无引号字符、无左边框，只靠字号和居中 */
+```
+
+Anthropic：
+```css
+.anth-quote { font-family:var(--font-body); font-style:italic; font-size:22px; line-height:1.55; padding-left:24px; border-left:3px solid var(--anth-orange); max-width:680px; }
+.anth-quote-cite { display:flex; align-items:center; gap:12px; margin-top:16px; font-size:14px; }
+.anth-quote-cite img { height:20px; width:auto; }  /* 客户公司 logo */
+```
+
+### 10.12 列表 Lists
+
+- **Ordered**：Apple 用小字数字前缀 + 18px padding；Anthropic 用 Poppins 粗体大数字 + 段落。
+- **Unordered**：Apple 实心小圆 4px；Anthropic 橙色 6px 点。
+- **Description list**（规格页关键）：Apple 用 H3 + 段落平铺，不真正用 `<dl>`；Anthropic 用 `<dl>` 带 `--font-heading` term + `--font-body` description。
+- **Feature list with icon**（privacy/accessibility 页）：24px icon 左对齐 + 16px gap + 标题 + 描述。
+
+### 10.13 横幅 / 促销条 Banner
+
+Apple 首页顶部常见 trade-in 促销条：
+- 高 44px，居中文字 12px，背景 `var(--apple-bg-alt)`，下方 1px 分隔线。
+- 右侧可选 "Shop" 链接。
+
+Anthropic 用"Latest news 轮播条"：
+- 宽度 960px，居中，白底，圆角 `--radius-md`，左侧品类 tag + 中间标题 + 右侧日期。
+
+### 10.14 面包屑 Breadcrumbs
+
+两者都只在 Dev docs / deep pages 用：
+- 12px 小字 secondary 色，分隔符 `›`，最后一节不可点击。
+
+### 10.15 分页 Pagination
+
+**两家都不使用数字分页**。统一做法：
+- Apple: 末尾大字 "View All" 链接 + 箭头。
+- Anthropic: 加载更多按钮（胶囊）+ 可选无限滚。
+
+### 10.16 搜索 Search
+
+Apple：图标点击 → 全屏覆盖搜索（顶部大输入框 + 建议列表 + Esc 关闭）。
+Anthropic：docs 站内有顶部搜索框；官网无显式搜索。
+
+### 10.17 购物车 / 计数器（Apple 专属）
+
+`🛍` 图标右上角显示数字角标 `0+`；点击进入 bag 页。skill 需提供 `.apple-bag-icon` 组件样式。
+
+### 10.18 区域选择器（Apple 专属）
+
+Footer 底部 "United States" 文字链 + 小三角 → 弹出区域列表（模态）。skill 提供 `.apple-region-select`。
+
+### 10.19 主题切换（Apple Dev Portal）
+
+`Light / Dark / Auto` 三态分段控件；主 apple.com 不提供，但 `docs.html` 模板应内置。
+
+### 10.20 代码块 Code Block
+
+| | Apple | Anthropic |
+|---|---|---|
+| 字体 | SF Mono 13px | JetBrains Mono 14px |
+| 背景 | `#F5F5F5` | `var(--anth-bg-subtle)` |
+| 圆角 | `--radius-md` | `--radius-md` |
+| Padding | 20px | 24px |
+| 复制按钮 | 右上角，hover 显示，无边框图标 | 同 |
+| 语法高亮 | VSCode Light+ 近似，关键字蓝、字符串红橙、注释灰 | 关键字橙 `--anth-orange`、字符串绿 `--anth-green`、注释灰 |
+| 行号 | docs 下可选，灰色 12px | 同 |
+
+### 10.21 内联元素 Inline
+
+- `<code>`：浅灰 bg 圆角 2px，前后各 2px 水平 padding，字号比正文小 1px。
+- `<kbd>`：Apple 风小圆角按钮样 `background:#fff;border:1px solid var(--apple-divider);padding:2px 6px;border-radius:4px;font-family:mono;font-size:12px;`；Anthropic 同结构但用橙 accent。
+- `<mark>`：Apple 用 `background:rgba(0,113,227,0.15)`；Anthropic 用 `background:rgba(217,119,87,0.2)`.
+- `<abbr>`：虚线下划线。
+- 外部链接图标：Apple 链接后附 `›`；Anthropic 附 `→`。
+
+### 10.22 图像 Figure / Caption
+
+```html
+<figure class="apple-figure">
+  <img src="..." alt="..." class="apple-figure-img" />
+  <figcaption class="apple-caption">Description</figcaption>
+</figure>
+```
+- Apple caption：12px `--apple-text-secondary` 居中，上方 12px gap。
+- Anthropic caption：13px Lora italic 居中。
+
+### 10.23 分隔线 Divider
+
+- Apple：`<hr>` 渲染为 1px `--apple-divider`，上下 48px 间距。
+- Anthropic：`<hr>` 为装饰花纹（3 个小圆点居中）或简单 1px，上下 64px。
+
+### 10.24 详情折叠 Details / Summary
+
+- Apple FAQ 风：左边 `+/−` 图标，点击展开 fade+slide，240ms。
+- Anthropic docs 风：右边 `▸` 箭头旋转 90°，背景用 `--anth-bg-subtle`。
+
+### 10.25 Admonition / Callout（docs 必备）
+
+四类：info / warning / success / danger。
+- Apple：左侧 4px 彩色边 + `--apple-bg-alt` 底。info 蓝、warning 橙、success 绿、danger 红，全部取 Apple 系统色。
+- Anthropic：整块 `--anth-bg-subtle` 背景 + 12px 圆角，标题用对应品牌色（info 蓝、warning 橙、success 绿、danger 深红 `#a14238`）。
+
+### 10.26 客户墙 / Logo Wall
+
+Anthropic 企业页专属：6–8 个客户 logo 并排，灰度处理（`filter:grayscale(1) opacity(0.6)`），hover 还原色彩。
+Apple 不使用此 pattern。
+
+### 10.27 空状态 / 404
+
+- Apple：居中 SF 图标 + 大标题 + 2 行描述 + 返回链接。
+- Anthropic：SVG 插画 + 标题 + 返回主页橙色 CTA。
+
+### 10.28 巨字号统计 Stat Callout（Apple 特色）
+
+Apple：
+```css
+.apple-stat-number { font-family:var(--font-display); font-size:120px; font-weight:600; letter-spacing:-0.02em; line-height:1; }
+.apple-stat-label { font-size:17px; color:var(--apple-text-secondary); margin-top:16px; max-width:240px; }
+```
+常并排 3 个在一行。
+
+Anthropic 极少使用；若用则字号减半到 64px，Poppins 粗体。
+
+### 10.29 数据可视化详细规范 Data Viz
+
+Anthropic 专项（Economic Index 风）：
+```css
+--chart-primary: #6a9bcc;
+--chart-secondary: #788c5d;
+--chart-tertiary: #d97757;  /* 仅重点系列 */
+--chart-grid: #e8e6dc;
+--chart-axis: #b0aea5;
+```
+- 柱图：柱宽占格 60%，圆角 4px，间距 20%。
+- 折线图：2px 粗线，端点 5px 圆点，区域填充 `rgba(106,155,204,0.1)` 仅当强调。
+- 散点图：8px 圆点，log 轴。
+- 地图：底色 `#e8e6dc`，数值梯度 5 级从 `#f0ede3` → `#6a9bcc`，不可用区域 `#b0aea5`。
+- 轴线：0.5px `--chart-axis`；网格 0.5px `--chart-grid` dashed。
+- 字体：Poppins 12px 标签、13px 轴标题、14px 图例。
+- 图例：顶部水平排列，color swatch 12×12px 圆角 2px。
+
+Apple：不建议用，除非复刻 environment 页。若用则单色 `--apple-link` 柱、无网格、刻度极简。
+
+### 10.30 响应式断点 Responsive
+
+Apple 断点（实测）：
+```
+mobile:      ≤734px
+tablet:      735–1068px
+desktop:     1069–1440px
+large:       ≥1441px
+```
+容器 max-width 按断点：980 / 1068 / 1280。
+
+Anthropic 断点：
+```
+mobile:      ≤768px
+tablet:      769–1024px
+desktop:     ≥1025px
+```
+容器 max-width：720（长文）/ 960（常规）/ 1200（wide）。
+
+`references/responsive.md` 用 CSS container queries 与 media queries 双版本示例。
+
+### 10.31 可访问性 A11y 最低要求
+
+两个 skill 都必须包含：
+- Skip-to-content 链接（`.sr-only` 除 focus 外隐藏）
+- 色彩对比度 ≥ AA（WCAG 2.2）
+- 所有 interactive 元素 focus-visible outline 2px
+- 语义 HTML（`<nav>` `<main>` `<article>` `<aside>` `<footer>`）
+- `prefers-reduced-motion` 时禁用入场动画
+
+### 10.32 字体来源与合规
+
+| 字体 | 来源 | 合规 |
+|---|---|---|
+| SF Pro Display / Text / Mono | Apple 官方仅限 Apple 平台；网页通过 `-apple-system` 系统栈 | **不做 @font-face** |
+| Fallback for Apple skin | Inter（OFL） | 通过 Google Fonts |
+| Poppins | Google Fonts (OFL) | 直接 @font-face |
+| Lora | Google Fonts (OFL) | 直接 @font-face |
+| JetBrains Mono | OFL | 通过 Google Fonts |
+
+`fonts.css` 声明 `@font-face` + `font-display: swap`。
+
+### 10.33 变更点汇总（写给自己的 checklist）
+
+相对第一版 spec 新增：
+- [x] 导航栏 / 页脚 / 促销条 / 面包屑
+- [x] 所有表单控件（input / select / textarea / radio / checkbox / toggle / 色板 / 容量卡 / 分段控件 / sticky buy bar）
+- [x] 表格 / 定义列表 / 列表完整规则
+- [x] tabs / carousel / video / details-summary / admonition / empty-state / logo wall / region selector / theme toggle / cart
+- [x] 徽章 / 引用 / 内联（code/kbd/mark/abbr） / 图像 caption / 分隔线
+- [x] 响应式断点 / 容器 max-width 体系
+- [x] A11y 最低清单
+- [x] 字体合规分来源表
+- [x] 完整 Anthropic 数据可视化色板
+- [x] 新增模板：nav-footer / form / product-configurator / specs-page
+
+此 checklist 用于实现阶段逐项核对。
