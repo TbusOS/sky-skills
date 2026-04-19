@@ -4,8 +4,9 @@ Same story, two aesthetics. Each demo is a single flagship HTML page showcasing 
 
 | Demo | Renders | Preview |
 |---|---|---|
-| [`apple-design/`](./apple-design/index.html) | `skills/apple-design/` | SF Pro, white/pale-gray alternating sections, 巨字号统计, product lineup, dark section, text-link CTAs |
-| [`anthropic-design/`](./anthropic-design/index.html) | `skills/anthropic-design/` | Warm cream, Poppins + Lora serif, orange filled pills, editorial cards, pull quote, inline low-saturation bar chart, 3-tier pricing |
+| [`apple-design/`](./apple-design/index.html) | `skills/apple-design/` | SF Pro, white/pale-gray alternating sections, 巨字号统计, product lineup, dark section, modern flow diagrams with gradients + soft shadows, text-link CTAs |
+| [`anthropic-design/`](./anthropic-design/index.html) | `skills/anthropic-design/` | Warm cream, Poppins + Lora serif, orange filled pills, editorial cards, pull quote, inline low-saturation bar chart, 3-tier pricing, git workflow diagram |
+| [`ember-design/`](./ember-design/index.html) | `skills/ember-design/` | Deep cream + chocolate + gold, Fraunces display serif + Inter body, coffee-bean hero SVG, gold-quoted pull-quote, three-aesthetics comparison, handcraft feel |
 
 ## Local preview
 

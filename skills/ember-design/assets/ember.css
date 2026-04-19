@@ -1,0 +1,555 @@
+/* === Ember Design System — Core CSS ===
+ * Last verified: 2026-04-19
+ * Docs: ../references/design-tokens.md
+ * Palette: warm cream + chocolate + brown + gold (handcraft editorial)
+ */
+
+/* ---------- Section A: Tokens ---------- */
+:root {
+  /* Colors */
+  --ember-bg: #fff2df;
+  --ember-bg-subtle: #f5e5c8;
+  --ember-text: #312520;
+  --ember-text-secondary: #6b5a4f;
+  --ember-brown: #492d22;
+  --ember-brown-hover: #5c3a2b;
+  --ember-gold: #c49464;
+  --ember-divider: #e6d9bf;
+  --ember-card: #ffffff;
+  --ember-danger: #8b3a2f;
+
+  /* Fonts */
+  --font-heading: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+
+  /* Space */
+  --space-1: 4px;  --space-2: 8px;   --space-3: 12px;  --space-4: 16px;
+  --space-5: 24px; --space-6: 32px;  --space-7: 48px;  --space-8: 64px;
+  --space-9: 80px; --space-10: 120px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 9999px;
+
+  /* Shadows (warm brown alpha) */
+  --shadow-card: 0 4px 20px rgba(73, 45, 34, 0.08);
+  --shadow-pop: 0 12px 40px rgba(73, 45, 34, 0.12);
+
+  /* Motion */
+  --ease-ember: cubic-bezier(0.32, 0.72, 0, 1);
+  --duration-sm: 240ms;
+  --duration-md: 400ms;
+  --duration-lg: 700ms;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ember-text);
+  background: var(--ember-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Section B: Typography ---------- */
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-heading);
+  margin: 0;
+  font-weight: 600;
+  /* Fraunces variable axes: softness + ink-trap */
+  font-variation-settings: "SOFT" 50, "opsz" 144;
+}
+h1 { font-size: 60px; line-height: 1.08; letter-spacing: -0.01em; }
+h2 { font-size: 40px; line-height: 1.15; letter-spacing: -0.005em; }
+h3 { font-size: 24px; line-height: 1.3; font-weight: 500; }
+h4 { font-size: 20px; line-height: 1.4; font-weight: 500; }
+p  { margin: 0 0 var(--space-4); }
+.ember-lead { font-size: 19px; line-height: 1.55; }
+.ember-caption { font-size: 13px; line-height: 1.45; color: var(--ember-text-secondary); font-style: italic; }
+
+/* ---------- Section C: Link & Button ---------- */
+.ember-link {
+  color: var(--ember-brown);
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--ember-gold);
+  transition: color var(--duration-sm) var(--ease-ember), text-decoration-color var(--duration-sm);
+}
+.ember-link:hover {
+  color: var(--ember-brown-hover);
+  text-decoration-color: var(--ember-brown);
+}
+.ember-link::after { content: " \2192"; color: var(--ember-gold); }
+.ember-link--no-arrow::after { content: none; }
+
+.ember-button {
+  display: inline-block;
+  padding: 14px 28px;
+  border-radius: var(--radius-pill);
+  background: var(--ember-brown);
+  color: var(--ember-bg);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  border: 0;
+  cursor: pointer;
+  transition: background var(--duration-sm) var(--ease-ember), transform var(--duration-sm);
+}
+.ember-button:hover {
+  background: var(--ember-brown-hover);
+  transform: translateY(-1px);
+}
+.ember-button--ghost {
+  background: transparent;
+  color: var(--ember-brown);
+  border: 1px solid var(--ember-brown);
+}
+.ember-button--ghost:hover {
+  background: var(--ember-brown);
+  color: var(--ember-bg);
+}
+.ember-button--gold {
+  background: var(--ember-gold);
+  color: var(--ember-text);
+}
+.ember-button--gold:hover { background: #b28454; }
+
+/* ---------- Section D: Layout ---------- */
+.ember-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+.ember-container--narrow { max-width: 720px; }
+.ember-container--wide { max-width: 1200px; }
+
+.ember-section { padding-block: var(--space-9); }
+.ember-section--subtle { background: var(--ember-bg-subtle); }
+.ember-section--dark {
+  background: var(--ember-text);
+  color: var(--ember-bg);
+}
+.ember-section--dark h1,
+.ember-section--dark h2,
+.ember-section--dark h3 { color: var(--ember-bg); }
+
+.ember-hero {
+  text-align: center;
+  padding-block: var(--space-10);
+}
+
+.ember-card {
+  background: var(--ember-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-6);
+}
+.ember-card--subtle {
+  background: var(--ember-bg-subtle);
+  box-shadow: none;
+  border: 1px solid var(--ember-divider);
+}
+
+/* ---------- Section E: Stat ---------- */
+.ember-stat { text-align: center; }
+.ember-stat-number {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 72px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ember-brown);
+}
+.ember-stat-label {
+  display: block;
+  font-size: 14px;
+  color: var(--ember-text-secondary);
+  margin-top: var(--space-3);
+  font-style: italic;
+  max-width: 220px;
+  margin-inline: auto;
+}
+
+/* ---------- Section F: Nav ---------- */
+.ember-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 72px;
+  background: rgba(255, 242, 223, 0.85);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--ember-divider);
+}
+.ember-nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ember-nav-brand {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--ember-text);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+.ember-nav a {
+  color: var(--ember-text);
+  font-size: 14px;
+  text-decoration: none;
+  margin-right: var(--space-5);
+  transition: color var(--duration-sm);
+}
+.ember-nav a:hover { color: var(--ember-brown); }
+
+/* ---------- Section G: Footer ---------- */
+.ember-footer {
+  background: var(--ember-bg-subtle);
+  padding-block: var(--space-8);
+  font-size: 13px;
+  color: var(--ember-text-secondary);
+  border-top: 1px solid var(--ember-divider);
+}
+.ember-footer-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-6);
+}
+.ember-footer-group h5 {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  color: var(--ember-text);
+  margin-bottom: var(--space-3);
+  font-weight: 600;
+}
+.ember-footer-group a {
+  display: block;
+  color: var(--ember-text-secondary);
+  text-decoration: none;
+  margin-bottom: var(--space-2);
+}
+.ember-footer-group a:hover {
+  color: var(--ember-brown);
+  text-decoration: underline;
+}
+.ember-footer-legal {
+  max-width: 1200px;
+  margin: var(--space-7) auto 0;
+  padding: var(--space-5) var(--space-5) 0;
+  border-top: 1px solid var(--ember-divider);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+/* ---------- Section H: Badge / Quote / Divider / Banner ---------- */
+.ember-badge {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--ember-brown);
+  color: var(--ember-bg);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.ember-badge--gold { background: var(--ember-gold); color: var(--ember-text); }
+.ember-badge--ghost {
+  background: transparent;
+  color: var(--ember-brown);
+  border: 1px solid var(--ember-divider);
+}
+
+.ember-quote {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 26px;
+  line-height: 1.45;
+  color: var(--ember-text);
+  padding-left: 0;
+  max-width: 720px;
+  margin: var(--space-7) auto;
+  text-align: left;
+  position: relative;
+}
+.ember-quote::before {
+  content: "“";
+  position: absolute;
+  left: -0.6em;
+  top: -0.2em;
+  font-size: 4em;
+  line-height: 1;
+  color: var(--ember-gold);
+  font-family: var(--font-heading);
+}
+.ember-quote-cite {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  font-family: var(--font-body);
+  font-style: normal;
+  font-size: 14px;
+  color: var(--ember-text-secondary);
+}
+
+.ember-divider {
+  border: 0;
+  height: 1px;
+  background: var(--ember-divider);
+  margin: var(--space-8) 0;
+  position: relative;
+}
+.ember-divider--ornament {
+  text-align: center;
+  background: transparent;
+  height: auto;
+  border: 0;
+}
+.ember-divider--ornament::before {
+  content: "·  ·  ·";
+  color: var(--ember-gold);
+  letter-spacing: 0.5em;
+  font-size: 20px;
+}
+
+.ember-banner {
+  background: var(--ember-bg-subtle);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--ember-divider);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* ---------- Section I: Forms ---------- */
+.ember-input, .ember-select, .ember-textarea {
+  width: 100%;
+  background: var(--ember-card);
+  border: 1px solid var(--ember-divider);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ember-text);
+}
+.ember-input:focus, .ember-select:focus, .ember-textarea:focus {
+  outline: 2px solid var(--ember-brown);
+  outline-offset: 0;
+  border-color: transparent;
+}
+.ember-radio, .ember-checkbox {
+  accent-color: var(--ember-brown);
+  width: 18px;
+  height: 18px;
+}
+.ember-label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ember-text);
+  margin-bottom: var(--space-2);
+}
+
+/* ---------- Section J: Tabs, Details, Code, Admonition ---------- */
+.ember-tabs {
+  display: flex;
+  gap: var(--space-5);
+  border-bottom: 1px solid var(--ember-divider);
+}
+.ember-tab {
+  background: transparent;
+  border: 0;
+  padding: var(--space-3) 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--ember-text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color var(--duration-sm), border-bottom-color var(--duration-sm);
+}
+.ember-tab.is-active {
+  color: var(--ember-brown);
+  border-bottom-color: var(--ember-gold);
+}
+
+.ember-details {
+  background: var(--ember-bg-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  margin: var(--space-3) 0;
+  border: 1px solid var(--ember-divider);
+}
+.ember-details summary {
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ember-details summary::after {
+  content: "+";
+  color: var(--ember-gold);
+  font-size: 20px;
+  font-weight: 300;
+  transition: transform var(--duration-sm);
+}
+.ember-details[open] summary::after { content: "−"; }
+
+.ember-code, pre.ember-code {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  background: var(--ember-text);
+  color: #f5e5c8;
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  overflow-x: auto;
+}
+code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  background: var(--ember-bg-subtle);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  color: var(--ember-brown);
+}
+kbd {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--ember-card);
+  border: 1px solid var(--ember-divider);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+mark { background: rgba(196, 148, 100, 0.32); color: inherit; }
+
+.ember-admonition {
+  background: var(--ember-card);
+  border-left: 4px solid var(--ember-gold);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-5);
+  margin: var(--space-5) 0;
+}
+.ember-admonition h5 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 14px;
+  margin: 0 0 var(--space-2);
+  color: var(--ember-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ember-admonition--warning { border-left-color: var(--ember-gold); }
+.ember-admonition--success h5 { color: #6b8e5a; }
+.ember-admonition--success { border-left-color: #6b8e5a; }
+.ember-admonition--danger h5 { color: var(--ember-danger); }
+.ember-admonition--danger { border-left-color: var(--ember-danger); }
+
+/* ---------- Section K: Breadcrumbs / Table / Reveal ---------- */
+.ember-breadcrumbs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: 13px;
+  color: var(--ember-text-secondary);
+}
+.ember-breadcrumbs li::after {
+  content: "/";
+  margin-left: var(--space-2);
+  color: var(--ember-divider);
+}
+.ember-breadcrumbs li:last-child::after { content: none; }
+.ember-breadcrumbs a { color: inherit; text-decoration: none; }
+.ember-breadcrumbs a:hover { color: var(--ember-brown); }
+
+.ember-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.ember-table th {
+  text-align: left;
+  padding: 12px 16px;
+  background: var(--ember-bg-subtle);
+  font-family: var(--font-heading);
+  font-weight: 500;
+  color: var(--ember-text);
+  border-bottom: 1px solid var(--ember-divider);
+}
+.ember-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ember-divider);
+}
+.ember-table tr:hover td { background: rgba(196, 148, 100, 0.08); }
+
+.ember-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity var(--duration-lg) var(--ease-ember),
+    transform var(--duration-lg) var(--ease-ember);
+}
+.ember-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- Section L: Responsive + a11y ---------- */
+@media (max-width: 768px) {
+  h1 { font-size: 40px; }
+  h2 { font-size: 28px; }
+  .ember-stat-number { font-size: 48px; }
+  .ember-footer-grid { grid-template-columns: repeat(2, 1fr); }
+  .ember-section { padding-block: var(--space-7); }
+  .ember-quote { font-size: 20px; }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  h1 { font-size: 48px; }
+  .ember-footer-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.ember-sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ember-brown);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

@@ -6,10 +6,11 @@ A curated collection of **Claude Code Skills** — reusable, domain-specific pro
 
 ## Live Demos
 
-The two design skills ship with single-page flagship demos under [`demos/`](./demos/) — same content, two aesthetics:
+The three design skills ship with single-page flagship demos under [`demos/`](./demos/) — same content, three aesthetics:
 
-- [**apple-design demo**](./demos/apple-design/index.html) — sky-skills told in apple.com's voice
-- [**anthropic-design demo**](./demos/anthropic-design/index.html) — sky-skills told in anthropic.com's voice
+- [**apple-design demo**](./demos/apple-design/index.html) — sky-skills in apple.com's crisp voice
+- [**anthropic-design demo**](./demos/anthropic-design/index.html) — sky-skills in anthropic.com's warm editorial voice
+- [**ember-design demo**](./demos/ember-design/index.html) — sky-skills in handcraft-editorial warmth (cream + chocolate + gold)
 
 To preview locally: `python3 -m http.server 8000` from the repo root, then open the URLs.
 
@@ -23,6 +24,7 @@ To preview locally: `python3 -m http.server 8000` from the repo root, then open 
 | [md-to-pdf](skills/md-to-pdf/) | EN/ZH | Markdown-to-PDF converter with full Chinese support, bookmarks, and page numbers via PyMuPDF Story HTML rendering |
 | [apple-design](skills/apple-design/) | EN/ZH | Render HTML/CSS in **apple.com** visual aesthetic — white/pale-gray alternating sections, SF Pro typography, minimal text links (no filled buttons), large stat callouts, product-photography-driven layout, hand-drawn SVG diagrams |
 | [anthropic-design](skills/anthropic-design/) | EN/ZH | Render HTML/CSS in **anthropic.com** visual aesthetic — warm cream bg (#faf9f5), Poppins + Lora serif body, orange accent (#d97757) filled pill buttons, editorial card grids, abstract SVG illustrations, low-saturation data viz |
+| [ember-design](skills/ember-design/) | EN/ZH | Render HTML/CSS in a **handcraft-editorial** aesthetic — cream (#fff2df) + chocolate (#312520) + brown CTA (#492d22) + gold accent (#c49464), Fraunces display serif + Inter body. For artisan brands, boutique hotels, literary journals |
 
 ## What Are Claude Code Skills?
 
