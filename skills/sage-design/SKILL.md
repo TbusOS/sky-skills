@@ -1,0 +1,80 @@
+---
+name: sage-design
+description: "Render HTML/CSS in a quiet, modern, Nordic-minimal aesthetic — sage green (#97B077), warm rice-paper cream (#f8faec), deep indigo (#393C54), Instrument Serif display + Inter body + JetBrains Mono. Evokes Muji / Kinfolk-Nordic / botanical studios / modern journals / quiet tech brands / reading apps. TRIGGER when the user says 'sage 风格' / 'sage style' / '抹茶' / '北欧极简' / '安静' / 'quiet editorial' / 'Nordic minimal' / 'matcha / botanical / library', or asks for a landing / journal / reading interface with restraint and negative space. DO NOT TRIGGER for warm-brown handcraft (use ember-design), high-tech white minimalism (use apple-design), or cream-with-orange (use anthropic-design)."
+last-verified: 2026-04-19
+---
+
+# Sage Design — Quiet Nordic Minimalism
+
+让 Claude 把任何 HTML 渲染成"安静 · 留白 · 现代植物感"的视觉语言：米黄底、深靛蓝标题、sage 绿强调、Instrument Serif 衬线 headline、Inter 无衬线正文。灵感来自 Muji、Kinfolk、北欧 / 日系生活方式杂志、植物学图鉴、安静的独立品牌。
+
+## 使用方式
+
+1. `<link rel="stylesheet" href="assets/fonts.css">` 然后 `<link rel="stylesheet" href="assets/sage.css">`
+2. 用 `sage-*` 前缀 class
+3. 模板见 `templates/`
+
+## 调色板（严格遵守）
+
+| Token | Hex | Use |
+|---|---|---|
+| `--sage-bg` | `#f8faec` | page / section background (rice-paper cream) |
+| `--sage-sage` | `#97B077` | accent / CTA fill / illustration primary |
+| `--sage-ink` | `#393C54` | display headings, strong text, dark sections |
+| `--sage-text` | `#2a2c40` | body text |
+| `--sage-text-secondary` | `#6d6f82` | muted / captions |
+| `--sage-divider` | `#e5e8da` | hairline rules |
+| `--sage-card` | `#ffffff` | elevated cards |
+| `--sage-sage-dark` | `#7a9561` | sage hover |
+
+**Typography:** Instrument Serif (display, 500/400-italic) + Inter (body, 400/500/600) + JetBrains Mono (code, 400).
+
+## 触发关键词
+
+`sage 风格` / `sage style` / `抹茶` / `北欧极简` / `quiet editorial` / `Nordic minimal` / `botanical` / `matcha` / `library feel` / `Muji style` / `reading app` / `journal / magazine with restraint` / `modern green brand`
+
+## 不要用于
+
+- 暖棕 / 手工 / Aesop（用 `ember-design`）
+- 苹果风极简（用 `apple-design`）
+- 橙色胶囊按钮（用 `anthropic-design`）
+- dark mode / 霓虹 / 彩虹
+- 情绪化插画 / 儿童 UI
+
+## 阅读顺序
+
+1. `references/design-tokens.md` — 色板 + 字体 + 间距
+2. `references/dos-and-donts.md` — 反例 + **发布前 checklist**
+3. `assets/sage.css` — CSS 变量与组件
+4. `templates/` — 着陆页骨架（mirrors ember-design structure, sage palette）
+
+## 发布前检查（MUST — 可执行）
+
+生成完整 HTML 后，必须：
+
+```bash
+# 1) 结构验证
+python3 skills/sage-design/scripts/verify.py <path/to/your.html>
+
+# 2) 视觉验证（Playwright 渲染 + 对比度 + 框图尺寸 + 孤儿卡检测）
+node skills/sage-design/scripts/visual-audit.mjs <path/to/your.html>
+
+# 3) 全页截图，肉眼审核
+node skills/sage-design/scripts/screenshot.mjs <path/to/your.html> shot.png
+```
+
+verify.py 扫占位符、BEM、未定义 class、SVG 平衡。visual-audit 会用浏览器渲染，检查：**按钮/徽章在深底上的文字对比度（WCAG）**、**hero 框图渲染宽度**、**SVG 文字实际像素**、**多列网格里的孤儿卡片（一张卡独占一行左半边）**。**任一脚本 exit 非 0 = 没完成。**
+
+## 设计签名（不能漏掉的"sage 味"）
+
+- hairline 分隔：`1px solid var(--sage-divider)`
+- 编号 section 标记：`01 · 02 · 03`（JetBrains Mono, `--sage-text-secondary`）
+- 大号 **Instrument Serif** italic headline（尤其 hero 和 pull-quote）
+- sage 填色 pill 按钮 + 纯白文字（contrast ≥ 4.5）
+- 暗部用 `--sage-ink`（深靛蓝），不是纯黑
+- 图表 / 图示调色板只用这三色 + 中性灰：`#97B077 / #393C54 / #f8faec / #e5e8da`
+- 大量负空间（section padding ≥ 96px vertical）
+
+## 为什么"sage"而不是"green"
+
+英文 sage 既是颜色也是"贤者 / 从容"，双关贴合这个调色板的气质：不是活力的 Kermit 绿，也不是科技绿，而是一种经过思考的、安静的、植物性的绿。和深靛蓝搭配时，像夜晚庭园里的一棵小树——这是这个 skill 想要 Claude 渲染出的东西。

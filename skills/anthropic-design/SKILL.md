@@ -55,18 +55,31 @@ python3 skills/anthropic-design/scripts/verify.py <path/to/your.html>
 
 Exit 0 = 可以宣布完成；exit 1 = 列出每条失败原因，你必须全部修完再跑一次。
 
-### 2. 视觉验证（必看）
+### 2. 视觉渲染验证（必跑 —— 最容易发现历史坑）
 
 ```bash
 # 一次性安装：npm i playwright && npx playwright install chromium
-node skills/anthropic-design/scripts/screenshot.mjs demos/anthropic-design/index.html demo-shot.png
+node skills/anthropic-design/scripts/visual-audit.mjs <path/to/your.html>
 ```
 
-脚本会起本地 server、headless 打开页面、存全页截图到 `demo-shot.png`。**必须亲眼看这张图**再宣布完成 —— 留白 / 字重 / 层次靠肉眼验证，脚本抓不出美感问题。
+visual-audit headless 渲染并检查：
+- **WCAG 对比度**：`.anth-button / .anth-badge / .anth-link` 在实际背景上的 contrast ratio。cream 在橙上是 2.96（error），白在橙上是 3.12（warn，brand-intentional）。拦截任何低于 3 的。
+- **Hero 框图尺寸**：span-2 figure 里的 SVG 渲染 ≥ 900px，否则 warn。
+- **SVG 文字像素**：最小 `<text>` 在 1440 视口渲染 ≥ 9px。
+- **孤儿卡检测**：grid 里一张非 hero 卡孤单在一堆 full-row hero 中间 → warn。
+
+### 3. 全页截图，肉眼审核
+
+```bash
+node skills/anthropic-design/scripts/screenshot.mjs <path/to/your.html> demo-shot.png
+```
+
+**必须亲眼看**这张图再宣布完成 —— 留白 / 字重 / 层次靠肉眼判断。
 
 ### 规则（reference only）
 
-详细 checklist 见 `references/dos-and-donts.md` 末尾。核心：
-- 禁止 `[placeholder]` 字符串；必须真 inline SVG（见 `components.md` §28）。
-- Hero 不用 `.anth-container--narrow`（那是给长文正文的 720px）。
-- 不做截图验证不算完成。
+详见 `references/dos-and-donts.md` 的 "Don't 带 Why" 表。核心：
+- 禁止 `[placeholder]` —— 必须真 inline SVG
+- Hero 用 `.anth-container anth-container--wide`（**base + modifier 都要**）
+- `.anth-button` 橙底必须 `color: #ffffff; font-weight: 600;`（cream 会 fail AA）
+- 三道闸任一 exit 非 0 不算完成

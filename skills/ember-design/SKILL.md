@@ -32,16 +32,17 @@ last-verified: 2026-04-19
 3. `assets/ember.css` — CSS 变量与组件
 4. `templates/landing-page.html` — 着陆页骨架
 
-## 发布前检查（MUST — 可执行）
-
-生成完整 HTML 后，必须：
+## 发布前检查（MUST — 三道闸都要 exit 0）
 
 ```bash
-# 1) 结构验证
+# 1) 结构验证（placeholder / BEM / 未定义 class / SVG 平衡）
 python3 skills/ember-design/scripts/verify.py <path/to/your.html>
 
-# 2) 视觉验证（Playwright）
+# 2) 视觉渲染验证（Playwright + WCAG 对比度 + 框图尺寸 + 孤儿卡）
+node skills/ember-design/scripts/visual-audit.mjs <path/to/your.html>
+
+# 3) 全页截图，肉眼审核
 node skills/ember-design/scripts/screenshot.mjs <path/to/your.html> shot.png
 ```
 
-verify.py 会扫占位符、容器 BEM、未定义 class、SVG 平衡等。**exit 非 0 = 没完成。** screenshot 需要肉眼看过再宣布 done。
+任一条 exit 非 0 → **任务没完成**。visual-audit 专门拦这些历史坑：深底上看不清的 CTA（`.ember-button` 曾被 `.ember-nav a` 吃掉 color）、hero 框图被窄容器压到 <900px、孤儿卡独占半行。详见 `references/dos-and-donts.md` 的 "Don't 带 Why" 表。

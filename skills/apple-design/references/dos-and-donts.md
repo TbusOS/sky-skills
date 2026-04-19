@@ -1,5 +1,8 @@
 # Apple Do / Don't
 
+> 这个文档既是美学指引，也是 **"这些坑我们已经踩过了"** 的防御清单。
+> 每条 Don't 旁边都有一句"Why"——如果不懂 Why，就不要删掉它。
+
 ## ✅ Do
 
 - 白 / 浅灰 / 黑三段交替叙事
@@ -13,36 +16,57 @@
 - 无衬线正文，Text 用于 <24px 场景
 - 使用 `var(--duration-sm)` 等 token，不写死毫秒
 - `.apple-link::after` 的 `›` 如不需要用 `.apple-link--no-arrow` 取消
+- **Hero 段**用 `.apple-container--hero`（1280px），让 SoC / code-arch / multi-repo 这类信息密集框图有足够空间
 
-## ❌ Don't
+## ❌ Don't — 每条都带 Why
 
-- 紫色 / 彩虹渐变（AI slop 标志）
-- 饼图 / 3D 柱图 / 霓虹光效
-- 大量彩色实心按钮堆叠（Apple 只在 Buy/Add to Bag 用）
-- Inter / Roboto 作标题字
-- 全页同一色无节奏
-- 反弹 / 弹簧 / rotation 入场
-- 斜切蒙版 / 不规则裁剪
-- 紧贴屏幕边缘的内容（min padding 24px）
-- 任何衬线字体
-- `transition: all`（显式列属性）
-- 硬编码 `#FFFFFF`（用 `var(--apple-bg)`）、硬编码 `240ms`（用 `var(--duration-sm)`）
-- 数字分页（用 "View All ›"）
-- **括号占位符**：`[hero image]` / `[icon]` / `[photo]` 这种字符串留在产物里 —— 永远不要
-- **窄容器包 hero**：hero 必须用 `.apple-container--hero` (1280px) 或 `.apple-container--wide` (1068px)，不要用 `.apple-container` (980px) 或更窄
+| Don't | Why（过去踩过的坑） |
+|---|---|
+| 紫色 / 彩虹渐变 | AI slop 标志 |
+| 饼图 / 3D 柱图 / 霓虹光效 | 非 Apple 语言 |
+| Inter / Roboto 作标题字 | 破坏 SF Pro 统一感 |
+| 反弹 / 弹簧 / rotation 入场 | Apple easing 是 `cubic-bezier(0.25, 1, 0.5, 1)` |
+| `transition: all` | 性能差 + 视觉跳动。显式列属性 |
+| 硬编码 `#FFFFFF` | 用 `var(--apple-bg)` 才能跟主题变 |
+| 把 `[hero image]` / `[icon]` / `[photo]` 留在产物里 | 上线即暴露空白格子。必须放**真 inline SVG** |
+| 只写 `.apple-container--hero` 不带 base | base 提供 `margin: 0 auto`；只写 modifier → 容器贴屏幕左边。**必须** `class="apple-container apple-container--hero"` |
+| 窄容器（`.apple-container` 980px）包信息密集的 hero 框图 | 框图被压缩到 ~920px，内部 8–10px 字体渲染后 <9px 看不清。用 `.apple-container--hero` 1280px |
+| hero 框图 figure `padding: var(--space-7)` | 再吃掉 96px 宽度，SVG 进一步变小。用 `var(--space-5) var(--space-6)` |
+| SVG 里 `font-size="8"` 用在信息标签 | 实际渲染 <9px 是失读线。最小给 10，意图小字给 9.5 |
+| 多列网格里一张非 hero 卡片夹在一堆 `grid-column: 1 / -1` 中间 | 独占左半边很难看。要么跟它 span 2，要么 SVG `max-width + margin: 0 auto` 居中 |
+| Lineup 卡片塞一个 72×72 细线图标居中 | 像 wireframe。每张都做满版 illustration，传达 skill 内容 |
+| CTA 文字色在深底上对比度 < 4.5 | 可读性 fail。深底用 `#ffffff`，别用 `var(--apple-bg)` 那样的 off-white |
 
 ---
 
-## 📋 发布前 checklist（**MUST**，生成完整 HTML / demo / 模板时必做）
+## 📋 发布前 checklist（**MUST** — 三道闸都要 exit 0）
 
-每次生成可运行的 HTML 页面后、向用户宣布"完成"前，必须过一遍下列 7 项：
+```bash
+# 1) 结构验证（placeholder / BEM / 未定义 class / SVG 平衡 / container base-modifier）
+python3 skills/apple-design/scripts/verify.py <path/to/your.html>
 
-- [ ] **占位符零容忍**：全文 `grep '\['` 无 `[hero image]` / `[placeholder]` / `[xxx.icon]` 等。任何图像位都必须是**真 inline SVG**（见 `components.md` §28）或删除该元素。
-- [ ] **容器正确**：Hero 段用 `.apple-container--hero`；lineup / 对比 grid 用 `.apple-container--wide`；默认正文用 `.apple-container`；文档三栏直接用 `max-width: 1280px; grid-template-columns: 240px 1fr 240px`。见 `layout-patterns.md` 容器表。
-- [ ] **居中生效**：Hero 的 `text-align: center` 来自 `.apple-hero`；如果在子元素加 `style="..."` 覆盖要确认未误伤。
-- [ ] **浏览器渲染**：`python3 -m http.server 8000` 打开产物目测 hero / 节奏 / 图标 / 响应式。**不做这一步不算完成**。
-- [ ] **CSS 路径**：`<link>` 相对路径从输出文件所在目录能解析到 `apple.css`，HTTP 200。
-- [ ] **class 定义完整**：每个 `class="apple-*"` 在 `apple.css` 都能 grep 到定义（不发明新类；如需要新组件先加到 CSS）。
-- [ ] **a11y**：说明性 SVG 用 `role="img"` + `aria-label="..."`，装饰性 SVG 用 `aria-hidden="true"`。
+# 2) 视觉渲染验证（Playwright + WCAG 对比度 + 框图尺寸 + 孤儿卡）
+node skills/apple-design/scripts/visual-audit.mjs <path/to/your.html>
 
-⚠️ 把任意 `[foo]` 留在 HTML 里就叫完成 —— demo 没用，开发者看了就退出。
+# 3) 全页截图，肉眼审核
+node skills/apple-design/scripts/screenshot.mjs <path/to/your.html> shot.png
+```
+
+任何一条 exit 非 0 → **任务没完成**。visual-audit 会报：
+- `[error]` contrast < 3 — 修文字或背景
+- `[warn]` contrast 3–4.5 — brand-intentional 除外
+- `[warn]` hero diagram rendered at only X px — 容器太窄
+- `[warn]` hero diagram smallest text renders at Xpx — SVG font-size 太小
+- `[warn]` orphan figure — grid 里孤单非 hero 卡，span 2 或配对
+
+## 📐 Lineup card 质量底线
+
+每张卡 `aspect-ratio: 1`，满版 illustration，一眼能看出这个 skill 是干什么的。参考 demo 里 6 张（dark chip tile / REC 蓝 / PDF↔MD 双纸 / PDF 叠层 / palette 四宫格 / 暖色几何）。
+
+## 📊 Hero diagram 质量底线
+
+1. 在 1440 视口渲染宽度 ≥ 900px（用 `.apple-container--hero` + `grid-column: 1 / -1`）
+2. 最小 SVG 字体 ≥ 10 (viewBox 坐标)，渲染 ≥ 9px
+3. 有 stage labels（`01 · INPUT · 02 · MATCHER · 03 · DECISION`）引导视线
+4. 用 soft shadow（blur 4–8, dy 5–12, alpha 0.10–0.14）而非粗描边
+5. 至少一个细节 texture（dotted grid / subtle gradient / radial glow）让它不像 ppt

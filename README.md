@@ -6,11 +6,12 @@ A curated collection of **Claude Code Skills** — reusable, domain-specific pro
 
 ## Live Demos
 
-The three design skills ship with single-page flagship demos under [`demos/`](./demos/) — same content, three aesthetics:
+Four design skills ship with single-page flagship demos under [`demos/`](./demos/) — same content, four aesthetics:
 
 - [**apple-design demo**](./demos/apple-design/index.html) — sky-skills in apple.com's crisp voice
 - [**anthropic-design demo**](./demos/anthropic-design/index.html) — sky-skills in anthropic.com's warm editorial voice
-- [**ember-design demo**](./demos/ember-design/index.html) — sky-skills in handcraft-editorial warmth (cream + chocolate + gold)
+- [**ember-design demo**](./demos/ember-design/index.html) — handcraft editorial warmth (cream + chocolate + gold)
+- [**sage-design demo**](./demos/sage-design/index.html) — quiet Nordic minimalism (cream + sage green + deep indigo)
 
 To preview locally: `python3 -m http.server 8000` from the repo root, then open the URLs.
 
@@ -25,6 +26,7 @@ To preview locally: `python3 -m http.server 8000` from the repo root, then open 
 | [apple-design](skills/apple-design/) | EN/ZH | Render HTML/CSS in **apple.com** visual aesthetic — white/pale-gray alternating sections, SF Pro typography, minimal text links (no filled buttons), large stat callouts, product-photography-driven layout, hand-drawn SVG diagrams |
 | [anthropic-design](skills/anthropic-design/) | EN/ZH | Render HTML/CSS in **anthropic.com** visual aesthetic — warm cream bg (#faf9f5), Poppins + Lora serif body, orange accent (#d97757) filled pill buttons, editorial card grids, abstract SVG illustrations, low-saturation data viz |
 | [ember-design](skills/ember-design/) | EN/ZH | Render HTML/CSS in a **handcraft-editorial** aesthetic — cream (#fff2df) + chocolate (#312520) + brown CTA (#492d22) + gold accent (#c49464), Fraunces display serif + Inter body. For artisan brands, boutique hotels, literary journals |
+| [sage-design](skills/sage-design/) | EN/ZH | Render HTML/CSS in a **quiet Nordic-minimal** aesthetic — rice-paper cream (#f8faec) + sage green accent (#97B077) + deep indigo ink (#393C54), Instrument Serif display + Inter body + JetBrains Mono. For reading apps, botanical studios, modern journals, quiet tech brands |
 
 ## What Are Claude Code Skills?
 

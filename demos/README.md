@@ -1,24 +1,27 @@
 # Demos
 
-Same story, two aesthetics. Each demo is a single flagship HTML page showcasing the respective design skill on realistic, self-referential content (this repository itself).
+Same story, four aesthetics. Each demo is a single flagship HTML page showcasing the respective design skill on realistic, self-referential content (this repository itself). Every demo ships the same three programming-focused hero diagrams — **code architecture**, **SoC block diagram**, and **multi-repo git collaboration flow** — so you can compare how each aesthetic handles information-dense visuals.
 
-| Demo | Renders | Preview |
+| Demo | Renders | Character |
 |---|---|---|
-| [`apple-design/`](./apple-design/index.html) | `skills/apple-design/` | SF Pro, white/pale-gray alternating sections, 巨字号统计, product lineup, dark section, modern flow diagrams with gradients + soft shadows, text-link CTAs |
-| [`anthropic-design/`](./anthropic-design/index.html) | `skills/anthropic-design/` | Warm cream, Poppins + Lora serif, orange filled pills, editorial cards, pull quote, inline low-saturation bar chart, 3-tier pricing, git workflow diagram |
-| [`ember-design/`](./ember-design/index.html) | `skills/ember-design/` | Deep cream + chocolate + gold, Fraunces display serif + Inter body, coffee-bean hero SVG, gold-quoted pull-quote, three-aesthetics comparison, handcraft feel |
+| [`apple-design/`](./apple-design/index.html) | `skills/apple-design/` | SF Pro, white/pale-gray alternating sections, hero-wide diagrams, full-bleed product tiles, text-link CTAs, dark section |
+| [`anthropic-design/`](./anthropic-design/index.html) | `skills/anthropic-design/` | Warm cream, Poppins + Lora serif, orange filled pills, editorial cards, pull quote, bar chart, 3-tier pricing |
+| [`ember-design/`](./ember-design/index.html) | `skills/ember-design/` | Deep cream + chocolate + gold, Fraunces display serif + Inter body, coffee-bean hero SVG, gold-quoted pull-quote, handcraft feel |
+| [`sage-design/`](./sage-design/index.html) | `skills/sage-design/` | Rice-paper cream + sage green + deep indigo, Instrument Serif display + Inter body + JetBrains Mono section numbers, quiet Nordic minimalism |
 
 ## Local preview
 
 ```bash
 # from repo root
 python3 -m http.server 8000
-# then open:
+# then open any of:
 #   http://localhost:8000/demos/apple-design/index.html
 #   http://localhost:8000/demos/anthropic-design/index.html
+#   http://localhost:8000/demos/ember-design/index.html
+#   http://localhost:8000/demos/sage-design/index.html
 ```
 
-Both demos reference CSS via relative paths:
+All demos reference CSS via relative paths:
 
 ```
 demos/<skill>/index.html
@@ -26,14 +29,37 @@ demos/<skill>/index.html
          └─ ../../skills/<skill>/assets/{fonts.css,<skill>.css}
 ```
 
-So opening them as files over HTTP (not `file://`) is enough — no build step.
+So opening them over HTTP (not `file://`) is enough — no build step.
 
-## What each demo exercises
+## Shared diagram set (programming-focused)
 
-**Apple demo** exercises: `.apple-banner`, `.apple-nav`, `.apple-hero`, `.apple-section` × 4 (alternating white / alt / white / dark), `.apple-stat` × 3 column, `.apple-card` product grid × 6, `.apple-code` install block, `.apple-admonition--info`, `.apple-quote` + `.apple-quote-cite`, `.apple-footer-grid` × 5 columns.
+Each demo ships these hero-sized full-row diagrams, rendered in the respective palette:
 
-**Anthropic demo** exercises: `.anth-nav` with orange CTA, `.anth-banner` with inline badge, `.anth-hero` + serif lead, 3 × `.anth-card` capability grid, `.anth-quote` italic with orange left rule + customer-logo cite, inline SVG low-saturation bar chart (`#6a9bcc` / `#d97757`), 3 × `.anth-card` pricing with `border: 2px solid var(--anth-orange)` on the highlighted tier, `.anth-code` + `.anth-admonition`, 6-column `.anth-footer-grid` with `.anth-social`.
+1. **Code architecture** — 4-layer stack (Presentation / Application / Domain / Infrastructure) with named modules and 5 skill pills in the Domain layer
+2. **SoC block diagram** — apple-silicon-feel layout with P-cluster, E-cluster, 10-core GPU, 16-core Neural Engine, memory controller + DRAM, and I/O strip
+3. **Multi-repo collaboration flow** — three-remote git workflow (upstream / working / commit-mirror) with feature branches, working-tree status, CI pipeline, and push/PR/rebase arrows
+
+On top of the shared three, each demo has aesthetic-specific small diagrams:
+- **Apple:** skill activation pipeline, directory hierarchy, install timeline
+- **Anthropic:** git workflow on a branch, orchestrator + sub-agents, release timeline
+- **Ember:** lifecycle curve, skill folder tree, install timeline
+- **Sage:** lifecycle flow, skill folder tree, install timeline
+
+## Quality gates
+
+Every demo is validated by three scripts before commit:
+
+```bash
+# Structural (placeholder / BEM / undefined class / SVG balance)
+python3 skills/<skill>/scripts/verify.py demos/<skill>/index.html
+
+# Visual (Playwright render + WCAG contrast + diagram sizing + orphan card)
+node skills/<skill>/scripts/visual-audit.mjs demos/<skill>/index.html
+
+# Human-in-the-loop screenshot
+node skills/<skill>/scripts/screenshot.mjs demos/<skill>/index.html demo-shot.png
+```
 
 ## Cross-link
 
-Each demo has a "See the other version" link near the footer so a reader can toggle between the two aesthetics on the same content and compare directly.
+Each demo links to the others near the footer so you can toggle between the four aesthetics on the same content and compare directly.
