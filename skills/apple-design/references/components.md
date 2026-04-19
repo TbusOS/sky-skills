@@ -540,3 +540,42 @@ struct ContentView: View {
 ```
 
 **备注：** 居中对齐，不使用插画；至少提供两个 `.apple-link` 指向主入口。
+
+## 28. Inline SVG Illustration
+
+**用途：** hero / lineup / 任何需要图像位。**绝对不要**用 `[placeholder]` 文字代替；写真的 inline SVG。
+**关键 class：** 无（inline SVG 不需要 class）
+**示例 — hero 抽象合成：**
+
+```html
+<svg role="img" aria-label="Six composable modules"
+     viewBox="0 0 1040 340"
+     style="display:block; margin:var(--space-8) auto 0; width:100%; max-width:1040px; height:auto; border-radius:var(--radius-lg); background:linear-gradient(180deg, #FFFFFF 0%, #F5F5F7 100%);">
+  <g>
+    <rect x="220" y="70"  width="108" height="108" rx="16" fill="#FFFFFF" stroke="#D2D2D7" stroke-width="1"/>
+    <rect x="348" y="70"  width="108" height="108" rx="16" fill="#FFFFFF" stroke="#D2D2D7" stroke-width="1"/>
+    <rect x="476" y="70"  width="108" height="108" rx="16" fill="#0071E3"/>
+    <rect x="604" y="70"  width="108" height="108" rx="16" fill="#FFFFFF" stroke="#D2D2D7" stroke-width="1"/>
+  </g>
+</svg>
+```
+
+**示例 — 线性图标（lineup 卡片）72×72：**
+
+```html
+<svg role="img" aria-label="Chip" viewBox="0 0 48 48" width="72" height="72">
+  <g fill="none" stroke="#1D1D1F" stroke-width="1.5" stroke-linecap="round">
+    <rect x="14" y="14" width="20" height="20" rx="2"/>
+    <rect x="19" y="19" width="10" height="10" rx="1"/>
+    <path d="M6 19h8M6 24h8M6 29h8M34 19h8M34 24h8M34 29h8M19 6v8M24 6v8M29 6v8M19 34v8M24 34v8M29 34v8"/>
+  </g>
+</svg>
+```
+
+**规则：**
+- **色板**：只用 `--apple-bg` (#FFFFFF) / `--apple-text` (#1D1D1F) / `--apple-link` (#0071E3) / `--apple-divider` (#D2D2D7) / `--apple-bg-alt` (#F5F5F7)。
+- **线性图标**：`stroke-width: 1.5`, `stroke-linecap: round`, 48×48 viewBox，外显尺寸 72×72。
+- **抽象组合**：圆角矩形 `rx=12-32` + 薄描边 + 偶尔一个 `--apple-link` 色块做强调。
+- **a11y**：有信息价值的 SVG 加 `role="img"` + `aria-label`；纯装饰加 `aria-hidden="true"`。
+
+❌ **不要**写 `<div>[hero]</div>` / `<div>[kernel.icon]</div>` 这样的占位 —— 永远用真 SVG。

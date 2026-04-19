@@ -28,10 +28,18 @@ last-verified: 2026-04-19
 
 1. `references/design-tokens.md` — 所有 CSS 变量
 2. `references/typography.md` — 字体层级与规则
-3. `references/layout-patterns.md` — 六类版式骨架
-4. `references/components.md` — nav/footer/form/table/tabs/... 全部组件
+3. `references/layout-patterns.md` — 六类版式骨架 + **容器选择表**
+4. `references/components.md` — 28 组件（含 §28 Inline SVG 插画模板）
 5. `references/motion.md` — 动画缓动
 6. `references/imagery.md` — 摄影与圆角规则
 7. `references/data-display.md` — 巨字号统计 + 等距插画
 8. `references/responsive.md` — 断点与 max-width
-9. `references/dos-and-donts.md` — 反例
+9. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
+
+## 发布前检查（MUST）
+
+生成任何完整 HTML 页面（demo / 模板 / 落地页）后、向用户宣布"完成"前，**必须**按 `dos-and-donts.md` 末尾的 7 项 checklist 逐项确认。重点：
+
+- 禁止任何 `[placeholder]` 字符串留在产物里 —— 必须是真 inline SVG（见 `components.md` §28）。
+- Hero 段必须用 `.apple-container--hero` 或 `.apple-container--wide`，不要用 `.apple-container` (980px) 或更窄。
+- 提交前用 `python3 -m http.server` 打开目测 —— 不做这一步不算完成。

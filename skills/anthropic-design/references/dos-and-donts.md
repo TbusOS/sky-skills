@@ -32,3 +32,21 @@
 - 反弹 / 弹簧 / rotate 入场动画
 - 5 色以外的插画色（仅 orange / blue / green / mid-gray / bg-subtle）
 - 立体 / 拟物 / 阴影过重的卡片（`--shadow-card` 已足够）
+- **括号占位符**：`[hero image]` / `[icon]` / `[SVG]` / `[abstract illustration]` 这种字符串留在产物里 —— 永远不要
+- **窄容器包 hero**：`.anth-container--narrow` (720px) 是**长文正文**用的，**不是** hero 容器；hero 用 `.anth-container` (960px) 或 `.anth-container--wide` (1200px)
+
+---
+
+## 📋 发布前 checklist（**MUST**，生成完整 HTML / demo / 模板时必做）
+
+每次生成可运行的 HTML 页面后、向用户宣布"完成"前，必须过一遍下列 7 项：
+
+- [ ] **占位符零容忍**：全文 `grep '\['` 无 `[hero image]` / `[placeholder]` / `[xxx.icon]` / `[SVG]` / `[abstract illustration]` 等。任何图像位都必须是**真 inline SVG**（见 `components.md` §28）或删除该元素。
+- [ ] **容器正确**：Hero 段用 `.anth-container` (960) 或 `.anth-container--wide` (1200)；**绝不要**用 `.anth-container--narrow`（720 是给长文用的）。长文正文 / focused install 段才用 `--narrow`。见 `layout-patterns.md` 容器表。
+- [ ] **居中生效**：Hero 的 `text-align: center` 来自 `.anth-hero`；如果在子元素加 `style="..."` 覆盖要确认未误伤。
+- [ ] **浏览器渲染**：`python3 -m http.server 8000` 打开产物目测 hero / 节奏 / 图标 / 响应式 / 字体加载（Google Fonts 联网）。**不做这一步不算完成**。
+- [ ] **CSS 路径**：`<link>` 相对路径从输出文件所在目录能解析到 `fonts.css` 与 `anthropic.css`，HTTP 200。
+- [ ] **class 定义完整**：每个 `class="anth-*"` 在 `anthropic.css` 都能 grep 到定义（不发明新类；如需要新组件先加到 CSS）。
+- [ ] **a11y**：说明性 SVG 用 `role="img"` + `aria-label="..."`，装饰性 SVG 用 `aria-hidden="true"`。
+
+⚠️ 把任意 `[foo]` 留在 HTML 里就叫完成 —— demo 没用，开发者看了就退出。

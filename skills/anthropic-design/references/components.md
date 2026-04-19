@@ -649,3 +649,46 @@ print(message.content)
 ```
 
 **备注：** 居中对齐，narrow 容器；不放抽象插画（保持简洁）；至少提供一个橙胶囊主入口 + 一个文字链辅助。
+
+## 28. Inline SVG Illustration
+
+**用途：** hero / 能力卡 / 任何图像位。**绝对不要**用 `[placeholder]` 文字代替；写真的 inline SVG。
+**关键 class：** 无（inline SVG 不需要 class）
+**示例 — hero 抽象合成（品牌三色）：**
+
+```html
+<svg role="img" aria-label="Composable skill blocks"
+     viewBox="0 0 1200 380"
+     style="display:block; width:100%; max-width:1200px; height:auto;
+            border-radius:var(--radius-lg);
+            background:linear-gradient(135deg, #faf9f5 0%, #f0ede3 100%);">
+  <rect x="220" y="90"  width="180" height="180" rx="32" fill="#d97757"/>
+  <circle cx="530" cy="190" r="92" fill="#6a9bcc"/>
+  <rect x="680" y="110" width="150" height="150" rx="75" fill="#788c5d"/>
+  <rect x="890" y="90"  width="180" height="180" rx="32" fill="#FFFFFF" stroke="#e8e6dc" stroke-width="1.5"/>
+  <!-- accent dots -->
+  <circle cx="100" cy="190" r="14" fill="#d97757"/>
+  <circle cx="1140" cy="210" r="20" fill="#6a9bcc" opacity="0.65"/>
+</svg>
+```
+
+**示例 — 能力卡图标（色块内嵌白色线性 icon，56×56）：**
+
+```html
+<div style="width:56px; height:56px; border-radius:var(--radius-md); background:var(--anth-orange); display:grid; place-items:center;">
+  <svg viewBox="0 0 32 32" width="28" height="28">
+    <g fill="none" stroke="#faf9f5" stroke-width="1.8" stroke-linecap="round">
+      <rect x="8" y="8" width="16" height="16" rx="2"/>
+      <rect x="12" y="12" width="8" height="8" rx="1"/>
+    </g>
+  </svg>
+</div>
+```
+
+**规则：**
+- **色板**：只用 `--anth-bg` (#faf9f5) / `--anth-text` (#141413) / `--anth-orange` (#d97757) / `--anth-blue` (#6a9bcc) / `--anth-green` (#788c5d) / `--anth-light-gray` (#e8e6dc)；插画不用白色作主色（留给卡片）。
+- **hero 插画**：圆角矩形 `rx=20-75` + 圆形 + 一个白卡描边（`#e8e6dc` 1.5px）提供呼吸；`opacity: 0.65` 可用于远景球体。
+- **线性图标**：`stroke-width: 1.8`, `stroke-linecap: round`, 32×32 viewBox，外显尺寸 28×28，放进 56×56 色块里。
+- **a11y**：有信息价值的 SVG 加 `role="img"` + `aria-label`；纯装饰加 `aria-hidden="true"`。
+
+❌ **不要**写 `<div>[abstract SVG illustration]</div>` / `<div>[icon]</div>` 这样的占位 —— 永远用真 SVG。

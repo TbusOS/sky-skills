@@ -81,3 +81,17 @@
 - 过往事件缩略图轮播
 
 具体骨架见 `templates/landing-page.html` 与 `templates/nav-footer.html`。
+
+---
+
+## 容器选择表（**按版式选正确容器**）
+
+| 版式 | 推荐容器 | max-width | 为什么 |
+|---|---|---|---|
+| Hero 主视觉 | `.apple-container--hero` | 1280px | hero 视觉重量需要宽度承载；窄容器会显得内容靠左 |
+| 产品 lineup / 5 列对比 | `.apple-container--wide` | 1068px | 5 列 grid 在 980 里会挤 |
+| 标准正文段落 / 统计 / CTA 段 | `.apple-container` | 980px | Apple 默认内容宽度 |
+| Newsroom 文章正文 | `.apple-container` + 内层 `max-width: 680px` | 680px | 单栏阅读舒适上限 |
+| Docs 三栏 | 不用 `.apple-container`；直接 `max-width: 1280px; grid-template-columns: 240px 1fr 240px` | 1280px | 三栏不需要容器 padding |
+
+⚠️ **最常见错误**：把 hero 包在 `.apple-container` (980px) 或更窄。请始终用 `--hero` 或至少 `--wide`。
