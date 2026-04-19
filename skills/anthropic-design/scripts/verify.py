@@ -99,7 +99,7 @@ def check_file(path: str) -> list[str]:
         ):
             errors.append(
                 f"{path}: hero uses narrow container ({finder.found!r}); "
-                f"expected anth-container--hero or --wide"
+                f"expected anth-container (default 960px) or anth-container--wide (1200px)"
             )
         elif not tokens.intersection(ACCEPTABLE_HERO_CONTAINERS):
             # hero exists but container is non-apple — warn if it's non-standard
