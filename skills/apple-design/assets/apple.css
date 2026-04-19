@@ -9,12 +9,13 @@
   --apple-bg: #FFFFFF;
   --apple-bg-alt: #F5F5F7;
   --apple-bg-dark: #000000;
-  --apple-text: #1D1D1D;
+  --apple-text: #1D1D1F;
   --apple-text-secondary: #6E6E73;
   --apple-text-on-dark: #F5F5F7;
   --apple-link: #0071E3;
   --apple-link-hover: #0077ED;
   --apple-divider: #D2D2D7;
+  --apple-bg-nav: rgba(251, 251, 253, 0.72);
   --apple-system-green: #34C759;
   --apple-system-orange: #FF9500;
   --apple-system-red: #FF3B30;
@@ -45,7 +46,6 @@
   /* Shadows */
   --shadow-product: 0 20px 60px -20px rgba(0, 0, 0, 0.15);
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-nav: 0 0 0 1px rgba(0, 0, 0, 0.04);
 
   /* Motion */
   --ease-apple: cubic-bezier(0.42, 0, 0.58, 1);
@@ -145,13 +145,17 @@ small,
   content: " \203A";
 }
 
+.apple-link--no-arrow::after {
+  content: none;
+}
+
 /* .apple-button 仅供 Buy/Add to Bag/付费 CTA 用；其它一律 .apple-link */
 .apple-button {
   display: inline-block;
   padding: 8px 16px;
   border-radius: var(--radius-pill);
   background: var(--apple-link);
-  color: #FFFFFF;
+  color: var(--apple-bg);
   font-size: 14px;
   font-weight: 400;
   text-decoration: none;
@@ -243,12 +247,13 @@ small,
   top: 0;
   z-index: 100;
   height: 44px;
-  background: rgba(251, 251, 253, 0.72);
+  background: var(--apple-bg-nav);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--apple-divider);
 }
 
+/* Nav container is 1024px — Apple's actual nav chrome width, narrower than the 1068 content wide container */
 .apple-nav-inner {
   max-width: 1024px;
   margin: 0 auto;
@@ -408,7 +413,7 @@ small,
   border-radius: var(--radius-pill);
   position: relative;
   cursor: pointer;
-  transition: background 240ms;
+  transition: background var(--duration-sm);
 }
 
 .apple-toggle::before {
@@ -419,9 +424,9 @@ small,
   width: 27px;
   height: 27px;
   border-radius: 50%;
-  background: #FFFFFF;
+  background: var(--apple-bg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform 240ms var(--ease-apple-out);
+  transition: transform var(--duration-sm) var(--ease-apple-out);
 }
 
 .apple-toggle:checked {
@@ -429,6 +434,7 @@ small,
 }
 
 .apple-toggle:checked::before {
+  /* 51 (track) − 27 (knob) − 2×2 (padding) = 20px travel */
   transform: translateX(20px);
 }
 
@@ -452,7 +458,7 @@ small,
   border-radius: var(--radius-md);
   padding: var(--space-4);
   cursor: pointer;
-  transition: border-color 240ms;
+  transition: border-color var(--duration-sm);
 }
 
 .apple-option-card--selected {
@@ -477,7 +483,7 @@ small,
 
 .apple-segmented button.is-active {
   background: var(--apple-text);
-  color: #FFFFFF;
+  color: var(--apple-bg);
 }
 
 /* ---------- Section L: Tabs / Carousel / Video / Details / Admonition / Code ---------- */
@@ -495,7 +501,7 @@ small,
   color: var(--apple-text-secondary);
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: all 240ms;
+  transition: color var(--duration-sm), border-bottom-color var(--duration-sm);
 }
 
 .apple-tab.is-active {
@@ -535,7 +541,7 @@ small,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform 240ms var(--ease-apple-out);
+  transition: transform var(--duration-sm) var(--ease-apple-out);
 }
 
 .apple-video-play:hover {
@@ -590,7 +596,7 @@ small,
 pre.apple-code {
   font-family: var(--font-mono);
   font-size: 13px;
-  background: #F5F5F5;
+  background: var(--apple-bg-alt);
   border-radius: var(--radius-md);
   padding: var(--space-5);
   overflow-x: auto;
@@ -607,7 +613,7 @@ code {
 kbd {
   font-family: var(--font-mono);
   font-size: 12px;
-  background: #FFFFFF;
+  background: var(--apple-bg);
   border: 1px solid var(--apple-divider);
   padding: 2px 6px;
   border-radius: 4px;

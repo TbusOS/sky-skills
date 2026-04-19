@@ -9,12 +9,13 @@
 | `--apple-bg` | `#FFFFFF` | 主背景 |
 | `--apple-bg-alt` | `#F5F5F7` | 交替段落 / 页脚 / 代码块底 |
 | `--apple-bg-dark` | `#000000` | 黑色章节（Pro 系列风） |
-| `--apple-text` | `#1D1D1D` | 主文字 |
+| `--apple-text` | `#1D1D1F` | 主文字 |
 | `--apple-text-secondary` | `#6E6E73` | 次级文字 |
 | `--apple-text-on-dark` | `#F5F5F7` | 黑底主文字 |
 | `--apple-link` | `#0071E3` | 文字链 / Buy CTA |
 | `--apple-link-hover` | `#0077ED` | 链接 hover |
 | `--apple-divider` | `#D2D2D7` | 细分隔线 |
+| `--apple-bg-nav` | `rgba(251,251,253,0.72)` | 毛玻璃 nav 背景 |
 | `--apple-system-green` | `#34C759` | toggle 开启 |
 | `--apple-system-orange` | `#FF9500` | warning admonition |
 | `--apple-system-red` | `#FF3B30` | danger admonition |
@@ -61,7 +62,6 @@
 ```
 --shadow-product: 0 20px 60px -20px rgba(0,0,0,0.15);
 --shadow-card:    0 2px 8px rgba(0,0,0,0.04);
---shadow-nav:     0 0 0 1px rgba(0,0,0,0.04);
 ```
 
 ## 缓动 / 时长
@@ -79,8 +79,7 @@
 ```
 mobile:   ≤734px
 tablet:   735–1068px
-desktop:  1069–1440px
-large:    ≥1441px
+desktop:  ≥1069px
 ```
 
 容器 max-width：980（常规）/ 1068（wide）/ 1280（hero）。
