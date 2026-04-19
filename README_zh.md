@@ -11,6 +11,9 @@
 | [linux-kernel-dev](skills/linux-kernel-dev/) | EN | Linux 内核与驱动开发 —— 编码规范、模块/驱动/字符设备模板、Kconfig、Makefile、设备树绑定、调试工具、并发模型、内核 API 速查 |
 | [wechat-video-publisher](skills/wechat-video-publisher/) | ZH | 微信公众号视频制作全流水线 —— edge-tts 配音、Playwright 逐帧录制、ffmpeg 字幕烧录、微信兼容 inline-style 文章模板 |
 | [doc-to-markdown](skills/doc-to-markdown/) | EN/ZH | 文档转 Markdown —— 批量 PDF/DOCX 转换为格式清晰的 Markdown，自动提取图片、表格转换、EMF/WMF 处理、中文支持 |
+| [md-to-pdf](skills/md-to-pdf/) | EN/ZH | Markdown 转 PDF —— 基于 PyMuPDF Story HTML 渲染，完整中文支持、自动书签、页码 |
+| [apple-design](skills/apple-design/) | EN/ZH | 以 **apple.com** 网页美学渲染 HTML/CSS —— SF Pro 字体、白/浅灰/黑交替段落、克制的文字链、巨字号统计、产品摄影主导、手工 SVG 流程图 |
+| [anthropic-design](skills/anthropic-design/) | EN/ZH | 以 **anthropic.com** 网页美学渲染 HTML/CSS —— 暖米白 + 橙色强调、Poppins 标题 + Lora 衬线正文、实心胶囊按钮、编辑式卡片、抽象 SVG 插画、低饱和图表 |
 
 ## 什么是 Claude Code Skills？
 
@@ -89,6 +92,35 @@ ln -s "$(pwd)/sky-skills/skills/linux-kernel-dev/SKILL.md" \
 - **后处理指引** —— 提供审查、重命名、整理提取图片的工作流
 
 **自动触发条件：** 转换文档为 Markdown、提取 PDF/DOCX 内容、批量转换文件夹，或涉及"convert to markdown"/"转成markdown"/"文档转换"的请求。
+
+### apple-design
+
+以 apple.com 的视觉语言渲染任何 HTML/CSS：
+
+- **设计 token** —— 完整 CSS 自定义属性色板、SF Pro 字号层级、4px 间距网格、12/18px 圆角、柔和阴影、`cubic-bezier(0.25, 1, 0.5, 1)` 缓动
+- **版式** —— 白/浅灰/黑交替段落、居中 hero、5 列产品 lineup、3 栏文档、newsroom 卡片网格、事件页
+- **组件** —— 27 个 `.apple-*` 开箱即用：毛玻璃 sticky nav、5 栏页脚、仅 Buy 用的填色按钮、表单控件、颜色/容量选项卡、分段控件、标签页、轮播、视频（带 ASL badge）、徽章、pull quote、details 折叠、info/warning/success/danger 四种 admonition、面包屑、全屏搜索
+- **模板** —— 9 个可直接打开的 HTML（landing / article / docs / slide-deck / stat-callout / nav-footer / form / product-configurator / specs-page）
+- **图表** —— 4 个手工 SVG 模板（flow / architecture / hierarchy / timeline），苹果风圆角矩形 + 细灰描边
+- **交付** —— 纯 `apple.css`（零构建），配套 Tailwind preset
+
+**自动触发条件：** 用户说"apple 风格"/"apple style"/"苹果官网风格"/"like apple.com"，或要求做落地页 / 幻灯片 / 文档 / 图表 / 选配器对齐苹果官网。
+**不触发于：** iOS/macOS 原生应用界面（用 Apple HIG 专属 skill），或泛泛的"做个好看页面"。
+
+### anthropic-design
+
+以 anthropic.com 的视觉语言渲染任何 HTML/CSS：
+
+- **设计 token** —— 暖米白 `#faf9f5` 底、`#141413` 文字、`#d97757` 橙主强调、`#6a9bcc` 蓝、`#788c5d` 绿、`#e8e6dc` 浅灰分隔
+- **排版** —— Poppins 标题 + **Lora 衬线正文**（与 Apple 无衬线正文是最大差异），JetBrains Mono 代码
+- **版式** —— 编辑式卡片网格、长文 720px 单栏、研究论文含内联低饱和图表、产品总览、三档 pricing 卡、企业页（logo 墙）
+- **组件** —— 27 个 `.anth-*` 含：实心橙胶囊按钮、Lora 斜体 + 橙色左边 + 客户 logo 的 pull quote、低饱和柱/折/散/地图 调色板、带 `01 / 21` 计数器的引用轮播、pricing 卡（推荐款橙细边）、grayscale hover 还原的 logo 墙
+- **模板** —— 9 个 HTML（landing / article / docs / slide-deck / pricing / data-report / enterprise / product-overview / nav-footer）
+- **图表** —— 4 个 SVG（橙/蓝/绿节点分类、菱形决策 gate）
+- **交付** —— 纯 `anthropic.css` + `fonts.css`（Google Fonts 导入 Poppins/Lora/JetBrains Mono），配套 Tailwind preset
+
+**自动触发条件：** 用户说"anthropic 风格"/"anthropic style"/"claude 官网风格"/"Anthropic 品牌"，或要求做编辑式长文、研究文章、pricing 卡片、带温度的填色按钮风格。
+**不触发于：** 泛泛的"好看页面"（用 `frontend-design`）或 Apple 美学（用 `apple-design`）。
 
 ## 贡献指南
 

@@ -11,6 +11,9 @@ A curated collection of **Claude Code Skills** — reusable, domain-specific pro
 | [linux-kernel-dev](skills/linux-kernel-dev/) | EN | Linux kernel & driver development — coding standards, module/driver/chardev templates, Kconfig, Makefile, device tree bindings, debugging tools, concurrency patterns, kernel API reference |
 | [wechat-video-publisher](skills/wechat-video-publisher/) | ZH | WeChat article & video production pipeline — edge-tts narration, Playwright frame-by-frame recording, ffmpeg subtitle burning, WeChat-compatible inline-style HTML article templates |
 | [doc-to-markdown](skills/doc-to-markdown/) | EN/ZH | Document-to-Markdown converter — batch PDF/DOCX to clean Markdown with extracted images, table conversion, EMF/WMF handling, CJK support |
+| [md-to-pdf](skills/md-to-pdf/) | EN/ZH | Markdown-to-PDF converter with full Chinese support, bookmarks, and page numbers via PyMuPDF Story HTML rendering |
+| [apple-design](skills/apple-design/) | EN/ZH | Render HTML/CSS in **apple.com** visual aesthetic — white/pale-gray alternating sections, SF Pro typography, minimal text links (no filled buttons), large stat callouts, product-photography-driven layout, hand-drawn SVG diagrams |
+| [anthropic-design](skills/anthropic-design/) | EN/ZH | Render HTML/CSS in **anthropic.com** visual aesthetic — warm cream bg (#faf9f5), Poppins + Lora serif body, orange accent (#d97757) filled pill buttons, editorial card grids, abstract SVG illustrations, low-saturation data viz |
 
 ## What Are Claude Code Skills?
 
@@ -89,6 +92,35 @@ Convert PDF and DOCX files to clean, well-formatted Markdown with images extract
 - **Post-processing guidance** — workflow for reviewing, renaming, and curating extracted images
 
 **Auto-triggers when:** converting documents to markdown, extracting content from PDFs/DOCX files, batch-converting a folder of documents, or any request involving "convert to markdown" / "转成markdown" / "文档转换".
+
+### apple-design
+
+Render any HTML/CSS in the visual language of apple.com:
+
+- **Design tokens** — full CSS custom-property palette, SF Pro type scale, 4px spacing grid, 12/18px radii, subtle shadows, `cubic-bezier(0.25, 1, 0.5, 1)` easing
+- **Layouts** — alternating white/pale-gray/black sections, centered hero, 5-col product lineup, 3-col docs, newsroom card grid, event page
+- **Components** — 27 ready-to-use `.apple-*` classes: sticky blurred nav, 5-col footer, filled-only-for-buy buttons, inputs, option cards, segmented controls, tabs, carousel, video with ASL badge, badges, pull quotes, details, info/warning/success/danger admonitions, breadcrumbs, search overlay
+- **Templates** — 9 drop-in HTML files (landing, article, docs, slide-deck, stat-callout, nav-footer, form, product-configurator, specs-page)
+- **Diagrams** — 4 hand-crafted SVG templates (flow / architecture / hierarchy / timeline) matching Apple's clean geometric style
+- **Delivery** — plain `.apple.css` (no build), plus Tailwind preset
+
+**Auto-triggers when:** the user says "apple 风格" / "apple style" / "苹果官网风格" / "like apple.com", or asks for a landing page / slide / doc / diagram / configurator matching Apple's web look.
+**Does not trigger for:** native iOS/macOS UI (use an Apple HIG skill instead) or generic "beautiful page" asks.
+
+### anthropic-design
+
+Render any HTML/CSS in the visual language of anthropic.com:
+
+- **Design tokens** — warm cream `#faf9f5` bg, `#141413` text, `#d97757` orange, `#6a9bcc` blue, `#788c5d` green, `#e8e6dc` light gray divider
+- **Typography** — Poppins headings + **Lora serif body** (distinct vs Apple's sans-serif body), JetBrains Mono code
+- **Layouts** — editorial card grids, long-form 720px single column, research paper with inline charts, product overview, pricing cards, enterprise with logo wall
+- **Components** — 27 `.anth-*` classes including filled-pill orange buttons, italic Lora pull quotes with customer logos, low-saturation data charts, customer quote carousel with counter, pricing card (highlight with orange border), logo wall with grayscale hover
+- **Templates** — 9 drop-in HTML files (landing, article, docs, slide-deck, pricing, data-report, enterprise, product-overview, nav-footer)
+- **Diagrams** — 4 SVG templates with orange/blue/green category coloring and diamond decision gates
+- **Delivery** — plain `.anthropic.css` + `fonts.css` (imports Poppins/Lora/JetBrains Mono from Google Fonts), plus Tailwind preset
+
+**Auto-triggers when:** the user says "anthropic 风格" / "anthropic style" / "claude 官网风格" / "Anthropic 品牌", or asks for editorial long-form, research articles, pricing cards, or a filled-button-with-warmth feel.
+**Does not trigger for:** generic "beautiful page" asks (use `frontend-design`) or Apple aesthetic (use `apple-design`).
 
 ## Contributing
 
