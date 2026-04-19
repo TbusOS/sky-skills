@@ -25,25 +25,50 @@ last-verified: 2026-04-20
 
 ## 使用方式
 
-任何时候写完一个 demo / 模板 / landing HTML，**宣布完成前**，按顺序跑三个闸口。
+### 推荐:一条命令(本仓 / 跨仓通用)
 
 ```bash
-# 1) 结构闸门（静态）
-python3 skills/design-review/scripts/verify.py [--skill=<name>] <path/to/html> [...]
+bin/design-review [--repo=<path>] [--skill=<name>] [--css=<path>]... <html> [...]
+```
 
-# 2) 视觉闸门（Playwright 渲染）
-node skills/design-review/scripts/visual-audit.mjs <path/to/html>
+一次性跑完 3 闸:verify.py + visual-audit.mjs `--ignore-intentional` + screenshot.mjs。
+任一步 exit 非 0 整体 fail,截图存到 `--out=` 或默认 `<repo>/shots/`。
 
-# 3) 肉眼闸门（全页截图）
+**本仓用例**:
+```bash
+bin/design-review index.html docs/HARNESS-ROADMAP.html
+```
+
+**跨仓用例**(例:engram):
+```bash
+bin/design-review --repo=/path/to/engram --skill=anthropic \
+  --css=/path/to/engram/docs/assets/app.css \
+  docs/en/index.html
+```
+
+### 分别调用(调试用)
+
+```bash
+# 1) 结构闸(静态)
+python3 skills/design-review/scripts/verify.py \
+  [--skill=<name>] [--css=<path>]... <path/to/html> [...]
+
+# 2) 视觉闸(Playwright 渲染) —— 加 --ignore-intentional 消掉 3.12 brand 噪音
+node skills/design-review/scripts/visual-audit.mjs \
+  [--ignore-intentional] <path/to/html>
+
+# 3) 肉眼闸(全页截图)
 node skills/design-review/scripts/screenshot.mjs <path/to/html> shot.png
 ```
 
-**任一脚本 exit 非 0 = 没完成**。修完再跑,跑到 3 个都绿。
+**任一步 exit 非 0 = 没完成**。修完再跑。
 
-### --skill 参数
+### 参数语义
 
-`verify.py` 根据 HTML 的 CSS link 自动识别 skill。
-识别不到时（或你想强制），用 `--skill=anthropic|apple|ember|sage`。
+- **`--skill=<name>`**(verify.py / bin/design-review)—— 选 `anthropic|apple|ember|sage`。省略时 verify.py 从 HTML 的 `<link href="...*.css">` 自动识别;识别不到就要求显式传入。
+- **`--css=<path>`**(verify.py / bin/design-review,可重复)—— 追加 CSS 文件到 class 定义查找。跨仓常用:sky-skills 默认只看 sky-skills/skills/&lt;skill&gt;-design/assets/&lt;skill&gt;.css,engram 自己的 `docs/assets/app.css` 需要显式传入。
+- **自动 link 识别**(verify.py 默认开启)—— HTML 里的 `<link rel="stylesheet" href="...*.css">` 被解析并加入查找集合(相对 HTML 目录),跨仓 HTML 无需手动配置就能工作。
+- **`--ignore-intentional`**(visual-audit.mjs / bin/design-review 默认开启)—— 过滤已在 known-bugs.md 登记为 brand-intentional 的对比度告警(当前:anthropic 橙 CTA 白字 3.12)。信号变干净,真新 bug 不被淹没。
 
 ## 闸口覆盖的 bug 类
 

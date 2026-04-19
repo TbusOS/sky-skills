@@ -6,15 +6,17 @@
 //   4. Orphan figure cards in multi-col grids next to full-row hero siblings
 //
 // Usage:
-//   node skills/design-review/scripts/visual-audit.mjs <html-path>
+//   node skills/design-review/scripts/visual-audit.mjs [--ignore-intentional] <html-path>
+//
+// Flags:
+//   --ignore-intentional  Suppress contrast warnings for colour pairs explicitly
+//                         documented as brand-intentional in INTENTIONAL_EXCEPTIONS
+//                         (e.g. white on anthropic orange #d97757 is a known 3.12
+//                         trade-off, see known-bugs.md 2.1). Reduces noise so real
+//                         new-bug warnings don't get lost in "the usual 5 warnings."
 //
 // Exit code 0 = pass, 1 = errors found, 2 = bad CLI. Run from repo root.
 // Requires: playwright  (npm i playwright --no-save, then npx playwright install chromium)
-//
-// NOTE: this file was unified from 4 byte-identical copies (one per design skill).
-// The CTA selector list already includes every skill's button/badge classes, so
-// the audit is genuinely cross-skill. If a new design skill lands, add its CTA
-// selectors below rather than forking this file.
 
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
@@ -22,10 +24,38 @@ import { readFile, stat } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
 import process from 'node:process';
 
-const [, , target] = process.argv;
+const args = process.argv.slice(2);
+const ignoreIntentional = args.includes('--ignore-intentional');
+const target = args.filter((a) => !a.startsWith('--'))[0];
 if (!target) {
-  console.error('usage: node visual-audit.mjs <html-path>');
+  console.error('usage: node visual-audit.mjs [--ignore-intentional] <html-path>');
   process.exit(2);
+}
+
+// Brand-intentional contrast patterns — when --ignore-intentional is set, any
+// finding matching one of these gets filtered out (or downgraded to an info
+// line). Keep this list short and cross-reference known-bugs.md.
+const INTENTIONAL_EXCEPTIONS = [
+  // Anthropic brand orange CTA. white(255,255,255) on orange(217,119,87) = 3.12
+  // — documented in known-bugs.md §2.1. Brand-intentional, reviewed, accepted.
+  { fg: [255, 255, 255], bg: [217, 119, 87], tolerance: 2,
+    note: 'anthropic brand orange CTA (known-bugs 2.1)' },
+];
+
+function matchesIntentional(finding) {
+  if (finding.kind !== 'contrast') return false;
+  const fg = /rgb\((\d+),(\d+),(\d+)\)/.exec(finding.fg);
+  const bg = /rgb\((\d+),(\d+),(\d+)\)/.exec(finding.bg);
+  if (!fg || !bg) return false;
+  const [fr, fgr, fb] = [+fg[1], +fg[2], +fg[3]];
+  const [br, bgr, bb] = [+bg[1], +bg[2], +bg[3]];
+  return INTENTIONAL_EXCEPTIONS.some((ex) => {
+    const [efr, efgr, efb] = ex.fg;
+    const [ebr, ebgr, ebb] = ex.bg;
+    const t = ex.tolerance;
+    return Math.abs(fr - efr) <= t && Math.abs(fgr - efgr) <= t && Math.abs(fb - efb) <= t &&
+           Math.abs(br - ebr) <= t && Math.abs(bgr - ebgr) <= t && Math.abs(bb - ebb) <= t;
+  });
 }
 
 const root = process.cwd();
@@ -208,16 +238,27 @@ const findings = await page.evaluate(() => {
 await browser.close();
 server.close();
 
-const errors = findings.filter((i) => i.severity === 'error');
-const warns = findings.filter((i) => i.severity === 'warn');
+// Filter out brand-intentional contrast findings if asked.
+let suppressed = 0;
+const visibleFindings = ignoreIntentional
+  ? findings.filter((f) => {
+      if (matchesIntentional(f)) { suppressed++; return false; }
+      return true;
+    })
+  : findings;
 
-if (findings.length === 0) {
-  console.log(`visual-audit: OK  (${target})`);
+const errors = visibleFindings.filter((i) => i.severity === 'error');
+const warns = visibleFindings.filter((i) => i.severity === 'warn');
+
+if (visibleFindings.length === 0) {
+  const noise = suppressed > 0 ? ` (${suppressed} brand-intentional suppressed)` : '';
+  console.log(`visual-audit: OK  (${target})${noise}`);
   process.exit(0);
 }
 
-console.log(`visual-audit: ${errors.length} error(s), ${warns.length} warning(s)  (${target})`);
-for (const i of findings) {
+const noise = suppressed > 0 ? ` · ${suppressed} brand-intentional suppressed` : '';
+console.log(`visual-audit: ${errors.length} error(s), ${warns.length} warning(s)  (${target})${noise}`);
+for (const i of visibleFindings) {
   if (i.kind === 'contrast') {
     console.log(
       `  [${i.severity}] contrast ${i.ratio}:1  fg=${i.fg} bg=${i.bg}  "${i.text}"  (${i.selector})`

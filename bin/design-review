@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# design-review — one-command wrapper for the three-gate design review pipeline
+#
+# Runs (in order): verify.py · visual-audit.mjs --ignore-intentional · screenshot.mjs
+# All three must exit 0 for the overall run to exit 0.
+#
+# Usage:
+#   bin/design-review [flags] <html-path> [...]
+#
+# Flags:
+#   --repo=<path>      Webroot for serving assets (Playwright gates). Defaults to CWD.
+#                      Use this when running from outside sky-skills (e.g. against
+#                      engram's docs/en/index.html — set --repo=/path/to/engram).
+#   --skill=<name>     Force a skill: anthropic | apple | ember | sage.
+#                      If omitted, verify.py auto-detects from the HTML's <link>.
+#   --css=<path>       Extra CSS file for class-definition lookup. Can repeat.
+#                      Useful when the HTML depends on CSS not in the skill default
+#                      (e.g. engram's docs/assets/app.css).
+#   --strict           Treat visual-audit warnings as failure (default: only errors).
+#   --out=<dir>        Where to save screenshots (default: ./shots/).
+#   -h, --help         Print this help.
+#
+# Example:
+#   bin/design-review --repo=~/code/engram --skill=anthropic --css=docs/assets/app.css \
+#     docs/en/index.html
+
+set -eu
+
+SELF_DIR="$(cd "$(dirname "$0")" && pwd)"
+SKY_ROOT="$(cd "$SELF_DIR/.." && pwd)"
+
+REPO="$PWD"
+SKILL=""
+STRICT=""
+OUT_DIR=""
+CSS_ARGS=()
+HTMLS=()
+
+for arg in "$@"; do
+  case "$arg" in
+    --repo=*)  REPO="${arg#--repo=}" ;;
+    --skill=*) SKILL="${arg#--skill=}" ;;
+    --css=*)   CSS_ARGS+=("$arg") ;;
+    --strict)  STRICT=1 ;;
+    --out=*)   OUT_DIR="${arg#--out=}" ;;
+    -h|--help)
+      # Print lines 2..N of this file, stripping the leading "# " / "#".
+      sed -n '2,26p' "$0" | sed -E 's|^# ?||'
+      exit 0
+      ;;
+    --*)
+      echo "unknown flag: $arg" >&2
+      exit 2
+      ;;
+    *) HTMLS+=("$arg") ;;
+  esac
+done
+
+if [ "${#HTMLS[@]}" -eq 0 ]; then
+  echo "usage: bin/design-review [--repo=<path>] [--skill=<name>] [--css=<path>]... [--strict] <html> [...]" >&2
+  exit 2
+fi
+
+# Resolve REPO to an absolute path so the Playwright scripts' CWD is correct.
+REPO="$(cd "$REPO" && pwd)"
+
+if [ -z "$OUT_DIR" ]; then
+  OUT_DIR="$REPO/shots"
+fi
+mkdir -p "$OUT_DIR"
+
+VERIFY="$SKY_ROOT/skills/design-review/scripts/verify.py"
+VISUAL="$SKY_ROOT/skills/design-review/scripts/visual-audit.mjs"
+SCREEN="$SKY_ROOT/skills/design-review/scripts/screenshot.mjs"
+
+SKILL_FLAG=()
+[ -n "$SKILL" ] && SKILL_FLAG=("--skill=$SKILL")
+
+# ----- Gate 1 · structural (run from --repo so relative HTML paths resolve) -----
+echo "==> [1/3] verify.py"
+( cd "$REPO" && python3 "$VERIFY" "${SKILL_FLAG[@]}" "${CSS_ARGS[@]}" "${HTMLS[@]}" )
+
+# ----- Gate 2 · visual-audit (run each HTML from --repo as CWD) -----
+exit_visual=0
+for html in "${HTMLS[@]}"; do
+  echo "==> [2/3] visual-audit.mjs  $html"
+  # Run from $REPO so Playwright's static server resolves the HTML and its
+  # relative CSS/font/SVG paths the same way a browser would.
+  if ! ( cd "$REPO" && node "$VISUAL" --ignore-intentional "$html" ); then
+    exit_visual=1
+  fi
+done
+if [ "$exit_visual" -ne 0 ]; then
+  echo "==> visual-audit produced errors" >&2
+  exit 1
+fi
+
+# ----- Gate 3 · screenshot (for human review) -----
+for html in "${HTMLS[@]}"; do
+  base="$(basename "$html" .html)"
+  out="$OUT_DIR/${base}-$(date +%Y%m%d-%H%M%S).png"
+  echo "==> [3/3] screenshot.mjs    $html  →  $out"
+  ( cd "$REPO" && node "$SCREEN" "$html" "$out" )
+done
+
+echo ""
+echo "✓ all three gates passed · screenshots in $OUT_DIR"

@@ -3,11 +3,20 @@
 Unified structural verifier for all design skills.
 
 Usage:
-  python3 skills/design-review/scripts/verify.py [--skill=<name>] <html-path> [...]
+  python3 skills/design-review/scripts/verify.py [--skill=<name>] [--css=<path>]...
+                                                  <html-path> [...]
 
 If --skill is omitted, the script auto-detects the skill by scanning the HTML
 for a `<link>` to one of {anthropic|apple|ember|sage}.css. Pass --skill when
 detection is ambiguous.
+
+CSS class-definition lookup: unions classes from
+  (a) the skill's default CSS at skills/<skill>-design/assets/<css> (if exists)
+  (b) every `<link href="...*.css">` in the HTML, resolved relative to the HTML
+  (c) every --css=<path> passed on the command line (relative to CWD)
+
+(b) is what makes the tool work cross-repo: an external HTML's own local CSS
+is auto-picked. (c) lets you add extra CSS files (e.g. engram's app.css).
 
 Exit code:
   0 — all files pass
@@ -18,7 +27,7 @@ Checks:
   1. No `[placeholder]` brackets leaked into HTML
   2. <!doctype html> + viewport meta present
   3. Hero inner element uses an acceptable container (per skill)
-  4. Every `class="{prefix}-*"` token is defined in the skill's CSS
+  4. Every `class="{prefix}-*"` token is defined somewhere in the CSS union
   5. <svg> tag balance
   6. Container modifier never used without its base class (BEM bug)
 """
@@ -126,6 +135,22 @@ def used_classes(html: str, prefix: str) -> set[str]:
     return used
 
 
+def linked_stylesheets(html: str, html_path: str) -> list[str]:
+    """Find <link rel=stylesheet href=...> in the HTML, resolved to absolute
+    filesystem paths.  External (http/https///) URLs are skipped.
+    """
+    paths: list[str] = []
+    html_dir = os.path.dirname(os.path.abspath(html_path))
+    for m in re.finditer(r'<link[^>]+href=["\']([^"\']+\.css)["\']', html, re.I):
+        href = m.group(1)
+        if href.startswith(("http://", "https://", "//")):
+            continue
+        resolved = os.path.normpath(os.path.join(html_dir, href))
+        if os.path.exists(resolved):
+            paths.append(resolved)
+    return paths
+
+
 def autodetect_skill(html: str) -> str | None:
     """Pick a skill by finding a <link href="...{name}.css"> in the HTML.
 
@@ -151,7 +176,9 @@ def autodetect_skill(html: str) -> str | None:
     return None
 
 
-def check_file(path: str, forced_skill: str | None) -> list[str]:
+def check_file(
+    path: str, forced_skill: str | None, extra_css: list[str]
+) -> list[str]:
     errors: list[str] = []
     if not os.path.exists(path):
         return [f"{path}: not found"]
@@ -170,7 +197,7 @@ def check_file(path: str, forced_skill: str | None) -> list[str]:
     cfg = SKILLS[skill]
     prefix = cfg["prefix"]
     hero_class = prefix + "hero"
-    css_path = os.path.join(REPO_ROOT, "skills", cfg["dir"], "assets", cfg["css"])
+    default_css = os.path.join(REPO_ROOT, "skills", cfg["dir"], "assets", cfg["css"])
 
     # 1. placeholder brackets
     brackets = PLACEHOLDER_PATTERN.findall(html)
@@ -200,14 +227,46 @@ def check_file(path: str, forced_skill: str | None) -> list[str]:
                     f"({finder.found!r})"
                 )
 
-    # 4. class usage — all classes used must exist in the skill's CSS
-    if not os.path.exists(css_path):
-        errors.append(f"{cfg['css']} not found at {css_path}")
+    # 4. class usage — union classes from default CSS + HTML-linked CSS + --css=
+    defined: set[str] = set()
+    css_files_used: list[str] = []
+
+    if os.path.exists(default_css):
+        defined |= defined_classes(open(default_css, encoding="utf-8").read(), prefix)
+        css_files_used.append(default_css)
+
+    for linked in linked_stylesheets(html, path):
+        if linked in css_files_used:
+            continue
+        try:
+            defined |= defined_classes(
+                open(linked, encoding="utf-8").read(), prefix
+            )
+            css_files_used.append(linked)
+        except (OSError, UnicodeDecodeError):
+            pass
+
+    for extra in extra_css:
+        if not os.path.exists(extra):
+            errors.append(f"--css path not found: {extra}")
+            continue
+        if extra in css_files_used:
+            continue
+        defined |= defined_classes(open(extra, encoding="utf-8").read(), prefix)
+        css_files_used.append(extra)
+
+    if not css_files_used:
+        errors.append(
+            f"{path}: no CSS source found (default {cfg['css']} at {default_css} "
+            f"missing, no <link> in HTML resolved, no --css= given)"
+        )
     else:
-        defined = defined_classes(open(css_path, encoding="utf-8").read(), prefix)
         for cls in sorted(used_classes(html, prefix)):
             if cls not in defined:
-                errors.append(f"{path}: undefined class '{cls}' (not in {cfg['css']})")
+                short = [os.path.relpath(p) for p in css_files_used]
+                errors.append(
+                    f"{path}: undefined class '{cls}' (not in any of {short})"
+                )
 
     # 5. SVG tag balance
     opens = len(re.findall(r"<svg\b", html))
@@ -234,22 +293,25 @@ def check_file(path: str, forced_skill: str | None) -> list[str]:
     return errors
 
 
-def parse_args(argv: list[str]) -> tuple[str | None, list[str]]:
+def parse_args(argv: list[str]) -> tuple[str | None, list[str], list[str]]:
     skill: str | None = None
     files: list[str] = []
+    extra_css: list[str] = []
     for a in argv:
         if a.startswith("--skill="):
             skill = a.split("=", 1)[1].strip()
+        elif a.startswith("--css="):
+            extra_css.append(a.split("=", 1)[1].strip())
         elif a in ("-h", "--help"):
             print(__doc__)
             sys.exit(0)
         else:
             files.append(a)
-    return skill, files
+    return skill, files, extra_css
 
 
 def main() -> int:
-    skill, files = parse_args(sys.argv[1:])
+    skill, files, extra_css = parse_args(sys.argv[1:])
     if not files:
         print(__doc__)
         return 2
@@ -259,7 +321,7 @@ def main() -> int:
 
     failures: list[str] = []
     for path in files:
-        failures.extend(check_file(path, skill))
+        failures.extend(check_file(path, skill, extra_css))
     if failures:
         print("design-review verify: FAIL")
         for line in failures:
