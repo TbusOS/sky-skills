@@ -123,6 +123,18 @@ def check_file(path: str) -> list[str]:
     if opens != closes:
         errors.append(f"{path}: unbalanced <svg> tags ({opens} open, {closes} close)")
 
+    # 6. Modifier-only container (BEM bug): '--narrow' / '--wide'
+    #    without the base .anth-container will lose margin: 0 auto centering.
+    for m in re.finditer(r'class="([^"]+)"', html):
+        classes = m.group(1).split()
+        for cls in classes:
+            if re.fullmatch(r"anth-container--(?:narrow|wide)", cls):
+                if "anth-container" not in classes:
+                    errors.append(
+                        f"{path}: '{cls}' used without base 'anth-container' — "
+                        f"margin:0 auto won't apply; write class=\"anth-container {cls}\""
+                    )
+
     return errors
 
 
