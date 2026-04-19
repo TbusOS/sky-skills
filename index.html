@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sky-skills — a curated collection of Claude Code Skills</title>
+<meta name="description" content="Eight focused Claude Code Skills — Linux kernel development, document conversion, video publishing, and four brand-level HTML design aesthetics. Small, composable, MIT-licensed.">
+<meta property="og:title" content="sky-skills — Claude Code Skills">
+<meta property="og:description" content="8 skills. Four design aesthetics. One folder each. Auto-activates when your prompt matches.">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="skills/anthropic-design/assets/anthropic.css">
+<style>
+  /* Bilingual toggle: only one of .lang-en / .lang-zh shows at a time */
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  /* Language toggle button */
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: background var(--duration-sm) var(--ease-anth), border-color var(--duration-sm);
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); border-color: var(--anth-mid-gray); }
+  /* Chinese body copy: swap Lora serif for system sans — Lora doesn't cover CJK */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] .anth-quote,
+  html[data-lang="zh"] li {
+    font-family: "Poppins", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  }
+  html[data-lang="zh"] .anth-quote { font-style: normal; }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="#" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">sky-skills</a>
+  <div>
+    <a href="#skills"><span class="lang-en">Skills</span><span class="lang-zh">技能</span></a>
+    <a href="#design"><span class="lang-en">Design</span><span class="lang-zh">设计</span></a>
+    <a href="#how"><span class="lang-en">How it works</span><span class="lang-zh">原理</span></a>
+    <a href="#install"><span class="lang-en">Install</span><span class="lang-zh">安装</span></a>
+    <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language" title="Switch language">中 / EN</button>
+    <a class="anth-link anth-link--no-arrow" href="https://github.com/TbusOS/sky-skills" style="font-family:var(--font-heading); color:var(--anth-text); text-decoration:none; font-size:14px;">★ <span class="lang-en">Star on GitHub</span><span class="lang-zh">给个 Star</span></a>
+    <a class="anth-button" href="#install"><span class="lang-en">Get skills</span><span class="lang-zh">获取 skills</span></a>
+  </div>
+</div></nav>
+
+<!-- Promo banner -->
+<section style="padding:var(--space-5) var(--space-5) 0;">
+  <div class="anth-container">
+    <div class="anth-banner">
+      <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">New</span><span class="lang-zh">新</span></span>
+      <span class="lang-en">Four design skills — <strong>apple</strong>, <strong>anthropic</strong>, <strong>ember</strong>, <strong>sage</strong> — each with a live demo.</span>
+      <span class="lang-zh">四款设计 skill —— <strong>apple</strong>、<strong>anthropic</strong>、<strong>ember</strong>、<strong>sage</strong> —— 每一款都配备可直接浏览的 demo。</span>
+      <a class="anth-link" href="#design" style="margin-left:auto;"><span class="lang-en">See all demos</span><span class="lang-zh">查看全部 demo</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Hero -->
+<section class="anth-hero">
+  <div class="anth-container" style="max-width:840px;">
+    <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Claude Code Skills · v1</span><span class="lang-zh">Claude Code Skills · 第一版</span></span>
+    <h1 style="margin-top:var(--space-4);">
+      <span class="lang-en">Eight skills.<br>One folder each.</span>
+      <span class="lang-zh">八个 skill。<br>每个一个文件夹。</span>
+    </h1>
+    <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.55; max-width:720px; font-family:var(--font-body);">
+      <span class="lang-en">A curated collection of <strong>Claude Code Skills</strong> — reusable domain modules that turn Claude into an expert for specific workflows. Linux kernel code, document conversion, narrated videos, and four brand-grade HTML design aesthetics. Small, composable, MIT-licensed.</span>
+      <span class="lang-zh">一份精选的 <strong>Claude Code Skills</strong> 合集 —— 可复用的领域专家模块，让 Claude 在特定工作流里变成专业助手。覆盖 Linux 内核开发、文档转换、配音视频，以及四款品牌级 HTML 设计美学。小巧、可组合、MIT 许可。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="#install"><span class="lang-en">Install in 60 seconds</span><span class="lang-zh">60 秒安装</span></a>
+      <a class="anth-button anth-button--ghost" href="#skills"><span class="lang-en">Browse all skills</span><span class="lang-zh">浏览全部 skills</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Hero illustration -->
+<section class="anth-section" style="padding-top:0;">
+  <div class="anth-container anth-container--wide">
+    <svg role="img" aria-label="sky-skills — eight domain-expert modules around a central orchestrator" viewBox="0 0 1200 440" style="display:block; width:100%; max-width:1200px; height:auto; border-radius:var(--radius-lg); background:linear-gradient(135deg, #faf9f5 0%, #f0ede3 100%);">
+      <defs>
+        <filter id="idx-hero-soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+          <feOffset dy="10"/>
+          <feColorMatrix values="0 0 0 0 0.08 0 0 0 0 0.08 0 0 0 0 0.07 0 0 0 0.12 0"/>
+          <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <radialGradient id="idx-hero-glow" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stop-color="#d97757" stop-opacity="0.18"/>
+          <stop offset="1" stop-color="#d97757" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <ellipse cx="600" cy="220" rx="420" ry="200" fill="url(#idx-hero-glow)"/>
+      <g fill="#e8e6dc">
+        <circle cx="80" cy="80" r="3"/><circle cx="140" cy="360" r="3"/>
+        <circle cx="1080" cy="70" r="3"/><circle cx="1120" cy="380" r="3"/>
+        <circle cx="60" cy="240" r="2"/><circle cx="1140" cy="220" r="2"/>
+      </g>
+
+      <g filter="url(#idx-hero-soft)">
+        <g transform="translate(240 100)"><rect width="120" height="120" rx="22" fill="#6a9bcc"/></g>
+        <g transform="translate(400 60)"><rect width="120" height="120" rx="22" fill="#6a9bcc"/></g>
+        <g transform="translate(680 60)"><rect width="120" height="120" rx="22" fill="#6a9bcc"/></g>
+        <g transform="translate(840 100)"><rect width="120" height="120" rx="22" fill="#6a9bcc"/></g>
+        <g transform="translate(240 240)"><rect width="120" height="120" rx="22" fill="#d97757"/></g>
+        <g transform="translate(400 300)"><rect width="120" height="120" rx="22" fill="#d97757"/></g>
+        <g transform="translate(680 300)"><rect width="120" height="120" rx="22" fill="#d97757"/></g>
+        <g transform="translate(840 240)"><rect width="120" height="120" rx="22" fill="#d97757"/></g>
+        <rect x="520" y="170" width="160" height="100" rx="22" fill="#788c5d"/>
+      </g>
+
+      <g stroke="#141413" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.2">
+        <path d="M360 160 Q 460 180 520 210"/>
+        <path d="M520 160 Q 520 190 540 200"/>
+        <path d="M740 120 Q 640 170 600 170"/>
+        <path d="M840 160 Q 740 190 680 210"/>
+        <path d="M360 300 Q 460 270 520 240"/>
+        <path d="M520 360 Q 540 290 560 270"/>
+        <path d="M740 360 Q 660 290 640 270"/>
+        <path d="M840 300 Q 740 260 680 240"/>
+      </g>
+
+      <g fill="#ffffff" font-family="Poppins,sans-serif" font-weight="500" text-anchor="middle">
+        <text x="300" y="150" font-size="13">kernel-dev</text>
+        <text x="300" y="170" font-size="10" opacity="0.85">drivers · dts</text>
+        <text x="460" y="110" font-size="13">wechat-video</text>
+        <text x="460" y="130" font-size="10" opacity="0.85">tts · recording</text>
+        <text x="740" y="110" font-size="13">doc-to-md</text>
+        <text x="740" y="130" font-size="10" opacity="0.85">pdf · docx</text>
+        <text x="900" y="150" font-size="13">md-to-pdf</text>
+        <text x="900" y="170" font-size="10" opacity="0.85">cjk · bookmarks</text>
+      </g>
+
+      <g fill="#ffffff" font-family="Poppins,sans-serif" font-weight="500" text-anchor="middle">
+        <text x="300" y="295" font-size="13">apple-design</text>
+        <text x="300" y="315" font-size="10" opacity="0.88">SF Pro · minimal</text>
+        <text x="460" y="355" font-size="13">anthropic-design</text>
+        <text x="460" y="375" font-size="10" opacity="0.88">warm · editorial</text>
+        <text x="740" y="355" font-size="13">ember-design</text>
+        <text x="740" y="375" font-size="10" opacity="0.88">cream · gold</text>
+        <text x="900" y="295" font-size="13">sage-design</text>
+        <text x="900" y="315" font-size="10" opacity="0.88">quiet · nordic</text>
+      </g>
+
+      <text x="600" y="212" text-anchor="middle" font-family="Poppins,sans-serif" font-size="16" font-weight="600" fill="#faf9f5">Claude Code</text>
+      <text x="600" y="234" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" fill="#faf9f5" opacity="0.85" class="lang-en-text">auto-loads matching skill</text>
+      <text x="600" y="234" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" fill="#faf9f5" opacity="0.85" class="lang-zh-text" style="display:none;">自动加载匹配 skill</text>
+      <circle cx="600" cy="252" r="4" fill="#faf9f5">
+        <animate attributeName="opacity" values="1;0.3;1" dur="1.8s" repeatCount="indefinite"/>
+      </circle>
+
+      <g font-family="Poppins,sans-serif" font-size="10" letter-spacing="2.5" fill="#6b6a5f" font-weight="600">
+        <text x="600" y="52" text-anchor="middle">CONTENT · SYSTEMS</text>
+        <text x="600" y="418" text-anchor="middle">BRAND DESIGN</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- Stat band -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container">
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:var(--space-6); text-align:center;">
+      <div>
+        <p style="font-family:var(--font-heading); font-size:56px; font-weight:600; color:var(--anth-text); margin:0; letter-spacing:-0.02em;">8</p>
+        <p style="color:var(--anth-text-secondary); font-size:14px; margin-top:var(--space-2); font-family:var(--font-heading);"><span class="lang-en">focused skills</span><span class="lang-zh">精选 skill</span></p>
+      </div>
+      <div>
+        <p style="font-family:var(--font-heading); font-size:56px; font-weight:600; color:var(--anth-text); margin:0; letter-spacing:-0.02em;">4</p>
+        <p style="color:var(--anth-text-secondary); font-size:14px; margin-top:var(--space-2); font-family:var(--font-heading);"><span class="lang-en">design aesthetics</span><span class="lang-zh">设计美学</span></p>
+      </div>
+      <div>
+        <p style="font-family:var(--font-heading); font-size:56px; font-weight:600; color:var(--anth-text); margin:0; letter-spacing:-0.02em;">0</p>
+        <p style="color:var(--anth-text-secondary); font-size:14px; margin-top:var(--space-2); font-family:var(--font-heading);"><span class="lang-en">build steps</span><span class="lang-zh">构建步骤</span></p>
+      </div>
+      <div>
+        <p style="font-family:var(--font-heading); font-size:56px; font-weight:600; color:var(--anth-text); margin:0; letter-spacing:-0.02em;">MIT</p>
+        <p style="color:var(--anth-text-secondary); font-size:14px; margin-top:var(--space-2); font-family:var(--font-heading);"><span class="lang-en">free forever</span><span class="lang-zh">永久免费</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- What is a skill -->
+<section class="anth-section" id="how">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">Concept</span><span class="lang-zh">概念</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">What is a Claude Code Skill?</span>
+      <span class="lang-zh">什么是 Claude Code Skill？</span>
+    </h2>
+    <p class="lang-en">
+      A <strong>skill</strong> is a folder with a <code>SKILL.md</code> file (plus optional templates, scripts, and references) that gives Claude Code domain expertise — coding standards, templates, patterns, whole workflows. When Claude reads a user prompt, it scans installed skills and automatically loads the ones whose <code>TRIGGER</code> keywords match. You never invoke them by name.
+    </p>
+    <p class="lang-zh">
+      一个 <strong>skill</strong> 是一个文件夹，里面放一份 <code>SKILL.md</code>（再加可选的模板、脚本、参考资料），给 Claude Code 喂领域知识 —— 编码规范、代码模板、工作流模式。Claude 读到用户 prompt 时会扫描已安装的所有 skill，自动加载 <code>TRIGGER</code> 关键词匹配的那几个。你不用手动调用。
+    </p>
+    <p class="lang-en">
+      The point is <em>folded expertise</em>. Prompts don't scale — they get buried, repeated, forgotten. A skill is a small, reusable module you write once and forget, and Claude applies it every time it's relevant. Think of it as the difference between handing a colleague a style guide versus telling them every time <q>remember to use our formatting rules.</q>
+    </p>
+    <p class="lang-zh">
+      关键词是 <em>"折叠好的专业知识"</em>。Prompt 无法规模化 —— 会被埋没、被重复、被遗忘。Skill 是一个小而可复用的模块，你写一次、塞进去就忘，之后 Claude 每次合适的时候会自动应用。就像给同事一份风格手册，而不是每次都提醒"记得按我们的规则排版"。
+    </p>
+
+    <blockquote class="anth-quote">
+      <span class="lang-en">A skill should feel like a colleague who already knows the domain — not a style guide you have to quote from.</span>
+      <span class="lang-zh">一个好的 skill 应该像一位已经懂行的同事 —— 而不是你需要反复引用的风格手册。</span>
+    </blockquote>
+    <p class="anth-quote-cite" style="margin-top:var(--space-4);">
+      <span aria-hidden="true" style="display:inline-block; width:24px; height:24px; border-radius:50%; background:var(--anth-orange);"></span>
+      <span><span class="lang-en">sky — maintainer</span><span class="lang-zh">sky —— 维护者</span></span>
+    </p>
+  </div>
+</section>
+
+<!-- Skills grid -->
+<section class="anth-section anth-section--subtle" id="skills">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:680px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">Lineup</span><span class="lang-zh">阵容</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">The eight skills.</span>
+        <span class="lang-zh">八个 skill。</span>
+      </h2>
+      <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+        <span class="lang-en">Four for systems and content. Four for rendering HTML in brand-grade aesthetics. Each is a self-contained folder under <code>skills/</code>.</span>
+        <span class="lang-zh">四个用于系统和内容。四个用于渲染品牌级 HTML 美学。每一个都是 <code>skills/</code> 下自包含的文件夹。</span>
+      </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:var(--space-5);">
+
+      <!-- linux-kernel-dev -->
+      <article class="anth-card">
+        <div aria-hidden="true" style="width:56px; height:56px; border-radius:var(--radius-md); background:var(--anth-text); margin-bottom:var(--space-4); display:grid; place-items:center;">
+          <svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="#faf9f5" stroke-width="1.8" stroke-linecap="round">
+            <rect x="8" y="8" width="16" height="16" rx="2"/>
+            <rect x="12" y="12" width="8" height="8" rx="1"/>
+            <path d="M4 12h4M4 16h4M4 20h4M24 12h4M24 16h4M24 20h4M12 4v4M16 4v4M20 4v4M12 24v4M16 24v4M20 24v4"/>
+          </svg>
+        </div>
+        <h3 style="font-size:20px;">linux-kernel-dev</h3>
+        <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3);">
+          <span class="lang-en">Kernel modules, drivers, Kconfig, device-tree bindings, checkpatch compliance, memory management patterns, concurrency primitives.</span>
+          <span class="lang-zh">内核模块、驱动、Kconfig、设备树 binding、checkpatch 合规、内存管理模式、并发原语。</span>
+        </p>
+        <a class="anth-link" href="https://github.com/TbusOS/sky-skills/tree/main/skills/linux-kernel-dev"><span class="lang-en">Explore</span><span class="lang-zh">查看</span></a>
+      </article>
+
+      <!-- wechat-video-publisher -->
+      <article class="anth-card">
+        <div aria-hidden="true" style="width:56px; height:56px; border-radius:var(--radius-md); background:var(--anth-blue); margin-bottom:var(--space-4); display:grid; place-items:center;">
+          <svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="#faf9f5" stroke-width="1.8" stroke-linecap="round">
+            <rect x="4" y="8" width="24" height="18" rx="2"/>
+            <polygon points="13,13 21,17 13,21" fill="#faf9f5"/>
+          </svg>
+        </div>
+        <h3 style="font-size:20px;">wechat-video-publisher</h3>
+        <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3);">
+          <span class="lang-en">edge-tts narration, Playwright frame-by-frame recording, ffmpeg subtitle burning, WeChat-compatible inline-style article templates.</span>
+          <span class="lang-zh">edge-tts 配音、Playwright 逐帧录制、ffmpeg 字幕烧录、微信兼容的 inline-style 文章模板。</span>
+        </p>
+        <a class="anth-link" href="https://github.com/TbusOS/sky-skills/tree/main/skills/wechat-video-publisher"><span class="lang-en">Explore</span><span class="lang-zh">查看</span></a>
+      </article>
+
+      <!-- doc-to-markdown -->
+      <article class="anth-card">
+        <div aria-hidden="true" style="width:56px; height:56px; border-radius:var(--radius-md); background:var(--anth-green); margin-bottom:var(--space-4); display:grid; place-items:center;">
+          <svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="#faf9f5" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+            <path d="M8 4h12l4 4v20H8z"/>
+            <path d="M20 4v4h4"/>
+            <path d="M12 14h8M12 18h8M12 22h6"/>
+          </svg>
+        </div>
+        <h3 style="font-size:20px;">doc-to-markdown</h3>
+        <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3);">
+          <span class="lang-en">PDF + DOCX → clean Markdown with images extracted and organized. Scanned-PDF fallback, EMF/WMF via LibreOffice, table conversion.</span>
+          <span class="lang-zh">PDF + DOCX → 整洁的 Markdown，图片自动提取并整理。扫描版 PDF 自动回退，EMF/WMF 通过 LibreOffice 处理，表格转换。</span>
+        </p>
+        <a class="anth-link" href="https://github.com/TbusOS/sky-skills/tree/main/skills/doc-to-markdown"><span class="lang-en">Explore</span><span class="lang-zh">查看</span></a>
+      </article>
+
+      <!-- md-to-pdf -->
+      <article class="anth-card">
+        <div aria-hidden="true" style="width:56px; height:56px; border-radius:var(--radius-md); background:var(--anth-orange); margin-bottom:var(--space-4); display:grid; place-items:center;">
+          <svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="#faf9f5" stroke-width="1.8" stroke-linejoin="round">
+            <path d="M8 4h12l4 4v20H8z"/>
+            <path d="M20 4v4h4"/>
+            <text x="16" y="23" text-anchor="middle" font-family="Poppins,sans-serif" font-size="7" font-weight="700" fill="#faf9f5" stroke="none">PDF</text>
+          </svg>
+        </div>
+        <h3 style="font-size:20px;">md-to-pdf</h3>
+        <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3);">
+          <span class="lang-en">Markdown → PDF via PyMuPDF Story. Full CJK support, automatic bookmarks from headings, page numbers, styled code blocks.</span>
+          <span class="lang-zh">Markdown → PDF，基于 PyMuPDF Story。完整中文支持，自动从标题生成书签、页码、代码块样式。</span>
+        </p>
+        <a class="anth-link" href="https://github.com/TbusOS/sky-skills/tree/main/skills/md-to-pdf"><span class="lang-en">Explore</span><span class="lang-zh">查看</span></a>
+      </article>
+
+      <!-- apple-design -->
+      <article class="anth-card" style="background:#1D1D1F; color:#faf9f5;">
+        <div aria-hidden="true" style="width:56px; height:56px; border-radius:var(--radius-md); background:#faf9f5; margin-bottom:var(--space-4); display:grid; place-items:center;">
+          <svg viewBox="0 0 32 32" width="28" height="28">
+            <g fill="#1D1D1F">
+              <rect x="4" y="4" width="10" height="10" rx="2"/>
+              <rect x="18" y="4" width="10" height="10" rx="2"/>
+              <rect x="4" y="18" width="10" height="10" rx="2"/>
+              <rect x="18" y="18" width="10" height="10" rx="2" fill="#0071E3"/>
+            </g>
+          </svg>
+        </div>
+        <h3 style="font-size:20px; color:#faf9f5;">apple-design</h3>
+        <p style="font-size:15px; color:rgba(250,249,245,0.75); margin-top:var(--space-3);">
+          <span class="lang-en">Render HTML in apple.com's visual language. SF Pro, alternating white/gray/dark sections, subtle text-link CTAs, giant stat callouts.</span>
+          <span class="lang-zh">用 apple.com 的视觉语言渲染 HTML。SF Pro 字体、白 / 浅灰 / 黑交替段落、克制的文字链 CTA、巨字号统计。</span>
+        </p>
+        <a class="anth-link" style="color:#0071E3;" href="demos/apple-design/index.html"><span class="lang-en">See demo</span><span class="lang-zh">查看 demo</span></a>
+      </article>
+
+      <!-- anthropic-design -->
+      <article class="anth-card" style="border:2px solid var(--anth-orange);">
+        <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600; margin-bottom:var(--space-3);"><span class="lang-en">You are here</span><span class="lang-zh">当前风格</span></span>
+        <div aria-hidden="true" style="width:56px; height:56px; border-radius:var(--radius-md); background:var(--anth-orange); margin-top:var(--space-2); margin-bottom:var(--space-4); display:grid; place-items:center;">
+          <svg viewBox="0 0 32 32" width="28" height="28">
+            <g fill="#faf9f5">
+              <circle cx="10" cy="20" r="4"/>
+              <circle cx="16" cy="10" r="4"/>
+              <circle cx="22" cy="20" r="4"/>
+            </g>
+          </svg>
+        </div>
+        <h3 style="font-size:20px;">anthropic-design</h3>
+        <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3);">
+          <span class="lang-en">Warm cream, Poppins + Lora serif, orange pill CTAs, editorial card grids, low-saturation charts, Lora italic pull quotes.</span>
+          <span class="lang-zh">暖米白底色、Poppins + Lora 衬线、橙色胶囊 CTA、编辑式卡片网格、低饱和图表、Lora italic 引文。</span>
+        </p>
+        <a class="anth-link" href="demos/anthropic-design/index.html"><span class="lang-en">See demo</span><span class="lang-zh">查看 demo</span></a>
+      </article>
+
+      <!-- ember-design -->
+      <article class="anth-card" style="background:#fff2df;">
+        <div aria-hidden="true" style="width:56px; height:56px; border-radius:var(--radius-md); background:#492d22; margin-bottom:var(--space-4); display:grid; place-items:center;">
+          <svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="#fff2df" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="16" cy="16" r="11"/>
+            <path d="M16 8 Q20 16 16 24 M12 12 Q14 14 12 17 M12 19 Q14 21 12 22"/>
+          </svg>
+        </div>
+        <h3 style="font-size:20px; font-family:'Fraunces',serif; font-style:italic; color:#312520;">ember-design</h3>
+        <p style="font-size:15px; color:#6b5a4f; margin-top:var(--space-3); font-family:'Fraunces',serif;">
+          <span class="lang-en">Handcraft editorial warmth. Cream + chocolate + gold, Fraunces display serif + Inter body. Aesop / Kinfolk / literary journal energy.</span>
+          <span class="lang-zh">手作 · 编辑 · 暖意。米白 + 巧克力 + 金色，Fraunces 展示衬线 + Inter 正文。Aesop / Kinfolk / 文学期刊气质。</span>
+        </p>
+        <a class="anth-link" style="color:#492d22;" href="demos/ember-design/index.html"><span class="lang-en">See demo</span><span class="lang-zh">查看 demo</span></a>
+      </article>
+
+      <!-- sage-design -->
+      <article class="anth-card" style="background:#f8faec;">
+        <div aria-hidden="true" style="width:56px; height:56px; border-radius:var(--radius-md); background:#393C54; margin-bottom:var(--space-4); display:grid; place-items:center;">
+          <svg viewBox="0 0 32 32" width="28" height="28" fill="#97B077">
+            <path d="M16 5 C 16 3, 22 3, 25 8 C 28 13, 24 18, 20 18 C 16 18, 16 16, 16 5 Z"/>
+            <path d="M16 5 L 16 27" stroke="#97B077" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 style="font-size:20px; font-family:'Instrument Serif',serif; font-style:italic; color:#393C54;">sage-design</h3>
+        <p style="font-size:15px; color:#6d6f82; margin-top:var(--space-3);">
+          <span class="lang-en">Quiet Nordic minimalism. Rice-paper cream + sage green + deep indigo, Instrument Serif + Inter. For reading apps, botanical studios, modern journals.</span>
+          <span class="lang-zh">安静 · 北欧极简。米黄 + 抹茶绿 + 深靛蓝，Instrument Serif + Inter。适合阅读 app、植物工作室、现代期刊。</span>
+        </p>
+        <a class="anth-link" style="color:#393C54;" href="demos/sage-design/index.html"><span class="lang-en">See demo</span><span class="lang-zh">查看 demo</span></a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- Design-skill showcase -->
+<section class="anth-section" id="design">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Design demos</span><span class="lang-zh">设计 demo</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">Four aesthetics, one repo.</span>
+        <span class="lang-zh">四种美学，一个仓库。</span>
+      </h2>
+      <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+        <span class="lang-en">Each design skill ships with a single-page flagship demo — same content, four voices. Browse them side by side.</span>
+        <span class="lang-zh">每一款设计 skill 都配备单页 flagship demo —— 同一份内容，四种声音。可以并排比较。</span>
+      </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-6);">
+
+      <a href="demos/apple-design/index.html" style="text-decoration:none; color:inherit; display:block;">
+        <figure class="anth-card" style="padding:0; margin:0; overflow:hidden;">
+          <svg role="img" aria-label="apple-design preview" viewBox="0 0 800 460" style="display:block; width:100%; height:auto; background:#FFFFFF;">
+            <rect x="0" y="0" width="800" height="40" fill="#FFFFFF" stroke="#E5E5EA" stroke-width="0.5"/>
+            <text x="36" y="24" font-family="-apple-system,'SF Pro Display',sans-serif" font-size="12" font-weight="600" fill="#1D1D1F">Sky Skills</text>
+            <g font-family="-apple-system,'SF Pro Text',sans-serif" font-size="10" fill="#1D1D1F">
+              <text x="260" y="24">Skills</text><text x="310" y="24">Design</text><text x="370" y="24">Install</text><text x="430" y="24">Why</text>
+            </g>
+            <text x="400" y="130" text-anchor="middle" font-family="-apple-system,'SF Pro Display',sans-serif" font-size="52" font-weight="700" letter-spacing="-2" fill="#1D1D1F">Your site.</text>
+            <text x="400" y="180" text-anchor="middle" font-family="-apple-system,'SF Pro Display',sans-serif" font-size="52" font-weight="700" letter-spacing="-2" fill="#1D1D1F">Apple-grade polish.</text>
+            <text x="400" y="220" text-anchor="middle" font-family="-apple-system,'SF Pro Text',sans-serif" font-size="14" fill="#6E6E73">A drop-in design system — SF Pro, crisp alternating sections.</text>
+            <text x="400" y="254" text-anchor="middle" font-family="-apple-system,'SF Pro Text',sans-serif" font-size="13" fill="#0071E3">Install in 60 seconds ›</text>
+            <rect x="140" y="290" width="520" height="150" rx="14" fill="#F5F5F7" stroke="#E5E5EA"/>
+            <circle cx="164" cy="312" r="4" fill="#FF5F57"/><circle cx="180" cy="312" r="4" fill="#FEBC2E"/><circle cx="196" cy="312" r="4" fill="#28C840"/>
+            <rect x="170" y="340" width="140" height="86" rx="10" fill="#FFFFFF"/>
+            <rect x="330" y="340" width="140" height="86" rx="10" fill="#1D1D1F"/>
+            <rect x="490" y="340" width="140" height="86" rx="10" fill="#FFFFFF" stroke="#E5E5EA"/>
+          </svg>
+          <figcaption style="padding:var(--space-5) var(--space-6);">
+            <h3 style="font-size:22px; margin:0;">apple-design</h3>
+            <p style="font-size:14px; color:var(--anth-text-secondary); margin-top:var(--space-2);">
+              <span class="lang-en">SF Pro · minimal · crisp. Alternating sections, text-link CTAs.</span>
+              <span class="lang-zh">SF Pro · 极简 · 克制。交替段落，文字链 CTA。</span>
+            </p>
+            <span class="anth-link" style="margin-top:var(--space-3); display:inline-block;"><span class="lang-en">Open demo</span><span class="lang-zh">打开 demo</span></span>
+          </figcaption>
+        </figure>
+      </a>
+
+      <a href="demos/anthropic-design/index.html" style="text-decoration:none; color:inherit; display:block;">
+        <figure class="anth-card" style="padding:0; margin:0; overflow:hidden;">
+          <svg role="img" aria-label="anthropic-design preview" viewBox="0 0 800 460" style="display:block; width:100%; height:auto; background:#faf9f5;">
+            <rect x="0" y="0" width="800" height="40" fill="#faf9f5" stroke="#e8e6dc" stroke-width="0.5"/>
+            <text x="36" y="24" font-family="Poppins,sans-serif" font-size="12" font-weight="600" fill="#141413">Sky Skills</text>
+            <rect x="700" y="14" width="70" height="20" rx="10" fill="#d97757"/>
+            <text x="735" y="27" text-anchor="middle" font-family="Poppins,sans-serif" font-size="10" font-weight="600" fill="#ffffff">Get skills</text>
+            <text x="400" y="130" text-anchor="middle" font-family="Poppins,sans-serif" font-size="46" font-weight="600" letter-spacing="-1.2" fill="#141413">Your pages,</text>
+            <text x="400" y="180" text-anchor="middle" font-family="Poppins,sans-serif" font-size="46" font-weight="600" letter-spacing="-1.2" fill="#141413">rendered like Anthropic&rsquo;s.</text>
+            <text x="400" y="220" text-anchor="middle" font-family="Lora,serif" font-size="15" font-style="italic" fill="#6b6a5f">Warm cream, orange CTAs, editorial rhythm.</text>
+            <g transform="translate(260 246)">
+              <rect width="140" height="36" rx="18" fill="#d97757"/>
+              <text x="70" y="23" text-anchor="middle" font-family="Poppins,sans-serif" font-size="13" font-weight="600" fill="#ffffff">Install in 60s</text>
+            </g>
+            <g transform="translate(410 246)">
+              <rect width="140" height="36" rx="18" fill="none" stroke="#141413" stroke-width="1.2"/>
+              <text x="70" y="23" text-anchor="middle" font-family="Poppins,sans-serif" font-size="13" font-weight="500" fill="#141413">See diagrams</text>
+            </g>
+            <g transform="translate(140 300)">
+              <rect x="0" y="20" width="130" height="130" rx="24" fill="#d97757"/>
+              <circle cx="210" cy="85" r="50" fill="#6a9bcc"/>
+              <rect x="270" y="50" width="110" height="110" rx="55" fill="#788c5d"/>
+              <rect x="400" y="30" width="140" height="130" rx="22" fill="#ffffff" stroke="#e8e6dc"/>
+            </g>
+          </svg>
+          <figcaption style="padding:var(--space-5) var(--space-6);">
+            <h3 style="font-size:22px; margin:0;">anthropic-design</h3>
+            <p style="font-size:14px; color:var(--anth-text-secondary); margin-top:var(--space-2);">
+              <span class="lang-en">Warm cream · Poppins + Lora · orange pill CTAs. Editorial.</span>
+              <span class="lang-zh">暖米白 · Poppins + Lora · 橙色胶囊 CTA。编辑式。</span>
+            </p>
+            <span class="anth-link" style="margin-top:var(--space-3); display:inline-block;"><span class="lang-en">Open demo</span><span class="lang-zh">打开 demo</span></span>
+          </figcaption>
+        </figure>
+      </a>
+
+      <a href="demos/ember-design/index.html" style="text-decoration:none; color:inherit; display:block;">
+        <figure class="anth-card" style="padding:0; margin:0; overflow:hidden;">
+          <svg role="img" aria-label="ember-design preview" viewBox="0 0 800 460" style="display:block; width:100%; height:auto; background:#fff2df;">
+            <rect x="0" y="0" width="800" height="40" fill="#fff2df" stroke="#e6d9bf" stroke-width="0.5"/>
+            <text x="36" y="24" font-family="Fraunces,serif" font-size="13" font-weight="600" font-style="italic" fill="#312520">Sky Skills</text>
+            <rect x="690" y="14" width="80" height="20" rx="10" fill="#492d22"/>
+            <text x="730" y="27" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#ffffff">Get skills</text>
+            <text x="400" y="130" text-anchor="middle" font-family="Fraunces,serif" font-size="50" font-weight="600" letter-spacing="-1" fill="#312520">Your pages,</text>
+            <text x="400" y="182" text-anchor="middle" font-family="Fraunces,serif" font-size="50" font-style="italic" fill="#312520">rendered with warmth.</text>
+            <text x="400" y="218" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" fill="#6b5a4f">Cream + chocolate + gold. Fraunces + Inter.</text>
+            <g transform="translate(100 268)">
+              <rect x="40" y="20" width="200" height="150" rx="22" fill="#492d22"/>
+              <text x="140" y="95" text-anchor="middle" font-family="Fraunces,serif" font-size="38" font-style="italic" fill="#fff2df">sky</text>
+              <text x="140" y="122" text-anchor="middle" font-family="Fraunces,serif" font-size="12" font-style="italic" fill="#c49464">— crafted —</text>
+              <rect x="280" y="30" width="180" height="140" rx="18" fill="#ffffff"/>
+              <text x="370" y="65" text-anchor="middle" font-family="Fraunces,serif" font-size="14" font-style="italic" fill="#312520">The method</text>
+              <line x1="300" y1="80" x2="440" y2="80" stroke="#e6d9bf"/>
+              <g font-family="Inter,sans-serif" font-size="10" fill="#6b5a4f">
+                <text x="300" y="104">1. write SKILL.md</text>
+                <text x="300" y="120">2. list TRIGGER words</text>
+                <text x="300" y="136">3. ship templates + CSS</text>
+              </g>
+              <circle cx="540" cy="95" r="60" fill="#312520"/>
+              <text x="540" y="100" text-anchor="middle" font-family="Fraunces,serif" font-size="14" font-style="italic" fill="#fff2df">ember</text>
+            </g>
+          </svg>
+          <figcaption style="padding:var(--space-5) var(--space-6);">
+            <h3 style="font-size:22px; margin:0;">ember-design</h3>
+            <p style="font-size:14px; color:var(--anth-text-secondary); margin-top:var(--space-2);">
+              <span class="lang-en">Cream · chocolate · gold. Fraunces serif. Handcraft editorial.</span>
+              <span class="lang-zh">米白 · 巧克力 · 金色。Fraunces 衬线。手作编辑。</span>
+            </p>
+            <span class="anth-link" style="margin-top:var(--space-3); display:inline-block;"><span class="lang-en">Open demo</span><span class="lang-zh">打开 demo</span></span>
+          </figcaption>
+        </figure>
+      </a>
+
+      <a href="demos/sage-design/index.html" style="text-decoration:none; color:inherit; display:block;">
+        <figure class="anth-card" style="padding:0; margin:0; overflow:hidden;">
+          <svg role="img" aria-label="sage-design preview" viewBox="0 0 800 460" style="display:block; width:100%; height:auto; background:#f8faec;">
+            <rect x="0" y="0" width="800" height="40" fill="#f8faec" stroke="#e5e8da" stroke-width="0.5"/>
+            <text x="36" y="24" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#393C54">Sky Skills</text>
+            <rect x="690" y="14" width="80" height="20" rx="10" fill="#393C54"/>
+            <text x="730" y="27" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#ffffff">Get skills</text>
+            <text x="400" y="130" text-anchor="middle" font-family="'Instrument Serif',serif" font-size="50" fill="#393C54">Your pages,</text>
+            <text x="400" y="186" text-anchor="middle" font-family="'Instrument Serif',serif" font-size="54" font-style="italic" fill="#393C54">unhurried.</text>
+            <text x="400" y="222" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" fill="#6d6f82">Rice-paper cream, sage green, deep indigo.</text>
+            <g transform="translate(80 268)">
+              <rect x="30" y="10" width="210" height="160" rx="20" fill="#393C54"/>
+              <text x="135" y="100" text-anchor="middle" font-family="'Instrument Serif',serif" font-size="74" font-style="italic" fill="#f8faec">Aa</text>
+              <line x1="60" y1="120" x2="210" y2="120" stroke="#6d6f82" opacity="0.5"/>
+              <text x="135" y="145" text-anchor="middle" font-family="'Instrument Serif',serif" font-size="16" font-style="italic" fill="#97B077">Quiet, please.</text>
+              <rect x="280" y="20" width="200" height="140" rx="16" fill="#ffffff"/>
+              <text x="300" y="50" font-family="JetBrains Mono,monospace" font-size="9" letter-spacing="1.4" fill="#6d6f82">02 · METHOD</text>
+              <text x="300" y="76" font-family="'Instrument Serif',serif" font-size="18" font-style="italic" fill="#393C54">How a skill lands.</text>
+              <line x1="300" y1="88" x2="460" y2="88" stroke="#e5e8da"/>
+              <g font-family="Inter,sans-serif" font-size="11" fill="#393C54">
+                <text x="300" y="110">1  write a SKILL.md</text>
+                <text x="300" y="126">2  list TRIGGER keywords</text>
+                <text x="300" y="142">3  Claude auto-activates</text>
+              </g>
+              <path d="M 560 100 C 560 30, 640 30, 680 70 C 720 110, 660 160, 620 155 C 580 150, 560 135, 560 100 Z" fill="#97B077"/>
+              <text x="620" y="112" text-anchor="middle" font-family="'Instrument Serif',serif" font-size="18" font-style="italic" fill="#ffffff">sage</text>
+            </g>
+          </svg>
+          <figcaption style="padding:var(--space-5) var(--space-6);">
+            <h3 style="font-size:22px; margin:0;">sage-design</h3>
+            <p style="font-size:14px; color:var(--anth-text-secondary); margin-top:var(--space-2);">
+              <span class="lang-en">Cream · sage green · deep indigo. Instrument Serif. Quiet Nordic.</span>
+              <span class="lang-zh">米黄 · 抹茶绿 · 深靛蓝。Instrument Serif。安静北欧。</span>
+            </p>
+            <span class="anth-link" style="margin-top:var(--space-3); display:inline-block;"><span class="lang-en">Open demo</span><span class="lang-zh">打开 demo</span></span>
+          </figcaption>
+        </figure>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- How it works flow -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:680px; margin:0 auto var(--space-7); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">How it works</span><span class="lang-zh">工作原理</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">Auto-activated. Always in context.</span>
+        <span class="lang-zh">自动激活。始终在场。</span>
+      </h2>
+      <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+        <span class="lang-en">You write a prompt. Claude scans every installed skill's <code>TRIGGER</code> frontmatter. If it matches, the skill loads automatically. No manual invocation.</span>
+        <span class="lang-zh">你写 prompt。Claude 扫描已安装 skill 的 <code>TRIGGER</code> 字段。匹配上就自动加载，不需要手动调用。</span>
+      </p>
+    </div>
+
+    <figure class="anth-card" style="padding:var(--space-6); margin:0;">
+      <svg role="img" aria-label="Skill activation flow: prompt → match → load" viewBox="0 0 1040 280" style="width:100%; height:auto;" font-family="Poppins,sans-serif">
+        <defs>
+          <filter id="idx-flow-sh" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+            <feOffset dy="4"/>
+            <feColorMatrix values="0 0 0 0 0.08 0 0 0 0 0.08 0 0 0 0 0.07 0 0 0 0.10 0"/>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <g font-family="JetBrains Mono,monospace" font-size="10" fill="#6b6a5f" letter-spacing="1.5" font-weight="600">
+          <text x="80" y="40">01 · USER PROMPT</text>
+          <text x="400" y="40">02 · SKILL MATCHER</text>
+          <text x="780" y="40">03 · LOADED SKILL</text>
+        </g>
+
+        <g filter="url(#idx-flow-sh)">
+          <rect x="60" y="80" width="240" height="120" rx="18" fill="#ffffff" stroke="#e8e6dc"/>
+        </g>
+        <circle cx="82" cy="104" r="4" fill="#FF5F57"/><circle cx="94" cy="104" r="4" fill="#FEBC2E"/><circle cx="106" cy="104" r="4" fill="#28C840"/>
+        <line x1="60" y1="120" x2="300" y2="120" stroke="#e8e6dc" stroke-width="0.8"/>
+        <text x="80" y="144" font-family="Lora,serif" font-size="14" fill="#141413">make me a landing</text>
+        <text x="80" y="162" font-family="Lora,serif" font-size="14" fill="#141413">page in</text>
+        <text x="80" y="180" font-family="Lora,serif" font-size="14" font-weight="600" fill="#d97757">apple style</text>
+
+        <path d="M300 140 C 340 140, 340 140, 380 140" stroke="#b0aea5" stroke-width="2" stroke-dasharray="4 4" fill="none"/>
+        <polygon points="380,140 372,136 372,144" fill="#b0aea5"/>
+
+        <g filter="url(#idx-flow-sh)">
+          <rect x="380" y="70" width="280" height="140" rx="18" fill="#d97757"/>
+        </g>
+        <g fill="none" stroke="#ffffff" stroke-opacity="0.2" stroke-width="1">
+          <circle cx="520" cy="140" r="30"/>
+          <circle cx="520" cy="140" r="48"/>
+          <circle cx="520" cy="140" r="64"/>
+        </g>
+        <circle cx="520" cy="140" r="18" fill="#ffffff"/>
+        <path d="M512 140 l5 5 l11 -11" stroke="#d97757" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <text x="520" y="185" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Matcher</text>
+        <text x="520" y="200" text-anchor="middle" font-size="10" fill="#ffffff" opacity="0.85">reads SKILL.md frontmatter only</text>
+
+        <path d="M660 140 C 700 140, 700 140, 740 140" stroke="#d97757" stroke-width="2.5" fill="none"/>
+        <polygon points="740,140 732,136 732,144" fill="#d97757"/>
+
+        <g filter="url(#idx-flow-sh)">
+          <rect x="740" y="80" width="240" height="120" rx="18" fill="#ffffff" stroke="#e8e6dc"/>
+        </g>
+        <rect x="764" y="100" width="32" height="32" rx="6" fill="#141413"/>
+        <g transform="translate(770 106)" fill="none" stroke="#faf9f5" stroke-width="1.6" stroke-linecap="round">
+          <rect x="4" y="4" width="12" height="12" rx="2"/>
+          <path d="M7 7 h6 M7 10 h6 M7 13 h4"/>
+        </g>
+        <text x="806" y="114" font-size="13" font-weight="600" fill="#141413">apple-design</text>
+        <text x="806" y="130" font-family="JetBrains Mono,monospace" font-size="9" fill="#6b6a5f">SKILL.md loaded</text>
+        <line x1="764" y1="146" x2="956" y2="146" stroke="#e8e6dc"/>
+        <g font-family="JetBrains Mono,monospace" font-size="10" fill="#788c5d">
+          <text x="764" y="164">✓ references/*.md</text>
+          <text x="764" y="180">✓ assets/apple.css</text>
+          <text x="764" y="196">✓ templates ready</text>
+        </g>
+      </svg>
+    </figure>
+  </div>
+</section>
+
+<!-- Install -->
+<section class="anth-section" id="install">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">Install</span><span class="lang-zh">安装</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">Three ways. Pick your fit.</span>
+      <span class="lang-zh">三种方式。按需选择。</span>
+    </h2>
+    <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+      <span class="lang-en">Skills are just folders. You can install one at a time, copy the whole repo, or symlink for live updates.</span>
+      <span class="lang-zh">skill 就是文件夹。可以单个安装、整仓库复制、或者 symlink 实时同步。</span>
+    </p>
+
+    <h3 style="margin-top:var(--space-7); font-size:22px;">
+      <span class="lang-en">1. Claude Code CLI (recommended)</span>
+      <span class="lang-zh">1. Claude Code CLI（推荐）</span>
+    </h3>
+    <p style="color:var(--anth-text-secondary); font-family:var(--font-body);">
+      <span class="lang-en">One skill at a time. Claude Code pulls it directly from GitHub.</span>
+      <span class="lang-zh">一次装一个，Claude Code 直接从 GitHub 拉取。</span>
+    </p>
+<pre class="anth-code" style="margin-top:var(--space-4);"><code>claude install github:TbusOS/sky-skills/skills/apple-design
+claude install github:TbusOS/sky-skills/skills/linux-kernel-dev
+claude install github:TbusOS/sky-skills/skills/doc-to-markdown</code></pre>
+
+    <h3 style="margin-top:var(--space-7); font-size:22px;">
+      <span class="lang-en">2. Copy into your project</span>
+      <span class="lang-zh">2. 复制到你的项目</span>
+    </h3>
+    <p style="color:var(--anth-text-secondary); font-family:var(--font-body);">
+      <span class="lang-en">Grab just the SKILL.md you need and drop it into your project's <code>.claude/skills/</code>.</span>
+      <span class="lang-zh">只拿你需要的 SKILL.md，放到项目的 <code>.claude/skills/</code> 下。</span>
+    </p>
+<pre class="anth-code" style="margin-top:var(--space-4);"><code>git clone https://github.com/TbusOS/sky-skills.git
+cp sky-skills/skills/anthropic-design/SKILL.md \
+   your-project/.claude/skills/anthropic-design.md</code></pre>
+
+    <h3 style="margin-top:var(--space-7); font-size:22px;">
+      <span class="lang-en">3. Symlink (auto-updates)</span>
+      <span class="lang-zh">3. Symlink（自动更新）</span>
+    </h3>
+    <p style="color:var(--anth-text-secondary); font-family:var(--font-body);">
+      <span class="lang-en">Symlink the whole folder. <code>git pull</code> brings new skills + fixes into every project automatically.</span>
+      <span class="lang-zh">整个文件夹 symlink 过去。之后 <code>git pull</code> 就能把新 skill 和修复同步到所有项目。</span>
+    </p>
+<pre class="anth-code" style="margin-top:var(--space-4);"><code>git clone https://github.com/TbusOS/sky-skills.git
+ln -s "$(pwd)/sky-skills/skills/sage-design" \
+      your-project/.claude/skills/sage-design</code></pre>
+
+    <aside class="anth-admonition" style="margin-top:var(--space-6);">
+      <h5><span class="lang-en">Auto-trigger</span><span class="lang-zh">自动触发</span></h5>
+      <p style="margin:0;">
+        <span class="lang-en">Claude activates each skill only when its <code>TRIGGER</code> keywords match your prompt. You never call one by name — you just describe the task, and the relevant skill loads itself.</span>
+        <span class="lang-zh">Claude 只在 <code>TRIGGER</code> 匹配上时加载对应 skill。你永远不用按名字调用 —— 只要描述任务，相关 skill 会自己加载。</span>
+      </p>
+    </aside>
+  </div>
+</section>
+
+<!-- Contributing -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">Contribute</span><span class="lang-zh">贡献</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">Write your own skill.</span>
+      <span class="lang-zh">写你自己的 skill。</span>
+    </h2>
+    <p class="lang-en">
+      A skill is a folder with a <code>SKILL.md</code>. The frontmatter lists <code>TRIGGER</code> keywords, and the body is the domain knowledge you want Claude to have. Templates, reference docs, and scripts all live under the same folder — self-contained, no external dependencies.
+    </p>
+    <p class="lang-zh">
+      一个 skill 就是一个含 <code>SKILL.md</code> 的文件夹。frontmatter 里写 <code>TRIGGER</code> 关键词，正文写你想让 Claude 掌握的领域知识。模板、参考文档、脚本都放在同一个文件夹里 —— 自包含，没有外部依赖。
+    </p>
+    <p class="lang-en">
+      Design skills in this repo ship with three automated quality gates: <code>verify.py</code> checks structure, <code>visual-audit.mjs</code> renders the page in Playwright and flags contrast / sizing / orphan-layout issues, and <code>screenshot.mjs</code> captures a full-page image for human review. All three must exit 0 before a skill ships.
+    </p>
+    <p class="lang-zh">
+      本仓库的设计 skill 都配备三道自动质量闸：<code>verify.py</code> 检查结构、<code>visual-audit.mjs</code> 用 Playwright 渲染页面并扫描对比度 / 尺寸 / 孤儿布局、<code>screenshot.mjs</code> 抓全页截图供人工 review。三道都 exit 0 才能发布。
+    </p>
+
+    <div style="display:flex; gap:var(--space-3); flex-wrap:wrap; margin-top:var(--space-6);">
+      <a class="anth-button" href="https://github.com/TbusOS/sky-skills#contributing"><span class="lang-en">Read contributing guide</span><span class="lang-zh">阅读贡献指南</span></a>
+      <a class="anth-button anth-button--ghost" href="https://github.com/TbusOS/sky-skills/fork"><span class="lang-en">Fork on GitHub</span><span class="lang-zh">在 GitHub 上 Fork</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Cross-link -->
+<section class="anth-section">
+  <div class="anth-container" style="text-align:center;">
+    <h2>
+      <span class="lang-en">Rendered with <strong>anthropic-design</strong>.</span>
+      <span class="lang-zh">本页由 <strong>anthropic-design</strong> 渲染。</span>
+    </h2>
+    <p style="max-width:640px; margin:var(--space-5) auto var(--space-6); color:var(--anth-text-secondary); font-size:17px; font-family:var(--font-body);">
+      <span class="lang-en">This page is itself a demo of what a sky-skills design aesthetic looks like. Compare with the other three:</span>
+      <span class="lang-zh">这个页面本身也是一个 demo，展示 sky-skills 的一种设计美学。看看其它三种：</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button anth-button--ghost" href="demos/apple-design/index.html"><span class="lang-en">apple version</span><span class="lang-zh">apple 版</span></a>
+      <a class="anth-button anth-button--ghost" href="demos/ember-design/index.html"><span class="lang-en">ember version</span><span class="lang-zh">ember 版</span></a>
+      <a class="anth-button anth-button--ghost" href="demos/sage-design/index.html"><span class="lang-en">sage version</span><span class="lang-zh">sage 版</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="anth-footer">
+  <div class="anth-footer-grid">
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Systems &amp; content</span><span class="lang-zh">系统 / 内容</span></h5>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/linux-kernel-dev">linux-kernel-dev</a>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/wechat-video-publisher">wechat-video-publisher</a>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/doc-to-markdown">doc-to-markdown</a>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/md-to-pdf">md-to-pdf</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Design</span><span class="lang-zh">设计</span></h5>
+      <a href="demos/apple-design/index.html">apple-design</a>
+      <a href="demos/anthropic-design/index.html">anthropic-design</a>
+      <a href="demos/ember-design/index.html">ember-design</a>
+      <a href="demos/sage-design/index.html">sage-design</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Learn</span><span class="lang-zh">学习</span></h5>
+      <a href="https://docs.anthropic.com/en/docs/claude-code/skills">Claude Code Skills</a>
+      <a href="https://docs.anthropic.com/">Anthropic docs</a>
+      <a href="#how"><span class="lang-en">How sky-skills works</span><span class="lang-zh">sky-skills 工作原理</span></a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Install</span><span class="lang-zh">安装</span></h5>
+      <a href="#install">CLI</a>
+      <a href="#install"><span class="lang-en">Copy</span><span class="lang-zh">复制</span></a>
+      <a href="#install">Symlink</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Repo</span><span class="lang-zh">仓库</span></h5>
+      <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+      <a href="https://github.com/TbusOS/sky-skills/issues">Issues</a>
+      <a href="https://github.com/TbusOS/sky-skills/pulls">Pull requests</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">About</span><span class="lang-zh">关于</span></h5>
+      <a href="https://github.com/TbusOS/sky-skills/blob/main/README.md">README</a>
+      <a href="https://github.com/TbusOS/sky-skills/blob/main/LICENSE">MIT License</a>
+      <a href="https://github.com/TbusOS"><span class="lang-en">Maintainer</span><span class="lang-zh">维护者</span></a>
+    </div>
+  </div>
+  <div class="anth-footer-legal">
+    <span class="lang-en">Copyright © 2026 Sky. Licensed under MIT.</span>
+    <span class="lang-zh">版权 © 2026 Sky · MIT 许可</span>
+    <span>
+      <span class="lang-en">Rendered with</span><span class="lang-zh">由</span>
+      <a class="anth-link anth-link--no-arrow" href="skills/anthropic-design/">anthropic-design</a>
+      <span class="lang-zh"> 渲染</span>
+    </span>
+    <div class="anth-social">
+      <a aria-label="GitHub" href="https://github.com/TbusOS/sky-skills">GitHub</a>
+      <a aria-label="Issues" href="https://github.com/TbusOS/sky-skills/issues">Issues</a>
+      <a aria-label="Fork" href="https://github.com/TbusOS/sky-skills/fork">Fork</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+  if (!saved) {
+    // first visit: follow browser preference
+    saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+  }
+
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+      btn.setAttribute('aria-pressed', lang === 'zh' ? 'true' : 'false');
+    });
+    // swap SVG text variants that can't use span (SVG can't host HTML)
+    document.querySelectorAll('.lang-en-text').forEach(function (el) {
+      el.style.display = lang === 'zh' ? 'none' : '';
+    });
+    document.querySelectorAll('.lang-zh-text').forEach(function (el) {
+      el.style.display = lang === 'zh' ? '' : 'none';
+    });
+  }
+
+  apply(saved);
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
