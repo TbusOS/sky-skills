@@ -36,10 +36,37 @@ last-verified: 2026-04-19
 8. `references/responsive.md` — 断点与 max-width
 9. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
 
-## 发布前检查（MUST）
+## 发布前检查（MUST — 可执行）
 
-生成任何完整 HTML 页面（demo / 模板 / 落地页）后、向用户宣布"完成"前，**必须**按 `dos-and-donts.md` 末尾的 7 项 checklist 逐项确认。重点：
+生成任何完整 HTML 页面后、宣布"完成"前，**必须**依次跑下面两条命令。它们不是建议，是闸口 —— exit 非 0 就是没完成。
 
-- 禁止任何 `[placeholder]` 字符串留在产物里 —— 必须是真 inline SVG（见 `components.md` §28）。
-- Hero 段必须用 `.anth-container` 或 `.anth-container--wide`；**不要**用 `.anth-container--narrow`（720 是长文正文宽度）。
-- 提交前用 `python3 -m http.server` 打开目测 —— 不做这一步不算完成。
+### 1. 结构验证（必跑）
+
+```bash
+python3 skills/anthropic-design/scripts/verify.py <path/to/your.html>
+```
+
+自动检查：
+- 无 `[placeholder]` / `[hero]` / `[abstract illustration]` 等括号占位符
+- `<!doctype html>` + viewport meta 存在
+- Hero 段用 `.anth-container`（默认 960）或 `.anth-container--wide`（**不得用 `.anth-container--narrow`**，它是给长文正文）
+- 每个 `class="anth-*"` 在 `anthropic.css` 都有定义（无幽灵 class）
+- `<svg>` 标签平衡
+
+Exit 0 = 可以宣布完成；exit 1 = 列出每条失败原因，你必须全部修完再跑一次。
+
+### 2. 视觉验证（必看）
+
+```bash
+# 一次性安装：npm i playwright && npx playwright install chromium
+node skills/anthropic-design/scripts/screenshot.mjs demos/anthropic-design/index.html demo-shot.png
+```
+
+脚本会起本地 server、headless 打开页面、存全页截图到 `demo-shot.png`。**必须亲眼看这张图**再宣布完成 —— 留白 / 字重 / 层次靠肉眼验证，脚本抓不出美感问题。
+
+### 规则（reference only）
+
+详细 checklist 见 `references/dos-and-donts.md` 末尾。核心：
+- 禁止 `[placeholder]` 字符串；必须真 inline SVG（见 `components.md` §28）。
+- Hero 不用 `.anth-container--narrow`（那是给长文正文的 720px）。
+- 不做截图验证不算完成。

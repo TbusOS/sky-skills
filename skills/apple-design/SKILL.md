@@ -36,10 +36,37 @@ last-verified: 2026-04-19
 8. `references/responsive.md` — 断点与 max-width
 9. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
 
-## 发布前检查（MUST）
+## 发布前检查（MUST — 可执行）
 
-生成任何完整 HTML 页面（demo / 模板 / 落地页）后、向用户宣布"完成"前，**必须**按 `dos-and-donts.md` 末尾的 7 项 checklist 逐项确认。重点：
+生成任何完整 HTML 页面后、宣布"完成"前，**必须**依次跑下面两条命令。它们不是建议，是闸口 —— exit 非 0 就是没完成。
 
-- 禁止任何 `[placeholder]` 字符串留在产物里 —— 必须是真 inline SVG（见 `components.md` §28）。
-- Hero 段必须用 `.apple-container--hero` 或 `.apple-container--wide`，不要用 `.apple-container` (980px) 或更窄。
-- 提交前用 `python3 -m http.server` 打开目测 —— 不做这一步不算完成。
+### 1. 结构验证（必跑）
+
+```bash
+python3 skills/apple-design/scripts/verify.py <path/to/your.html>
+```
+
+这个脚本自动检查：
+- 无 `[placeholder]` / `[hero]` / `[xxx.icon]` 等括号占位符
+- `<!doctype html>` + viewport meta 存在
+- Hero 段使用 `.apple-container--hero` 或 `.apple-container--wide`（**不得用窄容器**）
+- 每个 `class="apple-*"` 在 `apple.css` 都有定义（无幽灵 class）
+- `<svg>` 标签平衡
+
+Exit 0 = 可以宣布完成；exit 1 = 列出每条失败原因，你必须全部修完再跑一次。
+
+### 2. 视觉验证（必看）
+
+```bash
+# 一次性安装：npm i playwright && npx playwright install chromium
+node skills/apple-design/scripts/screenshot.mjs demos/apple-design/index.html demo-shot.png
+```
+
+脚本会起一个本地 server、headless 打开页面、存全页截图到 `demo-shot.png`。**必须亲眼看这张图**再宣布完成 —— 排版 / 图像 / 居中靠肉眼验证，脚本抓不出美感问题。
+
+### 规则（reference only — 上面两个命令已覆盖大部分）
+
+详细 checklist 见 `references/dos-and-donts.md` 末尾。简要复述：
+- 禁止 `[placeholder]` 字符串留在产物里 —— 必须是真 inline SVG（见 `components.md` §28）。
+- Hero 段必须用 `.apple-container--hero` 或 `.apple-container--wide`。
+- 不做截图验证不算完成。
