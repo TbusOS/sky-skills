@@ -4,6 +4,15 @@
 
 精选 **Claude Code Skills** 合集 —— 可复用的领域专家提示模块，让 Claude Code 成为特定工作流的专业助手。
 
+## 在线 Demo
+
+两个设计类 skill 各自配备了一份单页 flagship demo，位于 [`demos/`](./demos/) 目录 —— 同一份内容，两种美学呈现：
+
+- [**apple-design demo**](./demos/apple-design/index.html) —— 用 apple.com 的调性讲 sky-skills 的故事
+- [**anthropic-design demo**](./demos/anthropic-design/index.html) —— 用 anthropic.com 的调性讲同一个故事
+
+本地预览：在仓库根目录执行 `python3 -m http.server 8000`，然后打开上面两个 URL。
+
 ## 可用 Skills
 
 | Skill | 语言 | 说明 |

@@ -4,6 +4,15 @@
 
 A curated collection of **Claude Code Skills** — reusable, domain-specific prompt modules that turn Claude Code into an expert assistant for specialized workflows.
 
+## Live Demos
+
+The two design skills ship with single-page flagship demos under [`demos/`](./demos/) — same content, two aesthetics:
+
+- [**apple-design demo**](./demos/apple-design/index.html) — sky-skills told in apple.com's voice
+- [**anthropic-design demo**](./demos/anthropic-design/index.html) — sky-skills told in anthropic.com's voice
+
+To preview locally: `python3 -m http.server 8000` from the repo root, then open the URLs.
+
 ## Available Skills
 
 | Skill | Language | Description |
