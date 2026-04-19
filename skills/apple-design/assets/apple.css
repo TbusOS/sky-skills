@@ -509,6 +509,16 @@ small,
   border-bottom-color: var(--apple-link);
 }
 
+.apple-carousel {
+  position: relative;
+  overflow: hidden;
+}
+
+.apple-carousel-viewport {
+  display: flex;
+  transition: transform var(--duration-md) var(--ease-apple-out);
+}
+
 .apple-carousel-dots {
   display: flex;
   gap: var(--space-2);
@@ -588,6 +598,10 @@ small,
   border-left-color: var(--apple-system-green);
 }
 
+.apple-admonition--info {
+  border-left-color: var(--apple-link);
+}
+
 .apple-admonition--danger {
   border-left-color: var(--apple-system-red);
 }
@@ -621,6 +635,105 @@ kbd {
 
 mark {
   background: rgba(0, 113, 227, 0.15);
+}
+
+/* Breadcrumbs */
+.apple-breadcrumbs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: 12px;
+  color: var(--apple-text-secondary);
+}
+
+.apple-breadcrumbs li::after {
+  content: ' \203A';
+  margin-left: var(--space-2);
+  color: var(--apple-divider);
+}
+
+.apple-breadcrumbs li:last-child::after {
+  content: none;
+}
+
+.apple-breadcrumbs a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.apple-breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+/* Search */
+.apple-search-trigger {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  color: var(--apple-text);
+}
+
+.apple-search-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.97);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  z-index: 200;
+  padding: var(--space-8) var(--space-5);
+}
+
+.apple-search-overlay input {
+  display: block;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--apple-divider);
+  font-size: 40px;
+  font-family: var(--font-display);
+  padding: var(--space-4) 0;
+  outline: none;
+}
+
+/* Table (use sparingly — Apple prefers parallel sections for specs) */
+.apple-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-text);
+  font-size: 14px;
+}
+
+.apple-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 600;
+  color: var(--apple-text);
+  border-bottom: 1px solid var(--apple-divider);
+}
+
+.apple-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--apple-divider);
+}
+
+/* Reveal target for IntersectionObserver-driven entrance */
+.apple-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity var(--duration-lg) var(--ease-apple-out),
+    transform var(--duration-lg) var(--ease-apple-out);
+}
+
+.apple-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ---------- Section M: Responsive + a11y ---------- */

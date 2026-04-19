@@ -109,10 +109,9 @@
 
 <label><input class="apple-checkbox" type="checkbox" /> Subscribe to Apple emails</label>
 
-<label class="apple-toggle">
-  <input type="checkbox" />
-  <span class="apple-toggle-track"><span class="apple-toggle-thumb"></span></span>
+<label style="display:flex; align-items:center; gap:var(--space-3);">
   Enable notifications
+  <input type="checkbox" class="apple-toggle" />
 </label>
 ```
 
@@ -156,12 +155,12 @@
 ## 7. Table 表格
 
 **用途：** 规格对比 / 数据表。
-**关键 class：** `.apple-spec` `.apple-table`（降级）
+**关键 class：** `.apple-table`（降级真 table 时）
 **示例：**
 
 ```html
 <!-- 首选：并排段落（Apple 官网规格页样式） -->
-<div class="apple-spec" style="display:grid; grid-template-columns:repeat(3,1fr); gap:var(--space-6);">
+<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:var(--space-6);">
   <div>
     <h3>iPhone 17 Pro</h3>
     <p class="apple-caption">Display</p>
