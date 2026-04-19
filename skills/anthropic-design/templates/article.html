@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Scaling laws for contextual reasoning — Anthropic Research</title>
+    <link rel="stylesheet" href="../assets/fonts.css">
+    <link rel="stylesheet" href="../assets/anthropic.css">
+  </head>
+  <body>
+    <header class="anth-nav">
+      <div class="anth-nav-inner">
+        <a href="/" aria-label="Anthropic home" style="font-family:var(--font-heading); font-weight:600; font-size:18px; letter-spacing:-0.01em;">Anthropic</a>
+        <nav aria-label="Primary" style="display:flex; align-items:center;">
+          <a href="/research">Research</a>
+          <a href="/economic-futures">Economic Futures</a>
+          <a href="/commitments">Commitments</a>
+          <a href="/learn">Learn</a>
+          <a href="/news">News</a>
+        </nav>
+        <div style="display:flex; align-items:center; gap:var(--space-4);">
+          <a href="/login" style="font-family:var(--font-heading); font-size:14px; color:var(--anth-text); text-decoration:none;">Log in</a>
+          <a class="anth-button" href="/try">Try Claude</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="anth-container--narrow anth-container" style="padding-block: var(--space-9);">
+      <span class="anth-badge">Research</span>
+      <h1 style="margin-top: var(--space-4);">Scaling laws for contextual reasoning</h1>
+      <p class="anth-caption" style="margin-top: var(--space-3);">March 25, 2026 &middot; 12 min read</p>
+
+      <p style="font-size:22px; line-height:1.55; color:var(--anth-text); margin-top: var(--space-6);">
+        Larger context windows do not, on their own, make models better reasoners. We measure how reasoning quality changes as a function of model size, context length, and the density of relevant evidence — and find a clean scaling law.
+      </p>
+
+      <h2 style="margin-top: var(--space-7);">Introduction</h2>
+      <p>
+        For two years the field has assumed that more context tokens at inference time would translate directly into better long-horizon reasoning. In practice the picture is messier: a 2M-token window helps a small model only marginally, while a frontier model can extract structured argumentation from the same prompt. The question is what governs that gap.
+      </p>
+      <p>
+        We trained 14 models across three orders of magnitude of parameters and evaluated them on a new benchmark, ContextualReason-1k, that requires multi-hop reasoning over evidence scattered across long documents. The result is a power-law relationship between effective parameters and the largest context length that improves accuracy, with a clear knee where additional context hurts more than it helps.
+      </p>
+
+      <figure style="margin: var(--space-7) 0;">
+        <div aria-hidden="true" style="background:var(--anth-bg-subtle); border-radius:var(--radius-md); aspect-ratio:16/9; display:grid; place-items:center; color:var(--anth-text-secondary);">[SVG illustration of scaling law curves]</div>
+        <figcaption class="anth-caption" style="margin-top: var(--space-3);">
+          Figure 1. Reasoning accuracy as a function of context length, plotted for four model sizes. The dashed line marks the "context knee" where adding tokens degrades performance.
+        </figcaption>
+      </figure>
+
+      <h2>Results</h2>
+      <p>
+        Across all 14 models we observe a striking pattern: the optimal context length scales as roughly the 0.42 power of effective parameters. A 70B model peaks around 180k tokens of relevant context; a 7B model peaks at 22k. Beyond the peak, accuracy degrades by 6–11% per doubling of irrelevant tokens — confirming what practitioners have long suspected about needle-in-a-haystack benchmarks.
+      </p>
+
+      <blockquote class="anth-quote">
+        "We observe that larger context windows are necessary but not sufficient for contextual reasoning. The model must also be capable of building and maintaining the right intermediate representation, and that capacity scales with parameters in a predictable way."
+        <div class="anth-quote-cite">
+          <span>Aisha Patel, lead author</span>
+        </div>
+      </blockquote>
+
+      <p>
+        Implementations are short. The retrieval-then-reason loop we use to evaluate the models fits in 30 lines:
+      </p>
+
+      <pre class="anth-code"><code>def contextual_reason(model, question, documents, k=8):
+    """Two-stage retrieval then reasoning over a long context."""
+    scored = [(model.score(d, question), d) for d in documents]
+    top = [d for _, d in sorted(scored, reverse=True)[:k]]
+    prompt = (
+        "You are answering a multi-hop question.\n\n"
+        f"Evidence:\n{chr(10).join(top)}\n\n"
+        f"Question: {question}\n"
+        "Reason step by step, then give a final answer."
+    )
+    return model.complete(prompt, max_tokens=1024)</code></pre>
+
+      <hr class="anth-divider">
+
+      <p><a class="anth-link" href="/research/scaling-context.pdf">Read the full paper</a></p>
+    </main>
+
+    <footer class="anth-footer">
+      <div class="anth-footer-grid">
+        <div class="anth-footer-group"><h5>Products</h5><a href="/claude">Claude</a><a href="/claude-code">Claude Code</a><a href="/api">API Platform</a><a href="/console">Console</a></div>
+        <div class="anth-footer-group"><h5>Models</h5><a href="/opus">Claude Opus 4.7</a><a href="/sonnet">Claude Sonnet 4.6</a><a href="/haiku">Claude Haiku 4.5</a><a href="/model-card">Model card</a></div>
+        <div class="anth-footer-group"><h5>Solutions</h5><a href="/coding">AI for coding</a><a href="/customer-support">Customer support</a><a href="/financial-services">Financial services</a><a href="/legal">Legal</a></div>
+        <div class="anth-footer-group"><h5>Claude Platform</h5><a href="/agents">Agents</a><a href="/skills">Skills</a><a href="/connectors">Connectors</a><a href="/files">Files</a></div>
+        <div class="anth-footer-group"><h5>Resources</h5><a href="/docs">Docs</a><a href="/cookbook">Cookbook</a><a href="/courses">Courses</a><a href="/status">Status</a></div>
+        <div class="anth-footer-group"><h5>Company</h5><a href="/about">About</a><a href="/careers">Careers</a><a href="/press">Press</a><a href="/contact">Contact</a></div>
+      </div>
+      <div class="anth-footer-legal">
+        <span>&copy; 2026 Anthropic PBC</span>
+        <span>
+          <a href="/privacy" style="color:inherit; text-decoration:none; margin-right:var(--space-4);">Privacy</a>
+          <a href="/terms" style="color:inherit; text-decoration:none; margin-right:var(--space-4);">Terms</a>
+          <a href="/usage" style="color:inherit; text-decoration:none;">Usage policy</a>
+        </span>
+        <span class="anth-social">
+          <a href="https://linkedin.com/company/anthropicresearch" aria-label="LinkedIn" style="color:inherit; text-decoration:none;">[in]</a>
+          <a href="https://x.com/anthropicai" aria-label="X" style="color:inherit; text-decoration:none;">[X]</a>
+          <a href="https://youtube.com/@anthropic-ai" aria-label="YouTube" style="color:inherit; text-decoration:none;">[YT]</a>
+        </span>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Messages API — Anthropic Docs</title>
+    <link rel="stylesheet" href="../assets/fonts.css">
+    <link rel="stylesheet" href="../assets/anthropic.css">
+    <style>
+      .docs-shell {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: var(--space-7) var(--space-5);
+        display: grid;
+        grid-template-columns: 240px 1fr 240px;
+        gap: var(--space-7);
+      }
+      .docs-side {
+        font-family: var(--font-heading);
+        font-size: 14px;
+      }
+      .docs-side h6 {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--anth-text-secondary);
+        margin: 0 0 var(--space-3);
+      }
+      .docs-side ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 var(--space-5);
+      }
+      .docs-side li { margin-bottom: var(--space-2); }
+      .docs-side a {
+        color: var(--anth-text-secondary);
+        text-decoration: none;
+      }
+      .docs-side a.is-current { color: var(--anth-orange); font-weight: 500; }
+      .docs-toc a { display: block; padding: var(--space-1) 0; }
+      @media (max-width: 1024px) {
+        .docs-shell { grid-template-columns: 1fr; }
+        .docs-toc { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="anth-nav">
+      <div class="anth-nav-inner">
+        <a href="/docs" aria-label="Anthropic Docs" style="font-family:var(--font-heading); font-weight:600; font-size:18px; letter-spacing:-0.01em;">Anthropic Docs</a>
+        <nav aria-label="Primary" style="display:flex; align-items:center;">
+          <a href="/docs">Documentation</a>
+          <a href="/docs/api">API Reference</a>
+          <a href="/cookbook">Cookbook</a>
+        </nav>
+        <a class="anth-button" href="/console">Open Console</a>
+      </div>
+    </header>
+
+    <div class="docs-shell">
+      <aside class="docs-side" aria-label="Sidebar navigation">
+        <h6>Getting started</h6>
+        <ul>
+          <li><a href="/docs/quickstart">Quickstart</a></li>
+          <li><a href="/docs/auth">Authentication</a></li>
+          <li><a href="/docs/models">Models</a></li>
+        </ul>
+        <h6>API</h6>
+        <ul>
+          <li><a class="is-current" href="/docs/api/messages">Messages</a></li>
+          <li><a href="/docs/api/files">Files</a></li>
+          <li><a href="/docs/api/batches">Batches</a></li>
+          <li><a href="/docs/api/tools">Tool use</a></li>
+        </ul>
+        <h6>Guides</h6>
+        <ul>
+          <li><a href="/docs/prompt-caching">Prompt caching</a></li>
+          <li><a href="/docs/extended-thinking">Extended thinking</a></li>
+          <li><a href="/docs/skills">Skills</a></li>
+        </ul>
+      </aside>
+
+      <main>
+        <ol class="anth-breadcrumbs">
+          <li><a href="/docs">Docs</a></li>
+          <li><a href="/docs/api">API</a></li>
+          <li>Messages</li>
+        </ol>
+
+        <h1 style="margin-top: var(--space-4);">Messages API</h1>
+        <p style="font-size:22px; line-height:1.5; color:var(--anth-text-secondary); margin-top: var(--space-4);">
+          Send a structured list of input messages and receive the model's next message in the conversation. The Messages API is the primary surface for building assistants, agents, and analysis pipelines on Claude.
+        </p>
+
+        <h2 style="margin-top: var(--space-7);">Request</h2>
+        <p>
+          Send a <code>POST</code> to <code>/v1/messages</code> with a JSON body containing the model, messages array, and a <code>max_tokens</code> ceiling. The example below uses the Python SDK.
+        </p>
+        <pre class="anth-code"><code>from anthropic import Anthropic
+
+client = Anthropic()
+
+response = client.messages.create(
+    model="claude-opus-4-7",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Summarize this quarter's earnings call."}
+    ],
+)
+
+print(response.content[0].text)</code></pre>
+
+        <div class="anth-admonition">
+          <h5>Tip</h5>
+          <p style="margin:0;">For prompts that exceed 1,024 tokens and are reused across requests, enable prompt caching with <code>cache_control: {"type": "ephemeral"}</code> on the system message. Cached reads are 90% cheaper than uncached input.</p>
+        </div>
+
+        <h2 style="margin-top: var(--space-7);">Response shape</h2>
+        <p>
+          A successful response includes <code>id</code>, <code>model</code>, <code>role</code>, an array of typed content blocks, and a <code>usage</code> object with input and output token counts.
+        </p>
+
+        <details class="anth-details" open>
+          <summary>Error codes</summary>
+          <table class="anth-table" style="margin-top: var(--space-4);">
+            <thead>
+              <tr><th>Code</th><th>Status</th><th>Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>invalid_request_error</code></td><td>400</td><td>Malformed request body or unknown parameters.</td></tr>
+              <tr><td><code>authentication_error</code></td><td>401</td><td>Missing or invalid <code>x-api-key</code> header.</td></tr>
+              <tr><td><code>permission_error</code></td><td>403</td><td>API key lacks access to the requested model.</td></tr>
+              <tr><td><code>rate_limit_error</code></td><td>429</td><td>Per-minute token or request limit exceeded.</td></tr>
+              <tr><td><code>overloaded_error</code></td><td>529</td><td>Temporary capacity constraint — retry with exponential backoff.</td></tr>
+            </tbody>
+          </table>
+        </details>
+      </main>
+
+      <aside class="docs-toc docs-side" aria-label="On this page">
+        <h6>On this page</h6>
+        <a href="#request">Request</a>
+        <a href="#response">Response shape</a>
+        <a href="#errors">Error codes</a>
+      </aside>
+    </div>
+  </body>
+</html>
