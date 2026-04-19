@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Harness — sky-skills Roadmap</title>
+<meta name="description" content="The 8-component design harness behind sky-skills. Every component mapped to a specific model weakness. Generator/evaluator split, inspired by GAN and Anthropic's harness-design post.">
+<meta property="og:title" content="The Harness — sky-skills architecture roadmap">
+<meta property="og:description" content="Eight components, one rule: each must defend a specific model weakness. Anthropic voice.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../skills/anthropic-design/assets/anthropic.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: background var(--duration-sm) var(--ease-anth), border-color var(--duration-sm);
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); border-color: var(--anth-mid-gray); }
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] .anth-quote,
+  html[data-lang="zh"] li {
+    font-family: "Poppins", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  }
+  html[data-lang="zh"] .anth-quote { font-style: normal; }
+
+  /* Voice switcher */
+  .voice-bar {
+    display:flex; gap:var(--space-3); align-items:center; flex-wrap:wrap;
+    padding:var(--space-4) var(--space-5);
+    background:#ffffff; border:1px solid var(--anth-light-gray);
+    border-radius:var(--radius-md);
+  }
+  .voice-bar__label {
+    font-family:var(--font-heading); font-size:12px; letter-spacing:0.15em; text-transform:uppercase;
+    color:var(--anth-text-secondary); font-weight:600; margin-right:var(--space-2);
+  }
+  .voice-chip {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 14px; border-radius:var(--radius-pill); font-size:13px; font-weight:600;
+    font-family:var(--font-heading); text-decoration:none;
+    border:1px solid var(--anth-light-gray); color:var(--anth-text);
+    transition:background var(--duration-sm), border-color var(--duration-sm);
+  }
+  .voice-chip:hover { background:var(--anth-light-gray); }
+  .voice-chip--current {
+    background:var(--anth-orange); color:#ffffff; border-color:var(--anth-orange);
+  }
+  .voice-chip--current:hover { background:var(--anth-orange); }
+
+  /* Component card */
+  .comp-card {
+    position:relative; padding:var(--space-6);
+    background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg);
+    display:flex; flex-direction:column; gap:var(--space-3);
+  }
+  .comp-card__num {
+    font-family:var(--font-heading); font-size:13px; font-weight:700; letter-spacing:0.1em;
+    color:var(--anth-text-secondary);
+  }
+  .comp-card__title {
+    font-family:var(--font-heading); font-size:24px; font-weight:600; color:var(--anth-text);
+    margin:0; line-height:1.2;
+  }
+  .comp-card__path {
+    font-family:'JetBrains Mono', monospace; font-size:12.5px;
+    color:var(--anth-text-secondary); background:#faf9f5; padding:6px 10px; border-radius:6px;
+    display:inline-block; word-break:break-all;
+  }
+  .comp-card__weak-label {
+    font-family:var(--font-heading); font-size:11px; font-weight:700; letter-spacing:0.18em;
+    color:var(--anth-orange); text-transform:uppercase;
+  }
+  .comp-card__weak {
+    font-size:15.5px; line-height:1.6; color:var(--anth-text); margin:0;
+  }
+  .comp-card__status {
+    position:absolute; top:var(--space-5); right:var(--space-5);
+    font-family:var(--font-heading); font-size:11.5px; font-weight:600;
+    padding:4px 10px; border-radius:var(--radius-pill);
+    letter-spacing:0.05em;
+  }
+  .comp-card__status--done { background:#dfeadb; color:#2f5e33; }
+  .comp-card__status--next { background:#fde4d6; color:#8a3e1c; }
+  .comp-card__status--future { background:#eeecff; color:#3a3d7c; }
+
+  /* Timeline entry */
+  .timeline-entry {
+    position:relative; padding:var(--space-5) 0 var(--space-5) var(--space-7);
+    border-left:2px solid var(--anth-light-gray);
+  }
+  .timeline-entry::before {
+    content:''; position:absolute; left:-7px; top:var(--space-6);
+    width:12px; height:12px; border-radius:50%;
+    background:var(--anth-orange); border:2px solid var(--anth-bg);
+  }
+  .timeline-date {
+    font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:600;
+    letter-spacing:0.08em; color:var(--anth-text-secondary); text-transform:uppercase;
+  }
+  .timeline-title {
+    font-family:var(--font-heading); font-size:20px; font-weight:600; color:var(--anth-text);
+    margin:var(--space-2) 0 var(--space-3);
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="../index.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">sky-skills</a>
+  <div>
+    <a href="../index.html#skills"><span class="lang-en">Skills</span><span class="lang-zh">技能</span></a>
+    <a href="../index.html#design"><span class="lang-en">Design</span><span class="lang-zh">设计</span></a>
+    <a href="HARNESS-ROADMAP.html" style="color:var(--anth-orange); font-weight:600;"><span class="lang-en">Harness</span><span class="lang-zh">架构</span></a>
+    <a href="../index.html#install"><span class="lang-en">Install</span><span class="lang-zh">安装</span></a>
+    <a href="https://github.com/TbusOS/sky-skills/discussions"><span class="lang-en">Discussions</span><span class="lang-zh">讨论区</span></a>
+    <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language" title="Switch language">中 / EN</button>
+    <a class="anth-link anth-link--no-arrow" href="https://github.com/TbusOS/sky-skills" style="font-family:var(--font-heading); color:var(--anth-text); text-decoration:none; font-size:14px;">★ <span class="lang-en">Star</span><span class="lang-zh">Star</span></a>
+    <a class="anth-button" href="https://github.com/TbusOS/sky-skills/discussions"><span class="lang-en">Join Discussions</span><span class="lang-zh">加入讨论</span></a>
+  </div>
+</div></nav>
+
+<!-- Voice switcher -->
+<section style="padding:var(--space-5) var(--space-5) 0;">
+  <div class="anth-container">
+    <div class="voice-bar">
+      <span class="voice-bar__label"><span class="lang-en">Read in another voice</span><span class="lang-zh">用另一种声音读</span></span>
+      <a class="voice-chip" href="HARNESS-ROADMAP.apple.html">apple</a>
+      <a class="voice-chip voice-chip--current" href="HARNESS-ROADMAP.html" aria-current="page">anthropic</a>
+      <a class="voice-chip" href="HARNESS-ROADMAP.ember.html">ember</a>
+      <a class="voice-chip" href="HARNESS-ROADMAP.sage.html">sage</a>
+      <span style="margin-left:auto; color:var(--anth-text-secondary); font-size:13px; font-family:var(--font-heading);"><span class="lang-en">Same content. Four design voices.</span><span class="lang-zh">同一份内容。四种设计声音。</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- Hero -->
+<section class="anth-hero">
+  <div class="anth-container" style="max-width:840px;">
+    <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Architecture · 2026-04-20</span><span class="lang-zh">架构 · 2026-04-20</span></span>
+    <h1 style="margin-top:var(--space-4);">
+      <span class="lang-en">The Harness.<br>Eight components. One rule.</span>
+      <span class="lang-zh">架构蓝图。<br>八个组件。一条规矩。</span>
+    </h1>
+    <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.55; max-width:720px; font-family:var(--font-body);">
+      <span class="lang-en">The full design of the sky-skills harness — four <strong>generator</strong> skills, one <strong>evaluator</strong>, and the six components still to come. Every component must defend one question: <em>what specific model weakness does it correspond to?</em> No weakness, no seat at the table.</span>
+      <span class="lang-zh">sky-skills 架构的完整蓝图 —— 四个 <strong>生成器</strong> skill、一个 <strong>评审员</strong>,以及还要做的六件事。每个组件都必须能回答一个问题:<em>它挡的是模型的哪一个具体弱点?</em> 挡不住弱点,就不配留。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="#components"><span class="lang-en">See the eight</span><span class="lang-zh">看这八个</span></a>
+      <a class="anth-button anth-button--ghost" href="#status"><span class="lang-en">What's done today</span><span class="lang-zh">今天做到哪里</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Sources -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">Sources</span><span class="lang-zh">指导来源</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">Two ideas we're building on.</span>
+      <span class="lang-zh">我们站在的两个肩膀。</span>
+    </h2>
+    <p class="lang-en">
+      <strong>GAN (Goodfellow et al., 2014)</strong> — a generator and a discriminator train adversarially. The sharper the discriminator, the stronger the generator becomes. Our four design skills are the generator, <code>design-review</code> is the discriminator.
+    </p>
+    <p class="lang-zh">
+      <strong>GAN(Goodfellow et al., 2014)</strong> —— generator 和 discriminator 对抗训练。discriminator 越锐利,generator 就越强。我们的 4 个设计 skill 是 generator,<code>design-review</code> 是 discriminator。
+    </p>
+    <p class="lang-en">
+      <strong>Anthropic, <a class="anth-link" style="display:inline;" href="https://www.anthropic.com/engineering/harness-design-long-running-apps">Harness design for long-running apps</a></strong> — <em>planner / generator / evaluator</em> three-part split, evaluators must be separate, sprint contracts, 5–15 iteration rounds, and the rule we take most seriously: <strong>each harness component must correspond to one specific model weakness</strong>. Assumptions worth stress-testing, because they may be incorrect or quickly outdated.
+    </p>
+    <p class="lang-zh">
+      <strong>Anthropic 的 <a class="anth-link" style="display:inline;" href="https://www.anthropic.com/engineering/harness-design-long-running-apps">Harness design for long-running apps</a></strong> —— <em>planner / generator / evaluator</em> 三段式,evaluator 必须独立,sprint contract,5–15 轮迭代。我们最认真对待的一条:<strong>每一个 harness 组件都要对应模型的一个具体弱点</strong>。这些假设值得压测,因为它们可能不对,或者很快过时。
+    </p>
+    <blockquote class="anth-quote">
+      <span class="lang-en">Agents tend to praise their own work confidently — even when quality is obviously mediocre to a human observer. Separating the agent doing the work from the agent evaluating it is a powerful lever.</span>
+      <span class="lang-zh">Agent 倾向于自信地称赞自己的作品 —— 哪怕在人类观察者看来质量明显平庸。把做事的 agent 和评判的 agent 分开,是一个真正的杠杆。</span>
+    </blockquote>
+    <p class="anth-quote-cite" style="margin-top:var(--space-4);">
+      <span aria-hidden="true" style="display:inline-block; width:24px; height:24px; border-radius:50%; background:var(--anth-orange);"></span>
+      <span><span class="lang-en">Anthropic — Harness design post</span><span class="lang-zh">Anthropic —— harness-design 文章</span></span>
+    </p>
+  </div>
+</section>
+
+<!-- Goal -->
+<section class="anth-section">
+  <div class="anth-container anth-container--narrow" style="text-align:center;">
+    <span class="anth-badge"><span class="lang-en">Goal</span><span class="lang-zh">目标</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">What this harness is supposed to deliver.</span>
+      <span class="lang-zh">这个 harness 应该交付什么。</span>
+    </h2>
+    <p style="font-family:'Lora', serif; font-size:22px; line-height:1.55; color:var(--anth-text); max-width:680px; margin:var(--space-6) auto 0;">
+      <span class="lang-en">A one-sentence brief becomes a web page that stands next to <strong>anthropic.com</strong>, <strong>stripe.com</strong>, <strong>linear.app</strong>. Not <q>technically bug-free</q> — <strong>taste, originality, rhythm, copy, hand-crafted illustrations, device-agnostic, accessible, shareable</strong>.</span>
+      <span class="lang-zh">一句话需求,产出能和 <strong>anthropic.com</strong> / <strong>stripe.com</strong> / <strong>linear.app</strong> 同台站着的一张页面。不是"技术上没 bug",而是 <strong>有品位、有原创、有节奏、copy 过关、图示手工感强、全设备可用、无障碍、可分享</strong>。</span>
+    </p>
+  </div>
+</section>
+
+<!-- Eight components -->
+<section class="anth-section anth-section--subtle" id="components">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Eight components</span><span class="lang-zh">八个组件</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">Every row defends a weakness.</span>
+        <span class="lang-zh">每一行都挡一个弱点。</span>
+      </h2>
+      <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+        <span class="lang-en">The only legitimate reason for a harness component to exist is that a specific model weakness makes it necessary. If a reader can argue <q>this weakness isn't real</q> and we can't produce evidence, we remove the component.</span>
+        <span class="lang-zh">一个 harness 组件能存在的唯一理由,是有一条具体的模型弱点要求它存在。如果有人说"这条弱点不成立",而我们拿不出证据,就把这个组件删掉。</span>
+      </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--space-5);">
+
+      <!-- 01 -->
+      <article class="comp-card">
+        <span class="comp-card__status comp-card__status--future"><span class="lang-en">Future</span><span class="lang-zh">待做</span></span>
+        <span class="comp-card__num">01</span>
+        <h3 class="comp-card__title">design-planner</h3>
+        <code class="comp-card__path">skills/design-planner/</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">Faced with a vague brief, the model fills in training-data medians. Scope drifts. A planner expands the brief into a <em>sprint contract</em> — section list, must-include content, hard constraints — before the generator runs.</span>
+          <span class="lang-zh">面对模糊需求,模型会用训练数据的中位数填空,scope 失控。planner 在生成器动手前,把需求展开成 <em>sprint contract</em> —— 必含 section、必含内容、硬指标。</span>
+        </p>
+      </article>
+
+      <!-- 02 -->
+      <article class="comp-card">
+        <span class="comp-card__status comp-card__status--next"><span class="lang-en">Next · 期 2a</span><span class="lang-zh">下一步 · 期 2a</span></span>
+        <span class="comp-card__num">02</span>
+        <h3 class="comp-card__title"><span class="lang-en">reference library</span><span class="lang-zh">参考库</span></h3>
+        <code class="comp-card__path">skills/&lt;style&gt;-design/references/canonical/</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">Without reference, output regresses to <q>the most average web design.</q> A per-style canonical library of 10 page-types (pricing / landing / docs-home / blog / product / team / comparison / FAQ / changelog / feature-deep) anchors quality at each style's own best — not an industry average.</span>
+          <span class="lang-zh">没有参考,输出就向"最平均的 web 设计"收敛。每个 style 自己的 10 个 page-type canonical 库(pricing / landing / docs / blog / product / team / comparison / FAQ / changelog / feature-deep),把品质锚定在该 style 自己的最好,不是行业平均。</span>
+        </p>
+      </article>
+
+      <!-- 03 -->
+      <article class="comp-card">
+        <span class="comp-card__status comp-card__status--done"><span class="lang-en">Partly done</span><span class="lang-zh">部分完成</span></span>
+        <span class="comp-card__num">03</span>
+        <h3 class="comp-card__title"><span class="lang-en">generator + self-diff</span><span class="lang-zh">生成器 + 自评差异</span></h3>
+        <code class="comp-card__path">skills/{apple,anthropic,ember,sage}-design/</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">Models don't naturally articulate their design decisions after writing. Without a required <em>self-diff note</em> (what I chose and why), the critic has no concrete target to argue with — just vibes.</span>
+          <span class="lang-zh">模型写完 HTML 以后,不会自然复盘它的设计决策。没有强制的 <em>self-diff note</em>("我为什么选这个 section 顺序、这个 headline"),critic 没有具体靶子,只能凭感觉评。</span>
+        </p>
+      </article>
+
+      <!-- 04 -->
+      <article class="comp-card">
+        <span class="comp-card__status comp-card__status--done"><span class="lang-en">Phase 1 done · expanding</span><span class="lang-zh">期 1 已完成 · 扩展中</span></span>
+        <span class="comp-card__num">04</span>
+        <h3 class="comp-card__title">mechanical-review</h3>
+        <code class="comp-card__path">skills/design-review/</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">Models don't self-check runtime behavior — multi-viewport rendering, keyboard navigation, color contrast, LCP/CLS, SEO meta. A mechanical gate catches the class of bugs source-scanning and model self-review both miss.</span>
+          <span class="lang-zh">runtime 行为(多视口渲染、键盘可达性、对比度、LCP/CLS、SEO meta)模型自己不会检查。mechanical 闸口抓的正是源码扫描和模型自评都抓不到的那一类 bug。</span>
+        </p>
+      </article>
+
+      <!-- 05 -->
+      <article class="comp-card">
+        <span class="comp-card__status comp-card__status--future"><span class="lang-en">Future</span><span class="lang-zh">待做</span></span>
+        <span class="comp-card__num">05</span>
+        <h3 class="comp-card__title"><span class="lang-en">multi-critic</span><span class="lang-zh">多位专家评审员</span></h3>
+        <code class="comp-card__path">.claude/agents/design-{composition,copy,illustration,brand}-critic.md</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">Evaluating one's own work tends to produce uniform praise. Even a fresh-context critic has a limited attention budget, which one critic can't divide evenly across four orthogonal axes: <strong>composition</strong>, <strong>copy</strong>, <strong>illustration</strong>, <strong>brand coherence</strong>. Four specialists, each in fresh context, catch what a generalist misses.</span>
+          <span class="lang-zh">评审自己的作品会整体说好话。即便是 fresh context 的 critic,注意力预算也有限,一个人难以把它均匀分给四个正交维度:<strong>版式</strong>、<strong>copy</strong>、<strong>插画</strong>、<strong>品牌一致性</strong>。四位专家,各自 fresh context,合起来抓到的比一位通才更多。</span>
+        </p>
+      </article>
+
+      <!-- 06 -->
+      <article class="comp-card">
+        <span class="comp-card__status comp-card__status--future"><span class="lang-en">Future</span><span class="lang-zh">待做</span></span>
+        <span class="comp-card__num">06</span>
+        <h3 class="comp-card__title">/design-loop</h3>
+        <code class="comp-card__path">.claude/commands/design-loop.md</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">Models default to <q>ship the first-pass output.</q> Without orchestration, actual iteration ends after 1–2 rounds. A loop controller forces the planner → generator → review → critic cycle for up to 5 rounds, or escalates to a human.</span>
+          <span class="lang-zh">模型默认"第一版够用就发"。没有外部编排,实际只跑 1-2 轮。loop controller 强制 planner → generator → review → critic 最多 5 轮,超过还过不去就交还给人。</span>
+        </p>
+      </article>
+
+      <!-- 07 -->
+      <article class="comp-card">
+        <span class="comp-card__status comp-card__status--future"><span class="lang-en">Future · after 10+ real pages</span><span class="lang-zh">待做 · 跑够 10 张真实页后</span></span>
+        <span class="comp-card__num">07</span>
+        <h3 class="comp-card__title">learning-loop</h3>
+        <code class="comp-card__path">.claude/commands/design-learn.md + auto-PR</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">Models don't automatically archive <q>the new issue the critic caught today.</q> Without this loop, the same bug class keeps being caught by humans. We already have a hand-run version of this in <code>known-bugs.md</code>; automating it means the defense catalogue grows without anyone remembering to write it down.</span>
+          <span class="lang-zh">模型不会自动归档"critic 今天新抓到的问题"。没有这个环节,同一类 bug 会反复被人抓到。我们现在在 <code>known-bugs.md</code> 里做手动版本,自动化之后防御清单会在没人专门记录的情况下持续生长。</span>
+        </p>
+      </article>
+
+      <!-- 08 -->
+      <article class="comp-card">
+        <span class="comp-card__status comp-card__status--future"><span class="lang-en">Future · after 10+ real pages</span><span class="lang-zh">待做 · 跑够 10 张真实页后</span></span>
+        <span class="comp-card__num">08</span>
+        <h3 class="comp-card__title">library-grower</h3>
+        <code class="comp-card__path">.claude/commands/design-distill.md + human approval</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">Models can't self-organize <q>yesterday's good output</q> into tomorrow's reference. Without this, the canonical library stays fixed and becomes stale over 6 months. Five successful outputs of a page-type → auto-distilled into a new canonical, reviewed by a human, merged.</span>
+          <span class="lang-zh">模型没有"把昨天的好产物整理成明天参考"的能力。没有它,canonical library 会固定,6 个月后就开始过期。同一 page-type 攒 5 次优秀产物 → 自动蒸馏成新 canonical,人审核通过后并入。</span>
+        </p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- Phase ordering -->
+<section class="anth-section" id="ordering">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">Order of work</span><span class="lang-zh">推进顺序</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">The order is fixed by hard dependencies.</span>
+        <span class="lang-zh">顺序由硬依赖决定,不是由难度。</span>
+      </h2>
+      <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+        <span class="lang-en">We don't do them in <q>easiest first</q> order. We do them in the order that's physically possible — each phase builds on what the previous phase produces.</span>
+        <span class="lang-zh">不按"最容易先做",按"物理上才可能" —— 每一期都用上一期的产物。</span>
+      </p>
+    </div>
+
+    <figure class="anth-card" style="padding:var(--space-7); margin:0; background:linear-gradient(135deg, #faf9f5 0%, #f0ede3 100%);">
+      <svg role="img" aria-label="Phase order flowing left to right: done phases 0 and 1, next phase 1.5 and 2a starter, then phase 1 planner, phase 3 generator and mechanical, phase 5 multi-critic, phase 6 loop, phase 7 and 8 learning and grower" viewBox="0 0 1200 440" style="display:block; width:100%; max-width:1200px; height:auto; margin:0 auto;" font-family="Poppins,sans-serif">
+        <defs>
+          <filter id="rm-flow-sh" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
+            <feOffset dy="5"/>
+            <feColorMatrix values="0 0 0 0 0.08 0 0 0 0 0.08 0 0 0 0 0.07 0 0 0 0.10 0"/>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <g font-family="JetBrains Mono,monospace" font-size="11" fill="#6b6a5f" letter-spacing="1.5" font-weight="600">
+          <text x="60" y="40">DONE</text>
+          <text x="340" y="40" fill="#d97757">NEXT</text>
+          <text x="640" y="40">IN LINE</text>
+          <text x="940" y="40">AFTER DATA</text>
+        </g>
+
+        <g stroke="#b0aea5" stroke-width="1" fill="none" opacity="0.7">
+          <line x1="60" y1="220" x2="1140" y2="220"/>
+        </g>
+
+        <g filter="url(#rm-flow-sh)">
+          <rect x="60" y="80" width="240" height="260" rx="16" fill="#dfeadb" stroke="#2f5e33" stroke-width="1"/>
+        </g>
+        <text x="80" y="112" font-size="12" font-weight="700" fill="#2f5e33" letter-spacing="0.08em">期 0 · 期 1</text>
+        <text x="80" y="140" font-size="16" font-weight="600" fill="#141413">done</text>
+        <g font-size="12.5" fill="#3e4c3e" font-family="Poppins,sans-serif">
+          <text x="80" y="176">✓ known-bugs</text>
+          <text x="80" y="196" opacity="0.7" font-size="11.5">  → repo (9 rows)</text>
+          <text x="80" y="220">✓ 3 scripts unified</text>
+          <text x="80" y="240" opacity="0.7" font-size="11.5">  → design-review</text>
+          <text x="80" y="264">✓ dogfooded on</text>
+          <text x="80" y="284" opacity="0.7" font-size="11.5">  engram + sky-skills</text>
+          <text x="80" y="308">✓ roadmap anchored</text>
+        </g>
+
+        <g filter="url(#rm-flow-sh)">
+          <rect x="340" y="80" width="240" height="260" rx="16" fill="#fde4d6" stroke="#d97757" stroke-width="1.5"/>
+        </g>
+        <text x="360" y="112" font-size="12" font-weight="700" fill="#8a3e1c" letter-spacing="0.08em">期 1.5 · 期 2a</text>
+        <text x="360" y="140" font-size="16" font-weight="600" fill="#141413">next</text>
+        <g font-size="12.5" fill="#6c3519" font-family="Poppins,sans-serif">
+          <text x="360" y="176">→ cross-repo patches</text>
+          <text x="360" y="196" opacity="0.7" font-size="11.5">  --css --repo --ignore</text>
+          <text x="360" y="220">→ bin/design-review</text>
+          <text x="360" y="240" opacity="0.7" font-size="11.5">  wrapper</text>
+          <text x="360" y="264">→ 3 canonical / style</text>
+          <text x="360" y="284" opacity="0.7" font-size="11.5">  landing · pricing · docs</text>
+          <text x="360" y="308" opacity="0.8" font-size="11.5" font-style="italic">the biggest single lever</text>
+        </g>
+
+        <g filter="url(#rm-flow-sh)">
+          <rect x="640" y="80" width="240" height="260" rx="16" fill="#eeecff" stroke="#3a3d7c" stroke-width="1"/>
+        </g>
+        <text x="660" y="112" font-size="12" font-weight="700" fill="#3a3d7c" letter-spacing="0.08em">期 1 · 3 · 5 · 6</text>
+        <text x="660" y="140" font-size="16" font-weight="600" fill="#141413">in line</text>
+        <g font-size="12.5" fill="#3a3d7c" font-family="Poppins,sans-serif">
+          <text x="660" y="176">→ design-planner</text>
+          <text x="660" y="196" opacity="0.7" font-size="11.5">  sprint contract</text>
+          <text x="660" y="220">→ generator self-diff</text>
+          <text x="660" y="240" opacity="0.7" font-size="11.5">  + mech-review (a11y/perf)</text>
+          <text x="660" y="264">→ multi-critic × 4</text>
+          <text x="660" y="284" opacity="0.7" font-size="11.5">  independent subagents</text>
+          <text x="660" y="308">→ /design-loop</text>
+        </g>
+
+        <g filter="url(#rm-flow-sh)">
+          <rect x="940" y="80" width="200" height="260" rx="16" fill="#ffffff" stroke="#b0aea5" stroke-width="1" stroke-dasharray="4 3"/>
+        </g>
+        <text x="960" y="112" font-size="12" font-weight="700" fill="#6b6a5f" letter-spacing="0.08em">期 7 · 期 8</text>
+        <text x="960" y="140" font-size="16" font-weight="600" fill="#141413">after data</text>
+        <g font-size="12.5" fill="#6b6a5f" font-family="Poppins,sans-serif">
+          <text x="960" y="176">→ learning-loop</text>
+          <text x="960" y="196" opacity="0.7" font-size="11.5">  auto-archive bugs</text>
+          <text x="960" y="220">→ library-grower</text>
+          <text x="960" y="240" opacity="0.7" font-size="11.5">  distill 5 → 1 canonical</text>
+          <text x="960" y="272" opacity="0.8" font-size="11.5" font-style="italic">no data =</text>
+          <text x="960" y="290" opacity="0.8" font-size="11.5" font-style="italic">no governance</text>
+          <text x="960" y="316" opacity="0.6" font-size="11">need 10+ real pages</text>
+        </g>
+
+        <g stroke="#b0aea5" stroke-width="2" fill="none">
+          <path d="M300 220 L 340 220"/>
+          <path d="M580 220 L 640 220"/>
+          <path d="M880 220 L 940 220"/>
+        </g>
+        <g fill="#b0aea5">
+          <polygon points="340,220 332,216 332,224"/>
+          <polygon points="640,220 632,216 632,224"/>
+          <polygon points="940,220 932,216 932,224"/>
+        </g>
+
+        <text x="600" y="410" text-anchor="middle" font-size="12" fill="#6b6a5f" font-family="Poppins,sans-serif" font-style="italic">
+          <tspan class="lang-en-text">hard dependency: planner needs canonical · critic needs both · learning needs 10+ real outputs</tspan>
+          <tspan class="lang-zh-text" style="display:none;">硬依赖:planner 要 canonical · critic 要两者 · learning 要 10+ 真实产出</tspan>
+        </text>
+      </svg>
+    </figure>
+  </div>
+</section>
+
+<!-- Preserving four styles -->
+<section class="anth-section anth-section--subtle" id="styles">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">Hard constraint</span><span class="lang-zh">硬约束</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">The harness must not flatten the four voices.</span>
+        <span class="lang-zh">harness 越复杂,越怕把 4 种声音抹平。</span>
+      </h2>
+      <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+        <span class="lang-en">The most dangerous failure mode is that as we build more shared layers, the 4 styles start producing outputs that all <q>look the same.</q> The rule below makes that mechanically impossible: universal rules never judge style; style rules live in per-style folders; critic's taste is anchored to each style's own canonical.</span>
+        <span class="lang-zh">最危险的失败模式:共享层越多,4 个风格的产出越趋同。下面这条规矩让这件事在机制上不可能发生 —— universal 规则从不评判风格,风格规则住在各自的文件夹,critic 的品味锚定在每个 style 自己的 canonical。</span>
+      </p>
+    </div>
+
+    <div class="anth-card" style="padding:0; overflow:hidden; margin:0;">
+      <table style="width:100%; border-collapse:collapse; font-size:15px;">
+        <thead>
+          <tr style="background:#faf9f5;">
+            <th style="text-align:left; padding:var(--space-4) var(--space-5); font-family:var(--font-heading); font-size:13px; letter-spacing:0.08em; border-bottom:1px solid var(--anth-light-gray); width:24%;"><span class="lang-en">Layer</span><span class="lang-zh">层</span></th>
+            <th style="text-align:left; padding:var(--space-4) var(--space-5); font-family:var(--font-heading); font-size:13px; letter-spacing:0.08em; border-bottom:1px solid var(--anth-light-gray); width:38%;"><span class="lang-en">Where it lives</span><span class="lang-zh">住在哪</span></th>
+            <th style="text-align:left; padding:var(--space-4) var(--space-5); font-family:var(--font-heading); font-size:13px; letter-spacing:0.08em; border-bottom:1px solid var(--anth-light-gray);"><span class="lang-en">Flattens the voices?</span><span class="lang-zh">会抹平声音吗</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:var(--space-4) var(--space-5); border-bottom:1px solid var(--anth-light-gray); vertical-align:top;"><strong><span class="lang-en">Universal quality</span><span class="lang-zh">通用质量</span></strong></td>
+            <td style="padding:var(--space-4) var(--space-5); border-bottom:1px solid var(--anth-light-gray); vertical-align:top;"><code style="font-size:12.5px;">skills/design-review/references/cross-skill-rules.md</code></td>
+            <td style="padding:var(--space-4) var(--space-5); border-bottom:1px solid var(--anth-light-gray); vertical-align:top; color:#2f5e33;"><strong><span class="lang-en">No</span><span class="lang-zh">不会</span></strong><br><span style="color:var(--anth-text-secondary); font-size:14px;"><span class="lang-en">Only judges <q>does it work</q> (contrast, placeholders, SVG balance). Doesn't touch <q>what a style should look like.</q></span><span class="lang-zh">只管"能不能用"(对比度、占位符、SVG 平衡),不管"该是什么样"</span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:var(--space-4) var(--space-5); border-bottom:1px solid var(--anth-light-gray); vertical-align:top;"><strong><span class="lang-en">Cross-skill bugs</span><span class="lang-zh">跨 skill bug 清单</span></strong></td>
+            <td style="padding:var(--space-4) var(--space-5); border-bottom:1px solid var(--anth-light-gray); vertical-align:top;"><code style="font-size:12.5px;">skills/design-review/references/known-bugs.md</code></td>
+            <td style="padding:var(--space-4) var(--space-5); border-bottom:1px solid var(--anth-light-gray); vertical-align:top; color:#2f5e33;"><strong><span class="lang-en">No</span><span class="lang-zh">不会</span></strong><br><span style="color:var(--anth-text-secondary); font-size:14px;"><span class="lang-en">Already segmented into per-style sections. Orange-CTA bug lives in the anthropic section, sage-green contrast in the sage section.</span><span class="lang-zh">按分节组织。橙 CTA 在 anthropic 节,sage 绿对比度在 sage 节</span></span></td>
+          </tr>
+          <tr style="background:#fefaf5;">
+            <td style="padding:var(--space-4) var(--space-5); border-bottom:1px solid var(--anth-light-gray); vertical-align:top;"><strong><span class="lang-en">Style canonicals</span><span class="lang-zh">style canonical 例子</span></strong></td>
+            <td style="padding:var(--space-4) var(--space-5); border-bottom:1px solid var(--anth-light-gray); vertical-align:top;"><code style="font-size:12.5px;">skills/&lt;style&gt;-design/references/canonical/</code></td>
+            <td style="padding:var(--space-4) var(--space-5); border-bottom:1px solid var(--anth-light-gray); vertical-align:top; color:#8a3e1c;"><strong><span class="lang-en">Strengthens them</span><span class="lang-zh">反过来强化</span></strong><br><span style="color:var(--anth-text-secondary); font-size:14px;"><span class="lang-en">Apple pricing and sage pricing look nothing alike. <strong>The libraries are never shared, never copied across styles.</strong></span><span class="lang-zh">apple pricing 和 sage pricing 长得完全不一样。<strong>4 个 library 不互抄、不共享、不跨 style 引用</strong></span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:var(--space-4) var(--space-5); border-bottom:1px solid var(--anth-light-gray); vertical-align:top;"><strong><span class="lang-en">Style personality</span><span class="lang-zh">风格个性</span></strong></td>
+            <td style="padding:var(--space-4) var(--space-5); border-bottom:1px solid var(--anth-light-gray); vertical-align:top;"><code style="font-size:12.5px;">skills/&lt;style&gt;-design/references/dos-and-donts.md</code></td>
+            <td style="padding:var(--space-4) var(--space-5); border-bottom:1px solid var(--anth-light-gray); vertical-align:top; color:#2f5e33;"><strong><span class="lang-en">Strengthens them</span><span class="lang-zh">反过来强化</span></strong><br><span style="color:var(--anth-text-secondary); font-size:14px;"><span class="lang-en">Palette, fonts, signature moves — all per-style.</span><span class="lang-zh">色板、字体、签名动作 —— 全是各自的</span></span></td>
+          </tr>
+          <tr>
+            <td style="padding:var(--space-4) var(--space-5); vertical-align:top;"><strong><span class="lang-en">Critic's taste</span><span class="lang-zh">critic 的品味</span></strong></td>
+            <td style="padding:var(--space-4) var(--space-5); vertical-align:top;"><span class="lang-en">Subagent prompt reads <strong>this style's</strong> canonical + dos-and-donts</span><span class="lang-zh">subagent prompt 里读 <strong>当前 style 的</strong> canonical + dos-and-donts</span></td>
+            <td style="padding:var(--space-4) var(--space-5); vertical-align:top; color:#2f5e33;"><strong><span class="lang-en">No</span><span class="lang-zh">不会</span></strong><br><span style="color:var(--anth-text-secondary); font-size:14px;"><span class="lang-en">Critic always asks <q>is this a good &lt;style&gt; page?</q> — not <q>is this good in the abstract?</q> The standard moves with the style.</span><span class="lang-zh">critic 永远问"这是不是一张好的 &lt;style&gt; 页",不是"是不是绝对意义上好"。标准跟着 style 走</span></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Status today -->
+<section class="anth-section" id="status">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Status · 2026-04-20</span><span class="lang-zh">今天 · 2026-04-20</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">What's real. What's next.</span>
+        <span class="lang-zh">哪些是真的。下一步做什么。</span>
+      </h2>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-5);">
+      <article class="anth-card">
+        <span class="comp-card__status comp-card__status--done" style="position:static; margin-bottom:var(--space-3); display:inline-block;"><span class="lang-en">Done</span><span class="lang-zh">已完成</span></span>
+        <h3 style="font-size:19px; margin-top:var(--space-3);">
+          <span class="lang-en">Phase 0 + Phase 1</span>
+          <span class="lang-zh">期 0 + 期 1</span>
+        </h3>
+        <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3); line-height:1.6;">
+          <span class="lang-en">9 known-bugs catalogued in-repo. 4 copies of verify/visual-audit/screenshot unified into <code>skills/design-review/scripts/</code>. Dogfooded on engram and sky-skills landing — caught my own 4 new bugs on the roadmap landing update alone.</span>
+          <span class="lang-zh">9 条 known-bugs 从 memory 搬进 repo。4 份重复脚本合并成 <code>skills/design-review/scripts/</code>。在 engram + sky-skills landing 上 dogfood 验过 —— 仅仅修改 landing 就抓到我自己 4 个新 bug。</span>
+        </p>
+      </article>
+
+      <article class="anth-card" style="border:2px solid var(--anth-orange);">
+        <span class="comp-card__status comp-card__status--next" style="position:static; margin-bottom:var(--space-3); display:inline-block;"><span class="lang-en">Next</span><span class="lang-zh">下一步</span></span>
+        <h3 style="font-size:19px; margin-top:var(--space-3);">
+          <span class="lang-en">Phase 1.5 + Phase 2a</span>
+          <span class="lang-zh">期 1.5 + 期 2a</span>
+        </h3>
+        <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3); line-height:1.6;">
+          <span class="lang-en">Cross-repo patches (<code>--css</code>, <code>--repo</code>, <code>bin/design-review</code> wrapper, <code>--ignore-intentional</code> for the 3.12 noise). Then the <strong>biggest single lever</strong>: 3 canonical pages per style (landing / pricing / docs-home) × 4 styles = 12 canonical seeds. Without canonicals, phases 1 and 5 can't begin.</span>
+          <span class="lang-zh">跨仓补丁(<code>--css</code> / <code>--repo</code> / <code>bin/design-review</code> 壳 / <code>--ignore-intentional</code> 消 3.12 噪音)。然后是<strong>单项最大的杠杆</strong>:每 style × 3 canonical(landing / pricing / docs-home)= 12 张 canonical 种子。没有 canonical,期 1 和期 5 根本开不了头。</span>
+        </p>
+      </article>
+
+      <article class="anth-card">
+        <span class="comp-card__status comp-card__status--future" style="position:static; margin-bottom:var(--space-3); display:inline-block;"><span class="lang-en">After 10+ pages</span><span class="lang-zh">跑够 10 张真实页后</span></span>
+        <h3 style="font-size:19px; margin-top:var(--space-3);">
+          <span class="lang-en">Phase 7 + Phase 8</span>
+          <span class="lang-zh">期 7 + 期 8</span>
+        </h3>
+        <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3); line-height:1.6;">
+          <span class="lang-en">learning-loop and library-grower are <em>governance</em>. Governance without data is premature. We wait until the earlier phases have produced at least 10 real pages — then we have enough evidence to automate <q>same bug never caught twice</q> and <q>distill 5 good outputs into a canonical.</q></span>
+          <span class="lang-zh">learning-loop 和 library-grower 是 <em>治理</em>。没数据就做治理是提前规划。等前面的期跑出 10+ 张真实页,我们才有证据自动化"同一 bug 永远不抓第二次"和"5 个好产物蒸馏成一个 canonical"。</span>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Modification rules -->
+<section class="anth-section anth-section--subtle" id="rules">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">Rules for changing this document</span><span class="lang-zh">修改本文档的规矩</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">How this doc stays honest.</span>
+      <span class="lang-zh">这份文档怎么保持诚实。</span>
+    </h2>
+    <div style="background:#ffffff; border:1px solid var(--anth-light-gray); border-left:4px solid var(--anth-orange); border-radius:var(--radius-md); padding:var(--space-6); margin-top:var(--space-5);">
+      <ul style="margin:0; padding-left:var(--space-5); font-size:16px; line-height:1.75; color:var(--anth-text);">
+        <li class="lang-en"><strong>Adding a component</strong> — must state the specific model weakness it defends. No weakness, no seat.</li>
+        <li class="lang-zh"><strong>新增组件</strong> —— 必须写清它挡的是模型的哪一个具体弱点。挡不住弱点,没位置</li>
+        <li class="lang-en"><strong>Removing a component</strong> — must present evidence the weakness no longer applies. Vibes aren't evidence.</li>
+        <li class="lang-zh"><strong>删除组件</strong> —— 必须给出证据,证明那条弱点已经不成立。感觉不算证据</li>
+        <li class="lang-en"><strong>After every real page</strong> — update the <em>Status today</em> section. If the harness caught a bug class we hadn't catalogued, append to <code>known-bugs.md</code> and add a check.</li>
+        <li class="lang-zh"><strong>每跑完一张真实页</strong> —— 同步"今天"这一节。如果抓到一个新 bug 类,同时追加到 <code>known-bugs.md</code> + 加一个 check</li>
+        <li class="lang-en"><strong>If the harness drifts</strong> — flattens the four voices, produces noise that trains evaluators to ignore warnings, gives the generator a way to game the test — write a new <em>Historical lessons</em> entry.</li>
+        <li class="lang-zh"><strong>如果 harness 跑偏</strong> —— 抹平 4 种声音、产生让评审员习惯跳过的噪音、给 generator 作弊空间 —— 追加一条"历史教训"</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Historical lessons -->
+<section class="anth-section" id="lessons">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">Historical lessons</span><span class="lang-zh">历史教训</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">Things we were wrong about, written down so we don't repeat them.</span>
+      <span class="lang-zh">我们曾经搞错的事,写下来避免再犯。</span>
+    </h2>
+
+    <div style="margin-top:var(--space-7);">
+      <article class="timeline-entry">
+        <span class="timeline-date">2026-04-20</span>
+        <h3 class="timeline-title">
+          <span class="lang-en"><q>Simplicity first</q> is a heuristic, not a hard rule.</span>
+          <span class="lang-zh">"simplicity first" 是经验法则,不是硬规则。</span>
+        </h3>
+        <p style="font-size:16px; line-height:1.7; color:var(--anth-text);">
+          <span class="lang-en">While designing this roadmap, I (Claude) once argued for cutting 8 components to 5, citing the article's <q>simplicity first</q> principle. The user correctly pushed back: <q>Why not 8 again?</q> The article's actual hard rule isn't <q>fewer is better</q> — it's <q>every component must correspond to a specific model weakness.</q> The retreat was unwarranted and I restored all 8. Lesson: when tempted to cut a component, the only valid argument is <em>evidence that the weakness it defends doesn't exist</em>. Heuristic shortcuts are how real weaknesses go undefended.</span>
+          <span class="lang-zh">写这份 roadmap 时,我(Claude)曾经引用文章里 "simplicity first" 把 8 组件砍到 5。用户正确地反问"为什么又不是 8 了"。文章真正的硬规矩不是"越少越好",是"每个组件对应一个具体弱点"。那次退让没有依据,我恢复了 8 个。教训:想裁一个组件时,唯一有效的理由是<em>证据表明它挡的弱点不存在</em>。走捷径裁组件,就是把本该挡住的弱点放开了。</span>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Discussions / Issues CTA -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--narrow" style="text-align:center;">
+    <span class="anth-badge"><span class="lang-en">Contribute</span><span class="lang-zh">参与</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">Think a component is wrong? Missing? Misranked?</span>
+      <span class="lang-zh">觉得某个组件不对?漏了?顺序错了?</span>
+    </h2>
+    <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body); max-width:640px; margin-left:auto; margin-right:auto;">
+      <span class="lang-en">The document rules above apply to outside contributors too. Argue with evidence. We'd rather restructure the harness than keep a component that isn't really doing anything.</span>
+      <span class="lang-zh">上面的文档规矩对外部贡献者同样适用。用证据讲话。我们宁愿重构 harness,也不愿让一个其实没挡任何东西的组件继续占位。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap; margin-top:var(--space-6);">
+      <a class="anth-button" href="https://github.com/TbusOS/sky-skills/discussions"><span class="lang-en">Open a discussion</span><span class="lang-zh">开一个 discussion</span></a>
+      <a class="anth-button anth-button--ghost" href="https://github.com/TbusOS/sky-skills/issues"><span class="lang-en">File an issue</span><span class="lang-zh">提一个 issue</span></a>
+      <a class="anth-button anth-button--ghost" href="../index.html"><span class="lang-en">Back to sky-skills</span><span class="lang-zh">返回 sky-skills</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="anth-footer">
+  <div class="anth-footer-grid">
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Skills</span><span class="lang-zh">Skills</span></h5>
+      <a href="../index.html#skills">All skills</a>
+      <a href="../skills/design-review/">design-review</a>
+      <a href="../demos/apple-design/index.html">apple demo</a>
+      <a href="../demos/anthropic-design/index.html">anthropic demo</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">This page</span><span class="lang-zh">这一页</span></h5>
+      <a href="HARNESS-ROADMAP.html">anthropic voice</a>
+      <a href="HARNESS-ROADMAP.apple.html">apple voice</a>
+      <a href="HARNESS-ROADMAP.ember.html">ember voice</a>
+      <a href="HARNESS-ROADMAP.sage.html">sage voice</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Learn</span><span class="lang-zh">学习</span></h5>
+      <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">Harness design post</a>
+      <a href="https://docs.anthropic.com/en/docs/claude-code/skills">Claude Code Skills</a>
+      <a href="../index.html#how">How sky-skills works</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Repo</span><span class="lang-zh">仓库</span></h5>
+      <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+      <a href="https://github.com/TbusOS/sky-skills/discussions">Discussions</a>
+      <a href="https://github.com/TbusOS/sky-skills/issues">Issues</a>
+      <a href="https://github.com/TbusOS/sky-skills/pulls">Pull requests</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">About</span><span class="lang-zh">关于</span></h5>
+      <a href="https://github.com/TbusOS/sky-skills/blob/main/README.md">README</a>
+      <a href="https://github.com/TbusOS/sky-skills/blob/main/LICENSE">MIT License</a>
+      <a href="https://github.com/TbusOS"><span class="lang-en">Maintainer</span><span class="lang-zh">维护者</span></a>
+    </div>
+  </div>
+  <div class="anth-footer-legal">
+    <span class="lang-en">Copyright © 2026 Sky. Licensed under MIT.</span>
+    <span class="lang-zh">版权 © 2026 Sky · MIT 许可</span>
+    <span>
+      <span class="lang-en">Rendered with</span><span class="lang-zh">由</span>
+      <a class="anth-link anth-link--no-arrow" href="../skills/anthropic-design/">anthropic-design</a>
+      <span class="lang-zh"> 渲染</span>
+    </span>
+    <div class="anth-social">
+      <a aria-label="GitHub" href="https://github.com/TbusOS/sky-skills">GitHub</a>
+      <a aria-label="Discussions" href="https://github.com/TbusOS/sky-skills/discussions">Discussions</a>
+      <a aria-label="Issues" href="https://github.com/TbusOS/sky-skills/issues">Issues</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+  if (!saved) {
+    saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+  }
+
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+      btn.setAttribute('aria-pressed', lang === 'zh' ? 'true' : 'false');
+    });
+    document.querySelectorAll('.lang-en-text').forEach(function (el) {
+      el.style.display = lang === 'zh' ? 'none' : '';
+    });
+    document.querySelectorAll('.lang-zh-text').forEach(function (el) {
+      el.style.display = lang === 'zh' ? '' : 'none';
+    });
+  }
+
+  apply(saved);
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
