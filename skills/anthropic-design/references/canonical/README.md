@@ -18,7 +18,7 @@ quality is anchored at the style's own best.
 | Page type | File | Status |
 |---|---|---|
 | Pricing | `pricing.html` + `pricing.md` | ✅ v1 · 2026-04-20 |
-| Landing | `landing.html` + `landing.md` | ⏳ planned |
+| Landing | `landing.html` | ✅ v1 · 2026-04-20 |
 | Docs home | `docs-home.html` + `docs-home.md` | ⏳ planned |
 | Blog index | `blog-index.html` + `blog-index.md` | — |
 | Product detail | `product-detail.html` + `product-detail.md` | — |
