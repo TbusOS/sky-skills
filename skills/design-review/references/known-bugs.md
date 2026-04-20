@@ -65,8 +65,9 @@
 - **Reader sees**:SVG 框图右侧有一条旋转 90° 的 "REQUEST · FLOWS · DOWN" 装饰文字,和其他静态标签重叠成乱码。用户主动报告此 bug (2026-04-20)。
 - **Why**:generator 写 SVG 时用源码坐标思维;加上 `transform="translate(...) rotate(90)"` 之后,源码里看似安全的 x/y 坐标在渲染后变成另一方向的射线,穿过附近不该穿过的元素。**纯静态源扫描永远抓不到** —— 必须渲染后看 bounding box。
 - **Defense**:`visual-audit.mjs` 的 **svg-text-overlap** check —— 同 SVG 内任意两个 `<text>` 的 `getBoundingClientRect()` 相交 ≥ 4px × 4px 就报 error。阈值 4px 跳过 title/subtitle 正常 font-metric 紧贴。
-- **Rule**:`cross-skill-rules.md` 里增加"SVG 装饰元素"一节 —— 非内容型 transform(尤其 rotate)在 SVG 里 99% 情况下是装饰,去掉比加它更好。
-- **已修实例**:demos/{anthropic,apple,sage}-design/index.html 三处 code-architecture 图右侧装饰,已全部删掉;index.html 的 apple/anthropic 预览卡里两行大 h1 源码 y 偏移不够导致 rect 重叠,已调整 y 坐标。
+- **Rule**:`cross-skill-rules.md` §E 规定了修法优先级 —— **先问有没有设计意图,再挪位置 / 换布局,最后才考虑删**。
+- **正确修法示例**:demos/{anthropic,apple,sage}-design/index.html 三处装饰文字 —— **第一次**我直接删了 (错误示范);**用户 push back 指正**后改为"横着放在 stage labels 那一行,顶部中线,箭头 ↓ REQUEST · FLOWS · DOWN ↓",保留设计意图(声明信息流方向)的同时消除 overlap。index.html 预览卡里两行大 h1 源码 y 偏移不够,调整 y 坐标(不是删 h1)。
+- **教训**:2026-04-20 —— "overlap 出现时,删是最后一招,不是第一招"。这条教训已写进 cross-skill-rules §E.2 优先级规则。
 
 ### 1.9 SVG 里文字颜色和它所在的 shape 填充色太近
 - **Reader sees**:某 rect 里的文字和 rect 的填充色看起来几乎一样,文字变不可见。

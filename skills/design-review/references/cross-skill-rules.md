@@ -42,10 +42,15 @@
 
 ## E. SVG 规则(visual-audit 强制)
 
-1. **禁止"装饰性 transform"**:如果一段 SVG `<text>` 加了 `rotate()` 或其他 transform,它很可能是"在写源码时想塞个装饰"。99% 场景下**去掉它比加它更好** —— 因为渲染后它的 bounding box 会穿过原本看似安全的静态标签(known-bugs 1.8 就是这条)。写之前问自己:这文字**真的必要吗?** 必要的话,先渲染一次看它有没有压到别的元素再交付。
-2. **同 SVG 内任意两个 `<text>` 的 rendered rect 不应相交 ≥ 4×4 px**。title + subtitle 垂直紧贴的 1-2px 叠加不算。
-3. **文字颜色不要和它所在 shape 的填充色接近**:文字 `fill` 和承载它的最小不透明 rect/circle/path 的 `fill` RGB 欧氏距离 ≥ 40(simple heuristic,见 known-bugs 1.9)。半透明叠加层(fill-opacity < 0.5)不算背景 —— 真正的背景在它底下。
-4. **SVG `<text>` 源码 `font-size` ≥ 11** 才能在 worst-case 0.84 scale 下仍 ≥ 9 渲染像素。
+1. **transform 之后先渲染确认 bbox**:`<text>` 加了 `rotate()` / `translate()` 之后,源码坐标和渲染位置脱节。**写完渲染一次,看实际 bounding box 有没有穿过别的元素**。静态扫描永远抓不到这类,必须眼睛或 playwright 看。
+2. **overlap 出现时的修法优先级**(**重要** —— 不要上来就删):
+   - **(a)** 先问**有没有设计意图**。如果这元素在传达一件其他元素不传达的事(例如 "REQUEST FLOWS DOWN" 声明信息流方向),它有意图,不该删。
+   - **(b)** **优先挪位置 / 换布局** —— 顶部横条带、扩 viewBox 给它专属一列、换成更短的记号(`↓ FLOW` 代替 "REQUEST · FLOWS · DOWN")、改方向(旋转 → 横置)。
+   - **(c)** 只在设计意图确实是冗余(其他元素已经表达了同一件事)时才**删**。删之前问 "这屏上还有谁传达这同一个意思?"
+   - 历史教训:2026-04-20 第一次抓到 rotated text overlap 时,我直接删了 3 个 demo 里的装饰文字。用户指出:这是最省事不是最好的路。后来改成"横着放在 stage labels 那一行,顶部中线",既保留意图又消除 overlap。
+3. **同 SVG 内任意两个 `<text>` 的 rendered rect 不应相交 ≥ 4×4 px**(svg-text-overlap check)。title + subtitle 垂直紧贴的 1-2px 叠加不算。
+4. **文字颜色不要和它所在 shape 的填充色接近**:文字 `fill` 和承载它的最小不透明 rect/circle/path 的 `fill` RGB 欧氏距离 ≥ 40(simple heuristic,见 known-bugs 1.9)。半透明叠加层(fill-opacity < 0.5)不算背景 —— 真正的背景在它底下。
+5. **SVG `<text>` 源码 `font-size` ≥ 11** 才能在 worst-case 0.84 scale 下仍 ≥ 9 渲染像素。
 
 ## F. HTML 语义 + a11y(visual-audit 强制)
 
