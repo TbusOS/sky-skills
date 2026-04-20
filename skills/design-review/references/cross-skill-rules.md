@@ -59,6 +59,42 @@
 3. **`<img>` 必须有 `alt`**:装饰性用 `alt=""`,内容性用描述。
 4. **可见的 `<a>` 必须有文本 / `aria-label` / `title`**:空链接屏幕阅读器读不出。
 
+## G. 公开站页必须中英双语(verify.py 强制)
+
+**规则**:任何在 `docs/` 或 `skills/<style>/references/canonical/` 下的 HTML,都会被 GitHub Pages 发布到 `doc.tbusos.com/sky-skills/`(公开站的一部分)。这些页面 **必须** 支持中英切换,理由:
+
+1. 主站 `index.html` 有切换按钮 —— 用户点进 docs 或 canonical 后,切换突然消失 → UX 断裂。
+2. 4 个 design skill 的 SKILL.md TRIGGER 同时列出中英关键词(sage 风格 / sage style 等),站点自己得 match。
+3. 我的中文母语用户在 sky-skills 是一等公民,不是 i18n afterthought。
+
+**实现方式**(所有 canonical / docs HTML 遵循)—— 复用 roadmap.html 的模板:
+
+```html
+<html data-lang="en">  <!-- JS 会替换为读取的 localStorage 或 navigator.language -->
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  html[data-lang="zh"] body, html[data-lang="zh"] p, html[data-lang="zh"] li {
+    font-family: "PingFang SC", ..., sans-serif;  /* 每 style 各自实现 */
+  }
+</style>
+
+<!-- nav 含 toggle 按钮 -->
+<button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+
+<!-- 所有 user-facing 文本都成对包 spans -->
+<h1>
+  <span class="lang-en">Simple writing. Honest pricing.</span>
+  <span class="lang-zh">写作,简单。定价,诚实。</span>
+</h1>
+
+<!-- script in <body> 末尾 handle 切换 + localStorage -->
+```
+
+**verify.py 强制**:检测 public path 下的 HTML 若缺 lang-toggle / lang-en / lang-zh 任一标记,直接 fail。
+
+**历史教训**:2026-04-20 写 5 张 canonical 时,直接英文写了 —— 用户 push back。现在写进规则并机器化 check。
+
 ---
 
 ## 出坑以后

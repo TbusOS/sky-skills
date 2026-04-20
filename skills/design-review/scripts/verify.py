@@ -298,6 +298,30 @@ def check_file(
                     f"write class=\"{base_class} {cls}\""
                 )
 
+    # 7. Bilingual toggle — public-facing pages must support zh/en
+    # switching. Any HTML under docs/ or skills/<style>/references/canonical/
+    # is a public destination (linked from landing or GitHub Pages). Missing
+    # the lang-toggle / lang-en / lang-zh pattern = inconsistent UX for CJK
+    # users. Rule is documented in cross-skill-rules.md §G.
+    public_path = (
+        "/docs/" in path.replace(os.sep, "/")
+        or "/references/canonical/" in path.replace(os.sep, "/")
+    )
+    if public_path:
+        has_toggle = re.search(r'class=["\'][^"\']*\blang-toggle\b', html) is not None
+        has_lang_en = re.search(r'class=["\'][^"\']*\blang-en\b', html) is not None
+        has_lang_zh = re.search(r'class=["\'][^"\']*\blang-zh\b', html) is not None
+        if not (has_toggle and has_lang_en and has_lang_zh):
+            missing = []
+            if not has_toggle: missing.append("lang-toggle button")
+            if not has_lang_en: missing.append("lang-en spans")
+            if not has_lang_zh: missing.append("lang-zh spans")
+            errors.append(
+                f"{path}: public-facing page missing bilingual support "
+                f"(missing: {', '.join(missing)}). "
+                f"See cross-skill-rules.md §G."
+            )
+
     return errors
 
 

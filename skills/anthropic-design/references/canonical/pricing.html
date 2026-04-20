@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,19 +8,47 @@
 <link rel="stylesheet" href="../../assets/fonts.css">
 <link rel="stylesheet" href="../../assets/anthropic.css">
 <style>
-  /* Canonical-specific helpers */
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+  /* Chinese font stack: Noto Serif SC for reading (pairs with Lora),
+     Noto Sans SC for display (pairs with Poppins). Loaded via fonts.css. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .anth-quote,
+  html[data-lang="zh"] .faq-a,
+  html[data-lang="zh"] .tier-card__tagline {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", "Hiragino Sans GB", serif;
+    font-style: normal;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .tier-card__name,
+  html[data-lang="zh"] .faq-q,
+  html[data-lang="zh"] .anth-badge {
+    font-family: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", sans-serif;
+  }
 
   /* Tier cards */
-  .tier-grid {
-    display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-5);
-    margin-top:var(--space-8);
-  }
+  .tier-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-5); margin-top:var(--space-8); }
   .tier-card {
     background:#ffffff; border:1px solid var(--anth-light-gray);
-    border-radius:var(--radius-lg);
-    padding:var(--space-7);
-    display:flex; flex-direction:column; gap:var(--space-4);
-    position:relative;
+    border-radius:var(--radius-lg); padding:var(--space-7);
+    display:flex; flex-direction:column; gap:var(--space-4); position:relative;
   }
   .tier-card--featured {
     border:2px solid var(--anth-orange);
@@ -36,9 +64,7 @@
     font-family:var(--font-heading); font-size:22px; font-weight:600;
     color:var(--anth-text); margin:0; letter-spacing:-0.01em;
   }
-  .tier-card__price {
-    display:flex; align-items:baseline; gap:6px; margin:var(--space-2) 0 var(--space-4);
-  }
+  .tier-card__price { display:flex; align-items:baseline; gap:6px; margin:var(--space-2) 0 var(--space-4); }
   .tier-card__price-num {
     font-family:var(--font-heading); font-size:56px; font-weight:700;
     color:var(--anth-text); letter-spacing:-0.03em; line-height:1;
@@ -50,6 +76,7 @@
     font-family:'Lora', serif; font-size:15.5px; font-style:italic;
     color:var(--anth-text-secondary); line-height:1.55; margin:0;
   }
+  html[data-lang="zh"] .tier-card__tagline { font-family:"Poppins", "PingFang SC", sans-serif; font-style:normal; }
   .tier-card__features {
     list-style:none; padding:0; margin:var(--space-4) 0; flex:1;
     border-top:1px solid var(--anth-light-gray); padding-top:var(--space-5);
@@ -59,12 +86,8 @@
     font-family:var(--font-body); font-size:15px; line-height:1.5;
     color:var(--anth-text);
   }
-  .tier-card__features li svg {
-    flex-shrink:0; margin-top:3px;
-  }
-  .tier-card__features li.muted {
-    color:var(--anth-text-secondary); opacity:0.65;
-  }
+  .tier-card__features li svg { flex-shrink:0; margin-top:3px; }
+  .tier-card__features li.muted { color:var(--anth-text-secondary); opacity:0.65; }
 
   /* Comparison table */
   .cmp-table { width:100%; border-collapse:collapse; font-size:14.5px; }
@@ -78,8 +101,7 @@
   .cmp-table td {
     padding:var(--space-3) var(--space-4);
     border-bottom:1px solid var(--anth-light-gray);
-    vertical-align:middle;
-    font-family:var(--font-body);
+    vertical-align:middle; font-family:var(--font-body);
   }
   .cmp-table td.cmp-cell { text-align:center; color:var(--anth-text); }
   .cmp-table td.cmp-cell--off { color:var(--anth-text-secondary); opacity:0.5; }
@@ -94,17 +116,13 @@
   /* FAQ */
   .faq-item {
     background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-md);
-    padding:var(--space-5) var(--space-6);
-    margin-bottom:var(--space-3);
+    padding:var(--space-5) var(--space-6); margin-bottom:var(--space-3);
   }
   .faq-q {
     font-family:var(--font-heading); font-size:17px; font-weight:600;
     color:var(--anth-text); margin:0 0 var(--space-3);
   }
-  .faq-a {
-    margin:0; font-family:var(--font-body); font-size:15.5px; line-height:1.65;
-    color:var(--anth-text);
-  }
+  .faq-a { margin:0; font-family:var(--font-body); font-size:15.5px; line-height:1.65; color:var(--anth-text); }
 </style>
 </head>
 <body>
@@ -113,29 +131,33 @@
 <nav class="anth-nav"><div class="anth-nav-inner">
   <a href="#" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">Skypad</a>
   <div>
-    <a href="#product">Product</a>
-    <a href="#pricing">Pricing</a>
-    <a href="#teams">For teams</a>
-    <a href="#changelog">Changelog</a>
+    <a href="#product"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="#pricing"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="#teams"><span class="lang-en">For teams</span><span class="lang-zh">团队版</span></a>
+    <a href="#changelog"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a>
   </div>
   <div style="display:flex; gap:var(--space-3); align-items:center;">
-    <a class="anth-link anth-link--no-arrow" href="#login" style="font-family:var(--font-heading); color:var(--anth-text); text-decoration:none; font-size:14px;">Sign in</a>
-    <a class="anth-button" href="#start">Start writing</a>
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="anth-link anth-link--no-arrow" href="#login" style="font-family:var(--font-heading); color:var(--anth-text); text-decoration:none; font-size:14px;"><span class="lang-en">Sign in</span><span class="lang-zh">登录</span></a>
+    <a class="anth-button" href="#start"><span class="lang-en">Start writing</span><span class="lang-zh">开始写作</span></a>
   </div>
 </div></nav>
 
 <!-- Hero -->
 <section class="anth-hero">
   <div class="anth-container" style="max-width:780px;">
-    <span class="anth-badge"><span aria-hidden="true" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#788c5d; margin-right:6px; vertical-align:middle;"></span>No ads · Local-first · E2E encrypted</span>
+    <span class="anth-badge"><span aria-hidden="true" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#788c5d; margin-right:6px; vertical-align:middle;"></span><span class="lang-en">No ads · Local-first · E2E encrypted</span><span class="lang-zh">无广告 · 本地优先 · 端到端加密</span></span>
     <h1 style="margin-top:var(--space-4);">
-      Simple writing.<br>Honest pricing.
+      <span class="lang-en">Simple writing.<br>Honest pricing.</span>
+      <span class="lang-zh">写作,简单。<br>定价,诚实。</span>
     </h1>
     <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.6; max-width:640px; font-family:var(--font-body);">
-      Skypad is a quiet notebook for people who'd rather think than be notified. Free for solo writers. One price for <em>everything</em> on Pro. Team plan only when you actually need shared workspaces.
+      <span class="lang-en">Skypad is a quiet notebook for people who'd rather think than be notified. Free for solo writers. One price for <em>everything</em> on Pro. Team plan only when you actually need shared workspaces.</span>
+      <span class="lang-zh">Skypad 是一个安静的记事本,给那些宁愿思考也不愿被打扰的人。单人写作永久免费。Pro 一个价格包括<em>全部</em>。只有真的需要共享工作空间时才买 Team。</span>
     </p>
     <p style="color:var(--anth-text-secondary); font-family:var(--font-heading); font-size:14px; letter-spacing:0.02em;">
-      All plans include unlimited notes · offline sync · export to Markdown, PDF, Epub
+      <span class="lang-en">All plans include unlimited notes · offline sync · export to Markdown, PDF, Epub</span>
+      <span class="lang-zh">所有套餐包括 · 无限笔记 · 离线同步 · 导出到 Markdown / PDF / Epub</span>
     </p>
   </div>
 </section>
@@ -146,39 +168,39 @@
     <div class="tier-grid">
 
       <article class="tier-card">
-        <h2 class="tier-card__name">Free</h2>
+        <h2 class="tier-card__name"><span class="lang-en">Free</span><span class="lang-zh">免费版</span></h2>
         <div class="tier-card__price">
           <span class="tier-card__price-num">$0</span>
-          <span class="tier-card__price-unit">forever</span>
+          <span class="tier-card__price-unit"><span class="lang-en">forever</span><span class="lang-zh">永久</span></span>
         </div>
-        <p class="tier-card__tagline">For a single writer on a single machine. No account required.</p>
-        <a class="anth-button anth-button--ghost" href="#download" style="width:100%; text-align:center; justify-content:center;">Download</a>
+        <p class="tier-card__tagline"><span class="lang-en">For a single writer on a single machine. No account required.</span><span class="lang-zh">单人单机。无需注册账号。</span></p>
+        <a class="anth-button anth-button--ghost" href="#download" style="width:100%; text-align:center; justify-content:center;"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a>
         <ul class="tier-card__features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Unlimited notes &amp; folders</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Full Markdown + MDX writing</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Export to PDF, Epub, Markdown</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> 50 local file-system backlinks</li>
-          <li class="muted"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0aea5" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg> Cloud sync (Pro)</li>
-          <li class="muted"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0aea5" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg> Shared workspaces (Team)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">Unlimited notes &amp; folders</span><span class="lang-zh">无限笔记和文件夹</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">Full Markdown + MDX writing</span><span class="lang-zh">完整 Markdown + MDX 写作</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">Export to PDF, Epub, Markdown</span><span class="lang-zh">导出到 PDF / Epub / Markdown</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">50 local file-system backlinks</span><span class="lang-zh">50 条本地反向链接</span></li>
+          <li class="muted"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0aea5" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg> <span class="lang-en">Cloud sync (Pro)</span><span class="lang-zh">云同步(Pro)</span></li>
+          <li class="muted"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0aea5" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg> <span class="lang-en">Shared workspaces (Team)</span><span class="lang-zh">共享工作空间(Team)</span></li>
         </ul>
       </article>
 
       <article class="tier-card tier-card--featured">
-        <span class="tier-card__flag">Most writers</span>
+        <span class="tier-card__flag"><span class="lang-en">Most writers</span><span class="lang-zh">大多数写作者</span></span>
         <h2 class="tier-card__name">Pro</h2>
         <div class="tier-card__price">
           <span class="tier-card__price-num">$9</span>
-          <span class="tier-card__price-unit">/ month · billed yearly</span>
+          <span class="tier-card__price-unit"><span class="lang-en">/ month · billed yearly</span><span class="lang-zh">/ 月 · 按年付费</span></span>
         </div>
-        <p class="tier-card__tagline">Cloud sync across your devices, end-to-end encrypted. Everything Free has, plus:</p>
-        <a class="anth-button" href="#pro" style="width:100%; text-align:center; justify-content:center;">Start 14-day trial</a>
+        <p class="tier-card__tagline"><span class="lang-en">Cloud sync across your devices, end-to-end encrypted. Everything Free has, plus:</span><span class="lang-zh">跨设备加密同步。免费版的全部功能,另加:</span></p>
+        <a class="anth-button" href="#pro" style="width:100%; text-align:center; justify-content:center;"><span class="lang-en">Start 14-day trial</span><span class="lang-zh">14 天免费试用</span></a>
         <ul class="tier-card__features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Encrypted cloud sync (5 devices)</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Unlimited backlinks &amp; graph</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Version history (90 days)</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> iOS &amp; Android mobile app</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Publish to <code>name.skypad.page</code></li>
-          <li class="muted"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0aea5" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg> Shared workspaces (Team)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">Encrypted cloud sync (5 devices)</span><span class="lang-zh">加密云同步(5 台设备)</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">Unlimited backlinks &amp; graph</span><span class="lang-zh">无限反向链接 & 关系图</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">Version history (90 days)</span><span class="lang-zh">版本历史(90 天)</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">iOS &amp; Android mobile app</span><span class="lang-zh">iOS & Android 移动 app</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">Publish to <code>name.skypad.page</code></span><span class="lang-zh">发布到 <code>name.skypad.page</code></span></li>
+          <li class="muted"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0aea5" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg> <span class="lang-en">Shared workspaces (Team)</span><span class="lang-zh">共享工作空间(Team)</span></li>
         </ul>
       </article>
 
@@ -186,17 +208,17 @@
         <h2 class="tier-card__name">Team</h2>
         <div class="tier-card__price">
           <span class="tier-card__price-num">$29</span>
-          <span class="tier-card__price-unit">/ seat / month</span>
+          <span class="tier-card__price-unit"><span class="lang-en">/ seat / month</span><span class="lang-zh">/ 人 / 月</span></span>
         </div>
-        <p class="tier-card__tagline">Shared writing spaces for your studio, agency, or research group. Everything Pro has, plus:</p>
-        <a class="anth-button anth-button--ghost" href="#team" style="width:100%; text-align:center; justify-content:center;">Talk to us</a>
+        <p class="tier-card__tagline"><span class="lang-en">Shared writing spaces for your studio, agency, or research group. Everything Pro has, plus:</span><span class="lang-zh">给你的工作室、机构或研究组的共享写作空间。Pro 的全部功能,另加:</span></p>
+        <a class="anth-button anth-button--ghost" href="#team" style="width:100%; text-align:center; justify-content:center;"><span class="lang-en">Talk to us</span><span class="lang-zh">联系我们</span></a>
         <ul class="tier-card__features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Shared workspaces (unlimited)</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Roles &amp; granular permissions</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> SSO (Google / Okta / SAML)</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Audit logs &amp; data-residency</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Version history (unlimited)</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Priority support (24h)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">Shared workspaces (unlimited)</span><span class="lang-zh">共享工作空间(无限)</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">Roles &amp; granular permissions</span><span class="lang-zh">角色 & 细粒度权限</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">SSO (Google / Okta / SAML)</span><span class="lang-zh">SSO(Google / Okta / SAML)</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">Audit logs &amp; data-residency</span><span class="lang-zh">审计日志 & 数据驻留</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">Version history (unlimited)</span><span class="lang-zh">版本历史(无限)</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> <span class="lang-en">Priority support (24h)</span><span class="lang-zh">优先支持(24 小时)</span></li>
         </ul>
       </article>
 
@@ -208,8 +230,8 @@
 <section class="anth-section anth-section--subtle">
   <div class="anth-container anth-container--wide">
     <div style="max-width:640px; margin:0 auto var(--space-8); text-align:center;">
-      <span class="anth-badge">Compare</span>
-      <h2 style="margin-top:var(--space-3);">Every feature, every tier.</h2>
+      <span class="anth-badge"><span class="lang-en">Compare</span><span class="lang-zh">对比</span></span>
+      <h2 style="margin-top:var(--space-3);"><span class="lang-en">Every feature, every tier.</span><span class="lang-zh">每一项功能,每一个套餐。</span></h2>
     </div>
 
     <div style="background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-md); overflow:hidden;">
@@ -223,44 +245,45 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="cmp-group"><td colspan="4">Writing</td></tr>
-          <tr><td class="cmp-label">Notes &amp; folders</td><td class="cmp-cell">Unlimited</td><td class="cmp-cell">Unlimited</td><td class="cmp-cell">Unlimited</td></tr>
+          <tr class="cmp-group"><td colspan="4"><span class="lang-en">Writing</span><span class="lang-zh">写作</span></td></tr>
+          <tr><td class="cmp-label"><span class="lang-en">Notes &amp; folders</span><span class="lang-zh">笔记和文件夹</span></td><td class="cmp-cell"><span class="lang-en">Unlimited</span><span class="lang-zh">无限</span></td><td class="cmp-cell"><span class="lang-en">Unlimited</span><span class="lang-zh">无限</span></td><td class="cmp-cell"><span class="lang-en">Unlimited</span><span class="lang-zh">无限</span></td></tr>
           <tr><td class="cmp-label">Markdown + MDX</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td></tr>
-          <tr><td class="cmp-label">Backlinks &amp; graph</td><td class="cmp-cell">50 links</td><td class="cmp-cell">Unlimited</td><td class="cmp-cell">Unlimited</td></tr>
-          <tr><td class="cmp-label">Version history</td><td class="cmp-cell cmp-cell--off">Local only</td><td class="cmp-cell">90 days</td><td class="cmp-cell">Unlimited</td></tr>
+          <tr><td class="cmp-label"><span class="lang-en">Backlinks &amp; graph</span><span class="lang-zh">反向链接 & 关系图</span></td><td class="cmp-cell"><span class="lang-en">50 links</span><span class="lang-zh">50 条</span></td><td class="cmp-cell"><span class="lang-en">Unlimited</span><span class="lang-zh">无限</span></td><td class="cmp-cell"><span class="lang-en">Unlimited</span><span class="lang-zh">无限</span></td></tr>
+          <tr><td class="cmp-label"><span class="lang-en">Version history</span><span class="lang-zh">版本历史</span></td><td class="cmp-cell cmp-cell--off"><span class="lang-en">Local only</span><span class="lang-zh">仅本地</span></td><td class="cmp-cell"><span class="lang-en">90 days</span><span class="lang-zh">90 天</span></td><td class="cmp-cell"><span class="lang-en">Unlimited</span><span class="lang-zh">无限</span></td></tr>
 
-          <tr class="cmp-group"><td colspan="4">Sync &amp; devices</td></tr>
-          <tr><td class="cmp-label">Encrypted cloud sync</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">5 devices</td><td class="cmp-cell">Unlimited</td></tr>
-          <tr><td class="cmp-label">Mobile apps (iOS &amp; Android)</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td></tr>
-          <tr><td class="cmp-label">Offline-first</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td></tr>
+          <tr class="cmp-group"><td colspan="4"><span class="lang-en">Sync &amp; devices</span><span class="lang-zh">同步 & 设备</span></td></tr>
+          <tr><td class="cmp-label"><span class="lang-en">Encrypted cloud sync</span><span class="lang-zh">加密云同步</span></td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell"><span class="lang-en">5 devices</span><span class="lang-zh">5 台设备</span></td><td class="cmp-cell"><span class="lang-en">Unlimited</span><span class="lang-zh">无限</span></td></tr>
+          <tr><td class="cmp-label"><span class="lang-en">Mobile apps (iOS &amp; Android)</span><span class="lang-zh">移动 app(iOS & Android)</span></td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td></tr>
+          <tr><td class="cmp-label"><span class="lang-en">Offline-first</span><span class="lang-zh">离线优先</span></td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td></tr>
 
-          <tr class="cmp-group"><td colspan="4">Publishing</td></tr>
-          <tr><td class="cmp-label">Export to PDF / Epub / MD</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td></tr>
-          <tr><td class="cmp-label">Public page at <code>name.skypad.page</code></td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓ with custom domain</td></tr>
+          <tr class="cmp-group"><td colspan="4"><span class="lang-en">Publishing</span><span class="lang-zh">发布</span></td></tr>
+          <tr><td class="cmp-label"><span class="lang-en">Export to PDF / Epub / MD</span><span class="lang-zh">导出到 PDF / Epub / MD</span></td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td></tr>
+          <tr><td class="cmp-label"><span class="lang-en">Public page at <code>name.skypad.page</code></span><span class="lang-zh">公开页面 <code>name.skypad.page</code></span></td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td><td class="cmp-cell"><span class="lang-en">✓ with custom domain</span><span class="lang-zh">✓ 含自定义域名</span></td></tr>
 
-          <tr class="cmp-group"><td colspan="4">Teams</td></tr>
-          <tr><td class="cmp-label">Shared workspaces</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">Unlimited</td></tr>
-          <tr><td class="cmp-label">Roles &amp; permissions</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td></tr>
+          <tr class="cmp-group"><td colspan="4"><span class="lang-en">Teams</span><span class="lang-zh">团队</span></td></tr>
+          <tr><td class="cmp-label"><span class="lang-en">Shared workspaces</span><span class="lang-zh">共享工作空间</span></td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell"><span class="lang-en">Unlimited</span><span class="lang-zh">无限</span></td></tr>
+          <tr><td class="cmp-label"><span class="lang-en">Roles &amp; permissions</span><span class="lang-zh">角色 & 权限</span></td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td></tr>
           <tr><td class="cmp-label">SSO (Google / Okta / SAML)</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td></tr>
-          <tr><td class="cmp-label">Audit logs</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td></tr>
+          <tr><td class="cmp-label"><span class="lang-en">Audit logs</span><span class="lang-zh">审计日志</span></td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td></tr>
 
-          <tr class="cmp-group"><td colspan="4">Support</td></tr>
-          <tr><td class="cmp-label">Response time</td><td class="cmp-cell">Community</td><td class="cmp-cell">48 hours</td><td class="cmp-cell">24 hours</td></tr>
+          <tr class="cmp-group"><td colspan="4"><span class="lang-en">Support</span><span class="lang-zh">支持</span></td></tr>
+          <tr><td class="cmp-label"><span class="lang-en">Response time</span><span class="lang-zh">响应时间</span></td><td class="cmp-cell"><span class="lang-en">Community</span><span class="lang-zh">社区</span></td><td class="cmp-cell"><span class="lang-en">48 hours</span><span class="lang-zh">48 小时</span></td><td class="cmp-cell"><span class="lang-en">24 hours</span><span class="lang-zh">24 小时</span></td></tr>
         </tbody>
       </table>
     </div>
   </div>
 </section>
 
-<!-- Trust strip -->
+<!-- Testimonial -->
 <section class="anth-section">
   <div class="anth-container anth-container--narrow" style="text-align:center;">
     <blockquote class="anth-quote" style="font-size:24px; line-height:1.55;">
-      Skypad is the only tool I've actually stayed in. Every other note app tried to sell me AI. This one tries to get out of the way.
+      <span class="lang-en">Skypad is the only tool I've actually stayed in. Every other note app tried to sell me AI. This one tries to get out of the way.</span>
+      <span class="lang-zh">Skypad 是我唯一真的留下来用的工具。其他每一个笔记 app 都想卖我 AI。只有这个在努力把自己挪开。</span>
     </blockquote>
     <p class="anth-quote-cite" style="margin-top:var(--space-4);">
       <span aria-hidden="true" style="display:inline-block; width:24px; height:24px; border-radius:50%; background:var(--anth-orange);"></span>
-      <span>Anya Mehra — independent writer · 18 months on Pro</span>
+      <span><span class="lang-en">Anya Mehra — independent writer · 18 months on Pro</span><span class="lang-zh">Anya Mehra —— 独立作者 · 已用 Pro 18 个月</span></span>
     </p>
   </div>
 </section>
@@ -269,37 +292,42 @@
 <section class="anth-section anth-section--subtle">
   <div class="anth-container anth-container--narrow">
     <span class="anth-badge">FAQ</span>
-    <h2 style="margin-top:var(--space-3);">Questions worth asking.</h2>
+    <h2 style="margin-top:var(--space-3);"><span class="lang-en">Questions worth asking.</span><span class="lang-zh">值得问的问题。</span></h2>
 
     <div style="margin-top:var(--space-6);">
       <div class="faq-item">
-        <p class="faq-q">Do I lose my notes if I cancel Pro?</p>
+        <p class="faq-q"><span class="lang-en">Do I lose my notes if I cancel Pro?</span><span class="lang-zh">取消 Pro 后会丢笔记吗?</span></p>
         <p class="faq-a">
-          No. Every note you ever wrote is a plain Markdown file on your own machine — that's the <em>local-first</em> in local-first. If you cancel, sync stops and version history trims to 7 days, but your notes stay exactly where they were. Export runs the same on Free.
+          <span class="lang-en">No. Every note you ever wrote is a plain Markdown file on your own machine — that's the <em>local-first</em> in local-first. If you cancel, sync stops and version history trims to 7 days, but your notes stay exactly where they were. Export runs the same on Free.</span>
+          <span class="lang-zh">不会。你写过的每一条笔记都是本机上的纯 Markdown 文件 —— 这就是"<em>本地优先</em>"里的"本地"。取消后同步停止,版本历史缩到 7 天,但笔记还在原地。导出功能在免费版上一样用。</span>
         </p>
       </div>
       <div class="faq-item">
-        <p class="faq-q">What does "end-to-end encrypted" actually mean?</p>
+        <p class="faq-q"><span class="lang-en">What does "end-to-end encrypted" actually mean?</span><span class="lang-zh">"端到端加密" 到底什么意思?</span></p>
         <p class="faq-a">
-          Your notes are encrypted on your device with a key derived from your passphrase, before they leave your machine. Skypad servers store ciphertext; we can't read your notes, and we can't recover them if you lose your passphrase. We ship an open-source audit report every 6 months — the latest one is linked from <code>/security</code>.
+          <span class="lang-en">Your notes are encrypted on your device with a key derived from your passphrase, before they leave your machine. Skypad servers store ciphertext; we can't read your notes, and we can't recover them if you lose your passphrase. We ship an open-source audit report every 6 months — the latest one is linked from <code>/security</code>.</span>
+          <span class="lang-zh">你的笔记在设备上用从你密码派生的密钥加密后才离开本机。Skypad 服务器只存密文;我们读不到你的笔记,密码丢了也恢复不了。每 6 个月发一份开源审计报告,最新那份链接在 <code>/security</code>。</span>
         </p>
       </div>
       <div class="faq-item">
-        <p class="faq-q">Is there an AI-assist feature?</p>
+        <p class="faq-q"><span class="lang-en">Is there an AI-assist feature?</span><span class="lang-zh">有 AI 辅助写作吗?</span></p>
         <p class="faq-a">
-          No — and that's a product decision, not a roadmap item. The reason people stay on Skypad is that it's the one place that isn't trying to complete their sentences. If you want AI in your editor, Skypad isn't for you, and we're not upset about it.
+          <span class="lang-en">No — and that's a product decision, not a roadmap item. The reason people stay on Skypad is that it's the one place that isn't trying to complete their sentences. If you want AI in your editor, Skypad isn't for you, and we're not upset about it.</span>
+          <span class="lang-zh">没有 —— 而且这是产品决定,不是待开发项。人们留在 Skypad 的原因恰恰是:这是一个不试图替你补完句子的地方。如果你想要编辑器里有 AI,Skypad 不是给你的,我们对此没有什么需要道歉。</span>
         </p>
       </div>
       <div class="faq-item">
-        <p class="faq-q">Can my team try it before committing to 10 seats?</p>
+        <p class="faq-q"><span class="lang-en">Can my team try it before committing to 10 seats?</span><span class="lang-zh">我的团队能先试再买 10 个座位吗?</span></p>
         <p class="faq-a">
-          Yes. The Team plan has a 30-day pilot for up to 5 seats, no credit card. Email <code>team@skypad.page</code> with your company and we'll set it up within one business day.
+          <span class="lang-en">Yes. The Team plan has a 30-day pilot for up to 5 seats, no credit card. Email <code>team@skypad.page</code> with your company and we'll set it up within one business day.</span>
+          <span class="lang-zh">可以。Team 套餐有 30 天试点,最多 5 个座位,不用信用卡。发邮件到 <code>team@skypad.page</code> 写明公司,一个工作日内开通。</span>
         </p>
       </div>
       <div class="faq-item">
-        <p class="faq-q">I'm a student / on a low income. Discount?</p>
+        <p class="faq-q"><span class="lang-en">I'm a student / on a low income. Discount?</span><span class="lang-zh">我是学生 / 低收入,有折扣吗?</span></p>
         <p class="faq-a">
-          Pro is $3/month if you send us a photo of your student ID, or any evidence you're on a public-benefit program. No application, no review committee. We don't make the form hard — people who need the discount shouldn't also have to prove it twice.
+          <span class="lang-en">Pro is $3/month if you send us a photo of your student ID, or any evidence you're on a public-benefit program. No application, no review committee. We don't make the form hard — people who need the discount shouldn't also have to prove it twice.</span>
+          <span class="lang-zh">Pro 是 $3/月,只要给我们看学生证,或任何能证明你在公共福利项目里的证据。不用填申请,不用审核委员会。我们不把表格做难 —— 需要折扣的人不应该还要多证明一次。</span>
         </p>
       </div>
     </div>
@@ -309,16 +337,18 @@
 <!-- Final CTA -->
 <section class="anth-section">
   <div class="anth-container anth-container--narrow" style="text-align:center;">
-    <h2>Start writing today.</h2>
+    <h2><span class="lang-en">Start writing today.</span><span class="lang-zh">今天就开始写作。</span></h2>
     <p style="font-size:19px; color:var(--anth-text-secondary); margin:var(--space-4) auto var(--space-6); line-height:1.6; max-width:560px;">
-      Free for one writer. Pro for writers with more than one device. Team for groups who write together.
+      <span class="lang-en">Free for one writer. Pro for writers with more than one device. Team for groups who write together.</span>
+      <span class="lang-zh">免费版给单人。Pro 给多设备写作者。Team 给一起写的群组。</span>
     </p>
     <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
-      <a class="anth-button" href="#download">Download Skypad — free</a>
-      <a class="anth-button anth-button--ghost" href="#pro">Try Pro free for 14 days</a>
+      <a class="anth-button" href="#download"><span class="lang-en">Download Skypad — free</span><span class="lang-zh">下载 Skypad —— 免费</span></a>
+      <a class="anth-button anth-button--ghost" href="#pro"><span class="lang-en">Try Pro free for 14 days</span><span class="lang-zh">免费试 Pro 14 天</span></a>
     </div>
     <p style="margin-top:var(--space-5); color:var(--anth-text-secondary); font-family:var(--font-heading); font-size:13.5px;">
-      No credit card for Free · Cancel Pro any time · Full refund within 30 days
+      <span class="lang-en">No credit card for Free · Cancel Pro any time · Full refund within 30 days</span>
+      <span class="lang-zh">免费版无需信用卡 · Pro 随时取消 · 30 天全额退款</span>
     </p>
   </div>
 </section>
@@ -327,44 +357,45 @@
 <footer class="anth-footer">
   <div class="anth-footer-grid">
     <div class="anth-footer-group">
-      <h5>Product</h5>
-      <a href="#features">Features</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#download">Download</a>
-      <a href="#changelog">Changelog</a>
+      <h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5>
+      <a href="#features"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a>
+      <a href="#pricing"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+      <a href="#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a>
+      <a href="#changelog"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a>
     </div>
     <div class="anth-footer-group">
-      <h5>For teams</h5>
-      <a href="#teams">Team plan</a>
-      <a href="#enterprise">Enterprise</a>
-      <a href="#security">Security</a>
+      <h5><span class="lang-en">For teams</span><span class="lang-zh">团队</span></h5>
+      <a href="#teams"><span class="lang-en">Team plan</span><span class="lang-zh">Team 套餐</span></a>
+      <a href="#enterprise"><span class="lang-en">Enterprise</span><span class="lang-zh">企业版</span></a>
+      <a href="#security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a>
       <a href="#slas">SLAs</a>
     </div>
     <div class="anth-footer-group">
-      <h5>Writers</h5>
-      <a href="#guide">Writing guide</a>
-      <a href="#templates">Templates</a>
-      <a href="#showcase">Showcase</a>
-      <a href="#community">Community</a>
+      <h5><span class="lang-en">Writers</span><span class="lang-zh">写作者</span></h5>
+      <a href="#guide"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a>
+      <a href="#templates"><span class="lang-en">Templates</span><span class="lang-zh">模板</span></a>
+      <a href="#showcase"><span class="lang-en">Showcase</span><span class="lang-zh">案例</span></a>
+      <a href="#community"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a>
     </div>
     <div class="anth-footer-group">
-      <h5>Company</h5>
-      <a href="#about">About</a>
-      <a href="#press">Press</a>
-      <a href="#contact">Contact</a>
-      <a href="#status">System status</a>
+      <h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5>
+      <a href="#about"><span class="lang-en">About</span><span class="lang-zh">关于</span></a>
+      <a href="#press"><span class="lang-en">Press</span><span class="lang-zh">媒体</span></a>
+      <a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a>
+      <a href="#status"><span class="lang-en">System status</span><span class="lang-zh">系统状态</span></a>
     </div>
     <div class="anth-footer-group">
-      <h5>Legal</h5>
-      <a href="#privacy">Privacy</a>
-      <a href="#terms">Terms</a>
+      <h5><span class="lang-en">Legal</span><span class="lang-zh">法律</span></h5>
+      <a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a>
+      <a href="#terms"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a>
       <a href="#dpa">DPA</a>
-      <a href="#audit">Security audit</a>
+      <a href="#audit"><span class="lang-en">Security audit</span><span class="lang-zh">安全审计</span></a>
     </div>
   </div>
   <div class="anth-footer-legal">
-    <span>Copyright © 2026 Skypad Inc.</span>
-    <span>Made in Berlin · Toronto · Kyoto</span>
+    <span class="lang-en">Copyright © 2026 Skypad Inc.</span>
+    <span class="lang-zh">版权 © 2026 Skypad Inc.</span>
+    <span><span class="lang-en">Made in Berlin · Toronto · Kyoto</span><span class="lang-zh">产自柏林 · 多伦多 · 京都</span></span>
     <div class="anth-social">
       <a aria-label="Twitter" href="#tw">Twitter</a>
       <a aria-label="Mastodon" href="#mast">Mastodon</a>
@@ -372,6 +403,39 @@
     </div>
   </div>
 </footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  // URL ?lang= wins for sharable screenshots and explicit links.
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
 
 </body>
 </html>
