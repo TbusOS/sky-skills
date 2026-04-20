@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pricing — Skypad</title>
+<meta name="description" content="Skypad is a quiet writing app for people who want to think, not get notified. Free for solo. Paid plans for teams. Canonical anthropic-design pricing page — used as reference by the sky-skills harness.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/anthropic.css">
+<style>
+  /* Canonical-specific helpers */
+
+  /* Tier cards */
+  .tier-grid {
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-5);
+    margin-top:var(--space-8);
+  }
+  .tier-card {
+    background:#ffffff; border:1px solid var(--anth-light-gray);
+    border-radius:var(--radius-lg);
+    padding:var(--space-7);
+    display:flex; flex-direction:column; gap:var(--space-4);
+    position:relative;
+  }
+  .tier-card--featured {
+    border:2px solid var(--anth-orange);
+    box-shadow:0 12px 36px -8px rgba(217,119,87,0.18);
+  }
+  .tier-card__flag {
+    position:absolute; top:-12px; left:var(--space-6);
+    background:var(--anth-orange); color:#ffffff; font-weight:600;
+    font-family:var(--font-heading); font-size:12px; letter-spacing:0.06em;
+    padding:5px 12px; border-radius:var(--radius-pill);
+  }
+  .tier-card__name {
+    font-family:var(--font-heading); font-size:22px; font-weight:600;
+    color:var(--anth-text); margin:0; letter-spacing:-0.01em;
+  }
+  .tier-card__price {
+    display:flex; align-items:baseline; gap:6px; margin:var(--space-2) 0 var(--space-4);
+  }
+  .tier-card__price-num {
+    font-family:var(--font-heading); font-size:56px; font-weight:700;
+    color:var(--anth-text); letter-spacing:-0.03em; line-height:1;
+  }
+  .tier-card__price-unit {
+    font-family:var(--font-heading); font-size:16px; color:var(--anth-text-secondary);
+  }
+  .tier-card__tagline {
+    font-family:'Lora', serif; font-size:15.5px; font-style:italic;
+    color:var(--anth-text-secondary); line-height:1.55; margin:0;
+  }
+  .tier-card__features {
+    list-style:none; padding:0; margin:var(--space-4) 0; flex:1;
+    border-top:1px solid var(--anth-light-gray); padding-top:var(--space-5);
+  }
+  .tier-card__features li {
+    display:flex; gap:10px; padding:6px 0;
+    font-family:var(--font-body); font-size:15px; line-height:1.5;
+    color:var(--anth-text);
+  }
+  .tier-card__features li svg {
+    flex-shrink:0; margin-top:3px;
+  }
+  .tier-card__features li.muted {
+    color:var(--anth-text-secondary); opacity:0.65;
+  }
+
+  /* Comparison table */
+  .cmp-table { width:100%; border-collapse:collapse; font-size:14.5px; }
+  .cmp-table th {
+    text-align:left; padding:var(--space-4);
+    font-family:var(--font-heading); font-size:13px; letter-spacing:0.06em;
+    color:var(--anth-text); font-weight:600;
+    border-bottom:1px solid var(--anth-mid-gray);
+  }
+  .cmp-table th.cmp-tier { text-align:center; font-size:15px; }
+  .cmp-table td {
+    padding:var(--space-3) var(--space-4);
+    border-bottom:1px solid var(--anth-light-gray);
+    vertical-align:middle;
+    font-family:var(--font-body);
+  }
+  .cmp-table td.cmp-cell { text-align:center; color:var(--anth-text); }
+  .cmp-table td.cmp-cell--off { color:var(--anth-text-secondary); opacity:0.5; }
+  .cmp-table tr.cmp-group td {
+    font-family:var(--font-heading); font-size:12px; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--anth-text-secondary);
+    background:#faf9f5; padding-top:var(--space-4); padding-bottom:var(--space-2);
+    border-bottom:none;
+  }
+  .cmp-table .cmp-label { font-weight:500; color:var(--anth-text); }
+
+  /* FAQ */
+  .faq-item {
+    background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-md);
+    padding:var(--space-5) var(--space-6);
+    margin-bottom:var(--space-3);
+  }
+  .faq-q {
+    font-family:var(--font-heading); font-size:17px; font-weight:600;
+    color:var(--anth-text); margin:0 0 var(--space-3);
+  }
+  .faq-a {
+    margin:0; font-family:var(--font-body); font-size:15.5px; line-height:1.65;
+    color:var(--anth-text);
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="#" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">Skypad</a>
+  <div>
+    <a href="#product">Product</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#teams">For teams</a>
+    <a href="#changelog">Changelog</a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <a class="anth-link anth-link--no-arrow" href="#login" style="font-family:var(--font-heading); color:var(--anth-text); text-decoration:none; font-size:14px;">Sign in</a>
+    <a class="anth-button" href="#start">Start writing</a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="anth-hero">
+  <div class="anth-container" style="max-width:780px;">
+    <span class="anth-badge"><span aria-hidden="true" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#788c5d; margin-right:6px; vertical-align:middle;"></span>No ads · Local-first · E2E encrypted</span>
+    <h1 style="margin-top:var(--space-4);">
+      Simple writing.<br>Honest pricing.
+    </h1>
+    <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.6; max-width:640px; font-family:var(--font-body);">
+      Skypad is a quiet notebook for people who'd rather think than be notified. Free for solo writers. One price for <em>everything</em> on Pro. Team plan only when you actually need shared workspaces.
+    </p>
+    <p style="color:var(--anth-text-secondary); font-family:var(--font-heading); font-size:14px; letter-spacing:0.02em;">
+      All plans include unlimited notes · offline sync · export to Markdown, PDF, Epub
+    </p>
+  </div>
+</section>
+
+<!-- Tiers -->
+<section class="anth-section" id="pricing">
+  <div class="anth-container anth-container--wide">
+    <div class="tier-grid">
+
+      <article class="tier-card">
+        <h2 class="tier-card__name">Free</h2>
+        <div class="tier-card__price">
+          <span class="tier-card__price-num">$0</span>
+          <span class="tier-card__price-unit">forever</span>
+        </div>
+        <p class="tier-card__tagline">For a single writer on a single machine. No account required.</p>
+        <a class="anth-button anth-button--ghost" href="#download" style="width:100%; text-align:center; justify-content:center;">Download</a>
+        <ul class="tier-card__features">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Unlimited notes &amp; folders</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Full Markdown + MDX writing</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Export to PDF, Epub, Markdown</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> 50 local file-system backlinks</li>
+          <li class="muted"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0aea5" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg> Cloud sync (Pro)</li>
+          <li class="muted"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0aea5" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg> Shared workspaces (Team)</li>
+        </ul>
+      </article>
+
+      <article class="tier-card tier-card--featured">
+        <span class="tier-card__flag">Most writers</span>
+        <h2 class="tier-card__name">Pro</h2>
+        <div class="tier-card__price">
+          <span class="tier-card__price-num">$9</span>
+          <span class="tier-card__price-unit">/ month · billed yearly</span>
+        </div>
+        <p class="tier-card__tagline">Cloud sync across your devices, end-to-end encrypted. Everything Free has, plus:</p>
+        <a class="anth-button" href="#pro" style="width:100%; text-align:center; justify-content:center;">Start 14-day trial</a>
+        <ul class="tier-card__features">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Encrypted cloud sync (5 devices)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Unlimited backlinks &amp; graph</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Version history (90 days)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> iOS &amp; Android mobile app</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Publish to <code>name.skypad.page</code></li>
+          <li class="muted"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0aea5" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg> Shared workspaces (Team)</li>
+        </ul>
+      </article>
+
+      <article class="tier-card">
+        <h2 class="tier-card__name">Team</h2>
+        <div class="tier-card__price">
+          <span class="tier-card__price-num">$29</span>
+          <span class="tier-card__price-unit">/ seat / month</span>
+        </div>
+        <p class="tier-card__tagline">Shared writing spaces for your studio, agency, or research group. Everything Pro has, plus:</p>
+        <a class="anth-button anth-button--ghost" href="#team" style="width:100%; text-align:center; justify-content:center;">Talk to us</a>
+        <ul class="tier-card__features">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Shared workspaces (unlimited)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Roles &amp; granular permissions</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> SSO (Google / Okta / SAML)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Audit logs &amp; data-residency</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Version history (unlimited)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#788c5d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg> Priority support (24h)</li>
+        </ul>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- Comparison table -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:640px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge">Compare</span>
+      <h2 style="margin-top:var(--space-3);">Every feature, every tier.</h2>
+    </div>
+
+    <div style="background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-md); overflow:hidden;">
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th>&nbsp;</th>
+            <th class="cmp-tier">Free</th>
+            <th class="cmp-tier" style="color:var(--anth-orange);">Pro</th>
+            <th class="cmp-tier">Team</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="cmp-group"><td colspan="4">Writing</td></tr>
+          <tr><td class="cmp-label">Notes &amp; folders</td><td class="cmp-cell">Unlimited</td><td class="cmp-cell">Unlimited</td><td class="cmp-cell">Unlimited</td></tr>
+          <tr><td class="cmp-label">Markdown + MDX</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td></tr>
+          <tr><td class="cmp-label">Backlinks &amp; graph</td><td class="cmp-cell">50 links</td><td class="cmp-cell">Unlimited</td><td class="cmp-cell">Unlimited</td></tr>
+          <tr><td class="cmp-label">Version history</td><td class="cmp-cell cmp-cell--off">Local only</td><td class="cmp-cell">90 days</td><td class="cmp-cell">Unlimited</td></tr>
+
+          <tr class="cmp-group"><td colspan="4">Sync &amp; devices</td></tr>
+          <tr><td class="cmp-label">Encrypted cloud sync</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">5 devices</td><td class="cmp-cell">Unlimited</td></tr>
+          <tr><td class="cmp-label">Mobile apps (iOS &amp; Android)</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td></tr>
+          <tr><td class="cmp-label">Offline-first</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td></tr>
+
+          <tr class="cmp-group"><td colspan="4">Publishing</td></tr>
+          <tr><td class="cmp-label">Export to PDF / Epub / MD</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓</td></tr>
+          <tr><td class="cmp-label">Public page at <code>name.skypad.page</code></td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td><td class="cmp-cell">✓ with custom domain</td></tr>
+
+          <tr class="cmp-group"><td colspan="4">Teams</td></tr>
+          <tr><td class="cmp-label">Shared workspaces</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">Unlimited</td></tr>
+          <tr><td class="cmp-label">Roles &amp; permissions</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td></tr>
+          <tr><td class="cmp-label">SSO (Google / Okta / SAML)</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td></tr>
+          <tr><td class="cmp-label">Audit logs</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell cmp-cell--off">—</td><td class="cmp-cell">✓</td></tr>
+
+          <tr class="cmp-group"><td colspan="4">Support</td></tr>
+          <tr><td class="cmp-label">Response time</td><td class="cmp-cell">Community</td><td class="cmp-cell">48 hours</td><td class="cmp-cell">24 hours</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Trust strip -->
+<section class="anth-section">
+  <div class="anth-container anth-container--narrow" style="text-align:center;">
+    <blockquote class="anth-quote" style="font-size:24px; line-height:1.55;">
+      Skypad is the only tool I've actually stayed in. Every other note app tried to sell me AI. This one tries to get out of the way.
+    </blockquote>
+    <p class="anth-quote-cite" style="margin-top:var(--space-4);">
+      <span aria-hidden="true" style="display:inline-block; width:24px; height:24px; border-radius:50%; background:var(--anth-orange);"></span>
+      <span>Anya Mehra — independent writer · 18 months on Pro</span>
+    </p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge">FAQ</span>
+    <h2 style="margin-top:var(--space-3);">Questions worth asking.</h2>
+
+    <div style="margin-top:var(--space-6);">
+      <div class="faq-item">
+        <p class="faq-q">Do I lose my notes if I cancel Pro?</p>
+        <p class="faq-a">
+          No. Every note you ever wrote is a plain Markdown file on your own machine — that's the <em>local-first</em> in local-first. If you cancel, sync stops and version history trims to 7 days, but your notes stay exactly where they were. Export runs the same on Free.
+        </p>
+      </div>
+      <div class="faq-item">
+        <p class="faq-q">What does "end-to-end encrypted" actually mean?</p>
+        <p class="faq-a">
+          Your notes are encrypted on your device with a key derived from your passphrase, before they leave your machine. Skypad servers store ciphertext; we can't read your notes, and we can't recover them if you lose your passphrase. We ship an open-source audit report every 6 months — the latest one is linked from <code>/security</code>.
+        </p>
+      </div>
+      <div class="faq-item">
+        <p class="faq-q">Is there an AI-assist feature?</p>
+        <p class="faq-a">
+          No — and that's a product decision, not a roadmap item. The reason people stay on Skypad is that it's the one place that isn't trying to complete their sentences. If you want AI in your editor, Skypad isn't for you, and we're not upset about it.
+        </p>
+      </div>
+      <div class="faq-item">
+        <p class="faq-q">Can my team try it before committing to 10 seats?</p>
+        <p class="faq-a">
+          Yes. The Team plan has a 30-day pilot for up to 5 seats, no credit card. Email <code>team@skypad.page</code> with your company and we'll set it up within one business day.
+        </p>
+      </div>
+      <div class="faq-item">
+        <p class="faq-q">I'm a student / on a low income. Discount?</p>
+        <p class="faq-a">
+          Pro is $3/month if you send us a photo of your student ID, or any evidence you're on a public-benefit program. No application, no review committee. We don't make the form hard — people who need the discount shouldn't also have to prove it twice.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="anth-section">
+  <div class="anth-container anth-container--narrow" style="text-align:center;">
+    <h2>Start writing today.</h2>
+    <p style="font-size:19px; color:var(--anth-text-secondary); margin:var(--space-4) auto var(--space-6); line-height:1.6; max-width:560px;">
+      Free for one writer. Pro for writers with more than one device. Team for groups who write together.
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="#download">Download Skypad — free</a>
+      <a class="anth-button anth-button--ghost" href="#pro">Try Pro free for 14 days</a>
+    </div>
+    <p style="margin-top:var(--space-5); color:var(--anth-text-secondary); font-family:var(--font-heading); font-size:13.5px;">
+      No credit card for Free · Cancel Pro any time · Full refund within 30 days
+    </p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="anth-footer">
+  <div class="anth-footer-grid">
+    <div class="anth-footer-group">
+      <h5>Product</h5>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#download">Download</a>
+      <a href="#changelog">Changelog</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5>For teams</h5>
+      <a href="#teams">Team plan</a>
+      <a href="#enterprise">Enterprise</a>
+      <a href="#security">Security</a>
+      <a href="#slas">SLAs</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5>Writers</h5>
+      <a href="#guide">Writing guide</a>
+      <a href="#templates">Templates</a>
+      <a href="#showcase">Showcase</a>
+      <a href="#community">Community</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5>Company</h5>
+      <a href="#about">About</a>
+      <a href="#press">Press</a>
+      <a href="#contact">Contact</a>
+      <a href="#status">System status</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5>Legal</h5>
+      <a href="#privacy">Privacy</a>
+      <a href="#terms">Terms</a>
+      <a href="#dpa">DPA</a>
+      <a href="#audit">Security audit</a>
+    </div>
+  </div>
+  <div class="anth-footer-legal">
+    <span>Copyright © 2026 Skypad Inc.</span>
+    <span>Made in Berlin · Toronto · Kyoto</span>
+    <div class="anth-social">
+      <a aria-label="Twitter" href="#tw">Twitter</a>
+      <a aria-label="Mastodon" href="#mast">Mastodon</a>
+      <a aria-label="GitHub" href="#gh">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
