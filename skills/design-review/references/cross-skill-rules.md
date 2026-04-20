@@ -83,6 +83,38 @@
 
 **历史**:2026-04-20 INSTALL 的 "三种方式 abc" 就是等宽 3-col 横排太宽,用户指出"一长排太宽,看着很奇怪"。scaffold 原本没 hollow-card check,现在加了。同时规则里写清"层级式 > 等权式"。
 
+## J. Italic 是强调,不是默认(写稿前自检)
+
+当 display 字体支持 italic(Fraunces / Instrument Serif / Lora italic),italic 必须作为**强调**出现,不是每个 h1/h2/h3 的默认样式。
+
+**允许 italic 的场景**(earned):
+- Pull-quote(`blockquote` / `.ember-quote` / dark-band quote)
+- Tagline / 副标(已有更大的名字在上面,italic 做柔化陪衬,如 `.tier-card__tagline`)
+- 一个 heading 里的**单个强调词**(比如 `<em>by hand</em>` / `<em>to think</em>`)
+- 品牌 quote mark / 单独装饰 run
+
+**禁止** blanket italic:
+- 整页每个 h1 / h2 / h3 都是 italic
+- 每张卡片标题 + 每个定价档名 + 每条 FAQ 问题同时都是 italic
+- 长段落正文(CJK 没有真 italic;英文长段落可读性差)
+
+**为什么**:真正的 editorial 设计(Kinfolk / Aesop / 文学期刊)一次只让一个东西是 italic —— 一条 pull-quote,或者一个 tagline,或者一个词。满屏 italic 就不是排版,是视觉噪音。相比 apple / anthropic landing(标题都是 roman,italic 只在 pull-quote)的精致度,italic-everywhere 看起来是在用样式代替层级。
+
+**正确写法**:
+- 所有 heading 默认用字体的**正体**(roman upright)。
+  - Fraunces 400 / 500 / 600 roman 做 h1-h3。
+  - Instrument Serif 400 roman(它的正体本身就够优雅)。
+  - Lora italic **只** 给 pull-quote,不给 h1。
+- Italic 靠上面四条之一挣来。
+- 如果去掉 italic 后标题感觉"太平",说明层级在靠 italic 当拐杖 —— 改 size / spacing / contrast,不是加回 italic。
+
+**历史**:2026-04-21 写 ember + sage landing 时,我把 Fraunces / Instrument Serif 的 italic 铺在每个 h1/h2/h3/feat-title/use-tile h3 上,用户 push back:"另外两个风格的字体为什么很多斜体,你不觉得不好看吗?相比apple和anthropic的字体以及布局差很多"。修法:全部 heading 改 roman,italic 只留在:
+- `.pull-quote-dark blockquote`
+- 一个 hero 里的 `<em>` accent word
+- tier tagline(ember pricing)
+
+现在锁进规则,也让 pricing/docs-home/后续 canonical 都守。
+
 ## H. Chinese font stack(每 skill fonts.css 强制)
 
 每个 design skill 的 `assets/fonts.css` 必须包含中文字体导入,配对规则如下:

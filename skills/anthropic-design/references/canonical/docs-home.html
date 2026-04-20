@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>anthropic-design — documentation</title>
+<meta name="description" content="anthropic-design skill documentation home. Render HTML in the anthropic.com voice — editorial serif + warm cream + orange accent. Canonical docs-home page for the sky-skills harness.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/anthropic.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .ref-card__desc {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .ref-card__name,
+  html[data-lang="zh"] .anth-badge {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+
+  /* Ref grid — reference files this skill ships */
+  .ref-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .ref-card {
+    background: #ffffff; border: 1px solid var(--anth-light-gray); border-radius: var(--radius-md);
+    padding: var(--space-6); display: flex; flex-direction: column;
+  }
+  .ref-card__num {
+    font-family: var(--font-heading); font-size: 11.5px; letter-spacing: 0.14em;
+    color: var(--anth-orange); font-weight: 700; text-transform: uppercase;
+  }
+  .ref-card__name {
+    font-family: var(--font-heading); font-size: 20px; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--anth-text); margin: var(--space-2) 0 var(--space-2);
+  }
+  .ref-card__desc {
+    font-family: var(--font-body); font-size: 15px; line-height: 1.6; color: var(--anth-text);
+    margin: 0 0 var(--space-4); flex: 1;
+  }
+
+  /* Canonical preview cards */
+  .canon-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .canon-card {
+    background: #ffffff; border: 1px solid var(--anth-light-gray); border-radius: var(--radius-md);
+    padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3);
+    text-decoration: none; color: var(--anth-text); transition: border-color 0.2s ease;
+  }
+  .canon-card:hover { border-color: var(--anth-orange); }
+  .canon-card__preview {
+    height: 160px; border-radius: 6px; background: linear-gradient(135deg, #faf9f5 0%, #f0ede3 100%);
+    border: 1px solid var(--anth-light-gray); overflow: hidden;
+  }
+  .canon-card__title {
+    font-family: var(--font-heading); font-size: 17px; font-weight: 600; letter-spacing: -0.005em;
+    color: var(--anth-text); margin: 0;
+  }
+  .canon-card__meta {
+    font-family: var(--font-body); font-size: 13.5px; color: var(--anth-text-secondary); margin: 0;
+  }
+
+  /* Quick-start code card */
+  .quickstart {
+    background: #faf9f5; border: 1px solid var(--anth-light-gray); border-radius: var(--radius-md);
+    padding: var(--space-7); display: grid; grid-template-columns: 1fr 1.2fr; gap: var(--space-7); align-items: center;
+  }
+  .quickstart pre {
+    background: #141413; color: #faf9f5; padding: var(--space-5); border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6;
+    overflow-x: auto; margin: 0;
+  }
+  .quickstart pre .cmd { color: #d97757; }
+  .quickstart pre .str { color: #a9c890; }
+  .quickstart pre .com { color: #888; font-style: italic; }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="../../../../index.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">sky-skills</a>
+  <div>
+    <a href="landing.html"><span class="lang-en">Demo landing</span><span class="lang-zh">示例落地页</span></a>
+    <a href="pricing.html"><span class="lang-en">Demo pricing</span><span class="lang-zh">示例定价页</span></a>
+    <a href="../../../../docs/HARNESS-ROADMAP.html"><span class="lang-en">Roadmap</span><span class="lang-zh">路线图</span></a>
+    <a href="../../../../docs/INSTALL.html"><span class="lang-en">Install</span><span class="lang-zh">安装</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="anth-button" href="https://github.com/TbusOS/sky-skills" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="anth-hero">
+  <div class="anth-container" style="max-width:880px;">
+    <span class="anth-badge"><span class="lang-en">Skill · anthropic-design</span><span class="lang-zh">Skill · anthropic-design</span></span>
+    <h1 style="margin-top:var(--space-4); font-size:64px; line-height:1.08;">
+      <span class="lang-en">Write once.<br>Render like anthropic.com.</span>
+      <span class="lang-zh">写一次。<br>渲染如 anthropic.com。</span>
+    </h1>
+    <p style="font-size:19px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.6; font-family:var(--font-body); max-width:680px;">
+      <span class="lang-en">This skill makes Claude output HTML in anthropic's editorial voice — warm cream background, Poppins + Lora pairing, orange accent, italic pull-quotes. Pair it with a trigger word, or reference it by name, and the generator will write in this style.</span>
+      <span class="lang-zh">这个 skill 让 Claude 用 anthropic 的编辑风格输出 HTML —— 暖米底、Poppins + Lora 配对、橙色点缀、斜体引语。在 prompt 里用触发词或直接点名,生成器就会按这个风格写。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="landing.html"><span class="lang-en">See a landing page</span><span class="lang-zh">看一张 landing 页</span></a>
+      <a class="anth-button anth-button--ghost" href="pricing.html"><span class="lang-en">See a pricing page</span><span class="lang-zh">看一张定价页</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- What's inside this skill — reference files -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:680px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">References</span><span class="lang-zh">参考资料</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">What the skill ships.</span>
+        <span class="lang-zh">这个 skill 里有什么。</span>
+      </h2>
+      <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+        <span class="lang-en">Reading order: tokens → typography → layouts → components. Each one earns its place in the final output; they're not decorative.</span>
+        <span class="lang-zh">阅读顺序:tokens → 字体 → 布局 → 组件。每一份都在最终产出里起作用,不是装饰。</span>
+      </p>
+    </div>
+
+    <div class="ref-grid">
+      <article class="ref-card">
+        <span class="ref-card__num">01</span>
+        <h3 class="ref-card__name">design-tokens.md</h3>
+        <p class="ref-card__desc">
+          <span class="lang-en">CSS variables for colour, spacing, radius, type scale. Every component defers to tokens — no hard-coded hex.</span>
+          <span class="lang-zh">颜色、间距、圆角、字号的 CSS 变量。组件全部走 tokens —— 禁止硬编码 hex。</span>
+        </p>
+        <a class="anth-link" href="../design-tokens.md"><span class="lang-en">Read file</span><span class="lang-zh">查看文件</span></a>
+      </article>
+      <article class="ref-card">
+        <span class="ref-card__num">02</span>
+        <h3 class="ref-card__name">typography.md</h3>
+        <p class="ref-card__desc">
+          <span class="lang-en">Poppins (heading / display) + Lora (italic body quotes) + JetBrains Mono (code). Sizes, weights, leading, and when to use each.</span>
+          <span class="lang-zh">Poppins(标题 / 展示)+ Lora(斜体引文)+ JetBrains Mono(代码)。字号、字重、行高,以及各自的使用场景。</span>
+        </p>
+        <a class="anth-link" href="../typography.md"><span class="lang-en">Read file</span><span class="lang-zh">查看文件</span></a>
+      </article>
+      <article class="ref-card">
+        <span class="ref-card__num">03</span>
+        <h3 class="ref-card__name">layout-patterns.md</h3>
+        <p class="ref-card__desc">
+          <span class="lang-en">Six layout skeletons: marketing hero, pricing grid, blog long-form, doc page, feature-split, full-bleed showcase. Plus the container selection rule.</span>
+          <span class="lang-zh">六种布局骨架:营销 hero、定价网格、博客长文、文档页、双栏特性、全宽展示。附 container 选择规则。</span>
+        </p>
+        <a class="anth-link" href="../layout-patterns.md"><span class="lang-en">Read file</span><span class="lang-zh">查看文件</span></a>
+      </article>
+      <article class="ref-card">
+        <span class="ref-card__num">04</span>
+        <h3 class="ref-card__name">components.md</h3>
+        <p class="ref-card__desc">
+          <span class="lang-en">28 reusable blocks: nav, buttons, badges, cards, quotes, banners, footers, SVG illustrations. With <code>class=</code> and minimal HTML per block.</span>
+          <span class="lang-zh">28 个可复用组件:导航、按钮、徽章、卡片、引文、横幅、页脚、SVG 插画。每个组件附 class 与最小 HTML。</span>
+        </p>
+        <a class="anth-link" href="../components.md"><span class="lang-en">Read file</span><span class="lang-zh">查看文件</span></a>
+      </article>
+      <article class="ref-card">
+        <span class="ref-card__num">05</span>
+        <h3 class="ref-card__name">motion.md</h3>
+        <p class="ref-card__desc">
+          <span class="lang-en">Easing curves and durations. We transition specific properties only (opacity, transform, color) — never <code>all</code>.</span>
+          <span class="lang-zh">缓动曲线与时长。只对特定属性做 transition(opacity / transform / color)—— 绝不用 <code>all</code>。</span>
+        </p>
+        <a class="anth-link" href="../motion.md"><span class="lang-en">Read file</span><span class="lang-zh">查看文件</span></a>
+      </article>
+      <article class="ref-card">
+        <span class="ref-card__num">06</span>
+        <h3 class="ref-card__name">dos-and-donts.md</h3>
+        <p class="ref-card__desc">
+          <span class="lang-en">Bad examples with fixes, plus the 7-item pre-release checklist (MUST pass). The last stop before shipping.</span>
+          <span class="lang-zh">反例+修法,以及发布前 7 项 checklist(MUST 项)。出门前的最后一关。</span>
+        </p>
+        <a class="anth-link" href="../dos-and-donts.md"><span class="lang-en">Read file</span><span class="lang-zh">查看文件</span></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Canonical library preview -->
+<section class="anth-section">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:680px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">Canonical library</span><span class="lang-zh">Canonical 库</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">Pages at their best.</span>
+        <span class="lang-zh">每种页面的最佳样本。</span>
+      </h2>
+      <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+        <span class="lang-en">Reference pages the generator reads before writing new ones. Each also has a <code>.md</code> sibling with the 7-ish design decisions behind it.</span>
+        <span class="lang-zh">生成器在写新页之前要读的参考。每张附一个 <code>.md</code>,写清背后的 7 条左右设计决定。</span>
+      </p>
+    </div>
+
+    <div class="canon-row">
+      <a class="canon-card" href="pricing.html">
+        <div class="canon-card__preview">
+          <svg viewBox="0 0 260 160" style="width:100%; height:100%;">
+            <rect x="20" y="20" width="60" height="30" rx="4" fill="#ffffff" stroke="#d9d6cc"/>
+            <rect x="100" y="20" width="60" height="30" rx="4" fill="#ffffff" stroke="#d97757" stroke-width="2"/>
+            <rect x="180" y="20" width="60" height="30" rx="4" fill="#ffffff" stroke="#d9d6cc"/>
+            <text x="50" y="38" text-anchor="middle" font-family="Poppins,sans-serif" font-size="9" font-weight="600" fill="#141413">Free</text>
+            <text x="130" y="38" text-anchor="middle" font-family="Poppins,sans-serif" font-size="9" font-weight="600" fill="#141413">Pro</text>
+            <text x="210" y="38" text-anchor="middle" font-family="Poppins,sans-serif" font-size="9" font-weight="600" fill="#141413">Team</text>
+            <rect x="20" y="60" width="220" height="80" rx="4" fill="#ffffff" stroke="#d9d6cc"/>
+            <line x1="30" y1="76" x2="230" y2="76" stroke="#f0ede3"/>
+            <line x1="30" y1="92" x2="230" y2="92" stroke="#f0ede3"/>
+            <line x1="30" y1="108" x2="230" y2="108" stroke="#f0ede3"/>
+            <line x1="30" y1="124" x2="230" y2="124" stroke="#f0ede3"/>
+          </svg>
+        </div>
+        <p class="canon-card__title">pricing.html</p>
+        <p class="canon-card__meta"><span class="lang-en">3-tier pricing · comparison table · FAQ</span><span class="lang-zh">三档定价 · 对比表 · FAQ</span></p>
+      </a>
+      <a class="canon-card" href="landing.html">
+        <div class="canon-card__preview">
+          <svg viewBox="0 0 260 160" style="width:100%; height:100%;">
+            <rect x="20" y="16" width="220" height="4" rx="1" fill="#141413"/>
+            <rect x="50" y="28" width="160" height="8" rx="2" fill="#141413"/>
+            <rect x="80" y="42" width="100" height="3" rx="1" fill="#6b6a5f"/>
+            <rect x="20" y="58" width="220" height="60" rx="4" fill="#ffffff" stroke="#d9d6cc"/>
+            <rect x="50" y="74" width="40" height="28" rx="2" fill="#faf9f5"/>
+            <rect x="100" y="74" width="120" height="6" rx="1" fill="#141413"/>
+            <rect x="100" y="86" width="100" height="3" rx="1" fill="#6b6a5f"/>
+            <rect x="100" y="94" width="90" height="3" rx="1" fill="#6b6a5f"/>
+            <rect x="90" y="130" width="80" height="12" rx="6" fill="#d97757"/>
+          </svg>
+        </div>
+        <p class="canon-card__title">landing.html</p>
+        <p class="canon-card__meta"><span class="lang-en">Hero · product mock · 3 features · stats · CTA</span><span class="lang-zh">Hero · 产品截图 · 三条原则 · 指标 · CTA</span></p>
+      </a>
+      <article class="canon-card" style="opacity:0.55; cursor:default;">
+        <div class="canon-card__preview" style="display:grid; place-items:center;">
+          <svg width="48" height="48" viewBox="0 0 32 32" fill="none" stroke="#a8a5a0" stroke-width="1.2">
+            <circle cx="16" cy="16" r="13"/>
+            <path d="M12 16h8M16 12v8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="canon-card__title"><span class="lang-en">More coming…</span><span class="lang-zh">更多即将到来…</span></p>
+        <p class="canon-card__meta"><span class="lang-en">blog index · product detail · team · FAQ</span><span class="lang-zh">博客索引 · 产品详情 · 团队 · FAQ</span></p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Quick start -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:680px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">Quick start</span><span class="lang-zh">快速上手</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">Use it in three lines.</span>
+        <span class="lang-zh">三行就能用起来。</span>
+      </h2>
+    </div>
+
+    <div class="quickstart">
+      <div>
+        <h3 style="font-family:var(--font-heading); font-size:22px; font-weight:600; margin:0 0 var(--space-3);">
+          <span class="lang-en">From a Claude chat</span>
+          <span class="lang-zh">在 Claude 对话里</span>
+        </h3>
+        <p style="font-family:var(--font-body); font-size:16px; line-height:1.6; color:var(--anth-text); margin:0 0 var(--space-4);">
+          <span class="lang-en">Prefix your request with an <strong>anthropic 风格</strong> (or any trigger word in SKILL.md). The skill activates automatically. Then run the three-gate design-review before shipping.</span>
+          <span class="lang-zh">在请求前加上 <strong>anthropic 风格</strong>(或 SKILL.md 里任何触发词)。Skill 自动激活。发布前跑三道 design-review 闸。</span>
+        </p>
+        <a class="anth-link" href="../../SKILL.md"><span class="lang-en">Read the trigger list</span><span class="lang-zh">查看触发词列表</span></a>
+      </div>
+      <pre><span class="com"># 1) Ask Claude in the anthropic voice</span>
+&gt; <span class="str">anthropic 风格,写一张 Skypad pricing 页</span>
+
+<span class="com"># 2) Save to a file, then verify</span>
+$ <span class="cmd">python3</span> skills/design-review/scripts/verify.py \
+    my-page.html
+
+<span class="com"># 3) Render + audit + screenshot</span>
+$ <span class="cmd">bin/design-review</span> --skill=anthropic \
+    my-page.html</pre>
+    </div>
+  </div>
+</section>
+
+<!-- How this fits the harness -->
+<section class="anth-section">
+  <div class="anth-container" style="max-width:760px; text-align:center;">
+    <span class="anth-badge"><span class="lang-en">In the harness</span><span class="lang-zh">在 harness 里</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">One of eight generators.<br>Evaluated by one discriminator.</span>
+      <span class="lang-zh">八个生成器之一。<br>由一个判别器审核。</span>
+    </h2>
+    <p style="font-family:var(--font-body); font-size:17px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.65; max-width:620px;">
+      <span class="lang-en">anthropic-design generates. <code>design-review</code> judges. The split is intentional — GAN-style. No generator evaluates its own output.</span>
+      <span class="lang-zh">anthropic-design 负责生成。<code>design-review</code> 负责判别。这个分离是有意的 —— GAN 式。没有生成器评判自己的输出。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="../../../../docs/HARNESS-ROADMAP.html"><span class="lang-en">Read the roadmap</span><span class="lang-zh">阅读路线图</span></a>
+      <a class="anth-button anth-button--ghost" href="../../../../docs/INSTALL.html"><span class="lang-en">Install the harness</span><span class="lang-zh">安装 harness</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="anth-footer">
+  <div class="anth-footer-grid">
+    <div class="anth-footer-group"><h5><span class="lang-en">This skill</span><span class="lang-zh">这个 Skill</span></h5><a href="../../SKILL.md">SKILL.md</a><a href="landing.html"><span class="lang-en">Landing demo</span><span class="lang-zh">Landing 示例</span></a><a href="pricing.html"><span class="lang-en">Pricing demo</span><span class="lang-zh">Pricing 示例</span></a><a href="README.md"><span class="lang-en">Canonical README</span><span class="lang-zh">Canonical README</span></a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">Other skills</span><span class="lang-zh">其他 Skills</span></h5><a href="../../../apple-design/references/canonical/docs-home.html">apple-design</a><a href="../../../ember-design/references/canonical/docs-home.html">ember-design</a><a href="../../../sage-design/references/canonical/docs-home.html">sage-design</a><a href="../../../design-review/">design-review</a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">Harness</span><span class="lang-zh">Harness</span></h5><a href="../../../../docs/HARNESS-ROADMAP.html"><span class="lang-en">Roadmap</span><span class="lang-zh">路线图</span></a><a href="../../../../docs/INSTALL.html"><span class="lang-en">Install</span><span class="lang-zh">安装</span></a><a href="../../../../index.html"><span class="lang-en">Home</span><span class="lang-zh">主页</span></a><a href="https://github.com/TbusOS/sky-skills/issues" target="_blank" rel="noopener">Issues</a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">Discussion</span><span class="lang-zh">讨论</span></h5><a href="https://github.com/TbusOS/sky-skills/discussions" target="_blank" rel="noopener">GitHub Discussions</a><a href="https://github.com/TbusOS/sky-skills" target="_blank" rel="noopener">Repository</a><a href="https://github.com/TbusOS/sky-skills/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a><a href="https://github.com/TbusOS/sky-skills/blob/main/LICENSE" target="_blank" rel="noopener">License</a></div>
+  </div>
+  <div class="anth-footer-legal">
+    <span>sky-skills · <span class="lang-en">open source, MIT licensed</span><span class="lang-zh">开源,MIT 许可证</span></span>
+    <span>anthropic-design · v1 · 2026-04-21</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -23,7 +23,7 @@
     letter-spacing: 0.04em;
   }
   .lang-toggle:hover { background: rgba(196, 148, 100, 0.12); }
-  /* Chinese (§H): Fraunces italic → Noto Serif SC; Inter → Noto Sans SC. No CJK italic. */
+  /* Chinese (§H): Fraunces → Noto Serif SC; Inter → Noto Sans SC. */
   html[data-lang="zh"] body,
   html[data-lang="zh"] p,
   html[data-lang="zh"] li,
@@ -31,61 +31,84 @@
   html[data-lang="zh"] .feat-body,
   html[data-lang="zh"] .use-tile p {
     font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
-    font-style: normal;
   }
   html[data-lang="zh"] h1,
   html[data-lang="zh"] h2,
   html[data-lang="zh"] h3,
   html[data-lang="zh"] .feat-title,
-  html[data-lang="zh"] .ember-quote,
   html[data-lang="zh"] .giant-num,
-  html[data-lang="zh"] .tier-preview-name {
+  html[data-lang="zh"] .hero-headline em,
+  html[data-lang="zh"] .section-eyebrow + h2 em {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .ember-quote {
     font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
     font-style: normal !important;
   }
   html[data-lang="zh"] .ember-badge,
-  html[data-lang="zh"] .kicker {
+  html[data-lang="zh"] .eyebrow {
     font-family: "Noto Sans SC", "PingFang SC", sans-serif;
     text-transform: none;
     letter-spacing: 0.04em;
   }
 
-  /* Gold hairline (ember signature) */
+  /* Hero headline — Fraunces roman, with one italic "accent" word */
+  .hero-headline {
+    font-family: 'Fraunces', serif; font-weight: 400; font-style: normal;
+    font-size: 96px; line-height: 1.02; letter-spacing: -0.02em;
+    color: var(--ember-text); margin: 0 auto; max-width: 920px;
+  }
+  .hero-headline em {
+    font-style: italic; font-weight: 400;
+    color: #312520;
+  }
+  /* Section h2 — also roman, italic reserved for one accent word */
+  .section-title {
+    font-family: 'Fraunces', serif; font-weight: 400; font-style: normal;
+    font-size: 56px; line-height: 1.1; letter-spacing: -0.02em;
+    color: var(--ember-text); margin: 0;
+  }
+  .section-title em { font-style: italic; font-weight: 400; }
+  .section-title--md { font-size: 48px; }
+
+  /* Eyebrow — small mono marker above titles */
+  .eyebrow {
+    display: inline-block; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #8a7564; margin-bottom: var(--space-4);
+  }
+
+  /* Gold hairline */
   .accent-strip {
     height: 1px; width: 48px; background: #c49464; display: block;
   }
   .accent-strip--center { margin: 0 auto var(--space-5); }
 
-  /* Kicker (uppercase small marker above titles) */
-  .kicker {
-    font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
-    letter-spacing: 0.18em; text-transform: uppercase;
-    color: #8a7564;
-  }
-
-  /* Feature blocks */
+  /* Feature row */
   .feat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-top: var(--space-8); }
   .feat-card {
-    background: #ffffff; border: 1px solid rgba(73, 45, 34, 0.13);
+    background: #ffffff; border: 1px solid rgba(73, 45, 34, 0.12);
     border-radius: var(--radius-md); padding: var(--space-7);
     display: flex; flex-direction: column;
   }
   .feat-icon {
-    width: 52px; height: 52px; display: grid; place-items: center;
+    width: 56px; height: 56px; display: grid; place-items: center;
     background: rgba(196, 148, 100, 0.14); border-radius: 50%;
     margin-bottom: var(--space-5);
   }
+  /* Feature titles — roman, bolder to establish hierarchy without italic crutch */
   .feat-title {
-    font-family: 'Fraunces', serif; font-style: italic; font-weight: 400;
-    font-size: 28px; color: var(--ember-text); margin: 0 0 var(--space-3);
-    line-height: 1.2; letter-spacing: -0.01em;
+    font-family: 'Fraunces', serif; font-weight: 500; font-style: normal;
+    font-size: 26px; color: var(--ember-text); margin: 0 0 var(--space-3);
+    line-height: 1.22; letter-spacing: -0.01em;
   }
   .feat-body {
-    font-family: 'Inter', sans-serif; font-size: 15.5px; line-height: 1.6;
+    font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.65;
     color: var(--ember-text); margin: 0 0 var(--space-5); flex: 1;
   }
 
-  /* Giant stats — ember does them with italic Fraunces numerals */
+  /* Giant stats — Fraunces roman, not italic */
   .giant-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); text-align: center; }
   .giant-stats > div { padding: var(--space-5) var(--space-3); position: relative; }
   .giant-stats > div:not(:last-child)::after {
@@ -93,36 +116,53 @@
     width: 1px; background: rgba(73, 45, 34, 0.12);
   }
   .giant-num {
-    display: block; font-family: 'Fraunces', serif; font-style: italic; font-weight: 400;
-    font-size: 72px; color: var(--ember-text); letter-spacing: -0.025em; line-height: 1;
+    display: block; font-family: 'Fraunces', serif; font-weight: 400; font-style: normal;
+    font-size: 76px; color: var(--ember-text); letter-spacing: -0.025em; line-height: 1;
   }
   .giant-num-label {
-    display: block; margin-top: var(--space-3);
+    display: block; margin-top: var(--space-4);
     font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--ember-text);
-    line-height: 1.45;
+    line-height: 1.45; max-width: 180px; margin-left: auto; margin-right: auto;
   }
 
-  /* Product card (textured cream) */
+  /* Product frame */
   .product-frame {
     background: linear-gradient(135deg, #fff2df 0%, #fbeedd 100%);
     border-radius: var(--radius-lg); padding: var(--space-7);
     box-shadow: 0 20px 50px -20px rgba(73, 45, 34, 0.2);
   }
 
-  /* 2x2 tiles */
-  .use-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); }
+  /* 2x2 use tiles */
+  .use-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-6); }
   .use-tile {
-    background: #ffffff; border: 1px solid rgba(73, 45, 34, 0.13);
+    background: #ffffff; border: 1px solid rgba(73, 45, 34, 0.12);
     border-radius: var(--radius-md); padding: var(--space-6);
     display: grid; grid-template-columns: 120px 1fr; gap: var(--space-5); align-items: center;
   }
+  /* Use tile titles — roman, medium weight */
   .use-tile h3 {
-    font-family: 'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-family: 'Fraunces', serif; font-weight: 500; font-style: normal;
     font-size: 22px; color: var(--ember-text); margin: 0 0 var(--space-2); line-height: 1.25;
+    letter-spacing: -0.005em;
   }
   .use-tile p {
-    font-family: 'Inter', sans-serif; font-size: 14.5px; line-height: 1.55;
+    font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.6;
     color: var(--ember-text); margin: 0;
+  }
+
+  /* Pull-quote on dark — here italic is earned */
+  .pull-quote-dark {
+    background: #312520; color: #ffffff; padding: var(--space-10) 0;
+  }
+  .pull-quote-dark blockquote {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 400;
+    font-size: 40px; line-height: 1.35; color: #ffffff;
+    margin: 0; max-width: 920px;
+  }
+  .pull-quote-dark cite {
+    display: block; margin-top: var(--space-6);
+    font-family: 'Inter', sans-serif; font-style: normal; font-size: 15px;
+    color: #d9b892; letter-spacing: 0.04em;
   }
 </style>
 </head>
@@ -145,35 +185,34 @@
 </div></nav>
 
 <!-- Hero -->
-<section class="ember-hero">
-  <div class="ember-container" style="max-width:900px; text-align:center;">
+<section class="ember-hero" style="padding-top:var(--space-10); padding-bottom:var(--space-9);">
+  <div class="ember-container" style="max-width:960px; text-align:center;">
     <span class="accent-strip accent-strip--center"></span>
-    <span class="ember-badge" style="display:inline-block; margin-bottom:var(--space-4);"><span class="lang-en">Handcraft · Since 2019</span><span class="lang-zh">手作 · 始于 2019</span></span>
-    <h1 style="font-family:'Fraunces', serif; font-style:italic; font-weight:400; font-size:84px; line-height:1.02; letter-spacing:-0.015em; margin:0 auto var(--space-5); max-width:860px;">
-      <span class="lang-en">A notebook,<br>bound by hand.</span>
-      <span class="lang-zh">一本<br>手工装订的记事本。</span>
+    <span class="ember-badge" style="display:inline-block; margin-bottom:var(--space-5);"><span class="lang-en">Handcraft · Since 2019</span><span class="lang-zh">手作 · 始于 2019</span></span>
+    <h1 class="hero-headline">
+      <span class="lang-en">A notebook,<br>bound <em>by hand.</em></span>
+      <span class="lang-zh">一本<em>手工</em>装订<br>的记事本。</span>
     </h1>
-    <p class="ember-lead" style="margin:0 auto var(--space-7); max-width:680px; font-size:21px;">
+    <p class="ember-lead" style="margin:var(--space-6) auto 0; max-width:680px; font-size:21px; line-height:1.55;">
       <span class="lang-en">Plain Markdown on your own machine. End-to-end encrypted when you sync. No AI in your editor. Made by three people, in rooms with plants and late afternoon light.</span>
       <span class="lang-zh">普通 Markdown,你自己的机器。同步时端到端加密。编辑器里没有 AI。三个人做的,在有植物和傍晚阳光的房间里。</span>
     </p>
-    <div style="display:flex; gap:var(--space-5); justify-content:center; align-items:center; flex-wrap:wrap;">
+    <div style="display:flex; gap:var(--space-5); justify-content:center; align-items:center; flex-wrap:wrap; margin-top:var(--space-7);">
       <a class="ember-button" href="#download"><span class="lang-en">Download — free</span><span class="lang-zh">免费下载</span></a>
       <a class="ember-link" href="#product"><span class="lang-en">Read the story</span><span class="lang-zh">阅读故事</span></a>
     </div>
-    <p style="margin-top:var(--space-6); font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:#8a7564; letter-spacing:0.12em; text-transform:uppercase;">
-      <span class="lang-en">macOS · Windows · Linux · iOS · Android · no account for Free</span>
-      <span class="lang-zh" style="font-family:'Noto Sans SC', 'PingFang SC', sans-serif; text-transform:none; letter-spacing:0.04em;">macOS · Windows · Linux · iOS · Android · 免费版无需注册</span>
+    <p style="margin-top:var(--space-6); font-family:'Inter', sans-serif; font-size:13px; color:#8a7564; letter-spacing:0.02em;">
+      <span class="lang-en">macOS · Windows · Linux · iOS · Android &nbsp;·&nbsp; no account for Free</span>
+      <span class="lang-zh">macOS · Windows · Linux · iOS · Android · 免费版无需注册</span>
     </p>
   </div>
 </section>
 
-<!-- Product screen frame -->
-<section class="ember-section" style="padding-top:0;" id="product">
+<!-- Product screen -->
+<section class="ember-section" style="padding-top:0; padding-bottom:var(--space-9);" id="product">
   <div class="ember-container ember-container--wide">
     <div class="product-frame">
       <svg role="img" aria-label="Skypad editor — a writing window with a file tree and Markdown note" viewBox="0 0 1200 540" style="display:block; width:100%; height:auto; border-radius:10px; background:#ffffff; box-shadow:0 12px 30px -10px rgba(73, 45, 34, 0.18);">
-        <!-- Window chrome -->
         <rect width="1200" height="40" fill="#fbeedd"/>
         <g transform="translate(18 20)">
           <circle cx="0" cy="0" r="5.5" fill="#c49464"/>
@@ -183,7 +222,6 @@
         <text x="600" y="25" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12" fill="#77654d">on-morning-walks.md · Skypad</text>
         <line x1="0" y1="40" x2="1200" y2="40" stroke="rgba(73, 45, 34, 0.1)"/>
 
-        <!-- Sidebar -->
         <rect x="0" y="40" width="210" height="500" fill="#fdf8ee"/>
         <line x1="210" y1="40" x2="210" y2="540" stroke="rgba(73, 45, 34, 0.08)"/>
         <g font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#8a7564" letter-spacing="0.12em">
@@ -208,23 +246,20 @@
           <text x="22" y="388">· garden/bees</text>
         </g>
 
-        <!-- Main content -->
         <g transform="translate(260 80)">
-          <text x="0" y="0" font-family="'Fraunces', serif" font-style="italic" font-size="34" font-weight="400" fill="#312520" letter-spacing="-0.015em">On morning walks</text>
+          <text x="0" y="0" font-family="'Fraunces', serif" font-size="36" font-weight="500" fill="#312520" letter-spacing="-0.015em">On morning walks</text>
           <text x="0" y="28" font-family="'IBM Plex Mono', monospace" font-size="11" letter-spacing="0.12em" fill="#8a7564">04 · 13 · 2026</text>
 
-          <g font-family="'Fraunces', serif" font-style="italic" font-size="17" fill="#312520">
+          <g font-family="Georgia, serif" font-size="17" fill="#312520">
             <text x="0" y="78">I set out before the grocer's are open,</text>
             <text x="0" y="104">before the children go to school.</text>
             <text x="0" y="130">The city — quiet. The trees —</text>
             <text x="0" y="156">more real than they look at noon.</text>
           </g>
 
-          <g transform="translate(0 180)">
-            <rect width="18" height="1" fill="#c49464"/>
-          </g>
+          <rect x="0" y="180" width="18" height="1" fill="#c49464"/>
 
-          <g font-family="'Fraunces', serif" font-style="italic" font-size="17" fill="#312520">
+          <g font-family="Georgia, serif" font-size="17" fill="#312520">
             <text x="0" y="210">I don't walk for exercise. I walk</text>
             <text x="0" y="236">to let the day settle before it asks</text>
             <text x="0" y="262">anything of me. That small hour —</text>
@@ -236,7 +271,6 @@
           </rect>
         </g>
 
-        <!-- Status -->
         <line x1="210" y1="504" x2="1200" y2="504" stroke="rgba(73, 45, 34, 0.1)"/>
         <g font-family="'IBM Plex Mono', monospace" font-size="10" fill="#8a7564" letter-spacing="0.1em">
           <text x="228" y="526">SAVED · JUST NOW</text>
@@ -249,14 +283,14 @@
 </section>
 
 <!-- Giant stats -->
-<section class="ember-section" style="background:#fbeedd;">
+<section class="ember-section" style="background:#fbeedd; padding-block:var(--space-10);">
   <div class="ember-container ember-container--wide">
-    <div style="text-align:center; max-width:680px; margin:0 auto var(--space-8);">
+    <div style="text-align:center; max-width:680px; margin:0 auto var(--space-9);">
       <span class="accent-strip accent-strip--center"></span>
-      <span class="kicker"><span class="lang-en">By the numbers</span><span class="lang-zh">一些数字</span></span>
-      <h2 style="font-family:'Fraunces', serif; font-style:italic; font-weight:400; font-size:52px; letter-spacing:-0.015em; line-height:1.12; margin:var(--space-3) 0 0;">
-        <span class="lang-en">Small. On purpose.</span>
-        <span class="lang-zh">小而精。有意为之。</span>
+      <span class="eyebrow"><span class="lang-en">By the numbers</span><span class="lang-zh">一些数字</span></span>
+      <h2 class="section-title section-title--md">
+        <span class="lang-en">Small. On <em>purpose.</em></span>
+        <span class="lang-zh">小而精。<em>有意</em>为之。</span>
       </h2>
     </div>
 
@@ -282,16 +316,16 @@
 </section>
 
 <!-- Three values -->
-<section class="ember-section" id="features">
+<section class="ember-section" style="padding-block:var(--space-10);" id="features">
   <div class="ember-container ember-container--wide">
     <div style="max-width:720px; margin:0 auto; text-align:center;">
       <span class="accent-strip accent-strip--center"></span>
-      <span class="kicker"><span class="lang-en">What we chose</span><span class="lang-zh">我们的选择</span></span>
-      <h2 style="font-family:'Fraunces', serif; font-style:italic; font-weight:400; font-size:52px; letter-spacing:-0.015em; line-height:1.12; margin:var(--space-3) 0 var(--space-5);">
-        <span class="lang-en">Three decisions,<br>not compromising.</span>
-        <span class="lang-zh">三个不让步<br>的决定。</span>
+      <span class="eyebrow"><span class="lang-en">What we chose</span><span class="lang-zh">我们的选择</span></span>
+      <h2 class="section-title">
+        <span class="lang-en">Three decisions,<br>not <em>compromising.</em></span>
+        <span class="lang-zh">三个<em>不让步</em><br>的决定。</span>
       </h2>
-      <p class="ember-lead" style="font-size:18px;">
+      <p class="ember-lead" style="font-size:19px; margin-top:var(--space-5); max-width:620px; margin-left:auto; margin-right:auto;">
         <span class="lang-en">The features most note apps advertise are exactly the ones we declined to build. Here's what we chose instead.</span>
         <span class="lang-zh">其他笔记软件拿来宣传的功能,恰恰是我们拒绝做的。下面是我们选择做的。</span>
       </p>
@@ -300,7 +334,7 @@
     <div class="feat-row">
       <article class="feat-card">
         <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#c49464" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#c49464" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 4h12l4 4v20H8z"/>
             <path d="M20 4v4h4"/>
             <path d="M12 14h8M12 18h8M12 22h6"/>
@@ -316,7 +350,7 @@
 
       <article class="feat-card">
         <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#c49464" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#c49464" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="16" cy="16" r="12"/>
             <line x1="8" y1="8" x2="24" y2="24"/>
           </svg>
@@ -331,7 +365,7 @@
 
       <article class="feat-card">
         <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#c49464" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#c49464" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <rect x="6" y="8" width="20" height="16" rx="2"/>
             <path d="M10 12v-2a6 6 0 0112 0v2"/>
           </svg>
@@ -347,28 +381,28 @@
   </div>
 </section>
 
-<!-- Pull quote on dark chocolate -->
-<section class="ember-section--dark">
-  <div class="ember-container" style="text-align:center; max-width:860px;">
-    <blockquote class="ember-quote" style="font-size:32px; line-height:1.4; color:#ffffff;">
+<!-- Pull quote on dark chocolate — this is where italic earns its place -->
+<section class="pull-quote-dark">
+  <div class="ember-container" style="text-align:center; max-width:940px;">
+    <blockquote class="ember-quote">
       <span class="lang-en">Skypad is the only tool I've actually stayed in. Every other note app tried to sell me AI. This one tries to get out of the way.</span>
       <span class="lang-zh">Skypad 是我唯一真正留下来的工具。其他笔记软件都在给我推销 AI。只有这个,在努力消失于无形。</span>
     </blockquote>
-    <p class="ember-quote-cite" style="margin-top:var(--space-6); color:#d9b892;">
+    <cite>
       <span aria-hidden="true" style="display:inline-block; width:20px; height:1.5px; background:#c49464; vertical-align:middle; margin-right:8px;"></span>
       <span class="lang-en">Anya Mehra — independent writer · 18 months on Pro</span>
       <span class="lang-zh">Anya Mehra — 独立作者 · Pro 用户 18 个月</span>
-    </p>
+    </cite>
   </div>
 </section>
 
-<!-- Ways to use — 2x2 -->
-<section class="ember-section">
+<!-- 2x2 uses -->
+<section class="ember-section" style="padding-block:var(--space-10);">
   <div class="ember-container ember-container--wide">
-    <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
+    <div style="max-width:720px; margin:0 auto var(--space-9); text-align:center;">
       <span class="accent-strip accent-strip--center"></span>
-      <span class="kicker"><span class="lang-en">Uses</span><span class="lang-zh">用法</span></span>
-      <h2 style="font-family:'Fraunces', serif; font-style:italic; font-weight:400; font-size:48px; letter-spacing:-0.015em; line-height:1.12; margin:var(--space-3) 0 0;">
+      <span class="eyebrow"><span class="lang-en">Uses</span><span class="lang-zh">用法</span></span>
+      <h2 class="section-title section-title--md">
         <span class="lang-en">Made for the way you think.</span>
         <span class="lang-zh">为你思考的方式而做。</span>
       </h2>
@@ -454,15 +488,15 @@
 </section>
 
 <!-- Pricing preview -->
-<section class="ember-section" style="background:#fbeedd;">
+<section class="ember-section" style="background:#fbeedd; padding-block:var(--space-10);">
   <div class="ember-container" style="max-width:780px; text-align:center;">
     <span class="accent-strip accent-strip--center"></span>
-    <span class="kicker"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></span>
-    <h2 style="font-family:'Fraunces', serif; font-style:italic; font-weight:400; font-size:56px; letter-spacing:-0.02em; line-height:1.08; margin:var(--space-3) 0 var(--space-5);">
-      <span class="lang-en">Free forever.<br>Pro when you sync.</span>
-      <span class="lang-zh">永久免费。<br>需要同步才升 Pro。</span>
+    <span class="eyebrow"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></span>
+    <h2 class="section-title">
+      <span class="lang-en">Free forever.<br>Pro when you <em>sync.</em></span>
+      <span class="lang-zh">永久免费。<br>需要<em>同步</em>才升 Pro。</span>
     </h2>
-    <p class="ember-lead" style="margin:0 auto var(--space-7); max-width:600px;">
+    <p class="ember-lead" style="margin:var(--space-5) auto var(--space-7); max-width:600px;">
       <span class="lang-en">Solo writers, free forever. Cloud sync is $9 a month. Teams $29 a seat. That's the whole price list.</span>
       <span class="lang-zh">单人作者永久免费。云同步 $9/月。团队 $29/席位。定价就这些。</span>
     </p>
@@ -474,14 +508,14 @@
 </section>
 
 <!-- Final CTA -->
-<section class="ember-section" style="text-align:center;">
+<section class="ember-section" style="text-align:center; padding-block:var(--space-10);">
   <div class="ember-container" style="max-width:740px;">
     <span class="accent-strip accent-strip--center"></span>
-    <h2 style="font-family:'Fraunces', serif; font-style:italic; font-weight:400; font-size:64px; letter-spacing:-0.025em; line-height:1.05; margin:var(--space-3) 0 var(--space-5);">
+    <h2 class="section-title" style="font-size:64px;">
       <span class="lang-en">Start writing today.</span>
       <span class="lang-zh">今天就开始写作。</span>
     </h2>
-    <p class="ember-lead" style="margin:0 auto var(--space-6); max-width:540px;">
+    <p class="ember-lead" style="margin:var(--space-5) auto var(--space-6); max-width:540px;">
       <span class="lang-en">No sign-up. No credit card. Download and open a blank note in under a minute.</span>
       <span class="lang-zh">无需注册。无需信用卡。一分钟内下载并打开一页空白笔记。</span>
     </p>

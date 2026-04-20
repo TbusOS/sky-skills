@@ -24,7 +24,7 @@
     text-transform: uppercase;
   }
   .lang-toggle:hover { background: #f0f3e2; }
-  /* Chinese (§H): Instrument Serif italic → Noto Serif SC; Inter → Noto Sans SC. */
+  /* Chinese (§H): Instrument Serif → Noto Serif SC; Inter → Noto Sans SC. */
   html[data-lang="zh"] body,
   html[data-lang="zh"] p,
   html[data-lang="zh"] li,
@@ -32,13 +32,14 @@
   html[data-lang="zh"] .feat-body,
   html[data-lang="zh"] .use-tile p {
     font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
-    font-style: normal;
   }
   html[data-lang="zh"] h1,
   html[data-lang="zh"] h2,
   html[data-lang="zh"] h3,
   html[data-lang="zh"] .feat-title,
   html[data-lang="zh"] .giant-num,
+  html[data-lang="zh"] .hero-headline em,
+  html[data-lang="zh"] .section-title em,
   html[data-lang="zh"] blockquote {
     font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
     font-style: normal !important;
@@ -57,7 +58,26 @@
     font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600;
     letter-spacing: 0.18em; text-transform: uppercase;
     color: var(--sage-text-secondary);
+    margin-bottom: var(--space-4);
   }
+
+  /* Hero headline — Instrument Serif roman, italic ONLY on one accent word */
+  .hero-headline {
+    font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 104px; line-height: 1.0; letter-spacing: -0.022em;
+    color: var(--sage-ink); margin: 0;
+  }
+  .hero-headline em { font-style: italic; font-weight: 400; color: var(--sage-ink); }
+
+  /* Section titles — roman, italic reserved for one accent word */
+  .section-title {
+    font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 60px; line-height: 1.08; letter-spacing: -0.025em;
+    color: var(--sage-ink); margin: var(--space-3) 0 0;
+  }
+  .section-title em { font-style: italic; font-weight: 400; }
+  .section-title--md { font-size: 52px; }
+  .section-title--sm { font-size: 44px; }
 
   /* Feature row */
   .feat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-top: var(--space-8); }
@@ -67,66 +87,83 @@
     display: flex; flex-direction: column;
   }
   .feat-icon {
-    width: 48px; height: 48px; display: grid; place-items: center;
+    width: 52px; height: 52px; display: grid; place-items: center;
     background: #f0f3e2; border-radius: 4px; margin-bottom: var(--space-5);
   }
+  /* Feature titles — roman, slight weight bump for hierarchy */
   .feat-title {
-    font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
-    font-size: 30px; color: var(--sage-ink); margin: 0 0 var(--space-3);
+    font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 28px; color: var(--sage-ink); margin: 0 0 var(--space-3);
     line-height: 1.2; letter-spacing: -0.015em;
   }
   .feat-body {
-    font-family: 'Inter', sans-serif; font-size: 15.5px; line-height: 1.65;
+    font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.65;
     color: var(--sage-text); margin: 0 0 var(--space-5); flex: 1;
   }
 
-  /* Giant stats — sage does them with Instrument Serif italic */
+  /* Giant stats — Instrument Serif roman */
   .giant-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); text-align: left; }
   .giant-stats > div { padding: var(--space-5) var(--space-4); border-left: 1px solid var(--sage-divider); }
   .giant-stats > div:first-child { border-left: none; padding-left: 0; }
   .giant-num {
-    display: block; font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
-    font-size: 72px; color: var(--sage-ink); letter-spacing: -0.025em; line-height: 1;
+    display: block; font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 80px; color: var(--sage-ink); letter-spacing: -0.028em; line-height: 1;
   }
   .giant-stats .lbl {
-    display: block; margin-top: var(--space-3);
+    display: block; margin-top: var(--space-4);
     font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--sage-text);
     line-height: 1.5;
   }
 
-  /* Product frame */
   .product-frame {
     background: #f0f3e2;
     border-radius: 6px; padding: var(--space-7);
     border: 1px solid var(--sage-divider);
   }
 
-  /* Two column "craft" section with kbd list */
+  /* Craft / shortcuts section */
   .craft-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: var(--space-8); align-items: start; }
-  .kbd-row { display: grid; grid-template-columns: auto 1fr; gap: var(--space-5); align-items: baseline; padding: var(--space-3) 0; border-bottom: 1px solid var(--sage-divider); }
+  .kbd-row { display: grid; grid-template-columns: auto 1fr; gap: var(--space-5); align-items: baseline; padding: var(--space-4) 0; border-bottom: 1px solid var(--sage-divider); }
   .kbd-row kbd {
     font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
     background: #ffffff; padding: 4px 10px; border-radius: 3px;
     border: 1px solid var(--sage-divider); color: var(--sage-ink);
   }
   .kbd-row .tag {
-    font-family: 'Inter', sans-serif; font-size: 15px; color: var(--sage-text); line-height: 1.5;
+    font-family: 'Inter', sans-serif; font-size: 15.5px; color: var(--sage-text); line-height: 1.5;
   }
 
   /* Use tiles */
-  .use-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); }
+  .use-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-6); }
   .use-tile {
     background: #ffffff; border: 1px solid var(--sage-divider);
     border-radius: 4px; padding: var(--space-6);
     display: grid; grid-template-columns: 110px 1fr; gap: var(--space-5); align-items: center;
   }
+  /* Use titles — roman */
   .use-tile h3 {
-    font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
-    font-size: 22px; color: var(--sage-ink); margin: 0 0 var(--space-2); line-height: 1.25;
+    font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 24px; color: var(--sage-ink); margin: 0 0 var(--space-2); line-height: 1.22;
+    letter-spacing: -0.01em;
   }
   .use-tile p {
     font-family: 'Inter', sans-serif; font-size: 14.5px; line-height: 1.6;
     color: var(--sage-text); margin: 0;
+  }
+
+  /* Pull-quote — italic earned */
+  .pull-quote-dark {
+    background: var(--sage-ink); color: #ffffff; padding: var(--space-10) 0;
+  }
+  .pull-quote-dark blockquote {
+    font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
+    font-size: 40px; line-height: 1.35; color: #ffffff;
+    margin: 0; max-width: 920px;
+  }
+  .pull-quote-dark cite {
+    display: block; margin-top: var(--space-6);
+    font-family: 'Inter', sans-serif; font-style: normal; font-size: 15px;
+    color: #97B077; letter-spacing: 0.05em;
   }
 </style>
 </head>
@@ -149,14 +186,14 @@
 </div></nav>
 
 <!-- Hero -->
-<section class="sage-hero">
-  <div class="sage-container" style="max-width:880px;">
-    <span class="sect-marker" style="margin-bottom:var(--space-5);">00 · <span class="lang-en">Skypad for writers</span><span class="lang-zh">Skypad,给作者</span></span>
-    <h1 style="font-family:'Instrument Serif', serif; font-weight:400; font-size:92px; line-height:1.02; letter-spacing:-0.02em; color:var(--sage-ink);">
+<section class="sage-hero" style="padding-top:var(--space-10); padding-bottom:var(--space-9);">
+  <div class="sage-container" style="max-width:940px;">
+    <span class="sect-marker">00 · <span class="lang-en">Skypad for writers</span><span class="lang-zh">Skypad,给作者</span></span>
+    <h1 class="hero-headline">
       <span class="lang-en">A quieter place<br><em>to think.</em></span>
-      <span class="lang-zh">一个更安静<br><em>的思考地方。</em></span>
+      <span class="lang-zh">一个更安静<br><em>的思考</em>地方。</span>
     </h1>
-    <p class="sage-lead" style="margin-top:var(--space-6); max-width:680px; font-size:22px;">
+    <p class="sage-lead" style="margin-top:var(--space-6); max-width:720px; font-size:22px; line-height:1.5;">
       <span class="lang-en">Plain Markdown on your own machine. No AI. No notifications. Sync across devices when you want it, encrypted so only you can read it.</span>
       <span class="lang-zh">普通 Markdown,你自己的机器。没有 AI。没有通知。想同步时再同步,加密到只有你能读。</span>
     </p>
@@ -171,12 +208,11 @@
   </div>
 </section>
 
-<!-- Product screen frame -->
-<section class="sage-section" style="padding-top:0;" id="product">
+<!-- Product screen -->
+<section class="sage-section" style="padding-top:0; padding-bottom:var(--space-9);" id="product">
   <div class="sage-container sage-container--wide">
     <div class="product-frame">
       <svg role="img" aria-label="Skypad editor — a writing window with a file tree and Markdown note" viewBox="0 0 1200 540" style="display:block; width:100%; height:auto; border-radius:4px; background:#ffffff; border:1px solid var(--sage-divider);">
-        <!-- Window chrome -->
         <rect width="1200" height="40" fill="#f0f3e2"/>
         <g transform="translate(18 20)">
           <circle cx="0" cy="0" r="5.5" fill="#97B077"/>
@@ -186,7 +222,6 @@
         <text x="600" y="25" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12" fill="#6d6f82">on-stillness.md · Skypad</text>
         <line x1="0" y1="40" x2="1200" y2="40" stroke="#e5e8da"/>
 
-        <!-- Sidebar -->
         <rect x="0" y="40" width="220" height="500" fill="#fafbf0"/>
         <line x1="220" y1="40" x2="220" y2="540" stroke="#e5e8da"/>
         <g font-family="'JetBrains Mono', monospace" font-size="10.5" fill="#6d6f82" letter-spacing="0.14em">
@@ -211,22 +246,21 @@
           <text x="22" y="390">· reading/index</text>
         </g>
 
-        <!-- Main content -->
         <g transform="translate(270 82)">
           <text x="0" y="0" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="0.16em" fill="#6d6f82">03 · NOTE</text>
-          <text x="0" y="36" font-family="'Instrument Serif', serif" font-style="italic" font-size="36" font-weight="400" fill="#393C54" letter-spacing="-0.015em">On stillness</text>
-          <text x="0" y="62" font-family="'Inter', sans-serif" font-size="13" fill="#6d6f82">Aurelius · Book II · reading notes</text>
+          <text x="0" y="40" font-family="'Instrument Serif', serif" font-size="38" font-weight="400" fill="#393C54" letter-spacing="-0.02em">On stillness</text>
+          <text x="0" y="64" font-family="'Inter', sans-serif" font-size="13" fill="#6d6f82">Aurelius · Book II · reading notes</text>
 
-          <g font-family="Georgia, 'Times New Roman', serif" font-size="17" fill="#2a2c40">
-            <text x="0" y="108">Begin the morning by saying to thyself,</text>
-            <text x="0" y="134">I shall meet with the busy-body, the ungrateful,</text>
-            <text x="0" y="160">the arrogant — but I remember that</text>
-            <text x="0" y="186">I am part of the same nature.</text>
+          <g font-family="Georgia, serif" font-size="17" fill="#2a2c40">
+            <text x="0" y="110">Begin the morning by saying to thyself,</text>
+            <text x="0" y="136">I shall meet with the busy-body, the ungrateful,</text>
+            <text x="0" y="162">the arrogant — but I remember that</text>
+            <text x="0" y="188">I am part of the same nature.</text>
           </g>
 
           <rect x="0" y="212" width="18" height="1" fill="#97B077"/>
 
-          <g font-family="Georgia, 'Times New Roman', serif" font-size="17" fill="#2a2c40">
+          <g font-family="Georgia, serif" font-size="17" fill="#2a2c40">
             <text x="0" y="242">What strikes me is that this isn't about</text>
             <text x="0" y="268">being <tspan font-style="italic" fill="#97B077">above</tspan> other people — it's about noticing</text>
             <text x="0" y="294">you're made of the same stuff, and choosing</text>
@@ -238,7 +272,6 @@
           </rect>
         </g>
 
-        <!-- Status -->
         <line x1="220" y1="504" x2="1200" y2="504" stroke="#e5e8da"/>
         <g font-family="'JetBrains Mono', monospace" font-size="10" fill="#6d6f82" letter-spacing="0.14em">
           <text x="238" y="524">SAVED · JUST NOW</text>
@@ -251,13 +284,13 @@
 </section>
 
 <!-- Giant stats -->
-<section class="sage-section" style="background:#f0f3e2;">
+<section class="sage-section" style="background:#f0f3e2; padding-block:var(--space-10);">
   <div class="sage-container sage-container--wide">
-    <div style="max-width:640px; margin:0 auto var(--space-8); text-align:center;">
+    <div style="max-width:640px; margin:0 auto var(--space-9); text-align:center;">
       <span class="sect-marker">01 · <span class="lang-en">By the numbers</span><span class="lang-zh">数字</span></span>
-      <h2 style="font-family:'Instrument Serif', serif; font-style:italic; font-weight:400; font-size:48px; letter-spacing:-0.02em; line-height:1.14; color:var(--sage-ink); margin:var(--space-3) 0 0;">
-        <span class="lang-en">Small. On purpose.</span>
-        <span class="lang-zh">小而精。有意为之。</span>
+      <h2 class="section-title section-title--sm">
+        <span class="lang-en">Small. On <em>purpose.</em></span>
+        <span class="lang-zh">小而精。<em>有意</em>为之。</span>
       </h2>
     </div>
 
@@ -283,15 +316,15 @@
 </section>
 
 <!-- Three features -->
-<section class="sage-section" id="features">
+<section class="sage-section" style="padding-block:var(--space-10);" id="features">
   <div class="sage-container sage-container--wide">
     <div style="max-width:720px; margin:0 auto; text-align:center;">
       <span class="sect-marker">02 · <span class="lang-en">What we chose</span><span class="lang-zh">我们的选择</span></span>
-      <h2 style="font-family:'Instrument Serif', serif; font-weight:400; font-size:58px; letter-spacing:-0.025em; line-height:1.08; color:var(--sage-ink); margin:var(--space-3) 0 var(--space-5);">
-        <span class="lang-en">Three decisions.<br><em>Not compromising.</em></span>
-        <span class="lang-zh">三个不让步<br><em>的决定。</em></span>
+      <h2 class="section-title">
+        <span class="lang-en">Three decisions,<br>not <em>compromising.</em></span>
+        <span class="lang-zh">三个<em>不让步</em><br>的决定。</span>
       </h2>
-      <p class="sage-lead" style="max-width:620px; margin:0 auto; font-size:18px;">
+      <p class="sage-lead" style="max-width:620px; margin:var(--space-5) auto 0; font-size:19px;">
         <span class="lang-en">The features most note apps advertise are exactly the ones we declined to build. Here's what we chose instead.</span>
         <span class="lang-zh">其他笔记软件拿来宣传的功能,恰恰是我们拒绝做的。下面是我们选择做的。</span>
       </p>
@@ -300,7 +333,7 @@
     <div class="feat-row">
       <article class="feat-card">
         <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#97B077" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#97B077" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 4h12l4 4v20H8z"/>
             <path d="M20 4v4h4"/>
             <path d="M12 14h8M12 18h8M12 22h6"/>
@@ -316,7 +349,7 @@
 
       <article class="feat-card">
         <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#97B077" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#97B077" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="16" cy="16" r="12"/>
             <line x1="8" y1="8" x2="24" y2="24"/>
           </svg>
@@ -331,7 +364,7 @@
 
       <article class="feat-card">
         <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#97B077" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#97B077" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <rect x="6" y="8" width="20" height="16" rx="2"/>
             <path d="M10 12v-2a6 6 0 0112 0v2"/>
           </svg>
@@ -347,17 +380,17 @@
   </div>
 </section>
 
-<!-- Craft section: kbd list + product -->
-<section class="sage-section" style="background:#fafbf0;">
+<!-- Craft / shortcuts -->
+<section class="sage-section" style="background:#fafbf0; padding-block:var(--space-10);">
   <div class="sage-container sage-container--wide">
     <div class="craft-grid">
       <div>
         <span class="sect-marker">03 · <span class="lang-en">Craft</span><span class="lang-zh">工艺</span></span>
-        <h2 style="font-family:'Instrument Serif', serif; font-weight:400; font-size:48px; letter-spacing:-0.02em; line-height:1.1; color:var(--sage-ink); margin:var(--space-3) 0 var(--space-5);">
-          <span class="lang-en">Three shortcuts.<br><em>Nothing else to learn.</em></span>
-          <span class="lang-zh">三个快捷键。<br><em>没别的要学。</em></span>
+        <h2 class="section-title section-title--sm">
+          <span class="lang-en">Three shortcuts.<br>Nothing else <em>to learn.</em></span>
+          <span class="lang-zh">三个快捷键。<br>没别的<em>要学</em>。</span>
         </h2>
-        <p class="sage-lead" style="max-width:440px; font-size:17px;">
+        <p class="sage-lead" style="max-width:440px; font-size:17px; margin-top:var(--space-5);">
           <span class="lang-en">Skypad opens to a blank page and a cursor. No onboarding flow. No template gallery. You just write.</span>
           <span class="lang-zh">Skypad 打开就是空白页和一个光标。没有引导。没有模板库。直接写。</span>
         </p>
@@ -383,27 +416,27 @@
   </div>
 </section>
 
-<!-- Pull quote on dark -->
-<section class="sage-section--dark">
-  <div class="sage-container" style="text-align:center; max-width:880px;">
-    <blockquote style="font-family:'Instrument Serif', serif; font-style:italic; font-weight:400; font-size:36px; line-height:1.35; color:#ffffff; margin:0;">
-      <span class="lang-en">"Skypad is the only tool I've actually stayed in. Every other note app tried to sell me AI. This one tries to get out of the way."</span>
-      <span class="lang-zh">"Skypad 是我唯一真正留下来的工具。其他笔记软件都在给我推销 AI。只有这个,在努力消失于无形。"</span>
+<!-- Pull quote on dark — italic earned -->
+<section class="pull-quote-dark">
+  <div class="sage-container" style="text-align:center; max-width:940px;">
+    <blockquote>
+      <span class="lang-en">Skypad is the only tool I've actually stayed in. Every other note app tried to sell me AI. This one tries to get out of the way.</span>
+      <span class="lang-zh">Skypad 是我唯一真正留下来的工具。其他笔记软件都在给我推销 AI。只有这个,在努力消失于无形。</span>
     </blockquote>
-    <p style="margin-top:var(--space-6); font-family:'Inter', sans-serif; font-size:14.5px; color:#97B077; letter-spacing:0.05em;">
+    <cite>
       <span aria-hidden="true" style="display:inline-block; width:20px; height:1.5px; background:#97B077; vertical-align:middle; margin-right:8px;"></span>
       <span class="lang-en">Anya Mehra — independent writer · 18 months on Pro</span>
       <span class="lang-zh">Anya Mehra — 独立作者 · Pro 用户 18 个月</span>
-    </p>
+    </cite>
   </div>
 </section>
 
-<!-- Ways to use — 2x2 -->
-<section class="sage-section">
+<!-- 2x2 uses -->
+<section class="sage-section" style="padding-block:var(--space-10);">
   <div class="sage-container sage-container--wide">
-    <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
+    <div style="max-width:720px; margin:0 auto var(--space-9); text-align:center;">
       <span class="sect-marker">04 · <span class="lang-en">Uses</span><span class="lang-zh">用法</span></span>
-      <h2 style="font-family:'Instrument Serif', serif; font-style:italic; font-weight:400; font-size:48px; letter-spacing:-0.02em; line-height:1.1; color:var(--sage-ink); margin:var(--space-3) 0 0;">
+      <h2 class="section-title section-title--sm">
         <span class="lang-en">Made for the way you think.</span>
         <span class="lang-zh">为你思考的方式而做。</span>
       </h2>
@@ -489,14 +522,14 @@
 </section>
 
 <!-- Pricing preview -->
-<section class="sage-section" style="background:#f0f3e2;">
+<section class="sage-section" style="background:#f0f3e2; padding-block:var(--space-10);">
   <div class="sage-container" style="max-width:780px; text-align:center;">
     <span class="sect-marker">05 · <span class="lang-en">Pricing</span><span class="lang-zh">定价</span></span>
-    <h2 style="font-family:'Instrument Serif', serif; font-style:italic; font-weight:400; font-size:56px; letter-spacing:-0.02em; line-height:1.08; color:var(--sage-ink); margin:var(--space-3) 0 var(--space-5);">
-      <span class="lang-en">Free forever.<br>Pro when you sync.</span>
-      <span class="lang-zh">永久免费。<br>需要同步才升 Pro。</span>
+    <h2 class="section-title">
+      <span class="lang-en">Free forever.<br>Pro when you <em>sync.</em></span>
+      <span class="lang-zh">永久免费。<br>需要<em>同步</em>才升 Pro。</span>
     </h2>
-    <p class="sage-lead" style="max-width:600px; margin:0 auto var(--space-7);">
+    <p class="sage-lead" style="max-width:600px; margin:var(--space-5) auto var(--space-7);">
       <span class="lang-en">Solo writers, free forever. Cloud sync is $9 a month. Teams $29 a seat. That's the whole price list.</span>
       <span class="lang-zh">单人作者永久免费。云同步 $9/月。团队 $29/席位。定价就这些。</span>
     </p>
@@ -508,14 +541,14 @@
 </section>
 
 <!-- Final CTA -->
-<section class="sage-section" style="text-align:center;">
+<section class="sage-section" style="text-align:center; padding-block:var(--space-10);">
   <div class="sage-container" style="max-width:720px;">
     <span class="sect-marker">06 · <span class="lang-en">Start</span><span class="lang-zh">开始</span></span>
-    <h2 style="font-family:'Instrument Serif', serif; font-style:italic; font-weight:400; font-size:64px; letter-spacing:-0.025em; line-height:1.05; color:var(--sage-ink); margin:var(--space-3) 0 var(--space-5);">
+    <h2 class="section-title" style="font-size:68px;">
       <span class="lang-en">Start writing today.</span>
       <span class="lang-zh">今天就开始写作。</span>
     </h2>
-    <p class="sage-lead" style="max-width:540px; margin:0 auto var(--space-6);">
+    <p class="sage-lead" style="max-width:540px; margin:var(--space-5) auto var(--space-6);">
       <span class="lang-en">No sign-up. No credit card. Download and open a blank note in under a minute.</span>
       <span class="lang-zh">无需注册。无需信用卡。一分钟内下载并打开一页空白笔记。</span>
     </p>

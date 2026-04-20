@@ -19,7 +19,7 @@ quality is anchored at the style's own best.
 |---|---|---|
 | Pricing | `pricing.html` + `pricing.md` | ✅ v1 · 2026-04-20 |
 | Landing | `landing.html` + `landing.md` | ✅ v1 · 2026-04-21 |
-| Docs home | `docs-home.html` + `docs-home.md` | ⏳ planned |
+| Docs home | `docs-home.html` + `docs-home.md` | ✅ v1 · 2026-04-21 |
 | Blog index | `blog-index.html` + `blog-index.md` | — |
 | Product detail | `product-detail.html` + `product-detail.md` | — |
 | Team | `team.html` + `team.md` | — |
