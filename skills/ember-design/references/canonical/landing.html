@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad — a notebook bound by hand</title>
+<meta name="description" content="Skypad is a quiet, local-first notebook for writers who'd rather think than be notified. Handcraft editorial canonical — ember-design landing page for the sky-skills harness.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/ember.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid rgba(73, 45, 34, 0.2);
+    color: var(--ember-text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+  .lang-toggle:hover { background: rgba(196, 148, 100, 0.12); }
+  /* Chinese (§H): Fraunces italic → Noto Serif SC; Inter → Noto Sans SC. No CJK italic. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .ember-lead,
+  html[data-lang="zh"] .feat-body,
+  html[data-lang="zh"] .use-tile p {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-style: normal;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .feat-title,
+  html[data-lang="zh"] .ember-quote,
+  html[data-lang="zh"] .giant-num,
+  html[data-lang="zh"] .tier-preview-name {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .ember-badge,
+  html[data-lang="zh"] .kicker {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+    text-transform: none;
+    letter-spacing: 0.04em;
+  }
+
+  /* Gold hairline (ember signature) */
+  .accent-strip {
+    height: 1px; width: 48px; background: #c49464; display: block;
+  }
+  .accent-strip--center { margin: 0 auto var(--space-5); }
+
+  /* Kicker (uppercase small marker above titles) */
+  .kicker {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #8a7564;
+  }
+
+  /* Feature blocks */
+  .feat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-top: var(--space-8); }
+  .feat-card {
+    background: #ffffff; border: 1px solid rgba(73, 45, 34, 0.13);
+    border-radius: var(--radius-md); padding: var(--space-7);
+    display: flex; flex-direction: column;
+  }
+  .feat-icon {
+    width: 52px; height: 52px; display: grid; place-items: center;
+    background: rgba(196, 148, 100, 0.14); border-radius: 50%;
+    margin-bottom: var(--space-5);
+  }
+  .feat-title {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 400;
+    font-size: 28px; color: var(--ember-text); margin: 0 0 var(--space-3);
+    line-height: 1.2; letter-spacing: -0.01em;
+  }
+  .feat-body {
+    font-family: 'Inter', sans-serif; font-size: 15.5px; line-height: 1.6;
+    color: var(--ember-text); margin: 0 0 var(--space-5); flex: 1;
+  }
+
+  /* Giant stats — ember does them with italic Fraunces numerals */
+  .giant-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); text-align: center; }
+  .giant-stats > div { padding: var(--space-5) var(--space-3); position: relative; }
+  .giant-stats > div:not(:last-child)::after {
+    content: ""; position: absolute; right: 0; top: 20%; height: 60%;
+    width: 1px; background: rgba(73, 45, 34, 0.12);
+  }
+  .giant-num {
+    display: block; font-family: 'Fraunces', serif; font-style: italic; font-weight: 400;
+    font-size: 72px; color: var(--ember-text); letter-spacing: -0.025em; line-height: 1;
+  }
+  .giant-num-label {
+    display: block; margin-top: var(--space-3);
+    font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--ember-text);
+    line-height: 1.45;
+  }
+
+  /* Product card (textured cream) */
+  .product-frame {
+    background: linear-gradient(135deg, #fff2df 0%, #fbeedd 100%);
+    border-radius: var(--radius-lg); padding: var(--space-7);
+    box-shadow: 0 20px 50px -20px rgba(73, 45, 34, 0.2);
+  }
+
+  /* 2x2 tiles */
+  .use-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); }
+  .use-tile {
+    background: #ffffff; border: 1px solid rgba(73, 45, 34, 0.13);
+    border-radius: var(--radius-md); padding: var(--space-6);
+    display: grid; grid-template-columns: 120px 1fr; gap: var(--space-5); align-items: center;
+  }
+  .use-tile h3 {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 22px; color: var(--ember-text); margin: 0 0 var(--space-2); line-height: 1.25;
+  }
+  .use-tile p {
+    font-family: 'Inter', sans-serif; font-size: 14.5px; line-height: 1.55;
+    color: var(--ember-text); margin: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="ember-nav"><div class="ember-nav-inner">
+  <a href="#" class="ember-nav-brand">Skypad</a>
+  <div>
+    <a href="#product"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="#features"><span class="lang-en">Craft</span><span class="lang-zh">工艺</span></a>
+    <a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="#journal"><span class="lang-en">Journal</span><span class="lang-zh">杂志</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a href="#login" style="font-size:14px; color:var(--ember-text); text-decoration:none;"><span class="lang-en">Sign in</span><span class="lang-zh">登录</span></a>
+    <a class="ember-button" href="#download"><span class="lang-en">Start writing</span><span class="lang-zh">开始写作</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="ember-hero">
+  <div class="ember-container" style="max-width:900px; text-align:center;">
+    <span class="accent-strip accent-strip--center"></span>
+    <span class="ember-badge" style="display:inline-block; margin-bottom:var(--space-4);"><span class="lang-en">Handcraft · Since 2019</span><span class="lang-zh">手作 · 始于 2019</span></span>
+    <h1 style="font-family:'Fraunces', serif; font-style:italic; font-weight:400; font-size:84px; line-height:1.02; letter-spacing:-0.015em; margin:0 auto var(--space-5); max-width:860px;">
+      <span class="lang-en">A notebook,<br>bound by hand.</span>
+      <span class="lang-zh">一本<br>手工装订的记事本。</span>
+    </h1>
+    <p class="ember-lead" style="margin:0 auto var(--space-7); max-width:680px; font-size:21px;">
+      <span class="lang-en">Plain Markdown on your own machine. End-to-end encrypted when you sync. No AI in your editor. Made by three people, in rooms with plants and late afternoon light.</span>
+      <span class="lang-zh">普通 Markdown,你自己的机器。同步时端到端加密。编辑器里没有 AI。三个人做的,在有植物和傍晚阳光的房间里。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-5); justify-content:center; align-items:center; flex-wrap:wrap;">
+      <a class="ember-button" href="#download"><span class="lang-en">Download — free</span><span class="lang-zh">免费下载</span></a>
+      <a class="ember-link" href="#product"><span class="lang-en">Read the story</span><span class="lang-zh">阅读故事</span></a>
+    </div>
+    <p style="margin-top:var(--space-6); font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:#8a7564; letter-spacing:0.12em; text-transform:uppercase;">
+      <span class="lang-en">macOS · Windows · Linux · iOS · Android · no account for Free</span>
+      <span class="lang-zh" style="font-family:'Noto Sans SC', 'PingFang SC', sans-serif; text-transform:none; letter-spacing:0.04em;">macOS · Windows · Linux · iOS · Android · 免费版无需注册</span>
+    </p>
+  </div>
+</section>
+
+<!-- Product screen frame -->
+<section class="ember-section" style="padding-top:0;" id="product">
+  <div class="ember-container ember-container--wide">
+    <div class="product-frame">
+      <svg role="img" aria-label="Skypad editor — a writing window with a file tree and Markdown note" viewBox="0 0 1200 540" style="display:block; width:100%; height:auto; border-radius:10px; background:#ffffff; box-shadow:0 12px 30px -10px rgba(73, 45, 34, 0.18);">
+        <!-- Window chrome -->
+        <rect width="1200" height="40" fill="#fbeedd"/>
+        <g transform="translate(18 20)">
+          <circle cx="0" cy="0" r="5.5" fill="#c49464"/>
+          <circle cx="18" cy="0" r="5.5" fill="#dfc5a4"/>
+          <circle cx="36" cy="0" r="5.5" fill="#8a7564"/>
+        </g>
+        <text x="600" y="25" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12" fill="#77654d">on-morning-walks.md · Skypad</text>
+        <line x1="0" y1="40" x2="1200" y2="40" stroke="rgba(73, 45, 34, 0.1)"/>
+
+        <!-- Sidebar -->
+        <rect x="0" y="40" width="210" height="500" fill="#fdf8ee"/>
+        <line x1="210" y1="40" x2="210" y2="540" stroke="rgba(73, 45, 34, 0.08)"/>
+        <g font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#8a7564" letter-spacing="0.12em">
+          <text x="22" y="70">JOURNAL</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="13" fill="#312520">
+          <text x="22" y="98">▾ 2026</text>
+          <text x="36" y="122" font-weight="600">· on-morning-walks</text>
+          <text x="36" y="144" fill="#77654d">· april-readings</text>
+          <text x="36" y="166" fill="#77654d">· letter-to-self</text>
+          <text x="22" y="194">▸ 2025</text>
+          <text x="22" y="216">▸ letters</text>
+          <text x="22" y="238">▸ recipes</text>
+          <text x="22" y="260">▸ garden</text>
+        </g>
+        <g font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#8a7564" letter-spacing="0.12em">
+          <text x="22" y="318">LINKED FROM</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="12" fill="#77654d">
+          <text x="22" y="344">· daily/2026-04-12</text>
+          <text x="22" y="366">· letters/to-aunt-m</text>
+          <text x="22" y="388">· garden/bees</text>
+        </g>
+
+        <!-- Main content -->
+        <g transform="translate(260 80)">
+          <text x="0" y="0" font-family="'Fraunces', serif" font-style="italic" font-size="34" font-weight="400" fill="#312520" letter-spacing="-0.015em">On morning walks</text>
+          <text x="0" y="28" font-family="'IBM Plex Mono', monospace" font-size="11" letter-spacing="0.12em" fill="#8a7564">04 · 13 · 2026</text>
+
+          <g font-family="'Fraunces', serif" font-style="italic" font-size="17" fill="#312520">
+            <text x="0" y="78">I set out before the grocer's are open,</text>
+            <text x="0" y="104">before the children go to school.</text>
+            <text x="0" y="130">The city — quiet. The trees —</text>
+            <text x="0" y="156">more real than they look at noon.</text>
+          </g>
+
+          <g transform="translate(0 180)">
+            <rect width="18" height="1" fill="#c49464"/>
+          </g>
+
+          <g font-family="'Fraunces', serif" font-style="italic" font-size="17" fill="#312520">
+            <text x="0" y="210">I don't walk for exercise. I walk</text>
+            <text x="0" y="236">to let the day settle before it asks</text>
+            <text x="0" y="262">anything of me. That small hour —</text>
+            <text x="0" y="288">is the reason the rest works.</text>
+          </g>
+
+          <rect x="0" y="310" width="2" height="22" fill="#c49464">
+            <animate attributeName="opacity" values="1;0;1" dur="1.2s" repeatCount="indefinite"/>
+          </rect>
+        </g>
+
+        <!-- Status -->
+        <line x1="210" y1="504" x2="1200" y2="504" stroke="rgba(73, 45, 34, 0.1)"/>
+        <g font-family="'IBM Plex Mono', monospace" font-size="10" fill="#8a7564" letter-spacing="0.1em">
+          <text x="228" y="526">SAVED · JUST NOW</text>
+          <text x="420" y="526">218 WORDS · 4 MIN</text>
+          <text x="1020" y="526">ENCRYPTED · 3 DEVICES</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- Giant stats -->
+<section class="ember-section" style="background:#fbeedd;">
+  <div class="ember-container ember-container--wide">
+    <div style="text-align:center; max-width:680px; margin:0 auto var(--space-8);">
+      <span class="accent-strip accent-strip--center"></span>
+      <span class="kicker"><span class="lang-en">By the numbers</span><span class="lang-zh">一些数字</span></span>
+      <h2 style="font-family:'Fraunces', serif; font-style:italic; font-weight:400; font-size:52px; letter-spacing:-0.015em; line-height:1.12; margin:var(--space-3) 0 0;">
+        <span class="lang-en">Small. On purpose.</span>
+        <span class="lang-zh">小而精。有意为之。</span>
+      </h2>
+    </div>
+
+    <div class="giant-stats">
+      <div>
+        <span class="giant-num">3</span>
+        <span class="giant-num-label"><span class="lang-en">people on the team</span><span class="lang-zh">人的团队</span></span>
+      </div>
+      <div>
+        <span class="giant-num">18K</span>
+        <span class="giant-num-label"><span class="lang-en">writers in 62 countries</span><span class="lang-zh">位作者,62 个国家</span></span>
+      </div>
+      <div>
+        <span class="giant-num">0</span>
+        <span class="giant-num-label"><span class="lang-en">trackers · ads · pop-ups</span><span class="lang-zh">追踪 · 广告 · 弹窗</span></span>
+      </div>
+      <div>
+        <span class="giant-num">7</span>
+        <span class="giant-num-label"><span class="lang-en">years, one product</span><span class="lang-zh">年,一个产品</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Three values -->
+<section class="ember-section" id="features">
+  <div class="ember-container ember-container--wide">
+    <div style="max-width:720px; margin:0 auto; text-align:center;">
+      <span class="accent-strip accent-strip--center"></span>
+      <span class="kicker"><span class="lang-en">What we chose</span><span class="lang-zh">我们的选择</span></span>
+      <h2 style="font-family:'Fraunces', serif; font-style:italic; font-weight:400; font-size:52px; letter-spacing:-0.015em; line-height:1.12; margin:var(--space-3) 0 var(--space-5);">
+        <span class="lang-en">Three decisions,<br>not compromising.</span>
+        <span class="lang-zh">三个不让步<br>的决定。</span>
+      </h2>
+      <p class="ember-lead" style="font-size:18px;">
+        <span class="lang-en">The features most note apps advertise are exactly the ones we declined to build. Here's what we chose instead.</span>
+        <span class="lang-zh">其他笔记软件拿来宣传的功能,恰恰是我们拒绝做的。下面是我们选择做的。</span>
+      </p>
+    </div>
+
+    <div class="feat-row">
+      <article class="feat-card">
+        <div class="feat-icon">
+          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#c49464" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 4h12l4 4v20H8z"/>
+            <path d="M20 4v4h4"/>
+            <path d="M12 14h8M12 18h8M12 22h6"/>
+          </svg>
+        </div>
+        <h3 class="feat-title"><span class="lang-en">Your notes are plain Markdown.</span><span class="lang-zh">你的笔记就是 Markdown。</span></h3>
+        <p class="feat-body">
+          <span class="lang-en">Every note is a <code>.md</code> file on your own disk. No proprietary format, no database, no lock-in. Open one in any editor — they're just text.</span>
+          <span class="lang-zh">每条笔记都是你磁盘上的一个 <code>.md</code> 文件。没有私有格式,没有数据库,没有绑定。用任何编辑器打开 —— 就是纯文本。</span>
+        </p>
+        <a class="ember-link" href="#local"><span class="lang-en">How local-first works</span><span class="lang-zh">本地优先怎么工作</span></a>
+      </article>
+
+      <article class="feat-card">
+        <div class="feat-icon">
+          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#c49464" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="16" cy="16" r="12"/>
+            <line x1="8" y1="8" x2="24" y2="24"/>
+          </svg>
+        </div>
+        <h3 class="feat-title"><span class="lang-en">An editor that doesn't finish your sentence.</span><span class="lang-zh">不替你写完句子的编辑器。</span></h3>
+        <p class="feat-body">
+          <span class="lang-en">We don't ship AI autocomplete, rewriting, or summaries. Your ideas are yours, formed in your own head, in your own words. Use AI somewhere else, on purpose.</span>
+          <span class="lang-zh">我们不做 AI 自动补全、改写或摘要。你的想法是你的,在你脑子里、用你的话形成。要用 AI,请特意去别处用。</span>
+        </p>
+        <a class="ember-link" href="#no-ai"><span class="lang-en">Why we said no</span><span class="lang-zh">我们为什么说不</span></a>
+      </article>
+
+      <article class="feat-card">
+        <div class="feat-icon">
+          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#c49464" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="8" width="20" height="16" rx="2"/>
+            <path d="M10 12v-2a6 6 0 0112 0v2"/>
+          </svg>
+        </div>
+        <h3 class="feat-title"><span class="lang-en">We can't read your notes. By design.</span><span class="lang-zh">我们读不到你的笔记。这是有意的。</span></h3>
+        <p class="feat-body">
+          <span class="lang-en">Your notes are encrypted on your device before sync. Our servers only ever see ciphertext. We publish an open-source security audit every six months.</span>
+          <span class="lang-zh">笔记在你设备上加密后才同步。我们服务器只能看到密文。每 6 个月发布一次开源安全审计。</span>
+        </p>
+        <a class="ember-link" href="#security"><span class="lang-en">Read the audit</span><span class="lang-zh">阅读审计</span></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Pull quote on dark chocolate -->
+<section class="ember-section--dark">
+  <div class="ember-container" style="text-align:center; max-width:860px;">
+    <blockquote class="ember-quote" style="font-size:32px; line-height:1.4; color:#ffffff;">
+      <span class="lang-en">Skypad is the only tool I've actually stayed in. Every other note app tried to sell me AI. This one tries to get out of the way.</span>
+      <span class="lang-zh">Skypad 是我唯一真正留下来的工具。其他笔记软件都在给我推销 AI。只有这个,在努力消失于无形。</span>
+    </blockquote>
+    <p class="ember-quote-cite" style="margin-top:var(--space-6); color:#d9b892;">
+      <span aria-hidden="true" style="display:inline-block; width:20px; height:1.5px; background:#c49464; vertical-align:middle; margin-right:8px;"></span>
+      <span class="lang-en">Anya Mehra — independent writer · 18 months on Pro</span>
+      <span class="lang-zh">Anya Mehra — 独立作者 · Pro 用户 18 个月</span>
+    </p>
+  </div>
+</section>
+
+<!-- Ways to use — 2x2 -->
+<section class="ember-section">
+  <div class="ember-container ember-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="accent-strip accent-strip--center"></span>
+      <span class="kicker"><span class="lang-en">Uses</span><span class="lang-zh">用法</span></span>
+      <h2 style="font-family:'Fraunces', serif; font-style:italic; font-weight:400; font-size:48px; letter-spacing:-0.015em; line-height:1.12; margin:var(--space-3) 0 0;">
+        <span class="lang-en">Made for the way you think.</span>
+        <span class="lang-zh">为你思考的方式而做。</span>
+      </h2>
+    </div>
+
+    <div class="use-grid">
+      <article class="use-tile">
+        <svg viewBox="0 0 120 90" style="width:100%; height:auto; border-radius:6px; background:#fbeedd;">
+          <rect x="14" y="14" width="92" height="6" rx="1" fill="#312520"/>
+          <rect x="14" y="26" width="60" height="3" rx="1" fill="#8a7564"/>
+          <rect x="14" y="38" width="92" height="2" rx="1" fill="#c9b69a"/>
+          <rect x="14" y="44" width="82" height="2" rx="1" fill="#c9b69a"/>
+          <rect x="14" y="50" width="88" height="2" rx="1" fill="#c9b69a"/>
+          <rect x="14" y="56" width="70" height="2" rx="1" fill="#c9b69a"/>
+          <rect x="14" y="68" width="24" height="8" rx="4" fill="#c49464"/>
+        </svg>
+        <div>
+          <h3><span class="lang-en">Daily writing</span><span class="lang-zh">日常写作</span></h3>
+          <p>
+            <span class="lang-en">Open to a blank page in under a second. Essays, diaries, letters you haven't sent. Export to PDF when they're ready.</span>
+            <span class="lang-zh">一秒内打开空白页。文章、日记、还没寄出的信。写好了再导出 PDF。</span>
+          </p>
+        </div>
+      </article>
+      <article class="use-tile">
+        <svg viewBox="0 0 120 90" style="width:100%; height:auto; border-radius:6px; background:#fbeedd;">
+          <circle cx="36" cy="46" r="6" fill="#c49464"/>
+          <circle cx="72" cy="28" r="4" fill="#312520"/>
+          <circle cx="84" cy="62" r="5" fill="#312520"/>
+          <circle cx="96" cy="40" r="3.5" fill="#8a7564"/>
+          <line x1="36" y1="46" x2="72" y2="28" stroke="#c9b69a" stroke-width="0.8"/>
+          <line x1="36" y1="46" x2="84" y2="62" stroke="#c9b69a" stroke-width="0.8"/>
+          <line x1="72" y1="28" x2="96" y2="40" stroke="#c9b69a" stroke-width="0.8"/>
+          <line x1="84" y1="62" x2="96" y2="40" stroke="#c9b69a" stroke-width="0.8"/>
+        </svg>
+        <div>
+          <h3><span class="lang-en">Backlinks &amp; graph</span><span class="lang-zh">反向链接与关系图</span></h3>
+          <p>
+            <span class="lang-en">Link notes with <code>[[wiki]]</code> refs. See every backlink. Grow a graph of your thinking — slowly, without ceremony.</span>
+            <span class="lang-zh">用 <code>[[wiki]]</code> 风格链接笔记。看到每条反向链接。慢慢生长出你思考的关系图。</span>
+          </p>
+        </div>
+      </article>
+      <article class="use-tile">
+        <svg viewBox="0 0 120 90" style="width:100%; height:auto; border-radius:6px; background:#fbeedd;">
+          <rect x="16" y="16" width="28" height="56" rx="3" fill="#312520"/>
+          <rect x="50" y="16" width="28" height="56" rx="3" fill="#c49464"/>
+          <rect x="84" y="16" width="28" height="56" rx="3" fill="#8a7564"/>
+          <rect x="18" y="24" width="24" height="1.5" fill="#c49464" opacity="0.6"/>
+          <rect x="52" y="24" width="24" height="1.5" fill="#ffffff" opacity="0.7"/>
+          <rect x="86" y="24" width="24" height="1.5" fill="#ffffff" opacity="0.6"/>
+        </svg>
+        <div>
+          <h3><span class="lang-en">Sync on 5 devices</span><span class="lang-zh">5 台设备同步</span></h3>
+          <p>
+            <span class="lang-en">Start on your laptop, finish on the bus. End-to-end encrypted — only ciphertext leaves your machine.</span>
+            <span class="lang-zh">电脑上开始,公交上写完。端到端加密 —— 离开你设备的只有密文。</span>
+          </p>
+        </div>
+      </article>
+      <article class="use-tile">
+        <svg viewBox="0 0 120 90" style="width:100%; height:auto; border-radius:6px; background:#fbeedd;">
+          <rect x="16" y="16" width="40" height="56" rx="4" fill="#312520"/>
+          <circle cx="36" cy="30" r="3" fill="#c49464"/>
+          <rect x="22" y="40" width="28" height="2" fill="#c49464" opacity="0.7"/>
+          <rect x="22" y="46" width="20" height="2" fill="#c49464" opacity="0.5"/>
+          <rect x="64" y="16" width="40" height="56" rx="4" fill="#c49464"/>
+          <rect x="70" y="22" width="28" height="2" fill="#312520" opacity="0.8"/>
+          <rect x="70" y="28" width="22" height="1.5" fill="#312520" opacity="0.6"/>
+          <rect x="70" y="34" width="26" height="1.5" fill="#312520" opacity="0.6"/>
+          <rect x="70" y="42" width="28" height="18" rx="2" fill="#312520" opacity="0.2"/>
+        </svg>
+        <div>
+          <h3><span class="lang-en">Publish one click</span><span class="lang-zh">一键发布</span></h3>
+          <p>
+            <span class="lang-en">Turn any note into a public page at <code>name.skypad.page</code>. Custom domains on Team. No build step.</span>
+            <span class="lang-zh">任意笔记一键变为 <code>name.skypad.page</code> 上的公开页。Team 支持自定义域名。无需构建。</span>
+          </p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing preview -->
+<section class="ember-section" style="background:#fbeedd;">
+  <div class="ember-container" style="max-width:780px; text-align:center;">
+    <span class="accent-strip accent-strip--center"></span>
+    <span class="kicker"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></span>
+    <h2 style="font-family:'Fraunces', serif; font-style:italic; font-weight:400; font-size:56px; letter-spacing:-0.02em; line-height:1.08; margin:var(--space-3) 0 var(--space-5);">
+      <span class="lang-en">Free forever.<br>Pro when you sync.</span>
+      <span class="lang-zh">永久免费。<br>需要同步才升 Pro。</span>
+    </h2>
+    <p class="ember-lead" style="margin:0 auto var(--space-7); max-width:600px;">
+      <span class="lang-en">Solo writers, free forever. Cloud sync is $9 a month. Teams $29 a seat. That's the whole price list.</span>
+      <span class="lang-zh">单人作者永久免费。云同步 $9/月。团队 $29/席位。定价就这些。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-4); justify-content:center; align-items:center; flex-wrap:wrap;">
+      <a class="ember-button" href="pricing.html"><span class="lang-en">See pricing</span><span class="lang-zh">查看定价</span></a>
+      <a class="ember-link" href="#download"><span class="lang-en">Download for free</span><span class="lang-zh">免费下载</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="ember-section" style="text-align:center;">
+  <div class="ember-container" style="max-width:740px;">
+    <span class="accent-strip accent-strip--center"></span>
+    <h2 style="font-family:'Fraunces', serif; font-style:italic; font-weight:400; font-size:64px; letter-spacing:-0.025em; line-height:1.05; margin:var(--space-3) 0 var(--space-5);">
+      <span class="lang-en">Start writing today.</span>
+      <span class="lang-zh">今天就开始写作。</span>
+    </h2>
+    <p class="ember-lead" style="margin:0 auto var(--space-6); max-width:540px;">
+      <span class="lang-en">No sign-up. No credit card. Download and open a blank note in under a minute.</span>
+      <span class="lang-zh">无需注册。无需信用卡。一分钟内下载并打开一页空白笔记。</span>
+    </p>
+    <p>
+      <a class="ember-button" href="#download"><span class="lang-en">Download Skypad — free</span><span class="lang-zh">下载 Skypad - 免费</span></a>
+    </p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="ember-footer">
+  <div class="ember-footer-grid">
+    <div class="ember-footer-group"><h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5><a href="#features"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a><a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a><a href="#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a><a href="#changelog"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">For teams</span><span class="lang-zh">团队</span></h5><a href="#teams"><span class="lang-en">Team plan</span><span class="lang-zh">团队版</span></a><a href="#enterprise"><span class="lang-en">Enterprise</span><span class="lang-zh">企业版</span></a><a href="#security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a><a href="#slas">SLAs</a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">Writers</span><span class="lang-zh">作者</span></h5><a href="#guide"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a><a href="#journal"><span class="lang-en">Journal</span><span class="lang-zh">杂志</span></a><a href="#showcase"><span class="lang-en">Showcase</span><span class="lang-zh">作品精选</span></a><a href="#community"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5><a href="#about"><span class="lang-en">About</span><span class="lang-zh">关于</span></a><a href="#press"><span class="lang-en">Press</span><span class="lang-zh">媒体</span></a><a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a><a href="#status"><span class="lang-en">Status</span><span class="lang-zh">状态</span></a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">Legal</span><span class="lang-zh">法务</span></h5><a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a><a href="#terms"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a><a href="#dpa">DPA</a><a href="#audit"><span class="lang-en">Audit</span><span class="lang-zh">审计</span></a></div>
+  </div>
+  <div class="ember-footer-legal">
+    <span>Copyright © 2026 Skypad Inc.</span>
+    <span><span class="lang-en">Made in Berlin · Toronto · Kyoto</span><span class="lang-zh">制作于 柏林 · 多伦多 · 京都</span></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

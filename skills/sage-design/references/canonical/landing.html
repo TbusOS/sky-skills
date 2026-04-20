@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad — a quieter place to think</title>
+<meta name="description" content="Skypad is a local-first, end-to-end encrypted notebook with a quiet Nordic aesthetic. No AI. No notifications. Canonical sage-design landing page for the sky-skills harness.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/sage.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--sage-divider);
+    color: var(--sage-ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .lang-toggle:hover { background: #f0f3e2; }
+  /* Chinese (§H): Instrument Serif italic → Noto Serif SC; Inter → Noto Sans SC. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .sage-lead,
+  html[data-lang="zh"] .feat-body,
+  html[data-lang="zh"] .use-tile p {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-style: normal;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .feat-title,
+  html[data-lang="zh"] .giant-num,
+  html[data-lang="zh"] blockquote {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .sect-marker,
+  html[data-lang="zh"] .giant-stats .lbl,
+  html[data-lang="zh"] .kbd-row .tag {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+    text-transform: none;
+    letter-spacing: 0.04em;
+  }
+
+  /* Numbered section markers (sage signature) */
+  .sect-marker {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--sage-text-secondary);
+  }
+
+  /* Feature row */
+  .feat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-top: var(--space-8); }
+  .feat-card {
+    background: #ffffff; border: 1px solid var(--sage-divider);
+    border-radius: 4px; padding: var(--space-7);
+    display: flex; flex-direction: column;
+  }
+  .feat-icon {
+    width: 48px; height: 48px; display: grid; place-items: center;
+    background: #f0f3e2; border-radius: 4px; margin-bottom: var(--space-5);
+  }
+  .feat-title {
+    font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
+    font-size: 30px; color: var(--sage-ink); margin: 0 0 var(--space-3);
+    line-height: 1.2; letter-spacing: -0.015em;
+  }
+  .feat-body {
+    font-family: 'Inter', sans-serif; font-size: 15.5px; line-height: 1.65;
+    color: var(--sage-text); margin: 0 0 var(--space-5); flex: 1;
+  }
+
+  /* Giant stats — sage does them with Instrument Serif italic */
+  .giant-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); text-align: left; }
+  .giant-stats > div { padding: var(--space-5) var(--space-4); border-left: 1px solid var(--sage-divider); }
+  .giant-stats > div:first-child { border-left: none; padding-left: 0; }
+  .giant-num {
+    display: block; font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
+    font-size: 72px; color: var(--sage-ink); letter-spacing: -0.025em; line-height: 1;
+  }
+  .giant-stats .lbl {
+    display: block; margin-top: var(--space-3);
+    font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--sage-text);
+    line-height: 1.5;
+  }
+
+  /* Product frame */
+  .product-frame {
+    background: #f0f3e2;
+    border-radius: 6px; padding: var(--space-7);
+    border: 1px solid var(--sage-divider);
+  }
+
+  /* Two column "craft" section with kbd list */
+  .craft-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: var(--space-8); align-items: start; }
+  .kbd-row { display: grid; grid-template-columns: auto 1fr; gap: var(--space-5); align-items: baseline; padding: var(--space-3) 0; border-bottom: 1px solid var(--sage-divider); }
+  .kbd-row kbd {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+    background: #ffffff; padding: 4px 10px; border-radius: 3px;
+    border: 1px solid var(--sage-divider); color: var(--sage-ink);
+  }
+  .kbd-row .tag {
+    font-family: 'Inter', sans-serif; font-size: 15px; color: var(--sage-text); line-height: 1.5;
+  }
+
+  /* Use tiles */
+  .use-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); }
+  .use-tile {
+    background: #ffffff; border: 1px solid var(--sage-divider);
+    border-radius: 4px; padding: var(--space-6);
+    display: grid; grid-template-columns: 110px 1fr; gap: var(--space-5); align-items: center;
+  }
+  .use-tile h3 {
+    font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
+    font-size: 22px; color: var(--sage-ink); margin: 0 0 var(--space-2); line-height: 1.25;
+  }
+  .use-tile p {
+    font-family: 'Inter', sans-serif; font-size: 14.5px; line-height: 1.6;
+    color: var(--sage-text); margin: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="sage-nav"><div class="sage-nav-inner">
+  <a href="#" class="sage-nav-brand">Skypad</a>
+  <div>
+    <a href="#product"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="#features"><span class="lang-en">Why</span><span class="lang-zh">为什么</span></a>
+    <a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="#field-notes"><span class="lang-en">Field notes</span><span class="lang-zh">田野笔记</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a href="#login" style="font-size:14px; color:var(--sage-ink); text-decoration:none;"><span class="lang-en">Sign in</span><span class="lang-zh">登录</span></a>
+    <a class="sage-button" href="#download"><span class="lang-en">Start writing</span><span class="lang-zh">开始写作</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="sage-hero">
+  <div class="sage-container" style="max-width:880px;">
+    <span class="sect-marker" style="margin-bottom:var(--space-5);">00 · <span class="lang-en">Skypad for writers</span><span class="lang-zh">Skypad,给作者</span></span>
+    <h1 style="font-family:'Instrument Serif', serif; font-weight:400; font-size:92px; line-height:1.02; letter-spacing:-0.02em; color:var(--sage-ink);">
+      <span class="lang-en">A quieter place<br><em>to think.</em></span>
+      <span class="lang-zh">一个更安静<br><em>的思考地方。</em></span>
+    </h1>
+    <p class="sage-lead" style="margin-top:var(--space-6); max-width:680px; font-size:22px;">
+      <span class="lang-en">Plain Markdown on your own machine. No AI. No notifications. Sync across devices when you want it, encrypted so only you can read it.</span>
+      <span class="lang-zh">普通 Markdown,你自己的机器。没有 AI。没有通知。想同步时再同步,加密到只有你能读。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-5); align-items:center; margin-top:var(--space-7); flex-wrap:wrap;">
+      <a class="sage-button" href="#download"><span class="lang-en">Download — free</span><span class="lang-zh">免费下载</span></a>
+      <a class="sage-link" href="#product"><span class="lang-en">See how it works</span><span class="lang-zh">查看工作方式</span></a>
+    </div>
+    <p style="margin-top:var(--space-6); font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--sage-text-secondary); letter-spacing:0.12em;">
+      <span class="lang-en">MACOS · WINDOWS · LINUX · IOS · ANDROID &nbsp;·&nbsp; NO ACCOUNT FOR FREE</span>
+      <span class="lang-zh" style="font-family:'Noto Sans SC', 'PingFang SC', sans-serif; letter-spacing:0.04em;">macOS · Windows · Linux · iOS · Android · 免费版无需注册</span>
+    </p>
+  </div>
+</section>
+
+<!-- Product screen frame -->
+<section class="sage-section" style="padding-top:0;" id="product">
+  <div class="sage-container sage-container--wide">
+    <div class="product-frame">
+      <svg role="img" aria-label="Skypad editor — a writing window with a file tree and Markdown note" viewBox="0 0 1200 540" style="display:block; width:100%; height:auto; border-radius:4px; background:#ffffff; border:1px solid var(--sage-divider);">
+        <!-- Window chrome -->
+        <rect width="1200" height="40" fill="#f0f3e2"/>
+        <g transform="translate(18 20)">
+          <circle cx="0" cy="0" r="5.5" fill="#97B077"/>
+          <circle cx="18" cy="0" r="5.5" fill="#c9d1b3"/>
+          <circle cx="36" cy="0" r="5.5" fill="#6d6f82"/>
+        </g>
+        <text x="600" y="25" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12" fill="#6d6f82">on-stillness.md · Skypad</text>
+        <line x1="0" y1="40" x2="1200" y2="40" stroke="#e5e8da"/>
+
+        <!-- Sidebar -->
+        <rect x="0" y="40" width="220" height="500" fill="#fafbf0"/>
+        <line x1="220" y1="40" x2="220" y2="540" stroke="#e5e8da"/>
+        <g font-family="'JetBrains Mono', monospace" font-size="10.5" fill="#6d6f82" letter-spacing="0.14em">
+          <text x="22" y="72">01 · VAULT</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="13" fill="#2a2c40">
+          <text x="22" y="100">▾ reading</text>
+          <text x="36" y="124" font-weight="600">● on-stillness.md</text>
+          <text x="36" y="146" fill="#6d6f82">○ meditations.md</text>
+          <text x="36" y="168" fill="#6d6f82">○ on-solitude.md</text>
+          <text x="22" y="196">▸ daily</text>
+          <text x="22" y="218">▸ field-notes</text>
+          <text x="22" y="240">▸ garden-log</text>
+          <text x="22" y="262">▸ archive</text>
+        </g>
+        <g font-family="'JetBrains Mono', monospace" font-size="10.5" fill="#6d6f82" letter-spacing="0.14em">
+          <text x="22" y="318">02 · BACKLINKS</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="12" fill="#6d6f82">
+          <text x="22" y="346">· daily/2026-04-12</text>
+          <text x="22" y="368">· field-notes/spring-walk</text>
+          <text x="22" y="390">· reading/index</text>
+        </g>
+
+        <!-- Main content -->
+        <g transform="translate(270 82)">
+          <text x="0" y="0" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="0.16em" fill="#6d6f82">03 · NOTE</text>
+          <text x="0" y="36" font-family="'Instrument Serif', serif" font-style="italic" font-size="36" font-weight="400" fill="#393C54" letter-spacing="-0.015em">On stillness</text>
+          <text x="0" y="62" font-family="'Inter', sans-serif" font-size="13" fill="#6d6f82">Aurelius · Book II · reading notes</text>
+
+          <g font-family="Georgia, 'Times New Roman', serif" font-size="17" fill="#2a2c40">
+            <text x="0" y="108">Begin the morning by saying to thyself,</text>
+            <text x="0" y="134">I shall meet with the busy-body, the ungrateful,</text>
+            <text x="0" y="160">the arrogant — but I remember that</text>
+            <text x="0" y="186">I am part of the same nature.</text>
+          </g>
+
+          <rect x="0" y="212" width="18" height="1" fill="#97B077"/>
+
+          <g font-family="Georgia, 'Times New Roman', serif" font-size="17" fill="#2a2c40">
+            <text x="0" y="242">What strikes me is that this isn't about</text>
+            <text x="0" y="268">being <tspan font-style="italic" fill="#97B077">above</tspan> other people — it's about noticing</text>
+            <text x="0" y="294">you're made of the same stuff, and choosing</text>
+            <text x="0" y="320">how you respond to it.</text>
+          </g>
+
+          <rect x="0" y="342" width="2" height="22" fill="#97B077">
+            <animate attributeName="opacity" values="1;0;1" dur="1.2s" repeatCount="indefinite"/>
+          </rect>
+        </g>
+
+        <!-- Status -->
+        <line x1="220" y1="504" x2="1200" y2="504" stroke="#e5e8da"/>
+        <g font-family="'JetBrains Mono', monospace" font-size="10" fill="#6d6f82" letter-spacing="0.14em">
+          <text x="238" y="524">SAVED · JUST NOW</text>
+          <text x="420" y="524">232 WORDS · 4 MIN</text>
+          <text x="1020" y="524">ENCRYPTED · 3 DEVICES</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- Giant stats -->
+<section class="sage-section" style="background:#f0f3e2;">
+  <div class="sage-container sage-container--wide">
+    <div style="max-width:640px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="sect-marker">01 · <span class="lang-en">By the numbers</span><span class="lang-zh">数字</span></span>
+      <h2 style="font-family:'Instrument Serif', serif; font-style:italic; font-weight:400; font-size:48px; letter-spacing:-0.02em; line-height:1.14; color:var(--sage-ink); margin:var(--space-3) 0 0;">
+        <span class="lang-en">Small. On purpose.</span>
+        <span class="lang-zh">小而精。有意为之。</span>
+      </h2>
+    </div>
+
+    <div class="giant-stats">
+      <div>
+        <span class="giant-num">3</span>
+        <span class="lbl"><span class="lang-en">people on the team</span><span class="lang-zh">人的团队</span></span>
+      </div>
+      <div>
+        <span class="giant-num">18K</span>
+        <span class="lbl"><span class="lang-en">writers in 62 countries</span><span class="lang-zh">位作者,62 个国家</span></span>
+      </div>
+      <div>
+        <span class="giant-num">0</span>
+        <span class="lbl"><span class="lang-en">trackers · ads · pop-ups</span><span class="lang-zh">追踪 · 广告 · 弹窗</span></span>
+      </div>
+      <div>
+        <span class="giant-num">7</span>
+        <span class="lbl"><span class="lang-en">years, one product</span><span class="lang-zh">年,一个产品</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Three features -->
+<section class="sage-section" id="features">
+  <div class="sage-container sage-container--wide">
+    <div style="max-width:720px; margin:0 auto; text-align:center;">
+      <span class="sect-marker">02 · <span class="lang-en">What we chose</span><span class="lang-zh">我们的选择</span></span>
+      <h2 style="font-family:'Instrument Serif', serif; font-weight:400; font-size:58px; letter-spacing:-0.025em; line-height:1.08; color:var(--sage-ink); margin:var(--space-3) 0 var(--space-5);">
+        <span class="lang-en">Three decisions.<br><em>Not compromising.</em></span>
+        <span class="lang-zh">三个不让步<br><em>的决定。</em></span>
+      </h2>
+      <p class="sage-lead" style="max-width:620px; margin:0 auto; font-size:18px;">
+        <span class="lang-en">The features most note apps advertise are exactly the ones we declined to build. Here's what we chose instead.</span>
+        <span class="lang-zh">其他笔记软件拿来宣传的功能,恰恰是我们拒绝做的。下面是我们选择做的。</span>
+      </p>
+    </div>
+
+    <div class="feat-row">
+      <article class="feat-card">
+        <div class="feat-icon">
+          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#97B077" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 4h12l4 4v20H8z"/>
+            <path d="M20 4v4h4"/>
+            <path d="M12 14h8M12 18h8M12 22h6"/>
+          </svg>
+        </div>
+        <h3 class="feat-title"><span class="lang-en">Your notes are plain Markdown.</span><span class="lang-zh">你的笔记就是 Markdown。</span></h3>
+        <p class="feat-body">
+          <span class="lang-en">Every note is a <code>.md</code> file on your own disk. No proprietary format, no database, no lock-in. Open one in any editor — they're just text.</span>
+          <span class="lang-zh">每条笔记都是你磁盘上的一个 <code>.md</code> 文件。没有私有格式,没有数据库,没有绑定。用任何编辑器打开 —— 就是纯文本。</span>
+        </p>
+        <a class="sage-link" href="#local"><span class="lang-en">How local-first works</span><span class="lang-zh">本地优先怎么工作</span></a>
+      </article>
+
+      <article class="feat-card">
+        <div class="feat-icon">
+          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#97B077" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="16" cy="16" r="12"/>
+            <line x1="8" y1="8" x2="24" y2="24"/>
+          </svg>
+        </div>
+        <h3 class="feat-title"><span class="lang-en">An editor that doesn't finish your sentence.</span><span class="lang-zh">不替你写完句子的编辑器。</span></h3>
+        <p class="feat-body">
+          <span class="lang-en">We don't ship AI autocomplete, rewriting, or summaries. Your ideas are yours, formed in your own head, in your own words. Use AI somewhere else, on purpose.</span>
+          <span class="lang-zh">我们不做 AI 自动补全、改写或摘要。你的想法是你的,在你脑子里、用你的话形成。要用 AI,请特意去别处用。</span>
+        </p>
+        <a class="sage-link" href="#no-ai"><span class="lang-en">Why we said no</span><span class="lang-zh">我们为什么说不</span></a>
+      </article>
+
+      <article class="feat-card">
+        <div class="feat-icon">
+          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#97B077" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="8" width="20" height="16" rx="2"/>
+            <path d="M10 12v-2a6 6 0 0112 0v2"/>
+          </svg>
+        </div>
+        <h3 class="feat-title"><span class="lang-en">We can't read your notes. By design.</span><span class="lang-zh">我们读不到你的笔记。这是有意的。</span></h3>
+        <p class="feat-body">
+          <span class="lang-en">Your notes are encrypted on your device before sync. Our servers only ever see ciphertext. We publish an open-source security audit every six months.</span>
+          <span class="lang-zh">笔记在你设备上加密后才同步。我们服务器只能看到密文。每 6 个月发布一次开源安全审计。</span>
+        </p>
+        <a class="sage-link" href="#security"><span class="lang-en">Read the audit</span><span class="lang-zh">阅读审计</span></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Craft section: kbd list + product -->
+<section class="sage-section" style="background:#fafbf0;">
+  <div class="sage-container sage-container--wide">
+    <div class="craft-grid">
+      <div>
+        <span class="sect-marker">03 · <span class="lang-en">Craft</span><span class="lang-zh">工艺</span></span>
+        <h2 style="font-family:'Instrument Serif', serif; font-weight:400; font-size:48px; letter-spacing:-0.02em; line-height:1.1; color:var(--sage-ink); margin:var(--space-3) 0 var(--space-5);">
+          <span class="lang-en">Three shortcuts.<br><em>Nothing else to learn.</em></span>
+          <span class="lang-zh">三个快捷键。<br><em>没别的要学。</em></span>
+        </h2>
+        <p class="sage-lead" style="max-width:440px; font-size:17px;">
+          <span class="lang-en">Skypad opens to a blank page and a cursor. No onboarding flow. No template gallery. You just write.</span>
+          <span class="lang-zh">Skypad 打开就是空白页和一个光标。没有引导。没有模板库。直接写。</span>
+        </p>
+      </div>
+      <div>
+        <div class="kbd-row">
+          <kbd>⌘ N</kbd>
+          <span class="tag"><span class="lang-en">New note, no form — just start writing</span><span class="lang-zh">新建笔记,没表单 —— 直接开写</span></span>
+        </div>
+        <div class="kbd-row">
+          <kbd>⌘ K</kbd>
+          <span class="tag"><span class="lang-en">Quick switcher — any note, any backlink</span><span class="lang-zh">快速跳转 —— 任意笔记,任意反向链接</span></span>
+        </div>
+        <div class="kbd-row">
+          <kbd>⌘ E</kbd>
+          <span class="tag"><span class="lang-en">Writing mode — hide everything else</span><span class="lang-zh">写作模式 —— 隐藏其他一切</span></span>
+        </div>
+        <div class="kbd-row" style="border-bottom:none; padding-top:var(--space-5);">
+          <a class="sage-link" href="#shortcuts" style="grid-column:1 / -1;"><span class="lang-en">Full shortcut reference</span><span class="lang-zh">完整快捷键列表</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pull quote on dark -->
+<section class="sage-section--dark">
+  <div class="sage-container" style="text-align:center; max-width:880px;">
+    <blockquote style="font-family:'Instrument Serif', serif; font-style:italic; font-weight:400; font-size:36px; line-height:1.35; color:#ffffff; margin:0;">
+      <span class="lang-en">"Skypad is the only tool I've actually stayed in. Every other note app tried to sell me AI. This one tries to get out of the way."</span>
+      <span class="lang-zh">"Skypad 是我唯一真正留下来的工具。其他笔记软件都在给我推销 AI。只有这个,在努力消失于无形。"</span>
+    </blockquote>
+    <p style="margin-top:var(--space-6); font-family:'Inter', sans-serif; font-size:14.5px; color:#97B077; letter-spacing:0.05em;">
+      <span aria-hidden="true" style="display:inline-block; width:20px; height:1.5px; background:#97B077; vertical-align:middle; margin-right:8px;"></span>
+      <span class="lang-en">Anya Mehra — independent writer · 18 months on Pro</span>
+      <span class="lang-zh">Anya Mehra — 独立作者 · Pro 用户 18 个月</span>
+    </p>
+  </div>
+</section>
+
+<!-- Ways to use — 2x2 -->
+<section class="sage-section">
+  <div class="sage-container sage-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="sect-marker">04 · <span class="lang-en">Uses</span><span class="lang-zh">用法</span></span>
+      <h2 style="font-family:'Instrument Serif', serif; font-style:italic; font-weight:400; font-size:48px; letter-spacing:-0.02em; line-height:1.1; color:var(--sage-ink); margin:var(--space-3) 0 0;">
+        <span class="lang-en">Made for the way you think.</span>
+        <span class="lang-zh">为你思考的方式而做。</span>
+      </h2>
+    </div>
+
+    <div class="use-grid">
+      <article class="use-tile">
+        <svg viewBox="0 0 110 80" style="width:100%; height:auto; border-radius:3px; background:#f0f3e2;">
+          <rect x="12" y="12" width="86" height="5" rx="1" fill="#393C54"/>
+          <rect x="12" y="22" width="54" height="2.5" rx="1" fill="#6d6f82"/>
+          <rect x="12" y="34" width="86" height="2" rx="1" fill="#c9d1b3"/>
+          <rect x="12" y="40" width="76" height="2" rx="1" fill="#c9d1b3"/>
+          <rect x="12" y="46" width="82" height="2" rx="1" fill="#c9d1b3"/>
+          <rect x="12" y="52" width="64" height="2" rx="1" fill="#c9d1b3"/>
+          <rect x="12" y="62" width="22" height="7" rx="3.5" fill="#97B077"/>
+        </svg>
+        <div>
+          <h3><span class="lang-en">Daily writing</span><span class="lang-zh">日常写作</span></h3>
+          <p>
+            <span class="lang-en">Open to a blank page in under a second. Essays, field notes, letters to yourself. Export to PDF when ready.</span>
+            <span class="lang-zh">一秒内打开空白页。文章、田野笔记、写给自己的信。写好了再导出 PDF。</span>
+          </p>
+        </div>
+      </article>
+      <article class="use-tile">
+        <svg viewBox="0 0 110 80" style="width:100%; height:auto; border-radius:3px; background:#f0f3e2;">
+          <circle cx="30" cy="40" r="5" fill="#97B077"/>
+          <circle cx="64" cy="22" r="3.5" fill="#393C54"/>
+          <circle cx="76" cy="56" r="4.5" fill="#393C54"/>
+          <circle cx="90" cy="36" r="3" fill="#6d6f82"/>
+          <line x1="30" y1="40" x2="64" y2="22" stroke="#c9d1b3" stroke-width="0.7"/>
+          <line x1="30" y1="40" x2="76" y2="56" stroke="#c9d1b3" stroke-width="0.7"/>
+          <line x1="64" y1="22" x2="90" y2="36" stroke="#c9d1b3" stroke-width="0.7"/>
+          <line x1="76" y1="56" x2="90" y2="36" stroke="#c9d1b3" stroke-width="0.7"/>
+        </svg>
+        <div>
+          <h3><span class="lang-en">Backlinks &amp; graph</span><span class="lang-zh">反向链接与关系图</span></h3>
+          <p>
+            <span class="lang-en">Link notes with <code>[[wiki]]</code> refs. Every backlink is visible. Grow a graph of your thinking.</span>
+            <span class="lang-zh">用 <code>[[wiki]]</code> 风格链接笔记。每条反向链接都可见。慢慢生长出思考的关系图。</span>
+          </p>
+        </div>
+      </article>
+      <article class="use-tile">
+        <svg viewBox="0 0 110 80" style="width:100%; height:auto; border-radius:3px; background:#f0f3e2;">
+          <rect x="14" y="14" width="24" height="52" rx="3" fill="#393C54"/>
+          <rect x="44" y="14" width="24" height="52" rx="3" fill="#97B077"/>
+          <rect x="74" y="14" width="24" height="52" rx="3" fill="#6d6f82"/>
+          <rect x="16" y="20" width="20" height="1.5" fill="#97B077" opacity="0.6"/>
+          <rect x="46" y="20" width="20" height="1.5" fill="#ffffff" opacity="0.8"/>
+          <rect x="76" y="20" width="20" height="1.5" fill="#ffffff" opacity="0.6"/>
+        </svg>
+        <div>
+          <h3><span class="lang-en">Sync on 5 devices</span><span class="lang-zh">5 台设备同步</span></h3>
+          <p>
+            <span class="lang-en">Start on your laptop, finish on your phone. End-to-end encrypted — only ciphertext leaves your machine.</span>
+            <span class="lang-zh">电脑上开始,手机上写完。端到端加密 —— 离开你设备的只有密文。</span>
+          </p>
+        </div>
+      </article>
+      <article class="use-tile">
+        <svg viewBox="0 0 110 80" style="width:100%; height:auto; border-radius:3px; background:#f0f3e2;">
+          <rect x="14" y="14" width="34" height="52" rx="3" fill="#393C54"/>
+          <circle cx="31" cy="26" r="2.5" fill="#97B077"/>
+          <rect x="20" y="36" width="22" height="1.5" fill="#97B077" opacity="0.7"/>
+          <rect x="20" y="42" width="16" height="1.5" fill="#97B077" opacity="0.5"/>
+          <rect x="54" y="14" width="42" height="52" rx="3" fill="#97B077"/>
+          <rect x="60" y="20" width="30" height="1.5" fill="#393C54" opacity="0.8"/>
+          <rect x="60" y="26" width="22" height="1.5" fill="#393C54" opacity="0.6"/>
+          <rect x="60" y="32" width="26" height="1.5" fill="#393C54" opacity="0.6"/>
+          <rect x="60" y="40" width="30" height="18" rx="2" fill="#393C54" opacity="0.2"/>
+        </svg>
+        <div>
+          <h3><span class="lang-en">Publish one click</span><span class="lang-zh">一键发布</span></h3>
+          <p>
+            <span class="lang-en">Any note becomes a public page at <code>name.skypad.page</code>. Custom domains on Team. No build step.</span>
+            <span class="lang-zh">任意笔记一键变为 <code>name.skypad.page</code> 上的公开页。Team 支持自定义域名。无需构建。</span>
+          </p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing preview -->
+<section class="sage-section" style="background:#f0f3e2;">
+  <div class="sage-container" style="max-width:780px; text-align:center;">
+    <span class="sect-marker">05 · <span class="lang-en">Pricing</span><span class="lang-zh">定价</span></span>
+    <h2 style="font-family:'Instrument Serif', serif; font-style:italic; font-weight:400; font-size:56px; letter-spacing:-0.02em; line-height:1.08; color:var(--sage-ink); margin:var(--space-3) 0 var(--space-5);">
+      <span class="lang-en">Free forever.<br>Pro when you sync.</span>
+      <span class="lang-zh">永久免费。<br>需要同步才升 Pro。</span>
+    </h2>
+    <p class="sage-lead" style="max-width:600px; margin:0 auto var(--space-7);">
+      <span class="lang-en">Solo writers, free forever. Cloud sync is $9 a month. Teams $29 a seat. That's the whole price list.</span>
+      <span class="lang-zh">单人作者永久免费。云同步 $9/月。团队 $29/席位。定价就这些。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-4); justify-content:center; flex-wrap:wrap;">
+      <a class="sage-button" href="pricing.html"><span class="lang-en">See pricing</span><span class="lang-zh">查看定价</span></a>
+      <a class="sage-link" href="#download"><span class="lang-en">Download for free</span><span class="lang-zh">免费下载</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="sage-section" style="text-align:center;">
+  <div class="sage-container" style="max-width:720px;">
+    <span class="sect-marker">06 · <span class="lang-en">Start</span><span class="lang-zh">开始</span></span>
+    <h2 style="font-family:'Instrument Serif', serif; font-style:italic; font-weight:400; font-size:64px; letter-spacing:-0.025em; line-height:1.05; color:var(--sage-ink); margin:var(--space-3) 0 var(--space-5);">
+      <span class="lang-en">Start writing today.</span>
+      <span class="lang-zh">今天就开始写作。</span>
+    </h2>
+    <p class="sage-lead" style="max-width:540px; margin:0 auto var(--space-6);">
+      <span class="lang-en">No sign-up. No credit card. Download and open a blank note in under a minute.</span>
+      <span class="lang-zh">无需注册。无需信用卡。一分钟内下载并打开一页空白笔记。</span>
+    </p>
+    <p>
+      <a class="sage-button" href="#download"><span class="lang-en">Download Skypad — free</span><span class="lang-zh">下载 Skypad - 免费</span></a>
+    </p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="sage-footer">
+  <div class="sage-footer-grid">
+    <div class="sage-footer-group"><h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5><a href="#features"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a><a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a><a href="#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a><a href="#changelog"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a></div>
+    <div class="sage-footer-group"><h5><span class="lang-en">For teams</span><span class="lang-zh">团队</span></h5><a href="#teams"><span class="lang-en">Team plan</span><span class="lang-zh">团队版</span></a><a href="#enterprise"><span class="lang-en">Enterprise</span><span class="lang-zh">企业版</span></a><a href="#security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a><a href="#slas">SLAs</a></div>
+    <div class="sage-footer-group"><h5><span class="lang-en">Writers</span><span class="lang-zh">作者</span></h5><a href="#guide"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a><a href="#field-notes"><span class="lang-en">Field notes</span><span class="lang-zh">田野笔记</span></a><a href="#showcase"><span class="lang-en">Showcase</span><span class="lang-zh">作品精选</span></a><a href="#community"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a></div>
+    <div class="sage-footer-group"><h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5><a href="#about"><span class="lang-en">About</span><span class="lang-zh">关于</span></a><a href="#press"><span class="lang-en">Press</span><span class="lang-zh">媒体</span></a><a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a><a href="#status"><span class="lang-en">Status</span><span class="lang-zh">状态</span></a></div>
+    <div class="sage-footer-group"><h5><span class="lang-en">Legal</span><span class="lang-zh">法务</span></h5><a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a><a href="#terms"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a><a href="#dpa">DPA</a><a href="#audit"><span class="lang-en">Audit</span><span class="lang-zh">审计</span></a></div>
+  </div>
+  <div class="sage-footer-legal">
+    <span>Copyright © 2026 Skypad Inc.</span>
+    <span><span class="lang-en">Made in Berlin · Toronto · Kyoto</span><span class="lang-zh">制作于 柏林 · 多伦多 · 京都</span></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
