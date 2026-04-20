@@ -40,6 +40,20 @@
 2. 不用 `transition: all`：只 transition 具体属性（opacity / transform / color）。
 3. 不要把衬线 display 字体用作正文（Instrument Serif / Lora 做 display + italic pull-quote，不做 body）。
 
+## E. SVG 规则(visual-audit 强制)
+
+1. **禁止"装饰性 transform"**:如果一段 SVG `<text>` 加了 `rotate()` 或其他 transform,它很可能是"在写源码时想塞个装饰"。99% 场景下**去掉它比加它更好** —— 因为渲染后它的 bounding box 会穿过原本看似安全的静态标签(known-bugs 1.8 就是这条)。写之前问自己:这文字**真的必要吗?** 必要的话,先渲染一次看它有没有压到别的元素再交付。
+2. **同 SVG 内任意两个 `<text>` 的 rendered rect 不应相交 ≥ 4×4 px**。title + subtitle 垂直紧贴的 1-2px 叠加不算。
+3. **文字颜色不要和它所在 shape 的填充色接近**:文字 `fill` 和承载它的最小不透明 rect/circle/path 的 `fill` RGB 欧氏距离 ≥ 40(simple heuristic,见 known-bugs 1.9)。半透明叠加层(fill-opacity < 0.5)不算背景 —— 真正的背景在它底下。
+4. **SVG `<text>` 源码 `font-size` ≥ 11** 才能在 worst-case 0.84 scale 下仍 ≥ 9 渲染像素。
+
+## F. HTML 语义 + a11y(visual-audit 强制)
+
+1. **每页恰好一个 `<h1>`**(multiple-h1 error / no-h1 warn)。
+2. **不跳 heading 层级**:h1 → h3 (跳 h2) warn;footer / aside / nav 内的 h5 列标题是行业惯例,不算跳级。
+3. **`<img>` 必须有 `alt`**:装饰性用 `alt=""`,内容性用描述。
+4. **可见的 `<a>` 必须有文本 / `aria-label` / `title`**:空链接屏幕阅读器读不出。
+
 ---
 
 ## 出坑以后

@@ -61,6 +61,33 @@
 - **Why**：品牌色往往是中饱和中明度，配中性色文字差 0.5–1.0 就过不了 AA。
 - **Defense**：`visual-audit.mjs` 的 "contrast audit"：扫所有按钮/徽章选择器，ratio < 3 报 error，3–4.5 报 warn。
 
+### 1.8 SVG 里的 rotated / transformed 装饰文字穿过其他 label
+- **Reader sees**:SVG 框图右侧有一条旋转 90° 的 "REQUEST · FLOWS · DOWN" 装饰文字,和其他静态标签重叠成乱码。用户主动报告此 bug (2026-04-20)。
+- **Why**:generator 写 SVG 时用源码坐标思维;加上 `transform="translate(...) rotate(90)"` 之后,源码里看似安全的 x/y 坐标在渲染后变成另一方向的射线,穿过附近不该穿过的元素。**纯静态源扫描永远抓不到** —— 必须渲染后看 bounding box。
+- **Defense**:`visual-audit.mjs` 的 **svg-text-overlap** check —— 同 SVG 内任意两个 `<text>` 的 `getBoundingClientRect()` 相交 ≥ 4px × 4px 就报 error。阈值 4px 跳过 title/subtitle 正常 font-metric 紧贴。
+- **Rule**:`cross-skill-rules.md` 里增加"SVG 装饰元素"一节 —— 非内容型 transform(尤其 rotate)在 SVG 里 99% 情况下是装饰,去掉比加它更好。
+- **已修实例**:demos/{anthropic,apple,sage}-design/index.html 三处 code-architecture 图右侧装饰,已全部删掉;index.html 的 apple/anthropic 预览卡里两行大 h1 源码 y 偏移不够导致 rect 重叠,已调整 y 坐标。
+
+### 1.9 SVG 里文字颜色和它所在的 shape 填充色太近
+- **Reader sees**:某 rect 里的文字和 rect 的填充色看起来几乎一样,文字变不可见。
+- **Why**:作者在源码里用 `fill="#fff"` 给文字,不小心 rect 也是 `fill="#fff"`,或两者色相差几个 RGB。
+- **Defense**:`visual-audit.mjs` 的 **svg-text-on-same-colour** check —— 对每个 `<text>`,找到包含它中心点的**最小不透明** shape(忽略 fill-opacity < 0.5 的叠加层),计算 RGB 欧氏距离;< 40 就 warn。
+- **注意**:该 check 的 heuristic 近似度不高,只用作提示。真色彩对比度要 WCAG 算法(带 gamma 曲线),不是简单 RGB 距离。
+
+### 1.10 heading 层级跳级 h1 → h3(跳过 h2)
+- **Reader sees**:视觉上没问题,屏幕阅读器用户会感觉章节结构残缺。
+- **Why**:作者用 h1 标全页标题,直接用 h3 做子标题(因为 h2 太大了),h2 缺失。
+- **Defense**:`visual-audit.mjs` 的 **heading-skip** check —— 扫所有可见 heading(跳过 footer / aside / nav,这些 landmark 里 h5 列标题是行业惯例),发现 jump > 1 级就 warn。
+- **修法**:要么补一个 h2 层级,要么把 h3 改成 h2 + CSS 缩小字号(语义层级归语义,视觉层级归 CSS)。
+
+### 1.11 多 `<h1>` 同页 / 无 `<h1>`
+- **Reader sees**:没视觉异常;SEO 和 a11y 出问题。
+- **Defense**:`visual-audit.mjs` 的 **multiple-h1** check —— 可见 h1 > 1 报 error;== 0 报 warn。
+
+### 1.12 `<img>` 无 alt / `<a>` 无可访问文本
+- **Reader sees**:视觉正常;屏幕阅读器读不出内容。
+- **Defense**:`visual-audit.mjs` 的 **img-no-alt** 和 **link-no-text** check。`<img>` 必须有 alt(装饰性可 `alt=""`);可见 `<a>` 必须有文本或 aria-label 或 title。
+
 ---
 
 ## 2. anthropic-design
@@ -82,6 +109,11 @@
   - `verify.py` 的 hero container 规则：base `apple-container` 被标为 narrow，`--hero`/`--wide` 才被接受;
   - 模板里 hero 段已固定用 `.apple-container apple-container--hero`;
   - visual-audit 的 diagram-narrow + diagram-tiny-text 兜底。
+
+### 3.2 apple 品牌蓝链接在浅灰段上 = 4.31(差 0.19 过 AA)
+- **Reader sees**:`.apple-link`(#0071E3)用在 `background:#f5f5f7` 的 subtle section 上,contrast 4.31,差一点点。
+- **Why**:apple.com 自己就是这么做的,品牌定位上是 intentional。
+- **Defense**:visual-audit.mjs 的 INTENTIONAL_EXCEPTIONS 列表增加一条(fg #0071E3 × bg #f5f5f7),`--ignore-intentional` 过滤。
 
 ---
 

@@ -74,8 +74,8 @@ node skills/design-review/scripts/screenshot.mjs <path/to/html> shot.png
 
 | 闸口 | 抓哪些 | 依赖 |
 |---|---|---|
-| verify.py | `[placeholder]` 文本、BEM modifier-only、未定义 class、`<svg>` 不平衡、hero 容器用错 | Python 标准库 |
-| visual-audit.mjs | WCAG contrast < 4.5、hero 框图渲染 < 900px、SVG `<text>` 实际像素 < 9px、多列网格孤儿卡 | playwright |
+| verify.py | 占位符字符串(文档页的 `<pre>`/`<code>` 块自动剥除,不误报)、BEM modifier-only、未定义 class(union: 默认 skill CSS + HTML link + --css)、`<svg>` 不平衡、hero 容器用错 | Python 标准库 |
+| visual-audit.mjs | WCAG contrast < 4.5 (按钮/徽章)、hero 框图渲染 < 900px、SVG `<text>` 实际像素 < 9px、多列网格孤儿卡、**SVG `<text>` 互相重叠 ≥ 4×4 px(known-bugs 1.8)**、**SVG 文字 fill 和承载 shape fill 的 RGB 距离 < 40(known-bugs 1.9)**、**多 h1 / heading 跳级 / 无 alt img / 无文本 a(known-bugs 1.10-1.12)** | playwright |
 | screenshot.mjs | 只产物不评审 —— 给人看的 | playwright |
 
 具体清单在 `references/known-bugs.md` 和 `references/cross-skill-rules.md`。

@@ -4,6 +4,8 @@
 //   2. Hero-row diagrams that render too narrow (<900px → text becomes illegible)
 //   3. SVG <text> that renders under 9px on a 1440-wide viewport
 //   4. Orphan figure cards in multi-col grids next to full-row hero siblings
+//   5. SVG text elements whose rendered bounding boxes overlap (e.g. rotated
+//      decorative text intersecting static labels) — known-bugs 1.8
 //
 // Usage:
 //   node skills/design-review/scripts/visual-audit.mjs [--ignore-intentional] <html-path>
@@ -40,6 +42,10 @@ const INTENTIONAL_EXCEPTIONS = [
   // — documented in known-bugs.md §2.1. Brand-intentional, reviewed, accepted.
   { fg: [255, 255, 255], bg: [217, 119, 87], tolerance: 2,
     note: 'anthropic brand orange CTA (known-bugs 2.1)' },
+  // Apple brand link colour. blue(0,113,227) on pale-gray(245,245,247) = 4.31
+  // — 0.19 below AA but apple.com's standard link styling on its subtle band.
+  { fg: [0, 113, 227], bg: [245, 245, 247], tolerance: 2,
+    note: 'apple brand link on pale-gray section (known-bugs 3.2)' },
 ];
 
 function matchesIntentional(finding) {
@@ -232,6 +238,171 @@ const findings = await page.evaluate(() => {
     }
   });
 
+  // ---------- 5) SVG text overlap audit ----------
+  // Catches the class of bug where a rotated decorative label intersects
+  // static labels, whose coords looked safe in non-rotated source.
+  // Rule: require overlap ≥ 4px on BOTH axes — title+subtitle pairs with 1-2px
+  // font-metric overlap don't count; crossing-decorations do.
+  document.querySelectorAll('svg').forEach((svg) => {
+    const texts = [...svg.querySelectorAll('text')].filter((t) => {
+      const r = t.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    });
+    for (let i = 0; i < texts.length; i++) {
+      const a = texts[i].getBoundingClientRect();
+      for (let j = i + 1; j < texts.length; j++) {
+        const b = texts[j].getBoundingClientRect();
+        const xOverlap = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+        const yOverlap = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+        if (xOverlap < 4 || yOverlap < 4) continue;
+        // Skip if one text fully contains the other (tspans, etc.)
+        const aInB = a.left >= b.left && a.right <= b.right && a.top >= b.top && a.bottom <= b.bottom;
+        const bInA = b.left >= a.left && b.right <= a.right && b.top >= a.top && b.bottom <= a.bottom;
+        if (aInB || bInA) continue;
+        issues.push({
+          kind: 'svg-text-overlap',
+          severity: 'error',
+          textA: (texts[i].textContent || '').trim().slice(0, 34),
+          textB: (texts[j].textContent || '').trim().slice(0, 34),
+          rectA: `${Math.round(a.left)},${Math.round(a.top)}+${Math.round(a.width)}×${Math.round(a.height)}`,
+          rectB: `${Math.round(b.left)},${Math.round(b.top)}+${Math.round(b.width)}×${Math.round(b.height)}`,
+          svg: svg.getAttribute('aria-label') || 'unlabeled',
+        });
+      }
+    }
+  });
+
+  // ---------- 6) Multiple <h1> ----------
+  // Each page must have exactly one <h1>. More than one = broken SEO +
+  // screen-reader hierarchy + indicates semantic sloppiness.
+  const h1s = [...document.querySelectorAll('h1')].filter((h) => {
+    const s = getComputedStyle(h);
+    return s.display !== 'none' && s.visibility !== 'hidden';
+  });
+  if (h1s.length > 1) {
+    issues.push({
+      kind: 'multiple-h1',
+      severity: 'error',
+      count: h1s.length,
+      texts: h1s.map((h) => (h.innerText || '').trim().slice(0, 34)),
+    });
+  } else if (h1s.length === 0) {
+    issues.push({
+      kind: 'no-h1',
+      severity: 'warn',
+      note: 'page has no <h1> — every public page needs exactly one',
+    });
+  }
+
+  // ---------- 7) Heading level skip (main content only) ----------
+  // <h1> → <h3> without <h2> in between breaks reading order. Allow jumping
+  // DOWN freely, only flag skipping UP. Skip headings inside footer/aside/nav
+  // landmarks, where h5 column-header convention is widespread.
+  const headings = [...document.querySelectorAll('h1, h2, h3, h4, h5, h6')].filter(
+    (h) => !h.closest('footer, aside, nav')
+  );
+  let lastLevel = 0;
+  for (const h of headings) {
+    const level = parseInt(h.tagName.substring(1), 10);
+    if (lastLevel && level > lastLevel + 1) {
+      issues.push({
+        kind: 'heading-skip',
+        severity: 'warn',
+        from: `h${lastLevel}`,
+        to: `h${level}`,
+        text: (h.innerText || '').trim().slice(0, 50),
+      });
+    }
+    lastLevel = level;
+  }
+
+  // ---------- 8) Images without alt ----------
+  document.querySelectorAll('img').forEach((img) => {
+    if (!img.hasAttribute('alt')) {
+      issues.push({
+        kind: 'img-no-alt',
+        severity: 'error',
+        src: (img.getAttribute('src') || '').slice(0, 60),
+      });
+    }
+  });
+
+  // ---------- 9) Links without accessible text ----------
+  document.querySelectorAll('a').forEach((a) => {
+    const style = getComputedStyle(a);
+    if (style.display === 'none' || style.visibility === 'hidden') return;
+    const text = (a.innerText || '').trim();
+    const aria = a.getAttribute('aria-label');
+    const title = a.getAttribute('title');
+    if (!text && !aria && !title) {
+      issues.push({
+        kind: 'link-no-text',
+        severity: 'error',
+        href: (a.getAttribute('href') || '').slice(0, 50),
+      });
+    }
+  });
+
+  // ---------- 10) SVG text on same-colour shape ----------
+  // Simple heuristic: for every <text> inside an SVG, find the first ancestor
+  // shape (rect/circle/polygon/path) whose bbox contains the text's centre,
+  // compare fills — if they differ by < 40 in RGB distance, contrast is too low.
+  const colourDist = (r1, g1, b1, r2, g2, b2) =>
+    Math.sqrt((r1-r2)**2 + (g1-g2)**2 + (b1-b2)**2);
+  const hexOrRgb = (s) => {
+    if (!s) return null;
+    if (s.startsWith('#')) {
+      const h = s.length === 4 ? s.slice(1).split('').map((c) => parseInt(c+c, 16)) : [s.slice(1,3), s.slice(3,5), s.slice(5,7)].map((c) => parseInt(c, 16));
+      return h.length === 3 ? h : null;
+    }
+    const m = s.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    return m ? [+m[1], +m[2], +m[3]] : null;
+  };
+  document.querySelectorAll('svg text').forEach((t) => {
+    const rect = t.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    const textFill = hexOrRgb(t.getAttribute('fill') || getComputedStyle(t).fill);
+    if (!textFill) return;
+    const svg = t.closest('svg');
+    if (!svg) return;
+    // Find the deepest OPAQUE shape whose bbox contains the text centre.
+    // Skip semi-transparent overlay rects (fill-opacity / opacity < 0.5) —
+    // they're painterly overlays, the "true" background is beneath them.
+    const shapes = [...svg.querySelectorAll('rect, circle, polygon, path, ellipse')];
+    let best = null;
+    for (const s of shapes) {
+      const fillAttr = s.getAttribute('fill') || '';
+      if (fillAttr.startsWith('url(') || fillAttr === 'none') continue;
+      const st = getComputedStyle(s);
+      const fillOp = parseFloat(st.fillOpacity || '1');
+      const op = parseFloat(st.opacity || '1');
+      if (fillOp < 0.5 || op < 0.5) continue;
+      const sr = s.getBoundingClientRect();
+      if (sr.width === 0 || sr.height === 0) continue;
+      if (cx < sr.left || cx > sr.right || cy < sr.top || cy > sr.bottom) continue;
+      if (!best || (sr.width * sr.height < best.rect.width * best.rect.height)) {
+        best = { shape: s, rect: sr };
+      }
+    }
+    if (!best) return;
+    const shapeFill = hexOrRgb(best.shape.getAttribute('fill') || getComputedStyle(best.shape).fill);
+    if (!shapeFill) return;
+    const d = colourDist(...textFill, ...shapeFill);
+    if (d < 40) {
+      issues.push({
+        kind: 'svg-text-on-same-colour',
+        severity: 'warn',
+        distance: Math.round(d),
+        text: (t.textContent || '').trim().slice(0, 30),
+        textFill: `rgb(${textFill.join(',')})`,
+        shapeFill: `rgb(${shapeFill.join(',')})`,
+        svg: svg.getAttribute('aria-label') || 'unlabeled',
+      });
+    }
+  });
+
   return issues;
 });
 
@@ -274,6 +445,32 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'orphan-figure') {
     console.log(
       `  [${i.severity}] orphan figure "${i.label}" sits alone (${i.rendered}) next to full-row hero siblings — span 2 cols or center it`
+    );
+  } else if (i.kind === 'svg-text-overlap') {
+    console.log(
+      `  [${i.severity}] SVG text overlap in "${i.svg}": "${i.textA}" [${i.rectA}] ↔ "${i.textB}" [${i.rectB}] — move one element or drop the decorative label`
+    );
+  } else if (i.kind === 'multiple-h1') {
+    console.log(
+      `  [${i.severity}] ${i.count} <h1> elements on the page: ${i.texts.map((t) => `"${t}"`).join(', ')} — every page should have exactly one`
+    );
+  } else if (i.kind === 'no-h1') {
+    console.log(`  [${i.severity}] ${i.note}`);
+  } else if (i.kind === 'heading-skip') {
+    console.log(
+      `  [${i.severity}] heading level skipped: ${i.from} → ${i.to} at "${i.text}" — don't jump levels down, always step one`
+    );
+  } else if (i.kind === 'img-no-alt') {
+    console.log(
+      `  [${i.severity}] <img> without alt: ${i.src} — add alt="" for decorative or alt="description" for content`
+    );
+  } else if (i.kind === 'link-no-text') {
+    console.log(
+      `  [${i.severity}] <a> with no text, aria-label, or title: href=${i.href}`
+    );
+  } else if (i.kind === 'svg-text-on-same-colour') {
+    console.log(
+      `  [${i.severity}] SVG text colour too close to shape fill in "${i.svg}": "${i.text}" fg=${i.textFill} bg=${i.shapeFill} (RGB distance=${i.distance}) — probably unreadable`
     );
   }
 }
