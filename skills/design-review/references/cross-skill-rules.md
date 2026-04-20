@@ -63,7 +63,9 @@
 
 **问题模式**:等宽 grid(`repeat(3, 1fr)` / `repeat(4, 1fr)` 等)强行把内容拉到容器宽度的 1/N,但实际内容**不够填满**这个宽度 → 卡片看着"空心"、"拉伸"、"奇怪"。
 
-**visual-audit §10b hollow-card check**:任何等宽 grid 里,子卡 aspect > 2.0 且文本 < 120 字 → warn `hollow card`。
+**visual-audit §10b hollow-card check**:任何等宽 grid 里,子卡 aspect > 1.8 且文本 < 180 字 → warn `hollow card`。
+
+**例外:stat-strip**。如果卡内有 ≥36px 的大字号(big number display),跳过 —— 这是指标卡(比如 `18,000+ writers`),稀疏文本是设计本意,不是 bug。
 
 **写之前的自问(rule)**:每次用等宽 grid 放卡时,检查三件事:
 

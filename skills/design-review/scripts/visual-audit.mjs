@@ -364,6 +364,14 @@ const findings = await page.evaluate(() => {
     for (const c of children) {
       const rect = c.getBoundingClientRect();
       if (rect.width < 100 || rect.height < 40) continue;
+      // Skip stat-strip pattern: if any descendant has a very large font
+      // (≥36px), this is a number/metric display, not a content card —
+      // the sparse text is intentional (big digit + small label).
+      const hasBigNumber = [...c.querySelectorAll('*')].some((d) => {
+        const fs = parseFloat(getComputedStyle(d).fontSize);
+        return fs >= 36;
+      });
+      if (hasBigNumber) continue;
       const aspect = rect.width / rect.height;
       const text = (c.innerText || '').trim();
       const chars = text.length;

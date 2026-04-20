@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,6 +8,43 @@
 <link rel="stylesheet" href="../../assets/fonts.css">
 <link rel="stylesheet" href="../../assets/anthropic.css">
 <style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+  /* Chinese stack (§H): Poppins → Noto Sans SC (display); Lora → Noto Serif SC (editorial). */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .feat-card__body {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .feat-card__title,
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .feat-card__kicker,
+  html[data-lang="zh"] .stat-strip .num,
+  html[data-lang="zh"] .stat-strip .lbl {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] .test-card blockquote {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal;
+  }
+
   .feat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--space-5); }
   .feat-card {
     background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg);
@@ -17,6 +54,7 @@
     font-family:var(--font-heading); font-size:11.5px; letter-spacing:0.14em; text-transform:uppercase;
     color:var(--anth-orange); font-weight:700;
   }
+  html[data-lang="zh"] .feat-card__kicker { text-transform:none; letter-spacing:0.04em; }
   .feat-card__title {
     font-family:var(--font-heading); font-size:24px; font-weight:600; letter-spacing:-0.01em;
     color:var(--anth-text); margin:var(--space-2) 0 var(--space-3);
@@ -79,14 +117,15 @@
 <nav class="anth-nav"><div class="anth-nav-inner">
   <a href="#" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">Skypad</a>
   <div>
-    <a href="#product">Product</a>
-    <a href="#features">Why</a>
-    <a href="#pricing">Pricing</a>
-    <a href="#changelog">Changelog</a>
+    <a href="#product"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="#features"><span class="lang-en">Why</span><span class="lang-zh">为什么</span></a>
+    <a href="#pricing"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="#changelog"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a>
   </div>
   <div style="display:flex; gap:var(--space-3); align-items:center;">
-    <a class="anth-link anth-link--no-arrow" href="#login" style="font-family:var(--font-heading); color:var(--anth-text); text-decoration:none; font-size:14px;">Sign in</a>
-    <a class="anth-button" href="#start">Start writing</a>
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="anth-link anth-link--no-arrow" href="#login" style="font-family:var(--font-heading); color:var(--anth-text); text-decoration:none; font-size:14px;"><span class="lang-en">Sign in</span><span class="lang-zh">登录</span></a>
+    <a class="anth-button" href="#start"><span class="lang-en">Start writing</span><span class="lang-zh">开始写作</span></a>
   </div>
 </div></nav>
 
@@ -94,9 +133,9 @@
 <section style="padding:var(--space-5) var(--space-5) 0;">
   <div class="anth-container">
     <div class="anth-banner">
-      <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;">New</span>
-      <span>Mobile app for iOS and Android — sync your notes everywhere, encrypted end-to-end.</span>
-      <a class="anth-link" href="#mobile" style="margin-left:auto;">Read the launch post</a>
+      <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">New</span><span class="lang-zh">新</span></span>
+      <span><span class="lang-en">Mobile app for iOS and Android — sync your notes everywhere, encrypted end-to-end.</span><span class="lang-zh">iOS 与 Android 移动端上线 —— 笔记随身同步,端到端加密。</span></span>
+      <a class="anth-link" href="#mobile" style="margin-left:auto;"><span class="lang-en">Read the launch post</span><span class="lang-zh">阅读发布文章</span></a>
     </div>
   </div>
 </section>
@@ -104,19 +143,22 @@
 <!-- Hero -->
 <section class="anth-hero">
   <div class="anth-container" style="max-width:860px;">
-    <span class="anth-badge"><span aria-hidden="true" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#788c5d; margin-right:6px; vertical-align:middle;"></span>Local-first · E2E encrypted · Built in Berlin</span>
+    <span class="anth-badge"><span aria-hidden="true" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#788c5d; margin-right:6px; vertical-align:middle;"></span><span class="lang-en">Local-first · E2E encrypted · Built in Berlin</span><span class="lang-zh">本地优先 · 端到端加密 · 柏林制造</span></span>
     <h1 style="margin-top:var(--space-4);">
-      A quiet notebook.<br>For people who<br>want to think.
+      <span class="lang-en">A quiet notebook.<br>For people who<br>want to think.</span>
+      <span class="lang-zh">一个安静的记事本。<br>给那些想要<br>认真思考的人。</span>
     </h1>
     <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.6; max-width:680px; font-family:var(--font-body);">
-      Skypad is plain Markdown on your own machine. No AI in your editor. No notifications begging for your attention. Cloud sync when you want it, encrypted so only you can read it. Free for solo writers.
+      <span class="lang-en">Skypad is plain Markdown on your own machine. No AI in your editor. No notifications begging for your attention. Cloud sync when you want it, encrypted so only you can read it. Free for solo writers.</span>
+      <span class="lang-zh">Skypad 就是你本机上的普通 Markdown 文件。编辑器里没有 AI。没有争抢你注意力的通知。想同步时再云同步,加密到只有你能读。单人写作永久免费。</span>
     </p>
     <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
-      <a class="anth-button" href="#download">Download Skypad — free</a>
-      <a class="anth-button anth-button--ghost" href="#pricing">See pricing</a>
+      <a class="anth-button" href="#download"><span class="lang-en">Download Skypad — free</span><span class="lang-zh">下载 Skypad - 免费</span></a>
+      <a class="anth-button anth-button--ghost" href="#pricing"><span class="lang-en">See pricing</span><span class="lang-zh">查看定价</span></a>
     </div>
     <p style="margin-top:var(--space-5); color:var(--anth-text-secondary); font-family:var(--font-heading); font-size:13px; letter-spacing:0.02em;">
-      macOS · Windows · Linux · iOS · Android &nbsp;·&nbsp; no account required for Free
+      <span class="lang-en">macOS · Windows · Linux · iOS · Android &nbsp;·&nbsp; no account required for Free</span>
+      <span class="lang-zh">macOS · Windows · Linux · iOS · Android &nbsp;·&nbsp; 免费版无需注册</span>
     </p>
   </div>
 </section>
@@ -203,10 +245,10 @@
 <section class="anth-section anth-section--subtle">
   <div class="anth-container">
     <div class="stat-strip">
-      <div><span class="num">18,000+</span><span class="lbl">writers on Skypad</span></div>
-      <div><span class="num">12M</span><span class="lbl">notes written on Pro</span></div>
-      <div><span class="num">0</span><span class="lbl">ads, trackers, notifications</span></div>
-      <div><span class="num">100%</span><span class="lbl">open-source editor core</span></div>
+      <div><span class="num">18,000+</span><span class="lbl"><span class="lang-en">writers on Skypad</span><span class="lang-zh">位作者在使用 Skypad</span></span></div>
+      <div><span class="num">12M</span><span class="lbl"><span class="lang-en">notes written on Pro</span><span class="lang-zh">条笔记已在 Pro 上写就</span></span></div>
+      <div><span class="num">0</span><span class="lbl"><span class="lang-en">ads, trackers, notifications</span><span class="lang-zh">广告、追踪器、通知</span></span></div>
+      <div><span class="num">100%</span><span class="lbl"><span class="lang-en">open-source editor core</span><span class="lang-zh">编辑器内核开源</span></span></div>
     </div>
   </div>
 </section>
@@ -215,10 +257,11 @@
 <section class="anth-section" id="features">
   <div class="anth-container anth-container--wide">
     <div style="max-width:680px; margin:0 auto var(--space-8); text-align:center;">
-      <span class="anth-badge">Why Skypad</span>
-      <h2 style="margin-top:var(--space-3);">Three decisions we're not compromising on.</h2>
+      <span class="anth-badge"><span class="lang-en">Why Skypad</span><span class="lang-zh">为什么选 Skypad</span></span>
+      <h2 style="margin-top:var(--space-3);"><span class="lang-en">Three decisions we're not compromising on.</span><span class="lang-zh">三个不让步的决定。</span></h2>
       <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
-        The features most note apps advertise are exactly the ones we declined to build. Here's what we chose instead.
+        <span class="lang-en">The features most note apps advertise are exactly the ones we declined to build. Here's what we chose instead.</span>
+        <span class="lang-zh">其他笔记软件拿来宣传的功能,恰恰是我们拒绝做的。下面是我们选择做的。</span>
       </p>
     </div>
 
@@ -231,12 +274,13 @@
             <path d="M12 14h8M12 18h8M12 22h6"/>
           </svg>
         </div>
-        <span class="feat-card__kicker">Local-first</span>
-        <h3 class="feat-card__title">Your notes are plain Markdown files.</h3>
+        <span class="feat-card__kicker"><span class="lang-en">Local-first</span><span class="lang-zh">本地优先</span></span>
+        <h3 class="feat-card__title"><span class="lang-en">Your notes are plain Markdown files.</span><span class="lang-zh">你的笔记是普通 Markdown 文件。</span></h3>
         <p class="feat-card__body">
-          Every note you write is a <code>.md</code> file on your own disk. No proprietary format, no database, no lock-in. Open one in VS Code, Obsidian, or <code>cat</code> — they're just text.
+          <span class="lang-en">Every note you write is a <code>.md</code> file on your own disk. No proprietary format, no database, no lock-in. Open one in VS Code, Obsidian, or <code>cat</code> — they're just text.</span>
+          <span class="lang-zh">你写的每一条笔记都是你磁盘上的一个 <code>.md</code> 文件。没有私有格式,没有数据库,没有绑定。用 VS Code、Obsidian 或者 <code>cat</code> 打开 —— 就是纯文本。</span>
         </p>
-        <a class="anth-link" href="#local">How local-first works</a>
+        <a class="anth-link" href="#local"><span class="lang-en">How local-first works</span><span class="lang-zh">本地优先是怎么工作的</span></a>
       </article>
 
       <article class="feat-card">
@@ -246,12 +290,13 @@
             <line x1="8" y1="8" x2="24" y2="24"/>
           </svg>
         </div>
-        <span class="feat-card__kicker">No AI</span>
-        <h3 class="feat-card__title">An editor that stops trying to finish your sentence.</h3>
+        <span class="feat-card__kicker"><span class="lang-en">No AI</span><span class="lang-zh">没有 AI</span></span>
+        <h3 class="feat-card__title"><span class="lang-en">An editor that stops trying to finish your sentence.</span><span class="lang-zh">一个不替你写完句子的编辑器。</span></h3>
         <p class="feat-card__body">
-          We don't ship AI autocomplete, AI rewriting, or AI summaries. Your ideas are yours, formed in your own head, in your own words. If you want AI, use it on purpose — don't let it colonize your thinking.
+          <span class="lang-en">We don't ship AI autocomplete, AI rewriting, or AI summaries. Your ideas are yours, formed in your own head, in your own words. If you want AI, use it on purpose — don't let it colonize your thinking.</span>
+          <span class="lang-zh">我们不做 AI 自动补全、AI 改写或 AI 摘要。你的想法是你的,在你自己的脑子里、用你自己的话形成的。想用 AI 的时候专门打开用它 —— 别让它占领你的思考。</span>
         </p>
-        <a class="anth-link" href="#no-ai">Why we said no</a>
+        <a class="anth-link" href="#no-ai"><span class="lang-en">Why we said no</span><span class="lang-zh">我们为什么说不</span></a>
       </article>
 
       <article class="feat-card">
@@ -261,12 +306,13 @@
             <path d="M6 12l10 6 10-6"/>
           </svg>
         </div>
-        <span class="feat-card__kicker">E2E encrypted</span>
-        <h3 class="feat-card__title">We can't read your notes. By design.</h3>
+        <span class="feat-card__kicker"><span class="lang-en">E2E encrypted</span><span class="lang-zh">端到端加密</span></span>
+        <h3 class="feat-card__title"><span class="lang-en">We can't read your notes. By design.</span><span class="lang-zh">我们读不到你的笔记。这是有意的。</span></h3>
         <p class="feat-card__body">
-          Your notes are encrypted on your device before sync. Skypad servers only ever see ciphertext. We publish an open-source security audit every six months; the latest one is at <code>/security</code>.
+          <span class="lang-en">Your notes are encrypted on your device before sync. Skypad servers only ever see ciphertext. We publish an open-source security audit every six months; the latest one is at <code>/security</code>.</span>
+          <span class="lang-zh">笔记在你的设备上加密后才同步。Skypad 服务器只能看到密文。每 6 个月我们发布一次开源安全审计;最新一份在 <code>/security</code>。</span>
         </p>
-        <a class="anth-link" href="#security">Read the latest audit</a>
+        <a class="anth-link" href="#security"><span class="lang-en">Read the latest audit</span><span class="lang-zh">阅读最新审计</span></a>
       </article>
     </div>
   </div>
@@ -276,24 +322,26 @@
 <section class="anth-section anth-section--subtle" id="product">
   <div class="anth-container anth-container--wide">
     <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
-      <span class="anth-badge">How it feels</span>
-      <h2 style="margin-top:var(--space-3);">Open it. Think. Close it.</h2>
+      <span class="anth-badge"><span class="lang-en">How it feels</span><span class="lang-zh">使用的感觉</span></span>
+      <h2 style="margin-top:var(--space-3);"><span class="lang-en">Open it. Think. Close it.</span><span class="lang-zh">打开。思考。关掉。</span></h2>
       <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
-        No onboarding flow, no template gallery, no "welcome, tell us about yourself." The app opens to a blank page and a cursor. That's the product.
+        <span class="lang-en">No onboarding flow, no template gallery, no "welcome, tell us about yourself." The app opens to a blank page and a cursor. That's the product.</span>
+        <span class="lang-zh">没有引导流程,没有模板库,没有"欢迎,跟我们介绍一下你自己"。应用打开就是一页空白和一个光标。产品本身就是这样。</span>
       </p>
     </div>
 
     <div style="display:grid; grid-template-columns:2fr 3fr; gap:var(--space-7); align-items:center;">
       <div>
         <h3 style="font-size:28px; font-family:var(--font-heading); font-weight:600; letter-spacing:-0.01em; margin:0 0 var(--space-4);">
-          Three keyboard shortcuts. Nothing else to learn.
+          <span class="lang-en">Three keyboard shortcuts. Nothing else to learn.</span>
+          <span class="lang-zh">三个键盘快捷键。没别的要学。</span>
         </h3>
         <ul style="list-style:none; padding:0; margin:0; font-family:var(--font-body); font-size:16px; line-height:1.9;">
-          <li><kbd style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#faf9f5; padding:2px 8px; border-radius:4px; border:1px solid var(--anth-light-gray);">⌘ N</kbd> — new note (no form)</li>
-          <li><kbd style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#faf9f5; padding:2px 8px; border-radius:4px; border:1px solid var(--anth-light-gray);">⌘ K</kbd> — quick switcher (any note, any backlink)</li>
-          <li><kbd style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#faf9f5; padding:2px 8px; border-radius:4px; border:1px solid var(--anth-light-gray);">⌘ E</kbd> — toggle writing mode (hides everything else)</li>
+          <li><kbd style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#faf9f5; padding:2px 8px; border-radius:4px; border:1px solid var(--anth-light-gray);">⌘ N</kbd> — <span class="lang-en">new note (no form)</span><span class="lang-zh">新建笔记(无表单)</span></li>
+          <li><kbd style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#faf9f5; padding:2px 8px; border-radius:4px; border:1px solid var(--anth-light-gray);">⌘ K</kbd> — <span class="lang-en">quick switcher (any note, any backlink)</span><span class="lang-zh">快速跳转(任意笔记、任意反向链接)</span></li>
+          <li><kbd style="font-family:'JetBrains Mono',monospace; font-size:13px; background:#faf9f5; padding:2px 8px; border-radius:4px; border:1px solid var(--anth-light-gray);">⌘ E</kbd> — <span class="lang-en">toggle writing mode (hides everything else)</span><span class="lang-zh">切换写作模式(隐藏其他一切)</span></li>
         </ul>
-        <a class="anth-link" href="#shortcuts" style="margin-top:var(--space-5); display:inline-block;">Full shortcut reference</a>
+        <a class="anth-link" href="#shortcuts" style="margin-top:var(--space-5); display:inline-block;"><span class="lang-en">Full shortcut reference</span><span class="lang-zh">完整快捷键列表</span></a>
       </div>
 
       <div class="screen-mock">
@@ -324,28 +372,31 @@
 <section class="anth-section">
   <div class="anth-container anth-container--wide">
     <div style="max-width:640px; margin:0 auto var(--space-8); text-align:center;">
-      <span class="anth-badge">Writers</span>
-      <h2 style="margin-top:var(--space-3);">Three people who stayed.</h2>
+      <span class="anth-badge"><span class="lang-en">Writers</span><span class="lang-zh">作者</span></span>
+      <h2 style="margin-top:var(--space-3);"><span class="lang-en">Three people who stayed.</span><span class="lang-zh">三位留下来的人。</span></h2>
     </div>
 
     <div class="test-row">
       <div class="test-card">
         <blockquote>
-          Skypad is the only tool I've actually stayed in. Every other note app tried to sell me AI. This one tries to get out of the way.
+          <span class="lang-en">Skypad is the only tool I've actually stayed in. Every other note app tried to sell me AI. This one tries to get out of the way.</span>
+          <span class="lang-zh">Skypad 是我唯一真正留下来的工具。其他笔记软件都在给我推销 AI。只有这个,在努力消失于无形。</span>
         </blockquote>
-        <cite>Anya Mehra — independent writer</cite>
+        <cite><span class="lang-en">Anya Mehra — independent writer</span><span class="lang-zh">Anya Mehra — 独立作者</span></cite>
       </div>
       <div class="test-card">
         <blockquote>
-          I can open Skypad, write for twenty minutes, close it, and not have a single notification to deal with. That's rarer than it sounds.
+          <span class="lang-en">I can open Skypad, write for twenty minutes, close it, and not have a single notification to deal with. That's rarer than it sounds.</span>
+          <span class="lang-zh">我可以打开 Skypad,写 20 分钟,关掉,一条需要处理的通知都没有。这比听起来更稀有。</span>
         </blockquote>
-        <cite>Ken Ishihara — translator, Kyoto</cite>
+        <cite><span class="lang-en">Ken Ishihara — translator, Kyoto</span><span class="lang-zh">石原健 — 译者,京都</span></cite>
       </div>
       <div class="test-card">
         <blockquote>
-          We moved our research notes from Notion to Skypad last year. The files are Markdown. Nothing to migrate again — which is the whole point.
+          <span class="lang-en">We moved our research notes from Notion to Skypad last year. The files are Markdown. Nothing to migrate again — which is the whole point.</span>
+          <span class="lang-zh">我们去年把研究笔记从 Notion 搬到了 Skypad。文件是 Markdown。再也不用搬 —— 这就是重点。</span>
         </blockquote>
-        <cite>Priya Bhatt — studio lead, Mumbai</cite>
+        <cite><span class="lang-en">Priya Bhatt — studio lead, Mumbai</span><span class="lang-zh">Priya Bhatt — 工作室负责人,孟买</span></cite>
       </div>
     </div>
   </div>
@@ -354,14 +405,15 @@
 <!-- Pricing preview -->
 <section class="anth-section anth-section--subtle" id="pricing">
   <div class="anth-container anth-container--narrow" style="text-align:center;">
-    <span class="anth-badge">Pricing</span>
-    <h2 style="margin-top:var(--space-3);">Free forever. Pro when you sync.</h2>
+    <span class="anth-badge"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></span>
+    <h2 style="margin-top:var(--space-3);"><span class="lang-en">Free forever. Pro when you sync.</span><span class="lang-zh">永久免费。需要同步才升 Pro。</span></h2>
     <p style="color:var(--anth-text-secondary); font-size:18px; margin:var(--space-4) auto var(--space-6); line-height:1.65; max-width:600px;">
-      Solo writers use Skypad free forever, no account required. Cloud sync across devices is $9/month on Pro. Shared workspaces for teams are $29/seat/month. That's the entire price list.
+      <span class="lang-en">Solo writers use Skypad free forever, no account required. Cloud sync across devices is $9/month on Pro. Shared workspaces for teams are $29/seat/month. That's the entire price list.</span>
+      <span class="lang-zh">单人作者永久免费使用 Skypad,无需注册。跨设备云同步 Pro $9/月。团队共享工作空间 $29/席位/月。价目表到此为止。</span>
     </p>
     <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
-      <a class="anth-button" href="pricing.html">See the full pricing page</a>
-      <a class="anth-button anth-button--ghost" href="#download">Download for free</a>
+      <a class="anth-button" href="pricing.html"><span class="lang-en">See the full pricing page</span><span class="lang-zh">查看完整定价页</span></a>
+      <a class="anth-button anth-button--ghost" href="#download"><span class="lang-en">Download for free</span><span class="lang-zh">免费下载</span></a>
     </div>
   </div>
 </section>
@@ -369,13 +421,14 @@
 <!-- Final CTA -->
 <section class="anth-section">
   <div class="anth-container anth-container--narrow" style="text-align:center;">
-    <h2>Start writing today.</h2>
+    <h2><span class="lang-en">Start writing today.</span><span class="lang-zh">今天就开始写作。</span></h2>
     <p style="font-size:19px; color:var(--anth-text-secondary); margin:var(--space-4) auto var(--space-6); line-height:1.6; max-width:560px;">
-      No sign-up. No credit card. Download Skypad and open a blank note in under a minute.
+      <span class="lang-en">No sign-up. No credit card. Download Skypad and open a blank note in under a minute.</span>
+      <span class="lang-zh">无需注册。无需信用卡。一分钟内下载 Skypad 并打开一页空白笔记。</span>
     </p>
     <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
-      <a class="anth-button" href="#download">Download Skypad</a>
-      <a class="anth-button anth-button--ghost" href="#community">Join the community</a>
+      <a class="anth-button" href="#download"><span class="lang-en">Download Skypad</span><span class="lang-zh">下载 Skypad</span></a>
+      <a class="anth-button anth-button--ghost" href="#community"><span class="lang-en">Join the community</span><span class="lang-zh">加入社区</span></a>
     </div>
   </div>
 </section>
@@ -383,17 +436,49 @@
 <!-- Footer -->
 <footer class="anth-footer">
   <div class="anth-footer-grid">
-    <div class="anth-footer-group"><h5>Product</h5><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#download">Download</a><a href="#changelog">Changelog</a></div>
-    <div class="anth-footer-group"><h5>For teams</h5><a href="#teams">Team plan</a><a href="#enterprise">Enterprise</a><a href="#security">Security</a><a href="#slas">SLAs</a></div>
-    <div class="anth-footer-group"><h5>Writers</h5><a href="#guide">Writing guide</a><a href="#templates">Templates</a><a href="#showcase">Showcase</a><a href="#community">Community</a></div>
-    <div class="anth-footer-group"><h5>Company</h5><a href="#about">About</a><a href="#press">Press</a><a href="#contact">Contact</a><a href="#status">Status</a></div>
-    <div class="anth-footer-group"><h5>Legal</h5><a href="#privacy">Privacy</a><a href="#terms">Terms</a><a href="#dpa">DPA</a><a href="#audit">Audit</a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5><a href="#features"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a><a href="#pricing"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a><a href="#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a><a href="#changelog"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">For teams</span><span class="lang-zh">团队</span></h5><a href="#teams"><span class="lang-en">Team plan</span><span class="lang-zh">团队版</span></a><a href="#enterprise"><span class="lang-en">Enterprise</span><span class="lang-zh">企业版</span></a><a href="#security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a><a href="#slas">SLAs</a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">Writers</span><span class="lang-zh">作者</span></h5><a href="#guide"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a><a href="#templates"><span class="lang-en">Templates</span><span class="lang-zh">模板</span></a><a href="#showcase"><span class="lang-en">Showcase</span><span class="lang-zh">作品精选</span></a><a href="#community"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5><a href="#about"><span class="lang-en">About</span><span class="lang-zh">关于</span></a><a href="#press"><span class="lang-en">Press</span><span class="lang-zh">媒体</span></a><a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a><a href="#status"><span class="lang-en">Status</span><span class="lang-zh">状态</span></a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">Legal</span><span class="lang-zh">法务</span></h5><a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a><a href="#terms"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a><a href="#dpa">DPA</a><a href="#audit"><span class="lang-en">Audit</span><span class="lang-zh">审计</span></a></div>
   </div>
   <div class="anth-footer-legal">
     <span>Copyright © 2026 Skypad Inc.</span>
-    <span>Made in Berlin · Toronto · Kyoto</span>
+    <span><span class="lang-en">Made in Berlin · Toronto · Kyoto</span><span class="lang-zh">制作于 柏林 · 多伦多 · 京都</span></span>
   </div>
 </footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
 
 </body>
 </html>
