@@ -199,8 +199,16 @@ def check_file(
     hero_class = prefix + "hero"
     default_css = os.path.join(REPO_ROOT, "skills", cfg["dir"], "assets", cfg["css"])
 
-    # 1. placeholder brackets
-    brackets = PLACEHOLDER_PATTERN.findall(html)
+    # 1. placeholder brackets — strip <pre> and <code> first so that docs
+    # pages discussing placeholders (e.g. "verify.py catches [hero]") don't
+    # false-positive against themselves.
+    placeholder_scan = re.sub(
+        r"<pre\b[^>]*>.*?</pre>", "", html, flags=re.DOTALL | re.I
+    )
+    placeholder_scan = re.sub(
+        r"<code\b[^>]*>.*?</code>", "", placeholder_scan, flags=re.DOTALL | re.I
+    )
+    brackets = PLACEHOLDER_PATTERN.findall(placeholder_scan)
     if brackets:
         errors.append(f"{path}: placeholder strings: {sorted(set(brackets))}")
 

@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install & use sky-skills</title>
+<meta name="description" content="How to install sky-skills in Claude Code, trigger each of the nine skills, run design-review's three gates on your own HTML, and use the scaffold from outside this repo.">
+<meta property="og:title" content="Install sky-skills — three ways, nine skills">
+<meta property="og:description" content="From zero to a Claude Code session that auto-activates design skills and runs three-gate review on your output.">
+<link rel="stylesheet" href="../skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../skills/anthropic-design/assets/anthropic.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] .anth-quote,
+  html[data-lang="zh"] li {
+    font-family: "Poppins", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] .anth-quote { font-style: normal; }
+
+  /* In-page TOC */
+  .toc {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:var(--space-3);
+    padding:var(--space-6); background:#ffffff; border:1px solid var(--anth-light-gray);
+    border-radius:var(--radius-md); margin:var(--space-6) 0 var(--space-8);
+  }
+  .toc a {
+    display:block; padding:var(--space-3) var(--space-4);
+    background:#faf9f5; border-radius:var(--radius-sm);
+    text-decoration:none; color:var(--anth-text);
+    font-family:var(--font-heading); font-size:14.5px; font-weight:500;
+    transition:background var(--duration-sm) var(--ease-anth);
+  }
+  .toc a:hover { background:#f0ede3; }
+  .toc a strong {
+    display:block; font-family:'JetBrains Mono', monospace; font-size:11.5px;
+    color:var(--anth-orange); letter-spacing:0.1em; font-weight:700; margin-bottom:4px;
+  }
+
+  /* Method card */
+  .method-card {
+    background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-md);
+    padding:var(--space-6);
+  }
+  .method-card__num {
+    font-family:var(--font-heading); font-size:12px; font-weight:700;
+    letter-spacing:0.15em; color:var(--anth-text-secondary); text-transform:uppercase;
+  }
+  .method-card__title {
+    font-family:var(--font-heading); font-size:22px; font-weight:600;
+    color:var(--anth-text); margin:var(--space-2) 0 var(--space-3); line-height:1.2;
+  }
+  .method-card__tag {
+    display:inline-block; padding:2px 10px; border-radius:var(--radius-pill);
+    font-family:var(--font-heading); font-size:11.5px; font-weight:600; letter-spacing:0.04em;
+  }
+  .method-card__tag--best { background:#d7e8dc; color:#2e5c34; }
+  .method-card__tag--fast { background:#fde4d6; color:#8a3e1c; }
+  .method-card__tag--dev { background:#eeecff; color:#3a3d7c; }
+
+  /* Skill table */
+  .skill-table { width:100%; border-collapse:collapse; font-size:15px; }
+  .skill-table th {
+    text-align:left; padding:var(--space-3) var(--space-4);
+    font-family:var(--font-heading); font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--anth-text-secondary); font-weight:700;
+    background:#faf9f5; border-bottom:1px solid var(--anth-light-gray);
+  }
+  .skill-table td {
+    padding:var(--space-4);
+    border-bottom:1px solid var(--anth-light-gray); vertical-align:top;
+  }
+  .skill-table tr:last-child td { border-bottom:none; }
+  .skill-table td.skill-name { font-family:'JetBrains Mono', monospace; font-size:13.5px; color:var(--anth-text); font-weight:600; white-space:nowrap; }
+  .skill-table td.skill-trigger { font-family:'Lora', serif; font-size:14.5px; color:var(--anth-text-secondary); font-style:italic; }
+  .skill-table td.skill-trigger code { font-family:'JetBrains Mono', monospace; font-style:normal; background:#faf9f5; padding:1px 6px; border-radius:3px; font-size:12.5px; }
+
+  /* Troubleshoot callout */
+  .trouble-item {
+    background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-md);
+    padding:var(--space-5);
+    margin-bottom:var(--space-4);
+  }
+  .trouble-q {
+    font-family:var(--font-heading); font-size:17px; font-weight:600; color:var(--anth-text);
+    margin:0 0 var(--space-3);
+  }
+  .trouble-q::before {
+    content:'Q · '; color:var(--anth-orange); font-weight:700;
+  }
+  .trouble-a { margin:0; font-size:15.5px; line-height:1.65; color:var(--anth-text); }
+  .trouble-a::before {
+    content:'A · '; color:#2f5e33; font-weight:700;
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="../index.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">sky-skills</a>
+  <div>
+    <a href="../index.html#skills"><span class="lang-en">Skills</span><span class="lang-zh">技能</span></a>
+    <a href="../index.html#design"><span class="lang-en">Design</span><span class="lang-zh">设计</span></a>
+    <a href="HARNESS-ROADMAP.html"><span class="lang-en">Harness</span><span class="lang-zh">架构</span></a>
+    <a href="INSTALL.html" style="color:var(--anth-orange); font-weight:600;"><span class="lang-en">Install</span><span class="lang-zh">安装</span></a>
+    <a href="https://github.com/TbusOS/sky-skills/discussions"><span class="lang-en">Discussions</span><span class="lang-zh">讨论区</span></a>
+    <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="anth-link anth-link--no-arrow" href="https://github.com/TbusOS/sky-skills" style="font-family:var(--font-heading); color:var(--anth-text); text-decoration:none; font-size:14px;">★ <span class="lang-en">Star</span><span class="lang-zh">Star</span></a>
+    <a class="anth-button" href="https://github.com/TbusOS/sky-skills/discussions"><span class="lang-en">Join Discussions</span><span class="lang-zh">加入讨论</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="anth-hero">
+  <div class="anth-container" style="max-width:820px;">
+    <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Install · all 9 skills</span><span class="lang-zh">安装 · 全部 9 个 skill</span></span>
+    <h1 style="margin-top:var(--space-4);">
+      <span class="lang-en">From zero to auto-activating<br>in 60 seconds.</span>
+      <span class="lang-zh">从零到自动激活<br>60 秒。</span>
+    </h1>
+    <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.55; max-width:720px; font-family:var(--font-body);">
+      <span class="lang-en">Claude Code Skills are just folders. Install once, and Claude auto-loads the matching skill every time your prompt triggers it — no <code>@skill-name</code> invocation needed. This page covers: install methods, per-skill trigger keywords, running <code>design-review</code> on your own HTML, and using the scaffold from <strong>outside this repo</strong>.</span>
+      <span class="lang-zh">Claude Code Skill 就是文件夹。装一次,之后你的 prompt 匹配到 TRIGGER,Claude 自动加载相应 skill —— 不用 <code>@skill-name</code> 手动调用。本页覆盖:安装方法、每个 skill 的触发关键词、用 <code>design-review</code> 验自己的 HTML、从 <strong>本仓外</strong>的项目使用脚本。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="#methods"><span class="lang-en">Install methods</span><span class="lang-zh">安装方法</span></a>
+      <a class="anth-button anth-button--ghost" href="#skills-ref"><span class="lang-en">Trigger reference</span><span class="lang-zh">触发关键词表</span></a>
+      <a class="anth-button anth-button--ghost" href="#review"><span class="lang-en">Run design-review</span><span class="lang-zh">跑 design-review</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- TOC -->
+<section class="anth-section" style="padding-top:0;">
+  <div class="anth-container anth-container--narrow">
+    <div class="toc">
+      <a href="#prereq"><strong>01</strong><span class="lang-en">Prerequisites</span><span class="lang-zh">前置条件</span></a>
+      <a href="#methods"><strong>02</strong><span class="lang-en">Install methods</span><span class="lang-zh">安装方法</span></a>
+      <a href="#first-run"><strong>03</strong><span class="lang-en">Your first skill</span><span class="lang-zh">第一个 skill</span></a>
+      <a href="#skills-ref"><strong>04</strong><span class="lang-en">All 9 skills</span><span class="lang-zh">全部 9 个 skill</span></a>
+      <a href="#review"><strong>05</strong><span class="lang-en">Run design-review</span><span class="lang-zh">跑 design-review</span></a>
+      <a href="#cross-repo"><strong>06</strong><span class="lang-en">Cross-repo use</span><span class="lang-zh">跨仓使用</span></a>
+      <a href="#troubleshoot"><strong>07</strong><span class="lang-en">Troubleshooting</span><span class="lang-zh">排错</span></a>
+      <a href="#contribute"><strong>08</strong><span class="lang-en">Contribute</span><span class="lang-zh">参与</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- §1 Prerequisites -->
+<section class="anth-section anth-section--subtle" id="prereq">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">01 · Prerequisites</span><span class="lang-zh">01 · 前置条件</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">What you need first.</span>
+      <span class="lang-zh">先准备这些。</span>
+    </h2>
+    <p class="lang-en">
+      <strong>Claude Code</strong> is the CLI this skill collection plugs into. If you don't have it:
+    </p>
+    <p class="lang-zh">
+      <strong>Claude Code</strong> 是这套 skill 依附的 CLI。如果还没装:
+    </p>
+<pre class="anth-code"><code># macOS / Linux
+curl -fsSL claude.ai/install.sh | bash
+
+# Or via npm
+npm install -g @anthropic-ai/claude-code</code></pre>
+    <p style="margin-top:var(--space-5);">
+      <span class="lang-en">For the <code>design-review</code> scaffold's runtime gates, you also need:</span>
+      <span class="lang-zh">要跑 <code>design-review</code> 的运行时闸口,还需要:</span>
+    </p>
+    <ul style="font-size:16px; line-height:1.75;">
+      <li class="lang-en"><strong>Python 3.10+</strong> for <code>verify.py</code> (most macOS/Linux have it already).</li>
+      <li class="lang-zh"><strong>Python 3.10+</strong> 给 <code>verify.py</code>(macOS/Linux 一般自带)。</li>
+      <li class="lang-en"><strong>Node.js 18+</strong> and <strong>Playwright</strong> for <code>visual-audit.mjs</code> / <code>screenshot.mjs</code>:
+        <pre class="anth-code" style="margin-top:var(--space-2);"><code>npm i playwright
+npx playwright install chromium</code></pre>
+      </li>
+      <li class="lang-zh"><strong>Node.js 18+</strong> 和 <strong>Playwright</strong> 给 <code>visual-audit.mjs</code> / <code>screenshot.mjs</code>:
+        <pre class="anth-code" style="margin-top:var(--space-2);"><code>npm i playwright
+npx playwright install chromium</code></pre>
+      </li>
+    </ul>
+    <p style="margin-top:var(--space-4); color:var(--anth-text-secondary); font-size:14.5px;">
+      <span class="lang-en">Skills other than <code>design-review</code> don't need Python/Node to run — they're just markdown Claude reads.</span>
+      <span class="lang-zh"><code>design-review</code> 之外的 skill 不需要 Python/Node —— 它们就是 Claude 读的 markdown。</span>
+    </p>
+  </div>
+</section>
+
+<!-- §2 Install methods -->
+<section class="anth-section" id="methods">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">02 · Install methods</span><span class="lang-zh">02 · 安装方法</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">Three ways. Pick your fit.</span>
+        <span class="lang-zh">三种方式。按需选择。</span>
+      </h2>
+      <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+        <span class="lang-en">Skills are plain folders. Install a single one via Claude CLI, copy the whole repo for offline use, or symlink for live updates.</span>
+        <span class="lang-zh">Skill 就是普通文件夹。用 Claude CLI 装单个、整仓复制离线用、或 symlink 跟仓库同步更新。</span>
+      </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-5);">
+
+      <article class="method-card">
+        <span class="method-card__num">A</span>
+        <h3 class="method-card__title"><span class="lang-en">Claude CLI</span><span class="lang-zh">Claude CLI</span></h3>
+        <span class="method-card__tag method-card__tag--best"><span class="lang-en">Recommended</span><span class="lang-zh">推荐</span></span>
+        <p style="font-size:14.5px; color:var(--anth-text-secondary); margin-top:var(--space-3); line-height:1.6;">
+          <span class="lang-en">One skill at a time. Claude pulls directly from GitHub into your project's <code>.claude/skills/</code>.</span>
+          <span class="lang-zh">一次装一个。Claude 直接从 GitHub 拉进你项目的 <code>.claude/skills/</code>。</span>
+        </p>
+<pre class="anth-code" style="margin-top:var(--space-4); font-size:12.5px;"><code>claude install github:TbusOS/sky-skills/skills/anthropic-design
+claude install github:TbusOS/sky-skills/skills/design-review
+claude install github:TbusOS/sky-skills/skills/linux-kernel-dev</code></pre>
+      </article>
+
+      <article class="method-card">
+        <span class="method-card__num">B</span>
+        <h3 class="method-card__title"><span class="lang-en">Copy</span><span class="lang-zh">复制</span></h3>
+        <span class="method-card__tag method-card__tag--fast"><span class="lang-en">Offline</span><span class="lang-zh">离线</span></span>
+        <p style="font-size:14.5px; color:var(--anth-text-secondary); margin-top:var(--space-3); line-height:1.6;">
+          <span class="lang-en">Clone once, copy <code>SKILL.md</code> into each project you need. Good for air-gapped or forked setups.</span>
+          <span class="lang-zh">clone 一次,把 <code>SKILL.md</code> 复制到需要的项目。适合离线或 fork 环境。</span>
+        </p>
+<pre class="anth-code" style="margin-top:var(--space-4); font-size:12.5px;"><code>git clone https://github.com/TbusOS/sky-skills.git
+
+cp sky-skills/skills/anthropic-design/SKILL.md \
+   your-project/.claude/skills/anthropic-design.md</code></pre>
+      </article>
+
+      <article class="method-card">
+        <span class="method-card__num">C</span>
+        <h3 class="method-card__title"><span class="lang-en">Symlink</span><span class="lang-zh">符号链接</span></h3>
+        <span class="method-card__tag method-card__tag--dev"><span class="lang-en">Developer</span><span class="lang-zh">开发者</span></span>
+        <p style="font-size:14.5px; color:var(--anth-text-secondary); margin-top:var(--space-3); line-height:1.6;">
+          <span class="lang-en">Point to a single clone across all your projects. <code>git pull</code> updates every linked project at once.</span>
+          <span class="lang-zh">多个项目指向同一个 clone。<code>git pull</code> 一次更新所有项目。</span>
+        </p>
+<pre class="anth-code" style="margin-top:var(--space-4); font-size:12.5px;"><code>git clone https://github.com/TbusOS/sky-skills.git ~/sky-skills
+
+ln -s ~/sky-skills/skills/anthropic-design/SKILL.md \
+      your-project/.claude/skills/anthropic-design.md</code></pre>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- §3 First run -->
+<section class="anth-section anth-section--subtle" id="first-run">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">03 · Your first skill</span><span class="lang-zh">03 · 第一个 skill</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">60 seconds from install to auto-activation.</span>
+      <span class="lang-zh">60 秒从安装到自动激活。</span>
+    </h2>
+    <p class="lang-en">
+      Install <code>anthropic-design</code> (the style this page is rendered in), open your project in Claude Code, and type a prompt that contains one of the TRIGGER keywords:
+    </p>
+    <p class="lang-zh">
+      装上 <code>anthropic-design</code>(这页就是这个 skill 渲染的),在 Claude Code 里打开你的项目,写一句含 TRIGGER 关键词的 prompt:
+    </p>
+<pre class="anth-code"><code># Claude Code session
+> make me a landing page in anthropic style with two feature cards
+                              ^^^^^^^^^^^^^^^^^
+                              TRIGGER matched</code></pre>
+    <p style="margin-top:var(--space-5);">
+      <span class="lang-en">Claude scans every installed <code>SKILL.md</code>'s frontmatter, sees <em>"anthropic style"</em> in the TRIGGER description, and silently loads the skill's templates, color tokens, and dos-and-donts. Your HTML output comes back in the anthropic aesthetic — <strong>without you ever typing <code>@anthropic-design</code></strong>.</span>
+      <span class="lang-zh">Claude 扫每一个已装 <code>SKILL.md</code> 的 frontmatter,看到 TRIGGER 描述里匹配了 <em>"anthropic style"</em>,悄悄加载它的模板、色板 token、dos-and-donts。你的 HTML 产出就是 anthropic 美学 —— <strong>你从没输入 <code>@anthropic-design</code></strong>。</span>
+    </p>
+    <blockquote class="anth-quote">
+      <span class="lang-en">The whole point of a skill is folded expertise. You write one prompt, not a fresh style guide.</span>
+      <span class="lang-zh">skill 的核心是折叠好的专业知识。你只写一句 prompt,不用每次重新贴一份风格手册。</span>
+    </blockquote>
+  </div>
+</section>
+
+<!-- §4 All 9 skills ref -->
+<section class="anth-section" id="skills-ref">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">04 · Trigger reference</span><span class="lang-zh">04 · 触发关键词表</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">All nine skills at a glance.</span>
+        <span class="lang-zh">9 个 skill 一张表看完。</span>
+      </h2>
+      <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+        <span class="lang-en">Trigger keywords are a rough guide — the full TRIGGER condition is in each skill's frontmatter. Claude's matcher is fuzzy: synonyms often work.</span>
+        <span class="lang-zh">触发关键词是大致指引,完整 TRIGGER 条件在每个 skill 的 frontmatter 里。Claude 的匹配是 fuzzy 的,同义词一般也能触发。</span>
+      </p>
+    </div>
+
+    <div style="background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-md); overflow:hidden;">
+      <table class="skill-table">
+        <thead>
+          <tr>
+            <th style="width:20%;"><span class="lang-en">Skill</span><span class="lang-zh">Skill</span></th>
+            <th style="width:18%;"><span class="lang-en">Role</span><span class="lang-zh">角色</span></th>
+            <th><span class="lang-en">Sample trigger prompts</span><span class="lang-zh">样例触发 prompt</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="skill-name">linux-kernel-dev</td>
+            <td><span class="lang-en">Kernel / drivers</span><span class="lang-zh">内核 / 驱动</span></td>
+            <td class="skill-trigger"><span class="lang-en">"write a <code>chardev</code> driver", "add a <code>platform_driver</code>", "Kconfig this feature", "DT binding for …"</span><span class="lang-zh">"写一个 <code>chardev</code> 驱动"、"加一个 <code>platform_driver</code>"、"给这个功能加 Kconfig"、"<code>DT binding</code> …"</span></td>
+          </tr>
+          <tr>
+            <td class="skill-name">wechat-video-publisher</td>
+            <td><span class="lang-en">Narrated video</span><span class="lang-zh">配音视频</span></td>
+            <td class="skill-trigger"><span class="lang-en">"make a WeChat-style narrated video", "<code>edge-tts</code> recording + ffmpeg subtitles", "publish a WeChat article"</span><span class="lang-zh">"做一个微信风格的配音视频"、"<code>edge-tts</code> + ffmpeg 字幕"、"发一篇公众号文章"</span></td>
+          </tr>
+          <tr>
+            <td class="skill-name">doc-to-markdown</td>
+            <td><span class="lang-en">PDF/DOCX → MD</span><span class="lang-zh">PDF/DOCX → MD</span></td>
+            <td class="skill-trigger"><span class="lang-en">"convert this PDF to markdown", "<code>DOCX</code> → MD with images", "batch scan PDFs"</span><span class="lang-zh">"把这份 PDF 转成 markdown"、"<code>DOCX</code> 转 MD 带图片"、"批量扫描版 PDF"</span></td>
+          </tr>
+          <tr>
+            <td class="skill-name">md-to-pdf</td>
+            <td><span class="lang-en">MD → PDF</span><span class="lang-zh">MD → PDF</span></td>
+            <td class="skill-trigger"><span class="lang-en">"render this markdown to PDF with Chinese fonts", "MD → PDF with bookmarks"</span><span class="lang-zh">"把这份 markdown 渲成带中文字体的 PDF"、"MD → PDF 带书签"</span></td>
+          </tr>
+          <tr>
+            <td class="skill-name">apple-design</td>
+            <td><span class="lang-en">HTML — apple.com</span><span class="lang-zh">HTML — apple.com</span></td>
+            <td class="skill-trigger"><span class="lang-en">"apple style landing", "SF Pro typography", "like apple.com"</span><span class="lang-zh">"apple 风格落地页"、"SF Pro 字体"、"像 apple.com"</span></td>
+          </tr>
+          <tr>
+            <td class="skill-name">anthropic-design</td>
+            <td><span class="lang-en">HTML — anthropic.com</span><span class="lang-zh">HTML — anthropic.com</span></td>
+            <td class="skill-trigger"><span class="lang-en">"anthropic style", "warm cream + orange CTA", "Poppins + Lora editorial"</span><span class="lang-zh">"anthropic 风格"、"暖米 + 橙 CTA"、"Poppins + Lora 编辑风"</span></td>
+          </tr>
+          <tr>
+            <td class="skill-name">ember-design</td>
+            <td><span class="lang-en">HTML — handcraft</span><span class="lang-zh">HTML — 手作</span></td>
+            <td class="skill-trigger"><span class="lang-en">"ember style", "cream + chocolate + gold", "Aesop / Kinfolk feel", "handcraft editorial"</span><span class="lang-zh">"ember 风格"、"奶油 + 巧克力 + 金色"、"Aesop / Kinfolk 气质"、"手作编辑"</span></td>
+          </tr>
+          <tr>
+            <td class="skill-name">sage-design</td>
+            <td><span class="lang-en">HTML — Nordic quiet</span><span class="lang-zh">HTML — 北欧安静</span></td>
+            <td class="skill-trigger"><span class="lang-en">"sage style", "Nordic minimal", "reading-app feel", "botanical studio"</span><span class="lang-zh">"sage 风格"、"北欧极简"、"阅读 app 感觉"、"植物工作室"</span></td>
+          </tr>
+          <tr style="background:#f8faec;">
+            <td class="skill-name">design-review</td>
+            <td><span class="lang-en"><strong>Evaluator</strong></span><span class="lang-zh"><strong>评审员</strong></span></td>
+            <td class="skill-trigger"><span class="lang-en">Auto-invoked after any design-skill output. Or run manually via <code>bin/design-review &lt;html&gt;</code> — see §05.</span><span class="lang-zh">任何 design skill 产出后自动调用。或手动跑 <code>bin/design-review &lt;html&gt;</code> —— 见 §05。</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- §5 Run design-review -->
+<section class="anth-section anth-section--subtle" id="review">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">05 · Run design-review</span><span class="lang-zh">05 · 跑 design-review</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">Three gates. One command.</span>
+      <span class="lang-zh">三道闸,一条命令。</span>
+    </h2>
+    <p class="lang-en">
+      After Claude produces HTML for you, before you ship it, run the three gates.  They catch the classes of bugs that both you and the generator will miss.
+    </p>
+    <p class="lang-zh">
+      Claude 给你产出 HTML 后、你发布前,跑三道闸。它们抓的正是你和生成器都会漏的那类 bug。
+    </p>
+
+    <h3 style="margin-top:var(--space-7); font-size:22px;">
+      <span class="lang-en">One command — same for local and cross-repo</span>
+      <span class="lang-zh">一条命令 —— 本仓跨仓都一样</span>
+    </h3>
+<pre class="anth-code"><code># From the sky-skills repo — just pass the HTML
+bin/design-review your-page.html
+
+# From any other repo — tell the wrapper where the webroot is
+bin/design-review --repo=/path/to/your-project \
+                  --skill=anthropic \
+                  --css=/path/to/your-project/local.css \
+                  docs/landing.html</code></pre>
+
+    <p style="margin-top:var(--space-5);">
+      <span class="lang-en">The wrapper runs (in order) <code>verify.py</code> → <code>visual-audit.mjs</code> → <code>screenshot.mjs</code>, with <code>--ignore-intentional</code> on by default to suppress the documented 3.12-contrast brand-intentional noise. Any step failing exits non-zero. Screenshots are saved to <code>&lt;repo&gt;/shots/</code>.</span>
+      <span class="lang-zh">壳按序跑 <code>verify.py</code> → <code>visual-audit.mjs</code> → <code>screenshot.mjs</code>,默认开 <code>--ignore-intentional</code> 消掉 3.12 brand-intentional 噪音。任一步 fail 整体 fail。截图存到 <code>&lt;repo&gt;/shots/</code>。</span>
+    </p>
+
+    <h3 style="margin-top:var(--space-7); font-size:22px;">
+      <span class="lang-en">What each gate catches</span>
+      <span class="lang-zh">每一闸抓什么</span>
+    </h3>
+    <ul style="font-size:16px; line-height:1.75;">
+      <li class="lang-en"><strong><code>verify.py</code></strong> — placeholder strings (<code>[hero]</code>, <code>[svg]</code>), BEM modifier-only containers, undefined CSS classes, unbalanced <code>&lt;svg&gt;</code> tags, wrong hero container.</li>
+      <li class="lang-zh"><strong><code>verify.py</code></strong> —— 占位符字符串(<code>[hero]</code>、<code>[svg]</code>)、BEM modifier-only 容器、未定义 class、<code>&lt;svg&gt;</code> 不平衡、hero 容器错。</li>
+      <li class="lang-en"><strong><code>visual-audit.mjs</code></strong> — WCAG contrast &lt; 4.5 on buttons/badges, hero SVG rendered &lt; 900px, SVG text rendered &lt; 9px, orphan-figure cards next to full-row heroes.</li>
+      <li class="lang-zh"><strong><code>visual-audit.mjs</code></strong> —— 按钮/徽章 WCAG 对比度 &lt; 4.5、hero SVG 渲染 &lt; 900px、SVG 文字实际像素 &lt; 9px、多列网格孤儿卡。</li>
+      <li class="lang-en"><strong><code>screenshot.mjs</code></strong> — full-page PNG for your own review. Scripts can't judge composition, rhythm, or copy quality. You have to look.</li>
+      <li class="lang-zh"><strong><code>screenshot.mjs</code></strong> —— 全页截图给你肉眼审。脚本判不了版式、节奏、copy 质量。你得自己看。</li>
+    </ul>
+
+    <p style="margin-top:var(--space-5); color:var(--anth-text-secondary); font-size:14.5px;">
+      <span class="lang-en">Full rule list + every bug already catalogued: <a class="anth-link anth-link--no-arrow" style="display:inline;" href="https://github.com/TbusOS/sky-skills/blob/main/skills/design-review/references/known-bugs.md">known-bugs.md</a> · <a class="anth-link anth-link--no-arrow" style="display:inline;" href="https://github.com/TbusOS/sky-skills/blob/main/skills/design-review/references/cross-skill-rules.md">cross-skill-rules.md</a>.</span>
+      <span class="lang-zh">完整规则 + 所有已登记的 bug:<a class="anth-link anth-link--no-arrow" style="display:inline;" href="https://github.com/TbusOS/sky-skills/blob/main/skills/design-review/references/known-bugs.md">known-bugs.md</a> · <a class="anth-link anth-link--no-arrow" style="display:inline;" href="https://github.com/TbusOS/sky-skills/blob/main/skills/design-review/references/cross-skill-rules.md">cross-skill-rules.md</a>。</span>
+    </p>
+  </div>
+</section>
+
+<!-- §6 Cross-repo -->
+<section class="anth-section" id="cross-repo">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">06 · Cross-repo use</span><span class="lang-zh">06 · 跨仓使用</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">Use the scaffold from any repo.</span>
+      <span class="lang-zh">从任何仓库使用 scaffold。</span>
+    </h2>
+    <p class="lang-en">
+      The <code>design-review</code> scripts are designed to work from <em>outside</em> sky-skills — for example, against a separate project that uses <code>anthropic-design</code>'s CSS but adds its own overrides.
+    </p>
+    <p class="lang-zh">
+      <code>design-review</code> 脚本设计成可以从 sky-skills <em>外面</em>工作 —— 比如一个独立项目用了 <code>anthropic-design</code> 的 CSS 但有自己的 override。
+    </p>
+
+    <h3 style="margin-top:var(--space-6); font-size:20px;">
+      <span class="lang-en">Example · review an engram landing from sky-skills</span>
+      <span class="lang-zh">例:在 sky-skills 这边审 engram 的 landing</span>
+    </h3>
+<pre class="anth-code"><code>cd ~/code/sky-skills
+
+bin/design-review \
+  --repo=~/code/engram \
+  --skill=anthropic \
+  --css=~/code/engram/docs/assets/app.css \
+  docs/en/index.html</code></pre>
+    <p style="margin-top:var(--space-4);">
+      <span class="lang-en">The three flags to know:</span>
+      <span class="lang-zh">要知道的三个 flag:</span>
+    </p>
+    <ul style="font-size:16px; line-height:1.75;">
+      <li class="lang-en"><strong><code>--repo=&lt;path&gt;</code></strong> — the webroot for Playwright's static server.  All relative paths in the HTML (CSS, fonts, SVGs) resolve against this.  Without it, the wrapper uses your current directory.</li>
+      <li class="lang-zh"><strong><code>--repo=&lt;path&gt;</code></strong> —— Playwright 静态服务的 webroot。HTML 里的相对路径(CSS、字体、SVG)相对它解析。不传就用当前目录。</li>
+      <li class="lang-en"><strong><code>--skill=&lt;name&gt;</code></strong> — forces a design skill. If omitted, <code>verify.py</code> auto-detects by looking at the <code>&lt;link href&gt;</code> elements in the HTML.</li>
+      <li class="lang-zh"><strong><code>--skill=&lt;name&gt;</code></strong> —— 强制一个设计 skill。不传时 <code>verify.py</code> 从 HTML 里的 <code>&lt;link href&gt;</code> 自动识别。</li>
+      <li class="lang-en"><strong><code>--css=&lt;path&gt;</code></strong> (can repeat) — additional CSS files whose class definitions should count as "defined."  Useful when the target project has local overrides not shipped in the skill's default CSS.</li>
+      <li class="lang-zh"><strong><code>--css=&lt;path&gt;</code></strong>(可重复)—— 追加 CSS 文件到 class 定义查找集合。目标项目有本地 override 但不在 skill 默认 CSS 里时必用。</li>
+    </ul>
+
+    <p style="margin-top:var(--space-5); background:#f0ede3; padding:var(--space-4) var(--space-5); border-left:3px solid var(--anth-orange); border-radius:var(--radius-sm);">
+      <span class="lang-en"><strong>Auto-detection covers most cases.</strong> <code>verify.py</code> reads every <code>&lt;link rel="stylesheet" href="*.css"&gt;</code> in the HTML and resolves them relative to the HTML's own directory. For simple cross-repo setups you often don't need <code>--css</code> at all.</span>
+      <span class="lang-zh"><strong>自动识别已覆盖大部分场景。</strong><code>verify.py</code> 读 HTML 里每个 <code>&lt;link rel="stylesheet" href="*.css"&gt;</code> 并相对 HTML 目录解析。跨仓简单场景通常根本不用传 <code>--css</code>。</span>
+    </p>
+  </div>
+</section>
+
+<!-- §7 Troubleshoot -->
+<section class="anth-section anth-section--subtle" id="troubleshoot">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">07 · Troubleshooting</span><span class="lang-zh">07 · 排错</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">When it doesn't work.</span>
+      <span class="lang-zh">不灵的时候。</span>
+    </h2>
+
+    <div style="margin-top:var(--space-6);">
+      <div class="trouble-item">
+        <p class="trouble-q"><span class="lang-en">Claude doesn't auto-load my skill even when the prompt matches.</span><span class="lang-zh">Prompt 明明匹配了,Claude 没自动加载 skill。</span></p>
+        <p class="trouble-a">
+          <span class="lang-en">Check <code>.claude/skills/</code> in your project root. If the <code>SKILL.md</code> isn't there (or isn't a valid symlink), Claude can't match it. Also: the TRIGGER description is scanned <em>literal</em> — <q>apple style</q> matches, <q>苹果风</q> may not unless the TRIGGER includes Chinese keywords (all four design skills do).</span>
+          <span class="lang-zh">检查项目根的 <code>.claude/skills/</code>。<code>SKILL.md</code> 不在那里(或 symlink 无效),Claude 无法匹配。另外:TRIGGER 描述是<em>字面</em>扫的 —— "apple style" 匹配,"苹果风"不一定能(除非 TRIGGER 里包含中文;4 个设计 skill 都包含)。</span>
+        </p>
+      </div>
+
+      <div class="trouble-item">
+        <p class="trouble-q"><span class="lang-en"><code>verify.py</code> reports <q>undefined class</q> but the class is defined in my own CSS.</span><span class="lang-zh"><code>verify.py</code> 报 "undefined class",但那个 class 我自己 CSS 里有定义。</span></p>
+        <p class="trouble-a">
+          <span class="lang-en">Make sure your HTML has a <code>&lt;link rel="stylesheet" href="…"&gt;</code> pointing to that CSS, and the relative path resolves correctly. If the CSS is outside the HTML's directory tree, pass <code>--css=&lt;path&gt;</code> explicitly.</span>
+          <span class="lang-zh">确认 HTML 里有 <code>&lt;link rel="stylesheet" href="…"&gt;</code> 指向那份 CSS,且相对路径能正常解析。如果 CSS 在 HTML 目录树之外,显式传 <code>--css=&lt;path&gt;</code>。</span>
+        </p>
+      </div>
+
+      <div class="trouble-item">
+        <p class="trouble-q"><span class="lang-en"><code>visual-audit.mjs</code> floods me with 3.12-contrast warnings.</span><span class="lang-zh"><code>visual-audit.mjs</code> 把 3.12 对比度告警刷屏了。</span></p>
+        <p class="trouble-a">
+          <span class="lang-en">Pass <code>--ignore-intentional</code> (or just use <code>bin/design-review</code>, which sets it by default). That filters documented brand-intentional patterns like white on anthropic orange. Real new contrast bugs will still surface.</span>
+          <span class="lang-zh">加 <code>--ignore-intentional</code>(或直接用 <code>bin/design-review</code>,它默认就加了)。会过滤已登记的 brand-intentional 模式(例如白字 × anthropic 橙)。真新的对比度 bug 依然会报。</span>
+        </p>
+      </div>
+
+      <div class="trouble-item">
+        <p class="trouble-q"><span class="lang-en"><code>playwright</code> complains about missing Chromium.</span><span class="lang-zh"><code>playwright</code> 报找不到 Chromium。</span></p>
+        <p class="trouble-a">
+          <span class="lang-en">Run <code>npx playwright install chromium</code> once. The visual-audit and screenshot scripts need the headless browser binary, installed separately from the <code>playwright</code> npm package.</span>
+          <span class="lang-zh">跑一次 <code>npx playwright install chromium</code>。visual-audit / screenshot 需要 headless 浏览器二进制,和 <code>playwright</code> npm 包分开装。</span>
+        </p>
+      </div>
+
+      <div class="trouble-item">
+        <p class="trouble-q"><span class="lang-en">The hero diagram text is rendered below 9px even though I set <code>font-size="10"</code>.</span><span class="lang-zh">SVG 源码写了 <code>font-size="10"</code>,渲染出来却 &lt; 9px。</span></p>
+        <p class="trouble-a">
+          <span class="lang-en">This is the scale issue: <code>effective_px = font-size × (rendered_width / viewBox_width)</code>. If your container is narrower than the viewBox, the scale is &lt; 1 and source 10 becomes effective &lt; 10. Rule of thumb: <strong>source font-size ≥ 11</strong> in hero diagrams. Or widen the container (use <code>--hero</code> or <code>--wide</code> modifier in the design skills).</span>
+          <span class="lang-zh">是 scale 问题:<code>effective_px = font-size × (渲染宽度 / viewBox 宽度)</code>。容器比 viewBox 窄,scale &lt; 1,源码 10 渲染下来 &lt; 10。经验:<strong>hero 图里源码 font-size ≥ 11</strong>,或者加宽容器(设计 skill 里用 <code>--hero</code> / <code>--wide</code> modifier)。</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §8 Contribute -->
+<section class="anth-section" id="contribute">
+  <div class="anth-container anth-container--narrow" style="text-align:center;">
+    <span class="anth-badge"><span class="lang-en">08 · Contribute</span><span class="lang-zh">08 · 参与</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">Stuck? Idea for a new skill?</span>
+      <span class="lang-zh">卡住了?有新 skill 的想法?</span>
+    </h2>
+    <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+      <span class="lang-en">Open a discussion for use-cases and design proposals. Open an issue for actual bugs or missing features. Both are read.</span>
+      <span class="lang-zh">Use-case 和设计提案用 Discussion。真 bug 或缺失功能用 Issue。两边都会看。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap; margin-top:var(--space-6);">
+      <a class="anth-button" href="https://github.com/TbusOS/sky-skills/discussions"><span class="lang-en">Open a discussion</span><span class="lang-zh">开一个 discussion</span></a>
+      <a class="anth-button anth-button--ghost" href="https://github.com/TbusOS/sky-skills/issues"><span class="lang-en">File an issue</span><span class="lang-zh">提一个 issue</span></a>
+      <a class="anth-button anth-button--ghost" href="HARNESS-ROADMAP.html"><span class="lang-en">Read the harness roadmap</span><span class="lang-zh">读 harness 路线图</span></a>
+      <a class="anth-button anth-button--ghost" href="../index.html"><span class="lang-en">Back to sky-skills</span><span class="lang-zh">返回 sky-skills</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="anth-footer">
+  <div class="anth-footer-grid">
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Skills</span><span class="lang-zh">Skills</span></h5>
+      <a href="../index.html#skills">All skills</a>
+      <a href="../skills/design-review/">design-review</a>
+      <a href="../demos/anthropic-design/index.html">anthropic demo</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Docs</span><span class="lang-zh">文档</span></h5>
+      <a href="INSTALL.html">Install & use</a>
+      <a href="HARNESS-ROADMAP.html">Harness roadmap</a>
+      <a href="../index.html#how">How it works</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Learn</span><span class="lang-zh">学习</span></h5>
+      <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">Harness design post</a>
+      <a href="https://docs.anthropic.com/en/docs/claude-code/skills">Claude Code Skills</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Repo</span><span class="lang-zh">仓库</span></h5>
+      <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+      <a href="https://github.com/TbusOS/sky-skills/discussions">Discussions</a>
+      <a href="https://github.com/TbusOS/sky-skills/issues">Issues</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">About</span><span class="lang-zh">关于</span></h5>
+      <a href="https://github.com/TbusOS/sky-skills/blob/main/README.md">README</a>
+      <a href="https://github.com/TbusOS/sky-skills/blob/main/LICENSE">MIT License</a>
+      <a href="https://github.com/TbusOS"><span class="lang-en">Maintainer</span><span class="lang-zh">维护者</span></a>
+    </div>
+  </div>
+  <div class="anth-footer-legal">
+    <span class="lang-en">Copyright © 2026 Sky. Licensed under MIT.</span>
+    <span class="lang-zh">版权 © 2026 Sky · MIT 许可</span>
+    <span>
+      <span class="lang-en">Rendered with</span><span class="lang-zh">由</span>
+      <a class="anth-link anth-link--no-arrow" href="../skills/anthropic-design/">anthropic-design</a>
+      <span class="lang-zh"> 渲染</span>
+    </span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+  if (!saved) {
+    saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+    document.querySelectorAll('.lang-en-text').forEach(function (el) {
+      el.style.display = lang === 'zh' ? 'none' : '';
+    });
+    document.querySelectorAll('.lang-zh-text').forEach(function (el) {
+      el.style.display = lang === 'zh' ? '' : 'none';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
