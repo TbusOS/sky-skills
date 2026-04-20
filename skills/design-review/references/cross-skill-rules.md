@@ -59,6 +59,75 @@
 3. **`<img>` 必须有 `alt`**:装饰性用 `alt=""`,内容性用描述。
 4. **可见的 `<a>` 必须有文本 / `aria-label` / `title`**:空链接屏幕阅读器读不出。
 
+## I. 布局比例(visual-audit 强制 + 写之前自问)
+
+**问题模式**:等宽 grid(`repeat(3, 1fr)` / `repeat(4, 1fr)` 等)强行把内容拉到容器宽度的 1/N,但实际内容**不够填满**这个宽度 → 卡片看着"空心"、"拉伸"、"奇怪"。
+
+**visual-audit §10b hollow-card check**:任何等宽 grid 里,子卡 aspect > 2.0 且文本 < 120 字 → warn `hollow card`。
+
+**写之前的自问(rule)**:每次用等宽 grid 放卡时,检查三件事:
+
+1. **每张卡的内容能撑起这个宽度吗?** 3 行 + 1 段 + 1 小 code block 塞在 400px 宽里,大概率是空心。
+2. **卡的"权重"真的一样吗?** 如果其中一张是"推荐",其他是"替代",强行等宽等高**掩盖层级** → 用户分不清主次。改成 **1 hero + (N-1) 小卡** 或 **主区 + 侧栏**。
+3. **ABC / 123 这种没有语义的标签是装饰还是信息?** 如果只是"需要 3 个字母",就是装饰 → 删。有序号语义(Phase 01 / 02 / 03)才留。
+
+**正确布局模板**:
+
+```
+[ 主推方法 — 全宽 hero card (60% 文字说明 + 40% 代码) ]
+           ↓
+[ 替代方法 A — compact ]  [ 替代方法 B — compact ]
+```
+
+**历史**:2026-04-20 INSTALL 的 "三种方式 abc" 就是等宽 3-col 横排太宽,用户指出"一长排太宽,看着很奇怪"。scaffold 原本没 hollow-card check,现在加了。同时规则里写清"层级式 > 等权式"。
+
+## H. Chinese font stack(每 skill fonts.css 强制)
+
+每个 design skill 的 `assets/fonts.css` 必须包含中文字体导入,配对规则如下:
+
+| 英文字体类 | 对应中文 | 配对逻辑 |
+|---|---|---|
+| Lora / Fraunces / Instrument Serif(editorial 衬线) | **Noto Serif SC** | 中英都是 serif,书卷气一致 |
+| Poppins / Inter(display / body sans) | **Noto Sans SC** | 中英都是 sans,几何一致 |
+| IBM Plex Mono / JetBrains Mono(code) | `monospace` fallback | CJK 等宽字稀有,浏览器默认即可 |
+
+**apple-design 例外**:系统原生 PingFang SC 是 Apple 自己的中文字体设计,和 SF Pro 原装配对,**不改**。只给 non-Apple 平台加 Noto Sans SC fallback。
+
+**实现模板**(每 skill 的 fonts.css `@import`):
+```css
+@import url('https://fonts.googleapis.com/css2?
+  family=<主英文字体>&
+  family=Noto+Serif+SC:wght@400;500;600;700&
+  family=Noto+Sans+SC:wght@400;500;600&
+  display=swap');
+```
+
+**html[data-lang="zh"] 规则**(每张双语 HTML 的 `<style>` 或主 CSS):
+```css
+html[data-lang="zh"] body,
+html[data-lang="zh"] p,
+html[data-lang="zh"] li,
+html[data-lang="zh"] .<skill>-quote,
+html[data-lang="zh"] .<reading-elements> {
+  font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+  font-style: normal;  /* CJK 无真 italic,强制消掉英文侧的 italic */
+}
+html[data-lang="zh"] h1,
+html[data-lang="zh"] h2,
+html[data-lang="zh"] h3,
+html[data-lang="zh"] .<skill>-badge {
+  font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+}
+```
+
+**为什么锁死这个栈**:
+- Noto 系列是 Google + Adobe 合作的泛语言项目,中文 glyph 覆盖 18,000+ 字,editorial-grade 品质
+- Source Han 同源(一样的 glyph 数据,不同品牌)作第一 fallback
+- PingFang SC 作 Apple 系统保底
+- 以后新 skill 加进来 **不能用** `"PingFang SC"` 当单独主字体(那是 2010 年代 web 默认,看得出懒)
+
+**历史**:2026-04-20 写 canonical 时默认用 PingFang 系统栈,用户 push back ("中文字体要选个好看的"),改为 Noto Serif SC / Noto Sans SC 配对栈。现在锁进规则,不再走回老路。
+
 ## G. 公开站页必须中英双语(verify.py 强制)
 
 **规则**:任何在 `docs/` 或 `skills/<style>/references/canonical/` 下的 HTML,都会被 GitHub Pages 发布到 `doc.tbusos.com/sky-skills/`(公开站的一部分)。这些页面 **必须** 支持中英切换,理由:
@@ -74,8 +143,10 @@
 <style>
   html[data-lang="en"] .lang-zh { display: none !important; }
   html[data-lang="zh"] .lang-en { display: none !important; }
+  /* 中文字体按 §H 规则:Noto Serif SC 做 editorial body,Noto Sans SC 做 display */
   html[data-lang="zh"] body, html[data-lang="zh"] p, html[data-lang="zh"] li {
-    font-family: "PingFang SC", ..., sans-serif;  /* 每 style 各自实现 */
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal;
   }
 </style>
 

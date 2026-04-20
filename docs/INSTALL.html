@@ -209,57 +209,70 @@ npx playwright install chromium</code></pre>
 
 <!-- §2 Install methods -->
 <section class="anth-section" id="methods">
-  <div class="anth-container anth-container--wide">
-    <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
+  <div class="anth-container" style="max-width:860px;">
+    <div style="margin:0 auto var(--space-7); text-align:center;">
       <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">02 · Install methods</span><span class="lang-zh">02 · 安装方法</span></span>
       <h2 style="margin-top:var(--space-3);">
-        <span class="lang-en">Three ways. Pick your fit.</span>
-        <span class="lang-zh">三种方式。按需选择。</span>
+        <span class="lang-en">One recommended path. Two alternatives.</span>
+        <span class="lang-zh">一条推荐路径,两个替代。</span>
       </h2>
       <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
-        <span class="lang-en">Skills are plain folders. Install a single one via Claude CLI, copy the whole repo for offline use, or symlink for live updates.</span>
-        <span class="lang-zh">Skill 就是普通文件夹。用 Claude CLI 装单个、整仓复制离线用、或 symlink 跟仓库同步更新。</span>
+        <span class="lang-en">Skills are plain folders. Install via Claude CLI in 60 seconds, or fall back to copy / symlink when you need offline or developer control.</span>
+        <span class="lang-zh">Skill 就是普通文件夹。60 秒用 Claude CLI 装好;离线或需要开发者控制时回退到 copy / symlink。</span>
       </p>
     </div>
 
-    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-5);">
-
-      <article class="method-card">
-        <span class="method-card__num">A</span>
-        <h3 class="method-card__title"><span class="lang-en">Claude CLI</span><span class="lang-zh">Claude CLI</span></h3>
-        <span class="method-card__tag method-card__tag--best"><span class="lang-en">Recommended</span><span class="lang-zh">推荐</span></span>
-        <p style="font-size:14.5px; color:var(--anth-text-secondary); margin-top:var(--space-3); line-height:1.6;">
-          <span class="lang-en">One skill at a time. Claude pulls directly from GitHub into your project's <code>.claude/skills/</code>.</span>
-          <span class="lang-zh">一次装一个。Claude 直接从 GitHub 拉进你项目的 <code>.claude/skills/</code>。</span>
+    <!-- Primary method: Claude CLI (full-width, weighted) -->
+    <article style="background:#ffffff; border:2px solid var(--anth-orange); border-radius:var(--radius-lg); padding:var(--space-6) var(--space-7); margin-bottom:var(--space-5); display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.3fr); gap:var(--space-6); align-items:center;">
+      <div>
+        <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Recommended</span><span class="lang-zh">推荐</span></span>
+        <h3 style="font-family:var(--font-heading); font-size:28px; font-weight:600; letter-spacing:-0.015em; color:var(--anth-text); margin:var(--space-3) 0 var(--space-3);">
+          <span class="lang-en">Claude CLI</span>
+          <span class="lang-zh">Claude CLI</span>
+        </h3>
+        <p style="font-family:var(--font-body); font-size:16px; line-height:1.65; color:var(--anth-text); margin:0 0 var(--space-4);">
+          <span class="lang-en">One skill at a time. Claude pulls directly from GitHub into your project's <code>.claude/skills/</code>. No git clone, no copy, no maintenance — just run the command.</span>
+          <span class="lang-zh">一次装一个。Claude 直接从 GitHub 拉进你项目的 <code>.claude/skills/</code>。不用 git clone,不用 copy,不用后续维护 —— 一条命令就行。</span>
         </p>
-<pre class="anth-code" style="margin-top:var(--space-4); font-size:12.5px;"><code>claude install github:TbusOS/sky-skills/skills/anthropic-design
+        <a class="anth-link" href="#first-run"><span class="lang-en">See it activate in 60 seconds</span><span class="lang-zh">看它 60 秒自动激活</span></a>
+      </div>
+<pre class="anth-code" style="margin:0; font-size:13px;"><code>claude install github:TbusOS/sky-skills/skills/anthropic-design
 claude install github:TbusOS/sky-skills/skills/design-review
 claude install github:TbusOS/sky-skills/skills/linux-kernel-dev</code></pre>
-      </article>
+    </article>
 
-      <article class="method-card">
-        <span class="method-card__num">B</span>
-        <h3 class="method-card__title"><span class="lang-en">Copy</span><span class="lang-zh">复制</span></h3>
-        <span class="method-card__tag method-card__tag--fast"><span class="lang-en">Offline</span><span class="lang-zh">离线</span></span>
-        <p style="font-size:14.5px; color:var(--anth-text-secondary); margin-top:var(--space-3); line-height:1.6;">
-          <span class="lang-en">Clone once, copy <code>SKILL.md</code> into each project you need. Good for air-gapped or forked setups.</span>
-          <span class="lang-zh">clone 一次,把 <code>SKILL.md</code> 复制到需要的项目。适合离线或 fork 环境。</span>
+    <!-- Alternatives: Copy + Symlink (compact, 2-col) -->
+    <p style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--anth-text-secondary); font-weight:600; margin:var(--space-6) 0 var(--space-4);">
+      <span class="lang-en">— or, if you need offline or live updates —</span>
+      <span class="lang-zh">—— 或者,需要离线 / 实时更新时 ——</span>
+    </p>
+    <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--space-4);">
+
+      <article style="background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-md); padding:var(--space-5);">
+        <h4 style="font-family:var(--font-heading); font-size:18px; font-weight:600; color:var(--anth-text); margin:0 0 var(--space-2);">
+          <span class="lang-en">Copy</span>
+          <span class="lang-zh">复制</span>
+        </h4>
+        <p style="font-family:var(--font-body); font-size:14.5px; line-height:1.6; color:var(--anth-text-secondary); margin:0 0 var(--space-4);">
+          <span class="lang-en">Clone once, copy <code>SKILL.md</code> into each project. Offline-friendly, good for forks.</span>
+          <span class="lang-zh">clone 一次,把 <code>SKILL.md</code> 复制到每个项目。离线友好,适合 fork。</span>
         </p>
-<pre class="anth-code" style="margin-top:var(--space-4); font-size:12.5px;"><code>git clone https://github.com/TbusOS/sky-skills.git
+<pre class="anth-code" style="margin:0; font-size:12px;"><code>git clone https://github.com/TbusOS/sky-skills.git
 
 cp sky-skills/skills/anthropic-design/SKILL.md \
    your-project/.claude/skills/anthropic-design.md</code></pre>
       </article>
 
-      <article class="method-card">
-        <span class="method-card__num">C</span>
-        <h3 class="method-card__title"><span class="lang-en">Symlink</span><span class="lang-zh">符号链接</span></h3>
-        <span class="method-card__tag method-card__tag--dev"><span class="lang-en">Developer</span><span class="lang-zh">开发者</span></span>
-        <p style="font-size:14.5px; color:var(--anth-text-secondary); margin-top:var(--space-3); line-height:1.6;">
-          <span class="lang-en">Point to a single clone across all your projects. <code>git pull</code> updates every linked project at once.</span>
-          <span class="lang-zh">多个项目指向同一个 clone。<code>git pull</code> 一次更新所有项目。</span>
+      <article style="background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-md); padding:var(--space-5);">
+        <h4 style="font-family:var(--font-heading); font-size:18px; font-weight:600; color:var(--anth-text); margin:0 0 var(--space-2);">
+          <span class="lang-en">Symlink</span>
+          <span class="lang-zh">符号链接</span>
+        </h4>
+        <p style="font-family:var(--font-body); font-size:14.5px; line-height:1.6; color:var(--anth-text-secondary); margin:0 0 var(--space-4);">
+          <span class="lang-en">Point many projects at one clone. <code>git pull</code> updates all of them at once.</span>
+          <span class="lang-zh">多个项目指向同一个 clone。<code>git pull</code> 一次同步全部。</span>
         </p>
-<pre class="anth-code" style="margin-top:var(--space-4); font-size:12.5px;"><code>git clone https://github.com/TbusOS/sky-skills.git ~/sky-skills
+<pre class="anth-code" style="margin:0; font-size:12px;"><code>git clone https://github.com/TbusOS/sky-skills.git ~/sky-skills
 
 ln -s ~/sky-skills/skills/anthropic-design/SKILL.md \
       your-project/.claude/skills/anthropic-design.md</code></pre>

@@ -343,6 +343,43 @@ const findings = await page.evaluate(() => {
     }
   });
 
+  // ---------- 10b) Hollow cards in equal-width grid ----------
+  // Catches "ABC-style" layouts where 3+ equal cards get stretched wider than
+  // their content wants to be. Heuristic: card aspect > 2.0 AND text < 120
+  // chars in an equal-column grid (3+ cols) → card feels hollow. User this
+  // was the "三种方式 abc 太宽" bug (2026-04-20).
+  document.querySelectorAll('*').forEach((el) => {
+    const style = getComputedStyle(el);
+    if (!style.display.includes('grid')) return;
+    const tmpl = style.gridTemplateColumns || '';
+    // Crude: count column tracks by splitting on whitespace (px / fr / auto).
+    const cols = tmpl.trim().split(/\s+/).filter(Boolean).length;
+    if (cols < 3) return;
+    const children = [...el.children];
+    if (children.length < 3) return;
+    const widths = children.map((c) => c.getBoundingClientRect().width);
+    const maxW = Math.max(...widths);
+    const minW = Math.min(...widths);
+    if (maxW - minW > 10) return;  // columns not actually equal
+    for (const c of children) {
+      const rect = c.getBoundingClientRect();
+      if (rect.width < 100 || rect.height < 40) continue;
+      const aspect = rect.width / rect.height;
+      const text = (c.innerText || '').trim();
+      const chars = text.length;
+      if (aspect > 1.8 && chars < 180) {
+        issues.push({
+          kind: 'hollow-card',
+          severity: 'warn',
+          aspect: +aspect.toFixed(2),
+          chars,
+          dims: `${Math.round(rect.width)}×${Math.round(rect.height)}`,
+          preview: text.slice(0, 40),
+        });
+      }
+    }
+  });
+
   // ---------- 10) SVG text on same-colour shape ----------
   // Simple heuristic: for every <text> inside an SVG, find the first ancestor
   // shape (rect/circle/polygon/path) whose bbox contains the text's centre,
@@ -467,6 +504,10 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'link-no-text') {
     console.log(
       `  [${i.severity}] <a> with no text, aria-label, or title: href=${i.href}`
+    );
+  } else if (i.kind === 'hollow-card') {
+    console.log(
+      `  [${i.severity}] hollow card in equal-width grid: ${i.dims} aspect=${i.aspect}:1 only ${i.chars} chars "${i.preview}…" — content too sparse for width, consider narrower container or 1-hero + N-alternatives layout`
     );
   } else if (i.kind === 'svg-text-on-same-colour') {
     console.log(
