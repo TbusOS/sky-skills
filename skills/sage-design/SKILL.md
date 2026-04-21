@@ -48,24 +48,28 @@ last-verified: 2026-04-19
 3. `assets/sage.css` — CSS 变量与组件
 4. `templates/` — 着陆页骨架（mirrors ember-design structure, sage palette）
 
-## 发布前检查（MUST — 交给 design-review skill）
+## 发布前检查(MUST — 交给 design-review skill)
 
-生成完整 HTML 后, 必须:
+### 生成**前**读 canonical + 拿合约
 
 ```bash
-# 1) 结构验证(placeholder / BEM / 未定义 class / SVG 平衡)
-python3 skills/design-review/scripts/verify.py --skill=sage <path/to/your.html>
-
-# 2) 视觉渲染验证(对比度 + 框图尺寸 + SVG 文字 + 孤儿卡)
-node skills/design-review/scripts/visual-audit.mjs <path/to/your.html>
-
-# 3) 全页截图, 肉眼审核
-node skills/design-review/scripts/screenshot.mjs <path/to/your.html> shot.png
+bin/design-review --plan --skill=sage --page=<pricing|landing|docs-home> > /tmp/contract.md
+# 读 skills/sage-design/references/canonical/<page>.html + .md
 ```
 
-**任一脚本 exit 非 0 = 没完成**。规则与已知 bug 见
-`skills/design-review/references/cross-skill-rules.md` +
-`skills/design-review/references/known-bugs.md`。
+### 生成**后**跑四闸
+
+```bash
+bin/design-review --critic <path/to/your.html>
+```
+
+四闸:`verify.py` · `visual-audit.mjs`(加 §J italic / §K brand + smell)·
+`screenshot.mjs` · `critic.mjs`(LLM taste 0-100 分)。
+
+任一 error = 失败。critic 得分 < 75 必修。canonical 自回归 ≥ 90。
+
+规则:`skills/design-review/references/cross-skill-rules.md` A-L +
+`known-bugs.md`。canonical:`skills/sage-design/references/canonical/`。
 
 Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
 [harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)

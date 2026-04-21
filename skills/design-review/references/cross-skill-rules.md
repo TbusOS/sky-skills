@@ -83,6 +83,73 @@
 
 **历史**:2026-04-20 INSTALL 的 "三种方式 abc" 就是等宽 3-col 横排太宽,用户指出"一长排太宽,看着很奇怪"。scaffold 原本没 hollow-card check,现在加了。同时规则里写清"层级式 > 等权式"。
 
+## L. 完整评审流程(每次生成新页面必走)
+
+生成器生成任何 HTML 页之前、之中、之后都走这个流程:
+
+### 生成**前**(plan 阶段)
+
+```bash
+bin/design-review --plan --skill=<skill> --page=<type>
+```
+
+script 输出一份 sprint-contract md,必含:
+- 要读的 4 个文件(canonical.html + canonical.md + cross-skill-rules +
+  dos-and-donts)
+- 本页的结构 MUST(从 canonical.md 提)
+- brand-presence / italic / cross-skill-smell 的 MUST
+- 三闸命令
+
+**生成器把这份 contract 读完再动手**。不读 canonical 就写 = 又一次让读者
+push back。
+
+### 生成**后**(review 阶段 —— 4 闸)
+
+```bash
+bin/design-review --critic <page.html>
+```
+
+四闸依次跑:
+
+1. **verify.py** — 结构(占位符、DOCTYPE、BEM、SVG 平衡、class 定义、
+   bilingual §G)
+2. **visual-audit.mjs** — 渲染 + Playwright pngjs:
+   - contrast / hero 宽 / SVG 字号 / 孤儿 figure / text overlap /
+     多 h1 / heading 跳级 / img-alt / link-text / hollow card / SVG
+     同色
+   - **brand-presence** (§K) · **italic-overuse** (§J) ·
+     **cross-skill-smell** (§K)
+3. **screenshot.mjs** — 全页 PNG 存 shots/
+4. **critic.mjs** — LLM 口味评审(写一份 critic prompt md,喂给 Claude;
+   Claude Code 环境下直接 Task(subagent_type='design-critic'))。输出
+   0-100 分 + 7 维度分解 + 具体 issues + narrative
+
+任一 error 整个失败;warn 要人判定是否放行。critic 得分 < 75 必修。
+
+### 自回归保底(self-regression)
+
+每次 canonical 升级,canonical 自己跑 critic 必须 ≥ 90 分。如果达不到,
+说明 rubric 偏离了 canonical 代表的那种"好",是 rubric 错,不是 canonical 错。
+
+### 规则总览(A-L 索引)
+
+| § | 范围 | 机器化 | 规则要点 |
+|---|---|---|---|
+| A | 结构 | verify.py | 占位符/DOCTYPE/BEM/SVG/class 定义 |
+| B | 渲染 | visual-audit.mjs | contrast/hero 宽/SVG 字号 |
+| C | 原创性 | 文档级 | lineup 卡 / hero 框图反 AI slop |
+| D | 代码质量 | 文档级 | 禁写死 hex / `transition: all` |
+| E | SVG | visual-audit.mjs | 先渲染确认 bbox / 删是最后一招 / 同色警告 |
+| F | a11y | visual-audit.mjs | 单 h1 / heading 跳 / alt / link text |
+| G | 双语 | verify.py | 公开站页必须 lang-toggle + lang-en/zh |
+| H | 中文字体 | 文档级 | Noto Serif SC + Noto Sans SC(apple 例外) |
+| I | 布局比例 | visual-audit.mjs §10b | hollow card + 1 hero + N 替代 |
+| J | italic 纪律 | visual-audit.mjs italic-overuse | italic 仅做强调 |
+| K | 品牌可视 + 串味 | visual-audit.mjs brand-presence / smell | 本风格 vs 跨风格 |
+| L | 评审流程 | bin/design-review | plan → write → 4 闸 → self-regression |
+
+---
+
 ## K. 品牌可视性 + 串味(visual-audit 强制)
 
 每个 skill 的页面**第一眼必须能被认出**属于哪个 skill。`visual-audit.mjs` 有两层机器 check:

@@ -36,24 +36,28 @@ last-verified: 2026-04-19
 8. `references/responsive.md` — 断点与 max-width
 9. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
 
-## 发布前检查（MUST — 交给 design-review skill）
+## 发布前检查(MUST — 交给 design-review skill)
 
-生成任何完整 HTML 页面后、宣布"完成"前,**必须**依次跑三道闸:
+### 生成**前**读 canonical + 拿合约
 
 ```bash
-# 1) 结构验证(静态扫描)
-python3 skills/design-review/scripts/verify.py --skill=apple <path/to/your.html>
-
-# 2) 视觉渲染验证(Playwright)
-node skills/design-review/scripts/visual-audit.mjs <path/to/your.html>
-
-# 3) 全页截图,肉眼审核
-node skills/design-review/scripts/screenshot.mjs <path/to/your.html> shot.png
+bin/design-review --plan --skill=apple --page=<pricing|landing|docs-home> > /tmp/contract.md
+# 读 skills/apple-design/references/canonical/<page>.html + .md
 ```
 
-**任一脚本 exit 非 0 = 没完成**。规则与已知 bug 见
-`skills/design-review/references/cross-skill-rules.md` +
-`skills/design-review/references/known-bugs.md`。
+### 生成**后**跑四闸
+
+```bash
+bin/design-review --critic <path/to/your.html>
+```
+
+四闸:`verify.py` · `visual-audit.mjs`(加 §J italic / §K brand + smell)·
+`screenshot.mjs` · `critic.mjs`(LLM taste 0-100 分)。
+
+任一 error = 失败。critic 得分 < 75 必修。canonical 自回归 ≥ 90。
+
+规则:`skills/design-review/references/cross-skill-rules.md` A-L +
+`known-bugs.md`。canonical:`skills/apple-design/references/canonical/`。
 
 Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
 [harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)

@@ -36,24 +36,40 @@ last-verified: 2026-04-19
 8. `references/responsive.md` — 断点与 max-width
 9. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
 
-## 发布前检查（MUST — 交给 design-review skill）
+## 发布前检查(MUST — 交给 design-review skill)
 
-生成任何完整 HTML 页面后、宣布"完成"前,**必须**依次跑三道闸:
+### 生成**前**读 canonical + 拿合约
+
+任何 page-type(pricing / landing / docs-home / 其他)开写之前必须:
 
 ```bash
-# 1) 结构验证(静态扫描)
-python3 skills/design-review/scripts/verify.py --skill=anthropic <path/to/your.html>
-
-# 2) 视觉渲染验证(Playwright)
-node skills/design-review/scripts/visual-audit.mjs <path/to/your.html>
-
-# 3) 全页截图,肉眼审核
-node skills/design-review/scripts/screenshot.mjs <path/to/your.html> shot.png
+# 生成 sprint-contract(把 MUST/MUST NOT 交给生成器自己)
+bin/design-review --plan --skill=anthropic --page=pricing > /tmp/contract.md
+# 然后读 skills/anthropic-design/references/canonical/<page>.html + .md
 ```
 
-**任一脚本 exit 非 0 = 没完成**。规则与已知 bug 见
-`skills/design-review/references/cross-skill-rules.md` +
-`skills/design-review/references/known-bugs.md`。
+**不读 canonical 就写 = 必然偏掉风格**。canonical.md 里的 7-8 条设计
+决定 + typography 表就是评分标准。
+
+### 生成**后**跑四闸
+
+```bash
+bin/design-review --critic <path/to/your.html>
+```
+
+四闸依次:
+1. `verify.py` — 结构(placeholders / DOCTYPE / BEM / SVG / class / §G 双语)
+2. `visual-audit.mjs` — 渲染(contrast / hero 宽 / SVG 字号 / hollow card /
+   **brand-presence §K / italic-overuse §J / cross-skill-smell §K**)
+3. `screenshot.mjs` — 全页 PNG 存 `shots/`
+4. `critic.mjs` — LLM taste 评审(输出 JSON + 0-100 分,canonical 自跑 ≥ 90)
+
+**任一 error 整个失败**。warn 要判断是否放行。critic 得分 < 75 必修。
+
+规则与已知 bug 全在 `skills/design-review/references/cross-skill-rules.md`
+(A-L)+ `known-bugs.md`。canonical 文件在
+`skills/anthropic-design/references/canonical/`(pricing / landing /
+docs-home 各一对 .html + .md)。
 
 Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
 [harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)
