@@ -23,16 +23,30 @@
     letter-spacing: 0.02em;
   }
   .lang-toggle:hover { background: rgba(196, 148, 100, 0.12); }
+  /* §H · zh 字体配对:Inter → Noto Sans SC(body),Fraunces/Instrument Serif → Noto Serif SC(editorial display) */
   html[data-lang="zh"] body,
   html[data-lang="zh"] p,
   html[data-lang="zh"] li,
-  html[data-lang="zh"] .ember-quote {
-    font-family: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  html[data-lang="zh"] .ember-lead {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
   }
   html[data-lang="zh"] h1,
   html[data-lang="zh"] h2,
-  html[data-lang="zh"] h3 {
-    font-family: "Inter", "PingFang SC", "Hiragino Sans GB", sans-serif;
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .comp-card__title,
+  html[data-lang="zh"] .timeline-title,
+  html[data-lang="zh"] .ember-quote {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .ember-badge,
+  html[data-lang="zh"] .eyebrow,
+  html[data-lang="zh"] .voice-bar__label,
+  html[data-lang="zh"] .voice-chip,
+  html[data-lang="zh"] .comp-card__num,
+  html[data-lang="zh"] .comp-card__status {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+    font-style: normal !important;
   }
 
   /* Voice switcher — ember style */
@@ -66,7 +80,7 @@
     display:flex; flex-direction:column; gap:var(--space-3);
   }
   .comp-card__num {
-    font-family:'Fraunces', serif; font-style:italic; font-size:48px; font-weight:500;
+    font-family:'Fraunces', serif; font-size:48px; font-weight:500;
     color:#c49464; line-height:1; letter-spacing:-0.02em;
   }
   .comp-card__title {
@@ -87,8 +101,9 @@
   }
   .comp-card__status {
     position:absolute; top:var(--space-5); right:var(--space-5);
-    font-family:'Fraunces', serif; font-style:italic; font-size:13px;
-    padding:3px 12px; border-radius:999px;
+    font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:11px; font-weight:600;
+    letter-spacing:0.12em; text-transform:uppercase;
+    padding:4px 11px; border-radius:4px;
   }
   .comp-card__status--done { background:#e5e8c8; color:#58661e; }
   .comp-card__status--next { background:#f4d9b4; color:#8b4d16; }
@@ -121,8 +136,8 @@
   .rules-callout ul { margin:0; padding-left:var(--space-5); font-size:16px; line-height:1.8; }
   .rules-callout li { margin-bottom:var(--space-4); }
   .rules-callout li strong {
-    display:block; margin-bottom:6px; font-family:'Fraunces', serif; font-style:italic;
-    font-size:17px; color:#492d22;
+    display:block; margin-bottom:6px; font-family:'Fraunces', serif;
+    font-size:17px; font-weight:500; color:#492d22;
   }
 
   /* Gold accent strip */
@@ -157,8 +172,8 @@
     border-bottom:1px solid rgba(73, 45, 34, 0.1); vertical-align:top;
   }
   .styles-table tr:last-child td { border-bottom:none; }
-  .styles-table strong { font-family:'Fraunces', serif; font-style:italic; font-weight:500; }
-  .styles-table .yes { color:#58661e; font-style:italic; font-family:'Fraunces', serif; }
+  .styles-table strong { font-family:'Fraunces', serif; font-weight:500; }
+  .styles-table .yes { color:#58661e; font-family:'Fraunces', serif; font-weight:500; }
   .styles-table .accent { color:#c49464; font-style:italic; font-family:'Fraunces', serif; }
 </style>
 </head>
@@ -181,23 +196,10 @@
   </div>
 </div></nav>
 
-<!-- Voice switcher -->
-<section style="padding:var(--space-5) var(--space-5) 0;">
-  <div class="ember-container ember-container--wide">
-    <div class="voice-bar">
-      <span class="voice-bar__label"><span class="lang-en">Read in another voice</span><span class="lang-zh">用另一种声音读</span></span>
-      <a class="voice-chip" href="HARNESS-ROADMAP.apple.html">apple</a>
-      <a class="voice-chip" href="HARNESS-ROADMAP.html">anthropic</a>
-      <a class="voice-chip voice-chip--current" href="HARNESS-ROADMAP.ember.html" aria-current="page">ember</a>
-      <a class="voice-chip" href="HARNESS-ROADMAP.sage.html">sage</a>
-      <span style="margin-left:auto; color:var(--ember-text-secondary); font-size:14px; font-family:'Fraunces', serif; font-style:italic;"><span class="lang-en">Same content. Four design voices.</span><span class="lang-zh">同一份内容。四种设计声音。</span></span>
-    </div>
-  </div>
-</section>
-
 <!-- Hero -->
 <section class="ember-hero">
   <div class="ember-container" style="max-width:860px;">
+    <span class="accent-strip" style="display:block; width:48px; height:1px; background:#c49464; margin:0 0 var(--space-5);"></span>
     <span class="ember-badge"><span class="lang-en">Architecture · 2026-04-20</span><span class="lang-zh">架构 · 2026-04-20</span></span>
     <h1 style="margin-top:var(--space-5); font-family:'Fraunces', serif; font-style:normal; font-weight:400; font-size:72px; line-height:1.05; letter-spacing:-0.02em;">
       <span class="lang-en">The Harness.<br>Eight components.<br>One rule.</span>
@@ -210,6 +212,19 @@
     <div style="display:flex; gap:var(--space-3); justify-content:flex-start; flex-wrap:wrap; margin-top:var(--space-6);">
       <a class="ember-button" href="#components"><span class="lang-en">See the eight</span><span class="lang-zh">看这八个</span></a>
       <a class="ember-link" href="#status"><span class="lang-en">What's done today</span><span class="lang-zh">今天做到哪里</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Voice switcher · below hero, utility strip -->
+<section style="padding:0 var(--space-5) var(--space-4);">
+  <div class="ember-container ember-container--wide">
+    <div class="voice-bar" style="background:transparent; border:none; padding:var(--space-3) 0;">
+      <span class="voice-bar__label"><span class="lang-en">Read in another voice</span><span class="lang-zh">用另一种声音读</span></span>
+      <a class="voice-chip" href="HARNESS-ROADMAP.apple.html">apple</a>
+      <a class="voice-chip" href="HARNESS-ROADMAP.html">anthropic</a>
+      <a class="voice-chip voice-chip--current" href="HARNESS-ROADMAP.ember.html" aria-current="page">ember</a>
+      <a class="voice-chip" href="HARNESS-ROADMAP.sage.html">sage</a>
     </div>
   </div>
 </section>
@@ -498,8 +513,8 @@
         </g>
 
         <text x="600" y="410" text-anchor="middle" font-family="Fraunces,serif" font-style="italic" font-size="13" fill="#77654d">
-          <tspan class="lang-en-text">hard dependency: planner needs canonical · critic needs both · learning needs 10+ real outputs</tspan>
-          <tspan class="lang-zh-text" style="display:none;" font-family="Inter,sans-serif" font-style="normal">硬依赖:planner 要 canonical · critic 要两者 · learning 要 10+ 真实产出</tspan>
+          <tspan class="lang-en">hard dependency: planner needs canonical · critic needs both · learning needs 10+ real outputs</tspan>
+          <tspan class="lang-zh" font-family="Inter,sans-serif" font-style="normal">硬依赖:planner 要 canonical · critic 要两者 · learning 要 10+ 真实产出</tspan>
         </text>
       </svg>
     </figure>
@@ -566,7 +581,7 @@
 <section class="ember-section" id="status">
   <div class="ember-container ember-container--wide">
     <div style="max-width:820px; margin:0 auto var(--space-8); text-align:center;">
-      <span class="ember-badge"><span class="lang-en">Status · 2026-04-21</span><span class="lang-zh">今天 · 2026-04-21</span></span>
+      <span class="ember-badge"><span class="lang-en">Status · 2026-04-22</span><span class="lang-zh">今天 · 2026-04-22</span></span>
       <h2 style="font-family:'Fraunces', serif; font-size:48px; font-weight:400; letter-spacing:-0.02em; line-height:1.1; margin:var(--space-4) 0;">
         <span class="lang-en">What's real. <em>What's next.</em></span>
         <span class="lang-zh">哪些是真的。<em>下一步。</em></span>
@@ -587,14 +602,14 @@
       </article>
 
       <article class="ember-card" style="padding:var(--space-6); border:2px solid #c49464;">
-        <span class="comp-card__status comp-card__status--next" style="position:static; display:inline-block; margin-bottom:var(--space-3);"><span class="lang-en">now · use it</span><span class="lang-zh">现在 · 用起来</span></span>
+        <span class="comp-card__status comp-card__status--next" style="position:static; display:inline-block; margin-bottom:var(--space-3);"><span class="lang-en">now · critic validated</span><span class="lang-zh">现在 · critic 已验证</span></span>
         <h3 style="font-family:'Fraunces', serif; font-size:24px; font-weight:500; margin:var(--space-3) 0 0;">
-          <span class="lang-en">Gather <em>data</em> from real pages</span>
-          <span class="lang-zh">在真实页面上积累<em>数据</em></span>
+          <span class="lang-en">4 real pages reviewed</span>
+          <span class="lang-zh">评审了 4 张真实页</span>
         </h3>
         <p style="font-size:15.5px; color:var(--ember-text); margin-top:var(--space-3); line-height:1.65;">
-          <span class="lang-en">Harness is complete enough to prove out. Every new page passes 4 gates. Every critic miss or false-positive becomes a known-bugs entry plus a new check or rubric tune. That's how the harness sharpens.</span>
-          <span class="lang-zh">harness 已经完整到可以真用。每张新页过四闸。critic 漏抓 / 误报的每一次,都转成 known-bugs 新条目 + 新 check 或 rubric 微调。harness 只能这样变锐利。</span>
+          <span class="lang-en">2026-04-22: all 4 HARNESS-ROADMAP variants went through <code>bin/design-review --critic</code>. anthropic 84 → 93 in three rounds. apple 88, ember 84, sage 78 → pass after fixes. Each verdict cites line numbers, class names, paste-ready CSS — specific and actionable. Each fix cycle pins an §H / §J / §K regression into the next visual-audit run.</span>
+          <span class="lang-zh">2026-04-22:4 张 HARNESS-ROADMAP 都跑了 <code>bin/design-review --critic</code>。anthropic 三轮 84 → 93;apple 88,ember 84,sage 78 → 修完通过。每条 verdict 直接给行号、类名、可粘贴 CSS —— 具体可操作。每次修复都把 §H / §J / §K 回归锁进下一次 visual-audit。</span>
         </p>
       </article>
 
@@ -756,10 +771,10 @@
     document.querySelectorAll('.lang-toggle').forEach(function (btn) {
       btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
     });
-    document.querySelectorAll('.lang-en-text').forEach(function (el) {
+    document.querySelectorAll('tspan.lang-en').forEach(function (el) {
       el.style.display = lang === 'zh' ? 'none' : '';
     });
-    document.querySelectorAll('.lang-zh-text').forEach(function (el) {
+    document.querySelectorAll('tspan.lang-zh').forEach(function (el) {
       el.style.display = lang === 'zh' ? '' : 'none';
     });
   }

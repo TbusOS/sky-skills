@@ -23,16 +23,29 @@
     letter-spacing: 0.02em;
   }
   .lang-toggle:hover { background: #eef1e0; }
+  /* §H · zh 字体配对:Inter → Noto Sans SC(body),Instrument Serif → Noto Serif SC(editorial display) */
   html[data-lang="zh"] body,
   html[data-lang="zh"] p,
   html[data-lang="zh"] li,
-  html[data-lang="zh"] .sage-quote {
-    font-family: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  html[data-lang="zh"] .sage-lead {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
   }
   html[data-lang="zh"] h1,
   html[data-lang="zh"] h2,
-  html[data-lang="zh"] h3 {
-    font-family: "Inter", "PingFang SC", "Hiragino Sans GB", sans-serif;
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .comp-card__title,
+  html[data-lang="zh"] .timeline-title,
+  html[data-lang="zh"] .sage-quote {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .sect-marker,
+  html[data-lang="zh"] .voice-bar__label,
+  html[data-lang="zh"] .voice-chip,
+  html[data-lang="zh"] .comp-card__num,
+  html[data-lang="zh"] .comp-card__status {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+    font-style: normal !important;
   }
 
   /* Voice switcher — sage style */
@@ -130,7 +143,7 @@
   .rules-callout ul { margin:0; padding-left:var(--space-5); font-size:16px; line-height:1.8; }
   .rules-callout li { margin-bottom:var(--space-4); }
   .rules-callout li strong {
-    display:block; margin-bottom:6px; font-family:'Instrument Serif', serif; font-style:italic;
+    display:block; margin-bottom:6px; font-family:'Instrument Serif', serif;
     font-size:19px; color:var(--sage-ink); font-weight:400;
   }
 
@@ -161,9 +174,9 @@
     border-bottom:1px solid var(--sage-divider); vertical-align:top;
   }
   .styles-table tr:last-child td { border-bottom:none; }
-  .styles-table strong { font-family:'Instrument Serif', serif; font-style:italic; font-weight:400; font-size:16px; }
-  .styles-table .yes { color:#3d5b2e; font-style:italic; font-family:'Instrument Serif', serif; font-size:17px; }
-  .styles-table .accent { color:#7a9561; font-style:italic; font-family:'Instrument Serif', serif; font-size:17px; }
+  .styles-table strong { font-family:'Instrument Serif', serif; font-weight:500; font-size:16px; }
+  .styles-table .yes { color:var(--sage-sage-dark); font-family:'Instrument Serif', serif; font-size:17px; font-weight:500; }
+  .styles-table .accent { color:var(--sage-sage-dark); font-style:italic; font-family:'Instrument Serif', serif; font-size:17px; }
 </style>
 </head>
 <body>
@@ -185,27 +198,13 @@
   </div>
 </div></nav>
 
-<!-- Voice switcher -->
-<section style="padding:var(--space-5) var(--space-5) 0;">
-  <div class="sage-container sage-container--wide">
-    <div class="voice-bar">
-      <span class="voice-bar__label"><span class="lang-en">Read in another voice</span><span class="lang-zh">用另一种声音读</span></span>
-      <a class="voice-chip" href="HARNESS-ROADMAP.apple.html">apple</a>
-      <a class="voice-chip" href="HARNESS-ROADMAP.html">anthropic</a>
-      <a class="voice-chip" href="HARNESS-ROADMAP.ember.html">ember</a>
-      <a class="voice-chip voice-chip--current" href="HARNESS-ROADMAP.sage.html" aria-current="page">sage</a>
-      <span style="margin-left:auto; color:var(--sage-text-secondary); font-size:14px; font-family:'Instrument Serif', serif; font-style:italic;"><span class="lang-en">Same content. Four design voices.</span><span class="lang-zh">同一份内容。四种设计声音。</span></span>
-    </div>
-  </div>
-</section>
-
 <!-- Hero -->
 <section class="sage-hero">
   <div class="sage-container" style="max-width:860px;">
     <span class="sect-marker" style="display:block; margin-bottom:var(--space-5);">00 · <span class="lang-en">Architecture · 2026-04-20</span><span class="lang-zh">架构 · 2026-04-20</span></span>
     <h1 style="font-family:'Instrument Serif', serif; font-weight:400; font-size:84px; line-height:1.03; letter-spacing:-0.02em; color:var(--sage-ink);">
-      <span class="lang-en">The Harness.<br><em>Eight components.</em><br>One rule.</span>
-      <span class="lang-zh">架构蓝图。<br><em>八个组件。</em><br>一条规矩。</span>
+      <span class="lang-en">The Harness. Eight components. <em>One</em> rule.</span>
+      <span class="lang-zh">架构蓝图。八个组件。<em>一条</em>规矩。</span>
     </h1>
     <p class="sage-lead" style="margin-top:var(--space-6); max-width:760px;">
       <span class="lang-en">The full design of the sky-skills harness — four <strong>generator</strong> skills, one <strong>evaluator</strong>, and the six components still to come. Every component must defend one question: <em>what specific model weakness does it correspond to?</em></span>
@@ -214,6 +213,19 @@
     <div style="display:flex; gap:var(--space-4); align-items:center; margin-top:var(--space-6);">
       <a class="sage-button" href="#components" style="background:var(--sage-ink); color:#ffffff;"><span class="lang-en">See the eight</span><span class="lang-zh">看这八个</span></a>
       <a class="sage-link" href="#status"><span class="lang-en">What's done today</span><span class="lang-zh">今天做到哪里</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Voice switcher · below hero, utility strip -->
+<section style="padding:0 var(--space-5) var(--space-4);">
+  <div class="sage-container sage-container--wide">
+    <div class="voice-bar" style="background:transparent; border:none; padding:var(--space-3) 0;">
+      <span class="voice-bar__label"><span class="lang-en">Read in another voice</span><span class="lang-zh">用另一种声音读</span></span>
+      <a class="voice-chip" href="HARNESS-ROADMAP.apple.html">apple</a>
+      <a class="voice-chip" href="HARNESS-ROADMAP.html">anthropic</a>
+      <a class="voice-chip" href="HARNESS-ROADMAP.ember.html">ember</a>
+      <a class="voice-chip voice-chip--current" href="HARNESS-ROADMAP.sage.html" aria-current="page">sage</a>
     </div>
   </div>
 </section>
@@ -261,12 +273,18 @@
     <p class="lang-zh">
       <strong>Anthropic 的 <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">Harness design for long-running apps</a></strong> —— <em>planner / generator / evaluator</em> 三段式,evaluator 必须独立,sprint contract,5–15 轮迭代。我们最认真对待的一条:<strong>每一个 harness 组件都要对应模型的一个具体弱点</strong>。这些假设值得压测。
     </p>
-    <blockquote class="sage-quote" style="margin-top:var(--space-7);">
+  </div>
+</section>
+
+<!-- Pull-quote · deep-indigo band (sage signature) -->
+<section style="background:var(--sage-ink); padding:var(--space-9) var(--space-5);">
+  <div class="sage-container" style="max-width:780px;">
+    <blockquote style="margin:0; padding:0; border:none; font-family:'Instrument Serif', serif; font-style:italic; font-size:30px; line-height:1.45; color:#f8faec; letter-spacing:-0.005em;">
       <span class="lang-en">Agents tend to praise their own work confidently — even when quality is obviously mediocre to a human observer. Separating the agent doing the work from the agent evaluating it is a powerful lever.</span>
       <span class="lang-zh">Agent 倾向于自信地称赞自己的作品 —— 哪怕在人类观察者看来质量明显平庸。把做事的 agent 和评判的 agent 分开,是一个真正的杠杆。</span>
     </blockquote>
-    <p class="sage-quote-cite" style="margin-top:var(--space-4);">
-      <span>— <span class="lang-en">Anthropic, harness-design post</span><span class="lang-zh">Anthropic, harness-design 文章</span></span>
+    <p style="margin-top:var(--space-5); font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:#97B077;">
+      — <span class="lang-en">Anthropic · harness-design post</span><span class="lang-zh">Anthropic · harness-design 文章</span>
     </p>
   </div>
 </section>
@@ -431,7 +449,7 @@
           <rect x="60" y="80" width="240" height="260" rx="4" fill="#dfeadb" stroke="#3d5b2e" stroke-width="1"/>
         </g>
         <text x="80" y="112" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#3d5b2e" letter-spacing="0.1em">期 0 · 期 1</text>
-        <text x="80" y="146" font-family="Instrument Serif,serif" font-style="italic" font-size="22" font-weight="400" fill="#393C54">done</text>
+        <text x="80" y="146" font-family="Instrument Serif,serif" font-size="22" font-weight="400" fill="#393C54">done</text>
         <g font-size="12.5" fill="#3d5b2e" font-weight="500">
           <text x="80" y="180">✓ known-bugs → repo</text>
           <text x="80" y="198" opacity="0.7" font-size="11.5">  9 rows catalogued</text>
@@ -446,7 +464,7 @@
           <rect x="340" y="80" width="240" height="260" rx="4" fill="#393C54"/>
         </g>
         <text x="360" y="112" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#97B077" letter-spacing="0.1em">期 1.5 · 期 2a</text>
-        <text x="360" y="146" font-family="Instrument Serif,serif" font-style="italic" font-size="22" font-weight="400" fill="#ffffff">next</text>
+        <text x="360" y="146" font-family="Instrument Serif,serif" font-size="22" font-weight="400" fill="#ffffff">next</text>
         <g font-size="12.5" fill="#ffffff" font-weight="500">
           <text x="360" y="180">→ cross-repo patches</text>
           <text x="360" y="198" opacity="0.7" font-size="11.5">  --css --repo --ignore</text>
@@ -461,7 +479,7 @@
           <rect x="640" y="80" width="240" height="260" rx="4" fill="#ffffff" stroke="#6d6f82" stroke-width="1"/>
         </g>
         <text x="660" y="112" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#393C54" letter-spacing="0.1em">期 1 · 3 · 5 · 6</text>
-        <text x="660" y="146" font-family="Instrument Serif,serif" font-style="italic" font-size="22" font-weight="400" fill="#393C54">in line</text>
+        <text x="660" y="146" font-family="Instrument Serif,serif" font-size="22" font-weight="400" fill="#393C54">in line</text>
         <g font-size="12.5" fill="#2a2c40" font-weight="500">
           <text x="660" y="180">→ design-planner</text>
           <text x="660" y="198" opacity="0.7" font-size="11.5">  sprint contract</text>
@@ -476,7 +494,7 @@
           <rect x="940" y="80" width="200" height="260" rx="4" fill="#f8faec" stroke="#e5e8da" stroke-width="1" stroke-dasharray="4 3"/>
         </g>
         <text x="960" y="112" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#6d6f82" letter-spacing="0.1em">期 7 · 期 8</text>
-        <text x="960" y="146" font-family="Instrument Serif,serif" font-style="italic" font-size="22" font-weight="400" fill="#393C54">after data</text>
+        <text x="960" y="146" font-family="Instrument Serif,serif" font-size="22" font-weight="400" fill="#393C54">after data</text>
         <g font-size="12.5" fill="#6d6f82" font-weight="500">
           <text x="960" y="180">→ learning-loop</text>
           <text x="960" y="198" opacity="0.7" font-size="11.5">  auto-archive bugs</text>
@@ -567,7 +585,7 @@
 <section class="sage-section" id="status">
   <div class="sage-container sage-container--wide">
     <div style="max-width:820px; margin:0 auto var(--space-8); text-align:center;">
-      <span class="sect-marker">06 · <span class="lang-en">Status · 2026-04-21</span><span class="lang-zh">今天 · 2026-04-21</span></span>
+      <span class="sect-marker">06 · <span class="lang-en">Status · 2026-04-22</span><span class="lang-zh">今天 · 2026-04-22</span></span>
       <h2 style="font-family:'Instrument Serif', serif; font-size:52px; font-weight:400; letter-spacing:-0.02em; line-height:1.1; margin:var(--space-4) 0; color:var(--sage-ink);">
         <span class="lang-en">What's real. <em>What's next.</em></span>
         <span class="lang-zh">哪些是真的。<em>下一步。</em></span>
@@ -588,14 +606,14 @@
       </article>
 
       <article class="sage-card" style="padding:var(--space-6); border:2px solid var(--sage-ink);">
-        <span class="comp-card__status comp-card__status--next" style="position:static; display:inline-block; margin-bottom:var(--space-3);"><span class="lang-en">now · use it</span><span class="lang-zh">现在 · 用起来</span></span>
+        <span class="comp-card__status comp-card__status--next" style="position:static; display:inline-block; margin-bottom:var(--space-3);"><span class="lang-en">now · critic validated</span><span class="lang-zh">现在 · critic 已验证</span></span>
         <h3 style="font-family:'Instrument Serif', serif; font-size:26px; font-weight:400; margin:var(--space-3) 0 0; color:var(--sage-ink);">
-          <span class="lang-en">Gather <em>data</em> from real pages</span>
-          <span class="lang-zh">在真实页面上积累<em>数据</em></span>
+          <span class="lang-en">4 real pages reviewed</span>
+          <span class="lang-zh">评审了 4 张真实页</span>
         </h3>
         <p style="font-size:15.5px; color:var(--sage-text); margin-top:var(--space-3); line-height:1.7;">
-          <span class="lang-en">Harness is complete enough to prove out. Every new page passes 4 gates. Every critic miss or false-positive becomes a known-bugs entry plus a new check or rubric tune. That's how the harness sharpens.</span>
-          <span class="lang-zh">harness 已经完整到可以真用。每张新页过四闸。critic 漏抓 / 误报的每一次,都转成 known-bugs 新条目 + 新 check 或 rubric 微调。harness 只能这样变锐利。</span>
+          <span class="lang-en">2026-04-22: all 4 HARNESS-ROADMAP variants ran through <code>bin/design-review --critic</code>. anthropic 84 → 93 across three rounds. apple 88, ember 84, sage 78 → pass after fixes. Verdicts cite line numbers, class names, paste-ready CSS — specific and actionable. Each fix cycle pins an §H / §J / §K regression into the next visual-audit.</span>
+          <span class="lang-zh">2026-04-22:4 张 HARNESS-ROADMAP 都跑了 <code>bin/design-review --critic</code>。anthropic 三轮 84 → 93,apple 88,ember 84,sage 78 → 修完通过。每条 verdict 直接给行号、类名、可粘贴 CSS —— 具体可操作。每一轮修都把 §H / §J / §K 回归锁进下一次 visual-audit。</span>
         </p>
       </article>
 
