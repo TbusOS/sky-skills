@@ -83,6 +83,28 @@
 
 **历史**:2026-04-20 INSTALL 的 "三种方式 abc" 就是等宽 3-col 横排太宽,用户指出"一长排太宽,看着很奇怪"。scaffold 原本没 hollow-card check,现在加了。同时规则里写清"层级式 > 等权式"。
 
+## K. 品牌可视性 + 串味(visual-audit 强制)
+
+每个 skill 的页面**第一眼必须能被认出**属于哪个 skill。`visual-audit.mjs` 有两层机器 check:
+
+1. **no-brand-presence**:top 1440×500 像素区里,该 skill 的 signature 色覆盖率 ≥ 阈值。
+   - anthropic 橙 ≥ 0.4%(canonicals 实测 0.5-0.9%)
+   - apple 蓝 ≥ 0.02%(apple 极简,低阈值)
+   - ember 金 ≥ 0.01%(金色作 hairline,小剂量)
+   - sage 绿 ≥ 1.5%(sage 必须 carry 绿色身份 —— nav band 实现)
+   - 实现:Playwright 截图 → pngjs 像素距匹配(tolerance 55,兜住 antialiasing)
+2. **cross-skill-smell**:可见元素的 computed font-family 第一项 / color / bg / fill,若匹配禁忌清单(别 skill 的 signature),warn 一次。
+   - sage 禁忌:Fraunces / Poppins / Lora / 金色 #c49464 / 橙 #d97757
+   - ember 禁忌:Instrument Serif / Poppins / Lora / sage 绿 / apple 蓝
+   - apple 禁忌:Fraunces / Instrument Serif / Poppins / Lora / 橙 / 金 / sage 绿
+   - anthropic 禁忌:Fraunces / Instrument Serif / apple 蓝 / sage 绿 / 金
+
+**fix playbook**:
+- brand 不可见 → nav 给品牌 tint 背景,hero 加品牌色 kicker,CTA 用品牌色
+- 串味 → 换回本 skill 的 token / 字体栈;不要偷别人的 snippet
+
+**历史**:2026-04-21 sage nav 用 ember 暖米(跨味)+ sage 绿不在 top 可见,两类坑一起命中;sage/ember landing 第一版 Fraunces/Instrument Serif italic 铺满(也是字体 signature 错用)。机器化后同类 bug 再犯即抓。
+
 ## J. Italic 是强调,不是默认(写稿前自检)
 
 当 display 字体支持 italic(Fraunces / Instrument Serif / Lora italic),italic 必须作为**强调**出现,不是每个 h1/h2/h3 的默认样式。

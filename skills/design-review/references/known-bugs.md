@@ -89,6 +89,26 @@
 - **Reader sees**:视觉正常;屏幕阅读器读不出内容。
 - **Defense**:`visual-audit.mjs` 的 **img-no-alt** 和 **link-no-text** check。`<img>` 必须有 alt(装饰性可 `alt=""`);可见 `<a>` 必须有文本或 aria-label 或 title。
 
+### 1.14 品牌色在 hero 不可见(no brand presence)
+- **Reader sees**:页面一打开,看到的是白/米底 + 黑字,第一眼读不出是哪个 skill 的风格。
+- **Why**:作者按惯性把 nav 写成中性白/米色,brand 色只小剂量出现在正文深处。访客没品牌认知,第一眼的视觉信号决定"这是什么感觉"。
+- **Defense**:`visual-audit.mjs` 的 **no-brand-presence** check。截图 top 1440×500px,数该 skill 的 signature 色像素覆盖,低于阈值 → warn。
+- **Fix playbook**:nav bg 给品牌 tint(如 sage 用 `rgba(212,225,184,0.88)`)、hero kicker 用品牌色、或 hero 里放品牌色 badge / button。
+- **历史**:2026-04-21 sage nav 曾经用 `rgba(255,242,223,0.85)`(ember 暖米)导致 sage 页看起来是黄的,用户 push back。修法:sage nav 改 sage 绿 + 加机器化 check。
+
+### 1.15 Italic 滥用 / 铺满式 italic
+- **Reader sees**:每个 h1 / h2 / h3 / card-title 都是 italic,页面像婚礼请柬,不像 editorial。
+- **Why**:display 字体支持 italic 时(Fraunces / Instrument Serif / Lora),作者用 italic 代替层级拐杖,而不是用 size/weight/spacing 建立层级。
+- **Defense**:`visual-audit.mjs` 的 **italic-overuse** check。display heading ≥5 个时,italic 比例 >40% → warn。排除 pull-quote 内的 heading(italic 在那儿是挣得的)。
+- **规则**:`cross-skill-rules.md §J`。
+- **历史**:2026-04-21 ember/sage landing 第一版我把 italic 铺满每个 heading,用户 push back "不好看"。
+
+### 1.16 跨 skill 串味(cross-skill smell)
+- **Reader sees**:sage 页出现 ember 的金色 / Fraunces 字体,或 apple 页出现 anthropic 橙,视觉上"像另一个风格"。
+- **Why**:写作时复用了错风格的 snippet / token,或 inline style 硬编码了别的 skill 的 hex。
+- **Defense**:`visual-audit.mjs` 的 **cross-skill-smell** check。扫所有可见元素的 computed font-family + color/bg/fill,匹配禁忌清单就 warn。禁忌清单在 script 内的 `SKILL_SIGNATURES` 表。
+- **Fix playbook**:换成本 skill 的 token / 字体栈;如果真需要那个色 → 问自己是不是该换 skill。
+
 ### 1.13 等宽 grid 里的卡片空心(hollow card)
 - **Reader sees**:3+ 列等宽 grid 里某卡片被拉到 400px 宽,但只有 3 行文本 + 一个小 code block,看起来"空心拉伸"。
 - **Why**:作者写 `repeat(3, 1fr)` 放不同重要性的选项,用 ABC 标注,内容根本撑不满这个宽度。

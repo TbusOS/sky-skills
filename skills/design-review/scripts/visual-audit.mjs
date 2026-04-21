@@ -25,6 +25,7 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
 import process from 'node:process';
+import { PNG } from 'pngjs';
 
 const args = process.argv.slice(2);
 const ignoreIntentional = args.includes('--ignore-intentional');
@@ -64,6 +65,66 @@ function matchesIntentional(finding) {
   });
 }
 
+// Per-skill signatures — the brand colors a page of this skill MUST have
+// visible presence of in its top region, and foreign signatures that must
+// NOT leak in. Added 2026-04-21 as part of Phase A evaluator completion
+// (addresses "sage nav looked yellow" — brand identity wasn't visible at top).
+const SKILL_SIGNATURES = {
+  anthropic: {
+    name: 'anthropic orange',
+    accents: [[217, 119, 87]],        // #d97757
+    threshold: 0.004,                  // canonical pages 0.5-0.9%; catch "no orange at all"
+    forbiddenColors: [
+      { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
+      { rgb: [151, 176, 119], note: 'sage brand green #97B077' },
+      { rgb: [196, 148, 100], note: 'ember gold #c49464' },
+    ],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif'],
+  },
+  apple: {
+    name: 'apple blue',
+    accents: [[0, 113, 227]],          // #0071E3
+    threshold: 0.0002,                 // apple is minimalist; even tiny blue signals OK
+    forbiddenColors: [
+      { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
+      { rgb: [196, 148, 100], note: 'ember gold #c49464' },
+      { rgb: [151, 176, 119], note: 'sage green #97B077' },
+    ],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora'],
+  },
+  ember: {
+    name: 'ember gold',
+    accents: [[196, 148, 100]],        // #c49464
+    threshold: 0.0001,                 // gold is a hairline/accent — catch total absence only
+    forbiddenColors: [
+      { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
+      { rgb: [151, 176, 119], note: 'sage green #97B077' },
+    ],
+    forbiddenFonts: ['Instrument Serif', 'Poppins', 'Lora'],
+  },
+  sage: {
+    name: 'sage green',
+    accents: [[151, 176, 119], [212, 225, 184]],  // #97B077 + pale sage
+    threshold: 0.015,                  // sage must carry visibly green identity — real nav band
+    forbiddenColors: [
+      { rgb: [196, 148, 100], note: 'ember gold #c49464' },
+      { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
+    ],
+    forbiddenFonts: ['Fraunces', 'Poppins', 'Lora'],
+  },
+};
+
+function detectSkill(target, html) {
+  const m = target.match(/skills\/([a-z]+)-design\//);
+  if (m && SKILL_SIGNATURES[m[1]]) return m[1];
+  // Fallback: look for a <link href=".../<skill>.css"> inside the HTML.
+  for (const name of Object.keys(SKILL_SIGNATURES)) {
+    const re = new RegExp(`<link[^>]+href=["'][^"']*${name}\\.css`, 'i');
+    if (re.test(html)) return name;
+  }
+  return null;
+}
+
 const root = process.cwd();
 const mime = { '.html':'text/html;charset=utf-8','.css':'text/css;charset=utf-8','.js':'application/javascript','.svg':'image/svg+xml','.png':'image/png','.woff2':'font/woff2' };
 const PORT = 8801;
@@ -82,7 +143,20 @@ const page = await (await browser.newContext({ viewport: { width: 1440, height: 
 await page.goto(url, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
 
-const findings = await page.evaluate(() => {
+// Read the HTML so we can detect the skill, then pass cross-skill-smell
+// data into page.evaluate. The smell check needs to know this skill's
+// forbidden foreign signatures.
+const rawHtml = await readFile(resolve(root, target), 'utf-8').catch(() => '');
+const skillId = detectSkill(target, rawHtml);
+const crossSkillData = skillId
+  ? {
+      skill: skillId,
+      forbiddenColors: SKILL_SIGNATURES[skillId].forbiddenColors,
+      forbiddenFonts: SKILL_SIGNATURES[skillId].forbiddenFonts,
+    }
+  : null;
+
+const findings = await page.evaluate((cs) => {
   const issues = [];
 
   // ---------- Helpers ----------
@@ -448,8 +522,142 @@ const findings = await page.evaluate(() => {
     }
   });
 
+  // ---------- 11) Italic discipline (§J) ----------
+  // Blanket italic on display headings reads as "wedding invitation," not
+  // editorial. Count visible display headings; exclude ones living inside a
+  // pull-quote (where italic is earned). If >40% are italic → warn.
+  const DISPLAY_SELECTORS = [
+    'h1', 'h2', 'h3',
+    '.feat-title', '.tier-card__name', '.section-title',
+    '.hero-headline', '.ref-card__name', '.canon-card__title',
+    '.use-tile h3', '.faq-q', '.tier-card__price-num',
+  ].join(', ');
+  const displayHeadings = [...document.querySelectorAll(DISPLAY_SELECTORS)].filter((h) => {
+    if (h.closest('blockquote, .ember-quote, .pull-quote-dark, .quote-dark, .sage-section--dark')) return false;
+    const s = getComputedStyle(h);
+    return s.display !== 'none' && s.visibility !== 'hidden';
+  });
+  if (displayHeadings.length >= 5) {
+    const italics = displayHeadings.filter((h) => getComputedStyle(h).fontStyle === 'italic');
+    const ratio = italics.length / displayHeadings.length;
+    if (ratio > 0.4) {
+      issues.push({
+        kind: 'italic-overuse',
+        severity: 'warn',
+        italicCount: italics.length,
+        totalCount: displayHeadings.length,
+        pct: Math.round(ratio * 100),
+        sample: italics.slice(0, 3).map((h) => (h.textContent || '').trim().slice(0, 30)),
+      });
+    }
+  }
+
+  // ---------- 12) Cross-skill smell ----------
+  // If a sage page uses ember-gold or anthropic-orange, or apple uses Fraunces,
+  // the page is visually impersonating another skill. Warn once per offending
+  // signature so users know a cross-skill pattern slipped in.
+  if (cs) {
+    const smellMap = new Map();
+    const allEls = document.querySelectorAll('body, body *');
+    for (const el of allEls) {
+      const st = getComputedStyle(el);
+      // Font check — look at the primary family
+      const ff = (st.fontFamily || '').toLowerCase();
+      for (const f of cs.forbiddenFonts) {
+        if (ff.includes(f.toLowerCase()) && !smellMap.has(`font:${f}`)) {
+          // Ignore fallbacks — flag only when the forbidden font is the
+          // FIRST entry in the stack (the one actually used if installed).
+          const firstFamily = (st.fontFamily || '').split(',')[0].replace(/["']/g, '').trim().toLowerCase();
+          if (firstFamily === f.toLowerCase()) {
+            smellMap.set(`font:${f}`, {
+              kind: 'cross-skill-smell',
+              severity: 'warn',
+              type: 'font',
+              foreign: f,
+              skill: cs.skill,
+              sample: ((el.tagName || '').toLowerCase()) + (el.className ? '.' + (typeof el.className === 'string' ? el.className : el.className.baseVal || '').split(' ').slice(0, 2).join('.') : ''),
+              text: (el.textContent || '').trim().slice(0, 30),
+            });
+          }
+        }
+      }
+      // Color check — bg / color / fill — skip if rect is 0
+      const rect = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+      if (rect && (rect.width === 0 || rect.height === 0)) continue;
+      const vals = [st.color, st.backgroundColor, st.fill, st.borderColor, st.borderTopColor].filter(Boolean);
+      for (const c of vals) {
+        const m = c.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+        if (!m) continue;
+        const [r, g, b] = [+m[1], +m[2], +m[3]];
+        for (const fc of cs.forbiddenColors) {
+          const [fr, fg, fb] = fc.rgb;
+          const d = Math.sqrt((r-fr)*(r-fr) + (g-fg)*(g-fg) + (b-fb)*(b-fb));
+          if (d < 22) {
+            const key = `color:${fr},${fg},${fb}`;
+            if (!smellMap.has(key)) {
+              smellMap.set(key, {
+                kind: 'cross-skill-smell',
+                severity: 'warn',
+                type: 'color',
+                foreign: `rgb(${fr},${fg},${fb})`,
+                foreignNote: fc.note,
+                skill: cs.skill,
+                sample: ((el.tagName || '').toLowerCase()) + (el.className ? '.' + (typeof el.className === 'string' ? el.className : el.className.baseVal || '').split(' ').slice(0, 2).join('.') : ''),
+                text: (el.textContent || '').trim().slice(0, 30),
+              });
+            }
+          }
+        }
+      }
+    }
+    for (const v of smellMap.values()) issues.push(v);
+  }
+
   return issues;
-});
+}, crossSkillData);
+
+// ---------- 13) Brand-presence (pixel count in top hero region) ----------
+// Root issue caught 2026-04-21: sage-design nav was a warm yellow (ember-
+// cream rgba(255,242,223,...)) that made the top look ember, not sage. If
+// the skill's signature color(s) are not visibly present in the top 500px
+// of the 1440-wide viewport, the page fails to tell the reader "this is
+// a <skill> page at first glance".
+if (skillId) {
+  const sig = SKILL_SIGNATURES[skillId];
+  const buf = await page.screenshot({
+    clip: { x: 0, y: 0, width: 1440, height: 500 },
+    type: 'png',
+  });
+  const png = PNG.sync.read(buf);
+  let hits = 0;
+  const { data, width, height } = png;
+  // Tolerance 55: antialiased text on a light background blends toward
+  // mid-tone; pure-match 35 misses most glyph pixels. 55 (distance² = 3025)
+  // catches "color-family" pixels without false-flagging neutrals.
+  const TOL_SQ = 55 * 55;
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i], g = data[i + 1], b = data[i + 2];
+    for (const [ar, ag, ab] of sig.accents) {
+      const dr = r - ar, dg = g - ag, db = b - ab;
+      if (dr * dr + dg * dg + db * db < TOL_SQ) {
+        hits++;
+        break;
+      }
+    }
+  }
+  const total = width * height;
+  const coverage = hits / total;
+  if (coverage < sig.threshold) {
+    findings.push({
+      kind: 'no-brand-presence',
+      severity: 'warn',
+      skill: skillId,
+      brandName: sig.name,
+      coveragePct: +(coverage * 100).toFixed(2),
+      thresholdPct: +(sig.threshold * 100).toFixed(2),
+    });
+  }
+}
 
 await browser.close();
 server.close();
@@ -520,6 +728,24 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'svg-text-on-same-colour') {
     console.log(
       `  [${i.severity}] SVG text colour too close to shape fill in "${i.svg}": "${i.text}" fg=${i.textFill} bg=${i.shapeFill} (RGB distance=${i.distance}) — probably unreadable`
+    );
+  } else if (i.kind === 'italic-overuse') {
+    console.log(
+      `  [${i.severity}] italic overuse: ${i.italicCount}/${i.totalCount} display headings are italic (${i.pct}%) — italic should be reserved for pull-quotes and single emphasis words, see cross-skill-rules §J. Sample: ${i.sample.map((s) => `"${s}"`).join(', ')}`
+    );
+  } else if (i.kind === 'cross-skill-smell') {
+    if (i.type === 'font') {
+      console.log(
+        `  [${i.severity}] cross-skill smell: foreign font "${i.foreign}" used in ${i.skill}-design page (e.g. <${i.sample}>: "${i.text}") — that's another skill's signature font`
+      );
+    } else {
+      console.log(
+        `  [${i.severity}] cross-skill smell: foreign color ${i.foreign} (${i.foreignNote}) used in ${i.skill}-design page (e.g. <${i.sample}>: "${i.text}") — that's another skill's signature color`
+      );
+    }
+  } else if (i.kind === 'no-brand-presence') {
+    console.log(
+      `  [${i.severity}] brand not visible in top region: "${i.brandName}" covers only ${i.coveragePct}% of top 1440×500 (threshold ${i.thresholdPct}%) — ${i.skill}-design page should carry its signature color in hero/nav so readers recognise the brand at first glance`
     );
   }
 }
