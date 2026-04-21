@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
-# design-review — one-command wrapper for the three-gate design review pipeline
+# design-review — one-command wrapper for the design review pipeline
 #
-# Runs (in order): verify.py · visual-audit.mjs --ignore-intentional · screenshot.mjs
-# All three must exit 0 for the overall run to exit 0.
+# Runs up to four gates:
+#   [1/4] verify.py         — structural (placeholders, DOCTYPE, BEM, …)
+#   [2/4] visual-audit.mjs  — rendered (contrast, brand-presence, italic,
+#                             cross-skill-smell, …) — Playwright + pngjs
+#   [3/4] screenshot.mjs    — full-page PNG for human review
+#   [4/4] critic.mjs (opt)  — LLM taste judge; prepares prompt for
+#                             a Claude (or other LLM) call
 #
 # Usage:
 #   bin/design-review [flags] <html-path> [...]
@@ -14,15 +19,27 @@
 #   --skill=<name>     Force a skill: anthropic | apple | ember | sage.
 #                      If omitted, verify.py auto-detects from the HTML's <link>.
 #   --css=<path>       Extra CSS file for class-definition lookup. Can repeat.
-#                      Useful when the HTML depends on CSS not in the skill default
-#                      (e.g. engram's docs/assets/app.css).
 #   --strict           Treat visual-audit warnings as failure (default: only errors).
-#   --out=<dir>        Where to save screenshots (default: ./shots/).
+#   --out=<dir>        Where to save screenshots (default: <repo>/shots/).
+#   --critic           Also run the LLM critic (gate 4). Writes the critic prompt
+#                      to <out>/critic-<basename>-<timestamp>.md. You then feed
+#                      that to Claude / any LLM, or in Claude Code invoke the
+#                      `design-critic` subagent with the target path.
+#   --plan --skill=X --page=Y
+#                      Planning mode — skip all gates, generate sprint-contract.md
+#                      for an upcoming page generation.
 #   -h, --help         Print this help.
 #
-# Example:
-#   bin/design-review --repo=~/code/engram --skill=anthropic --css=docs/assets/app.css \
-#     docs/en/index.html
+# Examples:
+#   # full review of a new pricing page
+#   bin/design-review --critic docs/my-new-pricing.html
+#
+#   # cross-repo review (engram docs against anthropic-design rules)
+#   bin/design-review --repo=~/code/engram --skill=anthropic \
+#     --css=docs/assets/app.css docs/en/index.html
+#
+#   # generate a contract before writing
+#   bin/design-review --plan --skill=sage --page=landing > /tmp/contract.md
 
 set -eu
 
@@ -31,8 +48,11 @@ SKY_ROOT="$(cd "$SELF_DIR/.." && pwd)"
 
 REPO="$PWD"
 SKILL=""
+PAGE=""
 STRICT=""
 OUT_DIR=""
+CRITIC=""
+PLAN=""
 CSS_ARGS=()
 HTMLS=()
 
@@ -40,12 +60,14 @@ for arg in "$@"; do
   case "$arg" in
     --repo=*)  REPO="${arg#--repo=}" ;;
     --skill=*) SKILL="${arg#--skill=}" ;;
+    --page=*)  PAGE="${arg#--page=}" ;;
     --css=*)   CSS_ARGS+=("$arg") ;;
     --strict)  STRICT=1 ;;
     --out=*)   OUT_DIR="${arg#--out=}" ;;
+    --critic)  CRITIC=1 ;;
+    --plan)    PLAN=1 ;;
     -h|--help)
-      # Print lines 2..N of this file, stripping the leading "# " / "#".
-      sed -n '2,26p' "$0" | sed -E 's|^# ?||'
+      sed -n '2,48p' "$0" | sed -E 's|^# ?||'
       exit 0
       ;;
     --*)
@@ -56,52 +78,99 @@ for arg in "$@"; do
   esac
 done
 
+# ---------- Planning mode (skip all gates, emit contract) ----------
+if [ -n "$PLAN" ]; then
+  if [ -z "$SKILL" ] || [ -z "$PAGE" ]; then
+    echo "--plan requires both --skill=<name> and --page=<type>" >&2
+    exit 2
+  fi
+  exec node "$SKY_ROOT/skills/design-review/scripts/sprint-contract.mjs" \
+    "--skill=$SKILL" "--page=$PAGE"
+fi
+
 if [ "${#HTMLS[@]}" -eq 0 ]; then
-  echo "usage: bin/design-review [--repo=<path>] [--skill=<name>] [--css=<path>]... [--strict] <html> [...]" >&2
+  echo "usage: bin/design-review [--critic] [--repo=<path>] [--skill=<name>] [--css=<path>]... <html> [...]" >&2
+  echo "       bin/design-review --plan --skill=<name> --page=<type>" >&2
   exit 2
 fi
 
-# Resolve REPO to an absolute path so the Playwright scripts' CWD is correct.
 REPO="$(cd "$REPO" && pwd)"
-
-if [ -z "$OUT_DIR" ]; then
-  OUT_DIR="$REPO/shots"
-fi
+[ -z "$OUT_DIR" ] && OUT_DIR="$REPO/shots"
 mkdir -p "$OUT_DIR"
 
 VERIFY="$SKY_ROOT/skills/design-review/scripts/verify.py"
 VISUAL="$SKY_ROOT/skills/design-review/scripts/visual-audit.mjs"
 SCREEN="$SKY_ROOT/skills/design-review/scripts/screenshot.mjs"
+CRITIC_SCRIPT="$SKY_ROOT/skills/design-review/scripts/critic.mjs"
 
 SKILL_FLAG=()
 [ -n "$SKILL" ] && SKILL_FLAG=("--skill=$SKILL")
 
-# ----- Gate 1 · structural (run from --repo so relative HTML paths resolve) -----
-echo "==> [1/3] verify.py"
+TOTAL_GATES=3
+[ -n "$CRITIC" ] && TOTAL_GATES=4
+
+echo ""
+echo "┌─ design-review · $(date +%Y-%m-%d\ %H:%M:%S)"
+echo "│  repo=$REPO  skill=${SKILL:-auto}  strict=${STRICT:-no}  critic=${CRITIC:-no}"
+echo "│  targets: ${HTMLS[*]}"
+echo "└───────────────────────────────────────────────────────"
+echo ""
+
+# ---------- Gate 1 · structural ----------
+echo "━━ [1/$TOTAL_GATES] verify.py (structural)"
 ( cd "$REPO" && python3 "$VERIFY" "${SKILL_FLAG[@]}" "${CSS_ARGS[@]}" "${HTMLS[@]}" )
 
-# ----- Gate 2 · visual-audit (run each HTML from --repo as CWD) -----
+# ---------- Gate 2 · visual-audit ----------
 exit_visual=0
+VISUAL_FLAGS=(--ignore-intentional)
 for html in "${HTMLS[@]}"; do
-  echo "==> [2/3] visual-audit.mjs  $html"
-  # Run from $REPO so Playwright's static server resolves the HTML and its
-  # relative CSS/font/SVG paths the same way a browser would.
-  if ! ( cd "$REPO" && node "$VISUAL" --ignore-intentional "$html" ); then
+  echo ""
+  echo "━━ [2/$TOTAL_GATES] visual-audit.mjs (rendered + brand + italic + smell)  $html"
+  if ! ( cd "$REPO" && node "$VISUAL" "${VISUAL_FLAGS[@]}" "$html" ); then
     exit_visual=1
   fi
 done
 if [ "$exit_visual" -ne 0 ]; then
-  echo "==> visual-audit produced errors" >&2
+  echo ""
+  echo "✗ visual-audit produced errors — fix before continuing" >&2
   exit 1
 fi
 
-# ----- Gate 3 · screenshot (for human review) -----
+# ---------- Gate 3 · screenshot ----------
 for html in "${HTMLS[@]}"; do
   base="$(basename "$html" .html)"
   out="$OUT_DIR/${base}-$(date +%Y%m%d-%H%M%S).png"
-  echo "==> [3/3] screenshot.mjs    $html  →  $out"
+  echo ""
+  echo "━━ [3/$TOTAL_GATES] screenshot.mjs    $html  →  $out"
   ( cd "$REPO" && node "$SCREEN" "$html" "$out" )
 done
 
+# ---------- Gate 4 · design-critic (LLM taste judge) ----------
+if [ -n "$CRITIC" ]; then
+  for html in "${HTMLS[@]}"; do
+    base="$(basename "$html" .html)"
+    critic_prompt="$OUT_DIR/critic-${base}-$(date +%Y%m%d-%H%M%S).md"
+    echo ""
+    echo "━━ [4/$TOTAL_GATES] critic.mjs (LLM taste — prompt prep)   $html"
+    critic_args=("$html")
+    [ -n "$SKILL" ] && critic_args+=("--skill=$SKILL")
+    [ -n "$PAGE" ]  && critic_args+=("--page=$PAGE")
+    critic_args+=("--out=$critic_prompt")
+    if ( cd "$REPO" && node "$CRITIC_SCRIPT" "${critic_args[@]}" ); then
+      echo "   prompt written → $critic_prompt"
+      echo "   next: feed to Claude (or in Claude Code invoke 'design-critic' subagent with target path)"
+    else
+      echo "   critic prompt prep FAILED — likely missing canonical for this skill/page" >&2
+      exit 1
+    fi
+  done
+fi
+
 echo ""
-echo "✓ all three gates passed · screenshots in $OUT_DIR"
+echo "┌─ Summary"
+echo "│  ✓ verify.py       (structural)"
+echo "│  ✓ visual-audit    (rendered + brand + italic + smell)"
+echo "│  ✓ screenshot      (in $OUT_DIR)"
+[ -n "$CRITIC" ] && echo "│  ✓ critic prompt   (feed to LLM for taste judgment)"
+echo "└───────────────────────────────────────────────────────"
+echo ""
