@@ -25,6 +25,10 @@
 #                      to <out>/critic-<basename>-<timestamp>.md. You then feed
 #                      that to Claude / any LLM, or in Claude Code invoke the
 #                      `design-critic` subagent with the target path.
+#   --multi-critic     Like --critic, but uses 4 specialist subagents in parallel
+#                      (composition/copy/illustration/brand) plus an aggregator.
+#                      Writes 5 prompt files to <out>/multi-critic-*-<ts>.md.
+#                      Each specialist scores only its axis in fresh context.
 #   --plan --skill=X --page=Y
 #                      Planning mode — skip all gates, generate sprint-contract.md
 #                      for an upcoming page generation.
@@ -52,6 +56,7 @@ PAGE=""
 STRICT=""
 OUT_DIR=""
 CRITIC=""
+MULTI_CRITIC=""
 PLAN=""
 CSS_ARGS=()
 HTMLS=()
@@ -64,7 +69,8 @@ for arg in "$@"; do
     --css=*)   CSS_ARGS+=("$arg") ;;
     --strict)  STRICT=1 ;;
     --out=*)   OUT_DIR="${arg#--out=}" ;;
-    --critic)  CRITIC=1 ;;
+    --critic)       CRITIC=1 ;;
+    --multi-critic) MULTI_CRITIC=1 ;;
     --plan)    PLAN=1 ;;
     -h|--help)
       sed -n '2,48p' "$0" | sed -E 's|^# ?||'
@@ -102,16 +108,22 @@ VERIFY="$SKY_ROOT/skills/design-review/scripts/verify.py"
 VISUAL="$SKY_ROOT/skills/design-review/scripts/visual-audit.mjs"
 SCREEN="$SKY_ROOT/skills/design-review/scripts/screenshot.mjs"
 CRITIC_SCRIPT="$SKY_ROOT/skills/design-review/scripts/critic.mjs"
+MULTI_CRITIC_SCRIPT="$SKY_ROOT/skills/design-review/scripts/multi-critic.mjs"
 
 SKILL_FLAG=()
 [ -n "$SKILL" ] && SKILL_FLAG=("--skill=$SKILL")
 
 TOTAL_GATES=3
 [ -n "$CRITIC" ] && TOTAL_GATES=4
+[ -n "$MULTI_CRITIC" ] && TOTAL_GATES=4
+
+CRITIC_MODE="no"
+[ -n "$CRITIC" ] && CRITIC_MODE="solo"
+[ -n "$MULTI_CRITIC" ] && CRITIC_MODE="multi (4 specialists)"
 
 echo ""
 echo "┌─ design-review · $(date +%Y-%m-%d\ %H:%M:%S)"
-echo "│  repo=$REPO  skill=${SKILL:-auto}  strict=${STRICT:-no}  critic=${CRITIC:-no}"
+echo "│  repo=$REPO  skill=${SKILL:-auto}  strict=${STRICT:-no}  critic=$CRITIC_MODE"
 echo "│  targets: ${HTMLS[*]}"
 echo "└───────────────────────────────────────────────────────"
 echo ""
@@ -145,24 +157,41 @@ for html in "${HTMLS[@]}"; do
   ( cd "$REPO" && node "$SCREEN" "$html" "$out" )
 done
 
-# ---------- Gate 4 · design-critic (LLM taste judge) ----------
+# ---------- Gate 4 · design-critic (solo OR 4 specialists) ----------
 if [ -n "$CRITIC" ]; then
   for html in "${HTMLS[@]}"; do
     base="$(basename "$html" .html)"
     critic_prompt="$OUT_DIR/critic-${base}-$(date +%Y%m%d-%H%M%S).md"
     echo ""
-    echo "━━ [4/$TOTAL_GATES] critic.mjs (LLM taste — prompt prep)   $html"
+    echo "━━ [4/$TOTAL_GATES] critic.mjs (LLM taste — solo critic prompt)   $html"
     critic_args=("$html")
     [ -n "$SKILL" ] && critic_args+=("--skill=$SKILL")
     [ -n "$PAGE" ]  && critic_args+=("--page=$PAGE")
     critic_args+=("--out=$critic_prompt")
     if ( cd "$REPO" && node "$CRITIC_SCRIPT" "${critic_args[@]}" ); then
       echo "   prompt written → $critic_prompt"
-      echo "   next: feed to Claude (or in Claude Code invoke 'design-critic' subagent with target path)"
+      echo "   next: feed to Claude (or in Claude Code invoke 'design-critic' subagent)"
     else
       echo "   critic prompt prep FAILED — likely missing canonical for this skill/page" >&2
       exit 1
     fi
+  done
+fi
+
+if [ -n "$MULTI_CRITIC" ]; then
+  for html in "${HTMLS[@]}"; do
+    echo ""
+    echo "━━ [4/$TOTAL_GATES] multi-critic.mjs (4 specialists — composition/copy/illustration/brand)   $html"
+    mc_args=("$html")
+    [ -n "$SKILL" ] && mc_args+=("--skill=$SKILL")
+    [ -n "$PAGE" ]  && mc_args+=("--page=$PAGE")
+    mc_args+=("--out-dir=$OUT_DIR")
+    if ! ( cd "$REPO" && node "$MULTI_CRITIC_SCRIPT" "${mc_args[@]}" >/dev/null ); then
+      echo "   multi-critic prompt prep FAILED" >&2
+      exit 1
+    fi
+    echo "   5 prompt files written (4 specialists + aggregator) in $OUT_DIR"
+    echo "   next: in Claude Code, Task() each specialist prompt in parallel, then Task() the aggregator"
   done
 fi
 
@@ -171,6 +200,7 @@ echo "┌─ Summary"
 echo "│  ✓ verify.py       (structural)"
 echo "│  ✓ visual-audit    (rendered + brand + italic + smell)"
 echo "│  ✓ screenshot      (in $OUT_DIR)"
-[ -n "$CRITIC" ] && echo "│  ✓ critic prompt   (feed to LLM for taste judgment)"
+[ -n "$CRITIC" ] && echo "│  ✓ critic prompt   (solo — feed to LLM)"
+[ -n "$MULTI_CRITIC" ] && echo "│  ✓ multi-critic    (4 specialists + aggregator prompts)"
 echo "└───────────────────────────────────────────────────────"
 echo ""

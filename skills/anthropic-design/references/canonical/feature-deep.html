@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keyboard-first editor — Skypad feature deep-dive</title>
+<meta name="description" content="Your hands never leave the keyboard. Six chords you will use every day, a command palette that indexes your vault, and what it feels like to write without a mouse. Canonical anthropic-design feature-deep page.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/anthropic.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+
+  /* §H · Lora (editorial body) → Noto Serif SC;  Poppins (display) → Noto Sans SC. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .chord-card__body,
+  html[data-lang="zh"] .callout__body,
+  html[data-lang="zh"] .detail-row__body {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .chord-card__title,
+  html[data-lang="zh"] .chord-card__kicker,
+  html[data-lang="zh"] .detail-row__label,
+  html[data-lang="zh"] .stat-trio .num,
+  html[data-lang="zh"] .stat-trio .lbl {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] .anth-quote { font-style: normal; }
+
+  /* Feature-deep layout components. */
+
+  /* Chord card — 6 of these in a 3×2 grid */
+  .chord-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-5); }
+  .chord-card {
+    background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg);
+    padding:var(--space-6); display:flex; flex-direction:column; gap:var(--space-3);
+  }
+  .chord-card__kicker {
+    font-family:var(--font-heading); font-size:11px; font-weight:700; letter-spacing:0.16em;
+    color:var(--anth-orange); text-transform:uppercase;
+  }
+  .chord-card__chord {
+    display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin:var(--space-2) 0;
+  }
+  .chord-card__chord kbd {
+    font-family:'JetBrains Mono', monospace; font-size:13.5px; font-weight:500;
+    padding:5px 10px; background:#faf9f5; border:1px solid var(--anth-light-gray);
+    border-radius:5px; color:var(--anth-text); box-shadow:inset 0 -1px 0 rgba(0,0,0,0.05);
+    min-width:28px; text-align:center;
+  }
+  .chord-card__chord-sep {
+    font-family:var(--font-body); font-size:14px; color:var(--anth-text-secondary);
+  }
+  .chord-card__title {
+    font-family:var(--font-heading); font-size:21px; font-weight:600; letter-spacing:-0.01em;
+    color:var(--anth-text); margin:0; line-height:1.25;
+  }
+  .chord-card__body {
+    font-family:var(--font-body); font-size:15.5px; line-height:1.65; color:var(--anth-text);
+    margin:0;
+  }
+
+  /* Palette split · 2fr 3fr left text + right SVG mock */
+  .palette-split {
+    display:grid; grid-template-columns:2fr 3fr; gap:var(--space-7);
+    align-items:start;
+  }
+  .palette-list {
+    list-style:none; padding:0; margin:var(--space-5) 0 0;
+    display:flex; flex-direction:column; gap:var(--space-4);
+  }
+  .palette-list li {
+    font-family:var(--font-body); font-size:16px; line-height:1.6;
+    color:var(--anth-text); padding-left:var(--space-5); position:relative;
+  }
+  .palette-list li::before {
+    content:''; position:absolute; left:0; top:10px;
+    width:6px; height:6px; border-radius:50%; background:var(--anth-orange);
+  }
+  .palette-mock {
+    background:#141413; border-radius:var(--radius-md);
+    overflow:hidden; border:1px solid var(--anth-light-gray);
+  }
+
+  /* Detail rows — technical specs */
+  .detail-row {
+    display:grid; grid-template-columns:180px 1fr;
+    gap:var(--space-5); padding:var(--space-5) 0;
+    border-bottom:1px solid var(--anth-light-gray);
+  }
+  .detail-row:last-child { border-bottom:none; }
+  .detail-row__label {
+    font-family:var(--font-heading); font-size:11.5px; font-weight:700;
+    letter-spacing:0.16em; text-transform:uppercase; color:var(--anth-orange);
+    padding-top:3px;
+  }
+  .detail-row__body {
+    font-family:var(--font-body); font-size:16px; line-height:1.6; color:var(--anth-text);
+    margin:0;
+  }
+  .detail-row__body code {
+    font-family:'JetBrains Mono', monospace; font-size:14px;
+    background:#faf9f5; padding:2px 8px; border-radius:4px;
+    border:1px solid var(--anth-light-gray);
+  }
+
+  /* Honest callout — "when a mouse is better" */
+  .callout {
+    background:#faf9f5; border:1px solid var(--anth-light-gray); border-left:3px solid var(--anth-orange);
+    border-radius:var(--radius-md); padding:var(--space-6);
+  }
+  .callout__kicker {
+    font-family:var(--font-heading); font-size:11.5px; font-weight:700;
+    letter-spacing:0.16em; text-transform:uppercase; color:var(--anth-orange); margin:0;
+  }
+  .callout__title {
+    font-family:var(--font-heading); font-size:22px; font-weight:600;
+    color:var(--anth-text); margin:var(--space-2) 0 var(--space-3);
+  }
+  .callout__body {
+    font-family:var(--font-body); font-size:16px; line-height:1.65; color:var(--anth-text);
+    margin:0;
+  }
+
+  /* Stat trio — 3 numbers celebrating this feature */
+  .stat-trio {
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-5);
+    padding:var(--space-7) var(--space-5);
+    background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-md);
+  }
+  .stat-trio > div { text-align:center; }
+  .stat-trio .num {
+    display:block; font-family:var(--font-heading); font-size:48px; font-weight:600;
+    color:var(--anth-text); letter-spacing:-0.02em; line-height:1;
+  }
+  .stat-trio .lbl {
+    display:block; font-family:var(--font-heading); font-size:12.5px; font-weight:500;
+    color:var(--anth-text-secondary); margin-top:var(--space-3); letter-spacing:0.02em;
+  }
+
+  /* Eyebrow link row */
+  .eyebrow-link {
+    font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--anth-text-secondary); font-weight:600;
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="../../../../index.html" style="font-family:var(--font-heading); font-size:20px; font-weight:600; color:var(--anth-text); text-decoration:none; letter-spacing:-0.01em;">Skypad</a>
+  <div>
+    <a href="../landing.html"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="../pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="../docs-home.html"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+    <a href="feature-deep.html" style="color:var(--anth-orange); font-weight:600;"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="anth-button" href="#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a>
+  </div>
+</div></nav>
+
+<!-- Back-to-docs eyebrow -->
+<div style="padding:var(--space-5) var(--space-5) 0;">
+  <div class="anth-container">
+    <a href="../landing.html" style="text-decoration:none; display:inline-block;" class="eyebrow-link">
+      <span class="lang-en">← Back · Skypad overview</span><span class="lang-zh">← 返回 · Skypad 总览</span>
+    </a>
+  </div>
+</div>
+
+<!-- Hero -->
+<section class="anth-hero" style="padding-top:var(--space-7);">
+  <div class="anth-container" style="max-width:840px;">
+    <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;">
+      <span class="lang-en">Feature · 02</span><span class="lang-zh">功能 · 02</span>
+    </span>
+    <h1 style="margin-top:var(--space-4);">
+      <span class="lang-en">Your hands<br>never leave<br>the keyboard.</span>
+      <span class="lang-zh">你的手不必<br>离开键盘。</span>
+    </h1>
+    <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.6; max-width:680px; font-family:var(--font-body);">
+      <span class="lang-en">Skypad is designed like a terminal: six chord-shortcuts cover 90% of what you do, a command palette indexes everything else, and every motion is one <em>muscle memory</em> away. No menu bar to reach for. No right-click to learn.</span>
+      <span class="lang-zh">Skypad 设计得像终端:六个快捷键覆盖 90% 的操作,一个命令面板索引剩下的一切。每一步都近在一个<em>肌肉记忆</em>。不用去点菜单栏,也不用学右键菜单。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="#chords"><span class="lang-en">See the six chords</span><span class="lang-zh">看这六个快捷键</span></a>
+      <a class="anth-button anth-button--ghost" href="#palette"><span class="lang-en">How the palette works</span><span class="lang-zh">命令面板怎么用</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Stat trio · the numbers that define this feature -->
+<section class="anth-section">
+  <div class="anth-container anth-container--narrow">
+    <div class="stat-trio">
+      <div>
+        <span class="num">6</span>
+        <span class="lbl"><span class="lang-en">Chords that cover 90%</span><span class="lang-zh">覆盖 90% 的快捷键</span></span>
+      </div>
+      <div>
+        <span class="num">3.2ms</span>
+        <span class="lbl"><span class="lang-en">Median palette response</span><span class="lang-zh">面板中位响应</span></span>
+      </div>
+      <div>
+        <span class="num">0</span>
+        <span class="lbl"><span class="lang-en">Required mouse clicks</span><span class="lang-zh">必须点鼠标的操作</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Why keyboard-first -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">The premise</span><span class="lang-zh">前提</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">Mice are for pointing. Ideas are for typing.</span>
+      <span class="lang-zh">鼠标是用来指的。想法是用来敲的。</span>
+    </h2>
+    <p class="lang-en">
+      A mouse moves your hand off the home row, breaks the thought, forces a micro-decision (<q>where did I put that panel?</q>), and costs a half-second of recovery every time. For a tool whose only job is to stay out of your way, that adds up fast.
+    </p>
+    <p class="lang-zh">
+      鼠标让手离开 home row,打断思路,每次都要做一次微决策("那个面板在哪来着?"),之后还要半秒钟回神。对一个只需要"不挡路"的工具来说,这些成本很快会累积。
+    </p>
+    <p class="lang-en">
+      Skypad's shortcuts aren't mnemonic tricks. They were chosen by counting, across a year of writing logs, which actions we reached for most often and then giving those actions chords that a touch-typist's fingers already know how to make. Most of them work with one hand.
+    </p>
+    <p class="lang-zh">
+      Skypad 的快捷键不是助记技巧。它们是从一年的写作日志里统计出最常用的动作,然后把这些动作分配给触键者的手指本来就熟悉的组合。大多数可以一只手按。
+    </p>
+    <blockquote class="anth-quote">
+      <span class="lang-en">The best interface is the one you forget is there. A keyboard that already fits your fingers is closer to invisible than any menu bar.</span>
+      <span class="lang-zh">最好的界面,是你忘记它存在的那一种。一套已经贴合你手指的键盘,比任何菜单栏都更接近"看不见"。</span>
+    </blockquote>
+    <p class="anth-quote-cite" style="margin-top:var(--space-4);">
+      <span aria-hidden="true" style="display:inline-block; width:24px; height:24px; border-radius:50%; background:var(--anth-orange);"></span>
+      <span><span class="lang-en">From the Skypad design notes, 2024</span><span class="lang-zh">Skypad 设计笔记,2024</span></span>
+    </p>
+  </div>
+</section>
+
+<!-- Six chords · the core feature grid -->
+<section class="anth-section" id="chords">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">The six chords</span><span class="lang-zh">这六个快捷键</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">What you will use every day.</span>
+        <span class="lang-zh">你每天都会用的那几个。</span>
+      </h2>
+    </div>
+
+    <div class="chord-grid">
+
+      <!-- 01 -->
+      <article class="chord-card">
+        <span class="chord-card__kicker"><span class="lang-en">Find · cmd-K</span><span class="lang-zh">查找 · cmd-K</span></span>
+        <div class="chord-card__chord">
+          <kbd>⌘</kbd><span class="chord-card__chord-sep">+</span><kbd>K</kbd>
+        </div>
+        <h3 class="chord-card__title"><span class="lang-en">Open command palette</span><span class="lang-zh">打开命令面板</span></h3>
+        <p class="chord-card__body">
+          <span class="lang-en">Your index into every note, every command, every setting. Fuzzy-matches filenames, headings, and recent edits. The one chord you can't do without.</span>
+          <span class="lang-zh">所有笔记、命令、设置的总索引。模糊匹配文件名、标题、最近编辑。这一个少不了。</span>
+        </p>
+      </article>
+
+      <!-- 02 -->
+      <article class="chord-card">
+        <span class="chord-card__kicker"><span class="lang-en">Jump · cmd-O</span><span class="lang-zh">跳转 · cmd-O</span></span>
+        <div class="chord-card__chord">
+          <kbd>⌘</kbd><span class="chord-card__chord-sep">+</span><kbd>O</kbd>
+        </div>
+        <h3 class="chord-card__title"><span class="lang-en">Jump to any note</span><span class="lang-zh">跳到任意笔记</span></h3>
+        <p class="chord-card__body">
+          <span class="lang-en">File-only variant of the palette. Same fuzzy match, no commands — ideal when you already know the note and want the fewest keystrokes to get there.</span>
+          <span class="lang-zh">只搜文件的简化版。一样的模糊匹配,不含命令 —— 适合你已经知道要哪篇笔记、想用最少键击到达的时候。</span>
+        </p>
+      </article>
+
+      <!-- 03 -->
+      <article class="chord-card">
+        <span class="chord-card__kicker"><span class="lang-en">New · cmd-N</span><span class="lang-zh">新建 · cmd-N</span></span>
+        <div class="chord-card__chord">
+          <kbd>⌘</kbd><span class="chord-card__chord-sep">+</span><kbd>N</kbd>
+        </div>
+        <h3 class="chord-card__title"><span class="lang-en">New note, current folder</span><span class="lang-zh">在当前目录新建笔记</span></h3>
+        <p class="chord-card__body">
+          <span class="lang-en">Creates a note in the folder you're looking at, named by timestamp. Type over the name if you want. The cursor lands in the body, not the filename.</span>
+          <span class="lang-zh">在当前文件夹下按时间戳新建。想改名直接敲。光标落在正文里,不在文件名上。</span>
+        </p>
+      </article>
+
+      <!-- 04 -->
+      <article class="chord-card">
+        <span class="chord-card__kicker"><span class="lang-en">Focus · cmd-⇧-F</span><span class="lang-zh">专注 · cmd-⇧-F</span></span>
+        <div class="chord-card__chord">
+          <kbd>⌘</kbd><span class="chord-card__chord-sep">+</span><kbd>⇧</kbd><span class="chord-card__chord-sep">+</span><kbd>F</kbd>
+        </div>
+        <h3 class="chord-card__title"><span class="lang-en">Focus mode</span><span class="lang-zh">专注模式</span></h3>
+        <p class="chord-card__body">
+          <span class="lang-en">Hides the file tree, the sidebar, the status bar. Just the note, centred at 680px. Press again to bring the scaffolding back.</span>
+          <span class="lang-zh">隐藏文件树、侧栏、状态栏。只剩那篇笔记,居中 680px 宽。再按一次把脚手架找回来。</span>
+        </p>
+      </article>
+
+      <!-- 05 -->
+      <article class="chord-card">
+        <span class="chord-card__kicker"><span class="lang-en">Link · double-[</span><span class="lang-zh">链接 · 双 [</span></span>
+        <div class="chord-card__chord">
+          <kbd>[</kbd><span class="chord-card__chord-sep">+</span><kbd>[</kbd>
+        </div>
+        <h3 class="chord-card__title"><span class="lang-en">Link to another note</span><span class="lang-zh">链到另一篇笔记</span></h3>
+        <p class="chord-card__body">
+          <span class="lang-en">Opens an inline picker for the note you want to link to. Tab to accept, Esc to cancel. The link becomes bidirectional — the target gets a back-reference automatically.</span>
+          <span class="lang-zh">打开一个行内的选择器,挑你想链过去的笔记。Tab 确认,Esc 取消。链接是双向的 —— 目标笔记会自动得到一个反向引用。</span>
+        </p>
+      </article>
+
+      <!-- 06 -->
+      <article class="chord-card">
+        <span class="chord-card__kicker"><span class="lang-en">Toggle · cmd-E</span><span class="lang-zh">切换 · cmd-E</span></span>
+        <div class="chord-card__chord">
+          <kbd>⌘</kbd><span class="chord-card__chord-sep">+</span><kbd>E</kbd>
+        </div>
+        <h3 class="chord-card__title"><span class="lang-en">Preview ↔ source</span><span class="lang-zh">预览 ↔ 源码</span></h3>
+        <p class="chord-card__body">
+          <span class="lang-en">Switch between rendered Markdown and raw source. Cursor position is preserved across the toggle, so you can flip back and edit exactly where you were reading.</span>
+          <span class="lang-zh">在渲染后的 Markdown 和源码之间切换。光标位置跨切换保留,读到哪里就能在哪里继续改。</span>
+        </p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- Command palette · split layout -->
+<section class="anth-section anth-section--subtle" id="palette">
+  <div class="anth-container anth-container--wide">
+    <span class="anth-badge"><span class="lang-en">The palette</span><span class="lang-zh">命令面板</span></span>
+    <h2 style="margin-top:var(--space-3); max-width:780px;">
+      <span class="lang-en">Everything else lives in <em>one box</em>.</span>
+      <span class="lang-zh">其他一切,都住在<em>一个框里</em>。</span>
+    </h2>
+
+    <div class="palette-split" style="margin-top:var(--space-7);">
+      <div>
+        <p style="font-size:17px; line-height:1.7; color:var(--anth-text); font-family:var(--font-body);">
+          <span class="lang-en">Press <kbd style="font-family:'JetBrains Mono',monospace; font-size:13px; padding:3px 8px; background:#faf9f5; border:1px solid var(--anth-light-gray); border-radius:4px;">⌘K</kbd> and a single input takes over the screen. What you type fuzzy-matches against four namespaces at once:</span>
+          <span class="lang-zh">按 <kbd style="font-family:'JetBrains Mono',monospace; font-size:13px; padding:3px 8px; background:#faf9f5; border:1px solid var(--anth-light-gray); border-radius:4px;">⌘K</kbd>,一个输入框占据整个屏幕。你敲的字符同时对四个命名空间做模糊匹配:</span>
+        </p>
+        <ul class="palette-list">
+          <li>
+            <span class="lang-en"><strong>Notes.</strong> Every filename and H1 across your vault.</span>
+            <span class="lang-zh"><strong>笔记。</strong> 仓库里所有文件名和 H1。</span>
+          </li>
+          <li>
+            <span class="lang-en"><strong>Recent.</strong> The 20 files you touched in the last hour, boosted in the ranking.</span>
+            <span class="lang-zh"><strong>最近。</strong> 最近一小时碰过的 20 个文件,排序加权。</span>
+          </li>
+          <li>
+            <span class="lang-en"><strong>Commands.</strong> Every menu item, every setting, every action that could be bound to a key.</span>
+            <span class="lang-zh"><strong>命令。</strong> 每一个菜单项、每一个设置、每一个可以绑定到按键的动作。</span>
+          </li>
+          <li>
+            <span class="lang-en"><strong>Headings.</strong> Any <code style="font-family:'JetBrains Mono',monospace; font-size:14px; background:#faf9f5; padding:2px 6px; border-radius:3px;">##</code> or deeper inside the file you're currently reading.</span>
+            <span class="lang-zh"><strong>标题。</strong> 你当前文件里的任何 <code style="font-family:'JetBrains Mono',monospace; font-size:14px; background:#faf9f5; padding:2px 6px; border-radius:3px;">##</code> 或更深层级标题。</span>
+          </li>
+        </ul>
+        <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-5); font-family:var(--font-body);">
+          <span class="lang-en">Enter to open, ⇧-Enter to open in a split pane, ⌥-Enter to copy its Markdown link to the clipboard.</span>
+          <span class="lang-zh">Enter 打开,⇧-Enter 在分栏里打开,⌥-Enter 把它的 Markdown 链接复制到剪贴板。</span>
+        </p>
+      </div>
+
+      <!-- SVG mock of the palette open -->
+      <div class="palette-mock" aria-label="Skypad command palette mock">
+        <svg viewBox="0 0 640 420" role="img" xmlns="http://www.w3.org/2000/svg" style="display:block; width:100%; height:auto;">
+          <rect width="640" height="420" fill="#141413"/>
+          <!-- window chrome -->
+          <circle cx="18" cy="18" r="5" fill="#d97757"/>
+          <circle cx="36" cy="18" r="5" fill="#e8c07d"/>
+          <circle cx="54" cy="18" r="5" fill="#788c5d"/>
+          <text x="320" y="23" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#7a7a6f">vault · meditations</text>
+
+          <!-- palette panel -->
+          <rect x="80" y="60" width="480" height="300" rx="10" fill="#1f1f1e" stroke="#3a3a35" stroke-width="1"/>
+
+          <!-- search input -->
+          <rect x="96" y="78" width="448" height="42" rx="6" fill="#2b2b28" stroke="#3a3a35" stroke-width="1"/>
+          <text x="114" y="105" font-family="JetBrains Mono, monospace" font-size="14" fill="#faf9f5">meditat</text>
+          <rect x="195" y="93" width="1.5" height="16" fill="#d97757">
+            <animate attributeName="opacity" values="1;0;1" dur="1.1s" repeatCount="indefinite"/>
+          </rect>
+
+          <!-- row 1 selected -->
+          <rect x="96" y="132" width="448" height="42" rx="5" fill="#d97757" fill-opacity="0.12"/>
+          <text x="114" y="152" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#faf9f5">meditations.md</text>
+          <text x="114" y="167" font-family="Poppins, sans-serif" font-size="11" fill="#7a7a6f">reading · edited 2m ago</text>
+          <text x="528" y="157" text-anchor="end" font-family="Poppins, sans-serif" font-size="11" fill="#d97757">↵ open</text>
+
+          <!-- row 2 -->
+          <rect x="96" y="180" width="448" height="42" rx="5" fill="transparent"/>
+          <text x="114" y="200" font-family="JetBrains Mono, monospace" font-size="13" fill="#c8c6bd">on meditation — 2024-11-03.md</text>
+          <text x="114" y="215" font-family="Poppins, sans-serif" font-size="11" fill="#6b6a5f">journal · edited Nov 3</text>
+
+          <!-- row 3 -->
+          <rect x="96" y="228" width="448" height="42" rx="5" fill="transparent"/>
+          <text x="114" y="248" font-family="JetBrains Mono, monospace" font-size="13" fill="#c8c6bd">Stoic meditation — notes.md</text>
+          <text x="114" y="263" font-family="Poppins, sans-serif" font-size="11" fill="#6b6a5f">reading · edited Oct 28</text>
+
+          <!-- row 4 -->
+          <rect x="96" y="276" width="448" height="42" rx="5" fill="transparent"/>
+          <text x="114" y="296" font-family="JetBrains Mono, monospace" font-size="13" fill="#c8c6bd">Toggle focus mode</text>
+          <text x="114" y="311" font-family="Poppins, sans-serif" font-size="11" fill="#6b6a5f">command · ⌘⇧F</text>
+
+          <!-- footer hint -->
+          <rect x="96" y="328" width="448" height="1" fill="#3a3a35"/>
+          <text x="114" y="348" font-family="Poppins, sans-serif" font-size="11" fill="#6b6a5f">↑↓ navigate · ↵ open · esc close</text>
+          <text x="528" y="348" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#6b6a5f">3.2 ms</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Honest caveat -->
+<section class="anth-section">
+  <div class="anth-container anth-container--narrow">
+    <div class="callout">
+      <p class="callout__kicker"><span class="lang-en">Honest caveat</span><span class="lang-zh">坦诚的边界</span></p>
+      <h3 class="callout__title">
+        <span class="lang-en">Three things we still reach for a mouse to do.</span>
+        <span class="lang-zh">还有三件事,我们也还要伸手去摸鼠标。</span>
+      </h3>
+      <p class="callout__body">
+        <span class="lang-en">Dragging a file tree reorder, scrubbing through a long note, and resizing a split pane are all faster with a pointer than with any keybinding we have come up with. We have not tried to make these keyboard-only, because forcing them to be would break the rule that <em>the fastest hand wins</em>.</span>
+        <span class="lang-zh">拖拽文件树、在长笔记里滑动、拖改分栏宽度 —— 这三件用鼠标都比任何我们能想出来的键位快。我们没有硬塞键盘快捷键,因为那会违反"<em>哪只手更快就用哪只</em>"这条规则。</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Technical details -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">Technical details</span><span class="lang-zh">技术细节</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">If you care about the how.</span>
+      <span class="lang-zh">如果你在意怎么做到的。</span>
+    </h2>
+    <div style="margin-top:var(--space-6);">
+
+      <div class="detail-row">
+        <p class="detail-row__label"><span class="lang-en">Palette latency</span><span class="lang-zh">面板响应</span></p>
+        <p class="detail-row__body">
+          <span class="lang-en">Median <code>3.2ms</code> from keypress to first result on a 20,000-note vault, measured on an M1 MacBook Air with the vault fully cold (no pre-warmed cache). The fuzzy matcher is incremental — we reuse last frame's score table when the query extends by one character.</span>
+          <span class="lang-zh">在一个 20,000 篇笔记的仓库上,从按键到第一个结果中位 <code>3.2ms</code>(M1 MacBook Air,仓库完全冷启动,无预热缓存)。模糊匹配是增量的 —— 当 query 多一个字符时,我们重用上一帧的打分表。</span>
+        </p>
+      </div>
+
+      <div class="detail-row">
+        <p class="detail-row__label"><span class="lang-en">Keyboard layouts</span><span class="lang-zh">键盘布局</span></p>
+        <p class="detail-row__body">
+          <span class="lang-en">QWERTY, Dvorak, Colemak, and AZERTY. Chords are bound to physical keys, not logical letters — <code>⌘K</code> on a Dvorak keyboard is the physical key where QWERTY's K would be, not Dvorak's mapped letter. This keeps muscle memory portable when you switch layouts.</span>
+          <span class="lang-zh">支持 QWERTY、Dvorak、Colemak、AZERTY。快捷键绑的是物理键位,不是逻辑字母 —— Dvorak 上的 <code>⌘K</code> 就是 QWERTY K 的物理位置,不是 Dvorak 映射出的字母。切换布局时肌肉记忆不需要重学。</span>
+        </p>
+      </div>
+
+      <div class="detail-row">
+        <p class="detail-row__label"><span class="lang-en">Platform coverage</span><span class="lang-zh">平台覆盖</span></p>
+        <p class="detail-row__body">
+          <span class="lang-en">macOS, Windows, Linux (deb + rpm + flatpak + AppImage). The chord table is identical across platforms — <code>⌘</code> becomes <code>Ctrl</code>, <code>⌥</code> becomes <code>Alt</code>. No platform has a <q>special</q> shortcut you have to remember differently.</span>
+          <span class="lang-zh">macOS、Windows、Linux(deb + rpm + flatpak + AppImage)。快捷键表各平台一致 —— <code>⌘</code> 换成 <code>Ctrl</code>,<code>⌥</code> 换成 <code>Alt</code>。没有哪个平台有"特殊"快捷键需要你单独记。</span>
+        </p>
+      </div>
+
+      <div class="detail-row">
+        <p class="detail-row__label"><span class="lang-en">Rebindable?</span><span class="lang-zh">可不可以改?</span></p>
+        <p class="detail-row__body">
+          <span class="lang-en">Yes. Every chord is listed in <code>~/.skypad/keys.toml</code> and can be rebound to any free combination. The one we suggest you leave alone is <code>⌘K</code> — the palette is the escape hatch for every other action, so losing it costs more than any custom chord gains.</span>
+          <span class="lang-zh">可以。所有快捷键列在 <code>~/.skypad/keys.toml</code> 里,可以改绑到任何空闲组合。建议你不要动的只有一个:<code>⌘K</code> —— 因为命令面板是所有其他动作的退出通道,丢了它的损失大于任何自定义快捷键能带来的增益。</span>
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Download CTA -->
+<section class="anth-section" id="download">
+  <div class="anth-container anth-container--narrow" style="text-align:center;">
+    <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Try it</span><span class="lang-zh">试一下</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">Six chords, one palette.<br>Ten minutes to feel native.</span>
+      <span class="lang-zh">六个快捷键,一个面板。<br>十分钟上手到像用了一年。</span>
+    </h2>
+    <p style="font-size:17px; line-height:1.65; color:var(--anth-text-secondary); max-width:580px; margin:var(--space-5) auto var(--space-6); font-family:var(--font-body);">
+      <span class="lang-en">Skypad is free while we're in public beta. Every chord works on day one. We will send you one short email, only when there is something to say.</span>
+      <span class="lang-zh">公开 beta 期间 Skypad 免费。每一个快捷键第一天就能用。我们偶尔给你寄一封短邮件,只有真有事说才会寄。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="#download-mac"><span class="lang-en">Download for Mac</span><span class="lang-zh">下载 Mac 版</span></a>
+      <a class="anth-button anth-button--ghost" href="../docs-home.html"><span class="lang-en">Read the docs first</span><span class="lang-zh">先读文档</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="anth-footer">
+  <div class="anth-footer-grid">
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5>
+      <a href="../landing.html"><span class="lang-en">Overview</span><span class="lang-zh">总览</span></a>
+      <a href="../pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+      <a href="feature-deep.html"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a>
+      <a href="#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Docs</span><span class="lang-zh">文档</span></h5>
+      <a href="../docs-home.html"><span class="lang-en">Quickstart</span><span class="lang-zh">快速上手</span></a>
+      <a href="../docs-home.html#shortcuts"><span class="lang-en">Keyboard reference</span><span class="lang-zh">键位参考</span></a>
+      <a href="#palette"><span class="lang-en">Command palette</span><span class="lang-zh">命令面板</span></a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Writers</span><span class="lang-zh">作者</span></h5>
+      <a href="#"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a>
+      <a href="#"><span class="lang-en">Templates</span><span class="lang-zh">模板</span></a>
+      <a href="#"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5>
+      <a href="#"><span class="lang-en">About</span><span class="lang-zh">关于</span></a>
+      <a href="#"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a>
+      <a href="#"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Legal</span><span class="lang-zh">法务</span></h5>
+      <a href="#"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a>
+      <a href="#"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a>
+      <a href="#"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a>
+    </div>
+  </div>
+  <div class="anth-footer-legal">
+    <span>Copyright © 2026 Skypad Inc.</span>
+    <span><span class="lang-en">A quiet notebook for people who want to think.</span><span class="lang-zh">一个给愿意思考的人准备的笔记本。</span></span>
+  </div>
+</footer>
+
+<script>
+  var html = document.documentElement;
+  var saved = 'en';
+  try { saved = localStorage.getItem('sky-lang') || 'en'; } catch (e) {}
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var cur = html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh';
+        apply(cur);
+      });
+    });
+  });
+</script>
+</body>
+</html>

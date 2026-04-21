@@ -42,7 +42,7 @@ critic.mjs — prepare design-critic prompt
 Usage:
   node skills/design-review/scripts/critic.mjs <target.html>
     [--skill=anthropic|apple|ember|sage]
-    [--page=pricing|landing|docs-home]
+    [--page=pricing|landing|docs-home|feature-deep]
     [--out=prompt.md]
 `;
 
@@ -77,7 +77,7 @@ async function main() {
     return 2;
   }
   if (!page) {
-    console.error('cannot infer --page from path; pass it (pricing / landing / docs-home)');
+    console.error('cannot infer --page from path; pass it (pricing / landing / docs-home / feature-deep)');
     return 2;
   }
 

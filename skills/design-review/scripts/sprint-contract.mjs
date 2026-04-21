@@ -10,7 +10,7 @@
 // Usage:
 //   node skills/design-review/scripts/sprint-contract.mjs \
 //     --skill=<anthropic|apple|ember|sage> \
-//     --page=<pricing|landing|docs-home>
+//     --page=<pricing|landing|docs-home|feature-deep>
 //
 // Exit: 0 OK, 2 bad CLI, 1 missing canonical.
 
@@ -23,7 +23,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
 
 const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage'];
-const VALID_PAGES = ['pricing', 'landing', 'docs-home'];
+const VALID_PAGES = ['pricing', 'landing', 'docs-home', 'feature-deep'];
 
 // Per-skill brand presence requirements (mirror of visual-audit's
 // SKILL_SIGNATURES but in contract form — what the generator must ensure
@@ -79,7 +79,7 @@ sprint-contract.mjs — generate a contract for a new page
 Usage:
   node skills/design-review/scripts/sprint-contract.mjs \\
     --skill=<anthropic|apple|ember|sage> \\
-    --page=<pricing|landing|docs-home>
+    --page=<pricing|landing|docs-home|feature-deep>
 
 Output: markdown to stdout. Pipe into generator prompt or save.
 
