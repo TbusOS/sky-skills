@@ -148,15 +148,26 @@ else
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 fi
 
-# Tier 4 · critic (not yet implemented)
+# Tier 4 · critic (prompt builder — caller runs the subagent)
 if [[ $CRITIC -eq 1 ]]; then
-  echo ""
-  echo "━━ Tier 4 · Taste (--critic) ━━"
-  echo "  Not yet implemented in v0. Planned for next iteration."
-  echo "  Will run a Claude subagent to check:"
-  echo "    - has \$PUSH_BRANCH diverged beyond easy rebase from \$UPSTREAM_BRANCH?"
-  echo "    - has the project shrunk enough that a single repo would be cleaner?"
-  echo "    - are --no-verify bypasses showing up in .git/logs?"
+  if ! command -v node >/dev/null 2>&1; then
+    echo ""
+    echo "━━ Tier 4 · Taste (--critic) · SKIPPED ━━"
+    echo "  node is not installed · skipping"
+    echo "  install node ≥ 18 and re-run to use --critic"
+  else
+    echo ""
+    echo "━━ Tier 4 · Taste (--critic) · prompt prep ━━"
+    critic_args=(--gateway-dir="$GATEWAY" --satellite-dir="$SATELLITE")
+    [[ -n "$UPSTREAM_BRANCH" ]] && critic_args+=(--upstream-branch="$UPSTREAM_BRANCH")
+    [[ -n "$PUSH_BRANCH" ]]     && critic_args+=(--push-branch="$PUSH_BRANCH")
+    node "$SKILL_DIR/scripts/audit-critic.mjs" "${critic_args[@]}" || {
+      echo "  audit-critic.mjs failed" >&2
+    }
+    echo ""
+    echo "  Tier 4 does NOT affect exit code."
+    echo "  The prompt is for a Claude subagent · invoke it manually in Claude Code."
+  fi
 fi
 
 exit $max_exit
