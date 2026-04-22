@@ -125,19 +125,30 @@ function detectSkill(target, html) {
   return null;
 }
 
+// Decide how Playwright loads the target: explicit file:// / absolute path
+// go direct as file://; relative path is served over a local HTTP server
+// anchored at cwd (original behaviour). Callers passing an absolute path
+// don't need to cd into a specific repo root first.
 const root = process.cwd();
 const mime = { '.html':'text/html;charset=utf-8','.css':'text/css;charset=utf-8','.js':'application/javascript','.svg':'image/svg+xml','.png':'image/png','.woff2':'font/woff2' };
 const PORT = 8801;
-const server = createServer(async (req, res) => {
-  try {
-    const p = resolve(root, '.' + decodeURIComponent(req.url.split('?')[0]));
-    const s = await stat(p); if (s.isDirectory()) throw 0;
-    res.writeHead(200, { 'Content-Type': mime[extname(p)] ?? 'application/octet-stream' });
-    res.end(await readFile(p));
-  } catch { res.writeHead(404).end(); }
-}).listen(PORT);
-
-const url = `http://localhost:${PORT}/${target.replace(/^\/+/, '')}`;
+let server = null;
+let url;
+if (/^file:\/\//.test(target)) {
+  url = target;
+} else if (/^\//.test(target)) {
+  url = `file://${target}`;
+} else {
+  server = createServer(async (req, res) => {
+    try {
+      const p = resolve(root, '.' + decodeURIComponent(req.url.split('?')[0]));
+      const s = await stat(p); if (s.isDirectory()) throw 0;
+      res.writeHead(200, { 'Content-Type': mime[extname(p)] ?? 'application/octet-stream' });
+      res.end(await readFile(p));
+    } catch { res.writeHead(404).end(); }
+  }).listen(PORT);
+  url = `http://localhost:${PORT}/${target.replace(/^\/+/, '')}`;
+}
 const browser = await chromium.launch();
 const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
 await page.goto(url, { waitUntil: 'networkidle' });
@@ -676,7 +687,7 @@ if (skillId) {
 }
 
 await browser.close();
-server.close();
+if (server) server.close();
 
 // Filter out brand-intentional contrast findings if asked.
 let suppressed = 0;

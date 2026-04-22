@@ -31,7 +31,15 @@ const mime = {
 
 let url = target;
 let server;
-if (!/^https?:\/\//.test(target)) {
+if (/^file:\/\//.test(target)) {
+  // Explicit file:// URL — pass through to Playwright directly.
+  url = target;
+} else if (/^\//.test(target)) {
+  // Absolute local path — use file:// directly so any CWD can call us
+  // (matches the way visual-audit.mjs handles absolute paths).
+  url = `file://${target}`;
+} else if (!/^https?:\/\//.test(target)) {
+  // Relative path — serve repo root at :8787 and fetch via HTTP.
   const root = process.cwd();
   server = createServer(async (req, res) => {
     try {
