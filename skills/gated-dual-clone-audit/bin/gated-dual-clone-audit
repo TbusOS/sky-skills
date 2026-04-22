@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+# gated-dual-clone-audit — independent evaluator for gated-dual-clone topologies.
+#
+# Runs three tiers in order (structural → config → behavioural) and
+# aggregates their verdicts into one exit code + summary. Short-circuits on
+# any Tier 1 FAIL (no point checking config on a broken repo).
+#
+# Usage:
+#   bin/gated-dual-clone-audit \
+#     --gateway-dir=<path> --satellite-dir=<path> \
+#     [--upstream-branch=<name>] [--push-branch=<name>] \
+#     [--strict] [--json] [--critic]
+#
+# Exit code:
+#   0 all pass · 1 at least one WARN (any tier) · 2 at least one FAIL (any tier)
+#   3 bad CLI
+#
+# --strict: treat WARN as FAIL
+# --json:   emit JSON report (one document with all three tiers)
+# --critic: placeholder for Tier 4 · LLM taste judgment (planned)
+
+set -eu
+
+SELF_DIR="$(cd "$(dirname "$0")" && pwd)"
+SKILL_DIR="$(cd "$SELF_DIR/.." && pwd)"
+
+GATEWAY=""
+SATELLITE=""
+UPSTREAM_BRANCH=""
+PUSH_BRANCH=""
+STRICT=0
+JSON=0
+CRITIC=0
+
+for a in "$@"; do
+  case "$a" in
+    --gateway-dir=*)     GATEWAY="${a#*=}" ;;
+    --satellite-dir=*)   SATELLITE="${a#*=}" ;;
+    --upstream-branch=*) UPSTREAM_BRANCH="${a#*=}" ;;
+    --push-branch=*)     PUSH_BRANCH="${a#*=}" ;;
+    --strict)            STRICT=1 ;;
+    --json)              JSON=1 ;;
+    --critic)            CRITIC=1 ;;
+    -h|--help)           sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *)                   echo "unknown flag: $a" >&2; exit 3 ;;
+  esac
+done
+
+[[ -n "$GATEWAY"   ]] || { echo "--gateway-dir required"   >&2; exit 3; }
+[[ -n "$SATELLITE" ]] || { echo "--satellite-dir required" >&2; exit 3; }
+
+# --------------------- Run each tier --------------------------------
+run_tier() {
+  local script="$1"; shift
+  "$SELF_DIR/../scripts/$script" "$@"
+  echo "$?"
+}
+
+t1_exit=0
+t2_exit=0
+t3_exit=0
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+# Build argument list for each tier.
+common_args=(--gateway-dir="$GATEWAY" --satellite-dir="$SATELLITE")
+[[ -n "$UPSTREAM_BRANCH" ]] && t3_args=(--upstream-branch="$UPSTREAM_BRANCH") || t3_args=()
+[[ -n "$PUSH_BRANCH"     ]] && { t2_push_args=(--push-branch="$PUSH_BRANCH"); t3_push_args=(--push-branch="$PUSH_BRANCH"); } || { t2_push_args=(); t3_push_args=(); }
+
+json_flag=()
+[[ $JSON -eq 1 ]] && json_flag=(--json)
+
+# Tier 1
+if [[ $JSON -eq 1 ]]; then
+  bash "$SKILL_DIR/scripts/audit-structural.sh" "${common_args[@]}" --json > "$tmp/t1.json" || t1_exit=$?
+  [[ $t1_exit -gt 2 ]] && { echo "tier 1 failed with exit $t1_exit" >&2; exit 3; }
+else
+  bash "$SKILL_DIR/scripts/audit-structural.sh" "${common_args[@]}" || t1_exit=$?
+  [[ $t1_exit -gt 2 ]] && { echo "tier 1 failed with exit $t1_exit" >&2; exit 3; }
+fi
+
+# Short-circuit: if Tier 1 FAIL, skip later tiers.
+if [[ $t1_exit -eq 2 ]]; then
+  if [[ $JSON -eq 1 ]]; then
+    printf '{\n  "overall": "fail",\n  "short_circuit": true,\n  "reason": "tier 1 structural failure — fix before running tiers 2/3",\n  "tiers": [%s]\n}\n' "$(cat "$tmp/t1.json")"
+  else
+    echo ""
+    echo "━━ Tier 1 failed · short-circuit · skipping Tier 2 / 3 ━━"
+    echo "→ overall: FAIL (2)"
+  fi
+  exit 2
+fi
+
+# Tier 2
+if [[ $JSON -eq 1 ]]; then
+  bash "$SKILL_DIR/scripts/audit-config.sh" "${common_args[@]}" "${t2_push_args[@]}" --json > "$tmp/t2.json" || t2_exit=$?
+  [[ $t2_exit -gt 2 ]] && { echo "tier 2 failed with exit $t2_exit" >&2; exit 3; }
+else
+  echo ""
+  bash "$SKILL_DIR/scripts/audit-config.sh" "${common_args[@]}" "${t2_push_args[@]}" || t2_exit=$?
+  [[ $t2_exit -gt 2 ]] && { echo "tier 2 failed with exit $t2_exit" >&2; exit 3; }
+fi
+
+# Tier 3
+if [[ $JSON -eq 1 ]]; then
+  bash "$SKILL_DIR/scripts/audit-behavioural.sh" "${common_args[@]}" "${t3_args[@]}" "${t3_push_args[@]}" --json > "$tmp/t3.json" || t3_exit=$?
+  [[ $t3_exit -gt 2 ]] && { echo "tier 3 failed with exit $t3_exit" >&2; exit 3; }
+else
+  echo ""
+  bash "$SKILL_DIR/scripts/audit-behavioural.sh" "${common_args[@]}" "${t3_args[@]}" "${t3_push_args[@]}" || t3_exit=$?
+  [[ $t3_exit -gt 2 ]] && { echo "tier 3 failed with exit $t3_exit" >&2; exit 3; }
+fi
+
+# ----------------------- Aggregate ----------------------------------
+# Each tier's exit code: 0=pass, 1=warn, 2=fail. Overall = max.
+max_exit=$t1_exit
+[[ $t2_exit -gt $max_exit ]] && max_exit=$t2_exit
+[[ $t3_exit -gt $max_exit ]] && max_exit=$t3_exit
+
+# --strict: WARN → FAIL
+if [[ $STRICT -eq 1 && $max_exit -eq 1 ]]; then
+  max_exit=2
+fi
+
+case $max_exit in
+  0) overall="pass" ;;
+  1) overall="warn" ;;
+  2) overall="fail" ;;
+esac
+
+if [[ $JSON -eq 1 ]]; then
+  printf '{\n'
+  printf '  "skill": "gated-dual-clone-audit",\n'
+  printf '  "overall": "%s",\n' "$overall"
+  printf '  "strict": %s,\n' "$([[ $STRICT -eq 1 ]] && echo true || echo false)"
+  printf '  "tiers": [\n'
+  cat "$tmp/t1.json"; printf ',\n'
+  cat "$tmp/t2.json"; printf ',\n'
+  cat "$tmp/t3.json"; printf '\n'
+  printf '  ]\n'
+  printf '}\n'
+else
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "  gated-dual-clone-audit · $overall"
+  [[ $STRICT -eq 1 ]] && echo "  --strict: WARN treated as FAIL"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+fi
+
+# Tier 4 · critic (not yet implemented)
+if [[ $CRITIC -eq 1 ]]; then
+  echo ""
+  echo "━━ Tier 4 · Taste (--critic) ━━"
+  echo "  Not yet implemented in v0. Planned for next iteration."
+  echo "  Will run a Claude subagent to check:"
+  echo "    - has \$PUSH_BRANCH diverged beyond easy rebase from \$UPSTREAM_BRANCH?"
+  echo "    - has the project shrunk enough that a single repo would be cleaner?"
+  echo "    - are --no-verify bypasses showing up in .git/logs?"
+fi
+
+exit $max_exit

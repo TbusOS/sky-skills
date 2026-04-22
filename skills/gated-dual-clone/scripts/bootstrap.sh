@@ -219,13 +219,26 @@ else
     exit 5
   fi
 
-  # Gate C · gateway pre-push to upstream branch must be rejected by the hook.
+  # Gate C · gateway pre-push hook must reject protected-branch push. We
+  # invoke the hook script directly with synthetic stdin — git's own
+  # --dry-run short-circuits with "Everything up-to-date" when local = remote
+  # and never runs the hook. Testing the hook's logic directly is the
+  # reliable approach.
   if [[ $SKIP_GATEWAY -eq 0 ]]; then
-    if (cd "$GATEWAY_DIR" && git push origin "$UPSTREAM_BRANCH" --dry-run 2>&1 | grep -qiE "REJECTED|protected|hook declined"); then
-      echo "  ✓ Gate C · Pre-push hook · protected-branch push rejected"
+    hook_path="$GATEWAY_DIR/.git/hooks/pre-push"
+    if [[ -x "$hook_path" ]]; then
+      # Synthetic stdin: pretend we're pushing <upstream-branch> ref
+      # (format: local_ref local_sha remote_ref remote_sha per githooks docs).
+      hook_out="$(printf 'refs/heads/%s 1111 refs/heads/%s 0000\n' "$UPSTREAM_BRANCH" "$UPSTREAM_BRANCH" | bash "$hook_path" origin "$GATEWAY_DIR" 2>&1 || true)"
+      if echo "$hook_out" | grep -qiE "REJECTED|protected"; then
+        echo "  ✓ Gate C · Pre-push hook · protected-branch push rejected"
+      else
+        echo "  ✗ Gate C FAIL · hook did not reject synthetic push to '$UPSTREAM_BRANCH'" >&2
+        echo "    hook output: $(echo "$hook_out" | head -3 | tr '\n' ' / ')" >&2
+        exit 5
+      fi
     else
-      echo "  ✗ Gate C FAIL · gateway hook did not reject push to '$UPSTREAM_BRANCH'" >&2
-      echo "    (check: $GATEWAY_DIR/.git/hooks/pre-push exists + is executable)" >&2
+      echo "  ✗ Gate C FAIL · pre-push hook missing or not executable at $hook_path" >&2
       exit 5
     fi
   else
