@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gated-dual-clone — dual-repo git workflow for protected upstreams</title>
+<meta name="description" content="One command sets up a gateway repo (push source) and a satellite repo (fetch-only build tree) so a heavy build can't accidentally push to a protected upstream. Canonical anthropic-design demo.">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/anthropic.css">
+<style>
+  /* ---------- Bilingual toggle ---------- */
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+
+  /* ---------- Chinese font stack (§H) ---------- */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] td,
+  html[data-lang="zh"] .gdc-lede {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .gdc-kicker,
+  html[data-lang="zh"] .gdc-gate__title,
+  html[data-lang="zh"] .gdc-q__title,
+  html[data-lang="zh"] th {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] .gdc-pull {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal;
+  }
+  html[data-lang="zh"] .gdc-kicker {
+    text-transform: none;
+    letter-spacing: 0.04em;
+  }
+
+  /* ---------- Nav ---------- */
+  .gdc-nav {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--anth-bg);
+    border-bottom: 3px solid var(--anth-orange);
+  }
+  .gdc-nav__inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: 14px 24px;
+    display: flex; align-items: center; gap: var(--space-5);
+  }
+  .gdc-nav__brand {
+    font-family: var(--font-heading);
+    font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--anth-text); text-decoration: none;
+  }
+  .gdc-nav__brand .dot { color: var(--anth-orange); }
+  .gdc-nav__links { display: flex; gap: var(--space-4); flex: 1; }
+  .gdc-nav__links a {
+    font-family: var(--font-heading); font-size: 14px; font-weight: 500;
+    color: var(--anth-text-secondary); text-decoration: none;
+  }
+  .gdc-nav__links a:hover { color: var(--anth-text); }
+
+  /* ---------- Hero ---------- */
+  .gdc-kicker {
+    font-family: var(--font-heading);
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--anth-orange); font-weight: 700;
+    margin: 0 0 var(--space-4);
+  }
+  html[data-lang="zh"] .gdc-kicker { text-transform: none; letter-spacing: 0.04em; }
+  .gdc-lede {
+    font-family: var(--font-body);
+    font-size: 19px; line-height: 1.65;
+    color: var(--anth-text-secondary);
+    max-width: 760px; margin: var(--space-4) auto var(--space-6);
+  }
+  .gdc-hero__cta { display: flex; gap: var(--space-3); flex-wrap: wrap; justify-content: center; }
+
+  /* Non-hero sections get their own lede, left-aligned at container width */
+  section:not(.anth-hero) .gdc-lede { margin-left: 0; margin-right: 0; max-width: 820px; }
+
+  /* ---------- Topology figure ---------- */
+  .gdc-figure {
+    background: var(--anth-bg-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-7);
+    margin: var(--space-6) 0 0;
+  }
+  .gdc-figure svg { display: block; width: 100%; height: auto; }
+  figcaption {
+    font-family: var(--font-heading);
+    font-size: 14px; color: var(--anth-text-secondary);
+    margin-top: var(--space-4);
+    text-align: center;
+    line-height: 1.55;
+  }
+
+  /* ---------- Decision grid (4 questions) ---------- */
+  .gdc-q-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
+    margin-top: var(--space-6);
+  }
+  .gdc-q {
+    background: #ffffff;
+    border: 1px solid var(--anth-light-gray);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    display: flex; gap: var(--space-4);
+  }
+  .gdc-q__num {
+    font-family: var(--font-heading);
+    font-size: 40px; font-weight: 700;
+    color: var(--anth-orange);
+    line-height: 1; min-width: 54px;
+    letter-spacing: -0.02em;
+  }
+  .gdc-q__title {
+    font-family: var(--font-heading);
+    font-size: 18px; font-weight: 600;
+    color: var(--anth-text);
+    margin: 0 0 var(--space-2);
+    line-height: 1.35;
+  }
+  .gdc-q__body {
+    font-family: var(--font-body);
+    font-size: 15px; line-height: 1.6;
+    color: var(--anth-text-secondary);
+    margin: 0;
+  }
+  .gdc-verdict {
+    margin-top: var(--space-6);
+    padding: var(--space-5) var(--space-6);
+    background: #ffffff;
+    border: 1px solid var(--anth-orange);
+    border-radius: var(--radius-lg);
+    display: flex; gap: var(--space-4); align-items: center;
+  }
+  .gdc-verdict__badge {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    background: var(--anth-orange); color: #ffffff;
+    font-family: var(--font-heading); font-size: 12px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border-radius: var(--radius-pill);
+  }
+  html[data-lang="zh"] .gdc-verdict__badge {
+    text-transform: none; letter-spacing: 0.04em;
+  }
+  .gdc-verdict__text {
+    font-family: var(--font-body); font-size: 16px; color: var(--anth-text);
+    margin: 0;
+  }
+
+  /* ---------- Bootstrap code block ---------- */
+  .gdc-code {
+    background: #1c1b17;
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    margin: var(--space-5) 0 0;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.65;
+    color: #e8e6dc;
+  }
+  .gdc-code .cmd { color: #ffffff; }
+  .gdc-code .flag { color: #e9b083; }
+  .gdc-code .val { color: #a8c08a; }
+  .gdc-code .comment { color: #8c8876; font-style: normal; }
+  .gdc-code .cont { color: #6b6a5f; }
+
+  /* ---------- Three gates ---------- */
+  /* 1 hero + 2 alt · Gate A on its own row, Gates B/C equal below */
+  .gdc-gates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    margin-top: var(--space-6);
+  }
+  .gdc-gate--lead {
+    grid-column: 1 / -1;         /* span both columns, own row */
+    background: var(--anth-bg-subtle) !important;
+    border-color: var(--anth-orange) !important;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-5);
+    align-items: start;
+  }
+  .gdc-gate--lead .gdc-gate__icon { margin-bottom: 0; }
+  .gdc-gate--lead > h3,
+  .gdc-gate--lead > p,
+  .gdc-gate--lead > pre,
+  .gdc-gate--lead > figcaption,
+  .gdc-gate--lead > .gdc-kicker {
+    grid-column: 2;
+  }
+  .gdc-gate {
+    background: #ffffff;
+    border: 1px solid var(--anth-light-gray);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    display: flex; flex-direction: column;
+  }
+  .gdc-gate__icon {
+    width: 56px; height: 56px;
+    display: grid; place-items: center;
+    background: rgba(217, 119, 87, 0.12);
+    border-radius: var(--radius-md);
+    color: var(--anth-orange);
+    margin-bottom: var(--space-4);
+  }
+  .gdc-gate__title {
+    font-family: var(--font-heading);
+    font-size: 20px; font-weight: 600;
+    color: var(--anth-text);
+    margin: 0 0 var(--space-2);
+  }
+  .gdc-gate__body {
+    font-family: var(--font-body);
+    font-size: 15px; line-height: 1.55;
+    color: var(--anth-text);
+    margin: 0 0 var(--space-4);
+    flex-grow: 1;
+  }
+  .gdc-gate__verify {
+    font-family: var(--font-mono);
+    font-size: 13px; line-height: 1.5;
+    background: var(--anth-bg-subtle);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    color: var(--anth-text);
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* ---------- Pull quote (Lora italic · anthropic signature move) ---------- */
+  .gdc-pull {
+    font-family: var(--font-body);
+    font-size: 24px; line-height: 1.5;
+    color: var(--anth-text);
+    font-style: italic;
+    border-left: 3px solid var(--anth-orange);
+    padding: var(--space-3) var(--space-5);
+    margin: var(--space-6) auto 0;
+    max-width: 720px;
+  }
+  .gdc-pull::after {
+    content: "";
+    display: block;
+    width: 32px; height: 2px;
+    background: var(--anth-orange);
+    margin-top: var(--space-4);
+  }
+  /* Chinese pull-quote: serif but not italic (CJK italic looks wrong) */
+  html[data-lang="zh"] .gdc-pull {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal;
+  }
+
+  /* ---------- Premise band (between hero and topology) ---------- */
+  .gdc-premise {
+    text-align: center;
+  }
+  .gdc-premise__body {
+    font-family: var(--font-body);
+    font-size: 19px; line-height: 1.7;
+    color: var(--anth-text);
+    max-width: 720px; margin: 0 auto var(--space-5);
+  }
+  html[data-lang="zh"] .gdc-premise__body {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+  }
+  .gdc-stat-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+    max-width: 720px;
+    margin: var(--space-6) auto var(--space-7);
+    padding: var(--space-5) 0;
+    border-top: 1px solid var(--anth-light-gray);
+    border-bottom: 1px solid var(--anth-light-gray);
+  }
+  .gdc-stat-strip > div { text-align: center; }
+  .gdc-stat-strip .num {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 48px; font-weight: 700;
+    color: var(--anth-text);
+    letter-spacing: -0.02em; line-height: 1;
+  }
+  .gdc-stat-strip .lbl {
+    display: block;
+    margin-top: var(--space-2);
+    font-family: var(--font-heading);
+    font-size: 13px; font-weight: 500;
+    color: var(--anth-text-secondary);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- Footer ---------- */
+  .gdc-footer {
+    background: var(--anth-bg-subtle);
+    padding: var(--space-7) 0 var(--space-6);
+    margin-top: var(--space-8);
+  }
+  .gdc-footer__inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: 0 24px;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: var(--space-6);
+  }
+  .gdc-footer h4 {
+    font-family: var(--font-heading);
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--anth-text);
+    margin: 0 0 var(--space-3);
+  }
+  html[data-lang="zh"] .gdc-footer h4 {
+    text-transform: none; letter-spacing: 0.02em;
+  }
+  .gdc-footer a, .gdc-footer li {
+    font-family: var(--font-body);
+    font-size: 14px; line-height: 1.8;
+    color: var(--anth-text-secondary);
+    text-decoration: none;
+  }
+  .gdc-footer a:hover { color: var(--anth-orange); }
+  .gdc-footer ul { list-style: none; padding: 0; margin: 0; }
+  .gdc-footer p { font-size: 14px; color: var(--anth-text-secondary); line-height: 1.6; margin: 0 0 var(--space-3); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 900px) {
+    .gdc-q-grid { grid-template-columns: 1fr; }
+    .gdc-gates { grid-template-columns: 1fr; }
+    .gdc-footer__inner { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- =========================== NAV =========================== -->
+<nav class="gdc-nav" aria-label="primary">
+  <div class="gdc-nav__inner">
+    <a class="gdc-nav__brand" href="#top"><span class="dot">●</span>&nbsp;&nbsp;gated-dual-clone</a>
+    <div class="gdc-nav__links">
+      <a href="#topology"><span class="lang-en">Topology</span><span class="lang-zh">拓扑</span></a>
+      <a href="#decide"><span class="lang-en">Decide</span><span class="lang-zh">决策</span></a>
+      <a href="#bootstrap"><span class="lang-en">Bootstrap</span><span class="lang-zh">搭建</span></a>
+      <a href="#gates"><span class="lang-en">Safety</span><span class="lang-zh">安全闸</span></a>
+      <a href="#compare"><span class="lang-en">Compare</span><span class="lang-zh">对比</span></a>
+    </div>
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+  </div>
+</nav>
+
+<!-- =========================== HERO =========================== -->
+<section class="anth-hero" id="top">
+  <div class="anth-container">
+    <p class="gdc-kicker">
+      <span class="lang-en">Git Workflow Skill · v1</span><span class="lang-zh">Git 工作流 Skill · v1</span>
+    </p>
+    <h1>
+      <span class="lang-en">Two clones.<br>One push path.<br>Zero accidents.</span>
+      <span class="lang-zh">两份 clone。<br>一条 push 路径。<br>零误推。</span>
+    </h1>
+    <div style="width: 160px; height: 6px; background: var(--anth-orange); border-radius: 3px; margin: var(--space-4) auto var(--space-5);"></div>
+    <p class="gdc-lede">
+      <span class="lang-en">For projects where the upstream is protected (MR / PR only) and the build is heavy or pollutes the tree. One command sets up a <b>gateway</b> repo that pushes and a <b>satellite</b> repo that builds — the build tree is physically unable to reach the remote.</span>
+      <span class="lang-zh">适用于上游分支受保护（必须走 MR / PR）且编译重、会污染工作树的项目。一条命令搭起 <b>gateway</b> 仓库负责 push 和 <b>satellite</b> 仓库只读编译——编译树在物理上够不到远程。</span>
+    </p>
+    <div class="gdc-hero__cta">
+      <a class="anth-button" href="#bootstrap"><span class="lang-en">See the command</span><span class="lang-zh">看搭建命令</span></a>
+      <a class="anth-button anth-button--ghost" href="#decide"><span class="lang-en">Should I use this?</span><span class="lang-zh">该不该用</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== PREMISE BAND =========================== -->
+<section class="anth-section anth-section--subtle" id="premise">
+  <div class="anth-container">
+    <div class="gdc-premise">
+      <p class="gdc-premise__body">
+        <span class="lang-en">Most git workflows assume you trust yourself not to push the wrong thing. On a heavy project — Android builds, Yocto images, multi-gigabyte datasets — you stop trusting yourself the hundredth time <code>git status</code> returns sixty lines of unrelated artefacts. A tired afternoon, one wrong <code>git push</code>, and the whole team is rolling back.</span>
+        <span class="lang-zh">大多数 git 工作流的前提是：你信得过自己不会把错东西推出去。但在重型项目上——Android 编译、Yocto 镜像、多 GB 数据集——当 <code>git status</code> 第一百次返回 60 行无关产物，你就开始信不过自己了。一个疲惫的下午，一条错误的 <code>git push</code>，整个团队回滚半天。</span>
+      </p>
+      <p class="gdc-premise__body">
+        <span class="lang-en">This skill removes the choice. The tree that compiles is not the tree that pushes. They are two directories, each with its own <code>origin</code>, and the build tree's <code>origin</code> never left your laptop.</span>
+        <span class="lang-zh">这个 skill 把"选择"拿掉了。编译的目录不等于推代码的目录。是两个目录，各自有自己的 <code>origin</code>，而编译目录的 <code>origin</code> 从来没离开过你的笔记本。</span>
+      </p>
+
+      <div class="gdc-stat-strip" aria-label="at-a-glance numbers">
+        <div>
+          <span class="num">2</span>
+          <span class="lbl"><span class="lang-en">clones</span><span class="lang-zh">份 clone</span></span>
+        </div>
+        <div>
+          <span class="num">3</span>
+          <span class="lbl"><span class="lang-en">safety gates</span><span class="lang-zh">道安全闸</span></span>
+        </div>
+        <div>
+          <span class="num">1</span>
+          <span class="lbl"><span class="lang-en">push path</span><span class="lang-zh">条 push 路径</span></span>
+        </div>
+      </div>
+
+      <blockquote class="gdc-pull">
+        <span class="lang-en">The whole skill exists to make this command boring — so you can forget it, and trust the shape.</span>
+        <span class="lang-zh">这个 skill 存在的全部意义，就是让这条命令变得无聊——你可以忘掉它，信任这个结构。</span>
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== TOPOLOGY =========================== -->
+<section class="anth-section" id="topology">
+  <div class="anth-container anth-container--wide">
+    <h2>
+      <span class="lang-en">The topology</span>
+      <span class="lang-zh">拓扑</span>
+    </h2>
+    <p class="gdc-lede">
+      <span class="lang-en">Three nodes, two clones, one direction of push. The satellite's <code>origin</code> points at the <em>local</em> gateway — no protocol path to upstream exists from the build tree.</span>
+      <span class="lang-zh">三个节点，两份 clone，一条 push 方向。satellite 的 <code>origin</code> 指向<em>本地</em>的 gateway——编译树到上游根本不存在协议通路。</span>
+    </p>
+    <figure class="gdc-figure">
+      <svg viewBox="0 0 1200 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three-tier topology: upstream at top, gateway in middle, satellite at bottom. Push and fetch arrows shown.">
+        <defs>
+          <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#d97757"/>
+          </marker>
+          <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#6a9bcc"/>
+          </marker>
+          <marker id="arrow-block" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#b0aea5"/>
+          </marker>
+        </defs>
+
+        <!-- Upstream -->
+        <g>
+          <rect x="360" y="24" width="480" height="108" rx="18" fill="#141413"/>
+          <text x="600" y="72" text-anchor="middle" font-family="Poppins, sans-serif" font-size="24" font-weight="600" fill="#faf9f5">upstream remote</text>
+          <text x="600" y="102" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="16" fill="#b0aea5">git@gitlab.example.com:team/project.git</text>
+          <!-- lock icon -->
+          <g transform="translate(392, 58)">
+            <rect x="0" y="8" width="26" height="22" rx="3" fill="#d97757"/>
+            <path d="M5 8 v -5 a 8 8 0 0 1 16 0 v 5" stroke="#d97757" stroke-width="2.5" fill="none"/>
+          </g>
+          <text x="600" y="162" text-anchor="middle" font-family="Poppins, sans-serif" font-size="15" fill="#6b6a5f" letter-spacing="0.05em" font-weight="500">protected · MR / PR only</text>
+        </g>
+
+        <!-- Gateway -->
+        <g>
+          <rect x="60" y="228" width="480" height="128" rx="18" fill="#ffffff" stroke="#d97757" stroke-width="2.5"/>
+          <text x="92" y="268" font-family="Poppins, sans-serif" font-size="24" font-weight="600" fill="#141413">gateway/</text>
+          <text x="92" y="296" font-family="Poppins, sans-serif" font-size="16" fill="#6b6a5f">edit here · push source · 编辑 · push 源</text>
+          <text x="92" y="322" font-family="JetBrains Mono, monospace" font-size="14" fill="#141413">origin = git@gitlab.example.com:...</text>
+          <text x="92" y="344" font-family="JetBrains Mono, monospace" font-size="13" fill="#6b6a5f">pre-push hook: reject protected</text>
+        </g>
+
+        <!-- Satellite -->
+        <g>
+          <rect x="660" y="228" width="480" height="128" rx="18" fill="#ffffff" stroke="#788c5d" stroke-width="2.5"/>
+          <text x="692" y="268" font-family="Poppins, sans-serif" font-size="24" font-weight="600" fill="#141413">satellite/</text>
+          <text x="692" y="296" font-family="Poppins, sans-serif" font-size="16" fill="#6b6a5f">build here · fetch only · 编译 · 只读</text>
+          <text x="692" y="322" font-family="JetBrains Mono, monospace" font-size="14" fill="#141413">origin = file:///path/to/gateway/.git</text>
+          <text x="692" y="344" font-family="JetBrains Mono, monospace" font-size="13" fill="#a14238" font-weight="600">push URL = DISABLED</text>
+        </g>
+
+        <!-- gateway ↔ upstream arrows -->
+        <line x1="300" y1="228" x2="430" y2="140" stroke="#d97757" stroke-width="2.5" marker-end="url(#arrow-orange)"/>
+        <text x="310" y="198" font-family="Poppins, sans-serif" font-size="16" font-weight="600" fill="#d97757">push</text>
+        <text x="310" y="218" font-family="Poppins, sans-serif" font-size="13" fill="#6b6a5f">personal branch only</text>
+
+        <line x1="460" y1="142" x2="332" y2="228" stroke="#6a9bcc" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+        <text x="420" y="198" font-family="Poppins, sans-serif" font-size="16" font-weight="600" fill="#6a9bcc">fetch</text>
+
+        <!-- satellite ↔ gateway arrows (local protocol) -->
+        <line x1="660" y1="276" x2="546" y2="276" stroke="#6a9bcc" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+        <text x="603" y="266" text-anchor="middle" font-family="Poppins, sans-serif" font-size="16" font-weight="600" fill="#6a9bcc">fetch</text>
+        <text x="603" y="288" text-anchor="middle" font-family="Poppins, sans-serif" font-size="12.5" fill="#6b6a5f">hardlinked .git/objects</text>
+
+        <!-- satellite → upstream: blocked (line stops short of upstream, with × glyph mid-line) -->
+        <line x1="890" y1="228" x2="810" y2="170" stroke="#b0aea5" stroke-width="2.5" stroke-dasharray="7,5"/>
+        <g transform="translate(818, 178) rotate(-32)">
+          <rect x="-36" y="-13" width="72" height="26" rx="13" fill="#a14238"/>
+          <text x="0" y="5" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="700" fill="#faf9f5" letter-spacing="0.06em">BLOCKED</text>
+        </g>
+
+        <!-- Legend -->
+        <g transform="translate(60, 430)">
+          <text x="0" y="0" font-family="Poppins, sans-serif" font-size="14" font-weight="600" fill="#141413" letter-spacing="0.06em">LEGEND</text>
+          <line x1="0" y1="32" x2="52" y2="32" stroke="#d97757" stroke-width="2.5"/>
+          <text x="64" y="36" font-family="Poppins, sans-serif" font-size="15" fill="#141413" font-weight="500">push</text>
+
+          <line x1="160" y1="32" x2="212" y2="32" stroke="#6a9bcc" stroke-width="2.5"/>
+          <text x="224" y="36" font-family="Poppins, sans-serif" font-size="15" fill="#141413" font-weight="500">fetch</text>
+
+          <line x1="320" y1="32" x2="372" y2="32" stroke="#b0aea5" stroke-width="2.5" stroke-dasharray="7,5"/>
+          <text x="384" y="36" font-family="Poppins, sans-serif" font-size="15" fill="#141413" font-weight="500">blocked</text>
+        </g>
+      </svg>
+      <figcaption>
+        <span class="lang-en">Three tiers · two clones · push traffic is physically confined to the gateway. The satellite has no network path to upstream — only to the local gateway on disk.</span>
+        <span class="lang-zh">三层结构 · 两份 clone · push 流量被物理约束在 gateway 里。satellite 到上游没有网络路径，只连到本地磁盘上的 gateway。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- =========================== DECIDE =========================== -->
+<section class="anth-section anth-section--subtle" id="decide">
+  <div class="anth-container">
+    <h2>
+      <span class="lang-en">Should I use this?</span>
+      <span class="lang-zh">该不该用</span>
+    </h2>
+    <p class="gdc-lede">
+      <span class="lang-en">Four yes/no questions. Three or more "yes" means the pattern earns its weight. Otherwise a single repo or a <code>git worktree</code> is the right tool — this skill would add ceremony you don't need.</span>
+      <span class="lang-zh">4 道是非题。≥ 3 个 yes 这个模式的额外工程量才划得来。不到 3 个 yes，单仓库或者 <code>git worktree</code> 更合适，本 skill 会是多余的复杂度。</span>
+    </p>
+
+    <div class="gdc-q-grid">
+      <div class="gdc-q">
+        <div class="gdc-q__num">01</div>
+        <div>
+          <h3 class="gdc-q__title">
+            <span class="lang-en">Is the upstream branch protected?</span>
+            <span class="lang-zh">上游分支是否受保护？</span>
+          </h3>
+          <p class="gdc-q__body">
+            <span class="lang-en">MR / PR required, direct push rejected by the host. Check in the hosting UI (GitLab "Protected branches", GitHub "Branch protection rules").</span>
+            <span class="lang-zh">必须走 MR / PR，直接 push 被托管平台拒。托管后台看（GitLab "Protected branches"、GitHub "Branch protection rules"）。</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="gdc-q">
+        <div class="gdc-q__num">02</div>
+        <div>
+          <h3 class="gdc-q__title">
+            <span class="lang-en">Build &gt; 10 min, or &gt; 500 MB of artefacts?</span>
+            <span class="lang-zh">构建 &gt; 10 分钟，或产物 &gt; 500 MB？</span>
+          </h3>
+          <p class="gdc-q__body">
+            <span class="lang-en">Look at CI timing and <code>du -sh out/ build/</code>. Heavy builds are what make the separate satellite tree pay for itself.</span>
+            <span class="lang-zh">看 CI 时长和 <code>du -sh out/ build/</code>。编译重，satellite 独立工作树的开销才值得。</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="gdc-q">
+        <div class="gdc-q__num">03</div>
+        <div>
+          <h3 class="gdc-q__title">
+            <span class="lang-en">Disk for two trees — including LFS?</span>
+            <span class="lang-zh">盘够两份工作树 —— 含 LFS 吗？</span>
+          </h3>
+          <p class="gdc-q__body">
+            <span class="lang-en"><code>.git/objects</code> hardlinks, but <b>git-lfs payloads and large binary submodules do not</b> — they really cost 2× on disk. Budget for it.</span>
+            <span class="lang-zh"><code>.git/objects</code> 会 hardlink，但 <b>git-lfs 对象和大型二进制 submodule 不会</b>——真的 2× 占盘。预算时考虑进去。</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="gdc-q">
+        <div class="gdc-q__num">04</div>
+        <div>
+          <h3 class="gdc-q__title">
+            <span class="lang-en">Want physical edit/build isolation?</span>
+            <span class="lang-zh">想要 edit / build 物理隔离吗？</span>
+          </h3>
+          <p class="gdc-q__body">
+            <span class="lang-en">Build artefacts never pollute <code>git status</code>; an accidental <code>git push</code> from the build tree can't even reach upstream.</span>
+            <span class="lang-zh">编译产物永远不污染 <code>git status</code>；从编译树误跑 <code>git push</code> 也够不到上游。</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="gdc-verdict">
+      <span class="gdc-verdict__badge"><span class="lang-en">Verdict</span><span class="lang-zh">结论</span></span>
+      <p class="gdc-verdict__text">
+        <span class="lang-en">Three or more "yes" — use this skill. Fewer — see <a class="anth-link anth-link--no-arrow" href="#compare">the comparison table</a> for the better-fitting alternative.</span>
+        <span class="lang-zh">≥ 3 个 yes — 用本 skill。少于 3 个 — 去看<a class="anth-link anth-link--no-arrow" href="#compare">对比表</a>挑更合适的方案。</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== BOOTSTRAP =========================== -->
+<section class="anth-section" id="bootstrap">
+  <div class="anth-container">
+    <h2>
+      <span class="lang-en">The command</span>
+      <span class="lang-zh">搭建命令</span>
+    </h2>
+    <p class="gdc-lede">
+      <span class="lang-en">One invocation. Eight parameters. Every value is documented inline — no magic, no hidden state.</span>
+      <span class="lang-zh">一条命令，8 个参数，每个值都有行内注释 —— 无魔法，无隐藏状态。</span>
+    </p>
+
+    <pre class="gdc-code" aria-label="bootstrap command"><span class="cmd">scripts/bootstrap.sh</span> <span class="cont">\</span>
+  <span class="flag">--remote</span>          <span class="val">git@gitlab.example.com:team/project.git</span> <span class="cont">\</span>
+  <span class="flag">--upstream-branch</span> <span class="val">release</span>                                 <span class="cont">\</span>
+  <span class="flag">--push-branch</span>     <span class="val">feature/alice-auth</span>                      <span class="cont">\</span>
+  <span class="flag">--gateway-dir</span>     <span class="val">~/projects/foo-work</span>                     <span class="cont">\</span>
+  <span class="flag">--satellite-dir</span>   <span class="val">~/projects/foo-verify</span>                   <span class="cont">\</span>
+  <span class="flag">--user-email</span>      <span class="val">alice@example.com</span>                       <span class="cont">\</span>
+  <span class="flag">--user-name</span>       <span class="val">alice</span>
+
+<span class="comment"># gateway/     <span class="lang-en">— edit here, pushes to your personal branch</span><span class="lang-zh">— 在这里改代码，push 到你的个人分支</span></span>
+<span class="comment"># satellite/   <span class="lang-en">— build here, fetch from gateway, push is DISABLED</span><span class="lang-zh">— 在这里编译，从 gateway fetch，push 被禁用</span></span></pre>
+  </div>
+</section>
+
+<!-- =========================== SAFETY GATES =========================== -->
+<section class="anth-section anth-section--subtle" id="gates">
+  <div class="anth-container">
+    <h2>
+      <span class="lang-en">Three safety gates</span>
+      <span class="lang-zh">三道安全闸</span>
+    </h2>
+    <p class="gdc-lede">
+      <span class="lang-en">After bootstrap finishes, three checks must pass. Each one verifies a separate layer — protocol, git config, hook. Any single layer holds; three together is belt, braces, and a shoulder strap.</span>
+      <span class="lang-zh">bootstrap 完成后跑 3 道检查。每道验证一层——协议层、git 配置层、hook 层。任意单层都够用，三层叠加是三重保险。</span>
+    </p>
+
+    <div class="gdc-gates">
+      <figure class="gdc-gate gdc-gate--lead">
+        <div class="gdc-gate__icon" aria-hidden="true" style="background: rgba(217, 119, 87, 0.2);">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 3 L23 7 V13 C23 18 18.5 22 13 23 C7.5 22 3 18 3 13 V7 Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M9 13 L12 16 L17 10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <p class="gdc-kicker" style="margin: 0 0 var(--space-2);">
+          <span class="lang-en">Load-bearing · Layer 1</span><span class="lang-zh">主防线 · 第 1 层</span>
+        </p>
+        <h3 class="gdc-gate__title">
+          <span class="lang-en">Gate A · Protocol wall</span>
+          <span class="lang-zh">闸 A · 协议墙</span>
+        </h3>
+        <p class="gdc-gate__body">
+          <span class="lang-en">Satellite <code>origin</code> points at the local gateway path. There is no network route from the build tree to upstream — you can't push what you can't reach.</span>
+          <span class="lang-zh">Satellite <code>origin</code> 指向本地 gateway 路径。编译树到上游没有网络路由——够不到，就推不了。</span>
+        </p>
+        <pre class="gdc-gate__verify">cd satellite/ &amp;&amp; git push
+# → "does not accept"</pre>
+        <figcaption><span class="lang-en">Gate A — protocol-layer barrier.</span><span class="lang-zh">闸 A — 协议层屏障。</span></figcaption>
+      </figure>
+
+      <figure class="gdc-gate">
+        <div class="gdc-gate__icon" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="5" y="11" width="16" height="10" rx="2" stroke="currentColor" stroke-width="2.2"/><path d="M8 11 V7 a5 5 0 0 1 10 0 V11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="gdc-gate__title">
+          <span class="lang-en">Gate B · Explicit disable</span>
+          <span class="lang-zh">闸 B · 显式禁用</span>
+        </h3>
+        <p class="gdc-gate__body">
+          <span class="lang-en">Satellite's push URL is overwritten to the literal string <code>DISABLED</code>. Even a malformed config edit still yields a fast, readable error instead of a silent attempt.</span>
+          <span class="lang-zh">Satellite 的 push URL 覆盖为字符串 <code>DISABLED</code>。哪怕配置被误改，也报错直接清晰，不会静默尝试。</span>
+        </p>
+        <pre class="gdc-gate__verify">cd satellite/ &amp;&amp; git remote -v
+# → "origin ... (push): DISABLED"</pre>
+        <figcaption><span class="lang-en">Gate B — git-config belt-and-braces.</span><span class="lang-zh">闸 B — git 配置双保险。</span></figcaption>
+      </figure>
+
+      <figure class="gdc-gate">
+        <div class="gdc-gate__icon" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="9" stroke="currentColor" stroke-width="2.2"/><path d="M9 13 L12 16 L17 10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 class="gdc-gate__title">
+          <span class="lang-en">Gate C · Pre-push hook</span>
+          <span class="lang-zh">闸 C · pre-push hook</span>
+        </h3>
+        <p class="gdc-gate__body">
+          <span class="lang-en">Gateway runs a pre-push hook that rejects any push whose remote ref matches the protected-branch regex. Catches finger-slips like <code>git push origin main</code>.</span>
+          <span class="lang-zh">Gateway 的 pre-push hook 在推保护分支时拒绝。接住类似 <code>git push origin main</code> 的手滑误操作。</span>
+        </p>
+        <pre class="gdc-gate__verify">cd gateway/ &amp;&amp; \
+git push origin release --dry-run
+# → "REJECTED: protected branch"</pre>
+        <figcaption><span class="lang-en">Gate C — human-readable reject.</span><span class="lang-zh">闸 C — 人类可读的拒绝提示。</span></figcaption>
+      </figure>
+    </div>
+
+    <div class="anth-banner" style="margin-top: var(--space-6); border-left: 3px solid var(--anth-orange);">
+      <span aria-hidden="true" style="font-family:var(--font-heading); color:var(--anth-orange); font-weight:700;">!</span>
+      <span>
+        <span class="lang-en"><b>Client-side hooks are advisory, not enforcement.</b> <code>--no-verify</code> bypasses them. Real protection is server-side protected-branch rules on GitLab / GitHub / Gerrit. This skill layers on top of that — it does not replace it.</span>
+        <span class="lang-zh"><b>客户端 hook 是教学性质的提醒，不是强制边界。</b><code>--no-verify</code> 可以绕过。真正的保护是 GitLab / GitHub / Gerrit 服务端的 protected branch 规则。本 skill 只是在它之上加一层，不替代它。</span>
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== COMPARE =========================== -->
+<section class="anth-section" id="compare">
+  <div class="anth-container">
+    <h2>
+      <span class="lang-en">Dual-clone vs worktree vs single repo</span>
+      <span class="lang-zh">双 clone · worktree · 单仓库三者对比</span>
+    </h2>
+    <p class="gdc-lede">
+      <span class="lang-en">Quick reference — each row scores one practical dimension. Pick the column that fits your constraints; don't force the pattern to fit you.</span>
+      <span class="lang-zh">速查表——每行打一个实际维度的分。按约束挑列，不要硬套模式。</span>
+    </p>
+
+    <div style="overflow-x:auto; margin-top:var(--space-5);">
+    <table class="anth-table" style="margin-top:0;">
+      <thead>
+        <tr>
+          <th><span class="lang-en">Dimension</span><span class="lang-zh">维度</span></th>
+          <th><span class="lang-en">Dual-clone (this)</span><span class="lang-zh">双 clone (本方案)</span></th>
+          <th><span class="lang-en"><code>git worktree</code></span><span class="lang-zh"><code>git worktree</code></span></th>
+          <th><span class="lang-en">Single repo</span><span class="lang-zh">单仓库</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="lang-en">Disk cost</span><span class="lang-zh">盘占用</span></td>
+          <td><span class="lang-en">2× tree; <code>.git</code> hardlinked</span><span class="lang-zh">2× 工作树；<code>.git</code> hardlink</span></td>
+          <td><span class="lang-en">1× <code>.git</code> + N× tree</span><span class="lang-zh">1× <code>.git</code> + N× 工作树</span></td>
+          <td><span class="lang-en">1× total</span><span class="lang-zh">1× 总</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">LFS / binary submodule</span><span class="lang-zh">LFS / 大二进制 submodule</span></td>
+          <td><span class="lang-en">2× (no hardlink)</span><span class="lang-zh">2×（不 hardlink）</span></td>
+          <td>1×</td>
+          <td>1×</td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Physical push isolation</span><span class="lang-zh">物理防误推</span></td>
+          <td><span class="lang-en">Yes — satellite origin is local</span><span class="lang-zh">有——satellite origin 是本地</span></td>
+          <td><span class="lang-en">No — shared remote</span><span class="lang-zh">无——共享 remote</span></td>
+          <td><span class="lang-en">No</span><span class="lang-zh">无</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Build pollutes <code>git status</code></span><span class="lang-zh">编译污染 <code>git status</code></span></td>
+          <td><span class="lang-en">Isolated</span><span class="lang-zh">隔离</span></td>
+          <td><span class="lang-en">Isolated</span><span class="lang-zh">隔离</span></td>
+          <td><span class="lang-en">Polluted</span><span class="lang-zh">污染</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Cross-machine migration</span><span class="lang-zh">跨机迁移</span></td>
+          <td><span class="lang-en">Medium (re-install hooks)</span><span class="lang-zh">中（要重装 hook）</span></td>
+          <td><span class="lang-en">Low</span><span class="lang-zh">低</span></td>
+          <td><span class="lang-en">Low</span><span class="lang-zh">低</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Shared-machine safety</span><span class="lang-zh">共用机器的安全</span></td>
+          <td><span class="lang-en">Safe</span><span class="lang-zh">安全</span></td>
+          <td><span class="lang-en">Risky</span><span class="lang-zh">有风险</span></td>
+          <td><span class="lang-en">Risky</span><span class="lang-zh">有风险</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Client-hook bypass risk</span><span class="lang-zh">客户端 hook 被绕风险</span></td>
+          <td><span class="lang-en">Low — protocol barrier</span><span class="lang-zh">低——有协议层保护</span></td>
+          <td><span class="lang-en">Full</span><span class="lang-zh">完全暴露</span></td>
+          <td><span class="lang-en">Full</span><span class="lang-zh">完全暴露</span></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== FOOTER =========================== -->
+<footer class="gdc-footer">
+  <div class="gdc-footer__inner">
+    <div>
+      <h4><span class="dot" style="color:var(--anth-orange);">●</span> gated-dual-clone</h4>
+      <p>
+        <span class="lang-en">A sky-skills workflow bundle for dual-repo git setups. One bootstrap command, three safety gates, two languages.</span>
+        <span class="lang-zh">sky-skills 里的双仓库 git 搭建 skill。一条 bootstrap 命令，三道安全闸，两种语言。</span>
+      </p>
+    </div>
+
+    <div>
+      <h4><span class="lang-en">Skill</span><span class="lang-zh">Skill 内容</span></h4>
+      <ul>
+        <li><span class="lang-en">bootstrap.sh</span><span class="lang-zh">bootstrap.sh</span></li>
+        <li><span class="lang-en">sync-satellite.sh</span><span class="lang-zh">sync-satellite.sh</span></li>
+        <li><span class="lang-en">install-hooks.sh</span><span class="lang-zh">install-hooks.sh</span></li>
+        <li><span class="lang-en">6 reference docs</span><span class="lang-zh">6 份参考文档</span></li>
+      </ul>
+    </div>
+
+    <div>
+      <h4><span class="lang-en">Reference docs</span><span class="lang-zh">参考文档</span></h4>
+      <ul>
+        <li><span class="lang-en">decision-checklist</span><span class="lang-zh">决策清单</span></li>
+        <li><span class="lang-en">daily-workflow</span><span class="lang-zh">日常流程</span></li>
+        <li><span class="lang-en">guardrails</span><span class="lang-zh">安全闸原理</span></li>
+        <li><span class="lang-en">troubleshooting</span><span class="lang-zh">故障排查</span></li>
+      </ul>
+    </div>
+
+    <div>
+      <h4><span class="lang-en">Also in sky-skills</span><span class="lang-zh">sky-skills 其他</span></h4>
+      <ul>
+        <li><span class="lang-en">anthropic-design</span><span class="lang-zh">anthropic-design</span></li>
+        <li><span class="lang-en">apple-design</span><span class="lang-zh">apple-design</span></li>
+        <li><span class="lang-en">design-review</span><span class="lang-zh">design-review</span></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
