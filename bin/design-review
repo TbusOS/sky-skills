@@ -29,6 +29,11 @@
 #                      (composition/copy/illustration/brand) plus an aggregator.
 #                      Writes 5 prompt files to <out>/multi-critic-*-<ts>.md.
 #                      Each specialist scores only its axis in fresh context.
+#   --learn            Harness component 07 · learning-loop. After you have
+#                      verdict files in <out>/verdict-*.json (or multi-critic
+#                      outputs), builds a design-learner prompt that proposes
+#                      new known-bugs rows, visual-audit checks, and dos-and-donts
+#                      entries. Proposes only — human applies.
 #   --plan --skill=X --page=Y
 #                      Planning mode — skip all gates, generate sprint-contract.md
 #                      for an upcoming page generation.
@@ -57,6 +62,7 @@ STRICT=""
 OUT_DIR=""
 CRITIC=""
 MULTI_CRITIC=""
+LEARN=""
 PLAN=""
 CSS_ARGS=()
 HTMLS=()
@@ -71,6 +77,7 @@ for arg in "$@"; do
     --out=*)   OUT_DIR="${arg#--out=}" ;;
     --critic)       CRITIC=1 ;;
     --multi-critic) MULTI_CRITIC=1 ;;
+    --learn)        LEARN=1 ;;
     --plan)    PLAN=1 ;;
     -h|--help)
       sed -n '2,48p' "$0" | sed -E 's|^# ?||'
@@ -109,6 +116,7 @@ VISUAL="$SKY_ROOT/skills/design-review/scripts/visual-audit.mjs"
 SCREEN="$SKY_ROOT/skills/design-review/scripts/screenshot.mjs"
 CRITIC_SCRIPT="$SKY_ROOT/skills/design-review/scripts/critic.mjs"
 MULTI_CRITIC_SCRIPT="$SKY_ROOT/skills/design-review/scripts/multi-critic.mjs"
+LEARN_SCRIPT="$SKY_ROOT/skills/design-review/scripts/learning-loop.mjs"
 
 SKILL_FLAG=()
 [ -n "$SKILL" ] && SKILL_FLAG=("--skill=$SKILL")
@@ -195,6 +203,21 @@ if [ -n "$MULTI_CRITIC" ]; then
   done
 fi
 
+# ---------- Learning-loop (component 07) ----------
+if [ -n "$LEARN" ]; then
+  for html in "${HTMLS[@]}"; do
+    echo ""
+    echo "━━ [learn] learning-loop.mjs (propose known-bugs / check / dos-and-donts codifications)  $html"
+    learn_args=(--verdicts-dir="$OUT_DIR" --target="$html")
+    if ! ( cd "$REPO" && node "$LEARN_SCRIPT" "${learn_args[@]}" ); then
+      echo "   learning-loop FAILED — probably no verdicts found in $OUT_DIR" >&2
+      echo "   did you run --critic or --multi-critic first and save JSON verdicts?" >&2
+      exit 1
+    fi
+    echo "   next: in Claude Code, Task(subagent_type='design-learner', prompt=file-contents)"
+  done
+fi
+
 echo ""
 echo "┌─ Summary"
 echo "│  ✓ verify.py       (structural)"
@@ -202,5 +225,6 @@ echo "│  ✓ visual-audit    (rendered + brand + italic + smell)"
 echo "│  ✓ screenshot      (in $OUT_DIR)"
 [ -n "$CRITIC" ] && echo "│  ✓ critic prompt   (solo — feed to LLM)"
 [ -n "$MULTI_CRITIC" ] && echo "│  ✓ multi-critic    (4 specialists + aggregator prompts)"
+[ -n "$LEARN" ] && echo "│  ✓ learning-loop   (proposal prompt for known-bugs / check / dos-and-donts)"
 echo "└───────────────────────────────────────────────────────"
 echo ""

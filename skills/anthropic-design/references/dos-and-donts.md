@@ -39,6 +39,12 @@
 | SVG 里 `font-size="8"` 用在信息标签 | 渲染后 <9px 看不清。最小给 10，意图小字给 9.5 |
 | 多列网格里一张非 hero 卡片夹在一堆 `grid-column: 1 / -1` 中间 | 孤儿卡。要么 span 2 并 `max-width + margin: 0 auto` 居中 SVG，要么配对 |
 | Lineup 卡片塞一个 72×72 细线图标居中 | 像 wireframe。每张都做满版 illustration |
+| SVG 里用冷色系 hex（`#eaf0f6` / `#3a5c7a` / 任何偏蓝的 RGB） | anthropic 调色板是暖系(orange + cream + warm-tan + 可选 sage-done-green),一点冷蓝都读出"apple 串味"。4 档区分用暖中性:`#dfeadb`(done-green)/ `#fde4d6`(next-orange)/ `#f0ede3`(cream-subtle)/ 白 + dashed border。**known-bugs 1.17** |
+| `<figure>` 只放 SVG,不加 `<figcaption>` | SVG 里的 `<text>` + `aria-label` 是部分 a11y 兜底,但 figure+figcaption 的语义对不成立。真 `<figcaption>` 放在 `</svg>` 后,写具体信息(轴含义 / takeaway / 来源),不是占位 "Figure 1"。**known-bugs 1.18** |
+| 3-col 或 2×N 等宽 grid 里用 border 或 "Now" pill 标出推荐项 | 等宽掩盖层级。border 在做本该由 grid 比例做的事,读者不扫宽度看不出主次。改 `grid-template-columns: 0.9fr 1.15fr 0.9fr`,或切成 1 hero + (N-1) alternatives,或分成 "shipping today" / "queued" 两段。**known-bugs 1.19** |
+| `.anth-stat-number` 大数字用 `font-weight: 600` | canonical stat-strip 规约 Poppins **700** 做大号数字。600 在 42px 下偏细,和相邻正文 weight 差不够 —— 数字失去"指标"的分量感。固定 `font-weight: 700` |
+| Hero 副标 `<p>` 用 `font-size: 20px` | canonical 范围 17-19px。20 在 Lora serif 下开始往"正文强调"走而不是副标。保持 19px + `max-width: 720px` |
+| `.voice-bar` 的实例级 inline `background: transparent; border: none` | voice-switcher 没框就在页面里漂,读者不知道它是控件还是正文标签。保留默认 `.voice-bar` 的框和底色,不 override |
 
 ---
 
@@ -73,3 +79,5 @@ node skills/anthropic-design/scripts/screenshot.mjs <path/to/your.html> shot.png
 3. 用 stage labels 引导视线
 4. 只用 anthropic 5 色调色板
 5. 至少一个 texture 细节（grain dots / subtle gradient）让它不像 ppt
+6. 任何 `<rect|text|path>` 的 `fill` / `stroke` hex 都必须是 `var(--anth-*)` 的值或 anthropic 允许色板成员；冷色禁入（known-bugs 1.17）
+7. `<figure>` 必须配 `<figcaption>`，写清"图表说了什么"，不是 "Figure 1"（known-bugs 1.18）

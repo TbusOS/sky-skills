@@ -83,6 +83,18 @@
 
 **历史**:2026-04-20 INSTALL 的 "三种方式 abc" 就是等宽 3-col 横排太宽,用户指出"一长排太宽,看着很奇怪"。scaffold 原本没 hollow-card check,现在加了。同时规则里写清"层级式 > 等权式"。
 
+### §I 追加 · 装饰 vs 比例 之争(2026-04-22 learning-loop 命中)
+
+**再自问一条**:这个等宽 grid 里,有没有一张卡靠"额外装饰"(粗 border / "Now" pill / 颜色高亮)标出它是推荐项? 有 → **grid 比例和装饰在打架**。
+
+- 装饰在做**本该由 grid 比例做的工作**(建立视觉层级)。
+- 读者先扫宽度找主项,找不到,再退而扫装饰 —— 一次额外认知负担。
+- 修:改列宽 scale(`0.9fr 1.15fr 0.9fr` / `1fr 1.3fr 1fr`),或切成 "1 hero + (N-1) alternatives",或分成两段(主推段 + 替代段)。
+
+**机器 check**:`visual-audit.mjs` 的 `recommended-card-equal-grid` 做启发式提示 —— `repeat(N, 1fr)` 里发现唯一一张卡有显著 border(≥1.5px + chromatic) → warn。启发式会有假阳性,仅作提示。known-bugs 1.19。
+
+**历史**:2026-04-22 HARNESS-ROADMAP 一页命中两处 —— `#status` 中间卡 `border:2px solid orange` + 等宽 3-col;`#components` 8 张卡重要性不均 + 2×4 等宽。solo critic 给 93 没重点提,composition 专家(multi-critic 组件 05)给 86 各记一笔。
+
 ## L. 完整评审流程(每次生成新页面必走)
 
 生成器生成任何 HTML 页之前、之中、之后都走这个流程:

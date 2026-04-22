@@ -118,6 +118,41 @@
   - 如果真是内容层级不均:改为 1 hero + (N-1) 小卡(参考 cross-skill-rules §I);
   - 如果内容真的少:改 `minmax(0, Npx)` 限宽,不走全行。
 
+### 1.17 SVG 内部 foreign hue(skill 色板外的色偷渡)
+- **Reader sees**:anthropic docs-home 的 phase-order 图第 3 列用 `fill="#eaf0f6"` / `stroke="#3a5c7a"` —— 冷蓝色。anthropic 调色板是暖系(orange / cream / warm-tan) + 可选 sage-done-green,冷蓝没有锚点,读出"apple 调色偷渡"。
+- **Why**:1.16 的 cross-skill-smell check 只对 3 个参考 hex(apple #0071E3 / sage #97B077 / ember #c49464)做 22-RGB 容差匹配。一个冷蓝 `#eaf0f6` 和 apple blue RGB 距离 ~212,不触发,但仍然不在 anthropic 自己的色板家族里。SVG 属性 fill/stroke 也没经过 CSS cascading,走的是另一条路径。
+- **How caught**:multi-critic 的 illustration 专家(solo critic 和 brand 专家都漏了)。2026-04-22 首次命中。
+- **Defense**:`visual-audit.mjs` 新 check **svg-foreign-hex** —— 扫 inline SVG 的 `<rect|path|circle|ellipse|polygon|text|line>` 的 fill / stroke 属性,每个 hex 对照当前 skill 的 `allowedPalette` 允许清单 + 通用中性色(黑白近灰),都不沾就 warn。`SKILL_SIGNATURES[skill].allowedPalette` 存允许 hex 数组。
+- **Fix playbook**:换成本 skill 允许色。4 档区分用暖中性档:`#dfeadb` (done-green) / `#fde4d6` (next-orange) / `#f0ede3` (cream-subtle) / 白 + dashed border。保留 orange 作唯一 accent。
+- **和 1.16 的关系**:1.16 是"别扮成另一个 skill"的大教义,通过 3 个参考 hex + 字体名走 computed-style 匹配;1.17 是 SVG-属性 内部 色板外新 hue 的 sub-case,**方向相反** —— 不是"匹配到某个具体 foreign hex"而是"不在本 skill allow-list 内"。两个 check 互补,不是重复。
+
+### 1.18 `<figure>` 没有 `<figcaption>`(语义 contract 违反)
+- **Reader sees**:肉眼没问题 —— 图里通常会有 inline SVG `<text>` 充当视觉说明。但 `<figure>` 和 `<figcaption>` 的 screen-reader 对应关系消失,语义上这是错的 figure。
+- **Why**:generator 把"看上去像 caption"的文字塞进 SVG 里(因为它就在图下方),然后跳过 `<figcaption>`。SVG `<text>` + 外层 `aria-label` 是部分 a11y 兜底,但不满足 figure+caption 的语义对。
+- **How caught**:multi-critic 的 illustration 专家。2026-04-22 首次命中。
+- **Defense**:`visual-audit.mjs` 新 check **figure-no-caption** —— 每一个 `<figure>` 必须含至少一个直接子 `<figcaption>`。
+- **Fix playbook**:在 `</svg>` 后加真的 `<figcaption>`,具体写清(轴含义 / 一行 takeaway / 来源),不是占位"Figure 1: ..."。
+
+### 1.20 showcase page 上 cross-skill-smell 误报 (待修)
+- **Reader sees**:一张合法展示 4 个 skill 的 showcase 页(如 `/index.html` 介绍所有 skill),视觉上本来就**需要**显示 apple blue / ember gold / sage green / Fraunces / Instrument Serif 作为 skill 样品。visual-audit 把这些全部判为 cross-skill-smell。
+- **Why**:`cross-skill-smell` check 假设"一个 HTML 文件 = 一个 skill",但 showcase 页显式展示多 skill 是合法用法。
+- **How caught**:2026-04-22 learning-loop 在 index.html 上跑 figure-no-caption check 的同时,顺带跑 cross-skill-smell,产出 5 条 warn。所有 5 条都是合法展示,不是真的 smell。
+- **Defense**:待做 —— 给 `<html>` / `<body>` 加可选 `data-showcase="true"` 属性,visual-audit 的 cross-skill-smell 检查遇到这个属性就降级或跳过。或在 showcase 容器 `<section data-showcase>` 上做局部豁免。
+- **Fix playbook** (脚本待改):
+  - 短期:在 `bin/design-review` 加 `--showcase` flag,传给 visual-audit 后**跳过** cross-skill-smell。
+  - 中期:scanner 遇到 `data-showcase` 属性的 element 及其后代,对该区 cross-skill-smell 跳过,其余正常跑。
+  - 长期:showcase 页面用一个"多 skill 白名单"定义它合法引用哪些 skill 的元素。
+
+### 1.19 等宽 grid 里的"推荐卡"靠 border 撑层级
+- **Reader sees**:3-col 或 2×N `repeat(1fr)` grid 里,某一张卡有 `border: 2px solid orange` 或 "Now" pill 标出它是推荐项。但列宽仍然等分,所以读者得扫完内容才找到主项 —— border 在做"本该由 grid 比例做的事"。
+- **Why**:generator 默认 `repeat(3, 1fr)` 因为内容放得下,忘了 §I "等宽只在 peer 情况下用"。HARNESS-ROADMAP 命中两处:`#status` 3 张卡中间 `border:2px solid orange`,`#components` 8 张卡重要性不均。
+- **How caught**:multi-critic 的 composition 专家(一页两处)。2026-04-22 首次命中。
+- **Defense**:`visual-audit.mjs` 新 check **recommended-card-equal-grid**(heuristic)—— 对 `repeat(N, 1fr)` 的 grid,如果恰有一张子卡的 border-width/color/style 和兄弟不一样且 >= 1.5px 非中性,warn。启发式会有假阳性,仅作提示。
+- **Fix playbook**:
+  - 改列宽:`0.9fr 1.15fr 0.9fr`(中间大)或 `1fr 1.3fr 1fr`;
+  - 或切"1 hero + (N-1) alternatives":全行 hero 卡 + 下方 compact 行;
+  - 或分两段:"shipping today"(2-col 大)+ "queued"(3-col 小)。
+
 ---
 
 ## 2. anthropic-design

@@ -264,6 +264,22 @@ const findings = await page.evaluate((cs) => {
     }
   });
 
+  // ---------- 1c) Figure without <figcaption> (bug 1.18) ----------
+  document.querySelectorAll('figure').forEach((f) => {
+    const hasCaption = !!f.querySelector(':scope > figcaption');
+    if (!hasCaption) {
+      const svg = f.querySelector('svg');
+      const label = (svg && svg.getAttribute('aria-label'))
+        || (f.querySelector('h3, h4') && f.querySelector('h3, h4').innerText)
+        || 'figure';
+      issues.push({
+        kind: 'figure-no-caption',
+        severity: 'warn',
+        label: String(label).slice(0, 60),
+      });
+    }
+  });
+
   // ---------- 2) Hero diagram sizing audit ----------
   // Hero rows: figure elements with grid-column spanning the whole row (1 / -1).
   document.querySelectorAll('figure').forEach((fig) => {
@@ -698,6 +714,10 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'orphan-figure') {
     console.log(
       `  [${i.severity}] orphan figure "${i.label}" sits alone (${i.rendered}) next to full-row hero siblings — span 2 cols or center it`
+    );
+  } else if (i.kind === 'figure-no-caption') {
+    console.log(
+      `  [${i.severity}] <figure> without <figcaption>: "${i.label}" — SVG aria-label + inner <text> don't satisfy the semantic figure+caption pair; add real <figcaption> after </svg> (known-bugs 1.18)`
     );
   } else if (i.kind === 'svg-text-overlap') {
     console.log(
