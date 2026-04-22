@@ -42,6 +42,7 @@
 | SVG 里用冷色系 hex（`#eaf0f6` / `#3a5c7a` / 任何偏蓝的 RGB） | anthropic 调色板是暖系(orange + cream + warm-tan + 可选 sage-done-green),一点冷蓝都读出"apple 串味"。4 档区分用暖中性:`#dfeadb`(done-green)/ `#fde4d6`(next-orange)/ `#f0ede3`(cream-subtle)/ 白 + dashed border。**known-bugs 1.17** |
 | `<figure>` 只放 SVG,不加 `<figcaption>` | SVG 里的 `<text>` + `aria-label` 是部分 a11y 兜底,但 figure+figcaption 的语义对不成立。真 `<figcaption>` 放在 `</svg>` 后,写具体信息(轴含义 / takeaway / 来源),不是占位 "Figure 1"。**known-bugs 1.18** |
 | 3-col 或 2×N 等宽 grid 里用 border 或 "Now" pill 标出推荐项 | 等宽掩盖层级。border 在做本该由 grid 比例做的事,读者不扫宽度看不出主次。改 `grid-template-columns: 0.9fr 1.15fr 0.9fr`,或切成 1 hero + (N-1) alternatives,或分成 "shipping today" / "queued" 两段。**known-bugs 1.19** |
+| 用 `grid-template-columns: Xfr 1fr 1fr`(X > 1.2)把第 1 列拉宽当 hero | 读作"行重心偏左 / 歪",不是"第一列是主角"。位置 1 没对称 peer 兜住,非对称读作失衡。改独占全行(`grid-column: 1 / -1` + 下一行 2-col peers),或把 hero 放中间(`1fr 1.2fr 1fr`)。**cross-skill-rules §I 第 4 问 / known-bugs 1.21** |
 | `.anth-stat-number` 大数字用 `font-weight: 600` | canonical stat-strip 规约 Poppins **700** 做大号数字。600 在 42px 下偏细,和相邻正文 weight 差不够 —— 数字失去"指标"的分量感。固定 `font-weight: 700` |
 | Hero 副标 `<p>` 用 `font-size: 20px` | canonical 范围 17-19px。20 在 Lora serif 下开始往"正文强调"走而不是副标。保持 19px + `max-width: 720px` |
 | `.voice-bar` 的实例级 inline `background: transparent; border: none` | voice-switcher 没框就在页面里漂,读者不知道它是控件还是正文标签。保留默认 `.voice-bar` 的框和底色,不 override |

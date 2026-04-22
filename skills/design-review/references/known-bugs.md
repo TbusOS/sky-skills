@@ -153,6 +153,18 @@
   - 或切"1 hero + (N-1) alternatives":全行 hero 卡 + 下方 compact 行;
   - 或分两段:"shipping today"(2-col 大)+ "queued"(3-col 小)。
 
+### 1.21 非等宽 3-col grid 第 1 列更宽 = 读作"左重",不是"hero 领头"
+- **Reader sees**:`grid-template-columns: 1.4fr 1fr 1fr`(或任何 `Xfr 1fr 1fr` 且 X > 1.2)三列布局,本意是"放大第一列让它当主角",实际视觉上读成"整行的重量被拽向左边"。容器本身 `margin:0 auto` 居中也救不回来 —— 内容分布先于容器对齐定义视觉重心。
+- **Why**:hero 卡和 peers 并排且在**第 1 位**,第一列宽度被读作"row 的起始点偏移",不是"这一列被特别处理"。位置 1 没有相邻对称的 peer 做对冲 → 非对称被放大感知成失衡。hero 在**中间**(`1fr 1.2fr 1fr`) 两侧对称,读作"被抬高的中心";hero 在**第 1 位**就读作"重心下坠"。
+- **How caught**:人眼(2026-04-22)。composition-critic subagent 给 1.4fr 方案打 91/100 还建议"再宽一点" —— AI 评审认可了人眼判定崩坏的方案。`visual-audit.mjs` 的 grid 相关 check(hollow-card §10b / recommended-card-equal-grid §1.19)都只针对**等宽** grid,不审非等宽 grid 的位置效应。
+- **Defense**:`visual-audit.mjs` 新 check **asymmetric-first-col-hero**(heuristic)—— 3-col grid 渲染后第 1 列宽度 ≥ 1.2× 其他列最小值,且第 1 列不是"全行 hero"(`grid-column: 1 / -1`)、不是"anchored hero"(深底色 lum<0.25 或 chromatic border-left ≥ 3px) → warn。启发式,仅作提示。
+- **Fix playbook** (按优先级):
+  1. **1 hero 全行 + (N-1) alt 下一行**(推荐)——hero 独占 `grid-column: 1 / -1`;
+  2. **居中放大** `1fr 1.2fr 1fr`——hero 在中间,两侧对称;
+  3. 保留第 1 列宽 → 加视觉锚(深底 + accent border-left),让它读成"不同材质";
+  4. **禁止**单纯拉宽第 1 列当 hero 手段(`1.4fr 1fr 1fr`)。
+- **和 1.19 的关系**:1.19 是**等宽** grid 用装饰建层级(proportion 没承担 hero 的活被装饰接管);1.21 是**非等宽** grid proportion 放错位置(用了 proportion,但 hero 在第 1 位没对称 peer 对冲,读成失衡)。两者互为对照。
+
 ---
 
 ## 2. anthropic-design

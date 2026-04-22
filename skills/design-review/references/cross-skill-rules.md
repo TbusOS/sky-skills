@@ -95,6 +95,28 @@
 
 **历史**:2026-04-22 HARNESS-ROADMAP 一页命中两处 —— `#status` 中间卡 `border:2px solid orange` + 等宽 3-col;`#components` 8 张卡重要性不均 + 2×4 等宽。solo critic 给 93 没重点提,composition 专家(multi-critic 组件 05)给 86 各记一笔。
 
+### §I 追加 · "第 1 列更宽"不是 hero 手段(2026-04-22 learning-loop 命中)
+
+在 N 列 grid 里放"hero + peers"时,**位置 × 比例 一起决定读法**:
+
+| pattern | 读作 | 评价 |
+|---|---|---|
+| 第 1 列 `1.4fr`,2/3 列 `1fr` | "整行重心偏左 / lopsided" | ❌ 别用 |
+| 第 2 列 `1.2fr`,1/3 列 `1fr` | "中间被抬高 / 对称 hero" | ✅ OK |
+| 第 1 列独占整行 + 下一行 2 peers | "hero 明确 + peers 平等" | ✅ 首选 |
+| 第 1 列宽 + 深底色 + 粗 accent border | "hero 是不同材质" | ⚠️ 救场可行,别常规用 |
+
+**再自问一条**(加在 §I 已有的三问之后):
+
+4. **如果我要放大一列当 hero,这列在第 1 位吗?**
+   - 在第 1 位 → 不要拉宽它。独占全行(`grid-column: 1 / -1`),或改放中间,或用深底/border 当锚。
+   - 在中间 → 拉宽 OK(两侧 peer 对称兜住)。
+   - 在最后 → 别拉宽(读成"尾巴翘起")。
+
+**机器 check**:`visual-audit.mjs` 的 `asymmetric-first-col-hero`(3-col 触发,ratio ≥ 1.2,有 anchored-hero 豁免)。known-bugs 1.21。
+
+**历史**:2026-04-22 `demos/gated-dual-clone/index.html` 三道安全闸。作者按 composition critic 建议把 Gate A 从 `1fr 1fr 1fr` 改成 `1.4fr 1fr 1fr`,AI 评审给 91 分,用户一眼看出"还是歪的,偏左"。修法:改 `1fr 1fr` + `Gate A grid-column: 1 / -1`。composition critic subagent 只在 info-level 提了"窄视口会压缩" —— taste-level 的失衡被漏。
+
 ## L. 完整评审流程(每次生成新页面必走)
 
 生成器生成任何 HTML 页之前、之中、之后都走这个流程:

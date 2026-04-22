@@ -489,6 +489,47 @@ const findings = await page.evaluate((cs) => {
     }
   });
 
+  // ---------- 10c) Asymmetric first-col-wider 3-col grid ----------
+  // A 3-col grid with col-1 meaningfully wider than its siblings reads as
+  // "row pulled left" rather than "col-1 is the hero". Verdict source:
+  // human-eye 2026-04-22 (gated-dual-clone three safety gates). known-bugs 1.21.
+  // Heuristic: track rendered widths, not declared fr — resolves minmax/auto.
+  document.querySelectorAll('*').forEach((el) => {
+    const style = getComputedStyle(el);
+    if (!style.display.includes('grid')) return;
+    const tmpl = style.gridTemplateColumns || '';
+    const tracks = tmpl.trim().split(/\s+/).filter(Boolean);
+    if (tracks.length !== 3) return;          // scoped to 3-col for now
+    const children = [...el.children].filter((c) => {
+      const cs = getComputedStyle(c);
+      return cs.display !== 'none' && cs.visibility !== 'hidden';
+    });
+    if (children.length < 3) return;
+    const w = children.slice(0, 3).map((c) => c.getBoundingClientRect().width);
+    if (w.some((x) => x < 40)) return;
+    const restMin = Math.min(w[1], w[2]);
+    const ratio = w[0] / restMin;
+    if (ratio < 1.2) return;                   // near-symmetric, ignore
+    // Skip if col-1 child spans the full row (grid-column: 1 / -1) — recommended pattern.
+    const leadSpan = getComputedStyle(children[0]).gridColumnEnd;
+    if (leadSpan === '-1' || (children[0].style.gridColumn || '').includes('1 / -1')) return;
+    // Skip if leading card has a distinguishing visual anchor (dark bg or
+    // thick chromatic left-border) — reads as "different material" not "just wider".
+    const leadStyle = getComputedStyle(children[0]);
+    const bgRgb = /rgb\((\d+),\s*(\d+),\s*(\d+)/.exec(leadStyle.backgroundColor);
+    const bgLum = bgRgb ? (0.299*+bgRgb[1] + 0.587*+bgRgb[2] + 0.114*+bgRgb[3]) / 255 : 1;
+    const blw = parseFloat(leadStyle.borderLeftWidth || '0');
+    if (bgLum < 0.25 || blw >= 3) return;
+    issues.push({
+      kind: 'asymmetric-first-col-hero',
+      severity: 'warn',
+      ratio: +ratio.toFixed(2),
+      widths: w.map(Math.round),
+      tmpl,
+      hint: 'first col is ' + ratio.toFixed(2) + 'x the narrower peers; reads as "row pulled left" not "col-1 is hero". Prefer 1-hero-full-row + 2-col-alt, or center the wide column (1fr 1.2fr 1fr).',
+    });
+  });
+
   // ---------- 10) SVG text on same-colour shape ----------
   // Simple heuristic: for every <text> inside an SVG, find the first ancestor
   // shape (rect/circle/polygon/path) whose bbox contains the text's centre,
@@ -755,6 +796,10 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'hollow-card') {
     console.log(
       `  [${i.severity}] hollow card in equal-width grid: ${i.dims} aspect=${i.aspect}:1 only ${i.chars} chars "${i.preview}…" — content too sparse for width, consider narrower container or 1-hero + N-alternatives layout`
+    );
+  } else if (i.kind === 'asymmetric-first-col-hero') {
+    console.log(
+      `  [${i.severity}] asymmetric 3-col grid, first col ${i.ratio}× wider (widths=${i.widths.join('/')}px, tmpl="${i.tmpl}") — ${i.hint} (known-bugs 1.21)`
     );
   } else if (i.kind === 'svg-text-on-same-colour') {
     console.log(
