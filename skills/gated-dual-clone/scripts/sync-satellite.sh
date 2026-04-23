@@ -4,7 +4,8 @@
 # Three modes:
 #   fetch       — git fetch origin; working tree untouched (safe default)
 #   reset-hard  — git fetch origin && git reset --hard origin/<branch>;
-#                 drops satellite local changes (interactive prompt unless --yes)
+#                 refuses (exit 1) if satellite has uncommitted changes,
+#                 pass --yes to proceed and drop them
 #   merge-ff    — git pull --ff-only origin <branch>; refuses divergent history
 #
 # Usage:

@@ -1,10 +1,27 @@
 # Daily workflow cheatsheet · 日常流程速查
 
-> The core 4-step loop. Copy-paste ready. Assumes `$GATEWAY_DIR`,
-> `$SATELLITE_DIR`, `$PUSH_BRANCH`, `$UPSTREAM_BRANCH` are set as shell
-> variables (or substitute the real values).
+> The core 4-step loop. Copy-paste ready. Assumes these shell variables are
+> set (or substitute the real values inline):
 >
-> 核心 4 步流程,可直接复制。假设 shell 已设好上面 4 个变量(或替换真实值)。
+> - `$GATEWAY_DIR`   — absolute path of the gateway clone
+> - `$SATELLITE_DIR` — absolute path of the satellite clone
+> - `$PUSH_BRANCH`   — your personal branch name (e.g. `feature/xxx`)
+> - `$UPSTREAM_BRANCH` — the protected upstream branch (e.g. `main`)
+> - `$SKILL_DIR`     — where the skill lives, one of:
+>     - `~/.claude/skills/gated-dual-clone` (after `claude install` or `cp -r`)
+>     - `<path-to>/sky-skills/skills/gated-dual-clone` (source checkout)
+>
+> 核心 4 步流程,可直接复制。假设 shell 已设好上面 5 个变量(或替换真实值)。
+
+Example setup once per shell:
+
+```bash
+export GATEWAY_DIR=~/work/myproj-gw
+export SATELLITE_DIR=~/work/myproj-sat
+export PUSH_BRANCH=feature/alice-auth
+export UPSTREAM_BRANCH=main
+export SKILL_DIR=~/.claude/skills/gated-dual-clone
+```
 
 ---
 

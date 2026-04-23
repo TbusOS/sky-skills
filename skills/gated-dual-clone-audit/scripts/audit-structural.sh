@@ -94,7 +94,7 @@ if [[ -f "$HOOK_PATH" ]]; then
     record WARN S7 "pre-push hook has a protect regex"  "hook body doesn't look like the gated-dual-clone template — Tier 3 will verify behaviourally"
   fi
 else
-  record FAIL S5 "pre-push hook present"       "$HOOK_PATH missing · re-run install-hooks.sh"
+  record FAIL S5 "pre-push hook present"       "$HOOK_PATH missing · re-run gated-dual-clone/scripts/install-hooks.sh --repo=<gateway> --protect=<regex>"
   record FAIL S6 "pre-push hook executable"    "(cannot check · hook file missing)"
   record FAIL S7 "pre-push hook has a protect regex" "(cannot check · hook file missing)"
 fi

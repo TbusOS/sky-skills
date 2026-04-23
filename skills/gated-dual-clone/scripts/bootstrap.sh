@@ -182,8 +182,17 @@ else
 fi
 
 # ------------------------------ Step 4 · Install pre-push hook --------
-step "Step 4/8 · Install pre-push hook on gateway"
-run "bash \"$SCRIPT_DIR/install-hooks.sh\" --repo=\"$GATEWAY_DIR\" --protect=\"$PROTECT\"$([[ $DRY_RUN -eq 1 ]] && echo ' --dry-run')" || exit 4
+# --skip-gateway semantics = "don't touch the existing gateway". The hook is
+# gateway state, so it must not be overwritten. We previously reused the
+# install-hooks.sh call here, which with an empty UPSTREAM_BRANCH in
+# --skip-gateway mode silently wrote a hook with PROTECT="^$" (matches
+# nothing). Now explicitly skip.
+if [[ $SKIP_GATEWAY -eq 0 ]]; then
+  step "Step 4/8 · Install pre-push hook on gateway"
+  run "bash \"$SCRIPT_DIR/install-hooks.sh\" --repo=\"$GATEWAY_DIR\" --protect=\"$PROTECT\"$([[ $DRY_RUN -eq 1 ]] && echo ' --dry-run')" || exit 4
+else
+  step "Step 4/8 · Install pre-push hook · SKIPPED (--skip-gateway: gateway hook assumed already in place)"
+fi
 
 # ------------------------------ Step 5 · Clone satellite --------------
 step "Step 5/8 · Clone satellite from gateway (local path · hardlinked .git/objects)"
