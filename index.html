@@ -868,8 +868,8 @@
       <span class="lang-zh">三种方式。按需选择。</span>
     </h2>
     <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
-      <span class="lang-en">Skills are just folders. You can install one at a time, copy the whole repo, or symlink for live updates.</span>
-      <span class="lang-zh">skill 就是文件夹。可以单个安装、整仓库复制、或者 symlink 实时同步。</span>
+      <span class="lang-en">Skills are just folders. Two shapes: <strong>single-file</strong> (just <code>SKILL.md</code>, e.g. <code>linux-kernel-dev</code>) and <strong>multi-file</strong> (<code>SKILL.md</code> + <code>scripts/</code> + <code>references/</code>, e.g. <code>design-review</code> / <code>gated-dual-clone</code> / <code>gated-dual-clone-audit</code>). Multi-file skills must be installed as the whole directory or their scripts won't run. Restart Claude Code after installing.</span>
+      <span class="lang-zh">skill 就是文件夹。两种形态:<strong>单文件</strong>(只有 <code>SKILL.md</code>,如 <code>linux-kernel-dev</code>)和 <strong>多文件</strong>(<code>SKILL.md</code> + <code>scripts/</code> + <code>references/</code>,如 <code>design-review</code> / <code>gated-dual-clone</code> / <code>gated-dual-clone-audit</code>)。多文件 skill 必须按整目录装,不然脚本跑不起来。装完重启 Claude Code。</span>
     </p>
 
     <h3 style="margin-top:var(--space-7); font-size:22px;">
@@ -877,36 +877,56 @@
       <span class="lang-zh">1. Claude Code CLI（推荐）</span>
     </h3>
     <p style="color:var(--anth-text-secondary); font-family:var(--font-body);">
-      <span class="lang-en">One skill at a time. Claude Code pulls it directly from GitHub.</span>
-      <span class="lang-zh">一次装一个，Claude Code 直接从 GitHub 拉取。</span>
+      <span class="lang-en">Handles both shapes automatically. Claude Code pulls from GitHub.</span>
+      <span class="lang-zh">自动识别两种形态,Claude Code 直接从 GitHub 拉。</span>
     </p>
-<pre class="anth-code" style="margin-top:var(--space-4);"><code>claude install github:TbusOS/sky-skills/skills/apple-design
+<pre class="anth-code" style="margin-top:var(--space-4);"><code># Single-file skills / 单文件
 claude install github:TbusOS/sky-skills/skills/linux-kernel-dev
-claude install github:TbusOS/sky-skills/skills/doc-to-markdown</code></pre>
+claude install github:TbusOS/sky-skills/skills/doc-to-markdown
+
+# Multi-file skills / 多文件
+claude install github:TbusOS/sky-skills/skills/design-review
+claude install github:TbusOS/sky-skills/skills/gated-dual-clone
+claude install github:TbusOS/sky-skills/skills/gated-dual-clone-audit</code></pre>
 
     <h3 style="margin-top:var(--space-7); font-size:22px;">
-      <span class="lang-en">2. Copy into your project</span>
-      <span class="lang-zh">2. 复制到你的项目</span>
+      <span class="lang-en">2. Clone + copy</span>
+      <span class="lang-zh">2. clone + 复制</span>
     </h3>
     <p style="color:var(--anth-text-secondary); font-family:var(--font-body);">
-      <span class="lang-en">Grab just the SKILL.md you need and drop it into your project's <code>.claude/skills/</code>.</span>
-      <span class="lang-zh">只拿你需要的 SKILL.md，放到项目的 <code>.claude/skills/</code> 下。</span>
+      <span class="lang-en">Single file → <code>cp</code> the <code>SKILL.md</code>. Multi-file → <code>cp -r</code> the whole folder.</span>
+      <span class="lang-zh">单文件 <code>cp</code> 单个 <code>SKILL.md</code>。多文件用 <code>cp -r</code> 整目录。</span>
     </p>
 <pre class="anth-code" style="margin-top:var(--space-4);"><code>git clone https://github.com/TbusOS/sky-skills.git
-cp sky-skills/skills/anthropic-design/SKILL.md \
-   your-project/.claude/skills/anthropic-design.md</code></pre>
+
+# Single-file / 单文件
+cp sky-skills/skills/linux-kernel-dev/SKILL.md \
+   ~/.claude/skills/linux-kernel-dev.md
+
+# Multi-file / 多文件
+cp -r sky-skills/skills/gated-dual-clone       ~/.claude/skills/
+cp -r sky-skills/skills/gated-dual-clone-audit ~/.claude/skills/
+cp -r sky-skills/skills/design-review          ~/.claude/skills/</code></pre>
 
     <h3 style="margin-top:var(--space-7); font-size:22px;">
       <span class="lang-en">3. Symlink (auto-updates)</span>
       <span class="lang-zh">3. Symlink（自动更新）</span>
     </h3>
     <p style="color:var(--anth-text-secondary); font-family:var(--font-body);">
-      <span class="lang-en">Symlink the whole folder. <code>git pull</code> brings new skills + fixes into every project automatically.</span>
-      <span class="lang-zh">整个文件夹 symlink 过去。之后 <code>git pull</code> 就能把新 skill 和修复同步到所有项目。</span>
+      <span class="lang-en">Symlink the file or the folder. <code>git pull</code> brings upstream fixes into every project.</span>
+      <span class="lang-zh">文件或目录都 symlink。之后 <code>git pull</code> 上游就能同步到所有项目。</span>
     </p>
 <pre class="anth-code" style="margin-top:var(--space-4);"><code>git clone https://github.com/TbusOS/sky-skills.git
-ln -s "$(pwd)/sky-skills/skills/sage-design" \
-      your-project/.claude/skills/sage-design</code></pre>
+cd sky-skills
+
+# Single-file / 单文件
+ln -s "$(pwd)/skills/linux-kernel-dev/SKILL.md" \
+      ~/.claude/skills/linux-kernel-dev.md
+
+# Multi-file / 多文件
+ln -s "$(pwd)/skills/gated-dual-clone"       ~/.claude/skills/gated-dual-clone
+ln -s "$(pwd)/skills/gated-dual-clone-audit" ~/.claude/skills/gated-dual-clone-audit
+ln -s "$(pwd)/skills/design-review"          ~/.claude/skills/design-review</code></pre>
 
     <aside class="anth-admonition" style="margin-top:var(--space-6);">
       <h5><span class="lang-en">Auto-trigger</span><span class="lang-zh">自动触发</span></h5>

@@ -39,33 +39,62 @@
 
 ## 安装方法
 
+> **注意——仓库里有两种 skill。** 有的是单个 `SKILL.md` 文件（如 `linux-kernel-dev` / `md-to-pdf`），有的是 `SKILL.md` + `scripts/` + `references/` + 可选 `agents/` 的整目录（如 `design-review` / `gated-dual-clone` / `gated-dual-clone-audit`）。**多文件 skill 必须按整目录安装**——只 copy 单 `SKILL.md` 会让 skill 起来但脚本跑不动。下面三种方法各自覆盖两种形态。
+>
+> **装完之后退出 Claude Code 重进**——skill 清单是启动时扫描一次冻结的。
+
 ### 方法一：通过 Claude Code CLI 安装（推荐）
 
+自动处理单文件和多文件两种形态。
+
 ```bash
-# 安装指定 skill
+# 单文件 skill
 claude install github:TbusOS/sky-skills/skills/linux-kernel-dev
-claude install github:TbusOS/sky-skills/skills/wechat-video-publisher
-claude install github:TbusOS/sky-skills/skills/doc-to-markdown
+
+# 多文件 skill（整目录）
+claude install github:TbusOS/sky-skills/skills/design-review
+claude install github:TbusOS/sky-skills/skills/gated-dual-clone
+claude install github:TbusOS/sky-skills/skills/gated-dual-clone-audit
 ```
 
-### 方法二：复制到项目中
+### 方法二：clone + 复制
 
 ```bash
 git clone https://github.com/TbusOS/sky-skills.git
 
-# 复制需要的 skill
-cp sky-skills/skills/linux-kernel-dev/SKILL.md your-project/.claude/skills/linux-kernel-dev.md
+# 单文件 skill
+cp sky-skills/skills/linux-kernel-dev/SKILL.md \
+  ~/.claude/skills/linux-kernel-dev.md
+
+# 多文件 skill —— 整目录复制
+cp -r sky-skills/skills/gated-dual-clone       ~/.claude/skills/
+cp -r sky-skills/skills/gated-dual-clone-audit ~/.claude/skills/
+cp -r sky-skills/skills/design-review          ~/.claude/skills/
 ```
 
-### 方法三：符号链接
+### 方法三：符号链接（`git pull` 上游 = 本地自动同步）
 
 ```bash
 git clone https://github.com/TbusOS/sky-skills.git
+cd sky-skills
 
-# 符号链接，自动获取更新
-ln -s "$(pwd)/sky-skills/skills/linux-kernel-dev/SKILL.md" \
-  your-project/.claude/skills/linux-kernel-dev.md
+# 单文件 skill
+ln -s "$(pwd)/skills/linux-kernel-dev/SKILL.md" \
+  ~/.claude/skills/linux-kernel-dev.md
+
+# 多文件 skill —— 整目录 symlink
+ln -s "$(pwd)/skills/gated-dual-clone"       ~/.claude/skills/gated-dual-clone
+ln -s "$(pwd)/skills/gated-dual-clone-audit" ~/.claude/skills/gated-dual-clone-audit
+ln -s "$(pwd)/skills/design-review"          ~/.claude/skills/design-review
 ```
+
+### 三种方法怎么选
+
+| 方法 | 好处 | 不足 |
+|---|---|---|
+| 一 · CLI | 最少打字 · 自动识别形态 | 需要 `claude` CLI |
+| 二 · 复制 | 不依赖工具 · 可携带 | 上游更新要重新 copy |
+| 三 · symlink | `git pull` 上游 = 本地跟新 | 依赖 clone 路径不动 |
 
 ## Skill 详细介绍
 

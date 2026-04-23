@@ -39,33 +39,62 @@ For example, when you start editing a kernel module, the `linux-kernel-dev` skil
 
 ## Installation
 
-### Method 1: Install via Claude Code CLI (Recommended)
+> **Heads up — two kinds of skills in this repo.** Some skills are a single `SKILL.md` file (e.g. `linux-kernel-dev`, `md-to-pdf`). Others bundle `SKILL.md` + `scripts/` + `references/` + optionally `agents/` (e.g. `design-review`, `gated-dual-clone`, `gated-dual-clone-audit`). **Multi-file skills must be installed as the whole directory** — a single-file copy leaves the skill unable to run its scripts. Methods below cover both shapes.
+>
+> **After installation, restart your Claude Code session** so the skill registry picks up the new entries.
+
+### Method 1: Install via Claude Code CLI (recommended)
+
+Handles both single-file and multi-file skills automatically.
 
 ```bash
-# Install a specific skill
+# Single-file skill
 claude install github:TbusOS/sky-skills/skills/linux-kernel-dev
-claude install github:TbusOS/sky-skills/skills/wechat-video-publisher
-claude install github:TbusOS/sky-skills/skills/doc-to-markdown
+
+# Multi-file skill (directory)
+claude install github:TbusOS/sky-skills/skills/design-review
+claude install github:TbusOS/sky-skills/skills/gated-dual-clone
+claude install github:TbusOS/sky-skills/skills/gated-dual-clone-audit
 ```
 
-### Method 2: Copy into Your Project
+### Method 2: Clone + copy
 
 ```bash
 git clone https://github.com/TbusOS/sky-skills.git
 
-# Copy the skill you need
-cp sky-skills/skills/linux-kernel-dev/SKILL.md your-project/.claude/skills/linux-kernel-dev.md
+# Single-file skill
+cp sky-skills/skills/linux-kernel-dev/SKILL.md \
+  ~/.claude/skills/linux-kernel-dev.md
+
+# Multi-file skill — copy the whole directory
+cp -r sky-skills/skills/gated-dual-clone       ~/.claude/skills/
+cp -r sky-skills/skills/gated-dual-clone-audit ~/.claude/skills/
+cp -r sky-skills/skills/design-review          ~/.claude/skills/
 ```
 
-### Method 3: Symlink
+### Method 3: Symlink (auto-updates with `git pull`)
 
 ```bash
 git clone https://github.com/TbusOS/sky-skills.git
+cd sky-skills
 
-# Symlink for automatic updates
-ln -s "$(pwd)/sky-skills/skills/linux-kernel-dev/SKILL.md" \
-  your-project/.claude/skills/linux-kernel-dev.md
+# Single-file skill
+ln -s "$(pwd)/skills/linux-kernel-dev/SKILL.md" \
+  ~/.claude/skills/linux-kernel-dev.md
+
+# Multi-file skill — symlink the whole directory
+ln -s "$(pwd)/skills/gated-dual-clone"       ~/.claude/skills/gated-dual-clone
+ln -s "$(pwd)/skills/gated-dual-clone-audit" ~/.claude/skills/gated-dual-clone-audit
+ln -s "$(pwd)/skills/design-review"          ~/.claude/skills/design-review
 ```
+
+### Which method to pick
+
+| Method | Pros | Cons |
+|---|---|---|
+| 1 · CLI | Least typing · handles shape automatically | Requires `claude` CLI |
+| 2 · Copy | No tool dependency · portable | Upstream updates need re-copy |
+| 3 · Symlink | `git pull` upstream = your skills update too | Relies on the clone staying put on disk |
 
 ## Skill Details
 
