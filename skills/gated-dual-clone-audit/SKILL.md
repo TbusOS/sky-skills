@@ -12,7 +12,7 @@ description: >
   dual clone".
   DO NOT TRIGGER: single-repo setups, pure git worktree layouts, general
   git-config auditing unrelated to gated-dual-clone.
-last-verified: 2026-04-22
+last-verified: 2026-04-23
 ---
 
 # Gated Dual-Clone · Audit (independent evaluator)
@@ -68,13 +68,18 @@ checking `user.email` if `.git/` is missing):
 - C8 · satellite current branch is the expected push branch (if
        `--push-branch` given)
 
-### Tier 3 · Behavioural (safe `git --dry-run` calls, no state change)
+### Tier 3 · Behavioural (safe calls only — no real push, no state change)
 
 - B1 · `cd satellite && git push` is rejected
        (greps for "DISABLED" / "does not accept" / "unable")
-- B2 · `cd gateway && git push origin <protected-branch> --dry-run` is
-       rejected by the pre-push hook
-       (greps for "REJECTED" / "protected" / "hook declined")
+- B2 · gateway's `pre-push` hook is invoked **directly with synthetic
+       stdin** (format per `githooks(5)`: `local_ref local_sha remote_ref
+       remote_sha`) and must reject a push to the protected branch
+       (greps for "REJECTED" / "protected" / "hook declined").
+       We do NOT use `git push --dry-run` here — when `local = remote`
+       (a fresh bootstrap, or a push-branch just branched off upstream)
+       git short-circuits with "Everything up-to-date" and never runs
+       the hook, silently masking a broken hook as "fine".
 - B3 · `cd satellite && git fetch origin <branch> --dry-run` succeeds
        (fetch path from gateway is reachable)
 
@@ -86,11 +91,25 @@ Runs an LLM subagent to answer questions the machine can't:
 - Has the project shrunk to the point where a single repo would be cleaner?
 - Are `--no-verify` bypasses showing up in `.git/logs`?
 
-`--critic` invokes `scripts/audit-critic.mjs` to produce a self-contained
-prompt for the `gated-dual-clone-audit-critic` subagent. The wrapper does
-NOT run the subagent itself — you invoke it in Claude Code via
-`Task(subagent_type="gated-dual-clone-audit-critic", ...)`. Tier 4 does
-not affect the wrapper's exit code; its verdict is advisory.
+Two entry points for Tier 4:
+
+1. **`/gdc-audit-critic` slash command** (recommended) — one shot:
+   builds the prompt, dispatches the subagent in a fresh context, and
+   reports the verdict. Accepts the same `--gateway-dir` / `--satellite-dir`
+   / optional `--upstream-branch` / `--push-branch` arguments.
+
+   ```
+   /gdc-audit-critic --gateway-dir=<path> --satellite-dir=<path> \
+                     --upstream-branch=<name> --push-branch=<name>
+   ```
+
+2. **Manual path** — `bin/gated-dual-clone-audit --critic` invokes
+   `scripts/audit-critic.mjs` to produce a self-contained prompt file;
+   the wrapper prints the file path and you invoke the subagent yourself
+   in Claude Code via `Task(subagent_type="gated-dual-clone-audit-critic",
+   prompt=<contents>)`. Useful when scripting / CI.
+
+Tier 4 does not affect the wrapper's exit code; its verdict is advisory.
 
 ## Entry point · 入口
 

@@ -12,7 +12,7 @@ description: >
   "gateway 仓库", "set up dual clone".
   DO NOT TRIGGER: single-repo direct-push flow, pure worktree setup, monorepo
   package management, small projects where one clone is enough.
-last-verified: 2026-04-22
+last-verified: 2026-04-23
 ---
 
 # Gated Dual-Clone Workflow
@@ -138,6 +138,11 @@ real lever. See [design spec](../../docs/design-mr-gated-dual-repo.md) §11.
 - `scripts/install-hooks.sh` — writes the `pre-push` hook on the gateway
 - `references/decision-checklist.md` — when to use / when not to use
 - `references/daily-workflow.md` — 4-step cheatsheet
+- `references/patterns.md` — N-satellite / worktree fallback / GitHub-GitLab-Gerrit shapes
+- `references/guardrails.md` — why the three gates work / when they break / how to verify
+- `references/server-side-enforcement.md` — GitLab / GitHub / Gerrit / pre-receive / Actions templates (real enforcement beyond advisory client-side hook)
+- `references/troubleshooting.md` — 10 common failures, symptom → diagnose → fix → prevent
+- `references/comparison.md` — dual-clone vs worktree vs single-repo, 11-dimension table
 
 ## Reference · 参考
 
