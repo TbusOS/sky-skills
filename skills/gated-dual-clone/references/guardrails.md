@@ -24,6 +24,11 @@ If you can't configure server-side branch protection (e.g. you don't have
 admin rights on the hosting platform), this skill provides **defence in
 depth** — not absolute protection. Plan accordingly.
 
+> **Server-side templates** · see [`server-side-enforcement.md`](./server-side-enforcement.md)
+> for ready-to-use GitLab / GitHub / Gerrit config + a `pre-receive` hook
+> template + a GitHub Actions backstop. Use it when `--no-verify`
+> bypasses start showing up in `gated-dual-clone-audit` Tier 4 Q3.
+
 ---
 
 ## The three gates in detail · 三道闸的机制
