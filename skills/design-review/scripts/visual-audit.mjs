@@ -473,6 +473,22 @@ const findings = await page.evaluate((cs) => {
         return fs >= 36;
       });
       if (hasBigNumber) continue;
+      // Skip elements that are not cards at all — bare <div> wrappers in a
+      // stat-strip row inside a parent card. No border, no box-shadow,
+      // no distinct background = not a card, just a text group.
+      // Background check is relative to parent: if child and parent render
+      // the same colour, there's no visual boundary.
+      const cStyle = getComputedStyle(c);
+      const hasBorder = ['Top','Right','Bottom','Left'].some(
+        (s) => parseFloat(cStyle[`border${s}Width`]) > 0
+      );
+      const hasShadow = cStyle.boxShadow && cStyle.boxShadow !== 'none';
+      const parentBg = getComputedStyle(el).backgroundColor;
+      const hasDistinctBg =
+        cStyle.backgroundColor &&
+        cStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' &&
+        cStyle.backgroundColor !== parentBg;
+      if (!hasBorder && !hasShadow && !hasDistinctBg) continue;
       const aspect = rect.width / rect.height;
       const text = (c.innerText || '').trim();
       const chars = text.length;
@@ -500,6 +516,10 @@ const findings = await page.evaluate((cs) => {
     const tmpl = style.gridTemplateColumns || '';
     const tracks = tmpl.trim().split(/\s+/).filter(Boolean);
     if (tracks.length !== 3) return;          // scoped to 3-col for now
+    // Skip form rows (label + control + unit). The "left-weighted hero" reading
+    // doesn't apply to data-entry patterns where the left column is a short
+    // label and the middle is a wide control.
+    if (el.querySelector('input, select, textarea, [contenteditable], output')) return;
     const children = [...el.children].filter((c) => {
       const cs = getComputedStyle(c);
       return cs.display !== 'none' && cs.visibility !== 'hidden';

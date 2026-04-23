@@ -321,7 +321,15 @@ html[data-lang="zh"] .<skill>-badge {
 
 **verify.py 强制**:检测 public path 下的 HTML 若缺 lang-toggle / lang-en / lang-zh 任一标记,直接 fail。
 
-**历史教训**:2026-04-20 写 5 张 canonical 时,直接英文写了 —— 用户 push back。现在写进规则并机器化 check。
+**内部单语豁免**:如果某份 HTML 虽然放在 `docs/` 下但**不面向外部发布**(例如团队内部中文工程 memo、只给中文同事看的分析文档),可以显式加 `--allow-monolingual`(别名 `--internal`)关掉这条检查:
+
+```bash
+python3 skills/design-review/scripts/verify.py --allow-monolingual <path/to/internal-memo.html>
+```
+
+豁免是**按调用传参**,不是文件属性 —— 每次跑都要显式写这个 flag,防止 CI / pre-commit 默认静默走双语豁免路径。"对外发布要双语"仍是默认立场。
+
+**历史教训**:2026-04-20 写 5 张 canonical 时,直接英文写了 —— 用户 push back。现在写进规则并机器化 check。内部中文工程 memo 另加 `--allow-monolingual` 豁免,不牺牲对外站点的双语保证。
 
 ---
 

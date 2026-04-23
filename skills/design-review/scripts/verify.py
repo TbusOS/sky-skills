@@ -4,7 +4,11 @@ Unified structural verifier for all design skills.
 
 Usage:
   python3 skills/design-review/scripts/verify.py [--skill=<name>] [--css=<path>]...
-                                                  <html-path> [...]
+                                                  [--allow-monolingual] <html-path> [...]
+
+  --allow-monolingual (alias --internal) skips the bilingual-page rule for
+  internal docs. Without it, HTML under /docs/ or /references/canonical/ must
+  have lang-toggle + lang-en + lang-zh spans (see cross-skill-rules.md §G).
 
 If --skill is omitted, the script auto-detects the skill by scanning the HTML
 for a `<link>` to one of {anthropic|apple|ember|sage}.css. Pass --skill when
@@ -177,7 +181,10 @@ def autodetect_skill(html: str) -> str | None:
 
 
 def check_file(
-    path: str, forced_skill: str | None, extra_css: list[str]
+    path: str,
+    forced_skill: str | None,
+    extra_css: list[str],
+    allow_monolingual: bool = False,
 ) -> list[str]:
     errors: list[str] = []
     if not os.path.exists(path):
@@ -307,7 +314,7 @@ def check_file(
         "/docs/" in path.replace(os.sep, "/")
         or "/references/canonical/" in path.replace(os.sep, "/")
     )
-    if public_path:
+    if public_path and not allow_monolingual:
         has_toggle = re.search(r'class=["\'][^"\']*\blang-toggle\b', html) is not None
         has_lang_en = re.search(r'class=["\'][^"\']*\blang-en\b', html) is not None
         has_lang_zh = re.search(r'class=["\'][^"\']*\blang-zh\b', html) is not None
@@ -325,25 +332,30 @@ def check_file(
     return errors
 
 
-def parse_args(argv: list[str]) -> tuple[str | None, list[str], list[str]]:
+def parse_args(
+    argv: list[str],
+) -> tuple[str | None, list[str], list[str], bool]:
     skill: str | None = None
     files: list[str] = []
     extra_css: list[str] = []
+    allow_monolingual = False
     for a in argv:
         if a.startswith("--skill="):
             skill = a.split("=", 1)[1].strip()
         elif a.startswith("--css="):
             extra_css.append(a.split("=", 1)[1].strip())
+        elif a in ("--allow-monolingual", "--internal"):
+            allow_monolingual = True
         elif a in ("-h", "--help"):
             print(__doc__)
             sys.exit(0)
         else:
             files.append(a)
-    return skill, files, extra_css
+    return skill, files, extra_css, allow_monolingual
 
 
 def main() -> int:
-    skill, files, extra_css = parse_args(sys.argv[1:])
+    skill, files, extra_css, allow_monolingual = parse_args(sys.argv[1:])
     if not files:
         print(__doc__)
         return 2
@@ -353,7 +365,7 @@ def main() -> int:
 
     failures: list[str] = []
     for path in files:
-        failures.extend(check_file(path, skill, extra_css))
+        failures.extend(check_file(path, skill, extra_css, allow_monolingual))
     if failures:
         print("design-review verify: FAIL")
         for line in failures:

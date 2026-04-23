@@ -114,6 +114,7 @@
 - **Why**:作者写 `repeat(3, 1fr)` 放不同重要性的选项,用 ABC 标注,内容根本撑不满这个宽度。
 - **Defense**:`visual-audit.mjs` 的 **hollow-card** (§10b) check:等宽 grid 的子卡 aspect > 1.8 且文本 < 180 字 → warn。
 - **例外(2026-04-21 tuning)**:子卡内有 ≥36px 大字号(stat-strip / metric display)时跳过 —— `18,000+ writers` 这种指标卡稀疏文本是设计本意。
+- **例外(2026-04-23 tuning · issue #8)**:子元素**本身没有任何卡片视觉锚**(无 border、无 box-shadow、背景色和父容器一致)时跳过 —— 这类 `<div>` 是父卡内的文本分组,不是独立的卡。场景:android-llm-bridge `webui-preview.html` Playground 指标栏 6 连警告。
 - **Fix playbook**:
   - 如果真是内容层级不均:改为 1 hero + (N-1) 小卡(参考 cross-skill-rules §I);
   - 如果内容真的少:改 `minmax(0, Npx)` 限宽,不走全行。
@@ -158,6 +159,7 @@
 - **Why**:hero 卡和 peers 并排且在**第 1 位**,第一列宽度被读作"row 的起始点偏移",不是"这一列被特别处理"。位置 1 没有相邻对称的 peer 做对冲 → 非对称被放大感知成失衡。hero 在**中间**(`1fr 1.2fr 1fr`) 两侧对称,读作"被抬高的中心";hero 在**第 1 位**就读作"重心下坠"。
 - **How caught**:人眼(2026-04-22)。composition-critic subagent 给 1.4fr 方案打 91/100 还建议"再宽一点" —— AI 评审认可了人眼判定崩坏的方案。`visual-audit.mjs` 的 grid 相关 check(hollow-card §10b / recommended-card-equal-grid §1.19)都只针对**等宽** grid,不审非等宽 grid 的位置效应。
 - **Defense**:`visual-audit.mjs` 新 check **asymmetric-first-col-hero**(heuristic)—— 3-col grid 渲染后第 1 列宽度 ≥ 1.2× 其他列最小值,且第 1 列不是"全行 hero"(`grid-column: 1 / -1`)、不是"anchored hero"(深底色 lum<0.25 或 chromatic border-left ≥ 3px) → warn。启发式,仅作提示。
+- **例外(2026-04-23 tuning · issue #9)**:grid 内含 `input / select / textarea / [contenteditable] / output` 时跳过 —— 这是表单行(label + control + unit)模式,宽度不对称是数据录入行的固有语义,不是内容 hero 布局。场景:android-llm-bridge `webui-preview.html` Playground 滑块参数面板 ~12 连警告。
 - **Fix playbook** (按优先级):
   1. **1 hero 全行 + (N-1) alt 下一行**(推荐)——hero 独占 `grid-column: 1 / -1`;
   2. **居中放大** `1fr 1.2fr 1fr`——hero 在中间,两侧对称;
