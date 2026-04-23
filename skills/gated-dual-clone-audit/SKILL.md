@@ -78,7 +78,7 @@ checking `user.email` if `.git/` is missing):
 - B3 · `cd satellite && git fetch origin <branch> --dry-run` succeeds
        (fetch path from gateway is reachable)
 
-### Tier 4 · Taste (optional, planned)
+### Tier 4 · Taste (optional, via LLM subagent)
 
 Runs an LLM subagent to answer questions the machine can't:
 - Is `$PUSH_BRANCH` still based on `$UPSTREAM_BRANCH`, or has it diverged
@@ -86,8 +86,11 @@ Runs an LLM subagent to answer questions the machine can't:
 - Has the project shrunk to the point where a single repo would be cleaner?
 - Are `--no-verify` bypasses showing up in `.git/logs`?
 
-**Tier 4 is not in v0.** Present as a placeholder — the wrapper accepts
-`--critic` but currently prints a "planned" message.
+`--critic` invokes `scripts/audit-critic.mjs` to produce a self-contained
+prompt for the `gated-dual-clone-audit-critic` subagent. The wrapper does
+NOT run the subagent itself — you invoke it in Claude Code via
+`Task(subagent_type="gated-dual-clone-audit-critic", ...)`. Tier 4 does
+not affect the wrapper's exit code; its verdict is advisory.
 
 ## Entry point · 入口
 
@@ -158,11 +161,19 @@ bin/gated-dual-clone-audit \
 ## Files · 文件
 
 - `bin/gated-dual-clone-audit` — wrapper, runs tiers + aggregates output
-- `scripts/audit-structural.sh` — tier 1
-- `scripts/audit-config.sh` — tier 2
-- `scripts/audit-behavioural.sh` — tier 3
-- `references/gate-catalog.md` — full catalogue of what each gate checks
-  and what a pass/warn/fail looks like
+- `scripts/audit-structural.sh` — tier 1 (filesystem / hook / hardlink)
+- `scripts/audit-config.sh` — tier 2 (git config)
+- `scripts/audit-behavioural.sh` — tier 3 (safe `--dry-run` tests)
+- `scripts/audit-critic.mjs` — tier 4 prompt builder for the LLM subagent
+- `agents/gated-dual-clone-audit-critic.md` — Claude subagent definition
+  used by `--critic`
+- `references/gate-catalog.md` — per-gate reference · what each gate
+  checks, common failure modes, fixes
+- `references/known-drifts.md` — drift patterns caught in the wild ·
+  entry point for `learning-loop` feedback · template for adding new
+  entries
+- `references/troubleshooting.md` — task-oriented "audit says X · what
+  do I do"
 
 ## Reference · 参考
 
