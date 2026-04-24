@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compare — Skypad vs cloud-native notebooks</title>
+<meta name="description" content="Side-by-side comparison of Skypad (local-first, E2E encrypted) versus cloud-native notebooks. Canonical apple-design comparison page for the sky-skills harness — honest trade-offs, not a fight card.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/apple.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--apple-divider);
+    color: var(--apple-text);
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 980px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .lang-toggle:hover { background: var(--apple-bg-alt); }
+
+  /* Apple §H exception: PingFang SC first for zh (Apple's native SF companion). */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] td,
+  html[data-lang="zh"] th {
+    font-family: "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .pillar__title,
+  html[data-lang="zh"] blockquote {
+    font-family: "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", sans-serif;
+    font-weight: 600;
+  }
+
+  /* Two-pillar spine — apple way: big centered type, a vertical hairline
+     divider down the middle, no cards. */
+  .pillar-spine {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    gap: var(--space-7);
+    align-items: start;
+  }
+  .pillar-spine__rule {
+    background: var(--apple-divider);
+    height: 100%;
+    min-height: 320px;
+  }
+  .pillar { padding: 0 var(--space-4); }
+  .pillar__kicker {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--apple-link);
+    letter-spacing: -0.005em;
+    margin: 0 0 var(--space-4);
+  }
+  .pillar--cloud .pillar__kicker { color: var(--apple-text-secondary); }
+  .pillar__title {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 600;
+    color: var(--apple-text);
+    letter-spacing: -0.025em;
+    line-height: 1.08;
+    margin: 0 0 var(--space-5);
+  }
+  .pillar__claim {
+    font-family: var(--font-text);
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--apple-text);
+    margin: 0 0 var(--space-5);
+    max-width: 38ch;
+  }
+  .pillar__list {
+    list-style: none; padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: var(--space-3);
+  }
+  .pillar__list li {
+    font-family: var(--font-text);
+    font-size: 15.5px;
+    line-height: 1.55;
+    color: var(--apple-text-secondary);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--apple-divider);
+  }
+  .pillar__list li:first-child { border-top: 0; padding-top: 0; }
+
+  /* Comparison table — apple-table style: white card on alt band,
+     hairlines between rows, no coloured fills. */
+  .cmp-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border: 1px solid var(--apple-divider);
+    border-radius: 18px;
+    overflow: hidden;
+    font-family: var(--font-text);
+  }
+  .cmp-table thead th {
+    background: var(--apple-bg-alt);
+    text-align: left;
+    padding: var(--space-5);
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--apple-text);
+    letter-spacing: -0.005em;
+    border-bottom: 1px solid var(--apple-divider);
+  }
+  .cmp-table thead th:first-child {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--apple-text-secondary);
+    font-weight: 600;
+  }
+  html[data-lang="zh"] .cmp-table thead th:first-child {
+    text-transform: none; letter-spacing: 0.02em; font-size: 13px;
+  }
+  .cmp-table tbody td {
+    padding: var(--space-5);
+    font-size: 15.5px;
+    line-height: 1.55;
+    color: var(--apple-text);
+    border-bottom: 1px solid var(--apple-divider);
+    vertical-align: top;
+  }
+  .cmp-table tbody tr:last-child td { border-bottom: 0; }
+  .cmp-table tbody td:first-child {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--apple-text-secondary);
+    letter-spacing: 0;
+    width: 22%;
+  }
+  .cmp-mark {
+    display: inline-block;
+    width: 14px;
+    text-align: center;
+    font-family: var(--font-text);
+    margin-right: 6px;
+    color: var(--apple-text-secondary);
+  }
+  .cmp-mark--win { color: var(--apple-link); }
+  .cmp-mark--dash { color: var(--apple-text-secondary); }
+
+  /* Scenario stacked — apple way: full-width sections separated by hairline
+     rules, centered text. */
+  .scenarios { display: flex; flex-direction: column; }
+  .scenario {
+    padding: var(--space-8) 0;
+    border-bottom: 1px solid var(--apple-divider);
+    text-align: center;
+  }
+  .scenario:last-child { border-bottom: 0; }
+  .scenario__tag {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--apple-link);
+    margin-bottom: var(--space-4);
+  }
+  .scenario__tag--cloud { color: var(--apple-text-secondary); }
+  html[data-lang="zh"] .scenario__tag { text-transform: none; letter-spacing: 0.02em; font-size: 13px; }
+  .scenario__title {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--apple-text);
+    letter-spacing: -0.022em;
+    line-height: 1.12;
+    margin: 0 auto var(--space-4);
+    max-width: 22ch;
+  }
+  .scenario__body {
+    font-family: var(--font-text);
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--apple-text-secondary);
+    margin: 0 auto;
+    max-width: 58ch;
+  }
+
+  /* Dark verdict band — apple move: huge pull-quote on black. */
+  .verdict {
+    padding: var(--space-9) 0;
+    background: var(--apple-bg-dark);
+    color: var(--apple-text-on-dark);
+  }
+  .verdict blockquote {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.022em;
+    color: var(--apple-text-on-dark);
+    margin: 0 auto;
+    max-width: 20ch;
+    text-align: center;
+  }
+  .verdict cite {
+    display: block;
+    margin-top: var(--space-6);
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: #a1a1a6;
+    font-style: normal;
+    text-align: center;
+  }
+
+  /* Hero diagram — two facing product schematics with an idea origin between. */
+  .hero-diagram {
+    display: block;
+    width: 100%;
+    max-width: 1200px;
+    height: auto;
+    margin: 0 auto;
+    border-radius: 22px;
+    background: linear-gradient(180deg, var(--apple-bg-alt) 0%, #ffffff 100%);
+  }
+
+  @media (max-width: 820px) {
+    .pillar-spine { grid-template-columns: 1fr; }
+    .pillar-spine__rule { display: none; }
+    .pillar { padding: 0; }
+    .pillar__title { font-size: 32px; }
+    .scenario__title { font-size: 28px; }
+    .verdict blockquote { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="apple-nav"><div class="apple-nav-inner">
+  <a href="#" style="font-family:var(--font-display); font-weight:600; font-size:17px; text-decoration:none; color:var(--apple-text); letter-spacing:-0.01em;">Skypad</a>
+  <div>
+    <a class="apple-link apple-link--no-arrow" href="landing.html"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
+    <a class="apple-link apple-link--no-arrow" href="#compare"><span class="lang-en">Compare</span><span class="lang-zh">对比</span></a>
+    <a class="apple-link apple-link--no-arrow" href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a class="apple-link apple-link--no-arrow" href="docs-home.html"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="apple-link" href="landing.html#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="apple-hero">
+  <div class="apple-container apple-container--hero" style="text-align:center;">
+    <p style="color:var(--apple-link); font-family:var(--font-display); font-size:15px; font-weight:500; letter-spacing:-0.005em; margin:0 0 var(--space-4);">
+      <span class="lang-en">Compare · Skypad vs cloud-native</span>
+      <span class="lang-zh">对比 · Skypad 与云端笔记</span>
+    </p>
+    <h1 style="margin:0 auto; max-width:14ch; font-size:clamp(56px, 7.5vw, 96px); letter-spacing:-0.035em; line-height:1.05;">
+      <span class="lang-en">Two notebooks.<br>Two truths.<br>Pick the one<br>that fits.</span>
+      <span class="lang-zh">两种笔记本。<br>两种事实。<br>选适合你的。</span>
+    </h1>
+    <p style="font-family:var(--font-text); font-size:23px; line-height:1.4; color:var(--apple-text-secondary); margin:var(--space-6) auto 0; max-width:40ch;">
+      <span class="lang-en">Skypad is local-first. Notion, Evernote, Google Keep are cloud-native. Each design rules out things the other makes easy. We'll show you both — including the cases where Skypad isn't the right call.</span>
+      <span class="lang-zh">Skypad 是本地优先。Notion、印象笔记、Google Keep 是云端原生。每一个设计选择都关掉另一边擅长的事。两边都讲 —— 包括 Skypad 不适合你的场景。</span>
+    </p>
+  </div>
+</section>
+
+<!-- Hero diagram: two devices, one idea between them -->
+<section class="apple-section" style="padding-top:var(--space-4);">
+  <div class="apple-container apple-container--wide">
+    <figure style="margin:0;">
+      <svg role="img" aria-label="Two laptop schematics face each other; an idea sits between them — the left laptop shows a plain Markdown file saved to local disk, the right laptop shows the same idea routed through a cloud server with a record id" viewBox="0 0 1200 560" class="hero-diagram">
+        <defs>
+          <filter id="cmp-shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+            <feOffset dy="10"/>
+            <feColorMatrix values="0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.08 0"/>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- Left device · local-first -->
+        <g filter="url(#cmp-shadow)" transform="translate(60 110)">
+          <rect width="380" height="280" rx="14" fill="#ffffff" stroke="#d2d2d7"/>
+        </g>
+        <g transform="translate(60 110)">
+          <rect x="0" y="0" width="380" height="34" rx="14" fill="#f5f5f7"/>
+          <rect x="0" y="20" width="380" height="14" fill="#f5f5f7"/>
+          <circle cx="18" cy="17" r="5" fill="#FF5F57"/>
+          <circle cx="36" cy="17" r="5" fill="#FEBC2E"/>
+          <circle cx="54" cy="17" r="5" fill="#28C840"/>
+          <text x="190" y="21" text-anchor="middle" font-family="SF Pro Display,-apple-system,system-ui,sans-serif" font-size="11" fill="#6e6e73">idea.md · Skypad</text>
+
+          <g font-family="SF Pro Text,-apple-system,system-ui,sans-serif" font-size="13" fill="#1d1d1f">
+            <text x="24" y="76" font-weight="600">On writing by hand</text>
+            <text x="24" y="104" fill="#6e6e73">A notebook you can keep for 20 years</text>
+            <text x="24" y="132">needs to be readable without</text>
+            <text x="24" y="152">permission from anyone.</text>
+            <text x="24" y="188">Plain text survives.</text>
+          </g>
+
+          <rect x="24" y="216" width="332" height="1" fill="#d2d2d7"/>
+          <text x="24" y="240" font-family="SF Mono,monospace" font-size="11" fill="#6e6e73">~/Notes/idea.md · 2.1 KB · saved locally</text>
+        </g>
+
+        <!-- Origin node in the middle -->
+        <g transform="translate(540 210)">
+          <circle cx="60" cy="60" r="52" fill="#ffffff" stroke="#0071E3" stroke-width="2"/>
+          <text x="60" y="56" text-anchor="middle" font-family="SF Pro Display,-apple-system,system-ui,sans-serif" font-size="14" font-weight="600" fill="#1d1d1f">idea</text>
+          <text x="60" y="76" text-anchor="middle" font-family="SF Pro Text,-apple-system,system-ui,sans-serif" font-size="11" fill="#6e6e73">your mind</text>
+          <!-- Arrow to left -->
+          <path d="M 8 60 L -60 60" stroke="#0071E3" stroke-width="1.8" fill="none" marker-end="url(#cmp-arrow-blue)"/>
+          <!-- Arrow to right -->
+          <path d="M 112 60 L 180 60" stroke="#6e6e73" stroke-width="1.8" fill="none" marker-end="url(#cmp-arrow-gray)"/>
+        </g>
+
+        <!-- Markers -->
+        <defs>
+          <marker id="cmp-arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#0071E3"/>
+          </marker>
+          <marker id="cmp-arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#6e6e73"/>
+          </marker>
+        </defs>
+
+        <!-- Right device · cloud-native -->
+        <g filter="url(#cmp-shadow)" transform="translate(760 110)">
+          <rect width="380" height="280" rx="14" fill="#ffffff" stroke="#d2d2d7"/>
+        </g>
+        <g transform="translate(760 110)">
+          <rect x="0" y="0" width="380" height="34" rx="14" fill="#f5f5f7"/>
+          <rect x="0" y="20" width="380" height="14" fill="#f5f5f7"/>
+          <circle cx="18" cy="17" r="5" fill="#FF5F57"/>
+          <circle cx="36" cy="17" r="5" fill="#FEBC2E"/>
+          <circle cx="54" cy="17" r="5" fill="#28C840"/>
+          <text x="190" y="21" text-anchor="middle" font-family="SF Pro Display,-apple-system,system-ui,sans-serif" font-size="11" fill="#6e6e73">page 882091 · vendor app</text>
+
+          <g font-family="SF Pro Text,-apple-system,system-ui,sans-serif" font-size="13" fill="#1d1d1f">
+            <text x="24" y="76" font-weight="600">On writing by hand</text>
+            <text x="24" y="104" fill="#6e6e73">[block: paragraph · synced]</text>
+            <text x="24" y="132">[block: paragraph · synced]</text>
+            <text x="24" y="152">[block: paragraph · synced]</text>
+            <text x="24" y="188">[block: paragraph · synced]</text>
+          </g>
+
+          <rect x="24" y="216" width="332" height="1" fill="#d2d2d7"/>
+          <text x="24" y="240" font-family="SF Mono,monospace" font-size="11" fill="#6e6e73">record 882091 · account required · vendor-readable</text>
+        </g>
+
+        <!-- Caption labels -->
+        <text x="250" y="424" text-anchor="middle" font-family="SF Pro Display,-apple-system,system-ui,sans-serif" font-size="12" font-weight="600" fill="#0071E3" letter-spacing="0.12em">LOCAL-FIRST · YOUR DISK</text>
+        <text x="950" y="424" text-anchor="middle" font-family="SF Pro Display,-apple-system,system-ui,sans-serif" font-size="12" font-weight="600" fill="#6e6e73" letter-spacing="0.12em">CLOUD-NATIVE · VENDOR SERVER</text>
+      </svg>
+      <figcaption style="text-align:center; color:var(--apple-text-secondary); font-family:var(--font-display); font-size:14px; margin-top:var(--space-4); letter-spacing:-0.005em;">
+        <span class="lang-en">Same idea, two routes. The route shapes what the tool is good at — and what it can't do.</span>
+        <span class="lang-zh">同一个想法，两条路径。路径决定工具擅长什么、做不到什么。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Pillar spine -->
+<section class="apple-section apple-section--alt" id="pillars">
+  <div class="apple-container apple-container--wide">
+    <div style="text-align:center; max-width:48ch; margin:0 auto var(--space-9);">
+      <h2 style="margin:0 0 var(--space-4);">
+        <span class="lang-en">Two truths, equal weight.</span>
+        <span class="lang-zh">两种事实，等量齐观。</span>
+      </h2>
+      <p style="font-family:var(--font-text); font-size:19px; line-height:1.55; color:var(--apple-text-secondary);">
+        <span class="lang-en">Each was designed fully from its own first principles. Read both.</span>
+        <span class="lang-zh">各自都是从第一性原理完整设计的产物。两边都读一遍。</span>
+      </p>
+    </div>
+
+    <div class="pillar-spine">
+      <article class="pillar">
+        <p class="pillar__kicker"><span class="lang-en">Local-first · Skypad</span><span class="lang-zh">本地优先 · Skypad</span></p>
+        <h3 class="pillar__title">
+          <span class="lang-en">Your notes live on your disk.</span>
+          <span class="lang-zh">笔记在你的磁盘上。</span>
+        </h3>
+        <p class="pillar__claim">
+          <span class="lang-en">Writing is offline by default. Cloud sync is an option you turn on — encrypted so Skypad itself can't read your notes. Format is plain Markdown, openable 20 years from now by any text editor.</span>
+          <span class="lang-zh">默认离线写作。云同步是可选项 —— 开启后端到端加密，Skypad 自己看不到内容。格式是普通 Markdown，20 年后任何文本编辑器都能打开。</span>
+        </p>
+        <ul class="pillar__list">
+          <li><span class="lang-en">Offline is the default, not a fallback.</span><span class="lang-zh">离线是默认状态，不是降级。</span></li>
+          <li><span class="lang-en">Vendor going under → notes still on your disk.</span><span class="lang-zh">厂商倒闭 → 笔记还在你的磁盘。</span></li>
+          <li><span class="lang-en">Plain Markdown: grep, git, any editor.</span><span class="lang-zh">普通 Markdown：grep、git、任何编辑器。</span></li>
+          <li><span class="lang-en">No vendor reads your content.</span><span class="lang-zh">厂商读不到你的内容。</span></li>
+        </ul>
+      </article>
+
+      <div class="pillar-spine__rule" aria-hidden="true"></div>
+
+      <article class="pillar pillar--cloud">
+        <p class="pillar__kicker"><span class="lang-en">Cloud-native · Notion / Evernote</span><span class="lang-zh">云端原生 · Notion / 印象笔记</span></p>
+        <h3 class="pillar__title">
+          <span class="lang-en">Your notes live on a server.</span>
+          <span class="lang-zh">笔记在服务器上。</span>
+        </h3>
+        <p class="pillar__claim">
+          <span class="lang-en">Source of truth is the server. Every device renders the same live state. Collaboration is native — two people on the same page see each other typing. The trade-off: you trust the vendor and the vendor's uptime.</span>
+          <span class="lang-zh">服务器是真实源。每台设备渲染同一份实时状态。多人协作是原生能力 —— 两人同改一页时互相看到光标。代价：你信任厂商、信任它的在线时间。</span>
+        </p>
+        <ul class="pillar__list">
+          <li><span class="lang-en">Real-time collaboration with zero plumbing.</span><span class="lang-zh">多人实时协作，零配置。</span></li>
+          <li><span class="lang-en">Rich blocks beyond text (tables, databases, embeds).</span><span class="lang-zh">远超纯文本的富块（表格、数据库、嵌入）。</span></li>
+          <li><span class="lang-en">Same state across devices, always.</span><span class="lang-zh">多设备状态始终一致。</span></li>
+          <li><span class="lang-en">Vendor-backed search, permissions, admin.</span><span class="lang-zh">厂商提供搜索、权限、管理。</span></li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Comparison table -->
+<section class="apple-section" id="compare">
+  <div class="apple-container apple-container--wide">
+    <div style="text-align:center; max-width:48ch; margin:0 auto var(--space-8);">
+      <h2 style="margin:0 0 var(--space-4);">
+        <span class="lang-en">Side by side.</span>
+        <span class="lang-zh">并排对比。</span>
+      </h2>
+      <p style="font-family:var(--font-text); font-size:19px; line-height:1.55; color:var(--apple-text-secondary);">
+        <span class="lang-en">Nine dimensions. Blue dots mark where Skypad wins; dashes mark where the other side does.</span>
+        <span class="lang-zh">九个维度。蓝点标 Skypad 胜出的地方，短横标另一边胜出的地方。</span>
+      </p>
+    </div>
+
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th scope="col"><span class="lang-en">Dimension</span><span class="lang-zh">维度</span></th>
+          <th scope="col"><span class="lang-en">Skypad</span><span class="lang-zh">Skypad</span></th>
+          <th scope="col"><span class="lang-en">Notion / Evernote</span><span class="lang-zh">Notion / 印象</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="lang-en">Where data lives</span><span class="lang-zh">数据存在哪</span></td>
+          <td><span class="cmp-mark cmp-mark--win" aria-label="Skypad wins this row">●</span><span class="lang-en">Your disk · plain <code>.md</code> files.</span><span class="lang-zh">你的磁盘 · 普通 <code>.md</code> 文件。</span></td>
+          <td><span class="cmp-mark cmp-mark--dash" aria-hidden="true">—</span><span class="lang-en">Vendor servers · proprietary format.</span><span class="lang-zh">厂商服务器 · 私有格式。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Works offline</span><span class="lang-zh">离线可用</span></td>
+          <td><span class="cmp-mark cmp-mark--win">●</span><span class="lang-en">Always — it's the default.</span><span class="lang-zh">始终可用 —— 这是默认。</span></td>
+          <td><span class="cmp-mark cmp-mark--dash">—</span><span class="lang-en">Only cached pages; new writes queue.</span><span class="lang-zh">仅已缓存的页；新写入会排队。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Multi-device sync</span><span class="lang-zh">多设备同步</span></td>
+          <td><span class="cmp-mark cmp-mark--win">●</span><span class="lang-en">End-to-end encrypted.</span><span class="lang-zh">端到端加密。</span></td>
+          <td><span class="cmp-mark cmp-mark--dash">—</span><span class="lang-en">Vendor-readable by design.</span><span class="lang-zh">厂商可读，设计如此。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Real-time collaboration</span><span class="lang-zh">实时协作</span></td>
+          <td><span class="cmp-mark cmp-mark--dash">—</span><span class="lang-en">CRDT over peer sync · not native.</span><span class="lang-zh">基于 CRDT 的点对点同步 · 非原生。</span></td>
+          <td><span class="cmp-mark cmp-mark--win">●</span><span class="lang-en">Native · two cursors on same page.</span><span class="lang-zh">原生 · 同一页两个光标。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Search speed</span><span class="lang-zh">搜索速度</span></td>
+          <td><span class="cmp-mark cmp-mark--win">●</span><span class="lang-en">Instant · local index.</span><span class="lang-zh">即时 · 本地索引。</span></td>
+          <td><span class="cmp-mark cmp-mark--dash">—</span><span class="lang-en">Server round-trip · 100–400 ms.</span><span class="lang-zh">服务器往返 · 100–400 毫秒。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Content format</span><span class="lang-zh">内容格式</span></td>
+          <td><span class="cmp-mark cmp-mark--win">●</span><span class="lang-en">Plain Markdown · forever-openable.</span><span class="lang-zh">普通 Markdown · 永久可打开。</span></td>
+          <td><span class="cmp-mark cmp-mark--dash">—</span><span class="lang-en">Vendor blocks · export-then-convert.</span><span class="lang-zh">厂商私有块 · 导出后要转换。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Account required</span><span class="lang-zh">需要账号</span></td>
+          <td><span class="cmp-mark cmp-mark--win">●</span><span class="lang-en">No · free tier fully offline.</span><span class="lang-zh">否 · 免费档完全离线。</span></td>
+          <td><span class="cmp-mark cmp-mark--dash">—</span><span class="lang-en">Yes · email + password minimum.</span><span class="lang-zh">是 · 至少邮箱 + 密码。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">If the vendor shuts down</span><span class="lang-zh">厂商倒闭后</span></td>
+          <td><span class="cmp-mark cmp-mark--win">●</span><span class="lang-en">Notes untouched on your disk.</span><span class="lang-zh">笔记原样留在你的磁盘。</span></td>
+          <td><span class="cmp-mark cmp-mark--dash">—</span><span class="lang-en">Last export is all you have.</span><span class="lang-zh">最后一次导出是你仅剩的。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Lock-in risk</span><span class="lang-zh">结构性锁定</span></td>
+          <td><span class="cmp-mark cmp-mark--win">●</span><span class="lang-en">Zero · format is an open standard.</span><span class="lang-zh">零 · 格式是开放标准。</span></td>
+          <td><span class="cmp-mark cmp-mark--dash">—</span><span class="lang-en">High · migration needs an export tool.</span><span class="lang-zh">高 · 迁移需要导出工具。</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Scenario stacked -->
+<section class="apple-section apple-section--alt" id="when">
+  <div class="apple-container" style="max-width:780px;">
+    <div style="text-align:center; margin-bottom:var(--space-7);">
+      <h2 style="margin:0 0 var(--space-4);">
+        <span class="lang-en">Three clear scenarios.</span>
+        <span class="lang-zh">三个清晰的场景。</span>
+      </h2>
+      <p style="font-family:var(--font-text); font-size:19px; line-height:1.55; color:var(--apple-text-secondary);">
+        <span class="lang-en">Most decisions collapse to one of these.</span>
+        <span class="lang-zh">大多数选择落在这三种里的一种。</span>
+      </p>
+    </div>
+
+    <div class="scenarios">
+      <article class="scenario">
+        <span class="scenario__tag"><span class="lang-en">Pick Skypad</span><span class="lang-zh">选 Skypad</span></span>
+        <h3 class="scenario__title">
+          <span class="lang-en">Solo thinker, long time horizon.</span>
+          <span class="lang-zh">独立思考者，长时间跨度。</span>
+        </h3>
+        <p class="scenario__body">
+          <span class="lang-en">A journal, reading log, research vault. You want those notes readable in 20 years, searchable without waiting on someone's servers, not tied to a subscription you might stop paying. Local-first is the only pattern that passes all three tests.</span>
+          <span class="lang-zh">日记、读书笔记、研究素材库。你希望 20 年后还能读到、搜索不用等服务器、不被订阅费绑架。本地优先是唯一三项全过的模式。</span>
+        </p>
+      </article>
+
+      <article class="scenario">
+        <span class="scenario__tag scenario__tag--cloud"><span class="lang-en">Pick Notion / Evernote</span><span class="lang-zh">选 Notion / 印象</span></span>
+        <h3 class="scenario__title">
+          <span class="lang-en">Team editing the same page daily.</span>
+          <span class="lang-zh">团队每天共编同一页。</span>
+        </h3>
+        <p class="scenario__body">
+          <span class="lang-en">Five teammates editing the roadmap at the same time. Comment threads, permissions, admin history. If real-time collaboration is the core workflow, the cloud's native advantage wins — local-first can do it with CRDTs, but cloud-native gives it to you with zero setup.</span>
+          <span class="lang-zh">五位同事同时改同一张 roadmap。评论线、权限、管理后台。实时协作就是核心工作流时，云端原生的零配置优势压倒 —— 本地优先能用 CRDT 做到，但不是零成本。</span>
+        </p>
+      </article>
+
+      <article class="scenario">
+        <span class="scenario__tag scenario__tag--cloud"><span class="lang-en">Either works</span><span class="lang-zh">两者皆可</span></span>
+        <h3 class="scenario__title">
+          <span class="lang-en">Short-term project, low stakes.</span>
+          <span class="lang-zh">短期项目，低风险。</span>
+        </h3>
+        <p class="scenario__body">
+          <span class="lang-en">A trip itinerary, a week-long shopping list, a recipe collection you'll clone once and never touch again. Either side serves this fine — pick whichever you already have open. Long-term trade-offs don't compound on a two-week workload.</span>
+          <span class="lang-zh">一次出行行程、一周购物清单、从博客克隆来再也不改的菜谱。两边都够用 —— 哪个已经开着就用哪个。两周的工作量撑不出长期权衡。</span>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Dark verdict -->
+<section class="verdict">
+  <div class="apple-container" style="max-width:720px;">
+    <blockquote>
+      <span class="lang-en">The best tool is the one that matches your actual work — not the one with the better marketing.</span>
+      <span class="lang-zh">最好的工具，是和你真正工作匹配的那个 —— 不是营销做得更好的那个。</span>
+    </blockquote>
+    <cite><span class="lang-en">— The Skypad team</span><span class="lang-zh">— Skypad 团队</span></cite>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="apple-section">
+  <div class="apple-container" style="max-width:640px; text-align:center;">
+    <h2 style="margin:0 0 var(--space-4);">
+      <span class="lang-en">Ready to try the local-first side?</span>
+      <span class="lang-zh">想试试本地优先这一侧吗？</span>
+    </h2>
+    <p style="font-family:var(--font-text); font-size:19px; color:var(--apple-text-secondary); line-height:1.55; margin:0 0 var(--space-6);">
+      <span class="lang-en">Skypad is free for solo writers. No account. No installer dark patterns.</span>
+      <span class="lang-zh">Skypad 对单人写作永久免费。无需注册。没有安装陷阱。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-4); justify-content:center; flex-wrap:wrap;">
+      <a class="apple-link" href="landing.html#download"><span class="lang-en">Download Skypad</span><span class="lang-zh">下载 Skypad</span></a>
+      <a class="apple-link" href="pricing.html"><span class="lang-en">See pricing</span><span class="lang-zh">查看定价</span></a>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: apple
+Page-type: comparison
+Created: 2026-04-24
+
+Decisions (5):
+1. [hero-centered-stacked] chose "80-96px stacked hero headline 'Two notebooks. / Two truths. / Pick the one that fits.' centered with a blue kicker" over "left-aligned marketing hero with a Skypad > Notion victory callout". Because: apple pricing/landing canonicals center their heroes and let type be the product — a declare-winner hero would break apple's quiet, and a comparison page that opens with a winner forfeits trust in the first viewport.
+2. [device-mock-illustration] chose "two laptop-window schematics with an idea origin between" over "abstract arrow-flow diagram (anthropic approach)". Because: apple illustrations ARE product mocks — the story must be told with screens, not with diagrams. The left window shows plain text on disk, the right shows opaque "block: paragraph" entries on vendor servers; the architectural honesty lands through visual vocabulary apple readers already know.
+3. [pillar-spine-no-cards] chose "two text columns separated by a 1px hairline divider, no card chrome" over "two bordered cards". Because: apple's signature move is negative space and type hierarchy, not card stacks. A vertical hairline between symmetric columns is the apple way to say 'these are peers' without the defensive container language of cards.
+4. [table-dot-and-dash] chose "blue filled bullet for Skypad wins, em-dash for other-side wins, both in a monospace width" over "green ✓ / red ✗ grid or coloured cell backgrounds". Because: apple's comparison tables on apple.com use exactly this — minimal shape marks, no chromatic fills, one accent colour (blue) used sparingly. Emoji would smell of generic SaaS; coloured cell backgrounds would break the monochrome discipline.
+5. [dark-band-verdict] chose "single pull-quote on a black band, 40px centered, no attribution byline above the cite" over "bordered verdict card or testimonial grid". Because: apple pricing canonical section 5 defines the black pull-quote band as the signature closing move, reserved for one high-stakes line. A comparison page closing on that band reframes everything above as reasoning, not marketing.
+
+Known trade-offs:
+- SVG internal fills use raw hex (#0071E3, #6e6e73) because SVG element attributes cannot reference CSS custom properties. Values are exact token matches; noted for any port.
+- Scenario cards are stacked full-width (not 3-column) — more vertical scroll but matches apple's preference for one idea per scroll band over dense horizontal layouts. Users on narrow viewports see no layout regression.
+- Pillar columns share a single `1px hairline` divider; on max-width < 820px the divider hides and pillars stack. Acceptable mobile fallback but loses the 'equal weight, symmetric peers' visual cue that the desktop layout carries.
+
+/design-review:self-diff -->
+
+</body>
+</html>
