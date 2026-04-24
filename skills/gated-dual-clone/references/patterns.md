@@ -148,9 +148,94 @@ good `.gitignore` wins.
 
 ---
 
+---
+
+## 3-clone with reproducibility gate · 第 3 仓作 push 前关卡
+
+The default topology is 2 clones (gateway + satellite). For projects where
+reproducibility bugs surface when the code moves from SSD-based iteration
+clone to a cold HDD / CI / different filesystem, add a third clone:
+
+```
+                     ┌──────────┐ fetch  ┌─────────────┐
+upstream ──push──►  │ gateway  │ ──────► │  satellite  │  (fast-iteration
+                     │ (dev +   │ local   │  build tree │   build on SSD)
+                     │  push)   │ path    │  push=DISA) │
+                     └─┬──▲─────┘         └─────────────┘
+                       │  │
+              fetch    │  │  stamp write (on build success)
+         local path    │  │
+                       ▼  │
+                     ┌────┴───────────────┐
+                     │  clean-verify      │  (pre-push gate ·
+                     │  HDD / cold disk / │   from-scratch full build ·
+                     │  separate machine) │   push=DISABLED)
+                     └────────────────────┘
+```
+
+**Key differences from 2-clone**:
+
+- Third clone (`clean-verify`) lives on a different disk (HDD is typical
+  for SSD-dev teams) or different machine. Same repo, different hardware
+  characteristics.
+- `clean-verify` origin = local gateway path (same trick as satellite).
+  **NOT** the real remote. Fetching from gateway guarantees
+  "the clean-verify build reflects exactly what gateway will push" — there
+  is no window where gateway pushes remote, remote diverges, and
+  clean-verify then fetches something different.
+- `clean-verify` also has `pushurl = DISABLED` on both `origin` and the
+  optional `upstream` diagnostic remote. Hardware-diverse gate that
+  doesn't hold if it can also be a push source.
+- `scripts/clean-verify-run.sh` drives the gate: sync → `git clean -fdx`
+  (drop every untracked/ignored file) → run user's full-build end-to-end
+  → on success, write `gateway/.git/last-clean-verify` stamp with
+  `<commit-sha> <timestamp> <sha256 of build-cmd>`.
+- Gateway's `pre-push` hook (installed with `--enforce-clean-verify`)
+  reads the stamp and refuses to push commits whose sha doesn't match.
+  Emergency bypass: `git push --push-option=allow-unverified`.
+
+### When the extra disk pays off
+
+You see one or more of these regularly:
+
+- CI / shipping fails on a commit that passed locally · root cause is
+  filesystem cache / disk speed / ordering.
+- A generated file is in dev but not in git, and works on the dev clone
+  only because it's been laying around from a previous build.
+- Prod only accepts signed artefacts that pass a second-pass
+  reproducibility check.
+- The push path is high-stakes enough that one rollback costs more than a
+  full rebuild.
+
+If none of these apply, stay on the 2-clone default — the 3rd clone is
+real cost (disk + build time + discipline to run the gate before pushing)
+and zero benefit when there are no reproducibility bugs to catch.
+
+### Bootstrap
+
+```bash
+scripts/bootstrap.sh \
+  --remote              git@gitlab.example.com:team/project.git \
+  --upstream-branch     release \
+  --push-branch         feature/alice-auth \
+  --gateway-dir         ~/projects/foo-work \
+  --satellite-dir       ~/projects/foo-verify \
+  --clean-verify-dir    /mnt/hdd/foo-clean-verify \
+  --user-email          alice@example.com \
+  --user-name           alice
+```
+
+Optional `--clean-verify-dir` activates Steps 5b + 6b + Gate D + the
+`--enforce-clean-verify` install-hooks invocation. Without the flag, the
+script runs the 2-clone bootstrap unchanged.
+
+---
+
 ## See also · 参考
 
 - `SKILL.md` — the default flow and safety model
-- `decision-checklist.md` — 4-question self-test
+- `decision-checklist.md` — 4-question self-test (+ a 5th for 3-clone)
+- `daily-workflow.md` — 4-step cheatsheet (5 steps in 3-clone mode)
 - `comparison.md` — dual-clone vs worktree vs single-repo side-by-side
 - `guardrails.md` — why this pattern holds (and where it doesn't)
+- `server-side-enforcement.md` — GitLab / GitHub / Gerrit hard-enforcement templates

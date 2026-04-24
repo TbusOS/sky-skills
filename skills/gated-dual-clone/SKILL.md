@@ -12,7 +12,7 @@ description: >
   "gateway 仓库", "set up dual clone".
   DO NOT TRIGGER: single-repo direct-push flow, pure worktree setup, monorepo
   package management, small projects where one clone is enough.
-last-verified: 2026-04-23
+last-verified: 2026-04-24
 ---
 
 # Gated Dual-Clone Workflow
@@ -111,31 +111,119 @@ server-side branch protection alongside.
 - **1 gateway + N satellites** — run `bootstrap.sh` again with
   `--skip-gateway` + a new `--satellite-dir`. Useful for `verify` / `debug`
   / `test` trees.
+- **3-clone with reproducibility gate** (see below) — add a `clean-verify`
+  clone on separate disk/machine, with a pre-push hook that refuses to push
+  anything clean-verify hasn't stamped. Trade extra disk + extra build time
+  for catching "works on SSD, fails on HDD / CI" bugs before they reach
+  upstream.
 - **Worktree fallback** — if disk is tight (< 2× source size) and single
   developer, single machine: `git worktree` trades isolation for disk. See
   `decision-checklist.md` for when worktree beats this skill.
 - **Hosting differences** — GitLab MR, GitHub PR, Gerrit push-to-`refs/for/*`.
   The skill is host-neutral; protected-branch regex is a per-project flag.
 
-## Planned · 规划中
+## Optional 3rd clone · reproducibility gate · 可选 第 3 仓 · reproducibility 关卡
 
-**`gated-dual-clone-audit`** — peer evaluator skill. Re-verifies the three
-safety gates on demand (pre-push hook, pre-commit cron, manual). Independent
-of the generator — same reason `design-review` is independent of the 4 design
-skills: the doing agent praises its own work; a skeptical evaluator is the
-real lever. See [design spec](../../docs/design-mr-gated-dual-repo.md) §11.
+For projects where a failed build on CI (different filesystem, different
+disk speed, different filesystem cache state) has a real cost — add a
+**clean-verify** clone on a separate disk (or separate machine) and gate
+every push on a from-scratch full-build in it.
 
-**`gated-dual-clone-audit`** 独立评估器(规划中),按需重验三道安全闸
-(pre-push / 定时 cron / 手动)。独立于 generator,原因同 `design-review`
-独立于 4 个设计 skill:做事的 agent 称赞自己的作品,独立 evaluator 才是
-真正的杠杆。
+**When to use** (all four should be true):
+
+1. Daily dev happens on SSD; CI / shipping happens on HDD or remote machine.
+2. The project has reproducibility bugs that only surface from a cold, clean
+   tree (SSD cache / generated files / stale build artefacts hide them on
+   the iteration clone).
+3. The push path is high-stakes (production branch, signed release, audit
+   trail required).
+4. The team already has discipline to run a pre-push command.
+
+**Topology**:
+
+```
+                 ┌──────────┐       ┌──────────┐       ┌───────────────────┐
+   upstream ───► │ gateway  │ ────► │satellite │       │  clean-verify     │
+   (push only    │ (dev +   │ sync  │ (build · │       │  (pre-push gate · │
+   from gateway) │  push)   │ via   │  disabled│       │   HDD / diff disk)│
+                 │   SSD    │ local │  push)   │       │                   │
+                 └──▲───────┘ path  └──────────┘       └───▲───────────────┘
+                    │                                       │
+                    │ pre-push hook reads .git/last-clean-verify
+                    │ and refuses to push a commit whose sha ≠ stamped
+                    │                                       │
+                    └─── clean-verify-run.sh stamps on success ─┘
+```
+
+**Bootstrap it**:
+
+```bash
+scripts/bootstrap.sh \
+  --remote              git@gitlab.example.com:team/project.git \
+  --upstream-branch     release \
+  --push-branch         feature/alice-auth \
+  --gateway-dir         ~/projects/foo-work \
+  --satellite-dir       ~/projects/foo-verify \
+  --clean-verify-dir    /mnt/hdd/foo-clean-verify \
+  --user-email          alice@example.com \
+  --user-name           alice
+```
+
+Same as the 2-clone bootstrap, plus `--clean-verify-dir=<path>`. The
+script adds:
+
+- **Step 5b** — `git clone` the clean-verify from gateway (same local-path
+  trick as satellite · origin on a local path, never the real remote).
+- **Step 6b** — set `pushurl = DISABLED` on both `origin` and the
+  diagnostic `upstream` remote. Check out `<push-branch>`.
+- **Gate D** — in Step 7 post-setup, verify clean-verify push is DISABLED.
+- **Pre-push hook gets a 2nd gate** — `install-hooks.sh` is invoked with
+  `--enforce-clean-verify`, which adds a "stamp match" check alongside the
+  protected-branch check.
+
+**Daily flow** (5 steps instead of 4):
+
+1. Edit in gateway, commit.
+2. `sync-satellite.sh` → satellite → build + test there (fast iteration).
+3. When ready to push, run:
+   ```bash
+   scripts/clean-verify-run.sh \
+     --gateway-dir=<gw> --clean-verify-dir=<cv> \
+     --push-branch=<br> --build-cmd='<full-build command>' --yes
+   ```
+   This syncs clean-verify from gateway, runs `git clean -fdx` (drops
+   every untracked/ignored file), runs your full build end-to-end, and on
+   success writes `gateway/.git/last-clean-verify`.
+4. `git push origin <push-branch>` — the hook reads the stamp, refuses if
+   commit doesn't match. Emergency bypass: `git push
+   --push-option=allow-unverified` (use sparingly; the point of the gate
+   is that it holds).
+5. Raise MR/PR.
+
+**What this catches that 2-clone doesn't**:
+
+- SSD-only bugs: code depends on files that happen to be in OS filesystem
+  cache on the dev SSD but not on a cold HDD.
+- Stale-artefact bugs: satellite has build products from an earlier commit
+  that accidentally satisfy a missing `#include` / missing codegen that the
+  current commit wouldn't produce fresh.
+- Dirty-tree bugs: satellite has hand-edits the author forgot about; they
+  pass the build; clean-verify starts from git HEAD and fails.
+- Build-command drift: `--build-cmd` is sha256-hashed into the stamp; if
+  team changes build command out from under you, next push asks for a
+  re-verify.
+
+**Paired evaluator**: `gated-dual-clone-audit` auto-detects 3-clone mode
+when you pass `--clean-verify-dir`, and runs 4 extra gates (S9-S11 + C9 +
+B4) to re-verify the topology on demand.
 
 ## Files · 文件
 
-- `scripts/bootstrap.sh` — the main setup command, runs all 8 steps + 3 gates
+- `scripts/bootstrap.sh` — the main setup command, runs all 8 steps + 3 gates (4 gates in 3-clone mode) · accepts optional `--clean-verify-dir`
 - `scripts/sync-satellite.sh` — fetch / reset-hard / merge-ff modes for
   syncing satellite from gateway
-- `scripts/install-hooks.sh` — writes the `pre-push` hook on the gateway
+- `scripts/clean-verify-run.sh` — sync + clean + full-build + stamp · the pre-push reproducibility gate for 3-clone mode
+- `scripts/install-hooks.sh` — writes the `pre-push` hook on the gateway · `--enforce-clean-verify` adds the stamp-match gate
 - `references/decision-checklist.md` — when to use / when not to use
 - `references/daily-workflow.md` — 4-step cheatsheet
 - `references/patterns.md` — N-satellite / worktree fallback / GitHub-GitLab-Gerrit shapes

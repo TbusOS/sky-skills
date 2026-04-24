@@ -170,3 +170,73 @@ Four moves, same shape every day. The skill only shows up at setup time; day
 to day you just run these four commands.
 
 **四步,每天同样的形状**。skill 只在搭建时露面,日常就是这 4 条命令。
+
+---
+
+## 3-clone mode · 加一步 clean-verify
+
+If you bootstrapped with `--clean-verify-dir=<path>` (3-clone topology),
+insert **Step 3.5 · clean-verify** between build and push. The pre-push
+hook refuses to push a commit that hasn't been stamped.
+
+```bash
+export CLEAN_VERIFY_DIR=~/projects/foo-clean-verify   # or wherever
+```
+
+### Step 3.5 · clean-verify (pre-push reproducibility gate)
+
+After you're happy with the build + tests in satellite (Step 3), **before
+Step 4**:
+
+```bash
+"$SKILL_DIR/scripts/clean-verify-run.sh" \
+  --gateway-dir="$GATEWAY_DIR" \
+  --clean-verify-dir="$CLEAN_VERIFY_DIR" \
+  --push-branch="$PUSH_BRANCH" \
+  --build-cmd='<your full-build command · same one that built satellite>' \
+  --yes
+```
+
+What it does:
+1. Syncs clean-verify from gateway (`git fetch origin + reset --hard`).
+2. Runs `git clean -fdx` (drops every untracked/ignored file · true
+   from-scratch build).
+3. Runs your `--build-cmd` in clean-verify.
+4. On success: writes `$GATEWAY_DIR/.git/last-clean-verify` containing
+   `<commit-sha> <ISO-ts> <sha256(build-cmd)>`.
+5. On failure: does NOT write the stamp → your next `git push` will be
+   refused until you fix the build and re-run.
+
+The gate is intentional: if clean-verify fails but satellite passed, you
+have a reproducibility bug (SSD cache, stale artefact, dirty tree, build
+tool drift). Fix it in gateway, re-sync satellite, re-run clean-verify.
+
+### Step 4 · push (updated)
+
+`git push origin "$PUSH_BRANCH"` — pre-push hook checks the stamp.
+
+- **Stamp matches** → push proceeds normally.
+- **Stamp missing or sha mismatch** → push refused with a clear message
+  telling you to run `clean-verify-run.sh` first.
+- **Emergency bypass** (use sparingly · the gate is the whole point):
+  `git push origin "$PUSH_BRANCH" --push-option=allow-unverified`.
+
+### 3-clone shape
+
+```
+       [edit]              [fast build]          [reproducibility gate]
+  ┌──────────────┐      ┌──────────────┐      ┌──────────────────────┐
+  │   gateway/   │      │  satellite/  │      │   clean-verify/      │
+  │  (dev + push)│◄────►│   SSD build  │      │   HDD · cold start   │
+  │  pre-push:   │ sync │   disabled   │      │   push DISABLED on   │
+  │   - protected│      │   push       │      │   origin + upstream  │
+  │   - stamp    │      │              │      │                      │
+  │     match    │      └──────────────┘      └──────────┬───────────┘
+  └──────┬───────┘                                        │
+         │ push                  stamp ◄─── on build pass │
+         ▼
+    upstream remote
+```
+
+Five moves. Step 3.5 pays for itself the first time CI catches a bug
+clean-verify would have stopped.

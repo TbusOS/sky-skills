@@ -11,22 +11,25 @@ set -eu
 
 GATEWAY=""
 SATELLITE=""
+CLEAN_VERIFY=""
 PUSH_BRANCH=""
 JSON=0
 
 for a in "$@"; do
   case "$a" in
-    --gateway-dir=*)   GATEWAY="${a#*=}" ;;
-    --satellite-dir=*) SATELLITE="${a#*=}" ;;
-    --push-branch=*)   PUSH_BRANCH="${a#*=}" ;;
-    --json)            JSON=1 ;;
-    -h|--help)         sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-    *)                 echo "unknown flag: $a" >&2; exit 3 ;;
+    --gateway-dir=*)      GATEWAY="${a#*=}" ;;
+    --satellite-dir=*)    SATELLITE="${a#*=}" ;;
+    --clean-verify-dir=*) CLEAN_VERIFY="${a#*=}" ;;
+    --push-branch=*)      PUSH_BRANCH="${a#*=}" ;;
+    --json)               JSON=1 ;;
+    -h|--help)            sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *)                    echo "unknown flag: $a" >&2; exit 3 ;;
   esac
 done
 
 GATEWAY="${GATEWAY/#\~/$HOME}"
 SATELLITE="${SATELLITE/#\~/$HOME}"
+CLEAN_VERIFY="${CLEAN_VERIFY/#\~/$HOME}"
 
 [[ -n "$GATEWAY"   ]] || { echo "--gateway-dir required"   >&2; exit 3; }
 [[ -n "$SATELLITE" ]] || { echo "--satellite-dir required" >&2; exit 3; }
@@ -122,6 +125,50 @@ elif [[ -n "$PUSH_BRANCH" ]]; then
   fi
 else
   record PASS C8 "satellite on a named branch"            "$sat_head (no --push-branch given to check against)"
+fi
+
+# ------------------------------ C9 · clean-verify config (optional) --
+# Runs only when --clean-verify-dir was provided.
+if [[ -n "$CLEAN_VERIFY" && -d "$CLEAN_VERIFY/.git" ]]; then
+  cv_origin="$(gconfig "$CLEAN_VERIFY" remote.origin.url)"
+  cv_origin_push="$(cd "$CLEAN_VERIFY" && git remote get-url --push origin 2>/dev/null || echo '')"
+
+  # C9a · origin points at gateway (local path, not the real remote)
+  if [[ -z "$cv_origin" ]]; then
+    record FAIL C9a "clean-verify origin URL set"      "remote.origin.url is empty"
+  else
+    gw_real="$(cd "$GATEWAY" 2>/dev/null && pwd -P)" || gw_real="$GATEWAY"
+    cv_target=""
+    case "$cv_origin" in
+      file://*)  cv_target="${cv_origin#file://}" ;;
+      /*)        cv_target="$cv_origin" ;;
+      *)         cv_target="$cv_origin" ;;
+    esac
+    cv_target_real="$(cd "$cv_target" 2>/dev/null && pwd -P)" || cv_target_real="$cv_target"
+    cv_target_real="${cv_target_real%/.git}"
+    if [[ "$cv_target_real" == "$gw_real" ]]; then
+      record PASS C9a "clean-verify origin at gateway"  "$cv_origin"
+    else
+      record FAIL C9a "clean-verify origin at gateway"  "expected gateway path ($gw_real), got $cv_origin — reproducibility gate only makes sense if clean-verify fetches from gateway, not upstream"
+    fi
+  fi
+
+  # C9b · origin pushurl DISABLED
+  if echo "$cv_origin_push" | grep -qi "DISABLED"; then
+    record PASS C9b "clean-verify origin push = DISABLED" "$cv_origin_push"
+  else
+    record FAIL C9b "clean-verify origin push = DISABLED" "pushurl is '$cv_origin_push' — set-url --push DISABLED to make unreachable"
+  fi
+
+  # C9c · upstream remote (if present) pushurl DISABLED too
+  if (cd "$CLEAN_VERIFY" && git remote | grep -qx upstream); then
+    cv_up_push="$(cd "$CLEAN_VERIFY" && git remote get-url --push upstream 2>/dev/null || echo '')"
+    if echo "$cv_up_push" | grep -qi "DISABLED"; then
+      record PASS C9c "clean-verify upstream push = DISABLED" "$cv_up_push"
+    else
+      record FAIL C9c "clean-verify upstream push = DISABLED" "upstream pushurl is '$cv_up_push' — clean-verify must never push"
+    fi
+  fi
 fi
 
 # ------------------------------ Output --------------------------------

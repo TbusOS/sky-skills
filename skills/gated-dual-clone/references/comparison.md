@@ -9,19 +9,23 @@
 
 ## At-a-glance · 速查表
 
-| Dimension · 维度 | **Dual-clone (this skill)** | `git worktree` | Single repo |
-|---|---|---|---|
-| Disk (`.git`) | 2× tree; `.git/objects` **hardlinked** | 1× `.git` + N× tree | 1× total |
-| Disk (LFS / binary submodule) | **2×** (hardlink NA) | 1× | 1× |
-| Physical push isolation | **Yes** (satellite origin = local) | No — shared `origin` | No |
-| Build pollutes `git status` | Isolated | Isolated | Polluted |
-| Client-hook bypass risk | Low (protocol barrier) | Full | Full |
-| Multi-user / shared-machine safety | Safe | Risky | Risky |
-| Cross-machine migration | Medium (re-install hook) | Low | Low |
-| Setup complexity | Highest | Medium | Lowest |
-| Learning curve | Moderate (new mental model) | Low (subtree of git) | Zero |
-| Failure mode when something goes wrong | Diagnosable per-gate (audit) | Hard to audit | Hard to audit |
-| Works with protected upstream + MR flow | **Yes** (primary design goal) | Yes (but see isolation) | Yes |
+| Dimension · 维度 | **2-clone (default)** | **3-clone (+ reproducibility gate)** | `git worktree` | Single repo |
+|---|---|---|---|---|
+| Disk (`.git`) | 2× tree; hardlinked | 3× tree; 2 pairs hardlinked | 1× `.git` + N× tree | 1× total |
+| Disk (LFS / binary submodule) | 2× | 3× | 1× | 1× |
+| Physical push isolation | Yes (satellite origin = local) | **Yes** (satellite + clean-verify both local-origin) | No — shared `origin` | No |
+| Build pollutes `git status` | Isolated | Isolated | Isolated | Polluted |
+| Reproducibility catch | No (SSD-only bugs sneak through) | **Yes** (clean-verify on cold HDD catches them) | No | No |
+| Push-path gate | Hook (protected-branch) | Hook + **stamp match** against clean-verify | None | None |
+| Client-hook bypass risk | Low | Low (stamp gate has `allow-unverified` escape) | Full | Full |
+| Multi-user / shared-machine safety | Safe | **Safest** | Risky | Risky |
+| Cross-machine migration | Medium (re-install hook) | Medium–high (+ provision cold disk) | Low | Low |
+| Setup complexity | High | Highest | Medium | Lowest |
+| Daily overhead | ~0 (sync-satellite · 1 cmd) | +1 cmd (clean-verify-run) + wait for full build | ~0 | 0 |
+| Learning curve | Moderate (new mental model) | Moderate + "stamp match" | Low | Zero |
+| Failure-mode diagnosability | Per-gate (audit 3 tiers) | **Most** (audit 3 tiers + 4 extra gates) | Hard | Hard |
+| Works with protected upstream + MR flow | Yes (primary goal) | Yes + reproducibility audit trail | Yes (see isolation) | Yes |
+| `gated-dual-clone-audit` integration | 3 tiers | Same audit, auto-detects 3-clone via `--clean-verify-dir` | N/A | N/A |
 
 ---
 

@@ -13,20 +13,23 @@ set -eu
 
 GATEWAY=""
 SATELLITE=""
+CLEAN_VERIFY=""
 JSON=0
 
 for a in "$@"; do
   case "$a" in
-    --gateway-dir=*)   GATEWAY="${a#*=}" ;;
-    --satellite-dir=*) SATELLITE="${a#*=}" ;;
-    --json)            JSON=1 ;;
-    -h|--help)         sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-    *)                 echo "unknown flag: $a" >&2; exit 3 ;;
+    --gateway-dir=*)      GATEWAY="${a#*=}" ;;
+    --satellite-dir=*)    SATELLITE="${a#*=}" ;;
+    --clean-verify-dir=*) CLEAN_VERIFY="${a#*=}" ;;
+    --json)               JSON=1 ;;
+    -h|--help)            sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *)                    echo "unknown flag: $a" >&2; exit 3 ;;
   esac
 done
 
 GATEWAY="${GATEWAY/#\~/$HOME}"
 SATELLITE="${SATELLITE/#\~/$HOME}"
+CLEAN_VERIFY="${CLEAN_VERIFY/#\~/$HOME}"
 
 [[ -n "$GATEWAY"   ]] || { echo "--gateway-dir required"   >&2; exit 3; }
 [[ -n "$SATELLITE" ]] || { echo "--satellite-dir required" >&2; exit 3; }
@@ -129,6 +132,37 @@ if [[ -n "$loose_sample" ]]; then
   fi
 else
   record WARN S8 ".git/objects hardlinked"   "no loose objects to spot-check (fully packed · skipping · this is fine for mature repos)"
+fi
+
+# ------------------------------ S9–S11 · clean-verify (optional) ------
+# Only runs when --clean-verify-dir was provided (3-clone topology).
+if [[ -n "$CLEAN_VERIFY" ]]; then
+  if [[ -d "$CLEAN_VERIFY" ]]; then
+    record PASS S9 "clean-verify exists"            "$CLEAN_VERIFY"
+  else
+    record FAIL S9 "clean-verify exists"            "missing: $CLEAN_VERIFY"
+  fi
+
+  if [[ -d "$CLEAN_VERIFY/.git" ]] && (cd "$CLEAN_VERIFY" && git rev-parse --git-dir >/dev/null 2>&1); then
+    record PASS S10 "clean-verify is a git repo"    "$CLEAN_VERIFY/.git"
+  else
+    record FAIL S10 "clean-verify is a git repo"    "no valid .git at $CLEAN_VERIFY"
+  fi
+
+  # S11 · last-clean-verify stamp presence on gateway.
+  # Stamp is WARN-only on audit (user may not have run clean-verify yet for
+  # the current HEAD). The pre-push hook is the one that enforces match.
+  stamp="$GATEWAY/.git/last-clean-verify"
+  if [[ -r "$stamp" ]]; then
+    stamp_sha="$(awk '{print $1}' "$stamp" 2>/dev/null || echo '')"
+    if [[ -n "$stamp_sha" ]]; then
+      record PASS S11 "clean-verify stamp on gateway" "$stamp · sha=${stamp_sha:0:12}"
+    else
+      record WARN S11 "clean-verify stamp on gateway" "$stamp present but malformed"
+    fi
+  else
+    record WARN S11 "clean-verify stamp on gateway" "no stamp at $stamp · run clean-verify-run.sh before next push"
+  fi
 fi
 
 # ------------------------------ Output --------------------------------

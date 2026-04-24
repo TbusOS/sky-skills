@@ -69,6 +69,18 @@ Same shape as S2 for satellite.
   likely cloned across a filesystem boundary (hardlinks can't span fs).
   Move satellite onto the same fs as gateway, or accept the disk cost.
 
+### S9–S11 · clean-verify structural (3-clone only)
+
+Activated by `--clean-verify-dir=<path>`. Skipped in 2-clone mode.
+
+- **S9 · clean-verify exists** · pass if the dir exists · fail otherwise.
+- **S10 · clean-verify is a git repo** · pass if `.git` is valid.
+- **S11 · clean-verify stamp on gateway** ·
+  pass if `gateway/.git/last-clean-verify` is present and parseable;
+  warn if absent or malformed (user hasn't run `clean-verify-run.sh`
+  against current HEAD yet · not an error by itself, but the next push
+  will be blocked until the stamp catches up).
+
 ---
 
 ## Tier 2 · Configuration
@@ -115,6 +127,25 @@ Same shape as S2 for satellite.
   `--push-branch` you passed.
 - **Fix** · `cd satellite && git checkout <push-branch>`.
 
+### C9a–c · clean-verify config (3-clone only)
+
+Activated by `--clean-verify-dir=<path>`.
+
+- **C9a · clean-verify origin at gateway** · pass if `remote.origin.url`
+  resolves to the gateway path (same convention as C1 for satellite).
+  **Fail** if it points elsewhere (including the real upstream remote) —
+  clean-verify is a reproducibility gate, so it must fetch from the
+  same local source-of-truth that gateway pushes from. Fix:
+  `git remote set-url origin <gateway-path>`.
+- **C9b · clean-verify origin push = DISABLED** · pass if pushurl is
+  the literal `DISABLED`. Fail otherwise. Fix:
+  `git remote set-url --push origin DISABLED`.
+- **C9c · clean-verify upstream push = DISABLED** · only runs if the
+  clean-verify repo has an `upstream` remote (optional diagnostic
+  remote pointing at the real URL). If present, its pushurl must also
+  be `DISABLED` — clean-verify must never push to any remote. Fix:
+  `git remote set-url --push upstream DISABLED`.
+
 ---
 
 ## Tier 3 · Behavioural
@@ -151,6 +182,17 @@ Same shape as S2 for satellite.
   origin is now broken.
 - **Fix** · update satellite origin: `cd satellite && git remote set-url
   origin <new-gateway-path>`.
+
+### B4 · clean-verify push is rejected (3-clone only)
+
+Activated by `--clean-verify-dir=<path>`.
+
+- **Pass** · `cd clean-verify && git push --dry-run origin HEAD` is
+  rejected with "DISABLED" / "does not accept" / "unable" / "not allowed".
+- **Fail** · push was not rejected. The DISABLED escape hatch on
+  clean-verify is not holding.
+- **Fix** · verify C9b — if config is right but B4 still fails, file an
+  issue against the skill.
 
 ---
 

@@ -135,3 +135,46 @@ Count yes answers:
 
 → See `patterns.md` (v1 — planned) for the fallback pattern that fits
   your project size.
+
+---
+
+## Bonus · A 5th question (only relevant after the first 4 cleared)
+
+**Do you need a reproducibility gate?** — add `--clean-verify-dir=<path>`
+on top of the 2-clone bootstrap if yes, stick with 2-clone if no.
+
+### Q5 · Have you been burned by "works on dev clone, fails on cold clone / CI"?
+
+**EN** — Does a meaningful fraction of your rollbacks / push reverts come
+from bugs that **pass your iteration clone's build** but fail on a cold
+tree (CI / different filesystem / HDD vs SSD)? Common causes: stale build
+artefacts satisfying a missing include, generated files that weren't
+checked into git, OS filesystem cache masking a read ordering bug.
+
+**ZH** — 你的回滚/撤 push 里,有没有相当比例是这类 bug:**在迭代 clone
+上编过了**,但到了冷启动的 CI / 不同文件系统 / HDD 就挂?常见根因:旧的
+编译产物满足了缺失的 include、该进 git 的生成文件没进、OS 缓存掩盖了
+文件读顺序 bug。
+
+### If yes · 回答"是"
+
+Add `--clean-verify-dir=/mnt/hdd/<name>-clean-verify` to `bootstrap.sh`.
+Gets you:
+- A 3rd clone on a different disk (HDD typically, or a separate machine).
+- `clean-verify-run.sh`-driven gate: sync → `git clean -fdx` → full build.
+- Gateway's pre-push hook refuses to push anything clean-verify hasn't
+  stamped.
+- `gated-dual-clone-audit` runs 4 extra gates to re-verify the topology.
+
+Cost: the 3rd clone's disk space + a full build's worth of time before
+each push + the discipline to actually run `clean-verify-run.sh`.
+
+### If no · 回答"否"
+
+Don't add the 3rd clone. It's cost with no benefit when your
+reproducibility discipline is already tight (everything the build needs is
+tracked in git, `.gitignore` is accurate, CI and dev use the same
+filesystem type).
+
+Revisit if you start seeing push-then-rollback cycles — the 5th question
+is revisitable, not a one-shot decision.

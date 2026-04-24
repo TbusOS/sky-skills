@@ -12,24 +12,27 @@ set -eu
 
 GATEWAY=""
 SATELLITE=""
+CLEAN_VERIFY=""
 UPSTREAM_BRANCH=""
 PUSH_BRANCH=""
 JSON=0
 
 for a in "$@"; do
   case "$a" in
-    --gateway-dir=*)     GATEWAY="${a#*=}" ;;
-    --satellite-dir=*)   SATELLITE="${a#*=}" ;;
-    --upstream-branch=*) UPSTREAM_BRANCH="${a#*=}" ;;
-    --push-branch=*)     PUSH_BRANCH="${a#*=}" ;;
-    --json)              JSON=1 ;;
-    -h|--help)           sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-    *)                   echo "unknown flag: $a" >&2; exit 3 ;;
+    --gateway-dir=*)      GATEWAY="${a#*=}" ;;
+    --satellite-dir=*)    SATELLITE="${a#*=}" ;;
+    --clean-verify-dir=*) CLEAN_VERIFY="${a#*=}" ;;
+    --upstream-branch=*)  UPSTREAM_BRANCH="${a#*=}" ;;
+    --push-branch=*)      PUSH_BRANCH="${a#*=}" ;;
+    --json)               JSON=1 ;;
+    -h|--help)            sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *)                    echo "unknown flag: $a" >&2; exit 3 ;;
   esac
 done
 
 GATEWAY="${GATEWAY/#\~/$HOME}"
 SATELLITE="${SATELLITE/#\~/$HOME}"
+CLEAN_VERIFY="${CLEAN_VERIFY/#\~/$HOME}"
 
 [[ -n "$GATEWAY"   ]] || { echo "--gateway-dir required"   >&2; exit 3; }
 [[ -n "$SATELLITE" ]] || { echo "--satellite-dir required" >&2; exit 3; }
@@ -102,6 +105,18 @@ else
     record FAIL B3 "satellite fetch from gateway works"  "fetch errored: $(echo "$b3_out" | head -1)"
   else
     record PASS B3 "satellite fetch from gateway works"  "branch $PUSH_BRANCH reachable via origin"
+  fi
+fi
+
+# ------------------------------ B4 · clean-verify push hard-block -----
+# Only runs when --clean-verify-dir was provided. Tries a dry-run push from
+# clean-verify · must be rejected (pushurl DISABLED).
+if [[ -n "$CLEAN_VERIFY" && -d "$CLEAN_VERIFY/.git" ]]; then
+  b4_out="$(cd "$CLEAN_VERIFY" && git push --dry-run origin HEAD 2>&1 || true)"
+  if echo "$b4_out" | grep -qiE "DISABLED|does not accept|unable|not allowed"; then
+    record PASS B4 "clean-verify push is rejected"      "DISABLED path holds"
+  else
+    record FAIL B4 "clean-verify push is rejected"      "push was NOT rejected: $(echo "$b4_out" | head -1)"
   fi
 fi
 

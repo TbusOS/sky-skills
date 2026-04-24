@@ -8,8 +8,12 @@
 # Usage:
 #   bin/gated-dual-clone-audit \
 #     --gateway-dir=<path> --satellite-dir=<path> \
+#     [--clean-verify-dir=<path>] \
 #     [--upstream-branch=<name>] [--push-branch=<name>] \
 #     [--strict] [--json] [--critic]
+#
+# If --clean-verify-dir is passed (3-clone topology), the audit adds four
+# extra gates (S9-S11 + C9 + B4) that verify the third clone's state.
 #
 # Exit code:
 #   0 all pass · 1 at least one WARN (any tier) · 2 at least one FAIL (any tier)
@@ -26,6 +30,7 @@ SKILL_DIR="$(cd "$SELF_DIR/.." && pwd)"
 
 GATEWAY=""
 SATELLITE=""
+CLEAN_VERIFY=""
 UPSTREAM_BRANCH=""
 PUSH_BRANCH=""
 STRICT=0
@@ -34,15 +39,16 @@ CRITIC=0
 
 for a in "$@"; do
   case "$a" in
-    --gateway-dir=*)     GATEWAY="${a#*=}" ;;
-    --satellite-dir=*)   SATELLITE="${a#*=}" ;;
-    --upstream-branch=*) UPSTREAM_BRANCH="${a#*=}" ;;
-    --push-branch=*)     PUSH_BRANCH="${a#*=}" ;;
-    --strict)            STRICT=1 ;;
-    --json)              JSON=1 ;;
-    --critic)            CRITIC=1 ;;
-    -h|--help)           sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-    *)                   echo "unknown flag: $a" >&2; exit 3 ;;
+    --gateway-dir=*)      GATEWAY="${a#*=}" ;;
+    --satellite-dir=*)    SATELLITE="${a#*=}" ;;
+    --clean-verify-dir=*) CLEAN_VERIFY="${a#*=}" ;;
+    --upstream-branch=*)  UPSTREAM_BRANCH="${a#*=}" ;;
+    --push-branch=*)      PUSH_BRANCH="${a#*=}" ;;
+    --strict)             STRICT=1 ;;
+    --json)               JSON=1 ;;
+    --critic)             CRITIC=1 ;;
+    -h|--help)            sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *)                    echo "unknown flag: $a" >&2; exit 3 ;;
   esac
 done
 
@@ -65,6 +71,7 @@ trap 'rm -rf "$tmp"' EXIT
 
 # Build argument list for each tier.
 common_args=(--gateway-dir="$GATEWAY" --satellite-dir="$SATELLITE")
+[[ -n "$CLEAN_VERIFY" ]] && common_args+=(--clean-verify-dir="$CLEAN_VERIFY")
 [[ -n "$UPSTREAM_BRANCH" ]] && t3_args=(--upstream-branch="$UPSTREAM_BRANCH") || t3_args=()
 [[ -n "$PUSH_BRANCH"     ]] && { t2_push_args=(--push-branch="$PUSH_BRANCH"); t3_push_args=(--push-branch="$PUSH_BRANCH"); } || { t2_push_args=(); t3_push_args=(); }
 

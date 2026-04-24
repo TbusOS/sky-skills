@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# bootstrap.sh — one-shot build of a gated-dual-clone topology.
+# bootstrap.sh — one-shot build of a gated-dual-clone topology (2-clone or
+# 3-clone with a reproducibility gate).
 #
 # Creates a gateway repo (push source) and a satellite repo (fetch-only build
 # tree) for projects where the upstream integration branch is protected and
@@ -7,13 +8,21 @@
 # so a stray `git push` from the compile tree is physically unable to reach
 # the remote.
 #
-# 创建 gateway + satellite 双 clone 拓扑。gateway 负责 push,satellite 只读
-# 编译。satellite 的 origin 指向本地 gateway 路径,编译树无法触达远程。
+# Optional 3rd clone: a clean-verify repo on a separate disk (typically HDD
+# for hardware-diversity reproducibility · or a separate machine). Runs
+# from-scratch full builds before every push, and the gateway pre-push hook
+# refuses to push unless clean-verify has OK'd the exact commit.
+#
+# 创建 gateway + satellite 双 clone 拓扑(或 + clean-verify 第 3 仓,push 前
+# reproducibility 关卡)。gateway 负责 push,satellite 只读编译。satellite 的
+# origin 指向本地 gateway 路径,编译树无法触达远程。clean-verify 在异硬盘/
+# 异机器从零全量编,编通过才允许 push。
 #
 # Usage:
 #   bootstrap.sh --remote=<url> --upstream-branch=<name> --push-branch=<name> \
 #                --gateway-dir=<path> --satellite-dir=<path> \
 #                --user-email=<email> --user-name=<name> \
+#                [--clean-verify-dir=<path>] \
 #                [--protect=<regex>] [--dry-run] [--force] [--skip-gateway]
 #
 # Exit codes:
@@ -30,6 +39,7 @@ UPSTREAM_BRANCH=""
 PUSH_BRANCH=""
 GATEWAY_DIR=""
 SATELLITE_DIR=""
+CLEAN_VERIFY_DIR=""
 EMAIL=""
 NAME=""
 PROTECT=""
@@ -50,6 +60,7 @@ for a in "$@"; do
     --push-branch=*)      PUSH_BRANCH="${a#*=}" ;;
     --gateway-dir=*)      GATEWAY_DIR="${a#*=}" ;;
     --satellite-dir=*)    SATELLITE_DIR="${a#*=}" ;;
+    --clean-verify-dir=*) CLEAN_VERIFY_DIR="${a#*=}" ;;
     --user-email=*)       EMAIL="${a#*=}" ;;
     --user-name=*)        NAME="${a#*=}" ;;
     --protect=*)          PROTECT="${a#*=}" ;;
@@ -84,6 +95,7 @@ fi
 # Expand ~ in dir paths.
 GATEWAY_DIR="${GATEWAY_DIR/#\~/$HOME}"
 SATELLITE_DIR="${SATELLITE_DIR/#\~/$HOME}"
+CLEAN_VERIFY_DIR="${CLEAN_VERIFY_DIR/#\~/$HOME}"
 
 # ------------------------------ Dry-run helpers -----------------------
 run() {
@@ -120,6 +132,11 @@ fi
 sat_parent="$(dirname "$SATELLITE_DIR")"
 [[ -d "$sat_parent" && -w "$sat_parent" ]] || {
   echo "satellite parent '$sat_parent' missing or not writeable" >&2; exit 2; }
+if [[ -n "$CLEAN_VERIFY_DIR" ]]; then
+  cv_parent="$(dirname "$CLEAN_VERIFY_DIR")"
+  [[ -d "$cv_parent" && -w "$cv_parent" ]] || {
+    echo "clean-verify parent '$cv_parent' missing or not writeable" >&2; exit 2; }
+fi
 
 # Target dirs must not exist (or be empty with --force).
 check_target() {
@@ -143,6 +160,7 @@ else
   [[ -d "$GATEWAY_DIR" ]] || { echo "--skip-gateway set but gateway '$GATEWAY_DIR' does not exist" >&2; exit 2; }
 fi
 check_target "$SATELLITE_DIR" "satellite-dir"
+[[ -n "$CLEAN_VERIFY_DIR" ]] && check_target "$CLEAN_VERIFY_DIR" "clean-verify-dir"
 
 # Optional: SSH connectivity probe (ssh-based remotes only). Non-fatal — the
 # clone itself will be the real test.
@@ -156,10 +174,11 @@ case "$REMOTE" in
 esac
 
 echo "  git: $git_version"
-echo "  gateway:   $GATEWAY_DIR$([[ $SKIP_GATEWAY -eq 1 ]] && echo ' (existing)')"
-echo "  satellite: $SATELLITE_DIR"
-echo "  upstream:  ${REMOTE:-(skip-gateway: using existing)} · branch ${UPSTREAM_BRANCH:-(existing)}"
-echo "  push-branch: $PUSH_BRANCH"
+echo "  gateway:       $GATEWAY_DIR$([[ $SKIP_GATEWAY -eq 1 ]] && echo ' (existing)')"
+echo "  satellite:     $SATELLITE_DIR"
+[[ -n "$CLEAN_VERIFY_DIR" ]] && echo "  clean-verify:  $CLEAN_VERIFY_DIR"
+echo "  upstream:      ${REMOTE:-(skip-gateway: using existing)} · branch ${UPSTREAM_BRANCH:-(existing)}"
+echo "  push-branch:   $PUSH_BRANCH"
 echo "  protect regex: $PROTECT"
 
 # ------------------------------ Step 2 · Clone gateway ----------------
@@ -189,7 +208,9 @@ fi
 # nothing). Now explicitly skip.
 if [[ $SKIP_GATEWAY -eq 0 ]]; then
   step "Step 4/8 · Install pre-push hook on gateway"
-  run "bash \"$SCRIPT_DIR/install-hooks.sh\" --repo=\"$GATEWAY_DIR\" --protect=\"$PROTECT\"$([[ $DRY_RUN -eq 1 ]] && echo ' --dry-run')" || exit 4
+  enforce_cv_flag=""
+  [[ -n "$CLEAN_VERIFY_DIR" ]] && enforce_cv_flag=" --enforce-clean-verify"
+  run "bash \"$SCRIPT_DIR/install-hooks.sh\" --repo=\"$GATEWAY_DIR\" --protect=\"$PROTECT\"${enforce_cv_flag}$([[ $DRY_RUN -eq 1 ]] && echo ' --dry-run')" || exit 4
 else
   step "Step 4/8 · Install pre-push hook · SKIPPED (--skip-gateway: gateway hook assumed already in place)"
 fi
@@ -198,12 +219,46 @@ fi
 step "Step 5/8 · Clone satellite from gateway (local path · hardlinked .git/objects)"
 run "git clone \"$GATEWAY_DIR\" \"$SATELLITE_DIR\"" || exit 3
 
+# ------------------------------ Step 5b · Clone clean-verify (optional) -----
+# The reproducibility gate. On a separate disk (typically HDD for hardware-
+# diversity · catches SSD-cache / filesystem-specific build bugs) or on a
+# separate machine. Clones from the local gateway (same as satellite) —
+# NEVER from the upstream remote — so 'push the exact commit clean-verify
+# OK'd' is a well-defined question.
+if [[ -n "$CLEAN_VERIFY_DIR" ]]; then
+  step "Step 5b · Clone clean-verify from gateway (local path · pre-push reproducibility gate)"
+  run "git clone \"$GATEWAY_DIR\" \"$CLEAN_VERIFY_DIR\"" || exit 3
+fi
+
 # ------------------------------ Step 6 · Configure satellite ----------
 step "Step 6/8 · Configure satellite (disable push, set identity, check out push-branch)"
 run "cd \"$SATELLITE_DIR\" && git remote set-url --push origin DISABLED" || exit 4
 run "cd \"$SATELLITE_DIR\" && git config user.email \"$EMAIL\"" || exit 4
 run "cd \"$SATELLITE_DIR\" && git config user.name \"$NAME\"" || exit 4
 run "cd \"$SATELLITE_DIR\" && git checkout \"$PUSH_BRANCH\"" || exit 4
+
+# ------------------------------ Step 6b · Configure clean-verify ------
+# Same hardening as satellite: origin push disabled. Plus an optional
+# 'upstream' remote pointing at the real remote URL — for diagnostic-only
+# fetch ability (never pushes from clean-verify · pushurl DISABLED too).
+if [[ -n "$CLEAN_VERIFY_DIR" ]]; then
+  step "Step 6b · Configure clean-verify (push DISABLED on both remotes, check out push-branch)"
+  run "cd \"$CLEAN_VERIFY_DIR\" && git remote set-url --push origin DISABLED" || exit 4
+  run "cd \"$CLEAN_VERIFY_DIR\" && git config user.email \"$EMAIL\"" || exit 4
+  run "cd \"$CLEAN_VERIFY_DIR\" && git config user.name \"$NAME\"" || exit 4
+  run "cd \"$CLEAN_VERIFY_DIR\" && git checkout \"$PUSH_BRANCH\"" || exit 4
+  # Add diagnostic upstream remote with push DISABLED. If REMOTE is unset
+  # (--skip-gateway with a gateway that has its own origin), pull it from
+  # the gateway's origin config.
+  eff_remote="$REMOTE"
+  if [[ -z "$eff_remote" ]]; then
+    eff_remote="$(cd "$GATEWAY_DIR" && git remote get-url origin 2>/dev/null || echo '')"
+  fi
+  if [[ -n "$eff_remote" ]]; then
+    run "cd \"$CLEAN_VERIFY_DIR\" && git remote add upstream \"$eff_remote\"" || true
+    run "cd \"$CLEAN_VERIFY_DIR\" && git remote set-url --push upstream DISABLED" || true
+  fi
+fi
 
 # ------------------------------ Step 7 · Post-setup gates -------------
 step "Step 7/8 · Post-setup · 3 safety gates"
@@ -253,23 +308,62 @@ else
   else
     echo "  · Gate C · skipped (--skip-gateway)"
   fi
+
+  # Gate D · clean-verify push URLs (origin + upstream if present) must be
+  # the literal DISABLED. Only runs when --clean-verify-dir was provided.
+  if [[ -n "$CLEAN_VERIFY_DIR" ]]; then
+    cv_ok=1
+    cv_origin_push="$(cd "$CLEAN_VERIFY_DIR" && git remote get-url --push origin 2>&1 || true)"
+    if ! echo "$cv_origin_push" | grep -qi "DISABLED"; then
+      echo "  ✗ Gate D FAIL · clean-verify origin push URL is '$cv_origin_push'" >&2
+      cv_ok=0
+    fi
+    if (cd "$CLEAN_VERIFY_DIR" && git remote | grep -qx upstream); then
+      cv_up_push="$(cd "$CLEAN_VERIFY_DIR" && git remote get-url --push upstream 2>&1 || true)"
+      if ! echo "$cv_up_push" | grep -qi "DISABLED"; then
+        echo "  ✗ Gate D FAIL · clean-verify upstream push URL is '$cv_up_push'" >&2
+        cv_ok=0
+      fi
+    fi
+    if [[ $cv_ok -eq 1 ]]; then
+      echo "  ✓ Gate D · Clean-verify push URLs = DISABLED (origin$(cd "$CLEAN_VERIFY_DIR" && git remote | grep -qx upstream && echo ' + upstream'))"
+    else
+      exit 5
+    fi
+  fi
 fi
 
 # ------------------------------ Step 8 · Summary ----------------------
 step "Step 8/8 · Ready"
-echo "  gateway   · $GATEWAY_DIR"
-echo "  satellite · $SATELLITE_DIR"
+echo "  gateway      · $GATEWAY_DIR"
+echo "  satellite    · $SATELLITE_DIR"
+[[ -n "$CLEAN_VERIFY_DIR" ]] && echo "  clean-verify · $CLEAN_VERIFY_DIR"
 echo ""
-echo "  Gateway origin:   $(cd "$GATEWAY_DIR" 2>/dev/null && git remote get-url origin 2>/dev/null || echo '(dry-run)')"
-echo "  Satellite origin: $(cd "$SATELLITE_DIR" 2>/dev/null && git remote get-url origin 2>/dev/null || echo '(dry-run)')"
-echo "  Satellite push:   $(cd "$SATELLITE_DIR" 2>/dev/null && git remote get-url --push origin 2>/dev/null || echo '(dry-run)')"
+echo "  Gateway origin:     $(cd "$GATEWAY_DIR" 2>/dev/null && git remote get-url origin 2>/dev/null || echo '(dry-run)')"
+echo "  Satellite origin:   $(cd "$SATELLITE_DIR" 2>/dev/null && git remote get-url origin 2>/dev/null || echo '(dry-run)')"
+echo "  Satellite push:     $(cd "$SATELLITE_DIR" 2>/dev/null && git remote get-url --push origin 2>/dev/null || echo '(dry-run)')"
+if [[ -n "$CLEAN_VERIFY_DIR" ]]; then
+  echo "  Clean-verify origin:  $(cd "$CLEAN_VERIFY_DIR" 2>/dev/null && git remote get-url origin 2>/dev/null || echo '(dry-run)')"
+  echo "  Clean-verify push:    $(cd "$CLEAN_VERIFY_DIR" 2>/dev/null && git remote get-url --push origin 2>/dev/null || echo '(dry-run)')"
+fi
 echo ""
 echo "  Next steps:"
 echo "    1. edit code in gateway, commit on branch '$PUSH_BRANCH'"
 echo "    2. run 'scripts/sync-satellite.sh --satellite-dir=$SATELLITE_DIR --mode=reset-hard' before each build"
 echo "    3. build in satellite · your build commands (make / ninja / soong / etc.)"
-echo "    4. push from gateway · 'git push origin $PUSH_BRANCH'"
-echo "    5. raise MR/PR · $PUSH_BRANCH → $UPSTREAM_BRANCH on the hosting platform"
+if [[ -n "$CLEAN_VERIFY_DIR" ]]; then
+  echo "    4. before each push · run clean-verify gate:"
+  echo "         scripts/clean-verify-run.sh \\"
+  echo "           --gateway-dir=$GATEWAY_DIR \\"
+  echo "           --clean-verify-dir=$CLEAN_VERIFY_DIR \\"
+  echo "           --push-branch=$PUSH_BRANCH \\"
+  echo "           --build-cmd='<your full-build command>'"
+  echo "    5. if clean-verify passes · push from gateway · 'git push origin $PUSH_BRANCH'"
+  echo "    6. raise MR/PR · $PUSH_BRANCH → $UPSTREAM_BRANCH on the hosting platform"
+else
+  echo "    4. push from gateway · 'git push origin $PUSH_BRANCH'"
+  echo "    5. raise MR/PR · $PUSH_BRANCH → $UPSTREAM_BRANCH on the hosting platform"
+fi
 echo ""
 echo "  See references/daily-workflow.md for the cheatsheet."
 
