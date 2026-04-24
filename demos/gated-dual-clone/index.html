@@ -559,7 +559,7 @@
         <div>
           <h3 class="gdc-q__title">
             <span class="lang-en">Build &gt; 10 min, or &gt; 500 MB of artefacts?</span>
-            <span class="lang-zh">构建 &gt; 10 分钟，或产物 &gt; 500 MB？</span>
+            <span class="lang-zh">构建 &gt； 10 分钟，或产物 &gt； 500 MB？</span>
           </h3>
           <p class="gdc-q__body">
             <span class="lang-en">Look at CI timing and <code>du -sh out/ build/</code>. Heavy builds are what make the separate satellite tree pay for itself.</span>
@@ -708,6 +708,180 @@ git push origin release --dry-run
         <span class="lang-en"><b>Client-side hooks are advisory, not enforcement.</b> <code>--no-verify</code> bypasses them. Real protection is server-side protected-branch rules on GitLab / GitHub / Gerrit. This skill layers on top of that — it does not replace it.</span>
         <span class="lang-zh"><b>客户端 hook 是教学性质的提醒，不是强制边界。</b><code>--no-verify</code> 可以绕过。真正的保护是 GitLab / GitHub / Gerrit 服务端的 protected branch 规则。本 skill 只是在它之上加一层，不替代它。</span>
       </span>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== 3-CLONE OPTION · REPRODUCIBILITY GATE =========================== -->
+<section class="anth-section" id="reproducibility">
+  <div class="anth-container">
+    <p class="gdc-kicker">
+      <span class="lang-en">Optional · reproducibility gate</span>
+      <span class="lang-zh">可选 · reproducibility 关卡</span>
+    </p>
+    <h2>
+      <span class="lang-en">A 3rd clone for when "works on dev disk, fails on CI" has a real cost</span>
+      <span class="lang-zh">第 3 仓 —— 当 "dev 盘能编，CI/HDD 挂" 真的要付代价时</span>
+    </h2>
+    <p class="gdc-lede">
+      <span class="lang-en">Pass <code>--clean-verify-dir=&lt;path&gt;</code> (ideally on a cold HDD or a separate machine) and <code>bootstrap.sh</code> adds a third clone plus a pre-push gate: every push is refused unless a from-scratch full build has stamped the exact commit.</span>
+      <span class="lang-zh">加 <code>--clean-verify-dir=&lt;path&gt;</code>(推荐冷 HDD / 异机器)，<code>bootstrap.sh</code> 会加第 3 仓 + 一道 pre-push 关卡：没经过从零全量编 stamp 的 commit 推不出去。</span>
+    </p>
+
+    <figure style="margin: 0 auto var(--space-7); max-width: 1080px; text-align: center;">
+      <svg viewBox="0 0 1080 360" role="img" aria-label="3-clone topology — upstream on top, gateway in the middle pushes up, satellite on the left fetches from gateway, clean-verify on the right fetches from gateway and stamps verification back to gateway." style="display:block; width:100%; height:auto;">
+        <defs>
+          <marker id="gdc3-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#6b6a5f"/>
+          </marker>
+          <marker id="gdc3-arr-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#d97757"/>
+          </marker>
+        </defs>
+
+        <!-- Upstream -->
+        <g transform="translate(440 20)">
+          <rect width="200" height="56" rx="8" fill="#ffffff" stroke="#e0dcc9" stroke-width="1.5"/>
+          <text x="100" y="25" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="700" letter-spacing="0.1em" fill="#6b6a5f">UPSTREAM</text>
+          <text x="100" y="43" text-anchor="middle" font-family="Poppins,sans-serif" font-size="12" fill="#141413">gitlab / github / gerrit</text>
+        </g>
+
+        <!-- Gateway -->
+        <g transform="translate(440 156)">
+          <rect width="200" height="72" rx="8" fill="#fef5f0" stroke="#d97757" stroke-width="2"/>
+          <text x="100" y="25" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="700" letter-spacing="0.1em" fill="#d97757">GATEWAY · SSD</text>
+          <text x="100" y="45" text-anchor="middle" font-family="Poppins,sans-serif" font-size="12" fill="#141413">dev + commits + push</text>
+          <text x="100" y="61" text-anchor="middle" font-family="Lora,serif" font-size="10" fill="#6b6a5f" font-style="italic">pre-push: protect + stamp-match</text>
+        </g>
+
+        <!-- Satellite -->
+        <g transform="translate(60 156)">
+          <rect width="220" height="72" rx="8" fill="#ffffff" stroke="#6b6a5f" stroke-width="1.5"/>
+          <text x="110" y="25" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="700" letter-spacing="0.1em" fill="#6b6a5f">SATELLITE · SSD</text>
+          <text x="110" y="45" text-anchor="middle" font-family="Poppins,sans-serif" font-size="12" fill="#141413">iteration build</text>
+          <text x="110" y="61" text-anchor="middle" font-family="Lora,serif" font-size="10" fill="#6b6a5f" font-style="italic">push = DISABLED</text>
+        </g>
+
+        <!-- Clean-verify -->
+        <g transform="translate(800 156)">
+          <rect width="220" height="72" rx="8" fill="#ffffff" stroke="#6b6a5f" stroke-width="1.5"/>
+          <text x="110" y="25" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="700" letter-spacing="0.1em" fill="#6b6a5f">CLEAN-VERIFY · HDD</text>
+          <text x="110" y="45" text-anchor="middle" font-family="Poppins,sans-serif" font-size="12" fill="#141413">from-scratch full build</text>
+          <text x="110" y="61" text-anchor="middle" font-family="Lora,serif" font-size="10" fill="#6b6a5f" font-style="italic">push = DISABLED · origin + upstream</text>
+        </g>
+
+        <!-- Stamp note -->
+        <g transform="translate(380 270)">
+          <rect width="320" height="58" rx="10" fill="#f0ede3" stroke="#e0dcc9" stroke-width="1"/>
+          <text x="160" y="23" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="700" letter-spacing="0.08em" fill="#d97757">GATEWAY/.GIT/LAST-CLEAN-VERIFY</text>
+          <text x="160" y="41" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#141413">&lt;sha&gt;  &lt;ts&gt;  sha256(build-cmd)</text>
+          <text x="160" y="54" text-anchor="middle" font-family="Lora,serif" font-size="9.5" fill="#6b6a5f" font-style="italic">written on build pass · read by pre-push</text>
+        </g>
+
+        <!-- Arrows -->
+        <!-- Gateway → upstream (push) -->
+        <path d="M 540 156 L 540 76" stroke="#d97757" stroke-width="2" fill="none" marker-end="url(#gdc3-arr-orange)"/>
+        <text x="552" y="116" font-family="Poppins,sans-serif" font-size="10.5" fill="#d97757" font-weight="600">push</text>
+        <!-- Gateway → satellite (local path fetch) -->
+        <path d="M 440 192 L 280 192" stroke="#6b6a5f" stroke-width="1.5" fill="none" marker-end="url(#gdc3-arr)"/>
+        <text x="300" y="186" font-family="Poppins,sans-serif" font-size="10.5" fill="#6b6a5f">fetch (local path)</text>
+        <!-- Gateway → clean-verify (local path fetch) -->
+        <path d="M 640 192 L 800 192" stroke="#6b6a5f" stroke-width="1.5" fill="none" marker-end="url(#gdc3-arr)"/>
+        <text x="660" y="186" font-family="Poppins,sans-serif" font-size="10.5" fill="#6b6a5f">fetch (local path)</text>
+        <!-- clean-verify → stamp -->
+        <path d="M 860 228 Q 860 270 720 288" stroke="#d97757" stroke-width="1.5" fill="none" marker-end="url(#gdc3-arr-orange)" stroke-dasharray="4 3"/>
+        <!-- stamp → gateway (read) -->
+        <path d="M 420 288 Q 280 270 500 228" stroke="#6b6a5f" stroke-width="1.5" fill="none" marker-end="url(#gdc3-arr)" stroke-dasharray="4 3"/>
+      </svg>
+      <figcaption style="margin-top: var(--space-3); font-family: var(--font-heading); font-size: 12.5px; color: var(--anth-text-secondary); letter-spacing: 0.02em;">
+        <span class="lang-en">Only gateway reaches upstream. Satellite and clean-verify both fetch from gateway's local path — no network route out, pushurl DISABLED on both. On build pass, clean-verify writes a stamp; gateway's pre-push hook reads it.</span>
+        <span class="lang-zh">只有 gateway 能到上游。Satellite 和 clean-verify 都从 gateway 本地路径 fetch —— 没有对外网络路由，pushurl 都禁用。编译通过时 clean-verify 写 stamp，gateway pre-push hook 读。</span>
+      </figcaption>
+    </figure>
+
+    <h3 style="margin-top: var(--space-6);">
+      <span class="lang-en">Bootstrap with 3-clone</span>
+      <span class="lang-zh">3 仓模式搭建</span>
+    </h3>
+
+    <pre class="gdc-code" aria-label="bootstrap command with --clean-verify-dir"><span class="cmd">scripts/bootstrap.sh</span> <span class="cont">\</span>
+  <span class="flag">--remote</span>              <span class="val">git@gitlab.example.com:team/project.git</span> <span class="cont">\</span>
+  <span class="flag">--upstream-branch</span>     <span class="val">release</span>                                 <span class="cont">\</span>
+  <span class="flag">--push-branch</span>         <span class="val">feature/alice-auth</span>                      <span class="cont">\</span>
+  <span class="flag">--gateway-dir</span>         <span class="val">~/projects/foo-work</span>                     <span class="cont">\</span>
+  <span class="flag">--satellite-dir</span>       <span class="val">~/projects/foo-verify</span>                   <span class="cont">\</span>
+  <span class="flag">--clean-verify-dir</span>    <span class="val">/mnt/hdd/foo-clean-verify</span>               <span class="cont">\</span>
+  <span class="flag">--user-email</span>          <span class="val">alice@example.com</span>                       <span class="cont">\</span>
+  <span class="flag">--user-name</span>           <span class="val">alice</span>
+
+<span class="comment"># <span class="lang-en">adds Step 5b (clone clean-verify) + Step 6b (configure pushurl=DISABLED on origin + upstream)</span><span class="lang-zh">追加 Step 5b(clone clean-verify)+ Step 6b(origin + upstream 双重 pushurl=DISABLED)</span></span>
+<span class="comment"># <span class="lang-en">adds Gate D post-setup + passes --enforce-clean-verify to install-hooks.sh</span><span class="lang-zh">追加 Gate D 验证 + 自动给 install-hooks.sh 传 --enforce-clean-verify</span></span></pre>
+
+    <h3 style="margin-top: var(--space-7);">
+      <span class="lang-en">Before each push · the gate</span>
+      <span class="lang-zh">每次 push 前 · 跑关卡</span>
+    </h3>
+
+    <pre class="gdc-code" aria-label="clean-verify-run command"><span class="cmd">scripts/clean-verify-run.sh</span> <span class="cont">\</span>
+  <span class="flag">--gateway-dir</span>        <span class="val">~/projects/foo-work</span>           <span class="cont">\</span>
+  <span class="flag">--clean-verify-dir</span>   <span class="val">/mnt/hdd/foo-clean-verify</span>     <span class="cont">\</span>
+  <span class="flag">--push-branch</span>        <span class="val">feature/alice-auth</span>            <span class="cont">\</span>
+  <span class="flag">--build-cmd</span>          <span class="val">'make -j$(nproc) all test'</span>    <span class="cont">\</span>
+  <span class="flag">--yes</span>
+
+<span class="comment"># <span class="lang-en">1. fetch + reset --hard from gateway   2. git clean -fdx   3. run --build-cmd</span><span class="lang-zh">1. 从 gateway fetch + reset --hard   2. git clean -fdx   3. 跑 --build-cmd</span></span>
+<span class="comment"># <span class="lang-en">4. on pass: write gateway/.git/last-clean-verify  5. next git push is allowed</span><span class="lang-zh">4. 通过则写 stamp  5. 下一次 git push 才放行</span></span>
+<span class="comment"># <span class="lang-en">emergency bypass:  git push --push-option=allow-unverified</span><span class="lang-zh">紧急 bypass：  git push --push-option=allow-unverified</span></span></pre>
+
+    <div class="gdc-gates" style="margin-top: var(--space-7);">
+      <figure class="gdc-gate">
+        <div class="gdc-gate__icon" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 6 H22 V20 H4 Z" stroke="currentColor" stroke-width="2"/><path d="M8 10 L14 15 M14 10 L8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="gdc-gate__title">
+          <span class="lang-en">What 3-clone catches</span>
+          <span class="lang-zh">3 仓多抓什么</span>
+        </h3>
+        <ul class="gdc-gate__body" style="margin: 0; padding-left: 1.15em; list-style: disc;">
+          <li><span class="lang-en">SSD-cache-only bugs (cold HDD exposes them)</span><span class="lang-zh">SSD 缓存独有的 bug(冷 HDD 暴露)</span></li>
+          <li><span class="lang-en">Stale build artefacts that satisfy missing <code>#include</code></span><span class="lang-zh">旧产物掩盖了缺的 <code>#include</code></span></li>
+          <li><span class="lang-en">Dirty-tree bugs · edits author forgot</span><span class="lang-zh">未提交改动躲在 SSD 里</span></li>
+          <li><span class="lang-en">Build-command drift (hashed into stamp)</span><span class="lang-zh">build command 漂移（sha256 进 stamp）</span></li>
+        </ul>
+        <figcaption><span class="lang-en">Failure modes 2-clone doesn't catch.</span><span class="lang-zh">2 仓抓不到的失败模式。</span></figcaption>
+      </figure>
+
+      <figure class="gdc-gate">
+        <div class="gdc-gate__icon" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="9" stroke="currentColor" stroke-width="2"/><path d="M13 5 V13 L18 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="gdc-gate__title">
+          <span class="lang-en">Cost of the 3rd clone</span>
+          <span class="lang-zh">第 3 仓的代价</span>
+        </h3>
+        <ul class="gdc-gate__body" style="margin: 0; padding-left: 1.15em; list-style: disc;">
+          <li><span class="lang-en">Extra disk (one more checkout on HDD)</span><span class="lang-zh">额外磁盘(HDD 一份 checkout)</span></li>
+          <li><span class="lang-en">One full-build wait before each push</span><span class="lang-zh">每次 push 前等一次全量编</span></li>
+          <li><span class="lang-en">Discipline to run <code>clean-verify-run.sh</code></span><span class="lang-zh">要养成跑 <code>clean-verify-run.sh</code> 的习惯</span></li>
+          <li><span class="lang-en">Revisit: skip if no reproducibility pain</span><span class="lang-zh">没 reproducibility 痛就别开</span></li>
+        </ul>
+        <figcaption><span class="lang-en">The bill you pay for the gate.</span><span class="lang-zh">开这道关卡的账。</span></figcaption>
+      </figure>
+
+      <figure class="gdc-gate">
+        <div class="gdc-gate__icon" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 3 L23 7 V13 C23 18 18.5 22 13 23 C7.5 22 3 18 3 13 V7 Z" stroke="currentColor" stroke-width="2"/><path d="M9 13 L12 16 L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 class="gdc-gate__title">
+          <span class="lang-en">Audit auto-detects 3-clone</span>
+          <span class="lang-zh">audit 自动识别 3 仓</span>
+        </h3>
+        <p class="gdc-gate__body">
+          <span class="lang-en">Pass <code>--clean-verify-dir</code> to <code>gated-dual-clone-audit</code> too and it adds 4 extra gates: S9-S11 (exists, is git repo, stamp present) + C9a-c (origin at gateway, pushurls all DISABLED) + B4 (push actually rejected). 26 gates total in 3-clone mode.</span>
+          <span class="lang-zh">给 <code>gated-dual-clone-audit</code> 传 <code>--clean-verify-dir</code> 就自动扩 4 gate：S9-S11（存在、是 git 仓、stamp 有）+ C9a-c（origin 指 gateway、两 pushurl 都 DISABLED）+ B4（push 实际被拒）。3 仓模式共 26 gate。</span>
+        </p>
+        <figcaption><span class="lang-en">The evaluator tracks the new gates.</span><span class="lang-zh">评估器跟上新 gate。</span></figcaption>
+      </figure>
     </div>
   </div>
 </section>
