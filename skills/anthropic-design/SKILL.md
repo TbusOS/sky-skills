@@ -51,6 +51,17 @@ bin/design-review --plan --skill=anthropic --page=pricing > /tmp/contract.md
 **不读 canonical 就写 = 必然偏掉风格**。canonical.md 里的 7-8 条设计
 决定 + typography 表就是评分标准。
 
+### 生成**后**写 self-diff note(交付前 MUST)
+
+生成器在写完 HTML、跑 4 闸之前,必须在 `</body>` 前 embed 一个
+`design-review:self-diff v1` HTML 注释块,列出 5-7 条本次生成的关键
+设计决策 + 2-3 条 known trade-offs。contract 见
+`skills/design-review/references/cross-skill-rules.md §M`,示范参考
+`skills/anthropic-design/references/canonical/comparison.html` 末尾。
+
+没有 self-diff = canonical 不被 `verify.py` 承认。critic 也无法做实
+质评审(没有作者意图的靶子)。HARNESS-ROADMAP Phase 03 的硬规则。
+
 ### 生成**后**跑四闸
 
 ```bash

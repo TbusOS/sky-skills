@@ -8,6 +8,16 @@
 <link rel="stylesheet" href="../../assets/fonts.css">
 <link rel="stylesheet" href="../../assets/anthropic.css">
 <style>
+  /* Page-scoped tokens for darker neutral / sage siblings used on this
+     page only. Values are documented derivations of the anthropic
+     palette (--anth-text-secondary / --anth-green), kept local so we
+     don't pollute the global anthropic.css for a single page's tag
+     palette. */
+  :root {
+    --cmp-cloud-dark: #4a4a42;   /* darker sibling of --anth-text-secondary for tag text contrast */
+    --cmp-sage-dark:  #4e6343;   /* darker sibling of --anth-green for 'either-works' tag text contrast */
+  }
+
   html[data-lang="en"] .lang-zh { display: none !important; }
   html[data-lang="zh"] .lang-en { display: none !important; }
 
@@ -62,12 +72,12 @@
     gap: var(--space-4);
   }
   .pillar--local { border-top: 4px solid var(--anth-orange); }
-  .pillar--cloud { border-top: 4px solid #6b6a5f; }
+  .pillar--cloud { border-top: 4px solid var(--anth-text-secondary); }
   .pillar__kicker {
     font-family: var(--font-heading); font-size: 11.5px; letter-spacing: 0.14em;
     text-transform: uppercase; color: var(--anth-orange); font-weight: 700;
   }
-  .pillar--cloud .pillar__kicker { color: #6b6a5f; }
+  .pillar--cloud .pillar__kicker { color: var(--anth-text-secondary); }
   html[data-lang="zh"] .pillar__kicker { text-transform: none; letter-spacing: 0.04em; }
   .pillar__title {
     font-family: var(--font-heading); font-size: 28px; font-weight: 600;
@@ -89,7 +99,7 @@
     content: ""; position: absolute; left: 0; top: 10px;
     width: 10px; height: 2px; background: var(--anth-orange);
   }
-  .pillar--cloud .pillar__list li::before { background: #6b6a5f; }
+  .pillar--cloud .pillar__list li::before { background: var(--anth-text-secondary); }
 
   /* Comparison table */
   .cmp-table {
@@ -144,8 +154,8 @@
   }
   html[data-lang="zh"] .scenario__tag { text-transform: none; letter-spacing: 0.04em; }
   .scenario__tag--local { background: rgba(217, 119, 87, 0.1); color: var(--anth-orange); }
-  .scenario__tag--cloud { background: rgba(107, 106, 95, 0.15); color: #4a4a42; }
-  .scenario__tag--either { background: rgba(120, 140, 93, 0.15); color: #4e6343; }
+  .scenario__tag--cloud { background: rgba(107, 106, 95, 0.15); color: var(--cmp-cloud-dark); }
+  .scenario__tag--either { background: rgba(120, 140, 93, 0.15); color: var(--cmp-sage-dark); }
   .scenario__title {
     font-family: var(--font-heading); font-size: 19px; font-weight: 600;
     color: var(--anth-text); margin: 0;
@@ -274,7 +284,7 @@
       </svg>
       <figcaption style="text-align:center; color:var(--anth-text-secondary); font-family:var(--font-heading); font-size:13px; margin-top:var(--space-3); letter-spacing:0.02em;">
         <span class="lang-en">Same idea, two routes. The route shapes what the tool is good at — and what it can't do.</span>
-        <span class="lang-zh">同一个想法,两条路径。路径决定这个工具擅长什么,以及做不到什么。</span>
+        <span class="lang-zh">同一个想法，两条路径。路径决定这个工具擅长什么，以及做不到什么。</span>
       </figcaption>
     </figure>
   </div>
@@ -301,10 +311,10 @@
         <h3 class="pillar__title"><span class="lang-en">Your notes live on your disk. Sync is optional.</span><span class="lang-zh">笔记在你的磁盘上。同步是可选项。</span></h3>
         <p class="pillar__claim">
           <span class="lang-en">Writing is offline by default. Cloud sync is an optional feature you turn on — and when you do, it's end-to-end encrypted so Skypad itself can't read your notes. The data format is plain Markdown files, openable by any text editor, 20 years from now.</span>
-          <span class="lang-zh">默认离线写作。云同步是你主动打开的可选项 —— 打开后也是端到端加密,Skypad 自己看不到你的内容。数据就是普通 Markdown 文件,任何文本编辑器都能打开,20 年后也能。</span>
+          <span class="lang-zh">默认离线写作。云同步是你主动打开的可选项 —— 打开后也是端到端加密，Skypad 自己看不到你的内容。数据就是普通 Markdown 文件，任何文本编辑器都能打开，20 年后也能。</span>
         </p>
         <ul class="pillar__list">
-          <li><span class="lang-en">Offline is the default, not a degraded mode.</span><span class="lang-zh">离线是默认状态,不是降级模式。</span></li>
+          <li><span class="lang-en">Offline is the default, not a degraded mode.</span><span class="lang-zh">离线是默认状态，不是降级模式。</span></li>
           <li><span class="lang-en">Vendor going under = your notes are still on your disk.</span><span class="lang-zh">厂商倒闭 = 你的笔记还在你的磁盘上。</span></li>
           <li><span class="lang-en">Plain Markdown = grep, git, any editor works.</span><span class="lang-zh">普通 Markdown = grep、git、任何编辑器都能用。</span></li>
           <li><span class="lang-en">No vendor can read your content.</span><span class="lang-zh">厂商读不到你的内容。</span></li>
@@ -316,10 +326,10 @@
         <h3 class="pillar__title"><span class="lang-en">Your notes live on a server. Clients are windows into it.</span><span class="lang-zh">笔记在服务器上。客户端是通向它的窗口。</span></h3>
         <p class="pillar__claim">
           <span class="lang-en">The source of truth is the server. Every device renders the same live state. Collaboration is native — two people editing the same page see each other typing. The trade-off: you trust the vendor, you need an account, and when the vendor is down, so is your notebook.</span>
-          <span class="lang-zh">服务器是唯一真实源。每个设备渲染同一份实时状态。多人协作是原生能力 —— 两人同改一页时互相看到光标。代价:你信任厂商、需要账号,厂商宕机时你的笔记本也宕机。</span>
+          <span class="lang-zh">服务器是唯一真实源。每个设备渲染同一份实时状态。多人协作是原生能力 —— 两人同改一页时互相看到光标。代价：你信任厂商、需要账号，厂商宕机时你的笔记本也宕机。</span>
         </p>
         <ul class="pillar__list">
-          <li><span class="lang-en">Real-time collaboration with zero plumbing.</span><span class="lang-zh">多人实时协作,零配置。</span></li>
+          <li><span class="lang-en">Real-time collaboration with zero plumbing.</span><span class="lang-zh">多人实时协作，零配置。</span></li>
           <li><span class="lang-en">Rich block types beyond plain text (tables, databases, embeds).</span><span class="lang-zh">远超纯文本的富块类型(表格、数据库、嵌入)。</span></li>
           <li><span class="lang-en">Same state across devices, always.</span><span class="lang-zh">多设备状态始终一致。</span></li>
           <li><span class="lang-en">Vendor-backed search, permissions, admin tools.</span><span class="lang-zh">厂商提供搜索、权限、管理工具。</span></li>
@@ -357,7 +367,7 @@
         <tr>
           <td><span class="lang-en">Works offline</span><span class="lang-zh">离线可用</span></td>
           <td class="cell-win"><span class="lang-en">Always — it's the default.</span><span class="lang-zh">始终可用 —— 这是默认状态。</span></td>
-          <td><span class="lang-en">Only cached pages; new writes queue.</span><span class="lang-zh">仅已缓存的页;新写入会排队。</span></td>
+          <td><span class="lang-en">Only cached pages; new writes queue.</span><span class="lang-zh">仅已缓存的页；新写入会排队。</span></td>
         </tr>
         <tr>
           <td><span class="lang-en">Multi-device sync</span><span class="lang-zh">多设备同步</span></td>
@@ -376,7 +386,7 @@
         </tr>
         <tr>
           <td><span class="lang-en">Content format</span><span class="lang-zh">内容格式</span></td>
-          <td class="cell-win"><span class="lang-en">Plain Markdown · any editor, forever.</span><span class="lang-zh">普通 Markdown · 任何编辑器,永久可用。</span></td>
+          <td class="cell-win"><span class="lang-en">Plain Markdown · any editor, forever.</span><span class="lang-zh">普通 Markdown · 任何编辑器，永久可用。</span></td>
           <td><span class="lang-en">Vendor-specific blocks · export-then-convert.</span><span class="lang-zh">厂商私有块 · 导出后要转换。</span></td>
         </tr>
         <tr>
@@ -387,7 +397,7 @@
         <tr>
           <td><span class="lang-en">If the vendor shuts down</span><span class="lang-zh">厂商倒闭后</span></td>
           <td class="cell-win"><span class="lang-en">Notes untouched on your disk.</span><span class="lang-zh">笔记原样留在你的磁盘。</span></td>
-          <td><span class="lang-en">Last export is all you have; new edits stop.</span><span class="lang-zh">最后一次导出是你仅剩的;不能再编辑。</span></td>
+          <td><span class="lang-en">Last export is all you have; new edits stop.</span><span class="lang-zh">最后一次导出是你仅剩的；不能再编辑。</span></td>
         </tr>
         <tr>
           <td><span class="lang-en">Structural lock-in risk</span><span class="lang-zh">结构性锁定风险</span></td>
@@ -435,7 +445,7 @@
         </h3>
         <p class="scenario__body">
           <span class="lang-en">Five teammates editing the roadmap at the same time. Comments thread, permissions, admin history. Local-first can do this with CRDTs and some plumbing, but cloud-native gives it to you with zero setup. If real-time collab is the core workflow, the cloud's native advantage wins.</span>
-          <span class="lang-zh">五位同事同时改同一张 roadmap。评论线、权限、管理后台。本地优先可以用 CRDT 加配置做到,但云端原生零配置就给你了。如果实时协作就是核心工作流,云端原生的优势压倒。</span>
+          <span class="lang-zh">五位同事同时改同一张 roadmap。评论线、权限、管理后台。本地优先可以用 CRDT 加配置做到，但云端原生零配置就给你了。如果实时协作就是核心工作流，云端原生的优势压倒。</span>
         </p>
       </article>
 
@@ -461,7 +471,7 @@
       <span class="anth-badge"><span class="lang-en">Honest closing</span><span class="lang-zh">诚实的结尾</span></span>
       <blockquote>
         <span class="lang-en">Skypad is local-first. That's a trade-off, not a universal winner. If collaboration is your main workflow, use Notion. If you want notes you'll still be reading in 20 years, use us. The worst tool is the one you chose by following a trend — match the tool to the work, not to the marketing.</span>
-        <span class="lang-zh">Skypad 是本地优先。这是一种取舍,不是普适的赢家。如果协作是你的主工作流,用 Notion。如果你想 20 年后还能读这些笔记,用我们。最糟糕的工具是跟风选来的那个 —— 让工具匹配你的工作,不是让它匹配营销。</span>
+        <span class="lang-zh">Skypad 是本地优先。这是一种取舍，不是普适的赢家。如果协作是你的主工作流，用 Notion。如果你想 20 年后还能读这些笔记，用我们。最糟糕的工具是跟风选来的那个 —— 让工具匹配你的工作，不是让它匹配营销。</span>
       </blockquote>
       <cite><span class="lang-en">— The Skypad team</span><span class="lang-zh">— Skypad 团队</span></cite>
     </div>
@@ -517,6 +527,25 @@
   });
 })();
 </script>
+
+<!-- design-review:self-diff v1
+Skill: anthropic
+Page-type: comparison
+Created: 2026-04-24
+
+Decisions (5):
+1. [hero-framing] chose "two-truths neutral hero ('Two notebooks. Two truths. Pick the one that fits.')" over "declare-winner hero ('Skypad beats Notion — here's why')". Because: comparison pages lose trust the moment they declare a winner in the headline; the reader should finish informed, not sold. The anthropic voice earns authority by refusing propaganda.
+2. [illustration] chose "divergence diagram immediately after hero (one idea → two architectural paths)" over "feature-icon grid". Because: architectural reality (disk vs server, encrypted vs readable, account-gated vs account-less) must be shown at the structural level before any pros/cons text; icon grids flatten the trade-off into marketing bullets.
+3. [pillars] chose "two pillars of equal weight and equal bullet count (4 bullets each)" over "asymmetric pillars (us = 6 bullets, them = 2)". Because: asymmetric pillar lengths signal propaganda regardless of bullet content; equal-weight pillars let the trade-off read as honest.
+4. [table-wins] chose "thin orange left-border on win cells (.cell-win::before)" over "green checkmark / red X emoji grid". Because: emoji/checkmarks turn the table into a scoreboard, screen-read poorly, and look like every generic SaaS comparison page; a quiet chromatic bar marks wins without shouting. 6 of 9 wins would also overpower the rest if filled with green.
+5. [scenarios-neutral-middle] chose "three scenario cards including 'either works' middle" over "two scenario cards (pick us / pick them)". Because: giving the reader permission to not care for low-stakes use cases (short-term projects, trip itineraries) proves the author isn't pathologically pushing one side — and the sage-tinted middle tag visually separates it from the two partisan options.
+
+Known trade-offs:
+- SVG internal fills use raw hex #6b6a5f instead of var(--anth-text-secondary) because SVG element attributes cannot reference CSS custom properties. Noted for ports.
+- Scenario card bodies approach the hollow-card density floor (~180 chars each) at 1440 viewport. On ports to other skills, keep each scenario body ≥3 full lines or tighten the grid gap to avoid drift past §I threshold.
+- Two off-token dark neutrals exist as page-scoped custom properties (--cmp-cloud-dark, --cmp-sage-dark) rather than global anthropic tokens. Hex values are derivations of --anth-text-secondary and --anth-green; kept local to avoid polluting anthropic.css for a single page's scenario-tag palette.
+
+/design-review:self-diff -->
 
 </body>
 </html>

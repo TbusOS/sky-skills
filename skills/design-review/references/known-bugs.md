@@ -167,6 +167,27 @@
   4. **禁止**单纯拉宽第 1 列当 hero 手段(`1.4fr 1fr 1fr`)。
 - **和 1.19 的关系**:1.19 是**等宽** grid 用装饰建层级(proportion 没承担 hero 的活被装饰接管);1.21 是**非等宽** grid proportion 放错位置(用了 proportion,但 hero 在第 1 位没对称 peer 对冲,读成失衡)。两者互为对照。
 
+### 1.22 `<span class="lang-zh">` 内半角 ASCII 标点(,/;/:)打破 CJK 字体 metrics
+- **Reader sees**:中文段落里夹 `,` `;` `:` 半角标点,字体栈是 Noto Sans SC / Noto Serif SC(§H),半角标点按 Latin metrics 渲染,和周围的 Han 字符 kern 不一致,行内视觉出现 "抖一下" 的不均匀。大段中文读起来像标点松了。
+- **Why**:作者在写 `<span class="lang-zh">` 段落时,习惯性继续用英文段落里用的半角 `,` `;` `:`。中英文在同一 HTML 里切换时,语言栈切换了但标点没跟着切。`。` 句号多数作者会记得改,但 `,` `;` `:` 容易漏 —— 编辑器默认输入法半角状态下直接敲出来。
+- **How caught**:multi-critic 的 brand + copy 双抓(2026-04-24, anthropic comparison canonical v1)。brand critic 用 "Noto CJK 的 Latin metrics 打破行内节奏" 的角度说清楚为什么这不是单纯"审美偏好"而是渲染问题;copy critic 也同时标出,但说 "out of lane · typography critic own this"。
+- **Defense**:`verify.py` 新 check **zh-halfwidth-punct**:扫 HTML 里所有 `<span class="lang-zh">…</span>` 段落,若 body 内含半角 `,` `;` `:`(非 URL / 非 identifier · 通过"标点前后至少一个 CJK 字符" heuristic 降误报)→ fail,提示替换为对应全角 `,` `;` `:`。
+- **Fix playbook**:
+  - CSS 段落:`<span class="lang-zh">` 内部的 `,` → `,` · `;` → `;` · `:` → `:` · `!` → `!` · `?` → `?`
+  - **保留半角**的场景:代码块(`<code>` / `<pre>`)· URL / 路径 · identifier(如 `record_id 882091`)· 仅含数字/字母的 list item(`grep, git, any editor works` 这种 —— 但这种通常在 lang-en 里,zh 侧应用顿号 `、`)
+  - 重复性场景用脚本替换:见 2026-04-24 commit 里的 python one-liner · 限定 `<span class="lang-zh">` 范围,避免误伤 en span
+- **延伸**:适用所有使用 anthropic/apple/ember/sage design 的双语页。所有 canonical 的 zh 侧都要过这一条 check。
+
+### 1.23 canonical 页缺 generator self-diff note · critic 没靶子
+- **Reader sees**:critic(solo 或 4 专家)评审 canonical 时只能凭感觉说"布局不错""copy 平衡"等印象级评语,没法指出作者"为什么选 A 不选 B"的取舍站不站得住。下一个作者想 port 这张 canonical 到另一个 skill,得翻 .md 逆向推断设计意图,搬到新 skill 时把作者的 trade-off 搬丢。
+- **Why**:generator 写完 HTML 不会天然写出"我选了 two-truths 框架不选 declare-winner 框架,因为 comparison 一开头就站队立刻失去信任"。HARNESS-ROADMAP Phase 03 的模型弱点就是这条:模型天然不 articulate 自己的设计决策。没有强制:critic 只能凭感觉,同 page-type 不同 skill 的 port 过程把 trade-off 当成偏好搬丢。
+- **How caught**:HARNESS-ROADMAP 长期挂 Phase 03 "Partly done",2026-04-24 的 comparison canonical 过 multi-critic 时 4 位 critic 都没引用作者决策——不是他们水平不够,是作者没留下靶子。
+- **Defense**:`verify.py` 新 check **canonical-self-diff**:任何路径含 `/references/canonical/` 的 HTML,必须 embed `<!-- design-review:self-diff v1 ... /design-review:self-diff -->` HTML 注释块,内含 `Skill:` / `Page-type:` / `Created: YYYY-MM-DD` / `Decisions`(至少 3 条 · `[id] chose "A" over "B". Because: ...` 三段格式)/ `Known trade-offs:` 五个字段。缺任一 → fail。Contract 详见 `cross-skill-rules.md §M`。
+- **Fix playbook**:
+  - 生成新 canonical 时,作者完稿后把 5-7 条关键 decision + 2-3 条 trade-off 写成 self-diff 注释,embed 到 `</body>` 前。`Because:` 段必须回答"为什么不选替代方案",不是"A 的优点"。
+  - 历史 canonical(2026-04-24 前)从对应 `.md` 设计决策里提取,明确标明"derived from existing canonical.md"而非作者原笔,但作为 critic 靶子已够用。
+  - 修 placeholder check(`verify.py` 的 check 1)先剥 self-diff 块再扫方括号 —— self-diff 的决策 id `[hero-framing]` 不是占位符。
+
 ---
 
 ## 2. anthropic-design

@@ -165,7 +165,7 @@ bin/design-review --critic <page.html>
 每次 canonical 升级,canonical 自己跑 critic 必须 ≥ 90 分。如果达不到,
 说明 rubric 偏离了 canonical 代表的那种"好",是 rubric 错,不是 canonical 错。
 
-### 规则总览(A-L 索引)
+### 规则总览(A-M 索引)
 
 | § | 范围 | 机器化 | 规则要点 |
 |---|---|---|---|
@@ -181,6 +181,7 @@ bin/design-review --critic <page.html>
 | J | italic 纪律 | visual-audit.mjs italic-overuse | italic 仅做强调 |
 | K | 品牌可视 + 串味 | visual-audit.mjs brand-presence / smell | 本风格 vs 跨风格 |
 | L | 评审流程 | bin/design-review | plan → write → 4 闸 → self-regression |
+| M | self-diff note | verify.py | canonical 必须 embed HTML 注释块 · critic 的评审靶子 |
 
 ---
 
@@ -330,6 +331,82 @@ python3 skills/design-review/scripts/verify.py --allow-monolingual <path/to/inte
 豁免是**按调用传参**,不是文件属性 —— 每次跑都要显式写这个 flag,防止 CI / pre-commit 默认静默走双语豁免路径。"对外发布要双语"仍是默认立场。
 
 **历史教训**:2026-04-20 写 5 张 canonical 时,直接英文写了 —— 用户 push back。现在写进规则并机器化 check。内部中文工程 memo 另加 `--allow-monolingual` 豁免,不牺牲对外站点的双语保证。
+
+---
+
+## M. Generator self-diff note(每张 canonical 强制 · HARNESS-ROADMAP Phase 03)
+
+**规则**:任何 canonical HTML(路径含 `/references/canonical/`)**必须**在 `</body>` 前 embed 一个 `design-review:self-diff v1` HTML 注释块,列出作者本次生成时做的 5-7 条关键设计决策 + 已知 trade-offs。critic 和下一个作者读这个 note 知道"这张 canonical 为什么长这样",而不是靠感觉反推。
+
+### 为什么强制(Anthropic harness-design 原则)
+
+generator 写完 HTML 天然不会自然说出"我当时选了 X 因为 Y"。没有 self-diff:
+- critic 只能凭感觉评,抓不住作者意图
+- 下一个作者 port 到另一个 skill 时,要花时间逆向推理作者 intent
+- 争议点("为什么第一列宽 1.4fr")没有作者当时给的理由,讨论退化为偏好战
+
+self-diff 强制让作者在交付时把"选择 + 理由"落盘,给所有下游读者一个靶子。
+
+### Contract · 必须包含的字段
+
+```html
+<!-- design-review:self-diff v1
+Skill: <anthropic | apple | ember | sage>
+Page-type: <landing | pricing | docs-home | comparison | feature-deep | blog | product | team | faq | changelog>
+Created: <YYYY-MM-DD>
+
+Decisions (N · 至少 3 条,推荐 5-7):
+1. [<short-id>] chose "<choice>" over "<alternative>". Because: <one-line reason>
+2. [<short-id>] chose "<choice>" over "<alternative>". Because: <one-line reason>
+...
+
+Known trade-offs:
+- <constraint / concession 1>
+- <constraint / concession 2>
+(如果确实 0 trade-off · 写 "None — every canonical decision was free of trade-off" · 且准备被 critic 追问为什么)
+
+/design-review:self-diff -->
+```
+
+### 格式规则(机器 + 人双读)
+
+- 外层用 HTML 注释 `<!-- ... -->`(浏览器不渲染 · critic LLM 直接当纯文本读)
+- 开头第一行必须是 `design-review:self-diff v1`(v1 是 schema 版本 · 未来换字段就升 v2 · verify.py 按版本号分别解析)
+- 闭合前最后一行必须是 `/design-review:self-diff`
+- `Decisions` 段 **至少 3 条**(机器 check);每条遵循 `[id] chose "A" over "B". Because: C.` 三段
+- `Known trade-offs` 段**必须存在**(内容可以是 `None — ...`,但段头不能缺)
+- placement · `</body>` 前,排在所有 `<script>` 之后(不影响 DOM)
+
+### verify.py 机器 check
+
+canonical 路径下的 HTML(`/references/canonical/*.html`)必须存在合规的 self-diff 块。缺失或字段不全 → fail。详见 `known-bugs.md §1.23`。
+
+### 怎么写 decision(范例)
+
+**好** · 具体 · 可被 critic 评:
+```
+3. [pillars] chose "two pillars of equal weight and equal bullet count" over "asymmetric pillars (us = 6 bullets, them = 2)". Because: asymmetric pillar lengths signal propaganda; equal pillars let the trade-off read as honest.
+```
+
+**差** · 模糊 · 评不动:
+```
+3. [pillars] chose "nice pillars". Because: looked good.
+```
+
+decision 的 `Because` 必须回答"为什么选 A 不选 B",不是"A 的优点"。作者必须明确写出**替代方案**(`over "B"`)才有评审价值 —— 没替代就没取舍,没取舍就没决策。
+
+### 和 canonical.md 的分工
+
+| 文件 | 读者 | 内容 |
+|---|---|---|
+| `.md`(大文档) | **人** · 下一个作者 / 港到其他 skill 的实现者 | 完整 design-decisions + typography 规则 + don'ts + port 指引 |
+| self-diff note | **critic LLM** + 匆忙读者 | 5-7 条浓缩决策 + trade-offs · "这一实例为什么长这样" |
+
+self-diff 不是 .md 的复制 —— 它是**单实例的自述**。同一 page-type 的 anthropic canonical 和 apple canonical 会共享 .md 里的大部分 decisions,但各自 self-diff 会讲自己那个实例的具体取舍(比如 ember 版选了 4-col 而不是 3-col 的理由)。
+
+### 历史教训
+
+2026-04-24 前 13 张 canonical 全部缺 self-diff note。Phase 03 一直挂着 "Partly done",理由就是 self-diff 没强制。补完 + verify.py 机器化之后,Phase 03 → Done。
 
 ---
 

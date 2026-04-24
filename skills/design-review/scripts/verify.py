@@ -206,14 +206,23 @@ def check_file(
     hero_class = prefix + "hero"
     default_css = os.path.join(REPO_ROOT, "skills", cfg["dir"], "assets", cfg["css"])
 
-    # 1. placeholder brackets — strip <pre> and <code> first so that docs
-    # pages discussing placeholders (e.g. "verify.py catches [hero]") don't
-    # false-positive against themselves.
+    # 1. placeholder brackets — strip <pre>, <code>, and the self-diff
+    # comment block first, so:
+    #  - docs pages discussing placeholders ("verify.py catches [hero]")
+    #    don't false-positive against themselves
+    #  - self-diff decision ids like `[hero-framing]` / `[pillars]` are
+    #    not mistaken for placeholders (contract: §M)
     placeholder_scan = re.sub(
         r"<pre\b[^>]*>.*?</pre>", "", html, flags=re.DOTALL | re.I
     )
     placeholder_scan = re.sub(
         r"<code\b[^>]*>.*?</code>", "", placeholder_scan, flags=re.DOTALL | re.I
+    )
+    placeholder_scan = re.sub(
+        r"<!--\s*design-review:self-diff\b.*?/design-review:self-diff\s*-->",
+        "",
+        placeholder_scan,
+        flags=re.DOTALL,
     )
     brackets = PLACEHOLDER_PATTERN.findall(placeholder_scan)
     if brackets:
@@ -328,6 +337,80 @@ def check_file(
                 f"(missing: {', '.join(missing)}). "
                 f"See cross-skill-rules.md §G."
             )
+
+    # 8b. Self-diff contract — any HTML under /references/canonical/ MUST embed
+    # a `design-review:self-diff v1` HTML comment block. Contract documented in
+    # cross-skill-rules.md §M. See known-bugs.md §1.23. Critic + next author
+    # both read this block to know "why does this instance look like this?"
+    if "/references/canonical/" in path.replace(os.sep, "/"):
+        sd_pattern = re.compile(
+            r"<!--\s*design-review:self-diff\s+v1\b(.*?)/design-review:self-diff\s*-->",
+            re.DOTALL,
+        )
+        sd_match = sd_pattern.search(html)
+        if not sd_match:
+            errors.append(
+                f"{path}: canonical page is missing the `design-review:self-diff v1` "
+                f"HTML comment block before </body>. See cross-skill-rules.md §M "
+                f"for the contract and known-bugs.md §1.23 for why."
+            )
+        else:
+            body = sd_match.group(1)
+            missing_fields: list[str] = []
+            if not re.search(r"^\s*Skill:\s*\S+", body, re.MULTILINE):
+                missing_fields.append("Skill:")
+            if not re.search(r"^\s*Page-type:\s*\S+", body, re.MULTILINE):
+                missing_fields.append("Page-type:")
+            if not re.search(r"^\s*Created:\s*\d{4}-\d{2}-\d{2}", body, re.MULTILINE):
+                missing_fields.append("Created: YYYY-MM-DD")
+            if not re.search(r"^\s*Decisions\b", body, re.MULTILINE):
+                missing_fields.append("Decisions header")
+            # Count decisions: numbered lines in the Decisions section.
+            decisions = re.findall(r"^\s*\d+\.\s*\[", body, re.MULTILINE)
+            if len(decisions) < 3:
+                missing_fields.append(
+                    f"at least 3 decisions (found {len(decisions)})"
+                )
+            if not re.search(r"^\s*Known\s+trade-offs\b", body, re.MULTILINE | re.I):
+                missing_fields.append("Known trade-offs: header")
+            if missing_fields:
+                errors.append(
+                    f"{path}: self-diff block present but incomplete · missing "
+                    f"{', '.join(missing_fields)}. See cross-skill-rules.md §M."
+                )
+
+    # 8. Half-width ASCII punctuation inside lang-zh spans (known-bugs 1.22).
+    # Chinese body text rendered in Noto Sans/Serif SC uses CJK metrics; ASCII
+    # "," ";" ":" keep Latin metrics and kern tight against Han glyphs, breaking
+    # line rhythm. Replace with full-width ，；：. We only flag when a CJK char
+    # sits on at least one side of the punctuation (guards against identifiers
+    # like "record_id 882091" or stray URLs that legitimately keep half-width).
+    CJK = r"[\u3400-\u9fff\u3000-\u303f\uff00-\uffef]"
+    halfwidth_near_cjk = re.compile(
+        rf"(?:{CJK}\s?[,;:]|[,;:]\s?{CJK})"
+    )
+    zh_span_pattern = re.compile(
+        r'<span class=["\']lang-zh["\']\s*>(.*?)</span>',
+        re.DOTALL,
+    )
+    zh_hits: list[str] = []
+    for m in zh_span_pattern.finditer(html):
+        body = m.group(1)
+        # Ignore code spans inside the lang-zh body — identifiers legitimately
+        # keep half-width punctuation.
+        body_sansCode = re.sub(r"<code\b[^>]*>.*?</code>", "", body, flags=re.DOTALL | re.I)
+        hits = halfwidth_near_cjk.findall(body_sansCode)
+        if hits:
+            zh_hits.extend(hits[:3])
+    if zh_hits:
+        sample = ", ".join(repr(h) for h in zh_hits[:3])
+        errors.append(
+            f"{path}: lang-zh body contains half-width ASCII punctuation near "
+            f"CJK ({sample}{'...' if len(zh_hits) > 3 else ''}). "
+            f"Replace ',' with '，', ';' with '；', ':' with '：' — "
+            f"Noto CJK metrics break when Latin punctuation kerns against "
+            f"Han glyphs. See known-bugs.md §1.22."
+        )
 
     return errors
 

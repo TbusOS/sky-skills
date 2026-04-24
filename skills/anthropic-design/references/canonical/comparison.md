@@ -149,14 +149,28 @@ they're style-agnostic and load the honesty of the comparison.
 
 ## Verified
 
-Rendered at 1440×4446px. Passes the three mechanical gates at time of
-commit:
+Rendered at 1440×4446px. Passes all four gates:
 
-```
-python3 skills/design-review/scripts/verify.py <path>       →  OK
-node skills/design-review/scripts/visual-audit.mjs <path>   →  OK
-node skills/design-review/scripts/screenshot.mjs <path>     →  OK
-```
+| Gate | Result |
+|---|---|
+| `verify.py` | OK (incl. new §1.22 zh-halfwidth-punct check) |
+| `visual-audit.mjs` | OK (1 brand-intentional suppressed) |
+| `screenshot.mjs` | 1440 × 4446 png saved |
+| `--multi-critic` (composition / copy / illustration / brand) | **weighted 91 / 100** (94 / 94 / 88 / 88) |
 
-Multi-critic review pending. If a new bug class surfaces, follow the
-learning-loop per `skills/design-review/SKILL.md` §"Lifecycle rule".
+**Multi-critic fixes applied before shipping** (2026-04-24):
+
+1. **Token discipline** — CSS hardcoded `#6b6a5f` (3 places) replaced with
+   `var(--anth-text-secondary)`; scenario tag colours `#4a4a42` / `#4e6343`
+   tokenised to page-scoped `--cmp-cloud-dark` / `--cmp-sage-dark`.
+2. **Chinese typography hygiene** — 15 half-width commas, 2 semicolons, 1
+   colon inside `<span class="lang-zh">` bodies replaced with full-width
+   `，；：` to match Noto Sans / Serif SC metrics.
+3. **Same bug class was then codified** — `known-bugs.md §1.22` + new
+   `verify.py` check `zh-halfwidth-punct` · machine now catches this class
+   automatically across all canonicals and public HTML.
+
+SVG internal `fill="#6b6a5f"` attributes kept as raw hex: SVG attribute
+values cannot reference CSS custom properties, and the hex literally
+equals the `--anth-text-secondary` token. Noted for any downstream port
+of this template.
