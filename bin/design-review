@@ -37,6 +37,22 @@
 #   --plan --skill=X --page=Y
 #                      Planning mode — skip all gates, generate sprint-contract.md
 #                      for an upcoming page generation.
+#   --audit            Audit mode — batch-check existing HTML (file or directory)
+#                      with verify + visual-audit, no screenshot, do NOT exit on
+#                      first error, aggregate results into one report.
+#                      Pass-through flags: --skill, --out, --strict.
+#                      Audit-only flags (forwarded to audit.mjs):
+#                        --max=<n>             cap files audited
+#                        --exclude=<csv>       dir names to skip
+#                        --include=<substr>    filename filter (default ".html")
+#                        --no-visual           verify-only (~10x faster)
+#                        --allow-monolingual   skip bilingual rule
+#                      Writes audit-report-<ts>.md + .json to --out.
+#                      Examples:
+#                        bin/design-review --audit docs/                  # whole dir
+#                        bin/design-review --audit --skill=anthropic site/index.html
+#                        bin/design-review --audit --no-visual my-wiki/   # verify-only batch
+#                        bin/design-review --audit https://example.com/p  # remote URL
 #   -h, --help         Print this help.
 #
 # Examples:
@@ -64,6 +80,8 @@ CRITIC=""
 MULTI_CRITIC=""
 LEARN=""
 PLAN=""
+AUDIT=""
+AUDIT_FORWARD=()
 CSS_ARGS=()
 HTMLS=()
 
@@ -79,8 +97,11 @@ for arg in "$@"; do
     --multi-critic) MULTI_CRITIC=1 ;;
     --learn)        LEARN=1 ;;
     --plan)    PLAN=1 ;;
+    --audit)   AUDIT=1 ;;
+    --max=*|--exclude=*|--include=*|--no-visual|--allow-monolingual|--internal)
+               AUDIT_FORWARD+=("$arg") ;;
     -h|--help)
-      sed -n '2,48p' "$0" | sed -E 's|^# ?||'
+      sed -n '2,64p' "$0" | sed -E 's|^# ?||'
       exit 0
       ;;
     --*)
@@ -99,6 +120,27 @@ if [ -n "$PLAN" ]; then
   fi
   exec node "$SKY_ROOT/skills/design-review/scripts/sprint-contract.mjs" \
     "--skill=$SKILL" "--page=$PAGE"
+fi
+
+# ---------- Audit mode (batch verify + visual-audit, aggregate report) ----------
+if [ -n "$AUDIT" ]; then
+  if [ "${#HTMLS[@]}" -eq 0 ]; then
+    echo "--audit requires a path argument (file or directory)" >&2
+    exit 2
+  fi
+  AUDIT_TARGET="${HTMLS[0]}"
+  if [ "${#HTMLS[@]}" -gt 1 ]; then
+    echo "--audit takes exactly one path; got: ${HTMLS[*]}" >&2
+    echo "(use --include / --exclude to scope what audit.mjs walks under that path)" >&2
+    exit 2
+  fi
+  audit_args=("$AUDIT_TARGET")
+  [ -n "$SKILL" ] && audit_args+=("--skill=$SKILL")
+  [ -n "$REPO" ] && audit_args+=("--repo=$REPO")
+  [ -n "$OUT_DIR" ] && audit_args+=("--out=$OUT_DIR")
+  [ -n "$STRICT" ] && audit_args+=("--strict")
+  for f in "${AUDIT_FORWARD[@]}"; do audit_args+=("$f"); done
+  exec node "$SKY_ROOT/skills/design-review/scripts/audit.mjs" "${audit_args[@]}"
 fi
 
 if [ "${#HTMLS[@]}" -eq 0 ]; then
