@@ -2,6 +2,61 @@
 
 每条 checklist 项目都对应一类常见弱点，reviewer 用这个清单逐条过文档。
 
+## 代码确认层（最重要 · 评审员失职区）
+
+reviewer 评审报告里的每一个 A/B 级问题，**必须**有 reviewer 自己独立跑过的命令证据。以下是 reviewer 必须做的"代码确认动作"清单：
+
+### Z1 · 文档说"file:line"，reviewer Read 那一行看
+- 不要只采信文档说"common/spl/spl.c:614 加了 X" → reviewer 必须 `Read common/spl/spl.c` 看 614 行真的是 X
+- 找不到 → A 级（writer 编造）；找到但内容不对 → A 级（writer 引用错）
+
+### Z2 · 文档说"实测 X 字节"，reviewer 自己跑 stat 验
+- 文档说 `image.img = 2.34 GB` → reviewer 跑 `stat -c%s <build_output>/image.img` 看真值
+- 进制不一致（1000 vs 1024）/ 单位错（MB vs MiB）必须 reviewer 算出来才能 catch
+
+### Z3 · 文档说"X 算式 = Y"，reviewer 用 Python 手算
+- 文档说 `0x20000 × 512 = 16 MB` → reviewer 跑 `python3 -c "print(0x20000 * 512 / 1024 / 1024)"` 看真是 16 还是 64
+- 算式错是最常见的硬错
+
+### Z4 · 文档说"0 hits / N 个 commit / X 个引用"，reviewer 自己 grep
+- 文档说"5 维 grep partitionN 全 0 命中" → reviewer 自己跑这 5 个 grep 看真 0 吗
+- pattern 写漏 / 路径写错 / 漏掉某个目录 = writer 误报 0 命中
+
+### Z5 · 文档说"commit X 引入了 Y"，reviewer 跑 git show
+- 文档说 `commit <hash> 添加 partitionN` → reviewer 跑 `git show <hash> --stat` 看 commit 真存在吗 / message 对吗 / 改了什么文件
+
+### Z6 · 文档说"上游 SDK 这么设计"，reviewer 看上游源码
+- 文档说"上游 X 变体用 8 MB" → reviewer 自己 `cat <upstream>/<partition layout file>` 看真 8 MB 吗
+
+### Z7 · 文档说"build 产出 X"，reviewer 看 build log
+- 文档说"build log 显示 'X' 字串" → reviewer `grep X build*.log` 看真有这条吗
+
+### Z8 · 跨文档引用，reviewer Read 被引文档
+- 文档说"详见 doc N §4" → reviewer Read doc N 看 §4 真的是这内容吗
+
+### Z9 · 文档说"AVB / 闭源工具 / 不能改" 这种"不可观测"论断
+- 这类论断 reviewer 无法直接代码验证 → 标 B 级"建议联系 X 团队 / 跑 X 实测确认"
+- 不要因为不能验证就接受 hand-wave
+
+### Z10 · 反证 vs 正证
+- 文档说"frp 起点 0x25c000" + "metadata 起点 0x23c000" + "metadata 大小 16 MB"
+- reviewer 自己反推：0x25c000 - 0x23c000 = 0x20000 = 64 MB → metadata 算式不可能 16 MB
+- **反证比正证更有说服力**，reviewer 应主动找 self-consistency 内部矛盾
+
+---
+
+**评审报告里写问题时**，每条都要带"reviewer 自查证据"：
+
+❌ 不能写：
+> "doc N line 472 写 metadata = 16 MB，但 doc M line 541 写 64 MB，前后矛盾。"
+
+✅ 必须写：
+> "doc N line 472 写 metadata = 16 MB，doc M line 541 写 64 MB。**reviewer 跑 `python3 -c "print(0x20000 * 512 // 1024 // 1024)"` = 64**；又 Read 配置 makefile 见 `PRODUCT_SHIPPING_API_LEVEL >= 34 → metadata:64M`，本项目走该分支。**结论：doc M 对，doc N 错**，应改 doc N line 472 为 64 MB。"
+
+不带 reviewer 自查证据的"前后不一致"指控 = reviewer 失职。
+
+---
+
 ## 论证质量层
 
 ### 1. file:line 证据完整性
