@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad vs cloud-native notebooks — an editorial comparison</title>
+<meta name="description" content="A handcraft-editorial comparison of Skypad (local-first, E2E encrypted) versus cloud-native notebooks (Notion, Evernote). Canonical ember-design comparison page for the sky-skills harness — honest trade-offs, written like a literary journal essay, not a propaganda chart.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/ember.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid rgba(73, 45, 34, 0.2);
+    color: var(--ember-text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+  .lang-toggle:hover { background: rgba(196, 148, 100, 0.12); }
+
+  /* §H Chinese stack */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] td,
+  html[data-lang="zh"] th,
+  html[data-lang="zh"] .ember-lead,
+  html[data-lang="zh"] .pillar__claim,
+  html[data-lang="zh"] .pillar__list li,
+  html[data-lang="zh"] .scenario__body {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .hero-headline em,
+  html[data-lang="zh"] .section-title em,
+  html[data-lang="zh"] .pillar__title,
+  html[data-lang="zh"] .scenario__title {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .verdict-quote {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .eyebrow,
+  html[data-lang="zh"] .pillar__kicker,
+  html[data-lang="zh"] .scenario__tag,
+  html[data-lang="zh"] .ember-badge,
+  html[data-lang="zh"] .cmp-table thead th:first-child {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+    text-transform: none;
+    letter-spacing: 0.04em;
+  }
+
+  /* Hero */
+  .hero-headline {
+    font-family: 'Fraunces', serif; font-weight: 400; font-style: normal;
+    font-size: clamp(56px, 7vw, 88px); line-height: 1.05; letter-spacing: -0.02em;
+    color: var(--ember-text); margin: 0 auto; max-width: 880px;
+  }
+  .hero-headline em {
+    font-style: italic; font-weight: 400;
+    color: var(--ember-text);
+  }
+
+  /* Section title shared shape */
+  .section-title {
+    font-family: 'Fraunces', serif; font-weight: 400; font-style: normal;
+    font-size: 52px; line-height: 1.1; letter-spacing: -0.02em;
+    color: var(--ember-text); margin: 0;
+  }
+  .section-title em { font-style: italic; font-weight: 400; }
+  .section-title--md { font-size: 44px; }
+
+  /* Eyebrow + accent strip */
+  .eyebrow {
+    display: inline-block; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #8a7564; margin-bottom: var(--space-4);
+  }
+  .accent-strip {
+    height: 1px; width: 48px; background: var(--ember-gold); display: block;
+  }
+  .accent-strip--center { margin: 0 auto var(--space-5); }
+
+  /* Editorial paper-spread illustration */
+  .spread-frame {
+    background: linear-gradient(135deg, #fff2df 0%, #fbeedd 50%, #f5e5c8 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--space-7) var(--space-6);
+    box-shadow: 0 20px 50px -22px rgba(73, 45, 34, 0.22);
+  }
+  .spread-frame svg {
+    display: block; width: 100%; height: auto;
+    border-radius: 8px;
+  }
+
+  /* Two-pillar spine */
+  .pillar-spine {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+    align-items: stretch;
+    margin-top: var(--space-7);
+  }
+  .pillar {
+    background: #ffffff;
+    border: 1px solid rgba(73, 45, 34, 0.12);
+    border-radius: var(--radius-md);
+    padding: var(--space-7);
+    display: flex; flex-direction: column;
+    gap: var(--space-4);
+  }
+  .pillar--local { border-top: 4px solid var(--ember-gold); }
+  .pillar--cloud { border-top: 4px solid #6b5a4f; }
+  .pillar__kicker {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ember-gold); font-weight: 700;
+  }
+  .pillar--cloud .pillar__kicker { color: #6b5a4f; }
+  .pillar__title {
+    font-family: 'Fraunces', serif; font-weight: 500; font-style: normal;
+    font-size: 28px; line-height: 1.25; letter-spacing: -0.005em;
+    color: var(--ember-text); margin: 0;
+  }
+  .pillar__claim {
+    font-family: 'Inter', sans-serif; font-size: 17px; line-height: 1.6;
+    color: var(--ember-text); margin: 0;
+  }
+  .pillar__list {
+    list-style: none; padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: var(--space-3);
+  }
+  .pillar__list li {
+    font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.55;
+    color: var(--ember-text); padding-left: 22px; position: relative;
+  }
+  .pillar__list li::before {
+    content: ""; position: absolute; left: 0; top: 10px;
+    width: 10px; height: 2px; background: var(--ember-gold);
+  }
+  .pillar--cloud .pillar__list li::before { background: #6b5a4f; }
+
+  /* Comparison table */
+  .cmp-table {
+    width: 100%; border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+    background: #ffffff;
+    border: 1px solid rgba(73, 45, 34, 0.12);
+    border-radius: var(--radius-md); overflow: hidden;
+    margin-top: var(--space-7);
+  }
+  .cmp-table thead th {
+    background: var(--ember-bg-subtle);
+    text-align: left;
+    font-family: 'Fraunces', serif; font-size: 14.5px; font-weight: 600;
+    letter-spacing: -0.005em; color: var(--ember-text);
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid rgba(73, 45, 34, 0.12);
+  }
+  .cmp-table thead th:first-child {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #8a7564; font-weight: 700;
+  }
+  .cmp-table tbody td {
+    padding: var(--space-4) var(--space-5);
+    font-size: 15px; line-height: 1.6;
+    color: var(--ember-text);
+    border-bottom: 1px solid rgba(73, 45, 34, 0.08);
+    vertical-align: top;
+  }
+  .cmp-table tbody tr:last-child td { border-bottom: 0; }
+  .cmp-table tbody td:first-child {
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 14.5px;
+    color: var(--ember-text-secondary); width: 22%;
+  }
+  .cmp-table .cell-win {
+    position: relative;
+  }
+  .cmp-table .cell-win::before {
+    content: ""; position: absolute; left: 0;
+    top: var(--space-4); bottom: var(--space-4);
+    width: 2px; background: var(--ember-gold);
+  }
+  .cmp-table code {
+    font-family: 'IBM Plex Mono', monospace; font-size: 13.5px;
+    background: rgba(196, 148, 100, 0.12);
+    padding: 1px 5px; border-radius: 3px;
+    color: var(--ember-text);
+  }
+
+  /* Scenarios */
+  .scenarios {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+    margin-top: var(--space-7);
+  }
+  .scenario {
+    background: #ffffff;
+    border: 1px solid rgba(73, 45, 34, 0.12);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    display: flex; flex-direction: column;
+    gap: var(--space-3);
+  }
+  .scenario__tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10.5px;
+    letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700;
+    padding: 4px 10px; border-radius: var(--radius-pill);
+    align-self: flex-start;
+  }
+  .scenario__tag--local {
+    background: rgba(196, 148, 100, 0.18);
+    color: #8a5a2c;
+  }
+  .scenario__tag--cloud {
+    background: rgba(107, 90, 79, 0.16);
+    color: #5a4a3f;
+  }
+  .scenario__tag--either {
+    background: rgba(230, 217, 191, 0.55);
+    color: #6b5a4f;
+  }
+  .scenario__title {
+    font-family: 'Fraunces', serif; font-weight: 500; font-style: normal;
+    font-size: 22px; line-height: 1.3; letter-spacing: -0.005em;
+    color: var(--ember-text); margin: 0;
+  }
+  .scenario__body {
+    font-family: 'Inter', sans-serif; font-size: 15.5px; line-height: 1.6;
+    color: var(--ember-text); margin: 0;
+  }
+
+  /* Verdict band */
+  .verdict-band {
+    background: var(--ember-text);
+    color: #ffffff;
+    padding: var(--space-10) 0;
+  }
+  .verdict-quote {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 400;
+    font-size: 40px; line-height: 1.35;
+    color: #ffffff; margin: 0;
+    max-width: 920px;
+  }
+  .verdict-cite {
+    display: block; margin-top: var(--space-6);
+    font-family: 'Inter', sans-serif; font-style: normal;
+    font-size: 15px; color: #d9b892; letter-spacing: 0.04em;
+  }
+  .verdict-cite-rule {
+    display: inline-block; width: 20px; height: 1.5px;
+    background: var(--ember-gold);
+    vertical-align: middle; margin-right: 8px;
+  }
+
+  @media (max-width: 820px) {
+    .pillar-spine, .scenarios { grid-template-columns: 1fr; }
+    .cmp-table tbody td:first-child { width: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="ember-nav"><div class="ember-nav-inner">
+  <a href="#" class="ember-nav-brand">Skypad</a>
+  <div>
+    <a href="landing.html"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="#table"><span class="lang-en">Compare</span><span class="lang-zh">对比</span></a>
+    <a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="docs-home.html"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="ember-button" href="landing.html#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="ember-hero" style="padding-top:var(--space-10); padding-bottom:var(--space-8);">
+  <div class="ember-container" style="max-width:920px; text-align:center;">
+    <span class="accent-strip accent-strip--center"></span>
+    <span class="eyebrow"><span class="lang-en">Compare · Two ways to keep notes</span><span class="lang-zh">对比 · 两种保存笔记的方式</span></span>
+    <h1 class="hero-headline">
+      <span class="lang-en">Two notebooks.<br>Two truths.<br>Pick the one <em>that fits.</em></span>
+      <span class="lang-zh">两本笔记本。<br>两种事实。<br>选<em>适合你的</em>那一本。</span>
+    </h1>
+    <p class="ember-lead" style="margin:var(--space-6) auto 0; max-width:680px; font-size:21px; line-height:1.55;">
+      <span class="lang-en">Skypad is local-first. Notion, Evernote, and Google Keep are cloud-native. Each design choice rules out things the other makes easy. Below, we'll show both — honestly — including the cases where Skypad isn't the right call.</span>
+      <span class="lang-zh">Skypad 是本地优先。Notion、印象笔记、Google Keep 是云端原生。每一个设计决定都会关掉另一边擅长的事。下面诚实地两边都讲 —— 包括 Skypad 不适合你的场景。</span>
+    </p>
+  </div>
+</section>
+
+<!-- Divergence illustration · paper-spread -->
+<section class="ember-section" style="padding-top:0; padding-bottom:var(--space-9);">
+  <div class="ember-container ember-container--wide">
+    <figure class="spread-frame" style="margin:0;">
+      <svg role="img" aria-label="A two-page editorial spread on cream stock — left page is a handwritten Markdown notebook entry stored on the user's disk, right page is a vendor cloud receipt with synced metadata, joined by a thin gold rule labelled 'same idea'" viewBox="0 0 1200 460" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="paper-shadow" x="-2%" y="-4%" width="104%" height="112%">
+            <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#492d22" flood-opacity="0.08"/>
+          </filter>
+        </defs>
+
+        <!-- Left page · local-first notebook -->
+        <g filter="url(#paper-shadow)">
+          <rect x="60" y="40" width="480" height="380" rx="6" fill="#fffaef" stroke="#e6d9bf"/>
+          <rect x="60" y="40" width="480" height="32" fill="#f5e5c8"/>
+          <text x="78" y="60" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#8a7564" letter-spacing="0.14em">LOCAL-FIRST · YOUR DISK</text>
+          <text x="522" y="60" text-anchor="end" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#8a7564">idea.md · 2.1 KB</text>
+
+          <!-- Hand-Markdown body -->
+          <text x="92" y="106" font-family="'Fraunces', serif" font-size="22" font-weight="500" fill="#312520" letter-spacing="-0.005em">On morning walks</text>
+          <text x="92" y="128" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#8a7564" letter-spacing="0.12em">04 · 13 · 2026</text>
+
+          <rect x="92" y="142" width="20" height="1.2" fill="#c49464"/>
+
+          <g font-family="Georgia, 'Fraunces', serif" font-size="14.5" fill="#312520">
+            <text x="92" y="172">I set out before the grocer's are open.</text>
+            <text x="92" y="194">The city — quiet. The trees —</text>
+            <text x="92" y="216">more real than they look at noon.</text>
+            <text x="92" y="248">I don't walk for exercise. I walk</text>
+            <text x="92" y="270">to let the day settle. That small hour</text>
+            <text x="92" y="292">is the reason the rest works.</text>
+          </g>
+
+          <rect x="92" y="306" width="2" height="20" fill="#c49464">
+            <animate attributeName="opacity" values="1;0;1" dur="1.2s" repeatCount="indefinite"/>
+          </rect>
+
+          <line x1="60" y1="380" x2="540" y2="380" stroke="#e6d9bf"/>
+          <text x="78" y="402" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#8a7564" letter-spacing="0.1em">SAVED · LOCAL · OFFLINE OK</text>
+          <text x="522" y="402" text-anchor="end" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#8a7564" letter-spacing="0.1em">218 WORDS · 4 MIN</text>
+        </g>
+
+        <!-- Center binding · gold rule -->
+        <line x1="600" y1="60" x2="600" y2="400" stroke="#c49464" stroke-width="1" stroke-dasharray="3 5"/>
+        <g transform="translate(600 230)">
+          <circle r="22" fill="#fff2df" stroke="#c49464" stroke-width="1.5"/>
+          <text x="0" y="4" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#8a5a2c" letter-spacing="0.14em" font-weight="700">SAME</text>
+          <text x="0" y="16" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#8a5a2c" letter-spacing="0.14em" font-weight="700">IDEA</text>
+        </g>
+
+        <!-- Right page · cloud-native receipt -->
+        <g filter="url(#paper-shadow)">
+          <rect x="660" y="40" width="480" height="380" rx="6" fill="#ffffff" stroke="#dfd5c1"/>
+          <rect x="660" y="40" width="480" height="32" fill="#ede4d2"/>
+          <text x="678" y="60" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#6b5a4f" letter-spacing="0.14em">CLOUD-NATIVE · VENDOR SERVER</text>
+          <text x="1122" y="60" text-anchor="end" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#6b5a4f">record_id 882091</text>
+
+          <!-- Receipt-style metadata block -->
+          <g font-family="'IBM Plex Mono', monospace" font-size="11.5" fill="#312520">
+            <text x="692" y="106">block_type      :  paragraph</text>
+            <text x="692" y="128">workspace       :  acme-team</text>
+            <text x="692" y="150">created_by      :  user_4471</text>
+            <text x="692" y="172">created_at      :  2026-04-13T08:42Z</text>
+            <text x="692" y="194">last_synced     :  2026-04-13T08:42Z</text>
+            <text x="692" y="216">storage         :  vendor.example.com</text>
+            <text x="692" y="238">format          :  proprietary v7</text>
+            <text x="692" y="260">readable_by     :  vendor + collaborators</text>
+            <text x="692" y="282">access_token    :  required</text>
+            <text x="692" y="304">offline_edits   :  queued (then synced)</text>
+          </g>
+
+          <line x1="660" y1="332" x2="1140" y2="332" stroke="#dfd5c1"/>
+          <g font-family="'IBM Plex Mono', monospace" font-size="11" fill="#6b5a4f" letter-spacing="0.04em">
+            <text x="678" y="354">// vendor server is the source of truth.</text>
+            <text x="678" y="372">// every device renders this same record.</text>
+            <text x="678" y="390">// real-time collab is native to this shape.</text>
+          </g>
+
+          <line x1="660" y1="380" x2="1140" y2="380" stroke="#dfd5c1"/>
+          <text x="678" y="402" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#6b5a4f" letter-spacing="0.1em">SAVED · ROUND-TRIP · ACCOUNT REQUIRED</text>
+        </g>
+
+      </svg>
+      <figcaption style="text-align:center; color:var(--ember-text-secondary); font-family:'IBM Plex Mono', monospace; font-size:12px; margin-top:var(--space-4); letter-spacing:0.04em;">
+        <span class="lang-en">The same idea, written into two different ledgers. The ledger shape decides what the tool is good at.</span>
+        <span class="lang-zh">同一个想法，写进两本不同的账册。账册的形状，决定了工具擅长什么。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Pillar spine · two truths -->
+<section class="ember-section" id="pillars" style="padding-block:var(--space-10);">
+  <div class="ember-container ember-container--wide">
+    <div style="max-width:760px; margin:0 auto; text-align:center;">
+      <span class="accent-strip accent-strip--center"></span>
+      <span class="eyebrow"><span class="lang-en">The two truths</span><span class="lang-zh">两种事实</span></span>
+      <h2 class="section-title">
+        <span class="lang-en">Neither side is a smaller version of the <em>other.</em></span>
+        <span class="lang-zh">两边都不是对方的缩小版。</span>
+      </h2>
+      <p class="ember-lead" style="margin:var(--space-5) auto 0; max-width:620px; font-size:18px;">
+        <span class="lang-en">Each was designed fully from its first principles. Below, both claims read in their honest voice.</span>
+        <span class="lang-zh">两种笔记都从各自的第一性原理完整设计而来。下面用诚实的口吻分别讲两边的主张。</span>
+      </p>
+    </div>
+
+    <div class="pillar-spine">
+      <article class="pillar pillar--local">
+        <span class="pillar__kicker"><span class="lang-en">Local-first · Skypad</span><span class="lang-zh">本地优先 · Skypad</span></span>
+        <h3 class="pillar__title">
+          <span class="lang-en">Your notes live on your disk. Sync is optional.</span>
+          <span class="lang-zh">笔记在你的磁盘上。同步是可选项。</span>
+        </h3>
+        <p class="pillar__claim">
+          <span class="lang-en">Writing is offline by default. Cloud sync is an opt-in switch — and when you turn it on, it's end-to-end encrypted, so Skypad itself can't read your notes. The data format is plain Markdown, openable by any text editor — twenty years from now too.</span>
+          <span class="lang-zh">默认离线写作。云同步是你主动打开的开关 —— 打开后也是端到端加密，Skypad 自己读不到你的内容。数据是普通 Markdown，任何文本编辑器都能打开 —— 二十年后也能。</span>
+        </p>
+        <ul class="pillar__list">
+          <li><span class="lang-en">Offline is the default state, not a degraded fallback.</span><span class="lang-zh">离线是默认状态，不是降级模式。</span></li>
+          <li><span class="lang-en">Vendor going under = your notes are still on your disk.</span><span class="lang-zh">厂商倒闭 = 笔记还在你的磁盘上。</span></li>
+          <li><span class="lang-en">Plain Markdown — grep, git, any editor works on the file.</span><span class="lang-zh">普通 Markdown —— grep、git、任何编辑器都直接能用。</span></li>
+          <li><span class="lang-en">No vendor (us included) can read your content.</span><span class="lang-zh">任何厂商（包括我们）都读不到你的内容。</span></li>
+        </ul>
+      </article>
+
+      <article class="pillar pillar--cloud">
+        <span class="pillar__kicker"><span class="lang-en">Cloud-native · Notion / Evernote</span><span class="lang-zh">云端原生 · Notion / 印象笔记</span></span>
+        <h3 class="pillar__title">
+          <span class="lang-en">Your notes live on a server. Clients are windows into it.</span>
+          <span class="lang-zh">笔记在服务器上。客户端是通向它的窗口。</span>
+        </h3>
+        <p class="pillar__claim">
+          <span class="lang-en">The vendor server is the source of truth. Every device renders the same live state. Collaboration is native — two people on the same page see each other typing. The trade-off: you trust the vendor, you need an account, and when the vendor is down, so is your notebook.</span>
+          <span class="lang-zh">服务器是唯一真实源。每个设备渲染同一份实时状态。多人协作是原生能力 —— 两人同改一页时互相看到光标。代价：你要信任厂商、需要账号，厂商宕机时你的笔记本也宕机。</span>
+        </p>
+        <ul class="pillar__list">
+          <li><span class="lang-en">Real-time collaboration with zero plumbing.</span><span class="lang-zh">多人实时协作，零配置。</span></li>
+          <li><span class="lang-en">Rich block types — tables, databases, embeds — beyond plain text.</span><span class="lang-zh">丰富的内容块类型 —— 表格、数据库、嵌入 —— 远超纯文本。</span></li>
+          <li><span class="lang-en">State stays the same across all devices, all the time.</span><span class="lang-zh">所有设备状态始终一致。</span></li>
+          <li><span class="lang-en">Vendor-backed search, permissions, and admin tooling.</span><span class="lang-zh">厂商提供搜索、权限、管理工具。</span></li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Comparison table -->
+<section class="ember-section ember-section--subtle" id="table" style="padding-block:var(--space-10);">
+  <div class="ember-container ember-container--wide">
+    <div style="max-width:760px; margin:0 auto; text-align:center;">
+      <span class="accent-strip accent-strip--center"></span>
+      <span class="eyebrow"><span class="lang-en">Side by side</span><span class="lang-zh">并排对比</span></span>
+      <h2 class="section-title section-title--md">
+        <span class="lang-en">Nine dimensions. The gold bar marks where Skypad wins.</span>
+        <span class="lang-zh">九个维度。金色竖线标出 Skypad 胜出的地方。</span>
+      </h2>
+      <p class="ember-lead" style="margin:var(--space-5) auto 0; max-width:620px; font-size:17px;">
+        <span class="lang-en">Six of nine wins is a lot. So are the three rows where Skypad is honestly outdone — those are kept here, in the table, not hidden.</span>
+        <span class="lang-zh">九里赢六，已经不少。还有三项是 Skypad 老实输的 —— 也都留在表里，没藏起来。</span>
+      </p>
+    </div>
+
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th scope="col"><span class="lang-en">Dimension</span><span class="lang-zh">维度</span></th>
+          <th scope="col"><span class="lang-en">Skypad · local-first</span><span class="lang-zh">Skypad · 本地优先</span></th>
+          <th scope="col"><span class="lang-en">Notion / Evernote · cloud-native</span><span class="lang-zh">Notion / 印象笔记 · 云端原生</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="lang-en">Where data lives</span><span class="lang-zh">数据存在哪</span></td>
+          <td class="cell-win"><span class="lang-en">Your disk · plain <code>.md</code> files.</span><span class="lang-zh">你的磁盘 · 普通 <code>.md</code> 文件。</span></td>
+          <td><span class="lang-en">Vendor servers · proprietary block format.</span><span class="lang-zh">厂商服务器 · 私有块格式。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Works offline</span><span class="lang-zh">离线可用</span></td>
+          <td class="cell-win"><span class="lang-en">Always — it's the default state.</span><span class="lang-zh">始终可用 —— 这是默认状态。</span></td>
+          <td><span class="lang-en">Cached pages only · new writes queue.</span><span class="lang-zh">仅已缓存的页 · 新写入会排队。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Multi-device sync</span><span class="lang-zh">多设备同步</span></td>
+          <td class="cell-win"><span class="lang-en">E2E encrypted · vendor sees ciphertext only.</span><span class="lang-zh">端到端加密 · 厂商只看到密文。</span></td>
+          <td><span class="lang-en">Vendor-readable · required for features to work.</span><span class="lang-zh">厂商可读 · 功能依赖可读性。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Real-time collaboration</span><span class="lang-zh">实时协作</span></td>
+          <td><span class="lang-en">CRDT over peer sync · not native.</span><span class="lang-zh">基于 CRDT 的点对点同步 · 非原生。</span></td>
+          <td><span class="lang-en">Native · two cursors on the same page.</span><span class="lang-zh">原生 · 同一页两个光标。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Search speed</span><span class="lang-zh">搜索速度</span></td>
+          <td class="cell-win"><span class="lang-en">Instant · local index, no round-trip.</span><span class="lang-zh">即时 · 本地索引，无服务器往返。</span></td>
+          <td><span class="lang-en">Server round-trip · 100–400 ms typical.</span><span class="lang-zh">服务器往返 · 典型 100–400 毫秒。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Content format</span><span class="lang-zh">内容格式</span></td>
+          <td class="cell-win"><span class="lang-en">Plain Markdown · any editor, forever.</span><span class="lang-zh">普通 Markdown · 任何编辑器，永久可用。</span></td>
+          <td><span class="lang-en">Vendor-specific blocks · export-then-convert.</span><span class="lang-zh">厂商私有块 · 导出后要转换。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Account required</span><span class="lang-zh">是否需要账号</span></td>
+          <td class="cell-win"><span class="lang-en">No · the free tier is fully offline.</span><span class="lang-zh">否 · 免费档完全离线。</span></td>
+          <td><span class="lang-en">Yes · email + password minimum.</span><span class="lang-zh">是 · 至少邮箱 + 密码。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">If the vendor shuts down</span><span class="lang-zh">厂商倒闭后</span></td>
+          <td class="cell-win"><span class="lang-en">Notes untouched on your disk.</span><span class="lang-zh">笔记原样留在你的磁盘。</span></td>
+          <td><span class="lang-en">Last export is all you have · new edits stop.</span><span class="lang-zh">最后一次导出是你仅剩的 · 不能再编辑。</span></td>
+        </tr>
+        <tr>
+          <td><span class="lang-en">Structural lock-in risk</span><span class="lang-zh">结构性锁定风险</span></td>
+          <td class="cell-win"><span class="lang-en">Zero · the format is an open standard.</span><span class="lang-zh">零 · 格式是开放标准。</span></td>
+          <td><span class="lang-en">High · migration requires an export tool.</span><span class="lang-zh">高 · 迁移需要导出工具。</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- When to pick which -->
+<section class="ember-section" id="when" style="padding-block:var(--space-10);">
+  <div class="ember-container ember-container--wide">
+    <div style="max-width:760px; margin:0 auto; text-align:center;">
+      <span class="accent-strip accent-strip--center"></span>
+      <span class="eyebrow"><span class="lang-en">Pick the right one</span><span class="lang-zh">选对那一个</span></span>
+      <h2 class="section-title">
+        <span class="lang-en">Three clear scenarios.</span>
+        <span class="lang-zh">三个清晰的场景。</span>
+      </h2>
+      <p class="ember-lead" style="margin:var(--space-5) auto 0; max-width:620px; font-size:17px;">
+        <span class="lang-en">Skip the long pro-and-con matrix. The real decision usually collapses to one of these three.</span>
+        <span class="lang-zh">跳过长长的优劣表格。真实的选择通常落在这三种里的一种。</span>
+      </p>
+    </div>
+
+    <div class="scenarios">
+      <article class="scenario">
+        <span class="scenario__tag scenario__tag--local"><span class="lang-en">Pick Skypad</span><span class="lang-zh">选 Skypad</span></span>
+        <h3 class="scenario__title">
+          <span class="lang-en">Solo thinker, long horizon</span>
+          <span class="lang-zh">独立思考者，长时间跨度</span>
+        </h3>
+        <p class="scenario__body">
+          <span class="lang-en">You keep a journal, a reading log, or a research vault. You want those notes readable in twenty years, searchable without waiting on anyone's servers, and not tied to a subscription you might one day stop paying. Local-first is the only pattern that survives all three tests at once.</span>
+          <span class="lang-zh">你在记日记、写读书笔记或一份研究素材库。希望这些笔记二十年后还能读到、搜索时不用等服务器、也不被订阅费绑住。本地优先是唯一一次过这三关的模式。</span>
+        </p>
+      </article>
+
+      <article class="scenario">
+        <span class="scenario__tag scenario__tag--cloud"><span class="lang-en">Pick Notion / Evernote</span><span class="lang-zh">选 Notion / 印象</span></span>
+        <h3 class="scenario__title">
+          <span class="lang-en">Team editing the same page daily</span>
+          <span class="lang-zh">团队每天共编同一页</span>
+        </h3>
+        <p class="scenario__body">
+          <span class="lang-en">Five teammates editing the same roadmap, all at once. Threaded comments, shared permissions, an admin history you can audit. Local-first can imitate this with CRDTs and some plumbing — but cloud-native gives it to you with zero setup. If real-time collaboration is your core workflow, the cloud's native advantage wins.</span>
+          <span class="lang-zh">五个同事同时改一份 roadmap。评论线、共享权限、可追溯的管理历史。本地优先可以靠 CRDT 加配置模拟，但云端原生零配置就能给你。如果实时协作是你的核心工作流，云端原生的优势压倒本地优先。</span>
+        </p>
+      </article>
+
+      <article class="scenario">
+        <span class="scenario__tag scenario__tag--either"><span class="lang-en">Either works</span><span class="lang-zh">两者皆可</span></span>
+        <h3 class="scenario__title">
+          <span class="lang-en">Short-term, low-stakes</span>
+          <span class="lang-zh">短期项目，低风险</span>
+        </h3>
+        <p class="scenario__body">
+          <span class="lang-en">A trip itinerary. A week-long shopping list. A recipe collection cloned off a blog you'll never edit again. Either side serves these fine — pick whichever you have open. Long-term trade-offs don't compound on a workload that won't outlive a fortnight.</span>
+          <span class="lang-zh">一次出行的行程。一周购物清单。从博客复制来再也不改的菜谱合集。两边都够用 —— 哪个已经打开就用哪个。两周内就用完的事，长期权衡撑不到那一天。</span>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Verdict band · earned italic -->
+<section class="verdict-band" id="verdict">
+  <div class="ember-container" style="max-width:920px; text-align:center;">
+    <span class="accent-strip accent-strip--center" style="background:#c49464;"></span>
+    <span class="eyebrow" style="color:#d9b892;"><span class="lang-en">An honest closing</span><span class="lang-zh">诚实的结尾</span></span>
+    <blockquote class="verdict-quote">
+      <span class="lang-en">Skypad is local-first. That's a trade-off, not a universal winner. If real-time collaboration is your main workflow, use Notion. If you want notes you'll still be reading in twenty years, use us. The worst tool is the one chosen by following a trend — match the tool to the work, not to the marketing.</span>
+      <span class="lang-zh">Skypad 是本地优先。这是一种取舍，不是普适的赢家。如果实时协作是你的主工作流，用 Notion。如果你希望二十年后还能读这些笔记，用我们。最糟糕的工具是跟风选来的那个 —— 让工具匹配你的工作，不是让它匹配营销。</span>
+    </blockquote>
+    <cite class="verdict-cite">
+      <span class="verdict-cite-rule" aria-hidden="true"></span>
+      <span class="lang-en">The Skypad team — written by people who use both</span>
+      <span class="lang-zh">Skypad 团队 —— 我们两边都用</span>
+    </cite>
+  </div>
+</section>
+
+<!-- Footer / CTA -->
+<section class="ember-section" style="text-align:center; padding-block:var(--space-10);">
+  <div class="ember-container" style="max-width:740px;">
+    <span class="accent-strip accent-strip--center"></span>
+    <span class="eyebrow"><span class="lang-en">If local-first is your side</span><span class="lang-zh">如果你属于本地优先这一侧</span></span>
+    <h2 class="section-title section-title--md" style="margin-top:var(--space-3);">
+      <span class="lang-en">Try it for free.</span>
+      <span class="lang-zh">免费试一下。</span>
+    </h2>
+    <p class="ember-lead" style="margin:var(--space-5) auto var(--space-7); max-width:580px;">
+      <span class="lang-en">Skypad is free for solo writers. No account required. No installer dark patterns. Your notes stay yours from minute one.</span>
+      <span class="lang-zh">单人作者永久免费。无需注册。没有安装陷阱。笔记从第一分钟起就是你的。</span>
+    </p>
+    <p style="display:flex; gap:var(--space-4); justify-content:center; align-items:center; flex-wrap:wrap;">
+      <a class="ember-button" href="landing.html#download"><span class="lang-en">Download Skypad — free</span><span class="lang-zh">下载 Skypad - 免费</span></a>
+      <a class="ember-link" href="pricing.html"><span class="lang-en">See pricing</span><span class="lang-zh">查看定价</span></a>
+    </p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="ember-footer">
+  <div class="ember-footer-grid">
+    <div class="ember-footer-group"><h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5><a href="landing.html"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a><a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a><a href="#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a><a href="#changelog"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">For teams</span><span class="lang-zh">团队</span></h5><a href="#teams"><span class="lang-en">Team plan</span><span class="lang-zh">团队版</span></a><a href="#enterprise"><span class="lang-en">Enterprise</span><span class="lang-zh">企业版</span></a><a href="#security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a><a href="#slas">SLAs</a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">Writers</span><span class="lang-zh">作者</span></h5><a href="#guide"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a><a href="#journal"><span class="lang-en">Journal</span><span class="lang-zh">杂志</span></a><a href="#showcase"><span class="lang-en">Showcase</span><span class="lang-zh">作品精选</span></a><a href="#community"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5><a href="#about"><span class="lang-en">About</span><span class="lang-zh">关于</span></a><a href="#press"><span class="lang-en">Press</span><span class="lang-zh">媒体</span></a><a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a><a href="#status"><span class="lang-en">Status</span><span class="lang-zh">状态</span></a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">Legal</span><span class="lang-zh">法务</span></h5><a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a><a href="#terms"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a><a href="#dpa">DPA</a><a href="#audit"><span class="lang-en">Audit</span><span class="lang-zh">审计</span></a></div>
+  </div>
+  <div class="ember-footer-legal">
+    <span>Copyright © 2026 Skypad Inc.</span>
+    <span><span class="lang-en">Made in Berlin · Toronto · Kyoto</span><span class="lang-zh">制作于 柏林 · 多伦多 · 京都</span></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: ember
+Page-type: comparison
+Created: 2026-04-27
+
+Decisions (6):
+1. [hero-two-truths-italic-accent] chose "stacked Fraunces 80-88px roman h1 with ONE italic accent word at the end (`Pick the one *that fits.*`)" over "headline declaring a winner / whole headline italic". Because: comparison pages lose trust the moment the headline declares a winner; ember's §J reserves italic as an accent earned once per section, so the single italic accent word carries emotional weight precisely because the rest is roman. A whole-italic headline would read as a wedding invitation and dissolve into wallpaper.
+2. [editorial-paper-spread-illustration] chose "two-page editorial spread on cream stock — left page handwritten Markdown notebook entry, right page vendor-cloud receipt with metadata key-value rows, joined by a thin gold rule labelled SAME IDEA" over "abstract architecture diagram (anthropic) / two product-window mocks (apple)". Because: ember's illustration vocabulary is printed paper / journal pages, not contemporary UI chrome and not technical flow charts; the metaphor for the comparison is two ledgers of the same idea, which lands the architectural trade-off through ember's literary voice instead of fighting against it.
+3. [pillar-spine-gold-vs-brown] chose "two pillar cards of equal width, equal padding, equal bullet count, with gold (#c49464) top-border for local-first and brown-gray (#6b5a4f) top-border for cloud-native" over "asymmetric pillars / a competing chromatic accent for the cloud column (e.g. blue or green)". Because: asymmetric pillars signal propaganda regardless of what the bullets say; using a competing chromatic colour for the other side cues the reader to read the page as a fight. Honest comparison keeps one accent and lets the other side be quietly neutral.
+4. [table-gold-leftbar-no-emoji] chose "thin 2px gold left-border on win cells (.cell-win::before, inset 16px top/bottom)" over "green checkmark / red X emoji grid / coloured cell backgrounds". Because: emoji checkmarks turn the table into a scoreboard, screen-read poorly, and look like every generic SaaS comparison page; a quiet chromatic bar marks wins without shouting. Six wins out of nine would also overpower the rest if filled with green emoji.
+5. [scenarios-three-card-with-either-works] chose "three scenario cards including a neutral 'either works' middle card with divider-tan (#e6d9bf) tag tint" over "two partisan scenario cards / a decision tree". Because: giving the reader permission to not care for low-stakes use cases (trip itineraries, week-long shopping lists) proves the author isn't pathologically pushing one side — and the tan-tinted middle tag visually separates it from the two partisan options while staying in palette (no out-of-skill green or blue).
+6. [verdict-on-chocolate-band-fraunces-italic] chose "closing verdict on dark chocolate (#312520) band with Fraunces italic 40px pull-quote, gold hairline cite rule" over "verdict in a card on cream / no verdict / verdict + CTA combo". Because: the dark chocolate band is ember's signature reserved closing move (already established on landing.html) — used once, for one high-stakes line. Fraunces italic earns its keep here because the page has spent its other two italic moments (hero accent + section h2 accent) elsewhere. A CTA inside the verdict band would retroactively recolour every honest word above as marketing.
+
+Known trade-offs:
+- Italic is concentrated in three earned moments (hero accent word, one section h2 accent word, verdict pull-quote). Three is the §J ceiling; a fourth italic anywhere on this page would tip into italic-overuse. Rule for ports: don't add italic anywhere else without retiring one of the existing three.
+- Page-scoped scenario tag colours (#8a5a2c local, #5a4a3f cloud) are darker siblings of ember-text-secondary and ember-gold for tag-text contrast — kept as inline values rather than promoted to global ember.css tokens, since they're only used here. SVG internal fills (#c49464, #312520, #8a7564) use raw hex because SVG element attributes can't reference CSS custom properties; values match var(--ember-gold), var(--ember-text), and a darker sibling of ember-text-secondary.
+- The page leans heavily on slow editorial rhythm (gold hairlines, mono eyebrows, paper-spread illustration, static verdict). Accepted cost: fast-moving consumer comparisons (TikTok-pace launches, flash-sale retail) will read as underpowered here; canonical.md "When NOT to use" flags this — planner should pick apple-design for fast consumer or anthropic-design for developer tooling instead.
+
+/design-review:self-diff -->
+
+</body>
+</html>
