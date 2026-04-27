@@ -3,6 +3,17 @@
 > 这个文档既是美学指引，也是 **"这些坑我们已经踩过了"** 的防御清单。
 > 每条 Don't 旁边都有一句"Why"——如果不懂 Why，就不要删掉它。
 
+## 写边界版式 / 控件 / 文案 — 先读 scenario recipes
+
+§1-§6 / §1-§28 列的是 canonical 已覆盖的版式和组件。**如果你要写的版式 / 控件 / 文案不在 canonical 里**，**必须**先读对应 reference 末尾的 scenario recipes，再下笔：
+
+- 数据 dashboard / form / table / tab / accordion / modal / sidebar / changelog / video / empty-state → `references/layout-patterns.md` §L1-§L10
+- input / select / check / switch / tab / accordion / toast / dialog / banner / tooltip / skeleton → `references/components.md` §C1-§C11
+- hero 进入 / 列表 stagger / hover / modal / toast / loading / count-up / route → `references/motion.md` §M1-§M10
+- CTA / 空态 / error / placeholder / 链接 / pricing 文案 + 禁用词清单 → `references/ux-writing.md`
+
+每条 recipe 给的是量化合约（duration / padding / font-size / token / class）。按表执行。recipe class 已落到 `assets/anthropic.css`（C4-C11 + L1 一组），直接 `class="anth-*"` 用即可。
+
 ## ✅ Do
 
 - 暖米白 `#faf9f5` 底 + Lora 衬线正文
@@ -49,18 +60,48 @@
 
 ---
 
-## 📋 发布前 checklist（**MUST** — 三道闸都要 exit 0）
+## 📋 发布前 checklist（**MUST** — 四闸都要 exit 0）
+
+```bash
+# 一键跑全部 4 闸（verify + visual-audit + screenshot + critic prompt）
+bin/design-review --critic <path/to/your.html>
+```
+
+或分别跑：
 
 ```bash
 # 1) 结构验证（placeholder / BEM / 未定义 class / SVG 平衡 / container base-modifier）
-python3 skills/anthropic-design/scripts/verify.py <path/to/your.html>
+python3 skills/design-review/scripts/verify.py <path/to/your.html>
 
-# 2) 视觉渲染验证（Playwright + WCAG 对比度 + 框图尺寸 + 孤儿卡）
-node skills/anthropic-design/scripts/visual-audit.mjs <path/to/your.html>
+# 2) 视觉渲染验证（Playwright + WCAG 对比度 + 框图尺寸 + 孤儿卡 + brand-presence + italic + cross-skill smell）
+node skills/design-review/scripts/visual-audit.mjs <path/to/your.html>
 
 # 3) 全页截图，肉眼审核
-node skills/anthropic-design/scripts/screenshot.mjs <path/to/your.html> shot.png
+node skills/design-review/scripts/screenshot.mjs <path/to/your.html> shot.png
+
+# 4) LLM critic — 写 prompt 给 Claude / design-critic 子 agent，输出 0-100 分
+node skills/design-review/scripts/critic.mjs <path/to/your.html> --out=critic.md
 ```
+
+### 审存量页（不是新生成的） — `bin/design-review --audit`
+
+四闸只跑刚生成的 HTML。要批量扫存量目录、回归老页面、审客户给的 HTML：
+
+```bash
+bin/design-review --audit --skill=anthropic --allow-monolingual <dir>/
+bin/design-review --audit --skill=anthropic --no-visual <dir>/   # 10x 快，先看结构错
+```
+
+输出 `<repo>/shots/audit-report-<ts>.md` + `.json`：每页 errors/warnings + Top failure modes 直方图。详见 `SKILL.md` 末尾。
+
+### 文案前发布 checklist 追加项（来自 ux-writing.md）
+
+- [ ] CTA 文案 ≤ 3 词，动词开头，无 `!`
+- [ ] 没有 `Click here` / `Learn more` 单独做主 CTA
+- [ ] 没有 `Oops` / `Sorry` / emoji
+- [ ] 链接末尾 `→`（U+2192 单字符），不是 `›` / `->` / 裸文字
+- [ ] 没有禁用词（`leverage` / `cutting-edge` / `revolutionize` / `unlock` / `effortless` / `seamless` / `welcome to` / `we're excited to` / `meet the new` / 等等）
+- [ ] 数字千位逗号；三连点 `…` 是 U+2026 单字符
 
 任何一条 exit 非 0 → **任务没完成**。visual-audit 会报：
 - `[error]` contrast < 3 — 修文字或背景颜色

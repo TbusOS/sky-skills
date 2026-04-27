@@ -28,13 +28,23 @@ last-verified: 2026-04-19
 
 1. `references/design-tokens.md` — 所有 CSS 变量
 2. `references/typography.md` — 字体层级（Lora serif 正文是核心差异）
-3. `references/layout-patterns.md` — 六类版式骨架 + **容器选择表**
-4. `references/components.md` — 28 组件（含 §28 Inline SVG 插画模板）
-5. `references/motion.md` — 动画缓动
+3. `references/layout-patterns.md` — 六类版式骨架 + **容器选择表** + **L1-L10 scenario recipes**（dashboard / form / table / tab / accordion / modal / sidebar / changelog / video / empty-state）
+4. `references/components.md` — 28 组件（含 §28 Inline SVG 插画模板）+ **C1-C11 scenario recipes**（input / select / check / switch / tab / accordion / toast / dialog / banner / tooltip / skeleton）
+5. `references/motion.md` — 动画缓动 + **M1-M10 scenario recipes**（hero / stagger / hover / modal / toast / loading / count-up / route）
 6. `references/imagery.md` — 抽象 SVG 插画规则
 7. `references/data-display.md` — 低饱和图表色板
 8. `references/responsive.md` — 断点与 max-width
-9. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
+9. `references/ux-writing.md` — CTA / empty state / error / placeholder 文案模式 + 禁用词清单
+10. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
+
+### 何时读 scenario recipes（重要）
+
+写一个 page-type 之前先看 §3 / §4 / §5 / §9 末尾的 `## Scenario recipes`：
+
+- canonical 只有 pricing / landing / docs-home / feature-deep / comparison 五类
+- 上面之外的版式（dashboard / form / wiki / accordion / modal / toast / 数据表 / 文案规则）必须读对应 recipe
+- generator **不要凭感觉**把 landing 的卡片样式套到 dashboard、把 cream 直链当主 CTA、用 `Click here` 当 CTA 文案
+- recipe 里给的是量化合约（duration / padding / font-size / token），按表执行
 
 ## 发布前检查(MUST — 交给 design-review skill)
 
@@ -91,3 +101,29 @@ Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
 - `.anth-button` 橙底必须 `color: #ffffff; font-weight: 600;`(cream 在橙上是 2.96, fail AA)
 - Hero 段必须 `class="anth-container anth-container--wide"`(**base + modifier 都要**)
 - 风格规则详见 `references/dos-and-donts.md`
+
+### 审存量页（不是新生成的） — `--audit` 模式
+
+四闸只跑刚生成的 HTML。要批量扫存量页面（已有 wiki / 老 memo / 客户给的 HTML），用：
+
+```bash
+# 扫整个目录（递归）
+bin/design-review --audit --skill=anthropic --allow-monolingual <dir>/
+
+# 单文件
+bin/design-review --audit --skill=anthropic --allow-monolingual <file>.html
+
+# verify-only，10x 快（适合先看哪些有结构错）
+bin/design-review --audit --skill=anthropic --allow-monolingual --no-visual <dir>/
+
+# 限文件数（试跑）
+bin/design-review --audit --skill=anthropic --max=5 <dir>/
+```
+
+输出（默认 `<repo>/shots/`）：
+- `audit-report-<ts>.md` — 汇总表 + Top failure modes 直方图 + 每页 errors/warnings 详情
+- `audit-report-<ts>.json` — 同样数据的机器可读版本
+
+退出码：所有文件都 pass → 0；任一文件 errors > 0 → 1；warnings 默认不算 fail，加 `--strict` 才算。
+
+**审外部 HTML（没链 anthropic.css）**：先在 `<head>` 注入 `<link rel="stylesheet" href="<...>/anthropic.css">` 再扫，否则 audit 会报 "undefined class" / "no brand-presence" 等大量 false positive。

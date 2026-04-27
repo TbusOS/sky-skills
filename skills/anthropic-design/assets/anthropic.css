@@ -664,3 +664,241 @@ mark {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* ---------- Section S: Scenario recipe components ---------- */
+/* Added 2026-04-27 to back the scenario recipes in references/components.md
+ * (C4 switch · C7 toast · C8 dialog · C9 banner severity · C10 tooltip ·
+ *  C11 skeleton) and references/layout-patterns.md L1 dashboard
+ * (.anth-card--data / .anth-eyebrow / .anth-metric / .anth-delta).
+ * Existing classes (.anth-input/.anth-select/.anth-textarea/.anth-checkbox/
+ * .anth-radio/.anth-tabs/.anth-tab/.anth-banner/.anth-details) already cover
+ * C1/C2/C3/C5/C6 — no duplicates. */
+
+/* C4 · Toggle switch (settings only — for yes/no in forms use .anth-checkbox) */
+.anth-switch {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 36px;
+  height: 20px;
+  background: var(--anth-mid-gray);
+  border-radius: 9999px;
+  position: relative;
+  cursor: pointer;
+  transition: background var(--duration-sm) var(--ease-anth);
+  flex-shrink: 0;
+}
+.anth-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: #ffffff;
+  transition: transform var(--duration-sm) var(--ease-anth);
+}
+.anth-switch:checked {
+  background: var(--anth-orange);
+}
+.anth-switch:checked::after {
+  transform: translateX(16px);
+}
+.anth-switch:focus-visible {
+  outline: 2px solid var(--anth-orange);
+  outline-offset: 2px;
+}
+
+/* C7 · Toast notification */
+.anth-toast {
+  position: fixed;
+  bottom: var(--space-5);
+  right: var(--space-5);
+  background: var(--anth-text);
+  color: var(--anth-bg);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-pop);
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 360px;
+  z-index: 90;
+}
+.anth-toast--success {
+  background: var(--anth-green);
+  color: #ffffff;
+}
+.anth-toast--error {
+  background: var(--anth-danger);
+  color: #ffffff;
+}
+.anth-toast--info {
+  background: var(--anth-text);
+  color: var(--anth-bg);
+}
+
+/* C8 · Modal / Dialog */
+.anth-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 19, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 100;
+}
+.anth-dialog {
+  background: var(--anth-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  max-width: 560px;
+  width: calc(100% - var(--space-7));
+  padding: var(--space-7);
+}
+.anth-dialog h2 {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 var(--space-5);
+}
+.anth-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-7);
+}
+
+/* C9 · Banner severity modifiers + structured children
+ * (the base .anth-banner is defined earlier; here we add the left-bar
+ * severity variants and __title / __body slots). */
+.anth-banner {
+  border-left: 3px solid var(--anth-light-gray);
+  align-items: flex-start;
+}
+.anth-banner--info    { border-left-color: var(--anth-blue); }
+.anth-banner--success { border-left-color: var(--anth-green); }
+.anth-banner--warn    { border-left-color: var(--anth-orange); }
+.anth-banner--danger  { border-left-color: var(--anth-danger); }
+.anth-banner__title {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+.anth-banner__body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--anth-text-secondary);
+  margin: var(--space-1) 0 0;
+}
+
+/* C10 · Tooltip (paired with [data-tooltip] trigger) */
+.anth-tooltip {
+  position: absolute;
+  background: var(--anth-text);
+  color: var(--anth-bg);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 500;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--duration-sm) var(--ease-anth),
+              transform var(--duration-sm) var(--ease-anth);
+}
+[data-tooltip]:hover + .anth-tooltip,
+[data-tooltip]:focus + .anth-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* C11 · Skeleton loading (replace spinner with shimmer block) */
+.anth-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--anth-bg-subtle) 0%,
+    #f5f3ec 50%,
+    var(--anth-bg-subtle) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  animation: anth-shimmer 1.4s linear infinite;
+}
+.anth-skeleton--line   { height: 14px; margin: var(--space-2) 0; }
+.anth-skeleton--block  { height: 120px; }
+.anth-skeleton--circle { border-radius: 9999px; }
+@keyframes anth-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* L1 · Dashboard data cards (compact, no shadow, hairline border, big number) */
+.anth-card--data {
+  padding: var(--space-4);
+  border: 1px solid var(--anth-light-gray);
+  box-shadow: none;
+}
+.anth-eyebrow {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--anth-text-secondary);
+  margin: 0;
+}
+.anth-metric {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  margin: var(--space-2) 0 0;
+  font-variant-numeric: tabular-nums;
+}
+.anth-delta {
+  font-size: 13px;
+  font-weight: 600;
+  margin: var(--space-2) 0 0;
+}
+.anth-delta--up   { color: var(--anth-green); }
+.anth-delta--down { color: var(--anth-danger); }
+
+/* Section S motion · keyframes backing motion.md M1-M10 recipes
+ * Use as `animation: anth-enter var(--duration-lg) var(--ease-anth) both;`
+ * etc. so generators don't keep inlining @keyframes per page. */
+@keyframes anth-enter {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes anth-enter-soft {
+  /* M1 hero — subtle scale, no big jump */
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes anth-toast-enter {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes anth-toast-exit {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes anth-modal-enter {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes anth-overlay-enter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Convenience animation utilities — drop on any element to trigger. */
+.anth-anim-enter        { animation: anth-enter      var(--duration-lg) var(--ease-anth) both; }
+.anth-anim-enter--soft  { animation: anth-enter-soft var(--duration-lg) var(--ease-anth) both; }
+.anth-anim-toast-enter  { animation: anth-toast-enter var(--duration-md) var(--ease-anth) both; }
+.anth-anim-modal-enter  { animation: anth-modal-enter var(--duration-md) var(--ease-anth) both; }
+

@@ -692,3 +692,373 @@ print(message.content)
 - **a11y**：有信息价值的 SVG 加 `role="img"` + `aria-label`；纯装饰加 `aria-hidden="true"`。
 
 ❌ **不要**写 `<div>[abstract SVG illustration]</div>` / `<div>[icon]</div>` 这样的占位 —— 永远用真 SVG。
+
+---
+
+## Scenario recipes — 表单 / 控件 / 反馈
+
+§1-§28 列出了 anthropic.css 已经定义的组件。以下是 canonical 没现成卡片但常用的控件，给出 anthropic 化的样式合约。**新加的 class 名跟随 `.anth-*` 前缀**；如果还没在 `assets/anthropic.css` 里，按 recipe 自己 inline `<style>` 或追加到 anthropic.css。
+
+> **verify.py 注意**：verify 只扫 `<link>` 进来的外部 CSS，不读 `<style>` 块。新加的 recipe class 如果只 inline，会被报"undefined class"。两个出路：(a) 把 recipe class 追加到 `assets/anthropic.css` 里持久化；(b) 跑 audit/verify 时用 `--css=<path>` 把临时 CSS 文件加进来。生产上推荐 (a) — recipe 用得稳了就提到主 CSS。
+
+### C1 · `<input>` / `<textarea>` （`.anth-input` / `.anth-textarea`）
+
+```css
+.anth-input,
+.anth-textarea {
+  width: 100%;
+  font-family: var(--font-heading);   /* Poppins，不是 Lora —— 表单是控件不是阅读 */
+  font-size: 16px;                     /* 不要 < 16px：iOS 会强制缩放页面 */
+  line-height: 1.5;
+  color: var(--anth-text);
+  background: var(--anth-bg);          /* 不是 white：保持暖底 */
+  border: 1px solid var(--anth-light-gray);
+  border-radius: var(--radius-md);     /* 16px，不是 4px */
+  padding: 12px 16px;
+  transition: border-color var(--duration-sm) var(--ease-anth),
+              box-shadow      var(--duration-sm) var(--ease-anth);
+}
+.anth-input::placeholder,
+.anth-textarea::placeholder {
+  color: var(--anth-mid-gray);
+}
+.anth-input:hover,
+.anth-textarea:hover { border-color: var(--anth-text-secondary); }
+.anth-input:focus,
+.anth-textarea:focus {
+  outline: none;
+  border-color: var(--anth-orange);
+  box-shadow: 0 0 0 3px rgba(217,119,87,0.20);  /* 橙色光环 3px */
+}
+.anth-input[aria-invalid="true"],
+.anth-input.is-error {
+  border-color: var(--anth-danger);
+}
+.anth-textarea { resize: vertical; min-height: 96px; }
+```
+
+```html
+<label class="anth-label" for="email">Work email</label>
+<input id="email" class="anth-input" type="email" placeholder="you@company.com">
+```
+
+- 不要 `border: none + bg gray` 风格（material design 调）
+- 不要 floating label（anthropic 是 above-input）
+- 不要 focus 时改 background；只动 border + shadow
+
+### C2 · `<select>` （`.anth-select`）
+
+```css
+.anth-select {
+  /* 继承 .anth-input 全部属性，再追加： */
+  appearance: none;
+  -webkit-appearance: none;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%236b6a5f' d='M4 6l4 4 4-4'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+}
+```
+- 不用浏览器默认箭头（不一致）；inline SVG `▾` 用 `--anth-text-secondary` 灰
+- focus 态 ring 同 input
+
+### C3 · `<input type="checkbox">` / `<input type="radio">` （`.anth-check`）
+
+```css
+.anth-check {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--anth-light-gray);
+  background: var(--anth-bg);
+  vertical-align: middle;
+  cursor: pointer;
+  transition: background var(--duration-sm), border-color var(--duration-sm);
+}
+.anth-check[type="checkbox"] { border-radius: var(--radius-sm); }   /* 6px 方角 */
+.anth-check[type="radio"]    { border-radius: 9999px; }              /* 圆 */
+.anth-check:hover  { border-color: var(--anth-text-secondary); }
+.anth-check:focus-visible {
+  outline: 2px solid var(--anth-orange);
+  outline-offset: 2px;
+}
+.anth-check:checked {
+  background: var(--anth-orange);
+  border-color: var(--anth-orange);
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' d='M3 8l3.5 3.5L13 5'/></svg>");
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.anth-check[type="radio"]:checked {
+  background: var(--anth-orange);
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='3.5' fill='white'/></svg>");
+}
+```
+- 不要在 label 上加额外 `cursor:pointer` 边框；让 input + label 同一行 baseline 对齐即可
+- 不要 toggle switch 顶替 checkbox（anthropic 表单里不用 switch；switch 留给设置项）
+
+### C4 · Toggle switch （`.anth-switch`，仅设置项）
+
+```css
+.anth-switch {
+  appearance: none;
+  width: 36px; height: 20px;
+  background: var(--anth-mid-gray);
+  border-radius: 9999px;
+  position: relative;
+  cursor: pointer;
+  transition: background var(--duration-sm) var(--ease-anth);
+}
+.anth-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  border-radius: 9999px;
+  background: white;
+  transition: transform var(--duration-sm) var(--ease-anth);
+}
+.anth-switch:checked { background: var(--anth-orange); }
+.anth-switch:checked::after { transform: translateX(16px); }
+```
+- 仅用于 "开 / 关" 二态设置（如 "Email me weekly digest"）
+- 表单里的 yes/no 仍用 checkbox
+
+### C5 · Tab list （`.anth-tabs` / `.anth-tab`）
+
+```css
+.anth-tabs {
+  display: flex;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--anth-light-gray);
+}
+.anth-tab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--anth-text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;            /* 盖住 tablist 底线 */
+  transition: color        var(--duration-sm) var(--ease-anth),
+              border-color var(--duration-sm) var(--ease-anth);
+}
+.anth-tab:hover { color: var(--anth-text); }
+.anth-tab[aria-selected="true"] {
+  color: var(--anth-text);
+  border-bottom-color: var(--anth-orange);
+}
+```
+- 见 layout §L4
+- 不要 pill / capsule（橙底白字背景）；那是 ember 风格
+
+### C6 · Accordion （`<details>` + `<summary>` + `.anth-accordion-item`）
+
+```css
+.anth-accordion-item {
+  border-bottom: 1px solid var(--anth-light-gray);
+  padding: var(--space-5) 0;
+}
+.anth-accordion-item > summary {
+  list-style: none;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--anth-text);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: color var(--duration-sm) var(--ease-anth);
+}
+.anth-accordion-item > summary::-webkit-details-marker { display: none; }
+.anth-accordion-item > summary::after {
+  content: "+";
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--anth-text-secondary);
+  transition: transform var(--duration-sm) var(--ease-anth);
+}
+.anth-accordion-item[open] > summary::after { content: "−"; }
+.anth-accordion-item > div {
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--anth-text-secondary);
+  margin-top: var(--space-3);
+  max-width: 680px;
+}
+```
+- 用 `<details>` 不用 JS：原生展开 + 键盘可达
+- 不要 chevron icon；用 `+` / `−` 文字符号
+
+### C7 · Toast notification （`.anth-toast`）
+
+```css
+.anth-toast {
+  position: fixed;
+  bottom: var(--space-5);
+  right: var(--space-5);
+  background: var(--anth-text);
+  color: var(--anth-bg);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-pop);
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 360px;
+}
+.anth-toast--success { background: var(--anth-green); color: white; }
+.anth-toast--error   { background: var(--anth-danger); color: white; }
+.anth-toast--info    { background: var(--anth-text); color: var(--anth-bg); }
+```
+- 进出动画：见 motion §M7
+- 文字行数 ≤ 2，超出改成 banner
+
+### C8 · Modal / Dialog （`.anth-dialog`）
+
+```css
+.anth-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20,20,19,0.45);
+  display: grid;
+  place-items: center;
+  z-index: 100;
+}
+.anth-dialog {
+  background: var(--anth-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  max-width: 560px;
+  width: calc(100% - var(--space-7));
+  padding: var(--space-7);
+}
+.anth-dialog h2 {
+  font-family: var(--font-heading);
+  font-size: 28px;        /* 不是 section h2 的 40px */
+  font-weight: 600;
+  margin: 0 0 var(--space-5);
+}
+.anth-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-7);
+}
+```
+- 进出动画：见 motion §M6
+- 不要 backdrop blur；半透明实色背板即可
+
+### C9 · Banner / Inline alert （`.anth-banner`）
+
+```css
+.anth-banner {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  border-left: 3px solid;          /* 橙色或对应 severity */
+  background: var(--anth-bg-subtle);
+}
+.anth-banner--info    { border-left-color: var(--anth-blue); }
+.anth-banner--success { border-left-color: var(--anth-green); }
+.anth-banner--warn    { border-left-color: var(--anth-orange); }
+.anth-banner--danger  { border-left-color: var(--anth-danger); }
+.anth-banner__title {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+.anth-banner__body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--anth-text-secondary);
+  margin: var(--space-1) 0 0;
+}
+```
+- 用左 3px 色边 + 暖底，不要整片纯色背景（避免页面失衡）
+- icon 可选，放在最左 24×24（线性 stroke 1.8，匹配组件 §28）
+
+### C10 · Tooltip （`.anth-tooltip`）
+
+```css
+.anth-tooltip {
+  position: absolute;
+  background: var(--anth-text);
+  color: var(--anth-bg);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 500;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--duration-sm), transform var(--duration-sm);
+}
+[data-tooltip]:hover + .anth-tooltip,
+[data-tooltip]:focus + .anth-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+```
+- 始终 ≥ 60ms delay 才显（防止 hover 抖动）
+- 内容 ≤ 6 个词；超过就改 popover
+
+### C11 · Skeleton loading （`.anth-skeleton`）
+
+```css
+.anth-skeleton {
+  background: linear-gradient(90deg,
+    var(--anth-bg-subtle) 0%,
+    #f5f3ec 50%,
+    var(--anth-bg-subtle) 100%);
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  animation: anth-shimmer 1.4s linear infinite;
+}
+@keyframes anth-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+.anth-skeleton--line { height: 14px; margin: var(--space-2) 0; }
+.anth-skeleton--block { height: 120px; }
+.anth-skeleton--circle { border-radius: 9999px; }
+```
+- 替代 spinner；anthropic 视觉里转圈 spinner 极少出现
+- 长度模拟真实内容（不是统一一条长 bar）
+
+---
+
+## Scenario decision tree — 哪个组件
+
+```
+要呈现什么？
+├─ 主操作              → §3 .anth-button (primary)
+├─ 次操作 / 取消        → §3 .anth-button.anth-button--ghost
+├─ 单字段输入           → C1 .anth-input
+├─ 多行输入             → C1 .anth-textarea
+├─ 单选下拉            → C2 .anth-select
+├─ 多项可选            → C3 .anth-check[type=checkbox]
+├─ 单项二选一          → C3 .anth-check[type=radio]
+├─ 设置开关            → C4 .anth-switch
+├─ 内容切换            → C5 .anth-tabs
+├─ 折叠 FAQ            → C6 accordion
+├─ 临时浮层提示         → C7 .anth-toast (3.5s 自消) / C9 .anth-banner (常驻)
+├─ 阻塞式确认          → C8 .anth-dialog
+├─ hover 解释          → C10 .anth-tooltip (≤ 6 词)
+├─ 加载占位            → C11 .anth-skeleton（不要 spinner）
+└─ 都不匹配 → 回 §1-§28 找最近组件 + 复用其样式 token
+```
