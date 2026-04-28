@@ -36,6 +36,7 @@
 | 多列网格里一张非 hero 卡片夹在一堆 `grid-column: 1 / -1` 中间 | 独占左半边很难看。要么跟它 span 2，要么 SVG `max-width + margin: 0 auto` 居中 |
 | Lineup 卡片塞一个 72×72 细线图标居中 | 像 wireframe。每张都做满版 illustration，传达 skill 内容 |
 | CTA 文字色在深底上对比度 < 4.5 | 可读性 fail。深底用 `#ffffff`，别用 `var(--apple-bg)` 那样的 off-white |
+| 在 nav 里的 button 不加更高特异性 | `.apple-nav a { color: var(--apple-text); opacity: 0.8 }` 会吃掉 `.apple-button` 的 white color，渲染成深字 + 0.8 透明在 blue 上对比度 ~3.58:1 fail AA（2026-04-28 apple/feature-deep canonical 实测踩过）。**必须** `.apple-nav a.apple-button { color:#ffffff; opacity:1 }`。apple.css 已含此规则（2026-04-28 升级），page 内不必重复 |
 
 ---
 

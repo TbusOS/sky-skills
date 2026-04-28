@@ -46,6 +46,7 @@
 | `class="anth-container--wide"` 只写 modifier 不带 base | base 提供 `margin: 0 auto`；只写 modifier → 容器贴左。**必须** `class="anth-container anth-container--wide"` |
 | `.anth-button` 的 color 给 `var(--anth-bg)` = cream `#faf9f5` | cream 在橙上对比度 2.96 fail AA。**必须** `color:#ffffff` + `font-weight:600` |
 | 橙底 `.anth-badge` 的 color 给 cream | 同样对比度 fail，给 `#ffffff` |
+| 在 nav 里的 button 不加更高特异性 | `.anth-nav a { color: var(--anth-text); }` 会吃掉 `.anth-button` 的 white color。**必须** `.anth-nav a.anth-button { color:#ffffff; }` 单独写。anthropic.css 已含此规则（2026-04-28 升级），page 内不必重复 |
 | hero 框图 figure `padding: var(--space-7)` | 吞掉 SVG 宽度。用 `var(--space-6)` 即可 |
 | SVG 里 `font-size="8"` 用在信息标签 | 渲染后 <9px 看不清。最小给 10，意图小字给 9.5 |
 | 多列网格里一张非 hero 卡片夹在一堆 `grid-column: 1 / -1` 中间 | 孤儿卡。要么 span 2 并 `max-width + margin: 0 auto` 居中 SVG，要么配对 |

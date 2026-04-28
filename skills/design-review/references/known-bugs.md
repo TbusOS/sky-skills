@@ -190,6 +190,19 @@
 
 ---
 
+### 1.24 nav-cascade 吃掉 `.X-button` 的 white color · 跨 4 skill 同 bug 类
+- **Reader sees**：导航栏右边的 `Download` / `Get skills` / `Try it` 等 CTA 按钮，文字渲染成深字而不是白字，在彩色填充按钮上几乎看不见或对比度 fail AA。具体表现因 skill 而异：apple 是深字 + 0.8 透明在 blue 上 ~3.58:1（apple/feature-deep canonical 2026-04-28 实测踩过、visual-audit 抓到）；anthropic 是 `#141413` 在橙上 ~5.9:1 视觉错误但 contrast 过 AA（latent bug，visual-audit 不抓）；ember/sage 历史踩过同一类。
+- **Why**：CSS 选择器特异性 — `.X-nav a { color: var(--X-text) }` (0,2,1) 比 `.X-button { color: #ffffff }` (0,1,0) 强；nav 内的 button 元素继承 nav 规则的 color 而非 button 规则。apple 还多带一层 `opacity: 0.8` 二次伤害。是个**跨 skill 的 CSS-cascade 通病**，每个 skill 各踩一次。
+- **How caught**：apple/feature-deep canonical 2026-04-28 visual-audit `[warn] contrast 3.58:1` 抓到 nav `Download` 按钮；回头 audit 4 skill css 发现 ember + sage 已修（在 css 主源），anthropic + apple 没修。
+- **Defense**：
+  - 4 skill css 主源都加 `.X-nav a.X-button { color: #ffffff }`（apple 还要 `opacity: 1`）+ `:hover` 同。已在 ember.css / sage.css 已 ship；anthropic.css / apple.css 2026-04-28 升级。
+  - 4 skill `dos-and-donts.md` 都加一条 Don't 行（已在 ember + sage；anthropic + apple 2026-04-28 加）。
+  - 已升级到 css 主源后，page-scoped patch（如 apple/feature-deep canonical 临时加的 `<style> .apple-nav a.apple-button { color:#ffffff; opacity:1 }`）应移除。
+  - visual-audit 的 contrast 检查作为兜底（apple 这种 contrast 真 fail 时能抓；anthropic 的 latent 类 contrast 过 AA 时只能靠 css 主源 + dos-and-donts 双保险）。
+- **Rule**：每加一个新 skill，必须在它的 `<X>-design/assets/<X>.css` 加 `.X-nav a.X-button { color: #ffffff }` 规则 + 在 `dos-and-donts.md` 加 Don't 条。检查命令：`grep -c "\.X-nav a\.X-button" skills/X-design/assets/X.css` 应 ≥ 1。
+
+---
+
 ## 2. anthropic-design
 
 ### 2.1 cream 在橙 CTA 上 = 2.96（fail AA）
@@ -197,6 +210,12 @@
 - **Why**：`color: var(--anth-bg)` (`#faf9f5`) 在 `.anth-button` 的橙 (`#d97757`) 背景上 = 2.96。
 - **Defense**：改为 `color: #ffffff; font-weight: 600;`（3.12，warn-level，品牌 intentional）;
   visual-audit 的 contrast 检查会在 ratio < 3 时 fail。
+
+### 2.2 `.anth-nav a` 吃掉 `.anth-button` 的 white color → nav CTA 字色错（latent · §1.24 实例）
+- **Reader sees**：导航栏右边的 CTA 按钮（Download / Try Claude）渲染成 `#141413` 深字而不是白字，在橙底上 contrast ~5.9:1 通过 AA 但视觉错误（橙底按钮看起来像"反白文字 fail"）。
+- **Why**：CSS 特异性 `.anth-nav a` (0,2,1) > `.anth-button` (0,1,0)。anthropic 的橙底 + 深字 contrast 过 AA 让 visual-audit 不抓，是个 latent bug，2026-04-28 在 sweep 时发现。
+- **Defense**：`anthropic.css` 加 `.anth-nav a.anth-button { color: #ffffff }` + `:hover` 同（2026-04-28 ship）；`dos-and-donts.md` 加 Don't 行。
+- **Rule**：跨 skill 类 §1.24 的 anthropic 实例。
 
 ---
 
@@ -214,6 +233,13 @@
 - **Reader sees**:`.apple-link`(#0071E3)用在 `background:#f5f5f7` 的 subtle section 上,contrast 4.31,差一点点。
 - **Why**:apple.com 自己就是这么做的,品牌定位上是 intentional。
 - **Defense**:visual-audit.mjs 的 INTENTIONAL_EXCEPTIONS 列表增加一条(fg #0071E3 × bg #f5f5f7),`--ignore-intentional` 过滤。
+
+### 3.3 `.apple-nav a` 吃掉 `.apple-button` 的 white color + 加 0.8 透明 → nav CTA = 3.58:1 fail AA（§1.24 实例）
+- **Reader sees**：导航栏右边 `Download` 按钮渲染成 `rgb(29,29,31)` 深字 + 0.8 透明在 `rgb(0,113,227)` 蓝底上 = 3.58:1，fail AA。apple 的 blue 比 anthropic 橙更亮，所以这个 latent bug 在 apple 上 contrast 真的 fail，被 visual-audit 抓到。
+- **Why**：CSS 特异性 `.apple-nav a` (0,2,1) > `.apple-button` (0,1,0)，加上 nav 自带 `opacity: 0.8` 二次伤害（hover 才升 1）。
+- **How caught**：2026-04-28 apple/feature-deep canonical 跑 visual-audit `[warn] contrast 3.58:1 fg=rgb(29,29,31) bg=rgb(0,113,227) "Download" (a.apple-button)`。
+- **Defense**：`apple.css` 加 `.apple-nav a.apple-button { color: #ffffff; opacity: 1 }` + `:hover` 同（2026-04-28 ship）；`dos-and-donts.md` 加 Don't 行；既有 page-scoped 临时补丁应移除。
+- **Rule**：跨 skill 类 §1.24 的 apple 实例。
 
 ---
 
