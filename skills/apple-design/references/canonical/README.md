@@ -26,7 +26,7 @@ quality is anchored at the style's own best.
 | Team | `team.html` + `team.md` | — |
 | FAQ | `faq.html` + `faq.md` | — |
 | Changelog | `changelog.html` + `changelog.md` | — |
-| Feature deep | `feature-deep.html` + `feature-deep.md` | — |
+| Feature deep | `feature-deep.html` + `feature-deep.md` | ✅ v1 · 2026-04-28 |
 
 Each page-type's `.md` sibling is **required reading** for any generator
 about to produce that page-type. The `.md` states:
