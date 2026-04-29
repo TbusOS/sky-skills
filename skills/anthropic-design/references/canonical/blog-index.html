@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad Journal — notes from the quiet desk</title>
+<meta name="description" content="The Skypad Journal — engineering essays, reading notes, and editorial pieces from the team behind Skypad. Canonical anthropic-design blog-index page for the sky-skills harness — editorial restraint, no social metadata, no marketing modals.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/anthropic.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+
+  /* Chinese stack (§H · cross-skill-rules.md) */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .masthead__kicker,
+  html[data-lang="zh"] .featured__kicker,
+  html[data-lang="zh"] .post-card__kicker {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] .post-card__lede,
+  html[data-lang="zh"] .featured__lede,
+  html[data-lang="zh"] .footer-sub__copy {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+  }
+  html[data-lang="zh"] .editor-note blockquote {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal;
+  }
+
+  /* Masthead */
+  .masthead { padding: var(--space-9) 0 var(--space-8); }
+  .masthead__kicker {
+    font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--anth-text-secondary); font-weight: 500;
+    margin-bottom: var(--space-5);
+  }
+  html[data-lang="zh"] .masthead__kicker { letter-spacing: 0.04em; text-transform: none; }
+  .masthead__h1 {
+    font-family: var(--font-heading); font-size: clamp(40px, 5vw, 56px);
+    font-weight: 600; letter-spacing: -0.02em; line-height: 1.1;
+    color: var(--anth-text); margin: 0 0 var(--space-5);
+  }
+  .masthead__sub {
+    font-family: var(--font-body); font-size: 19px; line-height: 1.6;
+    color: var(--anth-text); max-width: 620px; margin: 0;
+  }
+  .masthead__sub em {
+    font-style: italic; color: var(--anth-text);
+  }
+
+  /* Featured post */
+  .featured-band {
+    background: var(--anth-bg-subtle);
+    border-top: 1px solid var(--anth-light-gray);
+    border-bottom: 1px solid var(--anth-light-gray);
+    padding: var(--space-8) 0;
+  }
+  .featured {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: var(--space-7);
+    align-items: center;
+  }
+  .featured__art {
+    margin: 0;
+    display: flex; flex-direction: column; gap: var(--space-2);
+  }
+  .featured__art > svg {
+    background: #ffffff;
+    border: 1px solid var(--anth-light-gray);
+    border-radius: var(--radius-lg);
+    width: 100%; height: auto; display: block;
+    aspect-ratio: 5 / 4;
+  }
+  .featured__art figcaption {
+    font-family: var(--font-heading); font-size: 12.5px; font-weight: 500;
+    color: var(--anth-text-secondary); letter-spacing: 0.02em;
+    margin: 0; padding: 0 var(--space-2);
+  }
+  .featured__body { display: flex; flex-direction: column; gap: var(--space-4); }
+  .featured__kicker {
+    font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--anth-orange); font-weight: 700;
+  }
+  html[data-lang="zh"] .featured__kicker { letter-spacing: 0.04em; text-transform: none; }
+  .featured__h2 {
+    font-family: var(--font-heading); font-size: clamp(34px, 3.4vw, 40px);
+    font-weight: 600; letter-spacing: -0.02em; line-height: 1.2;
+    color: var(--anth-text); margin: 0;
+  }
+  .featured__lede {
+    font-family: var(--font-body); font-size: 17px; line-height: 1.65;
+    color: var(--anth-text); margin: 0; max-width: 640px;
+  }
+  .featured__byline {
+    font-family: var(--font-heading); font-size: 13px; font-weight: 500;
+    color: var(--anth-text-secondary); margin: 0;
+  }
+  .featured__byline::before {
+    content: ""; display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; background: var(--anth-orange);
+    margin-right: 8px; vertical-align: middle;
+  }
+
+  /* Tag rail */
+  .tag-rail {
+    display: flex; flex-wrap: wrap; gap: var(--space-2);
+    padding: var(--space-7) 0 var(--space-5);
+  }
+  .tag-pill {
+    font-family: var(--font-mono); font-size: 12.5px; font-weight: 500;
+    color: var(--anth-text); background: var(--anth-bg-subtle);
+    border: 1px solid var(--anth-light-gray); border-radius: var(--radius-pill);
+    padding: 6px 14px; text-decoration: none;
+    transition: background var(--duration-sm) var(--ease-anth),
+                color var(--duration-sm) var(--ease-anth);
+  }
+  .tag-pill:hover { background: var(--anth-light-gray); }
+  .tag-pill--active {
+    background: var(--anth-orange); color: #ffffff; font-weight: 700;
+    border-color: var(--anth-orange);
+  }
+  .tag-pill--active:hover { background: var(--anth-orange-hover); }
+
+  /* Post grid */
+  .post-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-7) var(--space-6);
+    padding-bottom: var(--space-8);
+  }
+  .post-card { display: flex; flex-direction: column; gap: var(--space-3); }
+  .post-card__thumb {
+    background: var(--anth-bg-subtle);
+    border: 1px solid var(--anth-light-gray);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    aspect-ratio: 12 / 7;
+    margin-bottom: var(--space-3);
+  }
+  .post-card__thumb svg { width: 100%; height: 100%; display: block; }
+  .post-card__kicker {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--anth-orange); font-weight: 700;
+  }
+  html[data-lang="zh"] .post-card__kicker { letter-spacing: 0.04em; text-transform: none; }
+  .post-card__title {
+    font-family: var(--font-heading); font-size: 22px; font-weight: 600;
+    line-height: 1.3; letter-spacing: -0.01em;
+    color: var(--anth-text); margin: 0;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .post-card__lede {
+    font-family: var(--font-body); font-size: 15.5px; line-height: 1.6;
+    color: var(--anth-text); margin: 0;
+  }
+  .post-card__link {
+    font-family: var(--font-heading); font-size: 14px; font-weight: 500;
+    color: var(--anth-orange); text-decoration: none; margin-top: var(--space-2);
+  }
+  .post-card__link:hover { color: var(--anth-orange-hover); }
+
+  /* Editor's note */
+  .editor-note {
+    background: var(--anth-bg-subtle);
+    border-top: 1px solid var(--anth-light-gray);
+    border-bottom: 1px solid var(--anth-light-gray);
+    padding: var(--space-8) 0;
+  }
+  .editor-note__inner { max-width: 720px; margin: 0 auto; padding: 0 var(--space-5); }
+  .editor-note blockquote {
+    font-family: var(--font-body); font-style: italic;
+    font-size: 23px; line-height: 1.55;
+    color: var(--anth-text); margin: 0 0 var(--space-4);
+    border-left: 3px solid var(--anth-orange);
+    padding-left: var(--space-5);
+  }
+  .editor-note cite {
+    display: flex; gap: 10px; align-items: center;
+    font-style: normal; font-family: var(--font-heading);
+    font-size: 13px; font-weight: 500; color: var(--anth-text-secondary);
+    padding-left: var(--space-5);
+  }
+  .editor-note cite::before {
+    content: ""; display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; background: var(--anth-orange);
+  }
+
+  /* Pagination */
+  .pagination {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--anth-light-gray);
+    border-bottom: 1px solid var(--anth-light-gray);
+    margin-top: var(--space-7);
+    padding: var(--space-6) 0;
+  }
+  .pagination a {
+    font-family: var(--font-mono); font-size: 13.5px; font-weight: 500;
+    color: var(--anth-text-secondary); text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+  .pagination a:hover { color: var(--anth-orange); }
+  .pagination__newer { text-align: right; }
+
+  /* Footer subscribe */
+  .footer-sub {
+    background: var(--anth-bg-subtle);
+    padding: var(--space-9) 0;
+    margin-top: var(--space-9);
+  }
+  .footer-sub__inner { max-width: 720px; margin: 0 auto; padding: 0 var(--space-5); }
+  .footer-sub__h3 {
+    font-family: var(--font-heading); font-size: 24px; font-weight: 600;
+    letter-spacing: -0.01em; color: var(--anth-text);
+    margin: 0 0 var(--space-3);
+  }
+  .footer-sub__copy {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.65;
+    color: var(--anth-text); margin: 0 0 var(--space-5); max-width: 600px;
+  }
+  .footer-sub__copy a {
+    color: var(--anth-orange); text-decoration: underline;
+    text-decoration-thickness: 1px; text-underline-offset: 3px;
+  }
+  .footer-sub__form {
+    display: flex; gap: var(--space-3); flex-wrap: wrap;
+    margin-bottom: var(--space-3);
+  }
+  .footer-sub__input {
+    flex: 1 1 280px; min-width: 0;
+    font-family: var(--font-heading); font-size: 14px;
+    background: #ffffff; color: var(--anth-text);
+    border: 1px solid var(--anth-light-gray);
+    border-radius: var(--radius-pill);
+    padding: 12px 18px;
+  }
+  .footer-sub__input::placeholder { color: var(--anth-text-secondary); }
+  .footer-sub__note {
+    font-family: var(--font-heading); font-size: 13px;
+    color: var(--anth-text-secondary); margin: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .featured { grid-template-columns: 1fr; }
+    .post-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="#" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">Skypad</a>
+  <div>
+    <a href="#"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="#"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="#" style="color:var(--anth-text); border-bottom:2px solid var(--anth-orange); padding-bottom:2px;"><span class="lang-en">Journal</span><span class="lang-zh">日志</span></a>
+    <a href="#"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+    <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Toggle language"><span class="lang-en">中文</span><span class="lang-zh">EN</span></button>
+    <a class="anth-button" href="#"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a>
+  </div>
+</div></nav>
+
+<!-- Masthead -->
+<header class="anth-section">
+  <div class="anth-container">
+    <div class="masthead">
+      <div class="masthead__kicker">
+        <span class="lang-en">Journal · 2024–2026 · 47 pieces</span>
+        <span class="lang-zh">日志 · 2024–2026 · 47 篇</span>
+      </div>
+      <h1 class="masthead__h1">
+        <span class="lang-en">Notes from<br>the quiet desk.</span>
+        <span class="lang-zh">来自一张<br>安静书桌的笔记。</span>
+      </h1>
+      <p class="masthead__sub">
+        <span class="lang-en">Engineering essays, reading notes, and editorial pieces from the team behind Skypad. One letter per essay, written from the <em>quiet</em> desk we built the product on.</span>
+        <span class="lang-zh">一支团队的工程随笔、读书笔记和编辑短文，关于我们怎么造 Skypad，怎么用它写作。一篇一封信，写自我们造产品时坐的那张<em>安静的</em>书桌。</span>
+      </p>
+    </div>
+  </div>
+</header>
+
+<!-- Featured post -->
+<section class="featured-band">
+  <div class="anth-container">
+    <article class="featured">
+      <figure class="featured__art">
+        <svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A quiet desk: cup, open notebook, soft window light">
+          <!-- backdrop -->
+          <rect width="500" height="400" fill="#faf9f5"/>
+          <!-- soft window glow -->
+          <rect x="0" y="0" width="500" height="220" fill="#f0ede3"/>
+          <!-- desk surface (wood-ish warm-tan) -->
+          <rect x="0" y="220" width="500" height="180" fill="#e8e6dc"/>
+          <line x1="0" y1="220" x2="500" y2="220" stroke="#b0aea5" stroke-width="1"/>
+          <!-- open notebook (left page) -->
+          <rect x="60" y="180" width="180" height="140" fill="#ffffff" stroke="#b0aea5" stroke-width="1.2" rx="2"/>
+          <!-- right page -->
+          <rect x="240" y="180" width="180" height="140" fill="#faf9f5" stroke="#b0aea5" stroke-width="1.2" rx="2"/>
+          <!-- spine -->
+          <line x1="240" y1="180" x2="240" y2="320" stroke="#b0aea5" stroke-width="1.5"/>
+          <!-- ruled lines on left page -->
+          <line x1="78" y1="208" x2="222" y2="208" stroke="#b0aea5" stroke-width="0.8"/>
+          <line x1="78" y1="226" x2="222" y2="226" stroke="#b0aea5" stroke-width="0.8"/>
+          <line x1="78" y1="244" x2="222" y2="244" stroke="#b0aea5" stroke-width="0.8"/>
+          <line x1="78" y1="262" x2="200" y2="262" stroke="#b0aea5" stroke-width="0.8"/>
+          <line x1="78" y1="280" x2="222" y2="280" stroke="#b0aea5" stroke-width="0.8"/>
+          <line x1="78" y1="298" x2="180" y2="298" stroke="#b0aea5" stroke-width="0.8"/>
+          <!-- handwritten lines on right page -->
+          <path d="M 258 208 Q 280 204 304 208 T 360 208 T 410 208" fill="none" stroke="#141413" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M 258 230 Q 282 226 308 230 T 380 230" fill="none" stroke="#141413" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M 258 252 Q 285 248 312 252 T 396 252 T 414 252" fill="none" stroke="#141413" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M 258 274 Q 280 270 304 274 T 348 274" fill="none" stroke="#141413" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M 258 296 Q 286 292 314 296 T 392 296" fill="none" stroke="#141413" stroke-width="1.4" stroke-linecap="round"/>
+          <!-- coffee cup -->
+          <ellipse cx="430" cy="310" rx="40" ry="14" fill="#141413" opacity="0.08"/>
+          <path d="M 400 270 L 400 305 Q 400 318 415 318 L 445 318 Q 460 318 460 305 L 460 270 Z" fill="#ffffff" stroke="#b0aea5" stroke-width="1.2"/>
+          <ellipse cx="430" cy="270" rx="30" ry="6" fill="#d97757"/>
+          <ellipse cx="430" cy="270" rx="22" ry="3" fill="#c56544"/>
+          <!-- handle -->
+          <path d="M 460 282 Q 478 282 478 296 Q 478 308 460 308" fill="none" stroke="#b0aea5" stroke-width="1.2"/>
+          <!-- steam wisps -->
+          <path d="M 420 250 Q 416 244 422 238 Q 428 232 424 226" fill="none" stroke="#b0aea5" stroke-width="1.3" stroke-linecap="round" opacity="0.7"/>
+          <path d="M 432 252 Q 428 244 434 236 Q 440 228 436 220" fill="none" stroke="#b0aea5" stroke-width="1.3" stroke-linecap="round" opacity="0.55"/>
+          <!-- pen -->
+          <line x1="120" y1="334" x2="220" y2="320" stroke="#141413" stroke-width="3" stroke-linecap="round"/>
+          <polygon points="220,318 232,316 224,328" fill="#d97757"/>
+          <!-- soft window edge label (kept ≥10px per dos-and-donts) -->
+          <text x="32" y="34" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10.5" fill="#6b6a5f" letter-spacing="0.18em">MORNING · APR 22</text>
+        </svg>
+        <figcaption>
+          <span class="lang-en">An open notebook on a desk, coffee cup steaming in soft window light — illustration for the featured essay.</span>
+          <span class="lang-zh">书桌上摊开的笔记本，咖啡杯冒着热气，柔和的窗光——配本期编辑推荐文章的插图。</span>
+        </figcaption>
+      </figure>
+      <div class="featured__body">
+        <div class="featured__kicker">
+          <span class="lang-en">02 · Featured essay · 12 min read</span>
+          <span class="lang-zh">02 · 编辑推荐 · 12 分钟阅读</span>
+        </div>
+        <h2 class="featured__h2">
+          <span class="lang-en">Why we removed the AI assistant we shipped six months ago.</span>
+          <span class="lang-zh">为什么我们撤掉了半年前刚上线的 AI 助手。</span>
+        </h2>
+        <p class="featured__lede">
+          <span class="lang-en">It worked. Customers asked for it. We shipped it well. Then we read three months of usage logs side by side with the writing the assistant produced, and decided we'd been wrong about what the product was for. This is what we found and how we walked it back.</span>
+          <span class="lang-zh">它能用。客户在要。我们做得也不差。然后我们把三个月的使用数据和它产出的文字摆在一起读了一遍，发现我们对这个产品的方向判断错了。这是我们看到了什么，以及我们怎么把它撤回来。</span>
+        </p>
+        <p class="featured__byline">
+          <span class="lang-en">By the editors · 2026-04-22</span>
+          <span class="lang-zh">编辑部 · 2026-04-22</span>
+        </p>
+        <p style="margin:0;">
+          <a class="anth-link" href="#"><span class="lang-en">Read the essay →</span><span class="lang-zh">阅读全文 →</span></a>
+        </p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- Tag rail + post grid -->
+<section class="anth-section">
+  <div class="anth-container">
+    <nav class="tag-rail" aria-label="Filter by tag">
+      <a class="tag-pill tag-pill--active" href="#"><span class="lang-en">All</span><span class="lang-zh">全部</span></a>
+      <a class="tag-pill" href="#"><span class="lang-en">Engineering</span><span class="lang-zh">工程</span></a>
+      <a class="tag-pill" href="#"><span class="lang-en">Essays</span><span class="lang-zh">随笔</span></a>
+      <a class="tag-pill" href="#"><span class="lang-en">Notes</span><span class="lang-zh">短记</span></a>
+      <a class="tag-pill" href="#"><span class="lang-en">Changelog</span><span class="lang-zh">变更</span></a>
+      <a class="tag-pill" href="#"><span class="lang-en">Reading list</span><span class="lang-zh">书单</span></a>
+    </nav>
+
+    <div class="post-grid">
+      <!-- Post 1 -->
+      <article class="post-card">
+        <div class="post-card__thumb">
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A bookshelf in cross-section, three rows of books">
+            <rect width="480" height="280" fill="#f0ede3"/>
+            <line x1="0" y1="93" x2="480" y2="93" stroke="#b0aea5" stroke-width="1"/>
+            <line x1="0" y1="187" x2="480" y2="187" stroke="#b0aea5" stroke-width="1"/>
+            <!-- row 1 -->
+            <rect x="40" y="32"  width="22" height="58" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="66" y="38"  width="18" height="52" fill="#d97757"/>
+            <rect x="88" y="34"  width="26" height="56" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="118" y="40" width="22" height="50" fill="#788c5d"/>
+            <rect x="144" y="32" width="20" height="58" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="168" y="36" width="28" height="54" fill="#6a9bcc"/>
+            <rect x="200" y="42" width="22" height="48" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="226" y="34" width="24" height="56" fill="#d97757"/>
+            <rect x="254" y="38" width="20" height="52" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="278" y="32" width="26" height="58" fill="#788c5d"/>
+            <rect x="308" y="40" width="22" height="50" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="334" y="36" width="24" height="54" fill="#d97757"/>
+            <rect x="362" y="34" width="22" height="56" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="388" y="38" width="28" height="52" fill="#6a9bcc"/>
+            <rect x="420" y="42" width="20" height="48" fill="#e8e6dc" stroke="#b0aea5"/>
+            <!-- row 2 -->
+            <rect x="40" y="124" width="26" height="58" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="70" y="130" width="22" height="52" fill="#788c5d"/>
+            <rect x="96" y="126" width="20" height="56" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="120" y="132" width="24" height="50" fill="#d97757"/>
+            <rect x="148" y="126" width="22" height="56" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="174" y="130" width="28" height="52" fill="#6a9bcc"/>
+            <rect x="206" y="124" width="20" height="58" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="230" y="132" width="22" height="50" fill="#d97757"/>
+            <rect x="256" y="128" width="26" height="54" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="286" y="132" width="22" height="50" fill="#788c5d"/>
+            <rect x="312" y="124" width="24" height="58" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="340" y="130" width="20" height="52" fill="#d97757"/>
+            <rect x="364" y="126" width="26" height="56" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="394" y="132" width="22" height="50" fill="#6a9bcc"/>
+            <rect x="420" y="128" width="22" height="54" fill="#e8e6dc" stroke="#b0aea5"/>
+            <!-- row 3 -->
+            <rect x="40" y="218" width="22" height="56" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="66" y="224" width="20" height="50" fill="#d97757"/>
+            <rect x="90" y="220" width="26" height="54" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="120" y="226" width="22" height="48" fill="#788c5d"/>
+            <rect x="146" y="218" width="20" height="56" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="170" y="224" width="28" height="50" fill="#6a9bcc"/>
+            <rect x="202" y="220" width="22" height="54" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="228" y="226" width="20" height="48" fill="#d97757"/>
+            <rect x="252" y="218" width="26" height="56" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="282" y="222" width="22" height="52" fill="#788c5d"/>
+            <rect x="308" y="220" width="20" height="54" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="332" y="226" width="28" height="48" fill="#d97757"/>
+            <rect x="364" y="220" width="22" height="54" fill="#e8e6dc" stroke="#b0aea5"/>
+            <rect x="390" y="224" width="24" height="50" fill="#6a9bcc"/>
+            <rect x="418" y="222" width="22" height="52" fill="#e8e6dc" stroke="#b0aea5"/>
+            <text x="24" y="20" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10.5" fill="#6b6a5f" letter-spacing="0.18em">READING LIST · Q2</text>
+          </svg>
+        </div>
+        <div class="post-card__kicker">
+          <span class="lang-en">Reading list · 2026-04-18 · 8 min</span>
+          <span class="lang-zh">书单 · 2026-04-18 · 8 分钟</span>
+        </div>
+        <h3 class="post-card__title">
+          <span class="lang-en">Five books on writing tools that aged better than the tools.</span>
+          <span class="lang-zh">五本写"写作工具"的书，比工具本身活得更久。</span>
+        </h3>
+        <p class="post-card__lede">
+          <span class="lang-en">Word processors come and go; the books we read about writing keep teaching. A short reading list of out-of-print volumes still in our office.</span>
+          <span class="lang-zh">字处理器来来去去，关于"写作"本身的书却一直有用。一份在办公室仍被翻动的、半数已绝版的短书单。</span>
+        </p>
+        <a class="post-card__link" href="#"><span class="lang-en">Continue →</span><span class="lang-zh">继续阅读 →</span></a>
+      </article>
+
+      <!-- Post 2 -->
+      <article class="post-card">
+        <div class="post-card__thumb">
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A folder hierarchy diagram, three columns of nested files">
+            <rect width="480" height="280" fill="#f0ede3"/>
+            <!-- column rules -->
+            <line x1="160" y1="40" x2="160" y2="246" stroke="#b0aea5" stroke-width="1" stroke-dasharray="4 4"/>
+            <line x1="320" y1="40" x2="320" y2="246" stroke="#b0aea5" stroke-width="1" stroke-dasharray="4 4"/>
+            <!-- col 1: vault -->
+            <rect x="40" y="60" width="100" height="36" fill="#ffffff" stroke="#141413" stroke-width="1.4" rx="2"/>
+            <text x="56" y="83" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#141413">vault/</text>
+            <line x1="90" y1="96" x2="90" y2="240" stroke="#b0aea5" stroke-width="1"/>
+            <rect x="60" y="110" width="80" height="22" fill="#faf9f5" stroke="#b0aea5"/>
+            <text x="72" y="125" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#141413">2024/</text>
+            <rect x="60" y="138" width="80" height="22" fill="#faf9f5" stroke="#b0aea5"/>
+            <text x="72" y="153" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#141413">2025/</text>
+            <rect x="60" y="166" width="80" height="22" fill="#d97757"/>
+            <text x="72" y="181" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#ffffff">2026/</text>
+            <rect x="60" y="194" width="80" height="22" fill="#faf9f5" stroke="#b0aea5"/>
+            <text x="72" y="209" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#141413">_index.md</text>
+            <!-- arrow col 1 -> col 2 -->
+            <path d="M 140 177 L 196 177" fill="none" stroke="#141413" stroke-width="1.4"/>
+            <polygon points="196,173 204,177 196,181" fill="#141413"/>
+            <!-- col 2: month -->
+            <rect x="200" y="60" width="100" height="36" fill="#ffffff" stroke="#141413" stroke-width="1.4" rx="2"/>
+            <text x="216" y="83" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#141413">2026/04/</text>
+            <line x1="250" y1="96" x2="250" y2="240" stroke="#b0aea5" stroke-width="1"/>
+            <rect x="220" y="110" width="80" height="22" fill="#faf9f5" stroke="#b0aea5"/>
+            <text x="232" y="125" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#141413">14-walk.md</text>
+            <rect x="220" y="138" width="80" height="22" fill="#d97757"/>
+            <text x="232" y="153" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#ffffff">22-essay.md</text>
+            <rect x="220" y="166" width="80" height="22" fill="#faf9f5" stroke="#b0aea5"/>
+            <text x="232" y="181" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#141413">26-list.md</text>
+            <!-- arrow col 2 -> col 3 -->
+            <path d="M 300 149 L 356 149" fill="none" stroke="#141413" stroke-width="1.4"/>
+            <polygon points="356,145 364,149 356,153" fill="#141413"/>
+            <!-- col 3: file open -->
+            <rect x="360" y="60" width="100" height="180" fill="#ffffff" stroke="#141413" stroke-width="1.4" rx="2"/>
+            <text x="376" y="83" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#141413">22-essay.md</text>
+            <line x1="360" y1="92" x2="460" y2="92" stroke="#b0aea5" stroke-width="1"/>
+            <line x1="372" y1="106" x2="448" y2="106" stroke="#141413" stroke-width="1.2"/>
+            <line x1="372" y1="120" x2="440" y2="120" stroke="#141413" stroke-width="1.2"/>
+            <line x1="372" y1="134" x2="448" y2="134" stroke="#141413" stroke-width="1.2"/>
+            <line x1="372" y1="148" x2="426" y2="148" stroke="#141413" stroke-width="1.2"/>
+            <line x1="372" y1="162" x2="448" y2="162" stroke="#141413" stroke-width="1.2"/>
+            <line x1="372" y1="176" x2="436" y2="176" stroke="#141413" stroke-width="1.2"/>
+            <line x1="372" y1="190" x2="420" y2="190" stroke="#141413" stroke-width="1.2"/>
+            <line x1="372" y1="204" x2="448" y2="204" stroke="#141413" stroke-width="1.2"/>
+            <line x1="372" y1="218" x2="430" y2="218" stroke="#141413" stroke-width="1.2"/>
+            <text x="44" y="260" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#6b6a5f" letter-spacing="0.18em">VAULT · YEAR · MONTH · FILE</text>
+          </svg>
+        </div>
+        <div class="post-card__kicker">
+          <span class="lang-en">Engineering · 2026-04-14 · 6 min</span>
+          <span class="lang-zh">工程 · 2026-04-14 · 6 分钟</span>
+        </div>
+        <h3 class="post-card__title">
+          <span class="lang-en">Why our vault is filed by month, not by tag.</span>
+          <span class="lang-zh">为什么我们的笔记按月份分目录，而不按标签。</span>
+        </h3>
+        <p class="post-card__lede">
+          <span class="lang-en">Tags are good for retrieval, bad for memory. Months are good for memory, bad for retrieval. We chose memory and explain why we'd choose it again.</span>
+          <span class="lang-zh">标签擅长检索，不擅长记忆。月份擅长记忆，不擅长检索。我们选了记忆，并解释为什么再来一次还是这么选。</span>
+        </p>
+        <a class="post-card__link" href="#"><span class="lang-en">Continue →</span><span class="lang-zh">继续阅读 →</span></a>
+      </article>
+
+      <!-- Post 3 -->
+      <article class="post-card">
+        <div class="post-card__thumb">
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A keyboard cross-section, four keys lit, three unlit">
+            <rect width="480" height="280" fill="#f0ede3"/>
+            <!-- keyboard frame -->
+            <rect x="40" y="70" width="400" height="160" fill="#faf9f5" stroke="#b0aea5" stroke-width="1.5" rx="6"/>
+            <!-- top label -->
+            <text x="56" y="58" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10.5" fill="#6b6a5f" letter-spacing="0.18em">CHORD: ⌘ ⇧ K</text>
+            <!-- key grid (5 cols × 3 rows = 15 keys) -->
+            <g font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#141413">
+              <rect x="56"  y="86"  width="68" height="40" fill="#e8e6dc" stroke="#b0aea5"/><text x="84"  y="111">Q</text>
+              <rect x="132" y="86"  width="68" height="40" fill="#e8e6dc" stroke="#b0aea5"/><text x="160" y="111">W</text>
+              <rect x="208" y="86"  width="68" height="40" fill="#e8e6dc" stroke="#b0aea5"/><text x="236" y="111">E</text>
+              <rect x="284" y="86"  width="68" height="40" fill="#e8e6dc" stroke="#b0aea5"/><text x="312" y="111">R</text>
+              <rect x="360" y="86"  width="68" height="40" fill="#e8e6dc" stroke="#b0aea5"/><text x="388" y="111">T</text>
+              <rect x="56"  y="132" width="68" height="40" fill="#e8e6dc" stroke="#b0aea5"/><text x="84"  y="157">A</text>
+              <rect x="132" y="132" width="68" height="40" fill="#e8e6dc" stroke="#b0aea5"/><text x="160" y="157">S</text>
+              <rect x="208" y="132" width="68" height="40" fill="#e8e6dc" stroke="#b0aea5"/><text x="236" y="157">D</text>
+              <rect x="284" y="132" width="68" height="40" fill="#e8e6dc" stroke="#b0aea5"/><text x="312" y="157">F</text>
+              <rect x="360" y="132" width="68" height="40" fill="#e8e6dc" stroke="#b0aea5"/><text x="388" y="157">G</text>
+              <!-- chord-active row -->
+              <rect x="56"  y="178" width="68" height="40" fill="#d97757"/><text x="84"  y="203" fill="#ffffff">⌘</text>
+              <rect x="132" y="178" width="68" height="40" fill="#e8e6dc" stroke="#b0aea5"/><text x="160" y="203">Z</text>
+              <rect x="208" y="178" width="68" height="40" fill="#d97757"/><text x="236" y="203" fill="#ffffff">⇧</text>
+              <rect x="284" y="178" width="68" height="40" fill="#e8e6dc" stroke="#b0aea5"/><text x="312" y="203">C</text>
+              <rect x="360" y="178" width="68" height="40" fill="#d97757"/><text x="388" y="203" fill="#ffffff">K</text>
+            </g>
+            <text x="56" y="252" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#6b6a5f" letter-spacing="0.18em">3 KEYS · ONE GESTURE</text>
+          </svg>
+        </div>
+        <div class="post-card__kicker">
+          <span class="lang-en">Essays · 2026-04-08 · 9 min</span>
+          <span class="lang-zh">随笔 · 2026-04-08 · 9 分钟</span>
+        </div>
+        <h3 class="post-card__title">
+          <span class="lang-en">A short defense of three-key chords.</span>
+          <span class="lang-zh">三键连按：一份简短的辩护。</span>
+        </h3>
+        <p class="post-card__lede">
+          <span class="lang-en">Two-key shortcuts run out fast. Single-key launchers steal whole letters. Three-key chords feel slow on day one and disappear on day three. The middle path holds.</span>
+          <span class="lang-zh">双键组合很快就用光了。单键 launcher 又会抢走字母。三键连按第一天觉得慢，第三天就忘了它的存在。中间这条路最稳。</span>
+        </p>
+        <a class="post-card__link" href="#"><span class="lang-en">Continue →</span><span class="lang-zh">继续阅读 →</span></a>
+      </article>
+
+      <!-- Post 4 -->
+      <article class="post-card">
+        <div class="post-card__thumb">
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A simple line graph: usage rising and then declining over four months">
+            <rect width="480" height="280" fill="#f0ede3"/>
+            <!-- axes -->
+            <line x1="60"  y1="50"  x2="60"  y2="232" stroke="#b0aea5" stroke-width="1.2"/>
+            <line x1="60"  y1="232" x2="440" y2="232" stroke="#b0aea5" stroke-width="1.2"/>
+            <!-- x ticks -->
+            <g font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#6b6a5f">
+              <text x="84"  y="252">Jan</text>
+              <text x="170" y="252">Feb</text>
+              <text x="256" y="252">Mar</text>
+              <text x="342" y="252">Apr</text>
+            </g>
+            <!-- y label -->
+            <text x="20" y="56" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#6b6a5f" letter-spacing="0.16em">USAGE</text>
+            <!-- gridlines -->
+            <line x1="60"  y1="180" x2="440" y2="180" stroke="#e8e6dc" stroke-width="1"/>
+            <line x1="60"  y1="120" x2="440" y2="120" stroke="#e8e6dc" stroke-width="1"/>
+            <line x1="60"  y1="80"  x2="440" y2="80"  stroke="#e8e6dc" stroke-width="1"/>
+            <!-- baseline path -->
+            <path d="M 96 200 L 188 130 L 280 90 L 372 160" fill="none" stroke="#141413" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- markers -->
+            <circle cx="96"  cy="200" r="6" fill="#ffffff" stroke="#141413" stroke-width="2"/>
+            <circle cx="188" cy="130" r="6" fill="#ffffff" stroke="#141413" stroke-width="2"/>
+            <circle cx="280" cy="90"  r="7" fill="#d97757" stroke="#141413" stroke-width="2"/>
+            <circle cx="372" cy="160" r="6" fill="#ffffff" stroke="#141413" stroke-width="2"/>
+            <!-- callout -->
+            <line x1="280" y1="90" x2="280" y2="62" stroke="#d97757" stroke-width="1.4" stroke-dasharray="3 3"/>
+            <text x="290" y="58" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#d97757" font-weight="700">peak · we removed it</text>
+          </svg>
+        </div>
+        <div class="post-card__kicker">
+          <span class="lang-en">Notes · 2026-03-30 · 4 min</span>
+          <span class="lang-zh">短记 · 2026-03-30 · 4 分钟</span>
+        </div>
+        <h3 class="post-card__title">
+          <span class="lang-en">Three months of AI assistant usage, in one graph.</span>
+          <span class="lang-zh">三个月的 AI 助手使用情况，一张图。</span>
+        </h3>
+        <p class="post-card__lede">
+          <span class="lang-en">A short note ahead of the long essay. The shape of the curve is what convinced us; the prose was the lesson we drew from the shape.</span>
+          <span class="lang-zh">长文之前的一则短记。那条曲线的形状是说服我们的关键，文字只是我们事后从形状里读出的教训。</span>
+        </p>
+        <a class="post-card__link" href="#"><span class="lang-en">Continue →</span><span class="lang-zh">继续阅读 →</span></a>
+      </article>
+
+      <!-- Post 5 -->
+      <article class="post-card">
+        <div class="post-card__thumb">
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three small text boxes representing changelog entries v1.4.2 / v1.4.1 / v1.4.0">
+            <rect width="480" height="280" fill="#f0ede3"/>
+            <text x="40" y="36" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10.5" fill="#6b6a5f" letter-spacing="0.18em">CHANGELOG · APR 2026</text>
+            <!-- card 1 -->
+            <rect x="40" y="56" width="400" height="60" fill="#ffffff" stroke="#b0aea5" stroke-width="1.2" rx="4"/>
+            <text x="56" y="80" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12" fill="#d97757" font-weight="700">v1.4.2</text>
+            <text x="56" y="100" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#141413">faster open · 320ms → 180ms cold start</text>
+            <!-- card 2 -->
+            <rect x="40" y="128" width="400" height="60" fill="#ffffff" stroke="#b0aea5" stroke-width="1.2" rx="4"/>
+            <text x="56" y="152" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12" fill="#141413" font-weight="700">v1.4.1</text>
+            <text x="56" y="172" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#141413">vault rename without re-index</text>
+            <!-- card 3 -->
+            <rect x="40" y="200" width="400" height="60" fill="#ffffff" stroke="#b0aea5" stroke-width="1.2" rx="4"/>
+            <text x="56" y="224" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12" fill="#141413" font-weight="700">v1.4.0</text>
+            <text x="56" y="244" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#141413">remove AI assistant · keep transcripts</text>
+          </svg>
+        </div>
+        <div class="post-card__kicker">
+          <span class="lang-en">Changelog · 2026-03-22 · 3 min</span>
+          <span class="lang-zh">变更 · 2026-03-22 · 3 分钟</span>
+        </div>
+        <h3 class="post-card__title">
+          <span class="lang-en">v1.4 — three small fixes, one big removal.</span>
+          <span class="lang-zh">v1.4 ——三处小修，一处大撤。</span>
+        </h3>
+        <p class="post-card__lede">
+          <span class="lang-en">Faster cold start, vault rename without re-indexing, AI assistant removed (transcripts preserved). The full notes plus a short paragraph on what the removal means for export.</span>
+          <span class="lang-zh">冷启动更快，vault 改名不重建索引，AI 助手撤除（历史对话保留）。完整说明加一段关于"撤除对导出意味着什么"的解释。</span>
+        </p>
+        <a class="post-card__link" href="#"><span class="lang-en">Continue →</span><span class="lang-zh">继续阅读 →</span></a>
+      </article>
+
+      <!-- Post 6 -->
+      <article class="post-card">
+        <div class="post-card__thumb">
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A stylized window showing markdown source on left and rendered output on right">
+            <rect width="480" height="280" fill="#f0ede3"/>
+            <text x="40" y="34" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10.5" fill="#6b6a5f" letter-spacing="0.18em">SIDE BY SIDE · MARKDOWN ↔ RENDER</text>
+            <!-- left pane: source -->
+            <rect x="40" y="58" width="190" height="194" fill="#141413" rx="4"/>
+            <g font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#faf9f5">
+              <text x="56" y="82"># A small case</text>
+              <text x="56" y="100" fill="#d97757">## Premise</text>
+              <text x="56" y="118">Markdown lives</text>
+              <text x="56" y="134">past the editor.</text>
+              <text x="56" y="156" fill="#d97757">## Notes</text>
+              <text x="56" y="174">- portable</text>
+              <text x="56" y="190">- diff-friendly</text>
+              <text x="56" y="206">- *quiet*</text>
+              <text x="56" y="226" fill="#788c5d">— Skypad team</text>
+            </g>
+            <!-- arrow -->
+            <line x1="240" y1="155" x2="266" y2="155" stroke="#141413" stroke-width="1.6"/>
+            <polygon points="266,150 274,155 266,160" fill="#141413"/>
+            <!-- right pane: render -->
+            <rect x="280" y="58" width="160" height="194" fill="#ffffff" stroke="#b0aea5" rx="4"/>
+            <text x="294" y="82" font-family="Poppins, sans-serif" font-size="13" font-weight="700" fill="#141413">A small case</text>
+            <text x="294" y="106" font-family="Poppins, sans-serif" font-size="11" font-weight="600" fill="#d97757" letter-spacing="0.04em">PREMISE</text>
+            <text x="294" y="124" font-family="Lora, serif" font-size="11" fill="#141413">Markdown lives</text>
+            <text x="294" y="140" font-family="Lora, serif" font-size="11" fill="#141413">past the editor.</text>
+            <text x="294" y="166" font-family="Poppins, sans-serif" font-size="11" font-weight="600" fill="#d97757" letter-spacing="0.04em">NOTES</text>
+            <text x="294" y="184" font-family="Lora, serif" font-size="11" fill="#141413">· portable</text>
+            <text x="294" y="200" font-family="Lora, serif" font-size="11" fill="#141413">· diff-friendly</text>
+            <text x="294" y="216" font-family="Lora, serif" font-size="11" fill="#141413" font-style="italic">· quiet</text>
+            <text x="294" y="238" font-family="Poppins, sans-serif" font-size="10" font-weight="500" fill="#6b6a5f">— Skypad team</text>
+          </svg>
+        </div>
+        <div class="post-card__kicker">
+          <span class="lang-en">Engineering · 2026-03-15 · 7 min</span>
+          <span class="lang-zh">工程 · 2026-03-15 · 7 分钟</span>
+        </div>
+        <h3 class="post-card__title">
+          <span class="lang-en">Why we kept the rendered view, but not the WYSIWYG.</span>
+          <span class="lang-zh">为什么我们保留了"渲染视图"，但没做 WYSIWYG。</span>
+        </h3>
+        <p class="post-card__lede">
+          <span class="lang-en">The toggle works because the source is still the source. WYSIWYG hides the file; we wanted the file in front of the writer the whole time.</span>
+          <span class="lang-zh">切换之所以舒服，是因为源文件依然是源文件。WYSIWYG 把文件藏起来，我们希望文件一直在作者面前。</span>
+        </p>
+        <a class="post-card__link" href="#"><span class="lang-en">Continue →</span><span class="lang-zh">继续阅读 →</span></a>
+      </article>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="pagination" aria-label="Page navigation">
+      <a href="#"><span class="lang-en">← Older posts</span><span class="lang-zh">← 更早的文章</span></a>
+      <a class="pagination__newer" href="#"><span class="lang-en">Newer posts →</span><span class="lang-zh">更新的文章 →</span></a>
+    </nav>
+  </div>
+</section>
+
+<!-- Editor's note -->
+<section class="editor-note">
+  <div class="editor-note__inner">
+    <blockquote>
+      <span class="lang-en">This quarter we wrote less and removed more. The journal is, more than anything, a record of what we took out — and the slow process of explaining, to ourselves first, why.</span>
+      <span class="lang-zh">这一季我们写得少了，撤掉得多了。这份日志，与其说是新做了什么，不如说是在记录"我们撤掉了什么"，以及把"为什么撤"先讲给自己听的那个慢过程。</span>
+    </blockquote>
+    <cite>
+      <span class="lang-en">From the editors · Spring 2026</span>
+      <span class="lang-zh">编辑部 · 2026 春</span>
+    </cite>
+  </div>
+</section>
+
+<!-- Footer subscribe -->
+<section class="footer-sub">
+  <div class="footer-sub__inner">
+    <h3 class="footer-sub__h3">
+      <span class="lang-en">Get notes by email.</span>
+      <span class="lang-zh">用邮件订阅。</span>
+    </h3>
+    <p class="footer-sub__copy">
+      <span class="lang-en">One letter per essay. We don't send between, we don't track opens, and the archive lives at the same URL as this page. If you prefer your reader, the <a href="#">RSS feed</a> carries everything.</span>
+      <span class="lang-zh">一篇一封信，中间不发别的；我们不追踪打开率；过去的所有内容都还在这个页面上。如果你更喜欢用阅读器，<a href="#">RSS feed</a> 里有全部内容。</span>
+    </p>
+    <form class="footer-sub__form" action="#" method="post" onsubmit="return false;">
+      <input class="footer-sub__input" type="email" name="email" placeholder="you@example.com" aria-label="email address">
+      <button class="anth-button" type="submit"><span class="lang-en">Subscribe</span><span class="lang-zh">订阅</span></button>
+    </form>
+    <p class="footer-sub__note">
+      <span class="lang-en">No tracking, no list rentals.</span>
+      <span class="lang-zh">不追踪行为，不出租名单。</span>
+    </p>
+  </div>
+</section>
+
+<script>
+(function () {
+  var btn = document.getElementById("lang-toggle");
+  if (!btn) return;
+  btn.addEventListener("click", function () {
+    var html = document.documentElement;
+    html.setAttribute("data-lang", html.getAttribute("data-lang") === "zh" ? "en" : "zh");
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: anthropic
+Page-type: blog-index
+Created: 2026-04-29
+
+Decisions (7):
+1. [hero-restraint] chose "masthead with mono kicker + 2-line h1 + Lora subtitle, ZERO buttons in hero" over "hero with 'Subscribe' filled-orange CTA + featured-thumbnail above the fold". Because: a blog-index is a journal entrance, not a funnel; reader arrived to read, not to convert. A CTA in the masthead would retroactively recolour every word below as marketing.
+2. [featured-singular] chose "ONE editor-picked featured post in 5fr/7fr two-col with abstract SVG illustration" over "carousel of 5 most-popular posts" or "3-up grid of recent". Because: an editor's pick implies authority and editorial restraint; a most-popular carousel implies algorithmic content feed. Anthropic's voice earns trust by being editorial, not algorithmic.
+3. [tag-rail-horizontal] chose "horizontal tag-pill rail of 5–7 tags, ONE active filled-orange pill" over "left sidebar with tags + archive + author + recent (4 lists)". Because: anthropic blog-index is single-column-of-attention; sidebars split gaze and turn the page into an inbox. Mobile-friendly: rail wraps, sidebar collapses to a hamburger nobody opens.
+4. [grid-2col-not-3] chose "post grid as 2-col list of cards (6 posts/page)" over "3-col Pinterest grid (9–12 posts)". Because: 3-col at 1440 makes each card narrow (~360px) and forces titles into 3-line stacks; 2-col at ~540px each gives titles breathing room and lets the Lora lede be readable as prose, not as caption.
+5. [no-social-metadata] chose "post card = thumb + kicker + title + lede + Continue link" over "post card with view-count + heart-icon + comment-count + 'trending' badge". Because: social metadata cheapens the editorial register; turns a journal entrance into a social-feed clone. The card is a content trailer, not a social tile.
+6. [italic-budget-2] chose "§J italic budget 2 (hero accent + editor's note)" over "italic on every card lede or every kicker for emphasis". Because: italic on 6 ledes turns the grid into a wedding invitation; restraint to 2 earned moments preserves anthropic's editorial cadence.
+7. [pagination-prev-next] chose "older/newer plain mono links with hairline rule" over "numbered pagination 1·2·3·…·12 + 'showing 1–6 of 47' SaaS counter". Because: numbered pagination implies the reader is supposed to skim through; older/newer mirrors paper newsletters and the editorial cadence the page is borrowing.
+
+Known trade-offs:
+- SVG internal text fills use raw hex (#6b6a5f, #d97757, #141413, #788c5d, #6a9bcc) instead of var(--anth-*) tokens because SVG element attributes cannot reference CSS custom properties. Hex values match anthropic palette tokens exactly. Noted for ports.
+- Post-card lede length is at the §I hollow-card density floor (~140 chars). On ports to other skills, keep each lede ≥2 full lines or tighten the grid gap (or include byline as a 2nd line) to avoid drift past §I threshold.
+- Post-card thumbs sit in plain div.post-card__thumb, not figure+figcaption, because the post title + lede + Continue link directly below each thumb function as the de-facto caption (the card itself is the captioned unit). Only the standalone featured-post illustration is wrapped as figure+figcaption. aria-label on each SVG element provides a11y bridge per known-bugs §1.18.
+- A few inner SVG text labels (folder filenames, line-graph axis ticks) render at font-size=10 rather than the conservative ≥11 — kept at 10 because viewBox dimensions (480×280) make 11 visually heavy at this thumbnail scale; renders ≥9px after scaling so visual-audit threshold is held.
+
+Multi-critic fixes applied before shipping (2026-04-29):
+1. featured__h2 clamp lower bound 28→34 (brand-critic info: keep above the 34px canonical floor at narrow viewports).
+2. .featured__art wrapped from <div> to <figure> + <figcaption> with bilingual one-sentence caption (illustration-critic warn: known-bugs §1.18 figure/figcaption pairing for content-bearing illustrations).
+
+/design-review:self-diff -->
+
+</body>
+</html>
