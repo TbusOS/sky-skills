@@ -190,6 +190,32 @@
 
 ---
 
+### 1.26 SVG 装饰 shape 压住 text · 时间线 dot / icon ring / decorative path 后画盖文字
+- **Reader sees**：SVG 框图里某段文字被一个圆点 / 矩形 / 路径"打了一拳"——文字中间出现一个色块，文字看不清或部分被遮。最典型场景：时间线主轴穿过卡片，时间线的圆点（`<circle cy="180" r="5">`）正好落在卡片内部文字（如 `resource_setup_logo_bmp`）的位置上，圆点 fill 是非透明 → 字被盖。
+- **Why**：SVG 没有自动 z-axis 排版，**绘制顺序 = 视觉前后**。后画的元素压在先画的之上。设计 SVG 时按几何分组方便（先画卡片、再画卡片内文字、最后画时间线穿插装饰），但卡片内文字的 y 区间和时间线 dot 的 y 区间撞了 → dot 把字盖住。`visual-audit` 的像素采样原则上能在 dot 颜色和文字颜色对比足够时抓到，但当 dot 和卡片底色匹配时肉眼看不见、pixel check 也不会抓；若 dot 和卡片底色不同，文字就明显被盖。2026-05-01 dog-food 一个外部技术文档项目的时序图发现某卡片橙色 timeline dot 压在卡片中部一行 mono 文本上。
+- **How caught**：2026-05-01 加新 check `svg-shape-over-text`（§1.26）—— 对每个 SVG 内的 `<text>` 找它**之后**画的（DOM 序）shape (`circle/rect/ellipse/polygon/path`)，只要 fill 非 none/transparent + bbox 重叠 ≥ smaller text 的 10% + ≥ 16 px²，就 warn。23 canonical 0 假阳。
+- **Defense**：
+  - **DOM 序优先**：能画在 SVG 最先的元素就先画（背景 → 装饰 → 内容文字）。如果 dot/装饰 必须最后画，验证它们的 bbox 不和已有 text 撞。
+  - **避免几何撞车**：时间线穿过卡片时，把时间线 y 坐标放在卡片**中线**，但卡片**文字**避开中线 ±dot.r 的范围；或者把时间线放在卡片下方独立 band，不穿过文字区。
+  - **同色 escape**：若 shape 是有意和卡片底色同色（仅装饰隐形效果），加 `data-allow-overlap` 显式声明。
+- **Rule**：写 SVG 框图后必须 `visual-audit` 跑一遍 `[warn] svg-shape-over-text`。任一 hit 必须 (a) 重排 DOM 让 text 在 shape 之后画、(b) 移动 shape bbox 不和 text 撞、(c) 加 `data-allow-overlap` 显式跳过。不允许"看着像没问题就 ship"。
+
+---
+
+### 1.25 文字 bbox 几何重叠 · audit 像素采样的盲区 · 跨 4 skill 通用
+- **Reader sees**：两段不同的文字（标签 + 描述、列头 + 数据、双列 code 块）在屏幕上像素叠在一起，下层文字被上层挡住或两层混在一起读不清。最常见 2 类：
+  - **类 a · SVG `<text>` y 轴贴脸**：手画 SVG 时硬编码 y 坐标，标题和副标题间距 ≤ 字号高度 → 字符上下挤压（kicker label 紧贴 description 行，间隔仅 1-2px font-metric）。
+  - **类 b · HTML `<code>` / `<span>` 横溢冲入相邻列**：双列 grid 里 code 块没设 `word-break: break-all` 或 `overflow: hidden`，长路径冲到下一格里（长 file path 100% 覆盖隔壁列内容）。
+- **Why**：visual-audit 是像素采样（pngjs 看 PNG 像素颜色 / 对比度），看不出**两个 DOM 文字框在几何上重叠**。原 §1.8 的 SVG-text-overlap 只覆盖单个 `<svg>` 内部 `<text>` 且要求 4px on both axes — 漏掉 1-3px y 轴贴脸 + 漏掉所有 HTML 文字。2026-05-01 dog-food 一个外部项目（12 页）抓到 72 处此类 bug audit 0 报，才发现盲区。
+- **How caught**：2026-05-01 加新 check `text-overlap`（§1.25）—— 扫描所有可见叶子文字元素 → 两两 bbox 相交 → 排除 ancestor/descendant → 阈值"重叠面积 ≥ 16 px² 且 ≥ smaller bbox 10%"→ 排除"x 对齐 + y ≤ 3px + 宽度比 ≥ 0.5"的 2 行堆叠 label（如 SVG 里的 SAME/IDEA 这种有意 2 行）。23 张 ship-ready canonical 跑回归 0 假阳。
+- **Defense**：
+  - SVG 画图时 y 坐标间距 ≥ font-size × 1.4（即 12px 字至少 17px 行高）。手画 SVG 不要用 11/12px 这种小字 + 直接拿编辑器目测。
+  - 双列 grid / flex 里的长 code / 长 URL：父容器 `min-width: 0` + 子元素 `overflow-wrap: anywhere` 或 `word-break: break-all`，强制断词不溢出。
+  - 真有意贴叠（tooltip / shadow / decorative layered text）：在该元素或其祖先加 `data-allow-overlap` 显式声明。
+- **Rule**：所有新写 / 改写的 HTML 都要跑 `visual-audit.mjs` 看 `[warn] text-overlap` 行。任何 hit 必须 (a) 改 layout 让 bbox 不交、或 (b) 加 `data-allow-overlap` 显式声明意图。不允许"忽略 warning 直接 ship"。
+
+---
+
 ### 1.24 nav-cascade 吃掉 `.X-button` 的 white color · 跨 4 skill 同 bug 类
 - **Reader sees**：导航栏右边的 `Download` / `Get skills` / `Try it` 等 CTA 按钮，文字渲染成深字而不是白字，在彩色填充按钮上几乎看不见或对比度 fail AA。具体表现因 skill 而异：apple 是深字 + 0.8 透明在 blue 上 ~3.58:1（apple/feature-deep canonical 2026-04-28 实测踩过、visual-audit 抓到）；anthropic 是 `#141413` 在橙上 ~5.9:1 视觉错误但 contrast 过 AA（latent bug，visual-audit 不抓）；ember/sage 历史踩过同一类。
 - **Why**：CSS 选择器特异性 — `.X-nav a { color: var(--X-text) }` (0,2,1) 比 `.X-button { color: #ffffff }` (0,1,0) 强；nav 内的 button 元素继承 nav 规则的 color 而非 button 规则。apple 还多带一层 `opacity: 0.8` 二次伤害。是个**跨 skill 的 CSS-cascade 通病**，每个 skill 各踩一次。

@@ -170,7 +170,7 @@ bin/design-review --critic <page.html>
 | § | 范围 | 机器化 | 规则要点 |
 |---|---|---|---|
 | A | 结构 | verify.py | 占位符/DOCTYPE/BEM/SVG/class 定义 |
-| B | 渲染 | visual-audit.mjs | contrast/hero 宽/SVG 字号 |
+| B | 渲染 | visual-audit.mjs | contrast/hero 宽/SVG 字号/文字 bbox 不重叠(§1.25)/SVG shape 不压字(§1.26) |
 | C | 原创性 | 文档级 | lineup 卡 / hero 框图反 AI slop |
 | D | 代码质量 | 文档级 | 禁写死 hex / `transition: all` |
 | E | SVG | visual-audit.mjs | 先渲染确认 bbox / 删是最后一招 / 同色警告 |

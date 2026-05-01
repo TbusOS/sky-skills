@@ -373,6 +373,146 @@ const findings = await page.evaluate((cs) => {
     }
   });
 
+  // ---------- 5b) General text-bbox overlap audit (known-bugs §1.25) ----------
+  // §1.8 above only catches intra-SVG <text> with ≥4px on both axes. It misses
+  // two real-world classes seen in a dog-food project (technical doc set,
+  // 12 pages of mixed-content HTML with dense SVG diagrams):
+  //   (a) SVG sibling labels stacked with 1-2px y-overlap (font-metric height
+  //       eats the gap when designer hard-coded y= without measuring leading)
+  //   (b) HTML <code>/<span> in 2-col grid widening past its column and
+  //       crashing into the neighbor cell's content
+  // This check covers both: scan every visible leaf text-bearing element,
+  // measure pairwise bbox intersection, exclude ancestor/descendant pairs, and
+  // require overlap ≥ 10% of the smaller bbox AND ≥ 16 px² absolute floor.
+  // Escape hatch: <element data-allow-overlap> or any ancestor with it
+  // suppresses the check (for tooltips, decorative shadow text, etc.).
+  {
+    const allowOverlap = (el) => {
+      for (let n = el; n; n = n.parentElement) if (n.hasAttribute && n.hasAttribute('data-allow-overlap')) return true;
+      return false;
+    };
+    const isAncestor = (a, b) => { for (let n = b.parentElement; n; n = n.parentElement) if (n === a) return true; return false; };
+    const leaves = [...document.querySelectorAll('*')].filter((el) => {
+      if (el.children.length > 0) return false;
+      const txt = (el.textContent || '').trim();
+      if (!txt) return false;
+      const r = el.getBoundingClientRect();
+      if (r.width < 4 || r.height < 4) return false;
+      const cs = getComputedStyle(el);
+      if (cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity === 0) return false;
+      if (allowOverlap(el)) return false;
+      return true;
+    });
+    // Use getClientRects() per-line-fragment instead of union bbox: an inline
+    // <code> that wraps across 2 lines produces a single bbox spanning both
+    // lines, mathematically intersecting any element on the start line even
+    // when there's no actual visual collision. Per-fragment comparison fixes it.
+    const rectsOf = (el) => [...el.getClientRects()].filter((r) => r.width > 0 && r.height > 0);
+    const fragments = leaves.map((el) => ({ el, rects: rectsOf(el) }));
+    for (let i = 0; i < fragments.length; i++) {
+      const A = fragments[i];
+      for (let j = i + 1; j < fragments.length; j++) {
+        const B = fragments[j];
+        if (isAncestor(A.el, B.el) || isAncestor(B.el, A.el)) continue;
+        // find any pair (one rect from A × one from B) that overlaps enough
+        let hit = null;
+        outer:
+        for (const ra of A.rects) {
+          for (const rb of B.rects) {
+            const ox = Math.max(0, Math.min(ra.right, rb.right) - Math.max(ra.left, rb.left));
+            const oy = Math.max(0, Math.min(ra.bottom, rb.bottom) - Math.max(ra.top, rb.top));
+            const area = ox * oy;
+            if (area < 16) continue;
+            const smaller = Math.min(ra.width * ra.height, rb.width * rb.height);
+            const pct = area / smaller;
+            if (pct < 0.10) continue;
+            // Exclude intentional vertical-stack designs where the y-overlap
+            // is only font-metric tolerance, not actual glyph collision:
+            // (1) x-aligned siblings of similar width (SAME/IDEA layered label):
+            //     widthRatio ≥ 0.5 + oy ≤ 3 + xLeftClose
+            // (2) SVG kicker+body pattern (small label above wider description,
+            //     e.g. "证据 1" stacked over "build log 明文宣称..."):
+            //     both A and B are SVG <text> + oy ≤ 2 + xLeftClose
+            const xLeftClose = Math.abs(ra.left - rb.left) <= 5;
+            const widthRatio = Math.min(ra.width, rb.width) / Math.max(ra.width, rb.width);
+            if (oy <= 3 && xLeftClose && widthRatio >= 0.5) continue;
+            const aIsSvgText = A.el.tagName === 'text' && !!A.el.closest('svg');
+            const bIsSvgText = B.el.tagName === 'text' && !!B.el.closest('svg');
+            if (aIsSvgText && bIsSvgText && oy <= 2 && xLeftClose) continue;
+            hit = { ra, rb, ox, oy, pct }; break outer;
+          }
+        }
+        if (!hit) continue;
+        const aSvg = A.el.closest('svg'), bSvg = B.el.closest('svg');
+        const inSameSvg = aSvg && aSvg === bSvg;
+        const { ra, rb, ox, oy, pct } = hit;
+        issues.push({
+          kind: 'text-overlap',
+          severity: 'warn',
+          location: inSameSvg ? `svg "${aSvg.getAttribute('aria-label') || 'unlabeled'}"` : 'html-flow',
+          textA: (A.el.textContent || '').trim().slice(0, 40),
+          textB: (B.el.textContent || '').trim().slice(0, 40),
+          tagA: A.el.tagName.toLowerCase(),
+          tagB: B.el.tagName.toLowerCase(),
+          overlap: `${Math.round(ox)}×${Math.round(oy)}=${Math.round(pct * 100)}%`,
+          rectA: `${Math.round(ra.left)},${Math.round(ra.top)}+${Math.round(ra.width)}×${Math.round(ra.height)}`,
+          rectB: `${Math.round(rb.left)},${Math.round(rb.top)}+${Math.round(rb.width)}×${Math.round(rb.height)}`,
+        });
+      }
+    }
+  }
+
+  // ---------- 5c) SVG shape over text (known-bugs §1.26) ----------
+  // Catches the class where a decorative <circle>/<rect>/<path> drawn AFTER
+  // a <text> in DOM order lands on top of the text and visually obscures it.
+  // Real-world example: timeline-axis dots crossing through card text labels
+  // (timeline diagram dog-food: a horizontal axis crosses the cards, and the
+  // axis dots end up on top of card-internal text labels). Only flag when
+  // shape comes after text in DOM order (text drawn first, shape later = shape
+  // on top = z-axis cover) and shape's fill is not transparent.
+  // Escape hatch: data-allow-overlap on either element or any ancestor.
+  {
+    const SHAPE_TAGS = new Set(['circle', 'rect', 'ellipse', 'polygon', 'path']);
+    const allowsOverlap = (el) => {
+      for (let n = el; n; n = n.parentElement) if (n.hasAttribute && n.hasAttribute('data-allow-overlap')) return true;
+      return false;
+    };
+    document.querySelectorAll('svg').forEach((svg) => {
+      const all = [...svg.querySelectorAll('*')];
+      const texts = all.filter((e) => e.tagName === 'text');
+      for (const t of texts) {
+        if (allowsOverlap(t)) continue;
+        const tIdx = all.indexOf(t);
+        const tr = t.getBoundingClientRect();
+        if (tr.width < 4 || tr.height < 4) continue;
+        for (let i = tIdx + 1; i < all.length; i++) {
+          const s = all[i];
+          if (!SHAPE_TAGS.has(s.tagName)) continue;
+          if (allowsOverlap(s)) continue;
+          const fill = (s.getAttribute('fill') || '').trim();
+          if (fill === 'none' || fill === 'transparent') continue;
+          const sr = s.getBoundingClientRect();
+          const ox = Math.max(0, Math.min(tr.right, sr.right) - Math.max(tr.left, sr.left));
+          const oy = Math.max(0, Math.min(tr.bottom, sr.bottom) - Math.max(tr.top, sr.top));
+          const area = ox * oy;
+          if (area < 16) continue;
+          const pct = area / (tr.width * tr.height);
+          if (pct < 0.10) continue;
+          issues.push({
+            kind: 'svg-shape-over-text',
+            severity: 'warn',
+            text: (t.textContent || '').trim().slice(0, 40),
+            shape: s.tagName,
+            fill,
+            overlap: `${Math.round(ox)}×${Math.round(oy)}=${Math.round(pct * 100)}%`,
+            svg: svg.getAttribute('aria-label') || 'unlabeled',
+            textBbox: `${Math.round(tr.left)},${Math.round(tr.top)}+${Math.round(tr.width)}×${Math.round(tr.height)}`,
+          });
+        }
+      }
+    });
+  }
+
   // ---------- 6) Multiple <h1> ----------
   // Each page must have exactly one <h1>. More than one = broken SEO +
   // screen-reader hierarchy + indicates semantic sloppiness.
@@ -794,6 +934,14 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'svg-text-overlap') {
     console.log(
       `  [${i.severity}] SVG text overlap in "${i.svg}": "${i.textA}" [${i.rectA}] ↔ "${i.textB}" [${i.rectB}] — move one element or drop the decorative label`
+    );
+  } else if (i.kind === 'text-overlap') {
+    console.log(
+      `  [${i.severity}] text-overlap (${i.location}): <${i.tagA}> "${i.textA}" [${i.rectA}] ↔ <${i.tagB}> "${i.textB}" [${i.rectB}] — overlap ${i.overlap} — fix layout (column width / line gap / wrap policy) or add data-allow-overlap if intentional (known-bugs 1.25)`
+    );
+  } else if (i.kind === 'svg-shape-over-text') {
+    console.log(
+      `  [${i.severity}] svg-shape-over-text in "${i.svg}": <${i.shape} fill="${i.fill}"> drawn after & on top of text "${i.text}" [${i.textBbox}] — overlap ${i.overlap} — move shape, change DOM order (text after shape), set fill=none, or add data-allow-overlap if shape is same-bg-color (known-bugs 1.26)`
     );
   } else if (i.kind === 'multiple-h1') {
     console.log(
