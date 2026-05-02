@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad Studio — the desktop notebook for keyboard-first writing</title>
+<meta name="description" content="Skypad Studio is the desktop notebook for keyboard-first writing — Markdown-native, local-first, end-to-end encrypted sync. Canonical apple-design product-detail page for the sky-skills harness.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/apple.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--apple-divider);
+    color: var(--apple-text);
+    font-family: var(--font-text);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .lang-toggle:hover { background: var(--apple-bg-alt); }
+
+  /* §H zh stack: apple uses PingFang SC primary (apple.com.cn convention) */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3 {
+    font-family: "PingFang SC", "Noto Sans SC", "Source Han Sans SC", -apple-system, sans-serif;
+  }
+
+  /* Hero — product family eyebrow (plain blue text) + h1 + tagline + 2 CTAs */
+  .pd-hero { padding: var(--space-9) 0 var(--space-8); }
+  .pd-hero__eyebrow {
+    font-family: var(--font-display); font-size: 15px; font-weight: 500;
+    color: var(--apple-link); margin: 0 0 var(--space-4);
+  }
+  .pd-hero__h1 {
+    font-family: var(--font-display);
+    font-size: clamp(56px, 7.5vw, 80px);
+    font-weight: 700; letter-spacing: -0.035em; line-height: 1.05;
+    color: var(--apple-text); margin: 0 0 var(--space-4);
+  }
+  .pd-hero__h1-tag {
+    display: block; font-size: 0.62em; font-weight: 500;
+    color: var(--apple-text); margin-top: var(--space-2);
+    letter-spacing: -0.022em;
+  }
+  .pd-hero__sub {
+    font-family: var(--font-text); font-size: 21px; line-height: 1.5;
+    color: var(--apple-text-secondary); max-width: 720px;
+    margin: 0 0 var(--space-6);
+  }
+  .pd-hero__ctas { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+
+  /* At-a-glance bar — 4 cells, hairline-divided, on white */
+  .pd-glance {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--apple-divider);
+    border-bottom: 1px solid var(--apple-divider);
+    margin: var(--space-7) 0 var(--space-8);
+  }
+  .pd-glance__cell {
+    padding: var(--space-6) var(--space-4);
+    border-right: 1px solid var(--apple-divider);
+  }
+  .pd-glance__cell:last-child { border-right: 0; }
+  .pd-glance__label {
+    font-family: var(--font-display); font-size: 11.5px; font-weight: 700;
+    color: var(--apple-text-secondary);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin: 0 0 var(--space-2);
+  }
+  html[data-lang="zh"] .pd-glance__label { letter-spacing: 0.04em; text-transform: none; }
+  .pd-glance__value {
+    font-family: var(--font-display); font-size: 19px; font-weight: 600;
+    color: var(--apple-text); letter-spacing: -0.015em;
+    margin: 0;
+  }
+
+  /* Use-case grid — 3 cards with SVG · 24px radius (apple signature) */
+  .pd-use { padding: var(--space-8) 0; }
+  .pd-use__h2 {
+    font-family: var(--font-display); font-size: clamp(32px, 3.5vw, 44px);
+    font-weight: 600; letter-spacing: -0.025em; line-height: 1.15;
+    color: var(--apple-text); margin: 0 0 var(--space-3);
+  }
+  .pd-use__lead {
+    font-family: var(--font-text); font-size: 19px; line-height: 1.55;
+    color: var(--apple-text-secondary); max-width: 720px;
+    margin: 0 0 var(--space-7);
+  }
+  .pd-use__grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+  }
+  .pd-use__card {
+    background: var(--apple-bg);
+    border: 1px solid var(--apple-divider);
+    border-radius: 24px;
+    padding: var(--space-5);
+    display: flex; flex-direction: column; gap: var(--space-3);
+  }
+  .pd-use__card svg {
+    width: 100%; height: auto; display: block;
+    background: var(--apple-bg-alt);
+    border-radius: 12px;
+    aspect-ratio: 5 / 3;
+  }
+  .pd-use__card h3 {
+    font-family: var(--font-display); font-size: 21px; font-weight: 600;
+    color: var(--apple-text); margin: var(--space-2) 0 0;
+    letter-spacing: -0.015em;
+  }
+  .pd-use__card p {
+    font-family: var(--font-text); font-size: 15.5px; line-height: 1.55;
+    color: var(--apple-text-secondary); margin: 0;
+  }
+  .pd-use__card .pd-use__namedrop {
+    font-family: var(--font-text); font-size: 13.5px; line-height: 1.5;
+    color: var(--apple-text-secondary);
+    margin: 0; padding-top: var(--space-3);
+    border-top: 1px solid var(--apple-divider);
+  }
+
+  /* Spec table — light-gray band, blue labels */
+  .pd-spec { padding: var(--space-8) 0; background: var(--apple-bg-alt); }
+  .pd-spec__h2 {
+    font-family: var(--font-display); font-size: clamp(32px, 3.5vw, 44px);
+    font-weight: 600; letter-spacing: -0.025em; line-height: 1.15;
+    color: var(--apple-text); margin: 0 0 var(--space-3);
+  }
+  .pd-spec__lead {
+    font-family: var(--font-text); font-size: 19px; line-height: 1.55;
+    color: var(--apple-text-secondary); max-width: 720px;
+    margin: 0 0 var(--space-7);
+  }
+  .pd-spec__rows {
+    display: flex; flex-direction: column;
+    border-top: 1px solid var(--apple-divider);
+  }
+  .pd-spec__row {
+    display: grid; grid-template-columns: 240px 1fr;
+    gap: var(--space-5);
+    padding: var(--space-5) 0;
+    border-bottom: 1px solid var(--apple-divider);
+  }
+  .pd-spec__label {
+    font-family: var(--font-display); font-size: 11.5px; font-weight: 700;
+    color: var(--apple-link);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin: 0; padding-top: 4px;
+  }
+  html[data-lang="zh"] .pd-spec__label { letter-spacing: 0.04em; text-transform: none; }
+  .pd-spec__body {
+    font-family: var(--font-text); font-size: 16px; line-height: 1.6;
+    color: var(--apple-text); margin: 0;
+  }
+  .pd-spec__body code {
+    font-family: var(--font-mono); font-size: 14px;
+    background: var(--apple-bg); padding: 2px 8px; border-radius: var(--radius-sm);
+    border: 1px solid var(--apple-divider);
+    color: var(--apple-text);
+  }
+
+  /* Honest limits callout — light-gray inner box + 3px blue left */
+  .pd-honest { padding: var(--space-8) 0; }
+  .pd-honest__inner {
+    background: var(--apple-bg-alt);
+    border-left: 3px solid var(--apple-link);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: var(--space-6) var(--space-7);
+  }
+  .pd-honest__kicker {
+    font-family: var(--font-display); font-size: 11.5px; font-weight: 700;
+    color: var(--apple-link);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin: 0 0 var(--space-3);
+  }
+  html[data-lang="zh"] .pd-honest__kicker { letter-spacing: 0.04em; text-transform: none; }
+  .pd-honest__h3 {
+    font-family: var(--font-display); font-size: 26px; font-weight: 600;
+    color: var(--apple-text); letter-spacing: -0.015em;
+    margin: 0 0 var(--space-3); line-height: 1.25;
+  }
+  .pd-honest__body {
+    font-family: var(--font-text); font-size: 17px; line-height: 1.65;
+    color: var(--apple-text); margin: 0;
+  }
+
+  /* Sibling compare — 3 cards · 24px radius · current = 2px blue border */
+  .pd-sibling { padding: var(--space-8) 0; }
+  .pd-sibling__h2 {
+    font-family: var(--font-display); font-size: clamp(32px, 3.5vw, 44px);
+    font-weight: 600; letter-spacing: -0.025em; line-height: 1.15;
+    color: var(--apple-text); margin: 0 0 var(--space-3);
+  }
+  .pd-sibling__lead {
+    font-family: var(--font-text); font-size: 19px; line-height: 1.55;
+    color: var(--apple-text-secondary); max-width: 720px;
+    margin: 0 0 var(--space-7);
+  }
+  .pd-sibling__grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+    align-items: stretch;
+  }
+  .pd-sibling__card {
+    background: var(--apple-bg);
+    border: 1px solid var(--apple-divider);
+    border-radius: 24px;
+    padding: var(--space-6);
+    display: flex; flex-direction: column; gap: var(--space-3);
+  }
+  .pd-sibling__card--current {
+    border: 2px solid var(--apple-link);
+    padding: calc(var(--space-6) - 1px);
+  }
+  .pd-sibling__current-tag {
+    display: inline-block;
+    font-family: var(--font-display); font-size: 11px; font-weight: 700;
+    color: #ffffff; background: var(--apple-link);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 3px 10px; border-radius: var(--radius-pill);
+    align-self: flex-start; margin-top: -4px;
+  }
+  html[data-lang="zh"] .pd-sibling__current-tag { letter-spacing: 0.04em; text-transform: none; }
+  .pd-sibling__eyebrow {
+    font-family: var(--font-display); font-size: 11.5px; font-weight: 700;
+    color: var(--apple-text-secondary);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin: 0;
+  }
+  html[data-lang="zh"] .pd-sibling__eyebrow { letter-spacing: 0.04em; text-transform: none; }
+  .pd-sibling__card--current .pd-sibling__eyebrow { color: var(--apple-link); }
+  .pd-sibling__name {
+    font-family: var(--font-display); font-size: 24px; font-weight: 700;
+    color: var(--apple-text); letter-spacing: -0.015em;
+    margin: 0;
+  }
+  .pd-sibling__tagline {
+    font-family: var(--font-text); font-size: 15px; line-height: 1.5;
+    color: var(--apple-text-secondary);
+    margin: 0;
+  }
+  .pd-sibling__rows {
+    display: flex; flex-direction: column; gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--apple-divider);
+  }
+  .pd-sibling__row {
+    display: grid; grid-template-columns: 90px 1fr;
+    gap: var(--space-3);
+    font-family: var(--font-text); font-size: 14px; line-height: 1.55;
+  }
+  .pd-sibling__row-label {
+    color: var(--apple-text-secondary);
+    font-family: var(--font-display); font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    padding-top: 2px;
+  }
+  html[data-lang="zh"] .pd-sibling__row-label { letter-spacing: 0.04em; text-transform: none; }
+  .pd-sibling__row-value { color: var(--apple-text); }
+  .pd-sibling__link {
+    font-family: var(--font-text); font-size: 14px; font-weight: 500;
+    color: var(--apple-link); text-decoration: none;
+    align-self: flex-start; margin-top: var(--space-3);
+  }
+  .pd-sibling__link:hover { color: var(--apple-link-hover); }
+
+  /* Pricing snippet */
+  .pd-pricing { padding: var(--space-7) 0; text-align: center; }
+  .pd-pricing__line {
+    font-family: var(--font-text); font-size: 17px; line-height: 1.6;
+    color: var(--apple-text);
+    margin: 0 auto; max-width: 720px;
+  }
+  .pd-pricing__line a {
+    color: var(--apple-link); text-decoration: none;
+  }
+  .pd-pricing__line a:hover { color: var(--apple-link-hover); }
+
+  /* Closing band — apple signature BLACK band */
+  .pd-close {
+    background: var(--apple-bg-dark);
+    color: var(--apple-text-on-dark);
+    padding: var(--space-9) 0;
+    margin-top: var(--space-7);
+  }
+  .pd-close__inner { max-width: 800px; margin: 0 auto; padding: 0 var(--space-5); text-align: center; }
+  .pd-close__h2 {
+    font-family: var(--font-display); font-size: clamp(36px, 4.5vw, 56px);
+    font-weight: 500; letter-spacing: -0.025em; line-height: 1.15;
+    color: #ffffff; margin: 0 0 var(--space-4);
+  }
+  .pd-close__copy {
+    font-family: var(--font-text); font-size: 19px; line-height: 1.55;
+    color: rgba(255, 255, 255, 0.72); margin: 0 0 var(--space-7);
+  }
+  .pd-close__ctas { display: flex; gap: var(--space-3); flex-wrap: wrap; justify-content: center; }
+  .pd-close__cta-primary {
+    display: inline-block;
+    font-family: var(--font-text); font-size: 16px; font-weight: 500;
+    background: #ffffff; color: var(--apple-bg-dark);
+    text-decoration: none;
+    padding: 12px 28px; border-radius: var(--radius-pill);
+    transition: background var(--duration-sm) var(--ease-apple);
+  }
+  .pd-close__cta-primary:hover { background: #e5e5e7; }
+  .pd-close__cta-ghost {
+    display: inline-block;
+    font-family: var(--font-text); font-size: 16px; font-weight: 500;
+    background: transparent; color: #ffffff;
+    text-decoration: none;
+    padding: 11px 27px; border-radius: var(--radius-pill);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: border-color var(--duration-sm) var(--ease-apple), background var(--duration-sm);
+  }
+  .pd-close__cta-ghost:hover { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); }
+
+  /* Higher-specificity nav cascade — already in apple.css; redundant safety */
+  .apple-nav a.apple-button { color: #ffffff; opacity: 1; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .pd-glance { grid-template-columns: repeat(2, 1fr); }
+    .pd-glance__cell:nth-child(2) { border-right: 0; }
+    .pd-glance__cell:nth-child(1), .pd-glance__cell:nth-child(2) { border-bottom: 1px solid var(--apple-divider); }
+    .pd-use__grid { grid-template-columns: 1fr; }
+    .pd-spec__row { grid-template-columns: 1fr; gap: var(--space-2); }
+    .pd-sibling__grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="apple-nav"><div class="apple-nav-inner">
+  <a href="#" style="font-family:var(--font-display); font-weight:600; font-size:18px; text-decoration:none; color:var(--apple-text);">Skypad</a>
+  <div>
+    <a href="#" style="color:var(--apple-text); border-bottom:1px solid var(--apple-link); padding-bottom:2px;"><span class="lang-en">Studio</span><span class="lang-zh">Studio</span></a>
+    <a href="#"><span class="lang-en">Reader</span><span class="lang-zh">Reader</span></a>
+    <a href="#"><span class="lang-en">Sync</span><span class="lang-zh">Sync</span></a>
+    <a href="#"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="#"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+    <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Toggle language"><span class="lang-en">中文</span><span class="lang-zh">EN</span></button>
+    <a class="apple-button" href="#"><span class="lang-en">Try Studio</span><span class="lang-zh">试用 Studio</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<header class="apple-section">
+  <div class="apple-container">
+    <div class="pd-hero">
+      <p class="pd-hero__eyebrow">
+        <span class="lang-en">Skypad Studio · part of the Skypad lineup</span>
+        <span class="lang-zh">Skypad Studio · 三件套之一</span>
+      </p>
+      <h1 class="pd-hero__h1">
+        <span class="lang-en">Skypad Studio.<span class="pd-hero__h1-tag">The desktop notebook for keyboard-first writing.</span></span>
+        <span class="lang-zh">Skypad Studio。<span class="pd-hero__h1-tag">为键盘优先写作而设计的桌面笔记。</span></span>
+      </h1>
+      <p class="pd-hero__sub">
+        <span class="lang-en">A Markdown-native desktop editor for writers who'd rather keep both hands on the keys. Local files, end-to-end encrypted optional sync, and a six-key chord palette that disappears once you've learned it.</span>
+        <span class="lang-zh">为更愿意把手放在键盘上的写作者准备的 Markdown 原生桌面编辑器。本地文件、可选端到端加密同步，加一套六键和弦命令面板——学会之后就不再注意它的存在。</span>
+      </p>
+      <div class="pd-hero__ctas">
+        <a class="apple-button" href="#">
+          <span class="lang-en">Try Studio · 30-day trial</span>
+          <span class="lang-zh">试用 Studio · 30 天</span>
+        </a>
+        <a class="apple-button apple-button--secondary" href="#specs">
+          <span class="lang-en">View specs ↓</span>
+          <span class="lang-zh">查看规格 ↓</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- At-a-glance bar -->
+    <div class="pd-glance" aria-label="Quick facts about Skypad Studio">
+      <div class="pd-glance__cell">
+        <p class="pd-glance__label">
+          <span class="lang-en">Released</span>
+          <span class="lang-zh">发布</span>
+        </p>
+        <p class="pd-glance__value">2025-Q4 · v1.4</p>
+      </div>
+      <div class="pd-glance__cell">
+        <p class="pd-glance__label">
+          <span class="lang-en">Platforms</span>
+          <span class="lang-zh">平台</span>
+        </p>
+        <p class="pd-glance__value">macOS · Windows · Linux</p>
+      </div>
+      <div class="pd-glance__cell">
+        <p class="pd-glance__label">
+          <span class="lang-en">Tier from</span>
+          <span class="lang-zh">起步档</span>
+        </p>
+        <p class="pd-glance__value">
+          <span class="lang-en">$8 / month</span>
+          <span class="lang-zh">$8 / 月</span>
+        </p>
+      </div>
+      <div class="pd-glance__cell">
+        <p class="pd-glance__label">
+          <span class="lang-en">Trial</span>
+          <span class="lang-zh">试用</span>
+        </p>
+        <p class="pd-glance__value">
+          <span class="lang-en">30 days, full features</span>
+          <span class="lang-zh">30 天 · 全功能</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Use cases -->
+<section class="apple-section pd-use">
+  <div class="apple-container">
+    <h2 class="pd-use__h2">
+      <span class="lang-en">Three things Studio is best at.</span>
+      <span class="lang-zh">Studio 最擅长这三件事。</span>
+    </h2>
+    <p class="pd-use__lead">
+      <span class="lang-en">Workflows the editor was actually designed for. If your work doesn't fall into one of these, the honest-limits section below is more useful than the use-case grid.</span>
+      <span class="lang-zh">Studio 当初就是为这些场景设计的。如果你的写作不在其中，下面"诚实的局限"那一节比这里的用例更有参考价值。</span>
+    </p>
+    <div class="pd-use__grid">
+      <!-- Use case 1: Daily writing -->
+      <article class="pd-use__card">
+        <svg viewBox="0 0 240 144" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A morning writing window: Markdown file open with paragraph in progress, cursor blinking after a period, line counter showing 240 of 1200 words">
+          <rect width="240" height="144" fill="#F5F5F7"/>
+          <!-- product window with traffic-light dots -->
+          <rect x="20" y="20" width="200" height="104" fill="#ffffff" stroke="#D2D2D7" rx="8"/>
+          <line x1="20" y1="40" x2="220" y2="40" stroke="#D2D2D7"/>
+          <!-- traffic-light dots -->
+          <circle cx="32" cy="30" r="4" fill="#FF5F57"/>
+          <circle cx="46" cy="30" r="4" fill="#FEBC2E"/>
+          <circle cx="60" cy="30" r="4" fill="#28C840"/>
+          <text x="170" y="34" font-family="SF Mono, ui-monospace, monospace" font-size="11" fill="#6E6E73">letter.md</text>
+          <!-- writing lines (light gray hairlines) -->
+          <line x1="32" y1="58" x2="180" y2="58" stroke="#E5E5E7" stroke-width="1"/>
+          <line x1="32" y1="72" x2="200" y2="72" stroke="#E5E5E7" stroke-width="1"/>
+          <line x1="32" y1="86" x2="160" y2="86" stroke="#E5E5E7" stroke-width="1"/>
+          <line x1="32" y1="100" x2="190" y2="100" stroke="#E5E5E7" stroke-width="1"/>
+          <line x1="32" y1="114" x2="120" y2="114" stroke="#E5E5E7" stroke-width="1"/>
+          <!-- cursor (blue) -->
+          <line x1="124" y1="110" x2="124" y2="118" stroke="#0071E3" stroke-width="2"/>
+          <!-- footer counter inside white pane (darker fill for AA contrast) -->
+          <text x="32" y="118" font-family="SF Mono, ui-monospace, monospace" font-size="11" fill="#6E6E73">240 / 1200 words · saved</text>
+        </svg>
+        <h3>
+          <span class="lang-en">Daily writing</span>
+          <span class="lang-zh">日常写作</span>
+        </h3>
+        <p>
+          <span class="lang-en">Long-form prose, essays, weekly letters. The blank page opens in 80ms; saves are autosaved to local Markdown so the file is always recoverable from disk, not from a cloud queue.</span>
+          <span class="lang-zh">长文、随笔、周更。空白页 80ms 打开；保存是直接写本地 Markdown 文件，从磁盘就能恢复，不依赖云端队列。</span>
+        </p>
+        <p class="pd-use__namedrop">
+          <span class="lang-en">Used daily by writers at the Atlantic and a handful of arXiv-hosted essayists.</span>
+          <span class="lang-zh">每天在《大西洋月刊》编辑部和若干 arXiv 写作者那里被用作主力。</span>
+        </p>
+      </article>
+
+      <!-- Use case 2: Research notes -->
+      <article class="pd-use__card">
+        <svg viewBox="0 0 240 144" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A research-notes view: file tree with three Markdown files in research folder, one selected, citation expansion showing arXiv ID below">
+          <rect width="240" height="144" fill="#F5F5F7"/>
+          <!-- two-pane window -->
+          <rect x="20" y="20" width="80" height="104" fill="#ffffff" stroke="#D2D2D7" rx="8"/>
+          <rect x="108" y="20" width="112" height="104" fill="#ffffff" stroke="#D2D2D7" rx="8"/>
+          <!-- left pane: file tree -->
+          <text x="28" y="38" font-family="SF Mono, ui-monospace, monospace" font-size="11" fill="#86868B">research/</text>
+          <text x="32" y="54" font-family="SF Mono, ui-monospace, monospace" font-size="11" fill="#1D1D1F">survey.md</text>
+          <text x="32" y="70" font-family="SF Mono, ui-monospace, monospace" font-size="11" fill="#1D1D1F">attention.md</text>
+          <rect x="28" y="78" width="68" height="14" fill="#0071E3" opacity="0.12" rx="3"/>
+          <text x="32" y="89" font-family="SF Mono, ui-monospace, monospace" font-size="11" fill="#1D1D1F" font-weight="700">scaling.md</text>
+          <text x="32" y="106" font-family="SF Mono, ui-monospace, monospace" font-size="11" fill="#1D1D1F">_inbox.md</text>
+          <!-- right pane: citation -->
+          <text x="116" y="40" font-family="SF Pro Display, sans-serif" font-size="11" fill="#1D1D1F" font-weight="600">Scaling laws</text>
+          <line x1="116" y1="50" x2="208" y2="50" stroke="#0071E3" stroke-width="1.5"/>
+          <text x="116" y="68" font-family="SF Pro Text, sans-serif" font-size="11" fill="#1D1D1F">Loss curves track</text>
+          <text x="116" y="80" font-family="SF Pro Text, sans-serif" font-size="11" fill="#1D1D1F">log-linearly with</text>
+          <text x="116" y="92" font-family="SF Pro Text, sans-serif" font-size="11" fill="#1D1D1F">parameter count up</text>
+          <text x="116" y="104" font-family="SF Pro Text, sans-serif" font-size="11" fill="#1D1D1F">to 70B params.</text>
+          <text x="116" y="120" font-family="SF Mono, ui-monospace, monospace" font-size="11" fill="#86868B">arXiv:2304.01234</text>
+        </svg>
+        <h3>
+          <span class="lang-en">Research notes</span>
+          <span class="lang-zh">研究笔记</span>
+        </h3>
+        <p>
+          <span class="lang-en">Linked Markdown files with citation autocomplete (BibTeX or arXiv ID), backlinks computed in 18ms, and per-file frontmatter that reads as plain YAML for any other tool.</span>
+          <span class="lang-zh">支持 Markdown 文档互链，BibTeX / arXiv 引用自动补全，反向链接 18ms 算完，每篇 frontmatter 是标准 YAML——任何工具都能读。</span>
+        </p>
+        <p class="pd-use__namedrop">
+          <span class="lang-en">PI vaults at three university labs run on Studio.</span>
+          <span class="lang-zh">三个大学实验室的 PI 笔记仓在 Studio 上跑。</span>
+        </p>
+      </article>
+
+      <!-- Use case 3: Engineering changelogs -->
+      <article class="pd-use__card">
+        <svg viewBox="0 0 240 144" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="An engineering changelog: three release-note rows v1.4.2 / v1.4.1 / v1.4.0 in a clean list, version numbers in mono">
+          <rect width="240" height="144" fill="#F5F5F7"/>
+          <rect x="20" y="20" width="200" height="104" fill="#ffffff" stroke="#D2D2D7" rx="8"/>
+          <!-- traffic-light dots -->
+          <circle cx="32" cy="30" r="4" fill="#FF5F57"/>
+          <circle cx="46" cy="30" r="4" fill="#FEBC2E"/>
+          <circle cx="60" cy="30" r="4" fill="#28C840"/>
+          <text x="160" y="34" font-family="SF Mono, ui-monospace, monospace" font-size="11" fill="#6E6E73">changelog.md</text>
+          <line x1="20" y1="40" x2="220" y2="40" stroke="#D2D2D7"/>
+          <!-- v1.4.2 -->
+          <text x="32" y="62" font-family="SF Mono, ui-monospace, monospace" font-size="11" fill="#0071E3" font-weight="700">v1.4.2</text>
+          <text x="78" y="62" font-family="SF Pro Text, sans-serif" font-size="11" fill="#1D1D1F">Faster cold start</text>
+          <!-- v1.4.1 -->
+          <text x="32" y="84" font-family="SF Mono, ui-monospace, monospace" font-size="11" fill="#0071E3" font-weight="700">v1.4.1</text>
+          <text x="78" y="84" font-family="SF Pro Text, sans-serif" font-size="11" fill="#1D1D1F">Vault rename, no reindex</text>
+          <!-- v1.4.0 -->
+          <text x="32" y="106" font-family="SF Mono, ui-monospace, monospace" font-size="11" fill="#0071E3" font-weight="700">v1.4.0</text>
+          <text x="78" y="106" font-family="SF Pro Text, sans-serif" font-size="11" fill="#1D1D1F">Chord palette + offline export</text>
+        </svg>
+        <h3>
+          <span class="lang-en">Engineering changelogs</span>
+          <span class="lang-zh">工程变更日志</span>
+        </h3>
+        <p>
+          <span class="lang-en">Plain Markdown changelogs with a single-key chord to bump a version stub. Diff-friendly because every release is a heading and three bullets — git blame stays useful.</span>
+          <span class="lang-zh">纯 Markdown 变更日志，一键和弦插入版本 stub。每次发版就是一个标题加三条要点——git diff 干净，git blame 还能看。</span>
+        </p>
+        <p class="pd-use__namedrop">
+          <span class="lang-en">Maintained on Studio by the team that ships this app.</span>
+          <span class="lang-zh">本应用的维护团队就用 Studio 写自己的 changelog。</span>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Spec table -->
+<section class="apple-section pd-spec" id="specs">
+  <div class="apple-container">
+    <h2 class="pd-spec__h2">
+      <span class="lang-en">What's inside.</span>
+      <span class="lang-zh">具体规格。</span>
+    </h2>
+    <p class="pd-spec__lead">
+      <span class="lang-en">Eight rows of factual claims a tester could verify in five minutes. If a number changes between releases, this table is the first place we update.</span>
+      <span class="lang-zh">八条可以五分钟内核实的事实。每次发版如果某个数字变了，这张表是第一个被改的地方。</span>
+    </p>
+    <div class="pd-spec__rows">
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Latency</span>
+          <span class="lang-zh">延迟</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en"><code>&lt; 12ms</code> keystroke-to-render median, <code>p99 21ms</code> on M2 Air with a 100k-character buffer. Measured by <code>bench/keystroke-loop</code> over 50,000 chars of mixed prose + code.</span>
+          <span class="lang-zh">击键到渲染中位 <code>&lt; 12ms</code>，<code>p99 21ms</code>（M2 Air · 10 万字 buffer）。用 <code>bench/keystroke-loop</code> 跑 5 万字混合文本测得。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Storage</span>
+          <span class="lang-zh">存储</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">Plain Markdown files in <code>~/Documents/Skypad/</code>. Index DB at <code>~/.skypad/index.db</code> (rebuildable from files at any time). Up to 50,000 entries tested without index degradation.</span>
+          <span class="lang-zh">纯 Markdown 文件存 <code>~/Documents/Skypad/</code>。索引库在 <code>~/.skypad/index.db</code>（任何时候可从文件重建）。测过 5 万条不掉速。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Keyboard</span>
+          <span class="lang-zh">键盘</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">QWERTY · Dvorak · Colemak · AZERTY · Workman, plus custom physical-key mapping via <code>~/.skypad/keys.toml</code>. Chord cheatsheet identical across layouts.</span>
+          <span class="lang-zh">QWERTY · Dvorak · Colemak · AZERTY · Workman 五种，加 <code>~/.skypad/keys.toml</code> 自定义物理键。和弦速查表所有布局一样。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Export</span>
+          <span class="lang-zh">导出</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">Markdown · plain text · PDF (LaTeX-rendered) · JSON · plain HTML (no inlined CSS, you bring the stylesheet). All offline, no cloud round-trip.</span>
+          <span class="lang-zh">Markdown · 纯文本 · PDF（LaTeX 排版）· JSON · 纯 HTML（不内联 CSS，自己带样式表）。全部离线，不走云端。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Offline</span>
+          <span class="lang-zh">离线</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">Fully functional. The only network call is optional sync (off by default). Plane mode safe.</span>
+          <span class="lang-zh">完全可离线运行。仅在主动开启同步时有网络调用（默认关闭）。飞行模式安全。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Data policy</span>
+          <span class="lang-zh">数据政策</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">Local-first. Zero telemetry, zero crash reports unless you opt in. Cloud sync (when enabled) is end-to-end encrypted with a key derived on your machine.</span>
+          <span class="lang-zh">本地优先。不发任何遥测、不上传崩溃报告，除非你主动开启。云端同步（开启时）端到端加密，密钥在你机器本地派生。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Automation</span>
+          <span class="lang-zh">自动化</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">CLI hooks via <code>~/.skypad/hooks.toml</code>: pre-save · post-save · on-tag. Hooks run as your user, not as root.</span>
+          <span class="lang-zh"><code>~/.skypad/hooks.toml</code> 配 CLI 钩子：pre-save · post-save · on-tag。以当前用户身份运行，不走 root。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Accessibility</span>
+          <span class="lang-zh">无障碍</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">VoiceOver · NVDA · Orca tested on each release. Dyslexic-friendly font option, all UI reachable by keyboard, color-contrast passes WCAG AA throughout the app chrome.</span>
+          <span class="lang-zh">每次发版都过 VoiceOver · NVDA · Orca 测试。提供阅读障碍友好字体选项，所有界面可全键盘到达，应用所有色彩对比度过 WCAG AA。</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Honest limits -->
+<section class="apple-section pd-honest">
+  <div class="apple-container">
+    <div class="pd-honest__inner">
+      <p class="pd-honest__kicker">
+        <span class="lang-en">Honest limits</span>
+        <span class="lang-zh">诚实的局限</span>
+      </p>
+      <h3 class="pd-honest__h3">
+        <span class="lang-en">Three things Studio is not the right tool for.</span>
+        <span class="lang-zh">三件事 Studio 不是合适的工具。</span>
+      </h3>
+      <p class="pd-honest__body">
+        <span class="lang-en">Real-time collab is not native — for live multi-cursor work pick Notion, Google Docs, or Hedgedoc. Database-style views are intentionally absent — Studio is a notebook, not Airtable; if you need linked tables with formulas, use Obsidian DataView or a real database. Mobile editing is read-only — capture on phones happens through Skypad Reader, the sibling app, and syncs back to Studio when you are at your desk.</span>
+        <span class="lang-zh">原生不支持实时协同——多人光标场景请选 Notion · Google Docs · Hedgedoc。也刻意没做数据库式视图——Studio 是笔记本，不是 Airtable；如果要带公式的关联表，请用 Obsidian DataView 或真正的数据库。手机端是只读的——手机上的捕获走 Skypad Reader，回到桌面时再同步回 Studio。</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Sibling compare -->
+<section class="apple-section pd-sibling">
+  <div class="apple-container">
+    <h2 class="pd-sibling__h2">
+      <span class="lang-en">Studio in the lineup.</span>
+      <span class="lang-zh">三件套里的 Studio。</span>
+    </h2>
+    <p class="pd-sibling__lead">
+      <span class="lang-en">Three apps, one vault. Studio writes, Reader captures, Sync moves bytes between them. Picking the right one for the moment is the rest of the conversation.</span>
+      <span class="lang-zh">三个应用，一个仓。Studio 写作 · Reader 捕获 · Sync 同步字节。选哪个，根据当下的工作。</span>
+    </p>
+    <div class="pd-sibling__grid">
+      <!-- Skypad Reader -->
+      <article class="pd-sibling__card">
+        <p class="pd-sibling__eyebrow">
+          <span class="lang-en">Skypad Reader</span>
+          <span class="lang-zh">Skypad Reader</span>
+        </p>
+        <h3 class="pd-sibling__name">
+          <span class="lang-en">Reader</span>
+          <span class="lang-zh">Reader</span>
+        </h3>
+        <p class="pd-sibling__tagline">
+          <span class="lang-en">Mobile capture + read-only browse.</span>
+          <span class="lang-zh">移动端捕获 + 只读浏览。</span>
+        </p>
+        <div class="pd-sibling__rows">
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Best for</span>
+              <span class="lang-zh">适合</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">Voice memo + reading offline</span>
+              <span class="lang-zh">语音备忘 · 离线阅读</span>
+            </p>
+          </div>
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Platform</span>
+              <span class="lang-zh">平台</span>
+            </p>
+            <p class="pd-sibling__row-value">iOS · Android</p>
+          </div>
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Price</span>
+              <span class="lang-zh">价格</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">Free</span>
+              <span class="lang-zh">免费</span>
+            </p>
+          </div>
+        </div>
+        <a class="pd-sibling__link" href="#"><span class="lang-en">Read about Reader →</span><span class="lang-zh">了解 Reader →</span></a>
+      </article>
+
+      <!-- Skypad Studio (current) -->
+      <article class="pd-sibling__card pd-sibling__card--current">
+        <span class="pd-sibling__current-tag">
+          <span class="lang-en">You are here</span>
+          <span class="lang-zh">本页</span>
+        </span>
+        <p class="pd-sibling__eyebrow">
+          <span class="lang-en">Skypad Studio</span>
+          <span class="lang-zh">Skypad Studio</span>
+        </p>
+        <h3 class="pd-sibling__name">
+          <span class="lang-en">Studio</span>
+          <span class="lang-zh">Studio</span>
+        </h3>
+        <p class="pd-sibling__tagline">
+          <span class="lang-en">Desktop notebook · keyboard-first writing.</span>
+          <span class="lang-zh">桌面笔记本 · 键盘优先写作。</span>
+        </p>
+        <div class="pd-sibling__rows">
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Best for</span>
+              <span class="lang-zh">适合</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">Long-form writing + research</span>
+              <span class="lang-zh">长文写作 · 研究笔记</span>
+            </p>
+          </div>
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Platform</span>
+              <span class="lang-zh">平台</span>
+            </p>
+            <p class="pd-sibling__row-value">macOS · Windows · Linux</p>
+          </div>
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Price</span>
+              <span class="lang-zh">价格</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">$8 / month</span>
+              <span class="lang-zh">$8 / 月</span>
+            </p>
+          </div>
+        </div>
+        <a class="pd-sibling__link" href="#"><span class="lang-en">View specs ↓</span><span class="lang-zh">查看规格 ↓</span></a>
+      </article>
+
+      <!-- Skypad Sync -->
+      <article class="pd-sibling__card">
+        <p class="pd-sibling__eyebrow">
+          <span class="lang-en">Skypad Sync</span>
+          <span class="lang-zh">Skypad Sync</span>
+        </p>
+        <h3 class="pd-sibling__name">
+          <span class="lang-en">Sync</span>
+          <span class="lang-zh">Sync</span>
+        </h3>
+        <p class="pd-sibling__tagline">
+          <span class="lang-en">End-to-end encrypted vault sync.</span>
+          <span class="lang-zh">端到端加密同步。</span>
+        </p>
+        <div class="pd-sibling__rows">
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Best for</span>
+              <span class="lang-zh">适合</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">Two-or-more-device users</span>
+              <span class="lang-zh">多设备用户</span>
+            </p>
+          </div>
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Platform</span>
+              <span class="lang-zh">平台</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">Server-side · works with Studio + Reader</span>
+              <span class="lang-zh">服务端 · 配合 Studio + Reader</span>
+            </p>
+          </div>
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Price</span>
+              <span class="lang-zh">价格</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">$3 / month add-on</span>
+              <span class="lang-zh">$3 / 月 加购</span>
+            </p>
+          </div>
+        </div>
+        <a class="pd-sibling__link" href="#"><span class="lang-en">Read about Sync →</span><span class="lang-zh">了解 Sync →</span></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing snippet -->
+<section class="apple-section pd-pricing">
+  <div class="apple-container">
+    <p class="pd-pricing__line">
+      <span class="lang-en">Studio is included on the <strong>Pro tier</strong> ($8 / month, 30-day full-feature trial) and the <strong>Team tier</strong> ($16 / seat / month). <a href="#">See full pricing →</a></span>
+      <span class="lang-zh">Studio 包含在 <strong>Pro 档</strong>（$8 / 月，30 天全功能试用）和 <strong>Team 档</strong>（$16 / 席 / 月）。<a href="#">查看完整定价 →</a></span>
+    </p>
+  </div>
+</section>
+
+<!-- Closing band — apple signature BLACK band -->
+<section class="pd-close">
+  <div class="pd-close__inner">
+    <h2 class="pd-close__h2">
+      <span class="lang-en">Get started with Studio.</span>
+      <span class="lang-zh">开始使用 Studio。</span>
+    </h2>
+    <p class="pd-close__copy">
+      <span class="lang-en">Download the app, open a folder of Markdown files, and write. The 30-day trial unlocks every feature on this page; no credit card required to start.</span>
+      <span class="lang-zh">下载应用、打开一个装 Markdown 文件的文件夹，然后写。30 天试用解锁本页所有功能，不需要绑卡。</span>
+    </p>
+    <div class="pd-close__ctas">
+      <a class="pd-close__cta-primary" href="#">
+        <span class="lang-en">Download Studio</span>
+        <span class="lang-zh">下载 Studio</span>
+      </a>
+      <a class="pd-close__cta-ghost" href="#">
+        <span class="lang-en">Read the docs →</span>
+        <span class="lang-zh">阅读文档 →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  const t = document.getElementById('lang-toggle');
+  if (t) t.addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-lang');
+    document.documentElement.setAttribute('data-lang', cur === 'zh' ? 'en' : 'zh');
+  });
+</script>
+
+</body>
+
+<!-- design-review:self-diff v1
+Skill: apple
+Page-type: product-detail
+Created: 2026-05-02
+
+Decisions (5):
+1. [italic-zero-strict] chose "italic count = 0 across the entire page (no <em>, no font-style:italic in CSS, no SVG italic <text>)" over "italic budget = 2-3 like ember/sage product-detail or anthropic's 2-3". Because: apple §J is strict no-italic across all canonicals (feature-deep / landing / docs-home / comparison / pricing / blog-index all italic=0). Hero subtitle that anthropic earned ("actually learned it") is removed; honest-limits h3 that anthropic earned ("not the right tool for") is removed. Emphasis carried by SF Pro Display size scale (h1 80px → tagline 0.62em → subtitle 21px → body 16px) and tracking (-0.035em on h1, -0.022em on tagline, -0.025em on h2, -0.015em on smaller heads).
+2. [black-band-closing-signature] chose "closing on apple-bg-dark #000000 black band with 44px white SF Pro Display + filled white CTA + ghost CTA" over "closing on cream-subtle (anthropic) or warm-cream + chocolate-band (ember) or deep-ink band (sage)". Because: apple's signature reserved closing is the black band, established on apple/feature-deep / landing / pricing canonicals. A product-detail without it would lose apple voice; missing the black band on a closing CTA reads as "apple page minus its dramatic closing argument". Used ONCE on this page (never twice).
+3. [card-radius-24] chose "use-case cards + sibling-compare cards literal `border-radius: 24px`" over "anthropic 16px or ember 12px or sage 4px or apple-default --radius-md 12px". Because: apple's signature card radius is 24px (established in feature-deep canonical). Inner mock chrome inside SVGs uses 12px to differentiate "card layer" from "mock layer". 24px is itself part of apple brand vocabulary; departing to 12px would read as anthropic.
+4. [hero-eyebrow-plain-blue-text] chose "<p> SF Pro Display 15px weight 500 in var(--apple-link)" over "filled blue badge pill (would mirror anthropic's filled-orange .anth-badge pattern)". Because: apple kickers are plain blue text wayfinders, not pills (matches feature-deep canonical decision #1 where the filled-orange anth-badge would tip apple into anthropic register). Plain blue text reads as apple.com kicker convention.
+5. [traffic-light-product-window-mocks] chose "use-case 1 + use-case 3 SVG mocks rendered as light product-window with red/yellow/green dot trio (#FF5F57 / #FEBC2E / #28C840)" over "anthropic's white-panel + orange-topbar pattern or ember's warm-trio dots or sage's monochromatic dots". Because: apple's signature mock vocabulary is the light-window with traffic-lights; orange topbar would read as anthropic visual signal. Use-case 2 (research notes two-pane file tree + citation) doesn't show a window chrome so no traffic-lights — light panels with hairline borders carry the apple aesthetic without forcing chrome where it doesn't fit.
+
+Known trade-offs:
+- Sibling-compare 3 cards have the 2px blue border on the current-product card, which physically narrows the inner content area by 1px vs the other two cards (other cards have 1px gray border). Compensated by `padding: calc(var(--space-6) - 1px)` on the current card so the inner content area is identical across all three. Same compensation pattern as the anthropic anchor canonical.
+- At-a-glance bar uses SF Pro Display (display) for both label and value rather than SF Pro Text for value. This reads slightly more clinical / display-tight than Text-roman would, but the data nature of the strip (dates / version numbers / dollar amounts / day counts) reads more naturally in Display than in Text.
+- §H zh stack uses PingFang SC as primary instead of the harness-default Noto Sans/Serif SC. Because apple.com.cn convention is PingFang SC first; substituting Noto would feel like an off-brand zh apple page. Noto and Source Han stay as fallbacks.
+- Use-case 2 SVG (research notes) does NOT have traffic-light dots because it's a two-pane file-tree + citation view, not a single editor-window chrome. Adding traffic-lights to a two-pane view would force a fake "main window" framing that doesn't exist in the depicted state. Decisions 5 explicitly handles this exception.
+
+/design-review:self-diff -->
+
+</html>
