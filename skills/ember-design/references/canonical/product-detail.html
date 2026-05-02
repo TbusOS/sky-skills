@@ -1,0 +1,1154 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad Studio — the desktop notebook for keyboard-first writing</title>
+<meta name="description" content="Skypad Studio is the desktop notebook for keyboard-first writing — Markdown-native, local-first, end-to-end encrypted sync. Canonical ember-design product-detail page for the sky-skills harness.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/ember.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid rgba(73, 45, 34, 0.2);
+    color: var(--ember-text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+  .lang-toggle:hover { background: rgba(196, 148, 100, 0.12); }
+
+  /* §H zh stack: Inter body → Noto Sans SC; Fraunces display → Noto Serif SC */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] .pd-hero__sub,
+  html[data-lang="zh"] .pd-use__card p,
+  html[data-lang="zh"] .pd-use__card .pd-use__namedrop,
+  html[data-lang="zh"] .pd-use__lead,
+  html[data-lang="zh"] .pd-spec__lead,
+  html[data-lang="zh"] .pd-spec__body,
+  html[data-lang="zh"] .pd-honest__body,
+  html[data-lang="zh"] .pd-sibling__lead,
+  html[data-lang="zh"] .pd-sibling__tagline,
+  html[data-lang="zh"] .pd-sibling__row-value,
+  html[data-lang="zh"] .pd-pricing__line,
+  html[data-lang="zh"] .pd-close__copy {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .pd-hero__h1,
+  html[data-lang="zh"] .pd-glance__value,
+  html[data-lang="zh"] .pd-use__title,
+  html[data-lang="zh"] .pd-honest__h3,
+  html[data-lang="zh"] .pd-sibling__name,
+  html[data-lang="zh"] .pd-close__h2,
+  html[data-lang="zh"] .pd-verdict__quote {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .pd-eyebrow,
+  html[data-lang="zh"] .pd-glance__label,
+  html[data-lang="zh"] .pd-use__kicker,
+  html[data-lang="zh"] .pd-spec__label,
+  html[data-lang="zh"] .pd-honest__kicker,
+  html[data-lang="zh"] .pd-sibling__eyebrow,
+  html[data-lang="zh"] .pd-sibling__row-label,
+  html[data-lang="zh"] .pd-sibling__current-tag,
+  html[data-lang="zh"] .pd-verdict__marker {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+    text-transform: none;
+    letter-spacing: 0.04em;
+  }
+  html[data-lang="zh"] em { font-style: normal; }
+
+  /* Eyebrow + accent strip · ember signature cadence */
+  .pd-accent-strip {
+    height: 1px; width: 48px; background: var(--ember-gold);
+    display: block;
+  }
+  .pd-accent-strip--center { margin: 0 auto var(--space-4); }
+  .pd-eyebrow {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; letter-spacing: 0.18em;
+    text-transform: uppercase; font-weight: 700;
+    color: var(--ember-gold);
+    margin-bottom: var(--space-4);
+  }
+
+  /* Hero — Fraunces stacked h1, ONE italic accent on tag */
+  .pd-hero {
+    text-align: center;
+    padding: var(--space-9) 0 var(--space-7);
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  .pd-hero__h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(48px, 5.4vw, 64px);
+    font-weight: 600; font-style: normal;
+    letter-spacing: -0.02em; line-height: 1.05;
+    color: var(--ember-text);
+    margin: var(--space-2) 0 var(--space-5);
+    font-variation-settings: "SOFT" 50, "opsz" 144;
+  }
+  .pd-hero__h1-tag {
+    display: block;
+    font-size: 0.62em;
+    font-weight: 500;
+    color: var(--ember-text);
+    margin-top: var(--space-3);
+    letter-spacing: -0.01em;
+    font-style: normal;
+  }
+  .pd-hero__h1-tag em {
+    font-style: italic; font-weight: 500;
+    color: var(--ember-text);
+  }
+  .pd-hero__sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 19px; line-height: 1.6;
+    color: var(--ember-text);
+    max-width: 640px;
+    margin: 0 auto var(--space-6);
+  }
+  .pd-hero__ctas {
+    display: flex; gap: var(--space-4);
+    justify-content: center; align-items: center;
+    flex-wrap: wrap;
+  }
+
+  /* At-a-glance bar — gold-hairline-divided 4 cells */
+  .pd-glance {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid rgba(196, 148, 100, 0.32);
+    border-bottom: 1px solid rgba(196, 148, 100, 0.32);
+    margin: var(--space-7) 0 var(--space-8);
+  }
+  .pd-glance__cell {
+    padding: var(--space-7) var(--space-4);
+    border-right: 1px solid rgba(196, 148, 100, 0.32);
+  }
+  .pd-glance__cell:last-child { border-right: 0; }
+  .pd-glance__label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; font-weight: 700;
+    color: var(--ember-gold);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin: 0 0 var(--space-3);
+  }
+  .pd-glance__value {
+    font-family: 'Fraunces', serif;
+    font-size: 19px; font-weight: 500;
+    color: var(--ember-text);
+    letter-spacing: -0.005em; line-height: 1.2;
+    margin: 0;
+    font-variation-settings: "SOFT" 50, "opsz" 144;
+  }
+
+  /* Use-case grid — 3 cards 12px radius · gold kicker · warm-cream SVG mocks */
+  .pd-use { padding: var(--space-9) 0 var(--space-8); }
+  .pd-use__h2 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(32px, 3.6vw, 44px);
+    font-weight: 500; font-style: normal;
+    letter-spacing: -0.01em; line-height: 1.15;
+    color: var(--ember-text);
+    margin: 0 0 var(--space-3);
+    font-variation-settings: "SOFT" 50, "opsz" 144;
+  }
+  .pd-use__lead {
+    font-family: 'Inter', sans-serif;
+    font-size: 17px; line-height: 1.65;
+    color: var(--ember-text);
+    max-width: 640px;
+    margin: 0 0 var(--space-7);
+  }
+  .pd-use__grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+  }
+  .pd-use__card {
+    background: #ffffff;
+    border: 1px solid rgba(73, 45, 34, 0.12);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    display: flex; flex-direction: column; gap: var(--space-3);
+  }
+  .pd-use__card svg {
+    width: 100%; height: auto; display: block;
+    background: var(--ember-bg-subtle);
+    border-radius: var(--radius-sm);
+    aspect-ratio: 5 / 3;
+  }
+  .pd-use__kicker {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; font-weight: 700;
+    color: var(--ember-gold);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin: var(--space-2) 0 0;
+  }
+  .pd-use__title {
+    font-family: 'Fraunces', serif;
+    font-size: 19px; font-weight: 500; font-style: normal;
+    letter-spacing: -0.005em; line-height: 1.25;
+    color: var(--ember-text);
+    margin: 0;
+    font-variation-settings: "SOFT" 50, "opsz" 144;
+  }
+  .pd-use__card p {
+    font-family: 'Inter', sans-serif;
+    font-size: 15.5px; line-height: 1.6;
+    color: var(--ember-text);
+    margin: 0;
+  }
+  .pd-use__namedrop {
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px; line-height: 1.5;
+    color: var(--ember-text-secondary);
+    margin: 0;
+    padding-top: var(--space-3);
+    border-top: 1px solid rgba(73, 45, 34, 0.12);
+  }
+
+  /* Spec table — model card style on cream-subtle band */
+  .pd-spec {
+    padding: var(--space-9) 0;
+    background: var(--ember-bg-subtle);
+  }
+  .pd-spec__h2 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(32px, 3.6vw, 44px);
+    font-weight: 500; font-style: normal;
+    letter-spacing: -0.01em; line-height: 1.15;
+    color: var(--ember-text);
+    margin: 0 0 var(--space-3);
+    font-variation-settings: "SOFT" 50, "opsz" 144;
+  }
+  .pd-spec__lead {
+    font-family: 'Inter', sans-serif;
+    font-size: 17px; line-height: 1.65;
+    color: var(--ember-text);
+    max-width: 640px;
+    margin: 0 0 var(--space-7);
+  }
+  .pd-spec__rows {
+    display: flex; flex-direction: column;
+    border-top: 1px solid rgba(196, 148, 100, 0.32);
+  }
+  .pd-spec__row {
+    display: grid; grid-template-columns: 240px 1fr;
+    gap: var(--space-5);
+    padding: var(--space-5) 0;
+    border-bottom: 1px solid rgba(196, 148, 100, 0.32);
+  }
+  .pd-spec__label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; font-weight: 700;
+    color: var(--ember-gold);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin: 0; padding-top: 4px;
+  }
+  .pd-spec__body {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px; line-height: 1.6;
+    color: var(--ember-text);
+    margin: 0;
+  }
+  .pd-spec__body code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    background: #fbeedd;
+    padding: 2px 8px; border-radius: var(--radius-sm);
+    border: 1px solid rgba(73, 45, 34, 0.18);
+    color: var(--ember-text);
+  }
+
+  /* Honest-limits callout — 3px gold left + cream-subtle */
+  .pd-honest { padding: var(--space-9) 0; }
+  .pd-honest__inner {
+    background: var(--ember-bg-subtle);
+    border-left: 3px solid var(--ember-gold);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: var(--space-6) var(--space-7);
+  }
+  .pd-honest__kicker {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; font-weight: 700;
+    color: var(--ember-gold);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin: 0 0 var(--space-3);
+  }
+  .pd-honest__h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 24px; font-weight: 500; font-style: normal;
+    letter-spacing: -0.005em; line-height: 1.3;
+    color: var(--ember-text);
+    margin: 0 0 var(--space-3);
+    font-variation-settings: "SOFT" 50, "opsz" 144;
+  }
+  .pd-honest__h3 em {
+    font-style: italic;
+    color: var(--ember-text);
+  }
+  .pd-honest__body {
+    font-family: 'Inter', sans-serif;
+    font-size: 17px; line-height: 1.65;
+    color: var(--ember-text);
+    margin: 0;
+    max-width: 720px;
+  }
+
+  /* Sibling compare — 3 cards · current = 2px gold + warm-cream bg */
+  .pd-sibling { padding: var(--space-9) 0; }
+  .pd-sibling__h2 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(32px, 3.6vw, 44px);
+    font-weight: 500; font-style: normal;
+    letter-spacing: -0.01em; line-height: 1.15;
+    color: var(--ember-text);
+    margin: 0 0 var(--space-3);
+    font-variation-settings: "SOFT" 50, "opsz" 144;
+  }
+  .pd-sibling__lead {
+    font-family: 'Inter', sans-serif;
+    font-size: 17px; line-height: 1.65;
+    color: var(--ember-text);
+    max-width: 640px;
+    margin: 0 0 var(--space-7);
+  }
+  .pd-sibling__grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+    align-items: stretch;
+  }
+  .pd-sibling__card {
+    background: #ffffff;
+    border: 1px solid rgba(73, 45, 34, 0.12);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    display: flex; flex-direction: column; gap: var(--space-3);
+  }
+  .pd-sibling__card--current {
+    background: #fbeedd;
+    border: 2px solid var(--ember-gold);
+    padding: calc(var(--space-6) - 1px);
+  }
+  .pd-sibling__current-tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px; font-weight: 700;
+    color: var(--ember-text);
+    background: var(--ember-gold);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    align-self: flex-start;
+    margin-top: -4px;
+  }
+  .pd-sibling__eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; font-weight: 700;
+    color: var(--ember-text-secondary);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin: 0;
+  }
+  .pd-sibling__card--current .pd-sibling__eyebrow { color: var(--ember-gold); }
+  .pd-sibling__name {
+    font-family: 'Fraunces', serif;
+    font-size: 22px; font-weight: 500; font-style: normal;
+    letter-spacing: -0.005em; line-height: 1.2;
+    color: var(--ember-text);
+    margin: 0;
+    font-variation-settings: "SOFT" 50, "opsz" 144;
+  }
+  .pd-sibling__tagline {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px; line-height: 1.55;
+    color: var(--ember-text-secondary);
+    margin: 0;
+  }
+  .pd-sibling__rows {
+    display: flex; flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid rgba(73, 45, 34, 0.12);
+  }
+  .pd-sibling__card--current .pd-sibling__rows {
+    border-top-color: rgba(196, 148, 100, 0.4);
+  }
+  .pd-sibling__row {
+    display: grid; grid-template-columns: 90px 1fr;
+    gap: var(--space-3);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px; line-height: 1.55;
+  }
+  .pd-sibling__row-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; font-weight: 700;
+    color: var(--ember-text-secondary);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin: 0;
+    padding-top: 2px;
+  }
+  .pd-sibling__row-value {
+    color: var(--ember-text);
+    margin: 0;
+  }
+  .pd-sibling__link {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px; font-weight: 500;
+    color: var(--ember-brown);
+    text-decoration: underline;
+    text-underline-offset: 0.22em;
+    text-decoration-thickness: 1px;
+    text-decoration-color: var(--ember-gold);
+    align-self: flex-start;
+    margin-top: var(--space-3);
+  }
+  .pd-sibling__link::after { content: " \2192"; color: var(--ember-gold); }
+  .pd-sibling__link:hover { color: var(--ember-brown-hover); text-decoration-color: var(--ember-brown); }
+
+  /* Pricing snippet — single sentence + gold-underlined link */
+  .pd-pricing {
+    padding: var(--space-7) 0;
+    text-align: center;
+  }
+  .pd-pricing__line {
+    font-family: 'Inter', sans-serif;
+    font-size: 17px; line-height: 1.6;
+    color: var(--ember-text);
+    margin: 0 auto;
+    max-width: 640px;
+  }
+  .pd-pricing__line a {
+    color: var(--ember-brown);
+    text-decoration: underline;
+    text-underline-offset: 0.22em;
+    text-decoration-thickness: 1px;
+    text-decoration-color: var(--ember-gold);
+  }
+  .pd-pricing__line a:hover { color: var(--ember-brown-hover); }
+
+  /* Verdict band — chocolate (ember signature) · italic moment #3 */
+  .pd-verdict {
+    background: var(--ember-text);
+    color: #ffffff;
+    padding: var(--space-10) 0;
+    text-align: center;
+  }
+  .pd-verdict__inner {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 var(--space-5);
+  }
+  .pd-verdict__strip {
+    height: 1px; width: 48px;
+    background: var(--ember-gold);
+    margin: 0 auto var(--space-5);
+    display: block;
+  }
+  .pd-verdict__marker {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; letter-spacing: 0.18em;
+    text-transform: uppercase; font-weight: 700;
+    color: #d9b892;
+    margin-bottom: var(--space-5);
+  }
+  .pd-verdict__quote {
+    font-family: 'Fraunces', serif;
+    font-style: italic; font-weight: 400;
+    font-size: 40px; line-height: 1.35;
+    color: #ffffff;
+    margin: 0;
+    font-variation-settings: "SOFT" 50, "opsz" 144;
+  }
+  .pd-verdict__cite {
+    display: block;
+    margin-top: var(--space-6);
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-size: 14.5px;
+    color: #d9b892;
+    letter-spacing: 0.04em;
+  }
+  .pd-verdict__cite-rule {
+    display: inline-block;
+    width: 20px; height: 1.5px;
+    background: var(--ember-gold);
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  /* Closing CTA — cream */
+  .pd-close {
+    padding: var(--space-9) 0;
+    text-align: center;
+  }
+  .pd-close__inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 var(--space-5);
+  }
+  .pd-close__h2 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(32px, 3.4vw, 40px);
+    font-weight: 500; font-style: normal;
+    letter-spacing: -0.01em; line-height: 1.15;
+    color: var(--ember-text);
+    margin: 0 0 var(--space-4);
+    font-variation-settings: "SOFT" 50, "opsz" 144;
+  }
+  .pd-close__copy {
+    font-family: 'Inter', sans-serif;
+    font-size: 17px; line-height: 1.65;
+    color: var(--ember-text);
+    margin: 0 0 var(--space-6);
+  }
+  .pd-close__ctas {
+    display: flex; gap: var(--space-4);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Section heading wrap (eyebrow + accent strip + h2 grouping) */
+  .pd-section-head {
+    margin-bottom: var(--space-3);
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .pd-glance { grid-template-columns: repeat(2, 1fr); }
+    .pd-glance__cell:nth-child(2) { border-right: 0; }
+    .pd-glance__cell:nth-child(1),
+    .pd-glance__cell:nth-child(2) {
+      border-bottom: 1px solid rgba(196, 148, 100, 0.32);
+    }
+    .pd-use__grid { grid-template-columns: 1fr; }
+    .pd-spec__row { grid-template-columns: 1fr; gap: var(--space-2); }
+    .pd-sibling__grid { grid-template-columns: 1fr; }
+    .pd-verdict__quote { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="ember-nav"><div class="ember-nav-inner">
+  <a href="#" class="ember-nav-brand">Skypad</a>
+  <div>
+    <a href="#" style="color:var(--ember-text); border-bottom:1px solid var(--ember-gold); padding-bottom:2px;"><span class="lang-en">Studio</span><span class="lang-zh">Studio</span></a>
+    <a href="#"><span class="lang-en">Reader</span><span class="lang-zh">Reader</span></a>
+    <a href="#"><span class="lang-en">Sync</span><span class="lang-zh">Sync</span></a>
+    <a href="#"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="#"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Toggle language">中 / EN</button>
+    <a class="ember-button" href="#"><span class="lang-en">Try Studio</span><span class="lang-zh">试用 Studio</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<header class="ember-section" style="padding-block:var(--space-9);">
+  <div class="ember-container ember-container--wide">
+    <div class="pd-hero">
+      <span class="pd-accent-strip pd-accent-strip--center" aria-hidden="true"></span>
+      <span class="pd-eyebrow">
+        <span class="lang-en">Skypad Studio · part of the Skypad lineup</span>
+        <span class="lang-zh">Skypad Studio · 三件套之一</span>
+      </span>
+      <h1 class="pd-hero__h1">
+        <span class="lang-en">Skypad Studio<span class="pd-hero__h1-tag">the desktop notebook for <em>keyboard-first</em> writing.</span></span>
+        <span class="lang-zh">Skypad Studio<span class="pd-hero__h1-tag">为<em>键盘优先</em>写作而设计的桌面笔记。</span></span>
+      </h1>
+      <p class="pd-hero__sub">
+        <span class="lang-en">A Markdown-native desktop editor for writers who'd rather keep both hands on the keys. Local files, end-to-end encrypted optional sync, and a six-key chord palette that disappears once you've actually learned it.</span>
+        <span class="lang-zh">为更愿意把手放在键盘上的写作者准备的 Markdown 原生桌面编辑器。本地文件、可选端到端加密同步，加一套六键和弦命令面板——真正学会之后就不再注意它的存在。</span>
+      </p>
+      <div class="pd-hero__ctas">
+        <a class="ember-button" href="#">
+          <span class="lang-en">Try Studio · 30-day trial</span>
+          <span class="lang-zh">试用 Studio · 30 天</span>
+        </a>
+        <a class="ember-button ember-button--ghost" href="#specs">
+          <span class="lang-en">View specs ↓</span>
+          <span class="lang-zh">查看规格 ↓</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- At-a-glance bar -->
+    <div class="pd-glance" style="max-width:920px; margin-left:auto; margin-right:auto;" aria-label="Quick facts about Skypad Studio">
+      <div class="pd-glance__cell">
+        <p class="pd-glance__label">
+          <span class="lang-en">Released</span>
+          <span class="lang-zh">发布</span>
+        </p>
+        <p class="pd-glance__value">2025-Q4 · v1.4</p>
+      </div>
+      <div class="pd-glance__cell">
+        <p class="pd-glance__label">
+          <span class="lang-en">Platforms</span>
+          <span class="lang-zh">平台</span>
+        </p>
+        <p class="pd-glance__value">macOS · Windows · Linux</p>
+      </div>
+      <div class="pd-glance__cell">
+        <p class="pd-glance__label">
+          <span class="lang-en">Tier from</span>
+          <span class="lang-zh">起步档</span>
+        </p>
+        <p class="pd-glance__value">
+          <span class="lang-en">$8 / month</span>
+          <span class="lang-zh">$8 / 月</span>
+        </p>
+      </div>
+      <div class="pd-glance__cell">
+        <p class="pd-glance__label">
+          <span class="lang-en">Trial</span>
+          <span class="lang-zh">试用</span>
+        </p>
+        <p class="pd-glance__value">
+          <span class="lang-en">30 days, full features</span>
+          <span class="lang-zh">30 天 · 全功能</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Use cases -->
+<section class="ember-section pd-use">
+  <div class="ember-container ember-container--wide">
+    <div class="pd-section-head">
+      <span class="pd-accent-strip" aria-hidden="true"></span>
+      <span class="pd-eyebrow" style="margin-top:var(--space-3);">
+        <span class="lang-en">What it's for</span>
+        <span class="lang-zh">用在什么场景</span>
+      </span>
+      <h2 class="pd-use__h2">
+        <span class="lang-en">Three things Studio is best at.</span>
+        <span class="lang-zh">Studio 最擅长这三件事。</span>
+      </h2>
+    </div>
+    <p class="pd-use__lead">
+      <span class="lang-en">Workflows the editor was actually designed for. If your work doesn't fall into one of these, the honest-limits section below is more useful than this grid.</span>
+      <span class="lang-zh">Studio 当初是为这些场景设计的。如果你的写作不在其中，下面“诚实的局限”那一节比这里的用例更有参考价值。</span>
+    </p>
+    <div class="pd-use__grid">
+      <!-- Use case 1: Daily writing -->
+      <article class="pd-use__card">
+        <svg viewBox="0 0 240 144" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A morning writing scene: open Markdown file with paragraph in progress, cursor blinking after a period, line counter showing 240 of 1200 words">
+          <rect width="240" height="144" fill="#f5e5c8"/>
+          <!-- file area -->
+          <rect x="20" y="20" width="200" height="104" fill="#ffffff" rx="4"/>
+          <!-- gold accent topbar -->
+          <line x1="20" y1="20" x2="220" y2="20" stroke="#c49464" stroke-width="2"/>
+          <!-- writing lines -->
+          <line x1="32" y1="40" x2="180" y2="40" stroke="#e6d9bf" stroke-width="1"/>
+          <line x1="32" y1="54" x2="200" y2="54" stroke="#e6d9bf" stroke-width="1"/>
+          <line x1="32" y1="68" x2="160" y2="68" stroke="#e6d9bf" stroke-width="1"/>
+          <line x1="32" y1="82" x2="190" y2="82" stroke="#e6d9bf" stroke-width="1"/>
+          <line x1="32" y1="96" x2="120" y2="96" stroke="#e6d9bf" stroke-width="1"/>
+          <!-- cursor -->
+          <line x1="124" y1="92" x2="124" y2="100" stroke="#312520" stroke-width="2"/>
+          <!-- footer counter -->
+          <text x="32" y="118" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#6b5a4f" font-style="normal">240 / 1200 words · saved</text>
+        </svg>
+        <span class="pd-use__kicker">
+          <span class="lang-en">Daily writing · 80ms cold start</span>
+          <span class="lang-zh">日常写作 · 冷启 80ms</span>
+        </span>
+        <h3 class="pd-use__title">
+          <span class="lang-en">Long-form prose</span>
+          <span class="lang-zh">长文写作</span>
+        </h3>
+        <p>
+          <span class="lang-en">Essays, weekly letters, drafts that need to live in plain Markdown. The blank page opens in 80ms; saves write directly to disk so the file is always recoverable from the filesystem, not from a cloud queue.</span>
+          <span class="lang-zh">随笔、周更、需要以纯 Markdown 形式存在的草稿。空白页 80ms 打开；保存直接写入磁盘文件，可以从文件系统恢复，不依赖云端队列。</span>
+        </p>
+        <p class="pd-use__namedrop">
+          <span class="lang-en">Used daily by writers at the Atlantic and a handful of arXiv-hosted essayists.</span>
+          <span class="lang-zh">每天在《大西洋月刊》编辑部和若干 arXiv 写作者那里被用作主力。</span>
+        </p>
+      </article>
+
+      <!-- Use case 2: Research notes -->
+      <article class="pd-use__card">
+        <svg viewBox="0 0 240 144" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A research-notes view: three Markdown files in a folder tree, one selected with a citation expansion showing arXiv:2304.01234 below">
+          <rect width="240" height="144" fill="#f5e5c8"/>
+          <!-- two-pane -->
+          <rect x="20" y="20" width="80" height="104" fill="#ffffff" stroke="#e6d9bf" rx="4"/>
+          <rect x="108" y="20" width="112" height="104" fill="#ffffff" stroke="#e6d9bf" rx="4"/>
+          <!-- gold topbar across both -->
+          <line x1="20" y1="20" x2="220" y2="20" stroke="#c49464" stroke-width="2"/>
+          <!-- left pane: file tree -->
+          <text x="28" y="38" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#6b5a4f" font-style="normal">research/</text>
+          <text x="32" y="54" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#312520" font-style="normal">survey.md</text>
+          <text x="32" y="70" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#312520" font-style="normal">attention.md</text>
+          <rect x="28" y="78" width="68" height="14" fill="#c49464" opacity="0.18"/>
+          <text x="32" y="89" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#312520" font-weight="700" font-style="normal">scaling.md</text>
+          <text x="32" y="106" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#312520" font-style="normal">_inbox.md</text>
+          <!-- right pane: citation -->
+          <text x="116" y="40" font-family="'Fraunces', serif" font-size="11" fill="#312520" font-weight="600" font-style="normal">Scaling laws</text>
+          <line x1="116" y1="50" x2="208" y2="50" stroke="#c49464" stroke-width="1.5"/>
+          <text x="116" y="68" font-family="'Inter', sans-serif" font-size="10" fill="#312520" font-style="normal">Loss curves track</text>
+          <text x="116" y="80" font-family="'Inter', sans-serif" font-size="10" fill="#312520" font-style="normal">log-linearly with</text>
+          <text x="116" y="92" font-family="'Inter', sans-serif" font-size="10" fill="#312520" font-style="normal">parameter count up</text>
+          <text x="116" y="104" font-family="'Inter', sans-serif" font-size="10" fill="#312520" font-style="normal">to ~70B params.</text>
+          <text x="116" y="120" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#6b5a4f" font-style="normal">arXiv:2304.01234</text>
+        </svg>
+        <span class="pd-use__kicker">
+          <span class="lang-en">Research notes · 18ms backlink</span>
+          <span class="lang-zh">研究笔记 · 反链 18ms</span>
+        </span>
+        <h3 class="pd-use__title">
+          <span class="lang-en">Linked vault</span>
+          <span class="lang-zh">关联笔记仓</span>
+        </h3>
+        <p>
+          <span class="lang-en">Linked Markdown with citation autocomplete (BibTeX or arXiv ID), backlinks computed in 18ms, and per-file frontmatter that reads as plain YAML for any other tool.</span>
+          <span class="lang-zh">Markdown 文档互链，BibTeX / arXiv 引用自动补全，反向链接 18ms 算完，每篇 frontmatter 是标准 YAML——任何工具都能读。</span>
+        </p>
+        <p class="pd-use__namedrop">
+          <span class="lang-en">PI's vault at three university labs runs on Studio.</span>
+          <span class="lang-zh">三个大学实验室的 PI 笔记仓在 Studio 上跑。</span>
+        </p>
+      </article>
+
+      <!-- Use case 3: Engineering changelogs -->
+      <article class="pd-use__card">
+        <svg viewBox="0 0 240 144" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="An engineering changelog draft: three release-note bullets v1.4.2 / v1.4.1 / v1.4.0 in a clean list, version numbers in mono">
+          <rect width="240" height="144" fill="#f5e5c8"/>
+          <rect x="20" y="20" width="200" height="104" fill="#ffffff" stroke="#e6d9bf" rx="4"/>
+          <line x1="20" y1="20" x2="220" y2="20" stroke="#c49464" stroke-width="2"/>
+          <!-- header -->
+          <text x="32" y="40" font-family="'Fraunces', serif" font-size="11" fill="#312520" font-weight="600" font-style="normal">Skypad Studio · changelog</text>
+          <line x1="32" y1="48" x2="208" y2="48" stroke="#e6d9bf"/>
+          <!-- v1.4.2 -->
+          <text x="32" y="64" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#c49464" font-weight="700" font-style="normal">v1.4.2</text>
+          <text x="76" y="64" font-family="'Inter', sans-serif" font-size="10" fill="#312520" font-style="normal">Faster cold start</text>
+          <!-- v1.4.1 -->
+          <text x="32" y="84" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#c49464" font-weight="700" font-style="normal">v1.4.1</text>
+          <text x="76" y="84" font-family="'Inter', sans-serif" font-size="10" fill="#312520" font-style="normal">Vault rename, no reindex</text>
+          <!-- v1.4.0 -->
+          <text x="32" y="104" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#c49464" font-weight="700" font-style="normal">v1.4.0</text>
+          <text x="76" y="104" font-family="'Inter', sans-serif" font-size="10" fill="#312520" font-style="normal">Chord palette + offline export</text>
+        </svg>
+        <span class="pd-use__kicker">
+          <span class="lang-en">Changelogs · diff-friendly</span>
+          <span class="lang-zh">变更日志 · diff 干净</span>
+        </span>
+        <h3 class="pd-use__title">
+          <span class="lang-en">Engineering notes</span>
+          <span class="lang-zh">工程记录</span>
+        </h3>
+        <p>
+          <span class="lang-en">Plain Markdown changelogs with a single-key chord to bump a version stub. Diff-friendly because every release is a heading and three bullets — git blame stays useful.</span>
+          <span class="lang-zh">纯 Markdown 变更日志，一键和弦插入版本 stub。每次发版就是一个标题加三条要点——git diff 干净，git blame 还能看。</span>
+        </p>
+        <p class="pd-use__namedrop">
+          <span class="lang-en">Maintained on Studio by the team that ships this app.</span>
+          <span class="lang-zh">本应用的维护团队就用 Studio 写自己的 changelog。</span>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Spec table -->
+<section class="ember-section pd-spec" id="specs">
+  <div class="ember-container ember-container--wide">
+    <div class="pd-section-head">
+      <span class="pd-accent-strip" aria-hidden="true"></span>
+      <span class="pd-eyebrow" style="margin-top:var(--space-3);">
+        <span class="lang-en">What's inside</span>
+        <span class="lang-zh">具体规格</span>
+      </span>
+      <h2 class="pd-spec__h2">
+        <span class="lang-en">Eight rows a tester could verify in five minutes.</span>
+        <span class="lang-zh">八条可以五分钟内核实的事实。</span>
+      </h2>
+    </div>
+    <p class="pd-spec__lead">
+      <span class="lang-en">If a number changes between releases, this table is the first place we update.</span>
+      <span class="lang-zh">每次发版如果某个数字变了，这张表是第一个被改的地方。</span>
+    </p>
+    <div class="pd-spec__rows">
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Latency</span>
+          <span class="lang-zh">延迟</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en"><code>&lt; 12ms</code> keystroke-to-render median, <code>p99 21ms</code> on M2 Air with a 100k-character buffer. Measured by <code>bench/keystroke-loop</code> over 50,000 chars of mixed prose + code.</span>
+          <span class="lang-zh">击键到渲染中位 <code>&lt; 12ms</code>，<code>p99 21ms</code>（M2 Air · 10 万字 buffer）。用 <code>bench/keystroke-loop</code> 跑 5 万字混合文本测得。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Storage</span>
+          <span class="lang-zh">存储</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">Plain Markdown files in <code>~/Documents/Skypad/</code>. Index DB at <code>~/.skypad/index.db</code> (rebuildable from files at any time). Up to 50,000 entries tested without index degradation.</span>
+          <span class="lang-zh">纯 Markdown 文件存 <code>~/Documents/Skypad/</code>。索引库在 <code>~/.skypad/index.db</code>（任何时候可从文件重建）。测过 5 万条不掉速。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Keyboard</span>
+          <span class="lang-zh">键盘</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">QWERTY · Dvorak · Colemak · AZERTY · Workman, plus custom physical-key mapping via <code>~/.skypad/keys.toml</code>. Chord cheatsheet identical across layouts.</span>
+          <span class="lang-zh">QWERTY · Dvorak · Colemak · AZERTY · Workman 五种，加 <code>~/.skypad/keys.toml</code> 自定义物理键。和弦速查表所有布局一样。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Export</span>
+          <span class="lang-zh">导出</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">Markdown · plain text · PDF (LaTeX-rendered) · JSON · plain HTML (no inlined CSS, you bring the stylesheet). All offline, no cloud round-trip.</span>
+          <span class="lang-zh">Markdown · 纯文本 · PDF（LaTeX 排版）· JSON · 纯 HTML（不内联 CSS，自己带样式表）。全部离线，不走云端。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Offline</span>
+          <span class="lang-zh">离线</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">Fully functional. The only network call is optional sync (off by default). Plane mode safe.</span>
+          <span class="lang-zh">完全可离线运行。仅在主动开启同步时有网络调用（默认关闭）。飞行模式安全。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Data policy</span>
+          <span class="lang-zh">数据政策</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">Local-first. Zero telemetry, zero crash reports unless you opt in. Cloud sync (when enabled) is end-to-end encrypted with a key derived on your machine.</span>
+          <span class="lang-zh">本地优先。不发任何遥测、不上传崩溃报告，除非你主动开启。云端同步（开启时）端到端加密，密钥在你机器本地派生。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Automation</span>
+          <span class="lang-zh">自动化</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">CLI hooks via <code>~/.skypad/hooks.toml</code>: pre-save · post-save · on-tag. Hooks run as your user, not as root.</span>
+          <span class="lang-zh"><code>~/.skypad/hooks.toml</code> 配 CLI 钩子：pre-save · post-save · on-tag。以当前用户身份运行，不走 root。</span>
+        </p>
+      </div>
+      <div class="pd-spec__row">
+        <p class="pd-spec__label">
+          <span class="lang-en">Accessibility</span>
+          <span class="lang-zh">无障碍</span>
+        </p>
+        <p class="pd-spec__body">
+          <span class="lang-en">VoiceOver · NVDA · Orca tested on each release. Dyslexic-friendly font option, all UI reachable by keyboard, color-contrast passes WCAG AA throughout the app chrome.</span>
+          <span class="lang-zh">每次发版都过 VoiceOver · NVDA · Orca 测试。提供阅读障碍友好字体选项，所有界面可全键盘到达，应用所有色彩对比度过 WCAG AA。</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Honest limits -->
+<section class="ember-section pd-honest">
+  <div class="ember-container ember-container--wide">
+    <div class="pd-honest__inner">
+      <p class="pd-honest__kicker">
+        <span class="lang-en">Honest limits</span>
+        <span class="lang-zh">诚实的局限</span>
+      </p>
+      <h3 class="pd-honest__h3">
+        <span class="lang-en">Three things Studio is <em>not</em> the right tool for.</span>
+        <span class="lang-zh">三件事 Studio <em>不是</em>合适的工具。</span>
+      </h3>
+      <p class="pd-honest__body">
+        <span class="lang-en">Real-time collab is not native — for live multi-cursor work pick Notion, Google Docs, or Hedgedoc. Database-style views are intentionally absent — Studio is a notebook, not Airtable; if you need linked tables with formulas, use Obsidian DataView or a real database. Mobile editing is read-only — capture on phones happens through Skypad Reader, the sibling app, and syncs back to Studio when you're at your desk.</span>
+        <span class="lang-zh">原生不支持实时协同——多人光标场景请选 Notion · Google Docs · Hedgedoc。我们也刻意没做数据库式视图——Studio 是笔记本，不是 Airtable；如果你要带公式的关联表，请用 Obsidian DataView 或真正的数据库。手机端是只读的——手机上的捕获走 Skypad Reader，回到桌面时再同步回 Studio。</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Sibling compare -->
+<section class="ember-section pd-sibling">
+  <div class="ember-container ember-container--wide">
+    <div class="pd-section-head">
+      <span class="pd-accent-strip" aria-hidden="true"></span>
+      <span class="pd-eyebrow" style="margin-top:var(--space-3);">
+        <span class="lang-en">In the lineup</span>
+        <span class="lang-zh">三件套</span>
+      </span>
+      <h2 class="pd-sibling__h2">
+        <span class="lang-en">Studio in the lineup.</span>
+        <span class="lang-zh">三件套里的 Studio。</span>
+      </h2>
+    </div>
+    <p class="pd-sibling__lead">
+      <span class="lang-en">Three apps, one vault. Studio writes, Reader captures, Sync moves bytes between them. Picking the right one for the moment is the rest of the conversation.</span>
+      <span class="lang-zh">三个应用，一个仓。Studio 写作 · Reader 捕获 · Sync 同步字节。选哪个，根据当下的工作。</span>
+    </p>
+    <div class="pd-sibling__grid">
+      <!-- Skypad Reader -->
+      <article class="pd-sibling__card">
+        <p class="pd-sibling__eyebrow">
+          <span class="lang-en">Skypad Reader</span>
+          <span class="lang-zh">Skypad Reader</span>
+        </p>
+        <h3 class="pd-sibling__name">
+          <span class="lang-en">Reader</span>
+          <span class="lang-zh">Reader</span>
+        </h3>
+        <p class="pd-sibling__tagline">
+          <span class="lang-en">Mobile capture + read-only browse.</span>
+          <span class="lang-zh">移动端捕获 + 只读浏览。</span>
+        </p>
+        <div class="pd-sibling__rows">
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Best for</span>
+              <span class="lang-zh">适合</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">Voice memo + reading offline</span>
+              <span class="lang-zh">语音备忘 · 离线阅读</span>
+            </p>
+          </div>
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Platform</span>
+              <span class="lang-zh">平台</span>
+            </p>
+            <p class="pd-sibling__row-value">iOS · Android</p>
+          </div>
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Price</span>
+              <span class="lang-zh">价格</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">Free</span>
+              <span class="lang-zh">免费</span>
+            </p>
+          </div>
+        </div>
+        <a class="pd-sibling__link" href="#"><span class="lang-en">Read about Reader</span><span class="lang-zh">了解 Reader</span></a>
+      </article>
+
+      <!-- Skypad Studio (current) -->
+      <article class="pd-sibling__card pd-sibling__card--current">
+        <span class="pd-sibling__current-tag">
+          <span class="lang-en">You are here</span>
+          <span class="lang-zh">本页</span>
+        </span>
+        <p class="pd-sibling__eyebrow">
+          <span class="lang-en">Skypad Studio</span>
+          <span class="lang-zh">Skypad Studio</span>
+        </p>
+        <h3 class="pd-sibling__name">
+          <span class="lang-en">Studio</span>
+          <span class="lang-zh">Studio</span>
+        </h3>
+        <p class="pd-sibling__tagline">
+          <span class="lang-en">Desktop notebook · keyboard-first writing.</span>
+          <span class="lang-zh">桌面笔记本 · 键盘优先写作。</span>
+        </p>
+        <div class="pd-sibling__rows">
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Best for</span>
+              <span class="lang-zh">适合</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">Long-form writing + research</span>
+              <span class="lang-zh">长文写作 · 研究笔记</span>
+            </p>
+          </div>
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Platform</span>
+              <span class="lang-zh">平台</span>
+            </p>
+            <p class="pd-sibling__row-value">macOS · Windows · Linux</p>
+          </div>
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Price</span>
+              <span class="lang-zh">价格</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">$8 / month</span>
+              <span class="lang-zh">$8 / 月</span>
+            </p>
+          </div>
+        </div>
+        <a class="pd-sibling__link" href="#"><span class="lang-en">View specs</span><span class="lang-zh">查看规格</span></a>
+      </article>
+
+      <!-- Skypad Sync -->
+      <article class="pd-sibling__card">
+        <p class="pd-sibling__eyebrow">
+          <span class="lang-en">Skypad Sync</span>
+          <span class="lang-zh">Skypad Sync</span>
+        </p>
+        <h3 class="pd-sibling__name">
+          <span class="lang-en">Sync</span>
+          <span class="lang-zh">Sync</span>
+        </h3>
+        <p class="pd-sibling__tagline">
+          <span class="lang-en">End-to-end encrypted vault sync.</span>
+          <span class="lang-zh">端到端加密同步。</span>
+        </p>
+        <div class="pd-sibling__rows">
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Best for</span>
+              <span class="lang-zh">适合</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">Two-or-more-device users</span>
+              <span class="lang-zh">多设备用户</span>
+            </p>
+          </div>
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Platform</span>
+              <span class="lang-zh">平台</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">Server-side · works with Studio + Reader</span>
+              <span class="lang-zh">服务端 · 配合 Studio + Reader</span>
+            </p>
+          </div>
+          <div class="pd-sibling__row">
+            <p class="pd-sibling__row-label">
+              <span class="lang-en">Price</span>
+              <span class="lang-zh">价格</span>
+            </p>
+            <p class="pd-sibling__row-value">
+              <span class="lang-en">$3 / month add-on</span>
+              <span class="lang-zh">$3 / 月 加购</span>
+            </p>
+          </div>
+        </div>
+        <a class="pd-sibling__link" href="#"><span class="lang-en">Read about Sync</span><span class="lang-zh">了解 Sync</span></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing snippet -->
+<section class="ember-section pd-pricing">
+  <div class="ember-container ember-container--wide">
+    <p class="pd-pricing__line">
+      <span class="lang-en">Studio is included on the <strong>Pro tier</strong> ($8 / month, 30-day full-feature trial) and the <strong>Team tier</strong> ($16 / seat / month). <a href="#">See full pricing →</a></span>
+      <span class="lang-zh">Studio 包含在 <strong>Pro 档</strong>（$8 / 月，30 天全功能试用）和 <strong>Team 档</strong>（$16 / 席 / 月）。<a href="#">查看完整定价 →</a></span>
+    </p>
+  </div>
+</section>
+
+<!-- Verdict band · ember signature chocolate · italic moment #3 -->
+<section class="pd-verdict">
+  <div class="pd-verdict__inner">
+    <span class="pd-verdict__strip" aria-hidden="true"></span>
+    <span class="pd-verdict__marker">
+      <span class="lang-en">The verdict</span>
+      <span class="lang-zh">结语</span>
+    </span>
+    <blockquote class="pd-verdict__quote">
+      <span class="lang-en">A notebook earns its place by what it lets you forget. Studio remembers your folders, your chords, your last cursor — so the page in front of you stays empty until you fill it.</span>
+      <span class="lang-zh">笔记本是不是好用，看它让你能忘掉多少。Studio 记得你的目录、你的快捷键、你上次写到哪——所以你眼前的页面一直是空白的，直到你把它写满。</span>
+    </blockquote>
+    <span class="pd-verdict__cite">
+      <span class="pd-verdict__cite-rule" aria-hidden="true"></span>
+      <span class="lang-en">From the Skypad design notes, 2025</span>
+      <span class="lang-zh">Skypad 设计笔记 · 2025</span>
+    </span>
+  </div>
+</section>
+
+<!-- Closing CTA -->
+<section class="pd-close">
+  <div class="pd-close__inner">
+    <h2 class="pd-close__h2">
+      <span class="lang-en">Get started with Studio.</span>
+      <span class="lang-zh">开始使用 Studio。</span>
+    </h2>
+    <p class="pd-close__copy">
+      <span class="lang-en">Download the app, open a folder of Markdown files, and write. The 30-day trial unlocks every feature on this page; no credit card required to start.</span>
+      <span class="lang-zh">下载应用、打开一个装 Markdown 文件的文件夹，然后写。30 天试用解锁本页所有功能，不需要绑卡。</span>
+    </p>
+    <div class="pd-close__ctas">
+      <a class="ember-button" href="#">
+        <span class="lang-en">Download Studio</span>
+        <span class="lang-zh">下载 Studio</span>
+      </a>
+      <a class="ember-button ember-button--ghost" href="#">
+        <span class="lang-en">Read the docs</span>
+        <span class="lang-zh">阅读文档</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  const t = document.getElementById('lang-toggle');
+  if (t) t.addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-lang');
+    document.documentElement.setAttribute('data-lang', cur === 'zh' ? 'en' : 'zh');
+  });
+</script>
+
+</body>
+
+<!-- design-review:self-diff v1
+Skill: ember
+Page-type: product-detail
+Created: 2026-05-02
+
+Decisions (5):
+1. [hero-italic-on-h1-tag-not-subtitle] chose "Fraunces stacked h1 with italic accent on the .pd-hero__h1-tag (`keyboard-first`) and roman subtitle below" over "italic on subtitle phrase (anthropic pattern) or no italic anywhere in hero (apple pattern)". Because: ember's editorial signature is italic ON the headline, not on the body — the hero italic carries weight in Fraunces serif italic at the larger 0.62em-of-h1 size, where serif italic reads as a deliberate accent rather than a body emphasis. Anthropic uses Lora italic on subtitle because Lora is body type; ember Fraunces is display type, so the italic anchors at h1-tag level.
+2. [12px-card-radius-warm-cream-mocks] chose "12px (--radius-md) card radius for use-case cards + sibling cards, white card bg, warm-cream (#f5e5c8) SVG mock backgrounds with gold (#c49464) topbar accent" over "16px (anthropic) / 24px (apple) / 4px (sage) card radius and orange/blue/no-color topbar accents". Because: 12px is ember's signature card radius (consistent with feature-deep + landing + comparison + blog-index canonicals); the warm-cream SVG mock + gold topbar replace anthropic's #f0ede3-bg + orange topbar to keep brand-presence on every illustration. Reading the page side-by-side with anthropic, the card geometry is what flags the brand at first viewport.
+3. [sibling-compare-current-warm-cream-bg-not-just-border] chose "current sibling card with 2px gold border PLUS warm-cream (#fbeedd) bg + gold pill 'You are here'" over "border only (anthropic 2px orange) / filled blue header (apple) / hairline + numbered marker (sage planned)". Because: ember's editorial register reads strongest when chroma is a panel not a stripe — the warm-cream bg + gold border + gold pill triple-marks the current product so the reader's spatial reference doesn't drift across three near-identical white cards. The warm-cream bg is borrowed from the kbd-pill warm tint vocabulary (#fbeedd), keeping the chrome consistent with feature-deep cards.
+4. [chocolate-verdict-band-replaces-cream-close] chose "TWO-section closing — chocolate (#312520) verdict band with Fraunces italic 40px pull-quote + cite (NO CTA inside) + cream CTA section AFTER with download + ghost docs button" over "single cream-subtle closing (anthropic) / black band closing with white CTA inside (apple) / chocolate band with CTA inside (REJECTED — would retroactively recolour every honest word above as marketing)". Because: ember's chocolate band is the reserved editorial closing established on landing.html / comparison.html / feature-deep.html — it must stay editorial, NOT carry a CTA. Apple's black band carries a CTA because apple's voice is product-pitch leaning; ember's chocolate must stay quiet. The cream CTA section after handles the action, completing the page.
+5. [italic-budget-3-hero-honest-verdict] chose "italic moment #1 = hero h1 tag accent (`keyboard-first`); #2 = honest h3 em (`not`); #3 = verdict pull-quote on chocolate band" over "italic on premise quote (feature-deep pattern, REJECTED here because product-detail has no premise section)". Because: ember/feature-deep spent italic on premise pull-quote + hero accent + verdict. ember/product-detail has no premise section (the page is evidence-first with hero / use cases / spec table); italic moment #2 reroutes to honest-limits h3 `<em>not</em>`, keeping the §J 3-budget exact. Stat numerals + use-case titles + spec labels + sibling cards all ROMAN. SVG `<text>` all explicitly `font-style="normal"`.
+
+Known trade-offs:
+- Sibling-compare current card has 2px gold border AND a warm-cream bg, where other two cards have 1px gray border + white bg. This visually narrows the inner content area by 1px (border-width drift); compensated via `padding: calc(var(--space-6) - 1px)` so inner content area is identical across all three cards. Alternative considered: raise the other two cards to 2px gray borders to equalize border-width — rejected because it would visually equalize three cards when only one is current, defeating the anchor-the-current purpose.
+- At-a-glance bar uses Fraunces (display serif) for the value column rather than Inter (body sans). Chose Fraunces because the data nature of the strip (dates / version numbers / dollar amounts / day counts) reads with editorial weight in Fraunces 19px / weight 500. Inter values would read more clinical but lose the Fraunces signature on the page's first 200px. Stat numerals on feature-deep are Fraunces 72px ROMAN — the same pattern at smaller scale.
+- Use-case kicker carries a small bonus fact `· 80ms cold start` / `· 18ms backlink` / `· diff-friendly` because the kicker is the main visual line above the title (replaces feature-deep's `chord-card__chord` keystroke row which doesn't fit the use-case metaphor). Trade-off: kicker is slightly wider than a pure label, but the bonus number adds quantitative ballast that the use-case card body would otherwise have to repeat. Anthropic's kicker is just a category label; ember's earns a bit more density to compensate for not having a chord-row.
+- SVG topbar accent across all three use-case cards is the SAME 2px gold line (no per-card variation) — chose visual rhythm consistency over per-card differentiation. The differentiation is carried by the SVG content (file area vs file tree vs changelog list), not by the topbar color.
+
+Multi-critic fixes applied before shipping (2026-05-02):
+1. copy ERROR §1.22: zh use-case lead `下面"诚实的局限"那一节` (ASCII straight double quotes) → `下面“诚实的局限”那一节` (U+201C / U+201D Chinese curly quotes). The only blocking issue.
+2. composition info: `.pd-honest__body` got `max-width: 720px` so the 3-honest-cases concatenated paragraph doesn't stretch to full wide-container line-length at 1440px viewport.
+3. composition info (acknowledged, not fixed): sibling-compare equal `repeat(3, 1fr)` grid relies on chromatic decoration (2px gold + warm-cream bg + "You are here" pill) to anchor the current card. Decision 3 explicitly defends "chroma is a panel not a stripe"; center placement + triple-mark redeems it. §I追加 heuristic warns but the design intent is documented.
+4. composition info (acknowledged, not fixed): honest → sibling → pricing → verdict rhythm reads as cream → cream → cream → chocolate. Internal-band variation (honest cream-subtle inset + sibling-current warm-cream bg) supplies enough secondary chrome that the reader doesn't read "flat dense run." Resolved by chocolate band.
+5. illustration info (acknowledged, not fixed): use-case mock 1 (Daily writing) is comparatively spartan vs mocks 2/3 — intentional minimalism for the writing-scene metaphor (ruling lines = prose). No filename added; the kicker carries the metadata.
+6. copy info (acknowledged, not fixed): use-case 1 namedrop "Used daily by writers at the Atlantic..." — "Used daily" is the only soft-marketing verb on an evidence-heavy page; left as-is because The Atlantic + arXiv are concrete enough to carry the weight. Future namedrop edits should drop the verb if a second "Used by" line appears anywhere on the page.
+
+Final weighted score: 92×0.25 + 93×0.25 + 94×0.20 + 96×0.30 = **93.85 / 100** (composition / copy / illustration / brand). Above the §J 90 floor with comfortable margin.
+
+/design-review:self-diff -->
+
+</html>

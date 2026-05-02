@@ -21,7 +21,7 @@ quality is anchored at the style's own best.
 | Landing | `landing.html` + `landing.md` | ✅ v1 · 2026-04-21 |
 | Docs home | `docs-home.html` + `docs-home.md` | ✅ v1 · 2026-04-21 |
 | Blog index | `blog-index.html` + `blog-index.md` | ✅ v1 · 2026-04-30 |
-| Product detail | `product-detail.html` + `product-detail.md` | — |
+| Product detail | `product-detail.html` + `product-detail.md` | ✅ v1 · 2026-05-02 |
 | Team | `team.html` + `team.md` | — |
 | Comparison | `comparison.html` + `comparison.md` | ✅ v1 · 2026-04-27 |
 | FAQ | `faq.html` + `faq.md` | — |
