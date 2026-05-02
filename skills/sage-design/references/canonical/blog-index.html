@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad Reading Shelf — letters from the quiet plate</title>
+<meta name="description" content="The Skypad Reading Shelf — engineering essays, reading notes, and editorial pieces from the team behind Skypad. Canonical sage-design blog-index page for the sky-skills harness — quiet library plate, numbered section markers, sage hairline cadence, no marketing modals.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/sage.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--sage-divider);
+    color: var(--sage-text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .lang-toggle:hover { background: var(--sage-bg-subtle); }
+
+  /* §H zh stack: Instrument Serif → Noto Serif SC, Inter → Noto Sans SC */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .featured__h2,
+  html[data-lang="zh"] .post-card__title,
+  html[data-lang="zh"] .footer-sub__h3 {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-weight: 500;
+  }
+  html[data-lang="zh"] .editor-note blockquote {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal;
+  }
+
+  /* Masthead — sage signature numbered marker, no rule strip (ember has gold rule, sage has none) */
+  .masthead { padding: var(--space-9) 0 var(--space-8); }
+  .masthead__marker {
+    font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+    color: var(--sage-text-secondary);
+    text-transform: uppercase; letter-spacing: 0.18em;
+    margin: 0 0 var(--space-5);
+  }
+  html[data-lang="zh"] .masthead__marker { letter-spacing: 0.04em; text-transform: none; }
+  .masthead__h1 {
+    font-family: var(--font-heading); font-size: clamp(64px, 8vw, 96px);
+    font-weight: 400; letter-spacing: -0.022em; line-height: 1.05;
+    color: var(--sage-text); margin: 0 0 var(--space-5);
+  }
+  .masthead__h1 em { font-style: italic; color: var(--sage-text); }
+  .masthead__sub {
+    font-family: var(--font-body); font-size: 19px; line-height: 1.6;
+    color: var(--sage-text); max-width: 720px; margin: 0;
+  }
+
+  /* Featured post — white card on sage-bg, no band chrome (sage signature: floating plate) */
+  .featured-band {
+    padding: var(--space-9) 0;
+  }
+  .featured__marker {
+    font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+    color: var(--sage-text-secondary);
+    text-transform: uppercase; letter-spacing: 0.18em;
+    margin: 0 0 var(--space-3);
+  }
+  html[data-lang="zh"] .featured__marker { letter-spacing: 0.04em; text-transform: none; }
+  .featured__accent-rule {
+    width: 32px; height: 1px; background: var(--sage-sage);
+    margin: 0 0 var(--space-5);
+  }
+  .featured {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: var(--space-7);
+    align-items: center;
+    background: var(--sage-card);
+    border: 1px solid var(--sage-divider);
+    border-radius: 4px;
+    padding: var(--space-7);
+  }
+  .featured__art {
+    margin: 0;
+    display: flex; flex-direction: column; gap: var(--space-3);
+  }
+  .featured__art > svg {
+    background: var(--sage-bg);
+    border: 1px solid var(--sage-divider);
+    border-radius: 4px;
+    width: 100%; height: auto; display: block;
+    aspect-ratio: 5 / 4;
+  }
+  .featured__art figcaption {
+    font-family: var(--font-body); font-size: 12.5px; font-weight: 400;
+    color: var(--sage-text-secondary); letter-spacing: 0.01em;
+    margin: 0; padding: 0 var(--space-2);
+  }
+  .featured__body { display: flex; flex-direction: column; gap: var(--space-4); }
+  .featured__h2 {
+    font-family: var(--font-heading); font-size: clamp(36px, 3.6vw, 44px);
+    font-weight: 400; letter-spacing: -0.014em; line-height: 1.18;
+    color: var(--sage-text); margin: 0;
+  }
+  .featured__lede {
+    font-family: var(--font-body); font-size: 17.5px; line-height: 1.65;
+    color: var(--sage-text); margin: 0; max-width: 640px;
+  }
+  .featured__lede em { font-style: italic; color: var(--sage-text); }
+  .featured__byline {
+    font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+    color: var(--sage-text-secondary);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin: 0;
+  }
+  html[data-lang="zh"] .featured__byline { letter-spacing: 0.04em; text-transform: none; }
+  .featured__link {
+    font-family: var(--font-body); font-size: 15px; font-weight: 500;
+    color: var(--sage-sage-dark); text-decoration: none; margin: 0;
+    border-bottom: 1px solid var(--sage-sage-dark); padding-bottom: 2px;
+    align-self: flex-start;
+  }
+  .featured__link:hover { color: var(--sage-ink); border-color: var(--sage-ink); }
+
+  /* Tag rail — section marker above + 4px squared pills */
+  .tag-rail-section { padding-top: var(--space-7); }
+  .tag-rail__marker {
+    font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+    color: var(--sage-text-secondary);
+    text-transform: uppercase; letter-spacing: 0.18em;
+    margin: 0 0 var(--space-4);
+  }
+  html[data-lang="zh"] .tag-rail__marker { letter-spacing: 0.04em; text-transform: none; }
+  .tag-rail {
+    display: flex; flex-wrap: wrap; gap: var(--space-2);
+    padding: 0 0 var(--space-7);
+  }
+  .tag-pill {
+    font-family: var(--font-mono); font-size: 12.5px; font-weight: 500;
+    color: var(--sage-text); background: var(--sage-bg-subtle);
+    border: 1px solid var(--sage-divider); border-radius: 4px;
+    padding: 7px 14px; text-decoration: none;
+    transition: background var(--duration-sm) var(--ease-sage),
+                color var(--duration-sm) var(--ease-sage);
+  }
+  .tag-pill:hover { background: var(--sage-divider); }
+  .tag-pill--active {
+    background: var(--sage-ink); color: #ffffff; font-weight: 600;
+    border-color: var(--sage-ink);
+  }
+  .tag-pill--active:hover { background: #2b2e42; color: #ffffff; }
+
+  /* Post grid — section marker above + 2-col 6-card grid + 4px radius */
+  .post-grid-section { padding-bottom: var(--space-9); }
+  .post-grid__marker {
+    font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+    color: var(--sage-text-secondary);
+    text-transform: uppercase; letter-spacing: 0.18em;
+    margin: 0 0 var(--space-5);
+  }
+  html[data-lang="zh"] .post-grid__marker { letter-spacing: 0.04em; text-transform: none; }
+  .post-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-8) var(--space-7);
+  }
+  .post-card { display: flex; flex-direction: column; gap: var(--space-3); }
+  .post-card__thumb {
+    background: var(--sage-card);
+    border: 1px solid var(--sage-divider);
+    border-radius: 4px;
+    overflow: hidden;
+    aspect-ratio: 12 / 7;
+    margin-bottom: var(--space-3);
+  }
+  .post-card__thumb svg { width: 100%; height: 100%; display: block; }
+  .post-card__kicker {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    color: var(--sage-sage-dark); text-transform: uppercase; letter-spacing: 0.14em;
+    margin: 0;
+  }
+  html[data-lang="zh"] .post-card__kicker { letter-spacing: 0.04em; text-transform: none; }
+  .post-card__title {
+    font-family: var(--font-heading); font-size: 23px; font-weight: 400;
+    line-height: 1.28; letter-spacing: -0.005em;
+    color: var(--sage-text); margin: 0;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .post-card__lede {
+    font-family: var(--font-body); font-size: 15px; line-height: 1.6;
+    color: var(--sage-text); margin: 0;
+  }
+  .post-card__link {
+    font-family: var(--font-body); font-size: 14px; font-weight: 500;
+    color: var(--sage-sage-dark); text-decoration: none;
+    border-bottom: 1px solid var(--sage-sage-dark); padding-bottom: 2px;
+    align-self: flex-start; margin-top: var(--space-2);
+  }
+  .post-card__link:hover { color: var(--sage-ink); border-color: var(--sage-ink); }
+
+  /* Editor's note · sage Instrument Serif italic blockquote with sage hairline cite */
+  .editor-note {
+    background: var(--sage-bg-subtle);
+    padding: var(--space-9) 0;
+  }
+  .editor-note__marker {
+    font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+    color: var(--sage-text-secondary);
+    text-transform: uppercase; letter-spacing: 0.18em;
+    margin: 0 0 var(--space-5);
+  }
+  html[data-lang="zh"] .editor-note__marker { letter-spacing: 0.04em; text-transform: none; }
+  .editor-note__inner { max-width: 800px; margin: 0 auto; padding: 0 var(--space-5); }
+  .editor-note blockquote {
+    font-family: var(--font-heading); font-style: italic;
+    font-size: clamp(28px, 2.4vw, 32px); line-height: 1.45;
+    color: var(--sage-text); margin: 0 0 var(--space-5);
+    border-left: 2px solid var(--sage-sage);
+    padding-left: var(--space-5);
+  }
+  .editor-note cite {
+    display: flex; gap: var(--space-3); align-items: center;
+    font-style: normal; font-family: var(--font-body);
+    font-size: 13.5px; font-weight: 500;
+    color: var(--sage-text-secondary);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding-left: var(--space-5);
+  }
+  html[data-lang="zh"] .editor-note cite { letter-spacing: 0.04em; text-transform: none; }
+  .editor-note cite::before {
+    content: ""; display: inline-block; width: 18px; height: 1.5px;
+    background: var(--sage-sage);
+  }
+
+  /* Pagination — sage-divider hairlines top+bottom + JetBrains Mono labels */
+  .pagination {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--sage-divider);
+    border-bottom: 1px solid var(--sage-divider);
+    margin-top: var(--space-7);
+    padding: var(--space-6) 0;
+  }
+  .pagination a {
+    font-family: var(--font-mono); font-size: 13.5px; font-weight: 500;
+    color: var(--sage-text-secondary); text-decoration: none;
+    letter-spacing: 0.06em;
+  }
+  .pagination a:hover { color: var(--sage-sage-dark); }
+  .pagination__newer { text-align: right; }
+
+  /* Footer subscribe — cream-subtle bg, NO deep-ink band on this page-type */
+  .footer-sub {
+    background: var(--sage-bg-subtle);
+    border-top: 1px solid var(--sage-divider);
+    padding: var(--space-9) 0;
+    margin-top: var(--space-9);
+  }
+  .footer-sub__inner { max-width: 720px; margin: 0 auto; padding: 0 var(--space-5); }
+  .footer-sub__marker {
+    font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+    color: var(--sage-text-secondary);
+    text-transform: uppercase; letter-spacing: 0.18em;
+    margin: 0 0 var(--space-4);
+  }
+  html[data-lang="zh"] .footer-sub__marker { letter-spacing: 0.04em; text-transform: none; }
+  .footer-sub__h3 {
+    font-family: var(--font-heading); font-size: 28px; font-weight: 400;
+    letter-spacing: -0.01em; line-height: 1.2;
+    color: var(--sage-text); margin: 0 0 var(--space-3);
+  }
+  .footer-sub__copy {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.65;
+    color: var(--sage-text); margin: 0 0 var(--space-5); max-width: 600px;
+  }
+  .footer-sub__copy a {
+    color: var(--sage-sage-dark); text-decoration: none;
+    border-bottom: 1px solid var(--sage-sage-dark);
+  }
+  .footer-sub__copy a:hover { color: var(--sage-ink); border-color: var(--sage-ink); }
+  .footer-sub__form {
+    display: flex; gap: var(--space-3); flex-wrap: wrap;
+    margin-bottom: var(--space-3);
+  }
+  .footer-sub__input {
+    flex: 1 1 280px; min-width: 0;
+    font-family: var(--font-body); font-size: 15px;
+    background: var(--sage-card); color: var(--sage-text);
+    border: 1px solid var(--sage-divider);
+    border-radius: 4px;
+    padding: 12px 18px;
+  }
+  .footer-sub__input::placeholder { color: var(--sage-text-secondary); }
+  .footer-sub__note {
+    font-family: var(--font-body); font-size: 13px;
+    color: var(--sage-text-secondary); margin: 0;
+  }
+
+  /* Higher-specificity nav cascade fix — already in sage.css; redundant safety */
+  .sage-nav a.sage-button { color: #ffffff; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .featured { grid-template-columns: 1fr; padding: var(--space-5); }
+    .post-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="sage-nav"><div class="sage-nav-inner">
+  <a href="#" style="font-family:var(--font-heading); font-weight:400; font-size:22px; text-decoration:none; color:var(--sage-text);">Skypad</a>
+  <div>
+    <a href="#"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="#"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="#" style="color:var(--sage-text); border-bottom:1px solid var(--sage-sage); padding-bottom:2px;"><span class="lang-en">Reading Shelf</span><span class="lang-zh">书架</span></a>
+    <a href="#"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+    <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Toggle language"><span class="lang-en">中文</span><span class="lang-zh">EN</span></button>
+    <a class="sage-button" href="#"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a>
+  </div>
+</div></nav>
+
+<!-- Masthead -->
+<header class="sage-section">
+  <div class="sage-container">
+    <div class="masthead">
+      <p class="masthead__marker">
+        <span class="lang-en">01 · The Reading Shelf · 2024–2026 · 47 letters</span>
+        <span class="lang-zh">01 · 书架 · 2024–2026 · 共 47 篇</span>
+      </p>
+      <h1 class="masthead__h1">
+        <span class="lang-en">Notes from<br>the <em>quiet</em> shelf.</span>
+        <span class="lang-zh">来自<em>静谧</em>书架<br>的笔记。</span>
+      </h1>
+      <p class="masthead__sub">
+        <span class="lang-en">Engineering essays, reading notes, and editorial pieces from the team behind Skypad. One letter per essay — written from a small library of borrowed plates, calmly composed in negative space.</span>
+        <span class="lang-zh">来自 Skypad 团队的工程随笔、读书笔记、编辑短文。每篇一封信，写自我们各自的小书架——借自他人之书，于留白中静静编排。</span>
+      </p>
+    </div>
+  </div>
+</header>
+
+<!-- Featured post -->
+<section class="featured-band">
+  <div class="sage-container">
+    <p class="featured__marker">
+      <span class="lang-en">02 · Featured letter · 12 min read</span>
+      <span class="lang-zh">02 · 编辑推荐 · 12 分钟阅读</span>
+    </p>
+    <div class="featured__accent-rule" aria-hidden="true"></div>
+    <article class="featured">
+      <figure class="featured__art">
+        <svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A library reading plate: open notebook, fountain pen, ceramic cup with sage rim, soft window light from above">
+          <!-- backdrop · sage page -->
+          <rect width="500" height="400" fill="#f8faec"/>
+          <!-- soft window glow -->
+          <rect x="0" y="0" width="500" height="220" fill="#eef2de"/>
+          <!-- desk surface -->
+          <rect x="0" y="220" width="500" height="180" fill="#e5e8da"/>
+          <line x1="0" y1="220" x2="500" y2="220" stroke="#97B077" stroke-width="1"/>
+          <!-- open notebook (left page) -->
+          <rect x="60" y="180" width="180" height="140" fill="#ffffff" stroke="#6d6f82" stroke-width="1.2" rx="2"/>
+          <!-- right page -->
+          <rect x="240" y="180" width="180" height="140" fill="#eef2de" stroke="#6d6f82" stroke-width="1.2" rx="2"/>
+          <!-- spine -->
+          <line x1="240" y1="180" x2="240" y2="320" stroke="#6d6f82" stroke-width="1.5"/>
+          <!-- ruled lines on left page -->
+          <line x1="78" y1="208" x2="222" y2="208" stroke="#c9d1b3" stroke-width="0.8"/>
+          <line x1="78" y1="226" x2="222" y2="226" stroke="#c9d1b3" stroke-width="0.8"/>
+          <line x1="78" y1="244" x2="222" y2="244" stroke="#c9d1b3" stroke-width="0.8"/>
+          <line x1="78" y1="262" x2="200" y2="262" stroke="#c9d1b3" stroke-width="0.8"/>
+          <line x1="78" y1="280" x2="222" y2="280" stroke="#c9d1b3" stroke-width="0.8"/>
+          <line x1="78" y1="298" x2="180" y2="298" stroke="#c9d1b3" stroke-width="0.8"/>
+          <!-- handwritten lines on right page · in deep-ink -->
+          <path d="M 258 208 Q 280 204 304 208 T 360 208 T 410 208" fill="none" stroke="#393C54" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M 258 230 Q 282 226 308 230 T 380 230" fill="none" stroke="#393C54" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M 258 252 Q 285 248 312 252 T 396 252 T 414 252" fill="none" stroke="#393C54" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M 258 274 Q 280 270 304 274 T 348 274" fill="none" stroke="#393C54" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M 258 296 Q 286 292 314 296 T 392 296" fill="none" stroke="#393C54" stroke-width="1.4" stroke-linecap="round"/>
+          <!-- ceramic cup (cream with sage rim) -->
+          <ellipse cx="430" cy="310" rx="40" ry="14" fill="#393C54" opacity="0.06"/>
+          <path d="M 400 270 L 400 305 Q 400 318 415 318 L 445 318 Q 460 318 460 305 L 460 270 Z" fill="#eef2de" stroke="#6d6f82" stroke-width="1.2"/>
+          <ellipse cx="430" cy="270" rx="30" ry="6" fill="#97B077"/>
+          <ellipse cx="430" cy="270" rx="22" ry="3" fill="#7a9561"/>
+          <!-- handle -->
+          <path d="M 460 282 Q 478 282 478 296 Q 478 308 460 308" fill="none" stroke="#6d6f82" stroke-width="1.2"/>
+          <!-- steam wisps -->
+          <path d="M 420 250 Q 416 244 422 238 Q 428 232 424 226" fill="none" stroke="#6d6f82" stroke-width="1.3" stroke-linecap="round" opacity="0.7"/>
+          <path d="M 432 252 Q 428 244 434 236 Q 440 228 436 220" fill="none" stroke="#6d6f82" stroke-width="1.3" stroke-linecap="round" opacity="0.55"/>
+          <!-- fountain pen -->
+          <line x1="120" y1="334" x2="220" y2="320" stroke="#2a2c40" stroke-width="3" stroke-linecap="round"/>
+          <polygon points="220,318 232,316 224,328" fill="#97B077"/>
+          <!-- corner mono label -->
+          <text x="32" y="34" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" letter-spacing="0.18em">MORNING · APR 22</text>
+        </svg>
+        <figcaption>
+          <span class="lang-en">A notebook, a fountain pen, and a ceramic cup with sage rim in morning library light — illustration for the featured letter.</span>
+          <span class="lang-zh">一本笔记本、一支钢笔、一只带鼠尾草绿釉边的瓷杯，沐在图书馆的晨光里——配本期编辑推荐文章的插图。</span>
+        </figcaption>
+      </figure>
+      <div class="featured__body">
+        <h2 class="featured__h2">
+          <span class="lang-en">Why we removed the AI assistant we shipped six months ago.</span>
+          <span class="lang-zh">为什么我们撤掉了半年前刚上线的 AI 助手。</span>
+        </h2>
+        <p class="featured__lede">
+          <span class="lang-en">It worked. Customers asked for it. We shipped it well. Then we read three months of usage logs side by side with the writing the assistant produced, and decided we'd <em>got the question wrong</em>. This is what we found and how we walked it back.</span>
+          <span class="lang-zh">它能用。客户在要。我们做得也不差。然后我们把三个月的使用数据和它产出的文字摆在一起读了一遍，发现我们一开始<em>问错了问题</em>。这是我们看到了什么，以及我们怎么把它撤回来。</span>
+        </p>
+        <p class="featured__byline">
+          <span class="lang-en">By the editors · Apr 22, 2026</span>
+          <span class="lang-zh">编辑部 · 2026-04-22</span>
+        </p>
+        <p style="margin:0;">
+          <a class="featured__link" href="#"><span class="lang-en">Read the letter →</span><span class="lang-zh">阅读全文 →</span></a>
+        </p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- Tag rail + post grid -->
+<section class="sage-section tag-rail-section">
+  <div class="sage-container">
+    <p class="tag-rail__marker">
+      <span class="lang-en">03 · Filter by</span>
+      <span class="lang-zh">03 · 按主题过滤</span>
+    </p>
+    <nav class="tag-rail" aria-label="Filter by tag">
+      <a class="tag-pill tag-pill--active" href="#"><span class="lang-en">All</span><span class="lang-zh">全部</span></a>
+      <a class="tag-pill" href="#"><span class="lang-en">Engineering</span><span class="lang-zh">工程</span></a>
+      <a class="tag-pill" href="#"><span class="lang-en">Essays</span><span class="lang-zh">随笔</span></a>
+      <a class="tag-pill" href="#"><span class="lang-en">Notes</span><span class="lang-zh">短记</span></a>
+      <a class="tag-pill" href="#"><span class="lang-en">Changelog</span><span class="lang-zh">变更</span></a>
+      <a class="tag-pill" href="#"><span class="lang-en">Reading list</span><span class="lang-zh">书单</span></a>
+    </nav>
+  </div>
+</section>
+
+<section class="sage-section post-grid-section">
+  <div class="sage-container">
+    <p class="post-grid__marker">
+      <span class="lang-en">04 · All pieces</span>
+      <span class="lang-zh">04 · 全部文章</span>
+    </p>
+
+    <div class="post-grid">
+      <!-- Post 1 -->
+      <article class="post-card">
+        <div class="post-card__thumb">
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A bookshelf in cross-section, three rows of books in monochromatic sage tones, one sage-green spine as accent">
+            <rect width="480" height="280" fill="#eef2de"/>
+            <line x1="0" y1="93" x2="480" y2="93" stroke="#c9d1b3" stroke-width="1"/>
+            <line x1="0" y1="187" x2="480" y2="187" stroke="#c9d1b3" stroke-width="1"/>
+            <!-- row 1 -->
+            <rect x="40" y="32"  width="22" height="58" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="66" y="38"  width="18" height="52" fill="#c9d1b3"/>
+            <rect x="88" y="34"  width="26" height="56" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="118" y="40" width="22" height="50" fill="#6d6f82"/>
+            <rect x="144" y="32" width="20" height="58" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="168" y="36" width="28" height="54" fill="#97B077"/>
+            <rect x="200" y="42" width="22" height="48" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="226" y="34" width="24" height="56" fill="#c9d1b3"/>
+            <rect x="254" y="38" width="20" height="52" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="278" y="32" width="26" height="58" fill="#6d6f82"/>
+            <rect x="308" y="40" width="22" height="50" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="334" y="32" width="20" height="58" fill="#c9d1b3"/>
+            <rect x="358" y="38" width="26" height="52" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="388" y="34" width="22" height="56" fill="#7a9561"/>
+            <rect x="414" y="40" width="20" height="50" fill="#f8faec" stroke="#c9d1b3"/>
+            <!-- row 2 -->
+            <rect x="40" y="124" width="20" height="56" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="64" y="130" width="26" height="50" fill="#c9d1b3"/>
+            <rect x="94" y="124" width="22" height="56" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="120" y="128" width="24" height="52" fill="#6d6f82"/>
+            <rect x="148" y="130" width="20" height="50" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="172" y="124" width="22" height="56" fill="#c9d1b3"/>
+            <rect x="198" y="128" width="26" height="52" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="228" y="124" width="20" height="56" fill="#6d6f82"/>
+            <rect x="252" y="130" width="24" height="50" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="280" y="126" width="22" height="54" fill="#c9d1b3"/>
+            <rect x="306" y="130" width="20" height="50" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="330" y="124" width="26" height="56" fill="#7a9561"/>
+            <rect x="360" y="130" width="22" height="50" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="386" y="124" width="20" height="56" fill="#c9d1b3"/>
+            <rect x="410" y="128" width="24" height="52" fill="#f8faec" stroke="#c9d1b3"/>
+            <!-- row 3 -->
+            <rect x="40" y="218" width="22" height="54" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="66" y="222" width="20" height="50" fill="#c9d1b3"/>
+            <rect x="90" y="218" width="26" height="54" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="120" y="220" width="22" height="52" fill="#6d6f82"/>
+            <rect x="146" y="218" width="24" height="54" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="174" y="222" width="20" height="50" fill="#c9d1b3"/>
+            <rect x="198" y="218" width="22" height="54" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="224" y="220" width="26" height="52" fill="#6d6f82"/>
+            <rect x="254" y="222" width="22" height="50" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="280" y="218" width="20" height="54" fill="#c9d1b3"/>
+            <rect x="304" y="222" width="24" height="50" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="332" y="218" width="22" height="54" fill="#7a9561"/>
+            <rect x="358" y="222" width="26" height="50" fill="#f8faec" stroke="#c9d1b3"/>
+            <rect x="388" y="220" width="20" height="52" fill="#c9d1b3"/>
+            <rect x="412" y="222" width="22" height="50" fill="#f8faec" stroke="#c9d1b3"/>
+            <!-- corner mono label -->
+            <text x="24" y="22" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" letter-spacing="0.18em">READING SHELF · Q2</text>
+          </svg>
+        </div>
+        <p class="post-card__kicker">
+          <span class="lang-en">Reading list · Apr 18, 2026 · 8 min</span>
+          <span class="lang-zh">书单 · 2026-04-18 · 8 分钟</span>
+        </p>
+        <h3 class="post-card__title">
+          <span class="lang-en">Five books on writing tools that aged better than the tools.</span>
+          <span class="lang-zh">五本关于写作工具的书，写得比工具本身耐久。</span>
+        </h3>
+        <p class="post-card__lede">
+          <span class="lang-en">Word processors come and go; the books we read about writing keep teaching. A short reading list of out-of-print volumes still in our library.</span>
+          <span class="lang-zh">文字处理软件来了又走，关于写作的书还在教我们东西。一份小书单，几本已绝版的旧书还在我们书架上。</span>
+        </p>
+        <a class="post-card__link" href="#"><span class="lang-en">Continue →</span><span class="lang-zh">继续阅读 →</span></a>
+      </article>
+
+      <!-- Post 2 -->
+      <article class="post-card">
+        <div class="post-card__thumb">
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A folder hierarchy on screen: vault root with 2026/04/ folder open, three Markdown files visible inside, current month highlighted">
+            <rect width="480" height="280" fill="#eef2de"/>
+            <!-- window chrome -->
+            <rect x="40" y="36" width="400" height="220" fill="#ffffff" stroke="#c9d1b3" stroke-width="1" rx="4"/>
+            <line x1="40" y1="64" x2="440" y2="64" stroke="#c9d1b3" stroke-width="1"/>
+            <text x="56" y="56" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82">vault/</text>
+            <!-- folder tree rows -->
+            <text x="60" y="92"  font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" fill="#393C54">▸ 2024/</text>
+            <text x="60" y="116" font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" fill="#393C54">▸ 2025/</text>
+            <!-- 2026/ row · highlighted -->
+            <rect x="48" y="124" width="120" height="22" fill="#97B077" rx="2"/>
+            <text x="60" y="140" font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" fill="#393C54" font-weight="600">▾ 2026/</text>
+            <!-- 04/ folder -->
+            <text x="80" y="164" font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" fill="#393C54">▾ 04/</text>
+            <text x="100" y="186" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12.5" fill="#393C54">22-letter.md</text>
+            <text x="100" y="206" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12.5" fill="#393C54">26-list.md</text>
+            <text x="100" y="226" font-family="JetBrains Mono, ui-monospace, monospace" font-size="12.5" fill="#393C54">_index.md</text>
+            <!-- corner mono label -->
+            <text x="24" y="22" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" letter-spacing="0.18em">VAULT · ON DISK</text>
+          </svg>
+        </div>
+        <p class="post-card__kicker">
+          <span class="lang-en">Essays · Apr 14, 2026 · 6 min</span>
+          <span class="lang-zh">随笔 · 2026-04-14 · 6 分钟</span>
+        </p>
+        <h3 class="post-card__title">
+          <span class="lang-en">Why our vault is by month, not by tag.</span>
+          <span class="lang-zh">为什么我们的笔记仓按月归档，而不是按标签。</span>
+        </h3>
+        <p class="post-card__lede">
+          <span class="lang-en">Tags are good for retrieval, bad for memory. Months are good for memory, bad for retrieval. We chose memory and explain why we'd choose it again.</span>
+          <span class="lang-zh">标签便于检索、不利于记忆。月份便于记忆、不利于检索。我们选了"记忆"，并解释为什么再来一次还会这么选。</span>
+        </p>
+        <a class="post-card__link" href="#"><span class="lang-en">Continue →</span><span class="lang-zh">继续阅读 →</span></a>
+      </article>
+
+      <!-- Post 3 -->
+      <article class="post-card">
+        <div class="post-card__thumb">
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A keyboard chord highlighted: ⌘ ⇧ K keys lit in sage-green, surrounding QWERTY keys in muted sage-monochromatic tones">
+            <rect width="480" height="280" fill="#eef2de"/>
+            <!-- key rows · 5 rows × 11 keys, 4px radius -->
+            <!-- helper · plain key -->
+            <!-- row 1 -->
+            <rect x="40"  y="60"  width="32" height="32" fill="#f8faec" stroke="#c9d1b3" rx="2"/>
+            <text x="56"  y="81"  font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" text-anchor="middle">Q</text>
+            <rect x="76"  y="60"  width="32" height="32" fill="#f8faec" stroke="#c9d1b3" rx="2"/>
+            <text x="92"  y="81"  font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" text-anchor="middle">W</text>
+            <rect x="112" y="60"  width="32" height="32" fill="#f8faec" stroke="#c9d1b3" rx="2"/>
+            <text x="128" y="81"  font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" text-anchor="middle">E</text>
+            <rect x="148" y="60"  width="32" height="32" fill="#f8faec" stroke="#c9d1b3" rx="2"/>
+            <text x="164" y="81"  font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" text-anchor="middle">R</text>
+            <rect x="184" y="60"  width="32" height="32" fill="#f8faec" stroke="#c9d1b3" rx="2"/>
+            <text x="200" y="81"  font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" text-anchor="middle">T</text>
+            <!-- K key · highlighted sage-green -->
+            <rect x="220" y="60"  width="32" height="32" fill="#97B077" stroke="#7a9561" rx="2"/>
+            <text x="236" y="81"  font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="700">K</text>
+            <!-- row 2 -->
+            <rect x="56"  y="100" width="32" height="32" fill="#f8faec" stroke="#c9d1b3" rx="2"/>
+            <text x="72"  y="121" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" text-anchor="middle">A</text>
+            <rect x="92"  y="100" width="32" height="32" fill="#f8faec" stroke="#c9d1b3" rx="2"/>
+            <text x="108" y="121" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" text-anchor="middle">S</text>
+            <rect x="128" y="100" width="32" height="32" fill="#f8faec" stroke="#c9d1b3" rx="2"/>
+            <text x="144" y="121" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" text-anchor="middle">D</text>
+            <rect x="164" y="100" width="32" height="32" fill="#f8faec" stroke="#c9d1b3" rx="2"/>
+            <text x="180" y="121" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" text-anchor="middle">F</text>
+            <rect x="200" y="100" width="32" height="32" fill="#f8faec" stroke="#c9d1b3" rx="2"/>
+            <text x="216" y="121" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" text-anchor="middle">G</text>
+            <!-- ⌘ key · highlighted sage-green -->
+            <rect x="80"  y="170" width="50" height="32" fill="#97B077" stroke="#7a9561" rx="2"/>
+            <text x="105" y="191" font-family="JetBrains Mono, ui-monospace, monospace" font-size="14" fill="#ffffff" text-anchor="middle" font-weight="700">⌘</text>
+            <!-- ⇧ key · highlighted sage-green -->
+            <rect x="134" y="170" width="50" height="32" fill="#97B077" stroke="#7a9561" rx="2"/>
+            <text x="159" y="191" font-family="JetBrains Mono, ui-monospace, monospace" font-size="14" fill="#ffffff" text-anchor="middle" font-weight="700">⇧</text>
+            <!-- Z C neutral -->
+            <rect x="188" y="170" width="32" height="32" fill="#f8faec" stroke="#c9d1b3" rx="2"/>
+            <text x="204" y="191" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" text-anchor="middle">Z</text>
+            <rect x="224" y="170" width="32" height="32" fill="#f8faec" stroke="#c9d1b3" rx="2"/>
+            <text x="240" y="191" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" text-anchor="middle">C</text>
+            <!-- chord label -->
+            <text x="280" y="135" font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" fill="#393C54" font-weight="600">⌘ ⇧ K</text>
+            <text x="280" y="155" font-family="Inter, sans-serif" font-size="12" fill="#393C54">commit hunk</text>
+            <!-- corner mono label -->
+            <text x="24" y="22" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" letter-spacing="0.18em">CHORD · APR 09</text>
+          </svg>
+        </div>
+        <p class="post-card__kicker">
+          <span class="lang-en">Engineering · Apr 09, 2026 · 4 min</span>
+          <span class="lang-zh">工程 · 2026-04-09 · 4 分钟</span>
+        </p>
+        <h3 class="post-card__title">
+          <span class="lang-en">A short defence of three-key chords.</span>
+          <span class="lang-zh">为三键和弦短作一辩。</span>
+        </h3>
+        <p class="post-card__lede">
+          <span class="lang-en">Two-key shortcuts run out fast. Single-key launchers steal whole letters. Three-key chords feel slow on day one and disappear on day three. The middle path holds.</span>
+          <span class="lang-zh">两键快捷键不够用。单键启动会吞字。三键和弦第一天慢、第三天就消失。中间这条路最稳。</span>
+        </p>
+        <a class="post-card__link" href="#"><span class="lang-en">Continue →</span><span class="lang-zh">继续阅读 →</span></a>
+      </article>
+
+      <!-- Post 4 -->
+      <article class="post-card">
+        <div class="post-card__thumb">
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A line graph showing AI-assistant usage rising for two months then falling, with the peak labeled in deep ink">
+            <rect width="480" height="280" fill="#eef2de"/>
+            <!-- axes -->
+            <line x1="60" y1="220" x2="440" y2="220" stroke="#6d6f82" stroke-width="1"/>
+            <line x1="60" y1="220" x2="60" y2="60" stroke="#6d6f82" stroke-width="1"/>
+            <!-- grid lines -->
+            <line x1="60" y1="180" x2="440" y2="180" stroke="#c9d1b3" stroke-width="0.5" stroke-dasharray="2,3"/>
+            <line x1="60" y1="140" x2="440" y2="140" stroke="#c9d1b3" stroke-width="0.5" stroke-dasharray="2,3"/>
+            <line x1="60" y1="100" x2="440" y2="100" stroke="#c9d1b3" stroke-width="0.5" stroke-dasharray="2,3"/>
+            <!-- curve · rises then falls -->
+            <path d="M 60 200 Q 130 180 180 140 Q 230 100 280 70 Q 330 100 380 150 Q 410 180 440 200" fill="none" stroke="#393C54" stroke-width="2"/>
+            <!-- peak marker -->
+            <circle cx="280" cy="70" r="4" fill="#97B077" stroke="#7a9561" stroke-width="1"/>
+            <line x1="280" y1="70" x2="280" y2="50" stroke="#97B077" stroke-width="1.2" stroke-dasharray="2,2"/>
+            <text x="290" y="58" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#393C54" font-weight="700">peak · we removed it</text>
+            <!-- x labels -->
+            <text x="100" y="240" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82">Jan</text>
+            <text x="180" y="240" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82">Feb</text>
+            <text x="260" y="240" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82">Mar</text>
+            <text x="340" y="240" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82">Apr</text>
+            <!-- corner mono label -->
+            <text x="24" y="22" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" letter-spacing="0.18em">USAGE · 90 DAYS</text>
+          </svg>
+        </div>
+        <p class="post-card__kicker">
+          <span class="lang-en">Notes · Apr 06, 2026 · 5 min</span>
+          <span class="lang-zh">短记 · 2026-04-06 · 5 分钟</span>
+        </p>
+        <h3 class="post-card__title">
+          <span class="lang-en">Three months of AI-assistant usage, on one graph.</span>
+          <span class="lang-zh">AI 助手三个月使用情况，一张图。</span>
+        </h3>
+        <p class="post-card__lede">
+          <span class="lang-en">A short note ahead of the long letter. The shape of the curve is what convinced us; the prose below it draws from the shape.</span>
+          <span class="lang-zh">长信之前的一段短记。说服我们的就是这条曲线的形状；正文里说的话也是从这条曲线里读出来的。</span>
+        </p>
+        <a class="post-card__link" href="#"><span class="lang-en">Continue →</span><span class="lang-zh">继续阅读 →</span></a>
+      </article>
+
+      <!-- Post 5 -->
+      <article class="post-card">
+        <div class="post-card__thumb">
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three release-note cards stacked: v1.4.2 in deep-ink accent, v1.4.1, v1.4.0 — each with a one-line release note">
+            <rect width="480" height="280" fill="#eef2de"/>
+            <!-- v1.4.2 card · highlighted -->
+            <rect x="40" y="56" width="400" height="56" fill="#ffffff" stroke="#97B077" stroke-width="2" rx="4"/>
+            <text x="56" y="80" font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" fill="#393C54" font-weight="700">v1.4.2</text>
+            <text x="56" y="100" font-family="Inter, sans-serif" font-size="13" fill="#2a2c40">Faster cold start, vault rename without re-indexing.</text>
+            <!-- v1.4.1 -->
+            <rect x="40" y="124" width="400" height="56" fill="#ffffff" stroke="#c9d1b3" stroke-width="1" rx="4"/>
+            <text x="56" y="148" font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" fill="#393C54" font-weight="700">v1.4.1</text>
+            <text x="56" y="168" font-family="Inter, sans-serif" font-size="13" fill="#2a2c40">AI assistant removed; transcripts preserved.</text>
+            <!-- v1.4.0 -->
+            <rect x="40" y="192" width="400" height="56" fill="#ffffff" stroke="#c9d1b3" stroke-width="1" rx="4"/>
+            <text x="56" y="216" font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" fill="#393C54" font-weight="700">v1.4.0</text>
+            <text x="56" y="236" font-family="Inter, sans-serif" font-size="13" fill="#2a2c40">Keyboard chord palette + offline export.</text>
+            <!-- corner mono label -->
+            <text x="24" y="22" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" letter-spacing="0.18em">CHANGELOG · APR</text>
+          </svg>
+        </div>
+        <p class="post-card__kicker">
+          <span class="lang-en">Changelog · Apr 02, 2026 · 3 min</span>
+          <span class="lang-zh">变更 · 2026-04-02 · 3 分钟</span>
+        </p>
+        <h3 class="post-card__title">
+          <span class="lang-en">v1.4 · three small fixes, one big removal.</span>
+          <span class="lang-zh">v1.4 · 三处小修，一项撤回。</span>
+        </h3>
+        <p class="post-card__lede">
+          <span class="lang-en">Faster cold start, vault rename without re-indexing, AI assistant transcripts preserved. Plus a short paragraph on what the removal means for export.</span>
+          <span class="lang-zh">更快冷启动、笔记仓重命名不必重建索引、AI 助手会话被保留。另附一小段说明：这次撤回对导出有什么影响。</span>
+        </p>
+        <a class="post-card__link" href="#"><span class="lang-en">Continue →</span><span class="lang-zh">继续阅读 →</span></a>
+      </article>
+
+      <!-- Post 6 -->
+      <article class="post-card">
+        <div class="post-card__thumb">
+          <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A side-by-side view of Markdown source and rendered output: left a small mac-window with sage-monochromatic dots showing markdown syntax, right the same content rendered as quiet plate">
+            <rect width="480" height="280" fill="#eef2de"/>
+            <!-- left window: source -->
+            <rect x="20" y="40" width="220" height="200" fill="#ffffff" stroke="#c9d1b3" stroke-width="1" rx="4"/>
+            <line x1="20" y1="62" x2="240" y2="62" stroke="#c9d1b3" stroke-width="1"/>
+            <!-- sage monochromatic dots (replacing apple's red/yellow/green) -->
+            <circle cx="32" cy="51" r="4" fill="#97B077"/>
+            <circle cx="46" cy="51" r="4" fill="#c9d1b3"/>
+            <circle cx="60" cy="51" r="4" fill="#6d6f82"/>
+            <text x="170" y="56" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="#6d6f82">letter.md</text>
+            <!-- markdown source lines -->
+            <text x="32" y="84"  font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#393C54" font-weight="700"># A small case</text>
+            <text x="32" y="106" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82">## Premise</text>
+            <text x="32" y="126" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#2a2c40">It worked. Customers asked.</text>
+            <text x="32" y="146" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#2a2c40">## Notes</text>
+            <text x="32" y="164" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#2a2c40">- portable</text>
+            <text x="32" y="180" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#2a2c40">- diff-friendly</text>
+            <text x="32" y="196" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#2a2c40">- quiet</text>
+            <!-- arrow -->
+            <path d="M 248 140 L 268 140 L 268 134 L 280 144 L 268 154 L 268 148 L 248 148 Z" fill="#7a9561"/>
+            <!-- right window: rendered -->
+            <rect x="296" y="40" width="160" height="200" fill="#ffffff" stroke="#c9d1b3" stroke-width="1" rx="4"/>
+            <text x="312" y="64" font-family="Inter, sans-serif" font-size="14" fill="#393C54" font-weight="700">A small case</text>
+            <text x="312" y="86" font-family="Inter, sans-serif" font-size="11" fill="#6d6f82" font-weight="600">Premise</text>
+            <text x="312" y="104" font-family="Inter, sans-serif" font-size="11" fill="#2a2c40">It worked. Customers asked.</text>
+            <text x="312" y="130" font-family="Inter, sans-serif" font-size="11" fill="#6d6f82" font-weight="600">Notes</text>
+            <circle cx="316" cy="146" r="1.5" fill="#7a9561"/>
+            <text x="324" y="150" font-family="Inter, sans-serif" font-size="11" fill="#2a2c40">portable</text>
+            <circle cx="316" cy="166" r="1.5" fill="#7a9561"/>
+            <text x="324" y="170" font-family="Inter, sans-serif" font-size="11" fill="#2a2c40">diff-friendly</text>
+            <circle cx="316" cy="186" r="1.5" fill="#7a9561"/>
+            <text x="324" y="190" font-family="Inter, sans-serif" font-size="11" fill="#2a2c40">quiet</text>
+            <!-- corner mono label -->
+            <text x="24" y="22" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#6d6f82" letter-spacing="0.18em">SRC · RENDER</text>
+          </svg>
+        </div>
+        <p class="post-card__kicker">
+          <span class="lang-en">Engineering · Mar 30, 2026 · 7 min</span>
+          <span class="lang-zh">工程 · 2026-03-30 · 7 分钟</span>
+        </p>
+        <h3 class="post-card__title">
+          <span class="lang-en">We keep the rendered view, but not the WYSIWYG.</span>
+          <span class="lang-zh">我们保留渲染预览，但不要"所见即所得"。</span>
+        </h3>
+        <p class="post-card__lede">
+          <span class="lang-en">The toggle works because the source is still the source. WYSIWYG hides the file, we wanted the file in front of the writer the whole time.</span>
+          <span class="lang-zh">"切换"之所以好用，是因为源文件始终是源文件。WYSIWYG 把文件藏起来——我们想让作者从头到尾都看见自己的文件。</span>
+        </p>
+        <a class="post-card__link" href="#"><span class="lang-en">Continue →</span><span class="lang-zh">继续阅读 →</span></a>
+      </article>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <a href="#"><span class="lang-en">← Older letters</span><span class="lang-zh">← 早些时候的来信</span></a>
+      <a class="pagination__newer" href="#"><span class="lang-en">Newer letters →</span><span class="lang-zh">更近的来信 →</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Editor's note -->
+<section class="editor-note">
+  <div class="editor-note__inner">
+    <p class="editor-note__marker">
+      <span class="lang-en">05 · From the editor</span>
+      <span class="lang-zh">05 · 编辑的话</span>
+    </p>
+    <blockquote>
+      <span class="lang-en">This quarter we wrote less and removed more. The reading shelf, more than anything, is a record of what we took out — and the slow process of explaining, to ourselves first, why.</span>
+      <span class="lang-zh">这个季度我们写得少、撤得多。这书架与其说是写作集，不如说是一份"撤除清单"——以及慢慢向自己解释、为什么要撤的过程记录。</span>
+    </blockquote>
+    <cite>
+      <span class="lang-en">From the editors · Spring 2026</span>
+      <span class="lang-zh">编辑部 · 2026 年春</span>
+    </cite>
+  </div>
+</section>
+
+<!-- Footer subscribe -->
+<section class="footer-sub">
+  <div class="footer-sub__inner">
+    <p class="footer-sub__marker">
+      <span class="lang-en">06 · Get letters</span>
+      <span class="lang-zh">06 · 订阅来信</span>
+    </p>
+    <h3 class="footer-sub__h3">
+      <span class="lang-en">Get letters by email.</span>
+      <span class="lang-zh">用邮件订阅这些信。</span>
+    </h3>
+    <p class="footer-sub__copy">
+      <span class="lang-en">One letter per essay, and between them, nothing. We don't track opens, and the archive lives at this URL, as this page. If you prefer your reader, the <a href="#">RSS feed</a> carries everything.</span>
+      <span class="lang-zh">一篇一封信，间或安静——我们不追踪是否打开。这页面就是归档，就在这个网址。如果你更习惯用阅读器，订阅这份 <a href="#">RSS</a> 就好。</span>
+    </p>
+    <form class="footer-sub__form" onsubmit="return false;">
+      <input type="email" class="footer-sub__input" placeholder="you@example.com" aria-label="Your email">
+      <button type="submit" class="sage-button"><span class="lang-en">Subscribe</span><span class="lang-zh">订阅</span></button>
+    </form>
+    <p class="footer-sub__note">
+      <span class="lang-en">No tracking, no list rentals. Unsubscribe in one click.</span>
+      <span class="lang-zh">不追踪、不外借名单。一键退订。</span>
+    </p>
+  </div>
+</section>
+
+<script>
+  const t = document.getElementById('lang-toggle');
+  if (t) t.addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-lang');
+    document.documentElement.setAttribute('data-lang', cur === 'zh' ? 'en' : 'zh');
+  });
+</script>
+
+</body>
+
+<!-- design-review:self-diff v1
+Skill: sage
+Page-type: blog-index
+Created: 2026-05-02
+
+Decisions (5):
+1. [italic-budget-3] chose "italic budget = 3 (hero h1 accent + featured lede italic phrase + editor's note Instrument Serif italic blockquote)" over "italic budget = 2 (anthropic blog-index ceiling) or 0 (apple)". Because: sage §J standard across feature-deep / landing / comparison is 3 earned italic moments. Same shape as ember (3 earned italic). Hero accent = `*quiet*` inside the stacked Instrument Serif h1 (ember signature, NOT in subtitle). Featured lede italic = `*got the question wrong*` (one earned phrase inside the lede prose). Editor's note = full Instrument Serif italic 28-32px blockquote on cream-subtle band with 2px sage-green left rule.
+2. [numbered-section-markers] chose "every section gets `01 · ... 02 · ... 03 · ... 04 · ... 05 · ... 06 · ...` JetBrains Mono numbered marker" over "single masthead eyebrow + 5 unmarked sections (anthropic/ember pattern)". Because: numbered markers are sage's signature move (alongside Instrument Serif typography), established across feature-deep / pricing / docs-home. Skip any and the page loses sage's library cadence. Six markers = masthead/featured/tag-rail/post-grid/editor's note/footer-subscribe.
+3. [card-radius-4] chose "post-card thumb 4px radius (sage --radius-sm signature, smallest of 4 skills)" over "anthropic 16px or apple 24px or ember 12px". Because: cross-skill ladder sage 4 / ember 12 / anthropic 16 / apple 24 — sage carries the smallest, library-plate aesthetic. Same 4px on tag pills + featured card outer + footer subscribe input.
+4. [no-deepink-band] chose "footer subscribe on cream-subtle var(--sage-bg-subtle) with sage-divider hairline above" over "footer subscribe on deep-ink #393C54 closing band (sage signature reserved move)". Because: blog-index is editorial/browseable, not closing-argument. anthropic/apple/ember blog-index also avoid their respective signature closing bands (cream-subtle / black / chocolate) — same reasoning. Deep-ink band stays reserved for feature-deep / landing / pricing closing arguments. A second deep-ink moment on blog-index would dilute its closing-argument power on argumentative pages.
+5. [monochromatic-sage-svg-palette] chose "post-card SVG fills constrained to sage 9-hex monochromatic (#f8faec / #eef2de / #e5e8da / #c9d1b3 / #97B077 / #7a9561 / #6d6f82 / #393C54 / #2a2c40)" over "anthropic 5-color warm or apple system grays + blue or ember warm trio". Because: sage's library-plate aesthetic requires tonal not chromatic palette. Same illustration concepts (bookshelf / folder tree / keyboard chord / line graph / changelog cards / md↔render mac-window) recoloured to sage chroma. Mac-window product mock at post 6 uses sage-monochromatic dots (#97B077 / #c9d1b3 / #6d6f82) instead of apple's red/yellow/green or ember's gold/tan/cocoa per sage/feature-deep precedent.
+
+Known trade-offs:
+- SVG internal text + rect fills use raw hex (#2a2c40, #393C54, #6d6f82, #7a9561, #97B077, #c9d1b3, #e5e8da, #eef2de, #f8faec, #ffffff) instead of var(--sage-*) tokens because SVG element attributes cannot reference CSS custom properties. All hex values match sage palette tokens (sage-text / sage-ink / sage-text-secondary / sage-sage-dark / sage-sage / sage-pale-tint / sage-divider / sage-bg-subtle / sage-bg / sage-card). Noted for ports.
+- Featured-byline uses JetBrains Mono uppercase letterspaced (vs anthropic's Lora and apple's SF Pro Display roman). This matches sage's mono-eyebrow cadence elsewhere on the page (numbered markers, post-card kickers, pagination labels). Reads as "small printed catalogue byline" rather than "magazine masthead byline" — accepted as sage voice signature; on zh the letter-spacing drops to 0.04em + sentence-case to avoid visual stretching.
+- Editor's note blockquote uses 2px sage-green left-rule (vs anthropic's 3px orange and apple's no-rule moment-sentence and ember's 2px gold). 2px chosen because sage-green #97B077 is lower-contrast than ember-gold #c49464 and anthropic-orange #d97757 — a 3px sage rule would not lift the contrast enough on cream-subtle bg; 2px holds the editorial hairline weight. Cite uses 18×1.5px sage-green hairline before the text (matching sage/feature-deep verdict-band cite pattern, scaled down).
+- Tag-pill active uses var(--sage-ink) (#393C54) NOT var(--sage-sage). Because sage-green at 2.4:1 fails AA on white text — sage.css C-section establishes that sage-ink is the load-bearing CTA color for any white-text-on-color situation. The active tag pill follows the same discipline, matching sage-button.
+- Tag-pill active hover uses literal #2b2e42 (one tick darker than --sage-ink #393C54), not a tokenised --sage-ink-hover. Because sage.css already uses raw #2b2e42 for `.sage-button:hover` — staying consistent with existing sage convention rather than introducing a 10th palette token. If sage.css formalises --sage-ink-hover later, this page should adopt it.
+
+Multi-critic fixes applied before shipping (2026-05-02):
+1. copy ERROR: .post-card__title (post 2) EN "Why our vault is likely month, not by tag." → "Why our vault is by month, not by tag." (the EN had a misplaced word; zh sibling already said 按月归档).
+2. brand warn: .footer-sub__h3 font-size 32 → 28 (canonical Typography table row says 28px; one type-step drift corrected).
+3. illustration warn: post-card 4 line-graph x-axis labels Jan/Feb/Mar/Apr font-size 10 → 11 (§E SVG-text-min floor is 11px; bumped to clear the floor).
+4. brand info: .tag-pill font-size 12 → 12.5 (sub-pixel, matches canonical Typography table row).
+5. brand info: .pagination a font-size 13 → 13.5 (sub-pixel, matches canonical Typography table row).
+
+/design-review:self-diff -->
+
+</html>
