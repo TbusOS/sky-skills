@@ -23,7 +23,7 @@ quality is anchored at the style's own best.
 | Feature deep | `feature-deep.html` + `feature-deep.md` | ✅ v1 · 2026-04-22 |
 | Comparison | `comparison.html` + `comparison.md` | ✅ v1 · 2026-04-23 |
 | Blog index | `blog-index.html` + `blog-index.md` | ✅ v1 · 2026-04-29 |
-| Product detail | `product-detail.html` + `product-detail.md` | — |
+| Product detail | `product-detail.html` + `product-detail.md` | ✅ v1 · 2026-05-02 |
 | Team | `team.html` + `team.md` | — |
 | FAQ | `faq.html` + `faq.md` | — |
 | Changelog | `changelog.html` + `changelog.md` | — |
