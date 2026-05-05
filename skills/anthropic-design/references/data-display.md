@@ -111,3 +111,7 @@ Anthropic 仅在年度报告 / Economic Index 摘要等极少场景使用。Stat
 - 柱图所有柱子全用橙色（橙是强调色，过度使用稀释品牌）
 - 渐变填充
 - 图例放在图表底部（顶部更易扫描）
+
+## Sequence diagrams · 时序流程图
+
+多 actor 随时间推进的交互（API 调用 / 协议握手 / 硬件命令流） → 见独立文档 [`sequence-diagrams.md`](sequence-diagrams.md)（含 SVG 模板 + 颜色 token + 反面教材 + 发布前 checklist）.
