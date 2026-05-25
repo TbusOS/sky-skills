@@ -882,6 +882,255 @@
   </div>
 </section>
 
+<!-- What's new · md 渲染四件套 -->
+<section class="anth-section" id="md-pipeline">
+  <div class="anth-container anth-container--wide">
+    <span class="anth-badge">
+      <span class="lang-en">Recently shipped · 2026-05-22</span>
+      <span class="lang-zh">最近上线 · 2026-05-22</span>
+    </span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">From scattered .md links to one portable folder</span>
+      <span class="lang-zh">把散落的 .md 跳转收成一份可移植目录</span>
+    </h2>
+    <p style="font-size:18px; line-height:1.6; color:var(--anth-text-secondary); max-width:780px; margin-top:var(--space-3);">
+      <span class="lang-en">An anthropic-styled HTML doc that links out to sibling <code>.md</code> looks ugly in the browser (raw markdown) and breaks when the folder is copied alone. Four scripts under <code>anthropic-design/scripts/</code> fix both: render every linked <code>.md</code> into an anthropic-styled HTML mirror, collect mirrors into the same folder, rewrite hrefs, and fold in cross-directory sibling <code>.html</code> refs too. Result: <code>cp -r &lt;doc-dir&gt; /anywhere/</code> and every link still works.</span>
+      <span class="lang-zh">用 anthropic 风格写的 HTML 文档常链到外部 <code>.md</code>，浏览器原生显示 raw markdown 难看；单独打包文档目录时跨目录 sibling <code>.html</code> 链也会失效。<code>anthropic-design/scripts/</code> 下的 4 个脚本把这两个问题都解决：把每个被链接的 <code>.md</code> 渲染成 anthropic 风格的 <code>.html</code> 镜像 → 收纳到主目录的 <code>_md/</code> → 重写 href → 跨目录 <code>.html</code> 也折叠进来。结果：<code>cp -r &lt;文档目录&gt; /任何位置/</code>，所有链接依然能跳通。</span>
+    </p>
+
+    <figure style="margin:var(--space-6) 0;">
+      <svg role="img" aria-label="md 渲染四件套 pipeline: raw markdown problem on the left, four-script toolbox in the middle (md-mirror / md-rewrite-links / md-pack / cross-link-pack), portable self-contained folder on the right"
+           viewBox="0 0 1200 400"
+           style="display:block; width:100%; max-width:1200px; height:auto; border-radius:var(--radius-lg); background:linear-gradient(135deg, #faf9f5 0%, #f0ede3 100%);">
+        <defs>
+          <filter id="mdp-soft" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+            <feOffset dy="6"/>
+            <feColorMatrix values="0 0 0 0 0.08 0 0 0 0 0.08 0 0 0 0 0.07 0 0 0 0.10 0"/>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <marker id="mdp-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0 0 L 10 5 L 0 10 Z" fill="#b0aea5"/>
+          </marker>
+        </defs>
+
+        <!-- decorative dots -->
+        <g fill="#e8e6dc">
+          <circle cx="60" cy="50" r="2"/><circle cx="1140" cy="50" r="2"/>
+          <circle cx="60" cy="350" r="2"/><circle cx="1140" cy="350" r="2"/>
+        </g>
+
+        <!-- column labels -->
+        <g font-family="Poppins,sans-serif" font-size="10" letter-spacing="2.5" fill="#6b6a5f" font-weight="600" text-anchor="middle">
+          <text x="140" y="42">BEFORE</text>
+          <text x="600" y="42">PIPELINE · 4 SCRIPTS</text>
+          <text x="1060" y="42">AFTER</text>
+        </g>
+
+        <!-- BEFORE: browser window with raw markdown -->
+        <g filter="url(#mdp-soft)">
+          <rect x="40" y="70" width="200" height="240" rx="10" fill="#ffffff" stroke="#e8e6dc"/>
+          <rect x="40" y="70" width="200" height="22" rx="10" fill="#f0ede3"/>
+          <circle cx="55" cy="81" r="3" fill="#d97757"/>
+          <circle cx="68" cy="81" r="3" fill="#c49464"/>
+          <circle cx="81" cy="81" r="3" fill="#788c5d"/>
+        </g>
+        <g font-family="JetBrains Mono, monospace" font-size="9.5" fill="#6b6a5f">
+          <text x="56" y="115"># 任务 16 操作步骤</text>
+          <text x="56" y="133">## 〇、前置知识</text>
+          <text x="56" y="151">- AVB 在信任链中的位置</text>
+          <text x="56" y="169">- 任务 15 早期仓库</text>
+          <text x="56" y="187"><tspan fill="#a14238">&gt;</tspan> ## ⚠ v2 升级公告</text>
+          <text x="56" y="205"><tspan fill="#a14238">&gt;</tspan> 本 doc 写于 2026-04...</text>
+          <text x="56" y="223">| vboot_flag | AVB 行为 |</text>
+          <text x="56" y="241">|----|----|</text>
+          <text x="56" y="259">| 0 | 跳过 |</text>
+          <text x="56" y="277">[<tspan fill="#6a9bcc">原理详解</tspan>](../05.md)</text>
+          <text x="56" y="295">[<tspan fill="#6a9bcc">README</tspan>](../README.md)</text>
+        </g>
+
+        <!-- arrow BEFORE → PIPELINE -->
+        <path d="M250 190 L 290 190" stroke="#b0aea5" stroke-width="1.5" fill="none" marker-end="url(#mdp-arrow)"/>
+
+        <!-- PIPELINE: 4 cards -->
+        <g filter="url(#mdp-soft)">
+          <!-- md-mirror (blue) -->
+          <rect x="300" y="100" width="140" height="180" rx="14" fill="#6a9bcc"/>
+          <!-- md-rewrite-links (mid-gray) -->
+          <rect x="460" y="100" width="140" height="180" rx="14" fill="#b0aea5"/>
+          <!-- md-pack (green) -->
+          <rect x="620" y="100" width="140" height="180" rx="14" fill="#788c5d"/>
+          <!-- cross-link-pack (orange) -->
+          <rect x="780" y="100" width="140" height="180" rx="14" fill="#d97757"/>
+        </g>
+
+        <!-- card labels -->
+        <g font-family="Poppins,sans-serif" fill="#ffffff" text-anchor="middle">
+          <!-- md-mirror -->
+          <text x="370" y="142" font-size="11" font-weight="600" opacity="0.85">① RENDER</text>
+          <text x="370" y="170" font-size="14" font-weight="600">md-mirror</text>
+          <g font-family="Lora, serif" font-size="11" fill="#ffffff" opacity="0.95">
+            <text x="370" y="200" text-anchor="middle"><tspan class="lang-en-text">1 .md → 1 .html</tspan><tspan class="lang-zh-text" style="display:none;">1 渲染原语</tspan></text>
+            <text x="370" y="218" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">inline css</tspan><tspan class="lang-zh-text" style="display:none;">内联 css</tspan></text>
+            <text x="370" y="234" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">1200px shell</tspan><tspan class="lang-zh-text" style="display:none;">1200px 容器</tspan></text>
+            <text x="370" y="250" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">code · table</tspan><tspan class="lang-zh-text" style="display:none;">代码 · 表格</tspan></text>
+            <text x="370" y="266" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">callout</tspan><tspan class="lang-zh-text" style="display:none;">callout</tspan></text>
+          </g>
+
+          <!-- md-rewrite-links -->
+          <text x="530" y="142" font-size="11" font-weight="600" opacity="0.85">② SWAP</text>
+          <text x="530" y="170" font-size="14" font-weight="600">md-rewrite</text>
+          <text x="530" y="184" font-size="11" font-weight="500" opacity="0.92">-links</text>
+          <g font-family="Lora, serif" font-size="11" fill="#ffffff" opacity="0.95">
+            <text x="530" y="208" text-anchor="middle"><tspan class="lang-en-text">href .md → .html</tspan><tspan class="lang-zh-text" style="display:none;">href 后缀替换</tspan></text>
+            <text x="530" y="224" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">in-place</tspan><tspan class="lang-zh-text" style="display:none;">原地</tspan></text>
+            <text x="530" y="240" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">skips http(s)</tspan><tspan class="lang-zh-text" style="display:none;">跳过 http(s)</tspan></text>
+            <text x="530" y="256" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">skips anchors</tspan><tspan class="lang-zh-text" style="display:none;">跳过锚点</tspan></text>
+          </g>
+
+          <!-- md-pack -->
+          <text x="690" y="142" font-size="11" font-weight="600" opacity="0.85">③ FOLD .md</text>
+          <text x="690" y="170" font-size="14" font-weight="600">md-pack</text>
+          <g font-family="Lora, serif" font-size="11" fill="#ffffff" opacity="0.95">
+            <text x="690" y="200" text-anchor="middle"><tspan class="lang-en-text">collect .md to _md/</tspan><tspan class="lang-zh-text" style="display:none;">收 .md 到 _md/</tspan></text>
+            <text x="690" y="218" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">flat names</tspan><tspan class="lang-zh-text" style="display:none;">扁平命名</tspan></text>
+            <text x="690" y="234" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">retarget hrefs</tspan><tspan class="lang-zh-text" style="display:none;">重写 href</tspan></text>
+            <text x="690" y="250" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">basename rescue</tspan><tspan class="lang-zh-text" style="display:none;">basename 救援</tspan></text>
+            <text x="690" y="266" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">idempotent</tspan><tspan class="lang-zh-text" style="display:none;">幂等</tspan></text>
+          </g>
+
+          <!-- cross-link-pack -->
+          <text x="850" y="142" font-size="11" font-weight="600" opacity="0.85">④ FOLD .html</text>
+          <text x="850" y="170" font-size="14" font-weight="600">cross-link</text>
+          <text x="850" y="184" font-size="11" font-weight="500" opacity="0.92">-pack</text>
+          <g font-family="Lora, serif" font-size="11" fill="#ffffff" opacity="0.95">
+            <text x="850" y="208" text-anchor="middle"><tspan class="lang-en-text">pull sibling .html</tspan><tspan class="lang-zh-text" style="display:none;">拽 sibling .html</tspan></text>
+            <text x="850" y="224" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">same _md/ dir</tspan><tspan class="lang-zh-text" style="display:none;">同 _md/ 目录</tspan></text>
+            <text x="850" y="240" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">warns escapes</tspan><tspan class="lang-zh-text" style="display:none;">越界告警</tspan></text>
+            <text x="850" y="256" text-anchor="middle" font-size="10" opacity="0.85"><tspan class="lang-en-text">post-md-pack</tspan><tspan class="lang-zh-text" style="display:none;">md-pack 之后跑</tspan></text>
+          </g>
+        </g>
+
+        <!-- arrows between pipeline cards -->
+        <g stroke="#b0aea5" stroke-width="1.5" fill="none">
+          <path d="M440 190 L 460 190" marker-end="url(#mdp-arrow)"/>
+          <path d="M600 190 L 620 190" marker-end="url(#mdp-arrow)"/>
+          <path d="M760 190 L 780 190" marker-end="url(#mdp-arrow)"/>
+        </g>
+
+        <!-- arrow PIPELINE → AFTER -->
+        <path d="M925 190 L 965 190" stroke="#b0aea5" stroke-width="1.5" fill="none" marker-end="url(#mdp-arrow)"/>
+
+        <!-- AFTER: folder mockup -->
+        <g filter="url(#mdp-soft)">
+          <rect x="975" y="70" width="190" height="240" rx="10" fill="#ffffff" stroke="#e8e6dc"/>
+          <!-- folder tab -->
+          <path d="M975 92 L 975 80 L 1015 80 L 1023 86 L 1165 86 L 1165 92" fill="#f0ede3" stroke="#e8e6dc" stroke-width="0.8"/>
+        </g>
+        <g font-family="JetBrains Mono, monospace" font-size="10" fill="#141413">
+          <text x="990" y="113" font-weight="600">avb-decision/</text>
+        </g>
+        <g font-family="JetBrains Mono, monospace" font-size="9.5" fill="#6b6a5f">
+          <text x="1000" y="132">├─ index.html</text>
+          <text x="1000" y="148">├─ 01_overview.html</text>
+          <text x="1000" y="164">├─ 02_otp_and_flag.html</text>
+          <text x="1000" y="180">├─ 03_implementation.html</text>
+          <text x="1000" y="196">└─ _md/</text>
+          <text x="1015" y="212">├─ 05_AVB原理.html</text>
+          <text x="1015" y="228">├─ 06_操作步骤.html</text>
+          <text x="1015" y="244">├─ README.html</text>
+          <text x="1015" y="260">├─ 实施步骤.html</text>
+          <text x="1015" y="276">└─ … <tspan fill="#788c5d" font-weight="600">×13</tspan></text>
+        </g>
+        <!-- AFTER status badge -->
+        <g transform="translate(990 295)">
+          <rect width="160" height="20" rx="10" fill="rgba(120,140,93,0.12)" stroke="#788c5d" stroke-width="0.8"/>
+          <circle cx="14" cy="10" r="3" fill="#788c5d"/>
+          <text x="22" y="14" font-family="Poppins,sans-serif" font-size="9.5" fill="#788c5d" font-weight="600">
+            <tspan class="lang-en-text">124 links portable</tspan><tspan class="lang-zh-text" style="display:none;">124 链全部可移植</tspan>
+          </text>
+        </g>
+      </svg>
+      <figcaption class="anth-caption" style="margin-top:var(--space-3); max-width:920px;">
+        <span class="lang-en"><strong>Four scripts, four jobs.</strong> Run <code>md-pack</code> then <code>cross-link-pack</code> on the main HTML directory; <code>md-mirror</code> and <code>md-rewrite-links</code> are the underlying primitives. The output folder is a complete unit — <code>cp -r</code> it to any laptop, NAS, email attachment, or USB stick and every link still works.</span>
+        <span class="lang-zh"><strong>4 个脚本各管一段。</strong>在主 HTML 目录跑 <code>md-pack</code> 再跑 <code>cross-link-pack</code> 即可；<code>md-mirror</code> 和 <code>md-rewrite-links</code> 是底层原语。产出目录是一个完整单元——<code>cp -r</code> 到任何笔记本 / NAS / 邮件附件 / U 盘里所有跳转依然有效。</span>
+      </figcaption>
+    </figure>
+
+    <!-- 4 tool cards -->
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:var(--space-4); margin-top:var(--space-6);">
+      <article class="anth-card">
+        <div style="display:flex; align-items:center; gap:var(--space-2); margin-bottom:var(--space-2);">
+          <span style="display:inline-block; width:8px; height:8px; background:#6a9bcc; border-radius:50%;"></span>
+          <h3 style="font-size:16px; margin:0;">md-mirror</h3>
+        </div>
+        <p style="font-size:13.5px; color:var(--anth-text-secondary); margin:0;">
+          <span class="lang-en">1 .md → 1 anthropic-styled .html. Inline CSS + Poppins/Lora + dark code blocks + orange callout blockquotes. Banner shows git-relative source path.</span>
+          <span class="lang-zh">1 个 .md 渲成 1 个 anthropic 风格 .html。内联 CSS + Poppins/Lora + 深色代码块 + 橙色 callout blockquote。banner 显示 git 相对源路径。</span>
+        </p>
+      </article>
+      <article class="anth-card">
+        <div style="display:flex; align-items:center; gap:var(--space-2); margin-bottom:var(--space-2);">
+          <span style="display:inline-block; width:8px; height:8px; background:#b0aea5; border-radius:50%;"></span>
+          <h3 style="font-size:16px; margin:0;">md-rewrite-links</h3>
+        </div>
+        <p style="font-size:13.5px; color:var(--anth-text-secondary); margin:0;">
+          <span class="lang-en">In-place rewrite of <code>href="*.md"</code> to <code>href="*.html"</code> in HTML files. Skips http(s), anchors, mailto, javascript. Companion primitive when mirrors live next to sources.</span>
+          <span class="lang-zh">原地把 HTML 里的 <code>href="*.md"</code> 改成 <code>href="*.html"</code>。跳过 http(s) / 锚点 / mailto / javascript。镜像就放源旁时用它。</span>
+        </p>
+      </article>
+      <article class="anth-card">
+        <div style="display:flex; align-items:center; gap:var(--space-2); margin-bottom:var(--space-2);">
+          <span style="display:inline-block; width:8px; height:8px; background:#788c5d; border-radius:50%;"></span>
+          <h3 style="font-size:16px; margin:0;">md-pack</h3>
+        </div>
+        <p style="font-size:13.5px; color:var(--anth-text-secondary); margin:0;">
+          <span class="lang-en">Folds every linked <code>.md</code> into a flat subdir with deconflicted names. Retargets links (Case A: mirror sibling · Case B: back to main HTML · Case C: external + warn). Has a basename fallback that rescues source <code>.md</code> with off-by-one <code>../</code> typos.</span>
+          <span class="lang-zh">把所有被链到的 <code>.md</code> 折叠到扁平子目录（去重命名）。重写跳转（Case A：镜像兄弟 · Case B：回主 HTML · Case C：外部 + 警告）。带 basename fallback 救援源 <code>.md</code> 写错 <code>../</code> 的 typo。</span>
+        </p>
+      </article>
+      <article class="anth-card">
+        <div style="display:flex; align-items:center; gap:var(--space-2); margin-bottom:var(--space-2);">
+          <span style="display:inline-block; width:8px; height:8px; background:#d97757; border-radius:50%;"></span>
+          <h3 style="font-size:16px; margin:0;">cross-link-pack</h3>
+        </div>
+        <p style="font-size:13.5px; color:var(--anth-text-secondary); margin:0;">
+          <span class="lang-en">Folds sibling <code>.html</code> referenced from outside the pack root into the same <code>_md/</code> dir, then rewrites the main HTML's hrefs. Warns when a pulled file's own internal refs escape pack root (single-responsibility — no recursive packing).</span>
+          <span class="lang-zh">把主 HTML 链到的 pack root 外的 sibling <code>.html</code> 收到同款 <code>_md/</code>，并重写主 HTML 的 href。被拽进来的文件自己的内部引用如果跨出 pack root 会发警告（单一职责 · 不做递归打包）。</span>
+        </p>
+      </article>
+    </div>
+
+    <!-- callout: recommended workflow -->
+    <div class="anth-banner anth-banner--info" style="display:block; margin-top:var(--space-6); padding:var(--space-4) var(--space-5);">
+      <h4 style="margin:0 0 var(--space-2); font-family:var(--font-heading); font-size:15px;">
+        <span class="lang-en">Recommended workflow</span>
+        <span class="lang-zh">推荐工作流</span>
+      </h4>
+      <pre class="anth-code" style="margin:0;"><code># 1) main HTML's .md links → _md/ mirrors
+node skills/anthropic-design/scripts/md-pack.mjs \
+  --base docs --out docs/&lt;pack&gt;/_md docs/&lt;pack&gt;/*.html
+
+# 2) main HTML's cross-dir sibling .html → same _md/
+node skills/anthropic-design/scripts/cross-link-pack.mjs \
+  --pack-root docs/&lt;pack&gt; --base docs \
+  --out docs/&lt;pack&gt;/_md docs/&lt;pack&gt;/*.html
+
+# 3) cp -r docs/&lt;pack&gt; anywhere; every link still works.</code></pre>
+    </div>
+
+    <p style="margin-top:var(--space-5);">
+      <a class="anth-link" href="skills/anthropic-design/SKILL.md">
+        <span class="lang-en">Read the SKILL.md docs →</span><span class="lang-zh">查看 SKILL.md 详细说明 →</span>
+      </a>
+      &nbsp;·&nbsp;
+      <a class="anth-link" href="skills/anthropic-design/scripts/">
+        <span class="lang-en">Browse scripts/ source →</span><span class="lang-zh">浏览 scripts/ 源码 →</span>
+      </a>
+    </p>
+  </div>
+</section>
+
 <!-- Install -->
 <section class="anth-section" id="install">
   <div class="anth-container anth-container--narrow">
