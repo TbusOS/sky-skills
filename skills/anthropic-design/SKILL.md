@@ -127,3 +127,78 @@ bin/design-review --audit --skill=anthropic --max=5 <dir>/
 退出码：所有文件都 pass → 0；任一文件 errors > 0 → 1；warnings 默认不算 fail，加 `--strict` 才算。
 
 **审外部 HTML（没链 anthropic.css）**：先在 `<head>` 注入 `<link rel="stylesheet" href="<...>/anthropic.css">` 再扫，否则 audit 会报 "undefined class" / "no brand-presence" 等大量 false positive。
+
+### 让 .md / sibling .html 跳转也变好看 — md-mirror / md-rewrite-links / md-pack / cross-link-pack
+
+场景：anthropic 风格 HTML 文档常链到外部 .md（README / 实施步骤 / 原理详解），或链到 sibling 目录里的其他 .html。浏览器原生显示 raw markdown 难看，单独发文档目录时 sibling .html 链路又会 broken。`scripts/` 下四件套各管一段，按需用。
+
+#### 1. `md-mirror.mjs` · 1→1 渲染原语
+
+把 .md 渲成同款 anthropic.css 的自包含 .html（1200px 容器，深色代码块，橙色 callout blockquote，GFM 表格，banner 显示 git 相对源路径）。
+
+```bash
+node skills/anthropic-design/scripts/md-mirror.mjs <src.md>            # 旁边出 .html
+node skills/anthropic-design/scripts/md-mirror.mjs <src.md> <dst.html> # 显式 dst
+```
+
+库模式：`import { renderMarkdown } from './md-mirror.mjs'` 让上层（md-pack）注入 rewriteHref hook。
+
+#### 2. `md-rewrite-links.mjs` · href 后缀替换原语
+
+把 HTML 里 `href="*.md(?q)(#f)"` 直接改成 `href="*.html(?q)(#f)"`（in-place，跳过 http(s) / 锚点 / 绝对路径）。简单场景：所有 .md 镜像就放在原位置时用它。
+
+```bash
+node skills/anthropic-design/scripts/md-rewrite-links.mjs <file.html> [...]
+```
+
+#### 3. `md-pack.mjs` · 把 .md 链接折叠到子目录（推荐用于发包）
+
+发文档目录给同事 / 客户时，主 HTML 跳出去的 .md 散在各处，单发主目录就 broken。md-pack 一次性把所有被链接的 .md 渲染到 `<out>/<flat>.html`（扁平命名避免冲突），主 HTML 重写指向 `_md/...`，镜像之间相互跳转也修对。装到 `_md/` 后整个主目录 cp 哪都行。
+
+```bash
+node skills/anthropic-design/scripts/md-pack.mjs \
+  --base docs \
+  --out  docs/avb-decision/_md \
+  docs/avb-decision/*.html
+```
+
+行为：
+- 扫主 HTML 的 .md href → 解析到绝对路径
+- 扁平名 = `relpath(src, --base).replace(/\//g, '__').replace(/\.md$/, '.html')`
+- 调 `renderMarkdown` 把每个 .md 渲到 `<out>/<flat>.html`，链接重写按场景分类：
+  - **Case A**：跳到另一个被打包的 .md → 同目录扁平兄弟
+  - **Case B**：跳到主 HTML → 从 _md/ 出来 `../mainHtml.html`
+  - **Case C**：跳到 pack 外的资源 → 重算相对路径 + 警告
+  - **Fallback**：源 .md 写错路径（off-by-one ../）→ 按 basename 后缀匹配救回，发 info 提示
+- 主 HTML 的 .md href 全部重写到 `_md/<flat>.html`
+- 幂等，重跑可补漏（如果你后续在主 HTML 里加了新 .md 链接）
+
+`--dry-run` 看计划不写文件。
+
+#### 4. `cross-link-pack.mjs` · 把跨目录 sibling .html 也折叠进来
+
+md-pack 处理 .md，cross-link-pack 处理 .html。当主 HTML 链到 secure-boot-guide 其他目录里的兄弟 .html（不是镜像），cp 走主目录后这些链就坏。cross-link-pack 把那些 .html 直接拷到 `_md/`（同款扁平命名），并 rewrite 主 HTML 的 href。
+
+```bash
+node skills/anthropic-design/scripts/cross-link-pack.mjs \
+  --pack-root docs/avb-decision \
+  --base      docs \
+  --out       docs/avb-decision/_md \
+  docs/avb-decision/*.html
+```
+
+注意：被 cp 进来的 sibling .html 内部如果还有相对引用（图片 / 子链接 / CSS），那些引用在新位置可能 broken；脚本会扫并 warn。脚本只管把 sibling .html 拽过来，不试图也把 sibling 的依赖一起拽——遵循 single-responsibility，避免无限递归打包。
+
+#### 推荐工作流
+
+```bash
+# 1) 主 HTML 跳 .md 都收进来
+node md-pack.mjs --base docs --out docs/<pack>/_md docs/<pack>/*.html
+
+# 2) 主 HTML 跳跨目录 .html 也收进来
+node cross-link-pack.mjs --pack-root docs/<pack> --base docs --out docs/<pack>/_md docs/<pack>/*.html
+
+# 3) cp 走 docs/<pack>/ 给任何人，链全活
+```
+
+依赖：`marked@^15`（已在 sky-skills/node_modules）。脚本路径全部相对 `import.meta.url` 计算，整个 sky-skills 仓 cp 到任何地方都能用。
