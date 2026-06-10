@@ -12,6 +12,8 @@ Four design skills ship with single-page flagship demos under [`demos/`](./demos
 - [**anthropic-design demo**](./demos/anthropic-design/index.html) — sky-skills in anthropic.com's warm editorial voice
 - [**ember-design demo**](./demos/ember-design/index.html) — handcraft editorial warmth (cream + chocolate + gold)
 - [**sage-design demo**](./demos/sage-design/index.html) — quiet Nordic minimalism (cream + sage green + deep indigo)
+- [**anthropic diagram gallery**](./demos/anthropic-design/diagrams.html) — 23 hand-crafted SVG diagrams (registers, SoC blocks, waveforms, schedulers …)
+- [**apple diagram gallery**](./demos/apple-design/diagrams.html) — 12 of the same diagram types in apple.com's clean geometric style
 
 To preview locally: `python3 -m http.server 8000` from the repo root, then open the URLs.
 
@@ -23,11 +25,11 @@ To preview locally: `python3 -m http.server 8000` from the repo root, then open 
 | [wechat-video-publisher](skills/wechat-video-publisher/) | ZH | WeChat article & video production pipeline — edge-tts narration, Playwright frame-by-frame recording, ffmpeg subtitle burning, WeChat-compatible inline-style HTML article templates |
 | [doc-to-markdown](skills/doc-to-markdown/) | EN/ZH | Document-to-Markdown converter — batch PDF/DOCX to clean Markdown with extracted images, table conversion, EMF/WMF handling, CJK support |
 | [md-to-pdf](skills/md-to-pdf/) | EN/ZH | Markdown-to-PDF converter with full Chinese support, bookmarks, and page numbers via PyMuPDF Story HTML rendering |
-| [apple-design](skills/apple-design/) | EN/ZH | Render HTML/CSS in **apple.com** visual aesthetic — white/pale-gray alternating sections, SF Pro typography, minimal text links (no filled buttons), large stat callouts, product-photography-driven layout, hand-drawn SVG diagrams |
-| [anthropic-design](skills/anthropic-design/) | EN/ZH | Render HTML/CSS in **anthropic.com** visual aesthetic — warm cream bg (#faf9f5), Poppins + Lora serif body, orange accent (#d97757) filled pill buttons, editorial card grids, abstract SVG illustrations, low-saturation data viz. **Adds in v2 (2026-04):** scenario recipes for non-canonical layouts (dashboard / form / table / tab / accordion / modal / sidebar / changelog / video / empty-state) + components (input / select / check / switch / toast / dialog / banner / tooltip / skeleton) + motion (hero / stagger / hover / route) + a `references/ux-writing.md` codifying CTA / empty-state / error / placeholder copy plus a banned-word list, all backed by `assets/anthropic.css`. Pair with `bin/design-review --audit <dir-or-url>` to batch-check existing pages. **Adds in v3 (2026-05):** four-piece md rendering pipeline under `scripts/` — `md-mirror` (1 `.md` → 1 anthropic-styled `.html` with inline CSS), `md-rewrite-links` (in-place `.md`→`.html` href swap), `md-pack` (fold linked `.md` into a flat `_md/` subdir + retarget hrefs + basename rescue for source typos), `cross-link-pack` (fold cross-directory sibling `.html` into the same `_md/`). Run pack + cross-link-pack on a doc dir and `cp -r` it anywhere — all links survive |
+| [apple-design](skills/apple-design/) | EN/ZH | Render HTML/CSS in **apple.com** visual aesthetic — white/pale-gray alternating sections, SF Pro typography, minimal text links (no filled buttons), large stat callouts, product-photography-driven layout, hand-drawn SVG diagrams. **Adds diagram-craft v3 (2026-06):** kernel-grade SVG diagram rules (size-first workflow, tinted fills, ≥2 hues per diagram) + the template library grown to 12 — see the [diagram gallery](demos/apple-design/diagrams.html) |
+| [anthropic-design](skills/anthropic-design/) | EN/ZH | Render HTML/CSS in **anthropic.com** visual aesthetic — warm cream bg (#faf9f5), Poppins + Lora serif body, orange accent (#d97757) filled pill buttons, editorial card grids, abstract SVG illustrations, low-saturation data viz. **Adds in v2 (2026-04):** scenario recipes for non-canonical layouts (dashboard / form / table / tab / accordion / modal / sidebar / changelog / video / empty-state) + components (input / select / check / switch / toast / dialog / banner / tooltip / skeleton) + motion (hero / stagger / hover / route) + a `references/ux-writing.md` codifying CTA / empty-state / error / placeholder copy plus a banned-word list, all backed by `assets/anthropic.css`. Pair with `bin/design-review --audit <dir-or-url>` to batch-check existing pages. **Adds in v3 (2026-05):** four-piece md rendering pipeline under `scripts/` — `md-mirror` (1 `.md` → 1 anthropic-styled `.html` with inline CSS), `md-rewrite-links` (in-place `.md`→`.html` href swap), `md-pack` (fold linked `.md` into a flat `_md/` subdir + retarget hrefs + basename rescue for source typos), `cross-link-pack` (fold cross-directory sibling `.html` into the same `_md/`). Run pack + cross-link-pack on a doc dir and `cp -r` it anywhere — all links survive. **Adds diagram-craft v3 (2026-06):** kernel-grade SVG diagram rules + the template library grown to 14 (register-bitfield / soc-block / hw-timing-waveform / sched-timeline …) — see the [23-diagram gallery](demos/anthropic-design/diagrams.html) |
 | [ember-design](skills/ember-design/) | EN/ZH | Render HTML/CSS in a **handcraft-editorial** aesthetic — cream (#fff2df) + chocolate (#312520) + brown CTA (#492d22) + gold accent (#c49464), Fraunces display serif + Inter body. For artisan brands, boutique hotels, literary journals |
 | [sage-design](skills/sage-design/) | EN/ZH | Render HTML/CSS in a **quiet Nordic-minimal** aesthetic — rice-paper cream (#f8faec) + sage green accent (#97B077) + deep indigo ink (#393C54), Instrument Serif display + Inter body + JetBrains Mono. For reading apps, botanical studios, modern journals, quiet tech brands |
-| [design-review](skills/design-review/) | EN/ZH | **Independent evaluator** for the 4 design skills — three-gate validation (`verify.py` structural + `visual-audit.mjs` Playwright-rendered + `screenshot.mjs`) plus a repo-internal known-bug catalogue. Inspired by Anthropic's [harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps): generator and evaluator are separate skills so the reviewer doesn't inherit the generator's assumptions. See the full [8-component harness roadmap](docs/HARNESS-ROADMAP.html) (rendered in all 4 design voices) |
+| [design-review](skills/design-review/) | EN/ZH | **Independent evaluator** for the 4 design skills — four-gate validation (`verify.py` structural + `visual-audit.mjs` Playwright-rendered + `screenshot.mjs` + `critic.mjs` LLM taste review) plus a repo-internal known-bug catalogue. Also ships `multi-critic.mjs` (4 specialist reviewers with fixed weights), a learning loop that turns critic catches into new gate rules via the `design-learner` agent, and the `bin/design-review` CLI with three modes (`--plan` / `--critic` / `--audit`). Inspired by Anthropic's [harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps): generator and evaluator are separate skills so the reviewer doesn't inherit the generator's assumptions. See the full [8-component harness roadmap](docs/HARNESS-ROADMAP.html) (rendered in all 4 design voices) |
 | [gated-dual-clone](skills/gated-dual-clone/) | EN/ZH | **Dual-repo git workflow bootstrapper (2-clone default · optional 3-clone with a reproducibility gate).** For projects where the upstream branch is protected (MR / PR only) and builds are heavy / pollute the tree. One command creates a `gateway` repo (push source) and a `satellite` repo (fetch-only build tree) — the build tree is physically unable to reach the remote. Three safety gates verified post-setup: protocol wall, explicit push-URL disable, pre-push hook. Add `--clean-verify-dir` for a 3rd clone on cold disk + a stamp-match pre-push gate that refuses to push anything a from-scratch full build hasn't OK'd. Full [design spec](docs/design-mr-gated-dual-repo.md) + [anthropic demo](demos/gated-dual-clone/index.html) |
 | [gated-dual-clone-audit](skills/gated-dual-clone-audit/) | EN/ZH | **Independent evaluator** paired with `gated-dual-clone`. Imports nothing from the generator — only reads the output topology and re-verifies the safety gates. Four tiers: structural (filesystem / hook / hardlink, 8 gates) → configuration (git config, 8 gates) → behavioural (safe `--dry-run` + direct hook invocation, 3 gates) → taste (LLM critic subagent, advisory). Pass `--clean-verify-dir` to auto-add 4 more gates (S9-S11 + C9 + B4) for 3-clone topologies. Run on demand, as a `pre-push` hook, or as a cron drift check. `--json` output feeds `learning-loop` for drift codification. Same generator / evaluator split as `design-review` |
 | [doc-review-loop](skills/doc-review-loop/) | ZH | **Two-agent review loop for serious decision documents.** A `writer` agent drafts the doc with code/data evidence; a `reviewer` agent then plays a strict no-context PM, challenges every claim, and returns issues bucketed A (blocker) / B (must-fix) / C (nice-to-have). The main thread feeds reviewer findings back to writer for v2, repeats up to 3 rounds. Each round's diff and reviewer questions are logged to `<doc>.review.log`. Trigger: ship-gate decisions, cross-team alignment docs, complex change justifications, "change vs. don't" rationales. **Don't trigger** for short READMEs, single-page memos, or personal notes — overhead doesn't pay off |
@@ -40,25 +42,13 @@ For example, when you start editing a kernel module, the `linux-kernel-dev` skil
 
 ## Installation
 
-> **Heads up — two kinds of skills in this repo.** Some skills are a single `SKILL.md` file (e.g. `linux-kernel-dev`, `md-to-pdf`). Others bundle `SKILL.md` + `scripts/` + `references/` + optionally `agents/` (e.g. `design-review`, `gated-dual-clone`, `gated-dual-clone-audit`). **Multi-file skills must be installed as the whole directory** — a single-file copy leaves the skill unable to run its scripts. Methods below cover both shapes.
+> **Two install scopes.** Copying into a project's `.claude/skills/` makes a skill available in that repository only; copying into `~/.claude/skills/` makes it available in every repository on your machine. The commands below use the user-level `~/.claude/skills/` — swap the destination for project-level installs. Full bilingual walkthrough: [docs/INSTALL.html](docs/INSTALL.html).
+>
+> **Heads up — two kinds of skills in this repo.** Some skills are a single `SKILL.md` file (e.g. `linux-kernel-dev`, `md-to-pdf`). Others bundle `SKILL.md` + `scripts/` + `references/` + `templates/` — that includes the four design skills (`apple-design` / `anthropic-design` / `ember-design` / `sage-design`) plus `design-review`, `gated-dual-clone` and `gated-dual-clone-audit`. **Multi-file skills must be installed as the whole directory** — a single-file copy leaves the skill unable to run its scripts. Note the `design-learner` agent used by `design-review`'s learning loop is not part of the skill directory: copy `.claude/agents/design-learner.md` into your `~/.claude/agents/` separately.
 >
 > **After installation, restart your Claude Code session** so the skill registry picks up the new entries.
 
-### Method 1: Install via Claude Code CLI (recommended)
-
-Handles both single-file and multi-file skills automatically.
-
-```bash
-# Single-file skill
-claude install github:TbusOS/sky-skills/skills/linux-kernel-dev
-
-# Multi-file skill (directory)
-claude install github:TbusOS/sky-skills/skills/design-review
-claude install github:TbusOS/sky-skills/skills/gated-dual-clone
-claude install github:TbusOS/sky-skills/skills/gated-dual-clone-audit
-```
-
-### Method 2: Clone + copy
+### Method 1: Clone + copy (recommended)
 
 ```bash
 git clone https://github.com/TbusOS/sky-skills.git
@@ -73,7 +63,7 @@ cp -r sky-skills/skills/gated-dual-clone-audit ~/.claude/skills/
 cp -r sky-skills/skills/design-review          ~/.claude/skills/
 ```
 
-### Method 3: Symlink (auto-updates with `git pull`)
+### Method 2: Symlink (auto-updates with `git pull`)
 
 ```bash
 git clone https://github.com/TbusOS/sky-skills.git
@@ -89,15 +79,35 @@ ln -s "$(pwd)/skills/gated-dual-clone-audit" ~/.claude/skills/gated-dual-clone-a
 ln -s "$(pwd)/skills/design-review"          ~/.claude/skills/design-review
 ```
 
+### Method 3: Claude Code CLI (if your version supports it)
+
+Some Claude Code versions ship a `claude install` subcommand that handles both shapes:
+
+```bash
+claude install github:TbusOS/sky-skills/skills/linux-kernel-dev
+claude install github:TbusOS/sky-skills/skills/design-review
+```
+
+If the subcommand is not available in your version, use Method 1 or 2.
+
 ### Which method to pick
 
 | Method | Pros | Cons |
 |---|---|---|
-| 1 · CLI | Least typing · handles shape automatically | Requires `claude` CLI |
-| 2 · Copy | No tool dependency · portable | Upstream updates need re-copy |
-| 3 · Symlink | `git pull` upstream = your skills update too | Relies on the clone staying put on disk |
+| 1 · Copy | No tool dependency · portable | Upstream updates need re-copy |
+| 2 · Symlink | `git pull` upstream = your skills update too | Relies on the clone staying put on disk |
+| 3 · CLI | Least typing · handles shape automatically | Depends on `claude install` being available in your CLI version |
 
-## Skill Details
+## Selected skill details
+
+Five skills are detailed below. For the rest, each skill's own `SKILL.md` is the reference:
+[md-to-pdf](skills/md-to-pdf/SKILL.md) ·
+[ember-design](skills/ember-design/SKILL.md) ·
+[sage-design](skills/sage-design/SKILL.md) ·
+[design-review](skills/design-review/SKILL.md) ·
+[gated-dual-clone](skills/gated-dual-clone/SKILL.md) ·
+[gated-dual-clone-audit](skills/gated-dual-clone-audit/SKILL.md) ·
+[doc-review-loop](skills/doc-review-loop/SKILL.md)
 
 ### linux-kernel-dev
 
@@ -147,7 +157,7 @@ Render any HTML/CSS in the visual language of apple.com:
 - **Layouts** — alternating white/pale-gray/black sections, centered hero, 5-col product lineup, 3-col docs, newsroom card grid, event page
 - **Components** — 27 ready-to-use `.apple-*` classes: sticky blurred nav, 5-col footer, filled-only-for-buy buttons, inputs, option cards, segmented controls, tabs, carousel, video with ASL badge, badges, pull quotes, details, info/warning/success/danger admonitions, breadcrumbs, search overlay
 - **Templates** — 9 drop-in HTML files (landing, article, docs, slide-deck, stat-callout, nav-footer, form, product-configurator, specs-page)
-- **Diagrams** — 4 hand-crafted SVG templates (flow / architecture / hierarchy / timeline) matching Apple's clean geometric style
+- **Diagrams** — 12 hand-crafted SVG templates (flow / architecture / hierarchy / timeline / sequence / register-bitfield / soc-block / hw-timing-waveform / sched-timeline / build-pipeline / function-flowchart / algorithm-ringbuffer) matching Apple's clean geometric style — browse them all in the [diagram gallery](demos/apple-design/diagrams.html)
 - **Delivery** — plain `.apple.css` (no build), plus Tailwind preset
 
 **Auto-triggers when:** the user says "apple 风格" / "apple style" / "苹果官网风格" / "like apple.com", or asks for a landing page / slide / doc / diagram / configurator matching Apple's web look.
@@ -162,7 +172,7 @@ Render any HTML/CSS in the visual language of anthropic.com:
 - **Layouts** — editorial card grids, long-form 720px single column, research paper with inline charts, product overview, pricing cards, enterprise with logo wall
 - **Components** — 27 `.anth-*` classes including filled-pill orange buttons, italic Lora pull quotes with customer logos, low-saturation data charts, customer quote carousel with counter, pricing card (highlight with orange border), logo wall with grayscale hover
 - **Templates** — 9 drop-in HTML files (landing, article, docs, slide-deck, pricing, data-report, enterprise, product-overview, nav-footer)
-- **Diagrams** — 4 SVG templates with orange/blue/green category coloring and diamond decision gates
+- **Diagrams** — 14 SVG templates with orange/blue/green category coloring and diamond decision gates, including kernel-grade types (register-bitfield / soc-block / hw-timing-waveform / sched-timeline / state-machine / deployment) — browse them all in the [23-diagram gallery](demos/anthropic-design/diagrams.html)
 - **Delivery** — plain `.anthropic.css` + `fonts.css` (imports Poppins/Lora/JetBrains Mono from Google Fonts), plus Tailwind preset
 
 **Auto-triggers when:** the user says "anthropic 风格" / "anthropic style" / "claude 官网风格" / "Anthropic 品牌", or asks for editorial long-form, research articles, pricing cards, or a filled-button-with-warmth feel.

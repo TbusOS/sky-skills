@@ -8,6 +8,13 @@ Same story, four aesthetics. Each demo is a single flagship HTML page showcasing
 | [`anthropic-design/`](./anthropic-design/index.html) | `skills/anthropic-design/` | Warm cream, Poppins + Lora serif, orange filled pills, editorial cards, pull quote, bar chart, 3-tier pricing |
 | [`ember-design/`](./ember-design/index.html) | `skills/ember-design/` | Deep cream + chocolate + gold, Fraunces display serif + Inter body, coffee-bean hero SVG, gold-quoted pull-quote, handcraft feel |
 | [`sage-design/`](./sage-design/index.html) | `skills/sage-design/` | Rice-paper cream + sage green + deep indigo, Instrument Serif display + Inter body + JetBrains Mono section numbers, quiet Nordic minimalism |
+| [`gated-dual-clone/`](./gated-dual-clone/index.html) | `skills/gated-dual-clone/` | Anthropic voice, single-purpose page explaining the 2/3-clone git topology and its safety gates |
+
+Extra pages beyond the four flagship `index.html`:
+
+- [`anthropic-design/index-v2.html`](./anthropic-design/index-v2.html) — v2 scenario showcase (dashboard / form / table / modal and other non-canonical layouts)
+- [`anthropic-design/diagrams.html`](./anthropic-design/diagrams.html) — 23-diagram gallery (registers, SoC blocks, waveforms, schedulers …)
+- [`apple-design/diagrams.html`](./apple-design/diagrams.html) — 12-diagram gallery, same diagram types in Apple's clean geometric style
 
 ## Local preview
 
@@ -47,19 +54,22 @@ On top of the shared three, each demo has aesthetic-specific small diagrams:
 
 ## Quality gates
 
-Every demo is validated by three scripts before commit:
+Every demo passes four gates before commit. All gate scripts live in one place — `skills/design-review/scripts/` — and work on any of the demos:
 
 ```bash
-# Structural (placeholder / BEM / undefined class / SVG balance)
-python3 skills/<skill>/scripts/verify.py demos/<skill>/index.html
+# Gate 1 — structural (placeholder / BEM / undefined class / SVG balance)
+python3 skills/design-review/scripts/verify.py demos/<skill>/index.html
 
-# Visual (Playwright render + WCAG contrast + diagram sizing + orphan card)
-node skills/<skill>/scripts/visual-audit.mjs demos/<skill>/index.html
+# Gate 2 — visual (Playwright render + WCAG contrast + diagram sizing + orphan card)
+node skills/design-review/scripts/visual-audit.mjs demos/<skill>/index.html
 
-# Human-in-the-loop screenshot
-node skills/<skill>/scripts/screenshot.mjs demos/<skill>/index.html demo-shot.png
+# Gate 3 — human-in-the-loop screenshot
+node skills/design-review/scripts/screenshot.mjs demos/<skill>/index.html demo-shot.png
+
+# Gate 4 — LLM taste review (assembles the critic prompt; run it through Claude)
+node skills/design-review/scripts/critic.mjs demos/<skill>/index.html
 ```
 
 ## Cross-link
 
-Each demo links to the others near the footer so you can toggle between the four aesthetics on the same content and compare directly.
+The four flagship design demos link to each other near the footer so you can toggle between the aesthetics on the same content and compare directly. `gated-dual-clone/index.html` is the exception — it is a single-purpose page and does not carry the cross-links.
