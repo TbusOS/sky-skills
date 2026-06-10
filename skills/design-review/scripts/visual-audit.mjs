@@ -503,15 +503,24 @@ const findings = await page.evaluate((arg) => {
     }
   });
 
-  // ---------- 2c4) Monochrome engineering diagram — anthropic only (known-bugs §1.30) ----------
+  // ---------- 2c4) Monochrome engineering diagram — skill whitelist (known-bugs §1.30) ----------
   // Reverse gate to saturated-band: a diagram with ZERO saturated hues (white
   // cards + gray strokes + gray text) reads as an unfinished wireframe.
-  // Anthropic diagram-craft wants ≥2 semantic hues per engineering diagram;
-  // the machine gate only catches the unambiguous failure (0 hues) because
-  // legitimate single-hue diagrams exist (git graphs, timelines). Apple is
-  // exempt by design (single blue focus). Tints (l ≥ 0.85) don't count as
-  // hues — color presence must come from solid dots/badges/bars/lines.
-  if (cs && cs.skill === 'anthropic') {
+  // The machine gate only catches the unambiguous failure (0 hues) because
+  // legitimate single-hue diagrams exist (git graphs, timelines). Tints
+  // (l ≥ 0.85) don't count as hues — color presence must come from solid
+  // dots/badges/bars/lines.
+  // Whitelist rationale per skill:
+  //   anthropic — wants ≥2 semantic hues per engineering diagram (craft §1).
+  //   ember     — warm browns (#312520/#6b5a4f/#8a7564) sit below the s>0.25
+  //               bar; the gold focus #c49464 is what registers as a hue.
+  //               A 0-hue ember diagram means the gold focus is missing or
+  //               cold neutral gray crept in — both are dos-and-donts fails.
+  //   sage      — green #97B077 is the identity; indigo ink #393C54 is too
+  //               desaturated to count. 0 hue = a gray wireframe, not sage.
+  //   apple     — EXEMPT by design: achromatic grayscale + single blue focus
+  //               is the identity, so an all-gray diagram can be legitimate.
+  if (cs && ['anthropic', 'ember', 'sage'].includes(cs.skill)) {
     document.querySelectorAll('figure svg').forEach((svg) => {
       const rect = svg.getBoundingClientRect();
       if (rect.width < 300) return;
@@ -1289,7 +1298,7 @@ for (const i of visibleFindings) {
     );
   } else if (i.kind === 'diagram-monochrome') {
     console.log(
-      `  [${i.severity}] diagram-monochrome: engineering diagram "${i.label}" (${i.nodeCount} nodes, ${i.textCount} labels) has zero saturated hues — reads gray/unfinished; anthropic wants ≥2 semantic hues per diagram (tint containers + solid color dots/badges/lines), see diagram-craft.md §1 (known-bugs 1.30)`
+      `  [${i.severity}] diagram-monochrome: engineering diagram "${i.label}" (${i.nodeCount} nodes, ${i.textCount} labels) has zero saturated hues — reads gray/unfinished; this skill's accent must be present as a hue (anthropic ≥2 semantic hues · ember gold focus · sage green focus; tints don't count, use solid dots/badges/bars/lines), see the skill's diagram-craft.md (known-bugs 1.30)`
     );
   } else if (i.kind === 'text-desert') {
     console.log(

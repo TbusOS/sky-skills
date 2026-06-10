@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 364" role="img" aria-label="Scheduler timeline: CFS run view across CPU 0 to CPU 2 where the traced task app: render runs on CPU 0, is preempted by the eth0 IRQ thread at 4 ms, then migrates to CPU 2 under load balancing while kworker runs periodically on CPU 1; the traced task and its migration arrow carry the gold focus" font-family="Inter, -apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="emsch-arr-gold" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c49464"/>
+    </marker>
+  </defs>
+
+  <!-- header -->
+  <text x="24" y="32" font-size="11" font-weight="600" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" letter-spacing="1.1" fill="#8a7564">SCHED &#183; CFS RUN VIEW &#183; 12 MS WINDOW</text>
+  <text x="1096" y="32" text-anchor="end" font-size="11" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" fill="#8a7564">trace-cmd record -e sched_switch -e sched_migrate_task</text>
+
+  <!-- tick gridlines (under everything) -->
+  <g stroke="#e6d9bf" stroke-width="1">
+    <line x1="104" y1="96" x2="104" y2="288"/>
+    <line x1="264" y1="96" x2="264" y2="288"/>
+    <line x1="424" y1="96" x2="424" y2="288"/>
+    <line x1="584" y1="96" x2="584" y2="288"/>
+    <line x1="744" y1="96" x2="744" y2="288"/>
+    <line x1="904" y1="96" x2="904" y2="288"/>
+    <line x1="1064" y1="96" x2="1064" y2="288"/>
+  </g>
+
+  <!-- time axis -->
+  <g stroke="#8a7564" stroke-width="1">
+    <line x1="104" y1="288" x2="1064" y2="288"/>
+    <line x1="104" y1="288" x2="104" y2="296"/>
+    <line x1="264" y1="288" x2="264" y2="296"/>
+    <line x1="424" y1="288" x2="424" y2="296"/>
+    <line x1="584" y1="288" x2="584" y2="296"/>
+    <line x1="744" y1="288" x2="744" y2="296"/>
+    <line x1="904" y1="288" x2="904" y2="296"/>
+    <line x1="1064" y1="288" x2="1064" y2="296"/>
+  </g>
+
+  <!-- CPU 0 lane: traced task 0-4 ms (gold edge), irq/eth0 4-5 ms, idle 5-12 ms -->
+  <rect id="emsch-focus" x="104" y="104" width="320" height="36" rx="8" fill="#f5e5c8" stroke="#c49464" stroke-width="1.5"/>
+  <rect x="424" y="104" width="80" height="36" rx="8" fill="#f5e5c8"/>
+  <rect x="504" y="104" width="560" height="36" rx="8" fill="#ffffff" stroke="#e6d9bf" stroke-dasharray="4 3"/>
+
+  <!-- CPU 1 lane: kworker bursts every 4 ms -->
+  <rect x="104" y="168" width="80" height="36" rx="8" fill="#ffffff" stroke="#e6d9bf" stroke-dasharray="4 3"/>
+  <rect x="184" y="168" width="120" height="36" rx="8" fill="#f5e5c8"/>
+  <rect x="304" y="168" width="200" height="36" rx="8" fill="#ffffff" stroke="#e6d9bf" stroke-dasharray="4 3"/>
+  <rect x="504" y="168" width="120" height="36" rx="8" fill="#f5e5c8"/>
+  <rect x="624" y="168" width="200" height="36" rx="8" fill="#ffffff" stroke="#e6d9bf" stroke-dasharray="4 3"/>
+  <rect x="824" y="168" width="120" height="36" rx="8" fill="#f5e5c8"/>
+  <rect x="944" y="168" width="120" height="36" rx="8" fill="#ffffff" stroke="#e6d9bf" stroke-dasharray="4 3"/>
+
+  <!-- CPU 2 lane: idle 0-5 ms, traced task continues 5-9 ms (gold edge), idle 9-12 ms -->
+  <rect x="104" y="232" width="400" height="36" rx="8" fill="#ffffff" stroke="#e6d9bf" stroke-dasharray="4 3"/>
+  <rect x="504" y="232" width="320" height="36" rx="8" fill="#f5e5c8" stroke="#c49464" stroke-width="1.5"/>
+  <rect x="824" y="232" width="240" height="36" rx="8" fill="#ffffff" stroke="#e6d9bf" stroke-dasharray="4 3"/>
+
+  <!-- IRQ event marker at 4 ms: ink, never gold -->
+  <line x1="424" y1="88" x2="424" y2="104" stroke="#312520" stroke-width="1.8"/>
+  <rect x="400" y="64" width="48" height="24" rx="12" fill="#312520"/>
+  <text x="424" y="80" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">IRQ</text>
+  <text x="456" y="80" font-size="11" font-weight="600" fill="#6b5a4f">eth0 rx</text>
+
+  <!-- migration arrow: the traced task's move, gold dashed -->
+  <path d="M408,140 V208 Q408,216 416,216 H512 Q520,216 520,224 V228" fill="none" stroke="#c49464" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#emsch-arr-gold)"/>
+  <text x="532" y="220" font-size="11" fill="#8a7564">migrate (load balance)</text>
+
+  <!-- CPU labels -->
+  <text x="24" y="128" font-size="12" font-weight="600" fill="#312520">CPU 0</text>
+  <text x="24" y="192" font-size="12" font-weight="600" fill="#312520">CPU 1</text>
+  <text x="24" y="256" font-size="12" font-weight="600" fill="#312520">CPU 2</text>
+
+  <!-- block labels -->
+  <text x="116" y="128" font-size="11.5" font-weight="600" fill="#492d22">app: render</text>
+  <text x="436" y="128" font-size="11.5" font-weight="600" fill="#312520">irq/eth0</text>
+  <text x="516" y="128" font-size="11.5" fill="#8a7564">idle</text>
+  <text x="432" y="160" font-size="11" fill="#8a7564">preempted by irq/eth0</text>
+
+  <text x="116" y="192" font-size="11.5" fill="#8a7564">idle</text>
+  <text x="196" y="192" font-size="11.5" font-weight="600" fill="#312520">kworker/u8</text>
+  <text x="316" y="192" font-size="11.5" fill="#8a7564">idle</text>
+  <text x="516" y="192" font-size="11.5" font-weight="600" fill="#312520">kworker/u8</text>
+  <text x="636" y="192" font-size="11.5" fill="#8a7564">idle</text>
+  <text x="836" y="192" font-size="11.5" font-weight="600" fill="#312520">kworker/u8</text>
+  <text x="956" y="192" font-size="11.5" fill="#8a7564">idle</text>
+
+  <text x="116" y="256" font-size="11.5" fill="#8a7564">idle</text>
+  <text x="516" y="256" font-size="11.5" font-weight="600" fill="#492d22">app: render</text>
+  <text x="836" y="256" font-size="11.5" fill="#8a7564">idle</text>
+
+  <!-- axis labels -->
+  <g font-size="11" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" fill="#8a7564" text-anchor="middle">
+    <text x="104" y="312">0</text>
+    <text x="264" y="312">2</text>
+    <text x="424" y="312">4</text>
+    <text x="584" y="312">6</text>
+    <text x="744" y="312">8</text>
+    <text x="904" y="312">10</text>
+    <text x="1064" y="312">12</text>
+  </g>
+  <text x="1080" y="312" font-size="11" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" fill="#8a7564">ms</text>
+
+  <!-- legend -->
+  <rect x="104" y="328" width="20" height="16" rx="4" fill="#f5e5c8" stroke="#c49464" stroke-width="1.5"/>
+  <rect x="320" y="328" width="20" height="16" rx="4" fill="#f5e5c8"/>
+  <rect x="560" y="328" width="20" height="16" rx="4" fill="#ffffff" stroke="#e6d9bf" stroke-dasharray="4 3"/>
+  <line x1="656" y1="336" x2="680" y2="336" stroke="#c49464" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <g font-size="11" fill="#6b5a4f">
+    <text x="132" y="340">app: render &#183; traced task</text>
+    <text x="348" y="340">kworker / irq &#183; other tasks</text>
+    <text x="588" y="340">idle</text>
+    <text x="688" y="340">migration of the traced task</text>
+  </g>
+</svg>

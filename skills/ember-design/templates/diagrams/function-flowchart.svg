@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 864 588" role="img" aria-label="Kernel driver probe flowchart: mydev_probe gold happy path through devm_kzalloc, ioremap, request_irq and chardev registration, with a dashed warm-gray error lane collecting -ENOMEM errors and iounmap cleanup into a shared return ret exit" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="emffc-sh" x="-20%" y="-30%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#492d22" flood-opacity="0.08"/>
+    </filter>
+    <marker id="emffc-arrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c49464"/>
+    </marker>
+    <marker id="emffc-arrW" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a7564"/>
+    </marker>
+  </defs>
+
+  <!-- error lane: warm-beige group, dashed hairline marks the exception space -->
+  <rect x="588" y="56" width="252" height="496" rx="16" fill="#fbeedd" stroke="#e6d9bf" stroke-dasharray="4 4"/>
+  <text x="608" y="84" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="11" letter-spacing="1.1" fill="#8a7564">ERROR LANE</text>
+
+  <!-- gold happy path -->
+  <g fill="none" stroke="#c49464" stroke-width="1.8">
+    <line x1="152" y1="60" x2="152" y2="90" marker-end="url(#emffc-arrG)"/>
+    <line x1="276" y1="124" x2="354" y2="124" marker-end="url(#emffc-arrG)"/>
+    <path d="M436,152 V168 Q436,176 428,176 H160 Q152,176 152,184 V194" marker-end="url(#emffc-arrG)"/>
+    <line x1="276" y1="228" x2="354" y2="228" marker-end="url(#emffc-arrG)"/>
+    <path d="M436,256 V272 Q436,280 428,280 H160 Q152,280 152,288 V298" marker-end="url(#emffc-arrG)"/>
+    <line x1="276" y1="332" x2="354" y2="332" marker-end="url(#emffc-arrG)"/>
+    <path d="M436,360 V376 Q436,384 428,384 H160 Q152,384 152,392 V402" marker-end="url(#emffc-arrG)"/>
+    <line x1="152" y1="464" x2="152" y2="490" marker-end="url(#emffc-arrG)"/>
+  </g>
+
+  <!-- error path: dashed warm gray -->
+  <g fill="none" stroke="#8a7564" stroke-width="1.2" stroke-dasharray="4 4">
+    <line x1="512" y1="124" x2="602" y2="124" marker-end="url(#emffc-arrW)"/>
+    <line x1="512" y1="228" x2="602" y2="228" marker-end="url(#emffc-arrW)"/>
+    <line x1="512" y1="332" x2="602" y2="332" marker-end="url(#emffc-arrW)"/>
+    <path d="M820,124 H828 Q836,124 836,132 V476 Q836,484 828,484 H716 Q708,484 708,492" marker-end="url(#emffc-arrW)"/>
+    <path d="M820,228 H828 Q836,228 836,236 V240"/>
+    <path d="M820,332 H828 Q836,332 836,340 V344"/>
+  </g>
+
+  <!-- entry capsule: tint pill -->
+  <rect x="64" y="24" width="176" height="36" rx="18" fill="#f5e5c8" filter="url(#emffc-sh)"/>
+
+  <!-- main step cards: white, borderless, warm shadow -->
+  <g filter="url(#emffc-sh)">
+    <rect x="28" y="96" width="248" height="56" rx="12" fill="#ffffff"/>
+    <rect x="28" y="200" width="248" height="56" rx="12" fill="#ffffff"/>
+    <rect x="28" y="304" width="248" height="56" rx="12" fill="#ffffff"/>
+    <rect x="28" y="408" width="248" height="56" rx="12" fill="#ffffff"/>
+  </g>
+
+  <!-- decision diamonds: tint + gold edge, part of the happy-path narrative -->
+  <g fill="#f5e5c8" stroke="#c49464" stroke-width="1.5">
+    <path d="M436,96 L512,124 L436,152 L360,124 Z"/>
+    <path d="M436,200 L512,228 L436,256 L360,228 Z"/>
+    <path d="M436,304 L512,332 L436,360 L360,332 Z"/>
+  </g>
+
+  <!-- error lane cards -->
+  <g filter="url(#emffc-sh)">
+    <rect x="608" y="96" width="212" height="56" rx="12" fill="#ffffff"/>
+    <rect x="608" y="200" width="212" height="56" rx="12" fill="#ffffff"/>
+    <rect x="608" y="304" width="212" height="56" rx="12" fill="#ffffff"/>
+  </g>
+
+  <!-- exit capsules: success = tint pill, error = dashed-outline gray pill -->
+  <rect x="84" y="496" width="136" height="36" rx="18" fill="#f5e5c8" filter="url(#emffc-sh)"/>
+  <rect x="636" y="496" width="144" height="36" rx="18" fill="#ffffff" stroke="#e6d9bf" stroke-dasharray="4 4" filter="url(#emffc-sh)"/>
+
+  <!-- numbered badges: gold disc + dark text -->
+  <g font-size="11" font-weight="700" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">
+    <circle cx="32" cy="100" r="10" fill="#c49464"/><text x="32" y="104" fill="#312520">1</text>
+    <circle cx="32" cy="204" r="10" fill="#c49464"/><text x="32" y="208" fill="#312520">2</text>
+    <circle cx="32" cy="308" r="10" fill="#c49464"/><text x="32" y="312" fill="#312520">3</text>
+    <circle cx="32" cy="412" r="10" fill="#c49464"/><text x="32" y="416" fill="#312520">4</text>
+  </g>
+
+  <!-- entry / step text (code names in mono) -->
+  <text x="152" y="46" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="13" font-weight="600" fill="#312520" text-anchor="middle">mydev_probe(pdev)</text>
+  <g font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="13" font-weight="600" fill="#312520">
+    <text x="60" y="118">devm_kzalloc(ctx)</text>
+    <text x="60" y="222">ioremap registers</text>
+    <text x="60" y="326">request_irq(irq, handler)</text>
+    <text x="60" y="430">register chardev</text>
+  </g>
+  <g font-size="11" fill="#8a7564">
+    <text x="60" y="140">sizeof(*ctx) · GFP_KERNEL</text>
+    <text x="60" y="244">MMIO window · res-&gt;start</text>
+    <text x="60" y="348">IRQF_SHARED · dev_id = ctx</text>
+    <text x="60" y="452">misc_register(&amp;ctx-&gt;mdev)</text>
+  </g>
+
+  <!-- diamond text -->
+  <g font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#312520" text-anchor="middle">
+    <text x="436" y="128">ctx == NULL?</text>
+    <text x="436" y="232">base == NULL?</text>
+    <text x="436" y="336">ret &lt; 0?</text>
+  </g>
+
+  <!-- branch labels: continue = gold, error = warm gray -->
+  <g font-size="11" font-weight="600">
+    <text x="556" y="112" fill="#8a7564" text-anchor="middle">yes</text>
+    <text x="556" y="216" fill="#8a7564" text-anchor="middle">yes</text>
+    <text x="556" y="320" fill="#8a7564" text-anchor="middle">yes</text>
+    <text x="448" y="168" fill="#c49464">no</text>
+    <text x="448" y="272" fill="#c49464">no</text>
+    <text x="448" y="376" fill="#c49464">no</text>
+  </g>
+
+  <!-- error lane text -->
+  <g font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="13" font-weight="600" fill="#312520">
+    <text x="628" y="118">ret = -ENOMEM</text>
+    <text x="628" y="222">ret = -ENOMEM</text>
+    <text x="628" y="326">iounmap(base)</text>
+  </g>
+  <g font-size="11" fill="#8a7564">
+    <text x="628" y="140">ctx alloc failed</text>
+    <text x="628" y="244">mmio map failed</text>
+    <text x="628" y="348">unwind mmio mapping</text>
+  </g>
+
+  <!-- exit text -->
+  <text x="152" y="518" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="13" font-weight="600" fill="#492d22" text-anchor="middle">return 0</text>
+  <text x="708" y="518" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="13" font-weight="600" fill="#8a7564" text-anchor="middle">return ret</text>
+
+  <!-- annotation -->
+  <text x="840" y="40" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="11" fill="#8a7564" text-anchor="end">platform_driver · drivers/misc/mydev.c</text>
+
+  <!-- legend -->
+  <g font-size="11" fill="#6b5a4f">
+    <line x1="28" y1="564" x2="52" y2="564" stroke="#c49464" stroke-width="1.8" stroke-linecap="round"/>
+    <text x="60" y="568">happy path</text>
+    <line x1="156" y1="564" x2="180" y2="564" stroke="#8a7564" stroke-width="1.2" stroke-dasharray="4 4" stroke-linecap="round"/>
+    <text x="188" y="568">error path · dashed</text>
+    <rect x="320" y="556" width="16" height="16" rx="5" fill="#f5e5c8"/>
+    <text x="344" y="568">tint = entry / decision / exit</text>
+  </g>
+</svg>

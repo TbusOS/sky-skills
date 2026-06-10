@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 240" role="img" aria-label="Ingest pipeline flow: four numbered steps on a gold happy path with a Valid? decision diamond and a dashed fail-retry loop" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="emflow-sh" x="-20%" y="-30%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#492d22" flood-opacity="0.08"/>
+    </filter>
+    <marker id="emflow-arrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c49464"/>
+    </marker>
+    <marker id="emflow-arrW" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a7564"/>
+    </marker>
+  </defs>
+
+  <!-- group container: warm beige, mono small label -->
+  <rect width="960" height="240" rx="16" fill="#fbeedd" stroke="#e6d9bf"/>
+  <text x="28" y="36" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="11" letter-spacing="1.1" fill="#8a7564">INGEST PIPELINE · HAPPY PATH</text>
+  <text x="932" y="36" font-size="11" fill="#8a7564" text-anchor="end">retry ≤ 3 · then dead-letter</text>
+
+  <!-- gold happy path -->
+  <g fill="none" stroke="#c49464" stroke-width="1.8">
+    <line x1="192" y1="128" x2="224" y2="128" marker-end="url(#emflow-arrG)"/>
+    <line x1="392" y1="128" x2="432" y2="128" marker-end="url(#emflow-arrG)"/>
+    <line x1="536" y1="128" x2="568" y2="128" marker-end="url(#emflow-arrG)"/>
+    <line x1="736" y1="128" x2="768" y2="128" marker-end="url(#emflow-arrG)"/>
+  </g>
+  <text x="552" y="116" font-size="11" font-weight="600" fill="#c49464" text-anchor="middle">pass</text>
+
+  <!-- fail loop: dashed warm gray -->
+  <path d="M488,168 V192 Q488,200 480,200 H320 Q312,200 312,192 V172" fill="none" stroke="#8a7564" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#emflow-arrW)"/>
+  <text x="400" y="192" font-size="11" fill="#8a7564" text-anchor="middle">fail · retry</text>
+
+  <!-- step cards: white, borderless, warm shadow -->
+  <g filter="url(#emflow-sh)">
+    <rect x="32" y="88" width="160" height="80" rx="12" fill="#ffffff"/>
+    <rect x="232" y="88" width="160" height="80" rx="12" fill="#ffffff"/>
+    <rect x="576" y="88" width="160" height="80" rx="12" fill="#ffffff"/>
+    <rect x="776" y="88" width="160" height="80" rx="12" fill="#ffffff"/>
+  </g>
+
+  <!-- decision diamond: tint + gold edge, shares the happy-path narrative -->
+  <path d="M488,88 L536,128 L488,168 L440,128 Z" fill="#f5e5c8" stroke="#c49464" stroke-width="1.5"/>
+  <text x="488" y="132" font-size="12" font-weight="600" fill="#312520" text-anchor="middle">Valid?</text>
+
+  <!-- icons: gold stroke, no tile (decorative micro-gold) -->
+  <g transform="translate(48,116)" fill="none" stroke="#c49464" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v10"/><polyline points="7,9 12,14 17,9"/><path d="M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17"/>
+  </g>
+  <g transform="translate(248,116)" fill="none" stroke="#c49464" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3 L20 6.5 v5.5 c0 5 -3.5 8.5 -8 9.5 -4.5 -1 -8 -4.5 -8 -9.5 V6.5 Z"/>
+    <polyline points="8,12 11,15 16,9"/>
+  </g>
+  <g transform="translate(592,116)" fill="none" stroke="#c49464" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="4" width="16" height="16" rx="3"/>
+    <path d="M8.5 12 l2.5 2.5 l4.5 -6"/>
+  </g>
+  <g transform="translate(792,116)" fill="none" stroke="#c49464" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 4 L4 11 l6.5 2.5 2.5 6.5 Z"/><path d="M10.5 13.5 L20 4"/>
+  </g>
+
+  <!-- step text -->
+  <g font-size="13" font-weight="600" fill="#312520">
+    <text x="84" y="124">Fetch input</text>
+    <text x="284" y="124">Verify</text>
+    <text x="628" y="124">Process</text>
+    <text x="828" y="124">Publish</text>
+  </g>
+  <g font-size="11" fill="#8a7564">
+    <text x="84" y="146">from queue</text>
+    <text x="284" y="146">schema · auth</text>
+    <text x="628" y="146">transform · enrich</text>
+    <text x="828" y="146">notify consumers</text>
+  </g>
+
+  <!-- numbered badges: gold disc + dark text -->
+  <g font-size="11" font-weight="700" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">
+    <circle cx="36" cy="92" r="10" fill="#c49464"/><text x="36" y="96" fill="#312520">1</text>
+    <circle cx="236" cy="92" r="10" fill="#c49464"/><text x="236" y="96" fill="#312520">2</text>
+    <circle cx="580" cy="92" r="10" fill="#c49464"/><text x="580" y="96" fill="#312520">3</text>
+    <circle cx="780" cy="92" r="10" fill="#c49464"/><text x="780" y="96" fill="#312520">4</text>
+  </g>
+</svg>

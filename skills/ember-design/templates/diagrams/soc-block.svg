@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 568" role="img" aria-label="Quartz-3550 SoC block diagram: dual Cortex-A55 CPU cluster and clock-reset unit feed an AXI NoC interconnect that fans out to memory, high-speed peripherals and an APB bridge serving low-speed peripherals; the gold main data path runs CPU to NoC to DDR4" font-family="Inter, -apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="emsoc-sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#492d22" flood-opacity="0.08"/>
+    </filter>
+    <marker id="emsoc-arr-gold" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c49464"/>
+    </marker>
+    <marker id="emsoc-arr-weak" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a7564"/>
+    </marker>
+  </defs>
+
+  <!-- header -->
+  <text x="24" y="32" font-size="11" font-weight="600" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" letter-spacing="1.1" fill="#8a7564">QUARTZ-3550 SOC &#183; BLOCK DIAGRAM</text>
+  <text x="1096" y="32" text-anchor="end" font-size="11" fill="#8a7564">arm64 &#183; 12 nm LP &#183; 0.8 V core rail</text>
+
+  <!-- zones: warm-beige containers, no border, mono uppercase labels -->
+  <rect x="24" y="56" width="736" height="120" rx="16" fill="#fbeedd"/>
+  <text x="48" y="84" font-size="11" font-weight="600" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" letter-spacing="1.1" fill="#8a7564">CPU SUBSYSTEM</text>
+  <text x="736" y="84" text-anchor="end" font-size="11" fill="#8a7564">DynamIQ cluster &#183; 1.8 GHz</text>
+
+  <rect x="784" y="56" width="312" height="120" rx="16" fill="#fbeedd"/>
+  <text x="808" y="84" font-size="11" font-weight="600" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" letter-spacing="1.1" fill="#8a7564">CLOCK &amp; RESET</text>
+  <text x="1072" y="84" text-anchor="end" font-size="11" fill="#8a7564">24 MHz xtal</text>
+
+  <rect x="24" y="336" width="336" height="168" rx="16" fill="#fbeedd"/>
+  <text x="48" y="364" font-size="11" font-weight="600" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" letter-spacing="1.1" fill="#8a7564">MEMORY</text>
+  <text x="336" y="364" text-anchor="end" font-size="11" fill="#8a7564">AXI slaves</text>
+
+  <rect x="392" y="336" width="336" height="168" rx="16" fill="#fbeedd"/>
+  <text x="416" y="364" font-size="11" font-weight="600" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" letter-spacing="1.1" fill="#8a7564">HIGH-SPEED PERIPH</text>
+  <text x="704" y="364" text-anchor="end" font-size="11" fill="#8a7564">DMA masters</text>
+
+  <rect x="752" y="336" width="344" height="168" rx="16" fill="#fbeedd"/>
+  <text x="776" y="364" font-size="11" font-weight="600" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" letter-spacing="1.1" fill="#8a7564">LOW-SPEED PERIPH</text>
+  <text x="1072" y="364" text-anchor="end" font-size="11" fill="#8a7564">via APB</text>
+
+  <!-- connectors -->
+  <!-- gold main data path: Cortex-A55 -> NoC -->
+  <path d="M172,160 V196 Q172,204 180,204 H392 Q400,204 400,212 V224" fill="none" stroke="#c49464" stroke-width="1.8" marker-end="url(#emsoc-arr-gold)"/>
+  <!-- gold main data path: NoC -> DDR4 ctrl -->
+  <path d="M312,288 V304 Q312,312 304,312 H200 Q192,312 192,320 V372" fill="none" stroke="#c49464" stroke-width="1.8" marker-end="url(#emsoc-arr-gold)"/>
+  <!-- clock/reset fan-out -> NoC (weak dashed) -->
+  <path d="M820,176 V196 Q820,204 812,204 H736 Q728,204 728,212 V224" fill="none" stroke="#8a7564" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#emsoc-arr-weak)"/>
+  <text x="832" y="200" font-size="11" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" fill="#8a7564">clk &#183; rst</text>
+  <!-- NoC <-> high-speed zone (both directions) -->
+  <line x1="560" y1="292" x2="560" y2="332" stroke="#8a7564" stroke-width="1.2" marker-start="url(#emsoc-arr-weak)" marker-end="url(#emsoc-arr-weak)"/>
+  <!-- NoC -> APB bridge -> low-speed zone -->
+  <line x1="764" y1="260" x2="840" y2="260" stroke="#8a7564" stroke-width="1.2" marker-end="url(#emsoc-arr-weak)"/>
+  <line x1="936" y1="292" x2="936" y2="332" stroke="#8a7564" stroke-width="1.2" marker-end="url(#emsoc-arr-weak)"/>
+
+  <!-- IP cards: white, borderless, warm shadow; focus card alone wears the gold edge -->
+  <g filter="url(#emsoc-sh)">
+    <rect id="emsoc-focus" x="48" y="104" width="248" height="56" rx="12" fill="#ffffff" stroke="#c49464" stroke-width="1.5"/>
+    <rect x="312" y="104" width="200" height="56" rx="12" fill="#ffffff"/>
+    <rect x="528" y="104" width="200" height="56" rx="12" fill="#ffffff"/>
+    <rect x="808" y="104" width="136" height="56" rx="12" fill="#ffffff"/>
+    <rect x="956" y="104" width="120" height="56" rx="12" fill="#ffffff"/>
+    <rect x="280" y="232" width="480" height="56" rx="12" fill="#ffffff"/>
+    <rect x="848" y="232" width="176" height="56" rx="12" fill="#ffffff"/>
+    <rect x="48" y="380" width="288" height="48" rx="12" fill="#ffffff"/>
+    <rect x="48" y="436" width="136" height="48" rx="12" fill="#ffffff"/>
+    <rect x="196" y="436" width="140" height="48" rx="12" fill="#ffffff"/>
+    <rect x="416" y="380" width="288" height="48" rx="12" fill="#ffffff"/>
+    <rect x="416" y="436" width="136" height="48" rx="12" fill="#ffffff"/>
+    <rect x="564" y="436" width="140" height="48" rx="12" fill="#ffffff"/>
+    <rect x="776" y="380" width="140" height="48" rx="12" fill="#ffffff"/>
+    <rect x="928" y="380" width="144" height="48" rx="12" fill="#ffffff"/>
+    <rect x="776" y="436" width="140" height="48" rx="12" fill="#ffffff"/>
+    <rect x="928" y="436" width="144" height="48" rx="12" fill="#ffffff"/>
+  </g>
+
+  <!-- card names -->
+  <g font-size="13" font-weight="600" fill="#312520">
+    <text x="68" y="128" fill="#492d22">Cortex-A55 &#215;2</text>
+    <text x="332" y="128">L2 512K</text>
+    <text x="548" y="128">GIC-600</text>
+    <text x="828" y="128">PLL &#215;3</text>
+    <text x="976" y="128">CRU</text>
+    <text x="300" y="256">AXI NoC &#183; 64-bit @ 800 MHz</text>
+    <text x="868" y="256">APB bridge</text>
+    <text x="68" y="400">DDR4 ctrl + PHY</text>
+    <text x="68" y="456">SRAM 256K</text>
+    <text x="216" y="456">Boot ROM</text>
+    <text x="436" y="400">PCIe Gen3 x2</text>
+    <text x="436" y="456">USB 3.0</text>
+    <text x="584" y="456">GbE MAC</text>
+    <text x="796" y="400">UART &#215;4</text>
+    <text x="948" y="400">I2C &#215;3</text>
+    <text x="796" y="456">SPI &#215;2</text>
+    <text x="948" y="456">GPIO</text>
+  </g>
+
+  <!-- card sub-lines -->
+  <g font-size="11" fill="#8a7564">
+    <text x="68" y="146">L1 32K I/D per core</text>
+    <text x="332" y="146">unified &#183; ECC</text>
+    <text x="548" y="146">interrupt distributor</text>
+    <text x="828" y="146">core &#183; ddr &#183; peri</text>
+    <text x="976" y="146">gate &#183; reset</text>
+    <text x="300" y="274">system interconnect &#183; QoS arbitration &#183; 4 masters</text>
+    <text x="868" y="274">AXI-to-APB &#183; 100 MHz</text>
+    <text x="68" y="416">DDR4-3200 &#183; 32-bit + ECC</text>
+    <text x="68" y="472">on-chip scratch</text>
+    <text x="216" y="472">64K mask</text>
+    <text x="436" y="416">root complex &#183; MSI-X</text>
+    <text x="436" y="472">xHCI DRD</text>
+    <text x="584" y="472">RGMII &#183; TSO</text>
+    <text x="796" y="416">16550A</text>
+    <text x="948" y="416">400 kHz FM</text>
+    <text x="796" y="472">mode 0-3</text>
+    <text x="948" y="472">4 banks &#215;32</text>
+  </g>
+
+  <!-- numbered badges on the gold main path: gold disc + dark figure -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <circle cx="288" cy="204" r="10" fill="#c49464"/><text x="288" y="208" fill="#312520">1</text>
+    <circle cx="248" cy="312" r="10" fill="#c49464"/><text x="248" y="316" fill="#312520">2</text>
+  </g>
+
+  <!-- legend -->
+  <g font-size="11" fill="#6b5a4f">
+    <line x1="24" y1="536" x2="48" y2="536" stroke="#c49464" stroke-width="1.8" stroke-linecap="round"/>
+    <text x="56" y="540">main data path &#183; CPU &#8594; NoC &#8594; DDR4</text>
+    <line x1="296" y1="536" x2="320" y2="536" stroke="#8a7564" stroke-width="1.2" stroke-dasharray="4 4" stroke-linecap="round"/>
+    <text x="328" y="540">clk &#183; rst fan-out</text>
+    <line x1="456" y1="536" x2="480" y2="536" stroke="#8a7564" stroke-width="1.2" stroke-linecap="round"/>
+    <text x="488" y="540">secondary bus link</text>
+    <text x="1096" y="540" text-anchor="end">zones group IP by bus tier</text>
+  </g>
+</svg>
