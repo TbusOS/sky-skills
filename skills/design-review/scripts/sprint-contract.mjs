@@ -172,7 +172,10 @@ ${mdBody.split('\n').filter(l => l.startsWith('### ')).slice(0, 8).map(l => '- '
 ## 1b. Diagram density + sizing MUST
 
 Express with diagrams by default — do not wait to be asked. Any of these
-content shapes REQUIRES the matching visual:
+content shapes deserves a visual; the right column is the DEFAULT genre,
+a starting point — not a cage. Adapt structure, density and composition
+to the actual content; merge, split or invent genres freely. What is
+binding: the content gets a visual at all, and the craft gates below.
 
 | Content shape | Required visual |
 |---|---|
@@ -181,7 +184,19 @@ content shapes REQUIRES the matching visual:
 | System structure / layers / dependencies | architecture diagram |
 | Time evolution / versions / milestones | timeline |
 | Product / UI description | window mock |
+| Function control flow / error paths | function flowchart |
+| Registers / bit fields / protocol frames | bit-field diagram |
+| Chip / SoC / board structure | SoC block diagram |
+| Bus / signal timing | waveform diagram |
+| Build / packaging chain | build pipeline |
+| Multi-core scheduling / preemption | scheduler timeline |
 | >2 screens of continuous prose | ≥1 visual element (figure/stat/table/pull-quote) |
+
+Kernel/embedded genres have ready templates in \`skills/<skill>-design/templates/diagrams/\`
+and genre-specific craft in diagram-craft.md (anthropic §15 / apple §12). Start from the
+template — it encodes the aesthetic and the known pitfalls — then reshape it around your
+content. The contract binds craft quality (readability, color semantics, sizing), never
+the diagram's shape.
 
 Rhythm: ≥1 SVG/figure/stat per 1.5 screens (≈1300px). Machine gate
 \`text-desert\` warns past 2600px without a visual (known-bugs 1.31).

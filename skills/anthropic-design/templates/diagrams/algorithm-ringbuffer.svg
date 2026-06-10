@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 332" role="img" aria-label="Linux kfifo ring buffer: 16-slot byte array with valid data between the out pointer at index 3 and the in pointer at index 10, wrap-around handled by masking the index with size minus one" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="rbfDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <marker id="rbfArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/>
+    </marker>
+  </defs>
+
+  <!-- panel -->
+  <rect x="4" y="4" width="1032" height="324" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect x="4" y="4" width="1032" height="324" rx="16" fill="url(#rbfDots)"/>
+
+  <!-- title row -->
+  <text x="40" y="40" font-size="14" font-weight="600" fill="#141413">kfifo ring buffer</text>
+  <text x="196" y="40" font-size="11.5" fill="#6b6a5f">struct kfifo &#183; buf[16] &#183; mask = size &#8722; 1 = 0x0F</text>
+  <text x="1000" y="40" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">include/linux/kfifo.h &#183; size must be a power of two</text>
+
+  <!-- out pointer (consumer, orange) above cell 3 -->
+  <text x="252" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="#c2613f">out (head)</text>
+  <text x="252" y="84" text-anchor="middle" font-size="11" fill="#6b6a5f">consumer reads</text>
+  <path d="M244,92 L260,92 L252,104 Z" fill="#d97757"/>
+
+  <!-- in pointer (producer, blue) above cell 10 -->
+  <text x="672" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="#4a7bab">in (tail)</text>
+  <text x="672" y="84" text-anchor="middle" font-size="11" fill="#6b6a5f">producer writes</text>
+  <path d="M664,92 L680,92 L672,104 Z" fill="#6a9bcc"/>
+
+  <!-- buf[16] cells: 3..9 hold valid data (blue tint + top bar), rest free (white) -->
+  <g stroke="#d8d4c8" fill="#ffffff">
+    <rect x="44" y="112" width="56" height="48" rx="6"/>
+    <rect x="104" y="112" width="56" height="48" rx="6"/>
+    <rect x="164" y="112" width="56" height="48" rx="6"/>
+    <rect x="644" y="112" width="56" height="48" rx="6"/>
+    <rect x="704" y="112" width="56" height="48" rx="6"/>
+    <rect x="764" y="112" width="56" height="48" rx="6"/>
+    <rect x="824" y="112" width="56" height="48" rx="6"/>
+    <rect x="884" y="112" width="56" height="48" rx="6"/>
+    <rect x="944" y="112" width="56" height="48" rx="6"/>
+  </g>
+  <g stroke="#d8d4c8" fill="#e2ecf5">
+    <rect x="224" y="112" width="56" height="48" rx="6"/>
+    <rect x="284" y="112" width="56" height="48" rx="6"/>
+    <rect x="344" y="112" width="56" height="48" rx="6"/>
+    <rect x="404" y="112" width="56" height="48" rx="6"/>
+    <rect x="464" y="112" width="56" height="48" rx="6"/>
+    <rect x="524" y="112" width="56" height="48" rx="6"/>
+    <rect x="584" y="112" width="56" height="48" rx="6"/>
+  </g>
+  <g fill="#6a9bcc">
+    <rect x="228" y="112" width="48" height="4" rx="2"/>
+    <rect x="288" y="112" width="48" height="4" rx="2"/>
+    <rect x="348" y="112" width="48" height="4" rx="2"/>
+    <rect x="408" y="112" width="48" height="4" rx="2"/>
+    <rect x="468" y="112" width="48" height="4" rx="2"/>
+    <rect x="528" y="112" width="48" height="4" rx="2"/>
+    <rect x="588" y="112" width="48" height="4" rx="2"/>
+  </g>
+  <g font-size="11.5" font-weight="600" fill="#4a7bab" text-anchor="middle">
+    <text x="252" y="140">5A</text><text x="312" y="140">6B</text><text x="372" y="140">0D</text>
+    <text x="432" y="140">31</text><text x="492" y="140">9C</text><text x="552" y="140">E2</text>
+    <text x="612" y="140">47</text>
+  </g>
+
+  <!-- index labels 0..15 -->
+  <g font-size="11" fill="#6b6a5f" text-anchor="middle">
+    <text x="72" y="180">0</text><text x="132" y="180">1</text><text x="192" y="180">2</text>
+    <text x="252" y="180">3</text><text x="312" y="180">4</text><text x="372" y="180">5</text>
+    <text x="432" y="180">6</text><text x="492" y="180">7</text><text x="552" y="180">8</text>
+    <text x="612" y="180">9</text><text x="672" y="180">10</text><text x="732" y="180">11</text>
+    <text x="792" y="180">12</text><text x="852" y="180">13</text><text x="912" y="180">14</text>
+    <text x="972" y="180">15</text>
+  </g>
+
+  <!-- wrap-around: cell 15 right edge sweeps below back into cell 0 -->
+  <path d="M1000,136 H1004 Q1012,136 1012,144 V192 Q1012,200 1004,200 H40 Q32,200 32,192 V144 Q32,136 40,136 H44"
+        fill="none" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#rbfArrG)"/>
+  <text x="520" y="220" text-anchor="middle" font-size="11.5" fill="#6b6a5f">wrap: idx &amp; (size &#8722; 1)</text>
+
+  <!-- divider -->
+  <line x1="44" y1="240" x2="1000" y2="240" stroke="#eceadf"/>
+
+  <!-- API annotations -->
+  <circle cx="48" cy="268" r="4" fill="#6a9bcc"/>
+  <text x="60" y="272" font-size="12" font-weight="600" fill="#141413">kfifo_in(fifo, buf, len)</text>
+  <text x="264" y="272" font-size="12" fill="#6b6a5f">copy to buf[in &amp; mask] &#183; smp_wmb() &#183; in += len</text>
+
+  <circle cx="48" cy="296" r="4" fill="#d97757"/>
+  <text x="60" y="300" font-size="12" font-weight="600" fill="#141413">kfifo_out(fifo, buf, len)</text>
+  <text x="264" y="300" font-size="12" fill="#6b6a5f">smp_rmb() &#183; copy from buf[out &amp; mask] &#183; out += len</text>
+
+  <!-- stat chip -->
+  <rect x="824" y="256" width="176" height="24" rx="12" fill="#d97757"/>
+  <text x="912" y="272" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">len = in &#8722; out = 7</text>
+
+  <!-- legend -->
+  <rect x="824" y="292" width="12" height="12" rx="3" fill="#e2ecf5" stroke="#d8d4c8"/>
+  <text x="844" y="300" font-size="11" fill="#6b6a5f">valid data</text>
+  <rect x="920" y="292" width="12" height="12" rx="3" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="940" y="300" font-size="11" fill="#6b6a5f">free</text>
+</svg>

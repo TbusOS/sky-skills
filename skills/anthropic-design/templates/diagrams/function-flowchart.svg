@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 588" role="img" aria-label="Kernel driver probe flowchart: mydev_probe happy path through devm_kzalloc, ioremap, request_irq and chardev registration, with a gold error lane collecting -ENOMEM, PTR_ERR and iounmap cleanup into a shared return ret exit" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="ffc-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <filter id="ffc-sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/>
+    </filter>
+    <marker id="ffc-arrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+    </marker>
+    <marker id="ffc-arrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c9913f"/>
+    </marker>
+  </defs>
+
+  <!-- panel -->
+  <rect x="0" y="0" width="920" height="588" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect x="0" y="0" width="920" height="588" rx="16" fill="url(#ffc-dots)"/>
+
+  <!-- error lane container -->
+  <rect x="624" y="56" width="252" height="496" rx="12" fill="#f0e4d8" stroke="#d9bf94" stroke-dasharray="4 3"/>
+  <rect x="624" y="68" width="4" height="472" rx="2" fill="#c9913f"/>
+
+  <!-- happy path connectors (orange 1.8 solid) -->
+  <g fill="none" stroke="#d97757" stroke-width="1.8">
+    <line x1="188" y1="60" x2="188" y2="92" marker-end="url(#ffc-arrO)"/>
+    <line x1="312" y1="124" x2="392" y2="124" marker-end="url(#ffc-arrO)"/>
+    <path d="M472,152 V168 Q472,176 464,176 H196 Q188,176 188,184 V196" marker-end="url(#ffc-arrO)"/>
+    <line x1="312" y1="228" x2="392" y2="228" marker-end="url(#ffc-arrO)"/>
+    <path d="M472,256 V272 Q472,280 464,280 H196 Q188,280 188,288 V300" marker-end="url(#ffc-arrO)"/>
+    <line x1="312" y1="332" x2="392" y2="332" marker-end="url(#ffc-arrO)"/>
+    <path d="M472,360 V376 Q472,384 464,384 H196 Q188,384 188,392 V404" marker-end="url(#ffc-arrO)"/>
+    <line x1="188" y1="464" x2="188" y2="492" marker-end="url(#ffc-arrO)"/>
+  </g>
+
+  <!-- error lane connectors (gold 1.2 dashed) -->
+  <g fill="none" stroke="#c9913f" stroke-width="1.2" stroke-dasharray="4 3">
+    <line x1="548" y1="124" x2="640" y2="124" marker-end="url(#ffc-arrG)"/>
+    <line x1="548" y1="228" x2="640" y2="228" marker-end="url(#ffc-arrG)"/>
+    <line x1="548" y1="332" x2="640" y2="332" marker-end="url(#ffc-arrG)"/>
+    <path d="M836,124 H848 Q856,124 856,132 V476 Q856,484 848,484 H748 Q740,484 740,492" marker-end="url(#ffc-arrG)"/>
+    <path d="M836,228 H848 Q856,228 856,236 V240"/>
+    <path d="M836,332 H848 Q856,332 856,340 V344"/>
+  </g>
+
+  <!-- entry capsule (focus) -->
+  <rect x="100" y="24" width="176" height="36" rx="18" fill="#fbeee7" stroke="#d97757" stroke-width="1.5" filter="url(#ffc-sh)"/>
+
+  <!-- main step cards -->
+  <g filter="url(#ffc-sh)">
+    <rect x="64" y="96" width="248" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="64" y="200" width="248" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="64" y="304" width="248" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="64" y="408" width="248" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+
+  <!-- decision diamonds: the only emphasis-tint blocks -->
+  <g fill="#f4d9cd" stroke="#d97757" stroke-width="1.5">
+    <path d="M472,96 L548,124 L472,152 L396,124 Z"/>
+    <path d="M472,200 L548,228 L472,256 L396,228 Z"/>
+    <path d="M472,304 L548,332 L472,360 L396,332 Z"/>
+  </g>
+
+  <!-- error lane cards -->
+  <g filter="url(#ffc-sh)">
+    <rect x="644" y="96" width="192" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="644" y="200" width="192" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="644" y="304" width="192" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+
+  <!-- exit capsules -->
+  <rect x="120" y="496" width="136" height="36" rx="18" fill="#e5e9dd" stroke="#788c5d" stroke-width="1.5" filter="url(#ffc-sh)"/>
+  <rect x="668" y="496" width="144" height="36" rx="18" fill="#ffffff" stroke="#c9913f" stroke-width="1.5" filter="url(#ffc-sh)"/>
+
+  <!-- numbered badges (happy path) -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <circle cx="68" cy="100" r="10" fill="#d97757"/><text x="68" y="104" fill="#ffffff">1</text>
+    <circle cx="68" cy="204" r="10" fill="#d97757"/><text x="68" y="208" fill="#ffffff">2</text>
+    <circle cx="68" cy="308" r="10" fill="#d97757"/><text x="68" y="312" fill="#ffffff">3</text>
+    <circle cx="68" cy="412" r="10" fill="#d97757"/><text x="68" y="416" fill="#ffffff">4</text>
+  </g>
+
+  <!-- category dots -->
+  <g fill="#d97757">
+    <circle cx="84" cy="116" r="3.5"/>
+    <circle cx="84" cy="220" r="3.5"/>
+    <circle cx="84" cy="324" r="3.5"/>
+    <circle cx="84" cy="428" r="3.5"/>
+  </g>
+  <g fill="#c9913f">
+    <circle cx="660" cy="116" r="3.5"/>
+    <circle cx="660" cy="220" r="3.5"/>
+    <circle cx="660" cy="324" r="3.5"/>
+    <circle cx="696" cy="514" r="4"/>
+  </g>
+  <circle cx="148" cy="514" r="4" fill="#788c5d"/>
+  <circle cx="648" cy="80" r="4" fill="#c9913f"/>
+
+  <!-- text: entry / steps -->
+  <text x="188" y="46" font-size="13" font-weight="600" fill="#141413" text-anchor="middle">mydev_probe(pdev)</text>
+  <text x="96" y="120" font-size="13" font-weight="600" fill="#141413">devm_kzalloc(ctx)</text>
+  <text x="96" y="140" font-size="11" fill="#6b6a5f">sizeof(*ctx) · GFP_KERNEL</text>
+  <text x="96" y="224" font-size="13" font-weight="600" fill="#141413">ioremap registers</text>
+  <text x="96" y="244" font-size="11" fill="#6b6a5f">MMIO window · res-&gt;start</text>
+  <text x="96" y="328" font-size="13" font-weight="600" fill="#141413">request_irq(irq, handler)</text>
+  <text x="96" y="348" font-size="11" fill="#6b6a5f">IRQF_SHARED · dev_id = ctx</text>
+  <text x="96" y="432" font-size="13" font-weight="600" fill="#141413">register chardev</text>
+  <text x="96" y="452" font-size="11" fill="#6b6a5f">misc_register(&amp;ctx-&gt;mdev)</text>
+
+  <!-- text: diamonds -->
+  <g font-size="12" font-weight="600" fill="#141413" text-anchor="middle">
+    <text x="472" y="128">ctx == NULL?</text>
+    <text x="472" y="232">IS_ERR(base)?</text>
+    <text x="472" y="336">ret &lt; 0?</text>
+  </g>
+
+  <!-- text: branch labels -->
+  <g font-size="11" font-weight="600">
+    <text x="596" y="112" fill="#8a5a2a" text-anchor="middle">yes</text>
+    <text x="596" y="216" fill="#8a5a2a" text-anchor="middle">yes</text>
+    <text x="596" y="320" fill="#8a5a2a" text-anchor="middle">yes</text>
+    <text x="484" y="168" fill="#c2613f">no</text>
+    <text x="484" y="272" fill="#c2613f">no</text>
+    <text x="484" y="376" fill="#c2613f">no</text>
+  </g>
+
+  <!-- text: error lane -->
+  <text x="658" y="84" font-size="11" font-weight="600" fill="#8a5a2a" letter-spacing="1">ERROR LANE</text>
+  <text x="672" y="120" font-size="13" font-weight="600" fill="#141413">ret = -ENOMEM</text>
+  <text x="672" y="140" font-size="11" fill="#6b6a5f">ctx alloc failed</text>
+  <text x="672" y="224" font-size="13" font-weight="600" fill="#141413">ret = PTR_ERR(base)</text>
+  <text x="672" y="244" font-size="11" fill="#6b6a5f">mmio map failed</text>
+  <text x="672" y="328" font-size="13" font-weight="600" fill="#141413">iounmap(base)</text>
+  <text x="672" y="348" font-size="11" fill="#6b6a5f">unwind mmio mapping</text>
+
+  <!-- text: exits -->
+  <text x="196" y="518" font-size="13" font-weight="600" fill="#5d7045" text-anchor="middle">return 0</text>
+  <text x="748" y="518" font-size="13" font-weight="600" fill="#8a5a2a" text-anchor="middle">return ret</text>
+
+  <!-- annotation -->
+  <text x="876" y="44" font-size="11" font-style="italic" fill="#8c8a7d" text-anchor="end">platform_driver · drivers/misc/mydev.c</text>
+
+  <!-- legend -->
+  <circle cx="68" cy="564" r="4" fill="#d97757"/>
+  <text x="80" y="568" font-size="11" fill="#6b6a5f">happy path</text>
+  <circle cx="172" cy="564" r="4" fill="#c9913f"/>
+  <text x="184" y="568" font-size="11" fill="#6b6a5f">error path · dashed</text>
+  <circle cx="324" cy="564" r="4" fill="#788c5d"/>
+  <text x="336" y="568" font-size="11" fill="#6b6a5f">success exit</text>
+</svg>

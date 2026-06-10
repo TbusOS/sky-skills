@@ -1,8 +1,12 @@
 # Diagram Craft — 手工 SVG 图示工艺（apple-design）
 
+> **约束分三层**:① 审美(灰阶 + 一处蓝、无边框柔影、留白)不可变;② 工艺质量(可读性 / 字号 /
+> 不留白画布)机器闸强制;③ **图型与结构自由定制**——模板和 §12 谱系是审美起点和设计思想,
+> 不是强制规格。内容决定结构,变体 / 混搭 / 自创图型都允许,只要 ①② 成立。
+
 > 适用：架构图 / 流程图 / 层级图 / 时间线 / 时序图等一切工程类图示。
 > 与 anthropic 的多色语义路线不同，**apple 图的美感来自"少"**：无彩色为主、蓝色一处、柔影分层、留白比信息多。
-> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline 四件，全部按本文标准实现）。
+> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline,共 **12 件**,全部按本文标准实现）。案例库：`demos/apple-design/diagrams.html`（12 张图,每张带 Copy SVG）。
 
 ## 0. 第一原则：美靠"少"
 
@@ -102,3 +106,28 @@ apple 风时序图 pattern（anthropic 有专文 `sequence-diagrams.md`，apple 
 - ❌ viewBox 写大、内容挤中间一窄条（→ §6 先算再画;svg-letterbox 闸）
 - ❌ ≥ 20 个 text 的密图塞 980 标准容器（→ 1280 hero 档;dense-diagram-cramped 闸）
 - ❌ 长文页面通篇无图（→ §9 图密度合约;text-desert 闸）
+
+## 12. 内核 / 嵌入式工程图谱系（apple 语法）
+
+> 7 个图型与 anthropic §15 同谱系（function-flowchart / algorithm / register-bitfield / soc-block /
+> hw-timing-waveform / build-pipeline / sched-timeline），模板在 `templates/diagrams/` 同名 .svg。
+> 模板是起点不是规格——结构、密度、布局按实际内容重设计,谱系之外的内容自创图型即可。
+> 结构性工艺（布局、lane、车道、交替、双箭头标注）参考 anthropic §15;本节只写 apple 的**翻译规则**。
+
+核心问题只有一个：anthropic 用多 hue 编码类别，apple 只有灰阶 + 一个蓝——**每个图型必须先回答"蓝给谁"**：
+
+| 图型 | 蓝的唯一归属（单一叙事） | 其余元素 |
+|---|---|---|
+| 函数流程图 | happy path 主链 + 编号徽章 | 错误车道灰 1.2px 虚线,出口灰卡 |
+| 算法原理图 | 写入侧指针(in/tail)——"新数据落在哪" | 数据格 `#eaf3fe` tint,读出指针墨色 |
+| 寄存器位域图 | 焦点字段(EN 位类):tint + 蓝 1.5px 边 + 蓝字段名 | 普通字段 `#f5f5f7`,reserved 白底灰杠 |
+| SoC 框图 | CPU 焦点卡 + 主数据路径 CPU→NoC→DDR | zone 全部 `#f5f5f7` 无边容器,其余连线 `#aeaeb2` |
+| 波形时序图 | CS_N / 触发信号 + 其 active 窗口 tint | 其他 lane 用灰阶值区分(#1d1d1f / #6e6e73 / #aeaeb2) |
+| 编译流程图 | 主链 + 终点交付物焦点卡 | devicetree 等分支灰实线汇入 |
+| 调度时间线 | 被追踪的那一个任务(块 tint + 蓝边 + 迁移箭头) | 其他任务 `#f5f5f7`,IRQ 标记用墨不用蓝 |
+
+三条 apple 专属注意：
+
+1. **类别信息不丢**：anthropic 靠 hue 区分的维度,apple 靠"灰阶值 + 字重 + tint 有无"补偿——波形 lane 用三档灰,寄存器字段靠 tint/白底二分。画完自问:黑白打印仍能读吗?
+2. 位格 / 单元格阵列的 hairline(0.5-1px `#d2d2d7`)是允许的"格栅"例外——无边框原则针对卡片,不针对表格性结构。
+3. 时序参数标注(tSU/tH)、wrap 注释等机制性文字一律 `#86868b` 11-12px;不准为了强调改蓝——蓝的预算已经花给焦点了。

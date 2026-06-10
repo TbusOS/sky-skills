@@ -77,6 +77,7 @@
   <a href="../../index.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">Sky Skills</a>
   <div>
     <a href="#engineering"><span class="lang-en">Engineering</span><span class="lang-zh">工程图</span></a>
+    <a href="#hardware"><span class="lang-en">Kernel</span><span class="lang-zh">内核硬件</span></a>
     <a href="#product"><span class="lang-en">Product</span><span class="lang-zh">产品展示</span></a>
     <a href="#reporting"><span class="lang-en">Reporting</span><span class="lang-zh">演讲汇报</span></a>
     <a href="index.html"><span class="lang-en">Demo</span><span class="lang-zh">主 demo</span></a>
@@ -95,8 +96,8 @@
       <span class="lang-zh">让图替你把话说清</span>
     </h1>
     <p class="gal-intro">
-      <span class="lang-en">Sixteen hand-built SVG figures in the anthropic-design language — for engineering docs, product walkthroughs, and slide decks. Every figure follows the diagram-craft contract: sized to its content, ≥2 semantic hues, solid color dots, readable at every label. Copy any of them straight into your page.</span>
-      <span class="lang-zh">十六张手工 SVG 图，覆盖工程文档、产品演示、演讲汇报三类场合。每张都按 diagram-craft 工艺合约执行：画布贴内容、每图 ≥ 2 个语义色、实心色点、所有标签可读。点 Copy SVG 即可直接用进你的页面。</span>
+      <span class="lang-en">Twenty-three hand-built SVG figures in the anthropic-design language — for engineering docs, kernel &amp; hardware work, product walkthroughs, and slide decks. Every figure follows the diagram-craft contract: sized to its content, ≥2 semantic hues, solid color dots, readable at every label. Copy any of them straight into your page.</span>
+      <span class="lang-zh">二十三张手工 SVG 图，覆盖工程文档、内核与硬件、产品演示、演讲汇报四类场合。每张都按 diagram-craft 工艺合约执行：画布贴内容、每图 ≥ 2 个语义色、实心色点、所有标签可读。点 Copy SVG 即可直接用进你的页面。</span>
     </p>
   </div>
 </header>
@@ -668,10 +669,1035 @@
   </div>
 </section>
 
-<!-- ===================== §2 PRODUCT ===================== -->
+<!-- ===================== §2 KERNEL & HARDWARE ===================== -->
+<section class="anth-section" id="hardware" style="background:#ffffff;">
+  <div class="anth-container anth-container--wide">
+    <span class="gal-kicker"><span class="lang-en">02 · kernel &amp; hardware</span><span class="lang-zh">02 · 内核与硬件</span></span>
+    <h2 style="font-family:var(--font-heading); font-size:34px; font-weight:600; letter-spacing:-0.01em; margin:var(--space-2) 0 0;">
+      <span class="lang-en">Kernel &amp; hardware diagrams</span>
+      <span class="lang-zh">内核与硬件图</span>
+    </h2>
+    <p class="gal-section-note">
+      <span class="lang-en">The diagrams an embedded engineer actually draws: function control flow with error lanes, register bit fields, SoC blocks, bus waveforms, build chains, scheduler timelines. Real names, real offsets — copy and swap the content.</span>
+      <span class="lang-zh">嵌入式工程师真正天天画的图：带错误车道的函数控制流、寄存器位域、SoC 框图、总线波形、编译链、调度时间线。真实的名字和偏移——复制后换内容即可。</span>
+    </p>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 588" role="img" aria-label="Kernel driver probe flowchart: mydev_probe happy path through devm_kzalloc, ioremap, request_irq and chardev registration, with a gold error lane collecting -ENOMEM, PTR_ERR and iounmap cleanup into a shared return ret exit" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="ffc-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <filter id="ffc-sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/>
+    </filter>
+    <marker id="ffc-arrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+    </marker>
+    <marker id="ffc-arrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c9913f"/>
+    </marker>
+  </defs>
+
+  <!-- panel -->
+  <rect x="0" y="0" width="920" height="588" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect x="0" y="0" width="920" height="588" rx="16" fill="url(#ffc-dots)"/>
+
+  <!-- error lane container -->
+  <rect x="624" y="56" width="252" height="496" rx="12" fill="#f0e4d8" stroke="#d9bf94" stroke-dasharray="4 3"/>
+  <rect x="624" y="68" width="4" height="472" rx="2" fill="#c9913f"/>
+
+  <!-- happy path connectors (orange 1.8 solid) -->
+  <g fill="none" stroke="#d97757" stroke-width="1.8">
+    <line x1="188" y1="60" x2="188" y2="92" marker-end="url(#ffc-arrO)"/>
+    <line x1="312" y1="124" x2="392" y2="124" marker-end="url(#ffc-arrO)"/>
+    <path d="M472,152 V168 Q472,176 464,176 H196 Q188,176 188,184 V196" marker-end="url(#ffc-arrO)"/>
+    <line x1="312" y1="228" x2="392" y2="228" marker-end="url(#ffc-arrO)"/>
+    <path d="M472,256 V272 Q472,280 464,280 H196 Q188,280 188,288 V300" marker-end="url(#ffc-arrO)"/>
+    <line x1="312" y1="332" x2="392" y2="332" marker-end="url(#ffc-arrO)"/>
+    <path d="M472,360 V376 Q472,384 464,384 H196 Q188,384 188,392 V404" marker-end="url(#ffc-arrO)"/>
+    <line x1="188" y1="464" x2="188" y2="492" marker-end="url(#ffc-arrO)"/>
+  </g>
+
+  <!-- error lane connectors (gold 1.2 dashed) -->
+  <g fill="none" stroke="#c9913f" stroke-width="1.2" stroke-dasharray="4 3">
+    <line x1="548" y1="124" x2="640" y2="124" marker-end="url(#ffc-arrG)"/>
+    <line x1="548" y1="228" x2="640" y2="228" marker-end="url(#ffc-arrG)"/>
+    <line x1="548" y1="332" x2="640" y2="332" marker-end="url(#ffc-arrG)"/>
+    <path d="M836,124 H848 Q856,124 856,132 V476 Q856,484 848,484 H748 Q740,484 740,492" marker-end="url(#ffc-arrG)"/>
+    <path d="M836,228 H848 Q856,228 856,236 V240"/>
+    <path d="M836,332 H848 Q856,332 856,340 V344"/>
+  </g>
+
+  <!-- entry capsule (focus) -->
+  <rect x="100" y="24" width="176" height="36" rx="18" fill="#fbeee7" stroke="#d97757" stroke-width="1.5" filter="url(#ffc-sh)"/>
+
+  <!-- main step cards -->
+  <g filter="url(#ffc-sh)">
+    <rect x="64" y="96" width="248" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="64" y="200" width="248" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="64" y="304" width="248" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="64" y="408" width="248" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+
+  <!-- decision diamonds: the only emphasis-tint blocks -->
+  <g fill="#f4d9cd" stroke="#d97757" stroke-width="1.5">
+    <path d="M472,96 L548,124 L472,152 L396,124 Z"/>
+    <path d="M472,200 L548,228 L472,256 L396,228 Z"/>
+    <path d="M472,304 L548,332 L472,360 L396,332 Z"/>
+  </g>
+
+  <!-- error lane cards -->
+  <g filter="url(#ffc-sh)">
+    <rect x="644" y="96" width="192" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="644" y="200" width="192" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="644" y="304" width="192" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+
+  <!-- exit capsules -->
+  <rect x="120" y="496" width="136" height="36" rx="18" fill="#e5e9dd" stroke="#788c5d" stroke-width="1.5" filter="url(#ffc-sh)"/>
+  <rect x="668" y="496" width="144" height="36" rx="18" fill="#ffffff" stroke="#c9913f" stroke-width="1.5" filter="url(#ffc-sh)"/>
+
+  <!-- numbered badges (happy path) -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <circle cx="68" cy="100" r="10" fill="#d97757"/><text x="68" y="104" fill="#ffffff">1</text>
+    <circle cx="68" cy="204" r="10" fill="#d97757"/><text x="68" y="208" fill="#ffffff">2</text>
+    <circle cx="68" cy="308" r="10" fill="#d97757"/><text x="68" y="312" fill="#ffffff">3</text>
+    <circle cx="68" cy="412" r="10" fill="#d97757"/><text x="68" y="416" fill="#ffffff">4</text>
+  </g>
+
+  <!-- category dots -->
+  <g fill="#d97757">
+    <circle cx="84" cy="116" r="3.5"/>
+    <circle cx="84" cy="220" r="3.5"/>
+    <circle cx="84" cy="324" r="3.5"/>
+    <circle cx="84" cy="428" r="3.5"/>
+  </g>
+  <g fill="#c9913f">
+    <circle cx="660" cy="116" r="3.5"/>
+    <circle cx="660" cy="220" r="3.5"/>
+    <circle cx="660" cy="324" r="3.5"/>
+    <circle cx="696" cy="514" r="4"/>
+  </g>
+  <circle cx="148" cy="514" r="4" fill="#788c5d"/>
+  <circle cx="648" cy="80" r="4" fill="#c9913f"/>
+
+  <!-- text: entry / steps -->
+  <text x="188" y="46" font-size="13" font-weight="600" fill="#141413" text-anchor="middle">mydev_probe(pdev)</text>
+  <text x="96" y="120" font-size="13" font-weight="600" fill="#141413">devm_kzalloc(ctx)</text>
+  <text x="96" y="140" font-size="11" fill="#6b6a5f">sizeof(*ctx) · GFP_KERNEL</text>
+  <text x="96" y="224" font-size="13" font-weight="600" fill="#141413">ioremap registers</text>
+  <text x="96" y="244" font-size="11" fill="#6b6a5f">MMIO window · res-&gt;start</text>
+  <text x="96" y="328" font-size="13" font-weight="600" fill="#141413">request_irq(irq, handler)</text>
+  <text x="96" y="348" font-size="11" fill="#6b6a5f">IRQF_SHARED · dev_id = ctx</text>
+  <text x="96" y="432" font-size="13" font-weight="600" fill="#141413">register chardev</text>
+  <text x="96" y="452" font-size="11" fill="#6b6a5f">misc_register(&amp;ctx-&gt;mdev)</text>
+
+  <!-- text: diamonds -->
+  <g font-size="12" font-weight="600" fill="#141413" text-anchor="middle">
+    <text x="472" y="128">ctx == NULL?</text>
+    <text x="472" y="232">IS_ERR(base)?</text>
+    <text x="472" y="336">ret &lt; 0?</text>
+  </g>
+
+  <!-- text: branch labels -->
+  <g font-size="11" font-weight="600">
+    <text x="596" y="112" fill="#8a5a2a" text-anchor="middle">yes</text>
+    <text x="596" y="216" fill="#8a5a2a" text-anchor="middle">yes</text>
+    <text x="596" y="320" fill="#8a5a2a" text-anchor="middle">yes</text>
+    <text x="484" y="168" fill="#c2613f">no</text>
+    <text x="484" y="272" fill="#c2613f">no</text>
+    <text x="484" y="376" fill="#c2613f">no</text>
+  </g>
+
+  <!-- text: error lane -->
+  <text x="658" y="84" font-size="11" font-weight="600" fill="#8a5a2a" letter-spacing="1">ERROR LANE</text>
+  <text x="672" y="120" font-size="13" font-weight="600" fill="#141413">ret = -ENOMEM</text>
+  <text x="672" y="140" font-size="11" fill="#6b6a5f">ctx alloc failed</text>
+  <text x="672" y="224" font-size="13" font-weight="600" fill="#141413">ret = PTR_ERR(base)</text>
+  <text x="672" y="244" font-size="11" fill="#6b6a5f">mmio map failed</text>
+  <text x="672" y="328" font-size="13" font-weight="600" fill="#141413">iounmap(base)</text>
+  <text x="672" y="348" font-size="11" fill="#6b6a5f">unwind mmio mapping</text>
+
+  <!-- text: exits -->
+  <text x="196" y="518" font-size="13" font-weight="600" fill="#5d7045" text-anchor="middle">return 0</text>
+  <text x="748" y="518" font-size="13" font-weight="600" fill="#8a5a2a" text-anchor="middle">return ret</text>
+
+  <!-- annotation -->
+  <text x="876" y="44" font-size="11" font-style="italic" fill="#8c8a7d" text-anchor="end">platform_driver · drivers/misc/mydev.c</text>
+
+  <!-- legend -->
+  <circle cx="68" cy="564" r="4" fill="#d97757"/>
+  <text x="80" y="568" font-size="11" fill="#6b6a5f">happy path</text>
+  <circle cx="172" cy="564" r="4" fill="#c9913f"/>
+  <text x="184" y="568" font-size="11" fill="#6b6a5f">error path · dashed</text>
+  <circle cx="324" cy="564" r="4" fill="#788c5d"/>
+  <text x="336" y="568" font-size="11" fill="#6b6a5f">success exit</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">function flowchart · error lanes</span><span class="lang-zh">函数流程图 · 错误车道</span></span>
+          <span class="lang-en">A driver probe() with its error handling pulled into a gold side lane — the happy path stays readable top to bottom, cleanups join a shared exit. Template: <code>templates/diagrams/function-flowchart.svg</code>.</span>
+          <span class="lang-zh">驱动 probe() 函数：错误处理抽到右侧金色车道，主路径从上到下保持可读，清理步骤汇入共享出口。模板：<code>templates/diagrams/function-flowchart.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 324" role="img" aria-label="UART_CTRL register bit-field layout at offset 0x04: BAUD_DIV, PARITY, STOP, DATA8, FIFO_TH and TX/RX enable bits, reset value 0x0000_0301" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="regDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+  </defs>
+
+  <!-- panel -->
+  <rect x="4" y="4" width="1032" height="316" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect x="4" y="4" width="1032" height="316" rx="16" fill="url(#regDots)"/>
+
+  <!-- title row -->
+  <text x="72" y="44" font-size="14" font-weight="600" fill="#141413">UART_CTRL</text>
+  <text x="180" y="44" font-size="11.5" fill="#6b6a5f">offset 0x04 &#183; reset 0x0000_0301</text>
+  <text x="968" y="44" font-size="11" font-style="italic" fill="#8c8a7d" text-anchor="end">reserved bits read as 0 &#183; write as 0</text>
+
+  <!-- ====== row 1 · bits 31..16 ====== -->
+  <g font-size="11" fill="#6b6a5f" text-anchor="middle">
+    <text x="100" y="76">31</text><text x="156" y="76">30</text><text x="212" y="76">29</text><text x="268" y="76">28</text>
+    <text x="324" y="76">27</text><text x="380" y="76">26</text><text x="436" y="76">25</text><text x="492" y="76">24</text>
+    <text x="548" y="76">23</text><text x="604" y="76">22</text><text x="660" y="76">21</text><text x="716" y="76">20</text>
+    <text x="772" y="76">19</text><text x="828" y="76">18</text><text x="884" y="76">17</text><text x="940" y="76">16</text>
+  </g>
+
+  <!-- [31:24] reserved -->
+  <rect x="72" y="84" width="448" height="44" fill="#ffffff" stroke="#d8d4c8"/>
+  <g stroke="#eceadf">
+    <line x1="128" y1="84" x2="128" y2="100"/><line x1="184" y1="84" x2="184" y2="100"/>
+    <line x1="240" y1="84" x2="240" y2="100"/><line x1="296" y1="84" x2="296" y2="100"/>
+    <line x1="352" y1="84" x2="352" y2="100"/><line x1="408" y1="84" x2="408" y2="100"/>
+    <line x1="464" y1="84" x2="464" y2="100"/>
+  </g>
+  <!-- [23:16] BAUD_DIV -->
+  <rect x="520" y="84" width="448" height="44" fill="#e2ecf5" stroke="#d8d4c8"/>
+  <rect x="520" y="84" width="448" height="4" fill="#6a9bcc"/>
+  <g stroke="#d6e3f0">
+    <line x1="576" y1="88" x2="576" y2="100"/><line x1="632" y1="88" x2="632" y2="100"/>
+    <line x1="688" y1="88" x2="688" y2="100"/><line x1="744" y1="88" x2="744" y2="100"/>
+    <line x1="800" y1="88" x2="800" y2="100"/><line x1="856" y1="88" x2="856" y2="100"/>
+    <line x1="912" y1="88" x2="912" y2="100"/>
+  </g>
+  <text x="296" y="112" font-size="12" fill="#8c8a7d" text-anchor="middle">&#8212;</text>
+  <text x="744" y="112" font-size="12" font-weight="600" fill="#4a7bab" text-anchor="middle">BAUD_DIV</text>
+
+  <!-- ====== row 2 · bits 15..0 ====== -->
+  <g font-size="11" fill="#6b6a5f" text-anchor="middle">
+    <text x="100" y="156">15</text><text x="156" y="156">14</text><text x="212" y="156">13</text><text x="268" y="156">12</text>
+    <text x="324" y="156">11</text><text x="380" y="156">10</text><text x="436" y="156">9</text><text x="492" y="156">8</text>
+    <text x="548" y="156">7</text><text x="604" y="156">6</text><text x="660" y="156">5</text><text x="716" y="156">4</text>
+    <text x="772" y="156">3</text><text x="828" y="156">2</text><text x="884" y="156">1</text><text x="940" y="156">0</text>
+  </g>
+
+  <!-- [15:12] reserved -->
+  <rect x="72" y="164" width="224" height="44" fill="#ffffff" stroke="#d8d4c8"/>
+  <g stroke="#eceadf">
+    <line x1="128" y1="164" x2="128" y2="180"/><line x1="184" y1="164" x2="184" y2="180"/>
+    <line x1="240" y1="164" x2="240" y2="180"/>
+  </g>
+  <!-- [11:10] PARITY -->
+  <rect x="296" y="164" width="112" height="44" fill="#e5e9dd" stroke="#d8d4c8"/>
+  <rect x="296" y="164" width="112" height="4" fill="#788c5d"/>
+  <line x1="352" y1="168" x2="352" y2="180" stroke="#e0e5d4"/>
+  <!-- [9] STOP -->
+  <rect x="408" y="164" width="56" height="44" fill="#f0e4d8" stroke="#d8d4c8"/>
+  <rect x="408" y="164" width="56" height="4" fill="#c9913f"/>
+  <!-- [8] DATA8 -->
+  <rect x="464" y="164" width="56" height="44" fill="#f0e4d8" stroke="#d8d4c8"/>
+  <rect x="464" y="164" width="56" height="4" fill="#c9913f"/>
+  <!-- [7:4] FIFO_TH -->
+  <rect x="520" y="164" width="224" height="44" fill="#e2ecf5" stroke="#d8d4c8"/>
+  <rect x="520" y="164" width="224" height="4" fill="#6a9bcc"/>
+  <g stroke="#d6e3f0">
+    <line x1="576" y1="168" x2="576" y2="180"/><line x1="632" y1="168" x2="632" y2="180"/>
+    <line x1="688" y1="168" x2="688" y2="180"/>
+  </g>
+  <!-- [3:2] reserved -->
+  <rect x="744" y="164" width="112" height="44" fill="#ffffff" stroke="#d8d4c8"/>
+  <line x1="800" y1="164" x2="800" y2="180" stroke="#eceadf"/>
+  <!-- [1] TX_EN -->
+  <rect x="856" y="164" width="56" height="44" fill="#f7e4dc" stroke="#d8d4c8"/>
+  <rect x="856" y="164" width="56" height="4" fill="#d97757"/>
+  <!-- [0] RX_EN · focus -->
+  <rect x="912" y="164" width="56" height="44" fill="#fbeee7" stroke="#d97757" stroke-width="1.5"/>
+  <rect x="912" y="164" width="56" height="4" fill="#d97757"/>
+
+  <g font-size="12" font-weight="600" text-anchor="middle">
+    <text x="184" y="192" font-weight="400" fill="#8c8a7d">&#8212;</text>
+    <text x="352" y="192" fill="#5d7045">PARITY</text>
+    <text x="436" y="192" fill="#8a5a2a">STOP</text>
+    <text x="492" y="192" fill="#8a5a2a">DATA8</text>
+    <text x="632" y="192" fill="#4a7bab">FIFO_TH</text>
+    <text x="800" y="192" font-weight="400" fill="#8c8a7d">&#8212;</text>
+    <text x="884" y="192" fill="#c2613f">TX_EN</text>
+    <text x="940" y="192" fill="#c2613f">RX_EN</text>
+  </g>
+
+  <!-- ====== legend: key fields ====== -->
+  <line x1="72" y1="232" x2="968" y2="232" stroke="#eceadf"/>
+
+  <circle cx="76" cy="256" r="4" fill="#6a9bcc"/>
+  <text x="88" y="260" font-size="12" font-weight="600" fill="#141413">BAUD_DIV</text>
+  <rect x="168" y="248" width="32" height="16" rx="8" fill="#141413"/>
+  <text x="184" y="260" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">RW</text>
+  <text x="208" y="260" font-size="11.5" fill="#6b6a5f">bits 23:16 &#183; baud = PCLK / (16 &#183; div)</text>
+
+  <circle cx="76" cy="288" r="4" fill="#788c5d"/>
+  <text x="88" y="292" font-size="12" font-weight="600" fill="#141413">PARITY</text>
+  <rect x="168" y="280" width="32" height="16" rx="8" fill="#141413"/>
+  <text x="184" y="292" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">RW</text>
+  <text x="208" y="292" font-size="11.5" fill="#6b6a5f">bits 11:10 &#183; 00 none &#183; 01 even &#183; 10 odd</text>
+
+  <circle cx="540" cy="256" r="4" fill="#c9913f"/>
+  <text x="552" y="260" font-size="12" font-weight="600" fill="#141413">DATA8</text>
+  <rect x="632" y="248" width="32" height="16" rx="8" fill="#141413"/>
+  <text x="648" y="260" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">RW</text>
+  <text x="672" y="260" font-size="11.5" fill="#6b6a5f">bit 8 &#183; 1 = 8 data bits &#183; 0 = 7 data bits</text>
+
+  <circle cx="540" cy="288" r="4" fill="#d97757"/>
+  <text x="552" y="292" font-size="12" font-weight="600" fill="#141413">RX_EN</text>
+  <rect x="632" y="280" width="32" height="16" rx="8" fill="#141413"/>
+  <text x="648" y="292" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">RW</text>
+  <text x="672" y="292" font-size="11.5" fill="#6b6a5f">bit 0 &#183; receiver enable &#183; 1 at reset</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">register · bit fields</span><span class="lang-zh">寄存器 · 位域</span></span>
+          <span class="lang-en">A 32-bit control register split across two rows: fields as tint spans with solid top bars, reserved bits stay white, access chips and reset value where a datasheet would put them. Works for protocol frames too. Template: <code>templates/diagrams/register-bitfield.svg</code>.</span>
+          <span class="lang-zh">32 位控制寄存器拆两行：字段用 tint 跨格加实心顶条，保留位留白，访问权限 chip 和复位值放在数据手册该放的位置。协议帧格式同样适用。模板：<code>templates/diagrams/register-bitfield.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Quartz-3550 SoC block diagram: dual Cortex-A55 CPU cluster and clock-reset unit feed an AXI NoC interconnect that fans out to memory, high-speed peripherals and an APB bridge serving low-speed peripherals; the main data path runs CPU to NoC to DDR4" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="socDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <filter id="socSh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/>
+    </filter>
+    <marker id="socArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+    </marker>
+    <marker id="socArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6a9bcc"/>
+    </marker>
+    <marker id="socArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c9913f"/>
+    </marker>
+    <marker id="socArrI" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/>
+    </marker>
+  </defs>
+
+  <!-- panel -->
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#socDots)"/>
+
+  <!-- header -->
+  <text x="32" y="36" font-size="11" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">QUARTZ-3550 SoC · BLOCK DIAGRAM</text>
+  <text x="1088" y="36" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">arm64 · 12 nm LP · 0.8 V core rail</text>
+
+  <!-- zone: CPU subsystem (orange) -->
+  <rect x="32" y="60" width="728" height="112" rx="10" fill="#f7e4dc" stroke="#ecccbc"/>
+  <rect x="32" y="60" width="4" height="112" rx="2" fill="#d97757"/>
+  <circle cx="56" cy="84" r="4" fill="#d97757"/>
+  <text x="68" y="88" font-size="11" font-weight="600" letter-spacing="1.2" fill="#c2613f">CPU SUBSYSTEM</text>
+  <text x="744" y="88" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">DynamIQ cluster · 1.8 GHz</text>
+
+  <!-- zone: clock and reset (ink) -->
+  <rect x="784" y="60" width="304" height="112" rx="10" fill="#e7e4d9" stroke="#cfccc0"/>
+  <rect x="784" y="60" width="4" height="112" rx="2" fill="#141413"/>
+  <circle cx="808" cy="84" r="4" fill="#141413"/>
+  <text x="820" y="88" font-size="11" font-weight="600" letter-spacing="1.2" fill="#141413">CLOCK &amp; RESET</text>
+  <text x="1072" y="88" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">24 MHz xtal</text>
+
+  <!-- zone: memory (olive) -->
+  <rect x="32" y="332" width="336" height="164" rx="10" fill="#e5e9dd" stroke="#ccd3bd"/>
+  <rect x="32" y="332" width="4" height="164" rx="2" fill="#788c5d"/>
+  <circle cx="56" cy="356" r="4" fill="#788c5d"/>
+  <text x="68" y="360" font-size="11" font-weight="600" letter-spacing="1.2" fill="#5d7045">MEMORY</text>
+  <text x="352" y="360" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">AXI slaves</text>
+
+  <!-- zone: high-speed peripherals (blue) -->
+  <rect x="392" y="332" width="336" height="164" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
+  <rect x="392" y="332" width="4" height="164" rx="2" fill="#6a9bcc"/>
+  <circle cx="416" cy="356" r="4" fill="#6a9bcc"/>
+  <text x="428" y="360" font-size="11" font-weight="600" letter-spacing="1.2" fill="#4a7bab">HIGH-SPEED PERIPH</text>
+  <text x="712" y="360" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">DMA masters</text>
+
+  <!-- zone: low-speed peripherals (gold) -->
+  <rect x="752" y="332" width="336" height="164" rx="10" fill="#f0e4d8" stroke="#e4cfb2"/>
+  <rect x="752" y="332" width="4" height="164" rx="2" fill="#c9913f"/>
+  <circle cx="776" cy="356" r="4" fill="#c9913f"/>
+  <text x="788" y="360" font-size="11" font-weight="600" letter-spacing="1.2" fill="#8a5a2a">LOW-SPEED PERIPH</text>
+  <text x="1072" y="360" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">via APB</text>
+
+  <!-- connectors -->
+  <!-- main data path: Cortex-A55 -> NoC (orange 1.8) -->
+  <path d="M176,152 V196 Q176,204 184,204 H392 Q400,204 400,212 V228" fill="none" stroke="#d97757" stroke-width="1.8" marker-end="url(#socArrO)"/>
+  <!-- main data path: NoC -> DDR4 ctrl (orange 1.8) -->
+  <path d="M312,276 V296 Q312,304 304,304 H208 Q200,304 200,312 V376" fill="none" stroke="#d97757" stroke-width="1.8" marker-end="url(#socArrO)"/>
+  <!-- clock/reset fan-out -> NoC (ink dashed 1.2) -->
+  <path d="M820,172 V196 Q820,204 812,204 H728 Q720,204 720,212 V228" fill="none" stroke="#141413" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#socArrI)"/>
+  <text x="832" y="196" font-size="11" font-style="italic" fill="#8c8a7d">clk · rst</text>
+  <!-- NoC <-> high-speed zone (blue 1.2, both directions) -->
+  <line x1="560" y1="276" x2="560" y2="332" stroke="#6a9bcc" stroke-width="1.2" marker-start="url(#socArrB)" marker-end="url(#socArrB)"/>
+  <!-- NoC -> APB bridge -> low-speed zone (gold 1.2) -->
+  <line x1="760" y1="252" x2="848" y2="252" stroke="#c9913f" stroke-width="1.2" marker-end="url(#socArrG)"/>
+  <line x1="936" y1="276" x2="936" y2="332" stroke="#c9913f" stroke-width="1.2" marker-end="url(#socArrG)"/>
+
+  <!-- IP cards -->
+  <g filter="url(#socSh)">
+    <rect x="56" y="104" width="240" height="48" rx="8" fill="#fbeee7" stroke="#d97757" stroke-width="1.5"/>
+    <rect x="312" y="104" width="208" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="536" y="104" width="208" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="800" y="104" width="144" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="956" y="104" width="116" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="280" y="228" width="480" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="848" y="228" width="176" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="56" y="376" width="288" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="56" y="432" width="136" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="204" y="432" width="140" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="416" y="376" width="288" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="416" y="432" width="136" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="564" y="432" width="140" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="776" y="376" width="136" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="924" y="376" width="140" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="776" y="432" width="136" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="924" y="432" width="140" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+
+  <!-- category dots -->
+  <circle cx="72" cy="124" r="3.5" fill="#d97757"/>
+  <circle cx="328" cy="124" r="3.5" fill="#d97757"/>
+  <circle cx="552" cy="124" r="3.5" fill="#d97757"/>
+  <circle cx="816" cy="124" r="3.5" fill="#141413"/>
+  <circle cx="972" cy="124" r="3.5" fill="#141413"/>
+  <circle cx="296" cy="248" r="3.5" fill="#141413"/>
+  <circle cx="864" cy="248" r="3.5" fill="#c9913f"/>
+  <circle cx="72" cy="396" r="3.5" fill="#788c5d"/>
+  <circle cx="72" cy="452" r="3.5" fill="#788c5d"/>
+  <circle cx="220" cy="452" r="3.5" fill="#788c5d"/>
+  <circle cx="432" cy="396" r="3.5" fill="#6a9bcc"/>
+  <circle cx="432" cy="452" r="3.5" fill="#6a9bcc"/>
+  <circle cx="580" cy="452" r="3.5" fill="#6a9bcc"/>
+  <circle cx="792" cy="396" r="3.5" fill="#c9913f"/>
+  <circle cx="940" cy="396" r="3.5" fill="#c9913f"/>
+  <circle cx="792" cy="452" r="3.5" fill="#c9913f"/>
+  <circle cx="940" cy="452" r="3.5" fill="#c9913f"/>
+
+  <!-- card names -->
+  <g font-size="13" font-weight="600" fill="#141413">
+    <text x="84" y="128">Cortex-A55 ×2</text>
+    <text x="340" y="128">L2 512K</text>
+    <text x="564" y="128">GIC-600</text>
+    <text x="828" y="128">PLL ×3</text>
+    <text x="984" y="128">CRU</text>
+    <text x="308" y="252">AXI NoC · 64-bit @ 800 MHz</text>
+    <text x="876" y="252">APB bridge</text>
+    <text x="84" y="400">DDR4 ctrl + PHY</text>
+    <text x="84" y="456">SRAM 256K</text>
+    <text x="232" y="456">Boot ROM</text>
+    <text x="444" y="400">PCIe Gen3 x2</text>
+    <text x="444" y="456">USB 3.0</text>
+    <text x="592" y="456">GbE MAC</text>
+    <text x="804" y="400">UART ×4</text>
+    <text x="952" y="400">I2C ×3</text>
+    <text x="804" y="456">SPI ×2</text>
+    <text x="952" y="456">GPIO</text>
+  </g>
+
+  <!-- card sub-lines -->
+  <g font-size="11" fill="#6b6a5f">
+    <text x="84" y="144">L1 32K I/D per core</text>
+    <text x="340" y="144">unified · ECC</text>
+    <text x="564" y="144">interrupt distributor</text>
+    <text x="828" y="144">core · ddr · peri</text>
+    <text x="984" y="144">gate · reset</text>
+    <text x="308" y="268">system interconnect · QoS arbitration · 4 masters</text>
+    <text x="876" y="268">AXI-to-APB · 100 MHz</text>
+    <text x="84" y="416">DDR4-3200 · 32-bit + ECC</text>
+    <text x="84" y="472">on-chip scratch</text>
+    <text x="232" y="472">64K mask</text>
+    <text x="444" y="416">root complex · MSI-X</text>
+    <text x="444" y="472">xHCI DRD</text>
+    <text x="592" y="472">RGMII · TSO</text>
+    <text x="804" y="416">16550A</text>
+    <text x="952" y="416">400 kHz FM</text>
+    <text x="804" y="472">mode 0-3</text>
+    <text x="952" y="472">4 banks ×32</text>
+  </g>
+
+  <!-- numbered badges on main data path -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <circle cx="288" cy="204" r="10" fill="#d97757"/><text x="288" y="208" fill="#ffffff">1</text>
+    <circle cx="256" cy="304" r="10" fill="#d97757"/><text x="256" y="308" fill="#ffffff">2</text>
+  </g>
+
+  <!-- legend -->
+  <g font-size="11" fill="#6b6a5f">
+    <circle cx="544" cy="524" r="4" fill="#d97757"/><text x="556" y="528">CPU</text>
+    <circle cx="612" cy="524" r="4" fill="#788c5d"/><text x="624" y="528">memory</text>
+    <circle cx="696" cy="524" r="4" fill="#6a9bcc"/><text x="708" y="528">high-speed</text>
+    <circle cx="796" cy="524" r="4" fill="#c9913f"/><text x="808" y="528">low-speed</text>
+    <circle cx="892" cy="524" r="4" fill="#141413"/><text x="904" y="528">clock &amp; reset</text>
+    <line x1="1004" y1="524" x2="1028" y2="524" stroke="#d97757" stroke-width="1.8" stroke-linecap="round"/><text x="1036" y="528">main path</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">soc · block diagram</span><span class="lang-zh">SoC · 内部框图</span></span>
+          <span class="lang-en">Subsystems as tint zones, the interconnect as a neutral spine — never a saturated band. One orange path traces CPU through NoC to DDR; every zone keeps its own hue for internal links. Template: <code>templates/diagrams/soc-block.svg</code>.</span>
+          <span class="lang-zh">子系统是 tint 分区，互连是中性脊柱——绝不画成饱和色带。唯一的橙色路径从 CPU 经 NoC 到 DDR，每个分区的内部连线用自己的色相。模板：<code>templates/diagrams/soc-block.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 380" role="img" aria-label="SPI mode 0 read transaction timing waveform: SCLK, CS_N, MOSI and MISO lanes with data-valid windows, sampling edges at each SCLK rising edge, and tCSS / tSU timing annotations" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="wavDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <marker id="wavArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6b6a5f"/>
+    </marker>
+  </defs>
+
+  <!-- panel -->
+  <rect x="0" y="0" width="1120" height="380" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect x="0" y="0" width="1120" height="380" rx="16" fill="url(#wavDots)"/>
+
+  <!-- title chip -->
+  <rect x="24" y="16" width="192" height="24" rx="12" fill="#e7e4d9"/>
+
+  <!-- data-valid windows (bus cells, tint) -->
+  <!-- MOSI 0x9F -->
+  <path d="M208,196 L216,184 H556 L564,196 L556,208 H216 Z" fill="#e2ecf5" stroke="#6a9bcc" stroke-width="1.4"/>
+  <!-- MOSI 0x00 -->
+  <path d="M564,196 L572,184 H908 L916,196 L908,208 H572 Z" fill="#e2ecf5" stroke="#6a9bcc" stroke-width="1.4"/>
+  <!-- MISO 0xC2 -->
+  <path d="M564,252 L572,240 H732 L740,252 L732,264 H572 Z" fill="#e5e9dd" stroke="#788c5d" stroke-width="1.4"/>
+  <!-- MISO 0x20 -->
+  <path d="M740,252 L748,240 H908 L916,252 L908,264 H748 Z" fill="#e5e9dd" stroke="#788c5d" stroke-width="1.4"/>
+
+  <!-- sampling lines at each SCLK rising edge -->
+  <g stroke="#d8d4c8" stroke-width="1" stroke-dasharray="3 3">
+    <line x1="256" y1="64" x2="256" y2="272"/>
+    <line x1="344" y1="64" x2="344" y2="272"/>
+    <line x1="432" y1="64" x2="432" y2="272"/>
+    <line x1="520" y1="64" x2="520" y2="272"/>
+    <line x1="608" y1="64" x2="608" y2="272"/>
+    <line x1="696" y1="64" x2="696" y2="272"/>
+    <line x1="784" y1="64" x2="784" y2="272"/>
+    <line x1="872" y1="64" x2="872" y2="272"/>
+  </g>
+
+  <!-- timing reference extensions -->
+  <g stroke="#a8a496" stroke-width="1" stroke-dasharray="2 3">
+    <line x1="176" y1="156" x2="176" y2="300"/>
+    <line x1="256" y1="272" x2="256" y2="300"/>
+    <line x1="564" y1="212" x2="564" y2="300"/>
+    <line x1="608" y1="272" x2="608" y2="300"/>
+  </g>
+
+  <!-- phase brackets -->
+  <path d="M208,62 V58 H556 V62" fill="none" stroke="#a8a496" stroke-width="1"/>
+  <path d="M572,62 V58 H916 V62" fill="none" stroke="#a8a496" stroke-width="1"/>
+
+  <!-- time axis -->
+  <line x1="120" y1="312" x2="1080" y2="312" stroke="#d8d4c8" stroke-width="1"/>
+  <g stroke="#a8a496" stroke-width="1">
+    <line x1="256" y1="312" x2="256" y2="320"/>
+    <line x1="344" y1="312" x2="344" y2="320"/>
+    <line x1="432" y1="312" x2="432" y2="320"/>
+    <line x1="520" y1="312" x2="520" y2="320"/>
+    <line x1="608" y1="312" x2="608" y2="320"/>
+    <line x1="696" y1="312" x2="696" y2="320"/>
+    <line x1="784" y1="312" x2="784" y2="320"/>
+    <line x1="872" y1="312" x2="872" y2="320"/>
+    <line x1="960" y1="312" x2="960" y2="320"/>
+  </g>
+
+  <!-- waveforms -->
+  <!-- SCLK: 8 periods, CPOL=0 idle low -->
+  <path d="M120,96 H256 V72 H300 V96 H344 V72 H388 V96 H432 V72 H476 V96 H520 V72 H564 V96 H608 V72 H652 V96 H696 V72 H740 V96 H784 V72 H828 V96 H872 V72 H916 V96 H1080" fill="none" stroke="#141413" stroke-width="1.8"/>
+  <!-- CS_N: frames the transaction (focus) -->
+  <path d="M120,128 H176 V152 H1000 V128 H1080" fill="none" stroke="#d97757" stroke-width="1.8"/>
+  <!-- MOSI idle low, entry/exit slants into bus cells -->
+  <path d="M120,208 H200 L208,196" fill="none" stroke="#6a9bcc" stroke-width="1.8"/>
+  <path d="M916,196 L924,208 H1080" fill="none" stroke="#6a9bcc" stroke-width="1.8"/>
+  <!-- MISO high-Z before and after data -->
+  <path d="M120,252 H564" fill="none" stroke="#a8a496" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <path d="M916,252 H1080" fill="none" stroke="#a8a496" stroke-width="1.4" stroke-dasharray="5 4"/>
+
+  <!-- timing parameter arrows -->
+  <line x1="176" y1="292" x2="256" y2="292" stroke="#6b6a5f" stroke-width="1.1" marker-start="url(#wavArrG)" marker-end="url(#wavArrG)"/>
+  <line x1="564" y1="292" x2="608" y2="292" stroke="#6b6a5f" stroke-width="1.1" marker-start="url(#wavArrG)" marker-end="url(#wavArrG)"/>
+
+  <!-- legend swatches -->
+  <rect x="120" y="348" width="18" height="12" rx="2" fill="#e2ecf5" stroke="#6a9bcc" stroke-width="1"/>
+  <line x1="296" y1="356" x2="316" y2="356" stroke="#a8a496" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <line x1="484" y1="348" x2="484" y2="364" stroke="#d8d4c8" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <circle cx="704" cy="356" r="4" fill="#d97757"/>
+
+  <!-- lane label dots -->
+  <circle cx="32" cy="84" r="3.5" fill="#141413"/>
+  <circle cx="32" cy="140" r="3.5" fill="#d97757"/>
+  <circle cx="32" cy="196" r="3.5" fill="#6a9bcc"/>
+  <circle cx="32" cy="252" r="3.5" fill="#788c5d"/>
+
+  <!-- text (drawn last, nothing covers it) -->
+  <text x="120" y="32" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">SPI mode 0 · CPOL=0 CPHA=0</text>
+  <text x="1096" y="32" text-anchor="end" font-size="11" fill="#6b6a5f">MX25L6433F · JEDEC ID read</text>
+
+  <text x="384" y="48" text-anchor="middle" font-size="11" fill="#6b6a5f">command phase · MOSI drives</text>
+  <text x="744" y="48" text-anchor="middle" font-size="11" fill="#6b6a5f">data phase · MISO drives</text>
+
+  <text x="42" y="88" font-size="12" font-weight="600" fill="#141413">SCLK</text>
+  <text x="42" y="144" font-size="12" font-weight="600" fill="#c2613f">CS_N</text>
+  <text x="42" y="200" font-size="12" font-weight="600" fill="#4a7bab">MOSI</text>
+  <text x="42" y="256" font-size="12" font-weight="600" fill="#5d7045">MISO</text>
+
+  <text x="388" y="200" text-anchor="middle" font-size="12.5" font-weight="600" fill="#4a7bab">0x9F</text>
+  <text x="740" y="200" text-anchor="middle" font-size="12.5" font-weight="600" fill="#4a7bab">0x00</text>
+  <text x="652" y="256" text-anchor="middle" font-size="12.5" font-weight="600" fill="#5d7045">0xC2</text>
+  <text x="828" y="256" text-anchor="middle" font-size="12.5" font-weight="600" fill="#5d7045">0x20</text>
+
+  <text x="216" y="284" text-anchor="middle" font-size="11" fill="#6b6a5f">tCSS</text>
+  <text x="616" y="296" font-size="11" fill="#6b6a5f">tSU ≥ 5 ns</text>
+
+  <g font-size="11" fill="#6b6a5f" text-anchor="middle">
+    <text x="256" y="336">t0</text>
+    <text x="344" y="336">t1</text>
+    <text x="432" y="336">t2</text>
+    <text x="520" y="336">t3</text>
+    <text x="608" y="336">t4</text>
+    <text x="696" y="336">t5</text>
+    <text x="784" y="336">t6</text>
+    <text x="872" y="336">t7</text>
+    <text x="960" y="336">t8</text>
+  </g>
+
+  <g font-size="11" fill="#6b6a5f">
+    <text x="148" y="360">data-valid window</text>
+    <text x="324" y="360">high-Z (not driven)</text>
+    <text x="496" y="360">sampling edge · SCLK rising</text>
+    <text x="716" y="360">CS_N · focus signal</text>
+    <text x="1080" y="360" text-anchor="end">SCLK 25 MHz · bit period 40 ns</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">waveform · bus timing</span><span class="lang-zh">波形 · 总线时序</span></span>
+          <span class="lang-en">An SPI transaction the way a logic analyzer shows it: one lane per signal, the chip-select carries the orange focus, data cells hold real hex, and setup/hold arrows annotate the edges that matter. Template: <code>templates/diagrams/hw-timing-waveform.svg</code>.</span>
+          <span class="lang-zh">逻辑分析仪视角的 SPI 传输：一信号一行，片选承担橙色焦点，数据格里是真实 hex，建立/保持箭头标注关键边沿。模板：<code>templates/diagrams/hw-timing-waveform.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 324" role="img" aria-label="Linux kernel build pipeline from Kconfig sources through gcc, ld and objcopy to Image.gz, with a parallel devicetree branch merged by mkimage into boot.itb" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="bldDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <filter id="bldSh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/>
+    </filter>
+    <marker id="bldArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+    </marker>
+    <marker id="bldArrAu" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c9913f"/>
+    </marker>
+  </defs>
+
+  <!-- panel -->
+  <rect width="1060" height="324" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1060" height="324" rx="16" fill="url(#bldDots)"/>
+
+  <!-- header -->
+  <text x="32" y="36" font-size="11" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">LINUX KERNEL · BUILD PIPELINE</text>
+  <text x="1028" y="36" font-size="11" font-style="italic" fill="#8c8a7d" text-anchor="end">make ARCH=arm64 Image.gz dtbs</text>
+
+  <!-- main path (orange 1.8px) -->
+  <g fill="none" stroke="#d97757" stroke-width="1.8">
+    <line x1="216" y1="100" x2="256" y2="100" marker-end="url(#bldArrO)"/>
+    <line x1="380" y1="100" x2="420" y2="100" marker-end="url(#bldArrO)"/>
+    <line x1="532" y1="100" x2="572" y2="100" marker-end="url(#bldArrO)"/>
+    <line x1="692" y1="100" x2="732" y2="100" marker-end="url(#bldArrO)"/>
+    <line x1="864" y1="100" x2="904" y2="100" marker-end="url(#bldArrO)"/>
+    <path d="M968,128 V160 Q968,168 960,168 H796 Q788,168 788,176 V204" marker-end="url(#bldArrO)"/>
+    <line x1="860" y1="232" x2="900" y2="232" marker-end="url(#bldArrO)"/>
+  </g>
+
+  <!-- devicetree branch (gold 1.2px) -->
+  <g fill="none" stroke="#c9913f" stroke-width="1.2">
+    <line x1="144" y1="232" x2="184" y2="232" marker-end="url(#bldArrAu)"/>
+    <line x1="336" y1="232" x2="376" y2="232" marker-end="url(#bldArrAu)"/>
+    <line x1="500" y1="232" x2="716" y2="232" marker-end="url(#bldArrAu)"/>
+  </g>
+  <text x="608" y="220" font-size="11" font-style="italic" fill="#8c8a7d" text-anchor="middle">make dtbs · runs in parallel</text>
+
+  <!-- cards -->
+  <g filter="url(#bldSh)">
+    <rect x="32" y="72" width="184" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="256" y="72" width="124" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="420" y="72" width="112" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="572" y="72" width="120" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="732" y="72" width="132" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="904" y="72" width="132" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="32" y="204" width="112" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="184" y="204" width="152" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="376" y="204" width="124" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="716" y="204" width="144" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="900" y="204" width="128" height="56" rx="10" fill="#fbeee7" stroke="#d97757" stroke-width="1.5"/>
+  </g>
+
+  <!-- file-corner motifs on artifact cards -->
+  <g fill="none" stroke="#a8a496" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(192,80)"><path d="M1,1 h6.5 l4,4 v8 h-10.5 Z"/><path d="M7.5,1 v4 h4"/></g>
+    <g transform="translate(508,80)"><path d="M1,1 h6.5 l4,4 v8 h-10.5 Z"/><path d="M7.5,1 v4 h4"/></g>
+    <g transform="translate(1012,80)"><path d="M1,1 h6.5 l4,4 v8 h-10.5 Z"/><path d="M7.5,1 v4 h4"/></g>
+    <g transform="translate(120,212)"><path d="M1,1 h6.5 l4,4 v8 h-10.5 Z"/><path d="M7.5,1 v4 h4"/></g>
+    <g transform="translate(476,212)"><path d="M1,1 h6.5 l4,4 v8 h-10.5 Z"/><path d="M7.5,1 v4 h4"/></g>
+    <g transform="translate(1004,212)"><path d="M1,1 h6.5 l4,4 v8 h-10.5 Z"/><path d="M7.5,1 v4 h4"/></g>
+  </g>
+
+  <!-- category dots: blue = artifact, orange = tool -->
+  <circle cx="48" cy="92" r="3.5" fill="#6a9bcc"/>
+  <circle cx="272" cy="92" r="3.5" fill="#d97757"/>
+  <circle cx="436" cy="92" r="3.5" fill="#6a9bcc"/>
+  <circle cx="588" cy="92" r="3.5" fill="#d97757"/>
+  <circle cx="748" cy="92" r="3.5" fill="#d97757"/>
+  <circle cx="920" cy="92" r="3.5" fill="#6a9bcc"/>
+  <circle cx="48" cy="224" r="3.5" fill="#6a9bcc"/>
+  <circle cx="200" cy="224" r="3.5" fill="#d97757"/>
+  <circle cx="392" cy="224" r="3.5" fill="#6a9bcc"/>
+  <circle cx="732" cy="224" r="3.5" fill="#d97757"/>
+  <circle cx="916" cy="224" r="3.5" fill="#6a9bcc"/>
+
+  <!-- card text -->
+  <g font-size="13" font-weight="600" fill="#141413">
+    <text x="60" y="96">.config + Kconfig</text>
+    <text x="284" y="96">gcc -c</text>
+    <text x="448" y="96">*.o</text>
+    <text x="600" y="96">ld vmlinux</text>
+    <text x="760" y="96">objcopy</text>
+    <text x="932" y="96">Image.gz</text>
+    <text x="60" y="228">*.dts</text>
+    <text x="212" y="228">dtc</text>
+    <text x="404" y="228">*.dtb</text>
+    <text x="744" y="228">mkimage FIT</text>
+    <text x="928" y="228">boot.itb</text>
+  </g>
+  <g font-size="11" fill="#6b6a5f">
+    <text x="60" y="114">build configuration</text>
+    <text x="284" y="114">compile per-TU</text>
+    <text x="448" y="114">object files</text>
+    <text x="600" y="114">ELF + symbols</text>
+    <text x="760" y="114">strip to binary</text>
+    <text x="932" y="114">self-extracting</text>
+    <text x="60" y="246">board source</text>
+    <text x="212" y="246">devicetree compiler</text>
+    <text x="404" y="246">flattened blob</text>
+    <text x="744" y="246">kernel + dtb pack</text>
+    <text x="928" y="246">bootable image</text>
+  </g>
+
+  <!-- numbered badges on tool steps of the main path -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <circle cx="260" cy="76" r="10" fill="#d97757"/><text x="260" y="80" fill="#ffffff">1</text>
+    <circle cx="576" cy="76" r="10" fill="#d97757"/><text x="576" y="80" fill="#ffffff">2</text>
+    <circle cx="736" cy="76" r="10" fill="#d97757"/><text x="736" y="80" fill="#ffffff">3</text>
+    <circle cx="720" cy="208" r="10" fill="#d97757"/><text x="720" y="212" fill="#ffffff">4</text>
+  </g>
+
+  <!-- legend -->
+  <g font-size="11" fill="#6b6a5f">
+    <circle cx="36" cy="296" r="4" fill="#d97757"/><text x="48" y="300">tool step</text>
+    <circle cx="136" cy="296" r="4" fill="#6a9bcc"/><text x="148" y="300">artifact</text>
+    <line x1="224" y1="296" x2="248" y2="296" stroke="#c9913f" stroke-width="1.8" stroke-linecap="round"/><text x="256" y="300">devicetree branch</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">build · pipeline</span><span class="lang-zh">编译 · 流程链</span></span>
+          <span class="lang-en">Kernel build from .config to bootable image: tools and artifacts alternate along the orange chain, the devicetree branch joins in gold, the deliverable gets the focus card. Template: <code>templates/diagrams/build-pipeline.svg</code>.</span>
+          <span class="lang-zh">内核编译从 .config 到可启动镜像：工具与产物沿橙色主链交替，设备树分支以金色汇入，最终交付物用焦点卡。模板：<code>templates/diagrams/build-pipeline.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 360" role="img" aria-label="Scheduler timeline: CFS run view across CPU 0 to CPU 2 where app: render runs on CPU 0, is preempted by the eth0 IRQ thread at 4 ms, then migrates to CPU 2 under load balancing while kworker runs periodically on CPU 1" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="schDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <marker id="schArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/>
+    </marker>
+  </defs>
+
+  <!-- panel -->
+  <rect width="1120" height="360" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="360" rx="16" fill="url(#schDots)"/>
+
+  <!-- tick gridlines (under everything) -->
+  <g stroke="#eceadf" stroke-width="1">
+    <line x1="104" y1="96" x2="104" y2="288"/>
+    <line x1="264" y1="96" x2="264" y2="288"/>
+    <line x1="424" y1="96" x2="424" y2="288"/>
+    <line x1="584" y1="96" x2="584" y2="288"/>
+    <line x1="744" y1="96" x2="744" y2="288"/>
+    <line x1="904" y1="96" x2="904" y2="288"/>
+    <line x1="1064" y1="96" x2="1064" y2="288"/>
+  </g>
+
+  <!-- time axis -->
+  <g stroke="#a8a496" stroke-width="1">
+    <line x1="104" y1="288" x2="1064" y2="288"/>
+    <line x1="104" y1="288" x2="104" y2="296"/>
+    <line x1="264" y1="288" x2="264" y2="296"/>
+    <line x1="424" y1="288" x2="424" y2="296"/>
+    <line x1="584" y1="288" x2="584" y2="296"/>
+    <line x1="744" y1="288" x2="744" y2="296"/>
+    <line x1="904" y1="288" x2="904" y2="296"/>
+    <line x1="1064" y1="288" x2="1064" y2="296"/>
+  </g>
+
+  <!-- CPU 0 lane: app 0-4 ms, irq/eth0 4-5 ms, idle 5-12 ms -->
+  <rect x="104" y="104" width="320" height="36" rx="6" fill="#e2ecf5"/>
+  <rect x="104" y="104" width="4" height="36" rx="2" fill="#6a9bcc"/>
+  <rect x="424" y="104" width="80" height="36" rx="6" fill="#f7e4dc"/>
+  <rect x="424" y="104" width="4" height="36" rx="2" fill="#d97757"/>
+  <rect x="504" y="104" width="560" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-dasharray="4 3"/>
+
+  <!-- CPU 1 lane: kworker bursts every 4 ms -->
+  <rect x="104" y="168" width="80" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-dasharray="4 3"/>
+  <rect x="184" y="168" width="120" height="36" rx="6" fill="#e5e9dd"/>
+  <rect x="184" y="168" width="4" height="36" rx="2" fill="#788c5d"/>
+  <rect x="304" y="168" width="200" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-dasharray="4 3"/>
+  <rect x="504" y="168" width="120" height="36" rx="6" fill="#e5e9dd"/>
+  <rect x="504" y="168" width="4" height="36" rx="2" fill="#788c5d"/>
+  <rect x="624" y="168" width="200" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-dasharray="4 3"/>
+  <rect x="824" y="168" width="120" height="36" rx="6" fill="#e5e9dd"/>
+  <rect x="824" y="168" width="4" height="36" rx="2" fill="#788c5d"/>
+  <rect x="944" y="168" width="120" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-dasharray="4 3"/>
+
+  <!-- CPU 2 lane: idle 0-5 ms, app continuation 5-9 ms, idle 9-12 ms -->
+  <rect x="104" y="232" width="400" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-dasharray="4 3"/>
+  <rect x="504" y="232" width="320" height="36" rx="6" fill="#e2ecf5"/>
+  <rect x="504" y="232" width="4" height="36" rx="2" fill="#6a9bcc"/>
+  <rect x="824" y="232" width="240" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-dasharray="4 3"/>
+
+  <!-- IRQ event marker at 4 ms -->
+  <line x1="424" y1="88" x2="424" y2="104" stroke="#d97757" stroke-width="1.8"/>
+  <rect x="400" y="64" width="48" height="24" rx="12" fill="#d97757"/>
+
+  <!-- migration arrow: CPU 0 app block to CPU 2 continuation -->
+  <path d="M408,140 V208 Q408,216 416,216 H512 Q520,216 520,224 V232" fill="none" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#schArrG)"/>
+
+  <!-- legend swatches -->
+  <circle cx="108" cy="336" r="4" fill="#d97757"/>
+  <circle cx="276" cy="336" r="4" fill="#788c5d"/>
+  <circle cx="436" cy="336" r="4" fill="#6a9bcc"/>
+  <rect x="596" y="328" width="20" height="16" rx="4" fill="#ffffff" stroke="#d8d4c8" stroke-dasharray="4 3"/>
+
+  <!-- text layer (always last) -->
+  <text x="32" y="36" font-size="11" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">SCHED · CFS RUN VIEW · 12 MS WINDOW</text>
+  <text x="1088" y="36" font-size="11" font-style="italic" fill="#8c8a7d" text-anchor="end">trace-cmd record -e sched_switch -e sched_migrate_task</text>
+
+  <text x="32" y="128" font-size="12" font-weight="600" fill="#141413">CPU 0</text>
+  <text x="32" y="192" font-size="12" font-weight="600" fill="#141413">CPU 1</text>
+  <text x="32" y="256" font-size="12" font-weight="600" fill="#141413">CPU 2</text>
+
+  <text x="424" y="80" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">IRQ</text>
+  <text x="456" y="80" font-size="11" font-weight="600" fill="#c2613f">eth0 rx</text>
+
+  <text x="116" y="128" font-size="11.5" font-weight="600" fill="#141413">app: render</text>
+  <text x="436" y="128" font-size="11.5" font-weight="600" fill="#141413">irq/eth0</text>
+  <text x="516" y="128" font-size="11.5" fill="#6b6a5f">idle</text>
+  <text x="432" y="160" font-size="11" fill="#6b6a5f">preempted by irq/eth0</text>
+
+  <text x="116" y="192" font-size="11.5" fill="#6b6a5f">idle</text>
+  <text x="196" y="192" font-size="11.5" font-weight="600" fill="#141413">kworker/u8</text>
+  <text x="316" y="192" font-size="11.5" fill="#6b6a5f">idle</text>
+  <text x="516" y="192" font-size="11.5" font-weight="600" fill="#141413">kworker/u8</text>
+  <text x="636" y="192" font-size="11.5" fill="#6b6a5f">idle</text>
+  <text x="836" y="192" font-size="11.5" font-weight="600" fill="#141413">kworker/u8</text>
+  <text x="956" y="192" font-size="11.5" fill="#6b6a5f">idle</text>
+
+  <text x="532" y="220" font-size="11" fill="#6b6a5f">migrate (load balance)</text>
+
+  <text x="116" y="256" font-size="11.5" fill="#6b6a5f">idle</text>
+  <text x="516" y="256" font-size="11.5" font-weight="600" fill="#141413">app: render</text>
+  <text x="836" y="256" font-size="11.5" fill="#6b6a5f">idle</text>
+
+  <g font-size="11" fill="#6b6a5f" text-anchor="middle">
+    <text x="104" y="312">0</text>
+    <text x="264" y="312">2</text>
+    <text x="424" y="312">4</text>
+    <text x="584" y="312">6</text>
+    <text x="744" y="312">8</text>
+    <text x="904" y="312">10</text>
+    <text x="1064" y="312">12</text>
+  </g>
+  <text x="1080" y="312" font-size="11" fill="#6b6a5f">ms</text>
+
+  <g font-size="11" fill="#6b6a5f">
+    <text x="120" y="340">irq/eth0 · threaded IRQ</text>
+    <text x="288" y="340">kworker/u8 · workqueue</text>
+    <text x="448" y="340">app: render · CFS task</text>
+    <text x="624" y="340">idle</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">scheduler · timeline</span><span class="lang-zh">调度 · 时间线</span></span>
+          <span class="lang-en">Three CPU lanes, ftrace-style: task blocks keep their hue across cores, the IRQ preemption gets the one orange marker, and the migration arrow shows the load balancer at work. Template: <code>templates/diagrams/sched-timeline.svg</code>.</span>
+          <span class="lang-zh">三条 CPU 泳道，ftrace 风格：任务块跨核保持同色，IRQ 抢占是唯一的橙色标记，迁移箭头画出负载均衡的动作。模板：<code>templates/diagrams/sched-timeline.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 332" role="img" aria-label="Linux kfifo ring buffer: 16-slot byte array with valid data between the out pointer at index 3 and the in pointer at index 10, wrap-around handled by masking the index with size minus one" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="rbfDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <marker id="rbfArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/>
+    </marker>
+  </defs>
+
+  <!-- panel -->
+  <rect x="4" y="4" width="1032" height="324" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect x="4" y="4" width="1032" height="324" rx="16" fill="url(#rbfDots)"/>
+
+  <!-- title row -->
+  <text x="40" y="40" font-size="14" font-weight="600" fill="#141413">kfifo ring buffer</text>
+  <text x="196" y="40" font-size="11.5" fill="#6b6a5f">struct kfifo &#183; buf[16] &#183; mask = size &#8722; 1 = 0x0F</text>
+  <text x="1000" y="40" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">include/linux/kfifo.h &#183; size must be a power of two</text>
+
+  <!-- out pointer (consumer, orange) above cell 3 -->
+  <text x="252" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="#c2613f">out (head)</text>
+  <text x="252" y="84" text-anchor="middle" font-size="11" fill="#6b6a5f">consumer reads</text>
+  <path d="M244,92 L260,92 L252,104 Z" fill="#d97757"/>
+
+  <!-- in pointer (producer, blue) above cell 10 -->
+  <text x="672" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="#4a7bab">in (tail)</text>
+  <text x="672" y="84" text-anchor="middle" font-size="11" fill="#6b6a5f">producer writes</text>
+  <path d="M664,92 L680,92 L672,104 Z" fill="#6a9bcc"/>
+
+  <!-- buf[16] cells: 3..9 hold valid data (blue tint + top bar), rest free (white) -->
+  <g stroke="#d8d4c8" fill="#ffffff">
+    <rect x="44" y="112" width="56" height="48" rx="6"/>
+    <rect x="104" y="112" width="56" height="48" rx="6"/>
+    <rect x="164" y="112" width="56" height="48" rx="6"/>
+    <rect x="644" y="112" width="56" height="48" rx="6"/>
+    <rect x="704" y="112" width="56" height="48" rx="6"/>
+    <rect x="764" y="112" width="56" height="48" rx="6"/>
+    <rect x="824" y="112" width="56" height="48" rx="6"/>
+    <rect x="884" y="112" width="56" height="48" rx="6"/>
+    <rect x="944" y="112" width="56" height="48" rx="6"/>
+  </g>
+  <g stroke="#d8d4c8" fill="#e2ecf5">
+    <rect x="224" y="112" width="56" height="48" rx="6"/>
+    <rect x="284" y="112" width="56" height="48" rx="6"/>
+    <rect x="344" y="112" width="56" height="48" rx="6"/>
+    <rect x="404" y="112" width="56" height="48" rx="6"/>
+    <rect x="464" y="112" width="56" height="48" rx="6"/>
+    <rect x="524" y="112" width="56" height="48" rx="6"/>
+    <rect x="584" y="112" width="56" height="48" rx="6"/>
+  </g>
+  <g fill="#6a9bcc">
+    <rect x="228" y="112" width="48" height="4" rx="2"/>
+    <rect x="288" y="112" width="48" height="4" rx="2"/>
+    <rect x="348" y="112" width="48" height="4" rx="2"/>
+    <rect x="408" y="112" width="48" height="4" rx="2"/>
+    <rect x="468" y="112" width="48" height="4" rx="2"/>
+    <rect x="528" y="112" width="48" height="4" rx="2"/>
+    <rect x="588" y="112" width="48" height="4" rx="2"/>
+  </g>
+  <g font-size="11.5" font-weight="600" fill="#4a7bab" text-anchor="middle">
+    <text x="252" y="140">5A</text><text x="312" y="140">6B</text><text x="372" y="140">0D</text>
+    <text x="432" y="140">31</text><text x="492" y="140">9C</text><text x="552" y="140">E2</text>
+    <text x="612" y="140">47</text>
+  </g>
+
+  <!-- index labels 0..15 -->
+  <g font-size="11" fill="#6b6a5f" text-anchor="middle">
+    <text x="72" y="180">0</text><text x="132" y="180">1</text><text x="192" y="180">2</text>
+    <text x="252" y="180">3</text><text x="312" y="180">4</text><text x="372" y="180">5</text>
+    <text x="432" y="180">6</text><text x="492" y="180">7</text><text x="552" y="180">8</text>
+    <text x="612" y="180">9</text><text x="672" y="180">10</text><text x="732" y="180">11</text>
+    <text x="792" y="180">12</text><text x="852" y="180">13</text><text x="912" y="180">14</text>
+    <text x="972" y="180">15</text>
+  </g>
+
+  <!-- wrap-around: cell 15 right edge sweeps below back into cell 0 -->
+  <path d="M1000,136 H1004 Q1012,136 1012,144 V192 Q1012,200 1004,200 H40 Q32,200 32,192 V144 Q32,136 40,136 H44"
+        fill="none" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#rbfArrG)"/>
+  <text x="520" y="220" text-anchor="middle" font-size="11.5" fill="#6b6a5f">wrap: idx &amp; (size &#8722; 1)</text>
+
+  <!-- divider -->
+  <line x1="44" y1="240" x2="1000" y2="240" stroke="#eceadf"/>
+
+  <!-- API annotations -->
+  <circle cx="48" cy="268" r="4" fill="#6a9bcc"/>
+  <text x="60" y="272" font-size="12" font-weight="600" fill="#141413">kfifo_in(fifo, buf, len)</text>
+  <text x="264" y="272" font-size="12" fill="#6b6a5f">copy to buf[in &amp; mask] &#183; smp_wmb() &#183; in += len</text>
+
+  <circle cx="48" cy="296" r="4" fill="#d97757"/>
+  <text x="60" y="300" font-size="12" font-weight="600" fill="#141413">kfifo_out(fifo, buf, len)</text>
+  <text x="264" y="300" font-size="12" fill="#6b6a5f">smp_rmb() &#183; copy from buf[out &amp; mask] &#183; out += len</text>
+
+  <!-- stat chip -->
+  <rect x="824" y="256" width="176" height="24" rx="12" fill="#d97757"/>
+  <text x="912" y="272" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">len = in &#8722; out = 7</text>
+
+  <!-- legend -->
+  <rect x="824" y="292" width="12" height="12" rx="3" fill="#e2ecf5" stroke="#d8d4c8"/>
+  <text x="844" y="300" font-size="11" fill="#6b6a5f">valid data</text>
+  <rect x="920" y="292" width="12" height="12" rx="3" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="940" y="300" font-size="11" fill="#6b6a5f">free</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">algorithm · data structure</span><span class="lang-zh">算法 · 数据结构</span></span>
+          <span class="lang-en">A kfifo ring buffer as a flat array: occupied cells in tint, solid pointer markers for in/out, the wrap-around drawn as one quiet arrow with the mask trick spelled out. Template: <code>templates/diagrams/algorithm-ringbuffer.svg</code>.</span>
+          <span class="lang-zh">kfifo 环形缓冲画成直线阵列：占用格用 tint，in/out 用实心指针标记，回绕只画一条安静的箭头并写明掩码技巧。模板：<code>templates/diagrams/algorithm-ringbuffer.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== §3 PRODUCT ===================== -->
 <section class="anth-section" id="product" style="background:#ffffff;">
   <div class="anth-container anth-container--wide">
-    <span class="gal-kicker"><span class="lang-en">02 · for product demos</span><span class="lang-zh">02 · 产品展示</span></span>
+    <span class="gal-kicker"><span class="lang-en">03 · for product demos</span><span class="lang-zh">03 · 产品展示</span></span>
     <h2 style="font-family:var(--font-heading); font-size:34px; font-weight:600; letter-spacing:-0.01em; margin:var(--space-2) 0 0;">
       <span class="lang-en">Product mocks</span>
       <span class="lang-zh">产品 mock</span>
@@ -994,7 +2020,7 @@
 <!-- ===================== §3 REPORTING ===================== -->
 <section class="anth-section" id="reporting">
   <div class="anth-container anth-container--wide">
-    <span class="gal-kicker"><span class="lang-en">03 · for talks &amp; reports</span><span class="lang-zh">03 · 演讲与汇报</span></span>
+    <span class="gal-kicker"><span class="lang-en">04 · for talks &amp; reports</span><span class="lang-zh">04 · 演讲与汇报</span></span>
     <h2 style="font-family:var(--font-heading); font-size:34px; font-weight:600; letter-spacing:-0.01em; margin:var(--space-2) 0 0;">
       <span class="lang-en">Slides and reporting</span>
       <span class="lang-zh">演讲汇报图</span>
@@ -1015,7 +2041,7 @@
           <span class="anth-stat-label"><span class="lang-en">faster review when the claim is drawn, not described</span><span class="lang-zh">评审提速——观点画出来而不是写出来</span></span>
         </div>
         <div class="anth-stat">
-          <span class="anth-stat-number">16</span>
+          <span class="anth-stat-number">23</span>
           <span class="anth-stat-label"><span class="lang-en">copy-ready figures in this gallery</span><span class="lang-zh">张可直接复制的图在本页</span></span>
         </div>
       </div>

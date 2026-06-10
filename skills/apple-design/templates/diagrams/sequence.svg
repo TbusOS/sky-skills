@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 576" role="img" aria-label="Sequence diagram: a client request passes through the gateway to a worker and Postgres, then acknowledgment, token stream, and a 200 SSE response flow back" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="aseq-card-shadow" x="-20%" y="-30%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <filter id="aseq-bar-shadow" x="-300%" y="-20%" width="700%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <marker id="aseq-arrow-blue" markerWidth="7" markerHeight="7" refX="7" refY="4" orient="auto">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="aseq-arrow-gray" markerWidth="7" markerHeight="7" refX="7" refY="4" orient="auto">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+
+  <!-- background panel -->
+  <rect x="0" y="0" width="1080" height="576" fill="#ffffff"/>
+
+  <!-- lifelines -->
+  <line x1="132" y1="100" x2="132" y2="552" stroke="#d2d2d7" stroke-width="1"/>
+  <line x1="404" y1="100" x2="404" y2="552" stroke="#d2d2d7" stroke-width="1"/>
+  <line x1="676" y1="100" x2="676" y2="552" stroke="#d2d2d7" stroke-width="1"/>
+  <line x1="948" y1="100" x2="948" y2="552" stroke="#d2d2d7" stroke-width="1"/>
+
+  <!-- activation bars -->
+  <rect x="128" y="140" width="8" height="384" rx="4" fill="#ffffff" filter="url(#aseq-bar-shadow)"/>
+  <rect x="400" y="144" width="8" height="376" rx="4" fill="#ffffff" filter="url(#aseq-bar-shadow)"/>
+  <rect x="672" y="216" width="8" height="232" rx="4" fill="#ffffff" filter="url(#aseq-bar-shadow)"/>
+  <rect x="944" y="288" width="8" height="88" rx="4" fill="#ffffff" filter="url(#aseq-bar-shadow)"/>
+
+  <!-- main chain: blue solid -->
+  <line x1="136" y1="152" x2="396" y2="152" stroke="#0071e3" stroke-width="1.8" marker-end="url(#aseq-arrow-blue)"/>
+  <line x1="408" y1="224" x2="668" y2="224" stroke="#0071e3" stroke-width="1.8" marker-end="url(#aseq-arrow-blue)"/>
+  <line x1="680" y1="296" x2="940" y2="296" stroke="#0071e3" stroke-width="1.8" marker-end="url(#aseq-arrow-blue)"/>
+
+  <!-- returns: gray dashed -->
+  <line x1="944" y1="368" x2="684" y2="368" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="6 4" marker-end="url(#aseq-arrow-gray)"/>
+  <line x1="672" y1="440" x2="412" y2="440" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="6 4" marker-end="url(#aseq-arrow-gray)"/>
+  <line x1="400" y1="512" x2="140" y2="512" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="6 4" marker-end="url(#aseq-arrow-gray)"/>
+
+  <!-- actor cards -->
+  <rect x="24" y="24" width="216" height="76" rx="14" fill="#ffffff" filter="url(#aseq-card-shadow)"/>
+  <rect x="296" y="24" width="216" height="76" rx="14" fill="#ffffff" stroke="#0071e3" stroke-width="1.5" filter="url(#aseq-card-shadow)"/>
+  <rect x="568" y="24" width="216" height="76" rx="14" fill="#ffffff" filter="url(#aseq-card-shadow)"/>
+  <rect x="840" y="24" width="216" height="76" rx="14" fill="#ffffff" filter="url(#aseq-card-shadow)"/>
+
+  <!-- step badges -->
+  <circle cx="132" cy="152" r="10" fill="#0071e3"/>
+  <circle cx="404" cy="224" r="10" fill="#0071e3"/>
+  <circle cx="676" cy="296" r="10" fill="#0071e3"/>
+  <circle cx="948" cy="368" r="10" fill="#aeaeb2"/>
+  <circle cx="676" cy="440" r="10" fill="#aeaeb2"/>
+  <circle cx="404" cy="512" r="10" fill="#aeaeb2"/>
+
+  <!-- actor names -->
+  <text x="132" y="52" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1d1d1f">Client</text>
+  <text x="132" y="76" text-anchor="middle" font-size="11.5" fill="#86868b">browser app</text>
+  <text x="404" y="52" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1d1d1f">Gateway</text>
+  <text x="404" y="76" text-anchor="middle" font-size="11.5" fill="#86868b">auth · rate limit</text>
+  <text x="676" y="52" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1d1d1f">Worker</text>
+  <text x="676" y="76" text-anchor="middle" font-size="11.5" fill="#86868b">runs the job</text>
+  <text x="948" y="52" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1d1d1f">Postgres</text>
+  <text x="948" y="76" text-anchor="middle" font-size="11.5" fill="#86868b">primary db</text>
+
+  <!-- message labels -->
+  <text x="268" y="144" text-anchor="middle" font-size="12" font-weight="600" fill="#1d1d1f">POST /v1/messages</text>
+  <text x="540" y="216" text-anchor="middle" font-size="12" font-weight="600" fill="#1d1d1f">schedule(run)</text>
+  <text x="812" y="288" text-anchor="middle" font-size="12" font-weight="600" fill="#1d1d1f">INSERT run · queued</text>
+  <text x="812" y="360" text-anchor="middle" font-size="11.5" fill="#86868b">ack · 12 ms</text>
+  <text x="540" y="432" text-anchor="middle" font-size="11.5" fill="#86868b">stream tokens</text>
+  <text x="268" y="504" text-anchor="middle" font-size="11.5" fill="#86868b">200 OK · SSE</text>
+
+  <!-- badge numbers -->
+  <text x="132" y="156" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">1</text>
+  <text x="404" y="228" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">2</text>
+  <text x="676" y="300" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">3</text>
+  <text x="948" y="372" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">4</text>
+  <text x="676" y="444" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">5</text>
+  <text x="404" y="516" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">6</text>
+</svg>

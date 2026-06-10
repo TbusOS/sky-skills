@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Quartz-3550 SoC block diagram: dual Cortex-A55 CPU cluster and clock-reset unit feed an AXI NoC interconnect that fans out to memory, high-speed peripherals and an APB bridge serving low-speed peripherals; the main data path runs CPU to NoC to DDR4" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="socDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <filter id="socSh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/>
+    </filter>
+    <marker id="socArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+    </marker>
+    <marker id="socArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6a9bcc"/>
+    </marker>
+    <marker id="socArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c9913f"/>
+    </marker>
+    <marker id="socArrI" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/>
+    </marker>
+  </defs>
+
+  <!-- panel -->
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#socDots)"/>
+
+  <!-- header -->
+  <text x="32" y="36" font-size="11" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">QUARTZ-3550 SoC · BLOCK DIAGRAM</text>
+  <text x="1088" y="36" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">arm64 · 12 nm LP · 0.8 V core rail</text>
+
+  <!-- zone: CPU subsystem (orange) -->
+  <rect x="32" y="60" width="728" height="112" rx="10" fill="#f7e4dc" stroke="#ecccbc"/>
+  <rect x="32" y="60" width="4" height="112" rx="2" fill="#d97757"/>
+  <circle cx="56" cy="84" r="4" fill="#d97757"/>
+  <text x="68" y="88" font-size="11" font-weight="600" letter-spacing="1.2" fill="#c2613f">CPU SUBSYSTEM</text>
+  <text x="744" y="88" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">DynamIQ cluster · 1.8 GHz</text>
+
+  <!-- zone: clock and reset (ink) -->
+  <rect x="784" y="60" width="304" height="112" rx="10" fill="#e7e4d9" stroke="#cfccc0"/>
+  <rect x="784" y="60" width="4" height="112" rx="2" fill="#141413"/>
+  <circle cx="808" cy="84" r="4" fill="#141413"/>
+  <text x="820" y="88" font-size="11" font-weight="600" letter-spacing="1.2" fill="#141413">CLOCK &amp; RESET</text>
+  <text x="1072" y="88" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">24 MHz xtal</text>
+
+  <!-- zone: memory (olive) -->
+  <rect x="32" y="332" width="336" height="164" rx="10" fill="#e5e9dd" stroke="#ccd3bd"/>
+  <rect x="32" y="332" width="4" height="164" rx="2" fill="#788c5d"/>
+  <circle cx="56" cy="356" r="4" fill="#788c5d"/>
+  <text x="68" y="360" font-size="11" font-weight="600" letter-spacing="1.2" fill="#5d7045">MEMORY</text>
+  <text x="352" y="360" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">AXI slaves</text>
+
+  <!-- zone: high-speed peripherals (blue) -->
+  <rect x="392" y="332" width="336" height="164" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
+  <rect x="392" y="332" width="4" height="164" rx="2" fill="#6a9bcc"/>
+  <circle cx="416" cy="356" r="4" fill="#6a9bcc"/>
+  <text x="428" y="360" font-size="11" font-weight="600" letter-spacing="1.2" fill="#4a7bab">HIGH-SPEED PERIPH</text>
+  <text x="712" y="360" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">DMA masters</text>
+
+  <!-- zone: low-speed peripherals (gold) -->
+  <rect x="752" y="332" width="336" height="164" rx="10" fill="#f0e4d8" stroke="#e4cfb2"/>
+  <rect x="752" y="332" width="4" height="164" rx="2" fill="#c9913f"/>
+  <circle cx="776" cy="356" r="4" fill="#c9913f"/>
+  <text x="788" y="360" font-size="11" font-weight="600" letter-spacing="1.2" fill="#8a5a2a">LOW-SPEED PERIPH</text>
+  <text x="1072" y="360" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">via APB</text>
+
+  <!-- connectors -->
+  <!-- main data path: Cortex-A55 -> NoC (orange 1.8) -->
+  <path d="M176,152 V196 Q176,204 184,204 H392 Q400,204 400,212 V228" fill="none" stroke="#d97757" stroke-width="1.8" marker-end="url(#socArrO)"/>
+  <!-- main data path: NoC -> DDR4 ctrl (orange 1.8) -->
+  <path d="M312,276 V296 Q312,304 304,304 H208 Q200,304 200,312 V376" fill="none" stroke="#d97757" stroke-width="1.8" marker-end="url(#socArrO)"/>
+  <!-- clock/reset fan-out -> NoC (ink dashed 1.2) -->
+  <path d="M820,172 V196 Q820,204 812,204 H728 Q720,204 720,212 V228" fill="none" stroke="#141413" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#socArrI)"/>
+  <text x="832" y="196" font-size="11" font-style="italic" fill="#8c8a7d">clk · rst</text>
+  <!-- NoC <-> high-speed zone (blue 1.2, both directions) -->
+  <line x1="560" y1="276" x2="560" y2="332" stroke="#6a9bcc" stroke-width="1.2" marker-start="url(#socArrB)" marker-end="url(#socArrB)"/>
+  <!-- NoC -> APB bridge -> low-speed zone (gold 1.2) -->
+  <line x1="760" y1="252" x2="848" y2="252" stroke="#c9913f" stroke-width="1.2" marker-end="url(#socArrG)"/>
+  <line x1="936" y1="276" x2="936" y2="332" stroke="#c9913f" stroke-width="1.2" marker-end="url(#socArrG)"/>
+
+  <!-- IP cards -->
+  <g filter="url(#socSh)">
+    <rect x="56" y="104" width="240" height="48" rx="8" fill="#fbeee7" stroke="#d97757" stroke-width="1.5"/>
+    <rect x="312" y="104" width="208" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="536" y="104" width="208" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="800" y="104" width="144" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="956" y="104" width="116" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="280" y="228" width="480" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="848" y="228" width="176" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="56" y="376" width="288" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="56" y="432" width="136" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="204" y="432" width="140" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="416" y="376" width="288" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="416" y="432" width="136" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="564" y="432" width="140" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="776" y="376" width="136" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="924" y="376" width="140" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="776" y="432" width="136" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="924" y="432" width="140" height="48" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+
+  <!-- category dots -->
+  <circle cx="72" cy="124" r="3.5" fill="#d97757"/>
+  <circle cx="328" cy="124" r="3.5" fill="#d97757"/>
+  <circle cx="552" cy="124" r="3.5" fill="#d97757"/>
+  <circle cx="816" cy="124" r="3.5" fill="#141413"/>
+  <circle cx="972" cy="124" r="3.5" fill="#141413"/>
+  <circle cx="296" cy="248" r="3.5" fill="#141413"/>
+  <circle cx="864" cy="248" r="3.5" fill="#c9913f"/>
+  <circle cx="72" cy="396" r="3.5" fill="#788c5d"/>
+  <circle cx="72" cy="452" r="3.5" fill="#788c5d"/>
+  <circle cx="220" cy="452" r="3.5" fill="#788c5d"/>
+  <circle cx="432" cy="396" r="3.5" fill="#6a9bcc"/>
+  <circle cx="432" cy="452" r="3.5" fill="#6a9bcc"/>
+  <circle cx="580" cy="452" r="3.5" fill="#6a9bcc"/>
+  <circle cx="792" cy="396" r="3.5" fill="#c9913f"/>
+  <circle cx="940" cy="396" r="3.5" fill="#c9913f"/>
+  <circle cx="792" cy="452" r="3.5" fill="#c9913f"/>
+  <circle cx="940" cy="452" r="3.5" fill="#c9913f"/>
+
+  <!-- card names -->
+  <g font-size="13" font-weight="600" fill="#141413">
+    <text x="84" y="128">Cortex-A55 ×2</text>
+    <text x="340" y="128">L2 512K</text>
+    <text x="564" y="128">GIC-600</text>
+    <text x="828" y="128">PLL ×3</text>
+    <text x="984" y="128">CRU</text>
+    <text x="308" y="252">AXI NoC · 64-bit @ 800 MHz</text>
+    <text x="876" y="252">APB bridge</text>
+    <text x="84" y="400">DDR4 ctrl + PHY</text>
+    <text x="84" y="456">SRAM 256K</text>
+    <text x="232" y="456">Boot ROM</text>
+    <text x="444" y="400">PCIe Gen3 x2</text>
+    <text x="444" y="456">USB 3.0</text>
+    <text x="592" y="456">GbE MAC</text>
+    <text x="804" y="400">UART ×4</text>
+    <text x="952" y="400">I2C ×3</text>
+    <text x="804" y="456">SPI ×2</text>
+    <text x="952" y="456">GPIO</text>
+  </g>
+
+  <!-- card sub-lines -->
+  <g font-size="11" fill="#6b6a5f">
+    <text x="84" y="144">L1 32K I/D per core</text>
+    <text x="340" y="144">unified · ECC</text>
+    <text x="564" y="144">interrupt distributor</text>
+    <text x="828" y="144">core · ddr · peri</text>
+    <text x="984" y="144">gate · reset</text>
+    <text x="308" y="268">system interconnect · QoS arbitration · 4 masters</text>
+    <text x="876" y="268">AXI-to-APB · 100 MHz</text>
+    <text x="84" y="416">DDR4-3200 · 32-bit + ECC</text>
+    <text x="84" y="472">on-chip scratch</text>
+    <text x="232" y="472">64K mask</text>
+    <text x="444" y="416">root complex · MSI-X</text>
+    <text x="444" y="472">xHCI DRD</text>
+    <text x="592" y="472">RGMII · TSO</text>
+    <text x="804" y="416">16550A</text>
+    <text x="952" y="416">400 kHz FM</text>
+    <text x="804" y="472">mode 0-3</text>
+    <text x="952" y="472">4 banks ×32</text>
+  </g>
+
+  <!-- numbered badges on main data path -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <circle cx="288" cy="204" r="10" fill="#d97757"/><text x="288" y="208" fill="#ffffff">1</text>
+    <circle cx="256" cy="304" r="10" fill="#d97757"/><text x="256" y="308" fill="#ffffff">2</text>
+  </g>
+
+  <!-- legend -->
+  <g font-size="11" fill="#6b6a5f">
+    <circle cx="544" cy="524" r="4" fill="#d97757"/><text x="556" y="528">CPU</text>
+    <circle cx="612" cy="524" r="4" fill="#788c5d"/><text x="624" y="528">memory</text>
+    <circle cx="696" cy="524" r="4" fill="#6a9bcc"/><text x="708" y="528">high-speed</text>
+    <circle cx="796" cy="524" r="4" fill="#c9913f"/><text x="808" y="528">low-speed</text>
+    <circle cx="892" cy="524" r="4" fill="#141413"/><text x="904" y="528">clock &amp; reset</text>
+    <line x1="1004" y1="524" x2="1028" y2="524" stroke="#d97757" stroke-width="1.8" stroke-linecap="round"/><text x="1036" y="528">main path</text>
+  </g>
+</svg>

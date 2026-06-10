@@ -1,0 +1,1523 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagram Gallery — apple-design</title>
+<meta name="description" content="Twelve copy-ready SVG diagrams in the apple-design language: architecture, flows, registers, SoC blocks, waveforms, build chains, schedulers — grayscale plus one blue.">
+<link rel="stylesheet" href="../../skills/apple-design/assets/fonts.css">
+<link rel="stylesheet" href="../../skills/apple-design/assets/apple.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--apple-divider);
+    color: var(--apple-text);
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 980px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .lang-toggle:hover { background: #f5f5f7; }
+  /* Apple §H exception: PingFang SC native. Noto Sans SC as non-Apple fallback. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] figcaption {
+    font-family: "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2 {
+    font-family: "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", sans-serif;
+    font-weight: 600;
+  }
+
+  .gal-kicker {
+    font-family: var(--font-display); font-size: 13px; font-weight: 600;
+    color: #0071e3; letter-spacing: 0.01em;
+  }
+  .gal-intro { font-size: 19px; color: #6e6e73; max-width: 680px; line-height: 1.55; }
+  .gal-section-note { font-size: 16px; color: #6e6e73; max-width: 680px; line-height: 1.55; margin: 12px 0 44px; }
+  .gal-fig {
+    background: #ffffff; border: 1px solid var(--apple-divider);
+    border-radius: 18px; padding: 36px;
+    margin: 0 0 32px;
+  }
+  .gal-fig svg { display: block; width: 100%; height: auto; }
+  .gal-cap {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 24px; margin-top: 24px; flex-wrap: wrap;
+  }
+  .gal-cap-text { font-size: 14px; color: #6e6e73; line-height: 1.55; max-width: 860px; }
+  .gal-tag {
+    display: block; font-family: var(--font-display); font-size: 12px; font-weight: 600;
+    color: #1d1d1f; margin-bottom: 4px;
+  }
+  .gal-copy {
+    background: transparent; border: 1px solid var(--apple-divider); color: var(--apple-text);
+    font-family: var(--font-display); font-size: 12.5px; font-weight: 500;
+    padding: 7px 15px; border-radius: 980px; cursor: pointer; white-space: nowrap;
+  }
+  .gal-copy:hover { background: #f5f5f7; }
+</style>
+</head>
+<body>
+
+<nav class="apple-nav"><div class="apple-nav-inner">
+  <a href="../../index.html" style="font-weight:600;">Sky Skills</a>
+  <div>
+    <a href="#structure"><span class="lang-en">Structure</span><span class="lang-zh">结构流程</span></a>
+    <a href="#hardware"><span class="lang-en">Hardware</span><span class="lang-zh">硬件</span></a>
+    <a href="#runtime"><span class="lang-en">Runtime</span><span class="lang-zh">运行时</span></a>
+    <a href="index.html"><span class="lang-en">Demo</span><span class="lang-zh">主 demo</span></a>
+  </div>
+  <div style="display:flex; gap:16px; align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="apple-link" href="../../index.html"><span class="lang-en">All skills</span><span class="lang-zh">全部 skill</span></a>
+  </div>
+</div></nav>
+
+<header style="padding:96px 0 64px;">
+  <div class="apple-container apple-container--wide">
+    <span class="gal-kicker"><span class="lang-en">apple-design · diagram gallery</span><span class="lang-zh">apple-design · 图示案例库</span></span>
+    <h1 style="font-family:var(--font-display); font-size:52px; font-weight:600; letter-spacing:-0.015em; color:#1d1d1f; margin:10px 0 16px; max-width:780px;">
+      <span class="lang-en">Quiet diagrams. One blue.</span>
+      <span class="lang-zh">安静的图，一处蓝。</span>
+    </h1>
+    <p class="gal-intro">
+      <span class="lang-en">Twelve hand-built SVG figures in the apple-design language. Grayscale carries the structure; a single blue carries the story. Every figure answers one question first — where does the blue go — then everything else stays out of the way. Copy any of them.</span>
+      <span class="lang-zh">十二张手工 SVG 图。灰阶承担结构，唯一的蓝色承担叙事。每张图先回答一个问题——蓝给谁——其余一切退后。每张都可直接复制。</span>
+    </p>
+  </div>
+</header>
+
+<!-- ===================== §1 STRUCTURE & FLOW ===================== -->
+<section id="structure" style="padding:48px 0;">
+  <div class="apple-container apple-container--wide">
+    <h2 style="font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-0.01em; color:#1d1d1f; margin:0;">
+      <span class="lang-en">Structure &amp; flow</span>
+      <span class="lang-zh">结构与流程</span>
+    </h2>
+    <p class="gal-section-note">
+      <span class="lang-en">Architecture, orchestration, pipelines. Depth comes from soft shadows, never borders; the blue path is the one you are meant to follow.</span>
+      <span class="lang-zh">架构、编排、流水线。层次靠柔影而不是边框；蓝色路径就是你该跟随的那条。</span>
+    </p>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" role="img" aria-label="Layered architecture: pale-gray groups, soft-shadow white cards, single blue accent path">
+  <defs>
+    <filter id="arch-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <marker id="arch-arrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="arch-arrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="640" fill="#ffffff"/>
+
+  <!-- groups: pale gray, large radius, no border -->
+  <rect x="40" y="36" width="880" height="168" rx="18" fill="#f5f5f7"/>
+  <text x="68" y="72" font-size="12" font-weight="500" fill="#86868b">Presentation</text>
+  <rect x="40" y="248" width="880" height="168" rx="18" fill="#f5f5f7"/>
+  <text x="68" y="284" font-size="12" font-weight="500" fill="#86868b">Services</text>
+  <rect x="40" y="460" width="880" height="144" rx="18" fill="#f5f5f7"/>
+  <text x="68" y="496" font-size="12" font-weight="500" fill="#86868b">Data</text>
+
+  <!-- connectors: blue main path, hairline neutral secondary -->
+  <g fill="none">
+    <path d="M196,184 L196,228 Q196,236 204,236 L424,236 Q432,236 432,244 L432,292" stroke="#0071e3" stroke-width="1.8" marker-end="url(#arch-arrB)"/>
+    <path d="M480,396 L480,500" stroke="#0071e3" stroke-width="1.8" marker-end="url(#arch-arrB)"/>
+    <path d="M480,184 L480,292" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#arch-arrN)"/>
+    <path d="M764,184 L764,228 Q764,236 756,236 L536,236 Q528,236 528,244 L528,292" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#arch-arrN)"/>
+    <path d="M196,396 L196,500" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#arch-arrN)"/>
+    <path d="M764,396 L764,500" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#arch-arrN)"/>
+  </g>
+
+  <!-- numbered badges on the main path -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <circle cx="314" cy="236" r="10" fill="#0071e3"/>
+    <text x="314" y="240" fill="#ffffff">1</text>
+    <circle cx="480" cy="446" r="10" fill="#0071e3"/>
+    <text x="480" y="450" fill="#ffffff">2</text>
+  </g>
+
+  <!-- row 1 -->
+  <g filter="url(#arch-soft)">
+    <rect x="76" y="96" width="240" height="88" rx="14" fill="#ffffff"/>
+    <rect x="360" y="96" width="240" height="88" rx="14" fill="#ffffff"/>
+    <rect x="644" y="96" width="240" height="88" rx="14" fill="#ffffff"/>
+  </g>
+  <g transform="translate(100,128)" fill="none" stroke="#6e6e73" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="1" y="1" width="22" height="16" rx="3"/>
+    <line x1="8" y1="22" x2="16" y2="22"/><line x1="12" y1="17" x2="12" y2="22"/>
+  </g>
+  <text x="140" y="134" font-size="15" font-weight="600" fill="#1d1d1f">Views</text>
+  <text x="140" y="156" font-size="12" fill="#86868b">Declarative UI</text>
+  <g transform="translate(384,128)" fill="none" stroke="#6e6e73" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2 12 h7"/>
+    <path d="M9 12 c4 0 4 -6 8 -6 h3"/>
+    <path d="M9 12 c4 0 4 6 8 6 h3"/>
+    <polyline points="17.5,3 20.5,6 17.5,9"/>
+    <polyline points="17.5,15 20.5,18 17.5,21"/>
+  </g>
+  <text x="424" y="134" font-size="15" font-weight="600" fill="#1d1d1f">Routing</text>
+  <text x="424" y="156" font-size="12" fill="#86868b">Deep links</text>
+  <g transform="translate(668,128)" fill="none" stroke="#6e6e73" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M12 2 v4 M12 18 v4 M2 12 h4 M18 12 h4"/>
+  </g>
+  <text x="708" y="134" font-size="15" font-weight="600" fill="#1d1d1f">State</text>
+  <text x="708" y="156" font-size="12" fill="#86868b">Observable models</text>
+
+  <!-- row 2: API client is the single blue focal card -->
+  <g filter="url(#arch-soft)">
+    <rect x="76" y="308" width="240" height="88" rx="14" fill="#ffffff"/>
+    <rect x="360" y="308" width="240" height="88" rx="14" fill="#ffffff" stroke="#0071e3" stroke-width="1.5"/>
+    <rect x="644" y="308" width="240" height="88" rx="14" fill="#ffffff"/>
+  </g>
+  <g transform="translate(100,340)" fill="none" stroke="#6e6e73" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13 2 L4 14 h7 l-2 8 9 -12 h-7 Z"/>
+  </g>
+  <text x="140" y="346" font-size="15" font-weight="600" fill="#1d1d1f">Cache</text>
+  <text x="140" y="368" font-size="12" fill="#86868b">Edge &amp; memory</text>
+  <g transform="translate(384,340)" fill="none" stroke="#0071e3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.5"/>
+    <path d="M2.5 12 h19 M12 2.5 c3.5 3 3.5 16 0 19 c-3.5 -3 -3.5 -16 0 -19 Z"/>
+  </g>
+  <text x="424" y="346" font-size="15" font-weight="600" fill="#1d1d1f">API client</text>
+  <text x="424" y="368" font-size="12" fill="#86868b">REST &amp; GraphQL</text>
+  <g transform="translate(668,340)" fill="none" stroke="#6e6e73" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="10" width="16" height="10" rx="2"/>
+    <path d="M8 10 V7 a4 4 0 0 1 8 0 v3"/>
+  </g>
+  <text x="708" y="346" font-size="15" font-weight="600" fill="#1d1d1f">Auth</text>
+  <text x="708" y="368" font-size="12" fill="#86868b">Tokens &amp; sessions</text>
+
+  <!-- row 3 -->
+  <g filter="url(#arch-soft)">
+    <rect x="76" y="500" width="240" height="72" rx="14" fill="#ffffff"/>
+    <rect x="360" y="500" width="240" height="72" rx="14" fill="#ffffff"/>
+    <rect x="644" y="500" width="240" height="72" rx="14" fill="#ffffff"/>
+  </g>
+  <g transform="translate(98,524)" fill="none" stroke="#6e6e73" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="3" width="16" height="6.5" rx="1.6"/>
+    <rect x="2" y="11.5" width="16" height="6.5" rx="1.6"/>
+    <circle cx="14.8" cy="6.2" r="0.9" fill="#6e6e73" stroke="none"/>
+    <circle cx="14.8" cy="14.8" r="0.9" fill="#6e6e73" stroke="none"/>
+  </g>
+  <text x="136" y="530" font-size="14" font-weight="600" fill="#1d1d1f">Object store</text>
+  <text x="136" y="550" font-size="12" fill="#86868b">Media &amp; backups</text>
+  <g transform="translate(382,524)" fill="none" stroke="#6e6e73" stroke-width="1.5" stroke-linecap="round">
+    <ellipse cx="10" cy="4.5" rx="7" ry="2.6"/>
+    <path d="M3 4.5 v11 c0 1.5 3.1 2.6 7 2.6 s7 -1.1 7 -2.6 v-11"/>
+    <path d="M3 10 c0 1.5 3.1 2.6 7 2.6 s7 -1.1 7 -2.6"/>
+  </g>
+  <text x="420" y="530" font-size="14" font-weight="600" fill="#1d1d1f">Database</text>
+  <text x="420" y="550" font-size="12" fill="#86868b">Postgres cluster</text>
+  <g transform="translate(666,524)" fill="none" stroke="#6e6e73" stroke-width="1.5" stroke-linecap="round">
+    <circle cx="3.5" cy="4" r="1.1" fill="#6e6e73" stroke="none"/><line x1="7.5" y1="4" x2="17" y2="4"/>
+    <circle cx="3.5" cy="9.5" r="1.1" fill="#6e6e73" stroke="none"/><line x1="7.5" y1="9.5" x2="17" y2="9.5"/>
+    <circle cx="3.5" cy="15" r="1.1" fill="#6e6e73" stroke="none"/><line x1="7.5" y1="15" x2="17" y2="15"/>
+  </g>
+  <text x="704" y="530" font-size="14" font-weight="600" fill="#1d1d1f">Queue</text>
+  <text x="704" y="550" font-size="12" fill="#86868b">Background jobs</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">Architecture · layers</span><span class="lang-zh">架构 · 分层</span></span>
+          <span class="lang-en">Four layers in soft-gray groups, white cards floating on shadows. Template: <code>templates/diagrams/architecture.svg</code>.</span>
+          <span class="lang-zh">四层结构用浅灰分组，白卡靠柔影浮起。模板：<code>templates/diagrams/architecture.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 350" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" role="img" aria-label="Hierarchy: blue-ringed coordinator card fanning out to four worker cards on a pale-gray panel">
+  <defs>
+    <filter id="hier-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <marker id="hier-arrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+  <rect width="880" height="350" rx="18" fill="#f5f5f7"/>
+
+  <!-- fan-out connectors (edge anchors on coordinator bottom) -->
+  <g fill="none" stroke="#aeaeb2" stroke-width="1.2">
+    <path d="M380,118 L380,154 Q380,162 372,162 L151,162 Q143,162 143,170 L143,220" marker-end="url(#hier-arrN)"/>
+    <path d="M420,118 L420,178 Q420,186 412,186 L359,186 Q351,186 351,194 L351,220" marker-end="url(#hier-arrN)"/>
+    <path d="M460,118 L460,178 Q460,186 468,186 L551,186 Q559,186 559,194 L559,220" marker-end="url(#hier-arrN)"/>
+    <path d="M500,118 L500,154 Q500,162 508,162 L759,162 Q767,162 767,170 L767,220" marker-end="url(#hier-arrN)"/>
+  </g>
+
+  <!-- coordinator card (focal: blue ring + blue icon) -->
+  <g filter="url(#hier-soft)">
+    <rect x="320" y="34" width="240" height="84" rx="14" fill="#ffffff" stroke="#0071e3" stroke-width="1.5"/>
+  </g>
+  <g transform="translate(344,62)" fill="none" stroke="#0071e3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="5" width="14" height="14" rx="2"/>
+    <rect x="9.5" y="9.5" width="5" height="5"/>
+    <line x1="9" y1="2" x2="9" y2="5"/><line x1="15" y1="2" x2="15" y2="5"/>
+    <line x1="9" y1="19" x2="9" y2="22"/><line x1="15" y1="19" x2="15" y2="22"/>
+    <line x1="2" y1="9" x2="5" y2="9"/><line x1="2" y1="15" x2="5" y2="15"/>
+    <line x1="19" y1="9" x2="22" y2="9"/><line x1="19" y1="15" x2="22" y2="15"/>
+  </g>
+  <text x="384" y="72" font-size="15" font-weight="600" fill="#1d1d1f">Coordinator</text>
+  <text x="384" y="94" font-size="12" fill="#86868b">plans · delegates · merges</text>
+
+  <!-- worker cards -->
+  <g filter="url(#hier-soft)">
+    <rect x="48" y="226" width="190" height="76" rx="14" fill="#ffffff"/>
+    <rect x="256" y="226" width="190" height="76" rx="14" fill="#ffffff"/>
+    <rect x="464" y="226" width="190" height="76" rx="14" fill="#ffffff"/>
+    <rect x="672" y="226" width="190" height="76" rx="14" fill="#ffffff"/>
+  </g>
+  <!-- worker 1: Search -->
+  <g transform="translate(66,250)" fill="none" stroke="#6e6e73" stroke-width="1.6" stroke-linecap="round">
+    <circle cx="8" cy="8" r="5.5"/><line x1="12.5" y1="12.5" x2="18" y2="18"/>
+  </g>
+  <text x="100" y="258" font-size="13.5" font-weight="600" fill="#1d1d1f">Search</text>
+  <text x="100" y="278" font-size="11.5" fill="#86868b">worker 1 · web</text>
+  <!-- worker 2: Search -->
+  <g transform="translate(274,250)" fill="none" stroke="#6e6e73" stroke-width="1.6" stroke-linecap="round">
+    <circle cx="8" cy="8" r="5.5"/><line x1="12.5" y1="12.5" x2="18" y2="18"/>
+  </g>
+  <text x="308" y="258" font-size="13.5" font-weight="600" fill="#1d1d1f">Search</text>
+  <text x="308" y="278" font-size="11.5" fill="#86868b">worker 2 · docs</text>
+  <!-- worker 3: Analyse -->
+  <g transform="translate(482,250)" fill="none" stroke="#6e6e73" stroke-width="1.6" stroke-linecap="round">
+    <line x1="4" y1="17" x2="4" y2="11"/><line x1="10" y1="17" x2="10" y2="5"/><line x1="16" y1="17" x2="16" y2="13"/>
+  </g>
+  <text x="516" y="258" font-size="13.5" font-weight="600" fill="#1d1d1f">Analyse</text>
+  <text x="516" y="278" font-size="11.5" fill="#86868b">worker 3 · data</text>
+  <!-- worker 4: Analyse -->
+  <g transform="translate(690,250)" fill="none" stroke="#6e6e73" stroke-width="1.6" stroke-linecap="round">
+    <line x1="4" y1="17" x2="4" y2="11"/><line x1="10" y1="17" x2="10" y2="5"/><line x1="16" y1="17" x2="16" y2="13"/>
+  </g>
+  <text x="724" y="258" font-size="13.5" font-weight="600" fill="#1d1d1f">Analyse</text>
+  <text x="724" y="278" font-size="11.5" fill="#86868b">worker 4 · code</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">Hierarchy · orchestration</span><span class="lang-zh">层级 · 编排</span></span>
+          <span class="lang-en">One coordinator, four workers; the blue stroke marks the only focus card. Template: <code>templates/diagrams/hierarchy.svg</code>.</span>
+          <span class="lang-zh">一个协调者四个 worker；蓝描边标出唯一的焦点卡。模板：<code>templates/diagrams/hierarchy.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 70 960 184" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" role="img" aria-label="Pipeline flow: soft-shadow white step cards, blue happy path, decision diamond with fail loop">
+  <defs>
+    <filter id="flow-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <marker id="flow-arrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="flow-arrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+  <rect y="70" width="960" height="184" fill="#ffffff"/>
+
+  <!-- happy path -->
+  <g fill="none" stroke="#0071e3" stroke-width="1.8">
+    <line x1="206" y1="138" x2="240" y2="138" marker-end="url(#flow-arrB)"/>
+    <line x1="396" y1="138" x2="459" y2="138" marker-end="url(#flow-arrB)"/>
+    <line x1="557" y1="138" x2="589" y2="138" marker-end="url(#flow-arrB)"/>
+    <line x1="745" y1="138" x2="779" y2="138" marker-end="url(#flow-arrB)"/>
+  </g>
+  <text x="573" y="128" font-size="11" font-weight="600" fill="#0071e3" text-anchor="middle">yes</text>
+
+  <!-- fail loop -->
+  <path d="M511,180 L511,216 Q511,224 503,224 L329,224 Q321,224 321,216 L321,182" fill="none" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#flow-arrN)"/>
+  <text x="416" y="216" font-size="11" fill="#86868b" text-anchor="middle">no · back-order</text>
+
+  <!-- step cards -->
+  <g filter="url(#flow-soft)">
+    <rect x="56" y="102" width="150" height="72" rx="14" fill="#ffffff"/>
+    <rect x="246" y="102" width="150" height="72" rx="14" fill="#ffffff"/>
+    <rect x="595" y="102" width="150" height="72" rx="14" fill="#ffffff"/>
+    <rect x="785" y="102" width="150" height="72" rx="14" fill="#ffffff"/>
+  </g>
+
+  <!-- decision diamond: the only tinted block -->
+  <path d="M511,94 L557,138 L511,182 L465,138 Z" fill="#eaf3fe" stroke="#0071e3" stroke-width="1.5"/>
+  <text x="511" y="142" font-size="12" font-weight="600" fill="#1d1d1f" text-anchor="middle">In stock?</text>
+
+  <!-- step 1: Order -->
+  <g transform="translate(72,126)" fill="none" stroke="#6e6e73" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 3 h3 l2.4 11 h8.6 l2 -7 H7"/>
+    <circle cx="9.5" cy="17.5" r="1.4"/><circle cx="15.5" cy="17.5" r="1.4"/>
+  </g>
+  <text x="104" y="143" font-size="13.5" font-weight="600" fill="#1d1d1f">Order</text>
+  <!-- step 2: Validate -->
+  <g transform="translate(262,126)" fill="none" stroke="#6e6e73" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 2 L17 5 v5 c0 4.5 -3 7.5 -7 8 -4 -0.5 -7 -3.5 -7 -8 V5 Z"/>
+    <polyline points="6.5,10 9,12.5 13.5,7.5"/>
+  </g>
+  <text x="294" y="143" font-size="13.5" font-weight="600" fill="#1d1d1f">Validate</text>
+  <!-- step 3: Charge -->
+  <g transform="translate(611,126)" fill="none" stroke="#6e6e73" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="4" width="16" height="12" rx="2"/>
+    <line x1="2" y1="9" x2="18" y2="9"/>
+  </g>
+  <text x="643" y="143" font-size="13.5" font-weight="600" fill="#1d1d1f">Charge</text>
+  <!-- step 4: Ship -->
+  <g transform="translate(801,126)" fill="none" stroke="#6e6e73" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2 6 h11 v9 H2 Z"/><path d="M13 9 h4 l2 3 v3 h-6"/>
+    <circle cx="6" cy="17.5" r="1.5"/><circle cx="15.5" cy="17.5" r="1.5"/>
+  </g>
+  <text x="833" y="143" font-size="13.5" font-weight="600" fill="#1d1d1f">Ship</text>
+
+  <!-- numbered badges -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <circle cx="60" cy="106" r="10" fill="#0071e3"/><text x="60" y="110" fill="#ffffff">1</text>
+    <circle cx="250" cy="106" r="10" fill="#0071e3"/><text x="250" y="110" fill="#ffffff">2</text>
+    <circle cx="599" cy="106" r="10" fill="#0071e3"/><text x="599" y="110" fill="#ffffff">3</text>
+    <circle cx="789" cy="106" r="10" fill="#0071e3"/><text x="789" y="110" fill="#ffffff">4</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">Flow · decision</span><span class="lang-zh">流程 · 决策</span></span>
+          <span class="lang-en">Blue happy path, gray fail loop, one tinted diamond. Template: <code>templates/diagrams/flow.svg</code>.</span>
+          <span class="lang-zh">蓝色主路径、灰色失败回流、唯一的 tint 菱形。模板：<code>templates/diagrams/flow.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 20 960 548" role="img" aria-label="mydev_probe() flowchart: blue happy path through devm_kzalloc, ioremap, request_irq and chardev registration, three error checks branching to a shared return -errno exit" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="affc-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <marker id="affc-arrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="affc-arrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+  <rect x="0" y="20" width="960" height="548" fill="#ffffff"/>
+
+  <!-- error lane: gray dashed, converging on return -errno -->
+  <g fill="none" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="4 3">
+    <path d="M488,84 L488,52 Q488,44 496,44 L908,44 Q916,44 916,52 L916,476" marker-end="url(#affc-arrN)"/>
+    <path d="M96,372 L96,516 Q96,524 104,524 L732,524" marker-end="url(#affc-arrN)"/>
+    <path d="M480,372 L480,492 Q480,500 488,500 L732,500" marker-end="url(#affc-arrN)"/>
+  </g>
+
+  <!-- happy path: the single blue story -->
+  <g fill="none" stroke="#0071e3" stroke-width="1.8">
+    <line x1="196" y1="124" x2="220" y2="124" marker-end="url(#affc-arrB)"/>
+    <line x1="388" y1="124" x2="412" y2="124" marker-end="url(#affc-arrB)"/>
+    <line x1="564" y1="124" x2="588" y2="124" marker-end="url(#affc-arrB)"/>
+    <path d="M688,156 L688,220 Q688,228 680,228 L104,228 Q96,228 96,236 L96,292" marker-end="url(#affc-arrB)"/>
+    <line x1="172" y1="332" x2="196" y2="332" marker-end="url(#affc-arrB)"/>
+    <line x1="380" y1="332" x2="404" y2="332" marker-end="url(#affc-arrB)"/>
+    <line x1="540" y1="332" x2="564" y2="332" marker-end="url(#affc-arrB)"/>
+    <line x1="756" y1="332" x2="780" y2="332" marker-end="url(#affc-arrB)"/>
+  </g>
+
+  <!-- soft-shadow white cards -->
+  <g filter="url(#affc-soft)">
+    <rect x="24" y="102" width="168" height="44" rx="22" fill="#ffffff"/>
+    <rect x="224" y="92" width="160" height="64" rx="14" fill="#ffffff"/>
+    <rect x="592" y="92" width="192" height="64" rx="14" fill="#ffffff"/>
+    <rect x="200" y="300" width="176" height="64" rx="14" fill="#ffffff"/>
+    <rect x="568" y="300" width="184" height="64" rx="14" fill="#ffffff"/>
+    <rect x="784" y="310" width="112" height="44" rx="22" fill="#ffffff"/>
+  </g>
+
+  <!-- shared error exit: muted gray card -->
+  <rect x="736" y="480" width="200" height="64" rx="14" fill="#f5f5f7"/>
+
+  <!-- decision diamonds: the only tinted blocks -->
+  <g fill="#eaf3fe" stroke="#0071e3" stroke-width="1.5">
+    <path d="M416,124 L488,88 L560,124 L488,160 Z"/>
+    <path d="M24,332 L96,296 L168,332 L96,368 Z"/>
+    <path d="M408,332 L472,296 L536,332 L472,368 Z"/>
+  </g>
+
+  <!-- icons -->
+  <g fill="none" stroke="#6e6e73" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- devm_kzalloc: RAM chip -->
+    <g transform="translate(238,112)">
+      <rect x="3" y="7" width="18" height="10" rx="2"/>
+      <path d="M7 7 V4 M12 7 V4 M17 7 V4 M7 17 V20 M12 17 V20 M17 17 V20"/>
+    </g>
+    <!-- ioremap: register window -->
+    <g transform="translate(606,112)">
+      <rect x="3" y="5" width="18" height="14" rx="2"/>
+      <path d="M3 9 H21 M9 9 V19 M15 9 V19"/>
+    </g>
+    <!-- request_irq: bolt -->
+    <g transform="translate(214,320)">
+      <path d="M13 3 L6 13.5 H11 L9 21 L18 10.5 H13 Z"/>
+    </g>
+    <!-- register chardev: terminal -->
+    <g transform="translate(582,320)">
+      <rect x="3" y="5" width="18" height="14" rx="2"/>
+      <path d="M7 10 L10 12.5 L7 15"/>
+      <path d="M13 15 H17"/>
+    </g>
+  </g>
+
+  <!-- entry / exit capsules -->
+  <text x="108" y="129" font-size="13.5" font-weight="600" fill="#1d1d1f" text-anchor="middle">mydev_probe(pdev)</text>
+  <text x="840" y="337" font-size="13.5" font-weight="600" fill="#1d1d1f" text-anchor="middle">return 0</text>
+
+  <!-- step cards -->
+  <text x="274" y="120" font-size="13.5" font-weight="600" fill="#1d1d1f">devm_kzalloc</text>
+  <text x="274" y="140" font-size="11.5" fill="#86868b">ctx, GFP_KERNEL</text>
+  <text x="642" y="120" font-size="13.5" font-weight="600" fill="#1d1d1f">ioremap registers</text>
+  <text x="642" y="140" font-size="11.5" fill="#86868b">MMIO resource 0</text>
+  <text x="250" y="328" font-size="13.5" font-weight="600" fill="#1d1d1f">request_irq</text>
+  <text x="250" y="348" font-size="11.5" fill="#86868b">mydev_isr handler</text>
+  <text x="618" y="328" font-size="13.5" font-weight="600" fill="#1d1d1f">register chardev</text>
+  <text x="618" y="348" font-size="11.5" fill="#86868b">cdev_add, fops</text>
+
+  <!-- decision questions -->
+  <text x="488" y="128" font-size="12" font-weight="600" fill="#1d1d1f" text-anchor="middle">ctx == NULL?</text>
+  <text x="96" y="336" font-size="12" font-weight="600" fill="#1d1d1f" text-anchor="middle">IS_ERR(base)?</text>
+  <text x="472" y="336" font-size="12" font-weight="600" fill="#1d1d1f" text-anchor="middle">ret &lt; 0?</text>
+
+  <!-- branch labels -->
+  <text x="576" y="144" font-size="11" font-weight="600" fill="#0071e3" text-anchor="middle">no</text>
+  <text x="184" y="352" font-size="11" font-weight="600" fill="#0071e3" text-anchor="middle">no</text>
+  <text x="552" y="352" font-size="11" font-weight="600" fill="#0071e3" text-anchor="middle">no</text>
+  <text x="700" y="64" font-size="11" fill="#86868b" text-anchor="middle">yes &#183; -ENOMEM</text>
+  <text x="300" y="512" font-size="11" fill="#86868b" text-anchor="middle">yes &#183; PTR_ERR(base)</text>
+  <text x="600" y="488" font-size="11" fill="#86868b" text-anchor="middle">yes &#183; ret</text>
+
+  <!-- shared error exit -->
+  <text x="836" y="508" font-size="13.5" font-weight="600" fill="#1d1d1f" text-anchor="middle">return -errno</text>
+  <text x="836" y="528" font-size="11.5" fill="#86868b" text-anchor="middle">devm_* resources auto-freed</text>
+
+  <!-- numbered badges on the happy path -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <circle cx="228" cy="96" r="10" fill="#0071e3"/><text x="228" y="100" fill="#ffffff">1</text>
+    <circle cx="596" cy="96" r="10" fill="#0071e3"/><text x="596" y="100" fill="#ffffff">2</text>
+    <circle cx="204" cy="304" r="10" fill="#0071e3"/><text x="204" y="308" fill="#ffffff">3</text>
+    <circle cx="572" cy="304" r="10" fill="#0071e3"/><text x="572" y="308" fill="#ffffff">4</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">Function flowchart · error lanes</span><span class="lang-zh">函数流程图 · 错误车道</span></span>
+          <span class="lang-en">A driver probe() top to bottom in blue; error handling steps aside into a gray lane and shares one exit. Template: <code>templates/diagrams/function-flowchart.svg</code>.</span>
+          <span class="lang-zh">驱动 probe() 从上到下走蓝色；错误处理让到灰色车道，共享一个出口。模板：<code>templates/diagrams/function-flowchart.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="8 36 1052 300" role="img" aria-label="Linux kernel build pipeline: .config and Kconfig compiled by gcc into objects, linked by ld into vmlinux, stripped by objcopy to Image.gz, merged with the dtc-built devicetree blobs by mkimage into the final boot.itb FIT image" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="abldSoft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <marker id="abldArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="abldArrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+
+  <!-- panel -->
+  <rect x="8" y="36" width="1052" height="300" fill="#ffffff"/>
+
+  <!-- main chain (blue 1.8px) -->
+  <g fill="none" stroke="#0071e3" stroke-width="1.8">
+    <line x1="200" y1="100" x2="244" y2="100" marker-end="url(#abldArrB)"/>
+    <line x1="372" y1="100" x2="416" y2="100" marker-end="url(#abldArrB)"/>
+    <line x1="524" y1="100" x2="568" y2="100" marker-end="url(#abldArrB)"/>
+    <line x1="696" y1="100" x2="740" y2="100" marker-end="url(#abldArrB)"/>
+    <line x1="864" y1="100" x2="908" y2="100" marker-end="url(#abldArrB)"/>
+    <path d="M974,136 V180 Q974,188 966,188 H790 Q782,188 782,196 V236" marker-end="url(#abldArrB)"/>
+    <line x1="856" y1="276" x2="900" y2="276" marker-end="url(#abldArrB)"/>
+  </g>
+
+  <!-- devicetree branch (gray 1.2px solid) -->
+  <g fill="none" stroke="#aeaeb2" stroke-width="1.2">
+    <line x1="144" y1="276" x2="188" y2="276" marker-end="url(#abldArrN)"/>
+    <line x1="336" y1="276" x2="380" y2="276" marker-end="url(#abldArrN)"/>
+    <line x1="496" y1="276" x2="704" y2="276" marker-end="url(#abldArrN)"/>
+  </g>
+  <text x="600" y="264" font-size="11.5" fill="#86868b" text-anchor="middle">make dtbs · runs in parallel</text>
+
+  <!-- node cards: white, borderless, soft shadow -->
+  <g filter="url(#abldSoft)">
+    <rect x="32" y="64" width="168" height="72" rx="14" fill="#ffffff"/>
+    <rect x="248" y="64" width="124" height="72" rx="14" fill="#ffffff"/>
+    <rect x="420" y="64" width="104" height="72" rx="14" fill="#ffffff"/>
+    <rect x="572" y="64" width="124" height="72" rx="14" fill="#ffffff"/>
+    <rect x="744" y="64" width="120" height="72" rx="14" fill="#ffffff"/>
+    <rect x="912" y="64" width="124" height="72" rx="14" fill="#ffffff"/>
+    <rect x="32" y="240" width="112" height="72" rx="14" fill="#ffffff"/>
+    <rect x="192" y="240" width="144" height="72" rx="14" fill="#ffffff"/>
+    <rect x="384" y="240" width="112" height="72" rx="14" fill="#ffffff"/>
+    <rect x="708" y="240" width="148" height="72" rx="14" fill="#ffffff"/>
+  </g>
+
+  <!-- focus card: final deliverable, the only bordered card -->
+  <rect x="904" y="240" width="132" height="72" rx="14" fill="#ffffff" stroke="#0071e3" stroke-width="1.5"/>
+
+  <!-- card names -->
+  <g font-size="13.5" font-weight="600" fill="#1d1d1f" text-anchor="middle">
+    <text x="116" y="94">.config + Kconfig</text>
+    <text x="310" y="94">gcc -c</text>
+    <text x="472" y="94">*.o</text>
+    <text x="634" y="94">ld vmlinux</text>
+    <text x="804" y="94">objcopy</text>
+    <text x="974" y="94">Image.gz</text>
+    <text x="88" y="270">*.dts</text>
+    <text x="264" y="270">dtc</text>
+    <text x="440" y="270">*.dtb</text>
+    <text x="782" y="270">mkimage FIT</text>
+    <text x="970" y="270">boot.itb</text>
+  </g>
+
+  <!-- card sub-labels -->
+  <g font-size="11.5" fill="#86868b" text-anchor="middle">
+    <text x="116" y="116">build configuration</text>
+    <text x="310" y="116">compile per-TU</text>
+    <text x="472" y="116">object files</text>
+    <text x="634" y="116">ELF + symbols</text>
+    <text x="804" y="116">strip to binary</text>
+    <text x="974" y="116">compressed kernel</text>
+    <text x="88" y="292">board source</text>
+    <text x="264" y="292">devicetree compiler</text>
+    <text x="440" y="292">flattened blob</text>
+    <text x="782" y="292">kernel + dtb pack</text>
+    <text x="970" y="292">bootable FIT image</text>
+  </g>
+
+  <!-- numbered badges on the tool steps of the main chain -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <circle cx="252" cy="68" r="10" fill="#0071e3"/><text x="252" y="72" fill="#ffffff">1</text>
+    <circle cx="576" cy="68" r="10" fill="#0071e3"/><text x="576" y="72" fill="#ffffff">2</text>
+    <circle cx="748" cy="68" r="10" fill="#0071e3"/><text x="748" y="72" fill="#ffffff">3</text>
+    <circle cx="712" cy="244" r="10" fill="#0071e3"/><text x="712" y="248" fill="#ffffff">4</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">Build · pipeline</span><span class="lang-zh">编译 · 流程链</span></span>
+          <span class="lang-en">Kernel build from .config to boot.itb; the devicetree branch joins quietly in gray, the deliverable wears the blue stroke. Template: <code>templates/diagrams/build-pipeline.svg</code>.</span>
+          <span class="lang-zh">内核编译从 .config 到 boot.itb；设备树分支以灰色安静汇入，交付物戴上蓝描边。模板：<code>templates/diagrams/build-pipeline.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== §2 HARDWARE ===================== -->
+<section id="hardware" style="padding:48px 0; background:#f5f5f7;">
+  <div class="apple-container apple-container--wide">
+    <h2 style="font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-0.01em; color:#1d1d1f; margin:0;">
+      <span class="lang-en">Hardware</span>
+      <span class="lang-zh">硬件</span>
+    </h2>
+    <p class="gal-section-note">
+      <span class="lang-en">Registers, SoC blocks, bus waveforms. Where anthropic spends hues, apple spends gray values — and the datasheet reads cleaner for it.</span>
+      <span class="lang-zh">寄存器、SoC 框图、总线波形。anthropic 用色相的地方，apple 用灰阶——数据手册反而更清爽。</span>
+    </p>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 624" role="img" aria-label="Quartz-3550 SoC block diagram: dual Cortex-A55 cluster with L2 and GIC-600, clock and reset unit, AXI NoC interconnect fanning out to memory, high-speed and low-speed peripherals; the blue path traces a CPU load miss through L2 and the NoC to the DDR4 controller" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="asocSoft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <marker id="asocArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="asocArrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+
+  <rect width="1160" height="624" fill="#ffffff"/>
+
+  <!-- zones: pale gray, rx 18, no border, normal-case labels -->
+  <rect x="24" y="24" width="712" height="168" rx="18" fill="#f5f5f7"/>
+  <text x="52" y="60" font-size="12" font-weight="500" fill="#86868b">CPU subsystem</text>
+  <rect x="760" y="24" width="376" height="168" rx="18" fill="#f5f5f7"/>
+  <text x="788" y="60" font-size="12" font-weight="500" fill="#86868b">Clock &amp; reset</text>
+  <rect x="24" y="360" width="360" height="240" rx="18" fill="#f5f5f7"/>
+  <text x="52" y="396" font-size="12" font-weight="500" fill="#86868b">Memory</text>
+  <rect x="408" y="360" width="360" height="240" rx="18" fill="#f5f5f7"/>
+  <text x="436" y="396" font-size="12" font-weight="500" fill="#86868b">High-speed I/O</text>
+  <rect x="792" y="360" width="344" height="240" rx="18" fill="#f5f5f7"/>
+  <text x="820" y="396" font-size="12" font-weight="500" fill="#86868b">Low-speed I/O</text>
+
+  <!-- connectors: blue main path (load miss CPU -> L2 -> NoC -> DDR), gray everything else -->
+  <g fill="none">
+    <path d="M248,128 H288" stroke="#0071e3" stroke-width="1.8" marker-end="url(#asocArrB)"/>
+    <path d="M384,172 V236" stroke="#0071e3" stroke-width="1.8" marker-end="url(#asocArrB)"/>
+    <path d="M340,300 V320 Q340,328 332,328 H212 Q204,328 204,336 V416" stroke="#0071e3" stroke-width="1.8" marker-end="url(#asocArrB)"/>
+    <path d="M608,172 V236" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#asocArrN)"/>
+    <path d="M864,172 V204 Q864,212 856,212 H728 Q720,212 720,220 V236" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#asocArrN)"/>
+    <path d="M588,300 V360" stroke="#aeaeb2" stroke-width="1.2" marker-start="url(#asocArrN)" marker-end="url(#asocArrN)"/>
+    <path d="M748,268 H856" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#asocArrN)"/>
+    <path d="M956,300 V360" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#asocArrN)"/>
+  </g>
+  <text x="876" y="200" font-size="12" fill="#86868b">clk · rst</text>
+
+  <!-- IP cards: white, rx 14, no stroke, soft shadow; A55 cluster is the single blue focus card -->
+  <g filter="url(#asocSoft)">
+    <rect x="56" y="84" width="192" height="88" rx="14" fill="#ffffff" stroke="#0071e3" stroke-width="1.5"/>
+    <rect x="288" y="84" width="192" height="88" rx="14" fill="#ffffff"/>
+    <rect x="512" y="84" width="192" height="88" rx="14" fill="#ffffff"/>
+    <rect x="792" y="84" width="144" height="88" rx="14" fill="#ffffff"/>
+    <rect x="960" y="84" width="144" height="88" rx="14" fill="#ffffff"/>
+    <rect x="300" y="236" width="448" height="64" rx="14" fill="#ffffff"/>
+    <rect x="856" y="236" width="200" height="64" rx="14" fill="#ffffff"/>
+    <rect x="52" y="416" width="304" height="72" rx="14" fill="#ffffff"/>
+    <rect x="436" y="416" width="304" height="72" rx="14" fill="#ffffff"/>
+    <rect x="820" y="416" width="136" height="72" rx="14" fill="#ffffff"/>
+    <rect x="972" y="416" width="136" height="72" rx="14" fill="#ffffff"/>
+    <rect x="52" y="504" width="144" height="72" rx="14" fill="#ffffff"/>
+    <rect x="212" y="504" width="144" height="72" rx="14" fill="#ffffff"/>
+    <rect x="436" y="504" width="144" height="72" rx="14" fill="#ffffff"/>
+    <rect x="596" y="504" width="144" height="72" rx="14" fill="#ffffff"/>
+    <rect x="820" y="504" width="136" height="72" rx="14" fill="#ffffff"/>
+    <rect x="972" y="504" width="136" height="72" rx="14" fill="#ffffff"/>
+  </g>
+
+  <!-- numbered badges on the main path -->
+  <g font-size="11.5" font-weight="600" text-anchor="middle">
+    <circle cx="268" cy="128" r="10" fill="#0071e3"/><text x="268" y="132" fill="#ffffff">1</text>
+    <circle cx="384" cy="204" r="10" fill="#0071e3"/><text x="384" y="208" fill="#ffffff">2</text>
+    <circle cx="272" cy="328" r="10" fill="#0071e3"/><text x="272" y="332" fill="#ffffff">3</text>
+  </g>
+
+  <!-- card names -->
+  <g font-weight="600" fill="#1d1d1f">
+    <g font-size="15">
+      <text x="80" y="120">Cortex-A55 ×2</text>
+      <text x="312" y="120">L2 cache 512K</text>
+      <text x="536" y="120">GIC-600</text>
+      <text x="816" y="120">PLL ×3</text>
+      <text x="984" y="120">CRU</text>
+    </g>
+    <g font-size="14">
+      <text x="324" y="260">AXI NoC · 64-bit @ 800 MHz</text>
+      <text x="880" y="260">APB bridge</text>
+      <text x="76" y="444">DDR4 ctrl + PHY</text>
+      <text x="460" y="444">PCIe Gen3 ×2</text>
+      <text x="840" y="444">UART ×4</text>
+      <text x="992" y="444">I2C ×3</text>
+      <text x="72" y="532">SRAM 256K</text>
+      <text x="232" y="532">Boot ROM</text>
+      <text x="456" y="532">USB 3.0</text>
+      <text x="616" y="532">GbE MAC</text>
+      <text x="840" y="532">SPI ×2</text>
+      <text x="992" y="532">GPIO</text>
+    </g>
+  </g>
+
+  <!-- card sub-lines -->
+  <g font-size="12" fill="#86868b">
+    <text x="80" y="144">L1 32K I/D per core</text>
+    <text x="312" y="144">unified · ECC</text>
+    <text x="536" y="144">interrupt distributor</text>
+    <text x="816" y="144">core · ddr · peri</text>
+    <text x="984" y="144">gate · soft reset</text>
+    <text x="324" y="284">system interconnect · QoS arbitration · 4 masters</text>
+    <text x="880" y="284">AXI-to-APB · 100 MHz</text>
+    <text x="76" y="468">DDR4-3200 · 32-bit + ECC</text>
+    <text x="460" y="468">root complex · MSI-X</text>
+    <text x="840" y="468">16550A-compat</text>
+    <text x="992" y="468">400 kHz Fast-mode</text>
+    <text x="72" y="556">on-chip scratch</text>
+    <text x="232" y="556">64K mask ROM</text>
+    <text x="456" y="556">xHCI dual-role</text>
+    <text x="616" y="556">RGMII · TSO</text>
+    <text x="840" y="556">mode 0-3 · DMA</text>
+    <text x="992" y="556">4 banks ×32</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">SoC · block diagram</span><span class="lang-zh">SoC · 内部框图</span></span>
+          <span class="lang-en">Subsystems as borderless gray groups; one blue path traces CPU through the NoC to DDR. Template: <code>templates/diagrams/soc-block.svg</code>.</span>
+          <span class="lang-zh">子系统是无边框灰组；唯一的蓝色路径从 CPU 经 NoC 到 DDR。模板：<code>templates/diagrams/soc-block.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 944 352" role="img" aria-label="UART_CTRL register bit-field map at offset 0x04, reset value 0x0000_0301, showing BAUD_DIV, PARITY, STOP, DATA8 and FIFO_TH fields with the TX_EN and RX_EN enable bits highlighted" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <!-- panel -->
+  <rect x="0" y="0" width="944" height="352" fill="#ffffff"/>
+
+  <!-- field fills (row 1: bits 31..16) -->
+  <path d="M472 80 H912 Q920 80 920 88 V116 Q920 124 912 124 H472 Z" fill="#f5f5f7"/>
+
+  <!-- field fills (row 2: bits 15..0) -->
+  <rect x="248" y="168" width="112" height="44" fill="#f5f5f7"/>
+  <rect x="360" y="168" width="56" height="44" fill="#f5f5f7"/>
+  <rect x="416" y="168" width="56" height="44" fill="#f5f5f7"/>
+  <rect x="472" y="168" width="224" height="44" fill="#f5f5f7"/>
+  <path d="M808 168 H912 Q920 168 920 176 V204 Q920 212 912 212 H808 Z" fill="#eaf3fe"/>
+
+  <!-- bit lattice hairlines, row 1 -->
+  <g stroke="#d2d2d7" stroke-width="1">
+    <line x1="80" y1="80" x2="80" y2="124"/>
+    <line x1="136" y1="80" x2="136" y2="124"/>
+    <line x1="192" y1="80" x2="192" y2="124"/>
+    <line x1="248" y1="80" x2="248" y2="124"/>
+    <line x1="304" y1="80" x2="304" y2="124"/>
+    <line x1="360" y1="80" x2="360" y2="124"/>
+    <line x1="416" y1="80" x2="416" y2="124"/>
+    <line x1="528" y1="80" x2="528" y2="124"/>
+    <line x1="584" y1="80" x2="584" y2="124"/>
+    <line x1="640" y1="80" x2="640" y2="124"/>
+    <line x1="696" y1="80" x2="696" y2="124"/>
+    <line x1="752" y1="80" x2="752" y2="124"/>
+    <line x1="808" y1="80" x2="808" y2="124"/>
+    <line x1="864" y1="80" x2="864" y2="124"/>
+  </g>
+  <line x1="472" y1="80" x2="472" y2="124" stroke="#aeaeb2" stroke-width="1"/>
+
+  <!-- bit lattice hairlines, row 2 -->
+  <g stroke="#d2d2d7" stroke-width="1">
+    <line x1="80" y1="168" x2="80" y2="212"/>
+    <line x1="136" y1="168" x2="136" y2="212"/>
+    <line x1="192" y1="168" x2="192" y2="212"/>
+    <line x1="304" y1="168" x2="304" y2="212"/>
+    <line x1="528" y1="168" x2="528" y2="212"/>
+    <line x1="584" y1="168" x2="584" y2="212"/>
+    <line x1="640" y1="168" x2="640" y2="212"/>
+    <line x1="752" y1="168" x2="752" y2="212"/>
+    <line x1="864" y1="168" x2="864" y2="212"/>
+  </g>
+  <g stroke="#aeaeb2" stroke-width="1">
+    <line x1="248" y1="168" x2="248" y2="212"/>
+    <line x1="360" y1="168" x2="360" y2="212"/>
+    <line x1="416" y1="168" x2="416" y2="212"/>
+    <line x1="472" y1="168" x2="472" y2="212"/>
+    <line x1="696" y1="168" x2="696" y2="212"/>
+  </g>
+
+  <!-- row borders -->
+  <rect x="24" y="80" width="896" height="44" rx="8" fill="none" stroke="#d2d2d7" stroke-width="1"/>
+  <rect x="24" y="168" width="896" height="44" rx="8" fill="none" stroke="#d2d2d7" stroke-width="1"/>
+
+  <!-- focus field outline: the single blue story -->
+  <path d="M808 168 H912 Q920 168 920 176 V204 Q920 212 912 212 H808 Z" fill="none" stroke="#0071e3" stroke-width="1.5"/>
+
+  <!-- divider -->
+  <line x1="24" y1="240" x2="920" y2="240" stroke="#d2d2d7" stroke-width="1"/>
+
+  <!-- access chips -->
+  <rect x="128" y="252" width="36" height="24" rx="10" fill="#f5f5f7"/>
+  <rect x="128" y="280" width="36" height="24" rx="10" fill="#f5f5f7"/>
+  <rect x="128" y="308" width="36" height="24" rx="10" fill="#f5f5f7"/>
+
+  <!-- title -->
+  <text x="24" y="32" font-size="14" font-weight="600" fill="#1d1d1f">UART_CTRL</text>
+  <text x="920" y="32" font-size="12" fill="#86868b" text-anchor="end">offset 0x04 · reset 0x0000_0301</text>
+
+  <!-- bit numbers, row 1 -->
+  <g font-size="11" fill="#86868b" text-anchor="middle">
+    <text x="52" y="72">31</text>
+    <text x="108" y="72">30</text>
+    <text x="164" y="72">29</text>
+    <text x="220" y="72">28</text>
+    <text x="276" y="72">27</text>
+    <text x="332" y="72">26</text>
+    <text x="388" y="72">25</text>
+    <text x="444" y="72">24</text>
+    <text x="500" y="72">23</text>
+    <text x="556" y="72">22</text>
+    <text x="612" y="72">21</text>
+    <text x="668" y="72">20</text>
+    <text x="724" y="72">19</text>
+    <text x="780" y="72">18</text>
+    <text x="836" y="72">17</text>
+    <text x="892" y="72">16</text>
+  </g>
+
+  <!-- bit numbers, row 2 -->
+  <g font-size="11" fill="#86868b" text-anchor="middle">
+    <text x="52" y="160">15</text>
+    <text x="108" y="160">14</text>
+    <text x="164" y="160">13</text>
+    <text x="220" y="160">12</text>
+    <text x="276" y="160">11</text>
+    <text x="332" y="160">10</text>
+    <text x="388" y="160">9</text>
+    <text x="444" y="160">8</text>
+    <text x="500" y="160">7</text>
+    <text x="556" y="160">6</text>
+    <text x="612" y="160">5</text>
+    <text x="668" y="160">4</text>
+    <text x="724" y="160">3</text>
+    <text x="780" y="160">2</text>
+    <text x="836" y="160">1</text>
+    <text x="892" y="160">0</text>
+  </g>
+
+  <!-- field names -->
+  <g font-size="12" font-weight="600" fill="#1d1d1f" text-anchor="middle">
+    <text x="696" y="108">BAUD_DIV</text>
+    <text x="304" y="196">PARITY</text>
+    <text x="388" y="196">STOP</text>
+    <text x="444" y="196">DATA8</text>
+    <text x="584" y="196">FIFO_TH</text>
+  </g>
+  <g font-size="12" font-weight="600" fill="#0071e3" text-anchor="middle">
+    <text x="836" y="196">RX_EN</text>
+    <text x="892" y="196">TX_EN</text>
+  </g>
+
+  <!-- reserved markers -->
+  <g font-size="12" fill="#86868b" text-anchor="middle">
+    <text x="248" y="108">—</text>
+    <text x="136" y="196">—</text>
+    <text x="752" y="196">—</text>
+  </g>
+
+  <!-- field spec lines -->
+  <g font-size="12" font-weight="600" fill="#1d1d1f">
+    <text x="24" y="268">BAUD_DIV</text>
+    <text x="24" y="296">FIFO_TH</text>
+    <text x="24" y="324">TX_EN / RX_EN</text>
+  </g>
+  <g font-size="11" font-weight="600" fill="#6e6e73" text-anchor="middle">
+    <text x="146" y="268">RW</text>
+    <text x="146" y="296">RW</text>
+    <text x="146" y="324">RW</text>
+  </g>
+  <g font-size="12" fill="#86868b">
+    <text x="180" y="268">baud = clk / (16 · div) — divisor sampled at frame start, write while TX_EN = 0</text>
+    <text x="180" y="296">TX_IRQ asserts when FIFO fill level drops below threshold (0–15 entries)</text>
+    <text x="180" y="324">transmit / receive enables — reset 0x0301 starts TX only, driver sets RX_EN at probe</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">Register · bit fields</span><span class="lang-zh">寄存器 · 位域</span></span>
+          <span class="lang-en">Hairline bit lattice, fields in two gray values, and the enable bits — the ones you actually flip — in blue. Template: <code>templates/diagrams/register-bitfield.svg</code>.</span>
+          <span class="lang-zh">细线位格，字段用两档灰区分，真正要翻的使能位给蓝色。模板：<code>templates/diagrams/register-bitfield.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 380" role="img" aria-label="SPI mode 0 read transaction timing waveform: SCLK, CS_N, MOSI and MISO lanes; the CS_N low transfer window is highlighted in blue tint; data-valid bus cells, sampling edges at each SCLK rising edge, and tCSS / tSU timing annotations" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="awavArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#86868b"/>
+    </marker>
+  </defs>
+
+  <!-- panel -->
+  <rect x="0" y="0" width="1120" height="380" fill="#ffffff"/>
+
+  <!-- transfer window tint: CS_N low, the single narrative focus -->
+  <rect x="168" y="68" width="824" height="192" rx="8" fill="#eaf3fe"/>
+
+  <!-- phase brackets -->
+  <path d="M196,64 V60 H548 V64" fill="none" stroke="#aeaeb2" stroke-width="1"/>
+  <path d="M564,64 V60 H908 V64" fill="none" stroke="#aeaeb2" stroke-width="1"/>
+
+  <!-- data-valid bus cells -->
+  <!-- MOSI 0x9F / 0x00 -->
+  <path d="M196,188 L204,176 H548 L556,188 L548,200 H204 Z" fill="#f5f5f7" stroke="#6e6e73" stroke-width="1.4"/>
+  <path d="M556,188 L564,176 H900 L908,188 L900,200 H564 Z" fill="#f5f5f7" stroke="#6e6e73" stroke-width="1.4"/>
+  <!-- MISO 0xC2 / 0x20 -->
+  <path d="M556,240 L564,228 H724 L732,240 L724,252 H564 Z" fill="#f5f5f7" stroke="#aeaeb2" stroke-width="1.4"/>
+  <path d="M732,240 L740,228 H900 L908,240 L900,252 H732 Z" fill="#f5f5f7" stroke="#aeaeb2" stroke-width="1.4"/>
+
+  <!-- sampling verticals at each SCLK rising edge -->
+  <g stroke="#d2d2d7" stroke-width="1" stroke-dasharray="3 3">
+    <line x1="248" y1="68" x2="248" y2="260"/>
+    <line x1="336" y1="68" x2="336" y2="260"/>
+    <line x1="424" y1="68" x2="424" y2="260"/>
+    <line x1="512" y1="68" x2="512" y2="260"/>
+    <line x1="600" y1="68" x2="600" y2="260"/>
+    <line x1="688" y1="68" x2="688" y2="260"/>
+    <line x1="776" y1="68" x2="776" y2="260"/>
+    <line x1="864" y1="68" x2="864" y2="260"/>
+  </g>
+
+  <!-- timing reference extensions -->
+  <g stroke="#aeaeb2" stroke-width="1" stroke-dasharray="2 3">
+    <line x1="168" y1="148" x2="168" y2="292"/>
+    <line x1="248" y1="260" x2="248" y2="292"/>
+    <line x1="556" y1="252" x2="556" y2="292"/>
+    <line x1="600" y1="260" x2="600" y2="292"/>
+  </g>
+
+  <!-- timing parameter arrows -->
+  <line x1="168" y1="284" x2="248" y2="284" stroke="#86868b" stroke-width="1" marker-start="url(#awavArr)" marker-end="url(#awavArr)"/>
+  <line x1="556" y1="284" x2="600" y2="284" stroke="#86868b" stroke-width="1" marker-start="url(#awavArr)" marker-end="url(#awavArr)"/>
+
+  <!-- time axis -->
+  <line x1="104" y1="304" x2="1096" y2="304" stroke="#d2d2d7" stroke-width="1"/>
+  <g stroke="#aeaeb2" stroke-width="1">
+    <line x1="248" y1="304" x2="248" y2="312"/>
+    <line x1="336" y1="304" x2="336" y2="312"/>
+    <line x1="424" y1="304" x2="424" y2="312"/>
+    <line x1="512" y1="304" x2="512" y2="312"/>
+    <line x1="600" y1="304" x2="600" y2="312"/>
+    <line x1="688" y1="304" x2="688" y2="312"/>
+    <line x1="776" y1="304" x2="776" y2="312"/>
+    <line x1="864" y1="304" x2="864" y2="312"/>
+    <line x1="952" y1="304" x2="952" y2="312"/>
+  </g>
+
+  <!-- waveforms -->
+  <!-- SCLK: CPOL=0 idle low, 8 periods -->
+  <path d="M104,100 H248 V76 H292 V100 H336 V76 H380 V100 H424 V76 H468 V100 H512 V76 H556 V100 H600 V76 H644 V100 H688 V76 H732 V100 H776 V76 H820 V100 H864 V76 H908 V100 H1096" fill="none" stroke="#1d1d1f" stroke-width="1.8"/>
+  <!-- CS_N: the blue focus signal, frames the transfer window -->
+  <path d="M104,124 H168 V148 H992 V124 H1096" fill="none" stroke="#0071e3" stroke-width="1.8"/>
+  <!-- MOSI idle low, slants into / out of bus cells -->
+  <path d="M104,200 H188 L196,188" fill="none" stroke="#6e6e73" stroke-width="1.4"/>
+  <path d="M908,188 L916,200 H1096" fill="none" stroke="#6e6e73" stroke-width="1.4"/>
+  <!-- MISO high-Z before and after the data phase -->
+  <path d="M104,240 H556" fill="none" stroke="#aeaeb2" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <path d="M908,240 H1096" fill="none" stroke="#aeaeb2" stroke-width="1.4" stroke-dasharray="5 4"/>
+
+  <!-- legend swatches -->
+  <rect x="104" y="344" width="16" height="12" rx="2" fill="#f5f5f7" stroke="#aeaeb2" stroke-width="1"/>
+  <line x1="264" y1="352" x2="284" y2="352" stroke="#aeaeb2" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <line x1="448" y1="344" x2="448" y2="360" stroke="#d2d2d7" stroke-width="1" stroke-dasharray="3 3"/>
+  <rect x="656" y="344" width="16" height="12" rx="2" fill="#eaf3fe"/>
+
+  <!-- text (drawn last, nothing covers it) -->
+  <text x="24" y="28" font-size="12" font-weight="600" fill="#86868b">SPI mode 0 · CPOL=0 CPHA=0</text>
+  <text x="1096" y="28" text-anchor="end" font-size="12" fill="#86868b">MX25L6433F flash · JEDEC ID read (0x9F)</text>
+
+  <text x="376" y="48" text-anchor="middle" font-size="11" fill="#86868b">command phase · MOSI drives</text>
+  <text x="732" y="48" text-anchor="middle" font-size="11" fill="#86868b">data phase · MISO drives</text>
+
+  <text x="24" y="92" font-size="12" font-weight="600" fill="#1d1d1f">SCLK</text>
+  <text x="24" y="140" font-size="12" font-weight="600" fill="#1d1d1f">CS_N</text>
+  <text x="24" y="192" font-size="12" font-weight="600" fill="#1d1d1f">MOSI</text>
+  <text x="24" y="244" font-size="12" font-weight="600" fill="#1d1d1f">MISO</text>
+
+  <text x="376" y="192" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">0x9F</text>
+  <text x="732" y="192" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">0x00</text>
+  <text x="644" y="244" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">0xC2</text>
+  <text x="820" y="244" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">0x20</text>
+
+  <text x="208" y="272" text-anchor="middle" font-size="11" fill="#86868b">tCSS</text>
+  <text x="608" y="288" font-size="11" fill="#86868b">tSU ≥ 5 ns</text>
+
+  <g font-size="11" fill="#86868b" text-anchor="middle">
+    <text x="248" y="328">t0</text>
+    <text x="336" y="328">t1</text>
+    <text x="424" y="328">t2</text>
+    <text x="512" y="328">t3</text>
+    <text x="600" y="328">t4</text>
+    <text x="688" y="328">t5</text>
+    <text x="776" y="328">t6</text>
+    <text x="864" y="328">t7</text>
+    <text x="952" y="328">t8</text>
+  </g>
+
+  <g font-size="11" fill="#86868b">
+    <text x="128" y="356">data-valid window</text>
+    <text x="292" y="356">high-Z (not driven)</text>
+    <text x="456" y="356">sampling edge · SCLK rising</text>
+    <text x="680" y="356">transfer window · CS_N low</text>
+    <text x="1096" y="356" text-anchor="end">SCLK 25 MHz · bit period 40 ns</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">Waveform · bus timing</span><span class="lang-zh">波形 · 总线时序</span></span>
+          <span class="lang-en">An SPI transaction with data lanes in three grays; chip-select is blue because the transfer window is the story. Template: <code>templates/diagrams/hw-timing-waveform.svg</code>.</span>
+          <span class="lang-zh">SPI 传输，数据信号用三档灰；片选给蓝色——传输窗口才是叙事主角。模板：<code>templates/diagrams/hw-timing-waveform.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== §3 RUNTIME ===================== -->
+<section id="runtime" style="padding:48px 0 64px;">
+  <div class="apple-container apple-container--wide">
+    <h2 style="font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-0.01em; color:#1d1d1f; margin:0;">
+      <span class="lang-en">Runtime</span>
+      <span class="lang-zh">运行时</span>
+    </h2>
+    <p class="gal-section-note">
+      <span class="lang-en">Time-ordered views: who talks to whom, who runs where, where the data lands. Blue follows the one thing you are tracing.</span>
+      <span class="lang-zh">按时间展开的视图：谁和谁通信、谁在哪个核上跑、数据落在哪。蓝色始终跟着你正在追踪的那一个对象。</span>
+    </p>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 576" role="img" aria-label="Sequence diagram: a client request passes through the gateway to a worker and Postgres, then acknowledgment, token stream, and a 200 SSE response flow back" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="aseq-card-shadow" x="-20%" y="-30%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <filter id="aseq-bar-shadow" x="-300%" y="-20%" width="700%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <marker id="aseq-arrow-blue" markerWidth="7" markerHeight="7" refX="7" refY="4" orient="auto">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="aseq-arrow-gray" markerWidth="7" markerHeight="7" refX="7" refY="4" orient="auto">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+
+  <!-- background panel -->
+  <rect x="0" y="0" width="1080" height="576" fill="#ffffff"/>
+
+  <!-- lifelines -->
+  <line x1="132" y1="100" x2="132" y2="552" stroke="#d2d2d7" stroke-width="1"/>
+  <line x1="404" y1="100" x2="404" y2="552" stroke="#d2d2d7" stroke-width="1"/>
+  <line x1="676" y1="100" x2="676" y2="552" stroke="#d2d2d7" stroke-width="1"/>
+  <line x1="948" y1="100" x2="948" y2="552" stroke="#d2d2d7" stroke-width="1"/>
+
+  <!-- activation bars -->
+  <rect x="128" y="140" width="8" height="384" rx="4" fill="#ffffff" filter="url(#aseq-bar-shadow)"/>
+  <rect x="400" y="144" width="8" height="376" rx="4" fill="#ffffff" filter="url(#aseq-bar-shadow)"/>
+  <rect x="672" y="216" width="8" height="232" rx="4" fill="#ffffff" filter="url(#aseq-bar-shadow)"/>
+  <rect x="944" y="288" width="8" height="88" rx="4" fill="#ffffff" filter="url(#aseq-bar-shadow)"/>
+
+  <!-- main chain: blue solid -->
+  <line x1="136" y1="152" x2="396" y2="152" stroke="#0071e3" stroke-width="1.8" marker-end="url(#aseq-arrow-blue)"/>
+  <line x1="408" y1="224" x2="668" y2="224" stroke="#0071e3" stroke-width="1.8" marker-end="url(#aseq-arrow-blue)"/>
+  <line x1="680" y1="296" x2="940" y2="296" stroke="#0071e3" stroke-width="1.8" marker-end="url(#aseq-arrow-blue)"/>
+
+  <!-- returns: gray dashed -->
+  <line x1="944" y1="368" x2="684" y2="368" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="6 4" marker-end="url(#aseq-arrow-gray)"/>
+  <line x1="672" y1="440" x2="412" y2="440" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="6 4" marker-end="url(#aseq-arrow-gray)"/>
+  <line x1="400" y1="512" x2="140" y2="512" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="6 4" marker-end="url(#aseq-arrow-gray)"/>
+
+  <!-- actor cards -->
+  <rect x="24" y="24" width="216" height="76" rx="14" fill="#ffffff" filter="url(#aseq-card-shadow)"/>
+  <rect x="296" y="24" width="216" height="76" rx="14" fill="#ffffff" stroke="#0071e3" stroke-width="1.5" filter="url(#aseq-card-shadow)"/>
+  <rect x="568" y="24" width="216" height="76" rx="14" fill="#ffffff" filter="url(#aseq-card-shadow)"/>
+  <rect x="840" y="24" width="216" height="76" rx="14" fill="#ffffff" filter="url(#aseq-card-shadow)"/>
+
+  <!-- step badges -->
+  <circle cx="132" cy="152" r="10" fill="#0071e3"/>
+  <circle cx="404" cy="224" r="10" fill="#0071e3"/>
+  <circle cx="676" cy="296" r="10" fill="#0071e3"/>
+  <circle cx="948" cy="368" r="10" fill="#aeaeb2"/>
+  <circle cx="676" cy="440" r="10" fill="#aeaeb2"/>
+  <circle cx="404" cy="512" r="10" fill="#aeaeb2"/>
+
+  <!-- actor names -->
+  <text x="132" y="52" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1d1d1f">Client</text>
+  <text x="132" y="76" text-anchor="middle" font-size="11.5" fill="#86868b">browser app</text>
+  <text x="404" y="52" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1d1d1f">Gateway</text>
+  <text x="404" y="76" text-anchor="middle" font-size="11.5" fill="#86868b">auth · rate limit</text>
+  <text x="676" y="52" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1d1d1f">Worker</text>
+  <text x="676" y="76" text-anchor="middle" font-size="11.5" fill="#86868b">runs the job</text>
+  <text x="948" y="52" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1d1d1f">Postgres</text>
+  <text x="948" y="76" text-anchor="middle" font-size="11.5" fill="#86868b">primary db</text>
+
+  <!-- message labels -->
+  <text x="268" y="144" text-anchor="middle" font-size="12" font-weight="600" fill="#1d1d1f">POST /v1/messages</text>
+  <text x="540" y="216" text-anchor="middle" font-size="12" font-weight="600" fill="#1d1d1f">schedule(run)</text>
+  <text x="812" y="288" text-anchor="middle" font-size="12" font-weight="600" fill="#1d1d1f">INSERT run · queued</text>
+  <text x="812" y="360" text-anchor="middle" font-size="11.5" fill="#86868b">ack · 12 ms</text>
+  <text x="540" y="432" text-anchor="middle" font-size="11.5" fill="#86868b">stream tokens</text>
+  <text x="268" y="504" text-anchor="middle" font-size="11.5" fill="#86868b">200 OK · SSE</text>
+
+  <!-- badge numbers -->
+  <text x="132" y="156" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">1</text>
+  <text x="404" y="228" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">2</text>
+  <text x="676" y="300" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">3</text>
+  <text x="948" y="372" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">4</text>
+  <text x="676" y="444" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">5</text>
+  <text x="404" y="516" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">6</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">Sequence · api</span><span class="lang-zh">时序 · API</span></span>
+          <span class="lang-en">Requests in blue, returns in dashed gray, activation bars floating on shadows. Template: <code>templates/diagrams/sequence.svg</code>.</span>
+          <span class="lang-zh">请求走蓝色，返回走灰虚线，激活条靠柔影浮起。模板：<code>templates/diagrams/sequence.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 380" role="img" aria-label="Scheduler timeline: CFS run view across CPU 0 to CPU 2 over a 12 ms window where the traced task app: render runs on CPU 0 from 0 to 4 ms, is preempted by the threaded eth0 IRQ at 4 ms, then migrates to CPU 2 and runs from 5 to 9 ms while kworker/u8 runs periodically on CPU 1" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="aschArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+  </defs>
+
+  <!-- panel -->
+  <rect x="0" y="0" width="1120" height="380" fill="#ffffff"/>
+
+  <!-- CPU 0 lane: app 0-4 ms (traced, blue focus), irq/eth0 4-5 ms, idle 5-12 ms -->
+  <rect x="104" y="104" width="320" height="36" rx="8" fill="#eaf3fe" stroke="#0071e3" stroke-width="1.5"/>
+  <rect x="424" y="104" width="80" height="36" rx="8" fill="#f5f5f7"/>
+  <rect x="504" y="104" width="560" height="36" rx="8" fill="#ffffff" stroke="#d2d2d7" stroke-width="1"/>
+
+  <!-- CPU 1 lane: kworker/u8 bursts every 4 ms -->
+  <rect x="104" y="168" width="80" height="36" rx="8" fill="#ffffff" stroke="#d2d2d7" stroke-width="1"/>
+  <rect x="184" y="168" width="120" height="36" rx="8" fill="#f5f5f7"/>
+  <rect x="304" y="168" width="200" height="36" rx="8" fill="#ffffff" stroke="#d2d2d7" stroke-width="1"/>
+  <rect x="504" y="168" width="120" height="36" rx="8" fill="#f5f5f7"/>
+  <rect x="624" y="168" width="200" height="36" rx="8" fill="#ffffff" stroke="#d2d2d7" stroke-width="1"/>
+  <rect x="824" y="168" width="120" height="36" rx="8" fill="#f5f5f7"/>
+  <rect x="944" y="168" width="120" height="36" rx="8" fill="#ffffff" stroke="#d2d2d7" stroke-width="1"/>
+
+  <!-- CPU 2 lane: idle 0-5 ms, app continuation 5-9 ms (traced), idle 9-12 ms -->
+  <rect x="104" y="232" width="400" height="36" rx="8" fill="#ffffff" stroke="#d2d2d7" stroke-width="1"/>
+  <rect x="504" y="232" width="320" height="36" rx="8" fill="#eaf3fe" stroke="#0071e3" stroke-width="1.5"/>
+  <rect x="824" y="232" width="240" height="36" rx="8" fill="#ffffff" stroke="#d2d2d7" stroke-width="1"/>
+
+  <!-- IRQ preemption marker at 4 ms: ink, not blue -->
+  <rect x="380" y="56" width="88" height="24" rx="12" fill="#1d1d1f"/>
+  <line x1="424" y1="80" x2="424" y2="104" stroke="#1d1d1f" stroke-width="1"/>
+
+  <!-- migration arrow: traced task leaves CPU 0 at 4 ms, resumes on CPU 2 at 5 ms -->
+  <path d="M408,140 V208 Q408,216 416,216 H504 Q512,216 512,224 V232" fill="none" stroke="#0071e3" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#aschArrB)"/>
+
+  <!-- time axis -->
+  <line x1="104" y1="288" x2="1064" y2="288" stroke="#d2d2d7" stroke-width="1"/>
+  <g stroke="#aeaeb2" stroke-width="1">
+    <line x1="104" y1="288" x2="104" y2="296"/>
+    <line x1="264" y1="288" x2="264" y2="296"/>
+    <line x1="424" y1="288" x2="424" y2="296"/>
+    <line x1="584" y1="288" x2="584" y2="296"/>
+    <line x1="744" y1="288" x2="744" y2="296"/>
+    <line x1="904" y1="288" x2="904" y2="296"/>
+    <line x1="1064" y1="288" x2="1064" y2="296"/>
+  </g>
+
+  <!-- legend swatches -->
+  <rect x="104" y="344" width="16" height="12" rx="3" fill="#f5f5f7"/>
+  <rect x="320" y="344" width="16" height="12" rx="3" fill="#ffffff" stroke="#d2d2d7" stroke-width="1"/>
+  <rect x="424" y="344" width="16" height="12" rx="3" fill="#eaf3fe" stroke="#0071e3" stroke-width="1"/>
+
+  <!-- text layer (drawn last, nothing covers it) -->
+  <text x="24" y="28" font-size="12" font-weight="600" fill="#86868b">CFS run view · 12 ms window</text>
+  <text x="1096" y="28" text-anchor="end" font-size="12" fill="#86868b">trace-cmd record -e sched_switch -e sched_migrate_task</text>
+
+  <text x="424" y="72" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">IRQ · eth0</text>
+
+  <text x="24" y="128" font-size="12" font-weight="600" fill="#1d1d1f">CPU 0</text>
+  <text x="24" y="192" font-size="12" font-weight="600" fill="#1d1d1f">CPU 1</text>
+  <text x="24" y="256" font-size="12" font-weight="600" fill="#1d1d1f">CPU 2</text>
+
+  <text x="116" y="128" font-size="12" font-weight="600" fill="#1d1d1f">app: render</text>
+  <text x="436" y="128" font-size="12" font-weight="600" fill="#1d1d1f">irq/eth0</text>
+  <text x="516" y="128" font-size="12" fill="#86868b">idle</text>
+
+  <text x="116" y="192" font-size="12" fill="#86868b">idle</text>
+  <text x="196" y="192" font-size="12" font-weight="600" fill="#1d1d1f">kworker/u8</text>
+  <text x="316" y="192" font-size="12" fill="#86868b">idle</text>
+  <text x="516" y="192" font-size="12" font-weight="600" fill="#1d1d1f">kworker/u8</text>
+  <text x="636" y="192" font-size="12" fill="#86868b">idle</text>
+  <text x="836" y="192" font-size="12" font-weight="600" fill="#1d1d1f">kworker/u8</text>
+  <text x="956" y="192" font-size="12" fill="#86868b">idle</text>
+
+  <text x="528" y="220" font-size="11" fill="#86868b">migrate · load balance</text>
+
+  <text x="116" y="256" font-size="12" fill="#86868b">idle</text>
+  <text x="516" y="256" font-size="12" font-weight="600" fill="#1d1d1f">app: render</text>
+  <text x="836" y="256" font-size="12" fill="#86868b">idle</text>
+
+  <g font-size="11" fill="#86868b" text-anchor="middle">
+    <text x="104" y="312">0</text>
+    <text x="264" y="312">2</text>
+    <text x="424" y="312">4</text>
+    <text x="584" y="312">6</text>
+    <text x="744" y="312">8</text>
+    <text x="904" y="312">10</text>
+    <text x="1064" y="312">12</text>
+  </g>
+  <text x="1084" y="312" font-size="11" fill="#86868b">ms</text>
+
+  <g font-size="11" fill="#86868b">
+    <text x="128" y="356">task block · CFS / workqueue</text>
+    <text x="344" y="356">idle</text>
+    <text x="448" y="356">app: render · traced task</text>
+    <text x="1096" y="356" text-anchor="end">tick every 2 ms · HZ=1000</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">Scheduler · timeline</span><span class="lang-zh">调度 · 时间线</span></span>
+          <span class="lang-en">Three CPU lanes; the traced task wears blue across cores and its migration arrow shows the load balancer at work. Template: <code>templates/diagrams/sched-timeline.svg</code>.</span>
+          <span class="lang-zh">三条 CPU 泳道；被追踪的任务跨核保持蓝色，迁移箭头画出负载均衡的动作。模板：<code>templates/diagrams/sched-timeline.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 944 320" role="img" aria-label="kfifo ring buffer: 16-cell array with free-running in and out counters; the blue in pointer marks where new data lands; indices wrap with idx &amp; (size minus 1)" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="arbf-arrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="arbf-arrK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#1d1d1f"/>
+    </marker>
+    <marker id="arbf-arrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+    <clipPath id="arbf-cells">
+      <rect x="24" y="136" width="896" height="56" rx="10"/>
+    </clipPath>
+  </defs>
+  <rect width="944" height="320" fill="#ffffff"/>
+
+  <!-- pointer drop lines: in (blue, the one focus) and out (ink) -->
+  <line x1="332" y1="108" x2="332" y2="132" fill="none" stroke="#0071e3" stroke-width="1.8" marker-end="url(#arbf-arrB)"/>
+  <line x1="836" y1="108" x2="836" y2="132" fill="none" stroke="#1d1d1f" stroke-width="1.5" marker-end="url(#arbf-arrK)"/>
+
+  <!-- wrap-around path, split for the inline modulo label -->
+  <path d="M892,224 L892,228 Q892,236 884,236 L532,236" fill="none" stroke="#aeaeb2" stroke-width="1.2"/>
+  <path d="M412,236 L60,236 Q52,236 52,228 L52,224" fill="none" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#arbf-arrN)"/>
+
+  <!-- 16-cell array: white lattice, tinted occupied span (wraps 14,15 then 0..4) -->
+  <rect x="24" y="136" width="896" height="56" rx="10" fill="#ffffff"/>
+  <g clip-path="url(#arbf-cells)">
+    <rect x="24" y="136" width="280" height="56" fill="#eaf3fe"/>
+    <rect x="808" y="136" width="112" height="56" fill="#eaf3fe"/>
+  </g>
+  <g stroke="#d2d2d7" stroke-width="1">
+    <line x1="80" y1="136" x2="80" y2="192"/>
+    <line x1="136" y1="136" x2="136" y2="192"/>
+    <line x1="192" y1="136" x2="192" y2="192"/>
+    <line x1="248" y1="136" x2="248" y2="192"/>
+    <line x1="304" y1="136" x2="304" y2="192"/>
+    <line x1="360" y1="136" x2="360" y2="192"/>
+    <line x1="416" y1="136" x2="416" y2="192"/>
+    <line x1="472" y1="136" x2="472" y2="192"/>
+    <line x1="528" y1="136" x2="528" y2="192"/>
+    <line x1="584" y1="136" x2="584" y2="192"/>
+    <line x1="640" y1="136" x2="640" y2="192"/>
+    <line x1="696" y1="136" x2="696" y2="192"/>
+    <line x1="752" y1="136" x2="752" y2="192"/>
+    <line x1="808" y1="136" x2="808" y2="192"/>
+    <line x1="864" y1="136" x2="864" y2="192"/>
+  </g>
+  <rect x="24" y="136" width="896" height="56" rx="10" fill="none" stroke="#d2d2d7" stroke-width="1"/>
+
+  <!-- title row + legend -->
+  <text x="24" y="28" font-size="15" font-weight="600" fill="#1d1d1f">kfifo — lockless ring buffer, size = 16</text>
+  <text x="24" y="48" font-size="12" fill="#86868b">single producer / single consumer · len = in − out = 7</text>
+  <rect x="772" y="20" width="16" height="16" rx="4" fill="#eaf3fe"/>
+  <text x="796" y="32" font-size="11" fill="#6e6e73">data</text>
+  <rect x="856" y="20" width="16" height="16" rx="4" fill="#ffffff" stroke="#d2d2d7" stroke-width="1"/>
+  <text x="880" y="32" font-size="11" fill="#6e6e73">free</text>
+
+  <!-- pointer labels -->
+  <text x="332" y="84" font-size="13.5" font-weight="600" fill="#0071e3" text-anchor="middle">in = 37</text>
+  <text x="332" y="100" font-size="11" fill="#86868b" text-anchor="middle">new data lands here</text>
+  <text x="836" y="84" font-size="13.5" font-weight="600" fill="#1d1d1f" text-anchor="middle">out = 30</text>
+  <text x="836" y="100" font-size="11" fill="#86868b" text-anchor="middle">next read</text>
+
+  <!-- index labels 0..15 -->
+  <g font-size="11" fill="#86868b" text-anchor="middle">
+    <text x="52" y="212">0</text>
+    <text x="108" y="212">1</text>
+    <text x="164" y="212">2</text>
+    <text x="220" y="212">3</text>
+    <text x="276" y="212">4</text>
+    <text x="332" y="212">5</text>
+    <text x="388" y="212">6</text>
+    <text x="444" y="212">7</text>
+    <text x="500" y="212">8</text>
+    <text x="556" y="212">9</text>
+    <text x="612" y="212">10</text>
+    <text x="668" y="212">11</text>
+    <text x="724" y="212">12</text>
+    <text x="780" y="212">13</text>
+    <text x="836" y="212">14</text>
+    <text x="892" y="212">15</text>
+  </g>
+
+  <!-- wrap rule, inline on the wrap path -->
+  <text x="472" y="240" font-size="12" fill="#86868b" text-anchor="middle">idx &amp; (size − 1)</text>
+
+  <!-- memory-ordering annotations -->
+  <text x="24" y="296" font-size="12" fill="#6e6e73">kfifo_in(): copy, smp_wmb(), in += len</text>
+  <text x="920" y="296" font-size="12" fill="#6e6e73" text-anchor="end">kfifo_out(): smp_rmb(), out += len</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">Algorithm · data structure</span><span class="lang-zh">算法 · 数据结构</span></span>
+          <span class="lang-en">A kfifo ring buffer: tinted cells hold data, the blue pointer marks where new bytes land. Template: <code>templates/diagrams/algorithm-ringbuffer.svg</code>.</span>
+          <span class="lang-zh">kfifo 环形缓冲：tint 格存数据，蓝色指针标出新字节落点。模板：<code>templates/diagrams/algorithm-ringbuffer.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 210" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="12" role="img" aria-label="Timeline: shipped milestones as filled blue nodes, upcoming as outlined nodes, with a today marker">
+  <rect width="1040" height="210" fill="#ffffff"/>
+  <line x1="60" y1="110" x2="980" y2="110" stroke="#d2d2d7" stroke-width="2"/>
+
+  <!-- today marker -->
+  <line x1="520" y1="58" x2="520" y2="162" stroke="#0071e3" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <rect x="484" y="34" width="72" height="20" rx="10" fill="#eaf3fe"/>
+  <text x="520" y="48" text-anchor="middle" font-size="10" font-weight="600" fill="#0071e3">today</text>
+
+  <g text-anchor="middle">
+    <circle cx="60" cy="110" r="8" fill="#0071e3"/><circle cx="60" cy="110" r="2.5" fill="#ffffff"/>
+    <text x="60" y="82" font-weight="600" fill="#1d1d1f">v0.9</text><text x="60" y="142" font-size="10" fill="#86868b">Jan</text>
+    <circle cx="244" cy="110" r="8" fill="#0071e3"/><circle cx="244" cy="110" r="2.5" fill="#ffffff"/>
+    <text x="244" y="82" font-weight="600" fill="#1d1d1f">v1.0</text><text x="244" y="142" font-size="10" fill="#86868b">Mar</text>
+    <circle cx="428" cy="110" r="8" fill="#0071e3"/><circle cx="428" cy="110" r="2.5" fill="#ffffff"/>
+    <text x="428" y="82" font-weight="600" fill="#1d1d1f">v1.5</text><text x="428" y="142" font-size="10" fill="#86868b">May</text>
+    <circle cx="612" cy="110" r="8" fill="#ffffff" stroke="#aeaeb2" stroke-width="1.6"/>
+    <text x="612" y="82" fill="#6e6e73">v2.0</text><text x="612" y="142" font-size="10" fill="#86868b">Q3</text>
+    <circle cx="796" cy="110" r="8" fill="#ffffff" stroke="#aeaeb2" stroke-width="1.6"/>
+    <text x="796" y="82" fill="#6e6e73">v2.5</text><text x="796" y="142" font-size="10" fill="#86868b">Q4</text>
+    <circle cx="980" cy="110" r="8" fill="#ffffff" stroke="#aeaeb2" stroke-width="1.6"/>
+    <text x="980" y="82" fill="#6e6e73">v3.0</text><text x="980" y="142" font-size="10" fill="#86868b">next year</text>
+  </g>
+
+  <g font-size="11" fill="#6e6e73">
+    <circle cx="856" cy="186" r="5" fill="#0071e3"/><text x="868" y="190">shipped</text>
+    <circle cx="936" cy="186" r="5" fill="#ffffff" stroke="#aeaeb2" stroke-width="1.4"/><text x="948" y="190">upcoming</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">Timeline · milestones</span><span class="lang-zh">时间线 · 里程碑</span></span>
+          <span class="lang-en">Shipped milestones in ink, upcoming ones hollow, one blue marker for now. Template: <code>templates/diagrams/timeline.svg</code>.</span>
+          <span class="lang-zh">已交付的里程碑用墨色，未到的用空心，唯一的蓝色标记现在。模板：<code>templates/diagrams/timeline.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<footer style="border-top:1px solid var(--apple-divider); padding:40px 0 64px;">
+  <div class="apple-container apple-container--wide" style="display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; align-items:baseline;">
+    <p style="font-size:13.5px; color:#86868b; margin:0;">
+      <span class="lang-en">Every figure follows <code>skills/apple-design/references/diagram-craft.md</code> and passes the design-review gates.</span>
+      <span class="lang-zh">每张图都遵循 <code>skills/apple-design/references/diagram-craft.md</code>，并通过 design-review 检查。</span>
+    </p>
+    <div style="display:flex; gap:24px;">
+      <a class="apple-link" href="index.html"><span class="lang-en">Main demo</span><span class="lang-zh">主 demo</span></a>
+      <a class="apple-link" href="../anthropic-design/diagrams.html"><span class="lang-en">Anthropic gallery</span><span class="lang-zh">anthropic 案例库</span></a>
+      <a class="apple-link" href="../../index.html"><span class="lang-en">All skills</span><span class="lang-zh">全部 skill</span></a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+<script>
+(function () {
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-copy-svg]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var fig = btn.closest('figure');
+        var svg = fig && fig.querySelector('svg');
+        if (!svg) return;
+        var txt = svg.outerHTML;
+        function done(ok) {
+          var en = btn.querySelector('.lang-en');
+          var zh = btn.querySelector('.lang-zh');
+          if (!en || !zh) return;
+          var oldEn = en.textContent, oldZh = zh.textContent;
+          en.textContent = ok ? 'Copied ✓' : 'Copy failed';
+          zh.textContent = ok ? '已复制 ✓' : '复制失败';
+          setTimeout(function () { en.textContent = oldEn; zh.textContent = oldZh; }, 1400);
+        }
+        function fallback() {
+          var ta = document.createElement('textarea');
+          ta.value = txt;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          var ok = false;
+          try { ok = document.execCommand('copy'); } catch (e) {}
+          document.body.removeChild(ta);
+          done(ok);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(function () { done(true); }, fallback);
+        } else {
+          fallback();
+        }
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: apple-design
+Page-type: diagram-gallery (demo)
+Created: 2026-06-11
+Decisions:
+- [blue-budget] chose "open with 'where does the blue go' as the page thesis" over "mirroring the anthropic gallery's multi-hue copy". Because: apple's gallery must teach the §12 translation rule (one blue story per genre), not just show pictures — the captions name the blue's owner in every figure.
+- [three-sections] chose "structure / hardware / runtime" over "anthropic's audience-based sections". Because: apple's figures all serve engineers; the natural axis is what kind of truth the figure states, and hardware earns its own gray band section.
+- [gray-band] chose "#f5f5f7 full-bleed band for the hardware section" over "uniform white page". Because: apple.com rhythm alternates white and pale-gray bands; it also lets white figure cards read as cards without borders.
+- [copy-button] chose "gray pill button (lang-toggle styling)" over "apple-link with ›". Because: copy is an action, not navigation; the pill matches apple's control language and keeps ‹›-links unambiguous.
+- [hairline-exception] chose "documenting the cell-lattice hairline exception in captions" over "borderless cells". Because: registers and ring buffers are tables, not cards — §12 note 2 sanctions 0.5-1px #d2d2d7 lattices.
+Known trade-offs:
+- apple demo index.html remains monolingual; this gallery is bilingual per §G — same inconsistency as the anthropic side, one decision pending for all demos.
+- Existing four templates (architecture/flow/hierarchy/timeline) are inlined as-is; their internal ids were already unique per file.
+/design-review:self-diff -->
+</body>
+</html>

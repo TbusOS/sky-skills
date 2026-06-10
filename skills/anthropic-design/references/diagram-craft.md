@@ -1,8 +1,15 @@
 # Diagram Craft — 手工 SVG 图示工艺（anthropic-design）
 
+> **本文约束的是什么**——三层分清楚：
+> ① **审美**（色彩语义、暖系调色板、编辑式克制）——不可变,这是 skill 的身份;
+> ② **工艺质量**（可读性、字号、留白、不发灰、不满铺）——机器闸强制,这是底线不是风格;
+> ③ **图型与结构**——**自由定制**。模板和 §15 图型谱系是审美起点和设计思想的载体,不是强制规格。
+> 内容长什么样,图就该长什么样:可以变体、混搭(波形里嵌位域、架构图里嵌 mock)、自创新图型——
+> 只要 ①② 仍然成立。"必须配图"约束的是**有没有图**,从不约束**图长成哪样**。
+
 > 适用：架构图 / 流程图 / 层级图 / 时间线 / git graph / 一切"工程类"图示。
 > 时序图另有专文 `sequence-diagrams.md`；抽象插画见 `imagery.md`（两者不受本文"工程图"规则约束的条目会单独标注）。
-> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence / state-machine / deployment 七件，全部按本文标准实现，新图直接复制改）。案例库：`demos/anthropic-design/diagrams.html`（16 张图 × 工程 / 产品展示 / 演讲汇报三类场合，每张带 Copy SVG）。
+> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence / state-machine / deployment + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline,共 **14 件**,全部按本文标准实现）。案例库：`demos/anthropic-design/diagrams.html`（23 张图 × 工程 / 内核硬件 / 产品展示 / 演讲汇报四类场合，每张带 Copy SVG）。
 
 ## 0. 第一原则：颜色做语义，不做填充——但必须在场
 
@@ -170,9 +177,20 @@ LLM 画 UI mock 比画抽象插画稳定得多。骨架（浏览器窗）：
 | 系统结构 / 分层 / 依赖 | 架构图 |
 | 时间演进 / 版本 / 里程碑 | 时间线 |
 | 产品 / UI 描述 | 窗口 mock |
+| 函数控制流 / 错误处理路径 | 函数流程图（§15.1） |
+| 数据结构 / 算法机制 | 算法原理图（§15.2） |
+| 寄存器 / 位域 / 协议帧格式 | 位域图（§15.3） |
+| 芯片 / SoC / 板级硬件结构 | SoC 框图（§15.4） |
+| 硬件信号 / 总线协议时序 | 波形时序图（§15.5） |
+| 编译 / 构建 / 打包链 | 编译流程图（§15.6） |
+| 多核调度 / 抢占 / 时间片 | 调度时间线（§15.7） |
 | 连续纯文字 > 2 屏 | 插入至少 1 个视觉元素（图/表/stat/pull-quote） |
 
 节奏目标：每 1.5 屏高度（≈1300px @1440 视口）至少 1 个 SVG / figure / stat 元素。
+
+**表里的图型是默认映射,不是唯一解**:它回答"这类内容值得一张什么样的图作起点",
+实际结构按内容定制——拆图、合图、混搭、自创形态都允许,合约只在两件事上是硬的:
+该有图的地方要有图(text-desert 闸),以及图本身的工艺质量(§0-§9 + 各闸)。
 
 ## 13. figure 语义规范
 
@@ -194,3 +212,60 @@ LLM 画 UI mock 比画抽象插画稳定得多。骨架（浏览器窗）：
 - ❌ viewBox 写大、内容挤在中间一窄条（→ §8.1 先算 viewBox 再画；svg-letterbox 闸）
 - ❌ ≥ 20 个 text 的密图塞进 960 以下容器（→ wide breakout;dense-diagram-cramped 闸）
 - ❌ 长文页面通篇无图（→ §12 图密度合约;text-desert 闸）
+
+## 15. 内核 / 嵌入式工程图谱系（7 个图型的专属工艺）
+
+> 每个图型有现成模板（`templates/diagrams/` 同名 .svg），复制改内容比从零画稳得多——
+> 但模板是**起点不是规格**:它示范这个图型的审美和常见坑的解法,结构、节点数、布局、信息密度
+> 全部按你的实际内容重新设计;内容超出谱系时直接自创图型,套用 §0-§9 的工艺即可。
+> 通用规则（§0-§9）全部适用；本节只写每个图型**额外**的工艺决定。案例见 `demos/anthropic-design/diagrams.html`。
+
+### 15.1 函数流程图（function-flowchart）
+
+- 纵向主路径（happy path 橙 1.8px + 编号徽章），**错误处理走右侧独立车道**：gold 1.2px 虚线逐级下汇到共享出口（`return -errno`）——错误路径穿插在主路径里是最常见的可读性灾难
+- 菱形只给真判断（`ret < 0?`），用强调 tint `#f4d9cd`；cleanup 步骤（`iounmap` / `kfree`）是普通卡，不是菱形
+- 入口/出口用胶囊（rx = 高/2）；成功出口绿色点缀，错误出口 gold
+- 内容必须真实：真函数名、真 errno,不写 step1/step2
+
+### 15.2 算法原理图（algorithm-*，模板示例 ring buffer）
+
+- 数据结构 = 单元格阵列（cell ~56×48 rx 6）：**占用 = tint 填充,空闲 = 白底**,状态一眼可分
+- 指针/游标 = 实心 hue 三角 + 标签（in/out、head/tail），不同指针不同 hue
+- 机制性注释（`smp_wmb()` / `idx & (size-1)`）≤ 2 行,放阵列侧边或下方,12px;不要把伪码整段塞进图
+- 环形结构优先画直线阵列 + wrap-around 圆角箭头,真画圆环文字会全歪
+
+### 15.3 寄存器位域图（register-bitfield）
+
+- 32 位拆两行（31..16 / 15..0），位格 56-60px 宽、44px 高,4px 网格;bit 号 10.5-11px 在格顶
+- 字段 = 合并格 + 字段 hue tint + **4px 顶色条** + 居中字段名;焦点字段（EN 位类）用橙;reserved = 白底 + 灰 `—`
+- 标题行必含三件套:寄存器名 14px 600 + `offset 0x..` + `reset 0x..`(11px 灰)
+- 图下方 3-4 行字段说明:实心色点 + `字段 · RW/RO · 语义`(11.5px),访问权限用 ≤56px 实心 chip
+- 同样适用于协议帧格式(CAN frame / TCP header):把"bit"换成"byte/field"
+
+### 15.4 SoC / 芯片框图（soc-block）
+
+- 子系统 = tint zone(CPU 橙焦点 / 内存绿 / 高速外设蓝 / 低速外设金 / 时钟复位墨),zone 内连线用 zone hue
+- **互连(NoC / AXI / AHB 总线)= 中性细长卡**(白或墨 tint `#e7e4d9`),绝不允许画成饱和满宽色带(saturated-band 闸);APB 桥单独一张小卡喂低速 zone
+- 唯一的主数据路径(CPU→NoC→DDR)橙 1.8px + 徽章;其余 zone 连线 1.2px
+- 每张 IP 卡两行:IP 名 + 关键参数(`DDR4 ctrl + PHY` / `Cortex-A55 ×2 (L1 32K)`)
+
+### 15.5 硬件波形时序图（hw-timing-waveform）
+
+- 一信号一 lane,左侧 12px 600 标签;波形线 1.8px;**焦点信号(CS / 触发 / 使能)用橙,其余 lane 各 hue 区分**(SCLK 墨 / MOSI 蓝 / MISO 绿)
+- 数据段画成 tint cell + 居中 hex 值(`0x9F`);high-Z 用灰短划
+- 采样点 = 浅灰虚线竖线(每个有效沿);时序参数(tSU/tH/tCSS)= 双箭头 + 11px 标注,**离波形线 ≥ 8px**
+- 底部时间轴 t0..tn(10.5-11px);面板内放协议小标题 chip(`SPI mode 0 · CPOL=0 CPHA=0`)
+
+### 15.6 编译流程图（build-pipeline）
+
+- 工具步骤(橙点卡)和产物(蓝点卡)**交替**出现,主链橙 1.8px + 编号;产物卡副行写格式(`ELF + symbols`)
+- 并行分支(dts→dtc→dtb)走 gold 1.2px,在打包步骤(mkimage FIT)圆角汇入
+- 最终交付物(boot.itb / Image.gz)用焦点卡 `#fbeee7` + 橙边
+- 图例:橙点=工具 · 蓝点=产物 · 金=分支
+
+### 15.7 调度时间线（sched-timeline）
+
+- 一 CPU 一 lane(左标签 `CPU 0/1/2`),底部统一时间轴 + ticks(ms)
+- 任务块 = tint 块 + **4px 左色边** + 任务名 11.5px;同一任务跨 CPU 保持同 hue;idle = 白底灰虚线边
+- IRQ/抢占 = 竖线 + 实心橙徽章 + 事件标签(`IRQ · eth0 rx`);任务迁移 = 灰虚线圆角箭头 + `migrate` 标注
+- 图例必须有(任务数 ≥ 2 即多色);此图型天然 ≥ 3 hue,注意橙只给一个焦点事件/任务
