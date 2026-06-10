@@ -20,6 +20,7 @@
 2. **Hero 框图渲染宽度 ≥ 900px**（在 1440 视口下）：`figure[grid-column: 1 / -1] > svg` 实测 rect.width；不到就 warn。例外：作者明确用 `max-width + margin:0 auto` 居中限宽的 intentional 场景。
 3. **SVG `<text>` 渲染像素 ≥ 9px**：`effective_px = font_size * (rect.width / viewBox.width)`。小于 9 就 warn。**写源码时 font-size ≥ 9.5 作为缓冲**。
 4. **孤儿卡检测**：多列 grid 里 N-1 张是 `grid-column: 1 / -1` 的全行 hero 卡，剩 1 张不是且宽度 < 父容器 70% → warn。
+5. **满宽彩色带检测（saturated-band · known-bugs §1.27）**：渲染宽度 ≥ 300px 的 SVG 里，任一 rect 同时满足"HSL 饱和（s>0.25 且 l<0.85）+ 有效不透明度 ≥ 0.5 + 宽 ≥ 60% viewBox 宽 + 高 ≥ 24 + 面积 ≥ 8% viewBox" → warn。只抓 hue 饱和的"色带"；深色中性面板（终端/深色窗口 mock）和低饱和 tint 容器是合法模式。颜色做语义不做填充——tint 容器 + 色条 + 色点，纯色满填只给 ≤ 56px 元素。画图工艺全文见各 skill `references/diagram-craft.md`（含图密度合约：≥3 步流程必须画图、数字必须 stat/图表、>2 屏纯文字必须插视觉元素、每 1.5 屏 ≥ 1 个视觉元素）。
 
 ## C. 视觉原创性（目前文档级，将来 design-critic 强制）
 

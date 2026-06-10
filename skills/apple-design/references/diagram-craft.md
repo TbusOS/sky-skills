@@ -1,0 +1,86 @@
+# Diagram Craft — 手工 SVG 图示工艺（apple-design）
+
+> 适用：架构图 / 流程图 / 层级图 / 时间线 / 时序图等一切工程类图示。
+> 与 anthropic 的多色语义路线不同，**apple 图的美感来自"少"**：无彩色为主、蓝色一处、柔影分层、留白比信息多。
+> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline 四件，全部按本文标准实现）。
+
+## 0. 第一原则：美靠"少"
+
+- **无彩色为主**：白底、`#f5f5f7` 分组、灰阶文字与连线
+- **蓝 `#0071e3` 全图只点一处**：主路径 + 1 张焦点卡 + 决策菱形（同属一个叙事焦点）；蓝色元素 > 2 处即过量
+- 颜色覆盖率目标 < 5%；visual-audit 聚合饱和填充 > 30% viewBox 告警（known-bugs §1.27）
+- 不用 dot-grid、不用纹理、不用虚线分组框——背景保持纯净（这是和 anthropic 的核心分界）
+
+## 1. 调色板
+
+| 用途 | 值 |
+|---|---|
+| 焦点 / 主路径 / 徽章 | `#0071e3` |
+| 决策菱形 tint | `#eaf3fe` |
+| 主名文字 | `#1d1d1f` |
+| icon / 次级 | `#6e6e73` |
+| 副说明 / 弱标签 | `#86868b` |
+| 次要连线 / upcoming 环 | `#aeaeb2` |
+| 时间线轴 / 分隔 | `#d2d2d7` |
+| 分组底 | `#f5f5f7` |
+
+## 2. 深度靠柔影，不靠边框
+
+- 分组容器：`#f5f5f7` + rx 18 + **无边框**；标签 12px 500 `#86868b` 正常大小写（apple 不用 uppercase letter-spacing 标签）
+- 节点卡：白底 + rx 14 + **无描边** + 柔影 `feDropShadow dx=0 dy=4 stdDeviation=8 flood-opacity=0.08`——白卡靠影子从浅灰分组里浮起来
+- 焦点卡：白底 + 蓝 1.5px 描边（全图唯一带边框的卡）
+- 圆角体系：分组 18 / 卡 14 / chip 10——比 anthropic 更圆润，对齐硬件语言
+
+## 3. 节点卡排版
+
+- **字阶反差替代颜色分类**：主名 13.5-15px 600 `#1d1d1f` + 副说明 11.5-12px `#86868b`
+- icon 直接浮在卡内左侧（**无 tile 底块**，这点和 anthropic 不同）：24×24 坐标、stroke 1.5-1.6、round cap/join、`fill="none"`、灰 `#6e6e73`；焦点卡 icon 用蓝
+- 留白配额比 anthropic 多 25%：卡高 88（主行）/ 72（次行），组间距 44，分组上下 padding ≥ 36
+
+## 4. 连线
+
+- 圆角正交折线（8px quadratic 拐角）、边缘锚点出发，同 anthropic §4
+- 主路径蓝 1.8px 实线；次要灰 `#aeaeb2` 1.2px **实线**（apple 少用虚线；虚线只留给回流/未定状态）
+- 箭头 7px 同色小三角 marker
+- 编号徽章：r=10 蓝圆 + 11px 600 白字，只标主路径
+
+## 5. 决策菱形
+
+蓝 tint `#eaf3fe` + 蓝 1.5px 边 + 12px 600 `#1d1d1f` 问题文字。全图唯一的 tint 色块。出口标注 `yes` / `no` 11px 600（yes 蓝 / no 灰），text-anchor="middle"，与徽章保持 ≥ 4px。
+
+## 6. 布局公式
+
+同 anthropic §8 通用规则：节点宽 = max(160, 英文字符 × 9, CJK × 18)；4px 网格；viewBox padding ≥ 24；SVG 文字 ≥ 11px 源字号；文字 bbox 互不相交 ≥ 4px。apple 特有：信息密集的 hero 框图必须放 `apple-container--hero`（1280px）并 `grid-column: 1 / -1`，否则 980px 窄容器把文字压到 < 9px（SKILL.md 既有红线）。
+
+## 7. 时序图（sequence diagram）
+
+apple 风时序图 pattern（anthropic 有专文 `sequence-diagrams.md`，apple 按下面适配）：
+
+- **actor 卡**：顶部一排白卡 + 柔影（同 §2 节点卡），间距 ≥ 200px，每卡 icon + 名字
+- **lifeline**：自 actor 卡底中心垂下，`#d2d2d7` 1px 实线
+- **消息箭头**：水平线 + 7px 三角；请求实线、响应 1.2px 虚线；**主叙事链蓝色、其余灰色**
+- **step 编号**：消息线起点 r=10 蓝徽章（主链）/ 灰徽章 `#aeaeb2`（支链）
+- **激活条**：lifeline 上 8px 宽白色圆角条 + 柔影，表示处理区间
+- 消息标签 11-12px `#1d1d1f` 置于线上方 6px；返回值标签 11px `#86868b`
+- 文字一律平排（不旋转）；图宽不够就加宽 viewBox，不准缩字号
+
+## 8. 数据表达优先级
+
+复杂信息先考虑 **巨字号统计**（`data-display.md`：120px big number + caption），它是 apple 的视觉主角；柱图/饼图是最后选项。流程和结构才用本文的图示。产品形态用 SVG 设备线稿 mock：圆角矩形外框（手机 rx 28 / laptop rx 12 + 底座梯形）+ 浅灰描边 + 内容区极简线段——不要试图画拟真渐变金属质感（单文件 SVG 画不像，宁可线稿化）。
+
+## 9. 图密度合约
+
+同 anthropic `diagram-craft.md` §12 的表格执行（≥3 步流程必须图、数字必须 stat、结构必须架构图、>2 屏纯文字必须插视觉元素、每 1.5 屏 ≥ 1 个视觉元素）。apple 页面里 stat callout 可计入视觉元素。
+
+## 10. figure 语义规范
+
+同 anthropic §13：`<figure>` + 真实 `<figcaption>`（known-bugs §1.18）；SVG 带 `role="img"` + `aria-label`。
+
+## 11. 反模式清单
+
+- ❌ 彩色分类（多 hue 是 anthropic 的语言；apple 只有蓝一个焦点色）
+- ❌ 卡片加边框 + 阴影双重描边（二选一：普通卡只用柔影，焦点卡只加蓝边）
+- ❌ uppercase letter-spacing 分组标签 / dot-grid / 虚线分组框（anthropic 专属，用了就是 cross-skill smell）
+- ❌ 满宽色带、纯文字盒子、斜线穿心、大箭头、坐标随手写（同 anthropic §14 通用反模式）
+- ❌ 高饱和渐变 / 拟真材质 / 阴影 opacity > 0.12
+- ❌ 一图多焦点（蓝色元素 > 2 处）

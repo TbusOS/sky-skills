@@ -339,6 +339,58 @@ const findings = await page.evaluate((cs) => {
     }
   });
 
+  // ---------- 2b) Saturated band fill audit (known-bugs §1.27) ----------
+  // Diagram-craft rule: colour encodes meaning, it doesn't fill area.
+  // The smell is the "full-width colour band": a hue-saturated rect spanning
+  // ≥ 60% of the viewBox width with real height — three of those stacked is
+  // PowerPoint SmartArt. Per-element, hue-saturated only: dark-neutral panels
+  // (terminal / dark-window mocks) and low-saturation tints are legitimate and
+  // pass. Icon-scale SVGs (< 300px rendered) are out of scope because a filled
+  // icon tile legitimately covers its whole viewBox.
+  const toHsl = ({ r, g, b }) => {
+    const rn = r / 255, gn = g / 255, bn = b / 255;
+    const max = Math.max(rn, gn, bn), min = Math.min(rn, gn, bn);
+    const l = (max + min) / 2;
+    const d = max - min;
+    const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+    return { s, l };
+  };
+  document.querySelectorAll('svg').forEach((svg) => {
+    if (svg.getBoundingClientRect().width < 300) return;
+    const vb = (svg.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number);
+    const vbW = vb[2] || 0;
+    const vbArea = vbW * (vb[3] || 0);
+    if (!vbArea) return;
+    const bands = [];
+    svg.querySelectorAll('rect').forEach((el) => {
+      if (el.closest('defs, pattern, marker, clipPath, mask')) return;
+      const cs = getComputedStyle(el);
+      const fill = parseRgb(cs.fill);
+      if (!fill) return;
+      const op = (parseFloat(cs.opacity) || 1) * (parseFloat(cs.fillOpacity) || 1);
+      if (op < 0.5) return;
+      const { s, l } = toHsl(fill);
+      if (!(s > 0.25 && l < 0.85)) return; // hue-saturated only
+      let box;
+      try { box = el.getBBox(); } catch { return; }
+      if (box.width < 0.6 * vbW) return;          // not a full-width band
+      if (box.height < 24) return;                 // divider line, not a band
+      if (box.width * box.height < 0.08 * vbArea) return;
+      bands.push({ w: Math.round(box.width), h: Math.round(box.height), pct: +((box.width * box.height / vbArea) * 100).toFixed(1) });
+    });
+    if (bands.length) {
+      const biggest = bands.reduce((a, b) => (b.pct > a.pct ? b : a));
+      issues.push({
+        kind: 'saturated-band',
+        severity: 'warn',
+        count: bands.length,
+        dims: `${biggest.w}×${biggest.h}`,
+        coveragePct: biggest.pct,
+        label: svg.getAttribute('aria-label') || 'unlabeled',
+      });
+    }
+  });
+
   // ---------- 5) SVG text overlap audit ----------
   // Catches the class of bug where a rotated decorative label intersects
   // static labels, whose coords looked safe in non-rotated source.
@@ -987,6 +1039,10 @@ for (const i of visibleFindings) {
         `  [${i.severity}] cross-skill smell: foreign color ${i.foreign} (${i.foreignNote}) used in ${i.skill}-design page (e.g. <${i.sample}>: "${i.text}") — that's another skill's signature color`
       );
     }
+  } else if (i.kind === 'saturated-band') {
+    console.log(
+      `  [${i.severity}] ${i.count} full-width saturated band(s) in diagram "${i.label}" (largest ${i.dims}, ${i.coveragePct}% of viewBox) — colour encodes meaning, it doesn't fill area; use 8-12% tints + accent bars + colored dots, keep full-saturation fills for ≤56px elements (known-bugs 1.27, diagram-craft.md)`
+    );
   } else if (i.kind === 'no-brand-presence') {
     console.log(
       `  [${i.severity}] brand not visible in top region: "${i.brandName}" covers only ${i.coveragePct}% of top 1440×500 (threshold ${i.thresholdPct}%) — ${i.skill}-design page should carry its signature color in hero/nav so readers recognise the brand at first glance`

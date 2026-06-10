@@ -30,12 +30,14 @@ last-verified: 2026-04-19
 2. `references/typography.md` — 字体层级（Lora serif 正文是核心差异）
 3. `references/layout-patterns.md` — 六类版式骨架 + **容器选择表** + **L1-L10 scenario recipes**（dashboard / form / table / tab / accordion / modal / sidebar / changelog / video / empty-state）
 4. `references/components.md` — 28 组件（含 §28 Inline SVG 插画模板）+ **C1-C11 scenario recipes**（input / select / check / switch / tab / accordion / toast / dialog / banner / tooltip / skeleton）
-5. `references/motion.md` — 动画缓动 + **M1-M10 scenario recipes**（hero / stagger / hover / modal / toast / loading / count-up / route）
-6. `references/imagery.md` — 抽象 SVG 插画规则
-7. `references/data-display.md` — 低饱和图表色板
-8. `references/responsive.md` — 断点与 max-width
-9. `references/ux-writing.md` — CTA / empty state / error / placeholder 文案模式 + 禁用词清单
-10. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
+5. `references/diagram-craft.md` — **手工 SVG 图示工艺（画任何架构/流程/层级/时间线图前 MUST 读）**：色彩语义表（颜色做语义不做填充）、嵌套分组、节点卡、连线、编号徽章、布局公式、icon 语法、窗口 mock、图密度合约、反模式
+6. `references/sequence-diagrams.md` — UML 时序图专文（actor / lifeline / step 编号 / 平文本约束）
+7. `references/motion.md` — 动画缓动 + **M1-M10 scenario recipes**（hero / stagger / hover / modal / toast / loading / count-up / route）
+8. `references/imagery.md` — 抽象 SVG 插画规则
+9. `references/data-display.md` — 低饱和图表色板
+10. `references/responsive.md` — 断点与 max-width
+11. `references/ux-writing.md` — CTA / empty state / error / placeholder 文案模式 + 禁用词清单
+12. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
 
 ### 何时读 scenario recipes（重要）
 

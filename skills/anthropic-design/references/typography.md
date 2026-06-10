@@ -1,5 +1,10 @@
 # Anthropic Typography
 
+> 事实注记：anthropic.com 真身字体是 **Styrene A**（标题，商业授权）+ **Tiempos**（正文，商业授权）。
+> 本 skill 用 Google Fonts 的 **Poppins / Lora** 做开源替身——Poppins 模仿 Styrene 的几何无衬线骨架，
+> Lora 模仿 Tiempos 的过渡衬线质感。要更贴近官网质感时调字距即可（Poppins 标题 `letter-spacing: -0.01em`），
+> 不要引入第三种字体。
+
 ## 核心规则
 
 1. **标题 Poppins 无衬线**（几何感强），**正文 Lora 衬线 serif**。这是与 Apple 最核心的区别。

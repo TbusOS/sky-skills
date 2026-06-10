@@ -190,6 +190,18 @@
 
 ---
 
+### 1.27 高饱和色块满铺图示 · "PowerPoint SmartArt 色带"味
+- **Reader sees**：架构图/框图里整条层级是满宽的高饱和色带（橙/蓝/绿/黑各占一条），白字浮在色带上。颜色占了 40%+ 版面，图看起来像 2005 年的 SmartArt，刺眼且廉价；信息层次反而被颜色淹没。
+- **Why**：generator 把"颜色编码类别"理解成"把类别区域涂满该颜色"。正确语义是：颜色以 8-12% tint 容器底 + 4px 色条 + 节点色点 + 彩色连线呈现，纯色满填只给 ≤ 56×56 的小元素（icon tile / 徽章 / 色点）。2026-06-10 审 anthropic/apple 两 skill 的 templates/diagrams/architecture.svg，发现旧模板本身就是三条满宽色带（anthropic 饱和覆盖 55%，demos/anthropic-design v1 四层图 39.8%）——模板教坏 generator，源头治理后重写（详见两 skill 的 `references/diagram-craft.md`）。
+- **How caught**：2026-06-10 加 check `saturated-band` —— 对每个渲染宽度 ≥ 300px 的 SVG，逐 rect 判"满宽彩色带"：HSL 饱和（s>0.25 且 l<0.85）、有效不透明度 ≥ 0.5、宽 ≥ 60% viewBox 宽、高 ≥ 24、面积 ≥ 8% viewBox。任一命中即 warn。**只抓 hue 饱和**，深色中性面板（l 低但 s≈0 的终端/深色窗口 mock，如 anthropic feature-deep 的命令面板）是合法模式不抓——第一版用"聚合饱和+极暗面积 > 30%"曾把该 mock 误报成 181.8%（重叠元素重复计数），同日改为本算法后 v1 老 demo 命中 2 条带（橙 APPLICATION + 蓝 DOMAIN 满宽层，780×88 / 13.2% viewBox；墨色 INFRASTRUCTURE 层因 s≈0 按设计不算）、14 张 canonical（anthropic 7 + apple 7）+ v2 demo + 8 张新模板 0 假阳。
+- **Defense**：
+  - 模板源头：`templates/diagrams/*.svg`（两 skill 共 8 件）已全部按 diagram-craft 标准重写，generator 复制即得正确画法。
+  - 文档：anthropic/apple 各自 `references/diagram-craft.md` §0 第一原则 + 色彩语义表。
+  - 渲染兜底：`visual-audit.mjs` 的 `saturated-band` check。
+- **Rule**：颜色做语义不做填充。画图时自查：把图缩成拇指大小，如果第一眼看到的是"几块颜色"而不是"结构"，说明颜色面积超标。
+
+---
+
 ### 1.26 SVG 装饰 shape 压住 text · 时间线 dot / icon ring / decorative path 后画盖文字
 - **Reader sees**：SVG 框图里某段文字被一个圆点 / 矩形 / 路径"打了一拳"——文字中间出现一个色块，文字看不清或部分被遮。最典型场景：时间线主轴穿过卡片，时间线的圆点（`<circle cy="180" r="5">`）正好落在卡片内部文字（如 `resource_setup_logo_bmp`）的位置上，圆点 fill 是非透明 → 字被盖。
 - **Why**：SVG 没有自动 z-axis 排版，**绘制顺序 = 视觉前后**。后画的元素压在先画的之上。设计 SVG 时按几何分组方便（先画卡片、再画卡片内文字、最后画时间线穿插装饰），但卡片内文字的 y 区间和时间线 dot 的 y 区间撞了 → dot 把字盖住。`visual-audit` 的像素采样原则上能在 dot 颜色和文字颜色对比足够时抓到，但当 dot 和卡片底色匹配时肉眼看不见、pixel check 也不会抓；若 dot 和卡片底色不同，文字就明显被盖。2026-05-01 dog-food 一个外部技术文档项目的时序图发现某卡片橙色 timeline dot 压在卡片中部一行 mono 文本上。

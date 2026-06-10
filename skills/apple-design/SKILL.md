@@ -30,11 +30,12 @@ last-verified: 2026-04-19
 2. `references/typography.md` — 字体层级与规则
 3. `references/layout-patterns.md` — 六类版式骨架 + **容器选择表**
 4. `references/components.md` — 28 组件（含 §28 Inline SVG 插画模板）
-5. `references/motion.md` — 动画缓动
-6. `references/imagery.md` — 摄影与圆角规则
-7. `references/data-display.md` — 巨字号统计 + 等距插画
-8. `references/responsive.md` — 断点与 max-width
-9. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
+5. `references/diagram-craft.md` — **手工 SVG 图示工艺（画任何架构/流程/层级/时间线/时序图前 MUST 读）**：美靠"少"、蓝色单焦点、柔影白卡、布局公式、时序图 pattern、图密度合约、反模式
+6. `references/motion.md` — 动画缓动
+7. `references/imagery.md` — 摄影与圆角规则
+8. `references/data-display.md` — 巨字号统计 + 等距插画
+9. `references/responsive.md` — 断点与 max-width
+10. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
 
 ## 发布前检查(MUST — 交给 design-review skill)
 
