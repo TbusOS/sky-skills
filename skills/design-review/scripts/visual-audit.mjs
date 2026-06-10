@@ -11,6 +11,10 @@
 //   8. Engineering diagrams with zero saturated hues (anthropic only) — known-bugs 1.30
 //   9. Text deserts: >2600px of prose with no visual element — known-bugs 1.31
 //  10. Note: the <9px SVG text check covers ALL content figures, not just hero rows
+//  11. Keyboard a11y: focusables present but no :focus/:focus-visible style
+//      anywhere (outline stripped) · positive tabindex hijacking tab order
+//  12. Perf: LCP > 4000ms / CLS > 0.1 via buffered PerformanceObserver —
+//      local render, indicative only; skipped silently if API unavailable
 //
 // Usage:
 //   node skills/design-review/scripts/visual-audit.mjs [--ignore-intentional] <html-path>
@@ -28,7 +32,7 @@
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
-import { extname, resolve } from 'node:path';
+import { dirname, extname, resolve } from 'node:path';
 import process from 'node:process';
 import { PNG } from 'pngjs';
 
@@ -162,7 +166,9 @@ await page.waitForTimeout(500);
 // Read the HTML so we can detect the skill, then pass cross-skill-smell
 // data into page.evaluate. The smell check needs to know this skill's
 // forbidden foreign signatures.
-const rawHtml = await readFile(resolve(root, target), 'utf-8').catch(() => '');
+const rawHtml = await readFile(
+  resolve(root, target.replace(/^file:\/\//, '')), 'utf-8'
+).catch(() => '');
 const skillId = detectSkill(target, rawHtml);
 const crossSkillData = skillId
   ? {
@@ -172,7 +178,27 @@ const crossSkillData = skillId
     }
   : null;
 
-const findings = await page.evaluate((cs) => {
+// Linked-CSS focus hint for the keyboard check. Under file:// every linked
+// stylesheet is an opaque origin, so in-page cssRules access throws and the
+// no-focus-style gate would have to skip. Scan the linked CSS files from the
+// Node side instead and hand the verdict in. Remote (http/https) stylesheets
+// can't be scanned — record their presence so the gate stays conservative.
+let focusInExternalCss = false;
+let remoteCssPresent = false;
+{
+  const htmlDir = dirname(resolve(root, target.replace(/^file:\/\//, '')));
+  for (const m of rawHtml.matchAll(/<link[^>]+href=["']([^"']+\.css)["']/gi)) {
+    const href = m[1];
+    if (/^(https?:)?\/\//i.test(href)) { remoteCssPresent = true; continue; }
+    try {
+      const cssText = await readFile(resolve(htmlDir, href.split('?')[0]), 'utf-8');
+      if (cssText.includes(':focus')) { focusInExternalCss = true; break; }
+    } catch { /* unresolvable link — treat as absent */ }
+  }
+}
+
+const findings = await page.evaluate((arg) => {
+  const cs = arg.crossSkill;
   const issues = [];
 
   // ---------- Helpers ----------
@@ -1072,8 +1098,66 @@ const findings = await page.evaluate((cs) => {
     for (const v of smellMap.values()) issues.push(v);
   }
 
+  // ---------- 14) Keyboard accessibility ----------
+  // (a) no-focus-style: the page has focusable elements, every one of them
+  //     rests at outline:none, AND no stylesheet defines a :focus or
+  //     :focus-visible rule anywhere — a keyboard user tabbing through gets
+  //     no visible focus indicator. Conservative by design: if ANY stylesheet
+  //     is unreadable (cross-origin cssRules throws), skip rather than guess.
+  //     No real Tab traversal — headless focus simulation is unreliable.
+  // (b) positive-tabindex: tabindex > 0 overrides natural DOM tab order and
+  //     almost always breaks it for everything after the jump.
+  {
+    const focusables = [...document.querySelectorAll(
+      'a[href], button, input, select, textarea, [tabindex]'
+    )].filter((el) => {
+      const st = getComputedStyle(el);
+      return st.display !== 'none' && st.visibility !== 'hidden';
+    });
+    const positive = focusables.filter(
+      (el) => parseInt(el.getAttribute('tabindex') || '', 10) > 0
+    );
+    if (positive.length > 0) {
+      issues.push({
+        kind: 'positive-tabindex',
+        severity: 'warn',
+        count: positive.length,
+        sample: positive.slice(0, 3).map(
+          (el) => `<${el.tagName.toLowerCase()} tabindex="${el.getAttribute('tabindex')}">`
+        ),
+      });
+    }
+    if (focusables.length >= 1 && document.styleSheets.length > 0) {
+      // Node already scanned same-dir linked CSS (file:// sheets are opaque
+      // origins in-page); remote sheets it couldn't scan keep the gate quiet.
+      let focusRuleFound = arg.focusInExternalCss;
+      const unreadableRemote = arg.remoteCssPresent;
+      for (const sheet of document.styleSheets) {
+        if (focusRuleFound) break;
+        let rules = null;
+        try { rules = sheet.cssRules; } catch { continue; } // linked file:// sheet — covered by the Node-side scan
+        if (!rules) continue;
+        for (const r of rules) {
+          // cssText of grouping rules (@media etc.) includes child rule text.
+          if ((r.cssText || '').includes(':focus')) { focusRuleFound = true; break; }
+        }
+      }
+      const allOutlineNone = focusables.every((el) => {
+        const st = getComputedStyle(el);
+        return st.outlineStyle === 'none' || parseFloat(st.outlineWidth) === 0;
+      });
+      if (!focusRuleFound && !unreadableRemote && allOutlineNone) {
+        issues.push({
+          kind: 'no-focus-style',
+          severity: 'warn',
+          focusableCount: focusables.length,
+        });
+      }
+    }
+  }
+
   return issues;
-}, crossSkillData);
+}, { crossSkill: crossSkillData, focusInExternalCss, remoteCssPresent });
 
 // ---------- 13) Brand-presence (pixel count in top hero region) ----------
 // Root issue caught 2026-04-21: sage-design nav was a warm yellow (ember-
@@ -1116,6 +1200,47 @@ if (skillId) {
       thresholdPct: +(sig.threshold * 100).toFixed(2),
     });
   }
+}
+
+// ---------- 15) Performance — LCP / CLS (local render, indicative only) ----------
+// Buffered PerformanceObserver readout taken ≥2s after goto (500ms settle
+// above + 1500ms here), so late layout shifts are counted. Numbers from a
+// file:// or localhost render are NOT field data — thresholds are loose on
+// purpose (LCP > 4000ms, CLS > 0.1) so only egregious regressions fire and
+// CI timing jitter never does. If the API is unavailable in this headless
+// build, skip silently rather than fail the whole audit.
+try {
+  await page.waitForTimeout(1500);
+  const perf = await page.evaluate(() => new Promise((done) => {
+    const out = { lcp: null, cls: null };
+    try {
+      let lcp = 0;
+      let cls = 0;
+      const lcpObs = new PerformanceObserver((list) => {
+        for (const e of list.getEntries()) lcp = Math.max(lcp, e.startTime);
+      });
+      lcpObs.observe({ type: 'largest-contentful-paint', buffered: true });
+      const clsObs = new PerformanceObserver((list) => {
+        for (const e of list.getEntries()) { if (!e.hadRecentInput) cls += e.value; }
+      });
+      clsObs.observe({ type: 'layout-shift', buffered: true });
+      // Buffered entries arrive asynchronously — give observers one beat.
+      setTimeout(() => {
+        lcpObs.disconnect();
+        clsObs.disconnect();
+        done({ lcp: lcp > 0 ? Math.round(lcp) : null, cls: +cls.toFixed(4) });
+      }, 300);
+    } catch { done(out); }
+  }));
+  if (perf.lcp !== null && perf.lcp > 4000) {
+    findings.push({ kind: 'perf-lcp', severity: 'warn', lcp: perf.lcp });
+  }
+  if (perf.cls !== null && perf.cls > 0.1) {
+    findings.push({ kind: 'perf-cls', severity: 'warn', cls: perf.cls });
+  }
+} catch {
+  // PerformanceObserver / evaluate failed — perf numbers are advisory, never
+  // worth killing the audit over.
 }
 
 await browser.close();
@@ -1241,6 +1366,22 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'no-brand-presence') {
     console.log(
       `  [${i.severity}] brand not visible in top region: "${i.brandName}" covers only ${i.coveragePct}% of top 1440×500 (threshold ${i.thresholdPct}%) — ${i.skill}-design page should carry its signature color in hero/nav so readers recognise the brand at first glance`
+    );
+  } else if (i.kind === 'no-focus-style') {
+    console.log(
+      `  [${i.severity}] no visible focus style: ${i.focusableCount} focusable element(s) but no :focus / :focus-visible rule in any stylesheet and resting outline is none — keyboard users can't see where they are; add a :focus-visible outline`
+    );
+  } else if (i.kind === 'positive-tabindex') {
+    console.log(
+      `  [${i.severity}] positive tabindex on ${i.count} element(s): ${i.sample.join(', ')} — tabindex > 0 hijacks natural tab order; use tabindex="0" + DOM order instead`
+    );
+  } else if (i.kind === 'perf-lcp') {
+    console.log(
+      `  [${i.severity}] LCP ${i.lcp}ms exceeds 4000ms (local render, indicative only) — largest content paints late; check render-blocking fonts/scripts and oversized hero assets`
+    );
+  } else if (i.kind === 'perf-cls') {
+    console.log(
+      `  [${i.severity}] CLS ${i.cls} exceeds 0.1 (local render, indicative only) — layout shifts after load; reserve space for late-loading elements (explicit dimensions, font fallback metrics)`
     );
   }
 }

@@ -4,11 +4,16 @@ Unified structural verifier for all design skills.
 
 Usage:
   python3 skills/design-review/scripts/verify.py [--skill=<name>] [--css=<path>]...
-                                                  [--allow-monolingual] <html-path> [...]
+                                                  [--allow-monolingual]
+                                                  [--force-public] <html-path> [...]
 
   --allow-monolingual (alias --internal) skips the bilingual-page rule for
   internal docs. Without it, HTML under /docs/ or /references/canonical/ must
   have lang-toggle + lang-en + lang-zh spans (see cross-skill-rules.md §G).
+
+  --force-public runs the SEO meta check (check 9) even when the path is not
+  a public one (docs/ or references/canonical/). Test/fixture use only — it
+  does NOT enable the bilingual or self-diff public-path rules.
 
 If --skill is omitted, the script auto-detects the skill by scanning the HTML
 for a `<link>` to one of {anthropic|apple|ember|sage}.css. Pass --skill when
@@ -27,6 +32,8 @@ Exit code:
   1 — at least one check failed (every failure is printed)
   2 — bad CLI (no files / unknown skill / ambiguous autodetect)
 
+Warnings (check 9) are printed but NEVER affect the exit code.
+
 Checks:
   1. No `[placeholder]` brackets leaked into HTML
   2. <!doctype html> + viewport meta present
@@ -34,6 +41,11 @@ Checks:
   4. Every `class="{prefix}-*"` token is defined somewhere in the CSS union
   5. <svg> tag balance
   6. Container modifier never used without its base class (BEM bug)
+  7. Bilingual toggle on public pages (lang-toggle / lang-en / lang-zh)
+  8. Half-width ASCII punctuation inside lang-zh spans · self-diff block
+  9. SEO meta on public pages (warn-only): non-empty <title>, meta
+     description 50-160 chars, og:title + og:description present
+     (viewport is already a hard check in 2)
 """
 from __future__ import annotations
 import os
@@ -185,10 +197,14 @@ def check_file(
     forced_skill: str | None,
     extra_css: list[str],
     allow_monolingual: bool = False,
-) -> list[str]:
+    force_public: bool = False,
+) -> tuple[list[str], list[str]]:
+    """Returns (errors, warnings). Errors fail the run; warnings are
+    informational only and never affect the exit code."""
     errors: list[str] = []
+    warnings: list[str] = []
     if not os.path.exists(path):
-        return [f"{path}: not found"]
+        return [f"{path}: not found"], warnings
     html = open(path, encoding="utf-8").read()
 
     skill = forced_skill or autodetect_skill(html)
@@ -197,9 +213,9 @@ def check_file(
             f"{path}: cannot auto-detect skill from HTML "
             f"(no unique link to one of anthropic.css/apple.css/ember.css/sage.css). "
             f"Pass --skill=<name> explicitly."
-        ]
+        ], warnings
     if skill not in SKILLS:
-        return [f"{path}: unknown --skill '{skill}'. Valid: {sorted(SKILLS)}"]
+        return [f"{path}: unknown --skill '{skill}'. Valid: {sorted(SKILLS)}"], warnings
 
     cfg = SKILLS[skill]
     prefix = cfg["prefix"]
@@ -412,16 +428,56 @@ def check_file(
             f"Han glyphs. See known-bugs.md §1.22."
         )
 
-    return errors
+    # 9. SEO meta — public pages only (or --force-public for fixtures).
+    # WARN-ONLY: search engines and link unfurlers read these, but a missing
+    # og tag never blocks shipping the way a broken layout does. Viewport is
+    # already a hard check (2), so it isn't repeated here.
+    if public_path or force_public:
+        title_m = re.search(r"<title[^>]*>(.*?)</title>", html, re.I | re.DOTALL)
+        if not title_m or not title_m.group(1).strip():
+            warnings.append(f"{path}: SEO — missing or empty <title>")
+        desc_m = re.search(
+            r'<meta[^>]+name=["\']description["\'][^>]*content=["\']([^"\']*)["\']',
+            html,
+            re.I,
+        ) or re.search(
+            # attribute order flipped: content= before name=
+            r'<meta[^>]+content=["\']([^"\']*)["\'][^>]*name=["\']description["\']',
+            html,
+            re.I,
+        )
+        if not desc_m:
+            warnings.append(f'{path}: SEO — missing <meta name="description">')
+        else:
+            desc_len = len(desc_m.group(1).strip())
+            if not 50 <= desc_len <= 160:
+                warnings.append(
+                    f"{path}: SEO — meta description is {desc_len} chars "
+                    f"(recommended 50-160)"
+                )
+        og_missing = [
+            prop
+            for prop in ("og:title", "og:description")
+            if not re.search(
+                r'<meta[^>]+property=["\']' + re.escape(prop) + r'["\']', html, re.I
+            )
+        ]
+        if og_missing:
+            warnings.append(
+                f"{path}: SEO — missing Open Graph tags: {', '.join(og_missing)}"
+            )
+
+    return errors, warnings
 
 
 def parse_args(
     argv: list[str],
-) -> tuple[str | None, list[str], list[str], bool]:
+) -> tuple[str | None, list[str], list[str], bool, bool]:
     skill: str | None = None
     files: list[str] = []
     extra_css: list[str] = []
     allow_monolingual = False
+    force_public = False
     for a in argv:
         if a.startswith("--skill="):
             skill = a.split("=", 1)[1].strip()
@@ -429,16 +485,20 @@ def parse_args(
             extra_css.append(a.split("=", 1)[1].strip())
         elif a in ("--allow-monolingual", "--internal"):
             allow_monolingual = True
+        elif a == "--force-public":
+            force_public = True
         elif a in ("-h", "--help"):
             print(__doc__)
             sys.exit(0)
         else:
             files.append(a)
-    return skill, files, extra_css, allow_monolingual
+    return skill, files, extra_css, allow_monolingual, force_public
 
 
 def main() -> int:
-    skill, files, extra_css, allow_monolingual = parse_args(sys.argv[1:])
+    skill, files, extra_css, allow_monolingual, force_public = parse_args(
+        sys.argv[1:]
+    )
     if not files:
         print(__doc__)
         return 2
@@ -447,12 +507,19 @@ def main() -> int:
         return 2
 
     failures: list[str] = []
+    warnings: list[str] = []
     for path in files:
-        failures.extend(check_file(path, skill, extra_css, allow_monolingual))
+        errs, warns = check_file(
+            path, skill, extra_css, allow_monolingual, force_public
+        )
+        failures.extend(errs)
+        warnings.extend(warns)
     if failures:
         print("design-review verify: FAIL")
         for line in failures:
             print(f"  • {line}")
+        for line in warnings:
+            print(f"  ⚠ {line}  [warn, non-blocking]")
         print(
             f"\n{len(failures)} issue(s). "
             f"See skills/design-review/references/known-bugs.md for the defense catalogue."
@@ -460,6 +527,8 @@ def main() -> int:
         return 1
     label = f"--skill={skill}" if skill else "auto-detected skill"
     print(f"design-review verify: OK — {len(files)} file(s) passed ({label})")
+    for line in warnings:
+        print(f"  ⚠ {line}  [warn, non-blocking]")
     return 0
 
 

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BAD anthropic-flavoured page — focus styles stripped + positive tabindex</title>
+<!-- Standalone on purpose: links no skill CSS, so the only stylesheet is the
+     inline block below. It suppresses outline on every focusable and defines
+     zero :focus / :focus-visible rules — a keyboard user tabbing through gets
+     no visible focus indicator. One link also carries tabindex="3", which
+     hijacks the natural tab order. -->
+<style>
+  body { margin: 0; font-family: Georgia, serif; background: #faf9f5; color: #141413; }
+  nav { display: flex; gap: 24px; padding: 20px 48px; background: #ffffff; }
+  a, button { outline: none; color: #141413; text-decoration: none; font-size: 16px; }
+  button { background: #141413; color: #ffffff; border: 0; padding: 10px 22px; border-radius: 8px; }
+  main { max-width: 720px; margin: 48px auto; padding: 0 24px; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="#features">Features</a>
+  <a href="#pricing" tabindex="3">Pricing</a>
+  <a href="#docs">Docs</a>
+  <button type="button">Get started</button>
+</nav>
+<main>
+  <h1>Focus styles stripped</h1>
+  <p>Every focusable element on this page rests at outline:none and the page
+  defines no :focus or :focus-visible rule anywhere. Tab through it: nothing
+  lights up. The audit should warn "no visible focus style" and flag the
+  positive tabindex above.</p>
+</main>
+</body>
+</html>

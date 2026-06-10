@@ -208,7 +208,8 @@ function parseVerify(r) {
     const trimmed = line.trim();
     // verify.py emits failures as bullet lines: "  • <message>"
     if (trimmed.startsWith('•') || trimmed.startsWith('· ') || /^\s*•/.test(line)) {
-      findings.push({ severity: 'error', message: trimmed.replace(/^[•·]\s*/, '') });
+      const message = trimmed.replace(/^[•·]\s*/, '');
+      findings.push({ severity: 'error', kind: verifyKind(message), message });
     }
   }
   return {
@@ -231,13 +232,98 @@ function parseVisual(r) {
   for (const line of lines) {
     // visual-audit emits: "  [error] ..." or "  [warn] ..."
     const m = /\s*\[(error|warn)\]\s+(.+)$/.exec(line);
-    if (m) findings.push({ severity: m[1], message: m[2].trim() });
+    if (m) {
+      const message = m[2].trim();
+      findings.push({ severity: m[1], kind: visualKind(message), message });
+    }
   }
   return {
     exitCode: r.status,
     findings,
     raw: text.trim(),
   };
+}
+
+// ---------- kind classification ----------
+// aggregate every finding's kind across all results → sorted descending list
+// [{ kind, error, warn }, …]. Single source for both report formats.
+function aggregateByKind(results) {
+  const map = new Map();
+  for (const r of results) {
+    const all = [...r.verify.findings, ...(r.visual ? r.visual.findings : [])];
+    for (const f of all) {
+      const kind = f.kind || 'other';
+      const prev = map.get(kind) ?? { error: 0, warn: 0 };
+      map.set(kind, {
+        error: prev.error + (f.severity === 'error' ? 1 : 0),
+        warn: prev.warn + (f.severity === 'warn' ? 1 : 0),
+      });
+    }
+  }
+  return [...map.entries()]
+    .map(([kind, cnt]) => ({ kind, ...cnt }))
+    .sort((a, b) => (b.error + b.warn) - (a.error + a.warn) || a.kind.localeCompare(b.kind));
+}
+
+// verify.py prints plain strings ("<path>: <message>") with no kind field.
+// Classify by stable message prefixes/fragments; each rule maps 1:1 to one
+// `errors.append(...)` site in verify.py. Unmatched → verify:other.
+const VERIFY_KIND_RULES = [
+  [/placeholder strings:/, 'verify:placeholder'],
+  [/missing <!doctype html>/, 'verify:doctype'],
+  [/missing viewport meta/, 'verify:viewport'],
+  [/hero uses narrow container|hero inner element lacks/, 'verify:hero-container'],
+  [/--css path not found|no CSS source found/, 'verify:css-source'],
+  [/undefined class '/, 'verify:undefined-class'],
+  [/unbalanced <svg> tags/, 'verify:svg-balance'],
+  [/used without base '/, 'verify:container-base-modifier'],
+  [/missing bilingual support/, 'verify:bilingual-toggle'],
+  [/design-review:self-diff|self-diff block present but incomplete/, 'verify:self-diff'],
+  [/lang-zh body contains half-width/, 'verify:cjk-punctuation'],
+];
+
+function verifyKind(msg) {
+  for (const [re, kind] of VERIFY_KIND_RULES) {
+    if (re.test(msg)) return kind;
+  }
+  return 'verify:other';
+}
+
+// visual-audit.mjs has a real per-issue `kind` field but only prints formatted
+// text. Recover the kind from each format's stable lead-in (the part before
+// any interpolation). Keep this list in sync with visual-audit's print block.
+const VISUAL_KIND_RULES = [
+  [/^contrast \d/, 'contrast'],
+  [/^hero diagram rendered at only/, 'diagram-narrow'],
+  [/^diagram smallest text renders at/, 'diagram-tiny-text'],
+  [/^svg-letterbox in/, 'svg-letterbox'],
+  [/^dense diagram cramped:/, 'dense-diagram-cramped'],
+  [/^diagram-monochrome:/, 'diagram-monochrome'],
+  [/^text-desert:/, 'text-desert'],
+  [/^orphan figure/, 'orphan-figure'],
+  [/^<figure> without <figcaption>/, 'figure-no-caption'],
+  [/^SVG text overlap in/, 'svg-text-overlap'],
+  [/^text-overlap \(/, 'text-overlap'],
+  [/^svg-shape-over-text in/, 'svg-shape-over-text'],
+  [/^\d+ <h1> elements on the page/, 'multiple-h1'],
+  [/^page has no <h1>/, 'no-h1'],
+  [/^heading level skipped/, 'heading-skip'],
+  [/^<img> without alt/, 'img-no-alt'],
+  [/^<a> with no text/, 'link-no-text'],
+  [/^hollow card in/, 'hollow-card'],
+  [/^asymmetric 3-col grid/, 'asymmetric-first-col-hero'],
+  [/^SVG text colour too close/, 'svg-text-on-same-colour'],
+  [/^italic overuse:/, 'italic-overuse'],
+  [/^cross-skill smell:/, 'cross-skill-smell'],
+  [/full-width saturated band/, 'saturated-band'],
+  [/^brand not visible in top region/, 'no-brand-presence'],
+];
+
+function visualKind(msg) {
+  for (const [re, kind] of VISUAL_KIND_RULES) {
+    if (re.test(msg)) return kind;
+  }
+  return 'visual:other';
 }
 
 // ---------- main loop ----------
@@ -254,7 +340,7 @@ for (const htmlAbs of finalTargets) {
   if (runVisual) {
     try { visual = runVisualAudit(htmlAbs); }
     catch (e) {
-      visual = { exitCode: -1, findings: [{ severity: 'error', message: `visual-audit crashed: ${e.message}` }], raw: String(e) };
+      visual = { exitCode: -1, findings: [{ severity: 'error', kind: 'visual:crash', message: `visual-audit crashed: ${e.message}` }], raw: String(e) };
     }
   }
 
@@ -283,19 +369,28 @@ const elapsedSec = ((Date.now() - startMs) / 1000).toFixed(1);
 const totalErr = results.reduce((s, r) => s + r.errors, 0);
 const totalWarn = results.reduce((s, r) => s + r.warns, 0);
 const failedFiles = results.filter(r => r.overallFail).length;
+const byKind = aggregateByKind(results);
 
 // ---------- report writers ----------
 const mdPath = join(outDir, `audit-report-${ts}.md`);
 const jsonPath = join(outDir, `audit-report-${ts}.json`);
 
-writeFileSync(mdPath, renderMarkdown(results, { skill, runVisual, strict, elapsedSec, totalErr, totalWarn, failedFiles, repoAbs }));
+writeFileSync(mdPath, renderMarkdown(results, { skill, runVisual, strict, elapsedSec, totalErr, totalWarn, failedFiles, repoAbs, byKind }));
 writeFileSync(jsonPath, JSON.stringify({
   generated: new Date().toISOString(),
   skill: skill || 'auto',
   visual: runVisual,
   strict,
   repo: repoAbs,
-  totals: { files: results.length, failed: failedFiles, errors: totalErr, warnings: totalWarn },
+  totals: {
+    files: results.length,
+    failed: failedFiles,
+    errors: totalErr,
+    warnings: totalWarn,
+    // kind → issue count across every file, descending. Feeds learning-loop's
+    // "which check fires most" distribution without re-parsing per-file findings.
+    byKind: Object.fromEntries(byKind.map(k => [k.kind, k.error + k.warn])),
+  },
   results: results.map(r => ({
     path: r.path,
     errors: r.errors,
@@ -345,22 +440,16 @@ function renderMarkdown(results, meta) {
   });
   lines.push('');
 
-  // Top failure modes (across all files)
-  const histogram = new Map();
-  for (const r of results) {
-    for (const f of r.verify.findings) bumpHistogram(histogram, classify(f.message), f.severity);
-    if (r.visual) for (const f of r.visual.findings) bumpHistogram(histogram, classify(f.message), f.severity);
-  }
-  const top = [...histogram.entries()]
-    .sort((a, b) => (b[1].error + b[1].warn) - (a[1].error + a[1].warn))
-    .slice(0, 10);
-  if (top.length > 0) {
+  // Top failure modes — per-kind distribution across all files, descending.
+  // verify findings carry a `verify:*` kind (message-prefix classification),
+  // visual-audit findings carry the check's own kind name.
+  if (meta.byKind.length > 0) {
     lines.push('## Top failure modes');
     lines.push('');
-    lines.push('| Issue category | error | warn | total |');
+    lines.push('| Kind | error | warn | total |');
     lines.push('|---|---:|---:|---:|');
-    for (const [cat, cnt] of top) {
-      lines.push(`| ${cat} | ${cnt.error} | ${cnt.warn} | ${cnt.error + cnt.warn} |`);
+    for (const k of meta.byKind) {
+      lines.push(`| \`${k.kind}\` | ${k.error} | ${k.warn} | ${k.error + k.warn} |`);
     }
     lines.push('');
   }
@@ -401,38 +490,4 @@ function renderMarkdown(results, meta) {
   }
 
   return lines.join('\n');
-}
-
-function bumpHistogram(map, cat, sev) {
-  if (!map.has(cat)) map.set(cat, { error: 0, warn: 0 });
-  const entry = map.get(cat);
-  if (sev === 'error') entry.error++;
-  else entry.warn++;
-}
-
-// classify a finding message into a coarse failure-mode bucket
-function classify(msg) {
-  const m = msg.toLowerCase();
-  if (m.includes('contrast')) return 'contrast (WCAG)';
-  if (m.includes('placeholder')) return 'placeholder leaked';
-  if (m.includes('doctype') || m.includes('viewport')) return 'doctype/viewport';
-  if (m.includes('container') && m.includes('hero')) return 'hero container';
-  if (m.includes('container') && (m.includes('base') || m.includes('modifier'))) return 'container base+modifier';
-  if (m.includes('undefined') && m.includes('class')) return 'undefined CSS class';
-  if (m.includes('svg') && m.includes('balance')) return 'svg tag balance';
-  if (m.includes('hero diagram')) return 'hero diagram sizing';
-  if (m.includes('orphan')) return 'orphan figure';
-  if (m.includes('figcaption') || m.includes('figure-no-caption')) return 'figure missing caption';
-  if (m.includes('svg text')) return 'svg text rendering';
-  if (m.includes('h1')) return 'h1 count';
-  if (m.includes('heading')) return 'heading skip';
-  if (m.includes('alt')) return 'img alt';
-  if (m.includes('hollow card')) return 'hollow card';
-  if (m.includes('asymmetric')) return 'asymmetric grid';
-  if (m.includes('italic')) return 'italic overuse';
-  if (m.includes('cross-skill') || m.includes('foreign')) return 'cross-skill smell';
-  if (m.includes('brand')) return 'brand presence';
-  if (m.includes('lang-zh') || m.includes('half-width')) return 'i18n punctuation';
-  if (m.includes('self-diff') || m.includes('design-review:self-diff')) return 'self-diff missing';
-  return 'other';
 }

@@ -37,6 +37,17 @@
 #   --plan --skill=X --page=Y
 #                      Planning mode — skip all gates, generate sprint-contract.md
 #                      for an upcoming page generation.
+#   --distill --skill=X --page=Y [--corpus=<dir>] [--out=<dir>]
+#                      Harness component 08 · library-grower. Skip all gates and
+#                      distill a candidate canonical from ≥5 successful
+#                      same-type pages (all 4 gates passed, critic ≥ 88).
+#                      --corpus defaults to corpus/<skill>/<page>/ under the
+#                      sky-skills root. If the corpus holds fewer than 5 .html
+#                      files, reports "insufficient samples" and exits 1
+#                      instead of running. Output (candidate.md +
+#                      provenance.json) is a DRAFT for human review — the
+#                      grower proposes, it never ships into the canonical
+#                      library by itself.
 #   --audit            Audit mode — batch-check existing HTML (file or directory)
 #                      with verify + visual-audit, no screenshot, do NOT exit on
 #                      first error, aggregate results into one report.
@@ -80,6 +91,8 @@ CRITIC=""
 MULTI_CRITIC=""
 LEARN=""
 PLAN=""
+DISTILL=""
+CORPUS=""
 AUDIT=""
 AUDIT_FORWARD=()
 CSS_ARGS=()
@@ -97,11 +110,13 @@ for arg in "$@"; do
     --multi-critic) MULTI_CRITIC=1 ;;
     --learn)        LEARN=1 ;;
     --plan)    PLAN=1 ;;
+    --distill) DISTILL=1 ;;
+    --corpus=*) CORPUS="${arg#--corpus=}" ;;
     --audit)   AUDIT=1 ;;
     --max=*|--exclude=*|--include=*|--no-visual|--allow-monolingual|--internal)
                AUDIT_FORWARD+=("$arg") ;;
     -h|--help)
-      sed -n '2,64p' "$0" | sed -E 's|^# ?||'
+      awk 'NR < 2 { next } /^set -eu/ { exit } { sub(/^# ?/, ""); print }' "$0"
       exit 0
       ;;
     --*)
@@ -120,6 +135,30 @@ if [ -n "$PLAN" ]; then
   fi
   exec node "$SKY_ROOT/skills/design-review/scripts/sprint-contract.mjs" \
     "--skill=$SKILL" "--page=$PAGE"
+fi
+
+# ---------- Distill mode (component 08 · library-grower, skip all gates) ----------
+if [ -n "$DISTILL" ]; then
+  if [ -z "$SKILL" ] || [ -z "$PAGE" ]; then
+    echo "--distill requires both --skill=<name> and --page=<type>" >&2
+    exit 2
+  fi
+  [ -z "$CORPUS" ] && CORPUS="$SKY_ROOT/corpus/$SKILL/$PAGE"
+  MIN_SAMPLES=5  # keep in sync with library-grower.mjs
+  sample_count=0
+  if [ -d "$CORPUS" ]; then
+    sample_count="$(find "$CORPUS" -maxdepth 1 -name '*.html' | wc -l | tr -d ' ')"
+  fi
+  if [ "$sample_count" -lt "$MIN_SAMPLES" ]; then
+    echo "✗ insufficient samples: $sample_count .html in $CORPUS (need ≥ $MIN_SAMPLES)" >&2
+    echo "  library-grower distills from $MIN_SAMPLES+ successful same-type pages" >&2
+    echo "  (each passed all 4 gates with critic ≥ 88). Collect more successful" >&2
+    echo "  pages first, or point at another directory via --corpus=<dir>." >&2
+    exit 1
+  fi
+  distill_args=("--skill=$SKILL" "--page=$PAGE" "--corpus=$CORPUS")
+  [ -n "$OUT_DIR" ] && distill_args+=("--out=$OUT_DIR")
+  exec node "$SKY_ROOT/skills/design-review/scripts/library-grower.mjs" "${distill_args[@]}"
 fi
 
 # ---------- Audit mode (batch verify + visual-audit, aggregate report) ----------
@@ -146,6 +185,7 @@ fi
 if [ "${#HTMLS[@]}" -eq 0 ]; then
   echo "usage: bin/design-review [--critic] [--repo=<path>] [--skill=<name>] [--css=<path>]... <html> [...]" >&2
   echo "       bin/design-review --plan --skill=<name> --page=<type>" >&2
+  echo "       bin/design-review --distill --skill=<name> --page=<type> [--corpus=<dir>]" >&2
   exit 2
 fi
 

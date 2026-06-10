@@ -10,7 +10,10 @@
 // Usage:
 //   node skills/design-review/scripts/sprint-contract.mjs \
 //     --skill=<anthropic|apple|ember|sage> \
-//     --page=<pricing|landing|docs-home|feature-deep>
+//     --page=<pricing|landing|docs-home|feature-deep|any-other-type>
+//
+// Unknown page-types are accepted: the contract borrows structure from
+// the nearest canonical (FALLBACK_MAP below) and is stamped LOW-CONFIDENCE.
 //
 // Exit: 0 OK, 2 bad CLI, 1 missing canonical.
 
@@ -24,6 +27,33 @@ const REPO_ROOT = resolve(__dirname, '../../..');
 
 const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage'];
 const VALID_PAGES = ['pricing', 'landing', 'docs-home', 'feature-deep'];
+
+// Unknown page-types are not rejected — they borrow structure from the
+// nearest canonical (first regex match wins; default is landing). The
+// contract is then stamped LOW-CONFIDENCE: structural MUSTs become
+// defaults, while §1b diagram density / brand / §G bilingual / typography
+// stay binding as usual.
+const FALLBACK_MAP = [
+  [/dashboard|console|admin|panel/i, 'docs-home'],
+  [/form|signup|checkout|settings/i, 'pricing'],
+  [/article|blog|post|news/i, 'blog-index'],
+];
+const FALLBACK_DEFAULT = 'landing';
+
+async function exists(path) {
+  try { await stat(path); return true; }
+  catch { return false; }
+}
+
+// Resolve an unknown page-type to the structurally nearest canonical that
+// actually exists for this skill. Returns the borrowed page-type name.
+async function resolveFallback(skill, page) {
+  const matched = FALLBACK_MAP.find(([re]) => re.test(page));
+  const candidate = matched ? matched[1] : FALLBACK_DEFAULT;
+  const candidateHtml = resolve(
+    REPO_ROOT, `skills/${skill}-design/references/canonical/${candidate}.html`);
+  return (await exists(candidateHtml)) ? candidate : FALLBACK_DEFAULT;
+}
 
 // Per-skill brand presence requirements (mirror of visual-audit's
 // SKILL_SIGNATURES but in contract form — what the generator must ensure
@@ -100,7 +130,11 @@ sprint-contract.mjs — generate a contract for a new page
 Usage:
   node skills/design-review/scripts/sprint-contract.mjs \\
     --skill=<anthropic|apple|ember|sage> \\
-    --page=<pricing|landing|docs-home|feature-deep>
+    --page=<pricing|landing|docs-home|feature-deep|any-other-type>
+
+Unknown page-types fall back to the nearest canonical (dashboard→docs-home,
+form→pricing, article/blog→blog-index, otherwise landing) and the contract
+is stamped LOW-CONFIDENCE — structural MUSTs become defaults.
 
 Output: markdown to stdout. Pipe into generator prompt or save.
 
@@ -116,15 +150,32 @@ async function main() {
     console.error(`--skill must be one of: ${VALID_SKILLS.join(', ')}`);
     return 2;
   }
-  if (!VALID_PAGES.includes(args.page)) {
-    console.error(`--page must be one of: ${VALID_PAGES.join(', ')}`);
+  if (!args.page) {
+    console.error(`--page is required (known types: ${VALID_PAGES.join(', ')}; unknown types fall back to the nearest canonical)`);
     return 2;
   }
 
   const skill = args.skill;
   const page = args.page;
-  const canonicalHtml = `skills/${skill}-design/references/canonical/${page}.html`;
-  const canonicalMd = `skills/${skill}-design/references/canonical/${page}.md`;
+
+  // Resolve which canonical backs this contract. Three cases:
+  //   1. page is a known type           → its own canonical, full confidence
+  //   2. unknown, but canonical exists  → its own canonical, full confidence
+  //      (covers blog-index / comparison / product-detail etc.)
+  //   3. unknown, no canonical          → borrow via FALLBACK_MAP, LOW-CONFIDENCE
+  const ownHtml = resolve(
+    REPO_ROOT, `skills/${skill}-design/references/canonical/${page}.html`);
+  const known = VALID_PAGES.includes(page) || await exists(ownHtml);
+  const borrowedFrom = known ? null : await resolveFallback(skill, page);
+  const structuralPage = borrowedFrom ?? page;
+  if (borrowedFrom) {
+    console.error(
+      `note: page-type "${page}" has no canonical; borrowing structure from ` +
+      `"${borrowedFrom}" (contract is stamped LOW-CONFIDENCE).`);
+  }
+
+  const canonicalHtml = `skills/${skill}-design/references/canonical/${structuralPage}.html`;
+  const canonicalMd = `skills/${skill}-design/references/canonical/${structuralPage}.md`;
 
   // Confirm canonical exists (non-fatal if md missing; fatal if html missing).
   try { await stat(resolve(REPO_ROOT, canonicalHtml)); }
@@ -137,24 +188,43 @@ async function main() {
   const isPublic = true; // docs/ and canonical/ paths are always public per §G.
 
   const contract = renderContract({
-    skill, page, canonicalHtml, canonicalMd, brand, mdBody, isPublic,
+    skill, page, canonicalHtml, canonicalMd, brand, mdBody, isPublic, borrowedFrom,
   });
   console.log(contract);
   return 0;
 }
 
-function renderContract({ skill, page, canonicalHtml, canonicalMd, brand, mdBody, isPublic }) {
-  return `# Sprint contract · ${skill}-design · ${page}
+function renderContract({ skill, page, canonicalHtml, canonicalMd, brand, mdBody, isPublic, borrowedFrom }) {
+  const lowConfidenceBanner = borrowedFrom ? `
+> **LOW-CONFIDENCE: structure borrowed from ${borrowedFrom}; treat
+> structural MUSTs as defaults, not law.** There is no canonical for
+> "${page}" yet — §0/§1 below describe the nearest existing page-type
+> (${borrowedFrom}). Adapt or discard its section layout freely where
+> the content demands it. Everything else in this contract (diagram
+> density §1b, brand §2, italic §3, cross-skill §4, bilingual §5,
+> typography §6, color §7, gates §8) is generic and stays binding.
+` : '';
+  const structuralHeading = borrowedFrom
+    ? `## 1. Structural DEFAULT (borrowed from ${borrowedFrom} — LOW-CONFIDENCE)`
+    : '## 1. Structural MUST';
+  const structuralIntro = borrowedFrom
+    ? `These are extracted from the ${borrowedFrom} canonical.md "7 decisions"
+section. They are starting points, not requirements — keep what fits
+"${page}", replace what does not:`
+    : `These are extracted from the canonical.md "7 decisions" section. Follow
+the structure, adapt the content:`;
+  return `# Sprint contract · ${skill}-design · ${page}${borrowedFrom ? ' (LOW-CONFIDENCE)' : ''}
 
 > This contract tells you what MUST be true of the page you're about to
 > generate. Read the canonical first. Then write. Then run the three gates.
 > If you skip any step, the page will fail review and have to be redone —
 > which is more work than following the contract.
-
+${lowConfidenceBanner}
 ## 0. Files you MUST read before touching HTML
 
-1. \`${canonicalHtml}\` — the reference implementation. This is the gold
-   standard of a "${skill}-design ${page}" page.
+1. \`${canonicalHtml}\` — the reference implementation. ${borrowedFrom
+    ? `The closest existing canonical to "${page}" (it is the ${borrowedFrom} page); read it for voice and craft, not as a structural spec.`
+    : `This is the gold standard of a "${skill}-design ${page}" page.`}
 2. \`${canonicalMd}\` — 6-8 design decisions behind the canonical (below).
 3. \`skills/design-review/references/cross-skill-rules.md\` — A-K rules
    that apply to all skills.
@@ -162,10 +232,9 @@ function renderContract({ skill, page, canonicalHtml, canonicalMd, brand, mdBody
 
 Do not skim. The canonical exists so you don't re-invent the voice.
 
-## 1. Structural MUST
+${structuralHeading}
 
-These are extracted from the canonical.md "7 decisions" section. Follow
-the structure, adapt the content:
+${structuralIntro}
 
 ${mdBody.split('\n').filter(l => l.startsWith('### ')).slice(0, 8).map(l => '- ' + l.replace(/^###\s*\d+\.\s*/, '')).join('\n')}
 

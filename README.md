@@ -33,6 +33,7 @@ To preview locally: `python3 -m http.server 8000` from the repo root, then open 
 | [gated-dual-clone](skills/gated-dual-clone/) | EN/ZH | **Dual-repo git workflow bootstrapper (2-clone default · optional 3-clone with a reproducibility gate).** For projects where the upstream branch is protected (MR / PR only) and builds are heavy / pollute the tree. One command creates a `gateway` repo (push source) and a `satellite` repo (fetch-only build tree) — the build tree is physically unable to reach the remote. Three safety gates verified post-setup: protocol wall, explicit push-URL disable, pre-push hook. Add `--clean-verify-dir` for a 3rd clone on cold disk + a stamp-match pre-push gate that refuses to push anything a from-scratch full build hasn't OK'd. Full [design spec](docs/design-mr-gated-dual-repo.md) + [anthropic demo](demos/gated-dual-clone/index.html) |
 | [gated-dual-clone-audit](skills/gated-dual-clone-audit/) | EN/ZH | **Independent evaluator** paired with `gated-dual-clone`. Imports nothing from the generator — only reads the output topology and re-verifies the safety gates. Four tiers: structural (filesystem / hook / hardlink, 8 gates) → configuration (git config, 8 gates) → behavioural (safe `--dry-run` + direct hook invocation, 3 gates) → taste (LLM critic subagent, advisory). Pass `--clean-verify-dir` to auto-add 4 more gates (S9-S11 + C9 + B4) for 3-clone topologies. Run on demand, as a `pre-push` hook, or as a cron drift check. `--json` output feeds `learning-loop` for drift codification. Same generator / evaluator split as `design-review` |
 | [doc-review-loop](skills/doc-review-loop/) | ZH | **Two-agent review loop for serious decision documents.** A `writer` agent drafts the doc with code/data evidence; a `reviewer` agent then plays a strict no-context PM, challenges every claim, and returns issues bucketed A (blocker) / B (must-fix) / C (nice-to-have). The main thread feeds reviewer findings back to writer for v2, repeats up to 3 rounds. Each round's diff and reviewer questions are logged to `<doc>.review.log`. Trigger: ship-gate decisions, cross-team alignment docs, complex change justifications, "change vs. don't" rationales. **Don't trigger** for short READMEs, single-page memos, or personal notes — overhead doesn't pay off |
+| [design-planner](skills/design-planner/) | ZH | **Brief→sprint-contract planner** for the 4 design skills — expands a vague one-line brief into page-type + audience + section plan + hard quotas (diagram density / bilingual / brand) before any HTML is written, wrapping `bin/design-review --plan`. Unknown page-types borrow the nearest canonical structure and are stamped LOW-CONFIDENCE |
 
 ## What Are Claude Code Skills?
 
@@ -107,7 +108,8 @@ Five skills are detailed below. For the rest, each skill's own `SKILL.md` is the
 [design-review](skills/design-review/SKILL.md) ·
 [gated-dual-clone](skills/gated-dual-clone/SKILL.md) ·
 [gated-dual-clone-audit](skills/gated-dual-clone-audit/SKILL.md) ·
-[doc-review-loop](skills/doc-review-loop/SKILL.md)
+[doc-review-loop](skills/doc-review-loop/SKILL.md) ·
+[design-planner](skills/design-planner/SKILL.md)
 
 ### linux-kernel-dev
 

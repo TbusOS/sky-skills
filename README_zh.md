@@ -33,6 +33,7 @@
 | [gated-dual-clone](skills/gated-dual-clone/) | EN/ZH | **双仓库 git 工作流搭建器(2 仓默认 · 可选 3 仓加 reproducibility 关卡)。** 适用于上游分支受保护(必须走 MR / PR)、编译重会污染工作树的项目。一条命令创建 `gateway` 仓库(push 源) + `satellite` 仓库(只读编译树)——编译树在物理上够不到远程。搭完自动跑三道安全闸:协议墙、显式 push-URL 禁用、pre-push hook。加 `--clean-verify-dir` 启用第 3 仓(冷盘冷启动)+ stamp-match pre-push 关卡,没经从零全量编认证的 commit 推不出。完整[设计稿](docs/design-mr-gated-dual-repo.md) + [anthropic demo](demos/gated-dual-clone/index.html) |
 | [gated-dual-clone-audit](skills/gated-dual-clone-audit/) | EN/ZH | **独立评估器**,和 `gated-dual-clone` 配对。不 import 任何 generator 代码,只读成品拓扑 · 重验安全闸。四层:structural(文件系统 / hook / hardlink, 8 闸) → configuration(git-config, 8 闸) → behavioural(安全 `--dry-run` + 直接调 hook, 3 闸) → taste(LLM critic subagent · 不阻塞 exit code)。传 `--clean-verify-dir` 自动加 4 gate(S9-S11 + C9 + B4)覆盖 3 仓拓扑。可按需跑、作 `pre-push` hook 跑、作 cron drift 检查跑。`--json` 喂给 `learning-loop` 固化野外 drift。和 `design-review` 一样的 generator / evaluator 分离原则 |
 | [doc-review-loop](skills/doc-review-loop/) | ZH | **给认真的决策书做的双 agent 评审循环。** `writer` agent 拿代码 / 实测证据出稿，`reviewer` agent 扮演没接触过项目的严苛 PM，每个论断都质疑，问题分 A (阻塞) / B (必改) / C (建议改) 三档。主对话把 reviewer 问题清单喂回 writer 出 v2，最多 3 轮。每轮 diff + reviewer 问题留在 `<doc>.review.log`。触发：发版评审决策、跨团队对齐、复杂改动论证、改 vs 不改类问题。**不要触发** 简单 README、单页 memo、个人笔记 —— 杀鸡用牛刀 |
+| [design-planner](skills/design-planner/) | ZH | **brief→sprint contract 计划器**，服务 4 个设计 skill —— 在写任何 HTML 之前把一句模糊需求展开成 page-type + 受众 + section 计划 + 硬指标（图密度 / 双语 / 品牌），包装 `bin/design-review --plan`。没有 canonical 的 page-type 借最近的结构并标注 LOW-CONFIDENCE |
 
 ## 什么是 Claude Code Skills？
 
@@ -107,7 +108,8 @@ claude install github:TbusOS/sky-skills/skills/design-review
 [design-review](skills/design-review/SKILL.md) ·
 [gated-dual-clone](skills/gated-dual-clone/SKILL.md) ·
 [gated-dual-clone-audit](skills/gated-dual-clone-audit/SKILL.md) ·
-[doc-review-loop](skills/doc-review-loop/SKILL.md)
+[doc-review-loop](skills/doc-review-loop/SKILL.md) ·
+[design-planner](skills/design-planner/SKILL.md)
 
 ### linux-kernel-dev
 
