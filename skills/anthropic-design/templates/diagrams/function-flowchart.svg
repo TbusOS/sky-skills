@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 588" role="img" aria-label="Kernel driver probe flowchart: mydev_probe happy path through devm_kzalloc, ioremap, request_irq and chardev registration, with a gold error lane collecting -ENOMEM, PTR_ERR and iounmap cleanup into a shared return ret exit" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 588" role="img" aria-label="Kernel driver probe flowchart: mydev_probe happy path through devm_kzalloc, ioremap, request_irq and chardev registration, with a gold error lane collecting -ENOMEM errors and iounmap cleanup into a shared return ret exit" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
   <defs>
     <pattern id="ffc-dots" width="24" height="24" patternUnits="userSpaceOnUse">
       <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
@@ -112,7 +112,7 @@
   <!-- text: diamonds -->
   <g font-size="12" font-weight="600" fill="#141413" text-anchor="middle">
     <text x="472" y="128">ctx == NULL?</text>
-    <text x="472" y="232">IS_ERR(base)?</text>
+    <text x="472" y="232">base == NULL?</text>
     <text x="472" y="336">ret &lt; 0?</text>
   </g>
 
@@ -130,7 +130,7 @@
   <text x="658" y="84" font-size="11" font-weight="600" fill="#8a5a2a" letter-spacing="1">ERROR LANE</text>
   <text x="672" y="120" font-size="13" font-weight="600" fill="#141413">ret = -ENOMEM</text>
   <text x="672" y="140" font-size="11" fill="#6b6a5f">ctx alloc failed</text>
-  <text x="672" y="224" font-size="13" font-weight="600" fill="#141413">ret = PTR_ERR(base)</text>
+  <text x="672" y="224" font-size="13" font-weight="600" fill="#141413">ret = -ENOMEM</text>
   <text x="672" y="244" font-size="11" fill="#6b6a5f">mmio map failed</text>
   <text x="672" y="328" font-size="13" font-weight="600" fill="#141413">iounmap(base)</text>
   <text x="672" y="348" font-size="11" fill="#6b6a5f">unwind mmio mapping</text>

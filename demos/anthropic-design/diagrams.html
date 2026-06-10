@@ -683,7 +683,7 @@
     </p>
 
     <figure class="gal-fig">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 588" role="img" aria-label="Kernel driver probe flowchart: mydev_probe happy path through devm_kzalloc, ioremap, request_irq and chardev registration, with a gold error lane collecting -ENOMEM, PTR_ERR and iounmap cleanup into a shared return ret exit" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 588" role="img" aria-label="Kernel driver probe flowchart: mydev_probe happy path through devm_kzalloc, ioremap, request_irq and chardev registration, with a gold error lane collecting -ENOMEM errors and iounmap cleanup into a shared return ret exit" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
   <defs>
     <pattern id="ffc-dots" width="24" height="24" patternUnits="userSpaceOnUse">
       <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
@@ -796,7 +796,7 @@
   <!-- text: diamonds -->
   <g font-size="12" font-weight="600" fill="#141413" text-anchor="middle">
     <text x="472" y="128">ctx == NULL?</text>
-    <text x="472" y="232">IS_ERR(base)?</text>
+    <text x="472" y="232">base == NULL?</text>
     <text x="472" y="336">ret &lt; 0?</text>
   </g>
 
@@ -814,7 +814,7 @@
   <text x="658" y="84" font-size="11" font-weight="600" fill="#8a5a2a" letter-spacing="1">ERROR LANE</text>
   <text x="672" y="120" font-size="13" font-weight="600" fill="#141413">ret = -ENOMEM</text>
   <text x="672" y="140" font-size="11" fill="#6b6a5f">ctx alloc failed</text>
-  <text x="672" y="224" font-size="13" font-weight="600" fill="#141413">ret = PTR_ERR(base)</text>
+  <text x="672" y="224" font-size="13" font-weight="600" fill="#141413">ret = -ENOMEM</text>
   <text x="672" y="244" font-size="11" fill="#6b6a5f">mmio map failed</text>
   <text x="672" y="328" font-size="13" font-weight="600" fill="#141413">iounmap(base)</text>
   <text x="672" y="348" font-size="11" fill="#6b6a5f">unwind mmio mapping</text>
@@ -1412,7 +1412,7 @@
     <text x="448" y="114">object files</text>
     <text x="600" y="114">ELF + symbols</text>
     <text x="760" y="114">strip to binary</text>
-    <text x="932" y="114">self-extracting</text>
+    <text x="932" y="114">gzip-compressed</text>
     <text x="60" y="246">board source</text>
     <text x="212" y="246">devicetree compiler</text>
     <text x="404" y="246">flattened blob</text>
@@ -1600,12 +1600,12 @@
   <text x="1000" y="40" text-anchor="end" font-size="11" font-style="italic" fill="#8c8a7d">include/linux/kfifo.h &#183; size must be a power of two</text>
 
   <!-- out pointer (consumer, orange) above cell 3 -->
-  <text x="252" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="#c2613f">out (head)</text>
+  <text x="252" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="#c2613f">out (tail)</text>
   <text x="252" y="84" text-anchor="middle" font-size="11" fill="#6b6a5f">consumer reads</text>
   <path d="M244,92 L260,92 L252,104 Z" fill="#d97757"/>
 
   <!-- in pointer (producer, blue) above cell 10 -->
-  <text x="672" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="#4a7bab">in (tail)</text>
+  <text x="672" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="#4a7bab">in (head)</text>
   <text x="672" y="84" text-anchor="middle" font-size="11" fill="#6b6a5f">producer writes</text>
   <path d="M664,92 L680,92 L672,104 Z" fill="#6a9bcc"/>
 
@@ -1673,8 +1673,8 @@
   <text x="264" y="300" font-size="12" fill="#6b6a5f">smp_rmb() &#183; copy from buf[out &amp; mask] &#183; out += len</text>
 
   <!-- stat chip -->
-  <rect x="824" y="256" width="176" height="24" rx="12" fill="#d97757"/>
-  <text x="912" y="272" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">len = in &#8722; out = 7</text>
+  <rect x="824" y="256" width="176" height="24" rx="12" fill="#f7e4dc"/>
+  <text x="912" y="272" text-anchor="middle" font-size="12" font-weight="600" fill="#c2613f">len = in &#8722; out = 7</text>
 
   <!-- legend -->
   <rect x="824" y="292" width="12" height="12" rx="3" fill="#e2ecf5" stroke="#d8d4c8"/>
