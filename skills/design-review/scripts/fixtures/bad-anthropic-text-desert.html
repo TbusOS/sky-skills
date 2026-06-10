@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BAD anthropic page — 3000px of prose with no visual element</title>
+<link rel="stylesheet" href="../../../anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../anthropic-design/assets/anthropic.css">
+</head>
+<body>
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="#" class="anth-nav-brand">Fixture</a>
+  <a href="#" class="anth-button">Get started</a>
+</div></nav>
+<section class="anth-section">
+  <div class="anth-container" style="max-width:720px;">
+    <h1>How the build pipeline works</h1>
+    <!-- Intentionally violate: continuous prose far past two screens, zero figures/stats/tables -->
+    <p>The build pipeline starts when a commit lands on the main branch. A webhook fires, the coordinator picks an idle worker, and the worker clones the repository at the exact commit hash. Nothing else happens until the clone completes and the manifest has been parsed.</p>
+    <p>Parsing the manifest produces a target graph. Each target lists its inputs, its outputs, and the command that turns one into the other. The graph is acyclic by construction; a cycle is reported as a configuration error before any command runs.</p>
+    <p>The scheduler walks the graph in topological order. Targets whose inputs are unchanged since the last successful build are skipped entirely — their outputs are served from the content-addressed cache. Everything else is queued for execution.</p>
+    <p>Execution happens inside a sandbox. The sandbox exposes only the declared inputs, a writable scratch directory, and the toolchain pinned in the manifest. Undeclared reads fail loudly. This is the property that makes remote caching safe: identical inputs really do mean identical outputs.</p>
+    <p>When a command finishes, its outputs are hashed and uploaded to the cache before the next target starts. A failed command stops its dependents but not its siblings; independent subgraphs keep building so the report shows every failure in one pass rather than one failure per run.</p>
+    <p>The reporter aggregates results as they stream in. It groups failures by target, attaches the last two hundred lines of each log, and links the full log for anything longer. Warnings are folded into a separate section so they never bury an actual error.</p>
+    <p>Retries are deliberate, not automatic. A target marked flaky may retry up to twice, and every retry is recorded with its own log and timing. Targets not marked flaky never retry — a nondeterministic failure should be fixed, not hidden by a loop.</p>
+    <p>Timing data feeds the scheduler of the next run. Long-pole targets are started as early as their dependencies allow, which in practice shaves twenty to thirty percent off wall-clock time for the largest graphs we have measured.</p>
+    <p>Cache eviction is least-recently-used with a floor: outputs referenced by any release branch are pinned regardless of age. The pin set is recomputed nightly, so deleting a release branch eventually releases its artifacts too.</p>
+    <p>Secrets never enter the sandbox. Commands that need credentials declare a broker handle instead; the broker performs the privileged operation outside the sandbox and returns only the result. Logs are scrubbed for the handful of patterns the broker still cannot avoid emitting.</p>
+    <p>Worker machines are interchangeable by design. A worker that dies mid-build forfeits its lease, the coordinator reassigns the work, and the cache ensures the replacement worker skips everything the dead one had already finished and uploaded.</p>
+    <p>Upgrades roll out by draining: new leases go to workers on the new version while old workers finish their current build and exit. Two versions never share a cache namespace unless the release notes explicitly mark them compatible.</p>
+    <p>The coordinator itself is a single process with a write-ahead log. Failover replays the log on a standby; in three years the longest recorded gap was eleven seconds, during which workers simply kept their leases and kept building.</p>
+    <p>Observability is one Grafana board: queue depth, cache hit rate, p95 target time, and sandbox violations. Alerts page only on sustained queue growth and on any sandbox violation at all, because the second class is always a real bug somewhere.</p>
+    <p>Local builds use the same manifest and the same sandbox image. A developer reproducing a CI failure runs one command, gets the same toolchain, the same inputs, and almost always the same failure within a minute or two.</p>
+    <p>What keeps the system honest is the rule that every speedup must preserve the equivalence between a cached result and a fresh execution. Any optimisation that cannot prove that equivalence stays out of the tree, no matter how attractive the benchmark numbers look.</p>
+    <p>The remaining sharp edge is toolchain pinning on macOS, where system libraries leak into linking in ways the sandbox cannot fully intercept yet. The workaround is a vendored sysroot; the fix is tracked and slow, like all fixes that depend on someone else's release cycle.</p>
+    <p>New checks land behind a shadow flag first: they run on every build, report what they would have failed, and graduate to enforcing only after a week of zero false positives on the main branch. The same path is open to any team that wants a custom invariant enforced.</p>
+    <p>Capacity planning is intentionally boring. The fleet autoscaler tracks a seven-day moving average of queue depth and adds or removes workers in steps of ten percent, never more than twice per hour. Sudden spikes are absorbed by the queue rather than by emergency provisioning, because emergency provisioning is where configuration drift comes from.</p>
+    <p>Cost attribution follows the target graph. Every command's CPU-seconds and cache bytes are tagged with the owning team, and the monthly report ranks teams by cost per merged change rather than raw spend — a large team merging constantly should spend more, and the ratio is what surfaces actual waste.</p>
+    <p>The migration that taught us most was the move from timestamps to content hashes. Half the build rules in the tree turned out to depend on modification times in ways nobody had written down. The migration tool rewrote what it could mechanically and filed one issue per rule it could not, and the long tail took a quarter to drain.</p>
+    <p>Documentation lives next to the code it describes and is built by the same pipeline. A documentation target that fails to build fails the commit, which sounds harsh and is the only reason the documentation is still accurate three years in.</p>
+    <p>Onboarding a new repository takes one manifest file and one webhook. The defaults are deliberately strict — sandbox on, cache on, retries off — and teams loosen them per target with a comment explaining why. Loosening without a comment fails review by convention, and the convention has held.</p>
+    <p>The escape hatch exists and is logged. A build can be forced through with verification disabled by anyone on the on-call rotation, every use pages the build team, and the post-incident review asks why it was needed. It has been used four times, and two of those uses produced fixes that removed the need.</p>
+    <p>What we would do differently is start the remote execution protocol on the standard one instead of inventing our own. The custom protocol was three weeks faster to ship and has cost easily a quarter of cumulative maintenance since, a trade nobody would sign again with the bill visible up front.</p>
+    <p>The next year of work is mostly subtraction: deleting the compatibility layer for the old cache namespace, removing the last three unsandboxed rule types, and folding the separate macOS worker pool into the main fleet once the sysroot work lands. The system gets better by getting smaller.</p>
+  </div>
+</section>
+</body>
+</html>

@@ -6,6 +6,11 @@
 //   4. Orphan figure cards in multi-col grids next to full-row hero siblings
 //   5. SVG text elements whose rendered bounding boxes overlap (e.g. rotated
 //      decorative text intersecting static labels) — known-bugs 1.8
+//   6. Diagram content letterboxed inside an oversized viewBox — known-bugs 1.28
+//   7. Dense diagrams (≥20 labels) crammed into narrow containers — known-bugs 1.29
+//   8. Engineering diagrams with zero saturated hues (anthropic only) — known-bugs 1.30
+//   9. Text deserts: >2600px of prose with no visual element — known-bugs 1.31
+//  10. Note: the <9px SVG text check covers ALL content figures, not just hero rows
 //
 // Usage:
 //   node skills/design-review/scripts/visual-audit.mjs [--ignore-intentional] <html-path>
@@ -317,13 +322,25 @@ const findings = await page.evaluate((cs) => {
         label: svg.getAttribute('aria-label') || 'unlabeled',
       });
     }
+    // (tiny-text moved to block 2c — it now covers ALL content SVGs, not just hero rows)
+  });
 
-    // Smallest readable text inside the hero SVG (rendered px)
+  // ---------- 2c) Diagram tiny text — ALL content SVGs (scope widened 2026-06-11) ----------
+  // Was hero-only. The real-world failure class is the dense diagram squeezed
+  // into a prose column: a non-hero figure whose viewBox is far wider than its
+  // rendered box, so every label lands under 9px. Icon-scale SVGs (<300px) and
+  // decorative illustrations (<4 labels) are out of scope.
+  document.querySelectorAll('svg').forEach((svg) => {
+    const rect = svg.getBoundingClientRect();
+    if (rect.width < 300) return;
+    if (svg.getAttribute('aria-hidden') === 'true') return;
+    const texts = [...svg.querySelectorAll('text')];
+    if (texts.length < 4) return;
     const vb = (svg.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number);
     const vbW = vb[2] || 0;
     const scale = vbW ? rect.width / vbW : 1;
     let minText = Infinity;
-    svg.querySelectorAll('text').forEach((t) => {
+    texts.forEach((t) => {
       const size = parseFloat(t.getAttribute('font-size') || getComputedStyle(t).fontSize);
       if (!isFinite(size)) return;
       const effective = size * scale;
@@ -334,6 +351,7 @@ const findings = await page.evaluate((cs) => {
         kind: 'diagram-tiny-text',
         severity: 'warn',
         renderedPx: +minText.toFixed(1),
+        renderedWidth: Math.round(rect.width),
         label: svg.getAttribute('aria-label') || 'unlabeled',
       });
     }
@@ -353,7 +371,14 @@ const findings = await page.evaluate((cs) => {
     const l = (max + min) / 2;
     const d = max - min;
     const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
-    return { s, l };
+    let h = 0;
+    if (d !== 0) {
+      if (max === rn) h = 60 * (((gn - bn) / d) % 6);
+      else if (max === gn) h = 60 * ((bn - rn) / d + 2);
+      else h = 60 * ((rn - gn) / d + 4);
+      if (h < 0) h += 360;
+    }
+    return { h, s, l };
   };
   document.querySelectorAll('svg').forEach((svg) => {
     if (svg.getBoundingClientRect().width < 300) return;
@@ -390,6 +415,160 @@ const findings = await page.evaluate((cs) => {
       });
     }
   });
+
+  // ---------- 2c2) SVG letterbox — content doesn't fill the viewBox (known-bugs §1.28) ----------
+  // The author sized the viewBox, then drew everything in the middle. Both
+  // side margins are dead space, and because the figure is width-constrained,
+  // every label shrinks to pay for them. Measure the union client-rect of all
+  // content elements; full-size backplates (background panel, dot-grid layer,
+  // ≥96% of BOTH axes) don't count as content. Escape hatch: data-allow-letterbox
+  // on the svg or any ancestor (deliberately centered spot illustrations).
+  document.querySelectorAll('figure svg').forEach((svg) => {
+    const rect = svg.getBoundingClientRect();
+    if (rect.width < 300 || rect.height === 0) return;
+    if (svg.getAttribute('aria-hidden') === 'true') return;
+    for (let n = svg; n; n = n.parentElement) {
+      if (n.hasAttribute && n.hasAttribute('data-allow-letterbox')) return;
+    }
+    let u = null;
+    svg.querySelectorAll('rect, circle, ellipse, path, polygon, polyline, line, text, image').forEach((el) => {
+      if (el.closest('defs, pattern, marker, clipPath, mask')) return;
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 && r.height === 0) return;
+      if (r.width >= 0.96 * rect.width && r.height >= 0.96 * rect.height) return; // backplate
+      u = u
+        ? { left: Math.min(u.left, r.left), top: Math.min(u.top, r.top),
+            right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) }
+        : { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+    });
+    if (!u) return;
+    const fillW = (u.right - u.left) / rect.width;
+    const fillH = (u.bottom - u.top) / rect.height;
+    if (fillW < 0.72 || fillH < 0.5) {
+      const axis = fillW < 0.72 ? 'width' : 'height';
+      issues.push({
+        kind: 'svg-letterbox',
+        severity: 'warn',
+        axis,
+        fillPct: Math.round((axis === 'width' ? fillW : fillH) * 100),
+        label: svg.getAttribute('aria-label') || 'unlabeled',
+      });
+    }
+  });
+
+  // ---------- 2c3) Dense diagram crammed into a narrow container (known-bugs §1.29) ----------
+  // ≥20 <text> labels rendered under 760px: even when every label clears the
+  // 9px floor, a diagram this dense belongs in the wide container (1200px) or
+  // should be split. Deliberately narrow thresholds — this is the backstop for
+  // the worst cases; the positive guidance lives in diagram-craft §8.
+  document.querySelectorAll('figure svg').forEach((svg) => {
+    const rect = svg.getBoundingClientRect();
+    if (rect.width === 0) return;
+    if (svg.getAttribute('aria-hidden') === 'true') return;
+    const textCount = svg.querySelectorAll('text').length;
+    if (textCount >= 20 && rect.width < 760) {
+      issues.push({
+        kind: 'dense-diagram-cramped',
+        severity: 'warn',
+        textCount,
+        renderedWidth: Math.round(rect.width),
+        label: svg.getAttribute('aria-label') || 'unlabeled',
+      });
+    }
+  });
+
+  // ---------- 2c4) Monochrome engineering diagram — anthropic only (known-bugs §1.30) ----------
+  // Reverse gate to saturated-band: a diagram with ZERO saturated hues (white
+  // cards + gray strokes + gray text) reads as an unfinished wireframe.
+  // Anthropic diagram-craft wants ≥2 semantic hues per engineering diagram;
+  // the machine gate only catches the unambiguous failure (0 hues) because
+  // legitimate single-hue diagrams exist (git graphs, timelines). Apple is
+  // exempt by design (single blue focus). Tints (l ≥ 0.85) don't count as
+  // hues — color presence must come from solid dots/badges/bars/lines.
+  if (cs && cs.skill === 'anthropic') {
+    document.querySelectorAll('figure svg').forEach((svg) => {
+      const rect = svg.getBoundingClientRect();
+      if (rect.width < 300) return;
+      if (svg.getAttribute('aria-hidden') === 'true') return;
+      const nodeRects = [...svg.querySelectorAll('rect')].filter(
+        (el) => !el.closest('defs, pattern, marker, clipPath, mask')
+      );
+      const textCount = svg.querySelectorAll('text').length;
+      if (nodeRects.length < 4 || textCount < 6) return;   // not an engineering diagram
+      const hues = new Set();
+      svg.querySelectorAll('rect, circle, ellipse, path, polygon, polyline, line, text').forEach((el) => {
+        if (el.closest('defs, pattern, marker, clipPath, mask')) return;
+        const st = getComputedStyle(el);
+        for (const v of [st.fill, st.stroke]) {
+          const c = parseRgb(v || '');
+          if (!c) continue;
+          const { h, s, l } = toHsl(c);
+          if (s > 0.25 && l > 0.15 && l < 0.85) hues.add(Math.round(h / 30));
+        }
+      });
+      if (hues.size === 0) {
+        issues.push({
+          kind: 'diagram-monochrome',
+          severity: 'warn',
+          nodeCount: nodeRects.length,
+          textCount,
+          label: svg.getAttribute('aria-label') || 'unlabeled',
+        });
+      }
+    });
+  }
+
+  // ---------- 2c5) Text desert — long prose stretch with no visual element (known-bugs §1.31) ----------
+  // Diagram-density contract (diagram-craft §12): ≥1 visual per 1.5 screens
+  // (~1300px). The machine gate fires at 2600px (two screens) — only the worst
+  // offenders. Card grids count as visual relief (pricing tiers, stat strips).
+  // Exempt: md-mirror document pages (.md-banner), short pages (<1800px),
+  // <body data-allow-text-desert>.
+  {
+    const docH = document.body.scrollHeight;
+    const exempt =
+      docH < 1800 ||
+      document.body.hasAttribute('data-allow-text-desert') ||
+      !!document.querySelector('.md-banner');
+    if (!exempt) {
+      const visuals = [];
+      document.querySelectorAll('svg, figure, img, table, blockquote, pre, [class*="stat"]').forEach((el) => {
+        const st = getComputedStyle(el);
+        if (st.display === 'none' || st.visibility === 'hidden') return;
+        const r = el.getBoundingClientRect();
+        if (r.height < 60 || r.width < 80) return;
+        visuals.push(r);
+      });
+      document.querySelectorAll('*').forEach((el) => {
+        const st = getComputedStyle(el);
+        if (!st.display.includes('grid')) return;
+        if (el.children.length < 2) return;
+        const r = el.getBoundingClientRect();
+        if (r.height < 200 || r.width < 400) return;
+        visuals.push(r);
+      });
+      visuals.sort((a, b) => a.top - b.top);
+      let cursor = 0;            // page is unscrolled, so client-rect top == document y
+      let worst = null;
+      for (const r of visuals) {
+        const gap = r.top - cursor;
+        if (!worst || gap > worst.gap) worst = { gap, from: cursor, to: r.top };
+        cursor = Math.max(cursor, r.bottom);
+      }
+      const tailGap = docH - cursor;
+      if (!worst || tailGap > worst.gap) worst = { gap: tailGap, from: cursor, to: docH };
+      if (worst && worst.gap > 2600) {
+        issues.push({
+          kind: 'text-desert',
+          severity: 'warn',
+          gap: Math.round(worst.gap),
+          from: Math.round(worst.from),
+          to: Math.round(worst.to),
+          pageHeight: Math.round(docH),
+        });
+      }
+    }
+  }
 
   // ---------- 5) SVG text overlap audit ----------
   // Catches the class of bug where a rotated decorative label intersects
@@ -973,7 +1152,23 @@ for (const i of visibleFindings) {
     );
   } else if (i.kind === 'diagram-tiny-text') {
     console.log(
-      `  [${i.severity}] hero diagram smallest text renders at ${i.renderedPx}px — bump font-size or tighten viewBox  (aria-label: "${i.label}")`
+      `  [${i.severity}] diagram smallest text renders at ${i.renderedPx}px (svg rendered ${i.renderedWidth ?? '?'}px wide) — bump font-size, tighten viewBox, or move the figure to a wider container  (aria-label: "${i.label}")`
+    );
+  } else if (i.kind === 'svg-letterbox') {
+    console.log(
+      `  [${i.severity}] svg-letterbox in "${i.label}": content fills only ${i.fillPct}% of the rendered ${i.axis} — shrink the viewBox to hug content (≤24px margins) or spread content across the canvas; dead margins shrink every label (known-bugs 1.28, diagram-craft §8)`
+    );
+  } else if (i.kind === 'dense-diagram-cramped') {
+    console.log(
+      `  [${i.severity}] dense diagram cramped: ${i.textCount} <text> labels rendered at only ${i.renderedWidth}px in "${i.label}" — a diagram this dense needs the wide container (anth-container--wide / 1200px) or splitting into two figures (known-bugs 1.29, diagram-craft §8)`
+    );
+  } else if (i.kind === 'diagram-monochrome') {
+    console.log(
+      `  [${i.severity}] diagram-monochrome: engineering diagram "${i.label}" (${i.nodeCount} nodes, ${i.textCount} labels) has zero saturated hues — reads gray/unfinished; anthropic wants ≥2 semantic hues per diagram (tint containers + solid color dots/badges/lines), see diagram-craft.md §1 (known-bugs 1.30)`
+    );
+  } else if (i.kind === 'text-desert') {
+    console.log(
+      `  [${i.severity}] text-desert: ${i.gap}px of continuous prose (y ${i.from}→${i.to}, page ${i.pageHeight}px) with no figure/stat/table/mock — diagram-density contract wants ≥1 visual per 1.5 screens; add a flow diagram, stat callout, or window mock (known-bugs 1.31, diagram-craft §12)`
     );
   } else if (i.kind === 'orphan-figure') {
     console.log(

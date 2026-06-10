@@ -48,9 +48,24 @@
 
 蓝 tint `#eaf3fe` + 蓝 1.5px 边 + 12px 600 `#1d1d1f` 问题文字。全图唯一的 tint 色块。出口标注 `yes` / `no` 11px 600（yes 蓝 / no 灰），text-anchor="middle"，与徽章保持 ≥ 4px。
 
-## 6. 布局公式
+## 6. 先定尺寸再画 + 布局公式
 
-同 anthropic §8 通用规则：节点宽 = max(160, 英文字符 × 9, CJK × 18)；4px 网格；viewBox padding ≥ 24；SVG 文字 ≥ 11px 源字号；文字 bbox 互不相交 ≥ 4px。apple 特有：信息密集的 hero 框图必须放 `apple-container--hero`（1280px）并 `grid-column: 1 / -1`，否则 980px 窄容器把文字压到 < 9px（SKILL.md 既有红线）。
+**内容多的图必须画大,不准把元素缩小塞进固定画布**。画第一笔之前先算：
+
+```
+预估列数 C、最宽节点字符数、<text> 总数 T
+viewBox 宽 = max(720, C × (节点宽 + 24) + 2 × 24)
+scale = 容器内可用宽 / viewBox 宽 ≥ 0.82（11px 源字号 → 渲染 ≥ 9px）
+```
+
+| 容器档位 | 适用 |
+|---|---|
+| 980 标准（`apple-container`） | T ≤ 18 的图 |
+| 1280 hero（`apple-container--hero` + `grid-column: 1 / -1`） | **T ≥ 20 或 C ≥ 4 必须用** |
+
+scale < 0.82 → 升档；1280 还不够 → 拆成两张图，不准缩字号。**viewBox 紧贴内容**：内容 bbox 距 viewBox 边 ≤ 24px——viewBox 写大、内容挤中间 = 两侧死空间逼所有标签变小（svg-letterbox 闸,known-bugs §1.28;dense-diagram-cramped 闸,§1.29;diagram-tiny-text 闸现在覆盖所有 figure 图,不再限 hero）。
+
+通用布局规则同 anthropic §8.2：节点宽 = max(160, 英文字符 × 9, CJK × 18)；4px 网格；viewBox padding ≥ 24；SVG 文字 ≥ 11px 源字号；文字 bbox 互不相交 ≥ 4px。apple 特有：信息密集的 hero 框图必须放 `apple-container--hero`（1280px）并 `grid-column: 1 / -1`，否则 980px 窄容器把文字压到 < 9px（SKILL.md 既有红线）。
 
 ## 7. 时序图（sequence diagram）
 
@@ -70,7 +85,7 @@ apple 风时序图 pattern（anthropic 有专文 `sequence-diagrams.md`，apple 
 
 ## 9. 图密度合约
 
-同 anthropic `diagram-craft.md` §12 的表格执行（≥3 步流程必须图、数字必须 stat、结构必须架构图、>2 屏纯文字必须插视觉元素、每 1.5 屏 ≥ 1 个视觉元素）。apple 页面里 stat callout 可计入视觉元素。
+同 anthropic `diagram-craft.md` §12 的表格执行（≥3 步流程必须图、数字必须 stat、结构必须架构图、>2 屏纯文字必须插视觉元素、每 1.5 屏 ≥ 1 个视觉元素）。apple 页面里 stat callout 可计入视觉元素。机器闸：`text-desert`（连续 2600px 无视觉元素 → warn,known-bugs §1.31）跨 skill 生效。注意 diagram-monochrome（0 饱和 hue 闸）**只对 anthropic 生效**——apple 的灰阶 + 蓝单焦点是身份,不是 bug。
 
 ## 10. figure 语义规范
 
@@ -84,3 +99,6 @@ apple 风时序图 pattern（anthropic 有专文 `sequence-diagrams.md`，apple 
 - ❌ 满宽色带、纯文字盒子、斜线穿心、大箭头、坐标随手写（同 anthropic §14 通用反模式）
 - ❌ 高饱和渐变 / 拟真材质 / 阴影 opacity > 0.12
 - ❌ 一图多焦点（蓝色元素 > 2 处）
+- ❌ viewBox 写大、内容挤中间一窄条（→ §6 先算再画;svg-letterbox 闸）
+- ❌ ≥ 20 个 text 的密图塞 980 标准容器（→ 1280 hero 档;dense-diagram-cramped 闸）
+- ❌ 长文页面通篇无图（→ §9 图密度合约;text-desert 闸）

@@ -39,6 +39,21 @@ last-verified: 2026-04-19
 11. `references/ux-writing.md` — CTA / empty state / error / placeholder 文案模式 + 禁用词清单
 12. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
 
+## 图密度合约（写任何页面前 MUST — 不只画图时）
+
+**尽可能用图表达**——这是默认要求，不需要用户提醒。下表任一形态出现就必须配对应视觉化：
+
+| 内容形态 | 必须配 | 内容形态 | 必须配 |
+|---|---|---|---|
+| ≥3 步流程 / 启动链 / 数据流 | 流程图或时序图 | 数字对比 / 统计 | stat callout 或图表 |
+| 系统结构 / 分层 / 依赖 | 架构图 | 时间演进 / 版本 / 里程碑 | 时间线 |
+| 产品 / UI 描述 | 窗口 mock | 连续纯文字 > 2 屏 | ≥ 1 个视觉元素 |
+
+节奏：每 1.5 屏（≈1300px @1440）≥ 1 个 SVG / figure / stat。机器闸 `text-desert` 在连续
+2600px 无视觉元素时 warn（known-bugs 1.31）。动笔画图前再读 `references/diagram-craft.md`：
+§8.1 先算尺寸选容器档（**密图必须 1200 wide，看不清 = 没画**）、§1 色彩（每图 ≥ 2 语义 hue，
+小元素实心主色）。现成图直接抄 `templates/diagrams/`，案例库见 `demos/anthropic-design/diagrams.html`。
+
 ### 何时读 scenario recipes（重要）
 
 写一个 page-type 之前先看 §3 / §4 / §5 / §9 末尾的 `## Scenario recipes`：

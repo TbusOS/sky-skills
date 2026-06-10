@@ -190,6 +190,42 @@
 
 ---
 
+### 1.31 长文无图 · "text desert"
+- **Reader sees**：连续两屏以上全是段落文字，没有任何图 / 表 / stat / mock。读者在第二屏开始跳读，第三屏直接滚到底——内容再好也没被读到。
+- **Why**：图密度合约（anthropic diagram-craft §12 / apple §9：≥3 步流程必须画图、>2 屏纯文字必须插视觉元素、每 1.5 屏 ≥ 1 个视觉元素）只写在 diagram-craft.md 里，而那个文档的触发条件是"画图前必读"——generator 没打算画图就永远读不到"何时必须画图"，鸡生蛋。用户反馈"每次都要提醒多用图"（2026-06-11）。
+- **How caught**：check `text-desert`——收集所有视觉元素（svg / figure / img / table / blockquote / pre / [class*=stat]，高 ≥ 60px；display:grid 且 ≥ 2 子元素、高 ≥ 200 的卡片区也计入），按 y 排序求最大纵向空隙（含页首页尾）。空隙 > 2600px（两屏）→ warn。豁免：页高 < 1800、md-mirror 文档镜像页（`.md-banner` 存在）、`<body data-allow-text-desert>`。标定：合法 canonical 最大空隙 2266px（apple feature-deep，卡区计入后），不计卡区时 pricing / product-detail 会出 3248px 误报——卡区计入是这个 check 成立的关键。回归 14 canonical + 2 demo 0 误报。
+- **Defense**：合约摘要上提到 anthropic SKILL.md 必读区 + sprint-contract §1b；机器兜底 `text-desert`。
+- **Rule**：编辑合约是每 1.5 屏 ≥ 1 个视觉元素；机器闸放宽到 2 屏只抓最严重的——不要把 2600px 当达标线。
+
+---
+
+### 1.30 工程图 0 饱和 hue · "幽灵图"发灰
+- **Reader sees**：架构图/流程图全是白卡 + 灰描边 + 灰字 + 灰线，读起来像未上色的 wireframe / "没做完"。页面色彩印象寡淡（用户反馈 2026-06-11："色彩不够丰富，不如上一版"）。
+- **Why**：v2 工艺把满填全部退成 8-12% tint + 空心环后，generator 学到"颜色越少越安全"，一路退到 0 饱和色。tint（l ≥ 0.85）提供不了色彩在场感——在场感来自实心色点 / 徽章 / 色条 / 彩色连线。v3 修正：tint 加深到 16-20%、小元素必须实心主色、每图 ≥ 2 hue（anthropic diagram-craft §0/§1）。
+- **How caught**：check `diagram-monochrome`（**只对 anthropic 生效**，apple 的灰阶 + 蓝单焦点是身份）——figure 内渲染宽 ≥ 300px 的 SVG，节点 rect ≥ 4 且 text ≥ 6（工程图判定），统计 fill/stroke 中 s > 0.25 且 0.15 < l < 0.85 的 hue 桶数，== 0 → warn。机器只抓 0 hue：存量合法单 hue 图有 5 张（comparison git 图 / timeline 等），"< 2 hue 即 warn"会全误报——**≥ 2 hue 是文档合约 + critic 评审项，不是机器闸**，这是有意的精度取舍。回归 0 误报；tint（l ≥ 0.85）和深色面板（l ≤ 0.15）不计 hue，窗口 mock 红绿灯三圆是饱和色，天然不会误报。
+- **Defense**：diagram-craft §0 反向红线 + §1 三条硬规则；机器兜底 `diagram-monochrome`。
+- **Rule**：颜色做语义不做填充，**但必须在场**。0 饱和 hue 的工程图和满宽色带一样是 bug，方向相反。
+
+---
+
+### 1.29 密图塞窄容器 · 22 个标签挤在 480px 里
+- **Reader sees**：一张节点很多的图被塞在正文列宽里，每个标签都缩成蚂蚁字，要凑近屏幕才能读。两边是大片页边距留白——空间有，图没用上。
+- **Why**：generator 先选了容器（prose 流里顺手 `anth-container`），再把内容硬塞进去；内容密度增加时它缩小元素而不是升级容器。正确顺序是 §8.1 先算：`<text>` ≥ 20 或列数 ≥ 4 → 必须 `anth-container--wide`（1200）breakout，1200 还不够就拆图，不准缩字号。
+- **How caught**：check `dense-diagram-cramped`——figure 内 SVG，`<text>` ≥ 20 且渲染宽 < 760px → warn。阈值标定：回归集所有 ≥ 20 text 的合法图渲染都在 1088px；blog-index 装饰卡 17-19 text @438px 必须放过（所以 N 取 20 不取 18）。它和 `diagram-tiny-text` 分工：tiny-text 抓"字已 < 9px"的症状，cramped 抓"字还没破线但密度注定该升档"的根因。同日 `diagram-tiny-text` 从 hero-only 扩到全部 figure 图（原版只查 grid-column 1/-1 的 hero figure，正文列里的图完全不查——本类 bug 的主要藏身处），扩域后即抓到 demos v1/v2 7.6px、ember/sage landing 8.8px、sage blog-index 9.0px 共 5 处存量违规，全部当日修复。
+- **Defense**：diagram-craft §8.1 选档表（720/960/1200 + scale ≥ 0.82 判据）；机器兜底 `dense-diagram-cramped` + 扩域后的 `diagram-tiny-text`。
+- **Rule**：内容多的图必须画大。先算尺寸再画，不是画完再塞。
+
+---
+
+### 1.28 viewBox 写大内容挤中间 · letterbox 留白
+- **Reader sees**：图两侧大片空白，实际内容缩在画布中间一窄条。为了"对齐"或"留呼吸感"，所有标签跟着内容一起变小，看不清；图的视觉重量也撑不起它占的版面。
+- **Why**：generator 先随手定了个宽 viewBox（常照抄模板的 1080/1200），内容画完只占中间 40-60%，两侧死空间逼标签变小。正确做法：viewBox 紧贴内容（内容 bbox 距边 ≤ 24px），§8.1 公式先算宽再画。
+- **How caught**：check `svg-letterbox`——figure 内渲染宽 ≥ 300px 的 SVG，求所有内容元素 client-rect 的 union，宽向填充率 < 72% 或高向 < 50% → warn。实现要点：**全幅背板必须剔除**（双轴 ≥ 96% 渲染框的元素，如 architecture.svg 的全幅面板底 / dot-grid 层），否则 union 永远等于 viewBox、check 形同虚设；用 client-rect 而非 getBBox，自动消化 transform。标定：figure 内合法图填充率 0.93-1.0，阈值 0.72 留足缓冲；高向阈值独立取 0.50（timeline 类天然扁，0.72 同阈值必误报）。逃生舱 `data-allow-letterbox`（刻意居中的 spot 插画）。已知限制：inset 面板（比渲染框小 24px 的面板）会被算进内容——只漏报不误报，方向安全。回归 0 误报。
+- **Defense**：diagram-craft §8.1 "viewBox 紧贴内容"；机器兜底 `svg-letterbox`。
+- **Rule**：留白是版式的事（容器 / margin），不是画布的事。SVG 画布里的空白只会偷走字号。
+
+---
+
 ### 1.27 高饱和色块满铺图示 · "PowerPoint SmartArt 色带"味
 - **Reader sees**：架构图/框图里整条层级是满宽的高饱和色带（橙/蓝/绿/黑各占一条），白字浮在色带上。颜色占了 40%+ 版面，图看起来像 2005 年的 SmartArt，刺眼且廉价；信息层次反而被颜色淹没。
 - **Why**：generator 把"颜色编码类别"理解成"把类别区域涂满该颜色"。正确语义是：颜色以 8-12% tint 容器底 + 4px 色条 + 节点色点 + 彩色连线呈现，纯色满填只给 ≤ 56×56 的小元素（icon tile / 徽章 / 色点）。2026-06-10 审 anthropic/apple 两 skill 的 templates/diagrams/architecture.svg，发现旧模板本身就是三条满宽色带（anthropic 饱和覆盖 55%，demos/anthropic-design v1 四层图 39.8%）——模板教坏 generator，源头治理后重写（详见两 skill 的 `references/diagram-craft.md`）。

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BAD anthropic page — non-hero diagram text renders below 9px</title>
+<link rel="stylesheet" href="../../../anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../anthropic-design/assets/anthropic.css">
+</head>
+<body>
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="#" class="anth-nav-brand">Fixture</a>
+  <a href="#" class="anth-button">Get started</a>
+</div></nav>
+<section class="anth-section">
+  <div class="anth-container">
+    <h1>Tiny text in a non-hero figure</h1>
+    <p>The figure below is NOT a hero row (no grid, plain prose column). Its SVG
+    uses viewBox width 1600 but renders at ~700px, so font-size 12 becomes
+    ~5.3px — illegible. The old audit only checked hero figures.</p>
+    <!-- Intentionally violate: dense viewBox squeezed into a 700px column -->
+    <div style="max-width:700px;">
+      <figure>
+        <svg viewBox="0 0 1600 600" width="100%" role="img" aria-label="Pipeline stages overview">
+          <rect x="40" y="60" width="420" height="120" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="80" y="120" font-family="Poppins" font-size="12" fill="#141413">ingest service</text>
+          <rect x="580" y="60" width="420" height="120" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="620" y="120" font-family="Poppins" font-size="12" fill="#141413">transform worker</text>
+          <rect x="1120" y="60" width="420" height="120" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="1160" y="120" font-family="Poppins" font-size="12" fill="#141413">publish queue</text>
+          <rect x="40" y="380" width="420" height="120" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="80" y="440" font-family="Poppins" font-size="12" fill="#141413">metrics sink</text>
+          <rect x="580" y="380" width="420" height="120" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="620" y="440" font-family="Poppins" font-size="12" fill="#6b6a5f">retry buffer</text>
+          <rect x="1120" y="380" width="420" height="120" rx="10" fill="#fbeee7" stroke="#d97757"/>
+          <text x="1160" y="440" font-family="Poppins" font-size="12" fill="#c2613f">alert router</text>
+        </svg>
+        <figcaption>Six pipeline stages; the alert router is the orange focus node.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+</body>
+</html>

@@ -63,6 +63,27 @@ const BRAND = {
   },
 };
 
+// Per-skill diagram sizing + color-presence contract (mirror of each skill's
+// diagram-craft.md §8 tier table; the density table itself is cross-skill).
+const DIAGRAM = {
+  anthropic: {
+    tiers: '720 prose column (≤10 labels, ≤2 cols) · 960 `anth-container` (≤18 labels) · 1200 `anth-container anth-container--wide` (**MUST when ≥20 labels or ≥4 cols**)',
+    color: 'Every engineering diagram carries ≥2 semantic hues (orange/blue/olive/gold per category). Dots, badges, commit circles, legend chips = SOLID main color fills (no hollow rings). Containers = 16-20% tints from diagram-craft §1. Machine gate `diagram-monochrome` warns at 0 saturated hues.',
+  },
+  apple: {
+    tiers: '980 `apple-container` (≤18 labels) · 1280 `apple-container--hero` + `grid-column: 1 / -1` (**MUST when ≥20 labels or ≥4 cols**)',
+    color: 'Apple stays gray-scale + ONE blue focus (≤2 blue elements). diagram-monochrome does NOT apply.',
+  },
+  ember: {
+    tiers: 'scale = rendered width / viewBox width must stay ≥ 0.82 (11px source → ≥9px rendered); upgrade container or split the figure when it drops below',
+    color: 'Use ember palette per references; no extra contract.',
+  },
+  sage: {
+    tiers: 'scale = rendered width / viewBox width must stay ≥ 0.82 (11px source → ≥9px rendered); upgrade container or split the figure when it drops below',
+    color: 'Use sage palette per references; no extra contract.',
+  },
+};
+
 function parseArgs(argv) {
   const out = {};
   for (const a of argv) {
@@ -148,6 +169,32 @@ the structure, adapt the content:
 
 ${mdBody.split('\n').filter(l => l.startsWith('### ')).slice(0, 8).map(l => '- ' + l.replace(/^###\s*\d+\.\s*/, '')).join('\n')}
 
+## 1b. Diagram density + sizing MUST
+
+Express with diagrams by default — do not wait to be asked. Any of these
+content shapes REQUIRES the matching visual:
+
+| Content shape | Required visual |
+|---|---|
+| Process / boot chain / data flow with ≥3 steps | flow or sequence diagram |
+| Numeric comparison / statistics | stat callout or chart (never a prose list of numbers) |
+| System structure / layers / dependencies | architecture diagram |
+| Time evolution / versions / milestones | timeline |
+| Product / UI description | window mock |
+| >2 screens of continuous prose | ≥1 visual element (figure/stat/table/pull-quote) |
+
+Rhythm: ≥1 SVG/figure/stat per 1.5 screens (≈1300px). Machine gate
+\`text-desert\` warns past 2600px without a visual (known-bugs 1.31).
+
+**Size before you draw** (diagram-craft §8.1): estimate label count and
+columns FIRST, then pick the container tier — ${DIAGRAM[skill].tiers}.
+Never shrink fonts to fit; upgrade the tier or split the figure.
+viewBox hugs content (≤24px margins — \`svg-letterbox\` warns below 72%
+width-fill, known-bugs 1.28; \`dense-diagram-cramped\` warns at ≥20 labels
+under 760px, known-bugs 1.29).
+
+**Diagram color**: ${DIAGRAM[skill].color}
+
 ## 2. Brand-presence MUST (mechanical)
 
 The ${skill}-design signature color "${brand.name}" (${brand.accent}) must
@@ -226,9 +273,10 @@ a \`warn\`, fix when possible — warnings are real signals.
 The gates are:
 1. \`verify.py\` — structural (placeholders, DOCTYPE, BEM, SVG balance,
    class usage, bilingual, container rules).
-2. \`visual-audit.mjs\` — rendered (contrast, hero size, SVG tiny text,
-   overlap, h1 count, heading skip, a11y, hollow card, svg-same-colour,
-   italic-overuse, cross-skill-smell, brand-presence).
+2. \`visual-audit.mjs\` — rendered (contrast, hero size, SVG tiny text on
+   ALL figures, svg-letterbox, dense-diagram-cramped, diagram-monochrome,
+   text-desert, overlap, h1 count, heading skip, a11y, hollow card,
+   svg-same-colour, italic-overuse, cross-skill-smell, brand-presence).
 3. \`design-critic\` — LLM taste judge (Phase B; compares your page to
    the canonical and flags taste mismatches).
 

@@ -58,6 +58,10 @@
 | `.anth-stat-number` 大数字用 `font-weight: 600` | canonical stat-strip 规约 Poppins **700** 做大号数字。600 在 42px 下偏细,和相邻正文 weight 差不够 —— 数字失去"指标"的分量感。固定 `font-weight: 700` |
 | Hero 副标 `<p>` 用 `font-size: 20px` | canonical 范围 17-19px。20 在 Lora serif 下开始往"正文强调"走而不是副标。保持 19px + `max-width: 720px` |
 | `.voice-bar` 的实例级 inline `background: transparent; border: none` | voice-switcher 没框就在页面里漂,读者不知道它是控件还是正文标签。保留默认 `.voice-bar` 的框和底色,不 override |
+| 长文页面通篇文字不配图 | 图密度合约(diagram-craft §12,SKILL.md 有摘要):≥3 步流程必须图、数字必须 stat/图表、>2 屏纯文字必须插视觉元素。visual-audit `text-desert` 在连续 2600px 无视觉元素时 warn。**known-bugs 1.31** |
+| 内容密的图(≥20 个 `<text>`)塞 840px 正文列或 960 默认容器 | scale < 0.82 → 渲染字号 < 9px 看不清。§8.1 选档:密图必须 `anth-container anth-container--wide` breakout,1200 不够就拆图,不准缩字号。`dense-diagram-cramped` + 扩域 `diagram-tiny-text` 兜底。**known-bugs 1.29** |
+| viewBox 写大、内容挤中间一窄条"求对齐" | 两侧死空间逼所有标签变小。留白是容器/margin 的事,不是画布的事。内容 bbox 距 viewBox 边 ≤ 24px。`svg-letterbox` 兜底。**known-bugs 1.28** |
+| 工程图全白卡灰线(0 饱和 hue)/ 色点徽章画空心环 | 读作未上色 wireframe。v3 色彩:容器 tint 16-20%(§1 新表)、色点/徽章/提交圆**实心主色**、每图 ≥ 2 hue。`diagram-monochrome` 抓 0-hue。**known-bugs 1.30** |
 
 ---
 
@@ -108,8 +112,12 @@ bin/design-review --audit --skill=anthropic --no-visual <dir>/   # 10x 快，先
 - `[error]` contrast < 3 — 修文字或背景颜色
 - `[warn]` contrast 3–4.5 — brand-intentional 橙 CTA 视具体情况
 - `[warn]` hero diagram rendered at only X px — 容器太窄，换 `.anth-container--wide`
-- `[warn]` hero diagram smallest text renders at Xpx — SVG font-size 太小
+- `[warn]` diagram smallest text renders at Xpx — SVG font-size 太小或容器太窄（**所有** figure 图，不只 hero）
 - `[warn]` orphan figure — grid 里孤单非 hero 卡，span 2 或配对
+- `[warn]` svg-letterbox — 内容没撑满 viewBox，紧贴内容重算 viewBox（1.28）
+- `[warn]` dense diagram cramped — ≥20 标签的密图塞窄容器，升 wide 档或拆图（1.29）
+- `[warn]` diagram-monochrome — 工程图 0 饱和 hue 发灰，按 §1 加语义色（1.30）
+- `[warn]` text-desert — 连续 2600px 纯文字无视觉元素，按图密度合约补图（1.31）
 
 ## 📐 Lineup card 质量底线
 
