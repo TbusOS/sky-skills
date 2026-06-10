@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 528" role="img" aria-label="Deployment topology: edge zone, app cluster, and data zone with replica counts and traffic paths" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="dep-dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <filter id="dep-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/></filter>
+    <marker id="dep-arrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <marker id="dep-arrGr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#788c5d"/></marker>
+    <marker id="dep-arrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6a9bcc"/></marker>
+  </defs>
+  <rect width="1080" height="528" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1080" height="528" rx="16" fill="url(#dep-dots)"/>
+
+  <!-- EDGE zone -->
+  <rect x="40" y="40" width="1000" height="120" rx="12" fill="#e2ecf5" stroke="#c8d9ea"/>
+  <rect x="40" y="40" width="4" height="120" rx="2" fill="#6a9bcc"/>
+  <circle cx="68" cy="64" r="4" fill="#6a9bcc"/>
+  <text x="80" y="68" font-size="11" font-weight="600" letter-spacing="0.08em" fill="#4a7bab">EDGE</text>
+  <text x="1016" y="68" font-size="10" font-style="italic" fill="#8c8a7d" text-anchor="end">anycast · 12 PoPs</text>
+  <g filter="url(#dep-sh)">
+    <rect x="88" y="80" width="200" height="64" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="328" y="80" width="200" height="64" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="568" y="80" width="200" height="64" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+  <circle cx="110" cy="104" r="3.5" fill="#6a9bcc"/>
+  <text x="122" y="109" font-size="13" font-weight="600" fill="#141413">CDN</text>
+  <text x="110" y="129" font-size="10" fill="#6b6a5f">edge cache · 98% hit</text>
+  <circle cx="350" cy="104" r="3.5" fill="#6a9bcc"/>
+  <text x="362" y="109" font-size="13" font-weight="600" fill="#141413">WAF</text>
+  <text x="350" y="129" font-size="10" fill="#6b6a5f">rules v34</text>
+  <circle cx="590" cy="104" r="3.5" fill="#6a9bcc"/>
+  <text x="602" y="109" font-size="13" font-weight="600" fill="#141413">Load balancer</text>
+  <text x="590" y="129" font-size="10" fill="#6b6a5f">least-conn</text>
+  <line x1="292" y1="112" x2="324" y2="112" stroke="#6a9bcc" stroke-width="1.2" marker-end="url(#dep-arrB)"/>
+  <line x1="532" y1="112" x2="564" y2="112" stroke="#6a9bcc" stroke-width="1.2" marker-end="url(#dep-arrB)"/>
+
+  <!-- APP CLUSTER zone -->
+  <rect x="40" y="200" width="1000" height="152" rx="12" fill="#f7e4dc" stroke="#ecd0c0"/>
+  <rect x="40" y="200" width="4" height="152" rx="2" fill="#d97757"/>
+  <circle cx="68" cy="224" r="4" fill="#d97757"/>
+  <text x="80" y="228" font-size="11" font-weight="600" letter-spacing="0.08em" fill="#c2613f">APP CLUSTER</text>
+  <text x="1016" y="228" font-size="10" font-style="italic" fill="#8c8a7d" text-anchor="end">auto-scale 2-8 nodes</text>
+  <g filter="url(#dep-sh)">
+    <rect x="88" y="244" width="220" height="72" rx="8" fill="#fbeee7" stroke="#d97757" stroke-width="1.5"/>
+    <rect x="368" y="244" width="220" height="72" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="648" y="244" width="220" height="72" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+  <circle cx="110" cy="270" r="3.5" fill="#d97757"/>
+  <text x="122" y="275" font-size="13" font-weight="600" fill="#141413">api</text>
+  <text x="110" y="299" font-size="10" fill="#6b6a5f">REST + SSE</text>
+  <rect x="252" y="258" width="36" height="20" rx="10" fill="#d97757"/>
+  <text x="270" y="272" font-size="10.5" font-weight="600" fill="#ffffff" text-anchor="middle">×3</text>
+  <circle cx="390" cy="270" r="3.5" fill="#d97757"/>
+  <text x="402" y="275" font-size="13" font-weight="600" fill="#141413">worker</text>
+  <text x="390" y="299" font-size="10" fill="#6b6a5f">queue consumer</text>
+  <rect x="532" y="258" width="36" height="20" rx="10" fill="#d97757"/>
+  <text x="550" y="272" font-size="10.5" font-weight="600" fill="#ffffff" text-anchor="middle">×5</text>
+  <circle cx="670" cy="270" r="3.5" fill="#d97757"/>
+  <text x="682" y="275" font-size="13" font-weight="600" fill="#141413">scheduler</text>
+  <text x="670" y="299" font-size="10" fill="#6b6a5f">cron + retries</text>
+  <line x1="648" y1="288" x2="596" y2="288" stroke="#d97757" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#dep-arrO)"/>
+  <text x="622" y="278" font-size="10.5" fill="#6b6a5f" text-anchor="middle">dispatch</text>
+
+  <!-- DATA zone -->
+  <rect x="40" y="392" width="1000" height="104" rx="12" fill="#e5e9dd" stroke="#d3dcc4"/>
+  <rect x="40" y="392" width="4" height="104" rx="2" fill="#788c5d"/>
+  <circle cx="68" cy="416" r="4" fill="#788c5d"/>
+  <text x="80" y="420" font-size="11" font-weight="600" letter-spacing="0.08em" fill="#5d7045">DATA</text>
+  <text x="1016" y="420" font-size="10" font-style="italic" fill="#8c8a7d" text-anchor="end">encrypted at rest</text>
+  <g filter="url(#dep-sh)">
+    <rect x="98" y="424" width="200" height="60" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="368" y="424" width="200" height="60" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="648" y="424" width="200" height="60" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+  <circle cx="120" cy="448" r="3.5" fill="#788c5d"/>
+  <text x="132" y="453" font-size="13" font-weight="600" fill="#141413">Postgres 16</text>
+  <text x="120" y="472" font-size="10" fill="#6b6a5f">primary + replica</text>
+  <circle cx="390" cy="448" r="3.5" fill="#788c5d"/>
+  <text x="402" y="453" font-size="13" font-weight="600" fill="#141413">Redis</text>
+  <text x="390" y="472" font-size="10" fill="#6b6a5f">queues · cache</text>
+  <circle cx="670" cy="448" r="3.5" fill="#788c5d"/>
+  <text x="682" y="453" font-size="13" font-weight="600" fill="#141413">Object store</text>
+  <text x="670" y="472" font-size="10" fill="#6b6a5f">artifacts</text>
+
+  <!-- cross-zone paths -->
+  <path d="M668,144 V176 Q668,184 660,184 H206 Q198,184 198,192 V240" fill="none" stroke="#d97757" stroke-width="1.8" marker-end="url(#dep-arrO)"/>
+  <path d="M198,316 V420" fill="none" stroke="#788c5d" stroke-width="1.8" marker-end="url(#dep-arrGr)"/>
+  <path d="M478,316 V356 Q478,364 470,364 H436 Q428,364 428,372 V420" fill="none" stroke="#788c5d" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#dep-arrGr)"/>
+
+  <!-- legend -->
+  <circle cx="884" cy="510" r="4" fill="#6a9bcc"/>
+  <text x="894" y="514" font-size="11" fill="#6b6a5f">edge</text>
+  <circle cx="944" cy="510" r="4" fill="#d97757"/>
+  <text x="954" y="514" font-size="11" fill="#6b6a5f">compute</text>
+  <circle cx="1024" cy="510" r="4" fill="#788c5d"/>
+  <text x="1034" y="514" font-size="11" fill="#6b6a5f">data</text>
+</svg>

@@ -1,0 +1,1400 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagram Gallery — anthropic-design</title>
+<meta name="description" content="Sixteen copy-ready SVG diagrams in the anthropic-design language: architecture, flow, sequence, git graph, state machine, deployment, product mocks, and report charts.">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/anthropic.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+  /* Chinese stack (§H): Poppins → Noto Sans SC (display); Lora → Noto Serif SC (editorial). */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] figcaption {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3 {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+
+  .gal-kicker {
+    font-family: var(--font-heading); font-size: 12px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--anth-orange);
+  }
+  html[data-lang="zh"] .gal-kicker { text-transform: none; letter-spacing: 0.05em; }
+  .gal-intro { font-size: 19px; color: var(--anth-text-secondary); max-width: 720px; line-height: 1.6; }
+  .gal-section-note { font-size: 16px; color: var(--anth-text-secondary); max-width: 720px; line-height: 1.6; margin: var(--space-3) 0 var(--space-7); }
+  .gal-fig {
+    background: #ffffff; border: 1px solid var(--anth-light-gray);
+    border-radius: var(--radius-lg); padding: var(--space-6);
+    margin: 0 0 var(--space-6);
+  }
+  .gal-fig svg { display: block; width: 100%; height: auto; }
+  .gal-fig--dark { background: #faf9f5; }
+  .gal-cap {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: var(--space-5); margin-top: var(--space-4); flex-wrap: wrap;
+  }
+  .gal-cap-text { font-size: 14.5px; color: var(--anth-text-secondary); line-height: 1.55; max-width: 860px; }
+  .gal-tag {
+    display: block; font-family: var(--font-heading); font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--anth-orange);
+    margin-bottom: 4px;
+  }
+  html[data-lang="zh"] .gal-tag { text-transform: none; letter-spacing: 0.05em; }
+  .gal-copy { white-space: nowrap; font-size: 12.5px; padding: 8px 16px; }
+  .gal-pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); align-items: start; }
+  .gal-pair--terminal { grid-template-columns: 2.05fr 1fr; }
+  .gal-pair--stats { grid-template-columns: 1fr 1.7fr; }
+  .gal-stats { display: flex; flex-direction: column; gap: var(--space-6); justify-content: center; height: 100%; }
+  @media (max-width: 900px) {
+    .gal-pair, .gal-pair--terminal, .gal-pair--stats { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="../../index.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">Sky Skills</a>
+  <div>
+    <a href="#engineering"><span class="lang-en">Engineering</span><span class="lang-zh">工程图</span></a>
+    <a href="#product"><span class="lang-en">Product</span><span class="lang-zh">产品展示</span></a>
+    <a href="#reporting"><span class="lang-en">Reporting</span><span class="lang-zh">演讲汇报</span></a>
+    <a href="index.html"><span class="lang-en">Demo</span><span class="lang-zh">主 demo</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="anth-button" href="../../index.html"><span class="lang-en">Browse skills</span><span class="lang-zh">浏览全部 skill</span></a>
+  </div>
+</div></nav>
+
+<header class="anth-section">
+  <div class="anth-container anth-container--wide">
+    <span class="gal-kicker"><span class="lang-en">anthropic-design · diagram gallery</span><span class="lang-zh">anthropic-design · 图示案例库</span></span>
+    <h1 style="font-family:var(--font-heading); font-size:52px; font-weight:600; letter-spacing:-0.02em; margin:var(--space-3) 0 var(--space-4); max-width:820px;">
+      <span class="lang-en">Diagrams that carry the argument</span>
+      <span class="lang-zh">让图替你把话说清</span>
+    </h1>
+    <p class="gal-intro">
+      <span class="lang-en">Sixteen hand-built SVG figures in the anthropic-design language — for engineering docs, product walkthroughs, and slide decks. Every figure follows the diagram-craft contract: sized to its content, ≥2 semantic hues, solid color dots, readable at every label. Copy any of them straight into your page.</span>
+      <span class="lang-zh">十六张手工 SVG 图，覆盖工程文档、产品演示、演讲汇报三类场合。每张都按 diagram-craft 工艺合约执行：画布贴内容、每图 ≥ 2 个语义色、实心色点、所有标签可读。点 Copy SVG 即可直接用进你的页面。</span>
+    </p>
+  </div>
+</header>
+
+<!-- ===================== §1 ENGINEERING ===================== -->
+<section class="anth-section" id="engineering">
+  <div class="anth-container anth-container--wide">
+    <span class="gal-kicker"><span class="lang-en">01 · for engineers</span><span class="lang-zh">01 · 写给工程师</span></span>
+    <h2 style="font-family:var(--font-heading); font-size:34px; font-weight:600; letter-spacing:-0.01em; margin:var(--space-2) 0 0;">
+      <span class="lang-en">Engineering diagrams</span>
+      <span class="lang-zh">工程图</span>
+    </h2>
+    <p class="gal-section-note">
+      <span class="lang-en">Architecture, flows, sequences, git history, states, deployment — one hue per layer or category, orange reserved for the focus, color always on solid dots and bars rather than flooded fills.</span>
+      <span class="lang-zh">架构、流程、时序、git 历史、状态机、部署拓扑——一层一个色相，橙色只给焦点；颜色落在实心色点和色条上，不做大面积满填。</span>
+    </p>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 520" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif" role="img" aria-label="Layered architecture: four tinted groups with a numbered request path">
+  <defs>
+    <linearGradient id="arch-stage" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#faf9f5"/><stop offset="1" stop-color="#f5f3ea"/>
+    </linearGradient>
+    <pattern id="arch-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="1080" height="520" rx="12" fill="url(#arch-stage)"/>
+  <rect width="1080" height="520" rx="12" fill="url(#arch-dots)"/>
+
+  <!-- Layer 1: PRESENTATION (blue) -->
+  <rect x="36" y="44" width="1008" height="92" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
+  <rect x="36" y="44" width="4" height="92" rx="2" fill="#6a9bcc"/>
+  <circle cx="62" cy="66" r="4" fill="#6a9bcc"/>
+  <text x="74" y="70" font-size="10.5" font-weight="600" letter-spacing="1.2" fill="#4a7bab">PRESENTATION</text>
+  <text x="1024" y="70" text-anchor="end" font-size="10" font-style="italic" fill="#8c8a7d">user-facing surfaces</text>
+  <rect x="60" y="82" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="76" cy="97" r="3.5" fill="#6a9bcc"/>
+  <text x="88" y="101" font-size="12.5" font-weight="600" fill="#141413">Web</text>
+  <text x="88" y="117" font-size="9.5" fill="#6b6a5f">browser client</text>
+  <rect x="306" y="82" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="322" cy="97" r="3.5" fill="#6a9bcc"/>
+  <text x="334" y="101" font-size="12.5" font-weight="600" fill="#141413">Mobile</text>
+  <text x="334" y="117" font-size="9.5" fill="#6b6a5f">iOS · Android</text>
+  <rect x="552" y="82" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="568" cy="97" r="3.5" fill="#6a9bcc"/>
+  <text x="580" y="101" font-size="12.5" font-weight="600" fill="#141413">CLI</text>
+  <text x="580" y="117" font-size="9.5" fill="#6b6a5f">terminal tools</text>
+  <rect x="798" y="82" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="814" cy="97" r="3.5" fill="#6a9bcc"/>
+  <text x="826" y="101" font-size="12.5" font-weight="600" fill="#141413">API</text>
+  <text x="826" y="117" font-size="9.5" fill="#6b6a5f">REST · SDK</text>
+
+  <line x1="540" y1="140" x2="540" y2="156" stroke="#d97757" stroke-width="1.8"/>
+  <polygon points="540,162 534,153 546,153" fill="#d97757"/>
+  <circle cx="566" cy="151" r="9" fill="#d97757"/>
+  <text x="566" y="155" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">1</text>
+
+  <!-- Layer 2: APPLICATION (orange) -->
+  <rect x="36" y="164" width="1008" height="92" rx="10" fill="#f7e4dc" stroke="#ecccbc"/>
+  <rect x="36" y="164" width="4" height="92" rx="2" fill="#d97757"/>
+  <circle cx="62" cy="186" r="4" fill="#d97757"/>
+  <text x="74" y="190" font-size="10.5" font-weight="600" letter-spacing="1.2" fill="#c2613f">APPLICATION</text>
+  <text x="1024" y="190" text-anchor="end" font-size="10" font-style="italic" fill="#8c8a7d">coordination &amp; policy</text>
+  <rect x="60" y="202" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="76" cy="217" r="3.5" fill="#d97757"/>
+  <text x="88" y="221" font-size="12.5" font-weight="600" fill="#141413">Router</text>
+  <text x="88" y="237" font-size="9.5" fill="#6b6a5f">match &amp; dispatch</text>
+  <rect x="306" y="202" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="322" cy="217" r="3.5" fill="#d97757"/>
+  <text x="334" y="221" font-size="12.5" font-weight="600" fill="#141413">Orchestrator</text>
+  <text x="334" y="237" font-size="9.5" fill="#6b6a5f">plan · collect · merge</text>
+  <rect x="552" y="202" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="568" cy="217" r="3.5" fill="#d97757"/>
+  <text x="580" y="221" font-size="12.5" font-weight="600" fill="#141413">Gateway</text>
+  <text x="580" y="237" font-size="9.5" fill="#6b6a5f">tool calls · rate limits</text>
+  <rect x="798" y="202" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="814" cy="217" r="3.5" fill="#d97757"/>
+  <text x="826" y="221" font-size="12.5" font-weight="600" fill="#141413">Guard</text>
+  <text x="826" y="237" font-size="9.5" fill="#6b6a5f">allow · deny · confirm</text>
+
+  <line x1="540" y1="260" x2="540" y2="276" stroke="#d97757" stroke-width="1.8"/>
+  <polygon points="540,282 534,273 546,273" fill="#d97757"/>
+  <circle cx="566" cy="271" r="9" fill="#d97757"/>
+  <text x="566" y="275" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">2</text>
+
+  <!-- Layer 3: DOMAIN (olive) -->
+  <rect x="36" y="284" width="1008" height="92" rx="10" fill="#e5e9dd" stroke="#ccd3bd"/>
+  <rect x="36" y="284" width="4" height="92" rx="2" fill="#788c5d"/>
+  <circle cx="62" cy="306" r="4" fill="#788c5d"/>
+  <text x="74" y="310" font-size="10.5" font-weight="600" letter-spacing="1.2" fill="#5d7045">DOMAIN</text>
+  <text x="1024" y="310" text-anchor="end" font-size="10" font-style="italic" fill="#8c8a7d">business logic</text>
+  <rect x="60" y="322" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="76" cy="337" r="3.5" fill="#788c5d"/>
+  <text x="88" y="341" font-size="12.5" font-weight="600" fill="#141413">Billing</text>
+  <text x="88" y="357" font-size="9.5" fill="#6b6a5f">invoices · ledger</text>
+  <rect x="306" y="322" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="322" cy="337" r="3.5" fill="#788c5d"/>
+  <text x="334" y="341" font-size="12.5" font-weight="600" fill="#141413">Catalog</text>
+  <text x="334" y="357" font-size="9.5" fill="#6b6a5f">products · pricing</text>
+  <rect x="552" y="322" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="568" cy="337" r="3.5" fill="#788c5d"/>
+  <text x="580" y="341" font-size="12.5" font-weight="600" fill="#141413">Identity</text>
+  <text x="580" y="357" font-size="9.5" fill="#6b6a5f">accounts · roles</text>
+  <rect x="798" y="322" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="814" cy="337" r="3.5" fill="#788c5d"/>
+  <text x="826" y="341" font-size="12.5" font-weight="600" fill="#141413">Reporting</text>
+  <text x="826" y="357" font-size="9.5" fill="#6b6a5f">rollups · exports</text>
+
+  <line x1="540" y1="380" x2="540" y2="396" stroke="#d97757" stroke-width="1.8"/>
+  <polygon points="540,402 534,393 546,393" fill="#d97757"/>
+  <circle cx="566" cy="391" r="9" fill="#d97757"/>
+  <text x="566" y="395" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">3</text>
+
+  <!-- Layer 4: INFRASTRUCTURE (ink) -->
+  <rect x="36" y="404" width="1008" height="92" rx="10" fill="#e7e4d9" stroke="#cfccc0"/>
+  <rect x="36" y="404" width="4" height="92" rx="2" fill="#141413"/>
+  <circle cx="62" cy="426" r="4" fill="#141413"/>
+  <text x="74" y="430" font-size="10.5" font-weight="600" letter-spacing="1.2" fill="#141413">INFRASTRUCTURE</text>
+  <text x="1024" y="430" text-anchor="end" font-size="10" font-style="italic" fill="#8c8a7d">runtime substrate</text>
+  <rect x="60" y="442" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="76" cy="457" r="3.5" fill="#141413"/>
+  <text x="88" y="461" font-size="12.5" font-weight="600" fill="#141413">Database</text>
+  <text x="88" y="477" font-size="9.5" fill="#6b6a5f">Postgres cluster</text>
+  <rect x="306" y="442" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="322" cy="457" r="3.5" fill="#141413"/>
+  <text x="334" y="461" font-size="12.5" font-weight="600" fill="#141413">Storage</text>
+  <text x="334" y="477" font-size="9.5" fill="#6b6a5f">objects · backups</text>
+  <rect x="552" y="442" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="568" cy="457" r="3.5" fill="#141413"/>
+  <text x="580" y="461" font-size="12.5" font-weight="600" fill="#141413">Network</text>
+  <text x="580" y="477" font-size="9.5" fill="#6b6a5f">LB · CDN · DNS</text>
+  <rect x="798" y="442" width="232" height="44" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="814" cy="457" r="3.5" fill="#141413"/>
+  <text x="826" y="461" font-size="12.5" font-weight="600" fill="#141413">Queue</text>
+  <text x="826" y="477" font-size="9.5" fill="#6b6a5f">async jobs</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">architecture · layers</span><span class="lang-zh">架构 · 分层</span></span>
+          <span class="lang-en">Four-layer system map. Each layer is a 16-20% tint container with a 4px color bar; nodes are white cards with solid category dots. Template: <code>templates/diagrams/architecture.svg</code>.</span>
+          <span class="lang-zh">四层系统图。每层是 16-20% tint 容器加 4px 色条，节点是白卡加实心类别色点。模板：<code>templates/diagrams/architecture.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 62 960 180" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif" role="img" aria-label="Pipeline flow: four numbered steps with a decision diamond and a fail loop">
+  <defs>
+    <pattern id="flow-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <filter id="flow-sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/>
+    </filter>
+    <marker id="flow-arrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+    </marker>
+    <marker id="flow-arrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/>
+    </marker>
+  </defs>
+  <rect y="62" width="960" height="180" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect y="62" width="960" height="180" rx="16" fill="url(#flow-dots)"/>
+
+  <!-- happy path -->
+  <g fill="none" stroke="#d97757" stroke-width="1.8">
+    <line x1="206" y1="132" x2="240" y2="132" marker-end="url(#flow-arrO)"/>
+    <line x1="396" y1="132" x2="459" y2="132" marker-end="url(#flow-arrO)"/>
+    <line x1="557" y1="132" x2="589" y2="132" marker-end="url(#flow-arrO)"/>
+    <line x1="745" y1="132" x2="779" y2="132" marker-end="url(#flow-arrO)"/>
+  </g>
+  <text x="573" y="122" font-size="11" font-weight="600" fill="#d97757" text-anchor="middle">pass</text>
+
+  <!-- fail loop -->
+  <path d="M511,168 L511,204 Q511,212 503,212 L329,212 Q321,212 321,204 L321,174" fill="none" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#flow-arrG)"/>
+  <text x="416" y="204" font-size="11" fill="#8c8a7d" text-anchor="middle">fail · retry</text>
+
+  <!-- step cards -->
+  <g filter="url(#flow-sh)">
+    <rect x="56" y="96" width="150" height="72" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="246" y="96" width="150" height="72" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="595" y="96" width="150" height="72" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="785" y="96" width="150" height="72" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+
+  <!-- decision diamond: the only saturated tint block in the diagram -->
+  <path d="M511,90 L557,132 L511,174 L465,132 Z" fill="#f4d9cd" stroke="#d97757" stroke-width="1.5"/>
+  <text x="511" y="136" font-size="12" font-weight="600" fill="#141413" text-anchor="middle">Valid?</text>
+
+  <!-- step 1: Fetch -->
+  <rect x="70" y="118" width="28" height="28" rx="7" fill="#f0ede3"/>
+  <g transform="translate(74,122)" fill="none" stroke="#6b6a5f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 2v9"/><polyline points="6,8 10,12 14,8"/><path d="M3 14v2.5a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5V14"/>
+  </g>
+  <text x="110" y="137" font-size="13" font-weight="600" fill="#141413">Fetch input</text>
+  <!-- step 2: Verify -->
+  <rect x="260" y="118" width="28" height="28" rx="7" fill="#f0ede3"/>
+  <g transform="translate(264,122)" fill="none" stroke="#6b6a5f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 2 L17 5 v5 c0 4.5 -3 7.5 -7 8 -4 -0.5 -7 -3.5 -7 -8 V5 Z"/>
+    <polyline points="6.5,10 9,12.5 13.5,7.5"/>
+  </g>
+  <text x="300" y="137" font-size="13" font-weight="600" fill="#141413">Verify</text>
+  <!-- step 3: Process -->
+  <rect x="609" y="118" width="28" height="28" rx="7" fill="#f0ede3"/>
+  <g transform="translate(613,122)" fill="none" stroke="#6b6a5f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="14" height="14" rx="2"/>
+    <path d="M7 10 l2 2 l4 -5"/>
+  </g>
+  <text x="649" y="137" font-size="13" font-weight="600" fill="#141413">Process</text>
+  <!-- step 4: Publish -->
+  <rect x="799" y="118" width="28" height="28" rx="7" fill="#f0ede3"/>
+  <g transform="translate(803,122)" fill="none" stroke="#6b6a5f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17 3 L3 9 l5.5 2 2 5.5 Z"/><path d="M8.5 11 L17 3"/>
+  </g>
+  <text x="839" y="137" font-size="13" font-weight="600" fill="#141413">Publish</text>
+
+  <!-- numbered badges -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <circle cx="60" cy="100" r="10" fill="#d97757"/><text x="60" y="104" fill="#ffffff">1</text>
+    <circle cx="250" cy="100" r="10" fill="#d97757"/><text x="250" y="104" fill="#ffffff">2</text>
+    <circle cx="599" cy="100" r="10" fill="#d97757"/><text x="599" y="104" fill="#ffffff">3</text>
+    <circle cx="789" cy="100" r="10" fill="#d97757"/><text x="789" y="104" fill="#ffffff">4</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">flow · decision</span><span class="lang-zh">流程 · 决策</span></span>
+          <span class="lang-en">Pipeline with numbered badges, a decision diamond (the only emphasis-tint block in the frame), and a gray fail loop routed below. Template: <code>templates/diagrams/flow.svg</code>.</span>
+          <span class="lang-zh">带编号徽章的流水线，决策菱形是全图唯一的强调 tint 色块，失败回流走图下方灰虚线。模板：<code>templates/diagrams/flow.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg viewBox="0 0 1080 560" role="img" aria-label="Sequence diagram: a chat request flows from client through gateway and worker to the database, responses stream back" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="seq-dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+          <filter id="seq-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/></filter>
+          <marker id="seq-arrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+          <marker id="seq-arrGr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#788c5d"/></marker>
+          <marker id="seq-arrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/></marker>
+        </defs>
+        <rect width="1080" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1080" height="560" rx="16" fill="url(#seq-dots)"/>
+
+        <!-- lifelines -->
+        <g stroke="#d8d4c8" stroke-width="1">
+          <line x1="150" y1="92" x2="150" y2="508"/>
+          <line x1="420" y1="92" x2="420" y2="508"/>
+          <line x1="690" y1="92" x2="690" y2="508"/>
+          <line x1="960" y1="92" x2="960" y2="508"/>
+        </g>
+
+        <!-- activation bars -->
+        <rect x="416" y="152" width="8" height="328" rx="3" fill="#ffffff" stroke="#d97757" stroke-width="0.8"/>
+        <rect x="686" y="216" width="8" height="232" rx="3" fill="#ffffff" stroke="#788c5d" stroke-width="0.8"/>
+        <rect x="956" y="280" width="8" height="72" rx="3" fill="#ffffff" stroke="#c9913f" stroke-width="0.8"/>
+
+        <!-- actor cards -->
+        <g filter="url(#seq-sh)">
+          <rect x="60" y="24" width="180" height="64" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+          <rect x="330" y="24" width="180" height="64" rx="10" fill="#fbeee7" stroke="#d97757" stroke-width="1.5"/>
+          <rect x="600" y="24" width="180" height="64" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+          <rect x="870" y="24" width="180" height="64" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+        </g>
+        <circle cx="84" cy="48" r="3.5" fill="#6a9bcc"/>
+        <text x="96" y="53" font-size="13.5" font-weight="600" fill="#141413">Client</text>
+        <text x="84" y="74" font-size="10.5" fill="#6b6a5f">browser app</text>
+        <circle cx="354" cy="48" r="3.5" fill="#d97757"/>
+        <text x="366" y="53" font-size="13.5" font-weight="600" fill="#141413">Gateway</text>
+        <text x="354" y="74" font-size="10.5" fill="#6b6a5f">auth · rate limit</text>
+        <circle cx="624" cy="48" r="3.5" fill="#788c5d"/>
+        <text x="636" y="53" font-size="13.5" font-weight="600" fill="#141413">Worker</text>
+        <text x="624" y="74" font-size="10.5" fill="#6b6a5f">runs the job</text>
+        <circle cx="894" cy="48" r="3.5" fill="#c9913f"/>
+        <text x="906" y="53" font-size="13.5" font-weight="600" fill="#141413">Postgres</text>
+        <text x="894" y="74" font-size="10.5" fill="#6b6a5f">primary db</text>
+
+        <!-- messages -->
+        <line x1="154" y1="152" x2="412" y2="152" stroke="#d97757" stroke-width="1.8" marker-end="url(#seq-arrO)"/>
+        <text x="285" y="140" font-size="12" fill="#141413" text-anchor="middle">POST /v1/messages</text>
+        <circle cx="170" cy="152" r="9" fill="#d97757"/><text x="170" y="156" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">1</text>
+
+        <line x1="428" y1="216" x2="682" y2="216" stroke="#d97757" stroke-width="1.8" marker-end="url(#seq-arrO)"/>
+        <text x="555" y="204" font-size="12" fill="#141413" text-anchor="middle">schedule(run)</text>
+        <circle cx="444" cy="216" r="9" fill="#d97757"/><text x="444" y="220" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">2</text>
+
+        <line x1="698" y1="280" x2="952" y2="280" stroke="#788c5d" stroke-width="1.8" marker-end="url(#seq-arrGr)"/>
+        <text x="825" y="268" font-size="12" fill="#141413" text-anchor="middle">INSERT run · queued</text>
+        <circle cx="714" cy="280" r="9" fill="#d97757"/><text x="714" y="284" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">3</text>
+
+        <line x1="952" y1="352" x2="698" y2="352" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#seq-arrN)"/>
+        <text x="825" y="340" font-size="11" fill="#6b6a5f" text-anchor="middle">ack · 12 ms</text>
+        <circle cx="936" cy="352" r="9" fill="#d97757"/><text x="936" y="356" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">4</text>
+
+        <line x1="682" y1="416" x2="428" y2="416" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#seq-arrN)"/>
+        <text x="555" y="404" font-size="11" fill="#6b6a5f" text-anchor="middle">stream tokens</text>
+        <circle cx="666" cy="416" r="9" fill="#d97757"/><text x="666" y="420" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">5</text>
+
+        <line x1="412" y1="480" x2="158" y2="480" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#seq-arrN)"/>
+        <text x="285" y="468" font-size="11" fill="#6b6a5f" text-anchor="middle">200 OK · server-sent events</text>
+        <circle cx="396" cy="480" r="9" fill="#d97757"/><text x="396" y="484" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">6</text>
+
+        <!-- legend -->
+        <line x1="60" y1="536" x2="92" y2="536" stroke="#d97757" stroke-width="1.8"/>
+        <text x="100" y="540" font-size="11" fill="#6b6a5f">request</text>
+        <line x1="180" y1="536" x2="212" y2="536" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <text x="220" y="540" font-size="11" fill="#6b6a5f">response</text>
+        <line x1="312" y1="536" x2="344" y2="536" stroke="#788c5d" stroke-width="1.8"/>
+        <text x="352" y="540" font-size="11" fill="#6b6a5f">data write</text>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">sequence · api</span><span class="lang-zh">时序 · API</span></span>
+          <span class="lang-en">A chat request end to end: solid orange for the request chain, green for the data write, dashed gray for responses. Activation bars mark who is busy when; numbered badges give the narration order.</span>
+          <span class="lang-zh">一次对话请求的完整时序：实线橙是请求链，绿色是数据写入，灰虚线是响应。激活条标出谁在何时忙碌，编号徽章给出讲述顺序。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg viewBox="0 0 1040 320" role="img" aria-label="Git graph: main, feature, and hotfix branches with solid commit dots, merges, and a release tag" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="git-dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+        </defs>
+        <rect width="1040" height="320" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1040" height="320" rx="16" fill="url(#git-dots)"/>
+
+        <!-- branch labels -->
+        <text x="32" y="100" font-size="12" font-weight="600" fill="#c2613f">main</text>
+        <text x="32" y="180" font-size="12" font-weight="600" fill="#4a7bab">feature/gallery</text>
+        <text x="32" y="260" font-size="12" font-weight="600" fill="#8a5a2a">hotfix/1.4.2</text>
+
+        <!-- lane lines -->
+        <line x1="170" y1="96" x2="1008" y2="96" stroke="#d97757" stroke-width="2"/>
+        <line x1="420" y1="176" x2="700" y2="176" stroke="#6a9bcc" stroke-width="2"/>
+        <line x1="280" y1="256" x2="480" y2="256" stroke="#c9913f" stroke-width="2"/>
+
+        <!-- branch / merge curves -->
+        <path d="M360,96 C400,96 380,176 420,176" fill="none" stroke="#6a9bcc" stroke-width="2"/>
+        <path d="M700,176 C740,176 720,96 760,96" fill="none" stroke="#6a9bcc" stroke-width="2"/>
+        <path d="M220,96 C260,96 240,256 280,256" fill="none" stroke="#c9913f" stroke-width="2"/>
+        <path d="M480,256 C520,256 560,96 600,96" fill="none" stroke="#c9913f" stroke-width="2"/>
+
+        <!-- commits: solid dots, white core -->
+        <g>
+          <circle cx="220" cy="96" r="8" fill="#d97757"/><circle cx="220" cy="96" r="2.5" fill="#ffffff"/>
+          <circle cx="360" cy="96" r="8" fill="#d97757"/><circle cx="360" cy="96" r="2.5" fill="#ffffff"/>
+          <circle cx="600" cy="96" r="8" fill="#d97757"/><circle cx="600" cy="96" r="2.5" fill="#ffffff"/>
+          <circle cx="760" cy="96" r="8" fill="#d97757"/><circle cx="760" cy="96" r="2.5" fill="#ffffff"/>
+          <circle cx="920" cy="96" r="8" fill="#d97757"/><circle cx="920" cy="96" r="2.5" fill="#ffffff"/>
+          <circle cx="500" cy="176" r="8" fill="#6a9bcc"/><circle cx="500" cy="176" r="2.5" fill="#ffffff"/>
+          <circle cx="620" cy="176" r="8" fill="#6a9bcc"/><circle cx="620" cy="176" r="2.5" fill="#ffffff"/>
+          <circle cx="380" cy="256" r="8" fill="#c9913f"/><circle cx="380" cy="256" r="2.5" fill="#ffffff"/>
+        </g>
+
+        <!-- commit labels -->
+        <g font-size="11" fill="#6b6a5f" text-anchor="middle">
+          <text x="220" y="72">init</text>
+          <text x="360" y="72">scaffold</text>
+          <text x="600" y="72">merge hotfix</text>
+          <text x="760" y="72">merge feature</text>
+          <text x="470" y="204">gallery grid</text>
+          <text x="620" y="204">copy button</text>
+          <text x="380" y="284">fix overflow</text>
+        </g>
+
+        <!-- release tag -->
+        <rect x="896" y="56" width="48" height="22" rx="11" fill="#d97757"/>
+        <text x="920" y="71" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">v1.4</text>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">git graph · history</span><span class="lang-zh">git 图 · 历史</span></span>
+          <span class="lang-en">Three branches, three hues: orange main, blue feature, gold hotfix. Commits are solid dots with a white core; the release tag is the one solid chip — small elements carry the color.</span>
+          <span class="lang-zh">三条分支三个色相：橙 main、蓝 feature、金 hotfix。提交点是带白芯的实心圆，发布标签是唯一的实心色块——颜色由小元素承担。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg viewBox="0 0 960 360" role="img" aria-label="State machine: idle, running, paused, done, and failed states with labeled transitions" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="st-dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+          <filter id="st-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/></filter>
+          <marker id="st-arrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+          <marker id="st-arrGr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#788c5d"/></marker>
+          <marker id="st-arrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6a9bcc"/></marker>
+          <marker id="st-arrAu" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c9913f"/></marker>
+          <marker id="st-arrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/></marker>
+        </defs>
+        <rect width="960" height="360" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="960" height="360" rx="16" fill="url(#st-dots)"/>
+
+        <!-- entry -->
+        <circle cx="56" cy="76" r="7" fill="#d97757"/>
+        <line x1="64" y1="76" x2="96" y2="76" stroke="#d97757" stroke-width="1.8" marker-end="url(#st-arrO)"/>
+
+        <!-- transitions (drawn before cards so cards sit on top of line ends) -->
+        <line x1="250" y1="76" x2="366" y2="76" stroke="#d97757" stroke-width="1.8" marker-end="url(#st-arrO)"/>
+        <line x1="540" y1="76" x2="686" y2="76" stroke="#788c5d" stroke-width="1.8" marker-end="url(#st-arrGr)"/>
+        <line x1="430" y1="104" x2="430" y2="204" stroke="#6a9bcc" stroke-width="1.2" marker-end="url(#st-arrB)"/>
+        <line x1="480" y1="208" x2="480" y2="108" stroke="#6a9bcc" stroke-width="1.2" marker-end="url(#st-arrB)"/>
+        <path d="M510,104 V156 Q510,164 518,164 H732 Q740,164 740,172 V204" fill="none" stroke="#c9913f" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#st-arrAu)"/>
+        <path d="M700,264 V296 Q700,304 692,304 H183 Q175,304 175,296 V108" fill="none" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#st-arrN)"/>
+
+        <!-- transition labels -->
+        <text x="308" y="66" font-size="11" font-weight="600" fill="#c2613f" text-anchor="middle">start</text>
+        <text x="613" y="66" font-size="11" font-weight="600" fill="#5d7045" text-anchor="middle">success</text>
+        <text x="420" y="158" font-size="11" fill="#4a7bab" text-anchor="end">pause</text>
+        <text x="492" y="158" font-size="11" fill="#4a7bab">resume</text>
+        <text x="625" y="154" font-size="11" fill="#8a5a2a" text-anchor="middle">error · retry ≤ 2</text>
+        <text x="437" y="294" font-size="11" fill="#8c8a7d" text-anchor="middle">reset</text>
+
+        <!-- state cards -->
+        <g filter="url(#st-sh)">
+          <rect x="100" y="48" width="150" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+          <rect x="370" y="48" width="170" height="56" rx="10" fill="#fbeee7" stroke="#d97757" stroke-width="1.5"/>
+          <rect x="690" y="48" width="150" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+          <rect x="370" y="208" width="170" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+          <rect x="690" y="208" width="150" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+        </g>
+        <circle cx="122" cy="70" r="3.5" fill="#141413"/>
+        <text x="134" y="75" font-size="13" font-weight="600" fill="#141413">Idle</text>
+        <text x="122" y="93" font-size="10" fill="#6b6a5f">awaiting job</text>
+        <circle cx="392" cy="70" r="3.5" fill="#d97757"/>
+        <text x="404" y="75" font-size="13" font-weight="600" fill="#141413">Running</text>
+        <text x="392" y="93" font-size="10" fill="#6b6a5f">executing steps</text>
+        <circle cx="712" cy="70" r="3.5" fill="#788c5d"/>
+        <text x="724" y="75" font-size="13" font-weight="600" fill="#141413">Done</text>
+        <text x="712" y="93" font-size="10" fill="#6b6a5f">all gates green</text>
+        <circle cx="392" cy="230" r="3.5" fill="#6a9bcc"/>
+        <text x="404" y="235" font-size="13" font-weight="600" fill="#141413">Paused</text>
+        <text x="392" y="253" font-size="10" fill="#6b6a5f">operator hold</text>
+        <circle cx="712" cy="230" r="3.5" fill="#c9913f"/>
+        <text x="724" y="235" font-size="13" font-weight="600" fill="#141413">Failed</text>
+        <text x="712" y="253" font-size="10" fill="#6b6a5f">retries exhausted</text>
+
+        <!-- legend -->
+        <circle cx="420" cy="332" r="4" fill="#6a9bcc"/>
+        <text x="430" y="336" font-size="11" fill="#6b6a5f">operator action</text>
+        <circle cx="564" cy="332" r="4" fill="#d97757"/>
+        <text x="574" y="336" font-size="11" fill="#6b6a5f">active path</text>
+        <circle cx="688" cy="332" r="4" fill="#788c5d"/>
+        <text x="698" y="336" font-size="11" fill="#6b6a5f">terminal · ok</text>
+        <circle cx="820" cy="332" r="4" fill="#c9913f"/>
+        <text x="830" y="336" font-size="11" fill="#6b6a5f">terminal · error</text>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">state machine · lifecycle</span><span class="lang-zh">状态机 · 生命周期</span></span>
+          <span class="lang-en">Run lifecycle as a state machine. The focus state gets the orange tint card; transition lines take the hue of their meaning — green success, blue operator actions, gold errors, gray reset.</span>
+          <span class="lang-zh">任务生命周期状态机。焦点状态用橙 tint 卡；迁移线按语义取色——绿是成功、蓝是人工操作、金是错误、灰是重置。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg viewBox="0 0 1080 528" role="img" aria-label="Deployment topology: edge zone, app cluster, and data zone with replica counts and traffic paths" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="dep-dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+          <filter id="dep-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/></filter>
+          <marker id="dep-arrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+          <marker id="dep-arrGr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#788c5d"/></marker>
+          <marker id="dep-arrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6a9bcc"/></marker>
+        </defs>
+        <rect width="1080" height="528" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1080" height="528" rx="16" fill="url(#dep-dots)"/>
+
+        <!-- EDGE zone -->
+        <rect x="40" y="40" width="1000" height="120" rx="12" fill="#e2ecf5" stroke="#c8d9ea"/>
+        <rect x="40" y="40" width="4" height="120" rx="2" fill="#6a9bcc"/>
+        <circle cx="68" cy="64" r="4" fill="#6a9bcc"/>
+        <text x="80" y="68" font-size="11" font-weight="600" letter-spacing="0.08em" fill="#4a7bab">EDGE</text>
+        <text x="1016" y="68" font-size="10" font-style="italic" fill="#8c8a7d" text-anchor="end">anycast · 12 PoPs</text>
+        <g filter="url(#dep-sh)">
+          <rect x="88" y="80" width="200" height="64" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+          <rect x="328" y="80" width="200" height="64" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+          <rect x="568" y="80" width="200" height="64" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+        </g>
+        <circle cx="110" cy="104" r="3.5" fill="#6a9bcc"/>
+        <text x="122" y="109" font-size="13" font-weight="600" fill="#141413">CDN</text>
+        <text x="110" y="129" font-size="10" fill="#6b6a5f">edge cache · 98% hit</text>
+        <circle cx="350" cy="104" r="3.5" fill="#6a9bcc"/>
+        <text x="362" y="109" font-size="13" font-weight="600" fill="#141413">WAF</text>
+        <text x="350" y="129" font-size="10" fill="#6b6a5f">rules v34</text>
+        <circle cx="590" cy="104" r="3.5" fill="#6a9bcc"/>
+        <text x="602" y="109" font-size="13" font-weight="600" fill="#141413">Load balancer</text>
+        <text x="590" y="129" font-size="10" fill="#6b6a5f">least-conn</text>
+        <line x1="292" y1="112" x2="324" y2="112" stroke="#6a9bcc" stroke-width="1.2" marker-end="url(#dep-arrB)"/>
+        <line x1="532" y1="112" x2="564" y2="112" stroke="#6a9bcc" stroke-width="1.2" marker-end="url(#dep-arrB)"/>
+
+        <!-- APP CLUSTER zone -->
+        <rect x="40" y="200" width="1000" height="152" rx="12" fill="#f7e4dc" stroke="#ecd0c0"/>
+        <rect x="40" y="200" width="4" height="152" rx="2" fill="#d97757"/>
+        <circle cx="68" cy="224" r="4" fill="#d97757"/>
+        <text x="80" y="228" font-size="11" font-weight="600" letter-spacing="0.08em" fill="#c2613f">APP CLUSTER</text>
+        <text x="1016" y="228" font-size="10" font-style="italic" fill="#8c8a7d" text-anchor="end">auto-scale 2-8 nodes</text>
+        <g filter="url(#dep-sh)">
+          <rect x="88" y="244" width="220" height="72" rx="8" fill="#fbeee7" stroke="#d97757" stroke-width="1.5"/>
+          <rect x="368" y="244" width="220" height="72" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+          <rect x="648" y="244" width="220" height="72" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+        </g>
+        <circle cx="110" cy="270" r="3.5" fill="#d97757"/>
+        <text x="122" y="275" font-size="13" font-weight="600" fill="#141413">api</text>
+        <text x="110" y="299" font-size="10" fill="#6b6a5f">REST + SSE</text>
+        <rect x="252" y="258" width="36" height="20" rx="10" fill="#d97757"/>
+        <text x="270" y="272" font-size="10.5" font-weight="600" fill="#ffffff" text-anchor="middle">×3</text>
+        <circle cx="390" cy="270" r="3.5" fill="#d97757"/>
+        <text x="402" y="275" font-size="13" font-weight="600" fill="#141413">worker</text>
+        <text x="390" y="299" font-size="10" fill="#6b6a5f">queue consumer</text>
+        <rect x="532" y="258" width="36" height="20" rx="10" fill="#d97757"/>
+        <text x="550" y="272" font-size="10.5" font-weight="600" fill="#ffffff" text-anchor="middle">×5</text>
+        <circle cx="670" cy="270" r="3.5" fill="#d97757"/>
+        <text x="682" y="275" font-size="13" font-weight="600" fill="#141413">scheduler</text>
+        <text x="670" y="299" font-size="10" fill="#6b6a5f">cron + retries</text>
+        <line x1="648" y1="288" x2="596" y2="288" stroke="#d97757" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#dep-arrO)"/>
+        <text x="622" y="278" font-size="10.5" fill="#6b6a5f" text-anchor="middle">dispatch</text>
+
+        <!-- DATA zone -->
+        <rect x="40" y="392" width="1000" height="104" rx="12" fill="#e5e9dd" stroke="#d3dcc4"/>
+        <rect x="40" y="392" width="4" height="104" rx="2" fill="#788c5d"/>
+        <circle cx="68" cy="416" r="4" fill="#788c5d"/>
+        <text x="80" y="420" font-size="11" font-weight="600" letter-spacing="0.08em" fill="#5d7045">DATA</text>
+        <text x="1016" y="420" font-size="10" font-style="italic" fill="#8c8a7d" text-anchor="end">encrypted at rest</text>
+        <g filter="url(#dep-sh)">
+          <rect x="98" y="424" width="200" height="60" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+          <rect x="368" y="424" width="200" height="60" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+          <rect x="648" y="424" width="200" height="60" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+        </g>
+        <circle cx="120" cy="448" r="3.5" fill="#788c5d"/>
+        <text x="132" y="453" font-size="13" font-weight="600" fill="#141413">Postgres 16</text>
+        <text x="120" y="472" font-size="10" fill="#6b6a5f">primary + replica</text>
+        <circle cx="390" cy="448" r="3.5" fill="#788c5d"/>
+        <text x="402" y="453" font-size="13" font-weight="600" fill="#141413">Redis</text>
+        <text x="390" y="472" font-size="10" fill="#6b6a5f">queues · cache</text>
+        <circle cx="670" cy="448" r="3.5" fill="#788c5d"/>
+        <text x="682" y="453" font-size="13" font-weight="600" fill="#141413">Object store</text>
+        <text x="670" y="472" font-size="10" fill="#6b6a5f">artifacts</text>
+
+        <!-- cross-zone paths -->
+        <path d="M668,144 V176 Q668,184 660,184 H206 Q198,184 198,192 V240" fill="none" stroke="#d97757" stroke-width="1.8" marker-end="url(#dep-arrO)"/>
+        <path d="M198,316 V420" fill="none" stroke="#788c5d" stroke-width="1.8" marker-end="url(#dep-arrGr)"/>
+        <path d="M478,316 V356 Q478,364 470,364 H436 Q428,364 428,372 V420" fill="none" stroke="#788c5d" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#dep-arrGr)"/>
+
+        <!-- legend -->
+        <circle cx="884" cy="510" r="4" fill="#6a9bcc"/>
+        <text x="894" y="514" font-size="11" fill="#6b6a5f">edge</text>
+        <circle cx="944" cy="510" r="4" fill="#d97757"/>
+        <text x="954" y="514" font-size="11" fill="#6b6a5f">compute</text>
+        <circle cx="1024" cy="510" r="4" fill="#788c5d"/>
+        <text x="1034" y="514" font-size="11" fill="#6b6a5f">data</text>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">deployment · topology</span><span class="lang-zh">部署 · 拓扑</span></span>
+          <span class="lang-en">Three zones, three tints, one orange focus card. Replica counts ride as solid chips on the cards; the request path drops orange through the stack while data writes go green.</span>
+          <span class="lang-zh">三个区三种 tint，一张橙色焦点卡。副本数以实心小色块贴在卡上；请求路径橙色贯穿，数据写入走绿色。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== §2 PRODUCT ===================== -->
+<section class="anth-section" id="product" style="background:#ffffff;">
+  <div class="anth-container anth-container--wide">
+    <span class="gal-kicker"><span class="lang-en">02 · for product demos</span><span class="lang-zh">02 · 产品展示</span></span>
+    <h2 style="font-family:var(--font-heading); font-size:34px; font-weight:600; letter-spacing:-0.01em; margin:var(--space-2) 0 0;">
+      <span class="lang-en">Product mocks</span>
+      <span class="lang-zh">产品 mock</span>
+    </h2>
+    <p class="gal-section-note">
+      <span class="lang-en">Window skeletons are the highest-yield figures: a browser frame, a terminal, a phone. Real labels beat gray placeholder bars — give the mock one orange action and let everything else stay quiet.</span>
+      <span class="lang-zh">窗口骨架是性价比最高的图：浏览器框、终端、手机框。真实文字标签比灰色占位条更可信——给 mock 一个橙色动作，其余保持安静。</span>
+    </p>
+
+    <figure class="gal-fig gal-fig--dark">
+      <svg viewBox="0 0 1200 480" role="img" aria-label="Browser window mock: analytics dashboard with sidebar navigation, stat cards, a traffic chart, and a deploy button" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <rect x="8" y="8" width="1184" height="464" rx="12" fill="#ffffff" stroke="#e8e6dc"/>
+        <rect x="8" y="8" width="1184" height="36" rx="12" fill="#f0ede3"/>
+        <rect x="8" y="28" width="1184" height="16" fill="#f0ede3"/>
+        <circle cx="28" cy="26" r="5" fill="#e2857a"/><circle cx="46" cy="26" r="5" fill="#e8c180"/><circle cx="64" cy="26" r="5" fill="#86a35c"/>
+        <rect x="84" y="15" width="1032" height="22" rx="11" fill="#ffffff" stroke="#e8e6dc"/>
+        <text x="104" y="30" font-size="11" fill="#8c8a7d">acme.dev/overview</text>
+
+        <!-- sidebar -->
+        <rect x="8" y="44" width="232" height="428" fill="#faf9f5"/>
+        <text x="32" y="84" font-size="14" font-weight="600" fill="#141413">Acme Cloud</text>
+        <rect x="24" y="106" width="200" height="32" rx="8" fill="#f7e4dc"/>
+        <text x="40" y="127" font-size="12" font-weight="600" fill="#c2613f">Overview</text>
+        <text x="40" y="163" font-size="12" fill="#6b6a5f">Deployments</text>
+        <text x="40" y="195" font-size="12" fill="#6b6a5f">Logs</text>
+        <text x="40" y="227" font-size="12" fill="#6b6a5f">Billing</text>
+
+        <!-- main header -->
+        <text x="280" y="96" font-size="20" font-weight="600" fill="#141413">Production overview</text>
+        <text x="280" y="118" font-size="12" fill="#6b6a5f">Last 30 days · region us-east</text>
+        <rect x="1044" y="78" width="128" height="36" rx="18" fill="#d97757"/>
+        <text x="1108" y="101" font-size="12.5" font-weight="600" fill="#ffffff" text-anchor="middle">Deploy now</text>
+
+        <!-- stat cards -->
+        <rect x="280" y="140" width="272" height="88" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+        <text x="300" y="168" font-size="11" fill="#8c8a7d">Requests</text>
+        <text x="300" y="204" font-size="24" font-weight="700" fill="#141413">4,218,304</text>
+        <text x="532" y="168" font-size="11" font-weight="600" fill="#5d7045" text-anchor="end">+12%</text>
+        <rect x="580" y="140" width="272" height="88" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+        <text x="600" y="168" font-size="11" fill="#8c8a7d">p95 latency</text>
+        <text x="600" y="204" font-size="24" font-weight="700" fill="#141413">182 ms</text>
+        <text x="832" y="168" font-size="11" font-weight="600" fill="#5d7045" text-anchor="end">−9 ms</text>
+        <rect x="880" y="140" width="272" height="88" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+        <text x="900" y="168" font-size="11" fill="#8c8a7d">Error rate</text>
+        <text x="900" y="204" font-size="24" font-weight="700" fill="#141413">0.42%</text>
+        <text x="1132" y="168" font-size="11" font-weight="600" fill="#8a5a2a" text-anchor="end">+0.05</text>
+
+        <!-- traffic chart -->
+        <rect x="280" y="252" width="600" height="200" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+        <text x="300" y="282" font-size="12" font-weight="600" fill="#141413">Traffic</text>
+        <g stroke="#e8e6dc" stroke-width="0.5" stroke-dasharray="2 4">
+          <line x1="300" y1="320" x2="856" y2="320"/>
+          <line x1="300" y1="360" x2="856" y2="360"/>
+          <line x1="300" y1="400" x2="856" y2="400"/>
+        </g>
+        <path d="M300,420 L360,400 L420,408 L480,372 L540,380 L600,344 L660,352 L720,316 L780,324 L840,300 L856,296 L856,428 L300,428 Z" fill="#6a9bcc" fill-opacity="0.12"/>
+        <path d="M300,420 L360,400 L420,408 L480,372 L540,380 L600,344 L660,352 L720,316 L780,324 L840,300 L856,296" fill="none" stroke="#6a9bcc" stroke-width="2"/>
+        <text x="300" y="444" font-size="10.5" fill="#8c8a7d">May 12</text>
+        <text x="578" y="444" font-size="10.5" fill="#8c8a7d" text-anchor="middle">May 26</text>
+        <text x="856" y="444" font-size="10.5" fill="#8c8a7d" text-anchor="end">Jun 9</text>
+
+        <!-- top services -->
+        <rect x="904" y="252" width="268" height="200" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+        <text x="924" y="282" font-size="12" font-weight="600" fill="#141413">Top services</text>
+        <circle cx="930" cy="308" r="4" fill="#6a9bcc"/>
+        <text x="944" y="312" font-size="11.5" fill="#141413">api</text>
+        <text x="1152" y="312" font-size="11.5" font-weight="600" fill="#141413" text-anchor="end">42%</text>
+        <circle cx="930" cy="344" r="4" fill="#d97757"/>
+        <text x="944" y="348" font-size="11.5" fill="#141413">worker</text>
+        <text x="1152" y="348" font-size="11.5" font-weight="600" fill="#141413" text-anchor="end">31%</text>
+        <circle cx="930" cy="380" r="4" fill="#788c5d"/>
+        <text x="944" y="384" font-size="11.5" fill="#141413">web</text>
+        <text x="1152" y="384" font-size="11.5" font-weight="600" fill="#141413" text-anchor="end">18%</text>
+        <circle cx="930" cy="416" r="4" fill="#c9913f"/>
+        <text x="944" y="420" font-size="11.5" fill="#141413">cron</text>
+        <text x="1152" y="420" font-size="11.5" font-weight="600" fill="#141413" text-anchor="end">9%</text>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">browser mock · saas</span><span class="lang-zh">浏览器 mock · SaaS</span></span>
+          <span class="lang-en">The §10 browser skeleton with a real product inside: cream sidebar with one orange-tint active item, stat cards with real numbers, a single blue chart series, one orange CTA.</span>
+          <span class="lang-zh">§10 浏览器骨架装进真实产品：奶白侧栏配一个橙 tint 选中项，stat 卡用真实数字，图表只用一条蓝色系列，唯一的橙色 CTA。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <div class="gal-pair gal-pair--terminal">
+      <figure class="gal-fig gal-fig--dark" style="margin:0;">
+        <svg viewBox="0 0 900 400" role="img" aria-label="Terminal window mock: design-review gates passing, then a git commit" font-family="'JetBrains Mono', ui-monospace, monospace">
+          <rect width="900" height="400" rx="12" fill="#141413"/>
+          <rect width="900" height="32" rx="12" fill="#2a2a28"/>
+          <rect y="20" width="900" height="12" fill="#2a2a28"/>
+          <circle cx="24" cy="16" r="5" fill="#e2857a"/><circle cx="44" cy="16" r="5" fill="#e8c180"/><circle cx="64" cy="16" r="5" fill="#86a35c"/>
+          <text x="450" y="21" font-size="13" fill="#8c8a7d" text-anchor="middle">design-review — zsh</text>
+          <text x="24" y="72" font-size="13" fill="#86a35c">➜</text>
+          <text x="48" y="72" font-size="13" fill="#ffffff">bin/design-review --critic demos/anthropic-design/diagrams.html</text>
+          <text x="48" y="104" font-size="13" fill="#8c8a7d">verify.py ............ OK   (32 checks · bilingual pass)</text>
+          <text x="48" y="132" font-size="13" fill="#8c8a7d">visual-audit ......... OK   (0 errors · 0 warnings)</text>
+          <text x="48" y="160" font-size="13" fill="#8c8a7d">screenshot ........... shots/diagrams-2026-06-11.png</text>
+          <text x="48" y="188" font-size="13" fill="#d97757">critic ............... 93 / 100 — ship it</text>
+          <text x="24" y="232" font-size="13" fill="#86a35c">➜</text>
+          <text x="48" y="232" font-size="13" fill="#ffffff">git commit -m 'feat: diagram gallery'</text>
+          <text x="48" y="260" font-size="13" fill="#8c8a7d">[main 5f2c81a] feat: diagram gallery</text>
+          <text x="48" y="288" font-size="13" fill="#8c8a7d">3 files changed, 1841 insertions(+)</text>
+          <text x="24" y="336" font-size="13" fill="#86a35c">➜</text>
+          <rect x="48" y="324" width="10" height="16" fill="#86a35c"/>
+        </svg>
+        <figcaption class="gal-cap">
+          <span class="gal-cap-text">
+            <span class="gal-tag"><span class="lang-en">terminal mock · cli</span><span class="lang-zh">终端 mock · CLI</span></span>
+            <span class="lang-en">Dark panel, mono type, green prompt, one orange line for the verdict. The legal use of a dark fill: neutral ink, not a saturated hue.</span>
+            <span class="lang-zh">深底、等宽字、绿色提示符，结论行给橙色。深色满填合法的前提：中性墨色，不是饱和色相。</span>
+          </span>
+          <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+        </figcaption>
+      </figure>
+
+      <figure class="gal-fig" style="margin:0;">
+        <svg viewBox="0 0 380 720" role="img" aria-label="Phone mock: a runs inbox with avatars, search, and a tab bar" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+          <rect x="10" y="10" width="360" height="700" rx="40" fill="#ffffff" stroke="#141413" stroke-width="2"/>
+          <rect x="26" y="26" width="328" height="668" rx="28" fill="#faf9f5"/>
+          <rect x="160" y="42" width="60" height="6" rx="3" fill="#e3e0d4"/>
+          <text x="46" y="84" font-size="12" font-weight="600" fill="#141413">9:41</text>
+          <rect x="306" y="74" width="24" height="11" rx="3" fill="none" stroke="#8c8a7d"/>
+          <rect x="308" y="76" width="16" height="7" rx="1.5" fill="#8c8a7d"/>
+          <text x="46" y="132" font-size="22" font-weight="600" fill="#141413">Runs</text>
+          <circle cx="318" cy="124" r="12" fill="#d97757"/>
+          <text x="318" y="129" font-size="12" font-weight="600" fill="#ffffff" text-anchor="middle">3</text>
+          <rect x="46" y="152" width="288" height="36" rx="18" fill="#ffffff" stroke="#e3e0d4"/>
+          <text x="66" y="175" font-size="12" fill="#8c8a7d">Search runs</text>
+
+          <circle cx="70" cy="232" r="18" fill="#6a9bcc"/>
+          <text x="70" y="237" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">A</text>
+          <text x="102" y="228" font-size="13" font-weight="600" fill="#141413">api · run #4821</text>
+          <text x="102" y="247" font-size="12" fill="#6b6a5f">passed · 2m 14s</text>
+          <line x1="46" y1="268" x2="334" y2="268" stroke="#eceadf"/>
+          <circle cx="70" cy="312" r="18" fill="#d97757"/>
+          <text x="70" y="317" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">W</text>
+          <text x="102" y="308" font-size="13" font-weight="600" fill="#141413">worker · run #4820</text>
+          <text x="102" y="327" font-size="12" fill="#6b6a5f">running · step 3 / 7</text>
+          <line x1="46" y1="348" x2="334" y2="348" stroke="#eceadf"/>
+          <circle cx="70" cy="392" r="18" fill="#788c5d"/>
+          <text x="70" y="397" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">G</text>
+          <text x="102" y="388" font-size="13" font-weight="600" fill="#141413">gallery · run #4819</text>
+          <text x="102" y="407" font-size="12" fill="#6b6a5f">passed · 4m 02s</text>
+          <line x1="46" y1="428" x2="334" y2="428" stroke="#eceadf"/>
+          <circle cx="70" cy="472" r="18" fill="#c9913f"/>
+          <text x="70" y="477" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">D</text>
+          <text x="102" y="468" font-size="13" font-weight="600" fill="#141413">docs · run #4818</text>
+          <text x="102" y="487" font-size="12" fill="#6b6a5f">retried · flaky gate</text>
+
+          <line x1="26" y1="630" x2="354" y2="630" stroke="#e3e0d4"/>
+          <g fill="none" stroke="#8c8a7d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M112 668 l8 -8 8 8 M114 666 v10 h12 v-10"/>
+          </g>
+          <g fill="none" stroke="#d97757" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M182 662 h16 M182 668 h16 M182 674 h16"/>
+          </g>
+          <g fill="none" stroke="#8c8a7d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="260" cy="668" r="7"/>
+            <path d="M260 658 v3 M260 675 v3 M250 668 h3 M267 668 h3"/>
+          </g>
+          <text x="120" y="694" font-size="12" fill="#8c8a7d" text-anchor="middle">Home</text>
+          <text x="190" y="694" font-size="12" font-weight="600" fill="#c2613f" text-anchor="middle">Runs</text>
+          <text x="260" y="694" font-size="12" fill="#8c8a7d" text-anchor="middle">Settings</text>
+        </svg>
+        <figcaption class="gal-cap">
+          <span class="gal-cap-text">
+            <span class="gal-tag"><span class="lang-en">phone mock · mobile</span><span class="lang-zh">手机 mock · 移动端</span></span>
+            <span class="lang-en">Line-art frame, cream screen, solid avatar circles carrying the four category hues. The active tab is the only orange text.</span>
+            <span class="lang-zh">线稿外框、奶白屏幕，实心头像圆承担四个类别色。选中 tab 是唯一的橙色文字。</span>
+          </span>
+          <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+        </figcaption>
+      </figure>
+    </div>
+
+    <figure class="gal-fig gal-fig--dark" style="margin-top:var(--space-6);">
+      <svg viewBox="0 0 1160 420" role="img" aria-label="Before and after comparison: a cluttered settings page beside the redesigned page, with the improvement called out between them" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <text x="60" y="32" font-size="11" font-weight="600" letter-spacing="0.12em" fill="#6b6a5f">BEFORE</text>
+        <rect x="60" y="44" width="460" height="340" rx="12" fill="#ffffff" stroke="#e3e0d4"/>
+        <rect x="60" y="44" width="460" height="32" rx="12" fill="#f0ede3"/>
+        <rect x="60" y="62" width="460" height="14" fill="#f0ede3"/>
+        <circle cx="78" cy="60" r="4" fill="#e2857a"/><circle cx="94" cy="60" r="4" fill="#e8c180"/><circle cx="110" cy="60" r="4" fill="#86a35c"/>
+        <g fill="#eceadf">
+          <rect x="84" y="100" width="412" height="9" rx="4"/>
+          <rect x="84" y="118" width="380" height="9" rx="4"/>
+          <rect x="84" y="136" width="404" height="9" rx="4"/>
+          <rect x="84" y="154" width="356" height="9" rx="4"/>
+          <rect x="84" y="172" width="412" height="9" rx="4"/>
+          <rect x="84" y="190" width="332" height="9" rx="4"/>
+          <rect x="84" y="208" width="396" height="9" rx="4"/>
+          <rect x="84" y="226" width="372" height="9" rx="4"/>
+          <rect x="84" y="244" width="412" height="9" rx="4"/>
+          <rect x="84" y="262" width="348" height="9" rx="4"/>
+          <rect x="84" y="280" width="404" height="9" rx="4"/>
+          <rect x="84" y="298" width="380" height="9" rx="4"/>
+        </g>
+        <rect x="84" y="324" width="72" height="24" rx="12" fill="#e2857a"/>
+        <text x="120" y="340" font-size="10.5" font-weight="600" fill="#ffffff" text-anchor="middle">3 errors</text>
+
+        <circle cx="580" cy="200" r="24" fill="#d97757"/>
+        <text x="580" y="205" font-size="12" font-weight="600" fill="#ffffff" text-anchor="middle">−38%</text>
+        <text x="580" y="244" font-size="10.5" fill="#6b6a5f" text-anchor="middle">time to answer</text>
+
+        <text x="640" y="32" font-size="11" font-weight="600" letter-spacing="0.12em" fill="#6b6a5f">AFTER</text>
+        <rect x="640" y="44" width="460" height="340" rx="12" fill="#ffffff" stroke="#e3e0d4"/>
+        <rect x="640" y="44" width="460" height="32" rx="12" fill="#f0ede3"/>
+        <rect x="640" y="62" width="460" height="14" fill="#f0ede3"/>
+        <circle cx="658" cy="60" r="4" fill="#e2857a"/><circle cx="674" cy="60" r="4" fill="#e8c180"/><circle cx="690" cy="60" r="4" fill="#86a35c"/>
+        <rect x="664" y="100" width="220" height="14" rx="6" fill="#141413"/>
+        <rect x="664" y="130" width="380" height="9" rx="4" fill="#eceadf"/>
+        <rect x="664" y="148" width="344" height="9" rx="4" fill="#eceadf"/>
+        <circle cx="672" cy="196" r="5" fill="#788c5d"/>
+        <text x="688" y="200" font-size="12" fill="#141413">One setting per row</text>
+        <circle cx="672" cy="232" r="5" fill="#788c5d"/>
+        <text x="688" y="236" font-size="12" fill="#141413">Defaults that explain themselves</text>
+        <circle cx="672" cy="268" r="5" fill="#788c5d"/>
+        <text x="688" y="272" font-size="12" fill="#141413">Search across every panel</text>
+        <rect x="664" y="312" width="120" height="32" rx="16" fill="#d97757"/>
+        <text x="724" y="333" font-size="12" font-weight="600" fill="#ffffff" text-anchor="middle">Save changes</text>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">before / after · redesign</span><span class="lang-zh">前后对比 · 改版</span></span>
+          <span class="lang-en">Two window minis and one solid badge between them stating the measured win. The before side earns its clutter; the after side earns its calm.</span>
+          <span class="lang-zh">两个迷你窗口，中间一枚实心徽章写明可度量的收益。改版前的拥挤和改版后的克制都画到位，对比才成立。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig gal-fig--dark">
+      <svg viewBox="0 0 1200 420" role="img" aria-label="Operations dashboard mock: four stat cards, a deploy frequency bar chart, and a run share donut with legend" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <rect x="8" y="8" width="1184" height="404" rx="12" fill="#ffffff" stroke="#e8e6dc"/>
+        <rect x="8" y="8" width="1184" height="36" rx="12" fill="#f0ede3"/>
+        <rect x="8" y="28" width="1184" height="16" fill="#f0ede3"/>
+        <circle cx="28" cy="26" r="5" fill="#e2857a"/><circle cx="46" cy="26" r="5" fill="#e8c180"/><circle cx="64" cy="26" r="5" fill="#86a35c"/>
+        <rect x="84" y="15" width="1032" height="22" rx="11" fill="#ffffff" stroke="#e8e6dc"/>
+        <text x="104" y="30" font-size="11" fill="#8c8a7d">ops.acme.dev/board</text>
+
+        <rect x="32" y="64" width="272" height="84" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+        <text x="52" y="92" font-size="11" fill="#8c8a7d">Deploys this week</text>
+        <text x="52" y="126" font-size="24" font-weight="700" fill="#141413">38</text>
+        <text x="284" y="92" font-size="11" font-weight="600" fill="#5d7045" text-anchor="end">+6</text>
+        <rect x="328" y="64" width="272" height="84" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+        <text x="348" y="92" font-size="11" fill="#8c8a7d">Change failure rate</text>
+        <text x="348" y="126" font-size="24" font-weight="700" fill="#141413">2.1%</text>
+        <text x="580" y="92" font-size="11" font-weight="600" fill="#5d7045" text-anchor="end">−0.4</text>
+        <rect x="624" y="64" width="272" height="84" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+        <text x="644" y="92" font-size="11" fill="#8c8a7d">MTTR</text>
+        <text x="644" y="126" font-size="24" font-weight="700" fill="#141413">14 min</text>
+        <text x="876" y="92" font-size="11" font-weight="600" fill="#5d7045" text-anchor="end">−3 min</text>
+        <rect x="920" y="64" width="252" height="84" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+        <text x="940" y="92" font-size="11" fill="#8c8a7d">Queue depth</text>
+        <text x="940" y="126" font-size="24" font-weight="700" fill="#141413">112</text>
+        <text x="1152" y="92" font-size="11" font-weight="600" fill="#8a5a2a" text-anchor="end">+18</text>
+
+        <rect x="32" y="172" width="560" height="216" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+        <text x="52" y="202" font-size="12" font-weight="600" fill="#141413">Deploys per day</text>
+        <line x1="52" y1="348" x2="572" y2="348" stroke="#b0aea5" stroke-width="0.5"/>
+        <g stroke="#e8e6dc" stroke-width="0.5" stroke-dasharray="2 4">
+          <line x1="52" y1="296" x2="572" y2="296"/>
+          <line x1="52" y1="244" x2="572" y2="244"/>
+        </g>
+        <g fill="#6a9bcc">
+          <rect x="76" y="288" width="44" height="60" rx="4"/>
+          <rect x="148" y="268" width="44" height="80" rx="4"/>
+          <rect x="220" y="280" width="44" height="68" rx="4"/>
+          <rect x="292" y="248" width="44" height="100" rx="4"/>
+          <rect x="436" y="240" width="44" height="108" rx="4"/>
+          <rect x="508" y="256" width="44" height="92" rx="4"/>
+        </g>
+        <rect x="364" y="216" width="44" height="132" rx="4" fill="#d97757"/>
+        <text x="386" y="206" font-size="10.5" font-weight="600" fill="#c2613f" text-anchor="middle">peak 11</text>
+        <g font-size="10.5" fill="#8c8a7d" text-anchor="middle">
+          <text x="98" y="366">Mon</text>
+          <text x="242" y="366">Wed</text>
+          <text x="386" y="366">Fri</text>
+          <text x="530" y="366">Sun</text>
+        </g>
+
+        <rect x="616" y="172" width="556" height="216" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+        <text x="636" y="202" font-size="12" font-weight="600" fill="#141413">Run share by service</text>
+        <g transform="rotate(-90 756 292)">
+          <circle cx="756" cy="292" r="52" fill="none" stroke="#e8e6dc" stroke-width="20"/>
+          <circle cx="756" cy="292" r="52" fill="none" stroke="#6a9bcc" stroke-width="20" stroke-dasharray="147 326.7" stroke-dashoffset="0"/>
+          <circle cx="756" cy="292" r="52" fill="none" stroke="#788c5d" stroke-width="20" stroke-dasharray="98 326.7" stroke-dashoffset="-147"/>
+          <circle cx="756" cy="292" r="52" fill="none" stroke="#c9913f" stroke-width="20" stroke-dasharray="49 326.7" stroke-dashoffset="-245"/>
+          <circle cx="756" cy="292" r="52" fill="none" stroke="#d97757" stroke-width="20" stroke-dasharray="32.7 326.7" stroke-dashoffset="-294"/>
+        </g>
+        <text x="756" y="290" font-size="16" font-weight="700" fill="#141413" text-anchor="middle">12.4k</text>
+        <text x="756" y="308" font-size="10.5" fill="#8c8a7d" text-anchor="middle">runs / week</text>
+        <circle cx="884" cy="240" r="4" fill="#6a9bcc"/>
+        <text x="898" y="244" font-size="12" fill="#141413">api</text>
+        <text x="1120" y="244" font-size="12" font-weight="600" fill="#141413" text-anchor="end">45%</text>
+        <circle cx="884" cy="272" r="4" fill="#788c5d"/>
+        <text x="898" y="276" font-size="12" fill="#141413">web</text>
+        <text x="1120" y="276" font-size="12" font-weight="600" fill="#141413" text-anchor="end">30%</text>
+        <circle cx="884" cy="304" r="4" fill="#c9913f"/>
+        <text x="898" y="308" font-size="12" fill="#141413">cron</text>
+        <text x="1120" y="308" font-size="12" font-weight="600" fill="#141413" text-anchor="end">15%</text>
+        <circle cx="884" cy="336" r="4" fill="#d97757"/>
+        <text x="898" y="340" font-size="12" fill="#141413">batch</text>
+        <text x="1120" y="340" font-size="12" font-weight="600" fill="#141413" text-anchor="end">10%</text>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">dashboard mock · ops</span><span class="lang-zh">仪表盘 mock · 运维</span></span>
+          <span class="lang-en">Stat cards on top, one chart per question below. Bars stay blue except the single orange peak; the donut splits by the four category hues with its legend on the right.</span>
+          <span class="lang-zh">上排 stat 卡，下面一图回答一个问题。柱子保持蓝色，只给峰值一根橙柱；环图按四个类别色切分，图例放右侧。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== §3 REPORTING ===================== -->
+<section class="anth-section" id="reporting">
+  <div class="anth-container anth-container--wide">
+    <span class="gal-kicker"><span class="lang-en">03 · for talks &amp; reports</span><span class="lang-zh">03 · 演讲与汇报</span></span>
+    <h2 style="font-family:var(--font-heading); font-size:34px; font-weight:600; letter-spacing:-0.01em; margin:var(--space-2) 0 0;">
+      <span class="lang-en">Slides and reporting</span>
+      <span class="lang-zh">演讲汇报图</span>
+    </h2>
+    <p class="gal-section-note">
+      <span class="lang-en">A slide gets one idea per figure: a big number, a single highlighted bar, a roadmap with today marked. Charts default to soft blue; orange appears once, where you want the room to look.</span>
+      <span class="lang-zh">一页幻灯片一个观点：大数字、单根高亮柱、标出"今天"的路线图。图表默认柔蓝；橙色只出现一次，落在你想让全场看的地方。</span>
+    </p>
+
+    <div class="gal-pair gal-pair--stats">
+      <div class="gal-stats">
+        <div class="anth-stat">
+          <span class="anth-stat-number">92%</span>
+          <span class="anth-stat-label"><span class="lang-en">of pages ship with at least one diagram</span><span class="lang-zh">的页面至少带一张图发布</span></span>
+        </div>
+        <div class="anth-stat">
+          <span class="anth-stat-number">4×</span>
+          <span class="anth-stat-label"><span class="lang-en">faster review when the claim is drawn, not described</span><span class="lang-zh">评审提速——观点画出来而不是写出来</span></span>
+        </div>
+        <div class="anth-stat">
+          <span class="anth-stat-number">16</span>
+          <span class="anth-stat-label"><span class="lang-en">copy-ready figures in this gallery</span><span class="lang-zh">张可直接复制的图在本页</span></span>
+        </div>
+      </div>
+      <figure class="gal-fig" style="margin:0;">
+        <svg viewBox="0 0 720 300" role="img" aria-label="Bar chart: deploys per month, June highlighted in orange" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+          <text x="48" y="40" font-size="11" fill="#8c8a7d">deploys / month</text>
+          <g stroke="#e8e6dc" stroke-width="0.5" stroke-dasharray="2 4">
+            <line x1="48" y1="200" x2="688" y2="200"/>
+            <line x1="48" y1="140" x2="688" y2="140"/>
+            <line x1="48" y1="80" x2="688" y2="80"/>
+          </g>
+          <line x1="48" y1="260" x2="688" y2="260" stroke="#b0aea5" stroke-width="0.5"/>
+          <g fill="#6a9bcc">
+            <rect x="72" y="164" width="64" height="96" rx="4"/>
+            <rect x="176" y="110" width="64" height="150" rx="4"/>
+            <rect x="280" y="140" width="64" height="120" rx="4"/>
+            <rect x="384" y="80" width="64" height="180" rx="4"/>
+            <rect x="488" y="50" width="64" height="210" rx="4"/>
+          </g>
+          <rect x="592" y="90" width="64" height="170" rx="4" fill="#d97757"/>
+          <g font-size="12" fill="#141413" text-anchor="middle" font-weight="600">
+            <text x="104" y="152">96</text>
+            <text x="208" y="98">150</text>
+            <text x="312" y="128">120</text>
+            <text x="416" y="68">180</text>
+            <text x="520" y="38">210</text>
+            <text x="624" y="78" fill="#c2613f">170</text>
+          </g>
+          <g font-size="12" fill="#6b6a5f" text-anchor="middle">
+            <text x="104" y="282">Jan</text>
+            <text x="208" y="282">Feb</text>
+            <text x="312" y="282">Mar</text>
+            <text x="416" y="282">Apr</text>
+            <text x="520" y="282">May</text>
+            <text x="624" y="282">Jun</text>
+          </g>
+        </svg>
+        <figcaption class="gal-cap">
+          <span class="gal-cap-text">
+            <span class="gal-tag"><span class="lang-en">stat + bars · single series</span><span class="lang-zh">stat + 柱图 · 单系列</span></span>
+            <span class="lang-en">Big numbers carry the claim; the chart backs it. Single-series charts stay blue — the one orange bar is this month's story.</span>
+            <span class="lang-zh">大数字陈述观点，图表提供证据。单系列图保持蓝色——唯一的橙柱就是本月的故事。</span>
+          </span>
+          <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+        </figcaption>
+      </figure>
+    </div>
+
+    <figure class="gal-fig" style="margin-top:var(--space-6);">
+      <svg viewBox="0 0 1040 220" role="img" aria-label="Roadmap timeline: four quarters in four hues with milestones and a today marker" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="rm-dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+        </defs>
+        <rect width="1040" height="220" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1040" height="220" rx="16" fill="url(#rm-dots)"/>
+
+        <line x1="860" y1="56" x2="860" y2="136" stroke="#a8a496" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="860" y="44" font-size="10.5" fill="#6b6a5f" text-anchor="middle">today</text>
+
+        <line x1="60" y1="120" x2="300" y2="120" stroke="#6a9bcc" stroke-width="3"/>
+        <line x1="300" y1="120" x2="540" y2="120" stroke="#d97757" stroke-width="3"/>
+        <line x1="540" y1="120" x2="780" y2="120" stroke="#788c5d" stroke-width="3"/>
+        <line x1="780" y1="120" x2="1000" y2="120" stroke="#c9913f" stroke-width="3"/>
+
+        <circle cx="120" cy="120" r="7" fill="#6a9bcc"/>
+        <circle cx="240" cy="120" r="7" fill="#6a9bcc"/>
+        <circle cx="360" cy="120" r="7" fill="#d97757"/>
+        <circle cx="480" cy="120" r="7" fill="#d97757"/>
+        <circle cx="600" cy="120" r="7" fill="#788c5d"/>
+        <circle cx="720" cy="120" r="7" fill="#788c5d"/>
+        <circle cx="840" cy="120" r="7" fill="#c9913f"/>
+        <circle cx="944" cy="120" r="7" fill="#ffffff" stroke="#c9913f" stroke-width="1.6"/>
+
+        <g font-size="10.5" fill="#6b6a5f" text-anchor="middle">
+          <text x="120" y="96">design tokens</text>
+          <text x="240" y="72">four gates</text>
+          <text x="360" y="96">16 canonicals</text>
+          <text x="480" y="72">diagram craft</text>
+          <text x="600" y="96">multi-critic</text>
+          <text x="720" y="72">learning loop</text>
+          <text x="832" y="96">gallery</text>
+          <text x="944" y="72">v2.0</text>
+        </g>
+
+        <g font-size="11" font-weight="600" text-anchor="middle">
+          <text x="180" y="152" fill="#4a7bab">Q1 · foundations</text>
+          <text x="420" y="152" fill="#c2613f">Q2 · canonical library</text>
+          <text x="660" y="152" fill="#5d7045">Q3 · evaluators</text>
+          <text x="890" y="152" fill="#8a5a2a">Q4 · scale-out</text>
+        </g>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">roadmap · quarters</span><span class="lang-zh">路线图 · 季度</span></span>
+          <span class="lang-en">One hue per quarter, solid dots for shipped milestones, a hollow dot for the one still ahead, and a dashed line marking today. Hollow means upcoming — the only place rings are allowed.</span>
+          <span class="lang-zh">一个季度一个色相，已交付的里程碑用实心点，唯一未到的用空心点，虚线标出今天。空心只表示"未来"——这是环形唯一被允许的位置。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <div class="gal-pair" style="margin-top:var(--space-6);">
+      <figure class="gal-fig" style="margin:0;">
+        <svg viewBox="0 0 560 300" role="img" aria-label="Grouped bar chart comparing 2025 and 2026 across four quarters" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+          <rect x="396" y="22" width="12" height="12" rx="2" fill="#6a9bcc"/>
+          <text x="414" y="32" font-size="12" fill="#141413">2025</text>
+          <rect x="472" y="22" width="12" height="12" rx="2" fill="#788c5d"/>
+          <text x="490" y="32" font-size="12" fill="#141413">2026</text>
+          <g stroke="#e8e6dc" stroke-width="0.5" stroke-dasharray="2 4">
+            <line x1="40" y1="196" x2="528" y2="196"/>
+            <line x1="40" y1="140" x2="528" y2="140"/>
+            <line x1="40" y1="84" x2="528" y2="84"/>
+          </g>
+          <line x1="40" y1="252" x2="528" y2="252" stroke="#b0aea5" stroke-width="0.5"/>
+          <g fill="#6a9bcc">
+            <rect x="64" y="164" width="32" height="88" rx="4"/>
+            <rect x="184" y="136" width="32" height="116" rx="4"/>
+            <rect x="304" y="120" width="32" height="132" rx="4"/>
+            <rect x="424" y="100" width="32" height="152" rx="4"/>
+          </g>
+          <g fill="#788c5d">
+            <rect x="104" y="148" width="32" height="104" rx="4"/>
+            <rect x="224" y="124" width="32" height="128" rx="4"/>
+            <rect x="344" y="96" width="32" height="156" rx="4"/>
+            <rect x="464" y="64" width="32" height="188" rx="4"/>
+          </g>
+          <text x="480" y="52" font-size="11.5" font-weight="600" fill="#5d7045" text-anchor="middle">+24%</text>
+          <g font-size="12" fill="#6b6a5f" text-anchor="middle">
+            <text x="100" y="276">Q1</text>
+            <text x="220" y="276">Q2</text>
+            <text x="340" y="276">Q3</text>
+            <text x="460" y="276">Q4</text>
+          </g>
+        </svg>
+        <figcaption class="gal-cap">
+          <span class="gal-cap-text">
+            <span class="gal-tag"><span class="lang-en">grouped bars · yoy</span><span class="lang-zh">分组柱图 · 同比</span></span>
+            <span class="lang-en">Two series, two hues, legend on top where the eye starts. The only annotation sits on the bar that closes the argument.</span>
+            <span class="lang-zh">两个系列两个色相，图例放顶部。唯一的标注落在收尾论点的那根柱子上。</span>
+          </span>
+          <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+        </figcaption>
+      </figure>
+
+      <figure class="gal-fig" style="margin:0;">
+        <svg viewBox="0 0 560 300" role="img" aria-label="Stage conversion chart: visitors to paid, with conversion rates between stages" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+          <rect x="40" y="24" width="488" height="44" rx="8" fill="#e2ecf5"/>
+          <rect x="40" y="24" width="4" height="44" rx="2" fill="#6a9bcc"/>
+          <text x="58" y="51" font-size="12.5" font-weight="600" fill="#141413">Visitors</text>
+          <text x="512" y="51" font-size="12" font-weight="600" fill="#4a7bab" text-anchor="end">48,200</text>
+          <rect x="160" y="76" width="56" height="20" rx="10" fill="#d97757"/>
+          <text x="188" y="90" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">42%</text>
+          <rect x="40" y="100" width="360" height="44" rx="8" fill="#f7e4dc"/>
+          <rect x="40" y="100" width="4" height="44" rx="2" fill="#d97757"/>
+          <text x="58" y="127" font-size="12.5" font-weight="600" fill="#141413">Signed up</text>
+          <text x="384" y="127" font-size="12" font-weight="600" fill="#c2613f" text-anchor="end">20,250</text>
+          <rect x="130" y="152" width="56" height="20" rx="10" fill="#788c5d"/>
+          <text x="158" y="166" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">67%</text>
+          <rect x="40" y="176" width="252" height="44" rx="8" fill="#e5e9dd"/>
+          <rect x="40" y="176" width="4" height="44" rx="2" fill="#788c5d"/>
+          <text x="58" y="203" font-size="12.5" font-weight="600" fill="#141413">Activated</text>
+          <text x="276" y="203" font-size="12" font-weight="600" fill="#5d7045" text-anchor="end">13,500</text>
+          <rect x="100" y="228" width="56" height="20" rx="10" fill="#c9913f"/>
+          <text x="128" y="242" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">32%</text>
+          <rect x="40" y="252" width="140" height="44" rx="8" fill="#f0e4d8"/>
+          <rect x="40" y="252" width="4" height="44" rx="2" fill="#c9913f"/>
+          <text x="58" y="279" font-size="12.5" font-weight="600" fill="#141413">Paid</text>
+          <text x="164" y="279" font-size="12" font-weight="600" fill="#8a5a2a" text-anchor="end">4,340</text>
+        </svg>
+        <figcaption class="gal-cap">
+          <span class="gal-cap-text">
+            <span class="gal-tag"><span class="lang-en">stages · conversion</span><span class="lang-zh">阶段转化 · 分层</span></span>
+            <span class="lang-en">Each stage is a tint bar with its solid edge; the conversion rate between stages rides as a solid chip. Bar length is the data — no decoration needed.</span>
+            <span class="lang-zh">每一层是 tint 横条加实心色边，层间转化率用实心小色块标注。条的长度就是数据本身，不需要任何装饰。</span>
+          </span>
+          <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+        </figcaption>
+      </figure>
+    </div>
+
+    <figure class="gal-fig" style="margin-top:var(--space-6);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 360" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif" role="img" aria-label="Hierarchy: focal coordinator card fanning out to four worker cards, connectors colored by category">
+  <defs>
+    <pattern id="hier-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <filter id="hier-sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/>
+    </filter>
+    <marker id="hier-arrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6a9bcc"/>
+    </marker>
+    <marker id="hier-arrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#788c5d"/>
+    </marker>
+  </defs>
+  <rect width="880" height="360" rx="14" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="880" height="360" rx="14" fill="url(#hier-dots)"/>
+
+  <!-- fan-out connectors (edge anchors on coordinator bottom) -->
+  <g fill="none">
+    <path d="M380,124 L380,160 Q380,168 372,168 L151,168 Q143,168 143,176 L143,226" stroke="#6a9bcc" stroke-width="1.5" marker-end="url(#hier-arrB)"/>
+    <path d="M420,124 L420,184 Q420,192 412,192 L359,192 Q351,192 351,200 L351,226" stroke="#6a9bcc" stroke-width="1.5" marker-end="url(#hier-arrB)"/>
+    <path d="M460,124 L460,184 Q460,192 468,192 L551,192 Q559,192 559,200 L559,226" stroke="#788c5d" stroke-width="1.5" marker-end="url(#hier-arrG)"/>
+    <path d="M500,124 L500,160 Q500,168 508,168 L759,168 Q767,168 767,176 L767,226" stroke="#788c5d" stroke-width="1.5" marker-end="url(#hier-arrG)"/>
+  </g>
+
+  <!-- coordinator card (focal: the only orange element) -->
+  <g filter="url(#hier-sh)">
+    <rect x="320" y="40" width="240" height="84" rx="10" fill="#fbeee7" stroke="#d97757" stroke-width="1.5"/>
+  </g>
+  <rect x="338" y="62" width="40" height="40" rx="10" fill="#f4d9cd"/>
+  <g transform="translate(346,70)" fill="none" stroke="#c2613f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="5" width="14" height="14" rx="2"/>
+    <rect x="9.5" y="9.5" width="5" height="5"/>
+    <line x1="9" y1="2" x2="9" y2="5"/><line x1="15" y1="2" x2="15" y2="5"/>
+    <line x1="9" y1="19" x2="9" y2="22"/><line x1="15" y1="19" x2="15" y2="22"/>
+    <line x1="2" y1="9" x2="5" y2="9"/><line x1="2" y1="15" x2="5" y2="15"/>
+    <line x1="19" y1="9" x2="22" y2="9"/><line x1="19" y1="15" x2="22" y2="15"/>
+  </g>
+  <text x="394" y="78" font-size="14" font-weight="600" fill="#141413">Coordinator</text>
+  <text x="394" y="98" font-size="11" fill="#6b6a5f">plans · delegates · merges</text>
+
+  <!-- worker cards -->
+  <g filter="url(#hier-sh)">
+    <rect x="48" y="232" width="190" height="76" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="256" y="232" width="190" height="76" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="464" y="232" width="190" height="76" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="672" y="232" width="190" height="76" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+  <!-- search worker 1 -->
+  <rect x="62" y="246" width="32" height="32" rx="8" fill="#e2ecf5"/>
+  <g transform="translate(68,252)" fill="none" stroke="#4a7bab" stroke-width="1.6" stroke-linecap="round">
+    <circle cx="8" cy="8" r="5.5"/><line x1="12.5" y1="12.5" x2="18" y2="18"/>
+  </g>
+  <text x="104" y="264" font-size="13" font-weight="600" fill="#141413">Search</text>
+  <text x="104" y="284" font-size="11" fill="#6b6a5f">worker 1 · web</text>
+  <!-- search worker 2 -->
+  <rect x="270" y="246" width="32" height="32" rx="8" fill="#e2ecf5"/>
+  <g transform="translate(276,252)" fill="none" stroke="#4a7bab" stroke-width="1.6" stroke-linecap="round">
+    <circle cx="8" cy="8" r="5.5"/><line x1="12.5" y1="12.5" x2="18" y2="18"/>
+  </g>
+  <text x="312" y="264" font-size="13" font-weight="600" fill="#141413">Search</text>
+  <text x="312" y="284" font-size="11" fill="#6b6a5f">worker 2 · docs</text>
+  <!-- analyse worker 3 -->
+  <rect x="478" y="246" width="32" height="32" rx="8" fill="#e5e9dd"/>
+  <g transform="translate(484,252)" fill="none" stroke="#5d7045" stroke-width="1.6" stroke-linecap="round">
+    <line x1="4" y1="17" x2="4" y2="11"/><line x1="10" y1="17" x2="10" y2="5"/><line x1="16" y1="17" x2="16" y2="13"/>
+  </g>
+  <text x="520" y="264" font-size="13" font-weight="600" fill="#141413">Analyse</text>
+  <text x="520" y="284" font-size="11" fill="#6b6a5f">worker 3 · data</text>
+  <!-- analyse worker 4 -->
+  <rect x="686" y="246" width="32" height="32" rx="8" fill="#e5e9dd"/>
+  <g transform="translate(692,252)" fill="none" stroke="#5d7045" stroke-width="1.6" stroke-linecap="round">
+    <line x1="4" y1="17" x2="4" y2="11"/><line x1="10" y1="17" x2="10" y2="5"/><line x1="16" y1="17" x2="16" y2="13"/>
+  </g>
+  <text x="728" y="264" font-size="13" font-weight="600" fill="#141413">Analyse</text>
+  <text x="728" y="284" font-size="11" fill="#6b6a5f">worker 4 · code</text>
+
+  <!-- legend -->
+  <g font-size="11" fill="#6b6a5f">
+    <circle cx="54" cy="338" r="5" fill="#d97757"/><text x="66" y="342">coordinator</text>
+    <circle cx="168" cy="338" r="5" fill="#6a9bcc"/><text x="180" y="342">search workers</text>
+    <circle cx="304" cy="338" r="5" fill="#788c5d"/><text x="316" y="342">analysis workers</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">hierarchy · org / agents</span><span class="lang-zh">层级 · 组织 / agents</span></span>
+          <span class="lang-en">Orchestration tree: one coordinator, one hue per worker class, icon tiles instead of bare boxes. Works as an org chart by swapping the labels. Template: <code>templates/diagrams/hierarchy.svg</code>.</span>
+          <span class="lang-zh">编排树：一个协调者，每类 worker 一个色相，icon tile 替代裸盒子。换掉标签就是一张组织架构图。模板：<code>templates/diagrams/hierarchy.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<footer class="anth-section" style="border-top:1px solid var(--anth-light-gray); padding-top:var(--space-7); padding-bottom:var(--space-8);">
+  <div class="anth-container anth-container--wide" style="display:flex; justify-content:space-between; gap:var(--space-5); flex-wrap:wrap; align-items:baseline;">
+    <p style="font-size:14px; color:var(--anth-text-secondary); margin:0;">
+      <span class="lang-en">Every figure follows <code>skills/anthropic-design/references/diagram-craft.md</code> and passes the four design-review gates.</span>
+      <span class="lang-zh">每张图都遵循 <code>skills/anthropic-design/references/diagram-craft.md</code>，并通过 design-review 四道闸。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-5);">
+      <a class="anth-link" href="index.html"><span class="lang-en">Main demo</span><span class="lang-zh">主 demo</span></a>
+      <a class="anth-link" href="index-v2.html"><span class="lang-en">Color semantics demo</span><span class="lang-zh">多色语义 demo</span></a>
+      <a class="anth-link" href="../../index.html"><span class="lang-en">All skills</span><span class="lang-zh">全部 skill</span></a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+<script>
+(function () {
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-copy-svg]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var fig = btn.closest('figure');
+        var svg = fig && fig.querySelector('svg');
+        if (!svg) return;
+        var txt = svg.outerHTML;
+        function done(ok) {
+          var en = btn.querySelector('.lang-en');
+          var zh = btn.querySelector('.lang-zh');
+          if (!en || !zh) return;
+          var oldEn = en.textContent, oldZh = zh.textContent;
+          en.textContent = ok ? 'Copied ✓' : 'Copy failed';
+          zh.textContent = ok ? '已复制 ✓' : '复制失败';
+          setTimeout(function () { en.textContent = oldEn; zh.textContent = oldZh; }, 1400);
+        }
+        function fallback() {
+          var ta = document.createElement('textarea');
+          ta.value = txt;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          var ok = false;
+          try { ok = document.execCommand('copy'); } catch (e) {}
+          document.body.removeChild(ta);
+          done(ok);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(function () { done(true); }, fallback);
+        } else {
+          fallback();
+        }
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: anthropic-design
+Page-type: diagram-gallery (demo)
+Created: 2026-06-11
+Decisions:
+- [three-audiences] chose "engineering / product / reporting sections" over "diagram-type taxonomy (flow/chart/mock)". Because: the user picks a figure by occasion, not by SVG genre — a presenter looking for a roadmap should not need to know it is technically a timeline.
+- [copy-button] chose "per-figure Copy SVG ghost button" over "view-source instructions". Because: the gallery's job is reuse; one click to clipboard removes the only friction, and ghost ink styling keeps 16 buttons from competing with the single orange CTA per mock.
+- [v3-color] chose "16-20% tints + solid dots/badges + ≥2 hues per engineering diagram" over "v2's 8-12% tints with hollow rings". Because: v2 shipped diagrams that read gray; solid small elements carry color presence without flooding area (known-bugs 1.30).
+- [size-first] chose "wide container for every figure, viewBox hugged to content" over "prose-column figures". Because: density decides the canvas (diagram-craft §8.1); the gallery must model the rule it teaches.
+- [real-labels] chose "real product copy inside mocks (Acme Cloud, run #4821)" over "gray placeholder bars everywhere". Because: window mocks sell realism; placeholder-only mocks read as wireframes (dos-and-donts lineup rule).
+- [bilingual] chose "full §G en/zh toggle including figcaptions" over "demo-exemption monolingual". Because: the gallery is a public teaching surface linked from the Pages root; SVG-internal text stays English per canonical precedent, figcaptions carry the translation.
+Known trade-offs:
+- Demo siblings (index.html, index-v2.html) remain monolingual English; site-wide bilingual demos are a separate decision.
+- The dashboard donut uses stroke-dasharray segments, which approximate arc lengths to ±1%; acceptable for a mock, not for a data report.
+- Phone mock tab icons are hand-drawn 3-icon set, not the full lucide set used in templates.
+/design-review:self-diff -->
+</body>
+</html>

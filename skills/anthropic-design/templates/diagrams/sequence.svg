@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 560" role="img" aria-label="Sequence diagram: a chat request flows from client through gateway and worker to the database, responses stream back" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="seq-dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <filter id="seq-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/></filter>
+    <marker id="seq-arrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <marker id="seq-arrGr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#788c5d"/></marker>
+    <marker id="seq-arrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/></marker>
+  </defs>
+  <rect width="1080" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1080" height="560" rx="16" fill="url(#seq-dots)"/>
+
+  <!-- lifelines -->
+  <g stroke="#d8d4c8" stroke-width="1">
+    <line x1="150" y1="92" x2="150" y2="508"/>
+    <line x1="420" y1="92" x2="420" y2="508"/>
+    <line x1="690" y1="92" x2="690" y2="508"/>
+    <line x1="960" y1="92" x2="960" y2="508"/>
+  </g>
+
+  <!-- activation bars -->
+  <rect x="416" y="152" width="8" height="328" rx="3" fill="#ffffff" stroke="#d97757" stroke-width="0.8"/>
+  <rect x="686" y="216" width="8" height="232" rx="3" fill="#ffffff" stroke="#788c5d" stroke-width="0.8"/>
+  <rect x="956" y="280" width="8" height="72" rx="3" fill="#ffffff" stroke="#c9913f" stroke-width="0.8"/>
+
+  <!-- actor cards -->
+  <g filter="url(#seq-sh)">
+    <rect x="60" y="24" width="180" height="64" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="330" y="24" width="180" height="64" rx="10" fill="#fbeee7" stroke="#d97757" stroke-width="1.5"/>
+    <rect x="600" y="24" width="180" height="64" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="870" y="24" width="180" height="64" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+  <circle cx="84" cy="48" r="3.5" fill="#6a9bcc"/>
+  <text x="96" y="53" font-size="13.5" font-weight="600" fill="#141413">Client</text>
+  <text x="84" y="74" font-size="10.5" fill="#6b6a5f">browser app</text>
+  <circle cx="354" cy="48" r="3.5" fill="#d97757"/>
+  <text x="366" y="53" font-size="13.5" font-weight="600" fill="#141413">Gateway</text>
+  <text x="354" y="74" font-size="10.5" fill="#6b6a5f">auth · rate limit</text>
+  <circle cx="624" cy="48" r="3.5" fill="#788c5d"/>
+  <text x="636" y="53" font-size="13.5" font-weight="600" fill="#141413">Worker</text>
+  <text x="624" y="74" font-size="10.5" fill="#6b6a5f">runs the job</text>
+  <circle cx="894" cy="48" r="3.5" fill="#c9913f"/>
+  <text x="906" y="53" font-size="13.5" font-weight="600" fill="#141413">Postgres</text>
+  <text x="894" y="74" font-size="10.5" fill="#6b6a5f">primary db</text>
+
+  <!-- messages -->
+  <line x1="154" y1="152" x2="412" y2="152" stroke="#d97757" stroke-width="1.8" marker-end="url(#seq-arrO)"/>
+  <text x="285" y="140" font-size="12" fill="#141413" text-anchor="middle">POST /v1/messages</text>
+  <circle cx="170" cy="152" r="9" fill="#d97757"/><text x="170" y="156" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">1</text>
+
+  <line x1="428" y1="216" x2="682" y2="216" stroke="#d97757" stroke-width="1.8" marker-end="url(#seq-arrO)"/>
+  <text x="555" y="204" font-size="12" fill="#141413" text-anchor="middle">schedule(run)</text>
+  <circle cx="444" cy="216" r="9" fill="#d97757"/><text x="444" y="220" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">2</text>
+
+  <line x1="698" y1="280" x2="952" y2="280" stroke="#788c5d" stroke-width="1.8" marker-end="url(#seq-arrGr)"/>
+  <text x="825" y="268" font-size="12" fill="#141413" text-anchor="middle">INSERT run · queued</text>
+  <circle cx="714" cy="280" r="9" fill="#d97757"/><text x="714" y="284" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">3</text>
+
+  <line x1="952" y1="352" x2="698" y2="352" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#seq-arrN)"/>
+  <text x="825" y="340" font-size="11" fill="#6b6a5f" text-anchor="middle">ack · 12 ms</text>
+  <circle cx="936" cy="352" r="9" fill="#d97757"/><text x="936" y="356" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">4</text>
+
+  <line x1="682" y1="416" x2="428" y2="416" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#seq-arrN)"/>
+  <text x="555" y="404" font-size="11" fill="#6b6a5f" text-anchor="middle">stream tokens</text>
+  <circle cx="666" cy="416" r="9" fill="#d97757"/><text x="666" y="420" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">5</text>
+
+  <line x1="412" y1="480" x2="158" y2="480" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#seq-arrN)"/>
+  <text x="285" y="468" font-size="11" fill="#6b6a5f" text-anchor="middle">200 OK · server-sent events</text>
+  <circle cx="396" cy="480" r="9" fill="#d97757"/><text x="396" y="484" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">6</text>
+
+  <!-- legend -->
+  <line x1="60" y1="536" x2="92" y2="536" stroke="#d97757" stroke-width="1.8"/>
+  <text x="100" y="540" font-size="11" fill="#6b6a5f">request</text>
+  <line x1="180" y1="536" x2="212" y2="536" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <text x="220" y="540" font-size="11" fill="#6b6a5f">response</text>
+  <line x1="312" y1="536" x2="344" y2="536" stroke="#788c5d" stroke-width="1.8"/>
+  <text x="352" y="540" font-size="11" fill="#6b6a5f">data write</text>
+</svg>

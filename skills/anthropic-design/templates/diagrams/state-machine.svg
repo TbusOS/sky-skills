@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-label="State machine: idle, running, paused, done, and failed states with labeled transitions" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="st-dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <filter id="st-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/></filter>
+    <marker id="st-arrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <marker id="st-arrGr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#788c5d"/></marker>
+    <marker id="st-arrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6a9bcc"/></marker>
+    <marker id="st-arrAu" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c9913f"/></marker>
+    <marker id="st-arrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/></marker>
+  </defs>
+  <rect width="960" height="360" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="960" height="360" rx="16" fill="url(#st-dots)"/>
+
+  <!-- entry -->
+  <circle cx="56" cy="76" r="7" fill="#d97757"/>
+  <line x1="64" y1="76" x2="96" y2="76" stroke="#d97757" stroke-width="1.8" marker-end="url(#st-arrO)"/>
+
+  <!-- transitions (drawn before cards so cards sit on top of line ends) -->
+  <line x1="250" y1="76" x2="366" y2="76" stroke="#d97757" stroke-width="1.8" marker-end="url(#st-arrO)"/>
+  <line x1="540" y1="76" x2="686" y2="76" stroke="#788c5d" stroke-width="1.8" marker-end="url(#st-arrGr)"/>
+  <line x1="430" y1="104" x2="430" y2="204" stroke="#6a9bcc" stroke-width="1.2" marker-end="url(#st-arrB)"/>
+  <line x1="480" y1="208" x2="480" y2="108" stroke="#6a9bcc" stroke-width="1.2" marker-end="url(#st-arrB)"/>
+  <path d="M510,104 V156 Q510,164 518,164 H732 Q740,164 740,172 V204" fill="none" stroke="#c9913f" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#st-arrAu)"/>
+  <path d="M700,264 V296 Q700,304 692,304 H183 Q175,304 175,296 V108" fill="none" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#st-arrN)"/>
+
+  <!-- transition labels -->
+  <text x="308" y="66" font-size="11" font-weight="600" fill="#c2613f" text-anchor="middle">start</text>
+  <text x="613" y="66" font-size="11" font-weight="600" fill="#5d7045" text-anchor="middle">success</text>
+  <text x="420" y="158" font-size="11" fill="#4a7bab" text-anchor="end">pause</text>
+  <text x="492" y="158" font-size="11" fill="#4a7bab">resume</text>
+  <text x="625" y="154" font-size="11" fill="#8a5a2a" text-anchor="middle">error · retry ≤ 2</text>
+  <text x="437" y="294" font-size="11" fill="#8c8a7d" text-anchor="middle">reset</text>
+
+  <!-- state cards -->
+  <g filter="url(#st-sh)">
+    <rect x="100" y="48" width="150" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="370" y="48" width="170" height="56" rx="10" fill="#fbeee7" stroke="#d97757" stroke-width="1.5"/>
+    <rect x="690" y="48" width="150" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="370" y="208" width="170" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="690" y="208" width="150" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+  <circle cx="122" cy="70" r="3.5" fill="#141413"/>
+  <text x="134" y="75" font-size="13" font-weight="600" fill="#141413">Idle</text>
+  <text x="122" y="93" font-size="10" fill="#6b6a5f">awaiting job</text>
+  <circle cx="392" cy="70" r="3.5" fill="#d97757"/>
+  <text x="404" y="75" font-size="13" font-weight="600" fill="#141413">Running</text>
+  <text x="392" y="93" font-size="10" fill="#6b6a5f">executing steps</text>
+  <circle cx="712" cy="70" r="3.5" fill="#788c5d"/>
+  <text x="724" y="75" font-size="13" font-weight="600" fill="#141413">Done</text>
+  <text x="712" y="93" font-size="10" fill="#6b6a5f">all gates green</text>
+  <circle cx="392" cy="230" r="3.5" fill="#6a9bcc"/>
+  <text x="404" y="235" font-size="13" font-weight="600" fill="#141413">Paused</text>
+  <text x="392" y="253" font-size="10" fill="#6b6a5f">operator hold</text>
+  <circle cx="712" cy="230" r="3.5" fill="#c9913f"/>
+  <text x="724" y="235" font-size="13" font-weight="600" fill="#141413">Failed</text>
+  <text x="712" y="253" font-size="10" fill="#6b6a5f">retries exhausted</text>
+
+  <!-- legend -->
+  <circle cx="420" cy="332" r="4" fill="#6a9bcc"/>
+  <text x="430" y="336" font-size="11" fill="#6b6a5f">operator action</text>
+  <circle cx="564" cy="332" r="4" fill="#d97757"/>
+  <text x="574" y="336" font-size="11" fill="#6b6a5f">active path</text>
+  <circle cx="688" cy="332" r="4" fill="#788c5d"/>
+  <text x="698" y="336" font-size="11" fill="#6b6a5f">terminal · ok</text>
+  <circle cx="820" cy="332" r="4" fill="#c9913f"/>
+  <text x="830" y="336" font-size="11" fill="#6b6a5f">terminal · error</text>
+</svg>
