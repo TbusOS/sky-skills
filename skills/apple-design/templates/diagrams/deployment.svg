@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 640" role="img" aria-label="Deployment topology: edge, app cluster, and data zones in flat gray; the blue path traces a request from the load balancer to the api focus card and into Postgres; replica counts shown as gray chips" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="adep-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <marker id="adep-arrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="adep-arrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+
+  <rect width="1160" height="640" fill="#ffffff"/>
+
+  <!-- zones: pale gray, rx 18, no border, normal-case labels -->
+  <rect x="24" y="24" width="1112" height="168" rx="18" fill="#f5f5f7"/>
+  <text x="52" y="60" font-size="12" font-weight="500" fill="#86868b">Edge</text>
+  <text x="1108" y="60" font-size="12" fill="#86868b" text-anchor="end">anycast · 12 PoPs</text>
+  <rect x="24" y="236" width="1112" height="168" rx="18" fill="#f5f5f7"/>
+  <text x="52" y="272" font-size="12" font-weight="500" fill="#86868b">App cluster</text>
+  <text x="1108" y="272" font-size="12" fill="#86868b" text-anchor="end">auto-scale 2–8 nodes</text>
+  <rect x="24" y="448" width="1112" height="168" rx="18" fill="#f5f5f7"/>
+  <text x="52" y="484" font-size="12" font-weight="500" fill="#86868b">Data</text>
+  <text x="1108" y="484" font-size="12" fill="#86868b" text-anchor="end">encrypted at rest</text>
+
+  <!-- connectors: blue request path LB -> api -> Postgres, gray everything else -->
+  <g fill="none">
+    <path d="M312,128 H356" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#adep-arrN)"/>
+    <path d="M616,128 H660" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#adep-arrN)"/>
+    <path d="M792,172 V224 Q792,232 784,232 H192 Q184,232 184,240 V292" stroke="#0071e3" stroke-width="1.8" marker-end="url(#adep-arrB)"/>
+    <path d="M184,384 V504" stroke="#0071e3" stroke-width="1.8" marker-end="url(#adep-arrB)"/>
+    <path d="M664,340 H620" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#adep-arrN)"/>
+    <path d="M488,384 V504" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#adep-arrN)"/>
+  </g>
+  <text x="642" y="290" font-size="12" fill="#86868b" text-anchor="middle">dispatch</text>
+
+  <!-- node cards: white, rx 14, no stroke, soft shadow; api is the single blue focus card -->
+  <g filter="url(#adep-soft)">
+    <rect x="56" y="84" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="360" y="84" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="664" y="84" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="56" y="296" width="256" height="88" rx="14" fill="#ffffff" stroke="#0071e3" stroke-width="1.5"/>
+    <rect x="360" y="296" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="664" y="296" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="56" y="508" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="360" y="508" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="664" y="508" width="256" height="88" rx="14" fill="#ffffff"/>
+  </g>
+
+  <!-- replica chips: quiet gray, never colored -->
+  <rect x="244" y="320" width="44" height="22" rx="10" fill="#f5f5f7"/>
+  <text x="266" y="335" font-size="11.5" font-weight="600" fill="#6e6e73" text-anchor="middle">×3</text>
+  <rect x="548" y="320" width="44" height="22" rx="10" fill="#f5f5f7"/>
+  <text x="570" y="335" font-size="11.5" font-weight="600" fill="#6e6e73" text-anchor="middle">×5</text>
+
+  <!-- numbered badges on the blue request path -->
+  <g font-size="11.5" font-weight="600" text-anchor="middle">
+    <circle cx="792" cy="198" r="10" fill="#0071e3"/><text x="792" y="202" fill="#ffffff">1</text>
+    <circle cx="184" cy="440" r="10" fill="#0071e3"/><text x="184" y="444" fill="#ffffff">2</text>
+  </g>
+
+  <!-- card names -->
+  <g font-size="14" font-weight="600" fill="#1d1d1f">
+    <text x="80" y="122">CDN</text>
+    <text x="384" y="122">WAF</text>
+    <text x="688" y="122">Load balancer</text>
+    <text x="80" y="334">api</text>
+    <text x="384" y="334">worker</text>
+    <text x="688" y="334">scheduler</text>
+    <text x="80" y="546">Postgres 16</text>
+    <text x="384" y="546">Redis</text>
+    <text x="688" y="546">Object store</text>
+  </g>
+
+  <!-- card sub-lines -->
+  <g font-size="12" fill="#86868b">
+    <text x="80" y="146">edge cache · 98% hit</text>
+    <text x="384" y="146">rules v34</text>
+    <text x="688" y="146">least-conn</text>
+    <text x="80" y="358">REST + SSE</text>
+    <text x="384" y="358">queue consumer</text>
+    <text x="688" y="358">cron + retries</text>
+    <text x="80" y="570">primary + replica</text>
+    <text x="384" y="570">queues · cache</text>
+    <text x="688" y="570">artifacts</text>
+  </g>
+</svg>

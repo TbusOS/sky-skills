@@ -6,7 +6,7 @@
 
 > 适用：架构图 / 流程图 / 层级图 / 时间线 / 时序图等一切工程类图示。
 > 与 anthropic 的多色语义路线不同，**apple 图的美感来自"少"**：无彩色为主、蓝色一处、柔影分层、留白比信息多。
-> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline,共 **12 件**,全部按本文标准实现）。案例库：`demos/apple-design/diagrams.html`（12 张图,每张带 Copy SVG）。
+> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence / deployment / state-machine + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline,共 **14 件**,全部按本文标准实现）。案例库：`demos/apple-design/diagrams.html`（14 张图,每张带 Copy SVG）。
 
 ## 0. 第一原则：美靠"少"
 

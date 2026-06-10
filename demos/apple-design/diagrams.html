@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Diagram Gallery — apple-design</title>
-<meta name="description" content="Twelve copy-ready SVG diagrams in the apple-design language: architecture, flows, registers, SoC blocks, waveforms, build chains, schedulers — grayscale plus one blue.">
+<meta name="description" content="Fourteen copy-ready SVG diagrams in the apple-design language: architecture, flows, registers, SoC blocks, waveforms, build chains, schedulers — grayscale plus one blue.">
 <link rel="stylesheet" href="../../skills/apple-design/assets/fonts.css">
 <link rel="stylesheet" href="../../skills/apple-design/assets/apple.css">
 <style>
@@ -89,8 +89,8 @@
       <span class="lang-zh">安静的图，一处蓝。</span>
     </h1>
     <p class="gal-intro">
-      <span class="lang-en">Twelve hand-built SVG figures in the apple-design language. Grayscale carries the structure; a single blue carries the story. Every figure answers one question first — where does the blue go — then everything else stays out of the way. Copy any of them.</span>
-      <span class="lang-zh">十二张手工 SVG 图。灰阶承担结构，唯一的蓝色承担叙事。每张图先回答一个问题——蓝给谁——其余一切退后。每张都可直接复制。</span>
+      <span class="lang-en">Fourteen hand-built SVG figures in the apple-design language. Grayscale carries the structure; a single blue carries the story. Every figure answers one question first — where does the blue go — then everything else stays out of the way. Copy any of them.</span>
+      <span class="lang-zh">十四张手工 SVG 图。灰阶承担结构，唯一的蓝色承担叙事。每张图先回答一个问题——蓝给谁——其余一切退后。每张都可直接复制。</span>
     </p>
   </div>
 </header>
@@ -623,6 +623,105 @@
           <span class="gal-tag"><span class="lang-en">Build · pipeline</span><span class="lang-zh">编译 · 流程链</span></span>
           <span class="lang-en">Kernel build from .config to boot.itb; the devicetree branch joins quietly in gray, the deliverable wears the blue stroke. Template: <code>templates/diagrams/build-pipeline.svg</code>.</span>
           <span class="lang-zh">内核编译从 .config 到 boot.itb；设备树分支以灰色安静汇入，交付物戴上蓝描边。模板：<code>templates/diagrams/build-pipeline.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 640" role="img" aria-label="Deployment topology: edge, app cluster, and data zones in flat gray; the blue path traces a request from the load balancer to the api focus card and into Postgres; replica counts shown as gray chips" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="adep-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <marker id="adep-arrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="adep-arrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+
+  <rect width="1160" height="640" fill="#ffffff"/>
+
+  <!-- zones: pale gray, rx 18, no border, normal-case labels -->
+  <rect x="24" y="24" width="1112" height="168" rx="18" fill="#f5f5f7"/>
+  <text x="52" y="60" font-size="12" font-weight="500" fill="#86868b">Edge</text>
+  <text x="1108" y="60" font-size="12" fill="#86868b" text-anchor="end">anycast · 12 PoPs</text>
+  <rect x="24" y="236" width="1112" height="168" rx="18" fill="#f5f5f7"/>
+  <text x="52" y="272" font-size="12" font-weight="500" fill="#86868b">App cluster</text>
+  <text x="1108" y="272" font-size="12" fill="#86868b" text-anchor="end">auto-scale 2–8 nodes</text>
+  <rect x="24" y="448" width="1112" height="168" rx="18" fill="#f5f5f7"/>
+  <text x="52" y="484" font-size="12" font-weight="500" fill="#86868b">Data</text>
+  <text x="1108" y="484" font-size="12" fill="#86868b" text-anchor="end">encrypted at rest</text>
+
+  <!-- connectors: blue request path LB -> api -> Postgres, gray everything else -->
+  <g fill="none">
+    <path d="M312,128 H356" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#adep-arrN)"/>
+    <path d="M616,128 H660" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#adep-arrN)"/>
+    <path d="M792,172 V224 Q792,232 784,232 H192 Q184,232 184,240 V292" stroke="#0071e3" stroke-width="1.8" marker-end="url(#adep-arrB)"/>
+    <path d="M184,384 V504" stroke="#0071e3" stroke-width="1.8" marker-end="url(#adep-arrB)"/>
+    <path d="M664,340 H620" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#adep-arrN)"/>
+    <path d="M488,384 V504" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#adep-arrN)"/>
+  </g>
+  <text x="642" y="290" font-size="12" fill="#86868b" text-anchor="middle">dispatch</text>
+
+  <!-- node cards: white, rx 14, no stroke, soft shadow; api is the single blue focus card -->
+  <g filter="url(#adep-soft)">
+    <rect x="56" y="84" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="360" y="84" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="664" y="84" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="56" y="296" width="256" height="88" rx="14" fill="#ffffff" stroke="#0071e3" stroke-width="1.5"/>
+    <rect x="360" y="296" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="664" y="296" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="56" y="508" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="360" y="508" width="256" height="88" rx="14" fill="#ffffff"/>
+    <rect x="664" y="508" width="256" height="88" rx="14" fill="#ffffff"/>
+  </g>
+
+  <!-- replica chips: quiet gray, never colored -->
+  <rect x="244" y="320" width="44" height="22" rx="10" fill="#f5f5f7"/>
+  <text x="266" y="335" font-size="11.5" font-weight="600" fill="#6e6e73" text-anchor="middle">×3</text>
+  <rect x="548" y="320" width="44" height="22" rx="10" fill="#f5f5f7"/>
+  <text x="570" y="335" font-size="11.5" font-weight="600" fill="#6e6e73" text-anchor="middle">×5</text>
+
+  <!-- numbered badges on the blue request path -->
+  <g font-size="11.5" font-weight="600" text-anchor="middle">
+    <circle cx="792" cy="198" r="10" fill="#0071e3"/><text x="792" y="202" fill="#ffffff">1</text>
+    <circle cx="184" cy="440" r="10" fill="#0071e3"/><text x="184" y="444" fill="#ffffff">2</text>
+  </g>
+
+  <!-- card names -->
+  <g font-size="14" font-weight="600" fill="#1d1d1f">
+    <text x="80" y="122">CDN</text>
+    <text x="384" y="122">WAF</text>
+    <text x="688" y="122">Load balancer</text>
+    <text x="80" y="334">api</text>
+    <text x="384" y="334">worker</text>
+    <text x="688" y="334">scheduler</text>
+    <text x="80" y="546">Postgres 16</text>
+    <text x="384" y="546">Redis</text>
+    <text x="688" y="546">Object store</text>
+  </g>
+
+  <!-- card sub-lines -->
+  <g font-size="12" fill="#86868b">
+    <text x="80" y="146">edge cache · 98% hit</text>
+    <text x="384" y="146">rules v34</text>
+    <text x="688" y="146">least-conn</text>
+    <text x="80" y="358">REST + SSE</text>
+    <text x="384" y="358">queue consumer</text>
+    <text x="688" y="358">cron + retries</text>
+    <text x="80" y="570">primary + replica</text>
+    <text x="384" y="570">queues · cache</text>
+    <text x="688" y="570">artifacts</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">Deployment · topology</span><span class="lang-zh">部署 · 拓扑</span></span>
+          <span class="lang-en">Three zones in flat gray; the blue is spent once, on the request path — load balancer into the api focus card, then down to Postgres. Replica counts sit in quiet gray chips. Template: <code>templates/diagrams/deployment.svg</code>.</span>
+          <span class="lang-zh">三个区域全是平灰；蓝色只花一次，给请求主路径——负载均衡器进 api 焦点卡，再落到 Postgres。副本数装在安静的灰 chip 里。模板：<code>templates/diagrams/deployment.svg</code>。</span>
         </span>
         <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
       </figcaption>
@@ -1412,6 +1511,89 @@
           <span class="gal-tag"><span class="lang-en">Timeline · milestones</span><span class="lang-zh">时间线 · 里程碑</span></span>
           <span class="lang-en">Shipped milestones in ink, upcoming ones hollow, one blue marker for now. Template: <code>templates/diagrams/timeline.svg</code>.</span>
           <span class="lang-zh">已交付的里程碑用墨色，未到的用空心，唯一的蓝色标记现在。模板：<code>templates/diagrams/timeline.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 40 960 380" role="img" aria-label="State machine: blue happy path runs from entry through Idle and the Running focus card to Done; pause, resume and error transitions stay gray, and the dashed gray reset loop returns Failed to Idle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="astm-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+    <marker id="astm-arrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="astm-arrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="40" width="960" height="380" fill="#ffffff"/>
+
+  <!-- happy path: the single blue story, entry -> Idle -> Running -> Done -->
+  <g fill="none" stroke="#0071e3" stroke-width="1.8">
+    <line x1="40" y1="108" x2="92" y2="108" marker-end="url(#astm-arrB)"/>
+    <line x1="272" y1="108" x2="416" y2="108" marker-end="url(#astm-arrB)"/>
+    <line x1="620" y1="108" x2="756" y2="108" marker-end="url(#astm-arrB)"/>
+  </g>
+  <circle cx="31" cy="108" r="7" fill="#0071e3"/>
+
+  <!-- secondary transitions: gray solid; reset is the only dashed return loop -->
+  <g fill="none" stroke="#aeaeb2" stroke-width="1.2">
+    <line x1="470" y1="152" x2="470" y2="260" marker-end="url(#astm-arrN)"/>
+    <line x1="570" y1="264" x2="570" y2="156" marker-end="url(#astm-arrN)"/>
+    <path d="M600,152 V200 Q600,208 608,208 H840 Q848,208 848,216 V260" marker-end="url(#astm-arrN)"/>
+    <path d="M848,352 V388 Q848,396 840,396 H192 Q184,396 184,388 V156" stroke-dasharray="4 3" marker-end="url(#astm-arrN)"/>
+  </g>
+
+  <!-- transition labels -->
+  <text x="344" y="92" font-size="11" font-weight="600" fill="#0071e3" text-anchor="middle">start</text>
+  <text x="688" y="92" font-size="11" font-weight="600" fill="#0071e3" text-anchor="middle">success</text>
+  <text x="460" y="212" font-size="12" fill="#86868b" text-anchor="end">pause</text>
+  <text x="580" y="212" font-size="12" fill="#86868b">resume</text>
+  <text x="724" y="198" font-size="12" fill="#86868b" text-anchor="middle">error · retry ≤ 2</text>
+  <text x="516" y="386" font-size="12" fill="#86868b" text-anchor="middle">reset</text>
+
+  <!-- state cards: white, rx 14, no stroke, soft shadow; Running is the single blue focus card -->
+  <g filter="url(#astm-soft)">
+    <rect x="96" y="64" width="176" height="88" rx="14" fill="#ffffff"/>
+    <rect x="420" y="64" width="200" height="88" rx="14" fill="#ffffff" stroke="#0071e3" stroke-width="1.5"/>
+    <rect x="760" y="64" width="176" height="88" rx="14" fill="#ffffff"/>
+    <rect x="420" y="264" width="200" height="88" rx="14" fill="#ffffff"/>
+    <rect x="760" y="264" width="176" height="88" rx="14" fill="#ffffff"/>
+  </g>
+
+  <!-- numbered badges on the happy path -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <circle cx="344" cy="108" r="10" fill="#0071e3"/><text x="344" y="112" fill="#ffffff">1</text>
+    <circle cx="688" cy="108" r="10" fill="#0071e3"/><text x="688" y="112" fill="#ffffff">2</text>
+  </g>
+
+  <!-- state names -->
+  <g font-size="14" font-weight="600" fill="#1d1d1f">
+    <text x="120" y="102">Idle</text>
+    <text x="444" y="102">Running</text>
+    <text x="784" y="102">Done</text>
+    <text x="444" y="302">Paused</text>
+    <text x="784" y="302">Failed</text>
+  </g>
+
+  <!-- state sub-lines -->
+  <g font-size="12" fill="#86868b">
+    <text x="120" y="126">awaiting job</text>
+    <text x="444" y="126">executing steps</text>
+    <text x="784" y="126">all gates green</text>
+    <text x="444" y="326">operator hold</text>
+    <text x="784" y="326">retries exhausted</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">State machine · lifecycle</span><span class="lang-zh">状态机 · 生命周期</span></span>
+          <span class="lang-en">Blue belongs to the happy path: entry through Idle and the Running focus card to Done. Pause, resume and error stay gray; the reset loop is the one dashed return. Template: <code>templates/diagrams/state-machine.svg</code>.</span>
+          <span class="lang-zh">蓝色只属于 happy path：从入口经 Idle 和 Running 焦点卡到 Done。pause、resume、error 全留灰；reset 回流是全图唯一的虚线。模板：<code>templates/diagrams/state-machine.svg</code>。</span>
         </span>
         <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
       </figcaption>

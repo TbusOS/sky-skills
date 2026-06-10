@@ -13,7 +13,7 @@
 - [**ember-design demo**](./demos/ember-design/index.html) —— 手作 · 暖棕 · 文学式的咖啡色系（米白 + 巧克力 + 金）
 - [**sage-design demo**](./demos/sage-design/index.html) —— 安静 · 北欧极简（米黄 + 抹茶绿 + 深靛蓝）
 - [**anthropic 图表画廊**](./demos/anthropic-design/diagrams.html) —— 23 幅手工 SVG 图（寄存器、SoC 框图、时序波形、调度时间线……）
-- [**apple 图表画廊**](./demos/apple-design/diagrams.html) —— 同类图型的 apple.com 干净几何风版本，共 12 幅
+- [**apple 图表画廊**](./demos/apple-design/diagrams.html) —— 同类图型的 apple.com 干净几何风版本，共 14 幅
 
 本地预览：在仓库根目录执行 `python3 -m http.server 8000`，然后打开上面的 URL。
 
@@ -25,7 +25,7 @@
 | [wechat-video-publisher](skills/wechat-video-publisher/) | ZH | 微信公众号视频制作全流水线 —— edge-tts 配音、Playwright 逐帧录制、ffmpeg 字幕烧录、微信兼容 inline-style 文章模板 |
 | [doc-to-markdown](skills/doc-to-markdown/) | EN/ZH | 文档转 Markdown —— 批量 PDF/DOCX 转换为格式清晰的 Markdown，自动提取图片、表格转换、EMF/WMF 处理、中文支持 |
 | [md-to-pdf](skills/md-to-pdf/) | EN/ZH | Markdown 转 PDF —— 基于 PyMuPDF Story HTML 渲染，完整中文支持、自动书签、页码 |
-| [apple-design](skills/apple-design/) | EN/ZH | 以 **apple.com** 网页美学渲染 HTML/CSS —— SF Pro 字体、白/浅灰/黑交替段落、克制的文字链、巨字号统计、产品摄影主导、手工 SVG 流程图。**diagram-craft v3 (2026-06) 新增：** 内核级 SVG 制图规范（先定尺寸、tint 填充、每图 ≥2 个色相）+ 模板库扩到 12 件 —— 见[图表画廊](demos/apple-design/diagrams.html) |
+| [apple-design](skills/apple-design/) | EN/ZH | 以 **apple.com** 网页美学渲染 HTML/CSS —— SF Pro 字体、白/浅灰/黑交替段落、克制的文字链、巨字号统计、产品摄影主导、手工 SVG 流程图。**diagram-craft v3 (2026-06) 新增：** 内核级 SVG 制图规范（先定尺寸、tint 填充、每图 ≥2 个色相）+ 模板库扩到 14 件 —— 见[图表画廊](demos/apple-design/diagrams.html) |
 | [anthropic-design](skills/anthropic-design/) | EN/ZH | 以 **anthropic.com** 网页美学渲染 HTML/CSS —— 暖米白 + 橙色强调、Poppins 标题 + Lora 衬线正文、实心胶囊按钮、编辑式卡片、抽象 SVG 插画、低饱和图表。**v2 (2026-04) 新增：** 给 canonical 没覆盖的版式 / 控件 / 动效 / 文案各加一层 scenario recipes（dashboard / form / table / tab / accordion / modal / sidebar / changelog / video / empty-state · input / select / check / switch / toast / dialog / banner / tooltip / skeleton · hero / stagger / hover / route），加一份 `references/ux-writing.md`（CTA / empty / error / placeholder / 禁用词清单），所有 recipe class 已落到 `assets/anthropic.css`。配 `bin/design-review --audit <dir-or-url>` 批量审存量页面。**v3 (2026-05) 新增：** `scripts/` 下 4 件套 md 渲染管线 —— `md-mirror`（1 个 `.md` → 1 个 anthropic 风格 `.html`，内联 CSS）/ `md-rewrite-links`（原地 `.md`→`.html` href 替换）/ `md-pack`（把链到的 `.md` 折叠到扁平 `_md/` 子目录 + 重写 href + basename 救援源文档 `../` typo）/ `cross-link-pack`（跨目录 sibling `.html` 也折叠进同款 `_md/`）。在文档目录跑 pack + cross-link-pack 一次，`cp -r` 到任何地方所有链接全活。**diagram-craft v3 (2026-06) 新增：** 内核级 SVG 制图规范 + 模板库扩到 14 件（register-bitfield / soc-block / hw-timing-waveform / sched-timeline……）—— 见 [23 图画廊](demos/anthropic-design/diagrams.html) |
 | [ember-design](skills/ember-design/) | EN/ZH | 以 **手作编辑** 美学渲染 HTML/CSS —— 暖米 (#fff2df) + 深巧克力 (#312520) + 棕色 CTA (#492d22) + 金色 (#c49464)，Fraunces 展示衬线 + Inter 正文。适合咖啡工坊 / 精品酒店 / 文学期刊 / 独立品牌 |
 | [sage-design](skills/sage-design/) | EN/ZH | 以 **安静 · 北欧极简** 美学渲染 HTML/CSS —— 米黄 (#f8faec) + 抹茶绿 (#97B077) + 深靛蓝 (#393C54)，Instrument Serif + Inter + JetBrains Mono。适合阅读 app / 植物工作室 / 现代期刊 / 安静的科技品牌 |
@@ -159,7 +159,7 @@ claude install github:TbusOS/sky-skills/skills/design-review
 - **版式** —— 白/浅灰/黑交替段落、居中 hero、5 列产品 lineup、3 栏文档、newsroom 卡片网格、事件页
 - **组件** —— 27 个 `.apple-*` 开箱即用：毛玻璃 sticky nav、5 栏页脚、仅 Buy 用的填色按钮、表单控件、颜色/容量选项卡、分段控件、标签页、轮播、视频（带 ASL badge）、徽章、pull quote、details 折叠、info/warning/success/danger 四种 admonition、面包屑、全屏搜索
 - **模板** —— 9 个可直接打开的 HTML（landing / article / docs / slide-deck / stat-callout / nav-footer / form / product-configurator / specs-page）
-- **图表** —— 12 个手工 SVG 模板（flow / architecture / hierarchy / timeline / sequence / register-bitfield / soc-block / hw-timing-waveform / sched-timeline / build-pipeline / function-flowchart / algorithm-ringbuffer），苹果风圆角矩形 + 细灰描边 —— 全部可在[图表画廊](demos/apple-design/diagrams.html)预览
+- **图表** —— 14 个手工 SVG 模板（flow / architecture / hierarchy / timeline / sequence / register-bitfield / soc-block / hw-timing-waveform / sched-timeline / build-pipeline / function-flowchart / algorithm-ringbuffer / deployment / state-machine），苹果风圆角矩形 + 细灰描边 —— 全部可在[图表画廊](demos/apple-design/diagrams.html)预览
 - **交付** —— 纯 `apple.css`（零构建），配套 Tailwind preset
 
 **自动触发条件：** 用户说"apple 风格"/"apple style"/"苹果官网风格"/"like apple.com"，或要求做落地页 / 幻灯片 / 文档 / 图表 / 选配器对齐苹果官网。

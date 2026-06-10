@@ -8,11 +8,12 @@ Usage:
                                                   [--force-public] <html-path> [...]
 
   --allow-monolingual (alias --internal) skips the bilingual-page rule for
-  internal docs. Without it, HTML under /docs/ or /references/canonical/ must
-  have lang-toggle + lang-en + lang-zh spans (see cross-skill-rules.md §G).
+  internal docs. Without it, HTML under /docs/, /references/canonical/ or
+  /demos/ must have lang-toggle + lang-en + lang-zh spans (see
+  cross-skill-rules.md §G).
 
   --force-public runs the SEO meta check (check 9) even when the path is not
-  a public one (docs/ or references/canonical/). Test/fixture use only — it
+  a public one (docs/, references/canonical/ or demos/). Test/fixture use only — it
   does NOT enable the bilingual or self-diff public-path rules.
 
 If --skill is omitted, the script auto-detects the skill by scanning the HTML
@@ -331,13 +332,15 @@ def check_file(
                 )
 
     # 7. Bilingual toggle — public-facing pages must support zh/en
-    # switching. Any HTML under docs/ or skills/<style>/references/canonical/
-    # is a public destination (linked from landing or GitHub Pages). Missing
+    # switching. Any HTML under docs/, skills/<style>/references/canonical/
+    # or demos/ is a public destination (linked from landing or GitHub
+    # Pages). Missing
     # the lang-toggle / lang-en / lang-zh pattern = inconsistent UX for CJK
     # users. Rule is documented in cross-skill-rules.md §G.
     public_path = (
         "/docs/" in path.replace(os.sep, "/")
         or "/references/canonical/" in path.replace(os.sep, "/")
+        or "/demos/" in path.replace(os.sep, "/")
     )
     if public_path and not allow_monolingual:
         has_toggle = re.search(r'class=["\'][^"\']*\blang-toggle\b', html) is not None
