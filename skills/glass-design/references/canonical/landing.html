@@ -46,6 +46,23 @@
   /* Final CTA */
   .cta-panel { text-align: center; padding: var(--space-8) var(--space-6); }
   .cta-panel .glass-hairline { margin-inline: auto; }
+
+  /* —— Mobile ≤768px: grids collapse, dense figures pan in .glass-scroll —— */
+  @media (max-width: 768px) {
+    .stat-strip { grid-template-columns: repeat(2, 1fr); }
+    .stat-strip > div { min-width: 0; }
+    .stat-strip > div:nth-child(odd) { border-left: none; padding-left: 0; }
+    .stat-strip .glass-stat-number { font-size: clamp(28px, 8.5vw, 40px); }
+    .feat-row { grid-template-columns: 1fr; }
+    /* dense wide diagrams keep label size and pan instead of shrinking;
+       min-width:0 stops the pan width from propagating up the grid item */
+    .hero-grid > figure { min-width: 0; }
+    .glass-scroll--wide > svg { min-width: 1080px; }
+    /* nav CTA moves into the burger menu on phones */
+    .glass-nav-inner .glass-button { display: none; }
+    /* dropdown reads over any content even without backdrop-filter support */
+    .glass-nav-menu { background: linear-gradient(var(--glass-overlay-bg), var(--glass-overlay-bg)), var(--glass-bg); }
+  }
 </style>
 </head>
 <body>
@@ -67,9 +84,18 @@
   <div style="display:flex; gap:var(--space-3); align-items:center;">
     <button type="button" class="glass-lang-toggle lang-toggle" aria-label="Switch language">中 / EN</button>
     <button type="button" class="glass-theme-toggle" aria-label="Switch theme">light</button>
+    <button type="button" class="glass-nav-burger" aria-label="Menu" aria-expanded="false">☰</button>
     <a class="glass-button" href="#start"><span class="lang-en">Start streaming</span><span class="lang-zh">开始接入</span></a>
   </div>
-</div></nav>
+</div>
+<nav class="glass-nav-menu">
+  <a href="#product"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+  <a href="diagram-gallery.html"><span class="lang-en">Atlas</span><span class="lang-zh">系统图集</span></a>
+  <a href="dashboard.html"><span class="lang-en">Console</span><span class="lang-zh">控制台</span></a>
+  <a href="data-report.html"><span class="lang-en">Reports</span><span class="lang-zh">报告</span></a>
+  <a href="#start"><span class="lang-en">Start streaming</span><span class="lang-zh">开始接入</span></a>
+</nav>
+</nav>
 
 <!-- Hero -->
 <section class="glass-hero">
@@ -98,6 +124,7 @@
       </div>
 
       <figure class="glass-panel mock-frame" data-tilt>
+        <div class="glass-scroll glass-scroll--wide">
         <svg role="img" aria-label="Prism console — a streaming line chart, live stat chips and an event stream sidebar" viewBox="0 0 1200 520" data-draw>
           <!-- window chrome -->
           <rect x="0" y="0" width="1200" height="44" rx="14" class="glass-svg-node"/>
@@ -174,6 +201,7 @@
             <text x="1010" y="492">ALL REGIONS OK</text>
           </g>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">The console as it streams — one cyan series, a deploy marker, and a tail of raw events. No refresh button exists.</span>
           <span class="lang-zh">流动中的控制台——一条 cyan 序列、一个发布标记、一列原始事件。整个产品没有刷新按钮。</span>
@@ -274,6 +302,7 @@
       </h2>
     </div>
     <figure class="glass-panel" style="margin-top:var(--space-6);" data-reveal>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="Prism pipeline: ingest, index, query, render — events flow left to right" viewBox="0 0 1240 280" data-draw style="display:block; width:100%; height:auto;">
         <g font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="2" class="glass-svg-ink-3">
           <text x="24" y="40">01 · INGEST</text>
@@ -317,6 +346,7 @@
         </g>
         <text x="24" y="252" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">EVENTS FLOW LEFT TO RIGHT · BACKPRESSURE FLOWS BACK</text>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">The query stage is the product — everything left of it exists so that stage answers in 38ms.</span>
         <span class="lang-zh">查询阶段才是产品本体——它左边的一切，都是为了让它能在 38 毫秒内作答。</span>

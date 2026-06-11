@@ -668,6 +668,54 @@ html[data-theme="light"] .glass-svg-node--indigo { fill: rgba(79, 70, 229, 0.08)
   margin-bottom: var(--space-2);
 }
 
+/* Mobile diagram strategy — readable-width with horizontal pan. SVG text must
+ * never scale below legibility, so on small screens the figure keeps a
+ * readable minimum width and the reader pans. Wrap dense figures:
+ *   <div class="glass-scroll"><svg …>…</svg></div>
+ * Density tiers: default min 680px · --wide min 920px (≥20 labels). */
+.glass-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.glass-scroll > svg { min-width: 680px; }
+.glass-scroll--wide > svg { min-width: 920px; }
+.glass-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.glass-table-wrap .glass-table { min-width: 560px; }
+
+/* Mobile nav — hamburger that expands into a glass dropdown panel. glass.js
+ * toggles .is-open; desktop hides the burger and shows inline links. */
+.glass-nav-burger {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--glass-panel-border);
+  border-radius: var(--radius-sm);
+  width: 38px;
+  height: 34px;
+  padding: 0;
+  cursor: pointer;
+  color: var(--glass-ink);
+  font-size: 16px;
+  line-height: 1;
+}
+.glass-nav-menu {
+  display: none;
+  position: absolute;
+  top: 64px;
+  left: 0;
+  right: 0;
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  background: var(--glass-overlay-bg);
+  -webkit-backdrop-filter: blur(32px) saturate(160%) brightness(1.06);
+  backdrop-filter: blur(32px) saturate(160%) brightness(1.06);
+  border-bottom: 1px solid var(--glass-overlay-border);
+}
+.glass-nav-menu a {
+  display: block;
+  padding: var(--space-3) 0;
+  color: var(--glass-ink);
+  font-size: 16px;
+  text-decoration: none;
+  border-bottom: 1px solid var(--glass-line);
+}
+.glass-nav.is-open .glass-nav-menu { display: block; }
+
 /* ---------- Section L: Motion ----------
  * Every animation has a terminal state identical to the static markup, and
  * three independent freeze paths land there:
@@ -790,14 +838,21 @@ html[data-motion="off"] *::after {
 
 /* ---------- Section M: Responsive + a11y ---------- */
 @media (max-width: 768px) {
-  h1 { font-size: 44px; }
-  h2 { font-size: 32px; }
-  .glass-stat-number { font-size: 48px; }
-  .glass-quote { font-size: 26px; }
+  h1 { font-size: clamp(34px, 9.5vw, 44px); }
+  h2 { font-size: clamp(27px, 7.5vw, 32px); }
+  h3 { font-size: 21px; }
+  body { font-size: 16px; }
+  .glass-lead { font-size: 17px; }
+  .glass-stat-number { font-size: clamp(38px, 11vw, 48px); }
+  .glass-quote { font-size: clamp(21px, 6.5vw, 26px); }
   .glass-section { padding-block: var(--space-7); }
   .glass-hero { padding-block: var(--space-8) var(--space-7); }
+  .glass-container, .glass-container--wide, .glass-container--narrow { padding: 0 var(--space-4); }
+  .glass-panel { padding: var(--space-5); }
+  .glass-card { padding: var(--space-5); }
   .glass-footer-grid { grid-template-columns: repeat(2, 1fr); }
   .glass-nav-links { display: none; }
+  .glass-nav-burger { display: grid; place-items: center; }
 }
 @media (min-width: 769px) and (max-width: 1024px) {
   h1 { font-size: 56px; }

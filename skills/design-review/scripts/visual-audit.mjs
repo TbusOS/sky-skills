@@ -41,6 +41,12 @@ const ignoreIntentional = args.includes('--ignore-intentional');
 // --theme=dark|light — flips html[data-theme] after load. Glass pages are
 // dual-theme; the harness audits dark (canonical) and light separately.
 const themeArg = (args.find((a) => a.startsWith('--theme=')) || '').split('=')[1] || null;
+// --viewport=375x812 — audit at a phone viewport. Brand-presence is skipped
+// (its 1440×500 clip and thresholds are desktop-calibrated); the page-overflow
+// check below is the mobile-specific gate.
+const vpArg = (args.find((a) => a.startsWith('--viewport=')) || '').split('=')[1] || null;
+const vpMatch = vpArg ? vpArg.match(/^(\d+)x(\d+)$/) : null;
+const VIEWPORT = vpMatch ? { width: +vpMatch[1], height: +vpMatch[2] } : { width: 1440, height: 900 };
 const target = args.filter((a) => !a.startsWith('--'))[0];
 if (!target) {
   console.error('usage: node visual-audit.mjs [--ignore-intentional] [--theme=dark|light] <html-path>');
@@ -188,7 +194,7 @@ const browser = await chromium.launch();
 // below the fold would still be opacity:0 when fullPage screenshots are
 // taken (captureBeyondViewport never scrolls, so IO never fires).
 const page = await (await browser.newContext({
-  viewport: { width: 1440, height: 900 },
+  viewport: VIEWPORT,
   reducedMotion: 'reduce',
 })).newPage();
 await page.goto(url, { waitUntil: 'networkidle' });
@@ -1224,6 +1230,23 @@ const findings = await page.evaluate((arg) => {
     }
   }
 
+  // ---------- 15b) Horizontal page overflow ----------
+  // Any viewport: the root must not scroll sideways. Content wider than the
+  // screen on a phone is the #1 "layout broken on mobile" symptom. Designed
+  // pan areas (.glass-scroll / [data-scroll-x] / .glass-table-wrap) own their
+  // overflow locally and never propagate to the root, so they pass.
+  {
+    const docW = document.documentElement.scrollWidth;
+    if (docW > window.innerWidth + 2) {
+      issues.push({
+        kind: 'page-overflow-x',
+        severity: 'error',
+        docWidth: docW,
+        viewport: window.innerWidth,
+      });
+    }
+  }
+
   // ---------- 16) Glass-only material + motion-determinism checks ----------
   // glass-design is the one skill with heavy JS motion and translucent
   // panels, so it carries four extra gates:
@@ -1360,7 +1383,7 @@ const findings = await page.evaluate((arg) => {
 // a <skill> page at first glance".
 // Light theme is skipped: dark is the brand-canonical state for glass, and a
 // single threshold can't fit both modes' coverage profiles.
-if (skillId && themeArg !== 'light') {
+if (skillId && themeArg !== 'light' && VIEWPORT.width === 1440) {
   const sig = SKILL_SIGNATURES[skillId];
   const buf = await page.screenshot({
     clip: { x: 0, y: 0, width: 1440, height: 500 },
@@ -1601,6 +1624,10 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'glass-cyan-svg-text') {
     console.log(
       `  [${i.severity}] glass-cyan-svg-text: SVG text "${i.text}" computes to ${i.fill} under the LIGHT theme (~1.7:1 on light panels) — a literal cyan fill; use class="glass-svg-accent-ink" so the ink flips to #0E7490 in light (known-bugs 6.4)`
+    );
+  } else if (i.kind === 'page-overflow-x') {
+    console.log(
+      `  [${i.severity}] page-overflow-x: document is ${i.docWidth}px wide in a ${i.viewport}px viewport — the page scrolls sideways; collapse the offending grid/figure or wrap it in a designed pan container (.glass-scroll / .glass-table-wrap)`
     );
   } else if (i.kind === 'glass-aurora-text') {
     console.log(

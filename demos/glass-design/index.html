@@ -69,6 +69,23 @@
 
   /* Sibling demos */
   .xlink-row { display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap; margin-top: var(--space-6); }
+
+  /* —— Mobile ≤768px: grids collapse, dense figures pan in .glass-scroll —— */
+  @media (max-width: 768px) {
+    .stat-strip { grid-template-columns: repeat(2, 1fr); }
+    .stat-strip > div { min-width: 0; }
+    .stat-strip > div:nth-child(odd) { border-left: none; padding-left: 0; }
+    .stat-strip .glass-stat-number { font-size: clamp(28px, 8.5vw, 40px); }
+    .feat-row { grid-template-columns: 1fr; }
+    .craft-grid { grid-template-columns: 1fr; }
+    /* dense wide diagrams keep label size and pan instead of shrinking;
+       min-width:0 stops the pan width from propagating up the grid item */
+    .hero-grid > figure { min-width: 0; }
+    .glass-scroll--wide > svg { min-width: 1080px; }
+    .glass-nav-inner .glass-button { display: none; }
+    /* dropdown reads over any content even without backdrop-filter support */
+    .glass-nav-menu { background: linear-gradient(var(--glass-overlay-bg), var(--glass-overlay-bg)), var(--glass-bg); }
+  }
 </style>
 </head>
 <body>
@@ -92,9 +109,20 @@
   <div style="display:flex; gap:var(--space-3); align-items:center;">
     <button type="button" class="glass-lang-toggle lang-toggle" aria-label="Switch language">中 / EN</button>
     <button type="button" class="glass-theme-toggle" aria-label="Switch theme">light</button>
+    <button type="button" class="glass-nav-burger" aria-label="Menu" aria-expanded="false">☰</button>
     <a class="glass-button" href="#install"><span class="lang-en">Get the repo</span><span class="lang-zh">获取仓库</span></a>
   </div>
-</div></nav>
+</div>
+<nav class="glass-nav-menu">
+  <a href="#method"><span class="lang-en">Method</span><span class="lang-zh">工作方式</span></a>
+  <a href="#roster"><span class="lang-en">Roster</span><span class="lang-zh">阵容</span></a>
+  <a href="diagrams.html"><span class="lang-en">Templates</span><span class="lang-zh">图示模板</span></a>
+  <a href="#gates"><span class="lang-en">Gates</span><span class="lang-zh">检查</span></a>
+  <a href="../../index.html"><span class="lang-en">All skills</span><span class="lang-zh">全部 skill</span></a>
+  <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+  <a href="#install"><span class="lang-en">Get the repo</span><span class="lang-zh">获取仓库</span></a>
+</nav>
+</nav>
 
 <!-- Hero -->
 <section class="glass-hero">
@@ -123,6 +151,7 @@
       </div>
 
       <figure class="glass-panel mock-frame" data-tilt>
+        <div class="glass-scroll glass-scroll--wide">
         <svg role="img" aria-label="A Claude Code session on sky-skills: the prompt matches glass-design's TRIGGER, the skill loads, and the four-stage pipeline runs to zero errors" viewBox="0 0 1200 520" data-draw>
           <!-- window chrome -->
           <rect x="0" y="0" width="1200" height="44" rx="14" class="glass-svg-node"/>
@@ -213,6 +242,7 @@
             <text x="1010" y="492">MOTION FREEZABLE</text>
           </g>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">The session as it runs — one TRIGGER hit lights one chip, the pipeline ends at zero errors. The mock is drawn in the page's own glass.</span>
           <span class="lang-zh">运行中的会话——一次 TRIGGER 命中点亮一枚词片，流水线终点是零 error。这张 mock 用的就是页面自己的玻璃。</span>
@@ -359,6 +389,7 @@
 
     <!-- Diagram 1: code architecture -->
     <figure class="glass-panel diagram-panel" data-reveal>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="Code architecture: a prompt falls through presentation, application, domain and infrastructure layers; five design-skill pills sit in the domain layer" viewBox="0 0 1240 460" data-draw>
         <g font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="2" class="glass-svg-ink-3">
           <text x="24" y="36">01 · PRESENTATION</text>
@@ -437,6 +468,7 @@
 
         <text x="24" y="448" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">A PROMPT FALLS THROUGH FOUR LAYERS · ONLY GATED PAGES COME BACK UP</text>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">A prompt falls through four layers; the cyan-stroked pill is this page's author, and the strong-stroked gate node is the reason it shipped.</span>
         <span class="lang-zh">一个提示词穿过四层结构——cyan 描边的药丸是这页的作者，强描边的检查节点是它能发布的原因。</span>
@@ -445,6 +477,7 @@
 
     <!-- Diagram 2: SoC block -->
     <figure class="glass-panel diagram-panel" data-reveal>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="SoC block diagram in dark glass: P-cluster and E-cluster with shared L2, a ten-core GPU, a sixteen-core neural engine, media engine, unified memory and an interconnect fabric over an I/O strip" viewBox="0 0 1240 560">
         <!-- die -->
         <rect x="36" y="28" width="1168" height="504" rx="20" class="glass-svg-node"/>
@@ -551,6 +584,7 @@
           <text x="960" y="495">10G ETHERNET</text>
         </g>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">The same silicon every sibling demo draws — clusters, GPU, neural engine, unified memory — rendered as panels in the page's own glass, with the ANE as the one lit block.</span>
         <span class="lang-zh">姊妹 demo 都画过的同一块芯片——核心簇、GPU、神经引擎、统一内存——用页面自己的玻璃画成面板，ANE 是唯一点亮的模块。</span>
@@ -559,6 +593,7 @@
 
     <!-- Diagram 3: multi-repo git flow -->
     <figure class="glass-panel diagram-panel" data-reveal>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="Multi-repo collaboration flow: an upstream repo, a working repo with feature branches and a working tree, and a commit mirror with CI — push, pull-request and rebase arrows connect them" viewBox="0 0 1240 560">
         <!-- pull-request arc -->
         <path d="M1050 84 C 1050 30, 205 30, 205 84" style="stroke:var(--glass-aurora-indigo)" stroke-width="2" stroke-dasharray="6 4" fill="none"/>
@@ -638,6 +673,7 @@
 
         <text x="40" y="548" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">THREE REMOTES · EVERY COMMIT CROSSES A GATE BEFORE IT CROSSES A REMOTE</text>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">Three remotes, one discipline: work happens in the strong-stroked middle, and every commit crosses the gates before it crosses a remote.</span>
         <span class="lang-zh">三个远端，一条纪律：工作发生在强描边的中间仓，每个提交先过检查，再过远端。</span>

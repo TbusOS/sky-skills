@@ -45,6 +45,22 @@
   .craft-rule p { font-size: 14px; color: var(--glass-ink-2); margin: 0; }
 
   .sect-head { max-width: 760px; }
+
+  /* Atlas cards: pan container only binds on phones — desktop keeps the
+     natural 2-column card width */
+  .atlas-card .glass-scroll > svg { min-width: 0; }
+
+  /* —— Mobile ≤768px: grids collapse, dense figures pan in .glass-scroll —— */
+  @media (max-width: 768px) {
+    .atlas-grid { grid-template-columns: 1fr; }
+    .atlas-grid > figure { min-width: 0; }
+    .craft-grid { grid-template-columns: 1fr; }
+    .glass-scroll--wide > svg { min-width: 1080px; }
+    .atlas-card .glass-scroll > svg { min-width: 560px; }
+    .glass-nav-inner .glass-button { display: none; }
+    /* dropdown reads over any content even without backdrop-filter support */
+    .glass-nav-menu { background: linear-gradient(var(--glass-overlay-bg), var(--glass-overlay-bg)), var(--glass-bg); }
+  }
 </style>
 </head>
 <body>
@@ -66,9 +82,18 @@
   <div style="display:flex; gap:var(--space-3); align-items:center;">
     <button type="button" class="glass-lang-toggle lang-toggle" aria-label="Switch language">中 / EN</button>
     <button type="button" class="glass-theme-toggle" aria-label="Switch theme">light</button>
+    <button type="button" class="glass-nav-burger" aria-label="Menu" aria-expanded="false">☰</button>
     <a class="glass-button" href="landing.html#start"><span class="lang-en">Start streaming</span><span class="lang-zh">开始接入</span></a>
   </div>
-</div></nav>
+</div>
+<nav class="glass-nav-menu">
+  <a href="landing.html"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+  <a href="#atlas"><span class="lang-en">Atlas</span><span class="lang-zh">系统图集</span></a>
+  <a href="dashboard.html"><span class="lang-en">Console</span><span class="lang-zh">控制台</span></a>
+  <a href="data-report.html"><span class="lang-en">Reports</span><span class="lang-zh">报告</span></a>
+  <a href="landing.html#start"><span class="lang-en">Start streaming</span><span class="lang-zh">开始接入</span></a>
+</nav>
+</nav>
 
 <!-- Hero -->
 <section class="glass-hero">
@@ -99,6 +124,7 @@
       </h2>
     </div>
     <figure class="glass-panel featured-panel" data-reveal>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="Prism platform architecture: edge agents feed regional ingest, a two-tier index, the query engine, and streaming clients" viewBox="0 0 1240 440" data-draw>
         <g font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="2" class="glass-svg-ink-3">
           <text x="24" y="36">01 · EDGE</text>
@@ -163,6 +189,7 @@
         <text x="778" y="390" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">diffs over the wire · 60fps charts</text>
         <path d="M710 375 L750 375" stroke="#22D3EE" stroke-width="2" fill="none"/>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">Everything funnels toward the cyan-stroked query engine — the other eleven boxes exist so that one box answers in 38ms.</span>
         <span class="lang-zh">一切都汇向 cyan 描边的查询引擎——其余十一个框存在的意义，是让那一个框能在 38 毫秒内作答。</span>
@@ -186,6 +213,7 @@
 
       <figure class="glass-card atlas-card" data-reveal>
         <span class="atlas-kicker">flow · <span class="lang-en">ingest path</span><span class="lang-zh">接入路径</span></span>
+        <div class="glass-scroll">
         <svg role="img" aria-label="Ingest flow: SDK batches events through the edge into the regional log" viewBox="0 0 560 240">
           <rect x="16" y="92" width="140" height="56" rx="12" class="glass-svg-node"/>
           <rect x="212" y="92" width="140" height="56" rx="12" class="glass-svg-node"/>
@@ -207,6 +235,7 @@
           <text x="16" y="40" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">EVENT LEAVES THE PROCESS IN UNDER 1MS</text>
           <text x="16" y="210" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">BACKPRESSURE FLOWS RIGHT TO LEFT</text>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">The SDK never blocks the host app — batching happens at the edge, not in your process.</span>
           <span class="lang-zh">SDK 永不阻塞宿主应用——批处理发生在边缘，不在你的进程里。</span>
@@ -215,6 +244,7 @@
 
       <figure class="glass-card atlas-card" data-reveal>
         <span class="atlas-kicker">sequence · <span class="lang-en">query fan-out</span><span class="lang-zh">查询扇出</span></span>
+        <div class="glass-scroll">
         <svg role="img" aria-label="Query sequence: the planner scatters to six regions and gathers partial results" viewBox="0 0 560 240">
           <rect x="24" y="14" width="72" height="28" rx="14" class="glass-svg-node"/>
           <rect x="204" y="14" width="80" height="28" rx="14" class="glass-svg-node glass-svg-node--cyan"/>
@@ -240,6 +270,7 @@
           <circle cx="244" cy="161" r="5" fill="#22D3EE"/>
           <text x="258" y="165" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">merge + sort</text>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">The slowest region bounds the answer, so partials stream back and merge as they land.</span>
           <span class="lang-zh">最慢的区域决定答案下限，所以部分结果边到达边归并。</span>
@@ -248,6 +279,7 @@
 
       <figure class="glass-card atlas-card" data-reveal>
         <span class="atlas-kicker">state machine · <span class="lang-en">alert lifecycle</span><span class="lang-zh">告警生命周期</span></span>
+        <div class="glass-scroll">
         <svg role="img" aria-label="Alert lifecycle state machine: baseline, candidate, firing, resolved" viewBox="0 0 560 240">
           <rect x="24" y="56" width="128" height="48" rx="24" class="glass-svg-node"/>
           <rect x="216" y="56" width="128" height="48" rx="24" class="glass-svg-node"/>
@@ -270,6 +302,7 @@
             <text x="92" y="150">RELEARN</text>
           </g>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">Only the firing state pages a human — and resolution feeds the baseline back, so the same wobble never pages twice.</span>
           <span class="lang-zh">只有 firing 态会叫人——恢复后回灌基线，同样的抖动不会叫第二次。</span>
@@ -278,6 +311,7 @@
 
       <figure class="glass-card atlas-card" data-reveal>
         <span class="atlas-kicker">timeline · <span class="lang-en">deploy rollout</span><span class="lang-zh">发布滚动</span></span>
+        <div class="glass-scroll">
         <svg role="img" aria-label="Deploy rollout timeline: canary, two waves, full fleet across ninety minutes" viewBox="0 0 560 240">
           <line x1="32" y1="150" x2="528" y2="150" class="glass-svg-line" stroke-width="1.5"/>
           <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">
@@ -305,6 +339,7 @@
           <path d="M44 128 L44 144" stroke="#22D3EE" stroke-width="2"/>
           <text x="32" y="216" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">ANY GATE FAILS → AUTO-ROLLBACK IN 40S</text>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">Every rollout is four gates on a clock; the cyan tick is where a human last touched it.</span>
           <span class="lang-zh">每次发布是钟表上的四道检查；cyan 刻度是人手最后碰过的位置。</span>
@@ -313,6 +348,7 @@
 
       <figure class="glass-card atlas-card" data-reveal>
         <span class="atlas-kicker">wire format · <span class="lang-en">event envelope</span><span class="lang-zh">事件信封</span></span>
+        <div class="glass-scroll">
         <svg role="img" aria-label="Event envelope wire format: a 128-bit header in five fields, then the payload" viewBox="0 0 560 240">
           <text x="16" y="40" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">128-BIT HEADER · LITTLE ENDIAN</text>
           <rect x="16" y="60" width="168" height="52" class="glass-svg-node"/>
@@ -338,6 +374,7 @@
           <text x="28" y="170" font-family="'Inter', sans-serif" font-size="13.5" font-weight="600" class="glass-svg-ink">payload — column-coded key/value pairs</text>
           <text x="16" y="222" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">SHARD FIELD ROUTES WITHOUT PARSING THE PAYLOAD</text>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">The shard field is highlighted because routing reads only those 16 bits — the payload stays opaque until the index.</span>
           <span class="lang-zh">shard 字段被点亮，因为路由只读这 16 位——payload 在进索引之前保持不被解析。</span>
@@ -346,6 +383,7 @@
 
       <figure class="glass-card atlas-card" data-reveal>
         <span class="atlas-kicker">pipeline · <span class="lang-en">release build</span><span class="lang-zh">发布构建</span></span>
+        <div class="glass-scroll">
         <svg role="img" aria-label="Release build pipeline: commit, test, image, sign, deploy with a fan-in of checks" viewBox="0 0 560 240">
           <rect x="16" y="56" width="92" height="44" rx="10" class="glass-svg-node"/>
           <rect x="140" y="32" width="108" height="44" rx="10" class="glass-svg-node"/>
@@ -370,6 +408,7 @@
             <text x="16" y="196">EVERY ARTIFACT SIGNED · SBOM ATTACHED</text>
           </g>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">Tests fan out and fan back in before the image exists — nothing unsigned ever reaches a region.</span>
           <span class="lang-zh">测试先扇出再收拢，镜像才会产生——未签名的产物到不了任何区域。</span>

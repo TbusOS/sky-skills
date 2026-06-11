@@ -59,6 +59,19 @@
     }
   });
 
+  /* ---------- mobile nav (hamburger) ---------- */
+  document.addEventListener('DOMContentLoaded', function () {
+    var burgers = document.querySelectorAll('.glass-nav-burger');
+    for (var i = 0; i < burgers.length; i++) {
+      burgers[i].addEventListener('click', function (e) {
+        var nav = e.currentTarget.closest('.glass-nav');
+        if (!nav) return;
+        var open = nav.classList.toggle('is-open');
+        e.currentTarget.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    }
+  });
+
   /* ---------- freeze gate ---------- */
   var frozen = false;
   try {

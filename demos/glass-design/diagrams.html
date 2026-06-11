@@ -42,6 +42,22 @@
   .craft-rule p { font-size: 14px; color: var(--glass-ink-2); margin: 0; }
 
   .sect-head { max-width: 760px; }
+
+  /* Template cards: pan container only binds on phones — desktop keeps the
+     natural 2-column card width */
+  .tpl-card .glass-scroll > svg { min-width: 0; }
+
+  /* —— Mobile ≤768px: grids collapse, dense figures pan in .glass-scroll —— */
+  @media (max-width: 768px) {
+    .tpl-grid { grid-template-columns: 1fr; }
+    .tpl-grid > figure { min-width: 0; }
+    .craft-grid { grid-template-columns: 1fr; }
+    .glass-scroll--wide > svg { min-width: 1080px; }
+    .tpl-card .glass-scroll > svg { min-width: 560px; }
+    .glass-nav-inner .glass-button { display: none; }
+    /* dropdown reads over any content even without backdrop-filter support */
+    .glass-nav-menu { background: linear-gradient(var(--glass-overlay-bg), var(--glass-overlay-bg)), var(--glass-bg); }
+  }
 </style>
 </head>
 <body>
@@ -63,9 +79,18 @@
   <div style="display:flex; gap:var(--space-3); align-items:center;">
     <button type="button" class="glass-lang-toggle lang-toggle" aria-label="Switch language">中 / EN</button>
     <button type="button" class="glass-theme-toggle" aria-label="Switch theme">light</button>
+    <button type="button" class="glass-nav-burger" aria-label="Menu" aria-expanded="false">☰</button>
     <a class="glass-button" href="index.html#install"><span class="lang-en">Get the repo</span><span class="lang-zh">获取仓库</span></a>
   </div>
-</div></nav>
+</div>
+<nav class="glass-nav-menu">
+  <a href="index.html#method"><span class="lang-en">Method</span><span class="lang-zh">工作方式</span></a>
+  <a href="#templates"><span class="lang-en">Templates</span><span class="lang-zh">图示模板</span></a>
+  <a href="index.html#gates"><span class="lang-en">Gates</span><span class="lang-zh">检查</span></a>
+  <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+  <a href="index.html#install"><span class="lang-en">Get the repo</span><span class="lang-zh">获取仓库</span></a>
+</nav>
+</nav>
 
 <!-- Hero -->
 <section class="glass-hero">
@@ -97,6 +122,7 @@
     </div>
     <figure class="glass-panel featured-panel" data-reveal>
       <span class="tpl-kicker">templates/diagrams/architecture.svg · 1240 × 440</span>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="Prism platform architecture: edge agents feed regional ingest, a two-tier index, the query engine, and streaming clients" viewBox="0 0 1240 440" data-draw>
         <g font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="2" class="glass-svg-ink-3">
           <text x="24" y="36">01 · EDGE</text>
@@ -161,6 +187,7 @@
         <text x="778" y="390" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">diffs over the wire · 60fps charts</text>
         <path d="M710 375 L750 375" stroke="#22D3EE" stroke-width="2" fill="none"/>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">Twelve nodes, four tiers, one strong-stroked focus. Delete the embedded preview style when you paste it — the page's .glass-svg classes carry both themes.</span>
         <span class="lang-zh">十二个节点、四层结构、一个强描边焦点。贴进页面时删掉内嵌预览样式——页面的 .glass-svg 类会扛起双主题。</span>
@@ -184,6 +211,7 @@
 
       <figure class="glass-card tpl-card" data-reveal>
         <span class="tpl-kicker">templates/diagrams/flow.svg</span>
+        <div class="glass-scroll">
         <svg role="img" aria-label="Ingest flow: SDK batches events through the edge into the regional log" viewBox="0 0 560 240">
           <rect x="16" y="92" width="140" height="56" rx="12" class="glass-svg-node"/>
           <rect x="212" y="92" width="140" height="56" rx="12" class="glass-svg-node"/>
@@ -205,6 +233,7 @@
           <text x="16" y="40" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">EVENT LEAVES THE PROCESS IN UNDER 1MS</text>
           <text x="16" y="210" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">BACKPRESSURE FLOWS RIGHT TO LEFT</text>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">Three nodes and two cyan hops — the smallest flow that still says where energy goes. Start here for any left-to-right pipeline.</span>
           <span class="lang-zh">三个节点、两段 cyan 连线——能说清能量去向的最小流程图。任何从左到右的管线都从它起步。</span>
@@ -213,6 +242,7 @@
 
       <figure class="glass-card tpl-card" data-reveal>
         <span class="tpl-kicker">templates/diagrams/sequence.svg</span>
+        <div class="glass-scroll">
         <svg role="img" aria-label="Query sequence: the planner scatters to six regions and gathers partial results" viewBox="0 0 560 240">
           <rect x="24" y="14" width="72" height="28" rx="14" class="glass-svg-node"/>
           <rect x="204" y="14" width="80" height="28" rx="14" class="glass-svg-node glass-svg-node--cyan"/>
@@ -238,6 +268,7 @@
           <circle cx="244" cy="161" r="5" fill="#22D3EE"/>
           <text x="258" y="165" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">merge + sort</text>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">Lifelines are hairlines, the reply is dashed, and the one accent label marks the latency that matters.</span>
           <span class="lang-zh">生命线就是发丝线，回包用虚线，唯一的 accent 标签标出真正要紧的延迟。</span>
@@ -246,6 +277,7 @@
 
       <figure class="glass-card tpl-card" data-reveal>
         <span class="tpl-kicker">templates/diagrams/state-machine.svg</span>
+        <div class="glass-scroll">
         <svg role="img" aria-label="Alert lifecycle state machine: baseline, candidate, firing, resolved" viewBox="0 0 560 240">
           <rect x="24" y="56" width="128" height="48" rx="24" class="glass-svg-node"/>
           <rect x="216" y="56" width="128" height="48" rx="24" class="glass-svg-node"/>
@@ -268,6 +300,7 @@
             <text x="92" y="150">RELEARN</text>
           </g>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">Pill-shaped states, dashed return edges, mono guards on every transition — only the firing state takes the strong stroke.</span>
           <span class="lang-zh">药丸形状态、虚线回边、每条迁移都带 mono 守卫——只有 firing 态拿到强描边。</span>
@@ -276,6 +309,7 @@
 
       <figure class="glass-card tpl-card" data-reveal>
         <span class="tpl-kicker">templates/diagrams/timeline.svg</span>
+        <div class="glass-scroll">
         <svg role="img" aria-label="Deploy rollout timeline: canary, two waves, full fleet across ninety minutes" viewBox="0 0 560 240">
           <line x1="32" y1="150" x2="528" y2="150" class="glass-svg-line" stroke-width="1.5"/>
           <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">
@@ -303,6 +337,7 @@
           <path d="M44 128 L44 144" stroke="#22D3EE" stroke-width="2"/>
           <text x="32" y="216" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">ANY GATE FAILS → AUTO-ROLLBACK IN 40S</text>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">One hairline, four stops; the cyan tick marks the moment a human last touched it.</span>
           <span class="lang-zh">一条发丝线、四个停靠点；cyan 刻度标记人手最后碰过的时刻。</span>
@@ -311,6 +346,7 @@
 
       <figure class="glass-card tpl-card" data-reveal>
         <span class="tpl-kicker">templates/diagrams/bitfield.svg</span>
+        <div class="glass-scroll">
         <svg role="img" aria-label="Event envelope wire format: a 128-bit header in five fields, then the payload" viewBox="0 0 560 240">
           <text x="16" y="40" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">128-BIT HEADER · LITTLE ENDIAN</text>
           <rect x="16" y="60" width="168" height="52" class="glass-svg-node"/>
@@ -336,6 +372,7 @@
           <text x="28" y="170" font-family="'Inter', sans-serif" font-size="13.5" font-weight="600" class="glass-svg-ink">payload — column-coded key/value pairs</text>
           <text x="16" y="222" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">SHARD FIELD ROUTES WITHOUT PARSING THE PAYLOAD</text>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">Bit cells keep square corners on purpose — adjacent fields read as one 128-bit word, and the routed field is the only lit one.</span>
           <span class="lang-zh">位格刻意不做圆角——相邻字段读起来是同一个 128 位字，被路由读取的字段是唯一点亮的。</span>
@@ -344,6 +381,7 @@
 
       <figure class="glass-card tpl-card" data-reveal>
         <span class="tpl-kicker">templates/diagrams/build-pipeline.svg</span>
+        <div class="glass-scroll">
         <svg role="img" aria-label="Release build pipeline: commit, test, image, sign, deploy with a fan-in of checks" viewBox="0 0 560 240">
           <rect x="16" y="56" width="92" height="44" rx="10" class="glass-svg-node"/>
           <rect x="140" y="32" width="108" height="44" rx="10" class="glass-svg-node"/>
@@ -368,6 +406,7 @@
             <text x="16" y="196">EVERY ARTIFACT SIGNED · SBOM ATTACHED</text>
           </g>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">Fan out for the tests, fan back in for the artifact — the signed deploy node carries the strong stroke.</span>
           <span class="lang-zh">测试先扇出、再为产物收拢——签名发布节点带着强描边。</span>
@@ -395,6 +434,7 @@
 
     <figure class="glass-panel featured-panel" data-reveal>
       <span class="tpl-kicker">templates/diagrams/hierarchy.svg · 1240 × 396</span>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="Hierarchy: a research coordinator fans out to two search workers and two analysis workers; tint encodes the lane and partial results merge back into one answer" viewBox="0 0 1240 396">
         <text x="24" y="36" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">ONE COORDINATOR · FOUR WORKERS · FAN OUT, MERGE BACK</text>
 
@@ -435,6 +475,7 @@
         <text x="172" y="366" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">analysis lane</text>
         <text x="1216" y="366" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">PARTIALS MERGE BACK INTO ONE ANSWER</text>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">One coordinator, four workers, two tinted lanes — cyan searches, indigo analyses, and every partial result merges back into a single answer.</span>
         <span class="lang-zh">一个协调者、四个工作者、两条着色泳道——cyan 负责检索，indigo 负责分析，所有部分结果最终汇回同一个答案。</span>
@@ -443,6 +484,7 @@
 
     <figure class="glass-panel featured-panel" data-reveal>
       <span class="tpl-kicker">templates/diagrams/function-flowchart.svg · 1240 × 620</span>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="Kernel driver probe flowchart: mydev_probe runs down a cyan happy path through devm_kzalloc, ioremap, request_irq and chardev registration; each failed check exits right into an indigo error lane that unwinds in reverse and returns through one exit" viewBox="0 0 1240 620">
         <text x="24" y="36" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">DRIVER PROBE · HAPPY PATH LEFT · ERROR LANE RIGHT</text>
         <text x="1216" y="36" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">platform_driver · drivers/misc/mydev.c</text>
@@ -530,6 +572,7 @@
 
         <text x="24" y="604" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">EVERY ERROR RETURNS THROUGH ONE EXIT · UNWIND MIRRORS ACQUIRE ORDER</text>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">The happy path runs down the left in cyan; every failed check exits right into the indigo error lane and unwinds in reverse acquire order.</span>
         <span class="lang-zh">正常路径沿左侧 cyan 向下；每个失败的判断都向右退入 indigo 错误泳道，按申请的逆序回退。</span>
@@ -538,6 +581,7 @@
 
     <figure class="glass-panel featured-panel" data-reveal>
       <span class="tpl-kicker">templates/diagrams/deployment.svg · 1240 × 568</span>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="Deployment topology: an edge zone with CDN, WAF and load balancer, an app cluster with api, worker and scheduler, and an indigo data zone with Postgres, Redis and object store; the cyan request path runs load balancer to api to Postgres" viewBox="0 0 1240 568">
         <text x="24" y="36" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">DEPLOYMENT TOPOLOGY · THREE ZONES</text>
         <text x="1216" y="36" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">prod · us-east primary</text>
@@ -620,6 +664,7 @@
         <rect x="1070" y="546" width="14" height="14" rx="4" class="glass-svg-node glass-svg-node--indigo"/>
         <text x="1092" y="558" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">stateful zone</text>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">Three zones, one stateful: the cyan request path ends at Postgres, and only the indigo data zone is allowed to remember anything.</span>
         <span class="lang-zh">三个区域，只有一个有状态：cyan 请求路径终点是 Postgres，只有 indigo 数据区被允许记住任何东西。</span>
@@ -628,6 +673,7 @@
 
     <figure class="glass-panel featured-panel" data-reveal>
       <span class="tpl-kicker">templates/diagrams/soc-block.svg · 1240 × 600</span>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="Quartz-3550 SoC block diagram: a cyan-tinted CPU subsystem and a clock-reset unit feed one strong-stroked AXI NoC that fans out to an indigo memory zone, high-speed peripherals and an APB bridge serving low-speed peripherals; the numbered main data path runs CPU to NoC to DDR4" viewBox="0 0 1240 600">
         <text x="24" y="36" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">QUARTZ-3550 SOC · BLOCK DIAGRAM</text>
         <text x="1216" y="36" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">arm64 · 12nm LP · 0.8V core rail</text>
@@ -748,6 +794,7 @@
 
         <text x="24" y="588" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">MAIN DATA PATH · CPU → NOC → DDR4 · EVERYTHING ELSE HANGS OFF THE FABRIC</text>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">The cyan-tinted CPU subsystem reaches the indigo memory zone through the one strong-stroked NoC — the two numbered hops are the whole main data path.</span>
         <span class="lang-zh">cyan 着色的 CPU 子系统经由唯一强描边的 NoC 抵达 indigo 内存区——两个编号跳点就是整条主数据通路。</span>
@@ -756,6 +803,7 @@
 
     <figure class="glass-panel featured-panel" data-reveal>
       <span class="tpl-kicker">templates/diagrams/hw-timing-waveform.svg · 1240 × 440</span>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="SPI mode 0 read transaction timing waveform: SCLK, a cyan CS_N frame, cyan-tinted MOSI data-valid windows and indigo-tinted MISO reply windows, with dotted sampling edges at each SCLK rising edge and tCSS / tSU annotations" viewBox="0 0 1240 440">
         <!-- sampling gridlines at each SCLK rising edge -->
         <g class="glass-svg-grid">
@@ -839,6 +887,7 @@
         <text x="632" y="422" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">sampling edge · SCLK rising</text>
         <text x="1216" y="422" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">BIT PERIOD 40NS</text>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">Cyan cells are what the host drives, indigo cells are the device's reply, and every dotted line is an SCLK rising edge doing the sampling.</span>
         <span class="lang-zh">cyan 数据格是主机驱动的内容，indigo 数据格是器件的应答，每条点线都是一个负责采样的 SCLK 上升沿。</span>
@@ -847,6 +896,7 @@
 
     <figure class="glass-panel featured-panel" data-reveal>
       <span class="tpl-kicker">templates/diagrams/algorithm-ringbuffer.svg · 1240 × 344</span>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="Linux kfifo ring buffer: a 16-slot byte array with seven indigo slots of valid data between the out pointer at index 3 and the cyan in pointer at index 10; the dashed cyan sweep shows wrap-around via masking with size minus one" viewBox="0 0 1240 344">
         <!-- title row -->
         <text x="24" y="36" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">kfifo ring buffer</text>
@@ -925,6 +975,7 @@
         <rect x="1110" y="314" width="12" height="12" rx="3" class="glass-svg-node"/>
         <text x="1130" y="324" font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-2">free</text>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">Seven indigo slots of valid data sit between two pointers — the cyan in pointer writes, the mask wraps, and no byte ever moves.</span>
         <span class="lang-zh">两个指针之间是七格 indigo 有效数据——cyan 的 in 指针负责写入，mask 负责回绕，数据本身从不搬家。</span>
@@ -933,6 +984,7 @@
 
     <figure class="glass-panel featured-panel" data-reveal>
       <span class="tpl-kicker">templates/diagrams/sched-timeline.svg · 1240 × 400</span>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="Scheduler timeline: a CFS run view across CPU 0 to CPU 2 where the cyan app render task is preempted by the strong-stroked eth0 IRQ thread at 4ms and migrates to CPU 2 under load balancing while indigo kworker bursts run periodically on CPU 1" viewBox="0 0 1240 400">
         <!-- tick gridlines -->
         <g class="glass-svg-grid">
@@ -1027,6 +1079,7 @@
         <text x="582" y="380" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">irq/eth0 · threaded IRQ</text>
         <text x="790" y="380" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-3">bare lane = idle</text>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">One render task, three CPUs: preempted by the strong-stroked IRQ at 4ms, then moved by the load balancer — the dashed cyan arc is the migration.</span>
         <span class="lang-zh">一个渲染任务、三个 CPU：4ms 处被强描边的 IRQ 抢占，随后被负载均衡挪走——cyan 虚线弧就是那次迁移。</span>

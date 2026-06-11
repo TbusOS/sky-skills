@@ -84,11 +84,26 @@
     display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3);
   }
 
+  /* Pan container in the two-column band only binds on phones */
+  .two-col .glass-scroll > svg { min-width: 0; }
+
   @media (max-width: 900px) {
     .report-head h1 { font-size: 38px; }
     .sect-head h2 { font-size: 30px; }
     .two-col, .cards-2, .exec-strip { grid-template-columns: 1fr; }
     .exec-strip > div { padding-left: 0; border-left: none; }
+  }
+
+  /* —— Mobile ≤768px: dense figures pan in .glass-scroll, tables pan in
+     .glass-table-wrap; min-width:0 stops pan widths propagating up —— */
+  @media (max-width: 768px) {
+    .two-col > *, .exec-strip > div { min-width: 0; }
+    .exec-strip .glass-stat-number { font-size: clamp(34px, 11vw, 48px); }
+    .glass-scroll--wide > svg { min-width: 1080px; }
+    .two-col .glass-scroll > svg { min-width: 640px; }
+    .glass-nav-inner .glass-button { display: none; }
+    /* dropdown reads over any content even without backdrop-filter support */
+    .glass-nav-menu { background: linear-gradient(var(--glass-overlay-bg), var(--glass-overlay-bg)), var(--glass-bg); }
   }
 </style>
 </head>
@@ -111,9 +126,18 @@
   <div style="display:flex; gap:var(--space-3); align-items:center;">
     <button type="button" class="glass-lang-toggle lang-toggle" aria-label="Switch language">中 / EN</button>
     <button type="button" class="glass-theme-toggle" aria-label="Switch theme">light</button>
+    <button type="button" class="glass-nav-burger" aria-label="Menu" aria-expanded="false">☰</button>
     <a class="glass-button" href="landing.html#start"><span class="lang-en">Start streaming</span><span class="lang-zh">开始接入</span></a>
   </div>
-</div></nav>
+</div>
+<nav class="glass-nav-menu">
+  <a href="landing.html"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+  <a href="diagram-gallery.html"><span class="lang-en">Atlas</span><span class="lang-zh">系统图集</span></a>
+  <a href="dashboard.html"><span class="lang-en">Console</span><span class="lang-zh">控制台</span></a>
+  <a href="data-report.html" aria-current="page"><span class="lang-en">Reports</span><span class="lang-zh">报告</span></a>
+  <a href="landing.html#start"><span class="lang-en">Start streaming</span><span class="lang-zh">开始接入</span></a>
+</nav>
+</nav>
 
 <!-- Report header -->
 <section class="glass-hero">
@@ -193,6 +217,7 @@
   </div>
   <div class="glass-container glass-container--wide">
     <figure class="glass-panel chart-frame" data-reveal>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="Area chart of weekly peak ingest in Q2 2026, rising from 1.72 to 2.43 million events per second, with the June 9 incident marked" viewBox="0 0 1160 360" data-draw>
         <defs>
           <linearGradient id="rpt-area" x1="0" y1="0" x2="0" y2="1">
@@ -229,6 +254,7 @@
           <text x="1130" y="332" text-anchor="end">WEEKLY PEAK · 60S SUSTAINED</text>
         </g>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">Weekly peak ingest, Q2 2026 — 1.72M to 2.43M events/s. The June 9 incident reads as one flattened week, not a hole: buffered events replayed within the same hour.</span>
         <span class="lang-zh">Q2 2026 每周接入峰值——从每秒 172 万到 243 万。6 月 9 日的故障在图上只是被压平的一周，不是一个洞：缓冲的事件在同一小时内完成了重放。</span>
@@ -257,6 +283,7 @@
         </p>
       </div>
       <figure class="glass-panel chart-frame" data-reveal>
+        <div class="glass-scroll">
         <svg role="img" aria-label="Grouped bar chart of p99 query latency by region, Q1 versus Q2 2026 — every region improved 35 to 40 percent" viewBox="0 0 640 420">
           <!-- legend -->
           <rect x="440" y="26" width="12" height="12" rx="3" fill="#4F46E5"/>
@@ -311,6 +338,7 @@
             <text x="572" y="362">sa-east</text>
           </g>
         </svg>
+        </div>
         <figcaption>
           <span class="lang-en">p99 query latency by region, Q1 (indigo) vs Q2 (cyan). Every region improved 35–40%; the spread tightened from 14ms to 9ms.</span>
           <span class="lang-zh">各区域查询延迟 p99，Q1（indigo）对比 Q2（cyan）。每个区域都改善了 35–40%；区域间差距从 14 毫秒收窄到 9 毫秒。</span>
@@ -335,6 +363,7 @@
   </div>
   <div class="glass-container glass-container--wide">
     <figure class="glass-panel chart-frame" data-reveal>
+      <div class="glass-scroll glass-scroll--wide">
       <svg role="img" aria-label="Horizontal timeline of the June 9 incident: fiber cut at 14:01, alert at 14:02, reroute at 14:09, backlog replay at 14:18, fully restored at 14:25" viewBox="0 0 1160 300">
         <!-- base line -->
         <line x1="40" y1="150" x2="1120" y2="150" class="glass-svg-line" stroke-width="2"/>
@@ -393,6 +422,7 @@
           <text x="1120" y="288" text-anchor="end">ZERO EVENTS LOST · 31M REPLAYED BY 15:10</text>
         </g>
       </svg>
+      </div>
       <figcaption>
         <span class="lang-en">June 9 incident timeline. Detection to full restore in 23 minutes; edge buffers held 31M events and replayed them by 15:10.</span>
         <span class="lang-zh">6 月 9 日故障时间线。从发现到完全恢复 23 分钟；边缘缓冲存住 3100 万个事件，并在 15:10 前完成重放。</span>
@@ -445,6 +475,7 @@
   </div>
   <div class="glass-container glass-container--wide">
     <figure class="glass-panel table-frame" data-reveal>
+      <div class="glass-table-wrap">
       <table class="glass-table">
         <thead>
           <tr>
@@ -487,6 +518,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
       <figcaption>
         <span class="lang-en">Capacity by region, end of Q2. Ceilings come from quarterly load tests, not spec math — each cell is pushed to failure in a drill.</span>
         <span class="lang-zh">Q2 期末各区域容量。上限来自每季度的压测，不是纸面推算——每个单元都会在演练中被压到失效点。</span>

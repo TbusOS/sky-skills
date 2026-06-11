@@ -139,6 +139,10 @@
     vertical-align: 1px;
   }
 
+  /* Pan containers only bind on phones — desktop keeps natural figure widths */
+  .chart-panel .glass-scroll > svg { min-width: 0; }
+  .side-card .glass-scroll > svg { min-width: 0; }
+
   @media (max-width: 1024px) {
     .kpi-row { grid-template-columns: repeat(2, 1fr); }
     .console-grid { grid-template-columns: 1fr; }
@@ -146,8 +150,19 @@
   }
   @media (max-width: 768px) {
     .console-head h1 { font-size: 32px; }
-    .kpi-row { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .kpi-row > article { min-width: 0; }
+    .kpi-card { padding: var(--space-4); }
+    .kpi-card .glass-stat-number { font-size: clamp(28px, 8.5vw, 40px); }
     .side-col { grid-template-columns: 1fr; }
+    /* dense charts keep label size and pan; min-width:0 on the grid items
+       stops the pan width from propagating up */
+    .console-grid > *, .side-col > * { min-width: 0; }
+    .chart-panel .glass-scroll > svg { min-width: 880px; }
+    .side-card .glass-scroll > svg { min-width: 340px; }
+    .glass-nav-inner .glass-button { display: none; }
+    /* dropdown reads over any content even without backdrop-filter support */
+    .glass-nav-menu { background: linear-gradient(var(--glass-overlay-bg), var(--glass-overlay-bg)), var(--glass-bg); }
   }
 </style>
 </head>
@@ -170,9 +185,18 @@
   <div style="display:flex; gap:var(--space-3); align-items:center;">
     <button type="button" class="glass-lang-toggle lang-toggle" aria-label="Switch language">中 / EN</button>
     <button type="button" class="glass-theme-toggle" aria-label="Switch theme">light</button>
+    <button type="button" class="glass-nav-burger" aria-label="Menu" aria-expanded="false">☰</button>
     <a class="glass-button" href="#new-stream"><span class="lang-en">New stream</span><span class="lang-zh">新建流</span></a>
   </div>
-</div></nav>
+</div>
+<nav class="glass-nav-menu">
+  <a href="landing.html"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
+  <a href="diagram-gallery.html"><span class="lang-en">Atlas</span><span class="lang-zh">系统图集</span></a>
+  <a href="dashboard.html" aria-current="page"><span class="lang-en">Console</span><span class="lang-zh">控制台</span></a>
+  <a href="data-report.html"><span class="lang-en">Reports</span><span class="lang-zh">报告</span></a>
+  <a href="#new-stream"><span class="lang-en">New stream</span><span class="lang-zh">新建流</span></a>
+</nav>
+</nav>
 
 <main>
   <!-- Compact header: h1 + mono timestamp + decorative range control -->
@@ -237,6 +261,7 @@
             <h2><span class="lang-en">Throughput</span><span class="lang-zh">吞吐量</span></h2>
             <span class="panel-meta">checkout.events · 60 min · 1s buckets</span>
           </div>
+          <div class="glass-scroll">
           <svg role="img" aria-label="Throughput over the last 60 minutes: today's cyan series climbs from 2.0M to 2.42M events per second with a brief dip at the 14:14 deploy; yesterday's indigo dashed baseline runs about 8 percent lower" viewBox="0 0 880 540" data-draw>
             <defs>
               <linearGradient id="dash-area" x1="0" y1="0" x2="0" y2="1">
@@ -292,6 +317,7 @@
             <text x="636" y="88" font-family="'JetBrains Mono', monospace" font-size="11.5" class="glass-svg-ref-ink">DEPLOY 14:14 · v2.42</text>
             <text x="850" y="162" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" class="glass-svg-accent-ink">2.42M</text>
           </svg>
+          </div>
           <figcaption>
             <span class="lang-en">A brief dip at the 14:14 canary deploy, recovered in 90 seconds — the indigo dashes are yesterday's same hour, running about 8% lower.</span>
             <span class="lang-zh">14:14 灰度发布带来短暂下降，90 秒内恢复——靛蓝虚线是昨天同一小时，整体低约 8%。</span>
@@ -334,6 +360,7 @@
               <h2><span class="lang-en">Query p99 by region</span><span class="lang-zh">各区域查询 p99</span></h2>
               <span class="panel-meta">last 60 min</span>
             </div>
+            <div class="glass-scroll">
             <svg role="img" aria-label="Bar chart of query p99 latency by region: five regions sit between 29 and 41 milliseconds, sa-east-1 breaches the 48 millisecond SLO ceiling at 51 milliseconds" viewBox="0 0 340 160">
               <line x1="12" y1="46.8" x2="330" y2="46.8" stroke="#4F46E5" stroke-width="1.5" stroke-dasharray="4 5"/>
               <line x1="12" y1="126" x2="330" y2="126" class="glass-svg-line"/>
@@ -365,6 +392,7 @@
                 <text x="292" y="146">sae1</text>
               </g>
             </svg>
+            </div>
             <figcaption>
               <span class="lang-en">sa-east-1 p99 sits 3ms above the 48ms ceiling; the 503 rows in the event tail below come from the same region.</span>
               <span class="lang-zh">sa-east-1 的 p99 高出 48ms 上限 3ms；下方事件流里的 503 错误行正来自这一区域。</span>
@@ -384,6 +412,7 @@
           <h2><span class="lang-en">Recent events</span><span class="lang-zh">最近事件</span></h2>
           <a class="glass-link" href="#tail"><span class="lang-en">Open full tail</span><span class="lang-zh">打开完整事件流</span></a>
         </div>
+        <div class="glass-table-wrap">
         <table class="glass-table">
           <thead>
             <tr>
@@ -422,6 +451,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   </section>
