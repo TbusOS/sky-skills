@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prism Infrastructure Report — Q2 2026</title>
+<meta name="description" content="Prism Q2 2026 infrastructure report: ingest up 41% to 2.4M events/s, p99 down to 38ms, one 23-minute regional incident, and the H2 capacity plan.">
+<meta property="og:title" content="Prism Infrastructure Report — Q2 2026">
+<meta property="og:description" content="Quarterly engineering letter from Prism: 2.4M events/s peak ingest, 38ms p99 queries, a 23-minute incident review, and the capacity plan for H2 2026.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/glass.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  /* Report header — editorial scale, on the plain canvas (R1: no blob core here) */
+  .report-head { max-width: 820px; }
+  .report-head h1 { font-size: 56px; }
+  .report-lead { max-width: 680px; }
+  .report-meta {
+    margin-top: var(--space-6);
+    font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.12em;
+    color: var(--glass-ink-3); text-transform: uppercase;
+  }
+  html[data-lang="zh"] .report-meta { letter-spacing: 0.04em; text-transform: none; }
+
+  /* Section heads */
+  .sect-head h2 { font-size: 40px; max-width: 720px; }
+  .sect-head p { margin-top: var(--space-5); color: var(--glass-ink-2); }
+
+  /* Executive summary — three inline stats inside one Tier 1 panel */
+  .exec-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .exec-strip > div { padding-left: var(--space-5); border-left: 1px solid var(--glass-line); }
+  .exec-strip > div:first-child { border-left: none; padding-left: 0; }
+  .exec-strip .glass-stat-number { font-size: 64px; }
+  .exec-delta { display: block; margin-top: var(--space-3); }
+  .exec-note { margin: var(--space-5) 0 0; max-width: 68ch; font-size: 16px; color: var(--glass-ink-2); }
+
+  /* Chart frames */
+  .chart-frame { margin-top: var(--space-6); }
+  .chart-frame svg { display: block; width: 100%; height: auto; }
+
+  /* §02 two-column: prose + comparison bars */
+  .two-col { display: grid; grid-template-columns: 5fr 7fr; gap: var(--space-7); align-items: start; }
+  .two-col .chart-frame { margin-top: 0; }
+
+  /* §03 incident cards */
+  .cards-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); margin-top: var(--space-5); }
+  .cards-2 h3 { font-size: 22px; margin-bottom: var(--space-3); }
+  .cards-2 p, .cards-2 li { font-size: 15px; color: var(--glass-ink-2); }
+  .cards-2 ul { margin: 0; padding-left: 18px; display: grid; gap: var(--space-3); }
+  .badge-down {
+    display: inline-block;
+    font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: var(--radius-pill);
+    border: 1px solid var(--glass-down); color: var(--glass-down);
+    margin-bottom: var(--space-4);
+  }
+  .cards-2 .glass-badge--ghost { margin-bottom: var(--space-4); }
+
+  /* §04 capacity table */
+  .table-frame { padding: var(--space-5) var(--space-6) var(--space-6); margin-top: var(--space-6); }
+  .glass-table .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 13px; }
+  .glass-table tr.total td {
+    color: var(--glass-ink); font-weight: 600;
+    border-top: 1px solid var(--glass-panel-border); border-bottom: none;
+  }
+
+  /* Methodology footnote */
+  .footnote { border-top: 1px solid var(--glass-line); padding-top: var(--space-6); }
+  .footnote-label {
+    display: block;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--glass-ink-3); margin-bottom: var(--space-3);
+  }
+  html[data-lang="zh"] .footnote-label { letter-spacing: 0.06em; }
+  .footnote p { font-size: 13px; line-height: 1.7; color: var(--glass-ink-3); max-width: 68ch; }
+
+  /* Single-line footer */
+  .footer-line {
+    max-width: 1280px; margin: 0 auto; padding: 0 var(--space-5);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3);
+  }
+
+  @media (max-width: 900px) {
+    .report-head h1 { font-size: 38px; }
+    .sect-head h2 { font-size: 30px; }
+    .two-col, .cards-2, .exec-strip { grid-template-columns: 1fr; }
+    .exec-strip > div { padding-left: 0; border-left: none; }
+  }
+</style>
+</head>
+<body class="glass-page--calm">
+
+<!-- Calm aurora: two blobs only, both cores parked off every text column -->
+<div class="glass-aurora" aria-hidden="true">
+  <div class="glass-blob glass-blob--cyan" style="width:680px; height:680px; top:-260px; right:-220px;"></div>
+  <div class="glass-blob glass-blob--indigo" style="width:560px; height:560px; top:540px; left:-300px;"></div>
+</div>
+
+<nav class="glass-nav"><div class="glass-nav-inner">
+  <a href="landing.html" class="glass-nav-brand">Prism</a>
+  <div class="glass-nav-links">
+    <a href="landing.html"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="diagram-gallery.html"><span class="lang-en">Atlas</span><span class="lang-zh">系统图集</span></a>
+    <a href="dashboard.html"><span class="lang-en">Console</span><span class="lang-zh">控制台</span></a>
+    <a href="data-report.html" aria-current="page"><span class="lang-en">Reports</span><span class="lang-zh">报告</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="glass-lang-toggle lang-toggle" aria-label="Switch language">中 / EN</button>
+    <button type="button" class="glass-theme-toggle" aria-label="Switch theme">light</button>
+    <a class="glass-button" href="landing.html#start"><span class="lang-en">Start streaming</span><span class="lang-zh">开始接入</span></a>
+  </div>
+</div></nav>
+
+<!-- Report header -->
+<section class="glass-hero">
+  <div class="glass-container">
+    <div class="report-head">
+      <span class="glass-eyebrow">Q2 2026 · <span class="lang-en">Infrastructure report</span><span class="lang-zh">基础设施报告</span></span>
+      <h1>
+        <span class="lang-en">More traffic, less latency, one bad Tuesday.</span>
+        <span class="lang-zh">流量更多，延迟更低，外加一个糟糕的周二。</span>
+      </h1>
+      <hr class="glass-hairline">
+      <p class="glass-lead report-lead">
+        <span class="lang-en">Prism's quarterly engineering letter on the infrastructure behind 2.4 million events a second: where the traffic came from, how p99 fell to 38ms, what broke on June 9, and what we are building before the next doubling.</span>
+        <span class="lang-zh">Prism 每季一封的工程信，写给支撑每秒 240 万事件的那套基础设施：流量从哪里来，p99 怎么降到 38 毫秒，6 月 9 日坏掉了什么，以及在下一次翻倍之前我们在建什么。</span>
+      </p>
+      <p class="report-meta">
+        <span class="lang-en">2026-07-08 · Infrastructure team · v2.1 · 14 min read</span>
+        <span class="lang-zh">2026-07-08 · 基础设施团队 · v2.1 · 14 分钟读完</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Executive summary -->
+<section class="glass-section" id="summary">
+  <div class="glass-container glass-container--wide">
+    <div class="sect-head">
+      <span class="glass-eyebrow">00 · <span class="lang-en">Executive summary</span><span class="lang-zh">执行摘要</span></span>
+      <h2>
+        <span class="lang-en">The quarter in three numbers.</span>
+        <span class="lang-zh">三个数字，读完这个季度。</span>
+      </h2>
+    </div>
+    <div class="glass-panel chart-frame" data-reveal>
+      <div class="exec-strip">
+        <div>
+          <span class="glass-stat-number" data-count-to="2.4" data-count-suffix="M">2.4M</span>
+          <span class="glass-stat-label"><span class="lang-en">peak events ingested per second</span><span class="lang-zh">每秒接入事件峰值</span></span>
+          <span class="exec-delta glass-stat-delta glass-stat-delta--up"><span class="lang-en">+41% vs Q1</span><span class="lang-zh">较 Q1 +41%</span></span>
+        </div>
+        <div>
+          <span class="glass-stat-number" data-count-to="38" data-count-suffix="ms">38ms</span>
+          <span class="glass-stat-label"><span class="lang-en">p99 query latency at quarter close</span><span class="lang-zh">季末查询延迟 p99</span></span>
+          <span class="exec-delta glass-stat-delta glass-stat-delta--up"><span class="lang-en">−38% vs Q1</span><span class="lang-zh">较 Q1 −38%</span></span>
+        </div>
+        <div>
+          <span class="glass-stat-number" data-count-to="99.99" data-count-suffix="%">99.99%</span>
+          <span class="glass-stat-label"><span class="lang-en">delivery, incl. the June 9 incident</span><span class="lang-zh">送达率（含 6 月 9 日故障）</span></span>
+          <span class="exec-delta glass-badge glass-badge--ghost"><span class="lang-en">SLO 99.95% · met</span><span class="lang-zh">SLO 99.95% · 达标</span></span>
+        </div>
+      </div>
+      <hr class="glass-hairline">
+      <p class="exec-note">
+        <span class="lang-en">Q2 closed with peak ingest 41% above Q1 and p99 query latency 38% below it — the two lines crossed without a single capacity incident on the query path. Delivery held at 99.99% for the quarter, including the 23 minutes on June 9 when a transit fiber cut degraded eu-central; the buffer-and-replay design turned a regional outage into late events, not lost ones.</span>
+        <span class="lang-zh">Q2 收官时，峰值接入比 Q1 高 41%，查询延迟 p99 比 Q1 低 38%——两条曲线交错而过，查询路径上没有发生一起容量事故。整季送达率保持在 99.99%，包括 6 月 9 日 eu-central 因中转光纤被挖断而降级的那 23 分钟；缓冲重放的设计把一次区域故障变成了迟到的事件，而不是丢失的事件。</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- §01 Traffic growth -->
+<section class="glass-section" id="traffic">
+  <div class="glass-container glass-container--narrow sect-head">
+    <span class="glass-eyebrow">01 · <span class="lang-en">Traffic growth</span><span class="lang-zh">流量增长</span></span>
+    <h2>
+      <span class="lang-en">Ingest grew 41%. The pipes barely noticed.</span>
+      <span class="lang-zh">接入量涨了 41%，管道几乎没察觉。</span>
+    </h2>
+    <p>
+      <span class="lang-en">Peak ingest climbed from 1.72M to 2.43M events per second across thirteen weeks. About two thirds of the growth came from existing teams instrumenting more services — the cohort that joined in Q1 doubled its event volume by mid-June — and the rest from 214 new teams onboarded during the quarter.</span>
+      <span class="lang-zh">十三周里，峰值接入从每秒 172 万爬到 243 万。增长约三分之二来自既有团队接入更多服务——Q1 加入的那批团队到 6 月中旬把事件量翻了一倍——其余来自本季度新接入的 214 个团队。</span>
+    </p>
+    <p>
+      <span class="lang-en">The edge held without new hardware: batching agents absorbed the growth while ingest lag stayed flat, and the only visible artifact of 41% more traffic is the area under this curve. The June 9 dip is the §03 incident — one week of flattened peaks, not a hole.</span>
+      <span class="lang-zh">边缘层没有添置任何新硬件：批量 agent 把增长吸收进恒定的接入延迟里，41% 的流量增长在页面上唯一可见的痕迹，就是这条曲线下方的面积。6 月 9 日那次故障在 §03 详述——在这张图上只是一周被压平的峰值，而不是一个洞。</span>
+    </p>
+  </div>
+  <div class="glass-container glass-container--wide">
+    <figure class="glass-panel chart-frame" data-reveal>
+      <svg role="img" aria-label="Area chart of weekly peak ingest in Q2 2026, rising from 1.72 to 2.43 million events per second, with the June 9 incident marked" viewBox="0 0 1160 360" data-draw>
+        <defs>
+          <linearGradient id="rpt-area" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#22D3EE" stop-opacity="0.18"/>
+            <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- grid + axis -->
+        <g class="glass-svg-grid">
+          <line x1="60" y1="62" x2="1130" y2="62"/>
+          <line x1="60" y1="170" x2="1130" y2="170"/>
+          <line x1="60" y1="278" x2="1130" y2="278"/>
+        </g>
+        <line x1="60" y1="300" x2="1130" y2="300" class="glass-svg-line" stroke-width="1.5"/>
+        <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">
+          <text x="14" y="66">2.5M</text>
+          <text x="14" y="174">2.0M</text>
+          <text x="14" y="282">1.5M</text>
+        </g>
+        <!-- area + line -->
+        <path d="M70 231 L158 224 L247 211 L335 218 L423 200 L512 183 L600 189 L688 166 L777 153 L865 131 L953 140 L1042 103 L1130 77 L1130 300 L70 300 Z" fill="url(#rpt-area)" stroke="none"/>
+        <path d="M70 231 L158 224 L247 211 L335 218 L423 200 L512 183 L600 189 L688 166 L777 153 L865 131 L953 140 L1042 103 L1130 77" fill="none" stroke="#22D3EE" stroke-width="2.5"/>
+        <!-- June 9 incident marker (indigo = "not the data series") -->
+        <line x1="953" y1="70" x2="953" y2="300" stroke="#4F46E5" stroke-width="1.5" stroke-dasharray="3 5"/>
+        <text x="945" y="54" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">JUN 9 · INCIDENT</text>
+        <!-- peak endpoint -->
+        <circle cx="1130" cy="77" r="5" fill="#22D3EE"/>
+        <text x="1130" y="54" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" style="fill:var(--glass-accent-ink)">2.43M PEAK</text>
+        <!-- x axis -->
+        <g font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">
+          <text x="70" y="332">APR</text>
+          <text x="423" y="332">MAY</text>
+          <text x="865" y="332">JUN</text>
+          <text x="1130" y="332" text-anchor="end">WEEKLY PEAK · 60S SUSTAINED</text>
+        </g>
+      </svg>
+      <figcaption>
+        <span class="lang-en">Weekly peak ingest, Q2 2026 — 1.72M to 2.43M events/s. The June 9 incident reads as one flattened week, not a hole: buffered events replayed within the same hour.</span>
+        <span class="lang-zh">Q2 2026 每周接入峰值——从每秒 172 万到 243 万。6 月 9 日的故障在图上只是被压平的一周，不是一个洞：缓冲的事件在同一小时内完成了重放。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- §02 Latency -->
+<section class="glass-section glass-section--alt" id="latency">
+  <div class="glass-container glass-container--wide">
+    <div class="two-col">
+      <div class="sect-head">
+        <span class="glass-eyebrow">02 · <span class="lang-en">Latency</span><span class="lang-zh">延迟改善</span></span>
+        <h2>
+          <span class="lang-en">p99 fell from 61ms to 38ms.</span>
+          <span class="lang-zh">p99 从 61 毫秒降到 38 毫秒。</span>
+        </h2>
+        <p>
+          <span class="lang-en">Three changes shipped, in order of measured impact: the vectorized engine v2.4 rollout (−9ms, fleet-wide by April 18), the hot tier doubling to 36 hours of in-memory data (−8ms, May), and scatter-gather pruning that skips regions a query provably cannot touch (−6ms, June).</span>
+          <span class="lang-zh">三项改动按实测收益排序：向量化引擎 v2.4 全量上线（−9 毫秒，4 月 18 日覆盖全集群）、热层扩容到 36 小时全内存数据（−8 毫秒，5 月）、以及跳过查询确定触不到的区域的 scatter-gather 剪枝（−6 毫秒，6 月）。</span>
+        </p>
+        <p>
+          <span class="lang-en">The spread between regions narrowed too: the slowest region today (ap-southeast, 44ms) beats the fastest region of Q1 (eu-central, 57ms). The H2 latency budget moves from "keep p99 under 45ms" to "keep the regional spread under 10ms".</span>
+          <span class="lang-zh">区域之间的差距也在收窄：今天最慢的区域（ap-southeast，44 毫秒）已经快过 Q1 最快的区域（eu-central，57 毫秒）。H2 的延迟预算从「p99 压在 45 毫秒以内」改成「区域间差距压在 10 毫秒以内」。</span>
+        </p>
+      </div>
+      <figure class="glass-panel chart-frame" data-reveal>
+        <svg role="img" aria-label="Grouped bar chart of p99 query latency by region, Q1 versus Q2 2026 — every region improved 35 to 40 percent" viewBox="0 0 640 420">
+          <!-- legend -->
+          <rect x="440" y="26" width="12" height="12" rx="3" fill="#4F46E5"/>
+          <text x="458" y="37" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">Q1 P99</text>
+          <rect x="520" y="26" width="12" height="12" rx="3" fill="#22D3EE"/>
+          <text x="538" y="37" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">Q2 P99</text>
+          <!-- grid -->
+          <g class="glass-svg-grid">
+            <line x1="50" y1="115" x2="620" y2="115"/>
+            <line x1="50" y1="190" x2="620" y2="190"/>
+            <line x1="50" y1="265" x2="620" y2="265"/>
+          </g>
+          <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">
+            <text x="10" y="119">60ms</text>
+            <text x="10" y="194">40ms</text>
+            <text x="10" y="269">20ms</text>
+          </g>
+          <line x1="50" y1="340" x2="620" y2="340" class="glass-svg-line" stroke-width="1.5"/>
+          <!-- bars: Q1 indigo / Q2 cyan -->
+          <g fill="#4F46E5">
+            <rect x="68"  y="122" width="26" height="218" rx="4"/>
+            <rect x="163" y="104" width="26" height="236" rx="4"/>
+            <rect x="258" y="126" width="26" height="214" rx="4"/>
+            <rect x="353" y="115" width="26" height="225" rx="4"/>
+            <rect x="448" y="74"  width="26" height="266" rx="4"/>
+            <rect x="543" y="92"  width="26" height="248" rx="4"/>
+          </g>
+          <g fill="#22D3EE">
+            <rect x="100" y="205" width="26" height="135" rx="4"/>
+            <rect x="195" y="194" width="26" height="146" rx="4"/>
+            <rect x="290" y="209" width="26" height="131" rx="4"/>
+            <rect x="385" y="198" width="26" height="142" rx="4"/>
+            <rect x="480" y="175" width="26" height="165" rx="4"/>
+            <rect x="575" y="186" width="26" height="154" rx="4"/>
+          </g>
+          <!-- Q2 value labels -->
+          <g font-family="'JetBrains Mono', monospace" font-size="11" text-anchor="middle" class="glass-svg-ink-2">
+            <text x="113" y="197">36</text>
+            <text x="208" y="186">39</text>
+            <text x="303" y="201">35</text>
+            <text x="398" y="190">38</text>
+            <text x="493" y="167">44</text>
+            <text x="588" y="178">41</text>
+          </g>
+          <!-- region labels -->
+          <g font-family="'JetBrains Mono', monospace" font-size="11" text-anchor="middle" class="glass-svg-ink-3">
+            <text x="97"  y="362">us-east</text>
+            <text x="192" y="362">us-west</text>
+            <text x="287" y="362">eu-central</text>
+            <text x="382" y="362">eu-west</text>
+            <text x="477" y="362">ap-southeast</text>
+            <text x="572" y="362">sa-east</text>
+          </g>
+        </svg>
+        <figcaption>
+          <span class="lang-en">p99 query latency by region, Q1 (indigo) vs Q2 (cyan). Every region improved 35–40%; the spread tightened from 14ms to 9ms.</span>
+          <span class="lang-zh">各区域查询延迟 p99，Q1（indigo）对比 Q2（cyan）。每个区域都改善了 35–40%；区域间差距从 14 毫秒收窄到 9 毫秒。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- §03 Incident review -->
+<section class="glass-section" id="incident">
+  <div class="glass-container glass-container--narrow sect-head">
+    <span class="glass-eyebrow">03 · <span class="lang-en">Incident review</span><span class="lang-zh">故障复盘</span></span>
+    <h2>
+      <span class="lang-en">June 9: a fiber cut, 23 minutes, zero events lost.</span>
+      <span class="lang-zh">6 月 9 日：一次光纤被挖断，23 分钟，零事件丢失。</span>
+    </h2>
+    <p>
+      <span class="lang-en">At 14:01 UTC a construction crew cut a transit fiber bundle outside Frankfurt, taking 40% of eu-central's upstream capacity with it. Delivery lag in the region rose above the 5-second alert line within 38 seconds; the page reached the on-call at 14:02. What followed is the timeline below — and the reason the quarterly delivery number still reads 99.99%.</span>
+      <span class="lang-zh">UTC 时间 14:01，一支施工队在法兰克福城外挖断了一束中转光纤，eu-central 40% 的上游容量随之消失。38 秒内，该区域的送达延迟越过 5 秒告警线；14:02 值班工程师收到呼叫。下面是接下来发生的事——也是季度送达率依然写着 99.99% 的原因。</span>
+    </p>
+  </div>
+  <div class="glass-container glass-container--wide">
+    <figure class="glass-panel chart-frame" data-reveal>
+      <svg role="img" aria-label="Horizontal timeline of the June 9 incident: fiber cut at 14:01, alert at 14:02, reroute at 14:09, backlog replay at 14:18, fully restored at 14:25" viewBox="0 0 1160 300">
+        <!-- base line -->
+        <line x1="40" y1="150" x2="1120" y2="150" class="glass-svg-line" stroke-width="2"/>
+        <!-- degraded window: rose is a tick, never an area fill -->
+        <rect x="129" y="156" width="798" height="3" rx="1.5" style="fill:var(--glass-down)"/>
+        <text x="528" y="180" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" style="fill:var(--glass-down)">23 MIN DEGRADED</text>
+        <!-- fault marker -->
+        <circle cx="95" cy="150" r="4" style="fill:var(--glass-down)"/>
+        <text x="60" y="180" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">14:01 · CUT</text>
+        <!-- above events: 14:02 / 14:09 / 14:25 -->
+        <g class="glass-svg-line">
+          <line x1="129" y1="104" x2="129" y2="144"/>
+          <line x1="372" y1="104" x2="372" y2="144"/>
+          <line x1="927" y1="104" x2="927" y2="144"/>
+        </g>
+        <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">
+          <text x="125" y="58">14:02</text>
+          <text x="368" y="58">14:09</text>
+          <text x="923" y="58">14:25</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">
+          <text x="125" y="78">Delivery lag alert fires</text>
+          <text x="368" y="78">Reroute — edge buffers engaged</text>
+          <text x="923" y="78">Restored — lag under 250ms</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">
+          <text x="125" y="96">38s after the cut · page sent</text>
+          <text x="368" y="96">31M events held at the edge</text>
+          <text x="923" y="96">23 min after detection</text>
+        </g>
+        <circle cx="129" cy="150" r="5" fill="#22D3EE"/>
+        <circle cx="372" cy="150" r="5" fill="#22D3EE"/>
+        <circle cx="927" cy="150" r="5" fill="#22D3EE"/>
+        <!-- below events: 14:06 / 14:18 -->
+        <g class="glass-svg-line">
+          <line x1="268" y1="162" x2="268" y2="196"/>
+          <line x1="684" y1="162" x2="684" y2="196"/>
+        </g>
+        <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">
+          <text x="264" y="216">14:06</text>
+          <text x="680" y="216">14:18</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">
+          <text x="264" y="236">Transit fiber cut confirmed</text>
+          <text x="680" y="236">Backlog replay begins</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">
+          <text x="264" y="254">40% of upstream capacity lost</text>
+          <text x="680" y="254">drain at 2.1× line rate</text>
+        </g>
+        <circle cx="268" cy="150" r="5" class="glass-svg-ink-2" style="stroke:none"/>
+        <circle cx="684" cy="150" r="5" class="glass-svg-ink-2" style="stroke:none"/>
+        <!-- captions -->
+        <g font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">
+          <text x="60" y="288">ALL TIMES UTC · JUN 9 2026</text>
+          <text x="1120" y="288" text-anchor="end">ZERO EVENTS LOST · 31M REPLAYED BY 15:10</text>
+        </g>
+      </svg>
+      <figcaption>
+        <span class="lang-en">June 9 incident timeline. Detection to full restore in 23 minutes; edge buffers held 31M events and replayed them by 15:10.</span>
+        <span class="lang-zh">6 月 9 日故障时间线。从发现到完全恢复 23 分钟；边缘缓冲存住 3100 万个事件，并在 15:10 前完成重放。</span>
+      </figcaption>
+    </figure>
+
+    <div class="cards-2">
+      <article class="glass-card" data-reveal>
+        <span class="badge-down"><span class="lang-en">23 min degraded</span><span class="lang-zh">降级 23 分钟</span></span>
+        <h3><span class="lang-en">What users saw</span><span class="lang-zh">用户看到了什么</span></h3>
+        <p>
+          <span class="lang-en">For 23 minutes, events entering through eu-central's affected transit paths — about 4% of global traffic at that hour — were delivered late, with delivery lag peaking at 41 seconds. Queries stayed up: the read path failed over in 9 seconds. Zero events were lost — 31 million were buffered at the edge and replayed by 15:10.</span>
+          <span class="lang-zh">23 分钟里，经由 eu-central 受影响中转线路接入的事件——约占当时全球流量的 4%——被延迟送达，送达延迟峰值 41 秒。查询没有任何中断：读路径在 9 秒内完成切换。零事件丢失——3100 万个事件在边缘缓冲，并在 15:10 前完成重放。</span>
+        </p>
+      </article>
+      <article class="glass-card" data-reveal>
+        <span class="glass-badge glass-badge--ghost"><span class="lang-en">3 actions · H2</span><span class="lang-zh">3 项改动 · H2</span></span>
+        <h3><span class="lang-en">What we are changing</span><span class="lang-zh">我们要改什么</span></h3>
+        <ul>
+          <li>
+            <span class="lang-en">A second transit provider for eu-central, live July 22 — no single fiber path carries more than half the region's upstream again.</span>
+            <span class="lang-zh">为 eu-central 引入第二家中转供应商，7 月 22 日上线——不再有任何一条光纤线路承载该区域一半以上的上游流量。</span>
+          </li>
+          <li>
+            <span class="lang-en">Reroute on alert, not on confirm. Failover now triggers from the lag alert itself — June 9 spent 7 of its 23 minutes on a human confirming what the graphs already said.</span>
+            <span class="lang-zh">改为「告警即切换」，不再等人工确认。切换现在直接由延迟告警触发——6 月 9 日的 23 分钟里，有 7 分钟花在人工确认图表早已说明的事情上。</span>
+          </li>
+          <li>
+            <span class="lang-en">Quarterly cut drills: once a quarter we sever a transit link on purpose, in production — the only failover that works is the one that runs.</span>
+            <span class="lang-zh">每季度一次断链演练：每个季度在生产环境里主动切断一条中转链路——只有真正跑过的切换，才算可用的切换。</span>
+          </li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- §04 Capacity planning -->
+<section class="glass-section glass-section--alt" id="capacity">
+  <div class="glass-container glass-container--narrow sect-head">
+    <span class="glass-eyebrow">04 · <span class="lang-en">Capacity planning</span><span class="lang-zh">容量规划</span></span>
+    <h2>
+      <span class="lang-en">Planning for the next doubling, not the next quarter.</span>
+      <span class="lang-zh">为下一次翻倍做规划，而不是下一个季度。</span>
+    </h2>
+    <p>
+      <span class="lang-en">Fleet ceiling today is 4.36M events/s — 1.8× the Q2 peak, which is one strong quarter of margin, not two. Three expansions land before October and lift the ceiling to 6.3M: a new ingest cell in eu-central (July, paired with the second transit provider), a new cell in ap-southeast (August, the fastest-growing region), and a third cell row in us-east (September). At 25% quarterly growth, that holds a ≥1.3× margin through Q1 2027.</span>
+      <span class="lang-zh">目前集群的容量上限是每秒 436 万事件——是 Q2 峰值的 1.8 倍，这只够一个高速增长季度的余量，而不是两个。10 月之前会落地三项扩容，把上限抬到 630 万：eu-central 的新接入单元（7 月，与第二家中转供应商一起上线）、ap-southeast 的新单元（8 月，增长最快的区域）、以及 us-east 的第三排单元（9 月）。按每季 25% 的增长计算，这能把 ≥1.3 倍的余量保持到 2027 年 Q1。</span>
+    </p>
+  </div>
+  <div class="glass-container glass-container--wide">
+    <figure class="glass-panel table-frame" data-reveal>
+      <table class="glass-table">
+        <thead>
+          <tr>
+            <th><span class="lang-en">Region</span><span class="lang-zh">区域</span></th>
+            <th><span class="lang-en">Q2 peak · ev/s</span><span class="lang-zh">Q2 峰值 · ev/s</span></th>
+            <th><span class="lang-en">Ceiling · ev/s</span><span class="lang-zh">容量上限 · ev/s</span></th>
+            <th><span class="lang-en">Headroom</span><span class="lang-zh">余量</span></th>
+            <th><span class="lang-en">H2 plan</span><span class="lang-zh">H2 计划</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="num">us-east</td><td class="num">690K</td><td class="num">1.20M</td><td class="num">1.7×</td>
+            <td><span class="lang-en">expand cell · Sep</span><span class="lang-zh">扩建单元 · 9 月</span></td>
+          </tr>
+          <tr>
+            <td class="num">us-west</td><td class="num">410K</td><td class="num">800K</td><td class="num">2.0×</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td class="num">eu-central</td><td class="num">520K</td><td class="num">760K</td><td class="num">1.5×</td>
+            <td><span class="lang-en">new cell + 2nd transit · Jul</span><span class="lang-zh">新单元 + 第二中转 · 7 月</span></td>
+          </tr>
+          <tr>
+            <td class="num">eu-west</td><td class="num">350K</td><td class="num">720K</td><td class="num">2.1×</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td class="num">ap-southeast</td><td class="num">300K</td><td class="num">480K</td><td class="num">1.6×</td>
+            <td><span class="lang-en">new cell · Aug</span><span class="lang-zh">新单元 · 8 月</span></td>
+          </tr>
+          <tr>
+            <td class="num">sa-east</td><td class="num">160K</td><td class="num">400K</td><td class="num">2.5×</td>
+            <td>—</td>
+          </tr>
+          <tr class="total">
+            <td class="num"><span class="lang-en">Fleet</span><span class="lang-zh">全集群</span></td>
+            <td class="num">2.43M</td><td class="num">4.36M</td><td class="num">1.8×</td>
+            <td><span class="lang-en">→ 6.3M by Oct</span><span class="lang-zh">10 月前 → 630 万</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <figcaption>
+        <span class="lang-en">Capacity by region, end of Q2. Ceilings come from quarterly load tests, not spec math — each cell is pushed to failure in a drill.</span>
+        <span class="lang-zh">Q2 期末各区域容量。上限来自每季度的压测，不是纸面推算——每个单元都会在演练中被压到失效点。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Methodology footnote -->
+<section class="glass-section" id="methodology">
+  <div class="glass-container glass-container--narrow">
+    <div class="footnote">
+      <span class="footnote-label"><span class="lang-en">Methodology</span><span class="lang-zh">统计口径</span></span>
+      <p>
+        <span class="lang-en">Latency is measured at the query API edge and includes queue time; percentiles are computed over all production queries in the stated window, excluding synthetic monitors. Ingest peaks are 60-second sustained rates, not instantaneous. An event counts as delivered when every subscribed sink acknowledges it; events later than 5 seconds count as late but delivered. Q1 baselines use identical definitions; raw notebooks are linked from the internal edition of this report.</span>
+        <span class="lang-zh">延迟在查询 API 边缘测量，包含排队时间；分位数基于所述时间窗内全部生产查询计算，剔除拨测流量。接入峰值为 60 秒持续速率，不是瞬时值。送达的定义是事件被所有订阅下游确认接收；晚于 5 秒的事件计为迟到但已送达。Q1 基线使用完全相同的口径；原始 notebook 链接在本报告的内部版本中。</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Footer — single line -->
+<footer class="glass-footer">
+  <div class="footer-line">
+    <span>© 2026 Prism Analytics, Inc. · <span class="lang-en">Infrastructure Report Q2 2026 · v2.1</span><span class="lang-zh">基础设施报告 Q2 2026 · v2.1</span></span>
+    <span><span class="lang-en">Next report — October 2026</span><span class="lang-zh">下一份报告——2026 年 10 月</span></span>
+  </div>
+</footer>
+
+<script src="../../assets/glass.js"></script>
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = null;
+  try { queryLang = new URLSearchParams(location.search).get('lang'); } catch (e) {}
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: glass
+Page-type: data-report
+Created: 2026-06-11
+
+Decisions (7):
+1. [calm-two-blob] chose "two blobs (cyan top-right, indigo lower-left) under glass-page--calm" over "the landing's three-blob hero field". Because: a report is read top to bottom, not toured; both cores sit off every text column so R1 holds at every scroll position, and the calm modifier keeps light subordinate to data.
+2. [prose-on-canvas] chose "narrow-column prose directly on the navy canvas" over "wrapping every paragraph in glass panels". Because: glass tiers mark artifacts (charts, timeline, table); all-glass prose would flatten the material hierarchy, and the two-blob geometry already guarantees a core-free canvas under the 720px prose column.
+3. [report-scale-type] chose "56px h1 and 40px section h2" over "the landing's 76/48 display scale". Because: an infrastructure report is editorial, not launch-night; both values stay inside the typography.md binding ranges while lowering the volume.
+4. [rose-is-a-tick] chose "a 3px rose underline plus a small bordered badge for the 23-minute window" over "shading the whole degraded span as a rose band". Because: up/down hues are delta semantics, not area fills (data-display.md), and a saturated band ≥24px tall would also trip the saturated-band gate.
+5. [q1-vs-q2-bars] chose "grouped Q1-indigo / Q2-cyan bars per region" over "a single improvement-delta bar". Because: the section's claim is "every region got faster"; showing both quarters makes the comparison verifiable instead of asserted, and indigo is the sanctioned second series.
+6. [table-for-capacity] chose "a .glass-table for capacity planning" over "a stacked headroom chart". Because: the load-bearing column is the H2 plan — words and dates, not magnitudes; a chart would decorate the numbers while burying the actions.
+7. [draw-budget-on-traffic] chose "data-draw on the traffic area chart only" over "draw on all three figures". Because: path-draw is the page's one motion flourish and belongs to the chart carrying the quarter's headline number; the timeline and bars stay static so the incident section reads sober.
+
+Known trade-offs:
+- The executive panel repeats numbers that §01/§02 develop in full; accepted because the summary must survive being the only thing a hurried reader sees.
+- SVG annotations are English-only in both languages (figcaptions carry the bilingual takeaway); duplicating bilingual text inside three charts would double every text-overlap risk for marginal reach.
+- The June 9 marker in the traffic chart borrows indigo from the chart-second-series budget even though no second series exists there; kept because a marker must read as "not the data", and indigo is the only sanctioned non-cyan hue.
+
+/design-review:self-diff -->
+
+</body>
+</html>

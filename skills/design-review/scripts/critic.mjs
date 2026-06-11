@@ -41,7 +41,7 @@ critic.mjs — prepare design-critic prompt
 
 Usage:
   node skills/design-review/scripts/critic.mjs <target.html>
-    [--skill=anthropic|apple|ember|sage]
+    [--skill=anthropic|apple|ember|sage|glass]
     [--page=pricing|landing|docs-home|feature-deep]
     [--out=prompt.md]
 `;

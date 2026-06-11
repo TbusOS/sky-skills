@@ -1,6 +1,6 @@
 ---
 description: "Run the full design iteration loop (harness component 06): planner → generator → three machine gates → critic, up to --max-rounds (default 5). Verdict ≥ 88 ships; anything less feeds the critic's issues into the next round; rounds exhausted escalates to a human with the score trajectory. Accepts a brief + --skill (required), optional --page / --max-rounds."
-argument-hint: "<brief…> --skill=<anthropic|apple|ember|sage> [--page=<type>] [--max-rounds=<n>]"
+argument-hint: "<brief…> --skill=<anthropic|apple|ember|sage|glass> [--page=<type>] [--max-rounds=<n>]"
 ---
 
 # /design-loop — orchestrated planner → generator → review → critic rounds

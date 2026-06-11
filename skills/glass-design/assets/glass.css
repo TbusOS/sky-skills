@@ -1,0 +1,696 @@
+/* === Glass Design System — Core CSS ===
+ * Last verified: 2026-06-11
+ * Docs: ../references/design-tokens.md · ../references/glass-material.md
+ * Identity: Apple liquid-glass / aurora glassmorphism. Deep-navy (NOT black)
+ * canvas, ≤3 aurora light blobs per viewport, three tiers of frosted panels,
+ * a single solid foreground accent (aurora cyan). Violet/pink live ONLY in
+ * background blobs and 1px refraction rings — never as text/icon/button color.
+ * Dual theme: html[data-theme="dark"] is canonical; "light" is the iOS-frost
+ * variant. Components reference semantic tokens only — zero hardcoded hex in
+ * pages.
+ */
+
+/* ---------- Section A: Tokens ---------- */
+:root {
+  /* Theme-independent scale */
+  --font-display: "Space Grotesk", "Noto Sans SC", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  --space-1: 4px;  --space-2: 8px;   --space-3: 12px;  --space-4: 16px;
+  --space-5: 24px; --space-6: 32px;  --space-7: 48px;  --space-8: 64px;
+  --space-9: 80px; --space-10: 120px;
+
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-pill: 9999px;
+
+  --ease-glass: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-sm: 240ms;
+  --duration-md: 640ms;
+  --duration-lg: 1200ms;
+
+  /* Aurora palette — blob/ring duty ONLY (cyan is the one foreground color) */
+  --glass-aurora-cyan: #22D3EE;
+  --glass-aurora-violet: #A78BFA;
+  --glass-aurora-pink: #F472B6;
+  --glass-aurora-indigo: #4F46E5;
+}
+
+/* Dark theme (canonical default) */
+:root,
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --glass-bg: #0B1020;            /* deep navy, NOT pure black — blur stays luminous */
+  --glass-bg-2: #0E1530;          /* section alternation */
+  --glass-ink: #F4F7FF;
+  --glass-ink-2: rgba(231, 238, 255, 0.74);
+  --glass-ink-3: rgba(231, 238, 255, 0.55);
+  --glass-accent: #22D3EE;        /* solid fills: buttons, hairlines, glows */
+  --glass-accent-ink: #22D3EE;    /* accent as TEXT — swaps to deep teal in light */
+  --glass-button-ink: #062A33;    /* text on cyan fill (white on cyan fails AA) */
+  --glass-panel-bg: rgba(255, 255, 255, 0.06);
+  --glass-panel-border: rgba(255, 255, 255, 0.14);
+  --glass-card-bg: rgba(255, 255, 255, 0.05);
+  --glass-card-border: rgba(255, 255, 255, 0.10);
+  --glass-overlay-bg: rgba(13, 18, 32, 0.62);
+  --glass-overlay-border: rgba(255, 255, 255, 0.12);
+  --glass-line: rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.18);
+  --glass-shadow-panel: 0 24px 48px -16px rgba(2, 6, 18, 0.55);
+  --glass-shadow-card: 0 12px 28px -12px rgba(2, 6, 18, 0.45);
+  --glass-code-bg: rgba(2, 6, 18, 0.55);
+  --glass-up: #34D399;
+  --glass-down: #FB7185;
+  --glass-ref-ink: #818CF8;       /* indigo-as-TEXT (deploy markers, SLO labels) —
+                                     literal #4F46E5 text is ~2.7:1 on dark panels */
+  --glass-blob-alpha: 1;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+  --glass-bg: #F2F5FA;
+  --glass-bg-2: #E9EEF6;
+  --glass-ink: #0D1220;
+  --glass-ink-2: rgba(13, 18, 32, 0.72);
+  --glass-ink-3: rgba(13, 18, 32, 0.55);
+  --glass-accent: #22D3EE;
+  --glass-accent-ink: #0E7490;    /* cyan text on white is 1.6:1 — deep teal passes AA */
+  --glass-button-ink: #062A33;
+  --glass-panel-bg: rgba(255, 255, 255, 0.62);
+  --glass-panel-border: rgba(13, 18, 32, 0.10);
+  --glass-card-bg: rgba(255, 255, 255, 0.55);
+  --glass-card-border: rgba(13, 18, 32, 0.08);
+  --glass-overlay-bg: rgba(248, 250, 253, 0.80);
+  --glass-overlay-border: rgba(13, 18, 32, 0.08);
+  --glass-line: rgba(13, 18, 32, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-shadow-panel: 0 18px 40px -18px rgba(13, 18, 32, 0.16);
+  --glass-shadow-card: 0 10px 24px -12px rgba(13, 18, 32, 0.12);
+  --glass-code-bg: rgba(13, 18, 32, 0.05);
+  --glass-up: #047857;            /* #0E9F6E was 3.4:1 at 13px on white cards */
+  --glass-down: #E11D48;
+  --glass-ref-ink: #4F46E5;
+  --glass-blob-alpha: 0.6;
+}
+
+/* ---------- Section B: Reset ---------- */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--glass-ink);
+  background: var(--glass-bg);
+  -webkit-font-smoothing: antialiased;
+}
+figure { margin: 0; }
+figcaption {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--glass-ink-3);
+  margin-top: var(--space-3);
+}
+
+/* ---------- Section C: Typography ---------- */
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-display);
+  font-style: normal;   /* glass is a zero-italic skill — Space Grotesk has no italic cut */
+  margin: 0;
+  color: var(--glass-ink);
+}
+h1 { font-size: 76px; font-weight: 700; line-height: 1.02; letter-spacing: -0.02em; }
+h2 { font-size: 48px; font-weight: 600; line-height: 1.08; letter-spacing: -0.015em; }
+h3 { font-size: 25px; font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; }
+h4 { font-size: 19px; font-weight: 600; line-height: 1.35; }
+h5 { font-size: 14px; font-weight: 600; line-height: 1.4; letter-spacing: 0.02em; }
+p  { margin: 0 0 var(--space-4); }
+
+.glass-lead { font-size: 20px; line-height: 1.6; color: var(--glass-ink-2); }
+.glass-caption { font-size: 12.5px; line-height: 1.5; color: var(--glass-ink-3); }
+.glass-eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--glass-accent-ink);
+  margin-bottom: var(--space-4);
+}
+
+/* Chinese (§H): sans↔sans pairing — Noto Sans SC everywhere, never bare PingFang. */
+html[data-lang="zh"] body,
+html[data-lang="zh"] p,
+html[data-lang="zh"] li,
+html[data-lang="zh"] .glass-lead {
+  font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  font-style: normal;
+}
+html[data-lang="zh"] h1,
+html[data-lang="zh"] h2,
+html[data-lang="zh"] h3,
+html[data-lang="zh"] h4,
+html[data-lang="zh"] .glass-stat-number {
+  font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  font-style: normal;
+  letter-spacing: 0;
+}
+html[data-lang="zh"] .glass-eyebrow { letter-spacing: 0.06em; }
+
+/* ---------- Section D: Link & Button ---------- */
+.glass-link {
+  color: var(--glass-accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.24em;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--glass-line);
+  transition: color var(--duration-sm) var(--ease-glass), text-decoration-color var(--duration-sm) var(--ease-glass);
+}
+.glass-link:hover { text-decoration-color: var(--glass-accent); }
+.glass-link::after { content: " \2192"; }
+.glass-link--no-arrow::after { content: none; }
+
+.glass-button {
+  display: inline-block;
+  padding: 13px 26px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-accent);
+  color: var(--glass-button-ink);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  border: 0;
+  cursor: pointer;
+  transition: transform var(--duration-sm) var(--ease-glass), box-shadow var(--duration-sm) var(--ease-glass);
+}
+.glass-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -8px rgba(34, 211, 238, 0.45);
+}
+.glass-button--ghost {
+  background: transparent;
+  color: var(--glass-ink);
+  border: 1px solid var(--glass-panel-border);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+}
+.glass-button--ghost:hover {
+  border-color: var(--glass-accent);
+  box-shadow: none;
+}
+
+/* ---------- Section E: Layout ---------- */
+.glass-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+.glass-container--narrow { max-width: 720px; }
+.glass-container--wide { max-width: 1280px; }
+
+.glass-section { padding-block: var(--space-9); position: relative; }
+.glass-section--alt { background: var(--glass-bg-2); }
+.glass-hero {
+  padding-block: var(--space-10) var(--space-9);
+  position: relative;
+}
+
+/* ---------- Section F: Glass material (three tiers — see glass-material.md) ----------
+ * Tier 1 .glass-panel   — hero mocks, chart boards, featured diagrams
+ * Tier 2 .glass-card    — gallery cards, KPI cards, feature cards
+ * Tier 3 .glass-overlay — nav, tooltips, floating chrome (more opaque: protects text)
+ * Nesting limit: panel > card is the maximum. Never blur inside blur inside blur.
+ */
+.glass-panel {
+  position: relative;
+  background: var(--glass-panel-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--glass-panel-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow-panel), inset 0 1px 0 var(--glass-highlight);
+  padding: var(--space-6);
+}
+.glass-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--glass-card-bg);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid var(--glass-card-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow-card), inset 0 1px 0 var(--glass-highlight);
+  padding: var(--space-6);
+  transition: transform var(--duration-sm) var(--ease-glass), border-color var(--duration-sm) var(--ease-glass);
+}
+.glass-overlay {
+  position: relative;
+  background: var(--glass-overlay-bg);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  backdrop-filter: blur(28px) saturate(140%);
+  border: 1px solid var(--glass-overlay-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--glass-shadow-card);
+}
+
+/* Refraction ring — the liquid-glass edge. A 1px gradient border drawn with a
+ * masked pseudo-element: light enters top-left (white), exits bottom-right with
+ * a cyan cast. This is the ONLY place besides blobs where aurora violet may
+ * appear. NOT feTurbulence/feDisplacementMap — those composite unpredictably
+ * (backdrop doesn't participate in SVG filters in Chromium) and break the
+ * deterministic-screenshot gate. */
+.glass-panel::before,
+.glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0.06) 40%,
+    rgba(34, 211, 238, 0.28) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+html[data-theme="light"] .glass-panel::before,
+html[data-theme="light"] .glass-card::before {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.2) 40%,
+    rgba(14, 116, 144, 0.22) 100%
+  );
+}
+
+/* Hover sheen — a single light sweep across a card, earned on hover only. */
+.glass-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.07) 50%, transparent 58%);
+  transform: translateX(-130%);
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .glass-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--glass-panel-border);
+  }
+  .glass-card:hover::after {
+    transform: translateX(130%);
+    transition: transform 700ms var(--ease-glass);
+  }
+}
+
+/* ---------- Section G: Aurora background ----------
+ * One fixed layer behind everything; ≤3 blobs per viewport; blob core (inner
+ * 40% radius) must never sit under a text panel. Blobs are radial-gradient
+ * alpha falloff — NO filter:blur (cost + nondeterminism). Position/size are
+ * per-page via inline style. */
+.glass-aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.glass-blob {
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  opacity: var(--glass-blob-alpha);
+  will-change: transform;
+  pointer-events: none;
+}
+.glass-blob--cyan   { background: radial-gradient(closest-side, rgba(34, 211, 238, 0.45), transparent 70%); }
+.glass-blob--violet { background: radial-gradient(closest-side, rgba(167, 139, 250, 0.35), transparent 70%); }
+.glass-blob--pink   { background: radial-gradient(closest-side, rgba(244, 114, 182, 0.28), transparent 70%); }
+.glass-blob--indigo { background: radial-gradient(closest-side, rgba(79, 70, 229, 0.40), transparent 70%); }
+
+.glass-blob { animation: glass-drift-a 26s var(--ease-glass) infinite alternate; }
+.glass-blob:nth-of-type(2) { animation-name: glass-drift-b; animation-duration: 34s; }
+.glass-blob:nth-of-type(3) { animation-name: glass-drift-c; animation-duration: 42s; }
+@keyframes glass-drift-a {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(4%, -5%) scale(1.08); }
+}
+@keyframes glass-drift-b {
+  from { transform: translate(0, 0) scale(1.04); }
+  to   { transform: translate(-5%, 4%) scale(0.97); }
+}
+@keyframes glass-drift-c {
+  from { transform: translate(0, 0) scale(0.98); }
+  to   { transform: translate(3%, 5%) scale(1.06); }
+}
+
+/* Calm pages (dashboard / data-report): light yields to content. */
+.glass-page--calm .glass-blob { opacity: calc(var(--glass-blob-alpha) * 0.55); }
+
+/* ---------- Section H: Nav ---------- */
+.glass-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 64px;
+  background: var(--glass-overlay-bg);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  backdrop-filter: blur(28px) saturate(140%);
+  border-bottom: 1px solid var(--glass-overlay-border);
+}
+.glass-nav-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+.glass-nav-brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--glass-ink);
+  text-decoration: none;
+}
+.glass-nav a {
+  color: var(--glass-ink-2);
+  font-size: 14px;
+  text-decoration: none;
+  transition: color var(--duration-sm) var(--ease-glass);
+}
+.glass-nav a:hover { color: var(--glass-ink); }
+/* nav-cascade defense (known-bugs 1.24): the nav link rule must never repaint
+ * the CTA button's ink. */
+.glass-nav a.glass-button { color: var(--glass-button-ink); }
+.glass-nav a.glass-button:hover { color: var(--glass-button-ink); }
+.glass-nav-links { display: flex; gap: var(--space-5); align-items: center; }
+
+.glass-theme-toggle,
+.glass-lang-toggle {
+  background: transparent;
+  border: 1px solid var(--glass-panel-border);
+  color: var(--glass-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: color var(--duration-sm) var(--ease-glass), border-color var(--duration-sm) var(--ease-glass);
+}
+.glass-theme-toggle:hover,
+.glass-lang-toggle:hover {
+  color: var(--glass-ink);
+  border-color: var(--glass-accent);
+}
+
+/* ---------- Section I: Footer ---------- */
+.glass-footer {
+  border-top: 1px solid var(--glass-line);
+  padding-block: var(--space-8);
+  font-size: 13px;
+  color: var(--glass-ink-3);
+}
+.glass-footer-grid {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-6);
+}
+.glass-footer-group h5 {
+  font-size: 13px;
+  color: var(--glass-ink);
+  margin-bottom: var(--space-3);
+}
+.glass-footer-group a {
+  display: block;
+  color: var(--glass-ink-3);
+  text-decoration: none;
+  margin-bottom: var(--space-2);
+  transition: color var(--duration-sm) var(--ease-glass);
+}
+.glass-footer-group a:hover { color: var(--glass-accent-ink); }
+.glass-footer-legal {
+  max-width: 1280px;
+  margin: var(--space-7) auto 0;
+  padding: var(--space-5) var(--space-5) 0;
+  border-top: 1px solid var(--glass-line);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+/* ---------- Section J: Badge / Stat / Hairline / Quote ---------- */
+.glass-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-accent);
+  color: var(--glass-button-ink);
+}
+.glass-badge--ghost {
+  background: transparent;
+  color: var(--glass-ink-2);
+  border: 1px solid var(--glass-panel-border);
+}
+
+.glass-stat-number {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 72px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--glass-ink);
+}
+.glass-stat-label {
+  display: block;
+  margin-top: var(--space-3);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--glass-ink-2);
+}
+.glass-stat-delta { font-family: var(--font-mono); font-size: 13px; font-weight: 600; }
+.glass-stat-delta--up { color: var(--glass-up); }
+.glass-stat-delta--down { color: var(--glass-down); }
+
+/* 2px solid-cyan brand hairline — one of the three solid accent moves that
+ * carry brand presence (§K) in the hero. */
+.glass-hairline {
+  border: 0;
+  height: 2px;
+  width: 72px;
+  background: var(--glass-accent);
+  margin: var(--space-5) 0;
+}
+
+/* Pull-quote: large roman display text laid DIRECTLY on the aurora field —
+ * the page's one "no glass" moment. ≥32px full-opacity ink only (R1 exception). */
+.glass-quote {
+  font-family: var(--font-display);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 40px;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  color: var(--glass-ink);
+  margin: 0;
+}
+.glass-quote-cite {
+  display: block;
+  margin-top: var(--space-6);
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--glass-accent-ink);
+}
+
+/* ---------- Section K: Table / Code / Forms ---------- */
+.glass-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.glass-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--glass-ink-3);
+  border-bottom: 1px solid var(--glass-panel-border);
+}
+.glass-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--glass-line);
+  color: var(--glass-ink-2);
+}
+.glass-table tr:hover td { background: rgba(34, 211, 238, 0.06); }
+
+.glass-code, pre.glass-code {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  background: var(--glass-code-bg);
+  border: 1px solid var(--glass-line);
+  color: var(--glass-ink-2);
+  border-radius: var(--radius-sm);
+  padding: var(--space-5);
+  overflow-x: auto;
+}
+code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  background: var(--glass-code-bg);
+  border: 1px solid var(--glass-line);
+  padding: 1px 6px;
+  border-radius: 6px;
+  color: var(--glass-accent-ink);
+}
+kbd {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--glass-card-bg);
+  border: 1px solid var(--glass-panel-border);
+  padding: 2px 7px;
+  border-radius: 6px;
+  color: var(--glass-ink);
+}
+
+/* SVG theme classes — dual-theme diagrams MUST ink through these (or inline
+ * style="fill:var(--glass-*)"); a hardcoded white fill disappears in light
+ * mode. Cyan accents (#22D3EE) are theme-constant and may stay literal. */
+.glass-svg-ink           { fill: var(--glass-ink); }
+.glass-svg-ink-2         { fill: var(--glass-ink-2); }
+.glass-svg-ink-3         { fill: var(--glass-ink-3); }
+.glass-svg-node          { fill: var(--glass-panel-bg); stroke: var(--glass-panel-border); }
+.glass-svg-node-strong   { fill: var(--glass-card-bg); stroke: var(--glass-accent); }
+.glass-svg-line          { stroke: var(--glass-line); }
+.glass-svg-grid          { stroke: var(--glass-line); stroke-dasharray: 2 6; }
+.glass-svg-accent        { fill: var(--glass-accent); }
+.glass-svg-accent-stroke { stroke: var(--glass-accent); fill: none; }
+.glass-svg-accent-ink    { fill: var(--glass-accent-ink); } /* cyan TEXT must use this — literal #22D3EE text dies on the light theme */
+.glass-svg-ref-ink       { fill: var(--glass-ref-ink); }    /* indigo TEXT (deploy/SLO labels) — literal #4F46E5 text dies on the dark theme */
+.glass-svg-up            { fill: var(--glass-up); }
+.glass-svg-down          { fill: var(--glass-down); }
+
+.glass-lead--compact { font-size: 17px; }
+
+.glass-input, .glass-select, .glass-textarea {
+  width: 100%;
+  background: var(--glass-card-bg);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-panel-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--glass-ink);
+}
+.glass-label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--glass-ink-2);
+  margin-bottom: var(--space-2);
+}
+
+/* ---------- Section L: Motion ----------
+ * Every animation has a terminal state identical to the static markup, and
+ * three independent freeze paths land there:
+ *   1. CSS  @media (prefers-reduced-motion: reduce)  — below
+ *   2. JS   glass.js sets html[data-motion="off"] on the same media query,
+ *           on `#freeze` in the URL hash, or on <html data-motion-freeze>
+ *   3. No JS at all — reveal styles are gated behind html.js-enabled, so a
+ *      page whose glass.js failed to load renders fully visible.
+ * The review harness runs Playwright with reducedMotion:'reduce', so gates
+ * always see the deterministic terminal frame. */
+
+/* Scroll reveal — JS-gated initial state */
+html.js-enabled:not([data-motion="off"]) [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+}
+html.js-enabled:not([data-motion="off"]) [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--duration-md) var(--ease-glass),
+    transform var(--duration-md) var(--ease-glass);
+}
+
+/* Tilt targets get GPU hinting; transform itself is JS-driven. */
+[data-tilt] { will-change: transform; transition: transform 400ms var(--ease-glass); }
+
+/* Global freeze — JS-detected (reduced motion / #freeze / data-motion-freeze) */
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* ---------- Section M: Responsive + a11y ---------- */
+@media (max-width: 768px) {
+  h1 { font-size: 44px; }
+  h2 { font-size: 32px; }
+  .glass-stat-number { font-size: 48px; }
+  .glass-quote { font-size: 26px; }
+  .glass-section { padding-block: var(--space-7); }
+  .glass-hero { padding-block: var(--space-8) var(--space-7); }
+  .glass-footer-grid { grid-template-columns: repeat(2, 1fr); }
+  .glass-nav-links { display: none; }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  h1 { font-size: 56px; }
+  .glass-footer-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.glass-sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--glass-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  [data-reveal] { opacity: 1 !important; transform: none !important; }
+}

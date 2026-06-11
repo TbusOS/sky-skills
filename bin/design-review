@@ -16,8 +16,13 @@
 #   --repo=<path>      Webroot for serving assets (Playwright gates). Defaults to CWD.
 #                      Use this when running from outside sky-skills (e.g. against
 #                      engram's docs/en/index.html — set --repo=/path/to/engram).
-#   --skill=<name>     Force a skill: anthropic | apple | ember | sage.
+#   --skill=<name>     Force a skill: anthropic | apple | ember | sage | glass.
 #                      If omitted, verify.py auto-detects from the HTML's <link>.
+#   --theme=<t>        dark | light — forwarded to visual-audit + screenshot
+#                      (flips html[data-theme] after load). With --skill=glass
+#                      and no explicit --theme, gates 2 and 3 run BOTH themes
+#                      automatically (dark is brand-canonical, light is the
+#                      iOS-frost variant; both must be clean).
 #   --css=<path>       Extra CSS file for class-definition lookup. Can repeat.
 #   --strict           Treat visual-audit warnings as failure (default: only errors).
 #   --out=<dir>        Where to save screenshots (default: <repo>/shots/).
@@ -85,6 +90,7 @@ SKY_ROOT="$(cd "$SELF_DIR/.." && pwd)"
 REPO="$PWD"
 SKILL=""
 PAGE=""
+THEME=""
 STRICT=""
 OUT_DIR=""
 CRITIC=""
@@ -103,6 +109,7 @@ for arg in "$@"; do
     --repo=*)  REPO="${arg#--repo=}" ;;
     --skill=*) SKILL="${arg#--skill=}" ;;
     --page=*)  PAGE="${arg#--page=}" ;;
+    --theme=*) THEME="${arg#--theme=}" ;;
     --css=*)   CSS_ARGS+=("$arg") ;;
     --strict)  STRICT=1 ;;
     --out=*)   OUT_DIR="${arg#--out=}" ;;
@@ -222,15 +229,33 @@ echo ""
 echo "━━ [1/$TOTAL_GATES] verify.py (structural)"
 ( cd "$REPO" && python3 "$VERIFY" "${SKILL_FLAG[@]}" "${CSS_ARGS[@]}" "${HTMLS[@]}" )
 
+# ---------- Theme matrix ----------
+# Default: one run, no theme override. Explicit --theme: that theme only.
+# glass with no --theme: dark (brand-canonical) AND light (iOS-frost) — both
+# must be clean before a glass page ships.
+THEMES=("default")
+if [ -n "$THEME" ]; then
+  THEMES=("$THEME")
+elif [ "$SKILL" = "glass" ]; then
+  THEMES=("dark" "light")
+fi
+
 # ---------- Gate 2 · visual-audit ----------
 exit_visual=0
-VISUAL_FLAGS=(--ignore-intentional)
-for html in "${HTMLS[@]}"; do
-  echo ""
-  echo "━━ [2/$TOTAL_GATES] visual-audit.mjs (rendered + brand + italic + smell)  $html"
-  if ! ( cd "$REPO" && node "$VISUAL" "${VISUAL_FLAGS[@]}" "$html" ); then
-    exit_visual=1
+for theme in "${THEMES[@]}"; do
+  VISUAL_FLAGS=(--ignore-intentional)
+  theme_label=""
+  if [ "$theme" != "default" ]; then
+    VISUAL_FLAGS+=("--theme=$theme")
+    theme_label="  [theme=$theme]"
   fi
+  for html in "${HTMLS[@]}"; do
+    echo ""
+    echo "━━ [2/$TOTAL_GATES] visual-audit.mjs (rendered + brand + italic + smell)  $html$theme_label"
+    if ! ( cd "$REPO" && node "$VISUAL" "${VISUAL_FLAGS[@]}" "$html" ); then
+      exit_visual=1
+    fi
+  done
 done
 if [ "$exit_visual" -ne 0 ]; then
   echo ""
@@ -239,12 +264,20 @@ if [ "$exit_visual" -ne 0 ]; then
 fi
 
 # ---------- Gate 3 · screenshot ----------
-for html in "${HTMLS[@]}"; do
-  base="$(basename "$html" .html)"
-  out="$OUT_DIR/${base}-$(date +%Y%m%d-%H%M%S).png"
-  echo ""
-  echo "━━ [3/$TOTAL_GATES] screenshot.mjs    $html  →  $out"
-  ( cd "$REPO" && node "$SCREEN" "$html" "$out" )
+for theme in "${THEMES[@]}"; do
+  SCREEN_FLAGS=()
+  suffix=""
+  if [ "$theme" != "default" ]; then
+    SCREEN_FLAGS=("--theme=$theme")
+    suffix="-$theme"
+  fi
+  for html in "${HTMLS[@]}"; do
+    base="$(basename "$html" .html)"
+    out="$OUT_DIR/${base}${suffix}-$(date +%Y%m%d-%H%M%S).png"
+    echo ""
+    echo "━━ [3/$TOTAL_GATES] screenshot.mjs    $html  →  $out"
+    ( cd "$REPO" && node "$SCREEN" "${SCREEN_FLAGS[@]}" "$html" "$out" )
+  done
 done
 
 # ---------- Gate 4 · design-critic (solo OR 4 specialists) ----------

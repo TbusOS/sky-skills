@@ -26,6 +26,13 @@ else scores composition, copy, and illustration — stay in your lane.
      and supporting sage-leaning olive `#58661e` for status-accent only
    - sage: `#97B077 (sage)`, `#d4e1b8 (pale-sage)`, `#393C54 (indigo-ink)`,
      `#f0f3e2 (bg-subtle)`, `#7a9561 (sage-dark)`
+   - glass: `#22D3EE (aurora cyan — the ONLY foreground color)`,
+     `#A78BFA (veil violet — blobs/rings only)`, `#F472B6 (plasma pink —
+     blobs only, ≤1 per page)`, `#4F46E5 (depth indigo — blobs + chart
+     second series)`, `#0B1020 / #F4F7FF (navy canvas / ink — light theme
+     flips to #F2F5FA / #0D1220)`. Violet or pink appearing as TEXT, icon
+     or button fill = error (that's the AI-slop gradient line this skill
+     polices hardest).
 
    Any hex outside these + the near-whites = potential 6th hue. Flag
    each occurrence.
@@ -42,6 +49,9 @@ else scores composition, copy, and illustration — stay in your lane.
    - apple blue ≥ 0.02%
    - ember gold ≥ 0.01%
    - sage green ≥ 1.5%
+   - glass aurora cyan ≥ 0.2% (SOLID cyan only — eyebrow, nav CTA,
+     hairline; blobs blend toward the navy canvas and don't count.
+     Checked in dark theme only; light is the variant, dark is canon)
 
    visual-audit already runs the pixel count; your job is qualitative:
    does the first viewport SAY "this is a <skill> page" at a glance?
@@ -52,6 +62,8 @@ else scores composition, copy, and illustration — stay in your lane.
    - display sans in English (Poppins / Inter / SF Pro) → Noto Sans SC
    - NEVER PingFang SC as the sole primary zh font
    - apple is the explicit exception (system PingFang is apple-native)
+   - glass pairs sans↔sans: Noto Sans SC for both display and body
+     (already wired in glass.css; flag page-level overrides)
 
    Flag any regression to `Inter, PingFang SC, ...` as an error.
 
@@ -60,6 +72,11 @@ else scores composition, copy, and illustration — stay in your lane.
    - apple: 80-96px centered headline; black `.apple-section--dark` band; 72-120px stats; minimal filled `.apple-button`
    - ember: gold `.accent-strip` hairline above every section; IBM Plex Mono uppercase `.eyebrow`; Fraunces numerals in stats; chocolate CTA band
    - sage: numbered `.sect-marker` (00 · 01 · 02 …); left-aligned hero; deep-indigo pull-quote band; sage-green `.sage-nav` background
+   - glass: aurora blob field behind a deep-navy canvas (≤3 blobs, hero-
+     weighted); three-tier frosted panels with the 1px gradient refraction
+     ring; solid-cyan trio in the hero (mono eyebrow + filled CTA + 2px
+     hairline); zero italic anywhere (Space Grotesk has no italic cut);
+     dual-theme toggle in the nav
 
    If 2+ signature moves are missing, the page "isn't this skill" even
    if token use is correct.

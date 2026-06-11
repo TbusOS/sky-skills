@@ -1,8 +1,13 @@
 // Screenshot an HTML file with Playwright so you can visually verify a demo.
 // Usage:
-//   node skills/design-review/scripts/screenshot.mjs <url-or-path> [out.png]
+//   node skills/design-review/scripts/screenshot.mjs [--theme=dark|light] <url-or-path> [out.png]
 // Requires: `npm i playwright` (once) then `npx playwright install chromium`.
 // If given a file path, the script serves the repo root at :8787 and fetches it.
+//
+// --theme flips html[data-theme] after load (glass-design dual-theme audit).
+// The context runs with reducedMotion:'reduce' so every page renders its
+// deterministic terminal frame (glass.js freeze contract; the four light
+// skills' CSS already collapses motion under this media query).
 //
 // NOTE: unified from 4 byte-identical copies (one per design skill).
 
@@ -11,9 +16,11 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
 
-const [, , target = '', outRaw] = process.argv;
+const argv = process.argv.slice(2);
+const themeArg = (argv.find((a) => a.startsWith('--theme=')) || '').split('=')[1] || null;
+const [target = '', outRaw] = argv.filter((a) => !a.startsWith('--'));
 if (!target) {
-  console.error('usage: node screenshot.mjs <url-or-path> [out.png]');
+  console.error('usage: node screenshot.mjs [--theme=dark|light] <url-or-path> [out.png]');
   process.exit(2);
 }
 
@@ -57,9 +64,15 @@ if (/^file:\/\//.test(target)) {
 
 const out = outRaw || `shot-${Date.now()}.png`;
 const browser = await chromium.launch();
-const page = await browser.newContext({ viewport: { width: 1440, height: 900 } }).then((c) => c.newPage());
+const page = await browser
+  .newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' })
+  .then((c) => c.newPage());
 await page.goto(url, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
+if (themeArg) {
+  await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), themeArg);
+  await page.waitForTimeout(200);
+}
 await page.screenshot({ path: out, fullPage: true });
 await browser.close();
 if (server) server.close();

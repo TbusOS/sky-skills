@@ -9,7 +9,7 @@
 //
 // Usage:
 //   node skills/design-review/scripts/sprint-contract.mjs \
-//     --skill=<anthropic|apple|ember|sage> \
+//     --skill=<anthropic|apple|ember|sage|glass> \
 //     --page=<pricing|landing|docs-home|feature-deep|any-other-type>
 //
 // Unknown page-types are accepted: the contract borrows structure from
@@ -25,7 +25,7 @@ import process from 'node:process';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
 
-const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage'];
+const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage', 'glass'];
 const VALID_PAGES = ['pricing', 'landing', 'docs-home', 'feature-deep'];
 
 // Unknown page-types are not rejected — they borrow structure from the
@@ -64,32 +64,40 @@ const BRAND = {
     name: 'anthropic orange',
     minCoverage: '0.4%',
     howTo: 'orange `.anth-badge`, orange `.anth-button` CTA in nav or banner, or orange kicker text above h1',
-    forbiddenFonts: ['Fraunces', 'Instrument Serif'],
-    forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#c49464 (ember)'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Space Grotesk'],
+    forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#c49464 (ember)', '#22D3EE (glass)'],
   },
   apple: {
     accent: '#0071E3',
     name: 'apple blue',
     minCoverage: '0.02%',
     howTo: 'blue kicker above h1, blue `.apple-link` in nav with ›, or a filled `.apple-button` on hero CTA',
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora'],
-    forbiddenColors: ['#d97757 (anthropic)', '#c49464 (ember)', '#97B077 (sage)'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk'],
+    forbiddenColors: ['#d97757 (anthropic)', '#c49464 (ember)', '#97B077 (sage)', '#22D3EE (glass)'],
   },
   ember: {
     accent: '#c49464',
     name: 'ember gold',
     minCoverage: '0.01%',
     howTo: 'centered gold `.accent-strip` hairline above every section, gold SVG accent strokes, gold eyebrow text accent',
-    forbiddenFonts: ['Instrument Serif', 'Poppins', 'Lora'],
-    forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#97B077 (sage)'],
+    forbiddenFonts: ['Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk'],
+    forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#97B077 (sage)', '#22D3EE (glass)'],
   },
   sage: {
     accent: '#97B077 / #d4e1b8',
     name: 'sage green',
     minCoverage: '1.5%',
     howTo: '`.sage-nav` with `background: rgba(212,225,184,0.88)` + `border-bottom:#c9d6a8` — the nav band itself carries most of the sage-green coverage',
-    forbiddenFonts: ['Fraunces', 'Poppins', 'Lora'],
-    forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#c49464 (ember)'],
+    forbiddenFonts: ['Fraunces', 'Poppins', 'Lora', 'Space Grotesk'],
+    forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#c49464 (ember)', '#22D3EE (glass)'],
+  },
+  glass: {
+    accent: '#22D3EE',
+    name: 'glass aurora cyan',
+    minCoverage: '0.2%',
+    howTo: 'three SOLID cyan moves in the hero: mono `.glass-eyebrow` kicker above the h1, filled `.glass-button` CTA in the nav, and a 2px `.glass-hairline`. Aurora blobs do NOT count — they blend toward the navy canvas and never register at the pixel matcher\'s tolerance',
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora'],
+    forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#c49464 (ember)', '#97B077 (sage)'],
   },
 };
 
@@ -112,6 +120,10 @@ const DIAGRAM = {
     tiers: 'scale = rendered width / viewBox width must stay ≥ 0.82 (11px source → ≥9px rendered); upgrade container or split the figure when it drops below',
     color: 'Use sage palette per references; no extra contract.',
   },
+  glass: {
+    tiers: '720 prose column (≤10 labels) · 1040 `glass-container` (≤18 labels) · 1280 `glass-container glass-container--wide` (**MUST when ≥20 labels or ≥4 cols**)',
+    color: 'Dark-glass diagram language: node fills rgba(255,255,255,0.06) + 1px white-alpha strokes (same material as the page panels), ≤3 cyan glow nodes per diagram as the semantic focus. diagram-monochrome applies — zero saturated hues means the cyan focus is missing. Violet/pink NEVER appear inside diagrams.',
+  },
 };
 
 function parseArgs(argv) {
@@ -129,7 +141,7 @@ sprint-contract.mjs — generate a contract for a new page
 
 Usage:
   node skills/design-review/scripts/sprint-contract.mjs \\
-    --skill=<anthropic|apple|ember|sage> \\
+    --skill=<anthropic|apple|ember|sage|glass> \\
     --page=<pricing|landing|docs-home|feature-deep|any-other-type>
 
 Unknown page-types fall back to the nearest canonical (dashboard→docs-home,

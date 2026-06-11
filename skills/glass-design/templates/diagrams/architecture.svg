@@ -1,0 +1,79 @@
+<!-- glass-design diagram template · architecture · paste into a glass page and delete the embedded <style> + background rect (glass.css provides the classes; the page provides the canvas). Craft rules: diagram-craft.md -->
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Prism platform architecture: edge agents feed regional ingest, a two-tier index, the query engine, and streaming clients" viewBox="0 0 1240 440">
+  <style>
+    /* Standalone preview values = glass dark theme. When pasted into a glass
+       page, DELETE this style block — glass.css provides these classes with
+       theme-switching tokens (.glass-svg-* / light mode safe). */
+    .glass-svg-ink   { fill: #F4F7FF; }
+    .glass-svg-ink-2 { fill: rgba(231,238,255,0.74); }
+    .glass-svg-ink-3 { fill: rgba(231,238,255,0.55); }
+    .glass-svg-node  { fill: rgba(255,255,255,0.06); stroke: rgba(255,255,255,0.14); }
+    .glass-svg-node-strong { fill: rgba(255,255,255,0.05); stroke: #22D3EE; }
+    .glass-svg-line  { stroke: rgba(255,255,255,0.08); }
+    .glass-svg-grid  { stroke: rgba(255,255,255,0.08); stroke-dasharray: 2 6; }
+    .glass-svg-accent-ink { fill: #22D3EE; }
+  </style>
+  <rect width="100%" height="100%" fill="#0B1020"/>
+        <g font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="2" class="glass-svg-ink-3">
+          <text x="24" y="36">01 · EDGE</text>
+          <text x="24" y="142">02 · INGEST</text>
+          <text x="24" y="248">03 · INDEX</text>
+          <text x="24" y="354">04 · SERVE</text>
+        </g>
+
+        <!-- edge tier -->
+        <rect x="150" y="20" width="200" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="390" y="20" width="200" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="630" y="20" width="200" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="870" y="20" width="200" height="64" rx="14" class="glass-svg-node"/>
+        <g font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">
+          <text x="170" y="48">SDK · 14 langs</text>
+          <text x="410" y="48">OTel collector</text>
+          <text x="650" y="48">Edge batcher</text>
+          <text x="890" y="48">Replay uploader</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">
+          <text x="170" y="68">apps and services</text>
+          <text x="410" y="68">drop-in pipeline</text>
+          <text x="650" y="68">4ms coalescing</text>
+          <text x="890" y="68">backfill history</text>
+        </g>
+
+        <!-- edge → ingest -->
+        <path d="M250 84 L250 126" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M490 84 L490 126" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M730 84 L730 126" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M970 84 L970 126" stroke="#22D3EE" stroke-width="2" fill="none"/>
+
+        <!-- ingest tier -->
+        <rect x="150" y="126" width="920" height="64" rx="14" class="glass-svg-node"/>
+        <text x="178" y="153" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">Regional ingest gateways · 6 regions</text>
+        <text x="178" y="173" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">2.4M events/s sustained · at-least-once into the log · backpressure to the edge</text>
+        <circle cx="1010" cy="158" r="4.5" fill="#22D3EE"/>
+        <text x="1024" y="162" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-accent-ink">LIVE</text>
+
+        <!-- ingest → index -->
+        <path d="M400 190 L400 232" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M820 190 L820 232" stroke="#22D3EE" stroke-width="2" fill="none"/>
+
+        <!-- index tier: hot + cold -->
+        <rect x="150" y="232" width="440" height="64" rx="14" class="glass-svg-node"/>
+        <text x="178" y="259" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">Hot tier — in memory</text>
+        <text x="178" y="279" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">last 48h · columnar · sub-ms scans</text>
+        <rect x="630" y="232" width="440" height="64" rx="14" class="glass-svg-node"/>
+        <text x="658" y="259" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">Cold tier — object storage</text>
+        <text x="658" y="279" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">410TB · 12× zstd · lazily promoted</text>
+
+        <!-- index → serve -->
+        <path d="M400 296 L400 338" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M820 296 L820 338" stroke="#22D3EE" stroke-width="2" fill="none"/>
+
+        <!-- serve tier -->
+        <rect x="150" y="338" width="560" height="74" rx="14" class="glass-svg-node-strong"/>
+        <text x="178" y="368" font-family="'Inter', sans-serif" font-size="15" font-weight="600" class="glass-svg-ink">Query engine — vectorized, scatter-gather</text>
+        <text x="178" y="390" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-accent-ink">38MS P99 OVER A TRILLION ROWS</text>
+        <rect x="750" y="338" width="320" height="74" rx="14" class="glass-svg-node"/>
+        <text x="778" y="368" font-family="'Inter', sans-serif" font-size="15" font-weight="600" class="glass-svg-ink">Streaming render</text>
+        <text x="778" y="390" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">diffs over the wire · 60fps charts</text>
+        <path d="M710 375 L750 375" stroke="#22D3EE" stroke-width="2" fill="none"/>
+      </svg>

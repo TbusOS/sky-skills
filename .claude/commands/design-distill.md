@@ -1,6 +1,6 @@
 ---
 description: "Distill a candidate canonical from ≥5 successful same-type pages (harness component 08 · library-grower). Wraps bin/design-review --distill. Accepts --skill / --page (required) + optional --corpus / --out. Below the 5-sample threshold it reports 'insufficient samples' and stops — it never pads the corpus to force a run."
-argument-hint: "--skill=<anthropic|apple|ember|sage> --page=<pricing|landing|docs-home|new-type> [--corpus=<dir>] [--out=<dir>]"
+argument-hint: "--skill=<anthropic|apple|ember|sage|glass> --page=<pricing|landing|docs-home|new-type> [--corpus=<dir>] [--out=<dir>]"
 ---
 
 # /design-distill — grow the canonical library from real successes

@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sky Skills — fourteen Claude Code skills, one pane of glass</title>
+<meta name="description" content="The sky-skills repository rendered in glass-design: fourteen Claude Code skills, five design aesthetics and a four-gate review harness on one aurora field.">
+<meta property="og:title" content="Sky Skills — fourteen Claude Code skills, one pane of glass">
+<meta property="og:description" content="Same repo, fifth voice: SKILL.md folders, TRIGGER auto-activation and the generator/evaluator harness, drawn in liquid glass with dark/light themes.">
+<link rel="stylesheet" href="../../skills/glass-design/assets/fonts.css">
+<link rel="stylesheet" href="../../skills/glass-design/assets/glass.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  /* Hero — copy on the plain canvas, mock panel below (R1 geometry) */
+  .hero-grid { display: grid; gap: var(--space-7); }
+  .hero-copy { max-width: 780px; }
+  .hero-actions { display: flex; gap: var(--space-4); align-items: center; margin-top: var(--space-6); flex-wrap: wrap; }
+  .hero-meta {
+    margin-top: var(--space-6);
+    font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.12em;
+    color: var(--glass-ink-3); text-transform: uppercase;
+  }
+  html[data-lang="zh"] .hero-meta { letter-spacing: 0.04em; text-transform: none; }
+
+  /* Session mock — the page's single tilt element */
+  .mock-frame { padding: var(--space-4); }
+  .mock-frame svg { display: block; width: 100%; height: auto; border-radius: 14px; }
+  .mock-frame figcaption { padding: 0 var(--space-3); }
+
+  /* Stat strip — peers, hairline-divided */
+  .stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-5); }
+  .stat-strip > div { padding: var(--space-5) var(--space-5); border-left: 1px solid var(--glass-line); }
+  .stat-strip > div:first-child { border-left: none; padding-left: 0; }
+
+  /* Method cards */
+  .feat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); margin-top: var(--space-7); }
+  .feat-glyph { margin-bottom: var(--space-5); }
+  .feat-row h3 { margin-bottom: var(--space-3); }
+  .feat-row p { font-size: 15px; color: var(--glass-ink-2); margin-bottom: var(--space-5); }
+
+  /* Section header */
+  .sect-head { max-width: 760px; }
+  .sect-head--center { margin-inline: auto; text-align: center; }
+
+  /* Roster table */
+  .roster-panel { margin-top: var(--space-6); overflow-x: auto; }
+  .roster-panel td:first-child { font-family: var(--font-mono); font-size: 13px; color: var(--glass-ink); white-space: nowrap; }
+  .roster-kind { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--glass-ink-3); }
+  .roster-here { margin-left: var(--space-3); }
+
+  /* Featured diagram figures */
+  .diagram-panel { margin-top: var(--space-6); }
+  .diagram-panel svg { display: block; width: 100%; height: auto; }
+
+  /* Gates band — narrative left, gate rows right */
+  .craft-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: var(--space-7); align-items: start; }
+  .craft-rule { display: grid; grid-template-columns: 48px 1fr; gap: var(--space-4); padding: var(--space-4) 0; border-bottom: 1px solid var(--glass-line); }
+  .craft-rule:last-child { border-bottom: none; }
+  .craft-rule .num { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--glass-accent-ink); padding-top: 3px; }
+  .craft-rule h3 { font-size: 17px; margin-bottom: var(--space-1); }
+  .craft-rule p { font-size: 14px; color: var(--glass-ink-2); margin: 0; }
+
+  /* Install CTA */
+  .cta-panel { text-align: center; padding: var(--space-8) var(--space-6); }
+  .cta-panel .glass-hairline { margin-inline: auto; }
+  .cta-panel pre { text-align: left; max-width: 640px; margin: var(--space-6) auto 0; }
+
+  /* Sibling demos */
+  .xlink-row { display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap; margin-top: var(--space-6); }
+</style>
+</head>
+<body>
+
+<div class="glass-aurora" aria-hidden="true">
+  <div class="glass-blob glass-blob--cyan" style="width:760px; height:760px; top:-320px; left:-260px;"></div>
+  <div class="glass-blob glass-blob--violet" style="width:620px; height:620px; top:60px; right:-240px;"></div>
+  <div class="glass-blob glass-blob--indigo" style="width:480px; height:480px; top:1180px; left:-200px;"></div>
+</div>
+
+<nav class="glass-nav"><div class="glass-nav-inner">
+  <a href="#" class="glass-nav-brand">Sky Skills</a>
+  <div class="glass-nav-links">
+    <a href="#method"><span class="lang-en">Method</span><span class="lang-zh">工作方式</span></a>
+    <a href="#roster"><span class="lang-en">Roster</span><span class="lang-zh">阵容</span></a>
+    <a href="diagrams.html"><span class="lang-en">Templates</span><span class="lang-zh">图示模板</span></a>
+    <a href="#gates"><span class="lang-en">Gates</span><span class="lang-zh">闸</span></a>
+    <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="glass-lang-toggle lang-toggle" aria-label="Switch language">中 / EN</button>
+    <button type="button" class="glass-theme-toggle" aria-label="Switch theme">light</button>
+    <a class="glass-button" href="#install"><span class="lang-en">Get the repo</span><span class="lang-zh">获取仓库</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="glass-hero">
+  <div class="glass-container glass-container--wide">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="glass-eyebrow">01 · <span class="lang-en">Claude Code skills</span><span class="lang-zh">Claude Code 技能仓库</span></span>
+        <h1>
+          <span class="lang-en">Fourteen skills,<br>one pane of glass.</span>
+          <span class="lang-zh">十四个技能，<br>一块玻璃。</span>
+        </h1>
+        <hr class="glass-hairline">
+        <p class="glass-lead" style="max-width:640px;">
+          <span class="lang-en">sky-skills is a repository of Claude Code skills — five page-design aesthetics, a four-gate review harness, and a bench of working tools. This demo tells the repo's own story in glass-design, its fifth and newest voice.</span>
+          <span class="lang-zh">sky-skills 是一个 Claude Code 技能仓库——五种页面设计美学、一套四道闸的审查体系，外加一排干活的工具。这页 demo 用仓库第五种、也是最新的声音 glass-design，讲它自己的故事。</span>
+        </p>
+        <div class="hero-actions">
+          <a class="glass-button" href="#install"><span class="lang-en">Install in 60 seconds</span><span class="lang-zh">60 秒装好</span></a>
+          <a class="glass-button glass-button--ghost" href="diagrams.html"><span class="lang-en">Browse the templates</span><span class="lang-zh">看图示模板</span></a>
+          <a class="glass-link" href="#method"><span class="lang-en">How TRIGGER works</span><span class="lang-zh">TRIGGER 如何工作</span></a>
+        </div>
+        <p class="hero-meta">
+          <span class="lang-en">MIT · zero build steps · dark / light · EN / 中文</span>
+          <span class="lang-zh">MIT 许可 · 零构建 · 双主题 · 双语</span>
+        </p>
+      </div>
+
+      <figure class="glass-panel mock-frame" data-tilt>
+        <svg role="img" aria-label="A Claude Code session on sky-skills: the prompt matches glass-design's TRIGGER, the skill loads, and the four-stage pipeline runs to zero errors" viewBox="0 0 1200 520" data-draw>
+          <!-- window chrome -->
+          <rect x="0" y="0" width="1200" height="44" rx="14" class="glass-svg-node"/>
+          <rect x="0" y="30" width="1200" height="14" class="glass-svg-node" style="stroke:none;"/>
+          <circle cx="24" cy="22" r="5" fill="#22D3EE"/>
+          <circle cx="44" cy="22" r="5" class="glass-svg-ink-3" style="stroke:none;"/>
+          <circle cx="64" cy="22" r="5" class="glass-svg-ink-3" style="stroke:none;"/>
+          <text x="600" y="27" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">claude code · ~/sky-skills · live session</text>
+
+          <!-- sidebar: skills -->
+          <rect x="0" y="56" width="252" height="464" class="glass-svg-node"/>
+          <text x="24" y="92" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="2" class="glass-svg-ink-3">01 · SKILLS LOADED</text>
+          <g font-family="'Inter', sans-serif" font-size="14">
+            <circle cx="30" cy="121" r="4" fill="#22D3EE"/>
+            <text x="44" y="126" class="glass-svg-ink" font-weight="600">glass-design</text>
+            <text x="44" y="156" class="glass-svg-ink-2">sage-design</text>
+            <text x="44" y="186" class="glass-svg-ink-2">ember-design</text>
+            <text x="44" y="216" class="glass-svg-ink-2">apple-design</text>
+            <text x="44" y="246" class="glass-svg-ink-2">anthropic-design</text>
+            <text x="44" y="276" class="glass-svg-ink-2">design-review</text>
+          </g>
+          <text x="24" y="322" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="2" class="glass-svg-ink-3">02 · SESSION</text>
+          <g font-family="'JetBrains Mono', monospace" font-size="11.5">
+            <text x="24" y="350" class="glass-svg-ink-2">trigger · matched</text>
+            <text x="24" y="374" class="glass-svg-ink-2">pages · 2 shipped</text>
+            <text x="24" y="398" class="glass-svg-ink-2">gate errors · 0</text>
+          </g>
+
+          <!-- main: prompt header -->
+          <text x="288" y="96" font-family="'Space Grotesk', sans-serif" font-size="22" font-weight="600" class="glass-svg-ink">Make me a liquid-glass page</text>
+          <text x="288" y="120" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">PROMPT · 09:14 · MATCHED IN 0.2S</text>
+
+          <!-- stat chips -->
+          <g font-family="'Space Grotesk', sans-serif" font-weight="700">
+            <rect x="860" y="72" width="150" height="56" rx="12" class="glass-svg-node"/>
+            <text x="876" y="98" font-size="20" class="glass-svg-accent-ink">14</text>
+            <text x="876" y="116" font-family="'Inter', sans-serif" font-size="11" font-weight="400" class="glass-svg-ink-3">skills in repo</text>
+            <rect x="1026" y="72" width="150" height="56" rx="12" class="glass-svg-node"/>
+            <text x="1042" y="98" font-size="20" class="glass-svg-ink">4/4</text>
+            <text x="1042" y="116" font-family="'Inter', sans-serif" font-size="11" font-weight="400" class="glass-svg-ink-3">gates green</text>
+          </g>
+
+          <!-- trigger panel -->
+          <rect x="288" y="148" width="888" height="130" rx="16" class="glass-svg-node"/>
+          <text x="312" y="180" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="2" class="glass-svg-ink-3">TRIGGER · GLASS-DESIGN</text>
+          <rect x="312" y="198" width="150" height="32" rx="16" class="glass-svg-node-strong"/>
+          <text x="387" y="218" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-accent-ink">liquid glass</text>
+          <rect x="478" y="198" width="160" height="32" rx="16" class="glass-svg-node"/>
+          <text x="558" y="218" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-2">glassmorphism</text>
+          <rect x="654" y="198" width="110" height="32" rx="16" class="glass-svg-node"/>
+          <text x="709" y="218" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-2">aurora</text>
+          <rect x="780" y="198" width="116" height="32" rx="16" class="glass-svg-node"/>
+          <text x="838" y="218" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-2">毛玻璃</text>
+          <text x="312" y="258" font-family="'Inter', sans-serif" font-size="12.5" class="glass-svg-ink-2">keyword hit → SKILL.md loads itself · 9 reference docs · 4 canonical pages · 7 diagram templates</text>
+
+          <!-- pipeline panel -->
+          <rect x="288" y="292" width="888" height="152" rx="16" class="glass-svg-node"/>
+          <text x="312" y="324" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="2" class="glass-svg-ink-3">SESSION PIPELINE</text>
+          <rect x="312" y="340" width="180" height="64" rx="12" class="glass-svg-node"/>
+          <rect x="532" y="340" width="180" height="64" rx="12" class="glass-svg-node"/>
+          <rect x="752" y="340" width="180" height="64" rx="12" class="glass-svg-node"/>
+          <rect x="972" y="340" width="180" height="64" rx="12" class="glass-svg-node"/>
+          <path d="M492 372 L532 372" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <path d="M712 372 L752 372" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <path d="M932 372 L972 372" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <circle cx="512" cy="372" r="4" fill="#22D3EE"/>
+          <circle cx="732" cy="372" r="4" fill="#22D3EE"/>
+          <circle cx="952" cy="372" r="4" fill="#22D3EE"/>
+          <g font-family="'Inter', sans-serif" font-size="13.5" font-weight="600" class="glass-svg-ink">
+            <text x="332" y="366">Read the skill</text>
+            <text x="552" y="366">Generate</text>
+            <text x="772" y="366">Run the gates</text>
+            <text x="992" y="366">Ship</text>
+          </g>
+          <g font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">
+            <text x="332" y="386">SKILL.md + references</text>
+            <text x="552" y="386">start from canonical</text>
+            <text x="772" y="386">verify · audit · shot</text>
+            <text x="992" y="386">0 errors required</text>
+          </g>
+
+          <!-- bottom bar -->
+          <g font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">
+            <text x="288" y="492">SKILLS 14</text>
+            <text x="430" y="492">AESTHETICS 5</text>
+            <text x="610" y="492">GATES 4</text>
+            <text x="740" y="492">THEMES DARK + LIGHT</text>
+            <text x="1010" y="492">MOTION FREEZABLE</text>
+          </g>
+        </svg>
+        <figcaption>
+          <span class="lang-en">The session as it runs — one TRIGGER hit lights one chip, the pipeline ends at zero errors. The mock is drawn in the page's own glass.</span>
+          <span class="lang-zh">运行中的会话——一次 TRIGGER 命中点亮一枚词片，流水线终点是零 error。这张 mock 用的就是页面自己的玻璃。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- Stat strip -->
+<section class="glass-section" id="numbers">
+  <div class="glass-container glass-container--wide">
+    <div class="stat-strip">
+      <div>
+        <span class="glass-stat-number" data-count-to="14">14</span>
+        <span class="glass-stat-label"><span class="lang-en">skills in one repository</span><span class="lang-zh">个技能在同一个仓库里</span></span>
+      </div>
+      <div>
+        <span class="glass-stat-number" data-count-to="5">5</span>
+        <span class="glass-stat-label"><span class="lang-en">design aesthetics, one voice each</span><span class="lang-zh">种设计美学，每种一个声音</span></span>
+      </div>
+      <div>
+        <span class="glass-stat-number" data-count-to="4">4</span>
+        <span class="glass-stat-label"><span class="lang-en">gates before any page ships</span><span class="lang-zh">道闸，每页发布前都要过</span></span>
+      </div>
+      <div>
+        <span class="glass-stat-number" data-count-to="60" data-count-suffix="s">60s</span>
+        <span class="glass-stat-label"><span class="lang-en">from <code>git clone</code> to a rendered page</span><span class="lang-zh">从 <code>git clone</code> 到渲染出第一页</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Method: three cards -->
+<section class="glass-section glass-section--alt" id="method">
+  <div class="glass-container glass-container--wide">
+    <div class="sect-head sect-head--center">
+      <span class="glass-eyebrow">02 · <span class="lang-en">How it works</span><span class="lang-zh">工作方式</span></span>
+      <h2>
+        <span class="lang-en">A folder, a keyword, a verdict.</span>
+        <span class="lang-zh">一个文件夹、一个关键词、一个判决。</span>
+      </h2>
+    </div>
+
+    <div class="feat-row">
+      <article class="glass-card" data-reveal>
+        <svg class="feat-glyph" width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+          <rect x="7" y="6" width="30" height="32" rx="6" class="glass-svg-line" stroke-width="1.5"/>
+          <path d="M14 15 H30 M14 22 H30 M14 29 H24" stroke="#22D3EE" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h3><span class="lang-en">A folder is a skill.</span><span class="lang-zh">一个文件夹就是一个技能。</span></h3>
+        <p>
+          <span class="lang-en">Each skill is a self-contained directory: SKILL.md for the contract, references for the craft, assets for the CSS, templates to copy from. No registry, no build — delete the folder and it's gone.</span>
+          <span class="lang-zh">每个技能都是一个自带全部家当的目录：SKILL.md 写契约，references 放工艺文档，assets 放 CSS，templates 给你直接复制。没有注册表、没有构建——删掉文件夹，它就消失了。</span>
+        </p>
+        <a class="glass-link" href="https://github.com/TbusOS/sky-skills/tree/main/skills/glass-design"><span class="lang-en">Anatomy of a skill</span><span class="lang-zh">解剖一个技能</span></a>
+      </article>
+
+      <article class="glass-card" data-reveal>
+        <svg class="feat-glyph" width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+          <circle cx="22" cy="22" r="16" class="glass-svg-line" stroke-width="1.5"/>
+          <circle cx="22" cy="22" r="7" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <circle cx="22" cy="22" r="2.5" fill="#22D3EE"/>
+        </svg>
+        <h3><span class="lang-en">TRIGGER picks the moment.</span><span class="lang-zh">TRIGGER 挑准时机。</span></h3>
+        <p>
+          <span class="lang-en">Every SKILL.md carries TRIGGER keywords in its frontmatter. Say "liquid glass" and this skill loads itself — its tokens, its canon, its gates — without a single manual import.</span>
+          <span class="lang-zh">每份 SKILL.md 的 frontmatter 里都写着 TRIGGER 关键词。你说出 liquid glass，这个技能就自己加载进来——它的 token、它的范本、它的闸——不需要任何手动引入。</span>
+        </p>
+        <a class="glass-link" href="https://github.com/TbusOS/sky-skills#what-are-claude-code-skills"><span class="lang-en">What is a skill</span><span class="lang-zh">什么是技能</span></a>
+      </article>
+
+      <article class="glass-card" data-reveal>
+        <svg class="feat-glyph" width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+          <path d="M8 32 L8 14 M8 14 L16 14 M8 23 L16 23 M8 32 L16 32" class="glass-svg-line" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M22 14 L30 14 M22 23 L30 23 M22 32 L30 32" stroke="#22D3EE" stroke-width="2" stroke-linecap="round"/>
+          <path d="M35 11 L35 35" class="glass-svg-line" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <h3><span class="lang-en">Generators ship, gates judge.</span><span class="lang-zh">生成的归生成，评审的归评审。</span></h3>
+        <p>
+          <span class="lang-en">Five design skills generate pages; design-review judges them — structure, rendered audit, screenshots, then an LLM critic. A page that fails any gate is a page that doesn't ship.</span>
+          <span class="lang-zh">五个设计技能负责生成页面，design-review 负责评判——结构检查、渲染审计、截图、再加一个 LLM 评审。任何一道闸不过，页面就不算完成。</span>
+        </p>
+        <a class="glass-link" href="#gates"><span class="lang-en">The four gates</span><span class="lang-zh">四道闸</span></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Roster table -->
+<section class="glass-section" id="roster">
+  <div class="glass-container">
+    <div class="sect-head">
+      <span class="glass-eyebrow">03 · <span class="lang-en">The roster</span><span class="lang-zh">阵容</span></span>
+      <h2>
+        <span class="lang-en">Fourteen folders.</span>
+        <span class="lang-zh">十四个文件夹。</span>
+      </h2>
+    </div>
+    <div class="glass-panel roster-panel" data-reveal>
+      <table class="glass-table">
+        <thead>
+          <tr>
+            <th><span class="lang-en">Skill</span><span class="lang-zh">技能</span></th>
+            <th><span class="lang-en">Kind</span><span class="lang-zh">类型</span></th>
+            <th><span class="lang-en">What it does</span><span class="lang-zh">用途</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>anthropic-design</td><td><span class="roster-kind">generator</span></td><td><span class="lang-en">Warm editorial pages — cream, serif, orange pills</span><span class="lang-zh">温暖编辑感页面——米色、衬线、橙色按钮</span></td></tr>
+          <tr><td>apple-design</td><td><span class="roster-kind">generator</span></td><td><span class="lang-en">Pale minimal product pages, SF-style geometry</span><span class="lang-zh">浅白极简产品页，SF 式几何</span></td></tr>
+          <tr><td>ember-design</td><td><span class="roster-kind">generator</span></td><td><span class="lang-en">Handcraft warmth — chocolate, gold, Fraunces</span><span class="lang-zh">手作暖意——巧克力色、金色、Fraunces</span></td></tr>
+          <tr><td>sage-design</td><td><span class="roster-kind">generator</span></td><td><span class="lang-en">Quiet Nordic editorial — rice paper and sage green</span><span class="lang-zh">安静的北欧编辑感——宣纸白与鼠尾草绿</span></td></tr>
+          <tr><td>glass-design<span class="glass-badge roster-here"><span class="lang-en">this page</span><span class="lang-zh">本页</span></span></td><td><span class="roster-kind">generator</span></td><td><span class="lang-en">Liquid glass — aurora field, frosted panels, freezable motion</span><span class="lang-zh">液态玻璃——光晕背景、毛玻璃面板、可冻结动画</span></td></tr>
+          <tr><td>design-planner</td><td><span class="roster-kind">planner</span></td><td><span class="lang-en">Plans a page before any generator touches it</span><span class="lang-zh">在生成器动手之前先做页面规划</span></td></tr>
+          <tr><td>design-review</td><td><span class="roster-kind">evaluator</span></td><td><span class="lang-en">The four gates plus the known-bugs ledger</span><span class="lang-zh">四道闸，外加已知问题台账</span></td></tr>
+          <tr><td>doc-review-loop</td><td><span class="roster-kind">evaluator</span></td><td><span class="lang-en">Iterates documents against a reviewer until clean</span><span class="lang-zh">让文档对着评审意见迭代到干净为止</span></td></tr>
+          <tr><td>linux-kernel-dev</td><td><span class="roster-kind">domain</span></td><td><span class="lang-en">Kernel modules, drivers, checkpatch, DT bindings</span><span class="lang-zh">内核模块、驱动、checkpatch、设备树绑定</span></td></tr>
+          <tr><td>doc-to-markdown</td><td><span class="roster-kind">converter</span></td><td><span class="lang-en">PDF / DOCX into clean Markdown with images</span><span class="lang-zh">PDF / DOCX 转成干净的 Markdown 和图片</span></td></tr>
+          <tr><td>md-to-pdf</td><td><span class="roster-kind">converter</span></td><td><span class="lang-en">Markdown into PDF with bookmarks and CJK</span><span class="lang-zh">Markdown 转 PDF，带书签和中文支持</span></td></tr>
+          <tr><td>wechat-video-publisher</td><td><span class="roster-kind">pipeline</span></td><td><span class="lang-en">TTS, Playwright and ffmpeg in one publishing run</span><span class="lang-zh">TTS、Playwright、ffmpeg 串成一次发布</span></td></tr>
+          <tr><td>gated-dual-clone</td><td><span class="roster-kind">git</span></td><td><span class="lang-en">The 2/3-clone git topology with safety gates</span><span class="lang-zh">带安全闸的 2/3 克隆 git 拓扑</span></td></tr>
+          <tr><td>gated-dual-clone-audit</td><td><span class="roster-kind">git</span></td><td><span class="lang-en">Audits that topology before anything is pushed</span><span class="lang-zh">在任何推送之前审计这套拓扑</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Shared diagrams -->
+<section class="glass-section glass-section--alt" id="diagrams">
+  <div class="glass-container glass-container--wide">
+    <div class="sect-head">
+      <span class="glass-eyebrow">04 · <span class="lang-en">The shared three</span><span class="lang-zh">共用的三张图</span></span>
+      <h2>
+        <span class="lang-en">Three diagrams every demo carries.</span>
+        <span class="lang-zh">每个 demo 都要带的三张图。</span>
+      </h2>
+      <p class="glass-lead glass-lead--compact" style="max-width:680px; margin-top:var(--space-5);">
+        <span class="lang-en">Code architecture, an SoC block and a three-remote git flow — the same trio every sibling demo draws, here in dark glass: nodes are panels, lines are hairlines, cyan is where the energy goes.</span>
+        <span class="lang-zh">代码架构、SoC 框图、三远端 git 协作——每个姊妹 demo 都画的同一组图，这里换成暗玻璃语言：节点是面板，线是发丝线，cyan 指向能量去的地方。</span>
+      </p>
+    </div>
+
+    <!-- Diagram 1: code architecture -->
+    <figure class="glass-panel diagram-panel" data-reveal>
+      <svg role="img" aria-label="Code architecture: a prompt falls through presentation, application, domain and infrastructure layers; five design-skill pills sit in the domain layer" viewBox="0 0 1240 460" data-draw>
+        <g font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="2" class="glass-svg-ink-3">
+          <text x="24" y="36">01 · PRESENTATION</text>
+          <text x="24" y="142">02 · APPLICATION</text>
+          <text x="24" y="248">03 · DOMAIN</text>
+          <text x="24" y="354">04 · INFRASTRUCTURE</text>
+        </g>
+
+        <!-- presentation tier -->
+        <rect x="214" y="20" width="214" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="468" y="20" width="214" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="722" y="20" width="214" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="976" y="20" width="214" height="64" rx="14" class="glass-svg-node"/>
+        <g font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">
+          <text x="234" y="48">Landing pages</text>
+          <text x="488" y="48">Dashboards</text>
+          <text x="742" y="48">Galleries</text>
+          <text x="996" y="48">Data reports</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">
+          <text x="234" y="68">hero · stats · CTA</text>
+          <text x="488" y="68">KPI + live charts</text>
+          <text x="742" y="68">figure + figcaption</text>
+          <text x="996" y="68">long-form + tables</text>
+        </g>
+
+        <!-- presentation → application -->
+        <path d="M321 84 L321 126" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M575 84 L575 126" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M829 84 L829 126" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M1083 84 L1083 126" stroke="#22D3EE" stroke-width="2" fill="none"/>
+
+        <!-- application tier -->
+        <rect x="214" y="126" width="976" height="64" rx="14" class="glass-svg-node"/>
+        <text x="242" y="153" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">Claude Code runtime — the TRIGGER router</text>
+        <text x="242" y="173" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">prompt keywords match SKILL.md frontmatter · the whole skill folder loads into context</text>
+
+        <!-- application → domain -->
+        <path d="M460 190 L460 232" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M940 190 L940 232" stroke="#22D3EE" stroke-width="2" fill="none"/>
+
+        <!-- domain tier: five skill pills -->
+        <rect x="214" y="232" width="168" height="64" rx="32" class="glass-svg-node"/>
+        <rect x="402" y="232" width="168" height="64" rx="32" class="glass-svg-node"/>
+        <rect x="590" y="232" width="168" height="64" rx="32" class="glass-svg-node"/>
+        <rect x="778" y="232" width="168" height="64" rx="32" class="glass-svg-node"/>
+        <rect x="966" y="232" width="168" height="64" rx="32" class="glass-svg-node-strong"/>
+        <g font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink" text-anchor="middle">
+          <text x="298" y="259">anthropic-design</text>
+          <text x="486" y="259">apple-design</text>
+          <text x="674" y="259">ember-design</text>
+          <text x="862" y="259">sage-design</text>
+          <text x="1050" y="259">glass-design</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-3" text-anchor="middle">
+          <text x="298" y="277">warm editorial</text>
+          <text x="486" y="277">pale minimal</text>
+          <text x="674" y="277">handcraft</text>
+          <text x="862" y="277">quiet nordic</text>
+          <text x="1050" y="277">liquid glass</text>
+        </g>
+        <text x="1146" y="268" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">+9</text>
+
+        <!-- domain → infrastructure -->
+        <path d="M460 296 L460 338" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M940 296 L940 338" stroke="#22D3EE" stroke-width="2" fill="none"/>
+
+        <!-- infrastructure tier -->
+        <rect x="214" y="338" width="560" height="74" rx="14" class="glass-svg-node"/>
+        <text x="242" y="368" font-family="'Inter', sans-serif" font-size="15" font-weight="600" class="glass-svg-ink">Per-skill assets</text>
+        <text x="242" y="390" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">glass.css · fonts.css · glass.js · templates/diagrams · references/canonical</text>
+        <rect x="830" y="338" width="360" height="74" rx="14" class="glass-svg-node-strong"/>
+        <text x="858" y="368" font-family="'Inter', sans-serif" font-size="15" font-weight="600" class="glass-svg-ink">design-review — four gates</text>
+        <text x="858" y="390" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-accent-ink">0 ERROR = SHIPPABLE</text>
+        <path d="M774 375 L830 375" stroke="#22D3EE" stroke-width="2" fill="none"/>
+
+        <text x="24" y="448" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">A PROMPT FALLS THROUGH FOUR LAYERS · ONLY GATED PAGES COME BACK UP</text>
+      </svg>
+      <figcaption>
+        <span class="lang-en">A prompt falls through four layers; the cyan-stroked pill is this page's author, and the strong-stroked gate node is the reason it shipped.</span>
+        <span class="lang-zh">一个提示词穿过四层结构——cyan 描边的药丸是这页的作者，强描边的闸节点是它能发布的原因。</span>
+      </figcaption>
+    </figure>
+
+    <!-- Diagram 2: SoC block -->
+    <figure class="glass-panel diagram-panel" data-reveal>
+      <svg role="img" aria-label="SoC block diagram in dark glass: P-cluster and E-cluster with shared L2, a ten-core GPU, a sixteen-core neural engine, media engine, unified memory and an interconnect fabric over an I/O strip" viewBox="0 0 1240 560">
+        <!-- die -->
+        <rect x="36" y="28" width="1168" height="504" rx="20" class="glass-svg-node"/>
+        <text x="620" y="58" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="2" class="glass-svg-ink-3">SKY-1 · DESIGN-SKILL SILICON · 5NM</text>
+
+        <!-- P-cluster -->
+        <rect x="76" y="84" width="350" height="140" rx="12" class="glass-svg-node"/>
+        <text x="92" y="108" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">P-CLUSTER · 4× PERF · 3.5GHZ</text>
+        <rect x="92" y="120" width="76" height="56" rx="10" class="glass-svg-node"/>
+        <rect x="176" y="120" width="76" height="56" rx="10" class="glass-svg-node"/>
+        <rect x="260" y="120" width="76" height="56" rx="10" class="glass-svg-node"/>
+        <rect x="344" y="120" width="76" height="56" rx="10" class="glass-svg-node"/>
+        <g font-family="'Space Grotesk', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink" text-anchor="middle">
+          <text x="130" y="153">P0</text>
+          <text x="214" y="153">P1</text>
+          <text x="298" y="153">P2</text>
+          <text x="382" y="153">P3</text>
+        </g>
+        <rect x="92" y="186" width="328" height="24" rx="6" class="glass-svg-node"/>
+        <text x="256" y="202" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-2">L2 · 16 MB SHARED</text>
+
+        <!-- E-cluster -->
+        <rect x="76" y="248" width="350" height="140" rx="12" class="glass-svg-node"/>
+        <text x="92" y="272" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">E-CLUSTER · 4× EFFICIENCY · 2.0GHZ</text>
+        <rect x="92" y="284" width="76" height="56" rx="10" class="glass-svg-node"/>
+        <rect x="176" y="284" width="76" height="56" rx="10" class="glass-svg-node"/>
+        <rect x="260" y="284" width="76" height="56" rx="10" class="glass-svg-node"/>
+        <rect x="344" y="284" width="76" height="56" rx="10" class="glass-svg-node"/>
+        <g font-family="'Space Grotesk', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink" text-anchor="middle">
+          <text x="130" y="317">E0</text>
+          <text x="214" y="317">E1</text>
+          <text x="298" y="317">E2</text>
+          <text x="382" y="317">E3</text>
+        </g>
+        <rect x="92" y="350" width="328" height="24" rx="6" class="glass-svg-node"/>
+        <text x="256" y="366" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-2">L2 · 4 MB SHARED</text>
+
+        <!-- Memory column -->
+        <rect x="456" y="84" width="180" height="304" rx="12" class="glass-svg-node"/>
+        <text x="472" y="108" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">MEMORY</text>
+        <rect x="472" y="120" width="148" height="40" rx="8" class="glass-svg-node"/>
+        <text x="546" y="145" text-anchor="middle" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">Controller</text>
+        <rect x="472" y="172" width="148" height="34" rx="6" class="glass-svg-node"/>
+        <rect x="472" y="216" width="148" height="34" rx="6" class="glass-svg-node"/>
+        <rect x="472" y="260" width="148" height="34" rx="6" class="glass-svg-node"/>
+        <rect x="472" y="304" width="148" height="34" rx="6" class="glass-svg-node"/>
+        <g font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2" text-anchor="middle">
+          <text x="546" y="194">DRAM 0 · 8 GB</text>
+          <text x="546" y="238">DRAM 1 · 8 GB</text>
+          <text x="546" y="282">DRAM 2 · 8 GB</text>
+          <text x="546" y="326">DRAM 3 · 8 GB</text>
+        </g>
+        <text x="546" y="364" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">LPDDR5 · 200 GB/S · UNIFIED</text>
+
+        <!-- GPU -->
+        <rect x="666" y="84" width="506" height="160" rx="12" class="glass-svg-node"/>
+        <text x="682" y="108" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">GPU · 10 CORES</text>
+        <rect x="682" y="120" width="86" height="44" rx="8" class="glass-svg-node"/>
+        <rect x="778" y="120" width="86" height="44" rx="8" class="glass-svg-node"/>
+        <rect x="874" y="120" width="86" height="44" rx="8" class="glass-svg-node"/>
+        <rect x="970" y="120" width="86" height="44" rx="8" class="glass-svg-node"/>
+        <rect x="1066" y="120" width="86" height="44" rx="8" class="glass-svg-node"/>
+        <rect x="682" y="172" width="86" height="44" rx="8" class="glass-svg-node"/>
+        <rect x="778" y="172" width="86" height="44" rx="8" class="glass-svg-node"/>
+        <rect x="874" y="172" width="86" height="44" rx="8" class="glass-svg-node"/>
+        <rect x="970" y="172" width="86" height="44" rx="8" class="glass-svg-node"/>
+        <rect x="1066" y="172" width="86" height="44" rx="8" class="glass-svg-node"/>
+        <text x="682" y="234" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">SHARED TEXTURE CACHE · 24 MB</text>
+
+        <!-- Neural engine -->
+        <rect x="666" y="268" width="250" height="120" rx="12" class="glass-svg-node-strong"/>
+        <text x="682" y="292" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">NEURAL ENGINE</text>
+        <text x="682" y="324" font-family="'Inter', sans-serif" font-size="15" font-weight="600" class="glass-svg-ink">16-core ANE</text>
+        <text x="682" y="348" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-accent-ink">38 TOPS · INT8</text>
+
+        <!-- Media engine -->
+        <rect x="936" y="268" width="236" height="120" rx="12" class="glass-svg-node"/>
+        <text x="952" y="292" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">MEDIA ENGINE</text>
+        <g font-family="'JetBrains Mono', monospace" font-size="11.5" class="glass-svg-ink-2">
+          <text x="952" y="318">H.264 · H.265</text>
+          <text x="952" y="340">AV1 DECODE</text>
+          <text x="952" y="362">PRORES RAW</text>
+        </g>
+
+        <!-- fabric connectors -->
+        <path d="M251 388 L251 412" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M546 388 L546 412" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M791 388 L791 412" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M1054 388 L1054 412" stroke="#22D3EE" stroke-width="2" fill="none"/>
+
+        <!-- interconnect fabric -->
+        <rect x="76" y="412" width="1096" height="40" rx="12" class="glass-svg-node"/>
+        <text x="624" y="437" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="1.5" class="glass-svg-accent-ink">INTERCONNECT FABRIC · EVERY BLOCK ONE HOP FROM MEMORY</text>
+
+        <!-- I/O strip -->
+        <rect x="76" y="472" width="1096" height="36" rx="10" class="glass-svg-node"/>
+        <g font-family="'JetBrains Mono', monospace" font-size="11.5" class="glass-svg-ink-2">
+          <text x="104" y="495">I/O</text>
+          <text x="200" y="495">USB4</text>
+          <text x="340" y="495">PCIE 4</text>
+          <text x="490" y="495">THUNDERBOLT</text>
+          <text x="690" y="495">HDMI</text>
+          <text x="820" y="495">WIFI 7</text>
+          <text x="960" y="495">10G ETHERNET</text>
+        </g>
+      </svg>
+      <figcaption>
+        <span class="lang-en">The same silicon every sibling demo draws — clusters, GPU, neural engine, unified memory — rendered as panels in the page's own glass, with the ANE as the one lit block.</span>
+        <span class="lang-zh">姊妹 demo 都画过的同一块芯片——核心簇、GPU、神经引擎、统一内存——用页面自己的玻璃画成面板，ANE 是唯一点亮的模块。</span>
+      </figcaption>
+    </figure>
+
+    <!-- Diagram 3: multi-repo git flow -->
+    <figure class="glass-panel diagram-panel" data-reveal>
+      <svg role="img" aria-label="Multi-repo collaboration flow: an upstream repo, a working repo with feature branches and a working tree, and a commit mirror with CI — push, pull-request and rebase arrows connect them" viewBox="0 0 1240 560">
+        <!-- pull-request arc -->
+        <path d="M1050 84 C 1050 30, 205 30, 205 84" style="stroke:var(--glass-aurora-indigo)" stroke-width="2" stroke-dasharray="6 4" fill="none"/>
+        <polygon points="205,84 199,72 211,72" style="fill:var(--glass-aurora-indigo)"/>
+        <text x="620" y="26" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" class="glass-svg-ref-ink">PULL REQUEST · REVIEW · MERGE</text>
+
+        <!-- upstream -->
+        <rect x="40" y="84" width="330" height="200" rx="16" class="glass-svg-node"/>
+        <text x="64" y="120" font-family="'Inter', sans-serif" font-size="15" font-weight="600" class="glass-svg-ink">upstream</text>
+        <text x="64" y="140" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-3">TbusOS/sky-skills · main</text>
+        <text x="64" y="172" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">BRANCHES</text>
+        <rect x="64" y="184" width="282" height="26" rx="6" class="glass-svg-node"/>
+        <text x="78" y="202" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-2">main</text>
+        <text x="332" y="202" text-anchor="end" font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-3">protected</text>
+        <rect x="64" y="218" width="282" height="26" rx="6" class="glass-svg-node"/>
+        <text x="78" y="236" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-2">release/v1</text>
+        <rect x="64" y="252" width="282" height="26" rx="6" class="glass-svg-node"/>
+        <text x="78" y="270" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-2">docs</text>
+
+        <!-- working repo -->
+        <rect x="470" y="84" width="330" height="432" rx="16" class="glass-svg-node-strong"/>
+        <text x="494" y="120" font-family="'Inter', sans-serif" font-size="15" font-weight="600" class="glass-svg-ink">working-repo</text>
+        <text x="494" y="140" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-3">~/linux-kernel/github/sky-skills</text>
+        <text x="494" y="172" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">FEATURE BRANCHES</text>
+        <rect x="494" y="184" width="282" height="70" rx="8" class="glass-svg-node"/>
+        <text x="508" y="204" font-family="'JetBrains Mono', monospace" font-size="11.5" font-weight="600" class="glass-svg-ink">feature/glass-design</text>
+        <text x="508" y="222" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-2">a1b2c3d · tokens + aurora + css</text>
+        <text x="508" y="240" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-accent-ink">e4f5g6h · two demos — HEAD</text>
+        <rect x="494" y="266" width="282" height="52" rx="8" class="glass-svg-node"/>
+        <text x="508" y="286" font-family="'JetBrains Mono', monospace" font-size="11.5" font-weight="600" class="glass-svg-ink">feature/diagram-templates</text>
+        <text x="508" y="304" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-2">i7j8k9l · 7 svg templates</text>
+        <text x="494" y="348" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">WORKING TREE</text>
+        <g font-family="'JetBrains Mono', monospace" font-size="11">
+          <text x="494" y="372" class="glass-svg-ink-2">M  demos/glass-design/index.html</text>
+          <text x="494" y="392" class="glass-svg-ink-2">A  demos/glass-design/diagrams.html</text>
+          <text x="494" y="412" class="glass-svg-ink-3">?? /tmp/glass-demos/*.png</text>
+        </g>
+        <text x="494" y="444" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">PRE-PUSH GATES</text>
+        <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-2">
+          <text x="494" y="468">verify 0 err · audit 0 err × 2 themes</text>
+          <text x="494" y="488">screenshots reviewed by a human</text>
+        </g>
+
+        <!-- commit mirror -->
+        <rect x="900" y="84" width="300" height="200" rx="16" class="glass-svg-node"/>
+        <text x="924" y="120" font-family="'Inter', sans-serif" font-size="15" font-weight="600" class="glass-svg-ink">commit-mirror</text>
+        <text x="924" y="140" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-3">internal/sky-skills-mirror</text>
+        <text x="924" y="172" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">ROLE</text>
+        <rect x="924" y="184" width="252" height="26" rx="6" class="glass-svg-node"/>
+        <text x="938" y="202" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">signed commits only</text>
+        <rect x="924" y="218" width="252" height="26" rx="6" class="glass-svg-node"/>
+        <text x="938" y="236" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">history kept verbatim</text>
+        <rect x="924" y="252" width="252" height="26" rx="6" class="glass-svg-node"/>
+        <text x="938" y="270" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">hourly sync from upstream</text>
+
+        <!-- CI panel -->
+        <rect x="900" y="316" width="300" height="200" rx="16" class="glass-svg-node"/>
+        <text x="924" y="348" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">CI · ON PULL REQUEST</text>
+        <circle cx="934" cy="372" r="5" class="glass-svg-up" style="stroke:none;"/>
+        <text x="948" y="376" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">verify.py · passed</text>
+        <circle cx="934" cy="400" r="5" class="glass-svg-up" style="stroke:none;"/>
+        <text x="948" y="404" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">visual-audit × 2 themes · passed</text>
+        <circle cx="934" cy="428" r="5" class="glass-svg-ink-3" style="stroke:none;"/>
+        <text x="948" y="432" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">screenshot diff · running</text>
+        <circle cx="934" cy="456" r="5" class="glass-svg-ink-3" style="stroke:none;"/>
+        <text x="948" y="460" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">critic · queued</text>
+
+        <!-- push arrow -->
+        <path d="M800 150 L890 150" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <polygon points="900,150 888,144 888,156" fill="#22D3EE"/>
+        <text x="848" y="138" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-accent-ink">PUSH</text>
+
+        <!-- rebase arrow -->
+        <path d="M370 230 L460 230" style="stroke:var(--glass-ink-3)" stroke-width="2" stroke-dasharray="4 4" fill="none"/>
+        <polygon points="470,230 458,224 458,236" style="fill:var(--glass-ink-3)"/>
+        <text x="418" y="218" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">REBASE</text>
+
+        <text x="40" y="548" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">THREE REMOTES · EVERY COMMIT CROSSES A GATE BEFORE IT CROSSES A REMOTE</text>
+      </svg>
+      <figcaption>
+        <span class="lang-en">Three remotes, one discipline: work happens in the strong-stroked middle, and every commit crosses the gates before it crosses a remote.</span>
+        <span class="lang-zh">三个远端，一条纪律：工作发生在强描边的中间仓，每个提交先过闸，再过远端。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Pull quote — bare on the aurora field -->
+<section class="glass-section">
+  <div class="glass-container" style="text-align:center; max-width:920px;">
+    <blockquote class="glass-quote">
+      <span class="lang-en">Every bug we hit becomes a gate, so the same bug never ships twice.</span>
+      <span class="lang-zh">踩过的每个坑都变成一道闸——同一个坑不会发布第二次。</span>
+    </blockquote>
+    <span class="glass-quote-cite">
+      <span class="lang-en">— the repo's working rule · sky-skills harness</span>
+      <span class="lang-zh">—— 仓库的工作守则 · sky-skills 审查体系</span>
+    </span>
+  </div>
+</section>
+
+<!-- Gates band -->
+<section class="glass-section glass-section--alt" id="gates">
+  <div class="glass-container glass-container--wide">
+    <div class="craft-grid">
+      <div>
+        <span class="glass-eyebrow">05 · <span class="lang-en">Generator / evaluator</span><span class="lang-zh">生成器 / 评审器</span></span>
+        <h2>
+          <span class="lang-en">Skills generate.<br>Gates judge.</span>
+          <span class="lang-zh">技能负责生成。<br>闸负责评判。</span>
+        </h2>
+        <p class="glass-lead glass-lead--compact" style="max-width:440px; margin-top:var(--space-5);">
+          <span class="lang-en">The five generators carry strong opinions, so the judges are deliberately mechanical. Three scripts and one critic stand between any page and the public directory — and this very page just went through all four.</span>
+          <span class="lang-zh">五个生成器都带着明确的审美立场，所以评审刻意做成机械的。任何页面和公开目录之间隔着三个脚本和一位评审——你正在看的这页也刚刚过完这四道。</span>
+        </p>
+      </div>
+      <div>
+        <div class="craft-rule">
+          <span class="num">G·1</span>
+          <div>
+            <h3><span class="lang-en">verify.py — structure, statically</span><span class="lang-zh">verify.py——静态查结构</span></h3>
+            <p>
+              <span class="lang-en">Placeholders, undefined classes, bilingual coverage, full-width punctuation — caught before a browser ever opens.</span>
+              <span class="lang-zh">占位符、未定义的 class、双语覆盖、全角标点——浏览器还没打开就先拦下。</span>
+            </p>
+          </div>
+        </div>
+        <div class="craft-rule">
+          <span class="num">G·2</span>
+          <div>
+            <h3><span class="lang-en">visual-audit.mjs — render, then measure</span><span class="lang-zh">visual-audit.mjs——渲染后逐项测量</span></h3>
+            <p>
+              <span class="lang-en">Playwright renders the page and measures it: WCAG contrast, diagram sizing, hollow cards, brand presence. Glass pages run twice — dark and light.</span>
+              <span class="lang-zh">Playwright 渲染页面后逐项测量：WCAG 对比度、图示尺寸、空心卡、品牌占比。glass 页面要跑两遍——dark 和 light。</span>
+            </p>
+          </div>
+        </div>
+        <div class="craft-rule">
+          <span class="num">G·3</span>
+          <div>
+            <h3><span class="lang-en">screenshot.mjs — a human looks</span><span class="lang-zh">screenshot.mjs——人眼把关</span></h3>
+            <p>
+              <span class="lang-en">Full-page screenshots in both themes, reviewed before any commit. Taste the scripts can't measure, a person still can.</span>
+              <span class="lang-zh">全页截图、双主题，提交前必看。脚本量不出来的品位，人看得出来。</span>
+            </p>
+          </div>
+        </div>
+        <div class="craft-rule">
+          <span class="num">G·4</span>
+          <div>
+            <h3><span class="lang-en">critic — taste, scored</span><span class="lang-zh">critic——给品位打分</span></h3>
+            <p>
+              <span class="lang-en">An LLM critic scores composition, brand, copy and craft. Below 88, the issues feed the next round instead of the repo.</span>
+              <span class="lang-zh">LLM 评审给构图、品牌、文案、工艺打分。低于 88 分，意见进下一轮，页面进不了仓库。</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Install -->
+<section class="glass-section" id="install">
+  <div class="glass-container">
+    <div class="glass-panel cta-panel" data-reveal>
+      <span class="glass-eyebrow">06 · <span class="lang-en">Install</span><span class="lang-zh">安装</span></span>
+      <h2>
+        <span class="lang-en">One folder. Zero build.</span>
+        <span class="lang-zh">一个文件夹，零构建。</span>
+      </h2>
+      <hr class="glass-hairline">
+      <p class="glass-lead" style="max-width:560px; margin-inline:auto;">
+        <span class="lang-en">Clone once, symlink anywhere. Claude activates a skill only when your prompt hits its TRIGGER words — installing all fourteen costs nothing until you ask.</span>
+        <span class="lang-zh">克隆一次，到处符号链接。只有提示词命中 TRIGGER 词，Claude 才会激活对应技能——把十四个全装上，不开口就没有任何成本。</span>
+      </p>
+      <pre class="glass-code"><code># clone once, symlink anywhere
+git clone https://github.com/TbusOS/sky-skills.git
+ln -s "$(pwd)/sky-skills/skills/glass-design" \
+  your-project/.claude/skills/glass-design</code></pre>
+      <div style="display:flex; gap:var(--space-4); justify-content:center; flex-wrap:wrap; margin-top:var(--space-6);">
+        <a class="glass-button" href="https://github.com/TbusOS/sky-skills"><span class="lang-en">Clone the repo</span><span class="lang-zh">克隆仓库</span></a>
+        <a class="glass-button glass-button--ghost" href="diagrams.html"><span class="lang-en">See the templates</span><span class="lang-zh">看图示模板</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Sibling demos -->
+<section class="glass-section glass-section--alt" id="aesthetics">
+  <div class="glass-container" style="text-align:center; max-width:840px;">
+    <span class="glass-eyebrow">07 · <span class="lang-en">Five voices</span><span class="lang-zh">五种声音</span></span>
+    <h2>
+      <span class="lang-en">Same story, five aesthetics.</span>
+      <span class="lang-zh">同一个故事，五种美学。</span>
+    </h2>
+    <p class="glass-lead" style="max-width:620px; margin:var(--space-5) auto 0;">
+      <span class="lang-en">This page is the same story told by the apple, anthropic, ember and sage demos — same repo, same three diagrams, a fifth voice.</span>
+      <span class="lang-zh">这页和 apple、anthropic、ember、sage 四个 demo 讲的是同一个故事——同一个仓库、同一组三张图，只是换了第五种声音。</span>
+    </p>
+    <div class="xlink-row">
+      <a class="glass-button glass-button--ghost" href="../apple-design/index.html"><span class="lang-en">See apple-design</span><span class="lang-zh">看 apple-design</span></a>
+      <a class="glass-button glass-button--ghost" href="../anthropic-design/index.html"><span class="lang-en">See anthropic-design</span><span class="lang-zh">看 anthropic-design</span></a>
+      <a class="glass-button glass-button--ghost" href="../ember-design/index.html"><span class="lang-en">See ember-design</span><span class="lang-zh">看 ember-design</span></a>
+      <a class="glass-button glass-button--ghost" href="../sage-design/index.html"><span class="lang-en">See sage-design</span><span class="lang-zh">看 sage-design</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="glass-footer">
+  <div class="glass-footer-grid">
+    <div class="glass-footer-group">
+      <h5><span class="lang-en">Demos</span><span class="lang-zh">演示页</span></h5>
+      <a href="../apple-design/index.html">apple-design</a>
+      <a href="../anthropic-design/index.html">anthropic-design</a>
+      <a href="../ember-design/index.html">ember-design</a>
+      <a href="../sage-design/index.html">sage-design</a>
+      <a href="#">glass-design</a>
+    </div>
+    <div class="glass-footer-group">
+      <h5><span class="lang-en">Glass system</span><span class="lang-zh">玻璃体系</span></h5>
+      <a href="diagrams.html"><span class="lang-en">Diagram templates</span><span class="lang-zh">图示模板</span></a>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/glass-design/references"><span class="lang-en">References</span><span class="lang-zh">工艺文档</span></a>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/glass-design/references/canonical"><span class="lang-en">Canonical pages</span><span class="lang-zh">范本页面</span></a>
+    </div>
+    <div class="glass-footer-group">
+      <h5><span class="lang-en">Content skills</span><span class="lang-zh">内容技能</span></h5>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/linux-kernel-dev">linux-kernel-dev</a>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/doc-to-markdown">doc-to-markdown</a>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/md-to-pdf">md-to-pdf</a>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/wechat-video-publisher">wechat-video-publisher</a>
+    </div>
+    <div class="glass-footer-group">
+      <h5><span class="lang-en">Harness</span><span class="lang-zh">审查体系</span></h5>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/design-review">design-review</a>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/design-planner">design-planner</a>
+      <a href="../gated-dual-clone/index.html">gated-dual-clone</a>
+    </div>
+    <div class="glass-footer-group">
+      <h5><span class="lang-en">About</span><span class="lang-zh">关于</span></h5>
+      <a href="https://github.com/TbusOS">GitHub</a>
+      <a href="https://github.com/TbusOS/sky-skills/blob/main/LICENSE"><span class="lang-en">MIT License</span><span class="lang-zh">MIT 许可证</span></a>
+      <a href="https://github.com/TbusOS/sky-skills/issues">Issues</a>
+    </div>
+  </div>
+  <div class="glass-footer-legal">
+    <span><span class="lang-en">© 2026 Sky · MIT licensed.</span><span class="lang-zh">© 2026 Sky · MIT 许可。</span></span>
+    <span><span class="lang-en">Rendered with glass-design — the fifth voice</span><span class="lang-zh">由 glass-design 渲染——第五种声音</span></span>
+  </div>
+</footer>
+
+<script src="../../skills/glass-design/assets/glass.js"></script>
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = null;
+  try { queryLang = new URLSearchParams(location.search).get('lang'); } catch (e) {}
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

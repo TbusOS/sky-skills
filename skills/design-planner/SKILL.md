@@ -1,6 +1,6 @@
 ---
 name: design-planner
-description: "Use when the user gives a vague one-line brief for a web page ('做个 X 的页面' / 'we need a dashboard for Y') and a design skill (anthropic/apple/ember/sage) will generate it. Expands the brief into a concrete plan: infer page-type + audience, pull the sprint contract via bin/design-review --plan (unknown page-types fall back to the nearest canonical, stamped LOW-CONFIDENCE), then write a section list with required content per section plus the hard numbers (diagram density, bilingual, brand presence). DO NOT TRIGGER when the user already provides a section-level spec, or for non-page work (components, refactors)."
+description: "Use when the user gives a vague one-line brief for a web page ('做个 X 的页面' / 'we need a dashboard for Y') and a design skill (anthropic/apple/ember/sage/glass) will generate it. Expands the brief into a concrete plan: infer page-type + audience, pull the sprint contract via bin/design-review --plan (unknown page-types fall back to the nearest canonical, stamped LOW-CONFIDENCE), then write a section list with required content per section plus the hard numbers (diagram density, bilingual, brand presence). DO NOT TRIGGER when the user already provides a section-level spec, or for non-page work (components, refactors)."
 last-verified: 2026-06-11
 ---
 
@@ -28,7 +28,7 @@ last-verified: 2026-06-11
 ### ② 拿 sprint contract
 
 ```bash
-bin/design-review --plan --skill=<anthropic|apple|ember|sage> --page=<type> > /tmp/contract.md
+bin/design-review --plan --skill=<anthropic|apple|ember|sage|glass> --page=<type> > /tmp/contract.md
 ```
 
 - 已知类型:contract 含该 canonical 的结构 MUST,照常执行。

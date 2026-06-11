@@ -38,9 +38,12 @@ import { PNG } from 'pngjs';
 
 const args = process.argv.slice(2);
 const ignoreIntentional = args.includes('--ignore-intentional');
+// --theme=dark|light — flips html[data-theme] after load. Glass pages are
+// dual-theme; the harness audits dark (canonical) and light separately.
+const themeArg = (args.find((a) => a.startsWith('--theme=')) || '').split('=')[1] || null;
 const target = args.filter((a) => !a.startsWith('--'))[0];
 if (!target) {
-  console.error('usage: node visual-audit.mjs [--ignore-intentional] <html-path>');
+  console.error('usage: node visual-audit.mjs [--ignore-intentional] [--theme=dark|light] <html-path>');
   process.exit(2);
 }
 
@@ -87,8 +90,9 @@ const SKILL_SIGNATURES = {
       { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
       { rgb: [151, 176, 119], note: 'sage brand green #97B077' },
       { rgb: [196, 148, 100], note: 'ember gold #c49464' },
+      { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
     ],
-    forbiddenFonts: ['Fraunces', 'Instrument Serif'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Space Grotesk'],
   },
   apple: {
     name: 'apple blue',
@@ -98,8 +102,9 @@ const SKILL_SIGNATURES = {
       { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
       { rgb: [196, 148, 100], note: 'ember gold #c49464' },
       { rgb: [151, 176, 119], note: 'sage green #97B077' },
+      { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
     ],
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk'],
   },
   ember: {
     name: 'ember gold',
@@ -108,8 +113,9 @@ const SKILL_SIGNATURES = {
     forbiddenColors: [
       { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
       { rgb: [151, 176, 119], note: 'sage green #97B077' },
+      { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
     ],
-    forbiddenFonts: ['Instrument Serif', 'Poppins', 'Lora'],
+    forbiddenFonts: ['Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk'],
   },
   sage: {
     name: 'sage green',
@@ -118,8 +124,24 @@ const SKILL_SIGNATURES = {
     forbiddenColors: [
       { rgb: [196, 148, 100], note: 'ember gold #c49464' },
       { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
+      { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
     ],
-    forbiddenFonts: ['Fraunces', 'Poppins', 'Lora'],
+    forbiddenFonts: ['Fraunces', 'Poppins', 'Lora', 'Space Grotesk'],
+  },
+  glass: {
+    name: 'glass aurora cyan',
+    accents: [[34, 211, 238]],         // #22D3EE — only SOLID foreground cyan
+                                       // registers; aurora blobs blend toward the
+                                       // navy canvas and never match at TOL 55.
+    threshold: 0.002,                  // hero carries ≥3 solid cyan moves (kicker,
+                                       // nav CTA, hairline); calibrated 2026-06-11
+    forbiddenColors: [
+      { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
+      { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
+      { rgb: [196, 148, 100], note: 'ember gold #c49464' },
+      { rgb: [151, 176, 119], note: 'sage green #97B077' },
+    ],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora'],
   },
 };
 
@@ -159,9 +181,22 @@ if (/^file:\/\//.test(target)) {
   url = `http://localhost:${PORT}/${target.replace(/^\/+/, '')}`;
 }
 const browser = await chromium.launch();
-const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+// reducedMotion:'reduce' — deterministic rendering. All four light skills'
+// CSS already collapses transitions under this media query; glass.js reads
+// it and renders every animation's terminal state (reveal visible, count-up
+// final, paths drawn). Without it, IntersectionObserver reveal elements
+// below the fold would still be opacity:0 when fullPage screenshots are
+// taken (captureBeyondViewport never scrolls, so IO never fires).
+const page = await (await browser.newContext({
+  viewport: { width: 1440, height: 900 },
+  reducedMotion: 'reduce',
+})).newPage();
 await page.goto(url, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
+if (themeArg) {
+  await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), themeArg);
+  await page.waitForTimeout(200);
+}
 
 // Read the HTML so we can detect the skill, then pass cross-skill-smell
 // data into page.evaluate. The smell check needs to know this skill's
@@ -221,15 +256,35 @@ const findings = await page.evaluate((arg) => {
     const [hi, lo] = L1 > L2 ? [L1, L2] : [L2, L1];
     return (hi + 0.05) / (lo + 0.05);
   };
-  // Walk up ancestors to find first non-transparent background
+  // Walk up ancestors compositing semi-transparent backgrounds until an
+  // opaque layer (or the white default). The old version returned the FIRST
+  // layer with a>0.05 as-is, which mis-read frosted-glass panels: a
+  // rgba(255,255,255,0.06) glass card on a #0B1020 navy canvas was treated
+  // as a WHITE background, so white text on it scored contrast 1.0. Proper
+  // alpha compositing fixes glass and only shifts legacy translucent navs
+  // (e.g. sage's 0.88 band) by a few RGB points.
   const effectiveBg = (el) => {
+    const layers = [];
     let node = el;
+    let base = null;
     while (node && node !== document.body.parentElement) {
       const c = parseRgb(getComputedStyle(node).backgroundColor);
-      if (c && c.a > 0.05) return c;
+      if (c && c.a > 0.05) {
+        if (c.a >= 0.95) { base = c; break; }
+        layers.push(c);
+      }
       node = node.parentElement;
     }
-    return { r: 255, g: 255, b: 255, a: 1 };
+    let bg = base ? { r: base.r, g: base.g, b: base.b } : { r: 255, g: 255, b: 255 };
+    for (let i = layers.length - 1; i >= 0; i--) {
+      const l = layers[i];
+      bg = {
+        r: l.r * l.a + bg.r * (1 - l.a),
+        g: l.g * l.a + bg.g * (1 - l.a),
+        b: l.b * l.a + bg.b * (1 - l.a),
+      };
+    }
+    return { r: Math.round(bg.r), g: Math.round(bg.g), b: Math.round(bg.b), a: 1 };
   };
 
   // ---------- 1) Button / CTA contrast audit ----------
@@ -239,6 +294,7 @@ const findings = await page.evaluate((arg) => {
     '.anth-button', '.anth-badge',
     '.ember-button', '.ember-badge', '.ember-nav-brand',
     '.sage-button', '.sage-badge',
+    '.glass-button', '.glass-badge',
     'a[class*="button"]', 'a[class*="-cta"]'
   ];
   const seen = new Set();
@@ -520,7 +576,10 @@ const findings = await page.evaluate((arg) => {
   //               desaturated to count. 0 hue = a gray wireframe, not sage.
   //   apple     — EXEMPT by design: achromatic grayscale + single blue focus
   //               is the identity, so an all-gray diagram can be legitimate.
-  if (cs && ['anthropic', 'ember', 'sage'].includes(cs.skill)) {
+  //   glass     — dark-glass diagram language is white-alpha node fills +
+  //               white-alpha strokes (all s=0); the cyan glow nodes ARE the
+  //               semantic layer. 0 hue = the cyan focus is missing.
+  if (cs && ['anthropic', 'ember', 'sage', 'glass'].includes(cs.skill)) {
     document.querySelectorAll('figure svg').forEach((svg) => {
       const rect = svg.getBoundingClientRect();
       if (rect.width < 300) return;
@@ -1165,8 +1224,133 @@ const findings = await page.evaluate((arg) => {
     }
   }
 
+  // ---------- 16) Glass-only material + motion-determinism checks ----------
+  // glass-design is the one skill with heavy JS motion and translucent
+  // panels, so it carries four extra gates:
+  //  (a) glass-reveal-stuck   — this context runs prefers-reduced-motion:
+  //      reduce, so every [data-reveal] MUST already sit at its terminal
+  //      (visible) state. opacity<0.99 here means the freeze contract is
+  //      broken and screenshots/checks below the fold are lies.
+  //  (b) glass-fake-glass     — a "glass" page whose panels have no real
+  //      backdrop-filter (or an opaque background pretending to be glass).
+  //  (c) glass-countup-mismatch — [data-count-to] markup text must equal the
+  //      declared target; under freeze the markup IS the final render.
+  //  (d) glass-cta-obstructed — aurora/decoration layers must never eat
+  //      clicks; elementFromPoint at each visible CTA centre must resolve to
+  //      the CTA itself (missing pointer-events:none is the usual culprit).
+  if (cs && cs.skill === 'glass') {
+    document.querySelectorAll('[data-reveal]').forEach((el) => {
+      const st = getComputedStyle(el);
+      if (st.display === 'none' || st.visibility === 'hidden') return;
+      if (parseFloat(st.opacity) < 0.99) {
+        issues.push({
+          kind: 'glass-reveal-stuck',
+          severity: 'error',
+          text: (el.textContent || '').trim().slice(0, 40),
+          opacity: st.opacity,
+        });
+      }
+    });
+
+    const panels = [...document.querySelectorAll('.glass-panel, .glass-card, .glass-overlay, .glass-nav')];
+    if (panels.length === 0) {
+      issues.push({ kind: 'glass-no-material', severity: 'warn' });
+    } else {
+      const realGlass = panels.some((el) => {
+        const st = getComputedStyle(el);
+        const bf = st.backdropFilter || st.webkitBackdropFilter || 'none';
+        const bg = parseRgb(st.backgroundColor);
+        return bf !== 'none' && (!bg || bg.a < 0.9);
+      });
+      if (!realGlass) {
+        issues.push({ kind: 'glass-fake-glass', severity: 'error', panelCount: panels.length });
+      }
+    }
+
+    document.querySelectorAll('[data-count-to]').forEach((el) => {
+      const want = parseFloat(el.getAttribute('data-count-to'));
+      const got = parseFloat((el.textContent || '').replace(/[^0-9.\-]/g, ''));
+      if (isFinite(want) && (!isFinite(got) || Math.abs(got - want) > 0.001)) {
+        issues.push({
+          kind: 'glass-countup-mismatch',
+          severity: 'warn',
+          markup: (el.textContent || '').trim().slice(0, 24),
+          target: el.getAttribute('data-count-to'),
+        });
+      }
+    });
+
+    // Cyan TEXT in the light theme — the contrast gate only reads HTML text,
+    // so a literal fill="#22D3EE" on SVG <text> slips through and renders at
+    // ~1.7:1 on light panels. The sanctioned path is .glass-svg-accent-ink
+    // (var(--glass-accent-ink) flips to #0E7490 in light), so under
+    // --theme=light any computed cyan text fill is by definition a literal.
+    // Caught by the gallery canonical's critic pass 2026-06-11 (known-bugs §6).
+    if (arg.theme === 'light') {
+      document.querySelectorAll('svg text').forEach((t) => {
+        const f = parseRgb(getComputedStyle(t).fill || '');
+        if (!f) return;
+        const d = Math.sqrt((f.r - 34) ** 2 + (f.g - 211) ** 2 + (f.b - 238) ** 2);
+        if (d < 40) {
+          issues.push({
+            kind: 'glass-cyan-svg-text',
+            severity: 'error',
+            text: (t.textContent || '').trim().slice(0, 40),
+            fill: `rgb(${f.r},${f.g},${f.b})`,
+          });
+        }
+      });
+    } else {
+      // Dark run (the default): aurora hues as TEXT die here instead.
+      // Literal indigo #4F46E5 is ~2.7:1 on dark panels; violet/pink as text
+      // are banned outright (dos-and-donts). The sanctioned indigo text path
+      // .glass-svg-ref-ink computes #818CF8 in dark — distance 88 from the
+      // indigo anchor and 38 from violet, so the radius is 30, not 40.
+      const AURORA_TEXT = [
+        { rgb: [79, 70, 229], name: 'indigo #4F46E5 (use .glass-svg-ref-ink)' },
+        { rgb: [167, 139, 250], name: 'violet #A78BFA (never text)' },
+        { rgb: [244, 114, 182], name: 'pink #F472B6 (never text)' },
+      ];
+      document.querySelectorAll('svg text').forEach((t) => {
+        const f = parseRgb(getComputedStyle(t).fill || '');
+        if (!f) return;
+        for (const a of AURORA_TEXT) {
+          const d = Math.sqrt((f.r - a.rgb[0]) ** 2 + (f.g - a.rgb[1]) ** 2 + (f.b - a.rgb[2]) ** 2);
+          if (d < 30) {
+            issues.push({
+              kind: 'glass-aurora-text',
+              severity: 'error',
+              text: (t.textContent || '').trim().slice(0, 40),
+              fill: `rgb(${f.r},${f.g},${f.b})`,
+              hue: a.name,
+            });
+            break;
+          }
+        }
+      });
+    }
+
+    document.querySelectorAll('.glass-button').forEach((el) => {
+      const st = getComputedStyle(el);
+      if (st.display === 'none' || st.visibility === 'hidden') return;
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      if (cx < 0 || cy < 0 || cx > window.innerWidth || cy > window.innerHeight) return;
+      const hit = document.elementFromPoint(cx, cy);
+      if (hit && hit !== el && !el.contains(hit) && !hit.contains(el)) {
+        issues.push({
+          kind: 'glass-cta-obstructed',
+          severity: 'error',
+          text: (el.textContent || '').trim().slice(0, 30),
+          coveredBy: hit.tagName.toLowerCase() + (hit.className && typeof hit.className === 'string' ? '.' + hit.className.split(' ').slice(0, 2).join('.') : ''),
+        });
+      }
+    });
+  }
+
   return issues;
-}, { crossSkill: crossSkillData, focusInExternalCss, remoteCssPresent });
+}, { crossSkill: crossSkillData, focusInExternalCss, remoteCssPresent, theme: themeArg });
 
 // ---------- 13) Brand-presence (pixel count in top hero region) ----------
 // Root issue caught 2026-04-21: sage-design nav was a warm yellow (ember-
@@ -1174,7 +1358,9 @@ const findings = await page.evaluate((arg) => {
 // the skill's signature color(s) are not visibly present in the top 500px
 // of the 1440-wide viewport, the page fails to tell the reader "this is
 // a <skill> page at first glance".
-if (skillId) {
+// Light theme is skipped: dark is the brand-canonical state for glass, and a
+// single threshold can't fit both modes' coverage profiles.
+if (skillId && themeArg !== 'light') {
   const sig = SKILL_SIGNATURES[skillId];
   const buf = await page.screenshot({
     clip: { x: 0, y: 0, width: 1440, height: 500 },
@@ -1391,6 +1577,34 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'perf-cls') {
     console.log(
       `  [${i.severity}] CLS ${i.cls} exceeds 0.1 (local render, indicative only) — layout shifts after load; reserve space for late-loading elements (explicit dimensions, font fallback metrics)`
+    );
+  } else if (i.kind === 'glass-reveal-stuck') {
+    console.log(
+      `  [${i.severity}] glass-reveal-stuck: [data-reveal] element still at opacity ${i.opacity} under prefers-reduced-motion ("${i.text}") — the freeze contract is broken; reveal initial state must be gated behind html.js-enabled:not([data-motion="off"]) (see glass-design motion.md)`
+    );
+  } else if (i.kind === 'glass-no-material') {
+    console.log(
+      `  [${i.severity}] glass-no-material: page detected as glass but has no .glass-panel/.glass-card/.glass-overlay/.glass-nav — either it isn't a glass page or the material system was bypassed`
+    );
+  } else if (i.kind === 'glass-fake-glass') {
+    console.log(
+      `  [${i.severity}] glass-fake-glass: ${i.panelCount} glass panel(s) but none has a live backdrop-filter with a translucent background — opaque panels with a blur declaration are decoration, not glass (glass-material.md tier table)`
+    );
+  } else if (i.kind === 'glass-countup-mismatch') {
+    console.log(
+      `  [${i.severity}] glass-countup-mismatch: markup text "${i.markup}" ≠ data-count-to="${i.target}" — the final value must live in the markup; JS only animates toward it (motion.md count-up contract)`
+    );
+  } else if (i.kind === 'glass-cta-obstructed') {
+    console.log(
+      `  [${i.severity}] glass-cta-obstructed: CTA "${i.text}" centre is covered by <${i.coveredBy}> — a decoration layer is eating clicks; add pointer-events:none to aurora/sheen layers`
+    );
+  } else if (i.kind === 'glass-cyan-svg-text') {
+    console.log(
+      `  [${i.severity}] glass-cyan-svg-text: SVG text "${i.text}" computes to ${i.fill} under the LIGHT theme (~1.7:1 on light panels) — a literal cyan fill; use class="glass-svg-accent-ink" so the ink flips to #0E7490 in light (known-bugs 6.4)`
+    );
+  } else if (i.kind === 'glass-aurora-text') {
+    console.log(
+      `  [${i.severity}] glass-aurora-text: SVG text "${i.text}" computes to ${i.fill} (${i.hue}) on the dark theme — aurora hues are geometry/blob colors, not ink; route indigo labels through .glass-svg-ref-ink, never use violet/pink as text (known-bugs 6.4)`
     );
   }
 }

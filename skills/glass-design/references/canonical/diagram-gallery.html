@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prism Systems Atlas — every diagram of how Prism works</title>
+<meta name="description" content="The Prism systems atlas: architecture, ingest flow, query sequence, alert lifecycle, deploy timeline and wire format — drawn in dark glass.">
+<meta property="og:title" content="Prism Systems Atlas — engineering diagrams on liquid glass">
+<meta property="og:description" content="Seven diagrams of Prism's internals: architecture, flows, sequences, state machines and wire formats, all in the dark-glass diagram language.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/glass.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  .hero-copy { max-width: 760px; }
+
+  .atlas-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
+    margin-top: var(--space-6);
+  }
+  .atlas-card svg { display: block; width: 100%; height: auto; }
+  .atlas-kicker {
+    display: block;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--glass-ink-3); margin-bottom: var(--space-3);
+  }
+  html[data-lang="zh"] .atlas-kicker { letter-spacing: 0.04em; }
+
+  .featured-panel { margin-top: var(--space-6); }
+  .featured-panel svg { display: block; width: 100%; height: auto; }
+
+  /* Craft band — narrative left, rules right */
+  .craft-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: var(--space-7); align-items: start; }
+  .craft-rule { display: grid; grid-template-columns: 44px 1fr; gap: var(--space-4); padding: var(--space-4) 0; border-bottom: 1px solid var(--glass-line); }
+  .craft-rule:last-child { border-bottom: none; }
+  .craft-rule .num {
+    font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+    color: var(--glass-accent-ink); padding-top: 3px;
+  }
+  .craft-rule h3 { font-size: 17px; margin-bottom: var(--space-1); }
+  .craft-rule p { font-size: 14px; color: var(--glass-ink-2); margin: 0; }
+
+  .sect-head { max-width: 760px; }
+</style>
+</head>
+<body>
+
+<div class="glass-aurora" aria-hidden="true">
+  <div class="glass-blob glass-blob--cyan" style="width:720px; height:720px; top:-260px; left:-180px;"></div>
+  <div class="glass-blob glass-blob--violet" style="width:560px; height:560px; top:40px; right:-220px;"></div>
+  <div class="glass-blob glass-blob--indigo" style="width:520px; height:520px; bottom:-180px; left:-200px;"></div>
+</div>
+
+<nav class="glass-nav"><div class="glass-nav-inner">
+  <a href="landing.html" class="glass-nav-brand">Prism</a>
+  <div class="glass-nav-links">
+    <a href="landing.html"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="#atlas"><span class="lang-en">Atlas</span><span class="lang-zh">系统图集</span></a>
+    <a href="dashboard.html"><span class="lang-en">Console</span><span class="lang-zh">控制台</span></a>
+    <a href="data-report.html"><span class="lang-en">Reports</span><span class="lang-zh">报告</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="glass-lang-toggle lang-toggle" aria-label="Switch language">中 / EN</button>
+    <button type="button" class="glass-theme-toggle" aria-label="Switch theme">light</button>
+    <a class="glass-button" href="landing.html#start"><span class="lang-en">Start streaming</span><span class="lang-zh">开始接入</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="glass-hero">
+  <div class="glass-container glass-container--wide">
+    <div class="hero-copy">
+      <span class="glass-eyebrow">01 · <span class="lang-en">Systems atlas</span><span class="lang-zh">系统图集</span></span>
+      <h1>
+        <span class="lang-en">How Prism works,<br>drawn in glass.</span>
+        <span class="lang-zh">Prism 如何工作，<br>画在玻璃上。</span>
+      </h1>
+      <hr class="glass-hairline">
+      <p class="glass-lead" style="max-width:640px;">
+        <span class="lang-en">Seven diagrams cover the whole platform — from the wire format of a single event to the six-region query fan-out. Same glass, same light, same language as the product itself.</span>
+        <span class="lang-zh">七张图覆盖整个平台——从单个事件的线上格式，到六区域的查询扇出。和产品本体同一块玻璃、同一道光、同一种语言。</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Featured: platform architecture -->
+<section class="glass-section" id="atlas">
+  <div class="glass-container glass-container--wide">
+    <div class="sect-head">
+      <span class="glass-eyebrow">02 · <span class="lang-en">The whole platform</span><span class="lang-zh">平台全景</span></span>
+      <h2>
+        <span class="lang-en">One pane, four tiers.</span>
+        <span class="lang-zh">一块玻璃，四层结构。</span>
+      </h2>
+    </div>
+    <figure class="glass-panel featured-panel" data-reveal>
+      <svg role="img" aria-label="Prism platform architecture: edge agents feed regional ingest, a two-tier index, the query engine, and streaming clients" viewBox="0 0 1240 440" data-draw>
+        <g font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="2" class="glass-svg-ink-3">
+          <text x="24" y="36">01 · EDGE</text>
+          <text x="24" y="142">02 · INGEST</text>
+          <text x="24" y="248">03 · INDEX</text>
+          <text x="24" y="354">04 · SERVE</text>
+        </g>
+
+        <!-- edge tier -->
+        <rect x="150" y="20" width="200" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="390" y="20" width="200" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="630" y="20" width="200" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="870" y="20" width="200" height="64" rx="14" class="glass-svg-node"/>
+        <g font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">
+          <text x="170" y="48">SDK · 14 langs</text>
+          <text x="410" y="48">OTel collector</text>
+          <text x="650" y="48">Edge batcher</text>
+          <text x="890" y="48">Replay uploader</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">
+          <text x="170" y="68">apps and services</text>
+          <text x="410" y="68">drop-in pipeline</text>
+          <text x="650" y="68">4ms coalescing</text>
+          <text x="890" y="68">backfill history</text>
+        </g>
+
+        <!-- edge → ingest -->
+        <path d="M250 84 L250 126" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M490 84 L490 126" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M730 84 L730 126" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M970 84 L970 126" stroke="#22D3EE" stroke-width="2" fill="none"/>
+
+        <!-- ingest tier -->
+        <rect x="150" y="126" width="920" height="64" rx="14" class="glass-svg-node"/>
+        <text x="178" y="153" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">Regional ingest gateways · 6 regions</text>
+        <text x="178" y="173" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">2.4M events/s sustained · at-least-once into the log · backpressure to the edge</text>
+        <circle cx="1010" cy="158" r="4.5" fill="#22D3EE"/>
+        <text x="1024" y="162" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-accent-ink">LIVE</text>
+
+        <!-- ingest → index -->
+        <path d="M400 190 L400 232" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M820 190 L820 232" stroke="#22D3EE" stroke-width="2" fill="none"/>
+
+        <!-- index tier: hot + cold -->
+        <rect x="150" y="232" width="440" height="64" rx="14" class="glass-svg-node"/>
+        <text x="178" y="259" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">Hot tier — in memory</text>
+        <text x="178" y="279" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">last 48h · columnar · sub-ms scans</text>
+        <rect x="630" y="232" width="440" height="64" rx="14" class="glass-svg-node"/>
+        <text x="658" y="259" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">Cold tier — object storage</text>
+        <text x="658" y="279" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">410TB · 12× zstd · lazily promoted</text>
+
+        <!-- index → serve -->
+        <path d="M400 296 L400 338" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M820 296 L820 338" stroke="#22D3EE" stroke-width="2" fill="none"/>
+
+        <!-- serve tier -->
+        <rect x="150" y="338" width="560" height="74" rx="14" class="glass-svg-node-strong"/>
+        <text x="178" y="368" font-family="'Inter', sans-serif" font-size="15" font-weight="600" class="glass-svg-ink">Query engine — vectorized, scatter-gather</text>
+        <text x="178" y="390" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-accent-ink">38MS P99 OVER A TRILLION ROWS</text>
+        <rect x="750" y="338" width="320" height="74" rx="14" class="glass-svg-node"/>
+        <text x="778" y="368" font-family="'Inter', sans-serif" font-size="15" font-weight="600" class="glass-svg-ink">Streaming render</text>
+        <text x="778" y="390" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">diffs over the wire · 60fps charts</text>
+        <path d="M710 375 L750 375" stroke="#22D3EE" stroke-width="2" fill="none"/>
+      </svg>
+      <figcaption>
+        <span class="lang-en">Everything funnels toward the cyan-stroked query engine — the other eleven boxes exist so that one box answers in 38ms.</span>
+        <span class="lang-zh">一切都汇向 cyan 描边的查询引擎——其余十一个框存在的意义，是让那一个框能在 38 毫秒内作答。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Gallery: six diagrams -->
+<section class="glass-section glass-section--alt">
+  <div class="glass-container glass-container--wide">
+    <div class="sect-head">
+      <span class="glass-eyebrow">03 · <span class="lang-en">The atlas</span><span class="lang-zh">图集</span></span>
+      <h2>
+        <span class="lang-en">Six views, one language.</span>
+        <span class="lang-zh">六个视角，一种语言。</span>
+      </h2>
+    </div>
+
+    <div class="atlas-grid">
+
+      <figure class="glass-card atlas-card" data-reveal>
+        <span class="atlas-kicker">flow · <span class="lang-en">ingest path</span><span class="lang-zh">接入路径</span></span>
+        <svg role="img" aria-label="Ingest flow: SDK batches events through the edge into the regional log" viewBox="0 0 560 240">
+          <rect x="16" y="92" width="140" height="56" rx="12" class="glass-svg-node"/>
+          <rect x="212" y="92" width="140" height="56" rx="12" class="glass-svg-node"/>
+          <rect x="408" y="92" width="136" height="56" rx="12" class="glass-svg-node-strong"/>
+          <path d="M156 120 L212 120" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <path d="M352 120 L408 120" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <circle cx="184" cy="120" r="4" fill="#22D3EE"/>
+          <circle cx="380" cy="120" r="4" fill="#22D3EE"/>
+          <g font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">
+            <text x="36" y="116">App SDK</text>
+            <text x="232" y="116">Edge batch</text>
+            <text x="428" y="116">Region log</text>
+          </g>
+          <g font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">
+            <text x="36" y="136">emit + tag</text>
+            <text x="232" y="136">4ms window</text>
+            <text x="428" y="136">at-least-once</text>
+          </g>
+          <text x="16" y="40" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">EVENT LEAVES THE PROCESS IN UNDER 1MS</text>
+          <text x="16" y="210" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">BACKPRESSURE FLOWS RIGHT TO LEFT</text>
+        </svg>
+        <figcaption>
+          <span class="lang-en">The SDK never blocks the host app — batching happens at the edge, not in your process.</span>
+          <span class="lang-zh">SDK 永不阻塞宿主应用——批处理发生在边缘，不在你的进程里。</span>
+        </figcaption>
+      </figure>
+
+      <figure class="glass-card atlas-card" data-reveal>
+        <span class="atlas-kicker">sequence · <span class="lang-en">query fan-out</span><span class="lang-zh">查询扇出</span></span>
+        <svg role="img" aria-label="Query sequence: the planner scatters to six regions and gathers partial results" viewBox="0 0 560 240">
+          <g font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">
+            <text x="40" y="34">Client</text>
+            <text x="220" y="34">Planner</text>
+            <text x="424" y="34">Regions ×6</text>
+          </g>
+          <g class="glass-svg-line">
+            <line x1="60" y1="44" x2="60" y2="216"/>
+            <line x1="244" y1="44" x2="244" y2="216"/>
+            <line x1="452" y1="44" x2="452" y2="216"/>
+          </g>
+          <path d="M60 70 L244 70" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <text x="92" y="62" font-family="'JetBrains Mono', monospace" font-size="11.5" class="glass-svg-ink-2">SQL</text>
+          <path d="M244 104 L452 104" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <text x="290" y="96" font-family="'JetBrains Mono', monospace" font-size="11.5" class="glass-svg-ink-2">scatter ×6</text>
+          <path d="M452 142 L244 142" stroke="#22D3EE" stroke-width="2" stroke-dasharray="4 4" fill="none"/>
+          <text x="290" y="134" font-family="'JetBrains Mono', monospace" font-size="11.5" class="glass-svg-ink-2">partials</text>
+          <path d="M244 180 L60 180" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <text x="92" y="172" font-family="'JetBrains Mono', monospace" font-size="11.5" class="glass-svg-accent-ink">38MS P99</text>
+          <circle cx="244" cy="161" r="5" fill="#22D3EE"/>
+          <text x="258" y="165" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">merge + sort</text>
+        </svg>
+        <figcaption>
+          <span class="lang-en">The slowest region bounds the answer, so partials stream back and merge as they land.</span>
+          <span class="lang-zh">最慢的区域决定答案下限，所以部分结果边到达边归并。</span>
+        </figcaption>
+      </figure>
+
+      <figure class="glass-card atlas-card" data-reveal>
+        <span class="atlas-kicker">state machine · <span class="lang-en">alert lifecycle</span><span class="lang-zh">告警生命周期</span></span>
+        <svg role="img" aria-label="Alert lifecycle state machine: baseline, candidate, firing, resolved" viewBox="0 0 560 240">
+          <rect x="24" y="56" width="128" height="48" rx="24" class="glass-svg-node"/>
+          <rect x="216" y="56" width="128" height="48" rx="24" class="glass-svg-node"/>
+          <rect x="408" y="56" width="128" height="48" rx="24" class="glass-svg-node-strong"/>
+          <rect x="216" y="156" width="128" height="48" rx="24" class="glass-svg-node"/>
+          <g font-family="'Inter', sans-serif" font-size="13.5" font-weight="600" class="glass-svg-ink">
+            <text x="56" y="84">baseline</text>
+            <text x="242" y="84">candidate</text>
+            <text x="446" y="84">firing</text>
+            <text x="240" y="184">resolved</text>
+          </g>
+          <path d="M152 80 L216 80" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <path d="M344 80 L408 80" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <path d="M440 104 C400 160 360 176 344 178" stroke="#22D3EE" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
+          <path d="M216 178 C140 172 88 128 80 104" stroke="#22D3EE" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
+          <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">
+            <text x="158" y="70">3σ × 4MIN</text>
+            <text x="350" y="70">HUMAN PAGED</text>
+            <text x="380" y="150">BACK IN BAND</text>
+            <text x="92" y="150">RELEARN</text>
+          </g>
+        </svg>
+        <figcaption>
+          <span class="lang-en">Only the firing state pages a human — and resolution feeds the baseline back, so the same wobble never pages twice.</span>
+          <span class="lang-zh">只有 firing 态会叫人——恢复后回灌基线，同样的抖动不会叫第二次。</span>
+        </figcaption>
+      </figure>
+
+      <figure class="glass-card atlas-card" data-reveal>
+        <span class="atlas-kicker">timeline · <span class="lang-en">deploy rollout</span><span class="lang-zh">发布滚动</span></span>
+        <svg role="img" aria-label="Deploy rollout timeline: canary, two waves, full fleet across ninety minutes" viewBox="0 0 560 240">
+          <line x1="32" y1="150" x2="528" y2="150" class="glass-svg-line" stroke-width="1.5"/>
+          <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">
+            <text x="32" y="178">T+0</text>
+            <text x="166" y="178">T+15M</text>
+            <text x="306" y="178">T+45M</text>
+            <text x="460" y="178">T+90M</text>
+          </g>
+          <circle cx="44" cy="150" r="6" fill="#22D3EE"/>
+          <circle cx="184" cy="150" r="6" class="glass-svg-node" />
+          <circle cx="324" cy="150" r="6" class="glass-svg-node"/>
+          <circle cx="472" cy="150" r="6" class="glass-svg-node"/>
+          <g font-family="'Inter', sans-serif" font-size="13.5" font-weight="600" class="glass-svg-ink">
+            <text x="32" y="100">canary 1%</text>
+            <text x="166" y="100">wave 25%</text>
+            <text x="306" y="100">wave 75%</text>
+            <text x="448" y="100">full fleet</text>
+          </g>
+          <g font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">
+            <text x="32" y="120">auto-diff vs baseline</text>
+            <text x="166" y="120">error budget watch</text>
+            <text x="306" y="120">latency gate</text>
+            <text x="448" y="120">marker on charts</text>
+          </g>
+          <path d="M44 128 L44 144" stroke="#22D3EE" stroke-width="2"/>
+          <text x="32" y="216" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">ANY GATE FAILS → AUTO-ROLLBACK IN 40S</text>
+        </svg>
+        <figcaption>
+          <span class="lang-en">Every rollout is four gates on a clock; the cyan tick is where a human last touched it.</span>
+          <span class="lang-zh">每次发布是钟表上的四道闸；cyan 刻度是人手最后碰过的位置。</span>
+        </figcaption>
+      </figure>
+
+      <figure class="glass-card atlas-card" data-reveal>
+        <span class="atlas-kicker">wire format · <span class="lang-en">event envelope</span><span class="lang-zh">事件信封</span></span>
+        <svg role="img" aria-label="Event envelope wire format: a 128-bit header in five fields, then the payload" viewBox="0 0 560 240">
+          <text x="16" y="40" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">128-BIT HEADER · LITTLE ENDIAN</text>
+          <rect x="16" y="60" width="168" height="52" class="glass-svg-node"/>
+          <rect x="184" y="60" width="128" height="52" class="glass-svg-node"/>
+          <rect x="312" y="60" width="88" height="52" class="glass-svg-node-strong"/>
+          <rect x="400" y="60" width="80" height="52" class="glass-svg-node"/>
+          <rect x="480" y="60" width="64" height="52" class="glass-svg-node"/>
+          <g font-family="'JetBrains Mono', monospace" font-size="12" font-weight="600" class="glass-svg-ink">
+            <text x="28" y="82">timestamp</text>
+            <text x="196" y="82">stream id</text>
+            <text x="322" y="82">shard</text>
+            <text x="410" y="82">flags</text>
+            <text x="488" y="82">crc</text>
+          </g>
+          <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">
+            <text x="28" y="100">48</text>
+            <text x="196" y="100">32</text>
+            <text x="322" y="100">16</text>
+            <text x="410" y="100">16</text>
+            <text x="488" y="100">16</text>
+          </g>
+          <rect x="16" y="140" width="528" height="52" rx="8" class="glass-svg-node"/>
+          <text x="28" y="170" font-family="'Inter', sans-serif" font-size="13.5" font-weight="600" class="glass-svg-ink">payload — column-coded key/value pairs</text>
+          <text x="16" y="222" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">SHARD FIELD ROUTES WITHOUT PARSING THE PAYLOAD</text>
+        </svg>
+        <figcaption>
+          <span class="lang-en">The shard field is highlighted because routing reads only those 16 bits — the payload stays opaque until the index.</span>
+          <span class="lang-zh">shard 字段被点亮，因为路由只读这 16 位——payload 在进索引之前保持不被解析。</span>
+        </figcaption>
+      </figure>
+
+      <figure class="glass-card atlas-card" data-reveal>
+        <span class="atlas-kicker">pipeline · <span class="lang-en">release build</span><span class="lang-zh">发布构建</span></span>
+        <svg role="img" aria-label="Release build pipeline: commit, test, image, sign, deploy with a fan-in of checks" viewBox="0 0 560 240">
+          <rect x="16" y="56" width="92" height="44" rx="10" class="glass-svg-node"/>
+          <rect x="140" y="32" width="108" height="44" rx="10" class="glass-svg-node"/>
+          <rect x="140" y="92" width="108" height="44" rx="10" class="glass-svg-node"/>
+          <rect x="280" y="56" width="92" height="44" rx="10" class="glass-svg-node"/>
+          <rect x="404" y="56" width="140" height="44" rx="10" class="glass-svg-node-strong"/>
+          <g font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">
+            <text x="34" y="82">commit</text>
+            <text x="158" y="58">unit ×3k</text>
+            <text x="158" y="118">e2e ×140</text>
+            <text x="298" y="82">image</text>
+            <text x="422" y="82">sign + deploy</text>
+          </g>
+          <path d="M108 70 L140 54" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <path d="M108 86 L140 112" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <path d="M248 54 L280 70" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <path d="M248 112 L280 86" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <path d="M372 78 L404 78" stroke="#22D3EE" stroke-width="2" fill="none"/>
+          <circle cx="388" cy="78" r="4" fill="#22D3EE"/>
+          <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">
+            <text x="16" y="172">MEDIAN COMMIT → FLEET · 22 MIN</text>
+            <text x="16" y="196">EVERY ARTIFACT SIGNED · SBOM ATTACHED</text>
+          </g>
+        </svg>
+        <figcaption>
+          <span class="lang-en">Tests fan out and fan back in before the image exists — nothing unsigned ever reaches a region.</span>
+          <span class="lang-zh">测试先扇出再收拢，镜像才会产生——未签名的产物到不了任何区域。</span>
+        </figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<!-- Craft band -->
+<section class="glass-section">
+  <div class="glass-container glass-container--wide">
+    <div class="craft-grid">
+      <div>
+        <span class="glass-eyebrow">04 · <span class="lang-en">Diagram craft</span><span class="lang-zh">图示工艺</span></span>
+        <h2>
+          <span class="lang-en">Why these read<br>as one system.</span>
+          <span class="lang-zh">为什么它们读起来<br>是同一个系统。</span>
+        </h2>
+        <p class="glass-lead glass-lead--compact" style="max-width:440px; margin-top:var(--space-5);">
+          <span class="lang-en">None of these diagrams import a style. They reuse the page's own material — node fills are panel glass, lines are the page's hairlines, and cyan means exactly one thing: where the energy goes.</span>
+          <span class="lang-zh">这些图没有引入任何外来风格。它们复用页面自己的材质——节点就是面板玻璃，线就是页面的发丝线，而 cyan 永远只表达一件事：能量去哪里。</span>
+        </p>
+      </div>
+      <div>
+        <div class="craft-rule">
+          <span class="num">R·1</span>
+          <div>
+            <h3><span class="lang-en">Same material as the page</span><span class="lang-zh">与页面同材质</span></h3>
+            <p>
+              <span class="lang-en">Node fill is the panel token, stroke is the border token. A diagram pasted from elsewhere reads as a sticker on glass.</span>
+              <span class="lang-zh">节点填充用面板 token，描边用边框 token。从别处贴来的图，在玻璃上读起来就是一张贴纸。</span>
+            </p>
+          </div>
+        </div>
+        <div class="craft-rule">
+          <span class="num">R·2</span>
+          <div>
+            <h3><span class="lang-en">Cyan is a verb, not a paint</span><span class="lang-zh">cyan 是动词，不是涂料</span></h3>
+            <p>
+              <span class="lang-en">At most three cyan elements per diagram: the flow, the focus, the live marker. Zero cyan is a wireframe; four is a christmas tree.</span>
+              <span class="lang-zh">每张图至多三个 cyan 元素：流向、焦点、live 标记。零个是线稿，四个是圣诞树。</span>
+            </p>
+          </div>
+        </div>
+        <div class="craft-rule">
+          <span class="num">R·3</span>
+          <div>
+            <h3><span class="lang-en">Theme-proof ink</span><span class="lang-zh">主题免疫的墨</span></h3>
+            <p>
+              <span class="lang-en">Every label inks through the .glass-svg tokens, so the same SVG survives the light theme untouched. Hardcoded white text vanishes at noon.</span>
+              <span class="lang-zh">每个标签都通过 .glass-svg token 上墨，同一张 SVG 切到 light 主题原样存活。写死的白字到了白天就消失。</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="glass-section glass-section--alt">
+  <div class="glass-container" style="text-align:center; max-width:720px;">
+    <span class="glass-eyebrow">05 · <span class="lang-en">Go deeper</span><span class="lang-zh">更进一步</span></span>
+    <h2>
+      <span class="lang-en">Watch the diagrams move.</span>
+      <span class="lang-zh">看这些图动起来。</span>
+    </h2>
+    <p class="glass-lead" style="max-width:560px; margin:var(--space-5) auto var(--space-6);">
+      <span class="lang-en">The console renders these same systems live — the architecture you just read is the one streaming your events.</span>
+      <span class="lang-zh">控制台把同一套系统实时渲染出来——你刚读完的架构，就是正在流转你事件的那一套。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-4); justify-content:center; flex-wrap:wrap;">
+      <a class="glass-button" href="dashboard.html"><span class="lang-en">Open the console</span><span class="lang-zh">打开控制台</span></a>
+      <a class="glass-button glass-button--ghost" href="data-report.html"><span class="lang-en">Read the Q2 report</span><span class="lang-zh">读 Q2 报告</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="glass-footer">
+  <div class="glass-footer-legal" style="border-top:none; margin-top:0;">
+    <span>Copyright © 2026 Prism Analytics, Inc.</span>
+    <span><span class="lang-en">Atlas drawn in the glass-design diagram language</span><span class="lang-zh">图集以 glass-design 图示语言绘制</span></span>
+  </div>
+</footer>
+
+<script src="../../assets/glass.js"></script>
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = null;
+  try { queryLang = new URLSearchParams(location.search).get('lang'); } catch (e) {}
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: glass
+Page-type: diagram-gallery
+Created: 2026-06-11
+
+Decisions (6):
+1. [featured-then-grid] chose "one full-width architecture panel followed by a 2-col atlas of six" over "a uniform 2-col or 3-col grid of seven equal diagrams". Because: §I — the platform architecture IS the hero content; equal-weight tiles would hide the one diagram that explains all the others. 1-hero + N-alternatives is the layout law this repo wrote down twice.
+2. [two-col-not-three] chose "2-column gallery (≈580px rendered per diagram)" over "3-column (≈380px)". Because: diagram legibility is the page's whole point — at 380px the 11px source labels render near the 9px floor and sequence/timeline genres become postage stamps. Two columns keep every label ≥10px rendered with margin.
+3. [same-material-doctrine] chose "node fill = panel token, stroke = border token, labels via .glass-svg-* classes" over "a separate diagram color scheme". Because: the gallery must prove the skill's claim that diagrams are 'in the glass, not on it'; it also makes every SVG theme-proof for the light-mode audit run.
+4. [genre-spread] chose "flow, sequence, state machine, timeline, wire format, build pipeline" over "six variations of box-and-arrow". Because: the atlas is a capability demonstration for an engineering audience — wire-format and state-machine genres prove the language handles low-level content, not just marketing flows.
+5. [draw-on-featured-only] chose "data-draw on the architecture panel only; gallery cards static" over "draw on all seven". Because: motion budget — seven simultaneous path-draws on scroll turns craft into carnival; concentrating the one draw on the hero diagram makes it read as intentional.
+6. [craft-band-teaches] chose "closing craft band with three numbered rules" over "ending at the gallery". Because: this page doubles as the skill's own diagram-craft showcase; stating the three rules in-page turns the gallery from pretty pictures into a reusable system the next author can copy.
+
+Known trade-offs:
+- The featured architecture carries ~26 text labels — near the density ceiling for its 1240 viewBox. Accepted because it renders ≥1190px wide in the wide container (well above the 760px cramped threshold) and every label is ≥12px source.
+- Gallery SVGs use fixed 560×240 viewBoxes for rhythm, which leaves the state-machine diagram with more bottom margin than the bitfield. Accepted: uniform card heights beat per-diagram optical packing in a 2-col grid.
+- The sequence diagram's six regions are drawn as one lifeline labeled ×6 instead of six lifelines. Accepted: six lifelines at 580px would crush label spacing; the ×6 annotation keeps the truth without the clutter.
+
+/design-review:self-diff -->
+
+</body>
+</html>

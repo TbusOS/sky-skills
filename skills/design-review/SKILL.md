@@ -1,6 +1,6 @@
 ---
 name: design-review
-description: "Independent evaluator for any design-skill output (anthropic-design / apple-design / ember-design / sage-design). TRIGGER when a demo / template / landing page has just been written with one of the 4 design skills and is about to be shipped. Runs four gates — structural verify (placeholders, BEM, undefined classes, bilingual toggles), rendered visual-audit (contrast, hero diagram sizing, orphan cards, SVG text, 26 known-bugs), full-page screenshot, and LLM taste judgment (solo design-critic or 4 parallel specialists — composition / copy / illustration / brand). Pairs with design-learner to codify every critic miss so the same bug is never caught twice. Inspired by GAN's discriminator: this skill deliberately lives outside the generator skills so the reviewer does not inherit the generator's assumptions."
+description: "Independent evaluator for any design-skill output (anthropic-design / apple-design / ember-design / sage-design / glass-design). TRIGGER when a demo / template / landing page has just been written with one of the 5 design skills and is about to be shipped. Runs four gates — structural verify (placeholders, BEM, undefined classes, bilingual toggles), rendered visual-audit (contrast, hero diagram sizing, orphan cards, SVG text, 26 known-bugs), full-page screenshot, and LLM taste judgment (solo design-critic or 4 parallel specialists — composition / copy / illustration / brand). Pairs with design-learner to codify every critic miss so the same bug is never caught twice. Inspired by GAN's discriminator: this skill deliberately lives outside the generator skills so the reviewer does not inherit the generator's assumptions."
 last-verified: 2026-04-23
 ---
 
@@ -18,11 +18,11 @@ and the GAN paradigm:
    output favourably.
 2. **An independent, skeptical evaluator is the real lever.** This skill
    imports **nothing** from any generator. Its rules, scripts, known-bugs
-   list, and critic agents live in one shared pool — the four styles pay
+   list, and critic agents live in one shared pool — the five styles pay
    the same quality floor.
 
 **ZH** — 两条原则来自 Anthropic harness-design 和 GAN 范式:(1) 做事的
-agent 倾向自评过高;(2) 独立持怀疑的 evaluator 才是真正的杠杆。4 个
+agent 倾向自评过高;(2) 独立持怀疑的 evaluator 才是真正的杠杆。5 个
 design skill 是 generator,会给自己打高分;`design-review` 脚本、规则、
 已知 bug 清单 **不属于任何一个风格**,4 种风格共用同一套工艺底线。
 

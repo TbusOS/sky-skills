@@ -1,6 +1,6 @@
 # Demos
 
-Same story, four aesthetics. Each demo is a single flagship HTML page showcasing the respective design skill on realistic, self-referential content (this repository itself). Every demo ships the same three programming-focused hero diagrams — **code architecture**, **SoC block diagram**, and **multi-repo git collaboration flow** — so you can compare how each aesthetic handles information-dense visuals.
+Same story, five aesthetics. Each demo is a single flagship HTML page showcasing the respective design skill on realistic, self-referential content (this repository itself). Every demo ships the same three programming-focused hero diagrams — **code architecture**, **SoC block diagram**, and **multi-repo git collaboration flow** — so you can compare how each aesthetic handles information-dense visuals.
 
 | Demo | Renders | Character |
 |---|---|---|
@@ -8,6 +8,7 @@ Same story, four aesthetics. Each demo is a single flagship HTML page showcasing
 | [`anthropic-design/`](./anthropic-design/index.html) | `skills/anthropic-design/` | Warm cream, Poppins + Lora serif, orange filled pills, editorial cards, pull quote, bar chart, 3-tier pricing |
 | [`ember-design/`](./ember-design/index.html) | `skills/ember-design/` | Deep cream + chocolate + gold, Fraunces display serif + Inter body, coffee-bean hero SVG, gold-quoted pull-quote, handcraft feel |
 | [`sage-design/`](./sage-design/index.html) | `skills/sage-design/` | Rice-paper cream + sage green + deep indigo, Instrument Serif display + Inter body + JetBrains Mono section numbers, quiet Nordic minimalism |
+| [`glass-design/`](./glass-design/index.html) | `skills/glass-design/` | Apple liquid-glass: deep-navy canvas + aurora blobs + frosted panels + solid cyan accent, Space Grotesk + Inter, dark/light dual theme, freezable motion engine |
 | [`gated-dual-clone/`](./gated-dual-clone/index.html) | `skills/gated-dual-clone/` | Anthropic voice, single-purpose page explaining the 2/3-clone git topology and its safety gates |
 
 Extra pages beyond the four flagship `index.html`:
@@ -15,6 +16,7 @@ Extra pages beyond the four flagship `index.html`:
 - [`anthropic-design/index-v2.html`](./anthropic-design/index-v2.html) — v2 scenario showcase (dashboard / form / table / modal and other non-canonical layouts)
 - [`anthropic-design/diagrams.html`](./anthropic-design/diagrams.html) — 23-diagram gallery (registers, SoC blocks, waveforms, schedulers …)
 - [`apple-design/diagrams.html`](./apple-design/diagrams.html) — 12-diagram gallery, same diagram types in Apple's clean geometric style
+- [`glass-design/diagrams.html`](./glass-design/diagrams.html) — 7-diagram gallery as frosted panels on the aurora field (theme-proof SVG ink)
 
 ## Local preview
 
@@ -26,6 +28,7 @@ python3 -m http.server 8000
 #   http://localhost:8000/demos/anthropic-design/index.html
 #   http://localhost:8000/demos/ember-design/index.html
 #   http://localhost:8000/demos/sage-design/index.html
+#   http://localhost:8000/demos/glass-design/index.html
 ```
 
 All demos reference CSS via relative paths:

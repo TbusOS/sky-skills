@@ -17,8 +17,8 @@ Usage:
   does NOT enable the bilingual or self-diff public-path rules.
 
 If --skill is omitted, the script auto-detects the skill by scanning the HTML
-for a `<link>` to one of {anthropic|apple|ember|sage}.css. Pass --skill when
-detection is ambiguous.
+for a `<link>` to one of {anthropic|apple|ember|sage|glass}.css. Pass --skill
+when detection is ambiguous.
 
 CSS class-definition lookup: unions classes from
   (a) the skill's default CSS at skills/<skill>-design/assets/<css> (if exists)
@@ -97,6 +97,15 @@ SKILLS: dict[str, dict] = {
         "acceptable_hero": {"sage-container", "sage-container--wide"},
         "container_modifiers": ("narrow", "wide"),
         "hero_advice": "sage-container (default 960px) or sage-container--wide (1200px)",
+    },
+    "glass": {
+        "prefix": "glass-",
+        "css": "glass.css",
+        "dir": "glass-design",
+        "narrow_hero": {"glass-container--narrow"},
+        "acceptable_hero": {"glass-container", "glass-container--wide"},
+        "container_modifiers": ("narrow", "wide"),
+        "hero_advice": "glass-container (default 1040px) or glass-container--wide (1280px)",
     },
 }
 
@@ -210,9 +219,10 @@ def check_file(
 
     skill = forced_skill or autodetect_skill(html)
     if skill is None:
+        css_names = "/".join(cfg["css"] for cfg in SKILLS.values())
         return [
             f"{path}: cannot auto-detect skill from HTML "
-            f"(no unique link to one of anthropic.css/apple.css/ember.css/sage.css). "
+            f"(no unique link to one of {css_names}). "
             f"Pass --skill=<name> explicitly."
         ], warnings
     if skill not in SKILLS:
@@ -430,6 +440,26 @@ def check_file(
             f"Noto CJK metrics break when Latin punctuation kerns against "
             f"Han glyphs. See known-bugs.md §1.22."
         )
+
+    # 8c. Glass dual-theme contract — glass pages declare an initial theme on
+    # <html>, and public glass pages must ship the theme toggle. The light
+    # theme is part of the skill's identity (iOS-frost variant), and the
+    # review harness flips data-theme to audit both modes — a page without
+    # the attribute can't be theme-audited. See glass-design/references/
+    # glass-material.md.
+    if skill == "glass":
+        if not re.search(r'<html[^>]+data-theme=["\'](?:dark|light)["\']', html, re.I):
+            errors.append(
+                f"{path}: glass page must declare an initial theme on the root "
+                f'element: <html data-theme="dark"> (dual-theme contract).'
+            )
+        if public_path and not re.search(
+            r'class=["\'][^"\']*\bglass-theme-toggle\b', html
+        ):
+            errors.append(
+                f"{path}: public glass page missing the .glass-theme-toggle "
+                f"button — dark/light duality is part of the glass contract."
+            )
 
     # 9. SEO meta — public pages only (or --force-public for fixtures).
     # WARN-ONLY: search engines and link unfurlers read these, but a missing

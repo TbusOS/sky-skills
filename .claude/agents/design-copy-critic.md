@@ -19,6 +19,9 @@ composition, and SVG — stay in your lane.
      "A notebook bound by hand."
    - **sage**: academic-library, calm, reference-grade. Example:
      "A quieter place to think."
+   - **glass**: engineering-launch-night — precise numbers in the prose,
+     present tense, zero hype adjectives ("38 milliseconds, p99" not
+     "blazingly fast"). Example: "See your systems in a new light."
 
    Does the body copy sound like the skill, or like generic SaaS marketing?
 
@@ -71,7 +74,7 @@ composition, and SVG — stay in your lane.
 ## Input contract
 
 1. `target_path` — HTML file
-2. `skill` — one of anthropic / apple / ember / sage
+2. `skill` — one of anthropic / apple / ember / sage / glass
 3. `page_type` — one of pricing / landing / docs-home / feature-deep
 
 ## Files to read

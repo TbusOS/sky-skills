@@ -340,6 +340,35 @@
 
 ---
 
+---
+
+## 6. glass-design
+
+### 6.1 SVG 墨色写死白 fill → light 主题下图示隐形
+- **Reader sees**:dark 主题完美的图,切到 light 主题后只剩几条 cyan 线,文字和节点全部消失。
+- **Why**:glass 是双主题 skill,`fill="#F4F7FF"` 这类写死的"白墨"在浅底上不可见;SVG 的 presentation attribute 不会跟 `html[data-theme]` 切换。
+- **Defense**:glass.css 提供 `.glass-svg-ink/-2/-3 / .glass-svg-node(-strong) / .glass-svg-line / .glass-svg-grid` 主题类(CSS `fill`/`stroke` 属性能用 `var()`);diagram-craft.md 定为铁律;三闸对 glass 自动跑 dark + light 两遍,光靠 light 一遍的 contrast / svg-text-on-same-colour 检查即可抓到。2026-06-11 smoke 页实测命中后机器化。
+
+### 6.2 滚动浮现初始 `opacity:0` × fullPage 截图 = 下半页空白
+- **Reader sees**:全页截图(或无 JS 读者)看到首屏以下大片空白;visual-audit 的 contrast / text-desert 检查在 opacity:0 元素上失真。
+- **Why**:Playwright fullPage 截图走 captureBeyondViewport,**不滚动页面**,IntersectionObserver 永不触发;裸写 `[data-reveal]{opacity:0}` 的初始态就是截图里的终态。
+- **Defense**:三层冻结契约(motion.md §0)——初始隐藏门控在 `html.js-enabled:not([data-motion="off"])` 后面 + glass.js 读 `prefers-reduced-motion` 设 `data-motion="off"` + harness 两个 Playwright 脚本 `newContext({reducedMotion:'reduce'})`。机器闸:visual-audit `glass-reveal-stuck`(error)在 reduced-motion 上下文里抓任何 opacity<0.99 的 `[data-reveal]`。
+
+### 6.3 半透明玻璃面板被 contrast 检查误读为白底
+- **Reader sees**:visual-audit 对暗底玻璃卡上的白字报 contrast 1.0 的假 error,闸被堵死。
+- **Why**:旧 `effectiveBg` 把第一个 alpha>0.05 的祖先背景**原样**当作底色 —— `rgba(255,255,255,0.06)` 玻璃板被当成纯白。
+- **Defense**:2026-06-11 改为逐层 alpha 合成(半透明层依次混到首个不透明层或白底)。对存量 4 skill 回归 diff = 0 新增 finding。
+
+### 6.4 aurora 色直接做文字色 → 单主题不可读(cyan 挂 light,indigo 挂 dark)
+- **Reader sees**:light 模式下 accent 文字几乎看不见。
+- **Why**:cyan 亮度太高,白底上对比度 1.6;它只配做**填充**(按钮/hairline),做文字必须换深青。
+- **Defense**:token 分工 —— 填充色主题恒定可写死,**文字色一律走 `*-ink` token**:cyan 文字 `.glass-svg-accent-ink`(light 切 `#0E7490`),indigo 文字 `.glass-svg-ref-ink`(dark 调亮 `#818CF8`,literal `#4F46E5` 在暗面板上只有 2.7:1 —— dashboard/data-report canonical critic 实抓)。按钮文字锁 `--glass-button-ink` 深字(白字在 cyan 上 1.9)。机器闸:visual-audit `glass-cyan-svg-text`(light 跑抓 cyan 文字)+ `glass-aurora-text`(dark 跑抓 indigo/violet/pink 文字),均 error。
+
+### 6.5 aurora 光晕层挡点击
+- **Reader sees**:按钮看得见点不动。
+- **Why**:光晕层 `position:fixed; inset:0`,忘记 `pointer-events:none` 时整页点击都打在它身上。
+- **Defense**:`.glass-aurora` 在 glass.css 自带 `pointer-events:none`;visual-audit `glass-cta-obstructed`(error)对每个视口内 `.glass-button` 中心点做 `elementFromPoint` 命中检查,任何装饰层(自加的视差层/sheen 层)挡住 CTA 都会被抓。
+
 ## 新 bug 类的处置流程（每次必做）
 
 1. design-critic 或人发现一个本表之外的问题。

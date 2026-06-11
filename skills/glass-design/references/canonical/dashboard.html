@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prism Console — production operations on one pane of glass</title>
+<meta name="description" content="Prism production console — four live KPIs, 60 minutes of throughput, the 30-day error budget and a raw event tail, streaming on one pane of liquid glass.">
+<meta property="og:title" content="Prism Console — production operations on one pane of glass">
+<meta property="og:description" content="Four live KPIs, a streaming throughput chart, the 30-day error budget and an event tail — Prism's ops console in liquid glass.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/glass.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  /* Compact console header — chrome stays shorter than the data it serves */
+  .console-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--space-6);
+    flex-wrap: wrap;
+  }
+  .console-head h1 { font-size: 40px; letter-spacing: -0.015em; }
+  .console-meta {
+    margin: var(--space-3) 0 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--glass-ink-3);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  /* Segmented range control — decorative; active chip shows the cyan recipe */
+  .seg {
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px;
+    border: 1px solid var(--glass-panel-border);
+    border-radius: var(--radius-pill);
+    background: var(--glass-card-bg);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    backdrop-filter: blur(12px) saturate(140%);
+  }
+  .seg button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--glass-ink-2);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: color var(--duration-sm) var(--ease-glass);
+  }
+  .seg button:not(.is-active):hover { color: var(--glass-ink); }
+  .seg button.is-active { background: var(--glass-accent); color: var(--glass-button-ink); }
+
+  /* Dashboard rhythm — tighter than marketing sections */
+  .console-section { padding-block: var(--space-5); position: relative; }
+  .console-section--first { padding-top: var(--space-7); }
+  .console-section--last { padding-bottom: var(--space-8); }
+
+  /* KPI row — 4 peers (stat semantics), 24px padding so 64px numerals fit 4-up */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-5); }
+  .kpi-card { padding: var(--space-5); }
+  .kpi-card .glass-stat-number { font-size: 64px; }
+  .kpi-card .glass-stat-label { margin-top: var(--space-2); }
+  .kpi-card .glass-stat-delta { display: block; margin-top: var(--space-3); }
+
+  /* Main grid — Tier 1 chart at 2/3, side rail at 1/3 (never first column) */
+  .console-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-5);
+    align-items: stretch;
+  }
+  .side-col { display: grid; grid-template-rows: 1fr 1fr; gap: var(--space-5); min-width: 0; }
+
+  .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+  }
+  .panel-head h2 { font-size: 20px; letter-spacing: -0.01em; }
+  .panel-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--glass-ink-3);
+  }
+
+  .chart-panel { display: flex; flex-direction: column; }
+  .chart-panel svg { display: block; width: 100%; height: auto; }
+  .chart-panel figcaption { margin-top: auto; padding-top: var(--space-3); }
+  .side-card { display: flex; flex-direction: column; }
+  .side-card svg { display: block; width: 100%; height: auto; }
+  .side-card figcaption { margin-top: auto; padding-top: var(--space-3); }
+
+  /* Event tail — mono table, error rows inked --glass-down */
+  .table-panel { padding: var(--space-5) var(--space-6) var(--space-6); }
+  .table-panel td { font-family: var(--font-mono); font-size: 13px; }
+  .table-panel .num { text-align: right; }
+  .row-down td { color: var(--glass-down); }
+
+  /* Thin single-line footer — a console doesn't need a sitemap */
+  footer.glass-footer { padding-block: var(--space-6); }
+  .footer-line {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 var(--space-5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .footer-links { display: flex; gap: var(--space-5); }
+  .footer-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--glass-accent);
+    margin-right: 8px;
+    vertical-align: 1px;
+  }
+
+  @media (max-width: 1024px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .console-grid { grid-template-columns: 1fr; }
+    .side-col { grid-template-rows: none; grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .console-head h1 { font-size: 32px; }
+    .kpi-row { grid-template-columns: 1fr; }
+    .side-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body class="glass-page--calm">
+
+<!-- Calm light field: two blobs, cores pushed off-canvas — light yields to data -->
+<div class="glass-aurora" aria-hidden="true">
+  <div class="glass-blob glass-blob--cyan" style="width:560px; height:560px; top:-340px; right:-280px;"></div>
+  <div class="glass-blob glass-blob--indigo" style="width:600px; height:600px; bottom:-380px; left:-320px;"></div>
+</div>
+
+<nav class="glass-nav"><div class="glass-nav-inner">
+  <a href="landing.html" class="glass-nav-brand">Prism</a>
+  <div class="glass-nav-links">
+    <a href="landing.html"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
+    <a href="diagram-gallery.html"><span class="lang-en">Atlas</span><span class="lang-zh">系统图集</span></a>
+    <a href="dashboard.html" aria-current="page" style="color:var(--glass-ink);"><span class="lang-en">Console</span><span class="lang-zh">控制台</span></a>
+    <a href="data-report.html"><span class="lang-en">Reports</span><span class="lang-zh">报告</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="glass-lang-toggle lang-toggle" aria-label="Switch language">中 / EN</button>
+    <button type="button" class="glass-theme-toggle" aria-label="Switch theme">light</button>
+    <a class="glass-button" href="#new-stream"><span class="lang-en">New stream</span><span class="lang-zh">新建流</span></a>
+  </div>
+</div></nav>
+
+<main>
+  <!-- Compact header: h1 + mono timestamp + decorative range control -->
+  <section class="console-section console-section--first">
+    <div class="glass-container glass-container--wide">
+      <div class="console-head">
+        <div>
+          <span class="glass-eyebrow">PROD · <span class="lang-en">6 regions · streaming</span><span class="lang-zh">6 个区域 · 实时流</span></span>
+          <h1><span class="lang-en">Production console</span><span class="lang-zh">生产控制台</span></h1>
+          <p class="console-meta">
+            <span class="glass-badge">LIVE</span>
+            <span>2026-06-11 14:32:07 UTC</span>
+            <span><span class="lang-en">updated 2s ago</span><span class="lang-zh">2 秒前更新</span></span>
+          </p>
+        </div>
+        <div class="seg" role="group" aria-label="Time range">
+          <button type="button">15M</button>
+          <button type="button" class="is-active" aria-pressed="true">1H</button>
+          <button type="button">6H</button>
+          <button type="button">24H</button>
+          <button type="button">7D</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KPI row — markup carries the terminal values; JS only animates toward them -->
+  <section class="console-section">
+    <div class="glass-container glass-container--wide">
+      <div class="kpi-row">
+        <article class="glass-card kpi-card" data-reveal>
+          <span class="glass-stat-number" data-count-to="2.42" data-count-suffix="M">2.42M</span>
+          <span class="glass-stat-label"><span class="lang-en">events ingested per second</span><span class="lang-zh">每秒接入事件数</span></span>
+          <span class="glass-stat-delta glass-stat-delta--up">&#9650; +4.2% <span class="lang-en">vs prior hour</span><span class="lang-zh">较上一小时</span></span>
+        </article>
+        <article class="glass-card kpi-card" data-reveal>
+          <span class="glass-stat-number" data-count-to="38" data-count-suffix="ms">38ms</span>
+          <span class="glass-stat-label"><span class="lang-en">query latency p99, all regions</span><span class="lang-zh">查询延迟 p99（全部区域）</span></span>
+          <span class="glass-stat-delta glass-stat-delta--up">&#9660; 2.1ms <span class="lang-en">vs prior hour</span><span class="lang-zh">较上一小时</span></span>
+        </article>
+        <article class="glass-card kpi-card" data-reveal>
+          <span class="glass-stat-number" data-count-to="99.99" data-count-suffix="%">99.99%</span>
+          <span class="glass-stat-label"><span class="lang-en">delivery rate, last 24 hours</span><span class="lang-zh">近 24 小时送达率</span></span>
+          <span class="glass-stat-delta glass-stat-delta--up">&#9650; +0.01% <span class="lang-en">on SLO</span><span class="lang-zh">达标 SLO</span></span>
+        </article>
+        <article class="glass-card kpi-card" data-reveal>
+          <span class="glass-stat-number" data-count-to="3">3</span>
+          <span class="glass-stat-label"><span class="lang-en">active alerts</span><span class="lang-zh">活跃告警</span></span>
+          <span class="glass-stat-delta glass-stat-delta--down">&#9650; +2 <span class="lang-en">new in the last hour</span><span class="lang-zh">一小时内新增</span></span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main grid: Tier 1 throughput chart (2/3) + gauge and bars rail (1/3) -->
+  <section class="console-section">
+    <div class="glass-container glass-container--wide">
+      <div class="console-grid">
+
+        <figure class="glass-panel chart-panel">
+          <div class="panel-head">
+            <h2><span class="lang-en">Throughput</span><span class="lang-zh">吞吐量</span></h2>
+            <span class="panel-meta">checkout.events · 60 min · 1s buckets</span>
+          </div>
+          <svg role="img" aria-label="Throughput over the last 60 minutes: today's cyan series climbs from 2.0M to 2.42M events per second with a brief dip at the 14:14 deploy; yesterday's indigo dashed baseline runs about 8 percent lower" viewBox="0 0 880 540" data-draw>
+            <defs>
+              <linearGradient id="dash-area" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#22D3EE" stop-opacity="0.18"/>
+                <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+
+            <!-- grid -->
+            <g class="glass-svg-grid">
+              <line x1="60" y1="56"  x2="864" y2="56"/>
+              <line x1="60" y1="160" x2="864" y2="160"/>
+              <line x1="60" y1="263" x2="864" y2="263"/>
+              <line x1="60" y1="367" x2="864" y2="367"/>
+              <line x1="60" y1="470" x2="864" y2="470"/>
+            </g>
+
+            <!-- area fill: the one permitted gradient — light falling on data -->
+            <path d="M60 304 L100 293 L140 298 L180 284 L220 289 L260 273 L300 279 L340 264 L380 271 L420 255 L460 260 L500 245 L540 250 L580 237 L620 232 L634 312 L652 271 L700 235 L740 224 L780 213 L820 193 L864 176 L864 470 L60 470 Z" fill="url(#dash-area)"/>
+
+            <!-- yesterday, same hour — indigo reference -->
+            <path d="M60 338 L140 330 L220 323 L300 315 L380 307 L460 302 L540 294 L620 289 L700 281 L780 273 L864 266" fill="none" stroke="#4F46E5" stroke-width="1.5" stroke-dasharray="4 6"/>
+
+            <!-- deploy marker -->
+            <line x1="628" y1="64" x2="628" y2="470" stroke="#4F46E5" stroke-width="1.5" stroke-dasharray="3 5"/>
+
+            <!-- today — the data -->
+            <path d="M60 304 L100 293 L140 298 L180 284 L220 289 L260 273 L300 279 L340 264 L380 271 L420 255 L460 260 L500 245 L540 250 L580 237 L620 232 L634 312 L652 271 L700 235 L740 224 L780 213 L820 193 L864 176" fill="none" stroke="#22D3EE" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="864" cy="176" r="5" fill="#22D3EE"/>
+
+            <!-- legend -->
+            <line x1="640" y1="26" x2="664" y2="26" stroke="#22D3EE" stroke-width="2.5"/>
+            <line x1="760" y1="26" x2="784" y2="26" stroke="#4F46E5" stroke-width="1.5" stroke-dasharray="4 6"/>
+            <g font-family="'JetBrains Mono', monospace" font-size="12">
+              <text x="670" y="30" class="glass-svg-ink-2 lang-en">TODAY</text>
+              <text x="670" y="30" class="glass-svg-ink-2 lang-zh">今日</text>
+              <text x="790" y="30" class="glass-svg-ink-2 lang-en">&#8722;24H</text>
+              <text x="790" y="30" class="glass-svg-ink-2 lang-zh">昨日</text>
+            </g>
+
+            <!-- axis labels -->
+            <g font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">
+              <text x="8" y="60">3.0M</text>
+              <text x="8" y="164">2.5M</text>
+              <text x="8" y="267">2.0M</text>
+              <text x="8" y="371">1.5M</text>
+              <text x="8" y="474">1.0M</text>
+              <text x="167" y="502" text-anchor="middle">13:40</text>
+              <text x="435" y="502" text-anchor="middle">14:00</text>
+              <text x="703" y="502" text-anchor="middle">14:20</text>
+            </g>
+            <text x="864" y="502" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" class="glass-svg-accent-ink">NOW</text>
+            <text x="636" y="88" font-family="'JetBrains Mono', monospace" font-size="11.5" class="glass-svg-ref-ink">DEPLOY 14:14 · v2.42</text>
+            <text x="850" y="162" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" class="glass-svg-accent-ink">2.42M</text>
+          </svg>
+          <figcaption>
+            <span class="lang-en">A brief dip at the 14:14 canary deploy, recovered in 90 seconds — the indigo dashes are yesterday's same hour, running about 8% lower.</span>
+            <span class="lang-zh">14:14 灰度发布带来短暂下降，90 秒内恢复——靛蓝虚线是昨天同一小时，整体低约 8%。</span>
+          </figcaption>
+        </figure>
+
+        <div class="side-col">
+          <figure class="glass-card side-card">
+            <div class="panel-head">
+              <h2><span class="lang-en">Error budget</span><span class="lang-zh">错误预算</span></h2>
+              <span class="panel-meta">SLO · 30d</span>
+            </div>
+            <svg role="img" aria-label="Error budget gauge: 87 percent of the 30-day budget remains; SLO target 99.99 percent, burn rate 0.4 times" viewBox="0 0 340 160">
+              <!-- track + progress arc (stroke gauge, never a 3D pie) -->
+              <path d="M49.8 122.2 A54 54 0 1 1 126.2 122.2" fill="none" stroke="var(--glass-line)" stroke-width="11" stroke-linecap="round"/>
+              <path d="M49.8 122.2 A54 54 0 1 1 141.2 93.3" fill="none" stroke="#22D3EE" stroke-width="11" stroke-linecap="round"/>
+              <line x1="170" y1="28" x2="170" y2="132" class="glass-svg-line"/>
+              <text x="88" y="90" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-size="30" font-weight="700" class="glass-svg-ink">87%</text>
+              <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">
+                <text x="88" y="136" text-anchor="middle" class="lang-en">REMAINING</text>
+                <text x="88" y="136" text-anchor="middle" class="lang-zh">剩余额度</text>
+                <text x="200" y="40">SLO TARGET</text>
+                <text x="200" y="96">BURN RATE</text>
+                <text x="200" y="148">WINDOW</text>
+              </g>
+              <g font-family="'Space Grotesk', sans-serif" font-size="19" font-weight="600" class="glass-svg-ink">
+                <text x="332" y="64" text-anchor="end">99.99%</text>
+                <text x="332" y="120" text-anchor="end">0.4&#215;</text>
+              </g>
+              <text x="332" y="148" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-2">30D · JUL 01</text>
+            </svg>
+            <figcaption>
+              <span class="lang-en">13% of the 30-day error budget is spent at a 0.4&#215; burn rate — on track to reset on Jul 01 with room to spare.</span>
+              <span class="lang-zh">30 天错误预算已消耗 13%，燃烧率 0.4&#215;——按当前速度，7 月 1 日重置前仍有富余。</span>
+            </figcaption>
+          </figure>
+
+          <figure class="glass-card side-card">
+            <div class="panel-head">
+              <h2><span class="lang-en">Query p99 by region</span><span class="lang-zh">各区域查询 p99</span></h2>
+              <span class="panel-meta">last 60 min</span>
+            </div>
+            <svg role="img" aria-label="Bar chart of query p99 latency by region: five regions sit between 29 and 41 milliseconds, sa-east-1 breaches the 48 millisecond SLO ceiling at 51 milliseconds" viewBox="0 0 340 160">
+              <line x1="12" y1="46.8" x2="330" y2="46.8" stroke="#4F46E5" stroke-width="1.5" stroke-dasharray="4 5"/>
+              <line x1="12" y1="126" x2="330" y2="126" class="glass-svg-line"/>
+              <g fill="#22D3EE">
+                <rect x="18"  y="75" width="28" height="51" rx="4"/>
+                <rect x="70"  y="67" width="28" height="59" rx="4"/>
+                <rect x="122" y="72" width="28" height="54" rx="4"/>
+                <rect x="174" y="78" width="28" height="48" rx="4"/>
+                <rect x="226" y="58" width="28" height="68" rx="4"/>
+                <rect x="278" y="42" width="28" height="84" rx="4"/>
+              </g>
+              <text x="12" y="40" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ref-ink">SLO 48MS</text>
+              <!-- values sit INSIDE the bars (button-ink on cyan) so none collides
+                   with the ceiling line; the one breach value pops outside in red -->
+              <g font-family="'JetBrains Mono', monospace" font-size="11" text-anchor="middle" style="fill:var(--glass-button-ink)">
+                <text x="32"  y="91">31</text>
+                <text x="84"  y="83">36</text>
+                <text x="136" y="88">33</text>
+                <text x="188" y="94">29</text>
+                <text x="240" y="74">41</text>
+              </g>
+              <text x="292" y="36" font-family="'JetBrains Mono', monospace" font-size="11" text-anchor="middle" style="fill:var(--glass-down)">51</text>
+              <g font-family="'JetBrains Mono', monospace" font-size="11" text-anchor="middle" class="glass-svg-ink-3">
+                <text x="32"  y="146">use1</text>
+                <text x="84"  y="146">usw2</text>
+                <text x="136" y="146">euc1</text>
+                <text x="188" y="146">euw1</text>
+                <text x="240" y="146">aps1</text>
+                <text x="292" y="146">sae1</text>
+              </g>
+            </svg>
+            <figcaption>
+              <span class="lang-en">sa-east-1 p99 sits 3ms above the 48ms ceiling; the 503 rows in the event tail below come from the same region.</span>
+              <span class="lang-zh">sa-east-1 的 p99 高出 48ms 上限 3ms；下方事件流里的 503 错误行正来自这一区域。</span>
+            </figcaption>
+          </figure>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Event tail — mono table, two err rows inked --glass-down -->
+  <section class="console-section console-section--last">
+    <div class="glass-container glass-container--wide">
+      <div class="glass-panel table-panel">
+        <div class="panel-head">
+          <h2><span class="lang-en">Recent events</span><span class="lang-zh">最近事件</span></h2>
+          <a class="glass-link" href="#tail"><span class="lang-en">Open full tail</span><span class="lang-zh">打开完整事件流</span></a>
+        </div>
+        <table class="glass-table">
+          <thead>
+            <tr>
+              <th><span class="lang-en">Time</span><span class="lang-zh">时间</span></th>
+              <th><span class="lang-en">Stream</span><span class="lang-zh">流</span></th>
+              <th><span class="lang-en">Event</span><span class="lang-zh">事件</span></th>
+              <th><span class="lang-en">Region</span><span class="lang-zh">区域</span></th>
+              <th><span class="lang-en">Status</span><span class="lang-zh">状态</span></th>
+              <th class="num"><span class="lang-en">Latency</span><span class="lang-zh">延迟</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>14:32:04.118</td><td>checkout.events</td><td>order.created</td><td>use1</td><td>ok 200</td><td class="num">31ms</td>
+            </tr>
+            <tr>
+              <td>14:32:03.642</td><td>api.latency</td><td>window.rollup</td><td>euc1</td><td>ok 200</td><td class="num">29ms</td>
+            </tr>
+            <tr>
+              <td>14:32:02.971</td><td>checkout.events</td><td>payment.captured</td><td>usw2</td><td>ok 200</td><td class="num">36ms</td>
+            </tr>
+            <tr>
+              <td>14:32:01.508</td><td>infra.deploys</td><td>canary.health</td><td>use1</td><td>ok 201</td><td class="num">44ms</td>
+            </tr>
+            <tr class="row-down">
+              <td>14:32:00.183</td><td>checkout.events</td><td>order.created</td><td>sae1</td><td>err 503</td><td class="num">2.4s</td>
+            </tr>
+            <tr>
+              <td>14:31:58.755</td><td>auth.failures</td><td>login.blocked</td><td>aps1</td><td>ok 200</td><td class="num">38ms</td>
+            </tr>
+            <tr class="row-down">
+              <td>14:31:57.320</td><td>checkout.events</td><td>order.created</td><td>sae1</td><td>err 503</td><td class="num">2.1s</td>
+            </tr>
+            <tr>
+              <td>14:31:55.904</td><td>api.latency</td><td>window.rollup</td><td>euw1</td><td>ok 200</td><td class="num">27ms</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Thin footer — single line, no sitemap -->
+<footer class="glass-footer">
+  <div class="footer-line">
+    <span>&copy; 2026 Prism Analytics, Inc.</span>
+    <span><span class="footer-dot" aria-hidden="true"></span><span class="lang-en">All regions nominal · console v2.42</span><span class="lang-zh">全部区域正常 · 控制台 v2.42</span></span>
+    <span class="footer-links">
+      <a class="glass-link glass-link--no-arrow" href="landing.html"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
+      <a class="glass-link glass-link--no-arrow" href="#status"><span class="lang-en">Status</span><span class="lang-zh">状态页</span></a>
+      <a class="glass-link glass-link--no-arrow" href="#docs"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+    </span>
+  </div>
+</footer>
+
+<script src="../../assets/glass.js"></script>
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = null;
+  try { queryLang = new URLSearchParams(location.search).get('lang'); } catch (e) {}
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: glass
+Page-type: dashboard
+Created: 2026-06-11
+
+Decisions (7):
+1. [calm-two-blobs] chose "two blobs pushed to off-canvas corners under glass-page--calm" over "the landing's three-blob hero field". Because: a console is read for numbers, not spectacle — calm pages dim light to 0.55x and no blob core may sit under the KPI/panel grid (R1 geometry), so the cores live outside the viewport corners.
+2. [compact-h1-40] chose "a 40px h1 with mono timestamp and a segmented range control" over "the 76px launch-page hero". Because: a dashboard is a tool you return to hourly; its chrome must be shorter than the first row of data it serves.
+3. [kpi-terminal-markup] chose "KPI finals written in markup with data-count-to mirroring them" over "JS-injected numbers". Because: the freeze contract makes static markup the canonical render — gates, no-JS readers and deterministic screenshots all see true values; the animation is sugar.
+4. [delta-color-judgment] chose "delta color = judgment (green good / red bad), glyph = direction" over "color = direction". Because: on an ops console a latency drop is good news — a green falling-triangle 2.1ms reads 'improved', and red stays reserved for the one KPI (active alerts) that actually needs eyes.
+5. [single-draw-budget] chose "data-draw on the throughput chart only; gauge, bars and table fully static, zero tilt" over "draw/tilt on every figure". Because: motion is punctuation — one draw marks the Tier 1 figure, and tilt is launch-page language, not ops language.
+6. [indigo-reference-duty] chose "indigo for reference geometry only (yesterday's baseline, deploy marker, SLO ceiling)" over "a second brand color or red threshold lines". Because: the data-display contract is one hue per chart — cyan is the data, indigo is context, red/green appear only as up/down verdicts.
+7. [table-error-rows] chose "two err-503 rows inked --glass-down inside an otherwise neutral mono table" over "row background fills or per-row badges". Because: red is a verdict, not decoration — two colored rows in eight make the failure findable in one saccade without turning the tail into a christmas tree.
+
+Known trade-offs:
+- The range control (15M/1H/6H/24H/7D) is decorative — wiring real period switches needs a data layer a static canonical doesn't ship. The active chip still demonstrates the cyan-fill + --glass-button-ink recipe.
+- SVG-internal labels (axis ticks, region codes, SLO TARGET / BURN RATE rows) stay English mono identifiers rather than lang-en/lang-zh pairs — they are code-adjacent vocabulary; legend and gauge headline words do carry bilingual pairs, and page-level copy holds the full bilingual contract.
+- KPI cards use 24px padding (not the 32px card default) so 64px tabular numerals like "99.99%" fit a 4-up grid at 1440 without clipping.
+- The side rail's two cards are locked to equal heights (1fr 1fr) to keep the grid's right edge straight; the gauge figure carries slightly more internal whitespace than the bar figure as a result.
+
+/design-review:self-diff -->
+
+</body>
+</html>
