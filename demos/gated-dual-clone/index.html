@@ -195,6 +195,10 @@
     gap: var(--space-5);
     margin-top: var(--space-6);
   }
+  /* 3 equal cards on one row (3-clone section) — avoids an orphan card in a 2-col grid */
+  .gdc-gates--three {
+    grid-template-columns: repeat(3, 1fr);
+  }
   .gdc-gate--lead {
     grid-column: 1 / -1;         /* span both columns, own row */
     background: var(--anth-bg-subtle) !important;
@@ -217,6 +221,7 @@
     border: 1px solid var(--anth-light-gray);
     border-radius: var(--radius-lg);
     padding: var(--space-6);
+    margin: 0; /* reset UA figure margin so cards fill their grid tracks */
     display: flex; flex-direction: column;
   }
   .gdc-gate__icon {
@@ -350,7 +355,7 @@
   /* ---------- Responsive ---------- */
   @media (max-width: 900px) {
     .gdc-q-grid { grid-template-columns: 1fr; }
-    .gdc-gates { grid-template-columns: 1fr; }
+    .gdc-gates, .gdc-gates--three { grid-template-columns: 1fr; }
     .gdc-footer__inner { grid-template-columns: 1fr 1fr; }
   }
 </style>
@@ -367,6 +372,7 @@
       <a href="#bootstrap"><span class="lang-en">Bootstrap</span><span class="lang-zh">搭建</span></a>
       <a href="#gates"><span class="lang-en">Safety</span><span class="lang-zh">安全闸</span></a>
       <a href="#compare"><span class="lang-en">Compare</span><span class="lang-zh">对比</span></a>
+      <a href="../../index.html"><span class="lang-en">All skills</span><span class="lang-zh">全部 skill</span></a>
     </div>
     <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
   </div>
@@ -833,7 +839,7 @@ git push origin release --dry-run
 <span class="comment"># <span class="lang-en">4. on pass: write gateway/.git/last-clean-verify  5. next git push is allowed</span><span class="lang-zh">4. 通过则写 stamp  5. 下一次 git push 才放行</span></span>
 <span class="comment"># <span class="lang-en">emergency bypass:  git push --push-option=allow-unverified</span><span class="lang-zh">紧急 bypass：  git push --push-option=allow-unverified</span></span></pre>
 
-    <div class="gdc-gates" style="margin-top: var(--space-7);">
+    <div class="gdc-gates gdc-gates--three" style="margin-top: var(--space-7);">
       <figure class="gdc-gate">
         <div class="gdc-gate__icon" aria-hidden="true">
           <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 6 H22 V20 H4 Z" stroke="currentColor" stroke-width="2"/><path d="M8 10 L14 15 M14 10 L8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -975,20 +981,21 @@ git push origin release --dry-run
     <div>
       <h4><span class="lang-en">Skill</span><span class="lang-zh">Skill 内容</span></h4>
       <ul>
-        <li><span class="lang-en">bootstrap.sh</span><span class="lang-zh">bootstrap.sh</span></li>
-        <li><span class="lang-en">sync-satellite.sh</span><span class="lang-zh">sync-satellite.sh</span></li>
-        <li><span class="lang-en">install-hooks.sh</span><span class="lang-zh">install-hooks.sh</span></li>
-        <li><span class="lang-en">6 reference docs</span><span class="lang-zh">6 份参考文档</span></li>
+        <li><a href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone/scripts/bootstrap.sh"><span class="lang-en">bootstrap.sh</span><span class="lang-zh">bootstrap.sh</span></a></li>
+        <li><a href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone/scripts/sync-satellite.sh"><span class="lang-en">sync-satellite.sh</span><span class="lang-zh">sync-satellite.sh</span></a></li>
+        <li><a href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone/scripts/install-hooks.sh"><span class="lang-en">install-hooks.sh</span><span class="lang-zh">install-hooks.sh</span></a></li>
+        <li><a href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone/scripts/clean-verify-run.sh"><span class="lang-en">clean-verify-run.sh</span><span class="lang-zh">clean-verify-run.sh</span></a></li>
+        <li><a href="https://github.com/TbusOS/sky-skills/tree/main/skills/gated-dual-clone/references"><span class="lang-en">7 reference docs</span><span class="lang-zh">7 份参考文档</span></a></li>
       </ul>
     </div>
 
     <div>
       <h4><span class="lang-en">Reference docs</span><span class="lang-zh">参考文档</span></h4>
       <ul>
-        <li><span class="lang-en">decision-checklist</span><span class="lang-zh">决策清单</span></li>
-        <li><span class="lang-en">daily-workflow</span><span class="lang-zh">日常流程</span></li>
-        <li><span class="lang-en">guardrails</span><span class="lang-zh">安全闸原理</span></li>
-        <li><span class="lang-en">troubleshooting</span><span class="lang-zh">故障排查</span></li>
+        <li><a href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone/references/decision-checklist.md"><span class="lang-en">decision-checklist</span><span class="lang-zh">决策清单</span></a></li>
+        <li><a href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone/references/daily-workflow.md"><span class="lang-en">daily-workflow</span><span class="lang-zh">日常流程</span></a></li>
+        <li><a href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone/references/guardrails.md"><span class="lang-en">guardrails</span><span class="lang-zh">安全闸原理</span></a></li>
+        <li><a href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone/references/troubleshooting.md"><span class="lang-en">troubleshooting</span><span class="lang-zh">故障排查</span></a></li>
       </ul>
     </div>
 
