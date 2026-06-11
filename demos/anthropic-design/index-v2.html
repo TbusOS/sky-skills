@@ -7,6 +7,24 @@
 <meta name="description" content="Thirteen focused Claude Code Skills. Small, composable, unambiguous. Rendered with anthropic-design.">
 <link rel="stylesheet" href="../../skills/anthropic-design/assets/fonts.css">
 <link rel="stylesheet" href="../../skills/anthropic-design/assets/anthropic.css">
+<!-- Page-scoped sticky-nav hardening. Does NOT edit the shared anthropic.css
+     (that file is reused by canonical baseline pages). This block only nails
+     the nav to the top for THIS page and adds anchor-jump offset, since this
+     page is ~9000px tall with #skills/#design/#install/#pricing anchors. -->
+<style>
+  /* Pin the nav to the viewport top regardless of scroll position. */
+  .anth-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    /* Opaque background so page content does not bleed through while scrolling. */
+    background: var(--anth-bg);
+    /* One restrained editorial hairline (anthropic divider token). */
+    border-bottom: 1px solid var(--anth-light-gray);
+  }
+  /* Offset anchor jumps so the sticky 64px nav never covers the target heading. */
+  html { scroll-padding-top: 84px; }
+</style>
 <style>
   html[data-lang="en"] .lang-zh { display: none !important; }
   html[data-lang="zh"] .lang-en { display: none !important; }

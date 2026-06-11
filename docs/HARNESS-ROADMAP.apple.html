@@ -8,6 +8,24 @@
 <link rel="stylesheet" href="../skills/apple-design/assets/fonts.css">
 <link rel="stylesheet" href="../skills/apple-design/assets/apple.css">
 <style>
+  /* Page-scoped sticky-nav reinforcement (this page only; shared apple.css untouched).
+     This page is 6000-9600px tall — the brand link must stay reachable at any scroll
+     position. The shared .apple-nav semi-transparent bg lets content bleed through;
+     here we pin it with an opaque bg token so nothing shows through, keep a subtle
+     backdrop blur for the near-invisible apple.com chrome, add a 1px hairline divider,
+     and offset anchor jumps so section titles clear the bar. */
+  .apple-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--apple-bg);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--apple-divider);
+  }
+  /* nav height is 44px; offset anchor targets so headings clear the sticky bar */
+  html { scroll-padding-top: 88px; }
+
   html[data-lang="en"] .lang-zh { display: none !important; }
   html[data-lang="zh"] .lang-en { display: none !important; }
   .lang-toggle {

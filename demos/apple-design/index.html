@@ -7,7 +7,28 @@
 <meta name="description" content="A curated collection of Claude Code Skills, designed for focused, distraction-free work.">
 <link rel="stylesheet" href="../../skills/apple-design/assets/fonts.css">
 <link rel="stylesheet" href="../../skills/apple-design/assets/apple.css">
+<!-- Page-scoped sticky-nav override. Does NOT touch the shared apple.css
+     (canonical base reused by other pages). Pins .apple-nav to the viewport
+     top with an opaque background so content cannot smear through, and offsets
+     anchor jumps so the 44px bar never hides a section heading. -->
 <style>
+  /* Sticky nav: opaque bg (no translucent backdrop smear), hairline divider,
+     z-index 100 — matches base, stays below the search-overlay (200). */
+  .apple-nav {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--apple-bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-bottom: 1px solid var(--apple-divider);
+  }
+  /* Anchor offset: nav is 44px tall; 64px leaves a small gap above the target
+     heading so the bar never covers it. Fixes all 7 in-page #anchors at once. */
+  html {
+    scroll-padding-top: 64px;
+  }
   html[data-lang="en"] .lang-zh { display: none !important; }
   html[data-lang="zh"] .lang-en { display: none !important; }
   .lang-toggle {

@@ -48,6 +48,18 @@
     text-transform: none;
     letter-spacing: 0.04em;
   }
+  /* Sticky nav — page-scoped overrides (shared ember.css already sets
+     position:sticky/top:0/z-index:100/height:72px; here we make the
+     background fully opaque so content does not bleed through, and add
+     a scroll offset so anchor jumps clear the 72px bar). */
+  .ember-nav {
+    background: var(--ember-bg);            /* opaque #fff2df, no see-through */
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-bottom: 1px solid var(--ember-divider);  /* single warm hairline */
+    z-index: 50;
+  }
+  html { scroll-padding-top: 88px; }        /* 72px nav + breathing room */
 </style>
 </head>
 <body>

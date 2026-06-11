@@ -10,6 +10,24 @@
 <link rel="stylesheet" href="../skills/anthropic-design/assets/fonts.css">
 <link rel="stylesheet" href="../skills/anthropic-design/assets/anthropic.css">
 <style>
+  /* ---------- Page-scoped sticky nav (this page only) ----------
+     This page is 6000-9600px tall with many in-page anchor jumps
+     (#methods / #skills-ref / #review / ...). Pin the nav so the brand
+     link stays reachable at any scroll depth, give it an opaque bg so
+     content does not bleed through, and set scroll-padding-top so anchor
+     targets clear the 64px-tall bar. Scoped here; shared anthropic.css
+     is left untouched. */
+  .anth-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--anth-bg);            /* opaque — no content bleed-through */
+    border-bottom: 1px solid var(--anth-light-gray);  /* anthropic divider hairline */
+    box-shadow: 0 1px 0 rgba(20, 20, 19, 0.02);       /* barely-there warm seam */
+  }
+  /* Nav measures 64px tall; 88px clears anchor targets below the bar. */
+  html { scroll-padding-top: 88px; }
+
   html[data-lang="en"] .lang-zh { display: none !important; }
   html[data-lang="zh"] .lang-en { display: none !important; }
   .lang-toggle {

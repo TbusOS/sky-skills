@@ -8,6 +8,24 @@
 <link rel="stylesheet" href="../skills/sage-design/assets/fonts.css">
 <link rel="stylesheet" href="../skills/sage-design/assets/sage.css">
 <style>
+  /* ── Sticky nav · page-scoped override (does not touch shared sage.css) ──
+     This page is 6000-9600px tall; the brand link must stay reachable from
+     any scroll position. Shared .sage-nav is already position:sticky but uses
+     a translucent backdrop-filter bg that lets content bleed through when the
+     browser drops the blur. Force an opaque sage bg + single 1px hairline
+     (sage = most restrained: hairline only, no shadow). scroll-padding-top
+     keeps in-page #anchors clear of the 72px bar. */
+  .sage-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--sage-bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-bottom: 1px solid var(--sage-divider);
+  }
+  html { scroll-padding-top: 88px; }
+
   html[data-lang="en"] .lang-zh { display: none !important; }
   html[data-lang="zh"] .lang-en { display: none !important; }
   .lang-toggle {

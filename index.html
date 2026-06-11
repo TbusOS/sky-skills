@@ -37,6 +37,25 @@
     font-family: "Poppins", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif;
   }
   html[data-lang="zh"] .anth-quote { font-style: normal; }
+
+  /* ---- Page-scoped sticky nav (root home page) ----
+     Pins .anth-nav to the viewport top so the brand link (→ #) stays
+     reachable across this page's 6000-9600px height. Scoped to this page
+     only; the shared skills/anthropic-design/assets/anthropic.css is not
+     touched. Treatment is editorial-restrained: opaque cream background +
+     a single 1px hairline using the anthropic divider token
+     (--anth-light-gray, #e8e6dc — same token .anth-divider uses). */
+  .anth-nav {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--anth-bg);                       /* opaque #faf9f5 — no see-through */
+    border-bottom: 1px solid var(--anth-light-gray);  /* lone hairline divider */
+  }
+  /* Offset anchor jumps so the sticky bar never covers a target heading.
+     nav is 64px tall; ~80px clears it with a little breathing room. */
+  html { scroll-padding-top: 80px; }
 </style>
 </head>
 <body>

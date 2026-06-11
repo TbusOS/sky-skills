@@ -175,6 +175,23 @@
   .styles-table strong { font-family:'Fraunces', serif; font-weight:500; }
   .styles-table .yes { color:#58661e; font-family:'Fraunces', serif; font-weight:500; }
   .styles-table .accent { color:#c49464; font-style:italic; font-family:'Fraunces', serif; }
+
+  /* ── Sticky nav · page-scoped override (shared ember.css must not change) ──
+     This page is 6000–10000px tall; the brand mark must stay reachable at any
+     scroll position. The shared .ember-nav already declares position:sticky, but
+     its background is translucent (0.85 alpha + blur), so content shows through
+     while scrolling. Re-assert an opaque background and a hairline divider, and
+     add scroll-padding-top so #section anchor jumps clear the 72px bar. */
+  .ember-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--ember-bg);           /* #fff2df · opaque, no see-through */
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-bottom: 1px solid var(--ember-divider);  /* #e6d9bf · one warm hairline */
+  }
+  html { scroll-padding-top: 88px; }       /* 72px nav + 16px breathing room */
 </style>
 </head>
 <body>

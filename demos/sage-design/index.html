@@ -8,6 +8,24 @@
 <link rel="stylesheet" href="../../skills/sage-design/assets/fonts.css">
 <link rel="stylesheet" href="../../skills/sage-design/assets/sage.css">
 <style>
+  /* ---- Page-scoped sticky nav (sage · most restrained) ----
+     Shared sage.css already sets position:sticky, but with a translucent
+     backdrop-blur bg. This page is 6000-9600px tall; on long scrolls the
+     blur lets content smear through. Override here (this page only, never
+     the shared css) with an OPAQUE bg + a single 1px hairline divider.
+     No shadow — sage stays quiet. scroll-padding-top keeps #anchor jumps
+     clear of the 72px bar. */
+  .sage-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--sage-bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-bottom: 1px solid var(--sage-divider);
+  }
+  html { scroll-padding-top: 88px; }
+
   html[data-lang="en"] .lang-zh { display: none !important; }
   html[data-lang="zh"] .lang-en { display: none !important; }
   .lang-toggle {

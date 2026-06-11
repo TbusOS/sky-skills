@@ -11,6 +11,20 @@
 <link rel="stylesheet" href="../skills/anthropic-design/assets/fonts.css">
 <link rel="stylesheet" href="../skills/anthropic-design/assets/anthropic.css">
 <style>
+  /* Page-scoped sticky-nav guarantee (does not touch the shared anthropic.css).
+     This page is 6000-9600px tall; pin .anth-nav to the viewport top so the
+     brand link stays reachable at any scroll depth. Opaque bg so content does
+     not bleed through. scroll-padding-top offsets the 64px bar for the four
+     in-page #anchors (#components / #ordering / #styles / #status / #rules). */
+  html { scroll-padding-top: 84px; }
+  .anth-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--anth-bg);           /* opaque cream — no bleed-through */
+    border-bottom: 1px solid var(--anth-light-gray);  /* anthropic hairline divider */
+  }
+
   html[data-lang="en"] .lang-zh { display: none !important; }
   html[data-lang="zh"] .lang-en { display: none !important; }
   .lang-toggle {
