@@ -143,10 +143,10 @@
         <path d="M820 190 L820 232" stroke="#22D3EE" stroke-width="2" fill="none"/>
 
         <!-- index tier: hot + cold -->
-        <rect x="150" y="232" width="440" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="150" y="232" width="440" height="64" rx="14" class="glass-svg-node glass-svg-node--cyan"/>
         <text x="178" y="259" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">Hot tier — in memory</text>
         <text x="178" y="279" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">last 48h · columnar · sub-ms scans</text>
-        <rect x="630" y="232" width="440" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="630" y="232" width="440" height="64" rx="14" class="glass-svg-node glass-svg-node--indigo"/>
         <text x="658" y="259" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">Cold tier — object storage</text>
         <text x="658" y="279" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">410TB · 12× zstd · lazily promoted</text>
 
@@ -189,7 +189,7 @@
         <svg role="img" aria-label="Ingest flow: SDK batches events through the edge into the regional log" viewBox="0 0 560 240">
           <rect x="16" y="92" width="140" height="56" rx="12" class="glass-svg-node"/>
           <rect x="212" y="92" width="140" height="56" rx="12" class="glass-svg-node"/>
-          <rect x="408" y="92" width="136" height="56" rx="12" class="glass-svg-node-strong"/>
+          <rect x="408" y="92" width="136" height="56" rx="12" class="glass-svg-node glass-svg-node--indigo"/>
           <path d="M156 120 L212 120" stroke="#22D3EE" stroke-width="2" fill="none"/>
           <path d="M352 120 L408 120" stroke="#22D3EE" stroke-width="2" fill="none"/>
           <circle cx="184" cy="120" r="4" fill="#22D3EE"/>
@@ -216,6 +216,9 @@
       <figure class="glass-card atlas-card" data-reveal>
         <span class="atlas-kicker">sequence · <span class="lang-en">query fan-out</span><span class="lang-zh">查询扇出</span></span>
         <svg role="img" aria-label="Query sequence: the planner scatters to six regions and gathers partial results" viewBox="0 0 560 240">
+          <rect x="24" y="14" width="72" height="28" rx="14" class="glass-svg-node"/>
+          <rect x="204" y="14" width="80" height="28" rx="14" class="glass-svg-node glass-svg-node--cyan"/>
+          <rect x="404" y="14" width="96" height="28" rx="14" class="glass-svg-node"/>
           <g font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">
             <text x="40" y="34">Client</text>
             <text x="220" y="34">Planner</text>
@@ -304,7 +307,7 @@
         </svg>
         <figcaption>
           <span class="lang-en">Every rollout is four gates on a clock; the cyan tick is where a human last touched it.</span>
-          <span class="lang-zh">每次发布是钟表上的四道闸；cyan 刻度是人手最后碰过的位置。</span>
+          <span class="lang-zh">每次发布是钟表上的四道检查；cyan 刻度是人手最后碰过的位置。</span>
         </figcaption>
       </figure>
 
@@ -347,7 +350,7 @@
           <rect x="16" y="56" width="92" height="44" rx="10" class="glass-svg-node"/>
           <rect x="140" y="32" width="108" height="44" rx="10" class="glass-svg-node"/>
           <rect x="140" y="92" width="108" height="44" rx="10" class="glass-svg-node"/>
-          <rect x="280" y="56" width="92" height="44" rx="10" class="glass-svg-node"/>
+          <rect x="280" y="56" width="92" height="44" rx="10" class="glass-svg-node glass-svg-node--indigo"/>
           <rect x="404" y="56" width="140" height="44" rx="10" class="glass-svg-node-strong"/>
           <g font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">
             <text x="34" y="82">commit</text>
@@ -506,6 +509,7 @@ Known trade-offs:
 - The featured architecture carries ~26 text labels — near the density ceiling for its 1240 viewBox. Accepted because it renders ≥1190px wide in the wide container (well above the 760px cramped threshold) and every label is ≥12px source.
 - Gallery SVGs use fixed 560×240 viewBoxes for rhythm, which leaves the state-machine diagram with more bottom margin than the bitfield. Accepted: uniform card heights beat per-diagram optical packing in a 2-col grid.
 - The sequence diagram's six regions are drawn as one lifeline labeled ×6 instead of six lifelines. Accepted: six lifelines at 580px would crush label spacing; the ×6 annotation keeps the truth without the clutter.
+- 2026-06-11 tint batch: the atlas cards picked up the tint layer to match the featured architecture's hot/cold coloring — flow's Region log and the pipeline's image node go indigo (storage/artifact), the sequence's Planner gets a cyan-tinted actor pill (hot path); semantics per diagram-craft §2, at most two tint hues per card.
 
 /design-review:self-diff -->
 

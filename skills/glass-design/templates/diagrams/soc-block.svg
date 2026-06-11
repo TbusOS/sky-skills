@@ -1,0 +1,138 @@
+<!-- glass-design diagram template · soc-block · paste into a glass page and delete the embedded <style> + background rect (glass.css provides the classes; the page provides the canvas). Craft rules: diagram-craft.md -->
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Quartz-3550 SoC block diagram: a cyan-tinted CPU subsystem and a clock-reset unit feed one strong-stroked AXI NoC that fans out to an indigo memory zone, high-speed peripherals and an APB bridge serving low-speed peripherals; the numbered main data path runs CPU to NoC to DDR4" viewBox="0 0 1240 600">
+  <style>
+    /* Standalone preview values = glass dark theme. When pasted into a glass
+       page, DELETE this style block — glass.css provides these classes with
+       theme-switching tokens (.glass-svg-* / light mode safe). */
+    .glass-svg-ink   { fill: #F4F7FF; }
+    .glass-svg-ink-2 { fill: rgba(231,238,255,0.74); }
+    .glass-svg-ink-3 { fill: rgba(231,238,255,0.55); }
+    .glass-svg-node  { fill: rgba(255,255,255,0.06); stroke: rgba(255,255,255,0.14); }
+    .glass-svg-node-strong { fill: rgba(255,255,255,0.05); stroke: #22D3EE; }
+    .glass-svg-node--cyan { fill: rgba(34,211,238,0.10); stroke: rgba(34,211,238,0.50); }
+    .glass-svg-node--indigo { fill: rgba(129,140,248,0.12); stroke: rgba(129,140,248,0.50); }
+    .glass-svg-line  { stroke: rgba(255,255,255,0.08); }
+    .glass-svg-grid  { stroke: rgba(255,255,255,0.08); stroke-dasharray: 2 6; }
+    .glass-svg-accent-ink { fill: #22D3EE; }
+    .glass-svg-ref-ink { fill: #818CF8; }
+  </style>
+  <rect width="100%" height="100%" fill="#0B1020"/>
+        <text x="24" y="36" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">QUARTZ-3550 SOC · BLOCK DIAGRAM</text>
+        <text x="1216" y="36" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">arm64 · 12nm LP · 0.8V core rail</text>
+
+        <!-- zone containers -->
+        <rect x="24" y="56" width="800" height="124" rx="16" class="glass-svg-node"/>
+        <rect x="856" y="56" width="360" height="124" rx="16" class="glass-svg-node"/>
+        <rect x="24" y="356" width="380" height="200" rx="16" class="glass-svg-node glass-svg-node--indigo"/>
+        <rect x="428" y="356" width="380" height="200" rx="16" class="glass-svg-node"/>
+        <rect x="832" y="356" width="384" height="200" rx="16" class="glass-svg-node"/>
+
+        <!-- connectors -->
+        <path d="M188 180 L188 236" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M320 300 L320 400" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <g class="glass-svg-line" stroke-width="1.5" stroke-dasharray="4 4">
+          <line x1="940" y1="180" x2="940" y2="216"/>
+          <line x1="940" y1="216" x2="800" y2="216"/>
+          <line x1="618" y1="300" x2="618" y2="356"/>
+          <line x1="800" y1="268" x2="880" y2="268"/>
+          <line x1="980" y1="300" x2="980" y2="356"/>
+        </g>
+        <text x="952" y="208" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">clk · rst</text>
+        <text x="200" y="214" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-accent-ink">01</text>
+        <text x="332" y="348" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-accent-ink">02</text>
+
+        <!-- CPU subsystem -->
+        <text x="48" y="84" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-accent-ink">CPU SUBSYSTEM</text>
+        <text x="800" y="84" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">DynamIQ · 1.8GHz</text>
+        <rect x="48" y="100" width="280" height="64" rx="12" class="glass-svg-node glass-svg-node--cyan"/>
+        <rect x="360" y="100" width="200" height="64" rx="12" class="glass-svg-node glass-svg-node--cyan"/>
+        <rect x="592" y="100" width="208" height="64" rx="12" class="glass-svg-node glass-svg-node--cyan"/>
+        <g font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">
+          <text x="72" y="128">Cortex-A55 ×2</text>
+          <text x="384" y="128">L2 · 512K</text>
+          <text x="616" y="128">GIC-600</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-3">
+          <text x="72" y="148">L1 32K I/D per core</text>
+          <text x="384" y="148">unified · ECC</text>
+          <text x="616" y="148">interrupt distributor</text>
+        </g>
+
+        <!-- clock and reset -->
+        <text x="880" y="84" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">CLOCK &amp; RESET</text>
+        <text x="1192" y="84" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">24MHz xtal</text>
+        <rect x="880" y="100" width="150" height="64" rx="12" class="glass-svg-node"/>
+        <rect x="1046" y="100" width="146" height="64" rx="12" class="glass-svg-node"/>
+        <g font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">
+          <text x="900" y="128">PLL ×3</text>
+          <text x="1066" y="128">CRU</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-3">
+          <text x="900" y="148">core · ddr · peri</text>
+          <text x="1066" y="148">gate · reset</text>
+        </g>
+
+        <!-- interconnect row -->
+        <rect x="240" y="236" width="560" height="64" rx="14" class="glass-svg-node-strong"/>
+        <text x="268" y="263" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">AXI NoC · 64-bit @ 800MHz</text>
+        <text x="268" y="284" font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-2">system interconnect · QoS arbitration · 4 masters</text>
+        <rect x="880" y="236" width="200" height="64" rx="14" class="glass-svg-node"/>
+        <text x="904" y="263" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">APB bridge</text>
+        <text x="904" y="284" font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-2">AXI-to-APB · 100MHz</text>
+
+        <!-- memory zone -->
+        <text x="48" y="384" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ref-ink">MEMORY</text>
+        <text x="380" y="384" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">AXI slaves</text>
+        <rect x="48" y="400" width="332" height="60" rx="12" class="glass-svg-node"/>
+        <rect x="48" y="472" width="158" height="60" rx="12" class="glass-svg-node"/>
+        <rect x="222" y="472" width="158" height="60" rx="12" class="glass-svg-node"/>
+        <g font-family="'Inter', sans-serif" font-size="13.5" font-weight="600" class="glass-svg-ink">
+          <text x="72" y="426">DDR4 ctrl + PHY</text>
+          <text x="68" y="498">SRAM 256K</text>
+          <text x="242" y="498">Boot ROM</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-3">
+          <text x="72" y="446">DDR4-3200 · 32-bit + ECC</text>
+          <text x="68" y="518">scratch</text>
+          <text x="242" y="518">64K mask</text>
+        </g>
+
+        <!-- high-speed zone -->
+        <text x="452" y="384" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">HIGH-SPEED PERIPH</text>
+        <text x="784" y="384" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">DMA masters</text>
+        <rect x="452" y="400" width="332" height="60" rx="12" class="glass-svg-node"/>
+        <rect x="452" y="472" width="158" height="60" rx="12" class="glass-svg-node"/>
+        <rect x="626" y="472" width="158" height="60" rx="12" class="glass-svg-node"/>
+        <g font-family="'Inter', sans-serif" font-size="13.5" font-weight="600" class="glass-svg-ink">
+          <text x="476" y="426">PCIe Gen3 ×2</text>
+          <text x="472" y="498">USB 3.0</text>
+          <text x="646" y="498">GbE MAC</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-3">
+          <text x="476" y="446">root complex · MSI-X</text>
+          <text x="472" y="518">xHCI DRD</text>
+          <text x="646" y="518">RGMII · TSO</text>
+        </g>
+
+        <!-- low-speed zone -->
+        <text x="856" y="384" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">LOW-SPEED PERIPH</text>
+        <text x="1192" y="384" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">via APB</text>
+        <rect x="856" y="400" width="170" height="60" rx="12" class="glass-svg-node"/>
+        <rect x="1042" y="400" width="160" height="60" rx="12" class="glass-svg-node"/>
+        <rect x="856" y="472" width="170" height="60" rx="12" class="glass-svg-node"/>
+        <rect x="1042" y="472" width="160" height="60" rx="12" class="glass-svg-node"/>
+        <g font-family="'Inter', sans-serif" font-size="13.5" font-weight="600" class="glass-svg-ink">
+          <text x="876" y="426">UART ×4</text>
+          <text x="1062" y="426">I2C ×3</text>
+          <text x="876" y="498">SPI ×2</text>
+          <text x="1062" y="498">GPIO</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-3">
+          <text x="876" y="446">16550A</text>
+          <text x="1062" y="446">400kHz FM</text>
+          <text x="876" y="518">mode 0-3</text>
+          <text x="1062" y="518">4 banks ×32</text>
+        </g>
+
+        <text x="24" y="588" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">MAIN DATA PATH · CPU → NOC → DDR4 · EVERYTHING ELSE HANGS OFF THE FABRIC</text>
+      </svg>

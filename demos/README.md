@@ -16,7 +16,7 @@ Extra pages beyond the four flagship `index.html`:
 - [`anthropic-design/index-v2.html`](./anthropic-design/index-v2.html) — v2 scenario showcase (dashboard / form / table / modal and other non-canonical layouts)
 - [`anthropic-design/diagrams.html`](./anthropic-design/diagrams.html) — 23-diagram gallery (registers, SoC blocks, waveforms, schedulers …)
 - [`apple-design/diagrams.html`](./apple-design/diagrams.html) — 12-diagram gallery, same diagram types in Apple's clean geometric style
-- [`glass-design/diagrams.html`](./glass-design/diagrams.html) — 7-diagram gallery as frosted panels on the aurora field (theme-proof SVG ink)
+- [`glass-design/diagrams.html`](./glass-design/diagrams.html) — 14-diagram gallery as frosted panels on the aurora field (theme-proof SVG ink)
 
 ## Local preview
 

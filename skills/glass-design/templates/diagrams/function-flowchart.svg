@@ -1,0 +1,105 @@
+<!-- glass-design diagram template · function-flowchart · paste into a glass page and delete the embedded <style> + background rect (glass.css provides the classes; the page provides the canvas). Craft rules: diagram-craft.md -->
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kernel driver probe flowchart: mydev_probe runs down a cyan happy path through devm_kzalloc, ioremap, request_irq and chardev registration; each failed check exits right into an indigo error lane that unwinds in reverse and returns through one exit" viewBox="0 0 1240 620">
+  <style>
+    /* Standalone preview values = glass dark theme. When pasted into a glass
+       page, DELETE this style block — glass.css provides these classes with
+       theme-switching tokens (.glass-svg-* / light mode safe). */
+    .glass-svg-ink   { fill: #F4F7FF; }
+    .glass-svg-ink-2 { fill: rgba(231,238,255,0.74); }
+    .glass-svg-ink-3 { fill: rgba(231,238,255,0.55); }
+    .glass-svg-node  { fill: rgba(255,255,255,0.06); stroke: rgba(255,255,255,0.14); }
+    .glass-svg-node-strong { fill: rgba(255,255,255,0.05); stroke: #22D3EE; }
+    .glass-svg-node--cyan { fill: rgba(34,211,238,0.10); stroke: rgba(34,211,238,0.50); }
+    .glass-svg-node--indigo { fill: rgba(129,140,248,0.12); stroke: rgba(129,140,248,0.50); }
+    .glass-svg-line  { stroke: rgba(255,255,255,0.08); }
+    .glass-svg-grid  { stroke: rgba(255,255,255,0.08); stroke-dasharray: 2 6; }
+    .glass-svg-accent-ink { fill: #22D3EE; }
+    .glass-svg-ref-ink { fill: #818CF8; }
+  </style>
+  <rect width="100%" height="100%" fill="#0B1020"/>
+        <text x="24" y="36" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">DRIVER PROBE · HAPPY PATH LEFT · ERROR LANE RIGHT</text>
+        <text x="1216" y="36" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">platform_driver · drivers/misc/mydev.c</text>
+
+        <!-- happy-path connectors -->
+        <path d="M210 96 L210 136" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M340 168 L440 168" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M340 272 L440 272" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M340 376 L440 376" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M520 200 L520 220 L210 220 L210 240" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M520 304 L520 324 L210 324 L210 344" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M520 408 L520 428 L210 428 L210 448" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M210 512 L210 532" stroke="#22D3EE" stroke-width="2" fill="none"/>
+
+        <!-- error-lane connectors (indigo, dashed) -->
+        <line x1="600" y1="168" x2="792" y2="168" class="glass-svg-node--indigo" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="600" y1="272" x2="792" y2="272" class="glass-svg-node--indigo" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="600" y1="376" x2="792" y2="376" class="glass-svg-node--indigo" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="980" y1="196" x2="980" y2="244" class="glass-svg-node--indigo" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="980" y1="300" x2="980" y2="348" class="glass-svg-node--indigo" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="980" y1="404" x2="980" y2="532" class="glass-svg-node--indigo" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+        <!-- entry (focus) -->
+        <rect x="80" y="56" width="260" height="40" rx="20" class="glass-svg-node-strong"/>
+        <text x="210" y="81" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12.5" class="glass-svg-accent-ink">mydev_probe(pdev)</text>
+
+        <!-- happy-path steps -->
+        <rect x="80" y="136" width="260" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="80" y="240" width="260" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="80" y="344" width="260" height="64" rx="14" class="glass-svg-node"/>
+        <rect x="80" y="448" width="260" height="64" rx="14" class="glass-svg-node"/>
+        <g font-family="'Inter', sans-serif" font-size="13.5" font-weight="600" class="glass-svg-ink">
+          <text x="104" y="163">devm_kzalloc(ctx)</text>
+          <text x="104" y="267">ioremap registers</text>
+          <text x="104" y="371">request_irq(irq, isr)</text>
+          <text x="104" y="475">register chardev</text>
+        </g>
+        <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">
+          <text x="104" y="184">sizeof(*ctx) · GFP_KERNEL</text>
+          <text x="104" y="288">MMIO window · res-&gt;start</text>
+          <text x="104" y="392">IRQF_SHARED · dev_id = ctx</text>
+          <text x="104" y="496">misc_register(&amp;ctx-&gt;mdev)</text>
+        </g>
+
+        <!-- decisions -->
+        <path d="M520,136 L600,168 L520,200 L440,168 Z" class="glass-svg-node"/>
+        <path d="M520,240 L600,272 L520,304 L440,272 Z" class="glass-svg-node"/>
+        <path d="M520,344 L600,376 L520,408 L440,376 Z" class="glass-svg-node"/>
+        <g font-family="'JetBrains Mono', monospace" font-size="12" text-anchor="middle" class="glass-svg-ink">
+          <text x="520" y="172">ctx == NULL?</text>
+          <text x="520" y="276">base == NULL?</text>
+          <text x="520" y="380">ret &lt; 0?</text>
+        </g>
+        <g font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">
+          <text x="640" y="160">yes</text>
+          <text x="640" y="264">yes</text>
+          <text x="640" y="368">yes</text>
+          <text x="534" y="222">no</text>
+          <text x="534" y="326">no</text>
+          <text x="534" y="430">no</text>
+        </g>
+
+        <!-- error lane -->
+        <rect x="760" y="88" width="440" height="420" rx="16" class="glass-svg-node glass-svg-node--indigo"/>
+        <text x="784" y="120" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ref-ink">ERROR LANE · UNWIND IN REVERSE</text>
+        <rect x="792" y="140" width="376" height="56" rx="12" class="glass-svg-node"/>
+        <rect x="792" y="244" width="376" height="56" rx="12" class="glass-svg-node"/>
+        <rect x="792" y="348" width="376" height="56" rx="12" class="glass-svg-node"/>
+        <g font-family="'JetBrains Mono', monospace" font-size="12.5" font-weight="600" class="glass-svg-ink">
+          <text x="816" y="164">ret = -ENOMEM</text>
+          <text x="816" y="268">ret = -ENOMEM</text>
+          <text x="816" y="372">iounmap(base)</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-2">
+          <text x="816" y="184">ctx allocation failed</text>
+          <text x="816" y="288">MMIO map failed · nothing to unwind</text>
+          <text x="816" y="392">unwind the MMIO mapping, then return</text>
+        </g>
+
+        <!-- exits -->
+        <rect x="110" y="532" width="200" height="40" rx="20" class="glass-svg-node glass-svg-node--cyan"/>
+        <text x="210" y="557" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12.5" class="glass-svg-ink">return 0</text>
+        <rect x="880" y="532" width="200" height="40" rx="20" class="glass-svg-node glass-svg-node--indigo"/>
+        <text x="980" y="557" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12.5" class="glass-svg-ref-ink">return ret</text>
+
+        <text x="24" y="604" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">EVERY ERROR RETURNS THROUGH ONE EXIT · UNWIND MIRRORS ACQUIRE ORDER</text>
+      </svg>

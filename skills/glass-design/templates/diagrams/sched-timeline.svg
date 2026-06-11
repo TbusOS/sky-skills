@@ -1,0 +1,112 @@
+<!-- glass-design diagram template · sched-timeline · paste into a glass page and delete the embedded <style> + background rect (glass.css provides the classes; the page provides the canvas). Craft rules: diagram-craft.md -->
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Scheduler timeline: a CFS run view across CPU 0 to CPU 2 where the cyan app render task is preempted by the strong-stroked eth0 IRQ thread at 4ms and migrates to CPU 2 under load balancing while indigo kworker bursts run periodically on CPU 1" viewBox="0 0 1240 400">
+  <style>
+    /* Standalone preview values = glass dark theme. When pasted into a glass
+       page, DELETE this style block — glass.css provides these classes with
+       theme-switching tokens (.glass-svg-* / light mode safe). */
+    .glass-svg-ink   { fill: #F4F7FF; }
+    .glass-svg-ink-2 { fill: rgba(231,238,255,0.74); }
+    .glass-svg-ink-3 { fill: rgba(231,238,255,0.55); }
+    .glass-svg-node  { fill: rgba(255,255,255,0.06); stroke: rgba(255,255,255,0.14); }
+    .glass-svg-node-strong { fill: rgba(255,255,255,0.05); stroke: #22D3EE; }
+    .glass-svg-node--cyan { fill: rgba(34,211,238,0.10); stroke: rgba(34,211,238,0.50); }
+    .glass-svg-node--indigo { fill: rgba(129,140,248,0.12); stroke: rgba(129,140,248,0.50); }
+    .glass-svg-line  { stroke: rgba(255,255,255,0.08); }
+    .glass-svg-grid  { stroke: rgba(255,255,255,0.08); stroke-dasharray: 2 6; }
+    .glass-svg-accent-ink { fill: #22D3EE; }
+    .glass-svg-ref-ink { fill: #818CF8; }
+  </style>
+  <rect width="100%" height="100%" fill="#0B1020"/>
+        <!-- tick gridlines -->
+        <g class="glass-svg-grid">
+          <line x1="120" y1="96" x2="120" y2="300"/>
+          <line x1="293" y1="96" x2="293" y2="300"/>
+          <line x1="467" y1="96" x2="467" y2="300"/>
+          <line x1="640" y1="96" x2="640" y2="300"/>
+          <line x1="813" y1="96" x2="813" y2="300"/>
+          <line x1="987" y1="96" x2="987" y2="300"/>
+          <line x1="1160" y1="96" x2="1160" y2="300"/>
+        </g>
+
+        <!-- lanes (bare glass = idle) -->
+        <rect x="120" y="104" width="1040" height="44" rx="10" class="glass-svg-node"/>
+        <rect x="120" y="176" width="1040" height="44" rx="10" class="glass-svg-node"/>
+        <rect x="120" y="248" width="1040" height="44" rx="10" class="glass-svg-node"/>
+
+        <!-- run blocks -->
+        <rect x="120" y="104" width="347" height="44" rx="10" class="glass-svg-node glass-svg-node--cyan"/>
+        <rect x="467" y="104" width="86" height="44" rx="10" class="glass-svg-node-strong"/>
+        <rect x="207" y="176" width="130" height="44" rx="10" class="glass-svg-node glass-svg-node--indigo"/>
+        <rect x="510" y="176" width="130" height="44" rx="10" class="glass-svg-node glass-svg-node--indigo"/>
+        <rect x="813" y="176" width="130" height="44" rx="10" class="glass-svg-node glass-svg-node--indigo"/>
+        <rect x="553" y="248" width="347" height="44" rx="10" class="glass-svg-node glass-svg-node--cyan"/>
+
+        <!-- IRQ marker + migration arc -->
+        <line x1="467" y1="76" x2="467" y2="104" stroke="#22D3EE" stroke-width="2"/>
+        <path d="M460 148 V224 Q460 232 468 232 H545 Q553 232 553 240 V248" stroke="#22D3EE" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+
+        <!-- time axis -->
+        <line x1="120" y1="320" x2="1160" y2="320" class="glass-svg-line" stroke-width="1.5"/>
+        <g class="glass-svg-line">
+          <line x1="120" y1="320" x2="120" y2="328"/>
+          <line x1="293" y1="320" x2="293" y2="328"/>
+          <line x1="467" y1="320" x2="467" y2="328"/>
+          <line x1="640" y1="320" x2="640" y2="328"/>
+          <line x1="813" y1="320" x2="813" y2="328"/>
+          <line x1="987" y1="320" x2="987" y2="328"/>
+          <line x1="1160" y1="320" x2="1160" y2="328"/>
+        </g>
+
+        <!-- text layer -->
+        <text x="24" y="36" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">SCHED · CFS RUN VIEW · 12MS WINDOW</text>
+        <text x="1216" y="36" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">trace-cmd record -e sched_switch -e sched_migrate_task</text>
+
+        <text x="467" y="68" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-accent-ink">IRQ · eth0 rx</text>
+
+        <g font-family="'Inter', sans-serif" font-size="12.5" font-weight="600" class="glass-svg-ink">
+          <text x="32" y="130">CPU 0</text>
+          <text x="32" y="202">CPU 1</text>
+          <text x="32" y="274">CPU 2</text>
+        </g>
+
+        <g font-family="'Inter', sans-serif" font-size="11.5" font-weight="600" class="glass-svg-ink">
+          <text x="136" y="130">app: render</text>
+          <text x="219" y="202">kworker/u8</text>
+          <text x="522" y="202">kworker/u8</text>
+          <text x="825" y="202">kworker/u8</text>
+          <text x="569" y="274">app: render</text>
+        </g>
+        <text x="479" y="130" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink">irq/eth0</text>
+        <g font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-3">
+          <text x="580" y="130">idle</text>
+          <text x="136" y="202">idle</text>
+          <text x="360" y="202">idle</text>
+          <text x="660" y="202">idle</text>
+          <text x="960" y="202">idle</text>
+          <text x="136" y="274">idle</text>
+          <text x="920" y="274">idle</text>
+        </g>
+
+        <text x="640" y="164" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">preempted at 4ms</text>
+        <text x="575" y="236" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-2">migrate · load balance</text>
+
+        <g font-family="'JetBrains Mono', monospace" font-size="11" text-anchor="middle" class="glass-svg-ink-3">
+          <text x="120" y="344">0</text>
+          <text x="293" y="344">2</text>
+          <text x="467" y="344">4</text>
+          <text x="640" y="344">6</text>
+          <text x="813" y="344">8</text>
+          <text x="987" y="344">10</text>
+          <text x="1160" y="344">12</text>
+        </g>
+        <text x="1190" y="344" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">ms</text>
+
+        <!-- legend -->
+        <rect x="120" y="368" width="14" height="14" rx="4" class="glass-svg-node glass-svg-node--cyan"/>
+        <text x="142" y="380" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">app: render · CFS task</text>
+        <rect x="330" y="368" width="14" height="14" rx="4" class="glass-svg-node glass-svg-node--indigo"/>
+        <text x="352" y="380" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">kworker/u8 · workqueue</text>
+        <rect x="560" y="368" width="14" height="14" rx="4" class="glass-svg-node-strong"/>
+        <text x="582" y="380" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">irq/eth0 · threaded IRQ</text>
+        <text x="790" y="380" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-3">bare lane = idle</text>
+      </svg>

@@ -1,0 +1,102 @@
+<!-- glass-design diagram template · hw-timing-waveform · paste into a glass page and delete the embedded <style> + background rect (glass.css provides the classes; the page provides the canvas). The SCLK trace uses stroke="currentColor" so the page's body ink carries it through both themes. Craft rules: diagram-craft.md -->
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SPI mode 0 read transaction timing waveform: SCLK, a cyan CS_N frame, cyan-tinted MOSI data-valid windows and indigo-tinted MISO reply windows, with dotted sampling edges at each SCLK rising edge and tCSS / tSU annotations" viewBox="0 0 1240 440">
+  <style>
+    /* Standalone preview values = glass dark theme. When pasted into a glass
+       page, DELETE this style block — glass.css provides these classes with
+       theme-switching tokens (.glass-svg-* / light mode safe). */
+    svg { color: #F4F7FF; } /* currentColor for the SCLK trace */
+    .glass-svg-ink   { fill: #F4F7FF; }
+    .glass-svg-ink-2 { fill: rgba(231,238,255,0.74); }
+    .glass-svg-ink-3 { fill: rgba(231,238,255,0.55); }
+    .glass-svg-node  { fill: rgba(255,255,255,0.06); stroke: rgba(255,255,255,0.14); }
+    .glass-svg-node-strong { fill: rgba(255,255,255,0.05); stroke: #22D3EE; }
+    .glass-svg-node--cyan { fill: rgba(34,211,238,0.10); stroke: rgba(34,211,238,0.50); }
+    .glass-svg-node--indigo { fill: rgba(129,140,248,0.12); stroke: rgba(129,140,248,0.50); }
+    .glass-svg-line  { stroke: rgba(255,255,255,0.08); }
+    .glass-svg-grid  { stroke: rgba(255,255,255,0.08); stroke-dasharray: 2 6; }
+    .glass-svg-accent-ink { fill: #22D3EE; }
+    .glass-svg-ref-ink { fill: #818CF8; }
+  </style>
+  <rect width="100%" height="100%" fill="#0B1020"/>
+        <!-- sampling gridlines at each SCLK rising edge -->
+        <g class="glass-svg-grid">
+          <line x1="240" y1="68" x2="240" y2="300"/>
+          <line x1="336" y1="68" x2="336" y2="300"/>
+          <line x1="432" y1="68" x2="432" y2="300"/>
+          <line x1="528" y1="68" x2="528" y2="300"/>
+          <line x1="624" y1="68" x2="624" y2="300"/>
+          <line x1="720" y1="68" x2="720" y2="300"/>
+          <line x1="816" y1="68" x2="816" y2="300"/>
+          <line x1="912" y1="68" x2="912" y2="300"/>
+        </g>
+
+        <!-- waveforms -->
+        <path d="M120,100 H240 V76 H288 V100 H336 V76 H384 V100 H432 V76 H480 V100 H528 V76 H576 V100 H624 V76 H672 V100 H720 V76 H768 V100 H816 V76 H864 V100 H912 V76 H960 V100 H1180" stroke="currentColor" stroke-width="1.8" fill="none"/>
+        <path d="M120,128 H180 V156 H1060 V128 H1180" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <line x1="120" y1="220" x2="208" y2="220" class="glass-svg-line" stroke-width="1.5"/>
+        <path d="M208,208 L218,196 H582 L592,208 L582,220 H218 Z" class="glass-svg-node glass-svg-node--cyan"/>
+        <path d="M592,208 L602,196 H926 L936,208 L926,220 H602 Z" class="glass-svg-node glass-svg-node--cyan"/>
+        <line x1="944" y1="220" x2="1180" y2="220" class="glass-svg-line" stroke-width="1.5"/>
+        <line x1="120" y1="268" x2="588" y2="268" class="glass-svg-line" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <path d="M592,268 L602,256 H758 L768,268 L758,280 H602 Z" class="glass-svg-node glass-svg-node--indigo"/>
+        <path d="M768,268 L778,256 H926 L936,268 L926,280 H778 Z" class="glass-svg-node glass-svg-node--indigo"/>
+        <line x1="940" y1="268" x2="1180" y2="268" class="glass-svg-line" stroke-width="1.5" stroke-dasharray="5 4"/>
+
+        <!-- timing parameter ticks -->
+        <g class="glass-svg-line" stroke-width="1.5">
+          <line x1="180" y1="312" x2="180" y2="328"/>
+          <line x1="240" y1="312" x2="240" y2="328"/>
+          <line x1="180" y1="320" x2="240" y2="320"/>
+          <line x1="592" y1="312" x2="592" y2="328"/>
+          <line x1="624" y1="312" x2="624" y2="328"/>
+          <line x1="592" y1="320" x2="624" y2="320"/>
+        </g>
+
+        <!-- time axis -->
+        <line x1="120" y1="368" x2="1180" y2="368" class="glass-svg-line" stroke-width="1.5"/>
+
+        <!-- text layer -->
+        <text x="24" y="36" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">SPI MODE 0 · CPOL=0 CPHA=0 · JEDEC ID READ</text>
+        <text x="1216" y="36" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">MX25L6433F · SCLK 25MHz</text>
+        <text x="400" y="60" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">command phase · MOSI drives</text>
+        <text x="764" y="60" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">data phase · MISO drives</text>
+
+        <g font-family="'JetBrains Mono', monospace" font-size="12" font-weight="600">
+          <text x="32" y="92" class="glass-svg-ink">SCLK</text>
+          <text x="32" y="146" class="glass-svg-accent-ink">CS_N</text>
+          <text x="32" y="212" class="glass-svg-accent-ink">MOSI</text>
+          <text x="32" y="272" class="glass-svg-ref-ink">MISO</text>
+        </g>
+
+        <g font-family="'JetBrains Mono', monospace" font-size="12.5" font-weight="600" text-anchor="middle">
+          <text x="400" y="212" class="glass-svg-accent-ink">0x9F</text>
+          <text x="764" y="212" class="glass-svg-accent-ink">0x00</text>
+          <text x="680" y="272" class="glass-svg-ref-ink">0xC2</text>
+          <text x="852" y="272" class="glass-svg-ref-ink">0x20</text>
+        </g>
+
+        <text x="210" y="344" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-2">tCSS</text>
+        <text x="608" y="344" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-2">tSU ≥ 5ns</text>
+
+        <g font-family="'JetBrains Mono', monospace" font-size="11" text-anchor="middle" class="glass-svg-ink-3">
+          <text x="240" y="390">t0</text>
+          <text x="336" y="390">t1</text>
+          <text x="432" y="390">t2</text>
+          <text x="528" y="390">t3</text>
+          <text x="624" y="390">t4</text>
+          <text x="720" y="390">t5</text>
+          <text x="816" y="390">t6</text>
+          <text x="912" y="390">t7</text>
+        </g>
+
+        <!-- legend -->
+        <rect x="120" y="410" width="14" height="14" rx="4" class="glass-svg-node glass-svg-node--cyan"/>
+        <text x="142" y="422" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">host drives</text>
+        <rect x="260" y="410" width="14" height="14" rx="4" class="glass-svg-node glass-svg-node--indigo"/>
+        <text x="282" y="422" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">device drives</text>
+        <line x1="420" y1="417" x2="448" y2="417" class="glass-svg-line" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <text x="456" y="422" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">high-Z · not driven</text>
+        <line x1="620" y1="410" x2="620" y2="424" class="glass-svg-grid"/>
+        <text x="632" y="422" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">sampling edge · SCLK rising</text>
+        <text x="1216" y="422" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">BIT PERIOD 40NS</text>
+      </svg>

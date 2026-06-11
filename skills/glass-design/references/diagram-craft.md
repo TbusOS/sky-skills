@@ -22,16 +22,22 @@
 模式下隐形(2026-06-11 smoke 页实测)。**cyan 的"可写死"豁免只给形状**(流向线 stroke、
 实心圆点、徽标块);**cyan 文字必须走 `.glass-svg-accent-ink`**(light 自动切 #0E7490,
 写死的 cyan 文字在 light 下 1.7:1 —— gallery canonical critic 实抓,known-bugs 6.4,
-visual-audit 的 `glass-cyan-svg-text` 闸在 light 跑时按 error 抓)。
+visual-audit 的 `glass-cyan-svg-text` 检查在 light 跑时按 error 抓)。
 
 ## 2. 颜色合约
 
-- 每图 cyan glow 元素 **≤3 个**(语义焦点:当前 stage、关键路径、热点)——
-  多了焦点互相打架;0 个则 `diagram-monochrome` 闸抓(glass 在白名单内)。
+图有两层颜色:**tint 层**(节点底色编码类别)+ **accent 层**(cyan 实心元素标流向/焦点)。
+只有中性玻璃节点的图是允许的下限,但信息分层的图应该用 tint 把类别画出来:
+
+- **tint 层**:`.glass-svg-node--cyan`(热路径 / 焦点层 / 当前选中)和
+  `.glass-svg-node--indigo`(存储 / 基础设施 / 次级类别),10-12% tint 底 +
+  彩色描边,双主题自动换色。**每图至多 2 个 tint 色相**,叠在中性玻璃底上。
+- **accent 层**:cyan glow 元素 **≤3 个**(语义焦点:当前 stage、关键路径、热点)——
+  多了焦点互相打架;0 个则 `diagram-monochrome` 检查会报(glass 在白名单内)。
 - 图表第二序列用 Depth Indigo `#4F46E5`(柱状对比、双折线)。
 - violet / pink **永不**进图。
 - 涨跌语义:`--glass-up` / `--glass-down`,只给 delta 徽标,不做面积填充。
-- 满宽彩色带禁(saturated-band 闸):色带不填面积,焦点用 ≤56px 实心元素。
+- 满宽彩色带禁(saturated-band 检查):色带不填面积,焦点用 ≤56px 实心元素。
 
 ## 3. 尺寸档位(写图前先数 label)
 
@@ -42,7 +48,7 @@ visual-audit 的 `glass-cyan-svg-text` 闸在 light 跑时按 error 抓)。
 | ≥20 或 ≥4 列 | `.glass-container--wide` 整行 figure | ≥1230px(figure 进 Tier 1 面板时按面板内宽计,允许 −48px padding 折让) |
 
 - SVG 源码 `font-size ≥ 11`(worst-case 0.84 scale 下仍 ≥9px 渲染)。
-- viewBox 紧贴内容,边距 ≤24px(svg-letterbox 闸 <72% 宽向填充即警)。
+- viewBox 紧贴内容,边距 ≤24px(svg-letterbox 检查 <72% 宽向填充即警)。
 - featured diagram 进 Tier 1 面板 + 可选 `data-draw`(path-draw 只给 featured,gallery 卡静态)。
 
 ## 4. 工艺细节
@@ -51,10 +57,13 @@ visual-audit 的 `glass-cyan-svg-text` 闸在 light 跑时按 error 抓)。
 - 软阴影不进 SVG(面板已带);图内层次靠 fill alpha 差(node 0.06 vs node-strong 0.08)。
 - 肌理:可加 `.glass-svg-grid` 点阵线或 12% alpha 的 radial glow `<ellipse>`,每图 ≤1 处。
 - 每张 figure 必有 `<figcaption>`,写 takeaway 不写 "Figure 1"(known-bugs 1.18)。
-- `aria-label` 描述内容(a11y + 闸定位用)。
-- 同 SVG 内 text bbox 不相交(svg-text-overlap 闸);写完渲染一遍再交。
+- `aria-label` 描述内容(a11y + 检查定位用)。
+- 同 SVG 内 text bbox 不相交(svg-text-overlap 检查);写完渲染一遍再交。
 
 ## 5. 图型模板
 
-`templates/diagrams/` 首批:architecture / flow / sequence / state-machine /
-timeline / bar-chart(暗玻璃版)。从模板起步改内容,不要从零画。
+`templates/diagrams/` 共 14 张:architecture / flow / sequence / state-machine /
+timeline / bitfield / build-pipeline / hierarchy / function-flowchart /
+deployment / soc-block / hw-timing-waveform / algorithm-ringbuffer /
+sched-timeline。从模板起步改内容,不要从零画。密图(≥20 label)进
+`.glass-container--wide` 整行 figure;tint 层按 §2 编码类别。

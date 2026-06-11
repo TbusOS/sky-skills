@@ -1,0 +1,96 @@
+<!-- glass-design diagram template · algorithm-ringbuffer · paste into a glass page and delete the embedded <style> + background rect (glass.css provides the classes; the page provides the canvas). Craft rules: diagram-craft.md -->
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Linux kfifo ring buffer: a 16-slot byte array with seven indigo slots of valid data between the out pointer at index 3 and the cyan in pointer at index 10; the dashed cyan sweep shows wrap-around via masking with size minus one" viewBox="0 0 1240 344">
+  <style>
+    /* Standalone preview values = glass dark theme. When pasted into a glass
+       page, DELETE this style block — glass.css provides these classes with
+       theme-switching tokens (.glass-svg-* / light mode safe). */
+    .glass-svg-ink   { fill: #F4F7FF; }
+    .glass-svg-ink-2 { fill: rgba(231,238,255,0.74); }
+    .glass-svg-ink-3 { fill: rgba(231,238,255,0.55); }
+    .glass-svg-node  { fill: rgba(255,255,255,0.06); stroke: rgba(255,255,255,0.14); }
+    .glass-svg-node-strong { fill: rgba(255,255,255,0.05); stroke: #22D3EE; }
+    .glass-svg-node--cyan { fill: rgba(34,211,238,0.10); stroke: rgba(34,211,238,0.50); }
+    .glass-svg-node--indigo { fill: rgba(129,140,248,0.12); stroke: rgba(129,140,248,0.50); }
+    .glass-svg-line  { stroke: rgba(255,255,255,0.08); }
+    .glass-svg-grid  { stroke: rgba(255,255,255,0.08); stroke-dasharray: 2 6; }
+    .glass-svg-accent-ink { fill: #22D3EE; }
+    .glass-svg-ref-ink { fill: #818CF8; }
+  </style>
+  <rect width="100%" height="100%" fill="#0B1020"/>
+        <!-- title row -->
+        <text x="24" y="36" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">kfifo ring buffer</text>
+        <text x="200" y="36" font-family="'JetBrains Mono', monospace" font-size="11.5" class="glass-svg-ink-3">struct kfifo · buf[16] · mask = size - 1 = 0x0F</text>
+        <text x="1216" y="36" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">include/linux/kfifo.h · size is a power of two</text>
+
+        <!-- pointers -->
+        <text x="297" y="64" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="600" class="glass-svg-ink">out (tail)</text>
+        <text x="297" y="82" text-anchor="middle" font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-2">consumer reads</text>
+        <polygon points="289,90 305,90 297,102" class="glass-svg-ink"/>
+        <text x="815" y="64" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="600" class="glass-svg-accent-ink">in (head)</text>
+        <text x="815" y="82" text-anchor="middle" font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-2">producer writes</text>
+        <polygon points="807,90 823,90 815,102" fill="#22D3EE"/>
+
+        <!-- buf[16]: slots 3..9 hold valid data (indigo), rest free -->
+        <g class="glass-svg-node">
+          <rect x="40" y="112" width="70" height="56" rx="6"/>
+          <rect x="114" y="112" width="70" height="56" rx="6"/>
+          <rect x="188" y="112" width="70" height="56" rx="6"/>
+          <rect x="780" y="112" width="70" height="56" rx="6"/>
+          <rect x="854" y="112" width="70" height="56" rx="6"/>
+          <rect x="928" y="112" width="70" height="56" rx="6"/>
+          <rect x="1002" y="112" width="70" height="56" rx="6"/>
+          <rect x="1076" y="112" width="70" height="56" rx="6"/>
+          <rect x="1150" y="112" width="70" height="56" rx="6"/>
+        </g>
+        <g class="glass-svg-node glass-svg-node--indigo">
+          <rect x="262" y="112" width="70" height="56" rx="6"/>
+          <rect x="336" y="112" width="70" height="56" rx="6"/>
+          <rect x="410" y="112" width="70" height="56" rx="6"/>
+          <rect x="484" y="112" width="70" height="56" rx="6"/>
+          <rect x="558" y="112" width="70" height="56" rx="6"/>
+          <rect x="632" y="112" width="70" height="56" rx="6"/>
+          <rect x="706" y="112" width="70" height="56" rx="6"/>
+        </g>
+        <g font-family="'JetBrains Mono', monospace" font-size="12" font-weight="600" text-anchor="middle" class="glass-svg-ref-ink">
+          <text x="297" y="144">5A</text>
+          <text x="371" y="144">6B</text>
+          <text x="445" y="144">0D</text>
+          <text x="519" y="144">31</text>
+          <text x="593" y="144">9C</text>
+          <text x="667" y="144">E2</text>
+          <text x="741" y="144">47</text>
+        </g>
+
+        <!-- index labels -->
+        <g font-family="'JetBrains Mono', monospace" font-size="11" text-anchor="middle" class="glass-svg-ink-3">
+          <text x="75" y="192">0</text><text x="149" y="192">1</text><text x="223" y="192">2</text>
+          <text x="297" y="192">3</text><text x="371" y="192">4</text><text x="445" y="192">5</text>
+          <text x="519" y="192">6</text><text x="593" y="192">7</text><text x="667" y="192">8</text>
+          <text x="741" y="192">9</text><text x="815" y="192">10</text><text x="889" y="192">11</text>
+          <text x="963" y="192">12</text><text x="1037" y="192">13</text><text x="1111" y="192">14</text>
+          <text x="1185" y="192">15</text>
+        </g>
+
+        <!-- wrap-around sweep -->
+        <path d="M1220,140 H1226 Q1234,140 1234,148 V212 Q1234,220 1226,220 H30 Q22,220 22,212 V148 Q22,140 30,140 H34" stroke="#22D3EE" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+        <polygon points="34,134 34,146 44,140" fill="#22D3EE"/>
+        <text x="620" y="240" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" class="glass-svg-ink-2">wrap: idx &amp; (size - 1)</text>
+
+        <line x1="40" y1="256" x2="1216" y2="256" class="glass-svg-line"/>
+
+        <!-- API annotations -->
+        <circle cx="48" cy="288" r="4" fill="#22D3EE"/>
+        <text x="64" y="292" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="600" class="glass-svg-ink">kfifo_in(fifo, buf, len)</text>
+        <text x="320" y="292" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">copy to buf[in &amp; mask] · smp_wmb() · in += len</text>
+        <circle cx="48" cy="320" r="4" class="glass-svg-ink"/>
+        <text x="64" y="324" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="600" class="glass-svg-ink">kfifo_out(fifo, buf, len)</text>
+        <text x="320" y="324" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">smp_rmb() · copy from buf[out &amp; mask] · out += len</text>
+
+        <!-- stat chip + legend -->
+        <rect x="1000" y="272" width="216" height="28" rx="14" class="glass-svg-node glass-svg-node--cyan"/>
+        <text x="1108" y="290" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="600" class="glass-svg-accent-ink">len = in - out = 7</text>
+        <rect x="1000" y="314" width="12" height="12" rx="3" class="glass-svg-node glass-svg-node--indigo"/>
+        <text x="1020" y="324" font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-2">valid data</text>
+        <rect x="1110" y="314" width="12" height="12" rx="3" class="glass-svg-node"/>
+        <text x="1130" y="324" font-family="'Inter', sans-serif" font-size="11" class="glass-svg-ink-2">free</text>
+      </svg>

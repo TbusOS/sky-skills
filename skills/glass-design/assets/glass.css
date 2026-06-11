@@ -50,14 +50,14 @@ html[data-theme="dark"] {
   --glass-accent: #22D3EE;        /* solid fills: buttons, hairlines, glows */
   --glass-accent-ink: #22D3EE;    /* accent as TEXT — swaps to deep teal in light */
   --glass-button-ink: #062A33;    /* text on cyan fill (white on cyan fails AA) */
-  --glass-panel-bg: rgba(255, 255, 255, 0.06);
-  --glass-panel-border: rgba(255, 255, 255, 0.14);
-  --glass-card-bg: rgba(255, 255, 255, 0.05);
-  --glass-card-border: rgba(255, 255, 255, 0.10);
+  --glass-panel-bg: rgba(255, 255, 255, 0.08);
+  --glass-panel-border: rgba(255, 255, 255, 0.17);
+  --glass-card-bg: rgba(255, 255, 255, 0.07);
+  --glass-card-border: rgba(255, 255, 255, 0.13);
   --glass-overlay-bg: rgba(13, 18, 32, 0.62);
   --glass-overlay-border: rgba(255, 255, 255, 0.12);
   --glass-line: rgba(255, 255, 255, 0.08);
-  --glass-highlight: rgba(255, 255, 255, 0.18);
+  --glass-highlight: rgba(255, 255, 255, 0.26);
   --glass-shadow-panel: 0 24px 48px -16px rgba(2, 6, 18, 0.55);
   --glass-shadow-card: 0 12px 28px -12px rgba(2, 6, 18, 0.45);
   --glass-code-bg: rgba(2, 6, 18, 0.55);
@@ -229,31 +229,56 @@ html[data-lang="zh"] .glass-eyebrow { letter-spacing: 0.06em; }
  */
 .glass-panel {
   position: relative;
-  background: var(--glass-panel-bg);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  backdrop-filter: blur(24px) saturate(160%);
+  /* Internal dispersion — the glass carries its own faint luminance gradient
+   * (white entry top-left, a cyan-violet cast exiting bottom-right), so the
+   * material reads as glass even where the canvas behind it is plain navy.
+   * Same physics family as the refraction ring; ≤6% alpha, never a fill. */
+  background:
+    linear-gradient(
+      125deg,
+      rgba(255, 255, 255, 0.07),
+      rgba(255, 255, 255, 0) 38%,
+      rgba(34, 211, 238, 0.035) 78%,
+      rgba(167, 139, 250, 0.05) 100%
+    ),
+    var(--glass-panel-bg);
+  -webkit-backdrop-filter: blur(28px) saturate(185%) brightness(1.12);
+  backdrop-filter: blur(28px) saturate(185%) brightness(1.12);
   border: 1px solid var(--glass-panel-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--glass-shadow-panel), inset 0 1px 0 var(--glass-highlight);
+  box-shadow:
+    var(--glass-shadow-panel),
+    inset 0 1px 0 var(--glass-highlight),
+    inset 0 0 40px rgba(255, 255, 255, 0.03);
   padding: var(--space-6);
 }
 .glass-card {
   position: relative;
   overflow: hidden;
-  background: var(--glass-card-bg);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
-  backdrop-filter: blur(16px) saturate(150%);
+  background:
+    linear-gradient(
+      125deg,
+      rgba(255, 255, 255, 0.06),
+      rgba(255, 255, 255, 0) 42%,
+      rgba(34, 211, 238, 0.03) 100%
+    ),
+    var(--glass-card-bg);
+  -webkit-backdrop-filter: blur(20px) saturate(170%) brightness(1.1);
+  backdrop-filter: blur(20px) saturate(170%) brightness(1.1);
   border: 1px solid var(--glass-card-border);
   border-radius: var(--radius-md);
-  box-shadow: var(--glass-shadow-card), inset 0 1px 0 var(--glass-highlight);
+  box-shadow:
+    var(--glass-shadow-card),
+    inset 0 1px 0 var(--glass-highlight),
+    inset 0 0 28px rgba(255, 255, 255, 0.025);
   padding: var(--space-6);
   transition: transform var(--duration-sm) var(--ease-glass), border-color var(--duration-sm) var(--ease-glass);
 }
 .glass-overlay {
   position: relative;
   background: var(--glass-overlay-bg);
-  -webkit-backdrop-filter: blur(28px) saturate(140%);
-  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(32px) saturate(160%) brightness(1.06);
+  backdrop-filter: blur(32px) saturate(160%) brightness(1.06);
   border: 1px solid var(--glass-overlay-border);
   border-radius: var(--radius-sm);
   box-shadow: var(--glass-shadow-card);
@@ -274,15 +299,24 @@ html[data-lang="zh"] .glass-eyebrow { letter-spacing: 0.06em; }
   border-radius: inherit;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.5),
-    rgba(255, 255, 255, 0.06) 40%,
-    rgba(34, 211, 238, 0.28) 100%
+    rgba(255, 255, 255, 0.65),
+    rgba(255, 255, 255, 0.08) 40%,
+    rgba(34, 211, 238, 0.38) 100%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   pointer-events: none;
+}
+html[data-theme="light"] .glass-panel,
+html[data-theme="light"] .glass-card {
+  background-image: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.15) 45%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 html[data-theme="light"] .glass-panel::before,
 html[data-theme="light"] .glass-card::before {
@@ -335,10 +369,10 @@ html[data-theme="light"] .glass-card::before {
   will-change: transform;
   pointer-events: none;
 }
-.glass-blob--cyan   { background: radial-gradient(closest-side, rgba(34, 211, 238, 0.45), transparent 70%); }
-.glass-blob--violet { background: radial-gradient(closest-side, rgba(167, 139, 250, 0.35), transparent 70%); }
-.glass-blob--pink   { background: radial-gradient(closest-side, rgba(244, 114, 182, 0.28), transparent 70%); }
-.glass-blob--indigo { background: radial-gradient(closest-side, rgba(79, 70, 229, 0.40), transparent 70%); }
+.glass-blob--cyan   { background: radial-gradient(closest-side, rgba(34, 211, 238, 0.52), transparent 70%); }
+.glass-blob--violet { background: radial-gradient(closest-side, rgba(167, 139, 250, 0.42), transparent 70%); }
+.glass-blob--pink   { background: radial-gradient(closest-side, rgba(244, 114, 182, 0.33), transparent 70%); }
+.glass-blob--indigo { background: radial-gradient(closest-side, rgba(79, 70, 229, 0.48), transparent 70%); }
 
 .glass-blob { animation: glass-drift-a 26s var(--ease-glass) infinite alternate; }
 .glass-blob:nth-of-type(2) { animation-name: glass-drift-b; animation-duration: 34s; }
@@ -366,8 +400,8 @@ html[data-theme="light"] .glass-card::before {
   z-index: 100;
   height: 64px;
   background: var(--glass-overlay-bg);
-  -webkit-backdrop-filter: blur(28px) saturate(140%);
-  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(32px) saturate(160%) brightness(1.06);
+  backdrop-filter: blur(32px) saturate(160%) brightness(1.06);
   border-bottom: 1px solid var(--glass-overlay-border);
 }
 .glass-nav-inner {
@@ -602,6 +636,15 @@ kbd {
 .glass-svg-ref-ink       { fill: var(--glass-ref-ink); }    /* indigo TEXT (deploy/SLO labels) — literal #4F46E5 text dies on the dark theme */
 .glass-svg-up            { fill: var(--glass-up); }
 .glass-svg-down          { fill: var(--glass-down); }
+
+/* Tinted diagram nodes — the color layer of the diagram language. Tint fills
+ * 10-12% + colored strokes keep the glassy read while coding semantics:
+ * cyan = hot path / focus tier · indigo = storage / secondary / infra.
+ * Cap: ≤2 tint hues per diagram on top of the neutral glass base. */
+.glass-svg-node--cyan   { fill: rgba(34, 211, 238, 0.10); stroke: rgba(34, 211, 238, 0.50); }
+.glass-svg-node--indigo { fill: rgba(129, 140, 248, 0.12); stroke: rgba(129, 140, 248, 0.50); }
+html[data-theme="light"] .glass-svg-node--cyan   { fill: rgba(14, 116, 144, 0.09); stroke: rgba(14, 116, 144, 0.45); }
+html[data-theme="light"] .glass-svg-node--indigo { fill: rgba(79, 70, 229, 0.08); stroke: rgba(79, 70, 229, 0.40); }
 
 .glass-lead--compact { font-size: 17px; }
 

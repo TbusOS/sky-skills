@@ -1,19 +1,19 @@
 # Glass Motion — 动画体系与冻结契约
 
-> glass 是五个 skill 里唯一带富 JS 动画的。它能进三闸体系的前提是
+> glass 是五个 skill 里唯一带富 JS 动画的。它能进三道机械检查体系的前提是
 > **冻结契约**:一切动画的终态 = 静态 markup,三条独立路径都能到达终态。
 
 ## 0. 冻结契约(先读这个)
 
 任一条件为真,glass.js 设 `html[data-motion="off"]` 且不安装任何动画模块:
 
-1. `prefers-reduced-motion: reduce`(媒体查询 —— 审计闸用 Playwright `reducedMotion:'reduce'` 触发它)
+1. `prefers-reduced-motion: reduce`(媒体查询 —— 审查脚本用 Playwright `reducedMotion:'reduce'` 触发它)
 2. URL hash 含 `freeze`(`page.html#freeze` 手动调试用)
 3. `<html data-motion-freeze>` 静态属性
 
-终态语义(机器闸逐条验收):
+终态语义(机器检查逐条验收):
 
-| 动画 | 终态 | 闸 |
+| 动画 | 终态 | 检查 |
 |---|---|---|
 | reveal | 元素直接可见(初始隐藏门控在 `html.js-enabled:not([data-motion="off"])` 后面;无 JS 时页面天然全可见) | `glass-reveal-stuck`(error) |
 | count-up | markup 文本就是终值,JS 只是从 0 动画到它 | `glass-countup-mismatch`(warn) |

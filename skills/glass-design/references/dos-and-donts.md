@@ -23,18 +23,18 @@
 | 渐变文字(`background-clip:text`)、渐变按钮、渐变标题 | **AI slop 第一信号**。彩色只以"远处光源"存在;前景只有实心 cyan 一色 |
 | violet `#A78BFA` / pink `#F472B6` 做文字、图标、按钮 | 它们只活在 blob 与折射环里;上前景就是"紫色渐变 slop" |
 | 一个视口 >3 个 blob,或 blob 总覆盖 >60% | 光场变彩虹泳池;光稀缺才贵 |
-| blob 压在文字面板正下方(核心区) | R1 的几何前提;contrast 闸像素兜底会抓 |
+| blob 压在文字面板正下方(核心区) | R1 的几何前提;contrast 检查像素兜底会抓 |
 | blob 用官方四色之外的颜色 | 彩虹 slop + cross-skill 串味双杀 |
 | 玻璃叠玻璃 >2 层 | blur 叠加 = 噪糊 + 性能塌 |
-| `feTurbulence` / `feDisplacementMap` 折射 | Chromium 下 backdrop 不进 SVG filter;非确定渲染炸截图闸(glass-material §2) |
+| `feTurbulence` / `feDisplacementMap` 折射 | Chromium 下 backdrop 不进 SVG filter;非确定渲染炸截图检查(glass-material §2) |
 | blur <8px 或 >32px | <8 假玻璃,>32 磨砂塑料 |
 | 正文(<28px)直接落 aurora | R1;visual-audit contrast 必抓 |
 | cyan 文字用在 light 模式(写死 hex) | 白底 1.6:1;必须走 `--glass-accent-ink` token |
 | 白字放在 cyan 按钮上 | 1.9:1 fail;按钮配方锁死 `--glass-button-ink` 深字 |
 | 每张卡都 tilt / 都扫光 / 全页 reveal | 动画预算;全员起舞 = 廉价 |
-| 不透明面板 + blur 声明装玻璃 | `glass-fake-glass` 闸(error):blur 必须真的透出背景 |
-| reveal 初始态裸写 `opacity:0` | 绕过冻结门控;`glass-reveal-stuck` 闸(error)+ 全页截图下半截空白 |
-| count-up 终值只在 JS 里 | 无 JS / 冻结下页面是错的;`glass-countup-mismatch` 闸 |
+| 不透明面板 + blur 声明装玻璃 | `glass-fake-glass` 检查(error):blur 必须真的透出背景 |
+| reveal 初始态裸写 `opacity:0` | 绕过冻结门控;`glass-reveal-stuck` 检查(error)+ 全页截图下半截空白 |
+| count-up 终值只在 JS 里 | 无 JS / 冻结下页面是错的;`glass-countup-mismatch` 检查 |
 | SVG 墨色写死白 fill | light 模式隐形(2026-06-11 smoke 页实测命中);用 `.glass-svg-*` |
 | 借 apple 蓝 / anthropic 橙 / ember 金 / sage 绿 | cross-skill-smell 互查已登记四色 |
 | `transition: all` / 硬编码 hex | 性能 + 主题切换断裂 |
@@ -46,11 +46,11 @@
 python3 skills/design-review/scripts/verify.py --skill=glass <page.html>
 # 2+3) 渲染审计 + 截图 —— glass 自动 dark+light 双跑
 bin/design-review --skill=glass <page.html>
-# 4) 口味闸
+# 4) 口味检查
 bin/design-review --skill=glass --critic <page.html>
 ```
 
-任何 error = 任务没完成。glass 专属闸:`glass-reveal-stuck` / `glass-fake-glass` /
+任何 error = 任务没完成。glass 专属检查:`glass-reveal-stuck` / `glass-fake-glass` /
 `glass-countup-mismatch` / `glass-cta-obstructed`(均 visual-audit 内,kind 同名)。
 
 ## 📐 质量底线

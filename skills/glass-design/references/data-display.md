@@ -9,10 +9,10 @@
 
 - **终值写在 markup**(千分位照常写);`data-count-to` 是纯数值,前后缀用
   `data-count-prefix` / `data-count-suffix`。JS 从 0 动画到终值后**恢复原文本**。
-- 闸:`glass-countup-mismatch` 对比 markup 数值与 attr。
+- 检查:`glass-countup-mismatch` 对比 markup 数值与 attr。
 - 64–96px Space Grotesk 700 tabular-nums;delta 徽标用
   `.glass-stat-delta--up/--down`(mono 13px)。
-- KPI 行 = 4 × `.glass-card` 等宽(peer 语义合法);卡内大数字 ≥36px 自动豁免 hollow-card 闸。
+- KPI 行 = 4 × `.glass-card` 等宽(peer 语义合法);卡内大数字 ≥36px 自动豁免 hollow-card 检查。
 
 ## 2. 图表(手画 SVG,不引库)
 

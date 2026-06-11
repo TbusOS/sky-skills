@@ -1,0 +1,100 @@
+<!-- glass-design diagram template · deployment · paste into a glass page and delete the embedded <style> + background rect (glass.css provides the classes; the page provides the canvas). Craft rules: diagram-craft.md -->
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Deployment topology: an edge zone with CDN, WAF and load balancer, an app cluster with api, worker and scheduler, and an indigo data zone with Postgres, Redis and object store; the cyan request path runs load balancer to api to Postgres" viewBox="0 0 1240 568">
+  <style>
+    /* Standalone preview values = glass dark theme. When pasted into a glass
+       page, DELETE this style block — glass.css provides these classes with
+       theme-switching tokens (.glass-svg-* / light mode safe). */
+    .glass-svg-ink   { fill: #F4F7FF; }
+    .glass-svg-ink-2 { fill: rgba(231,238,255,0.74); }
+    .glass-svg-ink-3 { fill: rgba(231,238,255,0.55); }
+    .glass-svg-node  { fill: rgba(255,255,255,0.06); stroke: rgba(255,255,255,0.14); }
+    .glass-svg-node-strong { fill: rgba(255,255,255,0.05); stroke: #22D3EE; }
+    .glass-svg-node--cyan { fill: rgba(34,211,238,0.10); stroke: rgba(34,211,238,0.50); }
+    .glass-svg-node--indigo { fill: rgba(129,140,248,0.12); stroke: rgba(129,140,248,0.50); }
+    .glass-svg-line  { stroke: rgba(255,255,255,0.08); }
+    .glass-svg-grid  { stroke: rgba(255,255,255,0.08); stroke-dasharray: 2 6; }
+    .glass-svg-accent-ink { fill: #22D3EE; }
+    .glass-svg-ref-ink { fill: #818CF8; }
+  </style>
+  <rect width="100%" height="100%" fill="#0B1020"/>
+        <text x="24" y="36" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">DEPLOYMENT TOPOLOGY · THREE ZONES</text>
+        <text x="1216" y="36" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">prod · us-east primary</text>
+
+        <!-- zone containers -->
+        <rect x="24" y="56" width="1192" height="128" rx="16" class="glass-svg-node"/>
+        <rect x="24" y="216" width="1192" height="148" rx="16" class="glass-svg-node"/>
+        <rect x="24" y="396" width="1192" height="132" rx="16" class="glass-svg-node"/>
+
+        <!-- cross-zone request path -->
+        <path d="M878 164 L878 200 L218 200 L218 264" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M218 340 L218 440" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <circle cx="878" cy="182" r="4" fill="#22D3EE"/>
+        <circle cx="218" cy="380" r="4" fill="#22D3EE"/>
+        <line x1="598" y1="340" x2="598" y2="440" class="glass-svg-node--indigo" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+        <!-- edge zone -->
+        <text x="48" y="84" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">01 · EDGE</text>
+        <text x="1192" y="84" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">anycast · 12 PoPs</text>
+        <rect x="48" y="100" width="300" height="64" rx="12" class="glass-svg-node"/>
+        <rect x="388" y="100" width="300" height="64" rx="12" class="glass-svg-node"/>
+        <rect x="728" y="100" width="300" height="64" rx="12" class="glass-svg-node"/>
+        <path d="M348 132 L388 132" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <path d="M688 132 L728 132" stroke="#22D3EE" stroke-width="2" fill="none"/>
+        <g font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">
+          <text x="72" y="128">CDN</text>
+          <text x="412" y="128">WAF</text>
+          <text x="752" y="128">Load balancer</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">
+          <text x="72" y="148">edge cache · 98% hit</text>
+          <text x="412" y="148">managed rules · v34</text>
+          <text x="752" y="148">least-conn · TLS terminate</text>
+        </g>
+
+        <!-- app cluster zone -->
+        <text x="48" y="244" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ink-3">02 · APP CLUSTER</text>
+        <text x="1192" y="244" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">auto-scale 2-8 nodes</text>
+        <rect x="48" y="264" width="340" height="76" rx="12" class="glass-svg-node glass-svg-node--cyan"/>
+        <rect x="428" y="264" width="340" height="76" rx="12" class="glass-svg-node"/>
+        <rect x="808" y="264" width="340" height="76" rx="12" class="glass-svg-node"/>
+        <g font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">
+          <text x="72" y="292">api</text>
+          <text x="452" y="292">worker</text>
+          <text x="832" y="292">scheduler</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">
+          <text x="72" y="314">REST + SSE · stateless</text>
+          <text x="452" y="314">queue consumer · retries</text>
+          <text x="832" y="314">cron + backoff</text>
+        </g>
+        <rect x="312" y="276" width="48" height="24" rx="12" fill="#22D3EE"/>
+        <text x="336" y="292" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" font-weight="600" fill="#0B1020">×3</text>
+        <rect x="692" y="276" width="48" height="24" rx="12" class="glass-svg-node"/>
+        <text x="716" y="292" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" class="glass-svg-ink-2">×5</text>
+        <line x1="808" y1="326" x2="768" y2="326" class="glass-svg-node--indigo" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <text x="788" y="316" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">dispatch</text>
+
+        <!-- data zone -->
+        <text x="48" y="424" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" class="glass-svg-ref-ink">03 · DATA</text>
+        <text x="1192" y="424" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" class="glass-svg-ink-3">encrypted at rest · PITR</text>
+        <rect x="48" y="440" width="300" height="64" rx="12" class="glass-svg-node glass-svg-node--indigo"/>
+        <rect x="388" y="440" width="300" height="64" rx="12" class="glass-svg-node glass-svg-node--indigo"/>
+        <rect x="728" y="440" width="300" height="64" rx="12" class="glass-svg-node glass-svg-node--indigo"/>
+        <g font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">
+          <text x="72" y="468">Postgres 16</text>
+          <text x="412" y="468">Redis</text>
+          <text x="752" y="468">Object store</text>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">
+          <text x="72" y="488">primary + 2 replicas</text>
+          <text x="412" y="488">queues · hot cache</text>
+          <text x="752" y="488">artifacts · 410TB</text>
+        </g>
+
+        <!-- legend + takeaway -->
+        <text x="24" y="558" font-family="'JetBrains Mono', monospace" font-size="11.5" letter-spacing="1.5" class="glass-svg-ink-3">THE REQUEST PATH CROSSES THREE ZONES · ONLY THE DATA ZONE HOLDS STATE</text>
+        <rect x="920" y="546" width="14" height="14" rx="4" class="glass-svg-node glass-svg-node--cyan"/>
+        <text x="942" y="558" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">hot request path</text>
+        <rect x="1070" y="546" width="14" height="14" rx="4" class="glass-svg-node glass-svg-node--indigo"/>
+        <text x="1092" y="558" font-family="'Inter', sans-serif" font-size="11.5" class="glass-svg-ink-2">stateful zone</text>
+      </svg>

@@ -6,7 +6,7 @@ last-verified: 2026-06-11
 
 # Glass Design — HTML 风格
 
-生成 Apple 液态玻璃质感的 HTML 页面:深藏青画布上最多 3 个 aurora 光晕,三层毛玻璃面板承载内容,唯一的前景彩色是实心 cyan。自带完整动画体系(全部可冻结,审计闸确定性渲染)。最适合图表 / 图示 / 数据类内容的"炫酷"展示。
+生成 Apple 液态玻璃质感的 HTML 页面:深藏青画布上最多 3 个 aurora 光晕,三层毛玻璃面板承载内容,唯一的前景彩色是实心 cyan。自带完整动画体系(全部可冻结,审查脚本确定性渲染)。最适合图表 / 图示 / 数据类内容的"炫酷"展示。
 Generates Apple liquid-glass HTML: aurora light blobs on a deep-navy canvas, three tiers of frosted panels, one solid foreground accent (cyan), and a fully freezable motion system. Built for showing diagrams, charts and data with maximum visual impact.
 
 ## §1 使用方式
@@ -33,7 +33,7 @@ glass 风格 / glassmorphism / 玻璃拟态 / 液态玻璃 / liquid glass / auro
 1. `references/glass-material.md` — 三层材质配方 + aurora 体系 + 折射环(skill 的物理学)
 2. `references/design-tokens.md` — 双主题 token 全表
 3. `references/dos-and-donts.md` — 品位边界(aurora ≠ AI slop 的那条线)
-4. `references/motion.md` — 7 种动画 + 冻结契约(截图闸依赖)
+4. `references/motion.md` — 7 种动画 + 冻结契约(截图检查依赖)
 5. `references/typography.md` — Space Grotesk / Inter / JetBrains Mono / Noto Sans SC 字号表
 6. `references/layout-patterns.md` — 容器档位 + 区块节奏
 7. `references/diagram-craft.md` — 暗玻璃 SVG 图示工艺(双主题 SVG 必须 token 化)
@@ -51,23 +51,23 @@ bin/design-review --plan --skill=glass --page=<type>
 
 读完 contract + 对应 canonical 再动手。
 
-生成**后**:页内 `</body>` 前 embed `design-review:self-diff v1` 注释块(§M 契约,canonical 必须)。然后跑四闸:
+生成**后**:页内 `</body>` 前 embed `design-review:self-diff v1` 注释块(§M 契约,canonical 必须)。然后跑四道检查:
 
 ```bash
-bin/design-review --skill=glass <your-page.html>          # 三闸 · 自动 dark+light 双跑
-bin/design-review --skill=glass --critic <your-page.html> # 第四闸 · LLM critic
+bin/design-review --skill=glass <your-page.html>          # 三道机械检查 · 自动 dark+light 双跑
+bin/design-review --skill=glass --critic <your-page.html> # 第四道检查 · LLM critic
 ```
 
 任一 error = 任务没完成。critic < 75 必修;canonical 自回归 ≥ 90。
 
-## §6 glass 专属要点(机器闸会抓)
+## §6 glass 专属要点(机器检查会抓)
 
-- **双主题契约**:`<html data-theme="dark">` 必须显式声明(verify 8c);公开页必须有 `.glass-theme-toggle`。三闸对 glass 自动跑 dark + light 两遍,**两遍都要 0 error**。
-- **冻结契约**:一切动画的终态 = 静态 markup。reveal 初始隐藏必须门控在 `html.js-enabled:not([data-motion="off"])` 后面(裸写 `opacity:0` 会被 `glass-reveal-stuck` 闸抓);count-up 终值必须写在 markup 文本里(`glass-countup-mismatch` 闸)。
+- **双主题契约**:`<html data-theme="dark">` 必须显式声明(verify 8c);公开页必须有 `.glass-theme-toggle`。三道机械检查对 glass 自动跑 dark + light 两遍,**两遍都要 0 error**。
+- **冻结契约**:一切动画的终态 = 静态 markup。reveal 初始隐藏必须门控在 `html.js-enabled:not([data-motion="off"])` 后面(裸写 `opacity:0` 会被 `glass-reveal-stuck` 检查报);count-up 终值必须写在 markup 文本里(`glass-countup-mismatch` 检查)。
 - **R1 可读性铁律**:<28px 的文字要么落在 `.glass-panel/.glass-card/.glass-overlay` 内,要么落在无 blob 核的纯画布区;blob 核照亮的区域只允许 ≥32px 全不透明 display 文字(h1 / pull-quote)。
 - **blob 几何**:每视口 ≤3 个 blob;blob 核心区(内 40% 半径)不得压在文字面板 bbox 之下。
 - **前景只有 cyan**:violet `#A78BFA` / pink `#F472B6` 只活在背景 blob 和 1px 折射环里,一旦做文字 / 图标 / 按钮色就是 AI slop(dos-and-donts 第一条)。
-- **light 模式 accent 文字**走 `var(--glass-accent-ink)`(自动切 `#0E7490`);手写 cyan hex 在白底 1.6:1 必挂 contrast 闸。
+- **light 模式 accent 文字**走 `var(--glass-accent-ink)`(自动切 `#0E7490`);手写 cyan hex 在白底 1.6:1 必挂 contrast 检查。
 - **按钮配方锁死**:cyan 填充 + `--glass-button-ink` 深字。白字在 cyan 上 1.9:1,禁。
 - **双主题 SVG**:图示里的墨色 / 节点 / 线必须用 `.glass-svg-*` 类或 `style="fill:var(--glass-*)"`;写死白色 fill 在 light 模式下隐形。cyan `#22D3EE` 主题恒定,可以写死。
-- **aurora 层必须 `pointer-events:none`**(`.glass-aurora` 自带;自己加装饰层时记得)— `glass-cta-obstructed` 闸抓点击遮挡。
+- **aurora 层必须 `pointer-events:none`**(`.glass-aurora` 自带;自己加装饰层时记得)— `glass-cta-obstructed` 检查报点击遮挡。

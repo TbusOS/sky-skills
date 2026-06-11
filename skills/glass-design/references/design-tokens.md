@@ -25,11 +25,11 @@
 | `--glass-accent` | `#22D3EE` | `#22D3EE`(填充恒定) |
 | `--glass-accent-ink` | `#22D3EE` | `#0E7490`(白底 AA) |
 | `--glass-button-ink` | `#062A33` | 同 |
-| `--glass-panel-bg` / `-border` | rgba(255,255,255,.06) / .14 | rgba(255,255,255,.62) / rgba(13,18,32,.10) |
-| `--glass-card-bg` / `-border` | rgba(255,255,255,.05) / .10 | rgba(255,255,255,.55) / rgba(13,18,32,.08) |
+| `--glass-panel-bg` / `-border` | rgba(255,255,255,.08) / .17 | rgba(255,255,255,.62) / rgba(13,18,32,.10) |
+| `--glass-card-bg` / `-border` | rgba(255,255,255,.07) / .13 | rgba(255,255,255,.55) / rgba(13,18,32,.08) |
 | `--glass-overlay-bg` | rgba(13,18,32,.62) | rgba(248,250,253,.80) |
 | `--glass-line` | rgba(255,255,255,.08) | rgba(13,18,32,.08) |
-| `--glass-highlight` | rgba(255,255,255,.18) | rgba(255,255,255,.85) |
+| `--glass-highlight` | rgba(255,255,255,.26) | rgba(255,255,255,.85) |
 | `--glass-blob-alpha` | 1 | 0.6 |
 
 字体族:`--font-display`(Space Grotesk)/ `--font-body`(Inter)/ `--font-mono`(JetBrains Mono)。
@@ -44,4 +44,6 @@
 `.glass-svg-ink` / `.glass-svg-ink-2` / `.glass-svg-ink-3`(文字)·
 `.glass-svg-node` / `.glass-svg-node-strong`(节点)·
 `.glass-svg-line` / `.glass-svg-grid`(线)·
-`.glass-svg-accent` / `.glass-svg-accent-stroke`(cyan,也可直接写 `#22D3EE` —— 主题恒定)。
+`.glass-svg-accent` / `.glass-svg-accent-stroke`(cyan 形状,可写死 —— 主题恒定)·
+`.glass-svg-accent-ink`(cyan 文字,必须用这个)· `.glass-svg-ref-ink`(indigo 文字)·
+`.glass-svg-node--cyan` / `--indigo`(tint 节点,类别编码)· `.glass-svg-up` / `.glass-svg-down`(涨跌)。
