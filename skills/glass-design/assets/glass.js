@@ -207,6 +207,111 @@
       });
     }
 
+    /* ---------- liquid cursor — the pointer is a water droplet ----------
+     * Realism comes from motion physics, not just shading:
+     *   spring lag      — the drop chases the pointer with inertia
+     *   velocity stretch— it elongates along its direction of travel
+     *   stop wobble     — a damped jiggle when it catches up and halts
+     *   shed trail      — fast moves leave micro-droplets that evaporate
+     * Never installed under freeze (screenshots stay deterministic);
+     * opt out per page with <html data-no-liquid>. */
+    if (!html.hasAttribute('data-no-liquid') &&
+        window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      var drop = document.createElement('div');
+      drop.className = 'glass-drop';
+      drop.setAttribute('aria-hidden', 'true');
+      drop.style.opacity = '0';
+      document.body.appendChild(drop);
+
+      var cursorCss = document.createElement('style');
+      cursorCss.textContent = 'html.glass-liquid, html.glass-liquid body, html.glass-liquid a, html.glass-liquid button, html.glass-liquid [role="button"] { cursor: none !important; }';
+      document.head.appendChild(cursorCss);
+
+      var tx = -200, ty = -200;     // pointer target
+      var x = -200, y = -200;       // drop position (spring)
+      var vx = 0, vy = 0;           // drop velocity
+      var wobble = 0;               // damped jiggle energy, fed by arrival speed
+      var wobblePhase = 0;
+      var lastTrail = 0;
+      var trailCount = 0;
+      var active = false;
+
+      document.addEventListener('pointermove', function (e) {
+        tx = e.clientX;
+        ty = e.clientY;
+        if (!active) {
+          active = true;
+          x = tx; y = ty;
+          html.classList.add('glass-liquid');
+          drop.style.opacity = '1';
+        }
+        var t = e.target;
+        if (t && t.closest && t.closest('a, button, input, select, textarea, [role="button"]')) {
+          drop.classList.add('is-pointing');
+        } else {
+          drop.classList.remove('is-pointing');
+        }
+      }, { passive: true });
+      document.addEventListener('pointerleave', function () {
+        drop.style.opacity = '0';
+      });
+      document.addEventListener('pointerenter', function () {
+        if (active) drop.style.opacity = '1';
+      });
+
+      var STIFF = 0.16, DAMP = 0.70;
+      (function liquidFrame(now) {
+        // critically-underdamped spring: lag + slight overshoot = liquid chase
+        vx = (vx + (tx - x) * STIFF) * DAMP;
+        vy = (vy + (ty - y) * STIFF) * DAMP;
+        x += vx;
+        y += vy;
+        var speed = Math.sqrt(vx * vx + vy * vy);
+
+        // stretch along the velocity vector; cap so it never reads as a smear
+        var stretch = Math.min(speed * 0.022, 0.42);
+        var angle = Math.atan2(vy, vx);
+
+        // wobble: store energy while moving, release as a damped jiggle at rest
+        if (speed > 2.5) {
+          wobble = Math.min(wobble + speed * 0.004, 0.18);
+        } else if (wobble > 0.003) {
+          wobblePhase += 0.42;
+          stretch += Math.sin(wobblePhase) * wobble;
+          angle = wobblePhase * 0.7;   // jiggle axis precesses — looks organic
+          wobble *= 0.92;
+        }
+
+        drop.style.transform =
+          'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)' +
+          ' rotate(' + (angle * 57.2958).toFixed(1) + 'deg)' +
+          ' scale(' + (1 + stretch).toFixed(3) + ',' + (1 - stretch * 0.55).toFixed(3) + ')' +
+          ' rotate(' + (-angle * 57.2958).toFixed(1) + 'deg)';
+
+        // shed micro-droplets when moving fast (water leaves a trail)
+        if (speed > 9 && now - lastTrail > 50 && trailCount < 7) {
+          lastTrail = now;
+          trailCount++;
+          var bead = document.createElement('div');
+          bead.className = 'glass-drop-trail';
+          var size = 6 + Math.min(speed, 26) * 0.45;
+          bead.style.width = size + 'px';
+          bead.style.height = size + 'px';
+          // drop the bead slightly behind the motion, off-axis a touch
+          bead.style.left = (x - vx * 1.6 + (vy * 0.18)) + 'px';
+          bead.style.top = (y - vy * 1.6 - (vx * 0.18)) + 'px';
+          bead.style.marginLeft = (-size / 2) + 'px';
+          bead.style.marginTop = (-size / 2) + 'px';
+          document.body.appendChild(bead);
+          bead.addEventListener('animationend', function () {
+            bead.remove();
+            trailCount--;
+          });
+        }
+        requestAnimationFrame(liquidFrame);
+      })(0);
+    }
+
     /* ---------- parallax (decorative layers only, never text) ---------- */
     var pxEls = Array.prototype.slice.call(document.querySelectorAll('[data-parallax]'));
     if (pxEls.length) {

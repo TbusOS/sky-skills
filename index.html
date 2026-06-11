@@ -216,7 +216,7 @@
       </div>
       <div>
         <p style="font-family:var(--font-heading); font-size:56px; font-weight:600; color:var(--anth-text); margin:0; letter-spacing:-0.02em;">4</p>
-        <p style="color:var(--anth-text-secondary); font-size:14px; margin-top:var(--space-2); font-family:var(--font-heading);"><span class="lang-en">review gates</span><span class="lang-zh">评审闸口</span></p>
+        <p style="color:var(--anth-text-secondary); font-size:14px; margin-top:var(--space-2); font-family:var(--font-heading);"><span class="lang-en">review gates</span><span class="lang-zh">评审检查</span></p>
       </div>
       <div>
         <p style="font-family:var(--font-heading); font-size:56px; font-weight:600; color:var(--anth-text); margin:0; letter-spacing:-0.02em;">MIT</p>
@@ -449,7 +449,7 @@
           <h3 style="font-size:22px; margin-top:var(--space-3); font-family:'Instrument Serif',serif; font-style:italic; color:#393C54;">design-review</h3>
           <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3); max-width:640px;">
             <span class="lang-en">The evaluator keeps the five design generators honest. Independent from the generators — inspired by GAN's discriminator and Anthropic's harness-design principle that <em>evaluators must be separate</em>. Runs four gates: <code>verify.py</code> → <code>visual-audit.mjs</code> → <code>screenshot.mjs</code> → <code>critic.mjs</code> taste judgment via either a solo <code>design-critic</code> or <strong>4 parallel specialists</strong> (composition / copy / illustration / brand, weighted 25/25/20/30). Then <code>design-learner</code> (component 07) turns every critic miss into a new known-bugs row + a new mechanical check — same bug never caught twice. The <code>bin/design-review</code> CLI has three modes: <code>--plan</code> (sprint contract; unknown page-types fall back LOW-CONFIDENCE) / <code>--critic</code> / <code>--audit</code>. 38 known-bugs catalogued; 13 canonical reference pages shipped (target 40 · expanding).</span>
-            <span class="lang-zh">这个评审员给 5 个设计生成器守关。和生成器刻意分离 —— 受 GAN 的 discriminator 和 Anthropic harness 文章里"<em>evaluator 必须独立</em>"的思想启发。跑四道闸：<code>verify.py</code> → <code>visual-audit.mjs</code> → <code>screenshot.mjs</code> → <code>critic.mjs</code> 口味评审(单 <code>design-critic</code> 或<strong>4 位专家并行</strong> —— 版式 / copy / 插画 / 品牌，权重 25/25/20/30)。再由 <code>design-learner</code>(组件 07)把每次 critic 漏掉的转成新 known-bugs 行 + 新机器 check —— 同一个 bug 不再被抓第二次。<code>bin/design-review</code> 命令行有三种模式：<code>--plan</code>(sprint contract，未知 page-type 回退 LOW-CONFIDENCE)/ <code>--critic</code> / <code>--audit</code>。已收录 38 条 known-bugs，已发 13 张 canonical 参考页(目标 40 · 扩库中)。</span>
+            <span class="lang-zh">这个评审员给 5 个设计生成器守关。和生成器刻意分离 —— 受 GAN 的 discriminator 和 Anthropic harness 文章里"<em>evaluator 必须独立</em>"的思想启发。跑四道检查：<code>verify.py</code> → <code>visual-audit.mjs</code> → <code>screenshot.mjs</code> → <code>critic.mjs</code> 口味评审(单 <code>design-critic</code> 或<strong>4 位专家并行</strong> —— 版式 / copy / 插画 / 品牌，权重 25/25/20/30)。再由 <code>design-learner</code>(组件 07)把每次 critic 漏掉的转成新 known-bugs 行 + 新机器 check —— 同一个 bug 不再被抓第二次。<code>bin/design-review</code> 命令行有三种模式：<code>--plan</code>(sprint contract，未知 page-type 回退 LOW-CONFIDENCE)/ <code>--critic</code> / <code>--audit</code>。已收录 38 条 known-bugs，已发 13 张 canonical 参考页(目标 40 · 扩库中)。</span>
           </p>
         </div>
         <div style="display:flex; flex-direction:column; gap:var(--space-3); min-width:120px;">
@@ -473,7 +473,7 @@
           <h3 style="font-size:22px; margin-top:var(--space-3); color:var(--anth-text);">gated-dual-clone</h3>
           <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3); max-width:640px;">
             <span class="lang-en">Dual-repo git workflow bootstrapper (2-clone default · optional 3-clone with a reproducibility gate). For projects where the upstream branch is protected (MR / PR only) and builds are heavy. One command creates a <strong>gateway</strong> repo that pushes and a <strong>satellite</strong> repo that builds — the build tree is physically unable to reach the remote. Three safety gates (protocol wall / explicit disable / pre-push hook) verified post-setup. Add <code>--clean-verify-dir</code> for a 3rd clone on cold disk + a <strong>stamp-match pre-push gate</strong> that refuses to push anything a from-scratch full build hasn't OK'd. Paired with the independent <code>gated-dual-clone-audit</code> evaluator (skill 11).</span>
-            <span class="lang-zh">双仓库 git 工作流搭建器(2 仓默认 · 可选 3 仓加 reproducibility 关卡)。适用于上游分支受保护(必须走 MR / PR)、编译重的项目。一条命令创建 <strong>gateway</strong> 仓库做 push + <strong>satellite</strong> 仓库做编译 —— 编译树在物理上够不到远程。搭完自动跑三道安全闸(协议墙 / 显式禁用 / pre-push hook)。加 <code>--clean-verify-dir</code> 启用第 3 仓(冷盘冷启动)+ <strong>stamp-match pre-push 关卡</strong>，没经从零全量编认证的 commit 推不出。与独立的 <code>gated-dual-clone-audit</code> 评估器(第 11 个 skill)配对。</span>
+            <span class="lang-zh">双仓库 git 工作流搭建器(2 仓默认 · 可选 3 仓加 reproducibility 关卡)。适用于上游分支受保护(必须走 MR / PR)、编译重的项目。一条命令创建 <strong>gateway</strong> 仓库做 push + <strong>satellite</strong> 仓库做编译 —— 编译树在物理上够不到远程。搭完自动跑三道安全检查(协议墙 / 显式禁用 / pre-push hook)。加 <code>--clean-verify-dir</code> 启用第 3 仓(冷盘冷启动)+ <strong>stamp-match pre-push 关卡</strong>，没经从零全量编认证的 commit 推不出。与独立的 <code>gated-dual-clone-audit</code> 评估器(第 11 个 skill)配对。</span>
           </p>
         </div>
         <div style="display:flex; flex-direction:column; gap:var(--space-3); min-width:120px;">
@@ -496,12 +496,12 @@
           <h3 style="font-size:22px; margin-top:var(--space-3); color:var(--anth-text);">gated-dual-clone-audit</h3>
           <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3); max-width:640px;">
             <span class="lang-en">Independent evaluator for <code>gated-dual-clone</code> topologies. Imports nothing from the generator — only reads the output topology and re-verifies the safety gates. Four tiers: <strong>structural</strong> (filesystem / hook / hardlink, 8 gates) → <strong>configuration</strong> (git-config, 8 gates) → <strong>behavioural</strong> (safe <code>--dry-run</code> + direct hook invocation, 3 gates) → <strong>taste</strong> (LLM critic subagent, advisory · 3 drift questions). Pass <code>--clean-verify-dir</code> to auto-add 4 more gates (S9-S11 + C9 + B4) for 3-clone topologies. Run on demand, as a <code>pre-push</code> hook, or as a cron drift check. One-shot taste judgment via <code>/gdc-audit-critic</code>. <code>--json</code> output feeds the <code>learning-loop</code> on wild drifts.</span>
-            <span class="lang-zh">和 <code>gated-dual-clone</code> 配对的独立评估器。不 import 任何 generator 代码，只读成品拓扑 · 重验安全闸。四层：<strong>structural</strong>(文件系统 / hook / hardlink, 8 闸) → <strong>configuration</strong>(git-config, 8 闸) → <strong>behavioural</strong>(安全 <code>--dry-run</code> + 直接调 hook, 3 闸) → <strong>taste</strong>(LLM critic subagent · 3 个 drift 问题)。传 <code>--clean-verify-dir</code> 自动加 4 gate(S9-S11 + C9 + B4)覆盖 3 仓拓扑。可按需跑、作 <code>pre-push</code> hook 跑、作 cron drift 检查跑。一条 <code>/gdc-audit-critic</code> 拉起 Tier 4。<code>--json</code> 喂 <code>learning-loop</code> 固化野外 drift。</span>
+            <span class="lang-zh">和 <code>gated-dual-clone</code> 配对的独立评估器。不 import 任何 generator 代码，只读成品拓扑 · 重验安全检查。四层：<strong>structural</strong>(文件系统 / hook / hardlink, 8 项检查) → <strong>configuration</strong>(git-config, 8 项检查) → <strong>behavioural</strong>(安全 <code>--dry-run</code> + 直接调 hook, 3 项检查) → <strong>taste</strong>(LLM critic subagent · 3 个 drift 问题)。传 <code>--clean-verify-dir</code> 自动加 4 gate(S9-S11 + C9 + B4)覆盖 3 仓拓扑。可按需跑、作 <code>pre-push</code> hook 跑、作 cron drift 检查跑。一条 <code>/gdc-audit-critic</code> 拉起 Tier 4。<code>--json</code> 喂 <code>learning-loop</code> 固化野外 drift。</span>
           </p>
         </div>
         <div style="display:flex; flex-direction:column; gap:var(--space-3); min-width:120px;">
           <a class="anth-link" href="https://github.com/TbusOS/sky-skills/tree/main/skills/gated-dual-clone-audit"><span class="lang-en">Explore</span><span class="lang-zh">查看</span></a>
-          <a class="anth-link" href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone-audit/references/gate-catalog.md"><span class="lang-en">Gate catalog</span><span class="lang-zh">闸门清单</span></a>
+          <a class="anth-link" href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone-audit/references/gate-catalog.md"><span class="lang-en">Gate catalog</span><span class="lang-zh">检查清单</span></a>
         </div>
       </article>
 
@@ -866,7 +866,7 @@
       </svg>
       <figcaption style="margin-top:var(--space-5); font-family:var(--font-body); font-size:14px; line-height:1.55; color:var(--anth-text-secondary); text-align:center; max-width:820px; margin-left:auto; margin-right:auto;">
         <span class="lang-en">Generator-evaluator feedback loop — 4 design skills generate a page, <code>design-review</code> judges it through four gates (verify → visual-audit → screenshot → critic), and the orange dashed arrow feeds must_fix / should_fix / known-bug matches back to the generator for the next iteration.</span>
-        <span class="lang-zh">生成器-评审员反馈环 —— 4 个 design skill 生成页面，<code>design-review</code> 用四道闸评判(verify → visual-audit → screenshot → critic)，橙色虚线箭头把 must_fix / should_fix / known-bug 匹配反馈给生成器进下一轮迭代。</span>
+        <span class="lang-zh">生成器-评审员反馈环 —— 4 个 design skill 生成页面，<code>design-review</code> 用四道检查评判(verify → visual-audit → screenshot → critic)，橙色虚线箭头把 must_fix / should_fix / known-bug 匹配反馈给生成器进下一轮迭代。</span>
       </figcaption>
     </figure>
 
@@ -885,7 +885,7 @@
       </article>
 
       <article class="anth-card">
-        <span class="anth-badge" style="background:#d97757; color:#ffffff; font-weight:600;"><span class="lang-en">4 Gates</span><span class="lang-zh">四道闸</span></span>
+        <span class="anth-badge" style="background:#d97757; color:#ffffff; font-weight:600;"><span class="lang-en">4 Gates</span><span class="lang-zh">四道检查</span></span>
         <h3 style="font-size:19px; margin-top:var(--space-3);">
           <span class="lang-en">Structural · Rendered · Visual · Taste</span>
           <span class="lang-zh">结构 · 渲染 · 视觉 · 口味</span>
@@ -1403,7 +1403,7 @@ ln -s "$(pwd)/skills/design-review"          ~/.claude/skills/</code></pre>
       Design skills in this repo ship with four automated quality gates: <code>verify.py</code> checks structure, <code>visual-audit.mjs</code> renders the page in Playwright and flags contrast / sizing / orphan-layout issues, <code>screenshot.mjs</code> captures a full-page image for human review, and <code>critic.mjs</code> dispatches an LLM critic for the taste judgment. All four must exit 0 before a skill ships.
     </p>
     <p class="lang-zh">
-      本仓库的设计 skill 都配备四道自动质量闸：<code>verify.py</code> 检查结构、<code>visual-audit.mjs</code> 用 Playwright 渲染页面并扫描对比度 / 尺寸 / 孤儿布局、<code>screenshot.mjs</code> 抓全页截图供人工 review、<code>critic.mjs</code> 派 LLM critic 做口味评审。四道都 exit 0 才能发布。
+      本仓库的设计 skill 都配备四道自动质量检查：<code>verify.py</code> 检查结构、<code>visual-audit.mjs</code> 用 Playwright 渲染页面并扫描对比度 / 尺寸 / 孤儿布局、<code>screenshot.mjs</code> 抓全页截图供人工 review、<code>critic.mjs</code> 派 LLM critic 做口味评审。四道都 exit 0 才能发布。
     </p>
 
     <div style="display:flex; gap:var(--space-3); flex-wrap:wrap; margin-top:var(--space-6);">

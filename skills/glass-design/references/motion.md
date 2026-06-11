@@ -34,6 +34,7 @@
 | SVG path-draw | IO 进视口 | `svg[data-draw]` | 1100ms ease-out,逐条 stagger 90ms,≤8 条 | 每页 ≤2 张图开 draw,集中给 featured |
 | count-up | IO threshold 0.4 | `data-count-to="N"`(+ 可选 `data-count-prefix/suffix`) | 1200ms easeOutExpo,tabular-nums | stat 数字专用 |
 | 视差 | scroll + rAF | `data-parallax="0.08"` | 位移 clamp ±40px | **禁用于文字块**,只给装饰层 |
+| 液态光标(水滴) | pointermove + rAF 弹簧 | 自动(`<html data-no-liquid>` 退出) | 弹簧 k=0.16 d=0.70;拉伸 ≤0.42;停驻阻尼晃动;速度 >9px/帧 甩 ≤7 颗尾滴(760ms 蒸发) | 仅 hover+fine 指针;冻结下不安装,截图永远看不到它 |
 
 ## 2. 禁项
 

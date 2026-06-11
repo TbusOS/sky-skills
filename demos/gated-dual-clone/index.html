@@ -373,7 +373,7 @@
       <a href="#topology"><span class="lang-en">Topology</span><span class="lang-zh">拓扑</span></a>
       <a href="#decide"><span class="lang-en">Decide</span><span class="lang-zh">决策</span></a>
       <a href="#bootstrap"><span class="lang-en">Bootstrap</span><span class="lang-zh">搭建</span></a>
-      <a href="#gates"><span class="lang-en">Safety</span><span class="lang-zh">安全闸</span></a>
+      <a href="#gates"><span class="lang-en">Safety</span><span class="lang-zh">安全检查</span></a>
       <a href="#compare"><span class="lang-en">Compare</span><span class="lang-zh">对比</span></a>
       <a href="../../index.html"><span class="lang-en">All skills</span><span class="lang-zh">全部 skill</span></a>
     </div>
@@ -423,7 +423,7 @@
         </div>
         <div>
           <span class="num">3</span>
-          <span class="lbl"><span class="lang-en">safety gates</span><span class="lang-zh">道安全闸</span></span>
+          <span class="lbl"><span class="lang-en">safety gates</span><span class="lang-zh">道安全检查</span></span>
         </div>
         <div>
           <span class="num">1</span>
@@ -647,7 +647,7 @@
   <div class="anth-container">
     <h2>
       <span class="lang-en">Three safety gates</span>
-      <span class="lang-zh">三道安全闸</span>
+      <span class="lang-zh">三道安全检查</span>
     </h2>
     <p class="gdc-lede">
       <span class="lang-en">After bootstrap finishes, three checks must pass. Each one verifies a separate layer — protocol, git config, hook. Any single layer holds; three together is belt, braces, and a shoulder strap.</span>
@@ -664,7 +664,7 @@
         </p>
         <h3 class="gdc-gate__title">
           <span class="lang-en">Gate A · Protocol wall</span>
-          <span class="lang-zh">闸 A · 协议墙</span>
+          <span class="lang-zh">检查 A · 协议墙</span>
         </h3>
         <p class="gdc-gate__body">
           <span class="lang-en">Satellite <code>origin</code> points at the local gateway path. There is no network route from the build tree to upstream — you can't push what you can't reach.</span>
@@ -672,7 +672,7 @@
         </p>
         <pre class="gdc-gate__verify">cd satellite/ &amp;&amp; git push
 # → "does not accept"</pre>
-        <figcaption><span class="lang-en">Gate A — protocol-layer barrier.</span><span class="lang-zh">闸 A — 协议层屏障。</span></figcaption>
+        <figcaption><span class="lang-en">Gate A — protocol-layer barrier.</span><span class="lang-zh">检查 A — 协议层屏障。</span></figcaption>
       </figure>
 
       <figure class="gdc-gate">
@@ -681,7 +681,7 @@
         </div>
         <h3 class="gdc-gate__title">
           <span class="lang-en">Gate B · Explicit disable</span>
-          <span class="lang-zh">闸 B · 显式禁用</span>
+          <span class="lang-zh">检查 B · 显式禁用</span>
         </h3>
         <p class="gdc-gate__body">
           <span class="lang-en">Satellite's push URL is overwritten to the literal string <code>DISABLED</code>. Even a malformed config edit still yields a fast, readable error instead of a silent attempt.</span>
@@ -689,7 +689,7 @@
         </p>
         <pre class="gdc-gate__verify">cd satellite/ &amp;&amp; git remote -v
 # → "origin ... (push): DISABLED"</pre>
-        <figcaption><span class="lang-en">Gate B — git-config belt-and-braces.</span><span class="lang-zh">闸 B — git 配置双保险。</span></figcaption>
+        <figcaption><span class="lang-en">Gate B — git-config belt-and-braces.</span><span class="lang-zh">检查 B — git 配置双保险。</span></figcaption>
       </figure>
 
       <figure class="gdc-gate">
@@ -698,7 +698,7 @@
         </div>
         <h3 class="gdc-gate__title">
           <span class="lang-en">Gate C · Pre-push hook</span>
-          <span class="lang-zh">闸 C · pre-push hook</span>
+          <span class="lang-zh">检查 C · pre-push hook</span>
         </h3>
         <p class="gdc-gate__body">
           <span class="lang-en">Gateway runs a pre-push hook that rejects any push whose remote ref matches the protected-branch regex. Catches finger-slips like <code>git push origin main</code>.</span>
@@ -707,7 +707,7 @@
         <pre class="gdc-gate__verify">cd gateway/ &amp;&amp; \
 git push origin release --dry-run
 # → "REJECTED: protected branch"</pre>
-        <figcaption><span class="lang-en">Gate C — human-readable reject.</span><span class="lang-zh">闸 C — 人类可读的拒绝提示。</span></figcaption>
+        <figcaption><span class="lang-en">Gate C — human-readable reject.</span><span class="lang-zh">检查 C — 人类可读的拒绝提示。</span></figcaption>
       </figure>
     </div>
 
@@ -973,11 +973,11 @@ git push origin release --dry-run
       <h4><span class="dot" style="color:var(--anth-orange);">●</span> gated-dual-clone</h4>
       <p>
         <span class="lang-en">A sky-skills workflow bundle for dual-repo git setups. One bootstrap command, three safety gates, two languages.</span>
-        <span class="lang-zh">sky-skills 里的双仓库 git 搭建 skill。一条 bootstrap 命令，三道安全闸，两种语言。</span>
+        <span class="lang-zh">sky-skills 里的双仓库 git 搭建 skill。一条 bootstrap 命令，三道安全检查，两种语言。</span>
       </p>
       <p>
         <span class="lang-en">Comes with a paired evaluator — <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/gated-dual-clone-audit">gated-dual-clone-audit</a> — that checks a finished setup gate by gate.</span>
-        <span class="lang-zh">配套评估器 <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/gated-dual-clone-audit">gated-dual-clone-audit</a>，逐闸检查搭好的环境。</span>
+        <span class="lang-zh">配套评估器 <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/gated-dual-clone-audit">gated-dual-clone-audit</a>，逐检查检查搭好的环境。</span>
       </p>
     </div>
 
@@ -997,7 +997,7 @@ git push origin release --dry-run
       <ul>
         <li><a href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone/references/decision-checklist.md"><span class="lang-en">decision-checklist</span><span class="lang-zh">决策清单</span></a></li>
         <li><a href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone/references/daily-workflow.md"><span class="lang-en">daily-workflow</span><span class="lang-zh">日常流程</span></a></li>
-        <li><a href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone/references/guardrails.md"><span class="lang-en">guardrails</span><span class="lang-zh">安全闸原理</span></a></li>
+        <li><a href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone/references/guardrails.md"><span class="lang-en">guardrails</span><span class="lang-zh">安全检查原理</span></a></li>
         <li><a href="https://github.com/TbusOS/sky-skills/blob/main/skills/gated-dual-clone/references/troubleshooting.md"><span class="lang-en">troubleshooting</span><span class="lang-zh">故障排查</span></a></li>
       </ul>
     </div>

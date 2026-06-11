@@ -70,4 +70,5 @@ bin/design-review --skill=glass --critic <your-page.html> # 第四道检查 · L
 - **light 模式 accent 文字**走 `var(--glass-accent-ink)`(自动切 `#0E7490`);手写 cyan hex 在白底 1.6:1 必挂 contrast 检查。
 - **按钮配方锁死**:cyan 填充 + `--glass-button-ink` 深字。白字在 cyan 上 1.9:1,禁。
 - **双主题 SVG**:图示里的墨色 / 节点 / 线必须用 `.glass-svg-*` 类或 `style="fill:var(--glass-*)"`;写死白色 fill 在 light 模式下隐形。cyan `#22D3EE` 主题恒定,可以写死。
+- **液态光标**:glass.js 在 hover+fine 指针环境自动把鼠标变成一颗水滴(弹簧追随、随速度拉伸、停驻晃动、快速划过甩尾滴,透镜提亮下方内容)。冻结契约下不安装,截图与机械检查永远看不到它;单页退出加 `<html data-no-liquid>`。
 - **aurora 层必须 `pointer-events:none`**(`.glass-aurora` 自带;自己加装饰层时记得)— `glass-cta-obstructed` 检查报点击遮挡。
