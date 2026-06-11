@@ -37,6 +37,27 @@ last-verified: 2026-04-19
 9. `references/responsive.md` — 断点与 max-width
 10. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
 
+## 图密度合约（写任何页面前 MUST — 不只画图时）
+
+**尽可能用图表达**——这是默认要求，不需要用户提醒。下表任一形态出现就该配视觉化
+（图型列是**默认起点不是强制规格**——结构按实际内容定制、可混搭可自创，硬约束只有
+"该有图的地方有图" + 工艺质量闸，三层约束见 `diagram-craft.md` 开头）：
+
+| 内容形态 | 必须配 | 内容形态 | 必须配 |
+|---|---|---|---|
+| 数字对比 / 统计 | **巨字号统计**（apple 的视觉主角，计入视觉元素） | ≥3 步流程 / 启动链 / 数据流 | 流程图或时序图 |
+| 系统结构 / 分层 / 依赖 | 架构图 | 时间演进 / 版本 / 里程碑 | 时间线 |
+| 产品 / UI 描述 | 设备线稿 mock（diagram-craft §8 + `templates/diagrams/device-mock.svg`） | 连续纯文字 > 2 屏 | ≥ 1 个视觉元素 |
+| 函数控制流 / 寄存器位域 | 函数流程图 / 位域图 | SoC 结构 / 信号时序 / 编译链 / 调度 | 对应内核图型（diagram-craft §12） |
+
+节奏：每 1.5 屏（≈1300px @1440）≥ 1 个 SVG / figure / stat。机器闸 `text-desert` 在连续
+2600px 无视觉元素时 warn（known-bugs 1.31）。动笔画图前再读 `references/diagram-craft.md`：
+§6 先定尺寸再画（**内容多就加宽加高画布，禁止把图缩小去迁就版式——看不清 = 没画**；
+信息密集图必须走 `--hero` 1280px 容器 + `grid-column: 1 / -1`，否则文字被压到 <9px）、
+§0 色彩身份（灰阶为本 + 蓝 `#0071e3` 全图一处——apple 的"少"靠柔影和留白做层次，不是单调）。
+现成图直接抄 `templates/diagrams/`（14 件图型 + device-mock 底版），案例库见
+`demos/apple-design/diagrams.html`（每张带 Copy SVG）。
+
 ## 发布前检查(MUST — 交给 design-review skill)
 
 ### 生成**前**读 canonical + 拿合约

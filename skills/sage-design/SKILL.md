@@ -44,9 +44,30 @@ last-verified: 2026-04-19
 ## 阅读顺序
 
 1. `references/design-tokens.md` — 色板 + 字体 + 间距
-2. `references/dos-and-donts.md` — 反例 + **发布前 checklist**
-3. `assets/sage.css` — CSS 变量与组件
-4. `templates/` — 着陆页骨架（mirrors ember-design structure, sage palette）
+2. `references/diagram-craft.md` — **手工 SVG 图示工艺（画任何图前 MUST 读）**：绿单焦点 + 靛蓝做墨 + 暖灰分层、先定尺寸再画、内核谱系、图密度合约、反模式
+3. `references/dos-and-donts.md` — 反例 + **发布前 checklist**
+4. `assets/sage.css` — CSS 变量与组件
+5. `templates/` — 着陆页骨架（mirrors ember-design structure, sage palette；图示模板见 `templates/diagrams/`，8 件）
+
+## 图密度合约（写任何页面前 MUST — 不只画图时）
+
+**尽可能用图表达**——这是默认要求，不需要用户提醒。下表任一形态出现就该配视觉化
+（图型列是**默认起点不是强制规格**——结构按实际内容定制、可混搭可自创，硬约束只有
+"该有图的地方有图" + 工艺质量闸）：
+
+| 内容形态 | 必须配 | 内容形态 | 必须配 |
+|---|---|---|---|
+| ≥3 步流程 / 启动链 / 数据流 | 流程图 | 数字对比 / 统计 | stat callout 或图表 |
+| 系统结构 / 分层 / 依赖 | 架构图 | 时间演进 / 排程 | 时间线 |
+| 函数控制流 / 寄存器位域 | 函数流程图 / 位域图 | SoC 结构 / 信号时序 / 编译链 | 对应内核图型（diagram-craft §6） |
+| 产品 / UI 描述 | 窗口 mock（canonical landing 的编辑器 mock 语法） | 连续纯文字 > 2 屏 | ≥ 1 个视觉元素 |
+
+节奏：每 1.5 屏（≈1300px @1440）≥ 1 个 SVG / figure / stat。机器闸 `text-desert` 在连续
+2600px 无视觉元素时 warn（known-bugs 1.31）。动笔画图前再读 `references/diagram-craft.md`：
+§3 先定尺寸再画（**内容多就加宽加高画布，禁止把图缩小去迁就版式——看不清 = 没画**）、
+§0-1 色彩（绿 `#97B077` 单焦点 + 靛蓝 `#393C54` 做墨 + 低饱和 tint `#f0f3e2`/`#c9d1b3`/`#eef2de`
+分层——层次靠 tint 不靠饱和，完整调色板以 diagram-craft §1 为准）。现成图直接抄
+`templates/diagrams/`（8 件内核工程谱系），案例库见 `demos/sage-design/diagrams.html`（每张带 Copy SVG）。
 
 ## 发布前检查(MUST — 交给 design-review skill)
 
@@ -99,7 +120,7 @@ primary CTA 用 `--sage-ink` (#393C54), sage 绿只做 accent + 大面积填充 
 - 大号 **Instrument Serif** italic headline（尤其 hero 和 pull-quote）
 - sage 填色 pill 按钮 + 纯白文字（contrast ≥ 4.5）
 - 暗部用 `--sage-ink`（深靛蓝），不是纯黑
-- 图表 / 图示调色板只用这三色 + 中性灰：`#97B077 / #393C54 / #f8faec / #e5e8da`
+- 图表 / 图示调色板以 `diagram-craft.md` §1 为准（绿单焦点 + 靛蓝墨 + 低饱和 tint 分层）；UI 组件主色仍是 `#97B077 / #393C54 / #f8faec / #e5e8da`
 - 大量负空间（section padding ≥ 96px vertical）
 
 ## 为什么"sage"而不是"green"

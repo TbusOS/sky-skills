@@ -28,9 +28,30 @@ last-verified: 2026-04-19
 ## 阅读顺序
 
 1. `references/design-tokens.md` — 色板 + 字体 + 间距
-2. `references/dos-and-donts.md` — 反例 + **发布前 checklist**
-3. `assets/ember.css` — CSS 变量与组件
-4. `templates/landing-page.html` — 着陆页骨架
+2. `references/diagram-craft.md` — **手工 SVG 图示工艺（画任何图前 MUST 读）**：暖棕灰阶 + 金单焦点、先定尺寸再画、内核谱系翻译表、图密度合约、反模式
+3. `references/dos-and-donts.md` — 反例 + **发布前 checklist**
+4. `assets/ember.css` — CSS 变量与组件
+5. `templates/landing-page.html` — 着陆页骨架（图示模板见 `templates/diagrams/`，8 件）
+
+## 图密度合约（写任何页面前 MUST — 不只画图时）
+
+**尽可能用图表达**——这是默认要求，不需要用户提醒。下表任一形态出现就该配视觉化
+（图型列是**默认起点不是强制规格**——结构按实际内容定制、可混搭可自创，硬约束只有
+"该有图的地方有图" + 工艺质量闸）：
+
+| 内容形态 | 必须配 | 内容形态 | 必须配 |
+|---|---|---|---|
+| ≥3 步流程 / 启动链 / 数据流 | 流程图 | 数字对比 / 统计 | stat callout 或图表 |
+| 系统结构 / 分层 / 依赖 | 架构图 | 时间演进 / 排程 | 时间线 |
+| 函数控制流 / 寄存器位域 | 函数流程图 / 位域图 | SoC 结构 / 信号时序 / 编译链 | 对应内核图型（diagram-craft §8） |
+| 产品 / UI 描述 | 窗口 mock（白卡 + hairline 语法） | 连续纯文字 > 2 屏 | ≥ 1 个视觉元素 |
+
+节奏：每 1.5 屏（≈1300px @1440）≥ 1 个 SVG / figure / stat。机器闸 `text-desert` 在连续
+2600px 无视觉元素时 warn（known-bugs 1.31）。动笔画图前再读 `references/diagram-craft.md`：
+§6 先定尺寸再画（**内容多就加宽加高画布，禁止把图缩小去迁就版式——看不清 = 没画**）、
+§0-1 色彩（暖棕灰阶 `#312520`/`#6b5a4f`/`#8a7564` 分层 + 金 `#c49464` 单焦点 + 低饱和 tint
+`#fbeedd`/`#f5e5c8` 做层次——色彩有层次但不抢金的焦点）。现成图直接抄 `templates/diagrams/`
+（8 件内核工程谱系），案例库见 `demos/ember-design/diagrams.html`（每张带 Copy SVG）。
 
 ## 发布前检查(MUST — 交给 design-review skill)
 
