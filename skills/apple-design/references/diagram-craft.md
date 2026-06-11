@@ -6,7 +6,7 @@
 
 > 适用：架构图 / 流程图 / 层级图 / 时间线 / 时序图等一切工程类图示。
 > 与 anthropic 的多色语义路线不同，**apple 图的美感来自"少"**：无彩色为主、蓝色一处、柔影分层、留白比信息多。
-> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence / deployment / state-machine + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline,共 **14 件**,全部按本文标准实现）。案例库：`demos/apple-design/diagrams.html`（14 张图,每张带 Copy SVG）。
+> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence / deployment / state-machine + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline,共 **14 件**,全部按本文标准实现；另有 §8 配套的 device-mock.svg 设备线稿底版,不计入图型谱系）。案例库：`demos/apple-design/diagrams.html`（14 张图,每张带 Copy SVG）。
 
 ## 0. 第一原则：美靠"少"
 
@@ -83,9 +83,22 @@ apple 风时序图 pattern（anthropic 有专文 `sequence-diagrams.md`，apple 
 - 消息标签 11-12px `#1d1d1f` 置于线上方 6px；返回值标签 11px `#86868b`
 - 文字一律平排（不旋转）；图宽不够就加宽 viewBox，不准缩字号
 
-## 8. 数据表达优先级
+## 8. 数据表达优先级 + 设备线稿 mock
 
-复杂信息先考虑 **巨字号统计**（`data-display.md`：120px big number + caption），它是 apple 的视觉主角；柱图/饼图是最后选项。流程和结构才用本文的图示。产品形态用 SVG 设备线稿 mock：圆角矩形外框（手机 rx 28 / laptop rx 12 + 底座梯形）+ 浅灰描边 + 内容区极简线段——不要试图画拟真渐变金属质感（单文件 SVG 画不像，宁可线稿化）。
+复杂信息先考虑 **巨字号统计**（`data-display.md`：120px big number + caption），它是 apple 的视觉主角；柱图/饼图是最后选项。流程和结构才用本文的图示。
+
+产品形态用 SVG 设备线稿 mock，**线稿化不拟真**——渐变金属质感单文件 SVG 画不像，宁可全线稿。起点文件 `templates/diagrams/device-mock.svg`（三框并排、底边共线，复制需要的设备组单独用）：
+
+| 设备 | 外框 w×h（比例） | 外框 rx | 屏区 | 结构细节 | 场景 |
+|---|---|---|---|---|---|
+| phone | 148×320（≈9:19.5） | 28 | 内缩 8 / rx 20 | 顶部胶囊岛 44×10 + 底部 home 条 44×4 | App / 移动端 UI |
+| laptop | 屏 400×248（16:10） | 12 | 内缩 12 / rx 6 | 底座梯形（比屏宽各外扩 32、高 12、中央 48px 凹槽弧）+ 摄像头点 | 桌面端 / 控制台 |
+| tablet | 220×296（≈3:4 竖屏） | 20 | 内缩 8 / rx 12 | 顶部摄像头点 r 1.5 | 阅读 / 中屏对比 |
+
+- **描边**：机身 `#aeaeb2` 1.5px + `fill #ffffff`；屏区 `#d2d2d7` 1px 无填充；细节件（岛 / home 条 / 摄像头点）填 `#d2d2d7`——只用这两档灰，不引入新灰阶
+- **内容区**：几条 stroke-width 8、round linecap 的 `#d2d2d7` 短线，长短错落示意标题/正文即可；模板内有注释标记，使用时替换为实际 UI 线段
+- **焦点**：全图至多 1 条线换 `#0071e3`（如 CTA），或全灰阶零焦点；禁止渐变 / 金属质感 / 高饱和填充 / 实物照片描摹
+- 多设备同图底边基线对齐；标注 11-12px `#86868b` 平排在设备下方，不旋转
 
 ## 9. 图密度合约
 
