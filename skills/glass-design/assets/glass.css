@@ -160,6 +160,14 @@ html[data-lang="zh"] .glass-stat-number {
   letter-spacing: 0;
 }
 html[data-lang="zh"] .glass-eyebrow { letter-spacing: 0.06em; }
+/* CJK display headings: every glyph is full-width, so the same px size reads
+ * visually denser/heavier than Latin and overruns the hero copy column —
+ * shrink the display sizes one notch. text-wrap: balance (Chromium 114+,
+ * progressive) stops the browser breaking mid-word: CJK has no space word
+ * boundaries, so unbalanced wrap can split a two-character word across lines. */
+h1, h2 { text-wrap: balance; }
+html[data-lang="zh"] h1 { font-size: 64px; }
+html[data-lang="zh"] h2 { font-size: 42px; }
 
 /* ---------- Section D: Link & Button ---------- */
 .glass-link {
@@ -601,6 +609,18 @@ html[data-theme="light"] .glass-card::before {
   padding: var(--space-5);
   overflow-x: auto;
 }
+/* Inline variant — .glass-code is a BLOCK recipe (--space-5 padding blows up
+ * line boxes inside prose). Use this on <code> that sits in running text. */
+.glass-code--inline, code.glass-code--inline {
+  display: inline;
+  padding: 0.1em 0.45em;
+  font-size: 0.88em;
+  line-height: inherit;
+  overflow-x: visible;
+  white-space: normal;
+  overflow-wrap: break-word;
+  vertical-align: baseline;
+}
 code {
   font-family: var(--font-mono);
   font-size: 0.92em;
@@ -752,6 +772,10 @@ html.glass-liquid body,
 html.glass-liquid a,
 html.glass-liquid button,
 html.glass-liquid [role="button"] { cursor: none !important; }
+/* the water cursor never installs on touch/coarse pointers — hide its toggle */
+@media (hover: none), (pointer: coarse) {
+  .glass-cursor-toggle { display: none; }
+}
 .glass-water-head {
   position: fixed; left: 0; top: 0; z-index: 9996; pointer-events: none;
   background-repeat: no-repeat; background-size: 100% 100%;
@@ -804,6 +828,8 @@ html[data-motion="off"] *::after {
 @media (max-width: 768px) {
   h1 { font-size: clamp(34px, 9.5vw, 44px); }
   h2 { font-size: clamp(27px, 7.5vw, 32px); }
+  html[data-lang="zh"] h1 { font-size: clamp(32px, 8.8vw, 40px); }
+  html[data-lang="zh"] h2 { font-size: clamp(25px, 7vw, 30px); }
   h3 { font-size: 21px; }
   body { font-size: 16px; }
   .glass-lead { font-size: 17px; }
@@ -820,6 +846,7 @@ html[data-motion="off"] *::after {
 }
 @media (min-width: 769px) and (max-width: 1024px) {
   h1 { font-size: 56px; }
+  html[data-lang="zh"] h1 { font-size: 50px; }
   .glass-footer-grid { grid-template-columns: repeat(3, 1fr); }
 }
 

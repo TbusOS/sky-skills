@@ -28,5 +28,5 @@
 
 - 层级靠 **size / weight / spacing**,不靠 italic(没有)也不靠颜色堆砌。
 - 文字色只用三档 ink token + accent-ink;第四种灰不存在。
-- 中文侧:`html[data-lang="zh"]` 规则已内置于 glass.css(标题正文全 Noto Sans SC,`font-style:normal`,eyebrow 字距收到 0.06em);中文标点用全角(known-bugs 1.22,verify 强制)。
+- 中文侧:`html[data-lang="zh"]` 规则已内置于 glass.css(标题正文全 Noto Sans SC,`font-style:normal`,eyebrow 字距收到 0.06em);中文标点用全角(known-bugs 1.22,verify 强制)。CJK display 字号自动收一档(h1 76→64px,h2 48→42px,平板/手机断点同步收),h1/h2 全局 `text-wrap: balance`(Chromium 渐进增强)防止双字词被劈到两行。
 - 数字大显示一律 `font-variant-numeric: tabular-nums`(count-up 动画期间不跳宽)。

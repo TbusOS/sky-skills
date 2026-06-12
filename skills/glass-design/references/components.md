@@ -31,7 +31,7 @@
 ## 数据
 
 `.glass-stat-number`(72px tabular,配 `data-count-to`)· `.glass-stat-label` ·
-`.glass-stat-delta--up/--down` · `.glass-table` · `.glass-code` / `code` / `kbd`
+`.glass-stat-delta--up/--down` · `.glass-table` · `.glass-code`(块级,pre 用)/ `.glass-code.glass-code--inline`(行内,跑文里的 code 用——裸 `.glass-code` 的 --space-5 padding 会撑爆行盒)/ `code` / `kbd`
 
 ## SVG 主题类(diagram-craft.md 详)
 
