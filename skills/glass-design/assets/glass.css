@@ -727,89 +727,53 @@ html[data-theme="light"] .glass-svg-node--indigo { fill: rgba(79, 70, 229, 0.08)
  * The review harness runs Playwright with reducedMotion:'reduce', so gates
  * always see the deterministic terminal frame. */
 
-/* Liquid cursor — the pointer IS a water droplet. glass.js injects one
- * .glass-drop and drives it with spring physics: it lags behind the pointer,
- * stretches along its velocity, wobbles when it stops, and sheds .glass-drop-
- * trail micro-droplets when moving fast. The optics are layered fakes that
- * read as real water: backdrop brightening (lens), a top-left specular
- * crescent, a thickened bright rim (edge refraction), a bottom inner shade,
- * and a faint caustic glow cast below. Installed only on hover-capable fine
- * pointers, never under the freeze contract (so screenshots never see it).
- * Opt out per page with <html data-no-liquid>. */
-.glass-drop {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 46px;
-  height: 46px;
-  margin: -23px 0 0 -23px;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  -webkit-backdrop-filter: blur(0.4px) brightness(1.6) saturate(1.8);
-  backdrop-filter: blur(0.4px) brightness(1.6) saturate(1.8);
-  background:
-    /* small sharp specular — a real droplet's highlight is a point, not a wash */
-    radial-gradient(circle at 31% 26%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.35) 9%, rgba(255, 255, 255, 0) 17%),
-    /* refracted light pooling along the lower rim — the dark-surface water cue */
-    radial-gradient(circle at 50% 64%, rgba(255, 255, 255, 0) 70%, rgba(200, 240, 255, 0.28) 92%, rgba(255, 255, 255, 0) 100%),
-    /* whisper of body so the lens reads on pure canvas */
-    radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0) 70%);
-  box-shadow:
-    inset 0 0 1px 1px rgba(255, 255, 255, 0.28),
-    inset 0 2px 4px -2px rgba(255, 255, 255, 0.5),
-    0 5px 12px -8px rgba(2, 6, 18, 0.5),
-    0 12px 22px -14px rgba(34, 211, 238, 0.32);
-  will-change: transform;
+/* Liquid cursor v2 — the pointer IS water, physically. glass.js builds the
+ * whole system at runtime:
+ *   head bead    — an elliptical lens that refracts the REAL page content
+ *                  behind it (backdrop-filter + SDF dome displacement map,
+ *                  RGB channels displaced separately = chromatic dispersion),
+ *                  stretching along velocity through 6 pre-baked aspect states
+ *   rivulet      — fast moves lay a continuous water stream behind the bead
+ *                  (clip-path ribbon + turbulence refraction) that necks,
+ *                  breaks into beads (Plateau–Rayleigh) and evaporates < 1s
+ *   retraction   — stopping pulls nearby trail water back into the bead
+ *   splash       — double-click bursts the bead into radial water tongues +
+ *                  satellite beads; surface tension slowly re-coalesces it
+ *   fx layer     — flow-direction highlights, dark refraction edges, glints,
+ *                  optional faint sea-blue tint on a canvas overlay
+ * Light theme swaps the highlight bake for a dark refractive rim + contact
+ * shadow (white highlights vanish on white). Installed only on hover-capable
+ * fine pointers, never under the freeze contract. Opt out per page with
+ * <html data-no-liquid>; users can switch water/system cursor at runtime via
+ * a .glass-cursor-toggle button (persisted in localStorage sky-cursor).
+ * Tuning hooks: <html data-water-refr="52" data-water-tint="12">. */
+html.glass-liquid,
+html.glass-liquid body,
+html.glass-liquid a,
+html.glass-liquid button,
+html.glass-liquid [role="button"] { cursor: none !important; }
+.glass-water-head {
+  position: fixed; left: 0; top: 0; z-index: 9996; pointer-events: none;
+  background-repeat: no-repeat; background-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; -webkit-mask-size: 100% 100%;
+  mask-repeat: no-repeat; mask-size: 100% 100%;
+  will-change: transform; opacity: 0;
 }
-/* second, smaller specular — the double reflection real droplets show */
-.glass-drop::after {
-  content: "";
-  position: absolute;
-  right: 22%;
-  bottom: 20%;
-  width: 14%;
-  height: 10%;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.38);
-  filter: blur(1px);
+.glass-water-trail {
+  position: fixed; left: 0; top: 0; z-index: 9993; pointer-events: none;
+  will-change: clip-path; display: none;
 }
-html[data-theme="light"] .glass-drop {
-  box-shadow:
-    inset 0 0 0 1px rgba(13, 18, 32, 0.10),
-    inset 0 -5px 9px -6px rgba(13, 18, 32, 0.16),
-    inset 0 4px 8px -5px rgba(255, 255, 255, 0.9),
-    0 6px 14px -8px rgba(13, 18, 32, 0.20),
-    0 14px 24px -14px rgba(14, 116, 144, 0.20);
+.glass-water-fx {
+  position: fixed; inset: 0; width: 100vw; height: 100vh;
+  z-index: 9995; pointer-events: none;
 }
-/* over links/buttons the drop contracts to a bead so the target stays visible */
-.glass-drop.is-pointing {
-  width: 26px;
-  height: 26px;
-  margin: -13px 0 0 -13px;
-  transition: width 200ms var(--ease-glass), height 200ms var(--ease-glass), margin 200ms var(--ease-glass);
-}
-/* shed micro-droplet: shrinks, slides down a touch (gravity), evaporates */
-.glass-drop-trail {
-  position: fixed;
-  left: 0;
-  top: 0;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9998;
-  -webkit-backdrop-filter: blur(0.5px) brightness(1.16);
-  backdrop-filter: blur(0.5px) brightness(1.16);
-  background:
-    radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0) 66%),
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0) 62%, rgba(190, 235, 255, 0.26) 90%, rgba(255, 255, 255, 0) 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
-    0 3px 7px -4px rgba(2, 6, 18, 0.28);
-  animation: glass-trail-fade 760ms cubic-bezier(0.3, 0.6, 0.4, 1) forwards;
-}
-@keyframes glass-trail-fade {
-  0%   { opacity: 0.95; transform: translate(0, 0) scale(1); }
-  100% { opacity: 0; transform: translate(0, 12px) scale(0.18); }
+.glass-water-bead {
+  position: fixed; left: 0; top: 0; z-index: 9994; pointer-events: none;
+  width: 30px; height: 30px;
+  background-repeat: no-repeat; background-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; -webkit-mask-size: 100% 100%;
+  mask-repeat: no-repeat; mask-size: 100% 100%;
+  will-change: transform, opacity;
 }
 
 /* Scroll reveal — JS-gated initial state */

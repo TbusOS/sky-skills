@@ -45,7 +45,7 @@
 ## 动画属性(motion.md 详)
 
 `data-reveal` · `data-count-to`(+`-prefix`/`-suffix`)· `data-tilt` ·
-`data-draw`(svg)· `data-parallax` · 液态光标(自动注入 `.glass-drop`/`.glass-drop-trail`,`<html data-no-liquid>` 退出)· 冻结:`#freeze` hash 或 `data-motion-freeze`
+`data-draw`(svg)· `data-parallax` · 液态光标 v2(自动注入 `.glass-water-head`/`.glass-water-trail`/`.glass-water-fx`/`.glass-water-bead`,`<html data-no-liquid>` 退出,`.glass-cursor-toggle` 按钮切水珠/系统)· 冻结:`#freeze` hash 或 `data-motion-freeze`
 
 ## 布局
 
