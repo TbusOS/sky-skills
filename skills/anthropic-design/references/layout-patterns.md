@@ -481,9 +481,44 @@ CTA:        .anth-button primary
 - 不要 emoji 表情（"🤔 Nothing here"）；anthropic 用抽象 SVG，不用 emoji
 - 文案见 ux-writing.md（"No conversations yet" 不写 "Oops! It looks like you haven't created..."）
 
----
+### L11 · Info-dense 工程规格页（register map / fuse 布局 / 多维摘要）
 
-## Scenario decision tree
+工程文档的数据密度和营销页是两种形状：读者在**解码**不在浏览，`file:line`
+引用和 code ref 高频出现。直接套 anth-card / report-table 会过载——单 SVG 塞
+10+ 行 11-13px `<text>` 是字墙，4 行表格每格 4-5 句 + 8 个 `<code>` 是词墙
+（真实 reviewer 反应："密密麻麻如何阅读？"）。两个替代配方：
+
+**A · 多维摘要 → 2×2 维度卡**（4-6 个维度，每维 1 个关键数 + 3-5 条子项）
+
+```
+容器:        .anth-container（960）
+grid:        2×2,gap var(--space-4)
+每卡:        左侧 4px 色条(per-dimension,低饱和数据色板;不是品牌橙满涂)
+             小 badge("维度 N" / 域名,eyebrow 样式 13px uppercase)
+             H3 = 关键数字(Poppins 28-32px weight 700)
+             inline mini-SVG 280×50(见 data-display.md "卡内 mini-SVG")
+             3-5 条 bullet(15px,每条 ≤1 行)
+             一行 citation footer(mono 12px,var(--anth-text-secondary),file:line)
+```
+
+**B · 寄存器 / fuse / 内存布局 → HTML 卡片网格**（替代一张大 SVG）
+
+```
+区域:        每个 region 一个 panel(h3 标题 + 一句 caption)
+entry 卡:    offset(JetBrains Mono 18-22px weight 600,卡内最大字)
+             size(mono 12px,text-secondary)
+             name(Poppins 15px weight 600)
+             description(Lora 14px,≤2 行)
+grid:        repeat(auto-fill,minmax(200px,1fr)),gap var(--space-3)
+关键 entry:  深一档卡底(var(--anth-cream)) + offset 字号加大,不靠颜色喊
+零散/未知:   不进网格——收进 .anth-admonition 放网格之后
+```
+
+- 原则：**密度靠分层消化,不靠缩字号**。每个 entry 卡内部有自己的字号
+  阶梯(mono 大数 → 名称 → 描述),读者扫 offset 列即可定位,3 秒可扫
+- 一张图装不下 ≠ 缩小字号塞进去,= 换 HTML 网格(天然换行、可 hover、
+  可复制文本)
+- citation 永远 mono + text-secondary,不抢正文层级
 
 ```
 要做哪类版式？
@@ -498,5 +533,6 @@ CTA:        .anth-button primary
 ├─ 状态浮层                    → L6 modal
 ├─ 时间线                       → L8 changelog
 ├─ 空数据                       → L10 empty state
+├─ 工程规格(register/fuse/多维) → L11 info-dense
 └─ 都不是 → 回 §1-§6 找最近的版式 + dos-and-donts.md 对照检查
 ```

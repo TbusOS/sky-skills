@@ -112,6 +112,22 @@ Anthropic 仅在年度报告 / Economic Index 摘要等极少场景使用。Stat
 - 渐变填充
 - 图例放在图表底部（顶部更易扫描）
 
+## 卡内 mini-SVG（info-dense 卡片的呼吸图）
+
+L11 工程规格卡（见 layout-patterns.md）里的微型图：**280×50 单行**，让一张卡
+在数字和 bullet 之间有一眼可读的结构图，密度高但不闷。两种合法形态：
+
+| 形态 | 用途 | 配方 |
+|---|---|---|
+| 单行堆叠条 | 占比 / 布局分区（如 fuse 区块占位） | 一行 `<rect>` 拼满 280 宽,高 30-40,低饱和数据色板,块间 2px 留白,块上方/内部 11-13px mono 标签 |
+| 箭头链 | 流向 / 阶段（如信任链、流水线段） | 3-5 个圆角矩节点 + `→`,节点 11-13px 标签,当前/关键节点橙细边 |
+
+- 尺寸锁死 280×50(`viewBox="0 0 280 50"` + `width:100%; max-width:280px`),
+  再多内容就不是 mini-SVG 了——升级成正式 figure 或 L11-B 卡片网格
+- 标签 11-13px 是下限,塞不下就减少分块,不准缩字
+- 色彩走低饱和数据色板,**不用品牌橙做数据色**(橙只标当前/关键的细边)
+- 不算 figure:不强制 figcaption,但 `<svg>` 要 `role="img"` + `aria-label`
+
 ## Sequence diagrams · 时序流程图
 
 多 actor 随时间推进的交互（API 调用 / 协议握手 / 硬件命令流） → 见独立文档 [`sequence-diagrams.md`](sequence-diagrams.md)（含 SVG 模板 + 颜色 token + 反面教材 + 发布前 checklist）.
