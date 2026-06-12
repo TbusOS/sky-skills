@@ -190,6 +190,15 @@
 
 ---
 
+### 1.32 子元素撑破父容器 · margin:auto 块没居中
+- **Reader sees**：一张 8 列宽表（cell 里是不换行的长 `<code>` 串）从 1180px 的 shell 右边突出去 392px，页面横向滚动、视觉偏右；或一个本该居中的块整体偏向一边。
+- **Why**：块级盒不会为溢出的内容长大——`width:100%` 的 table 算完最小内容宽度后直接刺穿 max-width 容器，shell 自己还是居中的（bbox 正常），突破的是它的孩子，逐容器看"都对"，组合起来坏。margin:auto 偏移同理：意图在 stylesheet 里（auto），渲染时被 position 偏移 / 宽度覆盖 / 溢出子元素破坏，肉眼难定位。
+- **How caught**：2026-06-12 加两个 check（issue #11）。`layout-overflow`——内容型块元素（table/pre/img/video/iframe/canvas/figure/svg）bbox 与直接父容器比对，突破 > 8px → warn，输出子/父 box 全量数据（L/R/W）方便定位；只查 static/relative（absolute 装饰层合法越界，glass aurora 就是），父容器 overflow-x auto/scroll/hidden 全豁免（设计好的横滚/裁切不算）。`margin-auto-offcenter`——**意图必须从 stylesheet 读**（getComputedStyle 把 auto 解析成 used px 值，issue 原型代码在 Chromium 上永远不触发），扫 cssRules 收集 marginLeft/Right 双 auto 的 selector 再测量左右 gap，Δ > 12px → warn；flex/grid 父容器豁免（auto margin 在那里是对齐工具不是居中意图）。实现坑：支持 CSS nesting 的 Chromium 里每条 CSSStyleRule 都自带空 .cssRules，walk 时先判 style 再递归，不能 either/or。标定：repro 双阳性命中（869px 表格突破 / Δ160px 偏移），横滚包裹 + absolute 层 + flex 居中三阴性静音，canonical + docs 全量回归 0 假阳。
+- **Defense**：机器兜底 `layout-overflow` + `margin-auto-offcenter`；宽表的正确写法是包一层横滚容器（glass `.glass-table` 区已有 overflow 配方）。
+- **Rule**：宽内容要么约束宽度要么给它设计好的滚动容器，不准让它刺穿版心。
+
+---
+
 ### 1.31 长文无图 · "text desert"
 - **Reader sees**：连续两屏以上全是段落文字，没有任何图 / 表 / stat / mock。读者在第二屏开始跳读，第三屏直接滚到底——内容再好也没被读到。
 - **Why**：图密度合约（anthropic diagram-craft §12 / apple §9：≥3 步流程必须画图、>2 屏纯文字必须插视觉元素、每 1.5 屏 ≥ 1 个视觉元素）只写在 diagram-craft.md 里，而那个文档的触发条件是"画图前必读"——generator 没打算画图就永远读不到"何时必须画图"，鸡生蛋。用户反馈"每次都要提醒多用图"（2026-06-11）。

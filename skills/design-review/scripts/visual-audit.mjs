@@ -1372,6 +1372,95 @@ const findings = await page.evaluate((arg) => {
     });
   }
 
+  // ---------- 12c) layout-overflow + margin:auto centering (§1.32) ----------
+  // The classic miss: a wide <table> bursting its max-width shell renders
+  // 400px past the container edge and nothing flags it. Two checks:
+  //  (a) content-bearing block elements whose bbox breaks out of their parent
+  //  (b) elements TARGETED by a margin:auto rule that render off-center
+  // Conservative scoping keeps this out of the false-positive factory:
+  // static/relative only (absolute layers escape on purpose), parents that
+  // scroll or clip horizontally are exempt, breakout must exceed 8px.
+  const sigSelector = (el) =>
+    el.tagName.toLowerCase() + (el.classList.length ? '.' + [...el.classList].slice(0, 3).join('.') : '');
+  document.querySelectorAll('table, pre, img, video, iframe, canvas, figure, svg').forEach((el) => {
+    if (el.closest('svg') && el.tagName.toLowerCase() !== 'svg') return; // shapes inside svg
+    const st = getComputedStyle(el);
+    if (st.display === 'none' || st.visibility === 'hidden') return;
+    if (st.position === 'absolute' || st.position === 'fixed' || st.position === 'sticky') return;
+    const r = el.getBoundingClientRect();
+    if (r.width < 40 || r.height < 24) return;
+    const parent = el.parentElement;
+    if (!parent || parent === document.body) return;
+    const ps = getComputedStyle(parent);
+    if (/(auto|scroll|hidden)/.test(ps.overflowX) || /(auto|scroll|hidden)/.test(ps.overflow)) return;
+    const pr = parent.getBoundingClientRect();
+    if (pr.width < 1) return;
+    const rightBreak = r.right - pr.right;
+    const leftBreak = pr.left - r.left;
+    const breakPx = Math.max(rightBreak, leftBreak);
+    if (breakPx > 8) {
+      issues.push({
+        kind: 'layout-overflow',
+        severity: 'warn',
+        selector: sigSelector(el),
+        breakPx: Math.round(breakPx),
+        side: rightBreak >= leftBreak ? 'right' : 'left',
+        childBox: `L${Math.round(r.left)} R${Math.round(r.right)} W${Math.round(r.width)}`,
+        parentBox: `L${Math.round(pr.left)} R${Math.round(pr.right)} W${Math.round(pr.width)}`,
+      });
+    }
+  });
+  // (b) margin:auto intent must come from the STYLESHEETS — getComputedStyle
+  // resolves auto margins to used px values, so we scan cssRules for
+  // selectors declaring marginLeft/Right auto, then measure those elements.
+  const autoSelectors = new Set();
+  const walkRules = (list) => {
+    for (const rule of list) {
+      // NB: with CSS-nesting support every CSSStyleRule HAS a (usually
+      // empty) .cssRules — test style first, then recurse, never either/or.
+      if (rule.style && rule.selectorText &&
+          rule.style.marginLeft === 'auto' && rule.style.marginRight === 'auto') {
+        autoSelectors.add(rule.selectorText);
+      }
+      if (rule.cssRules && rule.cssRules.length) walkRules(rule.cssRules);
+    }
+  };
+  for (const sheet of document.styleSheets) {
+    let rules; try { rules = sheet.cssRules; } catch (e) { continue; }
+    if (rules) walkRules(rules);
+  }
+  const centeredSeen = new Set();
+  for (const selText of autoSelectors) {
+    let els; try { els = document.querySelectorAll(selText); } catch (e) { continue; }
+    els.forEach((el) => {
+      if (centeredSeen.has(el)) return; centeredSeen.add(el);
+      const st = getComputedStyle(el);
+      if (st.display === 'none' || st.visibility === 'hidden') return;
+      if (st.position === 'absolute' || st.position === 'fixed') return;
+      if (st.display.indexOf('inline') === 0) return;
+      const parent = el.parentElement;
+      if (!parent) return;
+      const pst = getComputedStyle(parent);
+      // in flex/grid auto margins are an alignment tool, not centering intent
+      if (pst.display.includes('flex') || pst.display.includes('grid')) return;
+      const r = el.getBoundingClientRect();
+      const pr = parent.getBoundingClientRect();
+      if (r.width < 40 || pr.width - r.width < 24) return; // not meaningfully narrower
+      const lGap = r.left - pr.left;
+      const rGap = pr.right - r.right;
+      if (Math.abs(lGap - rGap) > 12) {
+        issues.push({
+          kind: 'margin-auto-offcenter',
+          severity: 'warn',
+          selector: sigSelector(el),
+          leftGap: Math.round(lGap),
+          rightGap: Math.round(rGap),
+          delta: Math.round(Math.abs(lGap - rGap)),
+        });
+      }
+    });
+  }
+
   return issues;
 }, { crossSkill: crossSkillData, focusInExternalCss, remoteCssPresent, theme: themeArg });
 
@@ -1600,6 +1689,14 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'perf-cls') {
     console.log(
       `  [${i.severity}] CLS ${i.cls} exceeds 0.1 (local render, indicative only) — layout shifts after load; reserve space for late-loading elements (explicit dimensions, font fallback metrics)`
+    );
+  } else if (i.kind === 'layout-overflow') {
+    console.log(
+      `  [${i.severity}] layout-overflow: <${i.selector}> breaks ${i.breakPx}px past parent ${i.side} edge  child[${i.childBox}] parent[${i.parentBox}] — wrap in a horizontal scroller or constrain width  (§1.32)`
+    );
+  } else if (i.kind === 'margin-auto-offcenter') {
+    console.log(
+      `  [${i.severity}] margin:auto block renders off-center: <${i.selector}> leftGap=${i.leftGap}px rightGap=${i.rightGap}px (Δ${i.delta}px) — check overflowing children / width overrides  (§1.32)`
     );
   } else if (i.kind === 'glass-reveal-stuck') {
     console.log(
