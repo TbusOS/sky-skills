@@ -350,7 +350,7 @@
           dispChain('glassWaterHead') +
           dispChain('glassWaterBead', ' width="30" height="30"') +
           '<filter id="glassWaterTrail" x="-4%" y="-4%" width="108%" height="108%" color-interpolation-filters="sRGB">' +
-          '<feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="11" result="n"/>' +
+          '<feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="1" seed="11" result="n"/>' +
           '<feDisplacementMap id="glassWaterTrailDisp" in="SourceGraphic" in2="n" scale="26" xChannelSelector="R" yChannelSelector="G" result="d"/>' +
           '<feGaussianBlur in="d" stdDeviation="0.25" result="db"/>' +
           '<feColorMatrix in="db" type="saturate" values="1.15" result="sat"/>' +
@@ -458,6 +458,18 @@
         var LIFE = 920, NECK_T = 0.26, LAM = 27;
         var DEPOSIT_V = 4, GAP_PX = 3;
         var drops = [], POOL = [];
+        var trailGeom = { x: -1, y: -1, w: -1, h: -1 };
+        // The rivulet's refraction layer is OPT-IN (<html data-water-trail-refr>).
+        // Measured on the real glass page (software rendering): animating
+        // clip-path on a turbulence backdrop-filter element re-runs the whole
+        // filter chain every frame — 27fps with it, 60fps without; the head
+        // lens is free by comparison. The canvas fx ribbon (tint, refraction
+        // edges, flow highlight, glints) keeps the trail fully visible, and
+        // the head keeps true refraction — that is the part that reads as
+        // "real water". Demo pages that want the full effect opt in and get
+        // the auto-degrade guard below as a safety net.
+        var trailRefr = html.hasAttribute('data-water-trail-refr');
+        var slowFrames = 0;
 
         document.addEventListener('pointermove', function (e) {
           tx = e.clientX; ty = e.clientY;
@@ -549,12 +561,24 @@
               if (p.y - w < y0) y0 = p.y - w; if (p.y + w > y1) y1 = p.y + w;
             });
           });
-          x0 = Math.floor(x0); y0 = Math.floor(y0);
-          trailEl.style.display = 'block';
-          trailEl.style.left = x0 + 'px'; trailEl.style.top = y0 + 'px';
-          trailEl.style.width = Math.ceil(x1 - x0) + 'px';
-          trailEl.style.height = Math.ceil(y1 - y0) + 'px';
-          var path = '', tintA = TINT * 0.012, light = isLight();
+          // Quantize the refraction element's geometry to a 128px grid:
+          // per-frame left/top/width/height changes force the browser to
+          // re-capture the backdrop and re-run feTurbulence every frame —
+          // the single biggest cost on pages that already stack
+          // backdrop-filter panels. Snapped geometry only changes when the
+          // trail crosses a grid line; the clip-path keeps animating at 60Hz.
+          var Q = 128;
+          x0 = Math.floor(x0 / Q) * Q; y0 = Math.floor(y0 / Q) * Q;
+          var qw = Math.ceil((x1 - x0) / Q) * Q, qh = Math.ceil((y1 - y0) / Q) * Q;
+          trailEl.style.display = trailRefr ? 'block' : 'none';
+          if (trailGeom.x !== x0 || trailGeom.y !== y0 || trailGeom.w !== qw || trailGeom.h !== qh) {
+            trailGeom = { x: x0, y: y0, w: qw, h: qh };
+            trailEl.style.left = x0 + 'px'; trailEl.style.top = y0 + 'px';
+            trailEl.style.width = qw + 'px';
+            trailEl.style.height = qh + 'px';
+          }
+          // canvas-only mode compensates with a touch more tint
+          var path = '', tintA = TINT * (trailRefr ? 0.012 : 0.016), light = isLight();
           segs.forEach(function (s) {
             var n = s.pts.length, L = [], R = [];
             for (var k = 0; k < n; k++) {
@@ -565,10 +589,12 @@
               var nx = -ty2 / tn, ny = tx2 / tn, w = s.ws[k];
               L.push([p.x + nx * w, p.y + ny * w]); R.push([p.x - nx * w, p.y - ny * w]);
             }
-            var sp2 = 'M' + (L[0][0] - x0).toFixed(1) + ' ' + (L[0][1] - y0).toFixed(1);
-            for (var k = 1; k < n; k++) sp2 += 'L' + (L[k][0] - x0).toFixed(1) + ' ' + (L[k][1] - y0).toFixed(1);
-            for (var k = n - 1; k >= 0; k--) sp2 += 'L' + (R[k][0] - x0).toFixed(1) + ' ' + (R[k][1] - y0).toFixed(1);
-            path += sp2 + 'Z';
+            if (trailRefr) {
+              var sp2 = 'M' + (L[0][0] - x0).toFixed(1) + ' ' + (L[0][1] - y0).toFixed(1);
+              for (var k = 1; k < n; k++) sp2 += 'L' + (L[k][0] - x0).toFixed(1) + ' ' + (L[k][1] - y0).toFixed(1);
+              for (var k = n - 1; k >= 0; k--) sp2 += 'L' + (R[k][0] - x0).toFixed(1) + ' ' + (R[k][1] - y0).toFixed(1);
+              path += sp2 + 'Z';
+            }
             /* fx layer: tint fill, refraction edges, flow highlight, glints */
             var P = new Path2D();
             P.moveTo(L[0][0] * FXDPR, L[0][1] * FXDPR);
@@ -608,7 +634,7 @@
               }
             }
           });
-          trailEl.style.clipPath = 'path("' + path + '")';
+          if (trailRefr) trailEl.style.clipPath = 'path("' + path + '")';
         }
         function drawHeadGlint(sp, st, sV) {
           if (!active) return;
@@ -677,6 +703,11 @@
           var dt = Math.min(now - lastNow, 50) || 16.7;
           lastNow = now;
           if (mode !== 'water') { requestAnimationFrame(step); return; }
+          if (trailRefr && active) {
+            // 22ms ≈ 45fps. Only count frames where the cursor is doing work.
+            if (dt > 22) { slowFrames++; } else if (slowFrames > 0) { slowFrames--; }
+            if (slowFrames > 90) { trailRefr = false; trailEl.style.display = 'none'; }
+          }
           vx = (vx + (tx - x) * STIFF) * DAMP;
           vy = (vy + (ty - y) * STIFF) * DAMP;
           x += vx; y += vy;

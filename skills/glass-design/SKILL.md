@@ -70,5 +70,5 @@ bin/design-review --skill=glass --critic <your-page.html> # 第四道检查 · L
 - **light 模式 accent 文字**走 `var(--glass-accent-ink)`(自动切 `#0E7490`);手写 cyan hex 在白底 1.6:1 必挂 contrast 检查。
 - **按钮配方锁死**:cyan 填充 + `--glass-button-ink` 深字。白字在 cyan 上 1.9:1,禁。
 - **双主题 SVG**:图示里的墨色 / 节点 / 线必须用 `.glass-svg-*` 类或 `style="fill:var(--glass-*)"`;写死白色 fill 在 light 模式下隐形。cyan `#22D3EE` 主题恒定,可以写死。
-- **液态光标 v2**:glass.js 在 hover+fine 指针环境自动把鼠标变成一颗真折射水珠(backdrop-filter + SDF 圆顶位移图,折射真实页面内容 + RGB 色散;随速度拉伸;快划拖出连续水流,按 Plateau–Rayleigh 失稳缩颈断珠、1 秒内蒸发;停驻回抽尾流;双击爆裂成水舌四溅再汇聚)。light 主题自动换浅底高光烘焙。冻结契约下不安装,截图与机械检查永远看不到它;单页退出加 `<html data-no-liquid>`;页面放 `.glass-cursor-toggle` 按钮可让访客切水珠/系统光标(localStorage `sky-cursor` 持久);`<html data-water-refr data-water-tint>` 调折射强度/水色。
+- **液态光标 v2**:glass.js 在 hover+fine 指针环境自动把鼠标变成一颗真折射水珠(backdrop-filter + SDF 圆顶位移图,折射真实页面内容 + RGB 色散;随速度拉伸;快划拖出连续水流,按 Plateau–Rayleigh 失稳缩颈断珠、1 秒内蒸发;停驻回抽尾流;双击爆裂成水舌四溅再汇聚)。light 主题自动换浅底高光烘焙。冻结契约下不安装,截图与机械检查永远看不到它;单页退出加 `<html data-no-liquid>`;页面放 `.glass-cursor-toggle` 按钮可让访客切水珠/系统光标(localStorage `sky-cursor` 持久);`<html data-water-refr data-water-tint>` 调折射强度/水色;水流的折射层默认关(实测它让叠满毛玻璃面板的页面 60→27fps,canvas 光效层的水流照常可见,主珠真折射透镜保留),演示页可用 `<html data-water-trail-refr>` 开启(带自动降级兜底)。
 - **aurora 层必须 `pointer-events:none`**(`.glass-aurora` 自带;自己加装饰层时记得)— `glass-cta-obstructed` 检查报点击遮挡。
