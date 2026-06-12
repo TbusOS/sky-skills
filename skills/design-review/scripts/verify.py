@@ -347,10 +347,14 @@ def check_file(
     # Pages). Missing
     # the lang-toggle / lang-en / lang-zh pattern = inconsistent UX for CJK
     # users. Rule is documented in cross-skill-rules.md §G.
+    # Match on the ABSOLUTE path: a relative invocation like
+    # `verify.py docs/page.html` has no leading slash, so the naive
+    # `"/docs/" in path` test silently skipped this rule (and 8b below).
+    norm_path = os.path.abspath(path).replace(os.sep, "/")
     public_path = (
-        "/docs/" in path.replace(os.sep, "/")
-        or "/references/canonical/" in path.replace(os.sep, "/")
-        or "/demos/" in path.replace(os.sep, "/")
+        "/docs/" in norm_path
+        or "/references/canonical/" in norm_path
+        or "/demos/" in norm_path
     )
     if public_path and not allow_monolingual:
         has_toggle = re.search(r'class=["\'][^"\']*\blang-toggle\b', html) is not None
@@ -371,7 +375,7 @@ def check_file(
     # a `design-review:self-diff v1` HTML comment block. Contract documented in
     # cross-skill-rules.md §M. See known-bugs.md §1.23. Critic + next author
     # both read this block to know "why does this instance look like this?"
-    if "/references/canonical/" in path.replace(os.sep, "/"):
+    if "/references/canonical/" in norm_path:
         sd_pattern = re.compile(
             r"<!--\s*design-review:self-diff\s+v1\b(.*?)/design-review:self-diff\s*-->",
             re.DOTALL,
@@ -453,7 +457,10 @@ def check_file(
                 f"{path}: glass page must declare an initial theme on the root "
                 f'element: <html data-theme="dark"> (dual-theme contract).'
             )
-        if public_path and not re.search(
+        # Same exemption as the bilingual rule: the toggle button is a
+        # public-page UX affordance. Internal docs (--internal) still get
+        # dual-theme AUDITING — visual-audit flips data-theme itself.
+        if public_path and not allow_monolingual and not re.search(
             r'class=["\'][^"\']*\bglass-theme-toggle\b', html
         ):
             errors.append(

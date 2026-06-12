@@ -25,6 +25,9 @@
 #                      iOS-frost variant; both must be clean).
 #   --css=<path>       Extra CSS file for class-definition lookup. Can repeat.
 #   --strict           Treat visual-audit warnings as failure (default: only errors).
+#   --internal         (alias --allow-monolingual) Forwarded to gate 1 verify.py:
+#                      skip the bilingual-page rule for internal monolingual docs.
+#                      Gates 2/3/4 unchanged — glass still auto-runs both themes.
 #   --out=<dir>        Where to save screenshots (default: <repo>/shots/).
 #   --critic           Also run the LLM critic (gate 4). Writes the critic prompt
 #                      to <out>/critic-<basename>-<timestamp>.md. You then feed
@@ -100,6 +103,7 @@ PLAN=""
 DISTILL=""
 CORPUS=""
 AUDIT=""
+INTERNAL=""
 AUDIT_FORWARD=()
 CSS_ARGS=()
 HTMLS=()
@@ -120,7 +124,10 @@ for arg in "$@"; do
     --distill) DISTILL=1 ;;
     --corpus=*) CORPUS="${arg#--corpus=}" ;;
     --audit)   AUDIT=1 ;;
-    --max=*|--exclude=*|--include=*|--no-visual|--allow-monolingual|--internal)
+    --internal|--allow-monolingual)
+               INTERNAL=1
+               AUDIT_FORWARD+=("$arg") ;;
+    --max=*|--exclude=*|--include=*|--no-visual)
                AUDIT_FORWARD+=("$arg") ;;
     -h|--help)
       awk 'NR < 2 { next } /^set -eu/ { exit } { sub(/^# ?/, ""); print }' "$0"
@@ -226,8 +233,13 @@ echo "└───────────────────────�
 echo ""
 
 # ---------- Gate 1 · structural ----------
+# --internal forwards to verify.py only (skips the bilingual-page rule for
+# internal monolingual docs); gates 2/3/4 behave identically either way, so
+# glass pages still get the automatic dark+light double run.
+VERIFY_FLAGS=()
+[ -n "$INTERNAL" ] && VERIFY_FLAGS+=("--internal")
 echo "━━ [1/$TOTAL_GATES] verify.py (structural)"
-( cd "$REPO" && python3 "$VERIFY" "${SKILL_FLAG[@]}" "${CSS_ARGS[@]}" "${HTMLS[@]}" )
+( cd "$REPO" && python3 "$VERIFY" "${SKILL_FLAG[@]}" "${VERIFY_FLAGS[@]}" "${CSS_ARGS[@]}" "${HTMLS[@]}" )
 
 # ---------- Theme matrix ----------
 # Default: one run, no theme override. Explicit --theme: that theme only.
