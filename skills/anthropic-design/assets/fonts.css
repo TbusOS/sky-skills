@@ -1,6 +1,14 @@
 /* Anthropic Design — Font Declarations
  * 英文:Poppins (display) + Lora (editorial body + italic pull-quote) + JetBrains Mono (code)。
- * 中文:Noto Serif SC (body 衬线, 配 Lora) + Noto Sans SC (display, 配 Poppins)。
  * 全部 Google Fonts, OFL 许可。
+ *
+ * 中文策略:默认不拉 CJK webfont(Noto Sans/Serif SC 两族 4 weights 合计
+ * ~200 KB,CDN 慢时文字空白 2-5 秒)。中文显示依赖系统字体回退链:
+ *   macOS → PingFang SC · Windows → 微软雅黑/Source Han Sans SC ·
+ *   Linux → Noto Sans CJK SC(发行版自带)
+ * 页面 zh 覆盖的 font-family 仍写 "Noto Sans SC"/"Noto Serif SC" 在链首——
+ * 本机装了就用,没装走系统回退,视觉差异微小。
+ * 需要保证 CJK webfont 的页面(对外正式发布、目标环境无中文字体),
+ * 在本文件之后额外引入 fonts-cjk.css。
  */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');

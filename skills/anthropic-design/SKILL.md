@@ -10,7 +10,7 @@ last-verified: 2026-04-19
 
 ## 使用方式
 
-1. 在 HTML 里引入 `<link rel="stylesheet" href="assets/fonts.css">` 与 `<link rel="stylesheet" href="assets/anthropic.css">`。
+1. 在 HTML 里引入 `<link rel="stylesheet" href="assets/fonts.css">` 与 `<link rel="stylesheet" href="assets/anthropic.css">`。fonts.css 默认只含拉丁字体（~80 KB）；中文走系统字体回退（PingFang/微软雅黑/Noto CJK），zh 覆盖的 font-family 链首仍写 "Noto Sans SC"/"Noto Serif SC"。仅当必须保证 CJK webfont 时再追加 `assets/fonts-cjk.css`（+200 KB，CDN 慢时拖慢首屏 2-5 秒）。
 2. 写业务结构时套用 `anth-*` class 前缀。具体组件用法见 `references/components.md`。
 3. 新开模板直接从 `templates/` 复制。
 
