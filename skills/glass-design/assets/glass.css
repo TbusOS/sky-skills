@@ -63,6 +63,13 @@ html[data-theme="dark"] {
   --glass-code-bg: rgba(2, 6, 18, 0.55);
   --glass-up: #34D399;
   --glass-down: #FB7185;
+  /* Status semantics (engineering diagrams: pass / degraded / error-path).
+   * ok/danger reuse the up/down HUES on purpose — same palette discipline,
+   * different semantic axis. A single diagram uses EITHER the financial
+   * up/down axis OR the status axis, never both. See data-display.md §2. */
+  --glass-ok: #34D399;
+  --glass-warn: #FBBF24;
+  --glass-danger: #FB7185;
   --glass-ref-ink: #818CF8;       /* indigo-as-TEXT (deploy markers, SLO labels) —
                                      literal #4F46E5 text is ~2.7:1 on dark panels */
   --glass-blob-alpha: 1;
@@ -91,6 +98,9 @@ html[data-theme="light"] {
   --glass-code-bg: rgba(13, 18, 32, 0.05);
   --glass-up: #047857;            /* #0E9F6E was 3.4:1 at 13px on white cards */
   --glass-down: #E11D48;
+  --glass-ok: #047857;
+  --glass-warn: #B45309;          /* amber #FBBF24 text is ~1.6:1 on white — deep amber passes */
+  --glass-danger: #E11D48;
   --glass-ref-ink: #4F46E5;
   --glass-blob-alpha: 0.6;
 }
@@ -656,15 +666,34 @@ kbd {
 .glass-svg-ref-ink       { fill: var(--glass-ref-ink); }    /* indigo TEXT (deploy/SLO labels) — literal #4F46E5 text dies on the dark theme */
 .glass-svg-up            { fill: var(--glass-up); }
 .glass-svg-down          { fill: var(--glass-down); }
+/* Status axis (engineering: pass / degraded / error-path) — see tokens above.
+ * Color-blind rule: status MUST also carry a non-color channel. Danger nodes
+ * ship dashed by default; warn/ok pair with an icon or label. */
+.glass-svg-ok            { fill: var(--glass-ok); }
+.glass-svg-warn          { fill: var(--glass-warn); }
+.glass-svg-danger        { fill: var(--glass-danger); }
 
 /* Tinted diagram nodes — the color layer of the diagram language. Tint fills
- * 10-12% + colored strokes keep the glassy read while coding semantics:
+ * 14-18% + colored strokes keep the glassy read while coding semantics:
  * cyan = hot path / focus tier · indigo = storage / secondary / infra.
- * Cap: ≤2 tint hues per diagram on top of the neutral glass base. */
-.glass-svg-node--cyan   { fill: rgba(34, 211, 238, 0.10); stroke: rgba(34, 211, 238, 0.50); }
-.glass-svg-node--indigo { fill: rgba(129, 140, 248, 0.12); stroke: rgba(129, 140, 248, 0.50); }
-html[data-theme="light"] .glass-svg-node--cyan   { fill: rgba(14, 116, 144, 0.09); stroke: rgba(14, 116, 144, 0.45); }
-html[data-theme="light"] .glass-svg-node--indigo { fill: rgba(79, 70, 229, 0.08); stroke: rgba(79, 70, 229, 0.40); }
+ * (Raised from 10-12%: this skill's home turf is projector demos, where a
+ * 0.02-0.04 alpha delta over the 0.06-0.08 neutral node washes out — the
+ * category encoding must survive ambient light. Same lesson as
+ * anthropic-design diagram-craft's early-tint round.)
+ * Cap: ≤2 tint hues per diagram on top of the neutral glass base; category
+ * overflow strategy lives in diagram-craft.md §2. */
+.glass-svg-node--cyan   { fill: rgba(34, 211, 238, 0.15); stroke: rgba(34, 211, 238, 0.55); }
+.glass-svg-node--indigo { fill: rgba(129, 140, 248, 0.16); stroke: rgba(129, 140, 248, 0.55); }
+html[data-theme="light"] .glass-svg-node--cyan   { fill: rgba(14, 116, 144, 0.13); stroke: rgba(14, 116, 144, 0.50); }
+html[data-theme="light"] .glass-svg-node--indigo { fill: rgba(79, 70, 229, 0.12); stroke: rgba(79, 70, 229, 0.48); }
+/* Status-coded nodes — one status GROUP per diagram, on top of (not counted
+ * against) the 2-tint-hue budget. Danger carries the dashed stroke channel. */
+.glass-svg-node--ok     { fill: rgba(52, 211, 153, 0.14); stroke: rgba(52, 211, 153, 0.55); }
+.glass-svg-node--warn   { fill: rgba(251, 191, 36, 0.14); stroke: rgba(251, 191, 36, 0.55); }
+.glass-svg-node--danger { fill: rgba(251, 113, 133, 0.14); stroke: rgba(251, 113, 133, 0.60); stroke-dasharray: 5 3; }
+html[data-theme="light"] .glass-svg-node--ok     { fill: rgba(4, 120, 87, 0.12); stroke: rgba(4, 120, 87, 0.55); }
+html[data-theme="light"] .glass-svg-node--warn   { fill: rgba(180, 83, 9, 0.12); stroke: rgba(180, 83, 9, 0.55); }
+html[data-theme="light"] .glass-svg-node--danger { fill: rgba(225, 29, 72, 0.11); stroke: rgba(225, 29, 72, 0.60); stroke-dasharray: 5 3; }
 
 .glass-lead--compact { font-size: 17px; }
 
