@@ -28,13 +28,15 @@ const REPO_ROOT = resolve(__dirname, '../../..');
 const MIN_SAMPLES = 5;
 
 function parseArgs(argv) {
-  const out = {};
+  const out = { _: [] };
   for (const a of argv) {
     if (a.startsWith('--skill=')) out.skill = a.split('=')[1];
     else if (a.startsWith('--page=')) out.page = a.split('=')[1];
     else if (a.startsWith('--corpus=')) out.corpus = a.split('=')[1];
     else if (a.startsWith('--out=')) out.out = a.split('=')[1];
+    else if (a === '--deposit') out.deposit = true;
     else if (a === '-h' || a === '--help') out.help = true;
+    else if (!a.startsWith('--')) out._.push(a);
   }
   return out;
 }
@@ -62,6 +64,13 @@ Output:
 
 Candidate must be human-reviewed + edited before being accepted into
 the canonical library. library-grower produces drafts, never ships.
+
+Deposit mode (feeds the corpus from a shipped page — called by /design-loop):
+  node skills/design-review/scripts/library-grower.mjs --deposit \\
+    --skill=<s> --page=<type> <path-to-shipped-page.html>
+  copies the page into corpus/<skill>/<page>/ so it counts toward the ≥5
+  needed to distill. Only pages that passed all gates with critic ≥ 88
+  should be deposited.
 `;
 
 // ------ Pattern extractors (run on each source HTML) ------
@@ -207,11 +216,12 @@ See \`diffs.md\` in the same output directory.
 `;
 }
 
-function renderProvenance({ skill, page, sources }) {
+function renderProvenance({ skill, page, sources, chosen }) {
   return JSON.stringify({
     skill,
     page,
     sampleCount: sources.length,
+    forkedFrom: chosen ? chosen.path : null,
     generated: new Date().toISOString(),
     sources: sources.map((s) => ({
       path: s.path,
@@ -224,9 +234,75 @@ function renderProvenance({ skill, page, sources }) {
   }, null, 2);
 }
 
+// Pick the source closest to consensus — covers the most consensus classes,
+// adds the fewest off-consensus extras. That page is the cleanest starting
+// point to fork candidate.html from (the SKILL says "pick ONE clean source").
+function pickCleanest(samples, consensus) {
+  const cons = new Set(consensus.classes.map((c) => c.item));
+  let best = samples[0], bestScore = -Infinity;
+  for (const s of samples) {
+    const sc = new Set(s.classes);
+    let have = 0;
+    for (const c of cons) if (sc.has(c)) have++;
+    const extra = s.classes.filter((c) => !cons.has(c)).length;
+    const score = have - extra * 0.05; // reward coverage, lightly penalize sprawl
+    if (score > bestScore) { bestScore = score; best = s; }
+  }
+  return best;
+}
+
+// candidate.html — the cleanest source's raw HTML, fork starting point, with a
+// DRAFT banner so it can never be mistaken for a shippable canonical.
+function renderCandidateHtml(chosen, { skill, page, sources }) {
+  const banner =
+    `<!--\n  CANDIDATE canonical · ${skill}-design · ${page} — DRAFT, human review required.\n` +
+    `  Forked by library-grower.mjs from the source closest to consensus:\n` +
+    `    ${chosen.path}\n` +
+    `  (distilled from ${sources.length} successful pages). Do NOT ship as-is —\n` +
+    `  strip page-specific content, confirm the 7 decisions, re-run --critic (≥90).\n-->\n`;
+  const m = chosen.raw.match(/^\s*<!doctype[^>]*>/i);
+  return m ? chosen.raw.replace(m[0], m[0] + '\n' + banner) : banner + chosen.raw;
+}
+
+// diffs.md — where each source diverges from consensus, so the reviewer sees
+// what is shared structure vs one-off invention before locking the canonical.
+function renderDiffs({ samples, consensus }) {
+  const cons = new Set(consensus.classes.map((c) => c.item));
+  let out = '# Source divergence from consensus · diffs\n\n';
+  out += 'Consensus = classes present in ≥80% of sources. Per source: the consensus\nclasses it is MISSING, and the off-consensus classes it adds.\n\n';
+  for (const s of samples) {
+    const sc = new Set(s.classes);
+    const missing = [...cons].filter((c) => !sc.has(c));
+    const extra = s.classes.filter((c) => !cons.has(c));
+    out += `## ${s.path}\n`;
+    out += `- missing consensus classes (${missing.length}): ${missing.slice(0, 20).map((c) => '`' + c + '`').join(', ') || '_none — fully covers consensus_'}\n`;
+    out += `- off-consensus extras (${extra.length}): ${extra.slice(0, 20).map((c) => '`' + c + '`').join(', ') || '_none_'}\n\n`;
+  }
+  return out;
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) { console.log(HELP); return 0; }
+
+  // Deposit mode — copy a shipped page into corpus/<skill>/<page>/ so it counts
+  // toward the ≥5 the distiller needs. Called by /design-loop on a ≥88 ship.
+  if (args.deposit) {
+    if (!args.skill || !args.page || !args._.length) {
+      console.error('--deposit needs --skill --page and an <html> path'); return 2;
+    }
+    const { mkdir, copyFile } = await import('node:fs/promises');
+    const dest = resolve(REPO_ROOT, `corpus/${args.skill}/${args.page}`);
+    await mkdir(dest, { recursive: true });
+    const src = resolve(args._[0]);
+    const name = basename(src);
+    try { await copyFile(src, join(dest, name)); }
+    catch (e) { console.error(`deposit failed: ${e.message}`); return 1; }
+    const n = (await readdir(dest)).filter((f) => f.endsWith('.html')).length;
+    console.log(`deposited ${name} → corpus/${args.skill}/${args.page}/ (${n} page(s); need ≥${MIN_SAMPLES} to distill)`);
+    return 0;
+  }
+
   if (!args.skill || !args.page || !args.corpus) {
     console.error('required: --skill / --page / --corpus');
     console.error(HELP);
@@ -253,6 +329,7 @@ async function main() {
     const html = await readFile(path, 'utf-8');
     samples.push({
       path: args.corpus + '/' + f,
+      raw: html,
       sections: extractSections(html),
       headings: extractHeadings(html),
       fonts: extractFonts(html),
@@ -264,23 +341,26 @@ async function main() {
   console.error(`scanned ${samples.length} pages from ${args.corpus}`);
 
   const consensus = findConsensus(samples, 0.8);
-  const outDir = args.out || `/tmp/grower-${args.skill}-${args.page}-${Date.now()}`;
-  await writeFile(resolve(outDir + '-candidate.md'), renderCandidateMd({
-    skill: args.skill, page: args.page, sources: samples, consensus,
-  }), 'utf-8').catch(async () => {
-    // Create dir if needed
-    const { mkdir } = await import('node:fs/promises');
-    await mkdir(outDir, { recursive: true });
-    await writeFile(resolve(outDir, 'candidate.md'), renderCandidateMd({
-      skill: args.skill, page: args.page, sources: samples, consensus,
-    }), 'utf-8');
-    await writeFile(resolve(outDir, 'provenance.json'), renderProvenance({
-      skill: args.skill, page: args.page, sources: samples,
-    }), 'utf-8');
-    console.error(`candidate written to ${outDir}/`);
-    console.error('next: read candidate.md, pick a source to fork, hand-write the 7 decisions, submit PR');
-  });
+  const chosen = pickCleanest(samples, consensus);
 
+  const { mkdir } = await import('node:fs/promises');
+  const outDir = args.out ? resolve(REPO_ROOT, args.out)
+    : `/tmp/grower-${args.skill}-${args.page}-${Date.now()}`;
+  await mkdir(outDir, { recursive: true });
+
+  await writeFile(resolve(outDir, 'candidate.md'),
+    renderCandidateMd({ skill: args.skill, page: args.page, sources: samples, consensus }), 'utf-8');
+  await writeFile(resolve(outDir, 'candidate.html'),
+    renderCandidateHtml(chosen, { skill: args.skill, page: args.page, sources: samples }), 'utf-8');
+  await writeFile(resolve(outDir, 'provenance.json'),
+    renderProvenance({ skill: args.skill, page: args.page, sources: samples, chosen }), 'utf-8');
+  await writeFile(resolve(outDir, 'diffs.md'),
+    renderDiffs({ samples, consensus }), 'utf-8');
+
+  console.error(`candidate written to ${outDir}/`);
+  console.error(`  candidate.html   (forked from the cleanest source: ${chosen.path})`);
+  console.error('  candidate.md · provenance.json · diffs.md');
+  console.error('next: read candidate.md + diffs.md, refine candidate.html, hand-write the 7 decisions, run --critic (≥90), submit PR');
   return 0;
 }
 
