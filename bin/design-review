@@ -42,6 +42,17 @@
 #                      outputs), builds a design-learner prompt that proposes
 #                      new known-bugs rows, visual-audit checks, and dos-and-donts
 #                      entries. Proposes only — human applies.
+#   --evolve           Harness component 09 · design-evolve. Print the self-
+#                      improvement loop checklist + current ledger frontier.
+#                      See skills/design-evolve/SKILL.md for the full ratchet.
+#   --ledger [...]     Pass through to evolve-ledger.mjs (--frontier | --append …):
+#                      the append-only experiment log + running-best curve.
+#   --rules  [...]     Pass through to evolve-rules.mjs (--report | --lint |
+#                      --register …): rule registry + EvolveR success scoring.
+#   --regress [...]    Pass through to regression-gate.mjs (--baseline |
+#                      --check --skill=X): held-out anti-overfit gate.
+#   --coverage [...]   Pass through to coverage.mjs (component 02): the canonical
+#                      library skill×page-type matrix, gaps, and uncommitted pages.
 #   --plan --skill=X --page=Y
 #                      Planning mode — skip all gates, generate sprint-contract.md
 #                      for an upcoming page generation.
@@ -89,6 +100,37 @@ set -eu
 
 SELF_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKY_ROOT="$(cd "$SELF_DIR/.." && pwd)"
+
+# ---------- Self-evolution (component 09 · design-evolve) — thin pass-throughs ----------
+# Handled BEFORE the gate-arg parser so each sub-script's own flags pass through
+# untouched. The loop these support is documented in skills/design-evolve/SKILL.md.
+EVOLVE_SCRIPTS="$SKY_ROOT/skills/design-review/scripts"
+case "${1:-}" in
+  --ledger)  shift; exec node "$EVOLVE_SCRIPTS/evolve-ledger.mjs" "$@" ;;
+  --rules)   shift; exec node "$EVOLVE_SCRIPTS/evolve-rules.mjs" "$@" ;;
+  --regress) shift; exec node "$EVOLVE_SCRIPTS/regression-gate.mjs" "$@" ;;
+  --coverage) shift; exec node "$EVOLVE_SCRIPTS/coverage.mjs" "$@" ;;
+  --evolve)
+    cat <<'EVO'
+design-evolve · the self-improvement loop (harness component 09)
+Full ratchet: skills/design-evolve/SKILL.md. One round:
+  0. lock baseline — generate S×P, score it, regression-gate --baseline --skill=S
+  1. diagnose the weakest critic axis (composition / copy / illustration / brand)
+  2. propose ONE rule/template change for that axis  (--rules --register …)
+  3. apply on a branch + regenerate the page
+  4. score with the FROZEN evaluator (3 gates green + multi-critic, avg ≥3 renders)
+  5. --regress --check --skill=S   (no held-out canonical may regress)
+  6. keep iff Δ ≥ 2 AND step 5 clean; else git revert.  (--ledger --append …)
+  7. --rules --fire=<id> [--catch]      8. repeat to --max-rounds or plateau
+The evaluator is FROZEN: never edit verify.py / visual-audit.mjs / the rubric in
+a round. Evaluator changes and whole-skill rewrites are human-gated.
+
+current ledger frontier:
+EVO
+    node "$EVOLVE_SCRIPTS/evolve-ledger.mjs" --frontier 2>/dev/null || echo "  (no ledger yet — run a round to start one)"
+    exit 0
+    ;;
+esac
 
 REPO="$PWD"
 SKILL=""

@@ -127,13 +127,32 @@ const DIAGRAM = {
 };
 
 function parseArgs(argv) {
-  const out = {};
+  const out = { format: 'md' };
   for (const a of argv) {
     if (a.startsWith('--skill=')) out.skill = a.split('=')[1];
     else if (a.startsWith('--page=')) out.page = a.split('=')[1];
+    else if (a.startsWith('--format=')) out.format = a.split('=')[1];
     else if (a === '-h' || a === '--help') out.help = true;
   }
   return out;
+}
+
+// Robust structural-point extraction from a canonical.md. The old code only
+// matched "### " headings; canonicals that use "## ", a numbered list, or no
+// decisions section at all came out empty. Try, in order: ### → ## → "N." →
+// []. The loop / json consumer gets the same list the markdown does.
+function extractStructuralPoints(mdBody) {
+  const lines = mdBody.split('\n');
+  const clean = (l) => l.replace(/^#+\s*/, '').replace(/^\s*\d+\.\s*/, '').trim();
+  const byH3 = lines.filter((l) => l.startsWith('### ')).map(clean).filter(Boolean);
+  if (byH3.length) return byH3.slice(0, 8);
+  const byH2 = lines
+    .filter((l) => /^##\s/.test(l) && !/reference|canonical\.md/i.test(l))
+    .map(clean).filter(Boolean);
+  if (byH2.length) return byH2.slice(0, 8);
+  const byNum = lines.filter((l) => /^\s*\d+\.\s+\S/.test(l)).map(clean).filter(Boolean);
+  if (byNum.length) return byNum.slice(0, 8);
+  return [];
 }
 
 const HELP = `
@@ -142,13 +161,16 @@ sprint-contract.mjs — generate a contract for a new page
 Usage:
   node skills/design-review/scripts/sprint-contract.mjs \\
     --skill=<anthropic|apple|ember|sage|glass> \\
-    --page=<pricing|landing|docs-home|feature-deep|any-other-type>
+    --page=<pricing|landing|docs-home|feature-deep|any-other-type> \\
+    [--format=md|json]
 
 Unknown page-types fall back to the nearest canonical (dashboard→docs-home,
 form→pricing, article/blog→blog-index, otherwise landing) and the contract
 is stamped LOW-CONFIDENCE — structural MUSTs become defaults.
 
-Output: markdown to stdout. Pipe into generator prompt or save.
+Output: markdown to stdout by default (pipe into generator prompt or save).
+--format=json emits the structured contract model so the design-loop /
+self-evolution driver can read acceptance criteria without re-parsing prose.
 
 Example:
   node skills/design-review/scripts/sprint-contract.mjs \\
@@ -198,15 +220,37 @@ async function main() {
 
   const brand = BRAND[skill];
   const isPublic = true; // docs/ and canonical/ paths are always public per §G.
+  const structuralPoints = extractStructuralPoints(mdBody);
 
-  const contract = renderContract({
-    skill, page, canonicalHtml, canonicalMd, brand, mdBody, isPublic, borrowedFrom,
-  });
+  // The contract model — the single structured object both renderings derive
+  // from. The JSON form is what the design-loop / self-evolution driver reads
+  // so acceptance criteria are machine-comparable, not re-parsed from prose.
+  const model = {
+    skill,
+    page,
+    confidence: borrowedFrom ? 'low' : 'full',
+    borrowedFrom: borrowedFrom ?? null,
+    canonicalHtml,
+    canonicalMd,
+    structuralPoints,
+    diagram: DIAGRAM[skill],
+    brand,
+    bilingual: isPublic,
+    selfRegressionMin: 88,
+    gates: ['verify.py', 'visual-audit.mjs', 'design-critic'],
+  };
+
+  if (args.format === 'json') {
+    console.log(JSON.stringify(model, null, 2));
+    return 0;
+  }
+
+  const contract = renderContract({ ...model, mdBody, isPublic });
   console.log(contract);
   return 0;
 }
 
-function renderContract({ skill, page, canonicalHtml, canonicalMd, brand, mdBody, isPublic, borrowedFrom }) {
+function renderContract({ skill, page, canonicalHtml, canonicalMd, brand, mdBody, isPublic, borrowedFrom, structuralPoints }) {
   const lowConfidenceBanner = borrowedFrom ? `
 > **LOW-CONFIDENCE: structure borrowed from ${borrowedFrom}; treat
 > structural MUSTs as defaults, not law.** There is no canonical for
@@ -248,7 +292,9 @@ ${structuralHeading}
 
 ${structuralIntro}
 
-${mdBody.split('\n').filter(l => l.startsWith('### ')).slice(0, 8).map(l => '- ' + l.replace(/^###\s*\d+\.\s*/, '')).join('\n')}
+${structuralPoints.length
+    ? structuralPoints.map((p) => '- ' + p).join('\n')
+    : '- (No structured decisions found in canonical.md — read the canonical HTML directly and mirror its section order and rhythm.)'}
 
 ## 1b. Diagram density + sizing MUST
 

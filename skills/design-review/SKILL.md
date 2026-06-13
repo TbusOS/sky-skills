@@ -37,7 +37,7 @@ design skill 是 generator,会给自己打高分;`design-review` 脚本、规则
 | Gate 4 · multi-critic(4 专家) | **shipped** (2026-04-22) | `.claude/agents/design-{composition,copy,illustration,brand}-critic.md` 权重 25/25/20/30 |
 | Learning-loop · 闭环回灌 | **shipped** (2026-04-22) | `.claude/agents/design-learner.md` + `scripts/learning-loop.mjs` |
 | Cross-repo 入口 | **shipped** | `bin/design-review --repo=<仓> --skill=<名> <html>` |
-| 参考库 canonical | 13 张(目标 40 · 扩库中) | `skills/<style>-design/references/canonical/` |
+| 参考库 canonical | 实时计数见 `bin/design-review --coverage`(扩库中) | `skills/<style>-design/references/canonical/` |
 
 ## Entry points · 入口
 
@@ -132,7 +132,7 @@ node skills/design-review/scripts/learning-loop.mjs \
 |---|---|---|
 | 0 · 独立脚本 | verify / visual-audit / screenshot | **done** |
 | 1 · 多风格 known-bugs 库 | 9 → 26 条 | **done · 扩展中** |
-| 2a · canonical 参考库 | 13/40 张 | **next** · 每 session 1-2 张递进 |
+| 2a · canonical 参考库 | 计数见 `--coverage` | **next** · 每 session 1-2 张递进 |
 | 3 · generator self-diff | 强制自评 note | 部分完成 |
 | 5 · multi-critic | 4 专家并行 + 聚合 | **done** (2026-04-22) |
 | 6 · `/design-loop` 编排 | planner → gen → review → critic × 3 轮 | Future(依赖 Phase 01 planner)|
