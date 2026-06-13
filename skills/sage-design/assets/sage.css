@@ -544,14 +544,72 @@ mark { background: rgba(196, 148, 100, 0.32); color: inherit; }
   transform: translateY(0);
 }
 
-/* ---------- Section L: Responsive + a11y ---------- */
+/* ---------- Section L: Responsive + a11y ----------
+ * Phone layout. The card grids that overflow at 375px live in each page's
+ * embedded <style> (.use-grid, .use-grid3, .feat-row, …); the collapse rules
+ * below override them at equal specificity via !important, so the rollout is
+ * CSS-only and reaches every page that links this sheet. Genuinely wide figures
+ * pan via an opt-in .sage-scroll wrapper (strategy A); hero product mocks
+ * scale to fit so the whole window stays visible. */
 @media (max-width: 768px) {
-  h1 { font-size: 40px; }
-  h2 { font-size: 28px; }
-  .sage-stat-number { font-size: 48px; }
-  .sage-footer-grid { grid-template-columns: repeat(2, 1fr); }
+  /* Type — fluid headings, 16px reading floor. !important so the per-page
+     inline font-sizes (style="font-size:96px" on hero headings) scale down
+     too — without it an inline size wins over this media query and overflows. */
+  h1 { font-size: clamp(32px, 8.6vw, 40px) !important; line-height: 1.14; }
+  h2 { font-size: clamp(25px, 6.4vw, 30px) !important; }
+  h3 { font-size: 20px !important; }
+  body { font-size: 16px; }
+  .sage-stat-number { font-size: clamp(40px, 12vw, 56px); }
+  .sage-quote { font-size: clamp(20px, 6vw, 24px); }
+
+  /* Sections + containers breathe less on a phone */
   .sage-section { padding-block: var(--space-7); }
-  .sage-quote { font-size: 20px; }
+  .sage-container, .sage-container--wide, .sage-container--narrow {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  /* Collapse page-local multi-column grids so nothing scrolls sideways. The
+     full class list is generated from every page's embedded <style>; a class
+     absent from a given page is simply inert. Content & label/value rows go to
+     one column; compact numeric strips stay two-up. */
+  .feat-grid, .feat-row, .use-grid, .use-grid3, .use-tile, .tier-grid, .ref-grid,
+  .member-grid, .team-grid, .canon-row, .test-row, .channel-row, .chord-grid,
+  .scenarios, .scenario, .post-grid, .pd-sibling__grid, .pd-use__grid,
+  .pd-sibling__row, .pd-spec__row, .faq-group, .faq-sum, .log-entry, .log-month,
+  .detail-row, .spec-row, .kbd-row, .lineup-row, .lineup-grid, .limit-item,
+  .craft-rule, .ship-rule, .quickstart, .palette-split, .overlap-grid, .two-col,
+  .featured, .cards-2, .comp-grid, .side-col, .support-grid, .pillar-spine,
+  .stat-strip, .glance-strip, .giant-stats, .cadence-stats, .pd-glance,
+  .stat-trio, .faq-stats, .kpi-row, .exec-strip, .status-grid, .pagination {
+    grid-template-columns: 1fr !important;
+  }
+  /* inline splits (style="grid-template-columns:2fr 3fr") collapse too */
+  [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+  .sage-footer-grid { grid-template-columns: repeat(2, 1fr); }
+  /* children must shrink, or their min-content re-widens the row */
+  [class*="grid"] > *, [class*="row"] > *, [class*="strip"] > *,
+  [class*="stat"] > *, [class*="glance"] > *, [class*="scenario"] > * { min-width: 0; }
+  /* long unbreakable tokens (file paths in <code>, URLs) wrap, not overflow */
+  code, kbd { overflow-wrap: anywhere; }
+
+  /* Nav links wrap instead of overflowing (no JS burger on this skill) */
+  .sage-nav-inner, .sage-nav-inner > div { flex-wrap: wrap; gap: var(--space-3); row-gap: var(--space-2); }
+
+  /* Opt-in pan wrapper for genuinely wide figures (strategy A): wrap the <svg>
+     in <div class="sage-scroll"> to keep a readable width and pan on a phone.
+     Hero product mocks scale-to-fit instead — the whole window stays visible,
+     and their own overflow:hidden (rounded corners) would fight a pan anyway. */
+  .sage-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .sage-scroll > svg { min-width: 720px; }
+
+  /* Wide tables + code blocks pan inside their own box; table columns stay
+     aligned (min-width:max-content keeps display:table, parent does the scroll) */
+  :is(div, section, figure):has(> table) {
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+  }
+  .cmp-table { min-width: -webkit-max-content; min-width: max-content; }
+  .sage-code { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
 @media (min-width: 769px) and (max-width: 1024px) {
   h1 { font-size: 48px; }

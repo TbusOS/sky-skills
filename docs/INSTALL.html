@@ -108,6 +108,18 @@
   .skill-table td.skill-trigger { font-family:'Lora', serif; font-size:14.5px; color:var(--anth-text-secondary); font-style:italic; }
   .skill-table td.skill-trigger code { font-family:'JetBrains Mono', monospace; font-style:normal; background:#faf9f5; padding:1px 6px; border-radius:3px; font-size:12.5px; }
 
+  /* Phone: reflow to the viewport instead of forcing a sideways scroll —
+     monospace skill-name cells wrap, and code blocks wrap long git-clone URLs
+     (white-space:pre alone would let them push the page wide). */
+  @media (max-width: 768px) {
+    .skill-table { font-size: 13px; }
+    .skill-table td.skill-name { white-space: normal; word-break: break-word; }
+    .anth-code, .anth-code code, .anth-code pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+  }
+
   /* Troubleshoot callout */
   .trouble-item {
     background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-md);
