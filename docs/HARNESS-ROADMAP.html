@@ -6,7 +6,7 @@
 <title>The Harness — sky-skills Roadmap</title>
 <meta name="description" content="The 8-component design harness behind sky-skills. Every component mapped to a specific model weakness. Generator/evaluator split, inspired by GAN and Anthropic's harness-design post.">
 <meta property="og:title" content="The Harness — sky-skills architecture roadmap">
-<meta property="og:description" content="Eight components, one rule: each must defend a specific model weakness. Anthropic voice.">
+<meta property="og:description" content="Nine components, one rule: each must defend a specific model weakness. Anthropic voice.">
 <meta property="og:type" content="article">
 <link rel="stylesheet" href="../skills/anthropic-design/assets/fonts.css">
 <link rel="stylesheet" href="../skills/anthropic-design/assets/anthropic.css">
@@ -174,12 +174,12 @@
   <div class="anth-container" style="max-width:840px;">
     <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Architecture · 2026-04-20</span><span class="lang-zh">架构 · 2026-04-20</span></span>
     <h1 style="margin-top:var(--space-4);">
-      <span class="lang-en">The Harness.<br>Eight components. One rule.</span>
-      <span class="lang-zh">架构蓝图。<br>八个组件。一条规矩。</span>
+      <span class="lang-en">The Harness.<br>Nine components. One rule.</span>
+      <span class="lang-zh">架构蓝图。<br>九个组件。一条规矩。</span>
     </h1>
     <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.55; max-width:720px; font-family:var(--font-body);">
-      <span class="lang-en">The full design of the sky-skills harness — four <strong>generator</strong> skills and one <strong>evaluator</strong>. Of the eight components: four done, two half-shipped, one next (the canonical library, 27/40), one shipped awaiting its first real run. Every component must defend one question: <em>what specific model weakness does it correspond to?</em> No weakness, no seat at the table.</span>
-      <span class="lang-zh">sky-skills 架构的完整蓝图 —— 四个 <strong>生成器</strong> skill 加一个 <strong>评审员</strong>。八个组件里：4 个已完成，2 个发了一半，1 个在做（canonical 库，27/40），1 个已发等首次实战。每个组件都必须能回答一个问题：<em>它挡的是模型的哪一个具体弱点？</em>挡不住弱点，就不配留。</span>
+      <span class="lang-en">The full design of the sky-skills harness — four <strong>generator</strong> skills and one <strong>evaluator</strong>, now <strong>nine components</strong> (a self-evolution loop, 09, was added). Seven are done; the canonical library (02) is in progress (run <code>bin/design-review --coverage</code> for the live count) and now mechanically tracked; <code>/design-loop</code> (06) has a deterministic driver and awaits its first real run. Every component must defend one question: <em>what specific model weakness does it correspond to?</em> No weakness, no seat at the table.</span>
+      <span class="lang-zh">sky-skills 架构的完整蓝图 —— 四个 <strong>生成器</strong> skill 加一个 <strong>评审员</strong>，现在是<strong>九个组件</strong>(新增了自进化循环 09)。七个已完成；canonical 库(02)在补(实时计数跑 <code>bin/design-review --coverage</code>)、且已可机械跟踪；<code>/design-loop</code>(06)有了确定性 driver、等首次实战。每个组件都必须能回答一个问题：<em>它挡的是模型的哪一个具体弱点？</em>挡不住弱点，就不配留。</span>
     </p>
     <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
       <a class="anth-button" href="#components"><span class="lang-en">See the eight</span><span class="lang-zh">看这八个</span></a>
@@ -248,11 +248,11 @@
   </div>
 </section>
 
-<!-- Eight components -->
+<!-- Nine components -->
 <section class="anth-section anth-section--subtle" id="components">
   <div class="anth-container anth-container--wide">
     <div style="max-width:720px; margin:0 auto var(--space-8); text-align:center;">
-      <span class="anth-badge"><span class="lang-en">Eight components</span><span class="lang-zh">八个组件</span></span>
+      <span class="anth-badge"><span class="lang-en">Nine components</span><span class="lang-zh">九个组件</span></span>
       <h2 style="margin-top:var(--space-3);">
         <span class="lang-en">Every row defends a weakness.</span>
         <span class="lang-zh">每一行都挡一个弱点。</span>
@@ -290,7 +290,7 @@
 
       <!-- 01 -->
       <article class="comp-card">
-        <span class="comp-card__status comp-card__status--half"><span class="lang-en">Phase 1 done · expanding</span><span class="lang-zh">期 1 已完成 · 扩展中</span></span>
+        <span class="comp-card__status comp-card__status--done"><span class="lang-en">Done · contract + JSON output</span><span class="lang-zh">已完成 · 合同 + JSON 输出</span></span>
         <span class="comp-card__num">01</span>
         <h3 class="comp-card__title">design-planner</h3>
         <code class="comp-card__path">skills/design-review/scripts/sprint-contract.mjs + bin/design-review --plan + skills/design-planner/SKILL.md</code>
@@ -303,7 +303,7 @@
 
       <!-- 02 -->
       <article class="comp-card">
-        <span class="comp-card__status comp-card__status--next"><span class="lang-en">Next · Phase 2a</span><span class="lang-zh">下一步 · 期 2a</span></span>
+        <span class="comp-card__status comp-card__status--next"><span class="lang-en">In progress · coverage-tracked</span><span class="lang-zh">进行中 · 已可机械跟踪</span></span>
         <span class="comp-card__num">02</span>
         <h3 class="comp-card__title"><span class="lang-en">reference library</span><span class="lang-zh">参考库</span></h3>
         <code class="comp-card__path">skills/&lt;style&gt;-design/references/canonical/</code>
@@ -355,7 +355,7 @@
 
       <!-- 06 -->
       <article class="comp-card">
-        <span class="comp-card__status comp-card__status--untested"><span class="lang-en">Command shipped · awaiting first real run</span><span class="lang-zh">命令已发 · 等首次实战</span></span>
+        <span class="comp-card__status comp-card__status--untested"><span class="lang-en">Driver shipped · awaiting first real run</span><span class="lang-zh">driver 已发 · 等首次实战</span></span>
         <span class="comp-card__num">06</span>
         <h3 class="comp-card__title">/design-loop</h3>
         <code class="comp-card__path">.claude/commands/design-loop.md</code>
@@ -381,14 +381,27 @@
 
       <!-- 08 -->
       <article class="comp-card">
-        <span class="comp-card__status comp-card__status--half"><span class="lang-en">Skeleton built · waiting on 20+ real pages</span><span class="lang-zh">骨架已建 · 等 20+ 张真实页</span></span>
+        <span class="comp-card__status comp-card__status--done"><span class="lang-en">Built · awaiting corpus data</span><span class="lang-zh">已建 · 等 corpus 数据</span></span>
         <span class="comp-card__num">08</span>
         <h3 class="comp-card__title">library-grower</h3>
         <code class="comp-card__path">skills/design-review/scripts/library-grower.mjs</code>
         <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
         <p class="comp-card__weak">
-          <span class="lang-en">Models can't self-organize <q>yesterday's good output</q> into tomorrow's reference. Without this, the canonical library stays fixed and becomes stale over 6 months. Five successful outputs of a page-type → auto-distilled into a new canonical, reviewed by a human, merged.</span>
-          <span class="lang-zh">模型没有"把昨天的好产物整理成明天参考"的能力。没有它，canonical library 会固定，6 个月后就开始过期。同一 page-type 攒 5 次优秀产物 → 自动蒸馏成新 canonical，人审核通过后并入。</span>
+          <span class="lang-en">Models can't self-organize <q>yesterday's good output</q> into tomorrow's reference. Without this, the canonical library stays fixed and becomes stale over 6 months. Five successful outputs of a page-type → auto-distilled into a new canonical (candidate.html + diffs.md), reviewed by a human, merged. <code>/design-loop</code> deposits each ≥88 ship into the corpus via <code>--deposit</code>.</span>
+          <span class="lang-zh">模型没有"把昨天的好产物整理成明天参考"的能力。没有它，canonical library 会固定，6 个月后就开始过期。同一 page-type 攒 5 次优秀产物 → 自动蒸馏成新 canonical(candidate.html + diffs.md)，人审核通过后并入。<code>/design-loop</code> 每次 ≥88 上线都用 <code>--deposit</code> 把页喂进 corpus。</span>
+        </p>
+      </article>
+
+      <!-- 09 -->
+      <article class="comp-card">
+        <span class="comp-card__status comp-card__status--done"><span class="lang-en">Done · 2026-06-14</span><span class="lang-zh">已完成 · 2026-06-14</span></span>
+        <span class="comp-card__num">09</span>
+        <h3 class="comp-card__title">design-evolve</h3>
+        <code class="comp-card__path">skills/design-evolve/SKILL.md</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">Models repeat the same taste mistakes and can't tell which of their own rules actually help. A Darwin / autoresearch ratchet: mutate one generator rule, regenerate, score with the <strong>frozen</strong> evaluator, keep it only if it strictly beats the baseline with no held-out canonical regressing. Selection, not authorship — the system improves its own rules without being able to cheat the test. EvolveR scoring prunes dead rules; a held-out regression gate blocks overfit.</span>
+          <span class="lang-zh">模型会重复同样的审美错误，也分不清自己哪条规则真有用。一个 Darwin / autoresearch 式爬坡：改一条生成器规则、重新生成、用<strong>冻结</strong>的评审器打分，只有严格超过基线且无 held-out canonical 变差才保留。由选择而非作者决定 —— 系统能改进自己的规则，又没法在测试上作弊。EvolveR 成功率裁剪失效规则；held-out 回退门挡过拟合。</span>
         </p>
       </article>
 
@@ -586,38 +599,38 @@
 
     <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-5);">
       <article class="anth-card">
-        <span class="comp-card__status" style="position:static; margin-bottom:var(--space-3); display:inline-block; background:#efedea; color:#4a4a42;"><span class="lang-en">Done 4 · Half-shipped 2 · Next 1 · Shipped-untested 1</span><span class="lang-zh">已完成 4 · 发了一半 2 · 下一步 1 · 已发等实战 1</span></span>
+        <span class="comp-card__status" style="position:static; margin-bottom:var(--space-3); display:inline-block; background:#efedea; color:#4a4a42;"><span class="lang-en">Done 7 · In progress 1 (library) · Driver-done 1 (loop) · + new 09 design-evolve</span><span class="lang-zh">已完成 7 · 进行中 1(库) · driver 完成 1(loop) · 新增 09 design-evolve</span></span>
         <h3 style="font-size:19px; margin-top:var(--space-3);">
           <span class="lang-en">What's actually done</span>
           <span class="lang-zh">实际已完成</span>
         </h3>
         <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3); line-height:1.6;">
-          <span class="lang-en">Four components done (03 / 04 / 05 / 07), two half-shipped (01 / 08): <strong>(04) mechanical critic</strong> — 26-check <code>visual-audit.mjs</code> (brand-presence / italic-overuse / cross-skill-smell / hollow-card / asymmetric-first-col-hero / svg-foreign-hex / figure-no-caption, via pngjs) + 38 known-bugs catalogued; <strong>(01) sprint-contract — planner phase 1</strong> — shipped as <code>sprint-contract.mjs</code> + <code>bin/design-review --plan</code>, contract schema still growing; <code>skills/design-planner/SKILL.md</code> (brief→contract guidance) + LOW-CONFIDENCE fallback for canonical-less page-types shipped 2026-06-11; <strong>(05) multi-critic</strong> — 4 critic subagents in parallel (composition / copy / illustration / brand, weighted 25/25/20/30) + solo <code>design-critic</code>; <strong>(07) learning-loop</strong> — <code>design-learner</code> reads verdicts and proposes known-bugs rows + new mechanical checks. 27 canonical pages shipped (<code>pricing / landing / docs-home × 4 skills</code> + <code>4-skill comparison + 4-skill feature-deep (Wave 1 收官)</code> + <code>4-skill blog-index + anthropic + apple + ember product-detail (Wave 2 进度 · 7/20 · matrix 第三台阶 3/4)</code>); target 40. A second independent evaluator ships as skill 11: <code>gated-dual-clone-audit</code> (4 tiers, paired with skill 10 generator) — same generator/evaluator split principle, different domain. Dated increments since 2026-04-27 — v2/v3 features, new gates, new skills — live in the <a class="anth-link" style="display:inline;" href="#changelog">changelog below</a>.</span>
-          <span class="lang-zh">已完成 4 个组件（03 / 04 / 05 / 07），发了一半 2 个（01 / 08）：<strong>(04) 机器 critic</strong> —— 26 项 <code>visual-audit.mjs</code>(brand-presence / italic-overuse / cross-skill-smell / hollow-card / asymmetric-first-col-hero / svg-foreign-hex / figure-no-caption，用 pngjs)+ 38 条 known-bugs；<strong>(01) sprint-contract —— planner 期 1</strong>，已发（<code>sprint-contract.mjs</code> + <code>bin/design-review --plan</code>），contract 字段还在扩；<code>skills/design-planner/SKILL.md</code>（brief→contract 指南）+ 无 canonical 类型的 LOW-CONFIDENCE 回退已于 2026-06-11 上线；<strong>(05) multi-critic</strong> —— 4 位 critic subagent 并行(版式 / 文案 / 插画 / 品牌，权重 25/25/20/30)+ 单 <code>design-critic</code>；<strong>(07) learning-loop</strong> —— <code>design-learner</code> 读 verdict 自动给出 known-bugs 行 + 新机器 check 建议。已发 27 张 canonical(<code>pricing / landing / docs-home × 4 风格</code> + <code>4-skill comparison + 4-skill feature-deep (Wave 1 收官)</code> + <code>4-skill blog-index + anthropic + apple + ember product-detail (Wave 2 进度 · 7/20 · matrix 第三台阶 3/4)</code>)；目标 40。第二个独立 evaluator 作为第 11 个 skill 落地：<code>gated-dual-clone-audit</code>(4 tier，配对第 10 号 generator)—— 相同的 generator/evaluator 分离原则，不同领域。2026-04-27 起的日期增量（v2/v3 特性、新检查、新 skill）见<a class="anth-link" style="display:inline;" href="#changelog">下方 changelog</a>。</span>
+          <span class="lang-en">Seven components done (01 / 03 / 04 / 05 / 07 / 08 / 09); 02 (canonical library) is in progress and 06 (<code>/design-loop</code> driver) awaits its first real run. <strong>(09) design-evolve</strong> — the Darwin / autoresearch self-evolution ratchet: mutate one rule, regenerate, score with the frozen evaluator, keep only if measurably better and no held-out canonical regresses. <strong>(04) mechanical critic</strong> — 26-check <code>visual-audit.mjs</code> (brand-presence / italic-overuse / cross-skill-smell / hollow-card / asymmetric-first-col-hero / svg-foreign-hex / figure-no-caption, via pngjs) + 38 known-bugs catalogued; <strong>(01) sprint-contract — planner phase 1</strong> — shipped as <code>sprint-contract.mjs</code> + <code>bin/design-review --plan</code>, contract schema still growing; <code>skills/design-planner/SKILL.md</code> (brief→contract guidance) + LOW-CONFIDENCE fallback for canonical-less page-types shipped 2026-06-11; <strong>(05) multi-critic</strong> — 4 critic subagents in parallel (composition / copy / illustration / brand, weighted 25/25/20/30) + solo <code>design-critic</code>; <strong>(07) learning-loop</strong> — <code>design-learner</code> reads verdicts and proposes known-bugs rows + new mechanical checks. 27 canonical pages shipped (<code>pricing / landing / docs-home × 4 skills</code> + <code>4-skill comparison + 4-skill feature-deep (Wave 1 收官)</code> + <code>4-skill blog-index + anthropic + apple + ember product-detail (Wave 2 进度 · 7/20 · matrix 第三台阶 3/4)</code>); target 40. A second independent evaluator ships as skill 11: <code>gated-dual-clone-audit</code> (4 tiers, paired with skill 10 generator) — same generator/evaluator split principle, different domain. Dated increments since 2026-04-27 — v2/v3 features, new gates, new skills — live in the <a class="anth-link" style="display:inline;" href="#changelog">changelog below</a>.</span>
+          <span class="lang-zh">已完成 7 个组件（01 / 03 / 04 / 05 / 07 / 08 / 09）；02(canonical 库)在补、06(<code>/design-loop</code> driver)等首次实战。<strong>(09) design-evolve</strong> —— Darwin / autoresearch 式自进化爬坡：改一条规则、重新生成、用冻结评审器打分，只有可度量更优且无 held-out canonical 变差才保留。<strong>(04) 机器 critic</strong> —— 26 项 <code>visual-audit.mjs</code>(brand-presence / italic-overuse / cross-skill-smell / hollow-card / asymmetric-first-col-hero / svg-foreign-hex / figure-no-caption，用 pngjs)+ 38 条 known-bugs；<strong>(01) sprint-contract —— planner 期 1</strong>，已发（<code>sprint-contract.mjs</code> + <code>bin/design-review --plan</code>），contract 字段还在扩；<code>skills/design-planner/SKILL.md</code>（brief→contract 指南）+ 无 canonical 类型的 LOW-CONFIDENCE 回退已于 2026-06-11 上线；<strong>(05) multi-critic</strong> —— 4 位 critic subagent 并行(版式 / 文案 / 插画 / 品牌，权重 25/25/20/30)+ 单 <code>design-critic</code>；<strong>(07) learning-loop</strong> —— <code>design-learner</code> 读 verdict 自动给出 known-bugs 行 + 新机器 check 建议。已发 27 张 canonical(<code>pricing / landing / docs-home × 4 风格</code> + <code>4-skill comparison + 4-skill feature-deep (Wave 1 收官)</code> + <code>4-skill blog-index + anthropic + apple + ember product-detail (Wave 2 进度 · 7/20 · matrix 第三台阶 3/4)</code>)；目标 40。第二个独立 evaluator 作为第 11 个 skill 落地：<code>gated-dual-clone-audit</code>(4 tier，配对第 10 号 generator)—— 相同的 generator/evaluator 分离原则，不同领域。2026-04-27 起的日期增量（v2/v3 特性、新检查、新 skill）见<a class="anth-link" style="display:inline;" href="#changelog">下方 changelog</a>。</span>
         </p>
       </article>
 
       <article class="anth-card" style="border:2px solid var(--anth-orange);">
         <span class="comp-card__status comp-card__status--next" style="position:static; margin-bottom:var(--space-3); display:inline-block;"><span class="lang-en">Next · canonical expansion</span><span class="lang-zh">下一步 · canonical 扩库</span></span>
         <h3 style="font-size:19px; margin-top:var(--space-3);">
-          <span class="lang-en">27 → 40 canonical pages</span>
-          <span class="lang-zh">27 → 40 张 canonical</span>
+          <span class="lang-en">31 → 44 canonical pages</span>
+          <span class="lang-zh">31 → 44 张 canonical</span>
         </h3>
         <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3); line-height:1.6;">
-          <span class="lang-en">Phase 2a in progress. 27 shipped; 13 queued (sage product-detail + team / FAQ / changelog × 4 skills) . Each page: full <code>.html</code> + binding <code>.md</code> design-decisions file, must pass <code>verify.py</code> + <code>visual-audit.mjs</code> + <code>screenshot.mjs</code> 0-warning and survive a <code>--multi-critic</code> pass. Target cadence 1–2 canonicals per focused session — rushing degrades the library's reference quality.</span>
-          <span class="lang-zh">期 2a 进行中。已发 27，剩 13 张(sage product-detail + team / FAQ / changelog × 4 风格)排队。每张：完整 <code>.html</code> + 绑定的 <code>.md</code> 设计决策文档，必须 <code>verify.py</code> + <code>visual-audit.mjs</code> + <code>screenshot.mjs</code> 0 warning 并过 <code>--multi-critic</code>。每个专注 session 做 1–2 张，赶工会拉低 library 的参考水准。</span>
+          <span class="lang-en">In progress. 31 committed; 13 queued (sage product-detail + team / FAQ / changelog × 4 skills) — run <code>bin/design-review --coverage</code> for the live count. Each page: full <code>.html</code> + binding <code>.md</code> design-decisions file, must pass <code>verify.py</code> + <code>visual-audit.mjs</code> + <code>screenshot.mjs</code> 0-warning and survive a <code>--multi-critic</code> pass. Target cadence 1–2 canonicals per focused session — rushing degrades the library's reference quality.</span>
+          <span class="lang-zh">进行中。已提交 31，剩 13 张(sage product-detail + team / FAQ / changelog × 4 风格)排队 —— 实时计数见 <code>bin/design-review --coverage</code>。每张：完整 <code>.html</code> + 绑定的 <code>.md</code> 设计决策文档，必须 <code>verify.py</code> + <code>visual-audit.mjs</code> + <code>screenshot.mjs</code> 0 warning 并过 <code>--multi-critic</code>。每个专注 session 做 1–2 张，赶工会拉低 library 的参考水准。</span>
         </p>
       </article>
 
       <article class="anth-card">
-        <span class="comp-card__status" style="position:static; margin-bottom:var(--space-3); display:inline-block; background:#efedea; color:#4a4a42;"><span class="lang-en">Queued · needs prior work</span><span class="lang-zh">排队中 · 依赖前置工作</span></span>
+        <span class="comp-card__status" style="position:static; margin-bottom:var(--space-3); display:inline-block; background:#dfeadb; color:#2f5e33;"><span class="lang-en">Built · loop awaits first run</span><span class="lang-zh">已建 · loop 等首跑</span></span>
         <h3 style="font-size:19px; margin-top:var(--space-3);">
           <span class="lang-en">planner → /design-loop → library-grower</span>
           <span class="lang-zh">planner → /design-loop → library-grower</span>
         </h3>
         <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3); line-height:1.6;">
-          <span class="lang-en">Three components in dependency order: (01) <strong>planner</strong> expands a vague brief into a sprint-contract — phase 1 shipped (<code>sprint-contract.mjs</code> + <code>bin/design-review --plan</code>), contract schema still growing. (06) <strong>/design-loop</strong> orchestrates planner → generator → review → critic for up to 5 rounds — <em>depends on planner</em>. (08) <strong>library-grower</strong> distills 5+ successful same-type pages into a new canonical — skeleton built (<code>library-grower.mjs</code>), <em>waiting on 20+ real outputs</em>. Don't start loop before the planner is whole; don't feed the grower before the data.</span>
-          <span class="lang-zh">三个组件按依赖顺序：(01) <strong>planner</strong> 把模糊需求展开成 sprint-contract —— 期 1 已发（<code>sprint-contract.mjs</code> + <code>bin/design-review --plan</code>），contract 字段还在扩。(06) <strong>/design-loop</strong> 编排 planner → generator → review → critic 最多 5 轮 —— <em>依赖 planner</em>。(08) <strong>library-grower</strong> 把 5+ 张同类成功页蒸馏成新 canonical —— 骨架已建（<code>library-grower.mjs</code>），<em>等 20+ 张真实页</em>。planner 没补全前别动 loop；数据没到前别动 grower。</span>
+          <span class="lang-en">Three components in dependency order, now all built (2026-06-14): (01) <strong>planner</strong> expands a brief into a sprint-contract — shipped with <code>--format=json</code> so the loop reads acceptance criteria machine-readably. (06) <strong>/design-loop</strong> orchestrates planner → generator → review → critic for up to 5 rounds — a deterministic driver (<code>design-loop.mjs</code>) now owns the round counter, the ≥88 ship gate, and deposit-on-ship; one real end-to-end run is the last validation. (08) <strong>library-grower</strong> distills 5+ same-type pages into a candidate (candidate.html + diffs.md), fed by the loop's <code>--deposit</code>. And the line now closes with a 9th: <strong>(09) design-evolve</strong>, which optimizes the generators' own rules against the frozen evaluator.</span>
+          <span class="lang-zh">三个组件按依赖顺序，现在都已建（2026-06-14）：(01) <strong>planner</strong> 把需求展开成 sprint-contract —— 已加 <code>--format=json</code>，loop 可机读验收标准。(06) <strong>/design-loop</strong> 编排 planner → generator → review → critic 最多 5 轮 —— 确定性 driver（<code>design-loop.mjs</code>）现在管轮数计数、≥88 ship 门、上线落库；剩一次真端到端实战做最后验证。(08) <strong>library-grower</strong> 把 5+ 张同类页蒸馏成候选（candidate.html + diffs.md），由 loop 的 <code>--deposit</code> 喂数据。这条线现在以第 9 个收尾：<strong>(09) design-evolve</strong>，对着冻结评审器优化生成器自己的规则。</span>
         </p>
       </article>
     </div>
