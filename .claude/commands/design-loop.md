@@ -44,11 +44,19 @@ holds this command file; use absolute paths if the CWD differs.
 
 ## Round 1 setup (steps ① and ② run once)
 
-### ① Pull the sprint contract
+### ① Pull the sprint contract + initialize the loop driver
 
 ```bash
 bin/design-review --plan --skill=<skill> --page=<page> > /tmp/contract-<slug>.md
+bin/design-review --loop --init --skill=<skill> --page=<page> \
+  --file=<out.html> --brief="<brief>" --max-rounds=<n>
 ```
+
+The first line gives the generator the full contract to read. The second
+sets up `design-loop.mjs` — it creates `<out.html>.loop.log`, captures the
+contract's machine summary + the ship bar, and starts the round counter. From
+here the driver owns the bookkeeping (round count, ≥88 ship gate,
+escalate-at-max, the log, deposit-on-ship); you own generation + critics.
 
 If stderr marks the contract **LOW-CONFIDENCE** (no canonical for this
 page-type; structure borrowed from the nearest one), relay that label
@@ -96,25 +104,27 @@ specialists composition / copy / illustration / brand via
 - the previous solo verdict was **borderline** (85–91): specialists
   disagree where a generalist averages, and that disagreement is signal.
 
-### ⑥ Verdict gate
+### ⑥ Verdict gate — hand the result to the driver
 
-- **≥ 88** → ship. Report the file path, rounds used, score trajectory.
-- **< 88** → take the verdict's issue list verbatim, turn each issue
-  into a concrete edit instruction for the next round's step ③, append
-  the round log, and loop.
+Do not decide ship/continue/escalate yourself; record the round and obey the
+driver's `DECISION:` line (it owns the ≥88 bar, the counter, and escalate-at-max):
 
-## Round log (append per round, format after doc-review-loop)
-
-Keep `<file>.loop.log` next to the HTML:
-
+```bash
+bin/design-review --loop --record --file=<out.html> --round=<N> \
+  --gates=<pass|fail> [--score=<n>] [--critic=solo|multi] [--issues="i1; i2; …"]
 ```
-## Round {N}
-- Input:   <one-line summary of brief (R1) or carried issues (R2+)>
-- Changes: <which sections changed and how>
-- Gates:   verify <pass/fail> · visual-audit <errors/warnings> · screenshot <path>
-- Critic:  <solo|multi> · score <n> · verdict <ship|revise>
-- Carried: <numbered issues taken into the next round, or "none — shipped">
-```
+
+- `--gates=fail` (errors still open) → `DECISION: fix` — resolve gate errors in
+  THIS round, re-run, record again; no critic until gates are green.
+- `--gates=pass --score=<n>`:
+  - `DECISION: ship` (≥ 88) → the driver deposits the page into
+    `corpus/<skill>/<page>/` (feeds component 08) and prints the trajectory.
+  - `DECISION: revise` (< 88, rounds left) → carry the `--issues` verbatim into
+    round N+1 step ③, smallest-scope edits only.
+  - `DECISION: escalate` (< 88 at max-rounds) → stop; see below.
+
+`--record` appends the round block to `<out.html>.loop.log` for you; inspect the
+trajectory any time with `bin/design-review --loop --status --file=<out.html>`.
 
 ## Rounds exhausted (no verdict ≥ 88 after max-rounds)
 

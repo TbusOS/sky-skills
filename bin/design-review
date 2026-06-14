@@ -53,6 +53,10 @@
 #                      --check --skill=X): held-out anti-overfit gate.
 #   --coverage [...]   Pass through to coverage.mjs (component 02): the canonical
 #                      library skill×page-type matrix, gaps, and uncommitted pages.
+#   --loop [...]       Pass through to design-loop.mjs (component 06): the
+#                      deterministic /design-loop driver — --init / --record /
+#                      --status. Owns the round counter, ≥88 ship gate,
+#                      escalate-at-max, .loop.log, and deposit-on-ship.
 #   --plan --skill=X --page=Y
 #                      Planning mode — skip all gates, generate sprint-contract.md
 #                      for an upcoming page generation.
@@ -110,6 +114,7 @@ case "${1:-}" in
   --rules)   shift; exec node "$EVOLVE_SCRIPTS/evolve-rules.mjs" "$@" ;;
   --regress) shift; exec node "$EVOLVE_SCRIPTS/regression-gate.mjs" "$@" ;;
   --coverage) shift; exec node "$EVOLVE_SCRIPTS/coverage.mjs" "$@" ;;
+  --loop)    shift; exec node "$EVOLVE_SCRIPTS/design-loop.mjs" "$@" ;;
   --evolve)
     cat <<'EVO'
 design-evolve · the self-improvement loop (harness component 09)
