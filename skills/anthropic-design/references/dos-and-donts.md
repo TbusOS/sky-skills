@@ -132,3 +132,4 @@ bin/design-review --audit --skill=anthropic --no-visual <dir>/   # 10x 快，先
 5. 至少一个 texture 细节（grain dots / subtle gradient）让它不像 ppt
 6. 任何 `<rect|text|path>` 的 `fill` / `stroke` hex 都必须是 `var(--anth-*)` 的值或 anthropic 允许色板成员；冷色禁入（known-bugs 1.17）
 7. `<figure>` 必须配 `<figcaption>`，写清"图表说了什么"，不是 "Figure 1"（known-bugs 1.18）
+8. SVG 盒子/卡/节点里：前置状态圆点或字形和盒子标题**不能共用居中锚点** —— 别把左置字形（小 `cx`）压在 `text-anchor="middle"` 的标题底下：居中标题的左缘会盖住字形、切掉首字母。标题要么改 `text-anchor="start"`、`x` 放在字形右侧；要么把字形移到标题上方一行。流程 / 架构 / stat 里每个带标签的盒子都适用（evolve rule `svg-glyph-title-anchor`）
