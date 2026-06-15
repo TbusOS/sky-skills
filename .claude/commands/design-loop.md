@@ -26,14 +26,14 @@ If the brief or `--skill` is missing, print:
 usage: /design-loop <brief…> --skill=<name> [--page=<type>] [--max-rounds=<n>]
 ```
 
-and stop. Paths below are relative to the sky-skills repo root that
-holds this command file; use absolute paths if the CWD differs.
+and stop. Commands below call the design-review CLI by its installed path
+(`~/.claude/skills/design-review/dr-cli`), so they run from any directory.
 
 ## Three-layer constraints (frame every round with these)
 
 1. **Aesthetics are immutable** — the skill's visual language (fonts,
    palette, brand-accent placement) is defined by
-   `skills/<skill>-design/references/`. Never negotiated inside the loop.
+   `~/.claude/skills/<skill>-design/references/`. Never negotiated inside the loop.
 2. **Quality is machine-gated** — diagram density, bilingual, contrast,
    a11y are enforced by `verify.py` + `visual-audit.mjs` + critic. The
    loop's job is to satisfy them, never to reinterpret them.
@@ -47,8 +47,8 @@ holds this command file; use absolute paths if the CWD differs.
 ### ① Pull the sprint contract + initialize the loop driver
 
 ```bash
-bin/design-review --plan --skill=<skill> --page=<page> > /tmp/contract-<slug>.md
-bin/design-review --loop --init --skill=<skill> --page=<page> \
+~/.claude/skills/design-review/dr-cli --plan --skill=<skill> --page=<page> > <out.html>.contract.md
+~/.claude/skills/design-review/dr-cli --loop --init --skill=<skill> --page=<page> \
   --file=<out.html> --brief="<brief>" --max-rounds=<n>
 ```
 
@@ -84,7 +84,7 @@ sections the critic did not flag.
 ### ④ Run the three machine gates
 
 ```bash
-bin/design-review <file.html>
+~/.claude/skills/design-review/dr-cli <file.html>
 ```
 
 Any **error** → fix and re-run within the same round until errors are
@@ -98,7 +98,7 @@ Deleting content is the last resort, never the first.
 Default: dispatch the solo `design-critic` subagent via Task in a fresh
 context, target = the HTML path. Escalate to **multi-critic** (the 4
 specialists composition / copy / illustration / brand via
-`bin/design-review --multi-critic`, weights 25/25/20/30) when either:
+`~/.claude/skills/design-review/dr-cli --multi-critic`, weights 25/25/20/30) when either:
 
 - this is the **final round** (round = max-rounds), or
 - the previous solo verdict was **borderline** (85–91): specialists
@@ -110,7 +110,7 @@ Do not decide ship/continue/escalate yourself; record the round and obey the
 driver's `DECISION:` line (it owns the ≥88 bar, the counter, and escalate-at-max):
 
 ```bash
-bin/design-review --loop --record --file=<out.html> --round=<N> \
+~/.claude/skills/design-review/dr-cli --loop --record --file=<out.html> --round=<N> \
   --gates=<pass|fail> [--score=<n>] [--critic=solo|multi] [--issues="i1; i2; …"]
 ```
 
@@ -124,7 +124,7 @@ bin/design-review --loop --record --file=<out.html> --round=<N> \
   - `DECISION: escalate` (< 88 at max-rounds) → stop; see below.
 
 `--record` appends the round block to `<out.html>.loop.log` for you; inspect the
-trajectory any time with `bin/design-review --loop --status --file=<out.html>`.
+trajectory any time with `~/.claude/skills/design-review/dr-cli --loop --status --file=<out.html>`.
 
 ## Rounds exhausted (no verdict ≥ 88 after max-rounds)
 

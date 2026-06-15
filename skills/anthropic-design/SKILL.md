@@ -74,8 +74,8 @@ last-verified: 2026-04-19
 
 ```bash
 # 生成 sprint-contract(把 MUST/MUST NOT 交给生成器自己)
-bin/design-review --plan --skill=anthropic --page=pricing > /tmp/contract.md
-# 然后读 skills/anthropic-design/references/canonical/<page>.html + .md
+~/.claude/skills/design-review/dr-cli --plan --skill=anthropic --page=pricing
+# 然后读 ~/.claude/skills/anthropic-design/references/canonical/<page>.html + .md
 ```
 
 **不读 canonical 就写 = 必然偏掉风格**。canonical.md 里的 7-8 条设计
@@ -86,8 +86,8 @@ bin/design-review --plan --skill=anthropic --page=pricing > /tmp/contract.md
 生成器在写完 HTML、跑 4 闸之前,必须在 `</body>` 前 embed 一个
 `design-review:self-diff v1` HTML 注释块,列出 5-7 条本次生成的关键
 设计决策 + 2-3 条 known trade-offs。contract 见
-`skills/design-review/references/cross-skill-rules.md §M`,示范参考
-`skills/anthropic-design/references/canonical/comparison.html` 末尾。
+`~/.claude/skills/design-review/references/cross-skill-rules.md §M`,示范参考
+`~/.claude/skills/anthropic-design/references/canonical/comparison.html` 末尾。
 
 没有 self-diff = canonical 不被 `verify.py` 承认。critic 也无法做实
 质评审(没有作者意图的靶子)。HARNESS-ROADMAP Phase 03 的硬规则。
@@ -95,7 +95,7 @@ bin/design-review --plan --skill=anthropic --page=pricing > /tmp/contract.md
 ### 生成**后**跑四闸
 
 ```bash
-bin/design-review --critic <path/to/your.html>
+~/.claude/skills/design-review/dr-cli --critic <path/to/your.html>
 ```
 
 四闸依次:
@@ -107,9 +107,9 @@ bin/design-review --critic <path/to/your.html>
 
 **任一 error 整个失败**。warn 要判断是否放行。critic 得分 < 75 必修。
 
-规则与已知 bug 全在 `skills/design-review/references/cross-skill-rules.md`
+规则与已知 bug 全在 `~/.claude/skills/design-review/references/cross-skill-rules.md`
 (A-L)+ `known-bugs.md`。canonical 文件在
-`skills/anthropic-design/references/canonical/`(pricing / landing /
+`~/.claude/skills/anthropic-design/references/canonical/`(pricing / landing /
 docs-home 各一对 .html + .md)。
 
 Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
@@ -128,16 +128,16 @@ Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
 
 ```bash
 # 扫整个目录（递归）
-bin/design-review --audit --skill=anthropic --allow-monolingual <dir>/
+~/.claude/skills/design-review/dr-cli --audit --skill=anthropic --allow-monolingual <dir>/
 
 # 单文件
-bin/design-review --audit --skill=anthropic --allow-monolingual <file>.html
+~/.claude/skills/design-review/dr-cli --audit --skill=anthropic --allow-monolingual <file>.html
 
 # verify-only，10x 快（适合先看哪些有结构错）
-bin/design-review --audit --skill=anthropic --allow-monolingual --no-visual <dir>/
+~/.claude/skills/design-review/dr-cli --audit --skill=anthropic --allow-monolingual --no-visual <dir>/
 
 # 限文件数（试跑）
-bin/design-review --audit --skill=anthropic --max=5 <dir>/
+~/.claude/skills/design-review/dr-cli --audit --skill=anthropic --max=5 <dir>/
 ```
 
 输出（默认 `<repo>/shots/`）：

@@ -97,12 +97,15 @@
 #   bin/design-review --repo=~/code/engram --skill=anthropic \
 #     --css=docs/assets/app.css docs/en/index.html
 #
-#   # generate a contract before writing
-#   bin/design-review --plan --skill=sage --page=landing > /tmp/contract.md
+#   # generate a contract before writing (prints to stdout)
+#   bin/design-review --plan --skill=sage --page=landing
 
 set -eu
 
-SELF_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Resolve $0 through symlinks first so the CLI locates its own repo root even
+# when invoked via a launcher symlink (e.g. ~/.claude/skills/design-review/dr-cli).
+SELF="$(readlink -f "$0" 2>/dev/null || echo "$0")"
+SELF_DIR="$(cd "$(dirname "$SELF")" && pwd)"
 SKY_ROOT="$(cd "$SELF_DIR/.." && pwd)"
 
 # ---------- Self-evolution (component 09 · design-evolve) — thin pass-throughs ----------

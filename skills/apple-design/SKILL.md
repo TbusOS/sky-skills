@@ -63,8 +63,8 @@ last-verified: 2026-04-19
 ### 生成**前**读 canonical + 拿合约
 
 ```bash
-bin/design-review --plan --skill=apple --page=<pricing|landing|docs-home> > /tmp/contract.md
-# 读 skills/apple-design/references/canonical/<page>.html + .md
+~/.claude/skills/design-review/dr-cli --plan --skill=apple --page=<pricing|landing|docs-home>
+# 读 ~/.claude/skills/apple-design/references/canonical/<page>.html + .md
 ```
 
 ### 生成**后**写 self-diff note(交付前 MUST)
@@ -72,8 +72,8 @@ bin/design-review --plan --skill=apple --page=<pricing|landing|docs-home> > /tmp
 生成器在写完 HTML、跑 4 闸之前,必须在 `</body>` 前 embed 一个
 `design-review:self-diff v1` HTML 注释块,列出 5-7 条本次生成的关键
 设计决策 + 2-3 条 known trade-offs。contract 见
-`skills/design-review/references/cross-skill-rules.md §M`,示范参考
-`skills/anthropic-design/references/canonical/comparison.html` 末尾。
+`~/.claude/skills/design-review/references/cross-skill-rules.md §M`,示范参考
+`~/.claude/skills/anthropic-design/references/canonical/comparison.html` 末尾。
 
 没有 self-diff = canonical 不被 `verify.py` 承认。critic 也无法做实
 质评审(没有作者意图的靶子)。HARNESS-ROADMAP Phase 03 的硬规则。
@@ -81,7 +81,7 @@ bin/design-review --plan --skill=apple --page=<pricing|landing|docs-home> > /tmp
 ### 生成**后**跑四闸
 
 ```bash
-bin/design-review --critic <path/to/your.html>
+~/.claude/skills/design-review/dr-cli --critic <path/to/your.html>
 ```
 
 四闸:`verify.py` · `visual-audit.mjs`(加 §J italic / §K brand + smell)·
@@ -89,8 +89,8 @@ bin/design-review --critic <path/to/your.html>
 
 任一 error = 失败。critic 得分 < 75 必修。canonical 自回归 ≥ 90。
 
-规则:`skills/design-review/references/cross-skill-rules.md` A-L +
-`known-bugs.md`。canonical:`skills/apple-design/references/canonical/`。
+规则:`~/.claude/skills/design-review/references/cross-skill-rules.md` A-L +
+`known-bugs.md`。canonical:`~/.claude/skills/apple-design/references/canonical/`。
 
 Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
 [harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)

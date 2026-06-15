@@ -34,8 +34,8 @@ unchanged design-review evaluator as an independent step.
 ## What you may mutate (the editable asset)
 
 One per round, picked by diagnosis:
-- a `skills/<skill>-design/references/dos-and-donts.md` rule,
-- a `skills/<skill>-design/references/*.md` craft guideline,
+- a `~/.claude/skills/<skill>-design/references/dos-and-donts.md` rule,
+- a `~/.claude/skills/<skill>-design/references/*.md` craft guideline,
 - a `skills/<skill>-design/templates/...` template,
 - a canonical page (only via the human-gated exploratory rewrite, below).
 
@@ -67,7 +67,7 @@ Run from repo root. `S`=skill, `P`=page-type, `B`=a fixed test brief for `S`×`P
 3. **Apply + regenerate.** Edit the one asset, commit it on the branch, then
    regenerate `S`×`P` from the same brief `B` with the new rules.
 
-4. **Score with the frozen evaluator.** Run `bin/design-review <page>` (the 3
+4. **Score with the frozen evaluator.** Run `~/.claude/skills/design-review/dr-cli <page>` (the 3
    machine gates MUST stay green — a change that breaks a gate is an instant
    revert) then the multi-critic. To beat critic noise, **average N≥3 renders**
    and require the gain to clear the margin, not a single lucky sample.
@@ -124,7 +124,7 @@ the human, not auto-applied** (Darwin Phase 2.5, gated).
 
 ## Tools
 
-- `bin/design-review --evolve` — prints this loop's entry checklist + current
+- `~/.claude/skills/design-review/dr-cli --evolve` — prints this loop's entry checklist + current
   ledger frontier (orientation before a run).
 - `evolve-ledger.mjs` — append-only experiment log; `--frontier` shows the
   running-best curve, keep-rate, and biggest gains (autoresearch's progress.png
@@ -133,7 +133,7 @@ the human, not auto-applied** (Darwin Phase 2.5, gated).
   `--report` flags prune candidates, `--lint` finds dead/duplicate rules.
 - `regression-gate.mjs` — `--baseline` / `--check` the held-out canonicals
   (mechanical evaluator only — deterministic, so a regression is a real signal).
-- The frozen evaluator it scores against: `bin/design-review` (verify.py +
+- The frozen evaluator it scores against: `~/.claude/skills/design-review/dr-cli` (verify.py +
   visual-audit.mjs) and `--multi-critic` (the 4 weighted specialist critics).
 
 ## When NOT to use

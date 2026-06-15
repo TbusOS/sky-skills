@@ -35,12 +35,12 @@ and stop. Do not proceed.
 
 ### Step 1 · Build the prompt file
 
-Run the prompt builder (paths are relative to the sky-skills repo root
-that holds this command file — if the CWD differs, pass the absolute
-path to `audit-critic.mjs`). Capture the output path it prints.
+Run the prompt builder by its installed path (so it works from any
+directory). It self-locates the skill and writes its prompt under the
+repo's `shots/`, printing an absolute output path — capture that path.
 
 ```bash
-node <repo>/skills/gated-dual-clone-audit/scripts/audit-critic.mjs \
+node ~/.claude/skills/gated-dual-clone-audit/scripts/audit-critic.mjs \
   --gateway-dir=<path> \
   --satellite-dir=<path> \
   [--upstream-branch=<name>] \
@@ -94,7 +94,7 @@ next steps beyond what the verdict justifies.
 ### Step 5 · Learning-loop handoff (only if the verdict surfaced a new drift pattern)
 
 If the subagent's observation describes a drift pattern that is **not**
-already listed in `skills/gated-dual-clone-audit/references/known-drifts.md`,
+already listed in `~/.claude/skills/gated-dual-clone-audit/references/known-drifts.md`,
 tell the user:
 
 > New drift pattern surfaced. To codify it so the mechanical tiers catch

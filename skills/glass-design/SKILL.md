@@ -46,7 +46,7 @@ glass 风格 / glassmorphism / 玻璃拟态 / 液态玻璃 / liquid glass / auro
 生成**前**:
 
 ```bash
-bin/design-review --plan --skill=glass --page=<type>
+~/.claude/skills/design-review/dr-cli --plan --skill=glass --page=<type>
 ```
 
 读完 contract + 对应 canonical 再动手。
@@ -54,8 +54,8 @@ bin/design-review --plan --skill=glass --page=<type>
 生成**后**:页内 `</body>` 前 embed `design-review:self-diff v1` 注释块(§M 契约,canonical 必须)。然后跑四道检查:
 
 ```bash
-bin/design-review --skill=glass <your-page.html>          # 三道机械检查 · 自动 dark+light 双跑
-bin/design-review --skill=glass --critic <your-page.html> # 第四道检查 · LLM critic
+~/.claude/skills/design-review/dr-cli --skill=glass <your-page.html>          # 三道机械检查 · 自动 dark+light 双跑
+~/.claude/skills/design-review/dr-cli --skill=glass --critic <your-page.html> # 第四道检查 · LLM critic
 ```
 
 任一 error = 任务没完成。critic < 75 必修;canonical 自回归 ≥ 90。

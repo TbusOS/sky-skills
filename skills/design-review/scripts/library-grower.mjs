@@ -49,7 +49,7 @@ Usage:
     --skill=<anthropic|apple|ember|sage> \\
     --page=<pricing|landing|docs-home|new-type> \\
     --corpus=<dir>        # dir containing 5+ successful *.html of that page-type
-    [--out=<dir>]         # where to write candidate (default: /tmp/grower-<ts>/)
+    [--out=<dir>]         # where to write candidate (default: ./grower-<ts>/ in CWD)
 
 The corpus dir is scanned for .html files. Only files that pass \`bin/design-
 review --critic\` with score ≥ 88 are considered "successful." This script
@@ -344,8 +344,8 @@ async function main() {
   const chosen = pickCleanest(samples, consensus);
 
   const { mkdir } = await import('node:fs/promises');
-  const outDir = args.out ? resolve(REPO_ROOT, args.out)
-    : `/tmp/grower-${args.skill}-${args.page}-${Date.now()}`;
+  const outDir = args.out ? resolve(process.cwd(), args.out)
+    : resolve(process.cwd(), `grower-${args.skill}-${args.page}-${Date.now()}`);
   await mkdir(outDir, { recursive: true });
 
   await writeFile(resolve(outDir, 'candidate.md'),

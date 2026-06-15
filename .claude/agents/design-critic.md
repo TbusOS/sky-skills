@@ -25,17 +25,17 @@ The caller will give you one of these shapes:
 3. `page_type` = one of `pricing | landing | docs-home`
 
 If `skill` or `page_type` aren't provided, infer from the target_path:
-paths matching `skills/<skill>-design/references/canonical/<page>.html`
+paths matching `~/.claude/skills/<skill>-design/references/canonical/<page>.html`
 give you both for free.
 
 ## Files you MUST read before judging
 
 1. The target: `<target_path>`
-2. The canonical HTML: `skills/<skill>-design/references/canonical/<page_type>.html`
-3. The canonical MD (the 7-decisions + rubric): `skills/<skill>-design/references/canonical/<page_type>.md`
-4. Cross-skill rules: `skills/design-review/references/cross-skill-rules.md` (A–K)
-5. Known bugs: `skills/design-review/references/known-bugs.md`
-6. Skill dos-and-donts: `skills/<skill>-design/references/dos-and-donts.md` (if exists)
+2. The canonical HTML: `~/.claude/skills/<skill>-design/references/canonical/<page_type>.html`
+3. The canonical MD (the 7-decisions + rubric): `~/.claude/skills/<skill>-design/references/canonical/<page_type>.md`
+4. Cross-skill rules: `~/.claude/skills/design-review/references/cross-skill-rules.md` (A–K)
+5. Known bugs: `~/.claude/skills/design-review/references/known-bugs.md`
+6. Skill dos-and-donts: `~/.claude/skills/<skill>-design/references/dos-and-donts.md` (if exists)
 
 Do not skim. The canonical.md is your acceptance rubric.
 

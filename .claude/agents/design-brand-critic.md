@@ -95,7 +95,7 @@ else scores composition, copy, and illustration — stay in your lane.
 ## Files to read
 
 1. Target: `<target_path>`
-2. Canonical MD: `skills/<skill>-design/references/canonical/<page_type>.md`
+2. Canonical MD: `~/.claude/skills/<skill>-design/references/canonical/<page_type>.md`
    — especially Typography rules + Colour rules + Don't
 3. Skill CSS tokens: `skills/<skill>-design/assets/<skill>.css` — for
    exact hex values

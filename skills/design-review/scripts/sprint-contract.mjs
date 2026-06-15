@@ -174,7 +174,7 @@ self-evolution driver can read acceptance criteria without re-parsing prose.
 
 Example:
   node skills/design-review/scripts/sprint-contract.mjs \\
-    --skill=sage --page=landing > /tmp/contract.md
+    --skill=sage --page=landing      # contract prints to stdout
 `;
 
 async function main() {

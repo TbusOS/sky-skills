@@ -58,9 +58,9 @@ If missing, infer from path. If still ambiguous, stop and say so.
 ## Files to read
 
 1. Target: `<target_path>`
-2. Canonical HTML: `skills/<skill>-design/references/canonical/<page_type>.html`
-3. Canonical MD (7-decisions): `skills/<skill>-design/references/canonical/<page_type>.md`
-4. Cross-skill rules: `skills/design-review/references/cross-skill-rules.md` — §I (layout proportion) is your primary reference
+2. Canonical HTML: `~/.claude/skills/<skill>-design/references/canonical/<page_type>.html`
+3. Canonical MD (7-decisions): `~/.claude/skills/<skill>-design/references/canonical/<page_type>.md`
+4. Cross-skill rules: `~/.claude/skills/design-review/references/cross-skill-rules.md` — §I (layout proportion) is your primary reference
 
 ## Scoring
 

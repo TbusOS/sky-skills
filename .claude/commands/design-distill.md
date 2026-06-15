@@ -24,7 +24,7 @@ of producing a low-confidence draft.
 - `--corpus=<dir>`  optional — directory holding the successful pages;
   defaults to `corpus/<skill>/<page>/` under the sky-skills root
 - `--out=<dir>`     optional — where the candidate is written;
-  defaults to `/tmp/grower-<skill>-<page>-<timestamp>/`
+  defaults to `./grower-<skill>-<page>-<timestamp>/` (in the current directory)
 
 If either required flag is missing, print:
 
@@ -39,12 +39,11 @@ and stop. Do not proceed.
 
 ### Step 1 · Run the wrapper
 
-Paths are relative to the sky-skills repo root that holds this command
-file — if the CWD differs, use the absolute path to `bin/design-review`.
-Pass the flags through unchanged:
+The CLI is called by its installed path (`~/.claude/skills/design-review/dr-cli`),
+so this runs from any directory. Pass the flags through unchanged:
 
 ```bash
-bin/design-review --distill --skill=<skill> --page=<page> \
+~/.claude/skills/design-review/dr-cli --distill --skill=<skill> --page=<page> \
   [--corpus=<dir>] [--out=<dir>]
 ```
 
@@ -92,9 +91,9 @@ The candidate is a **draft**. Walk the user through the review steps
    consistent, only a human can explain WHY.
 4. Strip content-consensus: if every page says the same product name or
    price, that is copy-paste content, not structure.
-5. Run `bin/design-review --critic` on the edited candidate; it must
+5. Run `~/.claude/skills/design-review/dr-cli --critic` on the edited candidate; it must
    score ≥ 90 (the canonical bar, stricter than the 88 the sources met).
-6. Only then submit it as `skills/<skill>-design/references/canonical/`
+6. Only then submit it as `~/.claude/skills/<skill>-design/references/canonical/`
    via a normal PR for human merge.
 
 Do not perform steps 1-6 yourself unless the user explicitly asks; your
@@ -104,6 +103,6 @@ job ends at handing over the draft and the checklist.
 
 - Do not write anything into `skills/*/references/canonical/` from this
   command — the grower proposes, a human merges.
-- Do not run the 4 review gates here; that is plain `bin/design-review`.
+- Do not run the 4 review gates here; that is plain `~/.claude/skills/design-review/dr-cli`.
 - Do not treat exit 1 + "insufficient samples" as a failure to debug —
   it is the threshold working as designed. Report it and stop.

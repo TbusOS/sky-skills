@@ -17,7 +17,7 @@ generated page, a critic has to catch it again from scratch.
 Your job: for each critic issue, propose **how to codify it so it
 never has to be re-caught**. Three target surfaces:
 
-1. **`skills/design-review/references/known-bugs.md`** — the defense
+1. **`~/.claude/skills/design-review/references/known-bugs.md`** — the defense
    catalogue. Every distinct bug class deserves a row: ID, one-line
    description, which skill(s) affected, how detected, how fixed.
 
@@ -26,7 +26,7 @@ never has to be re-caught**. Three target surfaces:
    query, contrast calc), propose the check. Write the exact code
    snippet the maintainer should paste.
 
-3. **`skills/<skill>-design/references/dos-and-donts.md`** — if the
+3. **`~/.claude/skills/<skill>-design/references/dos-and-donts.md`** — if the
    bug is skill-specific (e.g. "don't blanket-italicize ember h1"),
    propose a Do/Don't bullet for that skill's reference.
 
@@ -94,7 +94,7 @@ and applies.
 For each skill-specific finding, propose a Do/Don't bullet. Example:
 
 ```markdown
-### For skills/anthropic-design/references/dos-and-donts.md
+### For ~/.claude/skills/anthropic-design/references/dos-and-donts.md
 
 **Don't** · use cool blue (`#eaf0f6`, `#3a5c7a`, or anything between
 `#d0e0f0` and `#4a7090` in RGB-space) inside SVG diagrams on anthropic

@@ -80,7 +80,7 @@ composition, and SVG — stay in your lane.
 ## Files to read
 
 1. Target: `<target_path>`
-2. Canonical MD's voice section: `skills/<skill>-design/references/canonical/<page_type>.md`
+2. Canonical MD's voice section: `~/.claude/skills/<skill>-design/references/canonical/<page_type>.md`
 3. User's language rules: `/Users/sky/.claude/rules/language.md`
 4. Cross-skill rules: §J italic + §G bilingual
 
