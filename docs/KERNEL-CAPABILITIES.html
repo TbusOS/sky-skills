@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kernel Harness — see it work</title>
+<meta name="description" content="The linux-kernel-dev engine, running. Real output: the fact gate catches a made-up CONFIG, the regression test guards it, version drift flags ion_alloc.">
+<meta property="og:title" content="Kernel Harness — see it work">
+<meta property="og:description" content="Real terminal output from every gate: hallucination caught, regression guarded, version drift flagged.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../skills/anthropic-design/assets/anthropic.css">
+<style>
+  html { scroll-padding-top: 84px; }
+  .anth-nav { position: sticky; top: 0; z-index: 50; background: var(--anth-bg); border-bottom: 1px solid var(--anth-light-gray); }
+
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent; border: 1px solid var(--anth-light-gray); color: var(--anth-text);
+    font-family: var(--font-heading); font-size: 13px; font-weight: 500; padding: 6px 12px;
+    border-radius: var(--radius-pill); cursor: pointer; letter-spacing: 0.05em;
+    transition: background var(--duration-sm) var(--ease-anth), border-color var(--duration-sm);
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); border-color: var(--anth-mid-gray); }
+
+  html[data-lang="zh"] body, html[data-lang="zh"] p, html[data-lang="zh"] li, html[data-lang="zh"] .anth-quote {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+  }
+  html[data-lang="zh"] h1, html[data-lang="zh"] h2, html[data-lang="zh"] h3,
+  html[data-lang="zh"] .anth-badge, html[data-lang="zh"] .cap-label, html[data-lang="zh"] .voice-chip, html[data-lang="zh"] .stat-label {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] .anth-quote { font-style: normal; }
+
+  /* Voice switcher */
+  .voice-bar { display:flex; gap:var(--space-3); align-items:center; flex-wrap:wrap; }
+  .voice-bar__label {
+    font-family:var(--font-heading); font-size:12px; letter-spacing:0.15em; text-transform:uppercase;
+    color:var(--anth-text-secondary); font-weight:600; margin-right:var(--space-2);
+  }
+  .voice-chip {
+    display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:var(--radius-pill);
+    font-size:13px; font-weight:600; font-family:var(--font-heading); text-decoration:none;
+    border:1px solid var(--anth-light-gray); color:var(--anth-text);
+    transition:background var(--duration-sm), border-color var(--duration-sm);
+  }
+  .voice-chip:hover { background:var(--anth-light-gray); }
+  .voice-chip--current { background:var(--anth-orange); color:#ffffff; border-color:var(--anth-orange); }
+  .voice-chip--current:hover { background:var(--anth-orange); }
+
+  /* Terminal block */
+  .term {
+    background:#1f1e1c; color:#e8e6e0; border-radius:var(--radius-md);
+    padding:var(--space-5) var(--space-5); font-family:'JetBrains Mono', monospace;
+    font-size:13px; line-height:1.7; overflow-x:auto; margin:0;
+    border:1px solid #2f2d2a;
+  }
+  .term .dim { color:#8a8780; }
+  .term .ok { color:#86c06a; font-weight:600; }
+  .term .bad { color:#e8835f; font-weight:600; }
+  .term .accent { color:#e8b07a; }
+
+  /* Capability block */
+  .cap { display:grid; grid-template-columns:1fr; gap:var(--space-4); }
+  .cap-label {
+    font-family:var(--font-heading); font-size:11px; font-weight:700; letter-spacing:0.18em;
+    color:var(--anth-orange); text-transform:uppercase;
+  }
+
+  /* Stat strip */
+  .stat-num { font-family:var(--font-heading); font-size:44px; font-weight:700; color:var(--anth-text); line-height:1; }
+  .stat-label { font-family:var(--font-heading); font-size:11.5px; font-weight:700; letter-spacing:0.14em; color:var(--anth-text-secondary); text-transform:uppercase; margin-top:var(--space-2); }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="../index.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">sky-skills</a>
+  <div>
+    <a href="../index.html#skills"><span class="lang-en">Skills</span><span class="lang-zh">技能</span></a>
+    <a href="KERNEL-HARNESS.html"><span class="lang-en">Kernel harness</span><span class="lang-zh">内核架构</span></a>
+    <a href="KERNEL-CAPABILITIES.html" style="color:var(--anth-orange); font-weight:600;"><span class="lang-en">See it work</span><span class="lang-zh">看它干活</span></a>
+    <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language" title="Switch language">中 / EN</button>
+    <a class="anth-button" href="https://github.com/TbusOS/sky-skills/tree/main/skills/linux-kernel-dev"><span class="lang-en">View on GitHub</span><span class="lang-zh">看源码</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="anth-hero">
+  <div class="anth-container" style="max-width:860px;">
+    <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Capabilities · real output</span><span class="lang-zh">能力 · 真实输出</span></span>
+    <h1 style="margin-top:var(--space-4);">
+      <span class="lang-en">Not a promise.<br>Here is it running.</span>
+      <span class="lang-zh">不是承诺。<br>这是它真在跑。</span>
+    </h1>
+    <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.55; max-width:740px; font-family:var(--font-body);">
+      <span class="lang-en">Every block below is real output from the scripts in the skill, run against a real 6.1 source tree and a 7.0 tree. The fact gate catches a made-up <code>CONFIG_*</code>. The regression test proves the gate can tell good from bad. The learn validator refuses a rule with no executable check. Version drift flags an API that vanished between kernels.</span>
+      <span class="lang-zh">下面每一块都是 skill 里脚本的真实输出，对着一棵真实 6.1 源码树和一棵 7.0 树跑出来的。事实检查抓出编造的 <code>CONFIG_*</code>。回归测试证明检查真能分好坏。学习验证器拒掉没有可执行检查的规则。版本漂移标出在内核之间消失的 API。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="#fact"><span class="lang-en">Watch it catch a hallucination</span><span class="lang-zh">看它抓幻觉</span></a>
+      <a class="anth-button anth-button--ghost" href="KERNEL-HARNESS.html"><span class="lang-en">The architecture</span><span class="lang-zh">看架构</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Voice switcher -->
+<section style="padding:0 var(--space-5) var(--space-4);">
+  <div class="anth-container">
+    <div class="voice-bar" style="padding:var(--space-3) 0;">
+      <span class="voice-bar__label"><span class="lang-en">Kernel harness</span><span class="lang-zh">内核架构</span></span>
+      <a class="voice-chip" href="KERNEL-HARNESS.html"><span class="lang-en">Architecture</span><span class="lang-zh">架构</span></a>
+      <a class="voice-chip voice-chip--current" href="KERNEL-CAPABILITIES.html" aria-current="page"><span class="lang-en">See it work</span><span class="lang-zh">看它干活</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Stat strip -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container">
+    <div style="display:flex; gap:var(--space-7); justify-content:center; align-items:baseline; flex-wrap:wrap;">
+      <div style="text-align:center;"><div class="stat-num">6</div><div class="stat-label"><span class="lang-en">Components</span><span class="lang-zh">组件</span></div></div>
+      <div style="color:var(--anth-light-gray); font-size:24px;">·</div>
+      <div style="text-align:center;"><div class="stat-num">4</div><div class="stat-label"><span class="lang-en">Scoring axes</span><span class="lang-zh">打分轴</span></div></div>
+      <div style="color:var(--anth-light-gray); font-size:24px;">·</div>
+      <div style="text-align:center;"><div class="stat-num">100%</div><div class="stat-label"><span class="lang-en">Case coverage</span><span class="lang-zh">用例覆盖</span></div></div>
+      <div style="color:var(--anth-light-gray); font-size:24px;">·</div>
+      <div style="text-align:center;"><div class="stat-num" style="color:var(--anth-orange);">3</div><div class="stat-label"><span class="lang-en">Hallucinations caught</span><span class="lang-zh">抓到幻觉</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 1. fact gate -->
+<section class="anth-section" id="fact">
+  <div class="anth-container anth-container--narrow">
+    <div class="cap">
+      <div>
+        <span class="cap-label"><span class="lang-en">01 · Objective check</span><span class="lang-zh">01 · 客观检查</span></span>
+        <h2 style="margin:var(--space-3) 0;"><span class="lang-en">The fact gate catches a made-up CONFIG.</span><span class="lang-zh">事实检查当场抓出编造的 CONFIG。</span></h2>
+        <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0;">
+          <span class="lang-en">The answer carried a <code>[CLAIMS]</code> block. <code>fact_gate.mjs</code> greps each cited symbol / CONFIG / compatible against the real tree. The real ones pass; the invented ones are flagged on the spot. Exit code 1 means a content failure (a hallucination), not a broken gate.</span>
+          <span class="lang-zh">答案带了 <code>[CLAIMS]</code> 块。<code>fact_gate.mjs</code> 把引用的每个符号 / CONFIG / compatible 拿真树 grep。真的过、编的当场标出。退出码 1 表示内容出错（幻觉），不是检查坏。</span>
+        </p>
+      </div>
+      <pre class="term"><span class="dim">$ node scripts/fact_gate.mjs answer.md --tree linux-6.1</span>
+[fact-check] tree: linux-6.1  (--tree)
+  <span class="ok">✓</span>  config: CONFIG_OF
+  <span class="bad">✗ HALLUCINATION</span>  config: CONFIG_THIS_DOES_NOT_EXIST_XYZZY
+  <span class="ok">✓</span>  symbol: devm_kzalloc
+  <span class="bad">✗ HALLUCINATION</span>  symbol: devm_kzalloc_turbocharged
+  <span class="ok">✓</span>  symbol: platform_get_irq
+  <span class="ok">✓</span>  compatible: simple-bus
+  <span class="bad">✗ HALLUCINATION</span>  compatible: vendor,totally-made-up-zzz
+<span class="bad">[fact-check] FAIL — 3 claim(s) not found in tree</span>   <span class="dim">(exit 1)</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- 2. checkpatch -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--narrow">
+    <div class="cap">
+      <div>
+        <span class="cap-label"><span class="lang-en">02 · Coding style</span><span class="lang-zh">02 · 代码风格</span></span>
+        <h2 style="margin:var(--space-3) 0;"><span class="lang-en">checkpatch runs your kernel's own rules.</span><span class="lang-zh">checkpatch 跑你内核自己的规则。</span></h2>
+        <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0;">
+          <span class="lang-en">No reimplemented linter — the gate wraps the <code>checkpatch.pl</code> that ships inside the bound tree, so the style rules track the kernel version exactly. Missing SPDX, spaces-for-tabs — caught.</span>
+          <span class="lang-zh">不另写 linter——检查直接包装绑定树里自带的 <code>checkpatch.pl</code>，风格规则跟内核版本完全一致。缺 SPDX、用空格当 tab——都抓得到。</span>
+        </p>
+      </div>
+      <pre class="term"><span class="dim">$ bash scripts/checkpatch_gate.sh bad.c --tree linux-6.1</span>
+[checkpatch-gate] linux-6.1/scripts/checkpatch.pl  on  bad.c
+<span class="accent">bad.c:1: WARNING:</span> Missing or malformed SPDX-License-Identifier tag in line 1
+<span class="accent">bad.c:3: WARNING:</span> please, no spaces at the start of a line
+total: 0 errors, 2 warnings, 4 lines checked
+<span class="bad">[checkpatch-gate] FAIL — checkpatch reported issues</span>   <span class="dim">(exit 1)</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- 3. regression -->
+<section class="anth-section">
+  <div class="anth-container anth-container--narrow">
+    <div class="cap">
+      <div>
+        <span class="cap-label"><span class="lang-en">03 · Regression + self-degradation</span><span class="lang-zh">03 · 回归 + 自降解校准</span></span>
+        <h2 style="margin:var(--space-3) 0;"><span class="lang-en">It proves the gate can tell good from bad.</span><span class="lang-zh">它证明检查真能分好坏。</span></h2>
+        <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0;">
+          <span class="lang-en">Each case carries a known-good answer (<em>gold</em>) and deliberate corruptions. The runner asserts gold resolves <strong>and</strong> every corruption is caught — a self-degradation check. Coverage is tracked: if too few cases actually ran against a tree, the whole run is marked untrustworthy.</span>
+          <span class="lang-zh">每条用例带一个正确答案（<em>gold</em>）和故意改坏的版本。runner 断言 gold 全过、<strong>且</strong>每个坏版本都被抓——自降解校准。覆盖率也记：真跑过检查的用例太少，整轮标为不可信。</span>
+        </p>
+      </div>
+      <pre class="term"><span class="dim">$ node scripts/regression_test.mjs --tree linux-6.1</span>
+[regression] cases 3 · ran 3 · coverage 100% · tree linux-6.1
+  <span class="ok">✓</span>  KV-001  gold<span class="ok">✓</span>  calibration<span class="ok">✓</span>
+  <span class="ok">✓</span>  KV-002  gold<span class="ok">✓</span>  calibration<span class="ok">✓</span>
+  <span class="ok">✓</span>  KV-003  gold<span class="ok">✓</span>  calibration<span class="ok">✓</span>
+<span class="ok">[regression] objective pass 3 · calibration fail 0</span>   <span class="dim">(exit 0)</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- 4. kernel-learn -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--narrow">
+    <div class="cap">
+      <div>
+        <span class="cap-label"><span class="lang-en">04 · Learning loop</span><span class="lang-zh">04 · 学习循环</span></span>
+        <h2 style="margin:var(--space-3) 0;"><span class="lang-en">No executable check, no rule.</span><span class="lang-zh">没有可执行检查，就不准建规则。</span></h2>
+        <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0;">
+          <span class="lang-en">When a trap is solved, <code>/kernel-learn</code> mints an atomic triple — a rule with an embedded <code>[CLAIMS]</code> check, a frozen case that fails before / passes after, and a registration. The validator is deterministic: a rule with a real check is accepted; a prose-only rule is rejected.</span>
+          <span class="lang-zh">解决一个坑后，<code>/kernel-learn</code> 产出原子三件套——带 <code>[CLAIMS]</code> 检查的规则、一条建前 fail/建后 pass 的冻结用例、一次注册。验证器是确定性的：带真检查的规则收下，纯散文的规则拒掉。</span>
+        </p>
+      </div>
+      <pre class="term"><span class="dim">$ node scripts/kernel_learn_validate.mjs --case KV-001 --rule rule-good.md --tree linux-6.1</span>
+<span class="ok">[kernel-learn-validate] ✓ triple valid (gold resolves + traps all caught) — ok to land + register</span>   <span class="dim">(exit 0)</span>
+
+<span class="dim">$ node scripts/kernel_learn_validate.mjs --case KV-001 --rule rule-no-check.md --tree linux-6.1</span>
+[kernel-learn-validate] triple invalid:
+  <span class="bad">✗</span> rule text has no embedded [CLAIMS] block (no executable check → rejected)   <span class="dim">(exit 1)</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- 5. scoring panel -->
+<section class="anth-section">
+  <div class="anth-container anth-container--wide">
+    <div class="cap">
+      <div>
+        <span class="cap-label"><span class="lang-en">05 · Scoring panel</span><span class="lang-zh">05 · 打分面板</span></span>
+        <h2 style="margin:var(--space-3) 0;"><span class="lang-en">Four specialists, safety weighted highest.</span><span class="lang-zh">四个专家，safety 权重最高。</span></h2>
+        <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0 0 var(--space-5);">
+          <span class="lang-en">After the objective checks settle the facts, four fresh-context critics each score one axis. Safety carries the most weight and an error there fails the answer outright — in kernel code a sleep-in-spinlock is not a style nit.</span>
+          <span class="lang-zh">客观检查把事实定下后，四个 fresh-context 打分员各评一轴。safety 权重最大，这一轴出 error 直接判 fail——内核里持 spinlock 睡眠不是小毛病。</span>
+        </p>
+      </div>
+      <figure style="margin:0;">
+        <svg viewBox="0 0 1000 150" width="100%" role="img" aria-labelledby="w-title" style="display:block;">
+          <title id="w-title">Scoring panel axis weights: correctness 35, safety 30, coding-style 20, completeness 15</title>
+          <!-- stacked weight bar -->
+          <g>
+            <rect x="20" y="40" width="332.5" height="46" rx="6" fill="#3a5a78"></rect>
+            <rect x="356.5" y="40" width="285" height="46" fill="#d97757"></rect>
+            <rect x="645.5" y="40" width="190" height="46" fill="#2f5e33"></rect>
+            <rect x="839.5" y="40" width="140.5" height="46" rx="6" fill="#8a8780"></rect>
+            <text x="186" y="69" text-anchor="middle" font-family="Poppins, sans-serif" font-size="15" font-weight="600" fill="#ffffff">correctness · 35%</text>
+            <text x="499" y="69" text-anchor="middle" font-family="Poppins, sans-serif" font-size="15" font-weight="700" fill="#ffffff">safety · 30%</text>
+            <text x="740" y="69" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14" font-weight="600" fill="#ffffff">coding-style · 20%</text>
+            <text x="909" y="69" text-anchor="middle" font-family="Poppins, sans-serif" font-size="12.5" font-weight="600" fill="#ffffff">complete · 15%</text>
+          </g>
+          <text x="499" y="118" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="13" fill="#5c5a54">overall = .35·correctness + .30·safety + .20·coding-style + .15·completeness</text>
+          <text x="499" y="138" text-anchor="middle" font-family="Poppins, sans-serif" font-size="12.5" fill="#d97757" font-weight="600">
+            <tspan class="lang-en">safety error → fail, regardless of total</tspan><tspan class="lang-zh">safety 出 error → 直接 fail，不看总分</tspan>
+          </text>
+        </svg>
+        <figcaption style="text-align:center; font-family:var(--font-body); font-size:14px; color:var(--anth-text-secondary); margin-top:var(--space-3);">
+          <span class="lang-en">Axis weights. Each critic runs in a fresh context and scores only its lane; an aggregator blends them, with a safety veto.</span>
+          <span class="lang-zh">各轴权重。每个打分员在独立上下文里只评自己那一轴；汇总器加权合成，safety 有一票否决。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 6. version drift -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--narrow">
+    <div class="cap">
+      <div>
+        <span class="cap-label"><span class="lang-en">06 · Version drift</span><span class="lang-zh">06 · 版本漂移</span></span>
+        <h2 style="margin:var(--space-3) 0;"><span class="lang-en">It found ion_alloc vanished between 6.1 and 7.0.</span><span class="lang-zh">它发现 ion_alloc 在 6.1 到 7.0 之间没了。</span></h2>
+        <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0;">
+          <span class="lang-en">Point the detector at two version trees and it runs the gold claims against each, then reports what changed. <code>ion_alloc</code> resolves in 6.1 but not 7.0 — flagged ROTTED, machine-found. That is the signal to version-tag the knowledge instead of letting it rot silently.</span>
+          <span class="lang-zh">把检测器对准两棵版本树，它在每棵上跑 gold 断言，再报出变化。<code>ion_alloc</code> 在 6.1 查得到、7.0 查不到——标 ROTTED，机器找出来的。这就是该给这条知识打版本标的信号，而不是让它悄悄过期。</span>
+        </p>
+      </div>
+      <pre class="term"><span class="dim">$ node scripts/version_drift.mjs --trees linux-6.1,linux-7.0</span>
+[version_drift] trees: 6.1.141 → 7.0.0  <span class="dim">(old → new)</span>
+  <span class="accent">1 drift found</span> — version-tag the matching knowledge:
+  <span class="bad">⚠ ROTTED</span>  symbol:ion_alloc   [ 6.1.141:<span class="ok">✓</span>  7.0.0:<span class="bad">✗</span> ]   <span class="dim">(exit 1)</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="anth-section">
+  <div class="anth-container anth-container--narrow" style="text-align:center;">
+    <h2><span class="lang-en">Bring your own tree and run it.</span><span class="lang-zh">自带内核树，跑跑看。</span></h2>
+    <p style="color:var(--anth-text-secondary); font-size:17px; font-family:var(--font-body); margin-bottom:var(--space-6);">
+      <span class="lang-en">Nothing here is mocked. Bind a kernel tree and the same checks run against your exact version.</span>
+      <span class="lang-zh">这里没有一处是假的。绑一棵内核树，同样的检查就对着你的确切版本跑。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="https://github.com/TbusOS/sky-skills/tree/main/skills/linux-kernel-dev/scripts"><span class="lang-en">Browse the scripts</span><span class="lang-zh">看脚本</span></a>
+      <a class="anth-button anth-button--ghost" href="KERNEL-HARNESS.html"><span class="lang-en">Back to architecture</span><span class="lang-zh">回到架构</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="anth-footer">
+  <div class="anth-footer-grid">
+    <div class="anth-footer-group">
+      <h5>sky-skills</h5>
+      <a href="../index.html"><span class="lang-en">Home</span><span class="lang-zh">首页</span></a>
+      <a href="KERNEL-HARNESS.html"><span class="lang-en">Kernel harness</span><span class="lang-zh">内核架构</span></a>
+      <a href="KERNEL-CAPABILITIES.html"><span class="lang-en">See it work</span><span class="lang-zh">看它干活</span></a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Code</span><span class="lang-zh">代码</span></h5>
+      <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/linux-kernel-dev"><span class="lang-en">linux-kernel-dev</span><span class="lang-zh">linux-kernel-dev</span></a>
+      <a href="https://github.com/TbusOS/sky-skills/discussions">Discussions</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">About</span><span class="lang-zh">关于</span></h5>
+      <a href="https://github.com/TbusOS/sky-skills/blob/main/README.md">README</a>
+      <a href="https://github.com/TbusOS/sky-skills/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+  <div class="anth-footer-legal">
+    <span class="lang-en">Copyright © 2026 Sky. Licensed under MIT.</span>
+    <span class="lang-zh">版权 © 2026 Sky · MIT 许可</span>
+    <span>
+      <span class="lang-en">Rendered with</span><span class="lang-zh">由</span>
+      <a class="anth-link anth-link--no-arrow" href="https://github.com/TbusOS/sky-skills/tree/main/skills/anthropic-design/">anthropic-design</a>
+      <span class="lang-zh"> 渲染</span>
+    </span>
+  </div>
+</footer>
+
+<!-- design-review:self-diff v1
+Skill: anthropic
+Page-type: capabilities-demo
+Decisions (6):
+1. [real-output] chose verbatim terminal output from the actual scripts over hand-written mockups. Because: the whole point of this page is "not a promise" — fabricated demos would undercut the page's own thesis. Tree paths are the only edit, generalized to linux-6.1 / linux-7.0 (no internal paths in a public page).
+2. [terminal-blocks] chose dark monospace panels as the primary visual rhythm over decorative SVG. Because: the artifact IS the output; a dark code block reads as "this really ran" where an illustration would read as marketing. Anthropic's own code blocks are dark, so it stays on-brand.
+3. [one-svg] chose a single weight-bar SVG for the scoring panel over none. Because: the 4-axis weighting + safety-veto is the one claim that has no terminal output to show, so it earns the page's one diagram; color marks safety (orange) as the high-stakes lane.
+4. [stat-strip] chose a 4-stat opener (6 / 4 / 100% / 3 caught) over a prose intro. Because: density contract + the numbers are real and set the "it works" tone immediately.
+5. [exit-codes] chose to show exit codes (0/1) in every block. Because: the harness's honesty rule is exit-1-is-a-content-fail vs exit-3-is-a-broken-gate; surfacing codes teaches the contract.
+6. [sibling-nav] chose a 2-chip switcher (Architecture / See it work) over folding into one page. Because: architecture explains, this page proves — different jobs, and the user asked for a dedicated capabilities page.
+Known trade-offs:
+- The terminal blocks are real but lightly trimmed (tree paths generalized); a reader can't copy-paste them verbatim without binding their own tree.
+- No live corpus-pass-rate-over-time chart yet — only 3 seed cases exist, so a trend line would overclaim; deferred until more real runs land.
+- Dark terminal panels are a strong visual departure from the cream body; mitigated by keeping them inside narrow containers with generous cream margin.
+/design-review:self-diff -->
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+  if (!saved) { saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en'; }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+      btn.setAttribute('aria-pressed', lang === 'zh' ? 'true' : 'false');
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
