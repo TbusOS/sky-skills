@@ -1410,6 +1410,37 @@ const findings = await page.evaluate((arg) => {
       });
     }
   });
+  // ---------- 12c2) text glyph spilling its own box (§1.33) ----------
+  // The box-rect blind spot behind 1.32a/1.25: a display:block text element
+  // with overflow:visible whose glyphs are WIDER than the element keeps its
+  // border box at the (clamped) layout width. getBoundingClientRect() returns
+  // that clamped box, so neither the overflow check (boxes vs parent) nor the
+  // overlap check (box vs sibling box) sees anything — yet the glyphs spill out
+  // and collide with the neighbour. scrollWidth reports the true content width
+  // even under overflow:visible, so scrollWidth − clientWidth catches it at any
+  // single viewport. Classic trigger: a big non-wrapping number/token in a grid
+  // cell sized by `minmax(0, max-content)` — the 0 min lets the track shrink
+  // below the glyph width, so the number overruns its cell into the next stat.
+  // Scope: the known display:block big-text loci. Opt out with
+  // data-allow-text-overflow if a marquee/ticker spills on purpose.
+  document.querySelectorAll('.glass-stat-number, [data-no-wrap-text]').forEach((el) => {
+    if (el.hasAttribute('data-allow-text-overflow')) return;
+    const st = getComputedStyle(el);
+    if (st.display === 'none' || st.visibility === 'hidden') return;
+    if (/(auto|scroll|hidden|clip)/.test(st.overflowX) || /(auto|scroll|hidden|clip)/.test(st.overflow)) return;
+    const spill = el.scrollWidth - el.clientWidth;
+    if (spill > 3) {
+      issues.push({
+        kind: 'text-glyph-overflow',
+        severity: 'error',
+        selector: sigSelector(el),
+        text: (el.textContent || '').trim().slice(0, 24),
+        spillPx: Math.round(spill),
+        boxW: el.clientWidth,
+        contentW: el.scrollWidth,
+      });
+    }
+  });
   // (b) margin:auto intent must come from the STYLESHEETS — getComputedStyle
   // resolves auto margins to used px values, so we scan cssRules for
   // selectors declaring marginLeft/Right auto, then measure those elements.
@@ -1693,6 +1724,10 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'layout-overflow') {
     console.log(
       `  [${i.severity}] layout-overflow: <${i.selector}> breaks ${i.breakPx}px past parent ${i.side} edge  child[${i.childBox}] parent[${i.parentBox}] — wrap in a horizontal scroller or constrain width  (§1.32)`
+    );
+  } else if (i.kind === 'text-glyph-overflow') {
+    console.log(
+      `  [${i.severity}] text-glyph-overflow: <${i.selector}> "${i.text}" content ${i.contentW}px spills its ${i.boxW}px box by ${i.spillPx}px — the glyphs overrun the element (box-rect checks miss this); a non-wrapping big number in a grid cell sized by minmax(0, max-content) overruns into the next cell. Fix: minmax(max-content, 1fr) / wider track / smaller font / wrap; or data-allow-text-overflow if intentional (§1.33)`
     );
   } else if (i.kind === 'margin-auto-offcenter') {
     console.log(

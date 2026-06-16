@@ -190,6 +190,15 @@
 
 ---
 
+### 1.33 文字撑破自己的盒子 · 大数字溢出网格列压到邻列
+- **Reader sees**：hero stat 一行 `3 / 124/256 / py / boot`，其中宽的 `124/256` 在 72px 大字下把右边的 `py` 压住了，两段字叠在一起。换窄一点的视口更明显。
+- **Why**：`.glass-stat-number` 是 `display:block` + `overflow:visible`。当它所在的网格列用 `grid-template-columns: repeat(4, minmax(0, max-content))` 时，`min=0` 允许列在空间不够时缩到内容宽度**以下**；不换行的大字（`124/256` 字形宽 260px）于是溢出只有 205px 的列，向右压到下一个 stat。要命的是**元素的边框盒不会随溢出长大**——`getBoundingClientRect()` 返回的还是被夹住的 205px 列宽。所以 §1.32a 的"子撑破父"（盒 vs 父盒）和 §1.25 的 text-overlap（盒 vs 兄弟盒）**都看不到**：盒子之间还有 64px 干净间距，溢出的字形对盒几何完全隐形。单宽度渲染又让"压到邻列"在 1440 下只是 9px 擦边（不触发），在用户更窄的视口才真叠——盒子检查 + 单宽度，双重盲区。
+- **How caught**：2026-06-16 加 check `text-glyph-overflow`（§1.32 同区，12c2）。不量盒子量**内容真实宽度**：`el.scrollWidth − el.clientWidth > 3px` → error。`scrollWidth` 即使在 `overflow:visible` 下也反映内容撑开的全宽，所以**在 gate 的单一 1440 视口就能抓到根因**（文字超出自己的格子 55px），不依赖"刚好在某个宽度叠上"。scope 限 `.glass-stat-number` + `[data-no-wrap-text]`；`overflow-x` 为 auto/scroll/hidden/clip 的豁免（设计好的截断/滚动不算）；`[data-allow-text-overflow]` 显式豁免跑马灯类。标定：修前 09g 命中 `"124/256" 内容 260px 撑破 205px 盒 55px`，修后（`minmax(max-content, 1fr)`）全 22 页 0 命中。
+- **Defense**：机器兜底 `text-glyph-overflow`（量 scrollWidth 不量盒）；hero-stats 网格用 `minmax(max-content, 1fr)` 而非 `minmax(0, max-content)`，让列不小于内容宽。
+- **Rule**：判文字溢出 / 重叠不能只信元素的 `getBoundingClientRect()`——`display` 块 + `overflow:visible` 时盒子被布局夹住、溢出的字形对盒几何隐形；要用 `scrollWidth`/`clientWidth`（或文字的 `Range.getBoundingClientRect()`）量内容真实范围。`minmax(0, max-content)` 配不换行大字是 footgun。
+
+---
+
 ### 1.32 子元素撑破父容器 · margin:auto 块没居中
 - **Reader sees**：一张 8 列宽表（cell 里是不换行的长 `<code>` 串）从 1180px 的 shell 右边突出去 392px，页面横向滚动、视觉偏右；或一个本该居中的块整体偏向一边。
 - **Why**：块级盒不会为溢出的内容长大——`width:100%` 的 table 算完最小内容宽度后直接刺穿 max-width 容器，shell 自己还是居中的（bbox 正常），突破的是它的孩子，逐容器看"都对"，组合起来坏。margin:auto 偏移同理：意图在 stylesheet 里（auto），渲染时被 position 偏移 / 宽度覆盖 / 溢出子元素破坏，肉眼难定位。
