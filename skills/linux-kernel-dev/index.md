@@ -27,10 +27,14 @@ linux-kernel-dev/
 │   ├── kernel-tree.mjs       # 绑内核树（detect/add/list/clone）
 │   ├── regression_test.mjs   # 回归测试:gold 用例 + 自降解校准 + 覆盖率
 │   ├── kernel-critic.mjs     # 打分面板 prompt 准备（P3，4 轴）
-│   └── kernel_learn_validate.mjs  # /kernel-learn 原子三件套确定性验证（P3）
-└── tests/eval/              # 测试用例（P2）
-    ├── cases/*.json          # 每条:gold_claims + corruptions + objective/subjective
-    └── baseline.json         # 基线（--baseline 记录,--check 对比）
+│   ├── kernel_learn_validate.mjs  # /kernel-learn 原子三件套确定性验证（P3）
+│   └── version_drift.mjs     # 版本适配:多版本树对比,报 rotted（P4）
+├── tests/eval/              # 测试用例（P2）
+│   ├── cases/*.json          # 每条:gold_claims + corruptions + objective/subjective
+│   └── baseline.json         # 基线（--baseline 记录,--check 对比）
+└── evolution/              # 记录表 + 规则（P4，复用 design-evolve 脚本）
+    ├── ledger.tsv            # 改动实验流水（evolve-ledger.mjs --ledger=）
+    └── rules.json            # 规则注册 + fires/catches（evolve-rules.mjs --registry=）
 
 # 仓根 .claude/（symlink 到 ~/.claude，跨技能共享）
 .claude/agents/kernel-{correctness,safety,coding-style,completeness}-critic.md   # 打分面板 4 轴（P3）
@@ -56,4 +60,5 @@ P0（结构化）+ P1（客观检查）+ P2（测试用例 + 回归测试）+ P3
 - P1：事实检查已对真树验证过"真假 CONFIG/API 当场分出"
 - P2：3 条种子用例 + `regression_test.mjs`（gold 全过 + 自降解校准 + 覆盖率），`--baseline`/`--check` 跑通
 - P3：4 轴打分面板（correctness 0.35 / safety 0.30 / coding-style 0.20 / completeness 0.15，`kernel-critic.mjs` 准备 prompt，Task 派子 agent）+ `/kernel-learn` 原子三件套（`kernel_learn_validate.mjs` 确定性验证:有 [CLAIMS]→过、无→拒）
-下一步 **P4**（记录表 + 版本适配 version_drift）。阶段表见 `HARNESS-DESIGN.md` §9。
+- P4：记录表/规则复用 design-evolve（`evolve-ledger.mjs --ledger=` 直用、`evolve-rules.mjs --registry=` 加小补丁），`evolution/{ledger.tsv,rules.json}` 已建 + seed 规则；`version_drift.mjs` 实测 6.1→7.0 抓到 `ion_alloc` ROTTED（机器跑出版本漂）
+引擎 6 组件全落。下一步 **Pages**（架构/能力/版本适配 3 页，过三检查 + anthropic-design）。阶段表见 `HARNESS-DESIGN.md` §9。

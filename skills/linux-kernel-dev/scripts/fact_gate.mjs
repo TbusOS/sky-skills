@@ -111,7 +111,7 @@ function grepCount(tree, pattern, globs) {
     args.push(tree);
   }
   try {
-    const out = execFileSync(cmd, args, { maxBuffer: 64 * 1024 * 1024 }).toString();
+    const out = execFileSync(cmd, args, { maxBuffer: 64 * 1024 * 1024, timeout: 120000 }).toString();
     return out.split('\n').filter(Boolean).length;
   } catch (e) {
     // grep/git grep exit 1 == no match (NOT an error)

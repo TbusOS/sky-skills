@@ -35,7 +35,7 @@ import process from 'node:process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
-const REGISTRY = resolve(REPO_ROOT, 'skills/design-review/evolution/rules.json');
+let REGISTRY = resolve(REPO_ROOT, 'skills/design-review/evolution/rules.json');
 
 // Prune/archive thresholds. A rule is a prune candidate once it has had enough
 // chances to prove itself (fires ≥ MIN_FIRES) yet scores below PRUNE_SCORE.
@@ -160,6 +160,7 @@ async function lint() {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (args.registry) REGISTRY = resolve(args.registry);   // 复用:kernel harness 指向自己的 rules.json (HARNESS-DESIGN §8)
   if (args.help || args.h) { console.log(HELP); return 0; }
   if (args.register) return register(args);
   if (args.fire) return fire(args.fire, !!args.catch);
