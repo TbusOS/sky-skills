@@ -52,6 +52,8 @@ design skill 是 generator,会给自己打高分;`design-review` 脚本、规则
 - `--critic` / `--multi-critic` 跑 Gate 4(solo 或 4 专家并行)
 - `--learn` 跑完把 verdict 喂 `learning-loop.mjs` 产出 `design-learner` prompt
 - `--allow-monolingual` 对内部单语 memo 豁免双语强制(issue #2)
+- `--audit <dir>` 整树批量检查;加 `--discover` 只列出树里所有 `.html`(分目录,不跑检查),确认没有藏在子目录里漏检的页 —— 详见下面「多页交付」
+- 第二视口几何复查**默认开**:Gate 2 主跑(1440)后,把 overlap/overflow 几类在更窄视口(默认 1024)再跑一遍,宽度相关的碰撞作 warn 标 `[at Npx]`(known-bugs §1.34)。`--viewport2=WxH` 调宽度、`--no-second-viewport` 关掉
 - 任一步 exit 非 0 整体 fail,截图存 `--out=` 或默认 `<repo>/shots/`
 
 **本仓用例**:

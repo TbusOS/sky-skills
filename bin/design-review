@@ -25,6 +25,13 @@
 #                      iOS-frost variant; both must be clean).
 #   --css=<path>       Extra CSS file for class-definition lookup. Can repeat.
 #   --strict           Treat visual-audit warnings as failure (default: only errors).
+#   --viewport2=WxH    Width of the second-viewport geometry pass (default 1024).
+#                      visual-audit re-runs the overlap/overflow checks at this
+#                      narrower width and reports width-dependent collisions as
+#                      warnings tagged [at Npx]. Skipped if the main viewport is
+#                      already narrow.
+#   --no-second-viewport
+#                      Disable that second pass (main viewport only).
 #   --internal         (alias --allow-monolingual) Forwarded to gate 1 verify.py:
 #                      skip the bilingual-page rule for internal monolingual docs.
 #                      Gates 2/3/4 unchanged — glass still auto-runs both themes.
@@ -160,6 +167,8 @@ REPO="$PWD"
 SKILL=""
 PAGE=""
 THEME=""
+VIEWPORT2=""
+NO_SECOND_VP=""
 STRICT=""
 OUT_DIR=""
 CRITIC=""
@@ -180,6 +189,8 @@ for arg in "$@"; do
     --skill=*) SKILL="${arg#--skill=}" ;;
     --page=*)  PAGE="${arg#--page=}" ;;
     --theme=*) THEME="${arg#--theme=}" ;;
+    --viewport2=*) VIEWPORT2="${arg#--viewport2=}" ;;
+    --no-second-viewport) NO_SECOND_VP=1 ;;
     --css=*)   CSS_ARGS+=("$arg") ;;
     --strict)  STRICT=1 ;;
     --out=*)   OUT_DIR="${arg#--out=}" ;;
@@ -326,6 +337,8 @@ fi
 exit_visual=0
 for theme in "${THEMES[@]}"; do
   VISUAL_FLAGS=(--ignore-intentional)
+  [ -n "$VIEWPORT2" ] && VISUAL_FLAGS+=("--viewport2=$VIEWPORT2")
+  [ -n "$NO_SECOND_VP" ] && VISUAL_FLAGS+=("--no-second-viewport")
   theme_label=""
   if [ "$theme" != "default" ]; then
     VISUAL_FLAGS+=("--theme=$theme")
