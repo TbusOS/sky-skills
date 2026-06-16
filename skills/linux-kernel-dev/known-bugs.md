@@ -20,8 +20,24 @@
 
 ## 一行索引（grep 用，先读这里再钻具体条目）
 
-（待积累）
+- KB-ION-001 · 现代内核移除了 ION，分配 DMA 缓冲用 DMA-heap（dma_heap_buffer_alloc），别用 ion_alloc · KV-004 · range：ION-removed kernels
 
 ## 条目
 
-（待积累）
+### KB-ION-001：现代内核移除了 ION，分配 DMA 缓冲要用 DMA-heap API
+
+- symptom：在较新内核上编译报 `implicit declaration of function 'ion_alloc'` / 链接 undefined reference；移植旧 BSP 的缓冲分配代码时尤甚。
+- root cause：ION 子系统在较新内核已被移除。遗留代码与旧教程里的 `ion_alloc` / `ion_client_create` 在新树上根本不存在——这是个会随版本失效的断言，不是写法问题。
+- fix：用 DMA-heap API 分配 DMA-able 缓冲（`dma_heap_buffer_alloc`）。
+- trigger：见到 `ion_alloc` / `ion_client_create` / ION，或在新内核上移植旧 BSP 的缓冲分配。
+- range：ION 在较新内核已移除；用 `version_drift.mjs` 对目标树核实（本条由 6.1→7.0 实跑抓出）。
+- scope/limits：版本敏感条目，须对 ION-removed 的现代树验证；老树（ION 仍在）上 `ion_alloc` 仍解析得到。
+- check：
+  ```
+  [CLAIMS]
+  api: dma_heap_buffer_alloc
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-004
+- provenance：self（version_drift 实跑抓出 ion_alloc ROTTED）
+- fires/catches：0 / 0

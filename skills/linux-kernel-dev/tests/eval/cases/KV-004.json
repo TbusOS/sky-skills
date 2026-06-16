@@ -1,0 +1,18 @@
+{
+  "id": "KV-004",
+  "topic": "DMA buffer allocation on modern kernels (ION removed)",
+  "q": "在较新内核上给驱动分配一块 DMA-able 缓冲,旧 BSP 用的 ion_alloc 编不过了,怎么写?",
+  "kind": "objective",
+  "canary": false,
+  "version_sensitive": true,
+  "note": "版本敏感:ION 在现代内核已移除。须对 ION-removed 的现代树(如 7.0)验证;在老树(ION 仍在)上 ion_alloc 仍解析得到,该用例的 calibration 只在现代树成立。",
+  "gold_claims": {
+    "api": ["dma_heap_buffer_alloc"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "ion_alloc", "why": "ION 已移除,现代树上不存在" },
+    { "type": "fake-api", "claim": "ion_client_create", "why": "ION 客户端 API,已随 ION 一起移除" }
+  ],
+  "forbidden": ["在现代内核上用 ion_alloc / ION 客户端 API"],
+  "rubric": "用 DMA-heap API(dma_heap_buffer_alloc)分配 DMA 缓冲;不碰已移除的 ION;版本敏感的知识要打版本标"
+}
