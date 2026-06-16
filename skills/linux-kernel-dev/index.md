@@ -25,10 +25,16 @@ linux-kernel-dev/
 │   ├── fact_gate.mjs         # 查 API/CONFIG/符号/compatible 实存 vs 真树
 │   ├── checkpatch_gate.sh    # 代码风格检查（内核自带 checkpatch.pl）
 │   ├── kernel-tree.mjs       # 绑内核树（detect/add/list/clone）
-│   └── regression_test.mjs   # 回归测试:gold 用例 + 自降解校准 + 覆盖率
+│   ├── regression_test.mjs   # 回归测试:gold 用例 + 自降解校准 + 覆盖率
+│   ├── kernel-critic.mjs     # 打分面板 prompt 准备（P3，4 轴）
+│   └── kernel_learn_validate.mjs  # /kernel-learn 原子三件套确定性验证（P3）
 └── tests/eval/              # 测试用例（P2）
     ├── cases/*.json          # 每条:gold_claims + corruptions + objective/subjective
     └── baseline.json         # 基线（--baseline 记录,--check 对比）
+
+# 仓根 .claude/（symlink 到 ~/.claude，跨技能共享）
+.claude/agents/kernel-{correctness,safety,coding-style,completeness}-critic.md   # 打分面板 4 轴（P3）
+.claude/commands/kernel-learn.md                                                 # /kernel-learn 学习循环（P3）
 ```
 
 ## 加载指引
@@ -46,7 +52,8 @@ linux-kernel-dev/
 
 ## 状态
 
-P0（结构化）+ P1（客观检查）+ P2（测试用例 + 回归测试）完成：
+P0（结构化）+ P1（客观检查）+ P2（测试用例 + 回归测试）+ P3（打分面板 + /kernel-learn）完成：
 - P1：事实检查已对真树验证过"真假 CONFIG/API 当场分出"
-- P2：3 条种子用例 + `regression_test.mjs`（gold 全过 + 自降解校准 + 覆盖率统计），`--baseline`/`--check` 跑通
-下一步 **P3**（打分面板 + `/kernel-learn`）。阶段表见 `HARNESS-DESIGN.md` §9。
+- P2：3 条种子用例 + `regression_test.mjs`（gold 全过 + 自降解校准 + 覆盖率），`--baseline`/`--check` 跑通
+- P3：4 轴打分面板（correctness 0.35 / safety 0.30 / coding-style 0.20 / completeness 0.15，`kernel-critic.mjs` 准备 prompt，Task 派子 agent）+ `/kernel-learn` 原子三件套（`kernel_learn_validate.mjs` 确定性验证:有 [CLAIMS]→过、无→拒）
+下一步 **P4**（记录表 + 版本适配 version_drift）。阶段表见 `HARNESS-DESIGN.md` §9。
