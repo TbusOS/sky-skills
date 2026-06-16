@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kernel Harness — linux-kernel-dev self-improving engine</title>
+<meta name="description" content="A self-improving Linux kernel / BSP skill: answer, check every claim against a real source tree, learn each trap as a rule with a regression proof, detect version drift.">
+<meta property="og:title" content="Kernel Harness — linux-kernel-dev self-improving engine">
+<meta property="og:description" content="Six components, one loop. Every kernel answer is checked against a real source tree; every trap becomes a rule with a regression proof.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../skills/anthropic-design/assets/anthropic.css">
+<style>
+  html { scroll-padding-top: 84px; }
+  .anth-nav { position: sticky; top: 0; z-index: 50; background: var(--anth-bg); border-bottom: 1px solid var(--anth-light-gray); }
+
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent; border: 1px solid var(--anth-light-gray); color: var(--anth-text);
+    font-family: var(--font-heading); font-size: 13px; font-weight: 500; padding: 6px 12px;
+    border-radius: var(--radius-pill); cursor: pointer; letter-spacing: 0.05em;
+    transition: background var(--duration-sm) var(--ease-anth), border-color var(--duration-sm);
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); border-color: var(--anth-mid-gray); }
+
+  /* §H · zh 字体配对 */
+  html[data-lang="zh"] body, html[data-lang="zh"] p, html[data-lang="zh"] li,
+  html[data-lang="zh"] .anth-quote, html[data-lang="zh"] .comp-card__weak {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+  }
+  html[data-lang="zh"] h1, html[data-lang="zh"] h2, html[data-lang="zh"] h3,
+  html[data-lang="zh"] .anth-badge, html[data-lang="zh"] .comp-card__title,
+  html[data-lang="zh"] .comp-card__num, html[data-lang="zh"] .comp-card__weak-label,
+  html[data-lang="zh"] .comp-card__status, html[data-lang="zh"] .map-th, html[data-lang="zh"] .voice-chip {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] .anth-quote { font-style: normal; }
+
+  /* Voice switcher */
+  .voice-bar { display:flex; gap:var(--space-3); align-items:center; flex-wrap:wrap; }
+  .voice-bar__label {
+    font-family:var(--font-heading); font-size:12px; letter-spacing:0.15em; text-transform:uppercase;
+    color:var(--anth-text-secondary); font-weight:600; margin-right:var(--space-2);
+  }
+  .voice-chip {
+    display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:var(--radius-pill);
+    font-size:13px; font-weight:600; font-family:var(--font-heading); text-decoration:none;
+    border:1px solid var(--anth-light-gray); color:var(--anth-text);
+    transition:background var(--duration-sm), border-color var(--duration-sm);
+  }
+  .voice-chip:hover { background:var(--anth-light-gray); }
+  .voice-chip--current { background:var(--anth-orange); color:#ffffff; border-color:var(--anth-orange); }
+  .voice-chip--current:hover { background:var(--anth-orange); }
+
+  /* Component card */
+  .comp-card {
+    position:relative; padding:var(--space-6); background:#ffffff;
+    border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg);
+    display:flex; flex-direction:column; gap:var(--space-3);
+  }
+  .comp-card__num {
+    align-self:flex-start; font-family:var(--font-heading); font-size:13px; font-weight:700;
+    letter-spacing:0.1em; color:var(--anth-text-secondary);
+  }
+  .comp-card__title { font-family:var(--font-heading); font-size:23px; font-weight:600; color:var(--anth-text); margin:0; line-height:1.2; }
+  .comp-card__path {
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--anth-text-secondary);
+    background:#faf9f5; padding:7px 12px; border-radius:6px; display:inline-block; word-break:break-all;
+  }
+  .comp-card__weak-label {
+    font-family:var(--font-heading); font-size:11px; font-weight:700; letter-spacing:0.18em;
+    color:var(--anth-orange); text-transform:uppercase;
+  }
+  .comp-card__weak { font-size:15.5px; line-height:1.6; color:var(--anth-text); margin:0; }
+  .comp-card__status {
+    position:absolute; top:var(--space-5); right:var(--space-5); font-family:var(--font-heading);
+    font-size:11.5px; font-weight:600; padding:4px 10px; border-radius:var(--radius-pill); letter-spacing:0.05em;
+    background:#dfeadb; color:#2f5e33;
+  }
+
+  /* Mapping table */
+  .map-table { width:100%; border-collapse:collapse; font-family:var(--font-body); }
+  .map-th {
+    text-align:left; font-family:var(--font-heading); font-size:12px; font-weight:700;
+    letter-spacing:0.12em; text-transform:uppercase; color:var(--anth-text-secondary);
+    padding:0 var(--space-4) var(--space-3); border-bottom:2px solid var(--anth-light-gray);
+  }
+  .map-table td { padding:var(--space-4); border-bottom:1px solid var(--anth-light-gray); font-size:15px; line-height:1.5; vertical-align:top; }
+  .map-table tr td:first-child { color:var(--anth-text-secondary); }
+  .map-table tr td:last-child { color:var(--anth-text); font-weight:500; }
+  .map-arrow { color:var(--anth-orange); font-weight:700; }
+  .mono { font-family:'JetBrains Mono', monospace; font-size:13px; }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="../index.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">sky-skills</a>
+  <div>
+    <a href="../index.html#skills"><span class="lang-en">Skills</span><span class="lang-zh">技能</span></a>
+    <a href="HARNESS-ROADMAP.html"><span class="lang-en">Design harness</span><span class="lang-zh">设计架构</span></a>
+    <a href="KERNEL-HARNESS.html" style="color:var(--anth-orange); font-weight:600;"><span class="lang-en">Kernel harness</span><span class="lang-zh">内核架构</span></a>
+    <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language" title="Switch language">中 / EN</button>
+    <a class="anth-button" href="https://github.com/TbusOS/sky-skills/tree/main/skills/linux-kernel-dev"><span class="lang-en">View on GitHub</span><span class="lang-zh">看源码</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="anth-hero">
+  <div class="anth-container" style="max-width:860px;">
+    <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Architecture · linux-kernel-dev</span><span class="lang-zh">架构 · linux-kernel-dev</span></span>
+    <h1 style="margin-top:var(--space-4);">
+      <span class="lang-en">A kernel skill that gets<br>smarter the more you use it.</span>
+      <span class="lang-zh">一个越用越聪明的<br>内核开发 skill。</span>
+    </h1>
+    <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.55; max-width:740px; font-family:var(--font-body);">
+      <span class="lang-en">Most AI kernel help is a static document that confidently cites APIs that don't exist and rots the day a new kernel ships. <strong>linux-kernel-dev</strong> closes the loop instead: every answer carries machine-checkable claims, every claim is verified against a <strong>real source tree</strong>, every trap you hit becomes a rule with a <strong>regression proof</strong>, and a drift detector flags what changed between kernel versions. Six components, one rule — nothing ships without an <em>executable check</em>.</span>
+      <span class="lang-zh">大多数 AI 内核助手是一份静态文档：自信地引用不存在的 API，新内核一发布就过期。<strong>linux-kernel-dev</strong> 把这个环合上：每个答案都带可机器核对的断言，每条断言都拿<strong>真源码树</strong>验证，每个踩过的坑都沉成一条<strong>带回归证明</strong>的规则，还有检测器报出内核版本间变了什么。六个组件，一条规矩——没有<em>可执行检查</em>就不准落地。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="#loop"><span class="lang-en">See the loop</span><span class="lang-zh">看这个循环</span></a>
+      <a class="anth-button anth-button--ghost" href="#components"><span class="lang-en">The six components</span><span class="lang-zh">六个组件</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Voice switcher -->
+<section style="padding:0 var(--space-5) var(--space-4);">
+  <div class="anth-container">
+    <div class="voice-bar" style="padding:var(--space-3) 0;">
+      <span class="voice-bar__label"><span class="lang-en">Sibling page</span><span class="lang-zh">姊妹页</span></span>
+      <a class="voice-chip" href="HARNESS-ROADMAP.html"><span class="lang-en">Design harness →</span><span class="lang-zh">设计架构 →</span></a>
+      <a class="voice-chip voice-chip--current" href="KERNEL-HARNESS.html" aria-current="page"><span class="lang-en">Kernel harness</span><span class="lang-zh">内核架构</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- The loop diagram -->
+<section class="anth-section anth-section--subtle" id="loop">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-7); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">The closed loop</span><span class="lang-zh">完整循环</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">Every real task feeds the next one.</span>
+        <span class="lang-zh">每个真任务，喂养下一个。</span>
+      </h2>
+      <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+        <span class="lang-en">A kernel answer flows through objective checks and a scoring panel; a trap becomes a measured rule; a regression test guards it; a drift detector keeps it honest across versions. The corpus pass-rate over commits is the one number that says whether it is actually compounding.</span>
+        <span class="lang-zh">一个内核答案先过客观检查和打分面板；踩到的坑沉成被度量的规则；回归测试守住它；版本变了由漂移检测兜底。测试通过率随 commit 的曲线，是判断它到底有没有在累积变强的唯一数字。</span>
+      </p>
+    </div>
+
+    <figure style="margin:0;">
+      <svg viewBox="0 0 1200 470" width="100%" role="img" aria-labelledby="loop-title loop-desc" style="display:block; background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg);">
+        <title id="loop-title">The linux-kernel-dev self-improving loop</title>
+        <desc id="loop-desc">Six stages in a cycle: answer with claims, objective checks, scoring panel, learn the trap, regression test, version drift — looping back to a sharper answer.</desc>
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#5c5a54"></path>
+          </marker>
+          <marker id="ah-o" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#d97757"></path>
+          </marker>
+        </defs>
+
+        <!-- loop-back arc (top) -->
+        <path d="M 1095 250 C 1095 70, 105 70, 105 250" fill="none" stroke="#d97757" stroke-width="2.5" stroke-dasharray="2 7" stroke-linecap="round" marker-end="url(#ah-o)"></path>
+        <text x="600" y="58" text-anchor="middle" font-family="Poppins, sans-serif" font-size="15" font-weight="600" fill="#d97757">
+          <tspan class="lang-en">gets sharper every pass · corpus pass-rate ↑</tspan><tspan class="lang-zh">每过一轮更准 · 通过率 ↑</tspan>
+        </text>
+
+        <!-- node template: rect + step num + label -->
+        <!-- 1 input (blue) -->
+        <g>
+          <rect x="30" y="250" width="165" height="96" rx="12" fill="#eef3f8" stroke="#3a5a78" stroke-width="1.5"></rect>
+          <circle cx="55" cy="278" r="13" fill="#3a5a78"></circle>
+          <text x="55" y="283" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="700" fill="#ffffff">1</text>
+          <text x="112" y="312" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14.5" font-weight="600" fill="#1f1e1c"><tspan class="lang-en">Answer</tspan><tspan class="lang-zh">答题</tspan></text>
+          <text x="112" y="332" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" fill="#5c5a54">+ [CLAIMS]</text>
+        </g>
+        <!-- 2 checks (green) -->
+        <g>
+          <rect x="225" y="250" width="165" height="96" rx="12" fill="#e6efe4" stroke="#2f5e33" stroke-width="1.5"></rect>
+          <circle cx="250" cy="278" r="13" fill="#2f5e33"></circle>
+          <text x="250" y="283" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="700" fill="#ffffff">2</text>
+          <text x="307" y="306" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14.5" font-weight="600" fill="#1f1e1c"><tspan class="lang-en">Objective checks</tspan><tspan class="lang-zh">客观检查</tspan></text>
+          <text x="307" y="326" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" fill="#5c5a54">fact + checkpatch</text>
+        </g>
+        <!-- 3 critic (green) -->
+        <g>
+          <rect x="420" y="250" width="165" height="96" rx="12" fill="#e6efe4" stroke="#2f5e33" stroke-width="1.5"></rect>
+          <circle cx="445" cy="278" r="13" fill="#2f5e33"></circle>
+          <text x="445" y="283" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="700" fill="#ffffff">3</text>
+          <text x="502" y="306" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14.5" font-weight="600" fill="#1f1e1c"><tspan class="lang-en">Scoring panel</tspan><tspan class="lang-zh">打分面板</tspan></text>
+          <text x="502" y="326" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" fill="#5c5a54">4 axes</text>
+        </g>
+        <!-- 4 learn (orange) -->
+        <g>
+          <rect x="615" y="250" width="165" height="96" rx="12" fill="#fbe7da" stroke="#d97757" stroke-width="1.5"></rect>
+          <circle cx="640" cy="278" r="13" fill="#d97757"></circle>
+          <text x="640" y="283" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="700" fill="#ffffff">4</text>
+          <text x="697" y="306" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14.5" font-weight="600" fill="#1f1e1c"><tspan class="lang-en">Learn the trap</tspan><tspan class="lang-zh">坑沉成规则</tspan></text>
+          <text x="697" y="326" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" fill="#5c5a54">/kernel-learn</text>
+        </g>
+        <!-- 5 regression (green) -->
+        <g>
+          <rect x="810" y="250" width="165" height="96" rx="12" fill="#e6efe4" stroke="#2f5e33" stroke-width="1.5"></rect>
+          <circle cx="835" cy="278" r="13" fill="#2f5e33"></circle>
+          <text x="835" y="283" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="700" fill="#ffffff">5</text>
+          <text x="892" y="306" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14.5" font-weight="600" fill="#1f1e1c"><tspan class="lang-en">Regression test</tspan><tspan class="lang-zh">回归测试</tspan></text>
+          <text x="892" y="326" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" fill="#5c5a54">keep / revert</text>
+        </g>
+        <!-- 6 drift (blue) -->
+        <g>
+          <rect x="1005" y="250" width="165" height="96" rx="12" fill="#eef3f8" stroke="#3a5a78" stroke-width="1.5"></rect>
+          <circle cx="1030" cy="278" r="13" fill="#3a5a78"></circle>
+          <text x="1030" y="283" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="700" fill="#ffffff">6</text>
+          <text x="1087" y="306" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14.5" font-weight="600" fill="#1f1e1c"><tspan class="lang-en">Version drift</tspan><tspan class="lang-zh">版本漂移</tspan></text>
+          <text x="1087" y="326" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" fill="#5c5a54">6.1 → 7.0</text>
+        </g>
+
+        <!-- forward arrows between nodes (y=298) -->
+        <line x1="195" y1="298" x2="223" y2="298" stroke="#5c5a54" stroke-width="2" marker-end="url(#ah)"></line>
+        <line x1="390" y1="298" x2="418" y2="298" stroke="#5c5a54" stroke-width="2" marker-end="url(#ah)"></line>
+        <line x1="585" y1="298" x2="613" y2="298" stroke="#5c5a54" stroke-width="2" marker-end="url(#ah)"></line>
+        <line x1="780" y1="298" x2="813" y2="298" stroke="#5c5a54" stroke-width="2" marker-end="url(#ah)"></line>
+        <line x1="975" y1="298" x2="1003" y2="298" stroke="#5c5a54" stroke-width="2" marker-end="url(#ah)"></line>
+
+        <!-- legend -->
+        <g font-family="Poppins, sans-serif" font-size="12.5" fill="#5c5a54">
+          <rect x="30" y="410" width="13" height="13" rx="3" fill="#eef3f8" stroke="#3a5a78"></rect>
+          <text x="50" y="421"><tspan class="lang-en">input / data</tspan><tspan class="lang-zh">输入 / 数据</tspan></text>
+          <rect x="190" y="410" width="13" height="13" rx="3" fill="#e6efe4" stroke="#2f5e33"></rect>
+          <text x="210" y="421"><tspan class="lang-en">objective gate</tspan><tspan class="lang-zh">客观检查</tspan></text>
+          <rect x="365" y="410" width="13" height="13" rx="3" fill="#fbe7da" stroke="#d97757"></rect>
+          <text x="385" y="421"><tspan class="lang-en">learning step</tspan><tspan class="lang-zh">学习步骤</tspan></text>
+        </g>
+      </svg>
+      <figcaption style="text-align:center; font-family:var(--font-body); font-size:14px; color:var(--anth-text-secondary); margin-top:var(--space-3);">
+        <span class="lang-en">The six-stage loop. Stages 2 and 5 are deterministic and CI-able; the dashed orange arc is the compounding return — each pass leaves a measured rule behind.</span>
+        <span class="lang-zh">六阶段循环。第 2、5 步是确定性的、可进 CI；橙色虚线弧是"越用越聪明"的回路——每过一轮都留下一条被度量的规则。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Six components -->
+<section class="anth-section" id="components">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-7); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">Six components</span><span class="lang-zh">六个组件</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">Each one defends a way the model goes wrong.</span>
+        <span class="lang-zh">每一个都挡模型出错的一种方式。</span>
+      </h2>
+      <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+        <span class="lang-en">All built and verified against a real 6.1 source tree. The kernel has an edge the design harness lacks: <code>checkpatch.pl</code>, compilation, and symbol existence are deterministic — harder gates than any heuristic.</span>
+        <span class="lang-zh">全部已建，并对一棵真实 6.1 源码树验证过。内核这边有设计架构没有的优势：<code>checkpatch.pl</code>、编译、符号实存都是确定性的——比任何启发式都硬的检查。</span>
+      </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--space-5);">
+
+      <article class="comp-card">
+        <span class="comp-card__status"><span class="lang-en">Built · catches hallucinations</span><span class="lang-zh">已建 · 抓幻觉</span></span>
+        <span class="comp-card__num">01</span>
+        <h3 class="comp-card__title"><span class="lang-en">Objective checks</span><span class="lang-zh">客观检查</span></h3>
+        <code class="comp-card__path">scripts/fact_gate.mjs · checkpatch_gate.sh · kernel-tree.mjs</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">Models invent plausible APIs and config symbols. The answer ends with a <code>[CLAIMS]</code> block; fact_gate greps every cited API / CONFIG / symbol / compatible against a real tree (<code>--tree</code>, no path baked in). A made-up <code>CONFIG_*</code> fails on the spot. checkpatch enforces coding style.</span>
+          <span class="lang-zh">模型会编造看似合理的 API 和 config 符号。答案末尾带 <code>[CLAIMS]</code> 块；fact_gate 把引用的每个 API / CONFIG / 符号 / compatible 拿真树 grep(<code>--tree</code>，不内置路径)。编造的 <code>CONFIG_*</code> 当场 fail。checkpatch 守代码风格。</span>
+        </p>
+      </article>
+
+      <article class="comp-card">
+        <span class="comp-card__status"><span class="lang-en">Built · CI-able, no LLM</span><span class="lang-zh">已建 · 可 CI，不要 LLM</span></span>
+        <span class="comp-card__num">02</span>
+        <h3 class="comp-card__title"><span class="lang-en">Test cases + regression</span><span class="lang-zh">测试用例 + 回归</span></h3>
+        <code class="comp-card__path">scripts/regression_test.mjs · tests/eval/cases/*.json</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">A content change can quietly break what used to work. A frozen case set carries a known-good answer (gold) plus deliberate corruptions; the runner asserts gold resolves and every corruption is caught — a self-degradation check that proves the gate can tell good from bad.</span>
+          <span class="lang-zh">改内容可能悄悄弄坏原本好的。一组冻结用例各带正确答案(gold)+ 故意改坏的版本；runner 断言 gold 全过、每个坏版本被抓——自降解校准，证明检查真能分好坏。</span>
+        </p>
+      </article>
+
+      <article class="comp-card">
+        <span class="comp-card__status"><span class="lang-en">Built · 4 weighted axes</span><span class="lang-zh">已建 · 4 加权轴</span></span>
+        <span class="comp-card__num">03</span>
+        <h3 class="comp-card__title"><span class="lang-en">Scoring panel</span><span class="lang-zh">打分面板</span></h3>
+        <code class="comp-card__path">.claude/agents/kernel-*-critic.md · scripts/kernel-critic.mjs</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">One reviewer scoring its own work praises uniformly. Four fresh-context specialists score one axis each — correctness (0.35), safety (0.30), coding-style (0.20), completeness (0.15). Safety is weighted high and an error there fails the answer outright; a sleep-in-spinlock can brick a board.</span>
+          <span class="lang-zh">一个评审评自己的活会一律说好。四个 fresh-context 专家各守一轴——correctness(0.35)、safety(0.30)、coding-style(0.20)、completeness(0.15)。safety 权重高，这一轴出 error 直接判 fail；持 spinlock 睡眠能把板子搞砖。</span>
+        </p>
+      </article>
+
+      <article class="comp-card">
+        <span class="comp-card__status"><span class="lang-en">Built · no check, no rule</span><span class="lang-zh">已建 · 无检查不建</span></span>
+        <span class="comp-card__num">04</span>
+        <h3 class="comp-card__title">/kernel-learn</h3>
+        <code class="comp-card__path">.claude/commands/kernel-learn.md · scripts/kernel_learn_validate.mjs</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">A lesson written as prose is never verified, so the same trap recurs. Every learned rule ships as an atomic triple — a rule with an embedded <code>[CLAIMS]</code> check, a frozen case that fails before / passes after, and a registration. No executable check, no rule: the validator rejects it.</span>
+          <span class="lang-zh">写成散文的经验没人验证，同一个坑会反复犯。每条学到的规则都是原子三件套——带 <code>[CLAIMS]</code> 检查的规则、一条建前 fail/建后 pass 的冻结用例、一次注册。没有可执行检查就不建：验证器直接拒。</span>
+        </p>
+      </article>
+
+      <article class="comp-card">
+        <span class="comp-card__status"><span class="lang-en">Built · reuses design harness</span><span class="lang-zh">已建 · 复用设计架构</span></span>
+        <span class="comp-card__num">05</span>
+        <h3 class="comp-card__title"><span class="lang-en">Ledger + rules</span><span class="lang-zh">记录表 + 规则</span></h3>
+        <code class="comp-card__path">evolution/{ledger.tsv, rules.json} · evolve-ledger / evolve-rules</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">A rules folder only grows; dead rules nag without catching anything. Each rule scores <code>s = (catches+1)/(fires+2)</code> — fires a lot, catches nothing means prune. The design harness scripts are reused directly: ledger as-is, rules with a one-flag patch.</span>
+          <span class="lang-zh">规则文件夹只增不减；死规则光报警不抓东西。每条规则评 <code>s = (catches+1)/(fires+2)</code>——老触发、零抓到就 prune。设计架构的脚本直接复用：记录表原样用，规则表加一个开关。</span>
+        </p>
+      </article>
+
+      <article class="comp-card">
+        <span class="comp-card__status"><span class="lang-en">Built · ion_alloc caught</span><span class="lang-zh">已建 · 抓到 ion_alloc</span></span>
+        <span class="comp-card__num">06</span>
+        <h3 class="comp-card__title"><span class="lang-en">Version drift</span><span class="lang-zh">版本适配</span></h3>
+        <code class="comp-card__path">scripts/version_drift.mjs · references/kernel_version_deltas.md</code>
+        <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">Kernel knowledge rots: an API real in 6.1 is gone by 7.0. The detector runs the gold claims against several version trees and reports what changed. A live run over 6.1 → 7.0 flagged <code>ion_alloc</code> as removed — machine-found, not hand-maintained.</span>
+          <span class="lang-zh">内核知识会过期：6.1 里真的 API 到 7.0 没了。检测器拿 gold 断言在多棵版本树上跑，报出变化。一次 6.1 → 7.0 实跑标出 <code>ion_alloc</code> 被删——机器找出来的，不靠手维护。</span>
+        </p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- Isomorphic to design harness -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">Same shape</span><span class="lang-zh">同构</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">The same harness, pointed at kernel facts.</span>
+      <span class="lang-zh">同一套架构，对准内核事实。</span>
+    </h2>
+    <p style="font-family:var(--font-body); color:var(--anth-text-secondary); font-size:17px; margin-bottom:var(--space-6);">
+      <span class="lang-en">sky-skills already had a design harness that makes design skills get smarter. This is the same machinery, with the gates swapped from rendered-pixels to kernel facts. Where it can, it reuses the exact scripts.</span>
+      <span class="lang-zh">sky-skills 本来就有一套让设计 skill 变聪明的架构。这是同一套机器，只把检查从"渲染像素"换成"内核事实"。能复用的地方，直接用同一份脚本。</span>
+    </p>
+    <table class="map-table">
+      <thead><tr>
+        <th class="map-th"><span class="lang-en">Design harness</span><span class="lang-zh">设计架构</span></th>
+        <th class="map-th"><span class="lang-en">Kernel harness</span><span class="lang-zh">内核架构</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td><span class="lang-en">visual-audit (rendered, heuristic)</span><span class="lang-zh">visual-audit(渲染，启发式)</span></td><td><span class="map-arrow">→</span> <span class="mono">fact_gate.mjs</span> <span class="lang-en">(symbol exists in tree)</span><span class="lang-zh">(符号在树里实存)</span></td></tr>
+        <tr><td><span class="lang-en">verify.py (structural)</span><span class="lang-zh">verify.py(结构)</span></td><td><span class="map-arrow">→</span> <span class="mono">checkpatch_gate.sh</span> <span class="lang-en">(kernel's own tool)</span><span class="lang-zh">(内核自带工具)</span></td></tr>
+        <tr><td><span class="lang-en">multi-critic (4 weighted LLM)</span><span class="lang-zh">multi-critic(4 加权 LLM)</span></td><td><span class="map-arrow">→</span> <span class="lang-en">4 kernel critics</span><span class="lang-zh">4 个内核打分员</span></td></tr>
+        <tr><td><span class="lang-en">design-learner</span><span class="lang-zh">design-learner</span></td><td><span class="map-arrow">→</span> <span class="mono">/kernel-learn</span> <span class="lang-en">(atomic triple)</span><span class="lang-zh">(原子三件套)</span></td></tr>
+        <tr><td><span class="lang-en">evolve-ledger / evolve-rules</span><span class="lang-zh">evolve-ledger / evolve-rules</span></td><td><span class="map-arrow">→</span> <span class="lang-en">reused as-is / one-flag patch</span><span class="lang-zh">原样复用 / 加一个开关</span></td></tr>
+      </tbody>
+    </table>
+    <blockquote class="anth-quote" style="margin-top:var(--space-7);">
+      <span class="lang-en">Separating the agent doing the work from the agent evaluating it is a powerful lever. The kernel just gives the evaluator harder ground to stand on — a real source tree.</span>
+      <span class="lang-zh">把做事的 agent 和评判的 agent 分开，是一个真正的杠杆。内核只是给了评判者更硬的立足点——一棵真源码树。</span>
+    </blockquote>
+  </div>
+</section>
+
+<!-- Tree binding -->
+<section class="anth-section">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">Open-source · bring your own tree</span><span class="lang-zh">开源 · 自带内核树</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">It checks against your kernel, not a generic one.</span>
+      <span class="lang-zh">它对着你的内核验证，不是泛泛一个。</span>
+    </h2>
+    <p class="lang-en">The skill ships tree-agnostic — no path is baked in. Most kernel and BSP engineers already have a source tree; the gate finds it by walking up from the working directory, an env var, or a one-line config. No tree? It degrades honestly: answers are marked <code>[unverified]</code> rather than asserted, and it prints how to bind or shallow-clone one.</p>
+    <p class="lang-zh">这个 skill 发布时是树无关的——不内置任何路径。多数内核/BSP 工程师本来就有源码树；检查脚本会从工作目录往上找、读环境变量、或读一行配置。没有树?它诚实降级：答案标 <code>[未验证]</code> 而不是直接断言，并打印怎么绑定或浅克隆一棵。</p>
+    <p class="lang-en">Bind it once and the payoff is real: answers are verified against <strong>your exact kernel version</strong>, checkpatch runs with <strong>your tree's own rules</strong>, and version drift is measured between the trees you actually ship.</p>
+    <p class="lang-zh">绑定一次，回报实在：答案对着<strong>你的确切内核版本</strong>验证，checkpatch 用<strong>你树里自己的规则</strong>跑，版本漂移是在你真正发布的那些树之间度量的。</p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--narrow" style="text-align:center;">
+    <h2><span class="lang-en">Read the design, or the code.</span><span class="lang-zh">看设计，或者看代码。</span></h2>
+    <p style="color:var(--anth-text-secondary); font-size:17px; font-family:var(--font-body); margin-bottom:var(--space-6);">
+      <span class="lang-en">The full engine design lives next to the skill; the scripts are a few hundred lines each.</span>
+      <span class="lang-zh">完整引擎设计就在 skill 旁边；脚本各几百行。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="https://github.com/TbusOS/sky-skills/blob/main/skills/linux-kernel-dev/HARNESS-DESIGN.md"><span class="lang-en">HARNESS-DESIGN.md</span><span class="lang-zh">设计文档</span></a>
+      <a class="anth-button anth-button--ghost" href="https://github.com/TbusOS/sky-skills/tree/main/skills/linux-kernel-dev"><span class="lang-en">Browse the skill</span><span class="lang-zh">浏览 skill</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="anth-footer">
+  <div class="anth-footer-grid">
+    <div class="anth-footer-group">
+      <h5>sky-skills</h5>
+      <a href="../index.html"><span class="lang-en">Home</span><span class="lang-zh">首页</span></a>
+      <a href="HARNESS-ROADMAP.html"><span class="lang-en">Design harness</span><span class="lang-zh">设计架构</span></a>
+      <a href="KERNEL-HARNESS.html"><span class="lang-en">Kernel harness</span><span class="lang-zh">内核架构</span></a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">Code</span><span class="lang-zh">代码</span></h5>
+      <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+      <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/linux-kernel-dev"><span class="lang-en">linux-kernel-dev</span><span class="lang-zh">linux-kernel-dev</span></a>
+      <a href="https://github.com/TbusOS/sky-skills/discussions">Discussions</a>
+    </div>
+    <div class="anth-footer-group">
+      <h5><span class="lang-en">About</span><span class="lang-zh">关于</span></h5>
+      <a href="https://github.com/TbusOS/sky-skills/blob/main/README.md">README</a>
+      <a href="https://github.com/TbusOS/sky-skills/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+  <div class="anth-footer-legal">
+    <span class="lang-en">Copyright © 2026 Sky. Licensed under MIT.</span>
+    <span class="lang-zh">版权 © 2026 Sky · MIT 许可</span>
+    <span>
+      <span class="lang-en">Rendered with</span><span class="lang-zh">由</span>
+      <a class="anth-link anth-link--no-arrow" href="https://github.com/TbusOS/sky-skills/tree/main/skills/anthropic-design/">anthropic-design</a>
+      <span class="lang-zh"> 渲染</span>
+    </span>
+  </div>
+</footer>
+
+<!-- design-review:self-diff v1
+[hero-loop] chose a single 6-stage horizontal loop SVG over a circular hub-and-spoke — left-to-right reads as a pipeline, the dashed orange return arc carries the "compounds" idea without crowding the center.
+[color-semantics] chose 3 semantic hues (blue=data, green=objective gate, orange=learning) over per-node decoration — color does meaning, matching diagram-craft §1; only 3 hues, no 6th-hue leak.
+[components-grid] chose a 2-col comp-card grid mirroring HARNESS-ROADMAP over a dense table — each component gets a model-weakness paragraph, the harness's core discipline.
+[mapping-table] chose a 2-col design→kernel table over prose — the isomorphism is the whole pitch; a table makes the 1:1 legible at a glance.
+[honest-status] chose "Built · verified against 6.1" badges over "Done/Shipped" — the skill is built and tree-verified but has banked no real evolution round yet; status must not overclaim (the 09 "建好≠跑过" lesson).
+[bilingual] chose full EN/zh parity via lang-en/lang-zh spans incl. inside SVG <tspan> — same toggle mechanism as the sibling design page.
+Known trade-offs:
+- The loop SVG packs 6 nodes at 165px each; at <900px viewport it scales down (width:100%) and small mono labels approach the readability floor — acceptable on desktop, the figcaption restates the flow.
+- version_drift demo cites ion_alloc 6.1→7.0 from a real run, but the corpus is only 3 seed cases; the page says "built", not "battle-tested".
+- No live metrics chart yet (corpus pass-rate curve) — deferred to the capabilities page once more real runs exist.
+/design-review:self-diff -->
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+  if (!saved) { saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en'; }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+      btn.setAttribute('aria-pressed', lang === 'zh' ? 'true' : 'false');
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
