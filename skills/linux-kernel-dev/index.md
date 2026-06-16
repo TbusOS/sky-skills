@@ -21,10 +21,14 @@ linux-kernel-dev/
     ├── bsp_discipline.md    # 通用 BSP 纪律（defconfig/上游gate/硬件读字节/4维度/冲突6步）
     ├── kernel_version_deltas.md  # 跨版本差异（版本敏感知识集中处）   [骨架/待核]
     └── claims-contract.md    # [CLAIMS] 答案验证契约（事实检查 靶子）
-└── scripts/                 # 客观检查（P1）
-    ├── fact_gate.mjs         # 查 API/CONFIG/符号/compatible 实存 vs 真树
-    ├── checkpatch_gate.sh    # 代码风格检查（内核自带 checkpatch.pl）
-    └── kernel-tree.mjs       # 绑内核树（detect/add/list/clone）
+├── scripts/                 # 客观检查（P1）+ 回归测试（P2）
+│   ├── fact_gate.mjs         # 查 API/CONFIG/符号/compatible 实存 vs 真树
+│   ├── checkpatch_gate.sh    # 代码风格检查（内核自带 checkpatch.pl）
+│   ├── kernel-tree.mjs       # 绑内核树（detect/add/list/clone）
+│   └── regression_test.mjs   # 回归测试:gold 用例 + 自降解校准 + 覆盖率
+└── tests/eval/              # 测试用例（P2）
+    ├── cases/*.json          # 每条:gold_claims + corruptions + objective/subjective
+    └── baseline.json         # 基线（--baseline 记录,--check 对比）
 ```
 
 ## 加载指引
@@ -42,4 +46,7 @@ linux-kernel-dev/
 
 ## 状态
 
-P0（结构化）+ P1（客观检查）完成：hub + references + `scripts/`（fact_gate / checkpatch_gate / kernel-tree）跑通——事实检查 已对真树验证过"真假 CONFIG/API 当场分出"。下一步 **P2**（测试用例集 + 回归测试）。阶段表见 `HARNESS-DESIGN.md` §9。
+P0（结构化）+ P1（客观检查）+ P2（测试用例 + 回归测试）完成：
+- P1：事实检查已对真树验证过"真假 CONFIG/API 当场分出"
+- P2：3 条种子用例 + `regression_test.mjs`（gold 全过 + 自降解校准 + 覆盖率统计），`--baseline`/`--check` 跑通
+下一步 **P3**（打分面板 + `/kernel-learn`）。阶段表见 `HARNESS-DESIGN.md` §9。

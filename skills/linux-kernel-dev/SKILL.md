@@ -64,8 +64,9 @@ references. Load a reference only when the task needs it (progressive disclosure
 并能跟随内核版本自更新。设计与状态见同目录 `HARNESS-DESIGN.md`。
 `dos-and-donts.md` / `known-bugs.md` 会随真实任务由该机制逐步充实——每条都带可执行检查，不是空话。
 
-**已落（P1 客观检查）**：
+**已落（P1 客观检查 + P2 回归测试）**：
 - `scripts/fact_gate.mjs` — 查答案 `[CLAIMS]` 里的 API / CONFIG / 符号 / compatible 是否在真内核树**实存**（树无关 `--tree`；exit 0 干净 / 1 有幻觉 / 3 检查坏不算 fail）
 - `scripts/checkpatch_gate.sh` — 用内核自带 `checkpatch.pl` 校代码风格
 - `scripts/kernel-tree.mjs` — 绑内核树（`detect` / `add` / `list` / `clone`），路径存本机配置不入库
-- 引具体符号的答案附 `[CLAIMS]` 块（`references/claims-contract.md`）；绑树后跑 事实检查，答案标 `[已对 linux <版本> 验证]` 或 `[未验证]`
+- `scripts/regression_test.mjs` + `tests/eval/cases/*.json` — 回归测试:每条用例的 gold 必须在真树查得到 + 自降解校准（故意改坏必须被抓）+ 覆盖率统计；`--baseline` 记录、`--check` 对比退步
+- 引具体符号的答案附 `[CLAIMS]` 块（`references/claims-contract.md`）；绑树后跑事实检查,答案标 `[已对 linux <版本> 验证]` 或 `[未验证]`

@@ -1,0 +1,16 @@
+{
+  "id": "KV-002",
+  "topic": "character device registration",
+  "q": "注册一个字符设备:动态主设备号 + cdev + class + device 节点,逆序清理。",
+  "kind": "objective",
+  "canary": false,
+  "gold_claims": {
+    "api": ["alloc_chrdev_region", "cdev_init", "cdev_add", "class_create", "device_create", "unregister_chrdev_region"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "cdev_add_safe", "why": "编造的安全变体" },
+    { "type": "fake-api", "claim": "device_create_node", "why": "编造的 API" }
+  ],
+  "forbidden": ["cdev_add 失败不回收主设备号"],
+  "rubric": "alloc_chrdev_region → cdev_add → class_create → device_create,失败逆序清理;class_create 参数个数版本敏感"
+}

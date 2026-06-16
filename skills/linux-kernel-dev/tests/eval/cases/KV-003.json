@@ -1,0 +1,17 @@
+{
+  "id": "KV-003",
+  "topic": "locking context",
+  "q": "驱动里一个数据结构,进程上下文和中断处理都会改,怎么加锁?",
+  "kind": "objective",
+  "canary": true,
+  "gold_claims": {
+    "config": ["CONFIG_PROVE_LOCKING"],
+    "api": ["spin_lock_irqsave", "spin_unlock_irqrestore", "mutex_lock"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "spin_lock_irqsave_nested_v3", "why": "编造的嵌套变体" },
+    { "type": "fake-config", "claim": "CONFIG_PROVE_LOCKING_FAST", "why": "编造的 CONFIG" }
+  ],
+  "forbidden": ["持 spinlock 时睡眠", "中断上下文用 mutex"],
+  "rubric": "与中断共享的临界区用 spin_lock_irqsave;绝不持 spinlock 睡眠;开 lockdep 验"
+}

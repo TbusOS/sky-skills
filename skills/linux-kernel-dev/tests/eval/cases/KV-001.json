@@ -1,0 +1,17 @@
+{
+  "id": "KV-001",
+  "topic": "platform driver MMIO probe",
+  "q": "给一个 MMIO 外设写 platform driver 的 probe,做资源映射和中断申请,用 devm_ 托管。",
+  "kind": "objective",
+  "canary": false,
+  "gold_claims": {
+    "config": ["CONFIG_OF"],
+    "api": ["devm_kzalloc", "devm_platform_ioremap_resource", "platform_get_irq", "devm_request_irq"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "devm_platform_ioremap_resource_v2", "why": "编造的 API 变体" },
+    { "type": "fake-config", "claim": "CONFIG_OF_DYNAMIC_TURBO", "why": "编造的 CONFIG" }
+  ],
+  "forbidden": ["devm 又手动 iounmap", "request_irq 不配 free_irq"],
+  "rubric": "用 devm_ 托管;goto 清理逆序;返回 -errno"
+}
