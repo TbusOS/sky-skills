@@ -61,6 +61,7 @@ let maxFiles = 0;
 let strict = false;
 let allowMonolingual = false;
 let runVisual = true;
+let discoverOnly = false;
 
 for (const a of argv) {
   if (a === '-h' || a === '--help') { printHelp(); process.exit(0); }
@@ -73,6 +74,7 @@ for (const a of argv) {
   else if (a === '--strict') strict = true;
   else if (a === '--allow-monolingual' || a === '--internal') allowMonolingual = true;
   else if (a === '--no-visual') runVisual = false;
+  else if (a === '--discover') discoverOnly = true;
   else if (a.startsWith('--')) { console.error(`unknown flag: ${a}`); process.exit(2); }
   else if (!target) target = a;
   else { console.error(`extra positional arg: ${a}`); process.exit(2); }
@@ -150,6 +152,8 @@ function printHelp() {
     '  --strict                visual-audit warnings count as failure',
     '  --allow-monolingual     pass to verify.py for non-bilingual pages',
     '  --no-visual             skip visual-audit gate (verify-only, ~10x faster)',
+    '  --discover              list every .html walk() finds (grouped by dir) and exit;',
+    '                          no gating — shows nested/underscore pages so none ship ungated',
   ].join('\n');
   console.log(help);
 }
@@ -163,6 +167,20 @@ function findTargets(rootAbs) {
   return out;
 }
 
+// Does `dir` hold any matching file anywhere beneath it? Used to decide whether
+// an underscore-prefixed dir is content (audit it) or pure assets (skip it).
+function dirHasMatch(dir) {
+  let entries;
+  try { entries = readdirSync(dir, { withFileTypes: true }); }
+  catch { return false; }
+  for (const e of entries) {
+    if (excludeList.includes(e.name)) continue;
+    if (e.isFile() && e.name.includes(includeSubstr)) return true;
+    if (e.isDirectory() && dirHasMatch(join(dir, e.name))) return true;
+  }
+  return false;
+}
+
 function walk(dir, out) {
   let entries;
   try { entries = readdirSync(dir, { withFileTypes: true }); }
@@ -170,8 +188,17 @@ function walk(dir, out) {
   for (const e of entries) {
     if (excludeList.includes(e.name)) continue;
     const p = join(dir, e.name);
-    if (e.isDirectory()) walk(p, out);
-    else if (e.isFile() && e.name.includes(includeSubstr)) out.push(p);
+    if (e.isDirectory()) {
+      // Underscore-dir convention (issue #21 §4): a `_foo` dir is audited only
+      // when it actually holds pages (e.g. `_demos/` of sample HTML); a pure
+      // asset dir (`_assets/` of css/js, no .html) is skipped — explicitly, so
+      // the intent is visible rather than relying on "it happens to have no
+      // HTML". Non-underscore dirs are always walked.
+      if (e.name.startsWith('_') && !dirHasMatch(p)) continue;
+      walk(p, out);
+    } else if (e.isFile() && e.name.includes(includeSubstr)) {
+      out.push(p);
+    }
   }
 }
 
@@ -180,6 +207,40 @@ if (targets.length === 0) {
   console.error(`no HTML files found under ${targetAbs} (filter="${includeSubstr}")`);
   process.exit(2);
 }
+
+// ---------- Discover mode (issue #21 §3 · page-coverage report) ----------
+// The footgun: the common workflow gates one explicit file at a time, so pages
+// living in a nested or underscore-prefixed dir (a `_demos/` of samples, copied
+// report artifacts) are easy to forget and ship ungated. This lists every .html
+// the SAME walk()+excludeList would reach, grouped by directory, so the hidden
+// ones are VISIBLE before ship. Reporting only — exit 0, no gates run.
+if (discoverOnly) {
+  const relTo = statSync(targetAbs).isDirectory() ? targetAbs : dirname(targetAbs);
+  const byDir = new Map();
+  for (const f of targets) {
+    const r = relative(relTo, f) || basename(f);
+    const d = dirname(r) === '.' ? '(root)' : dirname(r);
+    if (!byDir.has(d)) byDir.set(d, []);
+    byDir.get(d).push(basename(f));
+  }
+  console.log('');
+  console.log('┌─ design-review --discover · page-coverage report');
+  console.log(`│  root: ${targetAbs}`);
+  console.log(`│  found: ${targets.length} page(s) in ${byDir.size} dir(s)  (filter="${includeSubstr}")`);
+  console.log('└──────────────────────────────────────────────────');
+  for (const d of [...byDir.keys()].sort()) {
+    const files = byDir.get(d).sort();
+    const flag = d.split('/').some(seg => seg.startsWith('_')) ? '  ← underscore dir (content; would be audited)' : '';
+    console.log(`\n  ${d}/${flag}`);
+    for (const f of files) console.log(`    • ${f}`);
+  }
+  console.log('');
+  console.log(`To gate every page above in one run: bin/design-review --audit ${target}`);
+  console.log('(per-file gating misses nested pages — this is the backstop.)');
+  console.log('');
+  process.exit(0);
+}
+
 const finalTargets = maxFiles > 0 ? targets.slice(0, maxFiles) : targets;
 
 const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
@@ -304,6 +365,11 @@ const VISUAL_KIND_RULES = [
   [/^<figure> without <figcaption>/, 'figure-no-caption'],
   [/^SVG text overlap in/, 'svg-text-overlap'],
   [/^text-overlap \(/, 'text-overlap'],
+  [/^layout-overflow:/, 'layout-overflow'],
+  [/^text-glyph-overflow/, 'text-glyph-overflow'],
+  [/^grid-track-shrink-risk:/, 'grid-track-shrink-risk'],
+  [/^page-overflow-x:/, 'page-overflow-x'],
+  [/^margin:auto block renders off-center/, 'margin-auto-offcenter'],
   [/^svg-shape-over-text in/, 'svg-shape-over-text'],
   [/^\d+ <h1> elements on the page/, 'multiple-h1'],
   [/^page has no <h1>/, 'no-h1'],

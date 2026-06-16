@@ -193,9 +193,23 @@
 ### 1.33 文字撑破自己的盒子 · 大数字溢出网格列压到邻列
 - **Reader sees**：hero stat 一行 `3 / 124/256 / py / boot`，其中宽的 `124/256` 在 72px 大字下把右边的 `py` 压住了，两段字叠在一起。换窄一点的视口更明显。
 - **Why**：`.glass-stat-number` 是 `display:block` + `overflow:visible`。当它所在的网格列用 `grid-template-columns: repeat(4, minmax(0, max-content))` 时，`min=0` 允许列在空间不够时缩到内容宽度**以下**；不换行的大字（`124/256` 字形宽 260px）于是溢出只有 205px 的列，向右压到下一个 stat。要命的是**元素的边框盒不会随溢出长大**——`getBoundingClientRect()` 返回的还是被夹住的 205px 列宽。所以 §1.32a 的"子撑破父"（盒 vs 父盒）和 §1.25 的 text-overlap（盒 vs 兄弟盒）**都看不到**：盒子之间还有 64px 干净间距，溢出的字形对盒几何完全隐形。单宽度渲染又让"压到邻列"在 1440 下只是 9px 擦边（不触发），在用户更窄的视口才真叠——盒子检查 + 单宽度，双重盲区。
-- **How caught**：2026-06-16 加 check `text-glyph-overflow`（§1.32 同区，12c2）。不量盒子量**内容真实宽度**：`el.scrollWidth − el.clientWidth > 3px` → error。`scrollWidth` 即使在 `overflow:visible` 下也反映内容撑开的全宽，所以**在 gate 的单一 1440 视口就能抓到根因**（文字超出自己的格子 55px），不依赖"刚好在某个宽度叠上"。scope 限 `.glass-stat-number` + `[data-no-wrap-text]`；`overflow-x` 为 auto/scroll/hidden/clip 的豁免（设计好的截断/滚动不算）；`[data-allow-text-overflow]` 显式豁免跑马灯类。标定：修前 09g 命中 `"124/256" 内容 260px 撑破 205px 盒 55px`，修后（`minmax(max-content, 1fr)`）全 22 页 0 命中。
+- **How caught**：2026-06-16 加 check `text-glyph-overflow`（§1.32 同区，12c2）。不量盒子量**内容真实宽度**：`el.scrollWidth − el.clientWidth > 3px` → error。`scrollWidth` 即使在 `overflow:visible` 下也反映内容撑开的全宽，所以**在 gate 的单一 1440 视口就能抓到根因**（文字超出自己的格子 55px），不依赖"刚好在某个宽度叠上"。scope：`.glass-stat-number` + `[data-no-wrap-text]` 总查（不看字号）；**2026-06-16 扩展（issue #20 FU1）**：再加一遍通用扫描——任何 `white-space: nowrap/pre`、字号 ≥32px、`overflow:visible` 且直接含文字的元素都查，不止 glass stat（排除 `pre`/`code`，那两类由 §1.32a layout-overflow 管）。`overflow-x` 为 auto/scroll/hidden/clip 的豁免（设计好的截断/滚动不算）；`[data-allow-text-overflow]` 显式豁免跑马灯类。标定：修前 09g 命中 `"124/256" 内容 260px 撑破 205px 盒 55px`，修后（`minmax(max-content, 1fr)`）全 22 页 0 命中。
 - **Defense**：机器兜底 `text-glyph-overflow`（量 scrollWidth 不量盒）；hero-stats 网格用 `minmax(max-content, 1fr)` 而非 `minmax(0, max-content)`，让列不小于内容宽。
 - **Rule**：判文字溢出 / 重叠不能只信元素的 `getBoundingClientRect()`——`display` 块 + `overflow:visible` 时盒子被布局夹住、溢出的字形对盒几何隐形；要用 `scrollWidth`/`clientWidth`（或文字的 `Range.getBoundingClientRect()`）量内容真实范围。`minmax(0, max-content)` 配不换行大字是 footgun。
+
+### 1.33b 网格列 minmax(0, max-content) 配大字 · 静态查根因
+- **Reader sees**：和 §1.33 同样的"大字压邻列"，但有时在当前宽度还没真叠——只是迟早会。
+- **Why**：§1.33 的 `text-glyph-overflow` 量的是"此刻有没有溢出",依赖渲染宽度刚好让它溢。根因其实是 CSS 声明本身：`grid-template-columns` 里写了 `minmax(0, max-content)`（含 `repeat(N, …)`），`0` 下限让列能缩到内容以下。只要这列里坐着不换行的大字，换个更窄的宽度它就会溢。
+- **How caught**：2026-06-16 加 check `grid-track-shrink-risk`（§1.32 同区，12c3），warn。`getComputedStyle` 会把 `minmax(0, max-content)` 解析成 px、看不出原式，所以这条**扫样式表**（和 margin:auto 那条一个套路）：cssRules 里 `grid-template-columns` 命中 `minmax(0, max-content)` 的选择器，再看它名下的网格是否真坐着 ≥28px 不换行的文字 → warn。它查的是"会出事的写法"，不等真叠就提醒。
+- **Defense**：网格列要能装下不换行大字时，用 `minmax(max-content, 1fr)` / `minmax(min-content, …)`，别用 `minmax(0, max-content)`；或让文字允许换行。
+- **Rule**：`minmax(0, …)` 的 `0` 下限意味着"这列可以缩到比内容还小"。配定宽内容（不换行大字、固定尺寸图）就是把溢出写进了 CSS——静态就能看出来，不必等某个视口才发现。
+
+### 1.34 宽度相关的碰撞 · 只在更窄视口才叠
+- **Reader sees**：1440 下看着没事的两段字 / 一个表，在窄一点的窗口里就叠上了或横向出滚动条。
+- **Why**：overlap / overflow 这几条几何检查只在一个宽度（默认 1440）跑。布局随宽度变：列在 1440 有富余、在 1024 就挤；`minmax` 列、`flex-wrap`、百分比宽都会让"1440 下 9px 擦边"在更窄处变成真叠。单一测试宽度看不到这类。
+- **How caught**：2026-06-16 加第二视口几何复查（§1.32 同区，12d，issue #20 FU2）。主跑（1440）之后，把同一套检查在更窄的视口（默认 1024）再跑一遍，只留**宽度相关**的几类（`text-overlap` / `text-glyph-overflow` / `layout-overflow` / `page-overflow-x`），去重后作为 **warn** 追加，标注 `[at 1024px viewport]`——只提醒，不让桌面优先的页因此挂掉。实测：31 张 canonical 在 1024 各只冒 ~1 条真擦边，不是误报洪水。调宽度用 `--viewport2=WxH`，关掉用 `--no-second-viewport`；主跑已经是窄视口时自动不做第二遍。
+- **Defense**：几何检查别只信一个宽度；宽度相关的碰撞要在第二个更窄的视口复查。
+- **Rule**：一个测试宽度的"没事"只是那个宽度没事。overlap / overflow 是宽度的函数,至少两个宽度才说得清。
 
 ---
 

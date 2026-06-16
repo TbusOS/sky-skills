@@ -65,7 +65,12 @@
 #                      distill a candidate canonical from ≥5 successful
 #                      same-type pages (all 4 gates passed, critic ≥ 88).
 #                      --corpus defaults to corpus/<skill>/<page>/ under the
-#                      sky-skills root. If the corpus holds fewer than 5 .html
+#                      sky-skills root. The corpus is a FLAT dir of same-type
+#                      pages: the count is `find … -maxdepth 1` to match
+#                      library-grower.mjs, which scans the dir flat (readdir,
+#                      no recursion). Nested subdirs are intentionally NOT
+#                      counted — keep all corpus pages directly in the dir.
+#                      If the corpus holds fewer than 5 .html
 #                      files, reports "insufficient samples" and exits 1
 #                      instead of running. Output (candidate.md +
 #                      provenance.json) is a DRAFT for human review — the
@@ -81,12 +86,23 @@
 #                        --include=<substr>    filename filter (default ".html")
 #                        --no-visual           verify-only (~10x faster)
 #                        --allow-monolingual   skip bilingual rule
+#                        --discover            list every .html walk() finds
+#                                              (grouped by dir) and exit — no gating.
+#                                              Surfaces nested / underscore-dir
+#                                              pages so none ship ungated.
 #                      Writes audit-report-<ts>.md + .json to --out.
 #                      Examples:
 #                        bin/design-review --audit docs/                  # whole dir
 #                        bin/design-review --audit --skill=anthropic site/index.html
 #                        bin/design-review --audit --no-visual my-wiki/   # verify-only batch
+#                        bin/design-review --audit --discover deck/       # list pages, gate nothing
 #                        bin/design-review --audit https://example.com/p  # remote URL
+#
+#   PRE-SHIP A MULTI-PAGE DECK: gate the whole tree, not file-by-file.
+#                      bin/design-review --audit <deck-dir>   recurses into nested
+#                      and `_demos/`-style dirs, so a page in a subdirectory can't
+#                      silently skip the gate. Per-file review is for authoring one
+#                      page; --audit <dir> is the backstop before you ship.
 #   -h, --help         Print this help.
 #
 # Examples:
@@ -177,7 +193,7 @@ for arg in "$@"; do
     --internal|--allow-monolingual)
                INTERNAL=1
                AUDIT_FORWARD+=("$arg") ;;
-    --max=*|--exclude=*|--include=*|--no-visual)
+    --max=*|--exclude=*|--include=*|--no-visual|--discover)
                AUDIT_FORWARD+=("$arg") ;;
     -h|--help)
       awk 'NR < 2 { next } /^set -eu/ { exit } { sub(/^# ?/, ""); print }' "$0"
@@ -211,6 +227,10 @@ if [ -n "$DISTILL" ]; then
   MIN_SAMPLES=5  # keep in sync with library-grower.mjs
   sample_count=0
   if [ -d "$CORPUS" ]; then
+    # -maxdepth 1 on purpose: the corpus is a FLAT dir and library-grower.mjs
+    # scans it flat (readdir, no recursion). Counting recursively here would
+    # disagree with what the distiller actually reads. Keep corpus pages in
+    # the dir itself, not in subdirs.
     sample_count="$(find "$CORPUS" -maxdepth 1 -name '*.html' | wc -l | tr -d ' ')"
   fi
   if [ "$sample_count" -lt "$MIN_SAMPLES" ]; then

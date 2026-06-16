@@ -67,6 +67,21 @@ design skill 是 generator,会给自己打高分;`design-review` 脚本、规则
   docs/en/index.html
 ```
 
+### 多页交付:发布前整树批量检查(防漏页)
+
+逐页跑 `dr-cli <file>` 是写每一页时的常规做法,但**多页 deck 发布前要整树跑一遍**,否则放在子目录里的页(`_demos/` 样例、复制进来的报告产物等)很容易忘了过检查,带着真 bug 上线也没人发现。
+
+```bash
+# 整树批量检查(verify + visual-audit,递归子目录,一份汇总报告)
+~/.claude/skills/design-review/dr-cli --audit <deck-dir>
+
+# 只列出会被检查到的页(分目录,不跑检查)—— 先确认没有漏页
+~/.claude/skills/design-review/dr-cli --audit --discover <deck-dir>
+```
+
+- `--audit <dir>` 递归走子目录,`_demos/` 这类装内容的下划线目录也会进(纯资源目录 `_assets/` 无 html 自动跳过)。逐页检查只覆盖你显式传的那一个文件,`--audit <dir>` 是发布前的兜底。
+- `--audit --discover <dir>` 先把树里所有 `.html` 按目录列出来(不跑检查),一眼看清有没有藏在子目录里没被检查的页。
+
 ### 分别调用(调试用)
 
 ```bash

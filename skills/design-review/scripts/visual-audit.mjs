@@ -47,6 +47,19 @@ const themeArg = (args.find((a) => a.startsWith('--theme=')) || '').split('=')[1
 const vpArg = (args.find((a) => a.startsWith('--viewport=')) || '').split('=')[1] || null;
 const vpMatch = vpArg ? vpArg.match(/^(\d+)x(\d+)$/) : null;
 const VIEWPORT = vpMatch ? { width: +vpMatch[1], height: +vpMatch[2] } : { width: 1440, height: 900 };
+// --viewport2=WxH / --no-second-viewport — issue #20 FU2. After the main pass,
+// re-run the in-page checks at a narrower viewport and keep only the width-
+// sensitive geometry kinds (overlap / overflow) as warnings. A collision that's
+// a near-miss at 1440 (clamped grid tracks) becomes a real overrun once the
+// container shrinks; one test width can't see it. Default: 1024, but ONLY when
+// the caller didn't already ask for a narrow main viewport (nothing to add).
+const vp2Arg = (args.find((a) => a.startsWith('--viewport2=')) || '').split('=')[1] || null;
+const vp2Match = vp2Arg ? vp2Arg.match(/^(\d+)x(\d+)$/) : null;
+let secondViewport = null;
+if (!args.includes('--no-second-viewport')) {
+  if (vp2Match) secondViewport = { width: +vp2Match[1], height: +vp2Match[2] };
+  else if (!vpArg) secondViewport = { width: 1024, height: 900 };
+}
 const target = args.filter((a) => !a.startsWith('--'))[0];
 if (!target) {
   console.error('usage: node visual-audit.mjs [--ignore-intentional] [--theme=dark|light] <html-path>');
@@ -238,7 +251,7 @@ let remoteCssPresent = false;
   }
 }
 
-const findings = await page.evaluate((arg) => {
+const auditFn = (arg) => {
   const cs = arg.crossSkill;
   const issues = [];
 
@@ -1421,26 +1434,99 @@ const findings = await page.evaluate((arg) => {
   // single viewport. Classic trigger: a big non-wrapping number/token in a grid
   // cell sized by `minmax(0, max-content)` — the 0 min lets the track shrink
   // below the glyph width, so the number overruns its cell into the next stat.
-  // Scope: the known display:block big-text loci. Opt out with
-  // data-allow-text-overflow if a marquee/ticker spills on purpose.
-  document.querySelectorAll('.glass-stat-number, [data-no-wrap-text]').forEach((el) => {
-    if (el.hasAttribute('data-allow-text-overflow')) return;
-    const st = getComputedStyle(el);
-    if (st.display === 'none' || st.visibility === 'hidden') return;
-    if (/(auto|scroll|hidden|clip)/.test(st.overflowX) || /(auto|scroll|hidden|clip)/.test(st.overflow)) return;
-    const spill = el.scrollWidth - el.clientWidth;
-    if (spill > 3) {
-      issues.push({
-        kind: 'text-glyph-overflow',
-        severity: 'error',
-        selector: sigSelector(el),
-        text: (el.textContent || '').trim().slice(0, 24),
-        spillPx: Math.round(spill),
-        boxW: el.clientWidth,
-        contentW: el.scrollWidth,
+  // Scope: explicit display:block big-text loci (.glass-stat-number /
+  // [data-no-wrap-text]) ALWAYS checked, plus a generalized sweep (issue #20
+  // FU1) of any large non-wrapping text under overflow:visible — the same spill
+  // can hit a wide heading or a metric in any skill, not just glass stats. The
+  // generalized path is gated to display-size text (≥32px) so small nowrap UI
+  // labels don't trip it, and skips pre/code (covered by layout-overflow) and
+  // editable fields. Opt out with data-allow-text-overflow (marquee/ticker).
+  {
+    const glyphSeen = new Set();
+    const flagGlyphSpill = (el, optIn) => {
+      if (glyphSeen.has(el)) return;
+      glyphSeen.add(el);
+      if (el.hasAttribute('data-allow-text-overflow')) return;
+      const st = getComputedStyle(el);
+      if (st.display === 'none' || st.visibility === 'hidden') return;
+      if (/(auto|scroll|hidden|clip)/.test(st.overflowX) || /(auto|scroll|hidden|clip)/.test(st.overflow)) return;
+      if (!optIn) {
+        // generalized path — only display-size non-wrapping text
+        if (!/^(nowrap|pre)$/.test(st.whiteSpace)) return;
+        if (parseFloat(st.fontSize) < 32) return;
+        const tag = el.tagName.toLowerCase();
+        if (tag === 'pre' || tag === 'code' || tag === 'svg' || el.closest('svg')) return;
+        if (el.isContentEditable) return;
+        // must directly hold non-empty text (not merely wrap children)
+        const hasOwnText = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+        if (!hasOwnText) return;
+      }
+      const spill = el.scrollWidth - el.clientWidth;
+      if (spill > 3) {
+        issues.push({
+          kind: 'text-glyph-overflow',
+          severity: 'error',
+          selector: sigSelector(el),
+          text: (el.textContent || '').trim().slice(0, 24),
+          spillPx: Math.round(spill),
+          boxW: el.clientWidth,
+          contentW: el.scrollWidth,
+          via: optIn ? 'opt-in' : 'generalized',
+        });
+      }
+    };
+    document.querySelectorAll('.glass-stat-number, [data-no-wrap-text]').forEach((el) => flagGlyphSpill(el, true));
+    document.querySelectorAll('body *').forEach((el) => flagGlyphSpill(el, false));
+  }
+
+  // ---------- 12c3) grid track minmax(0, max-content) holding big text (§1.33b / issue #20 FU3) ----------
+  // The CAUSE behind the stat-spill, caught statically so it flags even at a
+  // width where nothing overruns yet: a grid whose track is declared
+  // `minmax(0, max-content)` can shrink BELOW its content (the 0 minimum), so a
+  // big non-wrapping number/token in that cell overruns into the next. Computed
+  // style resolves the track to px and hides the expression, so this reads the
+  // STYLESHEETS (same approach as the margin:auto scan below).
+  {
+    const riskyGridSelectors = new Set();
+    const gridWalk = (list) => {
+      for (const rule of list) {
+        if (rule.style && rule.selectorText) {
+          const gtc = (rule.style.gridTemplateColumns || rule.style.gridTemplate || '');
+          if (/minmax\(\s*0(?:px|fr|%)?\s*,\s*max-content\s*\)/i.test(gtc)) riskyGridSelectors.add(rule.selectorText);
+        }
+        if (rule.cssRules && rule.cssRules.length) gridWalk(rule.cssRules);
+      }
+    };
+    for (const sheet of document.styleSheets) {
+      let rules; try { rules = sheet.cssRules; } catch (e) { continue; }
+      if (rules) gridWalk(rules);
+    }
+    const gridSeen = new Set();
+    for (const sel of riskyGridSelectors) {
+      let els; try { els = document.querySelectorAll(sel); } catch (e) { continue; }
+      els.forEach((grid) => {
+        if (gridSeen.has(grid)) return; gridSeen.add(grid);
+        const gst = getComputedStyle(grid);
+        if (gst.display.indexOf('grid') === -1) return;
+        if (gst.display === 'none' || gst.visibility === 'hidden') return;
+        const risky = [...grid.querySelectorAll('*')].find((c) => {
+          const cs = getComputedStyle(c);
+          if (!/^(nowrap|pre)$/.test(cs.whiteSpace)) return false;
+          if (parseFloat(cs.fontSize) < 28) return false;
+          if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+          return (c.textContent || '').trim().length > 0;
+        });
+        if (risky) {
+          issues.push({
+            kind: 'grid-track-shrink-risk',
+            severity: 'warn',
+            selector: sigSelector(grid),
+            sample: (risky.textContent || '').trim().slice(0, 24),
+          });
+        }
       });
     }
-  });
+  }
   // (b) margin:auto intent must come from the STYLESHEETS — getComputedStyle
   // resolves auto margins to used px values, so we scan cssRules for
   // selectors declaring marginLeft/Right auto, then measure those elements.
@@ -1493,7 +1579,40 @@ const findings = await page.evaluate((arg) => {
   }
 
   return issues;
-}, { crossSkill: crossSkillData, focusInExternalCss, remoteCssPresent, theme: themeArg });
+};
+const evalArg = { crossSkill: crossSkillData, focusInExternalCss, remoteCssPresent, theme: themeArg };
+let findings = await page.evaluate(auditFn, evalArg);
+
+// ---------- 12d) Second-viewport geometry pass (issue #20 FU2) ----------
+// The overlap/overflow checks above run at one width. A collision that's a
+// near-miss at 1440 (grid tracks clamped wide) becomes a real overrun once the
+// container shrinks — invisible to a single test width. Re-run the SAME checks
+// at a narrower viewport and keep ONLY the width-sensitive geometry kinds, as
+// warnings tagged with the width (so a desktop-first page is informed, never
+// newly failed). Empirically clean: across the 31 canonical pages this surfaces
+// ~1 real near-miss per width, not a flood. Skipped when the caller already
+// asked for a narrow main viewport, or via --no-second-viewport.
+if (secondViewport && VIEWPORT.width >= secondViewport.width + 80) {
+  try {
+    await page.setViewportSize(secondViewport); // Playwright resize API
+    await page.waitForTimeout(150);             // let the layout reflow
+    const narrow = await page.evaluate(auditFn, evalArg);
+    const GEOM_KEEP = new Set(['text-overlap', 'text-glyph-overflow', 'layout-overflow', 'page-overflow-x']);
+    const fkey = (f) => [f.kind, f.selector || '', f.text || '', f.textA || '', f.textB || '', f.tagA || '', f.tagB || ''].join('|');
+    const seen = new Set(findings.map(fkey));
+    for (const f of narrow) {
+      if (!GEOM_KEEP.has(f.kind)) continue;
+      const k = fkey(f);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      findings.push({ ...f, severity: 'warn', atNarrow: secondViewport.width });
+    }
+    await page.setViewportSize(VIEWPORT); // restore for the brand-presence screenshot
+    await page.waitForTimeout(150);
+  } catch {
+    // best-effort — a flaky second pass must never kill the audit
+  }
+}
 
 // ---------- 13) Brand-presence (pixel count in top hero region) ----------
 // Root issue caught 2026-04-21: sage-design nav was a warm yellow (ember-
@@ -1647,7 +1766,7 @@ for (const i of visibleFindings) {
     );
   } else if (i.kind === 'text-overlap') {
     console.log(
-      `  [${i.severity}] text-overlap (${i.location}): <${i.tagA}> "${i.textA}" [${i.rectA}] ↔ <${i.tagB}> "${i.textB}" [${i.rectB}] — overlap ${i.overlap} — fix layout (column width / line gap / wrap policy) or add data-allow-overlap if intentional (known-bugs 1.25)`
+      `  [${i.severity}] text-overlap (${i.location}): <${i.tagA}> "${i.textA}" [${i.rectA}] ↔ <${i.tagB}> "${i.textB}" [${i.rectB}] — overlap ${i.overlap} — fix layout (column width / line gap / wrap policy) or add data-allow-overlap if intentional (known-bugs 1.25)${i.atNarrow ? ` [only at ${i.atNarrow}px viewport — width-dependent, §1.34]` : ''}`
     );
   } else if (i.kind === 'svg-shape-over-text') {
     console.log(
@@ -1723,11 +1842,15 @@ for (const i of visibleFindings) {
     );
   } else if (i.kind === 'layout-overflow') {
     console.log(
-      `  [${i.severity}] layout-overflow: <${i.selector}> breaks ${i.breakPx}px past parent ${i.side} edge  child[${i.childBox}] parent[${i.parentBox}] — wrap in a horizontal scroller or constrain width  (§1.32)`
+      `  [${i.severity}] layout-overflow: <${i.selector}> breaks ${i.breakPx}px past parent ${i.side} edge  child[${i.childBox}] parent[${i.parentBox}] — wrap in a horizontal scroller or constrain width  (§1.32)${i.atNarrow ? ` [only at ${i.atNarrow}px viewport — width-dependent, §1.34]` : ''}`
     );
   } else if (i.kind === 'text-glyph-overflow') {
     console.log(
-      `  [${i.severity}] text-glyph-overflow: <${i.selector}> "${i.text}" content ${i.contentW}px spills its ${i.boxW}px box by ${i.spillPx}px — the glyphs overrun the element (box-rect checks miss this); a non-wrapping big number in a grid cell sized by minmax(0, max-content) overruns into the next cell. Fix: minmax(max-content, 1fr) / wider track / smaller font / wrap; or data-allow-text-overflow if intentional (§1.33)`
+      `  [${i.severity}] text-glyph-overflow${i.via === 'generalized' ? ' (any big non-wrapping text)' : ''}: <${i.selector}> "${i.text}" content ${i.contentW}px spills its ${i.boxW}px box by ${i.spillPx}px — the glyphs overrun the element (box-rect checks miss this); a non-wrapping big number in a grid cell sized by minmax(0, max-content) overruns into the next cell. Fix: minmax(max-content, 1fr) / wider track / smaller font / wrap; or data-allow-text-overflow if intentional (§1.33)${i.atNarrow ? ` [only at ${i.atNarrow}px viewport — width-dependent, §1.34]` : ''}`
+    );
+  } else if (i.kind === 'grid-track-shrink-risk') {
+    console.log(
+      `  [${i.severity}] grid-track-shrink-risk: <${i.selector}> declares a track minmax(0, max-content) and holds big non-wrapping text "${i.sample}" — the 0 minimum lets the track shrink below the content, so the text can overrun the next cell at narrower widths. Prefer minmax(max-content, 1fr) (or allow wrap) (§1.33b)`
     );
   } else if (i.kind === 'margin-auto-offcenter') {
     console.log(
@@ -1759,7 +1882,7 @@ for (const i of visibleFindings) {
     );
   } else if (i.kind === 'page-overflow-x') {
     console.log(
-      `  [${i.severity}] page-overflow-x: document is ${i.docWidth}px wide in a ${i.viewport}px viewport — the page scrolls sideways; collapse the offending grid/figure or wrap it in a designed pan container (.glass-scroll / .glass-table-wrap)`
+      `  [${i.severity}] page-overflow-x: document is ${i.docWidth}px wide in a ${i.viewport}px viewport — the page scrolls sideways; collapse the offending grid/figure or wrap it in a designed pan container (.glass-scroll / .glass-table-wrap)${i.atNarrow ? ` [surfaced by the ${i.atNarrow}px second-viewport pass — width-dependent, §1.34]` : ''}`
     );
   } else if (i.kind === 'glass-aurora-text') {
     console.log(
