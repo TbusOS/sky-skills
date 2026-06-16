@@ -7,7 +7,7 @@
 ```
 linux-kernel-dev/
 ├── SKILL.md                 # hub：trigger + Core Principles + Forbidden Actions + references 导航
-├── HARNESS-DESIGN.md        # 自我进化引擎设计（fact-gate/critic/eval/回归门/kernel-learn + 版本适配 + 树绑定）
+├── HARNESS-DESIGN.md        # 自我进化引擎设计（事实检查/critic/eval/回归测试/kernel-learn + 版本适配 + 树绑定）
 ├── index.md                 # 本文件
 ├── dos-and-donts.md         # 随用积累的细则（带可执行检查）        [骨架]
 ├── known-bugs.md            # 踩过的坑 gotchas（带回归证明）        [骨架]
@@ -20,10 +20,10 @@ linux-kernel-dev/
     ├── patch-workflow.md    # ← process/submitting-patches.rst
     ├── bsp_discipline.md    # 通用 BSP 纪律（defconfig/上游gate/硬件读字节/4维度/冲突6步）
     ├── kernel_version_deltas.md  # 跨版本差异（版本敏感知识集中处）   [骨架/待核]
-    └── claims-contract.md    # [CLAIMS] 答案验证契约（fact-gate 靶子）
-└── scripts/                 # 客观闸（P1）
+    └── claims-contract.md    # [CLAIMS] 答案验证契约（事实检查 靶子）
+└── scripts/                 # 客观检查（P1）
     ├── fact_gate.mjs         # 查 API/CONFIG/符号/compatible 实存 vs 真树
-    ├── checkpatch_gate.sh    # 代码风格闸（内核自带 checkpatch.pl）
+    ├── checkpatch_gate.sh    # 代码风格检查（内核自带 checkpatch.pl）
     └── kernel-tree.mjs       # 绑内核树（detect/add/list/clone）
 ```
 
@@ -42,4 +42,4 @@ linux-kernel-dev/
 
 ## 状态
 
-P0（结构化）+ P1（客观闸）完成：hub + references + `scripts/`（fact_gate / checkpatch_gate / kernel-tree）跑通——fact-gate 已对真树验证过"真假 CONFIG/API 当场分出"。下一步 **P2**（题库 + 回归门）。阶段表见 `HARNESS-DESIGN.md` §9。
+P0（结构化）+ P1（客观检查）完成：hub + references + `scripts/`（fact_gate / checkpatch_gate / kernel-tree）跑通——事实检查 已对真树验证过"真假 CONFIG/API 当场分出"。下一步 **P2**（测试用例集 + 回归测试）。阶段表见 `HARNESS-DESIGN.md` §9。

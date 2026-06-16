@@ -170,7 +170,7 @@ if (!claims) { console.error('no [CLAIMS] block found (canary fail — answer mu
 
 const tree = resolveTree(o.tree);
 if (!tree || !existsSync(tree.path)) {
-  const msg = '[fact-gate] gate-error: no usable kernel tree bound.\n' +
+  const msg = '[事实检查] gate-error: no usable kernel tree bound.\n' +
     '  bind one:  node scripts/kernel-tree.mjs add /path/to/linux\n' +
     '  or pass:   --tree /path/to/linux\n' +
     '  or clone:  git clone --depth 1 -b v6.12 \\\n' +
@@ -190,7 +190,7 @@ try {
 } catch (e) {
   if (e.gateError) {
     if (o.json) console.log(JSON.stringify({ status: 'gate-error', reason: e.message }));
-    else console.error(`[fact-gate] gate-error: ${e.message} — NOT scoring as fail`);
+    else console.error(`[事实检查] gate-error: ${e.message} — NOT scoring as fail`);
     process.exit(3);
   }
   throw e;
@@ -199,9 +199,9 @@ try {
 if (o.json) {
   console.log(JSON.stringify({ status: failed ? 'fail' : 'clean', tree: tree.path, how: tree.how, failed, results, forbidden_respected: claims.forbidden_respected }, null, 2));
 } else {
-  console.log(`[fact-gate] tree: ${tree.path}  (${tree.how})`);
+  console.log(`[事实检查] tree: ${tree.path}  (${tree.how})`);
   for (const r of results) console.log(`  ${r.ok ? '✓' : '✗ HALLUCINATION'}  ${r.kind}: ${r.name}`);
-  if (claims.forbidden_respected.length) console.log(`  · forbidden_respected (critic 校,不在此闸): ${claims.forbidden_respected.join(', ')}`);
-  console.log(failed ? `[fact-gate] FAIL — ${failed} claim(s) not found in tree` : `[fact-gate] clean — all ${results.length} claim(s) resolved`);
+  if (claims.forbidden_respected.length) console.log(`  · forbidden_respected (打分员校,不在此检查): ${claims.forbidden_respected.join(', ')}`);
+  console.log(failed ? `[事实检查] FAIL — ${failed} claim(s) not found in tree` : `[事实检查] clean — all ${results.length} claim(s) resolved`);
 }
 process.exit(failed ? 1 : 0);

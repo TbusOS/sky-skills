@@ -1,7 +1,7 @@
 # Kernel API Quick Reference
 
 > 权威源：`Documentation/core-api/`、`Documentation/driver-api/`。
-> 速查表会随版本漂；具体签名按目标树核（fact-gate）。版本敏感项见 `kernel_version_deltas.md`。
+> 速查表会随版本漂；具体签名按目标树核（事实检查）。版本敏感项见 `kernel_version_deltas.md`。
 
 ## Memory
 

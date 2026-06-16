@@ -1,7 +1,7 @@
 # Kernel Templates
 
 > 权威源：`Documentation/kbuild/`（Makefile/Kconfig）、`Documentation/devicetree/bindings/writing-{bindings,schema}.rst`（DT）。
-> 模板是起点；具体 API 签名按目标内核版本核（见 `kernel_version_deltas.md` + fact-gate）。
+> 模板是起点；具体 API 签名按目标内核版本核（见 `kernel_version_deltas.md` + 事实检查）。
 
 ## Kernel Module
 

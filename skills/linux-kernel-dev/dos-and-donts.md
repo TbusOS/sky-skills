@@ -2,7 +2,7 @@
 
 > 稳定的内核/BSP 规则。由 `/kernel-learn`（P3 建）随真实任务逐条添加。
 > **地基规则（HARNESS-DESIGN §6.7）**：每条规则必须带可执行检查——内嵌 `[CLAIMS]` 子句 +
-> 一条建前 fail / 建后 pass 的 eval case + `rules.json` 注册。**无可执行检查不准建条目。**
+> 一条建前 fail / 建后 pass 的 测试用例 + `rules.json` 注册。**无可执行检查不准建条目。**
 > 当前为骨架，规则随使用积累。
 
 ## 条目格式

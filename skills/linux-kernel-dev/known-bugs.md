@@ -1,7 +1,7 @@
 # Known Bugs / Gotchas
 
 > 踩过的内核/BSP 坑（gotchas）。由 `/kernel-learn`（P3 建）随真实任务积累。
-> 每条带可执行检查 + 配套 eval case（建前 fail / 建后 pass），证明"这坑不再复现"。
+> 每条带可执行检查 + 配套 测试用例（建前 fail / 建后 pass），证明"这坑不再复现"。
 > 当前为骨架。
 
 ## 条目格式
