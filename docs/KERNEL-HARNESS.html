@@ -342,6 +342,64 @@
   </div>
 </section>
 
+<!-- Version adaptation -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-7); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">Version adaptation</span><span class="lang-zh">版本适配</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">Kernels change. The skill keeps up — on purpose.</span>
+        <span class="lang-zh">内核会变。skill 跟得上——这是设计出来的。</span>
+      </h2>
+      <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
+        <span class="lang-en">The trick is to split what never changes from what does, so version churn can never contaminate the stable core. Volatile facts carry a version tag and are re-checked against the target tree; the core is just taught.</span>
+        <span class="lang-zh">诀窍是把"从不变的"和"会变的"分开，让版本变动永远污染不到稳定核。易变的事实带版本标、按目标树重新核；稳定核直接教。</span>
+      </p>
+    </div>
+
+    <figure style="margin:0;">
+      <svg viewBox="0 0 1120 360" width="100%" role="img" aria-labelledby="va-title va-desc" style="display:block; background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg);">
+        <title id="va-title">Stable core versus version-volatile knowledge</title>
+        <desc id="va-desc">Two panels: a stable core that is always taught, and a version-volatile surface that is version-tagged and gate-checked against the target tree.</desc>
+
+        <!-- left: stable core -->
+        <rect x="30" y="64" width="490" height="244" rx="14" fill="#e6efe4" stroke="#2f5e33" stroke-width="1.5"></rect>
+        <text x="275" y="100" text-anchor="middle" font-family="Poppins, sans-serif" font-size="19" font-weight="700" fill="#2f5e33"><tspan class="lang-en">STABLE CORE</tspan><tspan class="lang-zh">稳定核</tspan></text>
+        <text x="275" y="124" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12.5" fill="#3f6a42"><tspan class="lang-en">always taught · no version tag</tspan><tspan class="lang-zh">永远教 · 不打版本标</tspan></text>
+        <g font-family="Poppins, sans-serif" font-size="15" fill="#1f1e1c">
+          <circle cx="70" cy="160" r="4" fill="#2f5e33"></circle><text x="86" y="165"><tspan class="lang-en">coding style · K&amp;R braces · tabs</tspan><tspan class="lang-zh">编码风格 · K&amp;R 括号 · tab</tspan></text>
+          <circle cx="70" cy="192" r="4" fill="#2f5e33"></circle><text x="86" y="197"><tspan class="lang-en">goto cleanup · return -errno</tspan><tspan class="lang-zh">goto 清理 · 返回 -errno</tspan></text>
+          <circle cx="70" cy="224" r="4" fill="#2f5e33"></circle><text x="86" y="229"><tspan class="lang-en">locking context · no sleep in spinlock</tspan><tspan class="lang-zh">锁上下文 · spinlock 里不睡</tspan></text>
+          <circle cx="70" cy="256" r="4" fill="#2f5e33"></circle><text x="86" y="261"><tspan class="lang-en">devm_ managed · patch flow</tspan><tspan class="lang-zh">devm_ 托管 · patch 流程</tspan></text>
+        </g>
+        <text x="275" y="294" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="600" fill="#2f5e33"><tspan class="lang-en">→ taught directly, every version</tspan><tspan class="lang-zh">→ 任何版本都照教</tspan></text>
+
+        <!-- divider -->
+        <line x1="560" y1="64" x2="560" y2="308" stroke="#cfcabd" stroke-width="1.5" stroke-dasharray="3 6"></line>
+
+        <!-- right: version-volatile -->
+        <rect x="600" y="64" width="490" height="244" rx="14" fill="#fbe7da" stroke="#d97757" stroke-width="1.5"></rect>
+        <text x="845" y="100" text-anchor="middle" font-family="Poppins, sans-serif" font-size="19" font-weight="700" fill="#c05f3c"><tspan class="lang-en">VERSION-VOLATILE</tspan><tspan class="lang-zh">版本易变面</tspan></text>
+        <text x="845" y="124" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12.5" fill="#b15833"><tspan class="lang-en">version-tagged · gate-checked per tree</tspan><tspan class="lang-zh">打版本标 · 按树核</tspan></text>
+        <g font-family="Poppins, sans-serif" font-size="15" fill="#1f1e1c">
+          <circle cx="640" cy="160" r="4" fill="#d97757"></circle><text x="656" y="165"><tspan class="lang-en">API signatures · header moves</tspan><tspan class="lang-zh">API 签名 · 头文件搬迁</tspan></text>
+          <circle cx="640" cy="192" r="4" fill="#d97757"></circle><text x="656" y="197"><tspan class="lang-en">CONFIG names · macros</tspan><tspan class="lang-zh">CONFIG 名 · 宏</tspan></text>
+          <circle cx="640" cy="224" r="4" fill="#d97757"></circle><text x="656" y="229"><tspan class="lang-en">subsystem rewrites</tspan><tspan class="lang-zh">子系统重构</tspan></text>
+          <circle cx="640" cy="256" r="4" fill="#d97757"></circle><text x="656" y="261" font-family="'JetBrains Mono', monospace" font-size="14" fill="#1f1e1c">ion_alloc → dma_heap_buffer_alloc</text>
+        </g>
+        <text x="845" y="294" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="600" fill="#c05f3c"><tspan class="lang-en">→ version_drift flags it when it rots</tspan><tspan class="lang-zh">→ 失效时 version_drift 报出来</tspan></text>
+
+        <!-- top label -->
+        <text x="560" y="36" text-anchor="middle" font-family="Poppins, sans-serif" font-size="15" font-weight="600" fill="#5c5a54"><tspan class="lang-en">churn stays on the right — the core never rots</tspan><tspan class="lang-zh">变动只发生在右边 —— 稳定核不会烂</tspan></text>
+      </svg>
+      <figcaption style="text-align:center; font-family:var(--font-body); font-size:14px; color:var(--anth-text-secondary); margin-top:var(--space-3);">
+        <span class="lang-en">The split is the whole idea: <code>version_drift.mjs</code> ran 6.1 → 7.0 and flagged <code>ion_alloc</code> as removed — a right-panel fact that earned a version tag, while the left panel stayed untouched.</span>
+        <span class="lang-zh">这个分法就是核心思路：<code>version_drift.mjs</code> 跑 6.1 → 7.0 标出 <code>ion_alloc</code> 被删——一条右栏事实拿到了版本标，左栏纹丝不动。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
 <!-- Isomorphic to design harness -->
 <section class="anth-section anth-section--subtle">
   <div class="anth-container anth-container--narrow">
@@ -386,6 +444,65 @@
     <p class="lang-zh">这个 skill 发布时是树无关的——不内置任何路径。多数内核/BSP 工程师本来就有源码树；检查脚本会从工作目录往上找、读环境变量、或读一行配置。没有树?它诚实降级：答案标 <code>[未验证]</code> 而不是直接断言，并打印怎么绑定或浅克隆一棵。</p>
     <p class="lang-en">Bind it once and the payoff is real: answers are verified against <strong>your exact kernel version</strong>, checkpatch runs with <strong>your tree's own rules</strong>, and version drift is measured between the trees you actually ship.</p>
     <p class="lang-zh">绑定一次，回报实在：答案对着<strong>你的确切内核版本</strong>验证，checkpatch 用<strong>你树里自己的规则</strong>跑，版本漂移是在你真正发布的那些树之间度量的。</p>
+  </div>
+  <div class="anth-container anth-container--wide" style="margin-top:var(--space-7);">
+    <figure style="margin:0;">
+      <svg viewBox="0 0 1120 230" width="100%" role="img" aria-labelledby="tb-title tb-desc" style="display:block; background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg);">
+        <title id="tb-title">How the gate finds a kernel tree</title>
+        <desc id="tb-desc">A five-step resolution cascade — explicit flag, env var, config file, walk up from the working directory, common locations — then a fork: a tree is bound and answers are verified, or none is found and the skill degrades honestly.</desc>
+        <defs>
+          <marker id="tah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5c5a54"></path></marker>
+        </defs>
+        <text x="20" y="38" font-family="Poppins, sans-serif" font-size="14" font-weight="600" fill="#5c5a54"><tspan class="lang-en">resolve order — first hit wins</tspan><tspan class="lang-zh">解析顺序 —— 命中即停</tspan></text>
+
+        <!-- 5 resolution steps (blue) -->
+        <g font-family="'JetBrains Mono', monospace">
+          <rect x="20" y="58" width="150" height="64" rx="10" fill="#eef3f8" stroke="#3a5a78" stroke-width="1.4"></rect>
+          <circle cx="40" cy="78" r="11" fill="#3a5a78"></circle><text x="40" y="82" text-anchor="middle" font-family="Poppins, sans-serif" font-size="11" font-weight="700" fill="#fff">1</text>
+          <text x="95" y="100" text-anchor="middle" font-size="13" fill="#1f1e1c">--tree</text>
+
+          <rect x="186" y="58" width="150" height="64" rx="10" fill="#eef3f8" stroke="#3a5a78" stroke-width="1.4"></rect>
+          <circle cx="206" cy="78" r="11" fill="#3a5a78"></circle><text x="206" y="82" text-anchor="middle" font-family="Poppins, sans-serif" font-size="11" font-weight="700" fill="#fff">2</text>
+          <text x="261" y="100" text-anchor="middle" font-size="12" fill="#1f1e1c">$KERNELDEV_TREE</text>
+
+          <rect x="352" y="58" width="150" height="64" rx="10" fill="#eef3f8" stroke="#3a5a78" stroke-width="1.4"></rect>
+          <circle cx="372" cy="78" r="11" fill="#3a5a78"></circle><text x="372" y="82" text-anchor="middle" font-family="Poppins, sans-serif" font-size="11" font-weight="700" fill="#fff">3</text>
+          <text x="427" y="100" text-anchor="middle" font-size="13" fill="#1f1e1c">trees.json</text>
+
+          <rect x="518" y="58" width="150" height="64" rx="10" fill="#eef3f8" stroke="#3a5a78" stroke-width="1.4"></rect>
+          <circle cx="538" cy="78" r="11" fill="#3a5a78"></circle><text x="538" y="82" text-anchor="middle" font-family="Poppins, sans-serif" font-size="11" font-weight="700" fill="#fff">4</text>
+          <text x="593" y="100" text-anchor="middle" font-family="Poppins, sans-serif" font-size="12.5" fill="#1f1e1c"><tspan class="lang-en">walk up cwd</tspan><tspan class="lang-zh">往上找</tspan></text>
+
+          <rect x="684" y="58" width="150" height="64" rx="10" fill="#eef3f8" stroke="#3a5a78" stroke-width="1.4"></rect>
+          <circle cx="704" cy="78" r="11" fill="#3a5a78"></circle><text x="704" y="82" text-anchor="middle" font-family="Poppins, sans-serif" font-size="11" font-weight="700" fill="#fff">5</text>
+          <text x="759" y="100" text-anchor="middle" font-size="12" fill="#1f1e1c">/lib/modules</text>
+        </g>
+        <!-- chain arrows -->
+        <g stroke="#5c5a54" stroke-width="1.8" marker-end="url(#tah)">
+          <line x1="170" y1="90" x2="184" y2="90"></line>
+          <line x1="336" y1="90" x2="350" y2="90"></line>
+          <line x1="502" y1="90" x2="516" y2="90"></line>
+          <line x1="668" y1="90" x2="682" y2="90"></line>
+        </g>
+        <!-- fork from step 5 -->
+        <line x1="834" y1="90" x2="876" y2="68" stroke="#2f5e33" stroke-width="1.8" marker-end="url(#tah)"></line>
+        <line x1="834" y1="90" x2="876" y2="150" stroke="#8a8780" stroke-width="1.8" marker-end="url(#tah)"></line>
+        <!-- found chip -->
+        <rect x="884" y="46" width="226" height="44" rx="10" fill="#e6efe4" stroke="#2f5e33" stroke-width="1.4"></rect>
+        <text x="997" y="66" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="600" fill="#2f5e33"><tspan class="lang-en">bound → verify answers</tspan><tspan class="lang-zh">绑定 → 验证答案</tspan></text>
+        <text x="997" y="82" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#3f6a42">[verified vs linux X]</text>
+        <!-- none chip -->
+        <rect x="884" y="128" width="226" height="44" rx="10" fill="#f1efe9" stroke="#8a8780" stroke-width="1.4"></rect>
+        <text x="997" y="148" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="600" fill="#6b6862"><tspan class="lang-en">none → degrade honestly</tspan><tspan class="lang-zh">没有 → 诚实降级</tspan></text>
+        <text x="997" y="164" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#8a8780">[unverified] + clone hint</text>
+
+        <text x="20" y="206" font-family="Poppins, sans-serif" font-size="13" fill="#5c5a54"><tspan class="lang-en">The path lives in your machine config — never baked into the skill. Inside a kernel tree, step 4 binds with zero setup.</tspan><tspan class="lang-zh">路径只在你本机配置里 —— 绝不写进 skill。在内核树里干活时，第 4 步零配置自动命中。</tspan></text>
+      </svg>
+      <figcaption style="text-align:center; font-family:var(--font-body); font-size:14px; color:var(--anth-text-secondary); margin-top:var(--space-3);">
+        <span class="lang-en">Tree resolution. Open-source-clean (no path in the repo), zero-config for anyone already working in a kernel tree, and honest when there is none.</span>
+        <span class="lang-zh">树解析。开源干净(仓里不留路径)、在内核树里干活的人零配置、没树时诚实降级。</span>
+      </figcaption>
+    </figure>
   </div>
 </section>
 
