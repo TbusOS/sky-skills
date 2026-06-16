@@ -352,49 +352,49 @@
         <span class="lang-zh">内核会变。skill 跟得上——这是设计出来的。</span>
       </h2>
       <p style="color:var(--anth-text-secondary); font-size:17px; margin-top:var(--space-3); font-family:var(--font-body);">
-        <span class="lang-en">The trick is to split what never changes from what does, so version churn can never contaminate the stable core. Volatile facts carry a version tag and are re-checked against the target tree; the core is just taught.</span>
-        <span class="lang-zh">诀窍是把"从不变的"和"会变的"分开，让版本变动永远污染不到稳定核。易变的事实带版本标、按目标树重新核；稳定核直接教。</span>
+        <span class="lang-en">Separate what stays the same across kernels from what changes between them. The unchanging part is taught directly. The changing part is labelled with the kernel versions it applies to, and re-checked against the actual source tree — so a kernel update can never quietly make stable knowledge wrong.</span>
+        <span class="lang-zh">把"每个内核都一样的"和"内核之间会变的"分开。不变的那部分直接教；会变的那部分注明它适用哪些内核版本、并对真实源码树重新核对——这样内核升级永远不会悄悄把稳定的知识弄错。</span>
       </p>
     </div>
 
     <figure style="margin:0;">
       <svg viewBox="0 0 1120 360" width="100%" role="img" aria-labelledby="va-title va-desc" style="display:block; background:#ffffff; border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg);">
         <title id="va-title">Stable core versus version-volatile knowledge</title>
-        <desc id="va-desc">Two panels: a stable core that is always taught, and a version-volatile surface that is version-tagged and gate-checked against the target tree.</desc>
+        <desc id="va-desc">Two panels: knowledge that is the same on every kernel and is taught directly, and knowledge that changes between kernels, which is labelled with the versions it applies to and checked against the source tree.</desc>
 
         <!-- left: stable core -->
         <rect x="30" y="64" width="490" height="244" rx="14" fill="#e6efe4" stroke="#2f5e33" stroke-width="1.5"></rect>
-        <text x="275" y="100" text-anchor="middle" font-family="Poppins, sans-serif" font-size="19" font-weight="700" fill="#2f5e33"><tspan class="lang-en">STABLE CORE</tspan><tspan class="lang-zh">稳定核</tspan></text>
-        <text x="275" y="124" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12.5" fill="#3f6a42"><tspan class="lang-en">always taught · no version tag</tspan><tspan class="lang-zh">永远教 · 不打版本标</tspan></text>
+        <text x="275" y="100" text-anchor="middle" font-family="Poppins, sans-serif" font-size="19" font-weight="700" fill="#2f5e33"><tspan class="lang-en">Same on every kernel</tspan><tspan class="lang-zh">每个内核都一样</tspan></text>
+        <text x="275" y="124" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12.5" fill="#3f6a42"><tspan class="lang-en">taught directly — no version needed</tspan><tspan class="lang-zh">直接教 —— 不用分版本</tspan></text>
         <g font-family="Poppins, sans-serif" font-size="15" fill="#1f1e1c">
           <circle cx="70" cy="160" r="4" fill="#2f5e33"></circle><text x="86" y="165"><tspan class="lang-en">coding style · K&amp;R braces · tabs</tspan><tspan class="lang-zh">编码风格 · K&amp;R 括号 · tab</tspan></text>
           <circle cx="70" cy="192" r="4" fill="#2f5e33"></circle><text x="86" y="197"><tspan class="lang-en">goto cleanup · return -errno</tspan><tspan class="lang-zh">goto 清理 · 返回 -errno</tspan></text>
           <circle cx="70" cy="224" r="4" fill="#2f5e33"></circle><text x="86" y="229"><tspan class="lang-en">locking context · no sleep in spinlock</tspan><tspan class="lang-zh">锁上下文 · spinlock 里不睡</tspan></text>
           <circle cx="70" cy="256" r="4" fill="#2f5e33"></circle><text x="86" y="261"><tspan class="lang-en">devm_ managed · patch flow</tspan><tspan class="lang-zh">devm_ 托管 · patch 流程</tspan></text>
         </g>
-        <text x="275" y="294" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="600" fill="#2f5e33"><tspan class="lang-en">→ taught directly, every version</tspan><tspan class="lang-zh">→ 任何版本都照教</tspan></text>
+        <text x="275" y="294" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="600" fill="#2f5e33"><tspan class="lang-en">→ the same on any kernel</tspan><tspan class="lang-zh">→ 任何内核都一样</tspan></text>
 
         <!-- divider -->
         <line x1="560" y1="64" x2="560" y2="308" stroke="#cfcabd" stroke-width="1.5" stroke-dasharray="3 6"></line>
 
         <!-- right: version-volatile -->
         <rect x="600" y="64" width="490" height="244" rx="14" fill="#fbe7da" stroke="#d97757" stroke-width="1.5"></rect>
-        <text x="845" y="100" text-anchor="middle" font-family="Poppins, sans-serif" font-size="19" font-weight="700" fill="#c05f3c"><tspan class="lang-en">VERSION-VOLATILE</tspan><tspan class="lang-zh">版本易变面</tspan></text>
-        <text x="845" y="124" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12.5" fill="#b15833"><tspan class="lang-en">version-tagged · gate-checked per tree</tspan><tspan class="lang-zh">打版本标 · 按树核</tspan></text>
+        <text x="845" y="100" text-anchor="middle" font-family="Poppins, sans-serif" font-size="19" font-weight="700" fill="#c05f3c"><tspan class="lang-en">Changes between kernels</tspan><tspan class="lang-zh">内核之间会变</tspan></text>
+        <text x="845" y="124" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12.5" fill="#b15833"><tspan class="lang-en">labelled by version · checked vs the tree</tspan><tspan class="lang-zh">注明适用版本 · 对源码树核对</tspan></text>
         <g font-family="Poppins, sans-serif" font-size="15" fill="#1f1e1c">
           <circle cx="640" cy="160" r="4" fill="#d97757"></circle><text x="656" y="165"><tspan class="lang-en">API signatures · header moves</tspan><tspan class="lang-zh">API 签名 · 头文件搬迁</tspan></text>
           <circle cx="640" cy="192" r="4" fill="#d97757"></circle><text x="656" y="197"><tspan class="lang-en">CONFIG names · macros</tspan><tspan class="lang-zh">CONFIG 名 · 宏</tspan></text>
           <circle cx="640" cy="224" r="4" fill="#d97757"></circle><text x="656" y="229"><tspan class="lang-en">subsystem rewrites</tspan><tspan class="lang-zh">子系统重构</tspan></text>
           <circle cx="640" cy="256" r="4" fill="#d97757"></circle><text x="656" y="261" font-family="'JetBrains Mono', monospace" font-size="14" fill="#1f1e1c">ion_alloc → dma_heap_buffer_alloc</text>
         </g>
-        <text x="845" y="294" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="600" fill="#c05f3c"><tspan class="lang-en">→ version_drift flags it when it rots</tspan><tspan class="lang-zh">→ 失效时 version_drift 报出来</tspan></text>
+        <text x="845" y="294" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="600" fill="#c05f3c"><tspan class="lang-en">→ version_drift flags it when it's gone</tspan><tspan class="lang-zh">→ 一旦失效，version_drift 报出来</tspan></text>
 
         <!-- top label -->
-        <text x="560" y="36" text-anchor="middle" font-family="Poppins, sans-serif" font-size="15" font-weight="600" fill="#5c5a54"><tspan class="lang-en">churn stays on the right — the core never rots</tspan><tspan class="lang-zh">变动只发生在右边 —— 稳定核不会烂</tspan></text>
+        <text x="560" y="36" text-anchor="middle" font-family="Poppins, sans-serif" font-size="15" font-weight="600" fill="#5c5a54"><tspan class="lang-en">what changes stays on the right — the left is never touched</tspan><tspan class="lang-zh">会变的都在右边 —— 左边从不受影响</tspan></text>
       </svg>
       <figcaption style="text-align:center; font-family:var(--font-body); font-size:14px; color:var(--anth-text-secondary); margin-top:var(--space-3);">
-        <span class="lang-en">The split is the whole idea: <code>version_drift.mjs</code> ran 6.1 → 7.0 and flagged <code>ion_alloc</code> as removed — a right-panel fact that earned a version tag, while the left panel stayed untouched.</span>
-        <span class="lang-zh">这个分法就是核心思路：<code>version_drift.mjs</code> 跑 6.1 → 7.0 标出 <code>ion_alloc</code> 被删——一条右栏事实拿到了版本标，左栏纹丝不动。</span>
+        <span class="lang-en">That split is the whole idea: <code>version_drift.mjs</code> ran 6.1 → 7.0 and flagged <code>ion_alloc</code> as removed — a right-side fact that got labelled with the versions it applies to, while the left side was not affected.</span>
+        <span class="lang-zh">这个分法就是核心：<code>version_drift.mjs</code> 跑 6.1 → 7.0 标出 <code>ion_alloc</code> 被删——一条右边的事实被注明了适用版本，左边不受影响。</span>
       </figcaption>
     </figure>
   </div>
