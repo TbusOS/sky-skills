@@ -119,8 +119,8 @@
       <span class="lang-zh">一个越用越聪明的<br>内核开发 skill。</span>
     </h1>
     <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.55; max-width:740px; font-family:var(--font-body);">
-      <span class="lang-en">Most AI kernel help is a static document that confidently cites APIs that don't exist and rots the day a new kernel ships. <strong>linux-kernel-dev</strong> closes the loop instead: every answer carries machine-checkable claims, every claim is verified against a <strong>real source tree</strong>, every trap you hit becomes a rule with a <strong>regression proof</strong>, and a drift detector flags what changed between kernel versions. Six components, one rule — nothing ships without an <em>executable check</em>.</span>
-      <span class="lang-zh">大多数 AI 内核助手是一份静态文档：自信地引用不存在的 API，新内核一发布就过期。<strong>linux-kernel-dev</strong> 把这个环合上：每个答案都带可机器核对的断言，每条断言都拿<strong>真源码树</strong>验证，每个踩过的坑都沉成一条<strong>带回归证明</strong>的规则，还有检测器报出内核版本间变了什么。六个组件，一条规矩——没有<em>可执行检查</em>就不准落地。</span>
+      <span class="lang-en"><strong>linux-kernel-dev</strong> is a Linux kernel, driver &amp; BSP development expert — it writes, reviews, debugs and maintains kernel code (modules, drivers, subsystem patches, Kconfig/Makefile, device trees), with the kernel's hard safety rules built in. And unlike a static cheat-sheet that cites APIs which don't exist and rots on the next release, it gets <em>more accurate the more you use it</em>: every answer is checked against a <strong>real source tree</strong>, and every trap becomes a <strong>regression-proven rule</strong>.</span>
+      <span class="lang-zh"><strong>linux-kernel-dev</strong> 是一个 Linux 内核 / 驱动 / BSP 开发专家——写、审、调、维护内核代码（模块、驱动、子系统补丁、Kconfig/Makefile、设备树），内核的硬性安全规则内建其中。和那种引用不存在 API、新版本一发就过期的静态速查表不同，它<em>越用越准</em>：每个答案都拿<strong>真源码树</strong>核对，每个踩过的坑都沉成<strong>带回归证明的规则</strong>。</span>
     </p>
     <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
       <a class="anth-button" href="#loop"><span class="lang-en">See the loop</span><span class="lang-zh">看这个循环</span></a>
@@ -137,6 +137,106 @@
       <a class="voice-chip voice-chip--current" href="KERNEL-HARNESS.html" aria-current="page"><span class="lang-en">Architecture</span><span class="lang-zh">架构</span></a>
       <a class="voice-chip" href="KERNEL-CAPABILITIES.html"><span class="lang-en">See it work →</span><span class="lang-zh">看它干活 →</span></a>
     </div>
+  </div>
+</section>
+
+<!-- What it's for -->
+<section class="anth-section" id="what">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:740px; margin:0 auto var(--space-7); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">What it's for</span><span class="lang-zh">它能帮你做什么</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">Day-to-day kernel &amp; BSP work — done to upstream standard.</span>
+        <span class="lang-zh">日常内核 / BSP 活儿——按上游标准来。</span>
+      </h2>
+      <p style="font-size:18px; color:var(--anth-text-secondary); line-height:1.6; margin-top:var(--space-4); font-family:var(--font-body);">
+        <span class="lang-en">Point it at any of these and you get an answer in kernel idiom, checkable against your tree — not generic C advice. The self-improving engine further down is what keeps those answers honest.</span>
+        <span class="lang-zh">下面任何一类活儿交给它，拿到的是内核地道写法、能拿你的树核对的答案——不是泛泛的 C 建议。再往下那套自我改进引擎，是让这些答案不跑偏的保障。</span>
+      </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--space-5);">
+
+      <article class="comp-card">
+        <h3 class="comp-card__title"><span class="lang-en">Drivers &amp; modules</span><span class="lang-zh">驱动与模块</span></h3>
+        <span class="comp-card__weak-label"><span class="lang-en">Write</span><span class="lang-zh">写</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en"><code>platform_driver</code> / char devices / <code>module_init</code> &amp; exit / probe &amp; remove, plus the build glue: <code>Makefile</code>, <code>Kconfig</code>, and device tree (<code>.dts</code>/<code>.dtsi</code>) bindings.</span>
+          <span class="lang-zh"><code>platform_driver</code> / 字符设备 / <code>module_init</code> 与 exit / probe 与 remove，连带构建胶水：<code>Makefile</code>、<code>Kconfig</code>、设备树（<code>.dts</code>/<code>.dtsi</code>）绑定。</span>
+        </p>
+      </article>
+
+      <article class="comp-card">
+        <h3 class="comp-card__title"><span class="lang-en">Review to kernel style</span><span class="lang-zh">按内核风格审码</span></h3>
+        <span class="comp-card__weak-label"><span class="lang-en">Review</span><span class="lang-zh">审</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">Held to <code>coding-style.rst</code> (tabs, K&amp;R braces, <code>/* */</code>), not GNU/Google. Output is meant to come back <code>checkpatch.pl</code>-clean.</span>
+          <span class="lang-zh">按 <code>coding-style.rst</code>（Tab、K&amp;R 大括号、<code>/* */</code>）来，不是 GNU/Google。产出目标是过 <code>checkpatch.pl</code> 零告警。</span>
+        </p>
+      </article>
+
+      <article class="comp-card">
+        <h3 class="comp-card__title"><span class="lang-en">Concurrency &amp; locking</span><span class="lang-zh">并发与锁</span></h3>
+        <span class="comp-card__weak-label"><span class="lang-en">Get it right</span><span class="lang-zh">写对</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">spinlock vs mutex, <code>atomic_t</code>, <code>GFP_ATOMIC</code> in atomic context, memory barriers — the race-and-sleep traps that crash ring 0.</span>
+          <span class="lang-zh">spinlock 还是 mutex、<code>atomic_t</code>、原子上下文里用 <code>GFP_ATOMIC</code>、内存屏障——那些会让 ring 0 崩掉的竞态与睡眠坑。</span>
+        </p>
+      </article>
+
+      <article class="comp-card">
+        <h3 class="comp-card__title"><span class="lang-en">Debugging</span><span class="lang-zh">调试</span></h3>
+        <span class="comp-card__weak-label"><span class="lang-en">Diagnose</span><span class="lang-zh">定位</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">printk levels, ftrace, decoding an oops/panic backtrace, and the right kernel dev-tool for the symptom.</span>
+          <span class="lang-zh">printk 级别、ftrace、读懂 oops/panic 回溯，针对症状选对内核 dev-tool。</span>
+        </p>
+      </article>
+
+      <article class="comp-card">
+        <h3 class="comp-card__title"><span class="lang-en">Patch submission</span><span class="lang-zh">提交补丁</span></h3>
+        <span class="comp-card__weak-label"><span class="lang-en">Ship upstream</span><span class="lang-zh">发上游</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en"><code>git format-patch</code>, a clean <code>checkpatch.pl</code> run, and the <code>submitting-patches.rst</code> conventions — so it's LKML-ready, not just compiling.</span>
+          <span class="lang-zh"><code>git format-patch</code>、过一遍 <code>checkpatch.pl</code>、守 <code>submitting-patches.rst</code> 规矩——做到能发 LKML，而不只是能编过。</span>
+        </p>
+      </article>
+
+      <article class="comp-card">
+        <h3 class="comp-card__title"><span class="lang-en">BSP customization</span><span class="lang-zh">BSP 定制</span></h3>
+        <span class="comp-card__weak-label"><span class="lang-en">Customize safely</span><span class="lang-zh">安全定制</span></span>
+        <p class="comp-card__weak">
+          <span class="lang-en">defconfig the native way (<code>merge_config</code> + <code>savedefconfig</code>), keep upstream code behind a vendor gate, read hardware bytes instead of inferring, analyse a change on all four dimensions, and port across kernel versions.</span>
+          <span class="lang-zh">defconfig 走原生流程（<code>merge_config</code> + <code>savedefconfig</code>）、上游代码加 vendor gate 保留、硬件状态直接读字节而非推断、改动按四个维度分析、跨内核版本移植。</span>
+        </p>
+      </article>
+
+    </div>
+
+    <!-- Safety rules callout -->
+    <div style="margin-top:var(--space-6); padding:var(--space-5) var(--space-6); border:1px solid var(--anth-light-gray); border-left:4px solid var(--anth-orange); border-radius:var(--radius-lg); background:var(--anth-bg-subtle);">
+      <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Hard rules it won't break</span><span class="lang-zh">它不会破的硬规则</span></span>
+      <p style="font-size:17px; color:var(--anth-text); line-height:1.6; margin:var(--space-4) 0 var(--space-3); font-family:var(--font-body); max-width:820px;">
+        <span class="lang-en">A wrong kernel answer doesn't throw an exception — it corrupts memory or ships a CVE. So a set of rules is non-negotiable, refused even when asked:</span>
+        <span class="lang-zh">内核答错不是抛个异常——是踩内存、是出 CVE。所以有一组规则不容商量，哪怕被要求也拒绝：</span>
+      </p>
+      <ul style="columns:2; column-gap:var(--space-6); font-family:var(--font-body); font-size:15.5px; line-height:1.7; color:var(--anth-text-secondary); margin:0; padding-left:1.2em;">
+        <li><span class="lang-en">No sleeping in atomic context</span><span class="lang-zh">原子上下文里不睡眠</span></li>
+        <li><span class="lang-en">No floating point in the kernel</span><span class="lang-zh">内核里不用浮点</span></li>
+        <li><span class="lang-en">No userspace idioms (malloc / printf / libc)</span><span class="lang-zh">不用用户态写法（malloc / printf / libc）</span></li>
+        <li><span class="lang-en">No breaking UAPI without a compat plan</span><span class="lang-zh">不破 UAPI（除非有兼容方案）</span></li>
+        <li><span class="lang-en">No hand-editing a defconfig</span><span class="lang-zh">不手改 defconfig</span></li>
+        <li><span class="lang-en">No deleting upstream code to customize</span><span class="lang-zh">不靠删上游代码来定制</span></li>
+        <li><span class="lang-en">No concluding hardware state from software alone</span><span class="lang-zh">不靠软件观察推断硬件状态</span></li>
+        <li><span class="lang-en">No "it compiles, so it's safe"</span><span class="lang-zh">不拿"能编过"当"就安全"</span></li>
+      </ul>
+    </div>
+
+    <!-- Triggers -->
+    <p style="text-align:center; max-width:820px; margin:var(--space-6) auto 0; font-size:15.5px; color:var(--anth-text-secondary); line-height:1.6; font-family:var(--font-body);">
+      <span class="lang-en"><strong>When it kicks in:</strong> you touch kernel modules, device drivers, subsystems, <code>Kconfig</code>/<code>Makefile</code>, device tree (<code>.dts</code>/<code>.dtsi</code>), or C using kernel APIs (<code>kmalloc</code>, <code>printk</code>, <code>platform_driver</code>…). It stays out of plain userspace C/C++.</span>
+      <span class="lang-zh"><strong>什么时候触发：</strong>你碰内核模块、设备驱动、子系统、<code>Kconfig</code>/<code>Makefile</code>、设备树（<code>.dts</code>/<code>.dtsi</code>），或用内核 API 的 C（<code>kmalloc</code>、<code>printk</code>、<code>platform_driver</code>……）。纯用户态 C/C++ 它不掺和。</span>
+    </p>
   </div>
 </section>
 
