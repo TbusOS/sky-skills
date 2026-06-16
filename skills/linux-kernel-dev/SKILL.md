@@ -50,6 +50,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 提交 patch / checkpatch / format-patch | `references/patch-workflow.md` | `Documentation/process/submitting-patches.rst` |
 | **BSP 定制纪律**（defconfig / 上游 gate / 硬件调试 / 改动分析 / 冲突解决） | `references/bsp_discipline.md` | 通用工程纪律 |
 | 跨内核版本差异 | `references/kernel_version_deltas.md` | 各版本树 + `Documentation` |
+| **答案验证契约**（引具体符号时附 `[CLAIMS]`） | `references/claims-contract.md` | fact-gate 靶子 |
 | 该做 / 不该做速查 | `dos-and-donts.md` | 本 skill 积累 |
 | 已知坑（gotchas） | `known-bugs.md` | 本 skill 积累 |
 
@@ -59,6 +60,12 @@ references. Load a reference only when the task needs it (progressive disclosure
 
 ## 关于本 skill 的自我进化引擎
 
-本 skill 正在配一套有度量的自我改进机制（fact-gate / critic 面板 / eval 语料 / 回归门 / `/kernel-learn`），
+本 skill 正在配一套有度量的自我改进机制（fact-gate / critic 面板 / eval 题库 / 回归门 / `/kernel-learn`），
 并能跟随内核版本自更新。设计与状态见同目录 `HARNESS-DESIGN.md`。
 `dos-and-donts.md` / `known-bugs.md` 会随真实任务由该机制逐步充实——每条都带可执行检查，不是空话。
+
+**已落（P1 客观闸）**：
+- `scripts/fact_gate.mjs` — 查答案 `[CLAIMS]` 里的 API / CONFIG / 符号 / compatible 是否在真内核树**实存**（树无关 `--tree`；exit 0 干净 / 1 有幻觉 / 3 闸坏不算 fail）
+- `scripts/checkpatch_gate.sh` — 用内核自带 `checkpatch.pl` 校代码风格
+- `scripts/kernel-tree.mjs` — 绑内核树（`detect` / `add` / `list` / `clone`），路径存本机配置不入库
+- 引具体符号的答案附 `[CLAIMS]` 块（`references/claims-contract.md`）；绑树后跑 fact-gate，答案标 `[已对 linux <版本> 验证]` 或 `[未验证]`

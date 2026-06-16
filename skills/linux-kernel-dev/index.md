@@ -19,7 +19,12 @@ linux-kernel-dev/
     ├── api-quick-ref.md     # ← core-api/ + driver-api/
     ├── patch-workflow.md    # ← process/submitting-patches.rst
     ├── bsp_discipline.md    # 通用 BSP 纪律（defconfig/上游gate/硬件读字节/4维度/冲突6步）
-    └── kernel_version_deltas.md  # 跨版本差异（版本敏感知识集中处）   [骨架/待核]
+    ├── kernel_version_deltas.md  # 跨版本差异（版本敏感知识集中处）   [骨架/待核]
+    └── claims-contract.md    # [CLAIMS] 答案验证契约（fact-gate 靶子）
+└── scripts/                 # 客观闸（P1）
+    ├── fact_gate.mjs         # 查 API/CONFIG/符号/compatible 实存 vs 真树
+    ├── checkpatch_gate.sh    # 代码风格闸（内核自带 checkpatch.pl）
+    └── kernel-tree.mjs       # 绑内核树（detect/add/list/clone）
 ```
 
 ## 加载指引
@@ -37,4 +42,4 @@ linux-kernel-dev/
 
 ## 状态
 
-P0（结构化）完成：单文件 → hub + 8 references + 骨架。引擎（P1+）见 `HARNESS-DESIGN.md` §9 阶段表。
+P0（结构化）+ P1（客观闸）完成：hub + references + `scripts/`（fact_gate / checkpatch_gate / kernel-tree）跑通——fact-gate 已对真树验证过"真假 CONFIG/API 当场分出"。下一步 **P2**（题库 + 回归门）。阶段表见 `HARNESS-DESIGN.md` §9。
