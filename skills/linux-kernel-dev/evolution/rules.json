@@ -29,6 +29,16 @@
       "catches": 0,
       "linked_eval_case": "KV-006",
       "added": "2026-06-16"
+    },
+    {
+      "id": "KB-SCHED-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "手动睡眠必须先 set_current_state(TASK_INTERRUPTIBLE) 再检查条件再 schedule();顺序反了(先查条件后设状态)有丢唤醒竞态会睡死。能用 wait_event 就别手写。子系统:调度器。用例 KV-010。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-010",
+      "added": "2026-06-17"
     }
   ]
 }

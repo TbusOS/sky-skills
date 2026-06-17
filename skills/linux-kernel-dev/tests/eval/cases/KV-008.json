@@ -1,0 +1,18 @@
+{
+  "id": "KV-008",
+  "topic": "wait until a condition holds (wait queue)",
+  "q": "内核线程要等某个标志/数据就绪再继续,怎么睡到条件成立而不忙等?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "scheduler",
+  "gold_claims": {
+    "api": ["wait_event_interruptible", "wake_up_interruptible", "DECLARE_WAIT_QUEUE_HEAD"],
+    "symbol": ["wait_queue_head_t", "TASK_INTERRUPTIBLE"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "wait_event_safe", "why": "编造的等待宏" },
+    { "type": "fake-api", "claim": "wake_up_interruptible_v2", "why": "不存在的唤醒变体" }
+  ],
+  "forbidden": ["忙等轮询标志位", "在原子/中断上下文里 wait_event"],
+  "rubric": "用等待队列 wait_event_interruptible(进程上下文)+ 唤醒方 wake_up_interruptible;检查 -ERESTARTSYS;不忙等"
+}

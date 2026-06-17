@@ -1,0 +1,18 @@
+{
+  "id": "KV-010",
+  "topic": "manual sleep ordering / lost wakeup",
+  "q": "不用 wait_event 宏、自己写睡眠时,set_current_state 和检查条件谁先谁后?为什么?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "scheduler",
+  "gold_claims": {
+    "api": ["set_current_state", "schedule", "wake_up_process"],
+    "symbol": ["TASK_INTERRUPTIBLE", "TASK_RUNNING"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "set_task_state_safe", "why": "编造的设状态 API" },
+    { "type": "fake-api", "claim": "schedule_and_wait", "why": "不存在的 API" }
+  ],
+  "forbidden": ["先检查条件后 set_current_state(会丢唤醒)", "裸 schedule() 不先设状态"],
+  "rubric": "必须先 set_current_state(TASK_INTERRUPTIBLE) 再检查条件再 schedule();醒来 set_current_state(TASK_RUNNING);顺序反了有丢唤醒竞态。能用 wait_event 就别手写"
+}

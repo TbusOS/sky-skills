@@ -1,0 +1,17 @@
+{
+  "id": "KV-009",
+  "topic": "wait for a one-shot event from another context (completion)",
+  "q": "一个上下文要等另一个上下文'干完了'(DMA 完成 / 线程起来),用什么?",
+  "kind": "objective",
+  "subsystem": "scheduler",
+  "gold_claims": {
+    "api": ["init_completion", "wait_for_completion", "complete"],
+    "symbol": ["completion"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "wait_for_completion_forever", "why": "编造的 API" },
+    { "type": "fake-api", "claim": "completion_signal", "why": "不存在,完成用 complete()" }
+  ],
+  "forbidden": ["用忙等轮询标志位代替", "在原子上下文 wait_for_completion"],
+  "rubric": "用 completion:init_completion + 等待方 wait_for_completion + 完成方 complete/complete_all;等待方在进程上下文"
+}

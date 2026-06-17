@@ -61,8 +61,9 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 任务命中 | 加载 | 权威源（对齐） |
 |---|---|---|
 | 中断 / 下半部 / threaded IRQ / tasklet / softirq / workqueue 选型 | `references/subsys/interrupts.md` | `Documentation/core-api/genericirq.rst`、`core-api/irq/` |
+| 睡眠/唤醒 / 等待队列 / completion / 抢占 / 调度策略·优先级·亲和性 / CFS·EEVDF·RT·DL | `references/subsys/scheduler.md` | `Documentation/scheduler/` |
 
-其余核心子系统（调度器 / 内存管理 / 文件系统）按同一形态（模块 + 路由 + eval 用例 + known-bug）陆续加入。
+其余核心子系统（内存管理 / 文件系统）按同一形态（模块 + 路由 + eval 用例 + known-bug）陆续加入。
 
 目录总览见 `index.md`。
 
