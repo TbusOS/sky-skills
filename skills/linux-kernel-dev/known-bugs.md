@@ -21,6 +21,7 @@
 ## 一行索引（grep 用，先读这里再钻具体条目）
 
 - KB-ION-001 · 现代内核移除了 ION，分配 DMA 缓冲用 DMA-heap（dma_heap_buffer_alloc），别用 ion_alloc · KV-004 · range：ION-removed kernels
+- KB-IRQ-001 · 硬中断 / 软中断(tasklet/softirq)上下文不能睡眠；要睡眠的延迟处理用 threaded IRQ 的 thread_fn 或 workqueue · KV-006 · range：版本无关
 
 ## 条目
 
@@ -40,4 +41,22 @@
   ```
 - linked_eval_case：KV-004
 - provenance：self（version_drift 实跑抓出 ion_alloc ROTTED）
+- fires/catches：0 / 0
+
+### KB-IRQ-001：原子/中断上下文不能睡眠，需要睡眠的延迟处理放对地方
+
+- symptom：在中断处理函数 / tasklet / softirq 里调 `msleep` / `mutex_lock` / `GFP_KERNEL` 分配 / 读慢速总线，导致 `BUG: scheduling while atomic`、死锁、或偶发崩。
+- root cause：硬中断半部和软中断（tasklet/softirq）都在原子上下文运行，不可调度、不可睡眠。把可睡眠的活放进了这些上下文。
+- fix：可睡眠的延迟处理放到进程上下文——threaded IRQ 的 `thread_fn`（`request_threaded_irq`），或 workqueue（`INIT_WORK` + `schedule_work`）。硬中断半部只做最少快处理后返回 `IRQ_WAKE_THREAD`。
+- trigger：见到中断 handler / tasklet / softirq 里出现 `msleep` / `mutex_lock` / `GFP_KERNEL` / 慢速 I/O，或问"中断里能不能睡 / 下半部用什么"。
+- range：版本无关（原子上下文不睡眠是内核长期不变规则）。
+- scope/limits：约束的是"在哪个上下文睡眠"；具体 API 名按目标树 `include/linux/interrupt.h` / `linux/workqueue.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: request_threaded_irq, schedule_work
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-006
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对中断上下文语义；样板子系统：中断）
 - fires/catches：0 / 0

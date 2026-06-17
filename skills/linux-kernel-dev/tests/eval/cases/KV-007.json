@@ -1,0 +1,17 @@
+{
+  "id": "KV-007",
+  "topic": "modern tasklet API (tasklet_setup / from_tasklet)",
+  "q": "用现代内核的正确 API 写一个 tasklet 做极短下半部,handler 怎么拿回父结构?",
+  "kind": "objective",
+  "subsystem": "interrupts",
+  "gold_claims": {
+    "api": ["tasklet_setup", "tasklet_schedule", "tasklet_kill"],
+    "symbol": ["tasklet_struct", "from_tasklet"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "tasklet_setup_data", "why": "编造的带 data 变体" },
+    { "type": "fake-api", "claim": "from_tasklet_safe", "why": "不存在的宏" }
+  ],
+  "forbidden": ["在 tasklet handler 里睡眠", "用已移除的 3 参 DECLARE_TASKLET(name, func, data)"],
+  "rubric": "用 tasklet_setup() 初始化 + from_tasklet() 从 struct tasklet_struct * 恢复父结构;handler 签名 void f(struct tasklet_struct *t);软中断上下文不可睡眠"
+}

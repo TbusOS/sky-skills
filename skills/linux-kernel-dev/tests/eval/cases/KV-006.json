@@ -1,0 +1,17 @@
+{
+  "id": "KV-006",
+  "topic": "deferred bottom half that may sleep: workqueue vs tasklet",
+  "q": "中断下半部要做可能睡眠的活,用 tasklet 还是 workqueue?",
+  "kind": "objective",
+  "subsystem": "interrupts",
+  "gold_claims": {
+    "api": ["INIT_WORK", "schedule_work", "queue_work"],
+    "symbol": ["work_struct"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "schedule_work_sync_v2", "why": "编造的同步变体" },
+    { "type": "fake-api", "claim": "tasklet_sleep", "why": "tasklet 不能睡,无此 API" }
+  ],
+  "forbidden": ["在 tasklet / 软中断上下文里睡眠", "用 tasklet 做需要睡眠的延迟处理"],
+  "rubric": "要睡眠的延迟处理用 workqueue(INIT_WORK + schedule_work / queue_work)或 threaded IRQ 的 thread_fn;tasklet 在软中断上下文,不可睡眠,不适合"
+}

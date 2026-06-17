@@ -54,6 +54,16 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 该做 / 不该做速查 | `dos-and-donts.md` | 本 skill 积累 |
 | 已知坑（gotchas） | `known-bugs.md` | 本 skill 积累 |
 
+### 子系统模块（按需路由）
+
+深入具体内核子系统时加载对应模块（命中才读，progressive disclosure），每个对齐该子系统的 `Documentation/<subsys>/`，并配套 eval 用例进 harness（fact_gate + 回归测）。
+
+| 任务命中 | 加载 | 权威源（对齐） |
+|---|---|---|
+| 中断 / 下半部 / threaded IRQ / tasklet / softirq / workqueue 选型 | `references/subsys/interrupts.md` | `Documentation/core-api/genericirq.rst`、`core-api/irq/` |
+
+其余核心子系统（调度器 / 内存管理 / 文件系统）按同一形态（模块 + 路由 + eval 用例 + known-bug）陆续加入。
+
 目录总览见 `index.md`。
 
 ---

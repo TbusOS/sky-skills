@@ -1,0 +1,18 @@
+{
+  "id": "KV-005",
+  "topic": "interrupt handling that needs to sleep (threaded IRQ)",
+  "q": "中断处理里需要睡眠(读慢速总线 / GFP_KERNEL 分配),中断处理函数怎么写?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "interrupts",
+  "gold_claims": {
+    "api": ["request_threaded_irq", "devm_request_threaded_irq"],
+    "symbol": ["irqreturn_t", "IRQ_WAKE_THREAD", "IRQ_HANDLED", "IRQF_ONESHOT"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "request_threaded_irq_sleepable", "why": "编造的可睡眠变体" },
+    { "type": "fake-api", "claim": "request_sleepable_irq", "why": "不存在的 API" }
+  ],
+  "forbidden": ["在硬中断半部(handler)里睡眠", "在 handler 里 mutex_lock / msleep / GFP_KERNEL"],
+  "rubric": "硬中断半部只做最少快处理,睡眠的活放 thread_fn(进程上下文);handler 返回 IRQ_WAKE_THREAD;handler=NULL 时必须配 IRQF_ONESHOT"
+}
