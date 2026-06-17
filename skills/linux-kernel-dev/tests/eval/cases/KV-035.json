@@ -1,0 +1,18 @@
+{
+  "id": "KV-035",
+  "topic": "register a net_device with net_device_ops",
+  "q": "写以太网控制器驱动,怎么分配 + 注册 net_device,核心回调放哪?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "networking",
+  "gold_claims": {
+    "api": ["alloc_etherdev", "register_netdev", "unregister_netdev", "netdev_priv"],
+    "symbol": ["net_device", "net_device_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "netdev_register", "why": "编造的(应是 register_netdev)" },
+    { "type": "fake-api", "claim": "alloc_netdev_eth", "why": "不存在(应是 alloc_etherdev)" }
+  ],
+  "forbidden": ["注册后不在卸载时 unregister_netdev + free_netdev"],
+  "rubric": "alloc_etherdev(sizeof priv) + netdev_priv 取私有区;填 net_device_ops(ndo_open/ndo_stop/ndo_start_xmit/ndo_get_stats64);register_netdev;卸载 unregister_netdev + free_netdev"
+}

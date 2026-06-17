@@ -1,0 +1,18 @@
+{
+  "id": "KV-036",
+  "topic": "NAPI receive poll",
+  "q": "网卡收包用 NAPI,poll 函数怎么写?budget 和 napi_complete 怎么处理?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "networking",
+  "gold_claims": {
+    "api": ["netif_napi_add", "napi_schedule", "napi_complete_done", "napi_gro_receive"],
+    "symbol": ["napi_struct"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "napi_recv", "why": "编造的(应是 napi_gro_receive/netif_receive_skb)" },
+    { "type": "fake-api", "claim": "napi_done", "why": "不存在(应是 napi_complete_done)" }
+  ],
+  "forbidden": ["在 NAPI poll 里睡眠(软中断上下文)", "不尊重 budget(收完 budget 不返回)"],
+  "rubric": "netif_napi_add 注册;中断里 napi_schedule;poll(napi,budget) 收到 budget 就返回,done<budget 才 napi_complete_done 重开中断,返回 done;napi_gro_receive 上交;不能睡"
+}

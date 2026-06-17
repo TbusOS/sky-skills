@@ -31,6 +31,7 @@
 - KB-GPIO-001 · 用 gpiod 描述符 API(gpiod_get/gpiod_set_value),弃旧整数 API(gpio_request/gpio_set_value);描述符已按 DT 处理 active-low,别再取反 · KV-026 · range：版本无关(旧 API 淘汰中)
 - KB-USB-001 · URB 完成回调在原子/软中断上下文,不能睡;回调里重新提交 URB 用 usb_submit_urb(urb, GFP_ATOMIC) · KV-031 · range：版本无关
 - KB-BUILD-001 · 模块漏 MODULE_LICENSE → 内核被 taint,且 EXPORT_SYMBOL_GPL 导出的符号对该模块不可用(链接/加载失败) · KV-032 · range：版本无关
+- KB-NET-001 · NAPI poll 在软中断上下文(不能睡);必须尊重 budget——收满 budget 就返回,done<budget 才 napi_complete_done 重开收中断,返回 done · KV-036 · range：版本无关
 
 ## 条目
 
@@ -235,4 +236,22 @@
   ```
 - linked_eval_case：KV-032
 - provenance：self（从内核构建系统文档蒸馏 + 真树核对 module.h 宏;子系统:构建系统）
+- fires/catches：0 / 0
+
+### KB-NET-001：NAPI poll 在软中断上下文,不能睡 + 必须尊重 budget
+
+- symptom：网卡驱动在高流量下软锁(`soft lockup`)、其他任务饿死、或收包停滞;`dmesg` 报 NAPI 相关 BUG;在 poll 里 mutex_lock/分配 GFP_KERNEL 直接 `scheduling while atomic`。
+- root cause：NAPI 的 poll 回调由网络软中断(NET_RX_SOFTIRQ)调用,是**原子/软中断上下文,不能睡**。且 poll **必须尊重 `budget`**:一轮最多处理 budget 个包就返回(让出 CPU,下一轮再来);只有处理数 `done < budget`(说明收空了)才 `napi_complete_done(napi, done)` 并重开收中断。无视 budget 一直收 → 霸占 softirq、软锁。
+- fix：poll 里只用非睡眠操作(`GFP_ATOMIC` / 无锁或 spinlock);`while (done < budget && 有包)` 收;`done == budget` 直接返回 `budget`(不 complete);`done < budget` 才 `napi_complete_done` + 重开中断,返回 `done`。要睡的活推 workqueue。
+- trigger：见到 NAPI poll 回调里 msleep/mutex_lock/GFP_KERNEL,或循环不看 budget、无条件 napi_complete,或问"NAPI poll 怎么写/软锁/budget"。
+- range：版本无关(NAPI 上下文与 budget 契约长期不变)。
+- scope/limits：约束 poll 的上下文 + budget 协议;API/签名按目标树 `include/linux/netdevice.h` 核(注意 netif_napi_add 的 weight 参版本差异)。
+- check：
+  ```
+  [CLAIMS]
+  api: netif_napi_add, napi_complete_done
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-036
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 NAPI 上下文/budget;子系统:网络。关联 KB-IRQ-001 同根"软中断不睡"）
 - fires/catches：0 / 0

@@ -70,6 +70,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 | SPI 设备驱动（spi_driver 绑定 / spi_sync·多段传输 / regmap-spi / buffer DMA-able） | `references/subsys/spi.md` | `Documentation/spi/`、`include/linux/spi/spi.h` |
 | GPIO（gpiod 描述符消费 / GPIO 当中断 / 写 gpiochip 控制器 / 弃旧整数 API） | `references/subsys/gpio.md` | `Documentation/driver-api/gpio/`、`include/linux/gpio/consumer.h` |
 | USB host 驱动（usb_driver 绑定 / 控制·批量传输 / URB 异步 / 完成回调上下文） | `references/subsys/usb.md` | `Documentation/driver-api/usb/`、`include/linux/usb.h` |
+| 网络（net_device 注册 / NAPI 收包 / ndo_start_xmit 发包 / sk_buff / 队列控制） | `references/subsys/networking.md` | `Documentation/networking/`、`include/linux/netdevice.h` |
 
 目录总览见 `index.md`。
 

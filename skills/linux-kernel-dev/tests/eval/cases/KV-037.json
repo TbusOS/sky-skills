@@ -1,0 +1,17 @@
+{
+  "id": "KV-037",
+  "topic": "transmit path (ndo_start_xmit) + skb lifecycle",
+  "q": "ndo_start_xmit 发包,发送环满了怎么办?skb 谁负责释放?返回什么?",
+  "kind": "objective",
+  "subsystem": "networking",
+  "gold_claims": {
+    "api": ["netif_stop_queue", "netif_wake_queue", "dev_kfree_skb"],
+    "symbol": ["sk_buff", "NETDEV_TX_OK"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "skb_free_netdev", "why": "编造的(应是 dev_kfree_skb)" },
+    { "type": "fake-api", "claim": "dev_free_skb", "why": "不存在的 API" }
+  ],
+  "forbidden": ["在 ndo_start_xmit 里睡眠(原子上下文)", "环满不 netif_stop_queue 导致丢包", "忘了 TX 完成后 dev_kfree_skb(skb 泄漏)"],
+  "rubric": "ndo_start_xmit 不能睡;接管 skb 返回 NETDEV_TX_OK 并最终 dev_kfree_skb;环满 netif_stop_queue + 返回 NETDEV_TX_BUSY,有空位 netif_wake_queue"
+}
