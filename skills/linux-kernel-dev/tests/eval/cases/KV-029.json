@@ -1,0 +1,18 @@
+{
+  "id": "KV-029",
+  "topic": "usb host driver: bind + synchronous transfers",
+  "q": "写一个 USB 设备的 host 驱动,怎么按 VID/PID 绑定 + 做控制/批量传输(同步)?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "usb",
+  "gold_claims": {
+    "api": ["module_usb_driver", "usb_control_msg", "usb_bulk_msg"],
+    "symbol": ["usb_interface", "usb_device"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "module_usb_register", "why": "不存在(应是 module_usb_driver)" },
+    { "type": "fake-api", "claim": "usb_send_msg", "why": "编造的(应是 usb_control_msg/usb_bulk_msg)" }
+  ],
+  "forbidden": ["在原子上下文做同步 usb_bulk_msg/usb_control_msg(会睡)", "disconnect 不清理 URB/资源"],
+  "rubric": "usb_driver + id_table(USB_DEVICE) + module_usb_driver;probe(intf,id),interface_to_usbdev 拿 udev;同步传输 usb_control_msg/usb_bulk_msg 在进程上下文"
+}

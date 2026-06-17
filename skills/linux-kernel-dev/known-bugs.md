@@ -29,6 +29,7 @@
 - KB-I2C-001 · i2c_driver.probe 签名变过:旧双参 (client,id) → probe_new(client) → 6.x 起单参 .probe(client);移植旧驱动编译错 · KV-020 · range：6.x 起单参
 - KB-SPI-001 · SPI 传输 buffer 必须 DMA-able(kmalloc),不能用栈上数组当 spi_transfer 的 tx_buf/rx_buf · KV-024 · range：版本无关
 - KB-GPIO-001 · 用 gpiod 描述符 API(gpiod_get/gpiod_set_value),弃旧整数 API(gpio_request/gpio_set_value);描述符已按 DT 处理 active-low,别再取反 · KV-026 · range：版本无关(旧 API 淘汰中)
+- KB-USB-001 · URB 完成回调在原子/软中断上下文,不能睡;回调里重新提交 URB 用 usb_submit_urb(urb, GFP_ATOMIC) · KV-031 · range：版本无关
 
 ## 条目
 
@@ -196,4 +197,23 @@
   ```
 - linked_eval_case：KV-026
 - provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 gpiod 消费 API;子系统:gpio）
+- fires/catches：0 / 0
+
+### KB-USB-001：URB 完成回调在原子上下文,不能睡;重提交用 GFP_ATOMIC
+
+- symptom：USB 驱动偶发 `BUG: scheduling while atomic` / `sleeping function called from invalid context`,栈回溯指向 URB completion;或重新提交 URB 在高负载下失败。
+- root cause：URB 的 completion 回调由 USB 核心在**软中断/原子上下文**调用,**不能睡眠**(不能 mutex_lock/msleep/GFP_KERNEL 分配/同步传输)。回调里直接做会睡的活,或用 `GFP_KERNEL` 重新 `usb_submit_urb`,就违规。
+- fix：回调里要重新提交用 `usb_submit_urb(urb, GFP_ATOMIC)`;要做会睡的处理(解析、写文件、同步传输)推给 workqueue(见 `interrupts.md`/`scheduler.md`)。
+- trigger：见到 URB completion 回调里有 msleep/mutex_lock/GFP_KERNEL/usb_bulk_msg,或问"URB 回调能不能睡/重提交 GFP 用哪个"。
+- range：版本无关(URB 回调上下文长期是原子)。
+- scope/limits：约束 completion 回调里的上下文;API 名按目标树 `include/linux/usb.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: usb_submit_urb
+  symbol: urb
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-031
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 URB 回调上下文;子系统:usb。关联 KB-IRQ-001/KB-MM-001 同根"原子不睡"）
 - fires/catches：0 / 0

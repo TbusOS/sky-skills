@@ -1,0 +1,17 @@
+{
+  "id": "KV-030",
+  "topic": "usb asynchronous bulk transfer via URB",
+  "q": "USB 设备要流式高吞吐收数据,用 URB 异步怎么建和提交?",
+  "kind": "objective",
+  "subsystem": "usb",
+  "gold_claims": {
+    "api": ["usb_alloc_urb", "usb_fill_bulk_urb", "usb_submit_urb", "usb_free_urb"],
+    "symbol": ["urb"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "usb_urb_alloc", "why": "编造的(应是 usb_alloc_urb)" },
+    { "type": "fake-api", "claim": "usb_bulk_transfer", "why": "不存在的 API" }
+  ],
+  "forbidden": ["disconnect 时不 usb_kill_urb 就释放(回调用到已释放内存)"],
+  "rubric": "usb_alloc_urb + usb_fill_bulk_urb(管道用 usb_rcvbulkpipe)+ usb_submit_urb;disconnect 里 usb_kill_urb 再 usb_free_urb"
+}

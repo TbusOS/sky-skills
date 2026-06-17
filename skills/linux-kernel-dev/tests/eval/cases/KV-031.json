@@ -1,0 +1,18 @@
+{
+  "id": "KV-031",
+  "topic": "URB completion callback context / GFP",
+  "q": "URB 的完成回调里能不能睡?要重新提交 URB 用什么 GFP 标志?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "usb",
+  "gold_claims": {
+    "api": ["usb_submit_urb"],
+    "symbol": ["urb", "GFP_ATOMIC"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "usb_msg_send", "why": "编造的 API" },
+    { "type": "fake-api", "claim": "usb_pipe_in", "why": "不存在(管道用 usb_rcvbulkpipe 等)" }
+  ],
+  "forbidden": ["在 URB 完成回调里睡眠/做会睡的活", "回调里用 GFP_KERNEL 重新提交 URB"],
+  "rubric": "URB 完成回调在原子/软中断上下文,不能睡;回调里重新提交用 usb_submit_urb(urb, GFP_ATOMIC);要做会睡的活推给 workqueue"
+}
