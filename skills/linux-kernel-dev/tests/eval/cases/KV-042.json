@@ -1,0 +1,18 @@
+{
+  "id": "KV-042",
+  "topic": "videobuf2 queue + stop_streaming buffer return",
+  "q": "用 vb2 管采集缓冲,stop_streaming 里对还没处理完的 buffer 要怎么办?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "camera",
+  "gold_claims": {
+    "api": ["vb2_queue_init", "vb2_buffer_done"],
+    "symbol": ["vb2_queue", "vb2_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "vb2_init_queue", "why": "顺序错(应是 vb2_queue_init)" },
+    { "type": "fake-api", "claim": "vb2_done_buffer", "why": "顺序错(应是 vb2_buffer_done)" }
+  ],
+  "forbidden": ["stop_streaming 不归还驱动手里的 buffer(队列卡死/泄漏)"],
+  "rubric": "vb2_ops 填 queue_setup/buf_queue/start_streaming/stop_streaming;stop_streaming 必须对每个仍在驱动手里的 buffer vb2_buffer_done(VB2_BUF_STATE_ERROR) 归还,否则 STREAMOFF 卡死"
+}

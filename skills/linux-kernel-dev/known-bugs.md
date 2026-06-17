@@ -33,6 +33,7 @@
 - KB-BUILD-001 · 模块漏 MODULE_LICENSE → 内核被 taint,且 EXPORT_SYMBOL_GPL 导出的符号对该模块不可用(链接/加载失败) · KV-032 · range：版本无关
 - KB-NET-001 · NAPI poll 在软中断上下文(不能睡);必须尊重 budget——收满 budget 就返回,done<budget 才 napi_complete_done 重开收中断,返回 done · KV-036 · range：版本无关
 - KB-ASOC-001 · ASoC 的 trigger 回调在原子上下文(持 PCM stream 锁,不能睡);慢速配置(I2C regmap)放 hw_params,trigger 只做非睡眠启停 · KV-040 · range：版本无关
+- KB-V4L2-001 · vb2 的 stop_streaming 必须把驱动手里所有 buffer 用 vb2_buffer_done 归还(VB2_BUF_STATE_ERROR),否则 STREAMOFF 卡死/泄漏 · KV-042 · range：版本无关
 
 ## 条目
 
@@ -274,4 +275,22 @@
   ```
 - linked_eval_case：KV-040
 - provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 ASoC DAI ops 上下文;子系统:音频。关联 KB-IRQ-001 同根"原子不睡"）
+- fires/catches：0 / 0
+
+### KB-V4L2-001：vb2 stop_streaming 必须归还所有 buffer,否则队列卡死
+
+- symptom：摄像头驱动 `VIDIOC_STREAMOFF` 卡住不返回 / 应用 hang;重新 streamon 失败;关流后 buffer 泄漏。
+- root cause：流运行时驱动从 vb2 拿了 buffer 交给硬件 DMA(还没 `vb2_buffer_done`)。`stop_streaming` 回调里如果不把这些"仍在驱动手里"的 buffer 还给 vb2,vb2 会一直等它们,STREAMOFF 卡死。
+- fix：`stop_streaming` 里先停硬件,再遍历驱动持有的 buffer 列表,对每个 `vb2_buffer_done(vb, VB2_BUF_STATE_ERROR)`(或 DONE)归还给 vb2,清空驱动的 in-flight 列表。
+- trigger：见到 vb2 `stop_streaming` 回调没有把 in-flight buffer `vb2_buffer_done` 归还,或问"STREAMOFF 卡死 / vb2 buffer 没还"。
+- range：版本无关(vb2 buffer 所有权契约长期不变)。
+- scope/limits：约束 stop_streaming 的 buffer 归还;回调/状态名按目标树 `include/media/videobuf2-core.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: vb2_queue_init, vb2_buffer_done
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-042
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 vb2 buffer 所有权;子系统:摄像）
 - fires/catches：0 / 0

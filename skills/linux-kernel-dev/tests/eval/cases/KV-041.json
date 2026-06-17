@@ -1,0 +1,18 @@
+{
+  "id": "KV-041",
+  "topic": "register a V4L2 device + video node",
+  "q": "写视频采集驱动,怎么注册 v4l2_device 和 /dev/videoN 节点?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "camera",
+  "gold_claims": {
+    "api": ["v4l2_device_register", "video_register_device", "video_device_alloc"],
+    "symbol": ["v4l2_device", "video_device"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "v4l2_register_device", "why": "顺序错(应是 v4l2_device_register)" },
+    { "type": "fake-api", "claim": "video_device_register", "why": "顺序错(应是 video_register_device)" }
+  ],
+  "forbidden": ["不在卸载时 video_unregister_device + v4l2_device_unregister"],
+  "rubric": "v4l2_device_register 建根;video_device_alloc + 填 v4l2_ioctl_ops/vb2 队列 + video_register_device 出 /dev/videoN;卸载反序注销"
+}

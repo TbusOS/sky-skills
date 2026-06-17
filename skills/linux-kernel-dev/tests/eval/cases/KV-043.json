@@ -1,0 +1,17 @@
+{
+  "id": "KV-043",
+  "topic": "camera sensor subdev (async register)",
+  "q": "摄像头 sensor 挂在 I2C 上,怎么作为 V4L2 subdev 注册并和桥接驱动绑定?",
+  "kind": "objective",
+  "subsystem": "camera",
+  "gold_claims": {
+    "api": ["v4l2_async_register_subdev", "v4l2_ctrl_handler_init"],
+    "symbol": ["v4l2_subdev"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "v4l2_subdev_register", "why": "编造的(应是 v4l2_async_register_subdev)" },
+    { "type": "fake-api", "claim": "v4l2_async_register", "why": "不存在的 API" }
+  ],
+  "forbidden": ["sensor subdev 用同步注册(probe 顺序一变就绑不上)"],
+  "rubric": "sensor 是 I2C 驱动(寄存器走 regmap)+ v4l2_subdev;v4l2_async_register_subdev 异步注册,桥接驱动用 async notifier 绑;控件 v4l2_ctrl_handler_init"
+}
