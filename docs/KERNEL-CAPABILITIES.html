@@ -115,6 +115,7 @@
     <div class="voice-bar" style="padding:var(--space-3) 0;">
       <span class="voice-bar__label"><span class="lang-en">Kernel harness</span><span class="lang-zh">内核架构</span></span>
       <a class="voice-chip" href="KERNEL-HARNESS.html"><span class="lang-en">Architecture</span><span class="lang-zh">架构</span></a>
+      <a class="voice-chip" href="#use"><span class="lang-en">How to use</span><span class="lang-zh">怎么用</span></a>
       <a class="voice-chip voice-chip--current" href="KERNEL-CAPABILITIES.html" aria-current="page"><span class="lang-en">See it work</span><span class="lang-zh">看它干活</span></a>
     </div>
   </div>
@@ -373,6 +374,34 @@ total: 0 errors, 2 warnings, 4 lines checked
 [version_drift] trees: 6.1.141 → 7.0.0  <span class="dim">(old → new)</span>
   <span class="accent">1 drift found</span> — version-tag the matching knowledge:
   <span class="bad">⚠ ROTTED</span>  symbol:ion_alloc   [ 6.1.141:<span class="ok">✓</span>  7.0.0:<span class="bad">✗</span> ]   <span class="dim">(exit 1)</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- Quickstart / install -->
+<section class="anth-section anth-section--subtle" id="install">
+  <div class="anth-container anth-container--narrow">
+    <div class="cap">
+      <div>
+        <span class="cap-label"><span class="lang-en">Quickstart</span><span class="lang-zh">三步装好</span></span>
+        <h2 style="margin:var(--space-3) 0;"><span class="lang-en">Get it running in three commands.</span><span class="lang-zh">三条命令装好。</span></h2>
+        <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0; line-height:1.6;">
+          <span class="lang-en">It's a multi-file skill (<code>SKILL.md</code> + <code>scripts/</code> + <code>references/</code>) — install the whole directory, not just <code>SKILL.md</code>, then restart Claude Code. Binding a kernel tree is what turns on fact-gate verification against your exact version.</span>
+          <span class="lang-zh">它是多文件 skill（<code>SKILL.md</code> + <code>scripts/</code> + <code>references/</code>）——装整个目录，不是只 <code>SKILL.md</code>，然后重启 Claude Code。绑内核树是为了让 fact-gate 能对你的确切版本验证。</span>
+        </p>
+      </div>
+      <pre class="term"><span class="dim"># 1. install the skill — link the folder into Claude Code, then restart it</span>
+$ ln -s /path/to/sky-skills/skills/linux-kernel-dev ~/.claude/skills/linux-kernel-dev
+  <span class="dim">(or copy the whole dir — it's multi-file, not just SKILL.md)</span>
+
+<span class="dim"># 2. bind your kernel source tree (per-machine; turns on fact-gate)</span>
+$ node ~/.claude/skills/linux-kernel-dev/scripts/kernel-tree.mjs add /path/to/your/kernel --default
+
+<span class="dim"># 3. confirm it's wired</span>
+$ node ~/.claude/skills/linux-kernel-dev/scripts/kernel-tree.mjs list
+  <span class="ok">linux 7.0</span>   /path/to/your/kernel   <span class="dim">(default)</span>
+
+<span class="dim"># now in Claude Code, just describe kernel work — modules load on demand.</span></pre>
     </div>
   </div>
 </section>
