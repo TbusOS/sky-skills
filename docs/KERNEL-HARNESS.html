@@ -213,6 +213,39 @@
 
     </div>
 
+    <!-- Core subsystems it speaks deeply -->
+    <div style="margin-top:var(--space-6);">
+      <div style="max-width:740px; margin:0 auto var(--space-5); text-align:center;">
+        <span class="anth-badge"><span class="lang-en">Core subsystems it speaks</span><span class="lang-zh">深入到具体内核子系统</span></span>
+        <p style="font-size:16px; color:var(--anth-text-secondary); line-height:1.6; margin-top:var(--space-3); font-family:var(--font-body);">
+          <span class="lang-en">Beyond the generic driver scaffolding, it loads a per-subsystem expert module on demand — each aligned to that subsystem's kernel <code>Documentation/</code>, verified against a real source tree, and carrying its own test cases.</span>
+          <span class="lang-zh">不止通用驱动骨架——按任务命中加载对应子系统的专家模块，每个都对齐该子系统的内核 <code>Documentation/</code>、拿真源码树验证、带自己的测试用例。</span>
+        </p>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--space-4);">
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">Interrupts</span><span class="lang-zh">中断</span></h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en"><code>request_irq</code> / threaded IRQ, bottom-half choice (workqueue / tasklet / softirq), and what can sleep where.</span><span class="lang-zh"><code>request_irq</code> / threaded IRQ、下半部选型（workqueue / tasklet / softirq）、哪个上下文能睡。</span></p>
+        </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">Scheduler</span><span class="lang-zh">调度器</span></h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">Wait queues, completion, the manual-sleep ordering (lost wakeup), preemption, policy / affinity, CFS &amp; EEVDF.</span><span class="lang-zh">等待队列、completion、手动睡眠顺序（丢唤醒）、抢占、策略 / 亲和性、CFS 与 EEVDF。</span></p>
+        </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">Memory management</span><span class="lang-zh">内存管理</span></h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">Allocator choice (kmalloc / kvmalloc / vmalloc / kmem_cache), GFP context, user-memory access, driver <code>mmap</code>.</span><span class="lang-zh">分配器选型（kmalloc / kvmalloc / vmalloc / kmem_cache）、GFP 上下文、访问用户内存、驱动 <code>mmap</code>。</span></p>
+        </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">Filesystems</span><span class="lang-zh">文件系统</span></h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">VFS objects, implementing <code>file_operations</code>, exposing data via debugfs / procfs / seq_file, writing a filesystem.</span><span class="lang-zh">VFS 对象、实现 <code>file_operations</code>、用 debugfs / procfs / seq_file 导出数据、写文件系统。</span></p>
+        </div>
+      </div>
+      <p style="text-align:center; max-width:740px; margin:var(--space-4) auto 0; font-size:13.5px; color:var(--anth-text-secondary); line-height:1.5; font-family:var(--font-body);">
+        <span class="lang-en">More subsystems land the same way — a new module never ships without test cases that pass against a real tree.</span>
+        <span class="lang-zh">更多子系统按同一形态加入——新模块不配上能在真源码树跑通的测试用例，就不上线。</span>
+      </p>
+    </div>
+
     <!-- Safety rules callout -->
     <div style="margin-top:var(--space-6); padding:var(--space-5) var(--space-6); border:1px solid var(--anth-light-gray); border-left:4px solid var(--anth-orange); border-radius:var(--radius-lg); background:var(--anth-bg-subtle);">
       <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Hard rules it won't break</span><span class="lang-zh">它不会破的硬规则</span></span>
