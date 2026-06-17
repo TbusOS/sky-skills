@@ -1,0 +1,18 @@
+{
+  "id": "KV-032",
+  "topic": "out-of-tree module: required macros + license",
+  "q": "写一个 out-of-tree 内核模块,源码里必须的宏有哪些?为什么 license 不能漏?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "build",
+  "gold_claims": {
+    "symbol": ["module_init", "module_exit", "MODULE_LICENSE"],
+    "config": ["MODULES"]
+  },
+  "corruptions": [
+    { "type": "fake-symbol", "claim": "MODULE_LICENCE", "why": "拼写错(应是 MODULE_LICENSE)" },
+    { "type": "fake-config", "claim": "CONFIG_MODULE_BUILD", "why": "编造的 CONFIG(应是 CONFIG_MODULES)" }
+  ],
+  "forbidden": ["漏 MODULE_LICENSE(内核被 taint + GPL-only 符号不可用)", "out-of-tree 不指 -C KDIR M=$(PWD) 直接 gcc"],
+  "rubric": "module_init/module_exit(或 module_*_driver 封装)+ MODULE_LICENSE(\"GPL\")必填;Makefile obj-m + make -C $(KDIR) M=$(PWD) modules;依赖 CONFIG_MODULES"
+}

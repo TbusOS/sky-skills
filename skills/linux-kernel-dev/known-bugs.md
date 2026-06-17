@@ -30,6 +30,7 @@
 - KB-SPI-001 · SPI 传输 buffer 必须 DMA-able(kmalloc),不能用栈上数组当 spi_transfer 的 tx_buf/rx_buf · KV-024 · range：版本无关
 - KB-GPIO-001 · 用 gpiod 描述符 API(gpiod_get/gpiod_set_value),弃旧整数 API(gpio_request/gpio_set_value);描述符已按 DT 处理 active-low,别再取反 · KV-026 · range：版本无关(旧 API 淘汰中)
 - KB-USB-001 · URB 完成回调在原子/软中断上下文,不能睡;回调里重新提交 URB 用 usb_submit_urb(urb, GFP_ATOMIC) · KV-031 · range：版本无关
+- KB-BUILD-001 · 模块漏 MODULE_LICENSE → 内核被 taint,且 EXPORT_SYMBOL_GPL 导出的符号对该模块不可用(链接/加载失败) · KV-032 · range：版本无关
 
 ## 条目
 
@@ -216,4 +217,22 @@
   ```
 - linked_eval_case：KV-031
 - provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 URB 回调上下文;子系统:usb。关联 KB-IRQ-001/KB-MM-001 同根"原子不睡"）
+- fires/catches：0 / 0
+
+### KB-BUILD-001：模块漏 MODULE_LICENSE,taint 内核 + 用不了 GPL-only 符号
+
+- symptom：`insmod` 后 `dmesg` 报 `module license 'unspecified' taints kernel`;或链接/加载时找不到某个内核符号(明明存在),报 `Unknown symbol`。
+- root cause：模块没声明 `MODULE_LICENSE`,内核视为非 GPL,标记 taint;并且**拒绝把 `EXPORT_SYMBOL_GPL` 导出的符号给它**——很多核心 API 是 GPL-only 导出的,于是该模块解析这些符号失败。
+- fix：每个模块都写 `MODULE_LICENSE("GPL")`(或 "GPL v2" 等内核认可的 GPL-兼容串);需要 GPL-only 符号时尤其必须。配 `MODULE_AUTHOR`/`MODULE_DESCRIPTION` 更规范。
+- trigger：见到内核模块源码没有 `MODULE_LICENSE`,或问"taint / Unknown symbol / 模块 license"。
+- range：版本无关(license/taint/GPL 符号机制长期不变)。
+- scope/limits：约束模块元数据;符号名按目标树 `include/linux/module.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  symbol: MODULE_LICENSE, EXPORT_SYMBOL_GPL
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-032
+- provenance：self（从内核构建系统文档蒸馏 + 真树核对 module.h 宏;子系统:构建系统）
 - fires/catches：0 / 0

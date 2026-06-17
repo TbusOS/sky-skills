@@ -1,0 +1,17 @@
+{
+  "id": "KV-033",
+  "topic": "export a symbol for another module",
+  "q": "一个模块要把函数导出给另一个模块用,用什么?GPL 版有什么区别?",
+  "kind": "objective",
+  "subsystem": "build",
+  "gold_claims": {
+    "symbol": ["EXPORT_SYMBOL", "EXPORT_SYMBOL_GPL", "THIS_MODULE"],
+    "config": ["MODULES"]
+  },
+  "corruptions": [
+    { "type": "fake-symbol", "claim": "EXPORT_GPL_SYMBOL", "why": "顺序错(应是 EXPORT_SYMBOL_GPL)" },
+    { "type": "fake-symbol", "claim": "MODULE_EXPORT", "why": "不存在的宏" }
+  ],
+  "forbidden": ["用 EXPORT_SYMBOL_GPL 导出却给非 GPL 模块用(链接/加载失败)"],
+  "rubric": "EXPORT_SYMBOL(name) 导出给任意模块;EXPORT_SYMBOL_GPL(name) 只给 GPL-licensed 模块;符号要在导出模块编进内核或先加载"
+}

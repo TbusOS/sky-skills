@@ -49,6 +49,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 内核 API 速查 | `references/api-quick-ref.md` | `Documentation/core-api/`, `driver-api/` |
 | 提交 patch / checkpatch / format-patch | `references/patch-workflow.md` | `Documentation/process/submitting-patches.rst` |
 | **BSP 定制纪律**（defconfig / 上游 gate / 硬件调试 / 改动分析 / 冲突解决） | `references/bsp_discipline.md` | 通用工程纪律 |
+| **构建系统**（Kbuild Makefile / Kconfig 语言 / 配置流程 / 交叉编译 / in-tree·out-of-tree / 模块要素） | `references/build.md` | `Documentation/kbuild/` |
 | 跨内核版本差异 | `references/kernel_version_deltas.md` | 各版本树 + `Documentation` |
 | **答案验证契约**（引具体符号时附 `[CLAIMS]`） | `references/claims-contract.md` | 事实检查 靶子 |
 | 该做 / 不该做速查 | `dos-and-donts.md` | 本 skill 积累 |

@@ -1,0 +1,17 @@
+{
+  "id": "KV-034",
+  "topic": "module autoload + kernel module support",
+  "q": "怎么让模块按设备自动加载(udev)?依赖哪个内核配置?",
+  "kind": "objective",
+  "subsystem": "build",
+  "gold_claims": {
+    "symbol": ["MODULE_DEVICE_TABLE", "MODULE_ALIAS"],
+    "config": ["MODULES", "MODULE_UNLOAD"]
+  },
+  "corruptions": [
+    { "type": "fake-symbol", "claim": "MODULE_TABLE", "why": "编造的(应是 MODULE_DEVICE_TABLE)" },
+    { "type": "fake-config", "claim": "CONFIG_AUTOLOAD", "why": "不存在的 CONFIG" }
+  ],
+  "forbidden": ["手改 defconfig 开关 CONFIG_MODULES(走原生流程)"],
+  "rubric": "MODULE_DEVICE_TABLE(of/i2c/usb, id_table) 生成别名让内核/udev 按设备自动加载;内核需 CONFIG_MODULES;配置走原生流程不手改 defconfig"
+}
