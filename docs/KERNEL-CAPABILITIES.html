@@ -135,6 +135,96 @@
   </div>
 </section>
 
+<!-- How you use it -->
+<section class="anth-section" id="use">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:760px; margin:0 auto var(--space-6); text-align:center;">
+      <span class="cap-label"><span class="lang-en">How you use it</span><span class="lang-zh">你怎么用它</span></span>
+      <h2 style="margin:var(--space-3) 0;"><span class="lang-en">One sentence in Claude Code → verified kernel code.</span><span class="lang-zh">在 Claude Code 里一句话 → 验过的内核代码。</span></h2>
+      <p style="font-family:var(--font-body); color:var(--anth-text-secondary); font-size:16px; line-height:1.6; margin:0;">
+        <span class="lang-en">It's a skill, not a doc you read. You describe the task; it routes to the right subsystem modules, writes the code in kernel idiom, and ends with a <code>[CLAIMS]</code> block you verify against <strong>your own</strong> kernel tree.</span>
+        <span class="lang-zh">它是个 skill，不是给你翻的文档。你描述任务，它路由到对应子系统模块、按内核地道写法出代码，末尾带一个 <code>[CLAIMS]</code> 块，你拿<strong>自己的</strong>内核树验。</span>
+      </p>
+    </div>
+
+    <!-- 5-step flow -->
+    <figure style="margin:0 0 var(--space-7);">
+      <svg role="img" aria-label="Five-step flow: describe the task, the skill loads subsystem modules, the answer carries a CLAIMS block, fact_gate verifies it against your tree, then checkpatch and build" viewBox="0 0 1200 150" style="display:block; width:100%; max-width:1200px; height:auto; margin:0 auto;" font-family="Poppins, sans-serif">
+        <title id="flow-title">How you use it — five steps</title>
+        <g>
+          <rect x="8" y="28" width="200" height="86" rx="11" fill="#faf9f5" stroke="#e5e1d8"/>
+          <text x="108" y="58" text-anchor="middle" font-size="15" font-weight="700" fill="#d97757">1</text>
+          <text x="108" y="82" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="108">Describe task</tspan><tspan class="lang-zh" x="108">描述任务</tspan></text>
+          <rect x="254" y="28" width="200" height="86" rx="11" fill="#faf9f5" stroke="#e5e1d8"/>
+          <text x="354" y="58" text-anchor="middle" font-size="15" font-weight="700" fill="#d97757">2</text>
+          <text x="354" y="82" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="354">Load modules</tspan><tspan class="lang-zh" x="354">加载子系统模块</tspan></text>
+          <rect x="500" y="28" width="200" height="86" rx="11" fill="#faf9f5" stroke="#e5e1d8"/>
+          <text x="600" y="58" text-anchor="middle" font-size="15" font-weight="700" fill="#d97757">3</text>
+          <text x="600" y="82" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="600">Answer + [CLAIMS]</tspan><tspan class="lang-zh" x="600">答案 + [CLAIMS]</tspan></text>
+          <rect x="746" y="28" width="200" height="86" rx="11" fill="#faf9f5" stroke="#e5e1d8"/>
+          <text x="846" y="58" text-anchor="middle" font-size="15" font-weight="700" fill="#d97757">4</text>
+          <text x="846" y="82" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="846">Verify vs your tree</tspan><tspan class="lang-zh" x="846">对你的树验证</tspan></text>
+          <rect x="992" y="28" width="200" height="86" rx="11" fill="#faf9f5" stroke="#e5e1d8"/>
+          <text x="1092" y="58" text-anchor="middle" font-size="15" font-weight="700" fill="#d97757">5</text>
+          <text x="1092" y="82" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="1092">checkpatch + build</tspan><tspan class="lang-zh" x="1092">checkpatch + 编译</tspan></text>
+        </g>
+        <g stroke="#d97757" stroke-width="2" fill="#d97757">
+          <line x1="212" y1="71" x2="248" y2="71"/><path d="M248 67 L256 71 L248 75 Z"/>
+          <line x1="458" y1="71" x2="494" y2="71"/><path d="M494 67 L502 71 L494 75 Z"/>
+          <line x1="704" y1="71" x2="740" y2="71"/><path d="M740 67 L748 71 L740 75 Z"/>
+          <line x1="950" y1="71" x2="986" y2="71"/><path d="M986 67 L994 71 L986 75 Z"/>
+        </g>
+      </svg>
+      <figcaption style="text-align:center; max-width:760px; margin:var(--space-3) auto 0; font-size:13.5px; color:var(--anth-text-secondary); line-height:1.5; font-family:var(--font-body);">
+        <span class="lang-en">Steps 1–3 happen in your Claude Code chat. Steps 4–5 are deterministic commands you run locally — the answer is checked against your tree, not taken on faith.</span>
+        <span class="lang-zh">第 1–3 步在你的 Claude Code 对话里发生。第 4–5 步是你本地跑的确定性命令——答案拿你的树核过，不是听它一面之词。</span>
+      </figcaption>
+    </figure>
+
+    <!-- worked example: a NIC driver -->
+    <div class="anth-container anth-container--narrow" style="padding:0;">
+      <div class="cap">
+        <div>
+          <span class="cap-label"><span class="lang-en">Worked example · a NIC driver</span><span class="lang-zh">实操 · 一个网卡驱动</span></span>
+          <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:var(--space-3) 0 0; line-height:1.6;">
+            <span class="lang-en">Bind your tree once. Ask in plain language. The skill pulls the device-tree, interrupts and memory modules, writes the driver, and emits the claims below — every symbol then checked against your kernel (all 10 resolve here on a 7.0 tree).</span>
+            <span class="lang-zh">绑一次树。用大白话问。skill 拉起设备树、中断、内存模块，写出驱动并给出下面的 claims——每个符号再拿你的内核核一遍（这里在 7.0 树上 10 个全过）。</span>
+          </p>
+        </div>
+        <pre class="term"><span class="dim"># one-time: bind your kernel tree (per-machine, never in the repo)</span>
+$ node ~/.claude/skills/linux-kernel-dev/scripts/kernel-tree.mjs add /path/to/your/kernel --default
+
+<span class="dim"># in Claude Code, just describe the task:</span>
+<span class="accent">you ▸</span> write a platform driver for this SoC's ethernet MAC — get the
+      registers and IRQ from the device tree, receive with NAPI, transmit with DMA
+
+<span class="dim"># the skill loads device-tree + interrupts + memory, writes the driver,</span>
+<span class="dim"># and ends the answer with a [CLAIMS] block:</span>
+[CLAIMS]
+api: platform_driver, devm_platform_ioremap_resource, platform_get_irq,
+     request_threaded_irq, netif_napi_add, napi_schedule, dma_map_single
+symbol: net_device, napi_struct, sk_buff
+[/CLAIMS]
+
+<span class="dim"># verify every cited API exists in YOUR kernel version:</span>
+$ node ~/.claude/skills/linux-kernel-dev/scripts/fact_gate.mjs answer.md --tree /path/to/your/kernel
+  <span class="ok">✓</span>  symbol: platform_driver
+  <span class="ok">✓</span>  symbol: netif_napi_add
+  <span class="ok">✓</span>  symbol: dma_map_single
+  <span class="dim">… (10 symbols)</span>
+<span class="ok">[fact-check] clean — all 10 claim(s) resolved</span>   <span class="dim">(exit 0)</span>
+
+<span class="dim"># then the kernel's own checkpatch, and build:</span>
+$ bash ~/.claude/skills/linux-kernel-dev/scripts/checkpatch_gate.sh --tree /path/to/your/kernel my.patch</pre>
+      </div>
+      <p style="font-family:var(--font-body); color:var(--anth-text-secondary); font-size:13.5px; line-height:1.5; margin:var(--space-4) 0 0;">
+        <span class="lang-en">Already linked into <code>~/.claude/skills/</code>? Then it's live in Claude Code — just start describing kernel work. The subsystem modules (interrupts / scheduler / memory / filesystems / device tree / i2c / spi / gpio / usb / build) load only when your task hits them.</span>
+        <span class="lang-zh">已经链到 <code>~/.claude/skills/</code> 了？那它在 Claude Code 里就是活的——直接描述内核活儿即可。子系统模块（中断 / 调度 / 内存 / 文件系统 / 设备树 / i2c / spi / gpio / usb / 构建）只在你的任务命中时才加载。</span>
+      </p>
+    </div>
+  </div>
+</section>
+
 <!-- 1. fact gate -->
 <section class="anth-section" id="fact">
   <div class="anth-container anth-container--narrow">
