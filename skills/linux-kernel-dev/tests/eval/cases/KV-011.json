@@ -1,0 +1,18 @@
+{
+  "id": "KV-011",
+  "topic": "allocator + GFP flag by context",
+  "q": "中断处理里要分配一小块内存,用什么函数 + 什么 GFP 标志?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "memory",
+  "gold_claims": {
+    "api": ["kmalloc", "kzalloc"],
+    "symbol": ["GFP_ATOMIC", "GFP_KERNEL"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "kmalloc_atomic", "why": "编造的原子分配函数(应是 kmalloc+GFP_ATOMIC)" },
+    { "type": "fake-symbol", "claim": "GFP_IRQ", "why": "不存在的 GFP 标志" }
+  ],
+  "forbidden": ["在中断/原子上下文用 GFP_KERNEL", "不检查返回 NULL"],
+  "rubric": "中断/原子上下文用 kmalloc(..., GFP_ATOMIC);进程上下文才用 GFP_KERNEL(会睡);分配后检查 NULL"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "KV-012",
+  "topic": "large buffer allocation (kvmalloc / vmalloc)",
+  "q": "要分配几 MB 的缓冲,kmalloc 行不行?该用什么?",
+  "kind": "objective",
+  "subsystem": "memory",
+  "gold_claims": {
+    "api": ["kvmalloc", "kvfree", "vmalloc", "vfree"],
+    "symbol": ["GFP_KERNEL"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "kmalloc_huge", "why": "编造的大块分配函数(kmalloc_large 是内核内部真函数,不能当假名)" },
+    { "type": "fake-api", "claim": "vmalloc_atomic", "why": "vmalloc 不能在原子上下文,无此 API" }
+  ],
+  "forbidden": ["用 kmalloc 强求超大物理连续块", "把 vmalloc 内存直接拿去 DMA(非物理连续)", "kvmalloc 配 kfree"],
+  "rubric": "大块用 kvmalloc(先试连续退化到 vmalloc,配 kvfree)或 vmalloc(配 vfree);kmalloc 大块易因碎片失败;vmalloc 非物理连续不能 DMA"
+}

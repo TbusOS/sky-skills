@@ -1,0 +1,18 @@
+{
+  "id": "KV-013",
+  "topic": "accessing user-space memory safely",
+  "q": "ioctl / 系统调用里要读写用户态传进来的指针,怎么安全访问?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "memory",
+  "gold_claims": {
+    "api": ["copy_from_user", "copy_to_user", "get_user", "put_user"],
+    "symbol": ["access_ok"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "copy_user_safe", "why": "编造的拷贝函数" },
+    { "type": "fake-api", "claim": "user_memcpy", "why": "不存在的 API" }
+  ],
+  "forbidden": ["直接解引用用户指针", "用 access_ok 替代 copy_*_user"],
+  "rubric": "用 copy_from_user / copy_to_user(返回未拷贝字节数,非 0 即失败返回 -EFAULT)或 get_user/put_user;绝不直接解引用用户指针;access_ok 只校验范围不保证可访问"
+}

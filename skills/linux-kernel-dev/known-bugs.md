@@ -23,6 +23,7 @@
 - KB-ION-001 · 现代内核移除了 ION，分配 DMA 缓冲用 DMA-heap（dma_heap_buffer_alloc），别用 ion_alloc · KV-004 · range：ION-removed kernels
 - KB-IRQ-001 · 硬中断 / 软中断(tasklet/softirq)上下文不能睡眠；要睡眠的延迟处理用 threaded IRQ 的 thread_fn 或 workqueue · KV-006 · range：版本无关
 - KB-SCHED-001 · 手动睡眠必须先 set_current_state 再检查条件(反了丢唤醒)；能用 wait_event 就别手写 · KV-010 · range：版本无关
+- KB-MM-001 · 原子/中断/持锁上下文分配内存用 GFP_ATOMIC，不用 GFP_KERNEL(后者会触发回收而睡眠) · KV-011 · range：版本无关
 
 ## 条目
 
@@ -78,4 +79,23 @@
   ```
 - linked_eval_case：KV-010
 - provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对睡眠/唤醒语义；样板子系统：调度器）
+- fires/catches：0 / 0
+
+### KB-MM-001：原子/中断上下文分配内存要用 GFP_ATOMIC，不是 GFP_KERNEL
+
+- symptom：在中断处理 / tasklet / softirq / 持 spinlock 时分配内存，偶发 `BUG: sleeping function called from invalid context`、卡死或栈回溯指向 `__might_sleep` / 内存回收路径。
+- root cause：`GFP_KERNEL` 允许直接回收和换出——内存紧张时会**睡眠**等内存。在不可睡眠的上下文用它就违规。这是 GFP **标志**选错，区别于"把可睡眠的活放错上下文"（那是 KB-IRQ-001）。
+- fix：不可睡眠上下文（中断/原子/持锁）用 `GFP_ATOMIC`（动用紧急储备、不睡，但更易失败，要检查 NULL）；只有进程上下文才用 `GFP_KERNEL`。
+- trigger：见到中断 handler / tasklet / softirq / 持 spinlock 段里 `kmalloc(..., GFP_KERNEL)` / `kzalloc(..., GFP_KERNEL)`，或问"中断里怎么分配内存 / GFP 用哪个"。
+- range：版本无关（GFP_KERNEL 可睡、GFP_ATOMIC 不可睡是长期语义）。
+- scope/limits：约束的是上下文与 GFP 标志的搭配；标志/函数名按目标树 `include/linux/gfp_types.h` / `slab.h` 核（注意 `__GFP_ATOMIC` 较新内核已移除，用组合宏 `GFP_ATOMIC`）。
+- check：
+  ```
+  [CLAIMS]
+  api: kmalloc
+  symbol: GFP_ATOMIC
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-011
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 GFP 上下文语义；样板子系统：内存管理。关联 KB-IRQ-001——同根不同面）
 - fires/catches：0 / 0
