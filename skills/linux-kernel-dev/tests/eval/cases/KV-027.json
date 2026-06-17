@@ -1,0 +1,17 @@
+{
+  "id": "KV-027",
+  "topic": "use a GPIO as an interrupt source",
+  "q": "一个按键/中断脚通过 GPIO 接进来,怎么把 GPIO 转成中断并申请?",
+  "kind": "objective",
+  "subsystem": "gpio",
+  "gold_claims": {
+    "api": ["gpiod_get", "gpiod_to_irq", "devm_request_irq"],
+    "symbol": ["gpio_desc"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "gpiod_get_irq", "why": "编造的(应 gpiod_to_irq 再 request_irq)" },
+    { "type": "fake-api", "claim": "gpio_desc_get", "why": "不存在(应是 gpiod_get/devm_gpiod_get)" }
+  ],
+  "forbidden": ["在硬中断 handler 里做会睡的 GPIO 读(扩展器 GPIO 经 i2c/spi 会睡)"],
+  "rubric": "devm_gpiod_get 拿描述符 → gpiod_to_irq(desc) 得 irq 号 → devm_request_irq/threaded;扩展器 GPIO 会睡的话用 threaded handler"
+}

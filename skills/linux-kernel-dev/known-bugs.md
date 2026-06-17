@@ -28,6 +28,7 @@
 - KB-DT-001 · 遍历 DT 节点(for_each_child_of_node / of_find_*)拿到的 device_node 用完要 of_node_put,提前 break 也要 · KV-019 · range：版本无关
 - KB-I2C-001 · i2c_driver.probe 签名变过:旧双参 (client,id) → probe_new(client) → 6.x 起单参 .probe(client);移植旧驱动编译错 · KV-020 · range：6.x 起单参
 - KB-SPI-001 · SPI 传输 buffer 必须 DMA-able(kmalloc),不能用栈上数组当 spi_transfer 的 tx_buf/rx_buf · KV-024 · range：版本无关
+- KB-GPIO-001 · 用 gpiod 描述符 API(gpiod_get/gpiod_set_value),弃旧整数 API(gpio_request/gpio_set_value);描述符已按 DT 处理 active-low,别再取反 · KV-026 · range：版本无关(旧 API 淘汰中)
 
 ## 条目
 
@@ -176,4 +177,23 @@
   ```
 - linked_eval_case：KV-024
 - provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 spi_transfer 语义;子系统:spi）
+- fires/catches：0 / 0
+
+### KB-GPIO-001：用 gpiod 描述符 API,别用旧整数 GPIO API
+
+- symptom：新内核上用旧整数 GPIO API 报 deprecated/可能编译告警;active-low 脚电平搞反;移植旧驱动后 GPIO 行为不对。
+- root cause：旧的整数 GPIO API(`gpio_request`/`gpio_free`/`gpio_set_value`/`gpio_get_value`,以裸 GPIO 编号操作)已被**描述符 API**(`gpiod_*`,以 `struct gpio_desc *` 操作)取代,旧 API 在淘汰中。描述符 API 还会**按 DT 的 `GPIO_ACTIVE_LOW` 自动处理极性**——`gpiod_set_value(d, 1)` 是"逻辑有效"。旧代码自己对 active-low 取反,换到描述符 API 后就反了。
+- fix：用 `devm_gpiod_get(dev, "<name>", GPIOD_*)`(对应 DT 的 `<name>-gpios`)拿 `gpio_desc`,`gpiod_set_value`/`gpiod_get_value` 按逻辑电平操作;不要自己处理 active-low(描述符已处理);别用旧整数 API。
+- trigger：见到 `gpio_request`/`gpio_set_value`/`gpio_get_value`/裸 GPIO 编号,或问"GPIO 怎么用/复位脚/active-low"。
+- range：版本无关(旧 API 长期淘汰中);具体函数名按目标树 `include/linux/gpio/consumer.h` 核。
+- scope/limits：消费侧 API 选择 + 极性处理;provider(gpiochip)另说。
+- check：
+  ```
+  [CLAIMS]
+  api: gpiod_get
+  symbol: gpio_desc
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-026
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 gpiod 消费 API;子系统:gpio）
 - fires/catches：0 / 0

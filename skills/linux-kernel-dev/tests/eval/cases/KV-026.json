@@ -1,0 +1,18 @@
+{
+  "id": "KV-026",
+  "topic": "use a reset/enable GPIO from a driver",
+  "q": "驱动里要控制一个复位脚(DT 里给了 reset-gpios),怎么拿和拉电平?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "gpio",
+  "gold_claims": {
+    "api": ["devm_gpiod_get", "gpiod_set_value", "gpiod_direction_output"],
+    "symbol": ["gpio_desc"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "gpiod_set", "why": "编造的(应是 gpiod_set_value)" },
+    { "type": "fake-api", "claim": "gpiod_write", "why": "不存在的 API" }
+  ],
+  "forbidden": ["用旧整数 API gpio_request/gpio_set_value", "自己再对 active-low 取反(描述符 API 已按 DT 处理)"],
+  "rubric": "devm_gpiod_get(dev, \"reset\", GPIOD_OUT_LOW) 拿描述符(检查 IS_ERR);gpiod_set_value 按逻辑电平操作;别用旧整数 API"
+}

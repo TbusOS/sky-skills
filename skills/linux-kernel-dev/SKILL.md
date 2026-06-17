@@ -67,6 +67,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 设备树消费（compatible 绑定 / of_* 读属性 / 拿 MMIO·中断·时钟·GPIO / 遍历节点 / overlay） | `references/subsys/device-tree.md` | `Documentation/devicetree/`（`.dts`/binding 模板见 `templates.md`） |
 | I2C 设备驱动（i2c_driver 绑定 / smbus·原始传输 / regmap-i2c / probe 签名版本） | `references/subsys/i2c.md` | `Documentation/i2c/`、`include/linux/i2c.h` |
 | SPI 设备驱动（spi_driver 绑定 / spi_sync·多段传输 / regmap-spi / buffer DMA-able） | `references/subsys/spi.md` | `Documentation/spi/`、`include/linux/spi/spi.h` |
+| GPIO（gpiod 描述符消费 / GPIO 当中断 / 写 gpiochip 控制器 / 弃旧整数 API） | `references/subsys/gpio.md` | `Documentation/driver-api/gpio/`、`include/linux/gpio/consumer.h` |
 
 目录总览见 `index.md`。
 

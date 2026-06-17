@@ -1,0 +1,17 @@
+{
+  "id": "KV-028",
+  "topic": "write a GPIO controller (gpiochip provider)",
+  "q": "要给一个 GPIO 扩展芯片写控制器驱动,注册 gpiochip 用什么?",
+  "kind": "objective",
+  "subsystem": "gpio",
+  "gold_claims": {
+    "api": ["devm_gpiochip_add_data"],
+    "symbol": ["gpio_chip"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "gpiochip_register_data", "why": "编造的(应是 devm_gpiochip_add_data / gpiochip_add_data)" },
+    { "type": "fake-api", "claim": "gpiod_read", "why": "不存在的 API" }
+  ],
+  "forbidden": ["手工 gpiochip_add 不用 devm 又忘 remove"],
+  "rubric": "填 struct gpio_chip(.get/.set/.direction_input/.direction_output 等)+ devm_gpiochip_add_data(dev, &chip, priv);要 GPIO 中断则配 gpio_irq_chip"
+}
