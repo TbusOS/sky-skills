@@ -1,0 +1,18 @@
+{
+  "id": "KV-014",
+  "topic": "expose kernel data to userspace (debugfs + seq_file)",
+  "q": "想把驱动的运行状态导出成一个文件给用户读,用什么?多行输出怎么不溢出?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "filesystems",
+  "gold_claims": {
+    "api": ["debugfs_create_file", "single_open", "seq_printf"],
+    "symbol": ["seq_file"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "debugfs_create_value", "why": "编造的 debugfs API" },
+    { "type": "fake-api", "claim": "seq_file_printf", "why": "不存在(应是 seq_printf)" }
+  ],
+  "forbidden": ["自己 sprintf 进定长 buffer 不用 seq_file(会截断/溢出)", "在 seq show 里长时间阻塞"],
+  "rubric": "用 seq_file 安全分页:single_open + seq_printf/seq_puts(或 DEFINE_SHOW_ATTRIBUTE);debugfs_create_file 挂上;debugfs 不是稳定 ABI"
+}

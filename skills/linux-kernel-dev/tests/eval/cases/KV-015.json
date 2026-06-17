@@ -1,0 +1,17 @@
+{
+  "id": "KV-015",
+  "topic": "implement file_operations read/write for a char/virtual file",
+  "q": "给字符设备/虚拟文件实现读写回调,怎么安全拿用户 buffer、怎么处理偏移?",
+  "kind": "objective",
+  "subsystem": "filesystems",
+  "gold_claims": {
+    "api": ["copy_to_user", "copy_from_user"],
+    "symbol": ["file_operations", "loff_t"]
+  },
+  "corruptions": [
+    { "type": "fake-symbol", "claim": "fops_register", "why": "编造的注册符号(file_operations 是结构,直接填回调)" },
+    { "type": "fake-api", "claim": "read_user_buffer", "why": "不存在(应用 copy_from_user)" }
+  ],
+  "forbidden": ["直接解引用用户 buffer", ".read 不推进 *ppos(导致 cat 死循环)"],
+  "rubric": "填 struct file_operations 的 .read/.write(或新的 .read_iter/.write_iter);用 copy_to_user/copy_from_user;按拷贝字节数推进 *ppos 并返回字节数"
+}

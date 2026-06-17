@@ -1,0 +1,18 @@
+{
+  "id": "KV-016",
+  "topic": "create a procfs entry (proc_ops since 5.6)",
+  "q": "在 /proc 下建一个入口,proc_create 最后一个参数填什么结构?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "filesystems",
+  "gold_claims": {
+    "api": ["proc_create", "proc_mkdir"],
+    "symbol": ["proc_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "proc_fops_install", "why": "编造的 API" },
+    { "type": "fake-api", "claim": "register_proc_entry", "why": "不存在的注册函数" }
+  ],
+  "forbidden": ["proc_create 末参传 struct file_operations(5.6 起要 struct proc_ops)"],
+  "rubric": "proc_create(name, mode, parent, &my_proc_ops),末参自 5.6 起是 struct proc_ops(不再是 file_operations);旧内核仍是 file_operations,按目标树核"
+}

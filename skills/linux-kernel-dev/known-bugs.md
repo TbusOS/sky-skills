@@ -24,6 +24,7 @@
 - KB-IRQ-001 · 硬中断 / 软中断(tasklet/softirq)上下文不能睡眠；要睡眠的延迟处理用 threaded IRQ 的 thread_fn 或 workqueue · KV-006 · range：版本无关
 - KB-SCHED-001 · 手动睡眠必须先 set_current_state 再检查条件(反了丢唤醒)；能用 wait_event 就别手写 · KV-010 · range：版本无关
 - KB-MM-001 · 原子/中断/持锁上下文分配内存用 GFP_ATOMIC，不用 GFP_KERNEL(后者会触发回收而睡眠) · KV-011 · range：版本无关
+- KB-FS-001 · procfs 的 proc_create 末参自 5.6 起从 struct file_operations 改成 struct proc_ops；移植旧 /proc 代码必踩 · KV-016 · range：5.6+
 
 ## 条目
 
@@ -98,4 +99,22 @@
   ```
 - linked_eval_case：KV-011
 - provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 GFP 上下文语义；样板子系统：内存管理。关联 KB-IRQ-001——同根不同面）
+- fires/catches：0 / 0
+
+### KB-FS-001：procfs 的 proc_create 末参 5.6 起从 file_operations 改成 proc_ops
+
+- symptom：把旧 `/proc` 代码移植到新内核，编译报 `proc_create` 实参类型不匹配 / 期望 `struct proc_ops *`；或直接传 `&my_file_operations` 编译错。
+- root cause：`proc_create()` 最后一个参数自 5.6 起由 `struct file_operations *` 改为 `struct proc_ops *`（procfs 不再复用通用 file_operations，单列一套精简回调）。旧教程/旧代码仍按 `file_operations` 写——这是个随版本失效的接口变更。
+- fix：定义 `static const struct proc_ops my_proc_ops = { .proc_open=…, .proc_read=…, … };`，`proc_create(name, mode, parent, &my_proc_ops)`。注意回调名带 `proc_` 前缀（`.proc_open`/`.proc_read`/`.proc_lseek`/`.proc_release`）。
+- trigger：见到 `proc_create` 末参传 `file_operations`，或问"建 /proc 入口 / proc_create 用什么结构 / 移植旧 proc 代码编译错"。
+- range：5.6+（5.6 以前是 `file_operations`）。按目标树 `include/linux/proc_fs.h` 核。
+- scope/limits：仅 procfs；debugfs/sysfs 不受此变更影响。
+- check：
+  ```
+  [CLAIMS]
+  symbol: proc_ops
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-016
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 proc_create 接口；样板子系统：文件系统）
 - fires/catches：0 / 0

@@ -63,8 +63,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 中断 / 下半部 / threaded IRQ / tasklet / softirq / workqueue 选型 | `references/subsys/interrupts.md` | `Documentation/core-api/genericirq.rst`、`core-api/irq/` |
 | 睡眠/唤醒 / 等待队列 / completion / 抢占 / 调度策略·优先级·亲和性 / CFS·EEVDF·RT·DL | `references/subsys/scheduler.md` | `Documentation/scheduler/` |
 | 内存分配（kmalloc/kvmalloc/vmalloc/alloc_pages/kmem_cache）/ GFP 标志 / 访问用户内存 / 驱动 mmap·缺页 | `references/subsys/memory.md` | `Documentation/mm/`、`core-api/memory-allocation.rst` |
-
-其余核心子系统（文件系统）按同一形态（模块 + 路由 + eval 用例 + known-bug）陆续加入。
+| VFS / file_operations 实现 / 导出数据（debugfs·procfs·sysfs·seq_file）/ 写文件系统·挂载 / page cache | `references/subsys/filesystems.md` | `Documentation/filesystems/` |
 
 目录总览见 `index.md`。
 
