@@ -65,6 +65,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 内存分配（kmalloc/kvmalloc/vmalloc/alloc_pages/kmem_cache）/ GFP 标志 / 访问用户内存 / 驱动 mmap·缺页 | `references/subsys/memory.md` | `Documentation/mm/`、`core-api/memory-allocation.rst` |
 | VFS / file_operations 实现 / 导出数据（debugfs·procfs·sysfs·seq_file）/ 写文件系统·挂载 / page cache | `references/subsys/filesystems.md` | `Documentation/filesystems/` |
 | 设备树消费（compatible 绑定 / of_* 读属性 / 拿 MMIO·中断·时钟·GPIO / 遍历节点 / overlay） | `references/subsys/device-tree.md` | `Documentation/devicetree/`（`.dts`/binding 模板见 `templates.md`） |
+| I2C 设备驱动（i2c_driver 绑定 / smbus·原始传输 / regmap-i2c / probe 签名版本） | `references/subsys/i2c.md` | `Documentation/i2c/`、`include/linux/i2c.h` |
 
 目录总览见 `index.md`。
 

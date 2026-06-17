@@ -1,0 +1,18 @@
+{
+  "id": "KV-020",
+  "topic": "i2c client driver: bind + smbus register access",
+  "q": "写一个挂在 I2C 总线上的简单芯片驱动,怎么绑定 + 读写一个寄存器?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "i2c",
+  "gold_claims": {
+    "api": ["module_i2c_driver", "i2c_smbus_read_byte_data", "i2c_smbus_write_byte_data"],
+    "symbol": ["i2c_driver", "i2c_client"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "i2c_smbus_read_reg", "why": "编造的(应是 i2c_smbus_read_byte_data)" },
+    { "type": "fake-api", "claim": "module_i2c_register", "why": "不存在(应是 module_i2c_driver)" }
+  ],
+  "forbidden": ["在中断/原子上下文做 I2C 传输(会睡)", "probe 用旧双参签名(新内核单参)"],
+  "rubric": "i2c_driver + of_match_table + module_i2c_driver;probe(client) 单参(新内核);简单寄存器用 i2c_smbus_read/write_byte_data;传输在进程上下文"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "KV-021",
+  "topic": "i2c raw message transfer",
+  "q": "I2C 设备需要先写寄存器地址再连续读多字节(非标准 SMBus),怎么发原始消息?",
+  "kind": "objective",
+  "subsystem": "i2c",
+  "gold_claims": {
+    "api": ["i2c_transfer", "i2c_master_send", "i2c_master_recv"],
+    "symbol": ["i2c_msg"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "i2c_send_data", "why": "编造的(应是 i2c_master_send)" },
+    { "type": "fake-api", "claim": "i2c_msg_transfer", "why": "不存在(应是 i2c_transfer)" }
+  ],
+  "forbidden": ["在原子上下文做 i2c_transfer", "忽略 i2c_transfer 返回的传输消息数"],
+  "rubric": "用 struct i2c_msg[] 描述写+读两段,i2c_transfer(adap, msgs, 2);或简单时 i2c_master_send/recv;检查返回值"
+}

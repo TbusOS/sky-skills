@@ -26,6 +26,7 @@
 - KB-MM-001 · 原子/中断/持锁上下文分配内存用 GFP_ATOMIC，不用 GFP_KERNEL(后者会触发回收而睡眠) · KV-011 · range：版本无关
 - KB-FS-001 · procfs 的 proc_create 末参自 5.6 起从 struct file_operations 改成 struct proc_ops；移植旧 /proc 代码必踩 · KV-016 · range：5.6+
 - KB-DT-001 · 遍历 DT 节点(for_each_child_of_node / of_find_*)拿到的 device_node 用完要 of_node_put,提前 break 也要 · KV-019 · range：版本无关
+- KB-I2C-001 · i2c_driver.probe 签名变过:旧双参 (client,id) → probe_new(client) → 6.x 起单参 .probe(client);移植旧驱动编译错 · KV-020 · range：6.x 起单参
 
 ## 条目
 
@@ -136,4 +137,23 @@
   ```
 - linked_eval_case：KV-019
 - provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 of 遍历引用计数；子系统：设备树）
+- fires/catches：0 / 0
+
+### KB-I2C-001：i2c_driver.probe 签名变过,移植旧驱动会编译错
+
+- symptom：把旧 I2C 驱动移到新内核，`i2c_driver` 的 `.probe` 赋值类型不匹配；或用了 `.probe_new` 在更新内核上字段不存在。
+- root cause：`i2c_driver.probe` 历史上是 `(struct i2c_client *, const struct i2c_device_id *)`（双参）；5.0 引入单参 `.probe_new(struct i2c_client *)`；6.x 起把 `.probe` 本身改为单参并移除 `.probe_new`。所以同一份代码在不同内核上对不上——随版本变的接口。
+- fix：现代内核（6.x+）用单参 `int probe(struct i2c_client *client)` 赋给 `.probe`；要兼容一段跨度时按目标树 `include/linux/i2c.h` 的实际字段写。型号/变体数据从 DT 用 `of_device_get_match_data` 取（不再依赖 `i2c_device_id`）。
+- trigger：见到 `i2c_driver` 的 `.probe`/`.probe_new` 赋值，或问"i2c probe 签名/移植旧 i2c 驱动编译错"。
+- range：6.x 起 `.probe` 单参；6.1 过渡期 `.probe`(双参) 与 `.probe_new`(单参) 并存；7.0 只剩单参 `.probe`。按目标树核。
+- scope/limits：仅 i2c_driver 的 probe 字段；传输 API 不受影响。
+- check：
+  ```
+  [CLAIMS]
+  api: module_i2c_driver
+  symbol: i2c_client
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-020
+- provenance：self（两棵树 6.1/7.0 实测 i2c.h probe 字段差异；子系统：i2c）
 - fires/catches：0 / 0

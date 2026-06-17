@@ -1,0 +1,17 @@
+{
+  "id": "KV-022",
+  "topic": "i2c register access via regmap",
+  "q": "一个多寄存器的 I2C 设备,怎么用 regmap 管寄存器读写而不手撸?",
+  "kind": "objective",
+  "subsystem": "i2c",
+  "gold_claims": {
+    "api": ["devm_regmap_init_i2c", "regmap_read", "regmap_write"],
+    "symbol": ["regmap"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "regmap_i2c_init", "why": "编造的(应是 devm_regmap_init_i2c)" },
+    { "type": "fake-api", "claim": "i2c_regmap_setup", "why": "不存在的 API" }
+  ],
+  "forbidden": ["设备适合 regmap 还手撸 i2c_transfer 管每个寄存器"],
+  "rubric": "devm_regmap_init_i2c(client, &config) 建 regmap,之后 regmap_read/regmap_write;regmap 自动管 cache/锁/字节序"
+}
