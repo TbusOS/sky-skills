@@ -1,0 +1,18 @@
+{
+  "id": "KV-038",
+  "topic": "register an ASoC codec/component + DAI",
+  "q": "写一个音频 codec 驱动,现代 ASoC 怎么注册 component 和 DAI?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "audio",
+  "gold_claims": {
+    "api": ["devm_snd_soc_register_component"],
+    "symbol": ["snd_soc_component_driver", "snd_soc_dai_driver"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "snd_soc_register_codec", "why": "旧 codec 模型已移除(改用 component)" },
+    { "type": "fake-api", "claim": "soc_register_component", "why": "不存在(应是 devm_snd_soc_register_component)" }
+  ],
+  "forbidden": ["还按旧 snd_soc_codec 模型写新 codec"],
+  "rubric": "现代 ASoC 用 component 模型:填 snd_soc_component_driver + snd_soc_dai_driver,devm_snd_soc_register_component 注册;codec 寄存器走 regmap;不用已移除的 snd_soc_register_codec"
+}

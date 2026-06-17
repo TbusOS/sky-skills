@@ -1,0 +1,17 @@
+{
+  "id": "KV-039",
+  "topic": "ASoC machine driver (sound card linking codec + cpu DAI)",
+  "q": "怎么写 machine 驱动把 codec 和 SoC 的 I2S 接口连成一块声卡?",
+  "kind": "objective",
+  "subsystem": "audio",
+  "gold_claims": {
+    "api": ["devm_snd_soc_register_card", "snd_soc_register_card"],
+    "symbol": ["snd_soc_card", "snd_soc_dai_link"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "snd_soc_card_register", "why": "顺序错(应是 snd_soc_register_card)" },
+    { "type": "fake-api", "claim": "soc_register_card", "why": "不存在的 API" }
+  ],
+  "forbidden": ["dai_link 里 cpu/codec/platform 名字对不上注册的组件"],
+  "rubric": "struct snd_soc_card + snd_soc_dai_link[] 描述每条链路(cpu/codec/platform 组件名要对上);devm_snd_soc_register_card 注册"
+}

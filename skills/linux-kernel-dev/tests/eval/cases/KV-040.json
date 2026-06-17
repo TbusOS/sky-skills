@@ -1,0 +1,18 @@
+{
+  "id": "KV-040",
+  "topic": "ASoC DAI ops and the trigger context",
+  "q": "snd_soc_dai_ops 里设格式/时钟和 trigger 启停分别放哪?trigger 能慢速 I2C 写吗?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "audio",
+  "gold_claims": {
+    "api": ["snd_soc_dai_set_fmt", "snd_soc_dai_set_sysclk"],
+    "symbol": ["snd_soc_dai_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "snd_dai_set_fmt", "why": "编造的(应是 snd_soc_dai_set_fmt)" },
+    { "type": "fake-api", "claim": "snd_soc_trigger", "why": "不存在(trigger 是 dai_ops 的回调字段)" }
+  ],
+  "forbidden": ["在 trigger 回调里睡眠(慢速 I2C 写 / mutex)——它在原子上下文"],
+  "rubric": "格式/时钟/采样率配置放 hw_params/set_fmt/set_sysclk(进程上下文,可慢速 regmap);trigger 只做非睡眠的启停(它持 PCM stream 锁,原子上下文)"
+}

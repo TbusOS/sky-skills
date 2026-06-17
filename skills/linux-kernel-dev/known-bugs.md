@@ -32,6 +32,7 @@
 - KB-USB-001 · URB 完成回调在原子/软中断上下文,不能睡;回调里重新提交 URB 用 usb_submit_urb(urb, GFP_ATOMIC) · KV-031 · range：版本无关
 - KB-BUILD-001 · 模块漏 MODULE_LICENSE → 内核被 taint,且 EXPORT_SYMBOL_GPL 导出的符号对该模块不可用(链接/加载失败) · KV-032 · range：版本无关
 - KB-NET-001 · NAPI poll 在软中断上下文(不能睡);必须尊重 budget——收满 budget 就返回,done<budget 才 napi_complete_done 重开收中断,返回 done · KV-036 · range：版本无关
+- KB-ASOC-001 · ASoC 的 trigger 回调在原子上下文(持 PCM stream 锁,不能睡);慢速配置(I2C regmap)放 hw_params,trigger 只做非睡眠启停 · KV-040 · range：版本无关
 
 ## 条目
 
@@ -254,4 +255,23 @@
   ```
 - linked_eval_case：KV-036
 - provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 NAPI 上下文/budget;子系统:网络。关联 KB-IRQ-001 同根"软中断不睡"）
+- fires/catches：0 / 0
+
+### KB-ASOC-001：ASoC trigger 回调在原子上下文,不能睡
+
+- symptom：音频驱动 START/STOP 流时偶发 `scheduling while atomic` / 死锁;在 trigger 里经 I2C 写 codec 寄存器(慢速、会睡)就崩。
+- root cause：ASoC 的 `snd_soc_dai_ops.trigger`(以及 PCM trigger)在**持 PCM substream 自旋锁的原子上下文**调用,**不能睡眠**——不能做经 I2C/SPI 的慢速 regmap 访问、不能 mutex_lock。
+- fix：把慢速配置(采样率/格式/时钟、需要经控制总线写的寄存器)放 `hw_params` / `set_fmt` / `set_sysclk`(进程上下文,可睡);`trigger` 里只做非睡眠的启停(写本地 MMIO 寄存器、置标志)。要在启停时做慢速操作就 defer 到 workqueue。
+- trigger：见到 ASoC `trigger` 回调里有 I2C/SPI regmap 写、msleep、mutex,或问"trigger 能不能慢速写 / ASoC 启停 codec"。
+- range：版本无关(PCM trigger 的原子上下文长期不变)。
+- scope/limits：约束 trigger 回调的上下文;回调结构按目标树 `include/sound/soc-dai.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: devm_snd_soc_register_component
+  symbol: snd_soc_dai_ops
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-040
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 ASoC DAI ops 上下文;子系统:音频。关联 KB-IRQ-001 同根"原子不睡"）
 - fires/catches：0 / 0
