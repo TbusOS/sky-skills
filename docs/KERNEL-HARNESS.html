@@ -213,16 +213,65 @@
 
     </div>
 
-    <!-- Core subsystems it speaks deeply -->
+    <!-- Subsystems it speaks (map + grouped cards) -->
     <div style="margin-top:var(--space-6);">
       <div style="max-width:740px; margin:0 auto var(--space-5); text-align:center;">
-        <span class="anth-badge"><span class="lang-en">Core subsystems it speaks</span><span class="lang-zh">深入到具体内核子系统</span></span>
+        <span class="anth-badge"><span class="lang-en">Subsystems it speaks</span><span class="lang-zh">它会的内核子系统</span></span>
         <p style="font-size:16px; color:var(--anth-text-secondary); line-height:1.6; margin-top:var(--space-3); font-family:var(--font-body);">
-          <span class="lang-en">Beyond the generic driver scaffolding, it loads a per-subsystem expert module on demand — each aligned to that subsystem's kernel <code>Documentation/</code>, verified against a real source tree, and carrying its own test cases.</span>
-          <span class="lang-zh">不止通用驱动骨架——按任务命中加载对应子系统的专家模块，每个都对齐该子系统的内核 <code>Documentation/</code>、拿真源码树验证、带自己的测试用例。</span>
+          <span class="lang-en">Beyond generic driver scaffolding, the hub routes each task to a per-subsystem expert module — loaded on demand, aligned to that subsystem's kernel <code>Documentation/</code>, verified against a real source tree, and carrying its own test cases and known-bug.</span>
+          <span class="lang-zh">不止通用驱动骨架——hub 按任务把你路由到对应子系统的专家模块：按需加载、对齐该子系统的内核 <code>Documentation/</code>、拿真源码树验证、各带自己的测试用例和踩坑记录。</span>
         </p>
       </div>
-      <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--space-4);">
+
+      <!-- Subsystem map -->
+      <figure style="margin:0 0 var(--space-6);">
+        <svg role="img" aria-label="linux-kernel-dev routes a task to one of nine subsystem expert modules, in two groups: core kernel internals (interrupts, scheduler, memory, filesystems) and buses, devices and boot (device tree, i2c, spi, gpio, usb)" viewBox="0 0 1200 430" style="display:block; width:100%; max-width:1200px; height:auto; margin:0 auto;" font-family="Poppins, sans-serif">
+          <title id="map-title">Subsystem module map</title>
+          <!-- hub -->
+          <rect x="440" y="20" width="320" height="62" rx="12" fill="#d97757"/>
+          <text x="600" y="47" text-anchor="middle" font-size="19" font-weight="600" fill="#ffffff">linux-kernel-dev</text>
+          <text x="600" y="68" text-anchor="middle" font-size="12.5" fill="#ffffff"><tspan class="lang-en" x="600">SKILL.md — routes by task</tspan><tspan class="lang-zh" x="600">SKILL.md — 按任务路由</tspan></text>
+          <!-- connectors -->
+          <path d="M600 82 L310 138" stroke="#c9c4b8" stroke-width="2" fill="none"/>
+          <path d="M600 82 L890 138" stroke="#c9c4b8" stroke-width="2" fill="none"/>
+          <!-- group A: core kernel internals -->
+          <rect x="40" y="140" width="540" height="272" rx="14" fill="#faf9f5" stroke="#e5e1d8"/>
+          <text x="310" y="170" text-anchor="middle" font-size="15" font-weight="600" fill="#d97757"><tspan class="lang-en" x="310">Core kernel internals</tspan><tspan class="lang-zh" x="310">核心内核机制</tspan></text>
+          <g>
+            <rect x="64" y="186" width="238" height="84" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="183" y="234" text-anchor="middle" font-size="17" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="183">Interrupts</tspan><tspan class="lang-zh" x="183">中断</tspan></text>
+            <rect x="318" y="186" width="238" height="84" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="437" y="234" text-anchor="middle" font-size="17" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="437">Scheduler</tspan><tspan class="lang-zh" x="437">调度器</tspan></text>
+            <rect x="64" y="294" width="238" height="84" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="183" y="342" text-anchor="middle" font-size="17" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="183">Memory</tspan><tspan class="lang-zh" x="183">内存管理</tspan></text>
+            <rect x="318" y="294" width="238" height="84" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="437" y="342" text-anchor="middle" font-size="17" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="437">Filesystems</tspan><tspan class="lang-zh" x="437">文件系统</tspan></text>
+          </g>
+          <!-- group B: buses, devices & boot -->
+          <rect x="620" y="140" width="540" height="272" rx="14" fill="#faf9f5" stroke="#e5e1d8"/>
+          <text x="890" y="170" text-anchor="middle" font-size="15" font-weight="600" fill="#d97757"><tspan class="lang-en" x="890">Buses, devices &amp; boot</tspan><tspan class="lang-zh" x="890">总线 · 设备 · 启动</tspan></text>
+          <g>
+            <rect x="636" y="186" width="158" height="84" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="715" y="234" text-anchor="middle" font-size="16" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="715">Device tree</tspan><tspan class="lang-zh" x="715">设备树</tspan></text>
+            <rect x="811" y="186" width="158" height="84" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="890" y="234" text-anchor="middle" font-size="16" font-weight="600" fill="#1f1e1c">I2C</text>
+            <rect x="986" y="186" width="158" height="84" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="1065" y="234" text-anchor="middle" font-size="16" font-weight="600" fill="#1f1e1c">SPI</text>
+            <rect x="724" y="294" width="158" height="84" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="803" y="342" text-anchor="middle" font-size="16" font-weight="600" fill="#1f1e1c">GPIO</text>
+            <rect x="899" y="294" width="158" height="84" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="978" y="342" text-anchor="middle" font-size="16" font-weight="600" fill="#1f1e1c">USB</text>
+          </g>
+        </svg>
+        <figcaption style="text-align:center; max-width:760px; margin:var(--space-4) auto 0; font-size:13.5px; color:var(--anth-text-secondary); line-height:1.5; font-family:var(--font-body);">
+          <span class="lang-en">Nine subsystem modules today. Each carries 3 frozen test cases (a right answer that must resolve in a real tree + corruptions that must be caught) and a known-bug — so coverage is measured, not claimed.</span>
+          <span class="lang-zh">目前九个子系统模块。每个带 3 个冻结测试用例（正确答案必须在真树查得到 + 故意写错的必须被抓）和一条踩坑记录——覆盖是测出来的，不是嘴上说的。</span>
+        </figcaption>
+      </figure>
+
+      <!-- group A cards -->
+      <h3 style="font-family:var(--font-heading); font-size:18px; font-weight:600; margin:0 0 var(--space-3); color:var(--anth-text);"><span class="lang-en">Core kernel internals</span><span class="lang-zh">核心内核机制</span></h3>
+      <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--space-4); margin-bottom:var(--space-6);">
         <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
           <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">Interrupts</span><span class="lang-zh">中断</span></h4>
           <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en"><code>request_irq</code> / threaded IRQ, bottom-half choice (workqueue / tasklet / softirq), and what can sleep where.</span><span class="lang-zh"><code>request_irq</code> / threaded IRQ、下半部选型（workqueue / tasklet / softirq）、哪个上下文能睡。</span></p>
@@ -240,10 +289,34 @@
           <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">VFS objects, implementing <code>file_operations</code>, exposing data via debugfs / procfs / seq_file, writing a filesystem.</span><span class="lang-zh">VFS 对象、实现 <code>file_operations</code>、用 debugfs / procfs / seq_file 导出数据、写文件系统。</span></p>
         </div>
       </div>
-      <p style="text-align:center; max-width:740px; margin:var(--space-4) auto 0; font-size:13.5px; color:var(--anth-text-secondary); line-height:1.5; font-family:var(--font-body);">
-        <span class="lang-en">More subsystems land the same way — a new module never ships without test cases that pass against a real tree.</span>
-        <span class="lang-zh">更多子系统按同一形态加入——新模块不配上能在真源码树跑通的测试用例，就不上线。</span>
-      </p>
+
+      <!-- group B cards -->
+      <h3 style="font-family:var(--font-heading); font-size:18px; font-weight:600; margin:0 0 var(--space-3); color:var(--anth-text);"><span class="lang-en">Buses, devices &amp; boot</span><span class="lang-zh">总线 · 设备 · 启动</span></h3>
+      <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--space-4);">
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">Device tree</span><span class="lang-zh">设备树</span></h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">compatible binding, <code>of_*</code> property reads, MMIO/IRQ/clock/GPIO resources, node iteration with refcounting.</span><span class="lang-zh">compatible 绑定、<code>of_*</code> 读属性、拿 MMIO/中断/时钟/GPIO、遍历节点的引用计数。</span></p>
+        </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);">I2C</h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en"><code>i2c_driver</code> bind, SMBus / raw transfer / regmap-i2c, and the probe-signature change across versions.</span><span class="lang-zh"><code>i2c_driver</code> 绑定、SMBus / 原始传输 / regmap-i2c、跨版本的 probe 签名变更。</span></p>
+        </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);">SPI</h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en"><code>spi_driver</code> bind, <code>spi_sync</code> multi-segment transfers, regmap-spi, DMA-able buffers.</span><span class="lang-zh"><code>spi_driver</code> 绑定、<code>spi_sync</code> 多段传输、regmap-spi、buffer 必须 DMA-able。</span></p>
+        </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);">GPIO</h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">gpiod descriptor consumer, GPIO-as-IRQ, writing a gpiochip, and the active-low handling.</span><span class="lang-zh">gpiod 描述符消费、GPIO 当中断、写 gpiochip 控制器、active-low 处理。</span></p>
+        </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);">USB</h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">host driver bind, control / bulk transfers, async URBs, and the completion-callback context rule.</span><span class="lang-zh">host 驱动绑定、控制 / 批量传输、URB 异步、完成回调的上下文规则。</span></p>
+        </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px dashed var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg); display:flex; align-items:center;">
+          <p style="font-size:14px; line-height:1.5; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">More land the same way — networking, audio (ASoC), camera (V4L2), the build system — each with test cases that pass against a real tree before it ships.</span><span class="lang-zh">更多按同一形态加入——网络、音频（ASoC）、摄像（V4L2）、构建系统——每个都要先有能在真树跑通的测试用例才上线。</span></p>
+        </div>
+      </div>
     </div>
 
     <!-- Safety rules callout -->
