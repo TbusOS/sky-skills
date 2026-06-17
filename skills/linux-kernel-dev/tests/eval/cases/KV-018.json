@@ -1,0 +1,17 @@
+{
+  "id": "KV-018",
+  "topic": "get MMIO and IRQ resources from DT",
+  "q": "platform 驱动怎么从设备树拿 MMIO 寄存器基址和中断号?",
+  "kind": "objective",
+  "subsystem": "device-tree",
+  "gold_claims": {
+    "api": ["devm_platform_ioremap_resource", "platform_get_irq"],
+    "symbol": ["platform_device"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "of_ioremap_resource", "why": "编造的(应是 devm_platform_ioremap_resource)" },
+    { "type": "fake-api", "claim": "platform_get_irq_num", "why": "不存在的 API" }
+  ],
+  "forbidden": ["手动 ioremap 不用 devm(清理顺序错)", "不检查 platform_get_irq 返回值(可能 -EPROBE_DEFER)"],
+  "rubric": "MMIO 用 devm_platform_ioremap_resource(pdev, 0);中断用 platform_get_irq(pdev, 0) 再 devm_request_irq;都检查返回值"
+}

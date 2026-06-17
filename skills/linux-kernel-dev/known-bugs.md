@@ -25,6 +25,7 @@
 - KB-SCHED-001 · 手动睡眠必须先 set_current_state 再检查条件(反了丢唤醒)；能用 wait_event 就别手写 · KV-010 · range：版本无关
 - KB-MM-001 · 原子/中断/持锁上下文分配内存用 GFP_ATOMIC，不用 GFP_KERNEL(后者会触发回收而睡眠) · KV-011 · range：版本无关
 - KB-FS-001 · procfs 的 proc_create 末参自 5.6 起从 struct file_operations 改成 struct proc_ops；移植旧 /proc 代码必踩 · KV-016 · range：5.6+
+- KB-DT-001 · 遍历 DT 节点(for_each_child_of_node / of_find_*)拿到的 device_node 用完要 of_node_put,提前 break 也要 · KV-019 · range：版本无关
 
 ## 条目
 
@@ -117,4 +118,22 @@
   ```
 - linked_eval_case：KV-016
 - provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 proc_create 接口；样板子系统：文件系统）
+- fires/catches：0 / 0
+
+### KB-DT-001：遍历 DT 节点拿到的 device_node 用完要 of_node_put
+
+- symptom：长期运行后 DT 节点引用计数泄漏；卸载模块或移除设备时 `device_node` 不释放、`/sys/firmware/devicetree` 引用残留；用 `OF_DYNAMIC`/overlay 时尤其暴露。
+- root cause：`for_each_child_of_node` / `of_find_node_by_*` / `of_get_*` 返回的 `device_node` 都**增加了引用计数**，需要 `of_node_put()` 配对释放。`for_each_child_of_node` 正常跑完循环会自动 put，但**提前 `break`/`return` 不会**——漏 put。
+- fix：正常遍历完循环自动配平；任何提前 `break`/`goto`/`return` 之前手动 `of_node_put(child)`。`of_find_*` 单独拿的节点用完显式 `of_node_put`。
+- trigger：见到 `for_each_child_of_node` / `of_find_node_by_*` / `of_get_child_by_name` 后没有对应 `of_node_put`，或循环里有提前退出。
+- range：版本无关（DT 节点引用计数语义长期不变）。
+- scope/limits：约束引用计数配对；遍历宏/函数名按目标树 `include/linux/of.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: of_node_put, for_each_child_of_node
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-019
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 of 遍历引用计数；子系统：设备树）
 - fires/catches：0 / 0

@@ -1,0 +1,18 @@
+{
+  "id": "KV-019",
+  "topic": "iterate DT child nodes with correct refcounting",
+  "q": "遍历设备树某节点的所有子节点,引用计数怎么处理?提前 break 要注意什么?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "device-tree",
+  "gold_claims": {
+    "api": ["for_each_child_of_node", "of_node_put"],
+    "symbol": ["device_node"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "of_node_free", "why": "编造的(应是 of_node_put)" },
+    { "type": "fake-api", "claim": "of_child_get", "why": "不存在的 API" }
+  ],
+  "forbidden": ["遍历后忘 of_node_put(漏引用)", "提前 break/return 前不 of_node_put 当前 node"],
+  "rubric": "for_each_child_of_node 拿到的 node 增了引用计数,正常遍历完循环自动 put;提前 break/return 前必须手动 of_node_put(child)"
+}

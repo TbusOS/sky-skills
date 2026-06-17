@@ -1,0 +1,18 @@
+{
+  "id": "KV-017",
+  "topic": "bind a driver to DT and read config",
+  "q": "驱动怎么按 compatible 绑定设备树,并按型号变体读私有数据 + 读一个整数属性?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "device-tree",
+  "gold_claims": {
+    "api": ["of_property_read_u32", "of_device_get_match_data"],
+    "symbol": ["of_device_id", "of_match_table"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "of_read_u32", "why": "编造的(应是 of_property_read_u32)" },
+    { "type": "fake-api", "claim": "of_get_match_data", "why": "不存在(应是 of_device_get_match_data)" }
+  ],
+  "forbidden": ["不检查 of_property_read_u32 返回值", "compatible 和 of_match_table 对不上"],
+  "rubric": "of_device_id 表 + driver.of_match_table + module_platform_driver;probe 里 of_device_get_match_data 区分变体;of_property_read_u32 检查返回值"
+}
