@@ -1,0 +1,18 @@
+{
+  "id": "KV-023",
+  "topic": "spi device driver: bind + simple read/write",
+  "q": "写一个 SPI 设备驱动,怎么绑定 + 设置 mode/速率 + 简单读写?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "spi",
+  "gold_claims": {
+    "api": ["module_spi_driver", "spi_write", "spi_read", "spi_setup"],
+    "symbol": ["spi_device"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "module_spi_register", "why": "不存在(应是 module_spi_driver)" },
+    { "type": "fake-api", "claim": "spi_bus_write", "why": "编造的(应是 spi_write)" }
+  ],
+  "forbidden": ["在中断/原子上下文做 SPI 传输(会睡)", "probe 里忘 spi_setup 导致 mode/速率没生效"],
+  "rubric": "spi_driver + of_match_table + module_spi_driver;probe(spi) 设 spi->mode/max_speed_hz 后 spi_setup();简单读写 spi_write/spi_read;传输在进程上下文"
+}

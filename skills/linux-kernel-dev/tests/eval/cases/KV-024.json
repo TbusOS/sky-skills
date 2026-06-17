@@ -1,0 +1,18 @@
+{
+  "id": "KV-024",
+  "topic": "spi full-duplex / multi-segment transfer",
+  "q": "SPI 设备要先发命令再读数据(多段传输),buffer 放哪要注意什么?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "spi",
+  "gold_claims": {
+    "api": ["spi_sync", "spi_message_init", "spi_message_add_tail"],
+    "symbol": ["spi_transfer", "spi_message"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "spi_transfer_sync", "why": "编造的(应是 spi_sync)" },
+    { "type": "fake-api", "claim": "spi_sync_send", "why": "不存在的 API" }
+  ],
+  "forbidden": ["用栈上数组当 spi_transfer 的 tx_buf/rx_buf(控制器可能 DMA)", "在原子上下文 spi_sync"],
+  "rubric": "struct spi_transfer[] 描述各段,spi_message_init + spi_message_add_tail + spi_sync;tx_buf/rx_buf 必须 DMA-able(kmalloc,不能栈数组)"
+}

@@ -27,6 +27,7 @@
 - KB-FS-001 · procfs 的 proc_create 末参自 5.6 起从 struct file_operations 改成 struct proc_ops；移植旧 /proc 代码必踩 · KV-016 · range：5.6+
 - KB-DT-001 · 遍历 DT 节点(for_each_child_of_node / of_find_*)拿到的 device_node 用完要 of_node_put,提前 break 也要 · KV-019 · range：版本无关
 - KB-I2C-001 · i2c_driver.probe 签名变过:旧双参 (client,id) → probe_new(client) → 6.x 起单参 .probe(client);移植旧驱动编译错 · KV-020 · range：6.x 起单参
+- KB-SPI-001 · SPI 传输 buffer 必须 DMA-able(kmalloc),不能用栈上数组当 spi_transfer 的 tx_buf/rx_buf · KV-024 · range：版本无关
 
 ## 条目
 
@@ -156,4 +157,23 @@
   ```
 - linked_eval_case：KV-020
 - provenance：self（两棵树 6.1/7.0 实测 i2c.h probe 字段差异；子系统：i2c）
+- fires/catches：0 / 0
+
+### KB-SPI-001：SPI 传输 buffer 必须 DMA-able,别用栈上数组
+
+- symptom：SPI 传输偶发读到垃圾/全 0、或栈被踩、`DMA-API: device driver maps memory from stack` 警告;某些控制器(走 DMA)上必现,PIO 控制器上侥幸不报。
+- root cause：`spi_transfer.tx_buf`/`rx_buf` 指向的内存可能被 SPI 控制器**直接 DMA**。栈上的数组不保证 DMA-able(可能不在线性映射的可 DMA 区、且 cache 一致性无法保证),控制器 DMA 取不到正确数据或踩栈。
+- fix：传输 buffer 用 `kmalloc`/`devm_kmalloc` 分配(在可 DMA 的内核堆),或用 SPI 核心的 bounce buffer 接口;不要用函数局部数组直接当 tx_buf/rx_buf。
+- trigger：见到 `spi_transfer` 的 `tx_buf`/`rx_buf` 指向栈上局部数组,或问"SPI 传输 buffer 放哪/读到垃圾"。
+- range：版本无关(DMA 对内存的要求长期不变)。
+- scope/limits：约束传输 buffer 的内存来源;API 名按目标树 `include/linux/spi/spi.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: spi_sync
+  symbol: spi_transfer
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-024
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 spi_transfer 语义;子系统:spi）
 - fires/catches：0 / 0
