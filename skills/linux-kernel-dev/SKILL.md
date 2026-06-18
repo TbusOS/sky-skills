@@ -77,6 +77,9 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 引脚 pinctrl（运行时切 state / PM sleep·idle 封装 / default 态由 core 自动应用） | `references/subsys/pinctrl.md` | `Documentation/driver-api/pin-control.rst`、`include/linux/pinctrl/consumer.h` |
 | 供电 regulator（get·enable·调压消费 / enable·disable 引用计数配平 / 可选供电 vs dummy） | `references/subsys/regulator.md` | `Documentation/power/regulator/consumer.rst`、`include/linux/regulator/consumer.h` |
 | 寄存器抽象 regmap（按总线 init / read·write·update_bits / cache + PM / volatile 寄存器） | `references/subsys/regmap.md` | `Documentation/driver-api/regmap.rst`、`include/linux/regmap.h` |
+| 复位 reset（assert·deassert·reset 消费 / exclusive vs shared 引用计数 / DT resets） | `references/subsys/reset.md` | `Documentation/driver-api/reset.rst`、`include/linux/reset.h` |
+| PWM（pwm_get / pwm_state 原子应用 / apply 接口改名·原子 vs 会睡 / DT pwms） | `references/subsys/pwm.md` | `Documentation/driver-api/pwm.rst`、`include/linux/pwm.h` |
+| IIO（写 sensor/ADC 驱动 / iio_priv 私有数据 / channels·info / 触发缓冲采集） | `references/subsys/iio.md` | `Documentation/driver-api/iio/`、`include/linux/iio/iio.h` |
 
 目录总览见 `index.md`。
 

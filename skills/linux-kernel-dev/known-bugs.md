@@ -38,6 +38,9 @@
 - KB-PINCTRL-001 · driver core 在 probe 前自动应用 default 态;别在 probe 里手动选 default;显式 pinctrl_select_state 只用于运行时切 sleep/idle · KV-049 · range：版本无关
 - KB-REG-001 · regulator_enable/disable 引用计数必须配平,别 force_disable 修不平衡;可选供电用 devm_regulator_get_optional(普通 get 没配返 dummy 掩盖缺失) · KV-052 · range：版本无关
 - KB-REGMAP-001 · regmap_config 必设 reg_bits/val_bits 否则 init 失败;硬件自改的寄存器要标 volatile_reg 否则 cache 返陈旧值;改 bit 用 regmap_update_bits · KV-055 · range：版本无关
+- KB-RESET-001 · 复位线被多设备共用必须 devm_reset_control_get_shared(引用计数,最后一个 assert 才真复位);独占线才用 *_exclusive,给共用线用 exclusive 会失败 · KV-057 · range：版本无关
+- KB-PWM-001 · pwm_apply_state 已改名 pwm_apply_might_sleep(旧名新内核编译错);用 apply 一次性写整个 state,别用 pwm_config+pwm_enable 老序列(会毛刺);原子上下文用 pwm_apply_atomic · KV-060 · range：apply 改名见目标树
+- KB-IIO-001 · IIO 私有数据跟 iio_dev 一起分配:devm_iio_device_alloc(dev,sizeof(state)) + iio_priv() 取,别单独 kmalloc;register 放最后(注册即对用户态可见) · KV-063 · range：版本无关
 
 ## 条目
 
@@ -370,4 +373,59 @@
   ```
 - linked_eval_case：KV-055
 - provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 regmap_config 必填字段与 volatile;子系统:regmap）
+- fires/catches：0 / 0
+
+### KB-RESET-001：共用复位线必须按 shared 申请,别用 exclusive
+
+- symptom：`devm_reset_control_get_exclusive` 返回 -EBUSY；或对一条共用复位线 `reset_control_assert` 后设备没复位/把别的还在用的外设也复位了。
+- root cause：一条复位信号在硬件上可能接给多个外设。reset 框架区分 exclusive（独占，谁先拿谁占，别人再拿 exclusive 失败）和 shared（共享，deassert/assert 引用计数——deassert 把线放出复位，assert 只有在所有使用者都 assert 后才真把线拉进复位）。把共用线当独占申请，要么获取失败，要么 assert 语义不符预期。
+- fix：按硬件接线选：复位线只此设备用 → `devm_reset_control_get_exclusive`（可选用 `_optional_exclusive`）；多设备共用 → `devm_reset_control_get_shared`，并理解 assert/deassert 是引用计数的。
+- trigger：见到对共用复位线用 exclusive 接口、或期望 shared 复位 assert 立即生效，或问"reset EBUSY / 共享复位线怎么申请"。
+- range：版本无关。
+- scope/limits：约束 exclusive vs shared 选择；API 名按目标树 `include/linux/reset.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: devm_reset_control_get_shared, reset_control_deassert
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-057
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 reset.h exclusive/shared 语义;子系统:reset）
+- fires/catches：0 / 0
+
+### KB-PWM-001：pwm_apply_state 已改名,且别用 config+enable 老序列
+
+- symptom：旧代码 `pwm_apply_state` 在新内核编译报未声明；或用 `pwm_config`+`pwm_enable` 分步设置时，周期/占空比切换出现毛刺。
+- root cause：① 通用应用接口从 `pwm_apply_state` 改名为 `pwm_apply_might_sleep`（随版本变的接口），旧名在新内核不存在。② 老的 `pwm_config`/`pwm_enable`/`pwm_disable` 分多次调用，每次只改一部分，中间态会输出到硬件 → 毛刺；新模型用一个 `struct pwm_state` 一次性原子应用周期+占空比+使能。
+- fix：用 `pwm_init_state` 取默认/DT 参数 → 改 `struct pwm_state` 的字段 → `pwm_apply_might_sleep`（进程上下文）一次性写入；需要原子上下文且控制器支持时用 `pwm_apply_atomic`。按目标树 `include/linux/pwm.h` 确认 apply 接口名。
+- trigger：见到 `pwm_apply_state`、或 `pwm_config`+`pwm_enable` 老序列，或问"pwm_apply_state 编译错 / PWM 切换毛刺"。
+- range：apply 接口改名以目标树为准（旧树 `pwm_apply_state`，新树 `pwm_apply_might_sleep`）。
+- scope/limits：约束 apply 接口名与原子应用；字段名按目标树 `pwm.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: pwm_apply_might_sleep, pwm_apply_atomic
+  symbol: pwm_state
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-060
+- provenance：self（两棵树核对 pwm.h apply 接口:7.0 为 pwm_apply_might_sleep/pwm_apply_atomic,旧名 pwm_apply_state 已移除;子系统:pwm）
+- fires/catches：0 / 0
+
+### KB-IIO-001：IIO 私有数据用 iio_priv,register 放最后
+
+- symptom：IIO 驱动私有数据另开 kmalloc 后生命周期/释放顺序乱；或注册太早，用户态读到还没配好的设备。
+- root cause：`devm_iio_device_alloc(dev, sizeof(priv))` 把驱动私有数据**内联**分配在 `iio_dev` 之后，用 `iio_priv(indio_dev)` 取——这样私有数据和 iio_dev 同生命周期。另外 `iio_device_register`/`devm_iio_device_register` 一旦调用，sysfs/chardev 立刻对用户态可见，通道马上能被读，所以必须在 channels/info 都填好后作为最后一步。
+- fix：`devm_iio_device_alloc(dev, sizeof(struct my_state))` + `iio_priv()` 取私有数据，不要单独 kmalloc；填好 `name`/`info`/`channels`/`num_channels` 后再 `devm_iio_device_register` 作为最后一步。
+- trigger：见到 IIO 私有数据单独 kmalloc、或 register 在填通道之前，或问"iio_priv 怎么用 / IIO 注册顺序"。
+- range：版本无关（`iio_device_alloc` 旧 API 仍在但推荐 devm 版）。
+- scope/limits：约束私有数据分配方式与注册时机；API 名按目标树 `include/linux/iio/iio.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: devm_iio_device_alloc, iio_priv
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-063
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 iio.h alloc/priv/register;子系统:iio）
 - fires/catches：0 / 0

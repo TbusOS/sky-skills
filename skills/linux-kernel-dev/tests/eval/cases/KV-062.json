@@ -1,0 +1,17 @@
+{
+  "id": "KV-062",
+  "topic": "writing an IIO sensor/ADC driver skeleton",
+  "q": "写一个 IIO 传感器驱动,分配设备、填通道、注册,骨架怎么搭?",
+  "kind": "objective",
+  "subsystem": "iio",
+  "gold_claims": {
+    "api": ["devm_iio_device_alloc", "devm_iio_device_register", "iio_priv"],
+    "symbol": ["iio_chan_spec", "iio_info"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "iio_device_alloc_priv", "why": "编造的分配函数,真名 devm_iio_device_alloc" },
+    { "type": "fake-api", "claim": "iio_register_device", "why": "不存在,注册是 iio_device_register" }
+  ],
+  "forbidden": ["register 放在填好 channels/info 之前"],
+  "rubric": "devm_iio_device_alloc(dev,sizeof(state)) 分配,iio_priv 取私有数据;填 name/info(iio_info)/channels(iio_chan_spec)/num_channels;最后 devm_iio_device_register"
+}

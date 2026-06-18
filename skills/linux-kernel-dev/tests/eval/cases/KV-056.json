@@ -1,0 +1,16 @@
+{
+  "id": "KV-056",
+  "topic": "asserting/deasserting a reset line from a driver",
+  "q": "驱动要把外设拉出复位让它工作,从 DT 拿 reset 到操作怎么写?",
+  "kind": "objective",
+  "subsystem": "reset",
+  "gold_claims": {
+    "api": ["devm_reset_control_get_exclusive", "reset_control_deassert", "reset_control_assert", "reset_control_reset"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "reset_control_trigger", "why": "编造的复位函数,自复位是 reset_control_reset" },
+    { "type": "fake-api", "claim": "reset_assert_line", "why": "不存在的 assert 函数" }
+  ],
+  "forbidden": ["在原子/中断上下文调 reset_control_*", "deassert/assert 不配对"],
+  "rubric": "devm_reset_control_get_exclusive 拿复位(判 IS_ERR);reset_control_deassert 放出复位、reset_control_assert 拉回;一次性脉冲用 reset_control_reset;均在进程上下文"
+}

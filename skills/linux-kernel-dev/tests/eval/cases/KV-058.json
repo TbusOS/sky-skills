@@ -1,0 +1,15 @@
+{
+  "id": "KV-058",
+  "topic": "reset status and non-devm cleanup",
+  "q": "查复位线当前状态,以及不用 devm 时怎么拿和释放?",
+  "kind": "objective",
+  "subsystem": "reset",
+  "gold_claims": {
+    "api": ["reset_control_status", "of_reset_control_get", "reset_control_put"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "reset_line_get", "why": "编造的获取函数" }
+  ],
+  "forbidden": ["非 devm 获取后忘 reset_control_put"],
+  "rubric": "reset_control_status 查状态;非 devm 用 of_reset_control_get 拿、用完 reset_control_put 释放;DT 用 resets/reset-names 描述"
+}

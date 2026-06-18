@@ -1,0 +1,16 @@
+{
+  "id": "KV-059",
+  "topic": "driving a PWM output (period/duty/enable)",
+  "q": "驱动要输出一路 PWM(比如背光),从 DT 拿 pwm 到设占空比怎么写?",
+  "kind": "objective",
+  "subsystem": "pwm",
+  "gold_claims": {
+    "api": ["devm_pwm_get", "pwm_init_state", "pwm_apply_might_sleep", "pwm_get_state"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "pwm_set_duty", "why": "编造的设占空比函数;应改 pwm_state 后 apply" },
+    { "type": "fake-api", "claim": "pwm_apply_config", "why": "不存在的应用函数,真名 pwm_apply_might_sleep" }
+  ],
+  "forbidden": ["用 pwm_config+pwm_enable 老序列分多步设置"],
+  "rubric": "devm_pwm_get 拿(判 IS_ERR);pwm_init_state 填默认/DT 参数,改 duty_cycle/enabled 后用 pwm_apply_might_sleep 一次性原子写入;读现状 pwm_get_state"
+}

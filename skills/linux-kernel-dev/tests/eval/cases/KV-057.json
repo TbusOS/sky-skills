@@ -1,0 +1,17 @@
+{
+  "id": "KV-057",
+  "topic": "exclusive vs shared reset lines",
+  "q": "一条复位线接了好几个外设,reset 该怎么申请?能像独占那样 assert 吗?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "reset",
+  "gold_claims": {
+    "api": ["devm_reset_control_get_shared", "devm_reset_control_get_optional_exclusive", "reset_control_deassert"],
+    "config": ["CONFIG_RESET_CONTROLLER"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "devm_reset_get_handle", "why": "编造的获取函数" }
+  ],
+  "forbidden": ["给共用复位线用 exclusive 接口", "期望 shared 复位 assert 立刻生效"],
+  "rubric": "多设备共用的复位线必须 devm_reset_control_get_shared;shared 的 deassert/assert 是引用计数,只有最后一个 assert 才真复位;独占线才用 *_exclusive;CONFIG_RESET_CONTROLLER 是框架开关"
+}

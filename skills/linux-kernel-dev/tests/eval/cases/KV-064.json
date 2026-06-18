@@ -1,0 +1,16 @@
+{
+  "id": "KV-064",
+  "topic": "IIO triggered buffer capture",
+  "q": "IIO 设备要做触发缓冲采集,一帧样本怎么推给上层?",
+  "kind": "objective",
+  "subsystem": "iio",
+  "gold_claims": {
+    "api": ["devm_iio_triggered_buffer_setup", "iio_push_to_buffers_with_timestamp"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "iio_push_sample", "why": "编造的推样本函数" },
+    { "type": "fake-api", "claim": "iio_chan_read", "why": "不存在的通道读函数" }
+  ],
+  "forbidden": ["在触发处理里做会睡的长操作而不评估上下文"],
+  "rubric": "devm_iio_triggered_buffer_setup 建触发缓冲;触发处理里采一帧后 iio_push_to_buffers_with_timestamp 推给上层(带时间戳)"
+}

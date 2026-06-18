@@ -189,6 +189,36 @@
       "catches": 0,
       "linked_eval_case": "KV-055",
       "added": "2026-06-18"
+    },
+    {
+      "id": "KB-RESET-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "复位信号被多个外设共用时必须 devm_reset_control_get_shared(assert/deassert 引用计数:deassert 放出复位,只有所有使用者都 assert 才真拉复位);独占线才用 *_exclusive,给共用线用 exclusive 会 -EBUSY 或语义不符。按硬件接线选。子系统:reset。用例 KV-057。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-057",
+      "added": "2026-06-18"
+    },
+    {
+      "id": "KB-PWM-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "PWM 通用应用接口 pwm_apply_state 已改名 pwm_apply_might_sleep(旧名新内核编译错);用 pwm_init_state 取参数后改 struct pwm_state 再 apply 一次性写周期+占空比+使能,别用 pwm_config+pwm_enable 老序列(多步会毛刺);原子上下文且控制器支持用 pwm_apply_atomic。apply 接口名按目标树 pwm.h。子系统:pwm。用例 KV-060。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-060",
+      "added": "2026-06-18"
+    },
+    {
+      "id": "KB-IIO-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "IIO 驱动私有数据跟 iio_dev 一起分配:devm_iio_device_alloc(dev, sizeof(state)) 内联 priv,用 iio_priv(indio_dev) 取,不要单独 kmalloc。devm_iio_device_register 放最后一步——注册即对用户态可见(sysfs/chardev 活,通道立刻可读),必须在 channels/info 填好之后。子系统:iio。用例 KV-063。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-063",
+      "added": "2026-06-18"
     }
   ]
 }

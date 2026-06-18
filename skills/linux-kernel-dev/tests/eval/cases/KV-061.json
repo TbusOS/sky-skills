@@ -1,0 +1,15 @@
+{
+  "id": "KV-061",
+  "topic": "PWM consumer lifecycle",
+  "q": "PWM 用完怎么收尾?devm 和非 devm 区别?",
+  "kind": "objective",
+  "subsystem": "pwm",
+  "gold_claims": {
+    "api": ["devm_pwm_get", "pwm_apply_might_sleep", "pwm_put"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "pwm_get_handle", "why": "编造的获取函数" }
+  ],
+  "forbidden": ["非 devm 获取后忘 pwm_put"],
+  "rubric": "devm_pwm_get 随设备自动释放;非 devm 用完 pwm_put;关输出把 pwm_state.enabled=false 后 pwm_apply_might_sleep"
+}

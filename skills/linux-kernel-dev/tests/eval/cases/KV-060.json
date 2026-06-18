@@ -1,0 +1,19 @@
+{
+  "id": "KV-060",
+  "topic": "PWM apply API rename and context",
+  "q": "老代码用的 pwm_apply_state 在新内核编译不过,而且想在原子上下文应用,怎么办?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "pwm",
+  "gold_claims": {
+    "api": ["pwm_apply_might_sleep", "pwm_apply_atomic"],
+    "symbol": ["pwm_state"],
+    "config": ["CONFIG_PWM"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "pwm_set_period", "why": "编造的设周期函数;应改 pwm_state 后 apply" },
+    { "type": "fake-api", "claim": "pwm_start_output", "why": "不存在的启动函数" }
+  ],
+  "forbidden": ["在新内核继续用 pwm_apply_state", "在原子上下文调 pwm_apply_might_sleep"],
+  "rubric": "pwm_apply_state 已改名 pwm_apply_might_sleep(进程上下文会睡);要在原子上下文应用且控制器支持时用 pwm_apply_atomic;state 是 struct pwm_state;CONFIG_PWM 是框架开关"
+}
