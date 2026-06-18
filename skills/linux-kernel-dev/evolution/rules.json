@@ -249,6 +249,36 @@
       "catches": 0,
       "linked_eval_case": "KV-072",
       "added": "2026-06-18"
+    },
+    {
+      "id": "KB-LED-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "led_classdev.brightness_set 回调在原子上下文被调(可能从软中断/定时器/trigger 路径),不能睡。LED 挂在 I2C/SPI/regmap 后面(设亮度会睡)要实现 .brightness_set_blocking(进程上下文,框架用 workqueue 调),别在 .brightness_set 里做总线传输。两者择一。子系统:led。用例 KV-075。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-075",
+      "added": "2026-06-18"
+    },
+    {
+      "id": "KB-INPUT-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "一组 input_report_*() 之后必须 input_sync()(它发 EV_SYN/SYN_REPORT 标记事件帧结束),否则事件不作为完整 packet 下发用户态。事件能力(EV_KEY/EV_ABS 及具体码)要在 input_register_device 之前用 input_set_capability/__set_bit 声明,没声明的码上报时被核心静默丢弃。子系统:input。用例 KV-078。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-078",
+      "added": "2026-06-18"
+    },
+    {
+      "id": "KB-PSY-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "power_supply 属性值用固定微单位:电压 µV、电流 µA、电量 µAh、温度 0.1°C、容量 0-100;按伏/毫伏填差几个数量级。状态变化(充↔放/容量跳变/插拔)必须调 power_supply_changed(psy) 发 uevent,否则 userspace 收不到更新。get_property 回填 union power_supply_propval。子系统:power-supply。用例 KV-081。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-081",
+      "added": "2026-06-18"
     }
   ]
 }

@@ -1,0 +1,17 @@
+{
+  "id": "KV-074",
+  "topic": "registering an LED class device",
+  "q": "写个 LED 驱动,把灯暴露成 /sys/class/leds,怎么注册?",
+  "kind": "objective",
+  "subsystem": "led",
+  "gold_claims": {
+    "api": ["devm_led_classdev_register", "led_classdev_register"],
+    "symbol": ["led_classdev"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "led_register_device", "why": "编造的注册函数" },
+    { "type": "fake-api", "claim": "led_classdev_create", "why": "不存在的创建函数" }
+  ],
+  "forbidden": ["漏设 max_brightness 却想设中间亮度"],
+  "rubric": "填 led_classdev(name/max_brightness/brightness_set 或 brightness_set_blocking),用 devm_led_classdev_register 注册;带 DT init_data 用 devm_led_classdev_register_ext"
+}

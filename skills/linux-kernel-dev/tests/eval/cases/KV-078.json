@@ -1,0 +1,18 @@
+{
+  "id": "KV-078",
+  "topic": "input_sync is required after reporting events",
+  "q": "input_report_key 上报了按键但用户态收不到,缺了什么?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "input",
+  "gold_claims": {
+    "api": ["input_report_key", "input_sync", "input_event"],
+    "symbol": ["input_dev"],
+    "config": ["CONFIG_INPUT"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "input_report_event", "why": "编造的上报函数" }
+  ],
+  "forbidden": ["上报后不调 input_sync", "说 input_report 自带帧同步"],
+  "rubric": "一组 input_report_*() 之后必须 input_sync()(它发 EV_SYN/SYN_REPORT 标记事件帧结束),否则事件不作为完整帧下发用户态;CONFIG_INPUT 是框架开关"
+}

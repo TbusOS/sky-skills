@@ -1,0 +1,15 @@
+{
+  "id": "KV-079",
+  "topic": "input absolute axis capability and reporting",
+  "q": "触摸/摇杆要上报绝对坐标,怎么声明范围和上报?",
+  "kind": "objective",
+  "subsystem": "input",
+  "gold_claims": {
+    "api": ["input_set_capability", "input_report_abs", "input_allocate_device", "input_sync"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "input_emit_key", "why": "编造的上报函数" }
+  ],
+  "forbidden": ["上报 abs 前没设范围/声明能力"],
+  "rubric": "声明 EV_ABS 能力(input_set_capability 或 input_set_abs_params 设 min/max),input_report_abs 上报坐标,input_sync 收尾;非 devm 分配用 input_allocate_device"
+}

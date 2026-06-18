@@ -83,6 +83,9 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 温控 thermal（温度传感器 zone / get_temp 毫摄氏度 / 冷却设备 / OF 注册改名 / DT thermal-zones） | `references/subsys/thermal.md` | `Documentation/driver-api/thermal/`、`include/linux/thermal.h` |
 | 看门狗 watchdog（watchdog_ops 启停喂狗 / nowayout 语义 / max_hw_heartbeat 代喂 / stop_on_reboot） | `references/subsys/watchdog.md` | `Documentation/watchdog/`、`include/linux/watchdog.h` |
 | RTC（rtc_class_ops 读写时间 / rtc_time 遵循 struct tm·tm_year 自 1900 / allocate+register） | `references/subsys/rtc.md` | `Documentation/admin-guide/rtc`、`include/linux/rtc.h` |
+| LED（led_classdev 注册 / brightness_set 原子上下文 vs blocking / DT init_data） | `references/subsys/led.md` | `Documentation/leds/`、`include/linux/leds.h` |
+| 输入 input（input_dev 注册 / 声明能力 + 上报 + input_sync 帧同步 / 绝对轴范围） | `references/subsys/input.md` | `Documentation/input/`、`include/linux/input.h` |
+| 电源 power-supply（power_supply_desc 注册 / 属性固定微单位 / power_supply_changed 通知 / propval） | `references/subsys/power-supply.md` | `Documentation/power/power_supply_class.rst`、`include/linux/power_supply.h` |
 
 目录总览见 `index.md`。
 

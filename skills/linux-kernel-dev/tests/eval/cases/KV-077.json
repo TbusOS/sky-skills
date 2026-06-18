@@ -1,0 +1,16 @@
+{
+  "id": "KV-077",
+  "topic": "registering an input device and reporting events",
+  "q": "写个按键输入驱动,分配设备、声明能力、注册、上报,怎么搭?",
+  "kind": "objective",
+  "subsystem": "input",
+  "gold_claims": {
+    "api": ["devm_input_allocate_device", "input_register_device", "input_report_key", "input_sync", "input_set_capability"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "input_device_register", "why": "编造的注册函数,真名 input_register_device" },
+    { "type": "fake-api", "claim": "input_send_event", "why": "不存在的发事件函数" }
+  ],
+  "forbidden": ["上报后漏 input_sync", "register 后才声明能力"],
+  "rubric": "devm_input_allocate_device 分配,input_set_capability 在注册前声明能力,input_register_device 注册;上报 input_report_key 后必须 input_sync 标记帧结束"
+}

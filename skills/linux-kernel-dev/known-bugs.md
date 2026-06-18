@@ -44,6 +44,9 @@
 - KB-THERMAL-001 · thermal_zone_device_ops.get_temp 回填的温度单位是毫摄氏度(m°C,25000=25°C),回填摄氏度会被当 0.025°C 致 trip 不触发;OF 注册用 devm_thermal_of_zone_register(旧名 thermal_zone_of_sensor_register 已改) · KV-067 · range：注册接口名见目标树
 - KB-WDT-001 · nowayout(watchdog_set_nowayout / CONFIG_WATCHDOG_NOWAYOUT)置位后看门狗 start 即停不掉,关 /dev/watchdog 也不停,别假设 .stop 必被调;watchdog_stop_on_reboot 避免干净重启被复位;max_hw_heartbeat_ms 让框架代喂别自开线程 · KV-069 · range：版本无关
 - KB-RTC-001 · struct rtc_time 遵循 struct tm:tm_year 自 1900 起(2025→125)、tm_mon 0-11(一月→0)、tm_mday 1 起;用 rtc_time64_to_tm/rtc_tm_to_time64 转换、rtc_valid_tm 校验,别手算 · KV-072 · range：版本无关
+- KB-LED-001 · led_classdev.brightness_set 在原子上下文被调(不能睡);LED 挂 I2C/SPI/regmap(设亮度会睡)要实现 .brightness_set_blocking,别在 .brightness_set 里做总线传输 · KV-075 · range：版本无关
+- KB-INPUT-001 · 一组 input_report_*() 之后必须 input_sync()(发 EV_SYN/SYN_REPORT 标记帧结束)否则事件不下发;能力(input_set_capability/EV_* 位)要在 input_register_device 之前声明,否则上报被静默丢 · KV-078 · range：版本无关
+- KB-PSY-001 · power_supply 属性用固定微单位(电压 µV/电流 µA/电量 µAh/温度 0.1°C/容量 0-100),数量级填错差千倍;状态变化要调 power_supply_changed 发 uevent 否则用户态收不到 · KV-081 · range：版本无关
 
 ## 条目
 
@@ -487,4 +490,59 @@
   ```
 - linked_eval_case：KV-072
 - provenance：self（真树核对 rtc.h struct tm 约定 + RTC_TIMESTAMP_BEGIN_1900;子系统:rtc）
+- fires/catches：0 / 0
+
+### KB-LED-001：brightness_set 在原子上下文,LED 走会睡的总线要用 blocking 版
+
+- symptom：LED 挂在 I2C/SPI 上，在 `.brightness_set` 里做总线写偶发 "scheduling while atomic" / might_sleep 告警，或从软中断/定时器路径设亮度时崩。
+- root cause：`led_classdev.brightness_set` 回调可能在**原子上下文**被调(LED 框架从软中断、定时器、trigger 路径设亮度)，**不能睡**。而 I2C/SPI/regmap 传输会睡。两者冲突。框架为此提供 `.brightness_set_blocking`(进程上下文，可睡，框架用 workqueue 调用)。
+- fix：LED 直挂寄存器/GPIO(设亮度不阻塞)→ 实现 `.brightness_set`；LED 在 I2C/SPI/regmap 后面 → 实现 `.brightness_set_blocking`，把总线传输放那里。两者择一，别在 `.brightness_set` 里做会睡的传输。
+- trigger：见到 `.brightness_set` 里做 I2C/SPI/regmap 传输，或问 "LED 设亮度 might_sleep / brightness_set 能不能睡"。
+- range：版本无关。
+- scope/limits：约束 brightness 回调的上下文选择;符号名按目标树 `include/linux/leds.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: devm_led_classdev_register
+  symbol: led_classdev
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-075
+- provenance：self（真树核对 leds.h:"brightness_set Must not sleep. Use brightness_set_blocking";子系统:led。关联 KB-IRQ-001 同根"原子不睡"）
+- fires/catches：0 / 0
+
+### KB-INPUT-001：上报事件后必须 input_sync;能力要在 register 前声明
+
+- symptom：`input_report_key`/`input_report_abs` 上报了，用户态 `/dev/input` 却收不到；或上报某键/轴完全没反应。
+- root cause：① 一组 `input_report_*()` 只是排队，必须 `input_sync()`(它发 `EV_SYN`/`SYN_REPORT`)标记"事件帧结束"，事件才作为完整 packet 下发；漏了就不下发。② 设备的事件能力(`EV_KEY`/`EV_ABS` 及具体码)必须在 `input_register_device` **之前**用 `input_set_capability`(或 `__set_bit` 到 evbit/keybit)声明，没声明的码上报时被核心静默丢弃。
+- fix：注册前 `input_set_capability` 声明所有要上报的事件类型/码(abs 轴用 `input_set_abs_params` 设范围)；每帧上报结束 `input_sync()`。
+- trigger：见到上报后没有 `input_sync`、或 register 之后才声明能力，或问"输入事件收不到 / input_sync"。
+- range：版本无关。
+- scope/limits：约束 input_sync 收尾与能力声明时机;API 名按目标树 `include/linux/input.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: input_sync, input_report_key
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-078
+- provenance：self（真树核对 input.h:input_sync=input_event(EV_SYN,SYN_REPORT);子系统:input）
+- fires/catches：0 / 0
+
+### KB-PSY-001：power_supply 属性是固定微单位 + 状态变化要 power_supply_changed
+
+- symptom：用户态读到的电压/电流数量级差 1000 倍；或充放电状态、容量变了但 `/sys/class/power_supply` 和上层策略收不到更新。
+- root cause：① power_supply 属性值约定**固定微单位**——电压 `VOLTAGE_NOW` µV、电流 `CURRENT_NOW` µA、电量 `CHARGE_*` µAh、温度 `TEMP` 0.1°C、容量 `CAPACITY` 0–100。按伏/毫伏填就差几个数量级。② 状态变化时核心不会自动发通知，必须驱动主动调 `power_supply_changed(psy)` 发 uevent，否则 userspace 不知道变了。
+- fix：`get_property` 按属性回填正确微单位到 `union power_supply_propval`；充↔放、容量跳变、电源插拔等状态变化时调 `power_supply_changed(psy)`。
+- trigger：见到属性值数量级可疑(填了伏/毫伏)、或状态变化不调 `power_supply_changed`，或问"电池读数差千倍 / power_supply 不更新"。
+- range：版本无关。
+- scope/limits：约束属性单位与变更通知;API 名按目标树 `include/linux/power_supply.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: power_supply_changed, power_supply_get_property
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-081
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 power_supply.h 属性单位与 power_supply_changed;子系统:power-supply）
 - fires/catches：0 / 0

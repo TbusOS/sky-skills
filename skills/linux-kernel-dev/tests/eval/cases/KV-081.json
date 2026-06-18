@@ -1,0 +1,19 @@
+{
+  "id": "KV-081",
+  "topic": "power_supply units and change notification",
+  "q": "电池电压属性填什么单位?充电状态变了用户态收不到更新,缺啥?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "power-supply",
+  "gold_claims": {
+    "api": ["power_supply_changed", "devm_power_supply_register"],
+    "symbol": ["power_supply_desc"],
+    "config": ["CONFIG_POWER_SUPPLY"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "power_supply_notify_change", "why": "编造的通知函数,真名 power_supply_changed" },
+    { "type": "fake-api", "claim": "power_supply_set_status", "why": "不存在的设状态函数" }
+  ],
+  "forbidden": ["电压填毫伏当微伏", "状态变化不调 power_supply_changed"],
+  "rubric": "属性用固定微单位:电压 µV、电流 µA、电量 µAh、温度 0.1°C、容量 0-100;状态变化(充↔放/容量跳变/插拔)调 power_supply_changed 发 uevent,否则用户态收不到更新;CONFIG_POWER_SUPPLY 是框架开关"
+}

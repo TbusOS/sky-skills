@@ -1,0 +1,16 @@
+{
+  "id": "KV-076",
+  "topic": "LED registration with DT init data",
+  "q": "LED 想从设备树拿 label / 默认触发器,注册时用哪个接口?",
+  "kind": "objective",
+  "subsystem": "led",
+  "gold_claims": {
+    "api": ["devm_led_classdev_register_ext", "led_classdev_register"],
+    "symbol": ["led_classdev"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "led_classdev_create", "why": "编造的创建函数" }
+  ],
+  "forbidden": ["需要 DT init_data 却用不带 _ext 的接口"],
+  "rubric": "带 DT 信息(label/默认触发器等)用 devm_led_classdev_register_ext 传 led_init_data;不带 DT 用 devm_led_classdev_register;核心结构 led_classdev"
+}

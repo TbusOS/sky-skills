@@ -1,0 +1,16 @@
+{
+  "id": "KV-082",
+  "topic": "power_supply get_property and propval union",
+  "q": "power_supply 读属性回调怎么回填值?用什么类型?",
+  "kind": "objective",
+  "subsystem": "power-supply",
+  "gold_claims": {
+    "api": ["power_supply_get_property"],
+    "symbol": ["power_supply_propval", "power_supply"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "power_supply_read_property", "why": "编造的读属性函数" }
+  ],
+  "forbidden": ["回填值用错 union 成员"],
+  "rubric": "get_property 回调按属性把值写进 union power_supply_propval(整数属性用 intval,字符串用 strval);上层用 power_supply_get_property 读;核心句柄 struct power_supply"
+}

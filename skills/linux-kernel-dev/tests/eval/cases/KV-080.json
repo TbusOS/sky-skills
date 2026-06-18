@@ -1,0 +1,17 @@
+{
+  "id": "KV-080",
+  "topic": "registering a power_supply (battery/charger)",
+  "q": "写个电池驱动暴露电量/电压给用户态,怎么注册和实现属性?",
+  "kind": "objective",
+  "subsystem": "power-supply",
+  "gold_claims": {
+    "api": ["devm_power_supply_register", "power_supply_get_property"],
+    "symbol": ["power_supply_desc", "power_supply_propval"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "power_supply_register_device", "why": "编造的注册函数" },
+    { "type": "fake-api", "claim": "power_supply_read_property", "why": "不存在的读属性函数" }
+  ],
+  "forbidden": ["get_property 不认的属性不返 -EINVAL"],
+  "rubric": "填 power_supply_desc(name/type/properties/num_properties/get_property),devm_power_supply_register 注册;get_property 把值放 union power_supply_propval"
+}

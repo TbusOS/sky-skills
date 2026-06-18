@@ -1,0 +1,19 @@
+{
+  "id": "KV-075",
+  "topic": "LED brightness_set runs in atomic context",
+  "q": "LED 挂在 I2C 上,设亮度回调里能直接 regmap_write 吗?该实现哪个回调?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "led",
+  "gold_claims": {
+    "api": ["led_set_brightness", "devm_led_classdev_register"],
+    "symbol": ["led_classdev"],
+    "config": ["CONFIG_LEDS_CLASS"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "led_set_level", "why": "编造的设亮度函数" },
+    { "type": "fake-api", "claim": "led_brightness_set_value", "why": "不存在的设值函数" }
+  ],
+  "forbidden": ["在 .brightness_set 里做 I2C/SPI 传输", "说 brightness_set 可以睡眠"],
+  "rubric": "led_classdev.brightness_set 在原子上下文被调,不能睡;LED 在 I2C/SPI/regmap 后面应实现 .brightness_set_blocking(进程上下文可睡),别在 .brightness_set 里 regmap_write;CONFIG_LEDS_CLASS 是框架开关"
+}
