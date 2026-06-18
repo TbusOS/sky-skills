@@ -73,6 +73,10 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 网络（net_device 注册 / NAPI 收包 / ndo_start_xmit 发包 / sk_buff / 队列控制） | `references/subsys/networking.md` | `Documentation/networking/`、`include/linux/netdevice.h` |
 | 音频 ASoC（codec/component · cpu DAI · machine 声卡 / DAI ops / trigger 上下文） | `references/subsys/audio.md` | `Documentation/sound/soc/`、`include/sound/soc.h` |
 | 摄像 V4L2（v4l2_device/video_device 注册 / vb2 缓冲 / sensor subdev async / stop_streaming） | `references/subsys/camera.md` | `Documentation/driver-api/media/`、`include/media/` |
+| 时钟 CCF（clk_get/prepare/enable 消费 / prepare·enable 两阶段上下文 / 写 clk provider 暴露给 DT） | `references/subsys/clk.md` | `Documentation/driver-api/clk.rst`、`include/linux/clk.h`、`clk-provider.h` |
+| 引脚 pinctrl（运行时切 state / PM sleep·idle 封装 / default 态由 core 自动应用） | `references/subsys/pinctrl.md` | `Documentation/driver-api/pin-control.rst`、`include/linux/pinctrl/consumer.h` |
+| 供电 regulator（get·enable·调压消费 / enable·disable 引用计数配平 / 可选供电 vs dummy） | `references/subsys/regulator.md` | `Documentation/power/regulator/consumer.rst`、`include/linux/regulator/consumer.h` |
+| 寄存器抽象 regmap（按总线 init / read·write·update_bits / cache + PM / volatile 寄存器） | `references/subsys/regmap.md` | `Documentation/driver-api/regmap.rst`、`include/linux/regmap.h` |
 
 目录总览见 `index.md`。
 

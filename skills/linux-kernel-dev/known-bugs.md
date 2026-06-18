@@ -34,6 +34,10 @@
 - KB-NET-001 · NAPI poll 在软中断上下文(不能睡);必须尊重 budget——收满 budget 就返回,done<budget 才 napi_complete_done 重开收中断,返回 done · KV-036 · range：版本无关
 - KB-ASOC-001 · ASoC 的 trigger 回调在原子上下文(持 PCM stream 锁,不能睡);慢速配置(I2C regmap)放 hw_params,trigger 只做非睡眠启停 · KV-040 · range：版本无关
 - KB-V4L2-001 · vb2 的 stop_streaming 必须把驱动手里所有 buffer 用 vb2_buffer_done 归还(VB2_BUF_STATE_ERROR),否则 STREAMOFF 卡死/泄漏 · KV-042 · range：版本无关
+- KB-CLK-001 · 时钟分两阶段:clk_prepare/unprepare 进程上下文会睡,clk_enable/disable 不睡可在原子/中断上下文;别在原子上下文 clk_prepare(_enable) · KV-045 · range：版本无关
+- KB-PINCTRL-001 · driver core 在 probe 前自动应用 default 态;别在 probe 里手动选 default;显式 pinctrl_select_state 只用于运行时切 sleep/idle · KV-049 · range：版本无关
+- KB-REG-001 · regulator_enable/disable 引用计数必须配平,别 force_disable 修不平衡;可选供电用 devm_regulator_get_optional(普通 get 没配返 dummy 掩盖缺失) · KV-052 · range：版本无关
+- KB-REGMAP-001 · regmap_config 必设 reg_bits/val_bits 否则 init 失败;硬件自改的寄存器要标 volatile_reg 否则 cache 返陈旧值;改 bit 用 regmap_update_bits · KV-055 · range：版本无关
 
 ## 条目
 
@@ -293,4 +297,77 @@
   ```
 - linked_eval_case：KV-042
 - provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 vb2 buffer 所有权;子系统:摄像）
+- fires/catches：0 / 0
+
+### KB-CLK-001：时钟 prepare/enable 两阶段,别在原子上下文 prepare
+
+- symptom：在中断/原子/持自旋锁上下文调 `clk_prepare_enable` 偶发睡眠告警("scheduling while atomic" / might_sleep);或只 `clk_enable` 没先 prepare,时钟不出/CCF 报警。
+- root cause：CCF 把开时钟拆成两步——`clk_prepare` 可能要等 PLL 锁定、甚至走 I2C 访问 PMIC，**会睡**，只能在进程上下文调；`clk_enable` 只翻使能位，**不睡**，可在原子/中断上下文调。拆开就是为了让你先在进程上下文 prepare，之后在原子上下文按需 enable/disable。把两者混为一谈就会在错误上下文睡眠或漏 prepare。
+- fix：可睡眠上下文图省事用 `clk_prepare_enable` / `clk_disable_unprepare` 配对；需要在原子/中断上下文开关时，提前在进程上下文 `clk_prepare`，临界区里只 `clk_enable`/`clk_disable`，退出后再 `clk_unprepare`。enable 计数必须和 disable 配平。
+- trigger：见到原子/中断/持锁上下文里出现 `clk_prepare`/`clk_prepare_enable`，或问"clk prepare 和 enable 区别 / 能不能在中断里开时钟"。
+- range：版本无关（CCF 两阶段语义长期不变）。
+- scope/limits：约束 prepare/enable 的上下文；API 名按目标树 `include/linux/clk.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: clk_prepare_enable, clk_enable
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-045
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 clk.h 两阶段上下文;子系统:clk。关联 KB-IRQ-001 同根"原子不睡"）
+- fires/catches：0 / 0
+
+### KB-PINCTRL-001：default pinctrl 态由 driver core 自动应用,别在 probe 里手动选
+
+- symptom：照搬别处代码在 probe 里 `pinctrl_select_state(p, default)`，引脚被选两次/时序错；或误以为不手动选 default 引脚就不工作而到处加冗余代码。
+- root cause：driver core 在 probe **之前**已自动应用 `pinctrl-0`（"default"）态（设备模型在 really_probe 路径里做）。驱动再手动选一次 default 是冗余，个别控制器还会因重复切换出问题。显式 pinctrl 的真正用途是**运行时切非 default 态**（PM 的 sleep/idle）。
+- fix：probe 里不要手动选 default；只在需要运行时切换时 `devm_pinctrl_get` + `pinctrl_lookup_state` + `pinctrl_select_state`，PM 场景直接用 `pinctrl_pm_select_sleep_state`/`_default_state` 封装。
+- trigger：见到 probe 里手动选 default 态，或问"要不要手动选 pinctrl default / 引脚不生效"。
+- range：版本无关。
+- scope/limits：约束 default 态的处理；API 名按目标树 `include/linux/pinctrl/consumer.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: pinctrl_select_state, pinctrl_lookup_state
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-049
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 driver core 自动选 default;子系统:pinctrl）
+- fires/catches：0 / 0
+
+### KB-REG-001：regulator enable/disable 引用计数必须配平,别 force_disable 修不平衡
+
+- symptom：`regulator_disable` 报"unbalanced disables"告警；或共享同一路 supply 的另一设备被意外断电；或可选供电没配也"成功"了，硬件其实没上电。
+- root cause：一路 supply 可被多个消费者共享，`regulator_enable`/`regulator_disable` 维护一个使能引用计数。disable 多于 enable → 不平衡告警，且计数归零时会真断电，殃及还在用它的其他消费者。另外 `devm_regulator_get` 在 DT 没声明该 supply 时返回一个 **dummy**（恒成功、恒通），会把"配置漏了"掩盖成"正常工作"。
+- fix：每个消费者各自 enable、各自 disable，严格配平；不要用 `regulator_force_disable` 去"修"不平衡（它强行清零计数，破坏共享语义）。真正可有可无的供电用 `devm_regulator_get_optional` 并 `IS_ERR` 判断，区分"没这路电"和"拿到 dummy"。
+- trigger：见到 `regulator_force_disable`、enable/disable 不配对，或用 `devm_regulator_get` 拿可选供电，或问"regulator unbalanced / 共享 supply 被关 / 可选供电怎么拿"。
+- range：版本无关。
+- scope/limits：约束 enable/disable 配平和可选供电获取；API 名按目标树 `include/linux/regulator/consumer.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: regulator_enable, regulator_disable
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-052
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 regulator 引用计数与 dummy 语义;子系统:regulator）
+- fires/catches：0 / 0
+
+### KB-REGMAP-001：regmap_config 必设 reg_bits/val_bits;会变的寄存器要标 volatile
+
+- symptom：`devm_regmap_init_*` 返回错误指针/init 失败；或读状态/数据寄存器总拿到旧值（regcache 缓存的）。
+- root cause：`struct regmap_config` 的 `reg_bits` 和 `val_bits` 是必填项，不填 regmap 无法确定地址/值宽度，初始化失败。开了 regcache 后，被硬件自己改写的寄存器（状态、数据、FIFO、计数器）如果不在 `volatile_reg` 里标成 volatile，regmap 会从缓存返回写过的旧值，而不去读真硬件。
+- fix：`regmap_config` 至少设 `reg_bits`/`val_bits`（按芯片手册）；用 `volatile_reg` 回调（或 volatile_table）标出所有硬件自改的寄存器；改某几个 bit 用 `regmap_update_bits`（regmap 内部加锁做 RMW），别手动 read→改→write。
+- trigger：见到 `regmap_config` 没设 reg_bits/val_bits、状态寄存器没标 volatile，或问"regmap init 失败 / 读寄存器是旧值"。
+- range：版本无关。
+- scope/limits：约束 regmap_config 必填字段与 volatile 标注；字段/API 名按目标树 `include/linux/regmap.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  symbol: regmap_config
+  api: regmap_update_bits
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-055
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 regmap_config 必填字段与 volatile;子系统:regmap）
 - fires/catches：0 / 0

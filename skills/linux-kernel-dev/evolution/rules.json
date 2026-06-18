@@ -149,6 +149,46 @@
       "catches": 0,
       "linked_eval_case": "KV-042",
       "added": "2026-06-17"
+    },
+    {
+      "id": "KB-CLK-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "时钟开关分两阶段:clk_prepare/unprepare 在进程上下文会睡(可能等 PLL 锁定/走 PMIC),clk_enable/disable 不睡可在原子/中断上下文。拆开就是为先 prepare 再在原子上下文 enable。别在原子上下文 clk_prepare(_enable);enable 与 disable 计数配平。子系统:clk。用例 KV-045。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-045",
+      "added": "2026-06-18"
+    },
+    {
+      "id": "KB-PINCTRL-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "default pinctrl 态由 driver core 在 probe 前自动应用,别在 probe 里手动选 default(冗余/时序错)。显式 pinctrl_select_state 只用于运行时切非 default 态;PM 用 pinctrl_pm_select_sleep_state/_default_state 封装。子系统:pinctrl。用例 KV-049。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-049",
+      "added": "2026-06-18"
+    },
+    {
+      "id": "KB-REG-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "regulator_enable/disable 是引用计数(一路 supply 可多消费者共享),必须配平;disable 多于 enable 会告警且计数归零时真断电殃及他人。别用 regulator_force_disable 修不平衡。真可选供电用 devm_regulator_get_optional 并 IS_ERR 判断(普通 get 没配返 dummy,掩盖配置缺失)。子系统:regulator。用例 KV-052。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-052",
+      "added": "2026-06-18"
+    },
+    {
+      "id": "KB-REGMAP-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "struct regmap_config 必须设 reg_bits 和 val_bits,否则 regmap init 失败。开 regcache 后,硬件自改的寄存器(状态/数据/FIFO)要在 volatile_reg 里标 volatile,否则读到缓存的陈旧值。改 bit 用 regmap_update_bits(内部加锁 RMW),别手动 read→改→write。子系统:regmap。用例 KV-055。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-055",
+      "added": "2026-06-18"
     }
   ]
 }

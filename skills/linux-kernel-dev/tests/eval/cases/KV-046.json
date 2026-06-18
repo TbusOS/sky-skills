@@ -1,0 +1,17 @@
+{
+  "id": "KV-046",
+  "topic": "registering a clock provider to device tree",
+  "q": "写一个时钟控制器驱动,怎么注册 clk 并让 DT 的 clocks=<&ctrl ID> 能解析?",
+  "kind": "objective",
+  "subsystem": "clk",
+  "gold_claims": {
+    "api": ["devm_clk_hw_register", "devm_of_clk_add_hw_provider", "of_clk_hw_onecell_get"],
+    "symbol": ["clk_hw"],
+    "config": ["CONFIG_COMMON_CLK"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "clk_acquire_handle", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["用已废弃的 clk_register 而非 clk_hw 接口(无说明)"],
+  "rubric": "用 devm_clk_hw_register 注册 clk_hw;devm_of_clk_add_hw_provider 配 of_clk_hw_onecell_get 让 #clock-cells 解析;框架开关 CONFIG_COMMON_CLK"
+}

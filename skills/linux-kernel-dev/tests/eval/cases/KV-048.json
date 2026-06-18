@@ -1,0 +1,15 @@
+{
+  "id": "KV-048",
+  "topic": "pinctrl PM helpers for sleep/idle states",
+  "q": "在 suspend/resume 里把引脚切到省电态再切回来,有现成封装吗?",
+  "kind": "objective",
+  "subsystem": "pinctrl",
+  "gold_claims": {
+    "api": ["pinctrl_pm_select_default_state", "pinctrl_pm_select_sleep_state", "pinctrl_pm_select_idle_state"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "pinctrl_get_state", "why": "编造的取状态函数" }
+  ],
+  "forbidden": ["在 suspend 里手撸 lookup+select 而忽略现成 PM 封装(无理由)"],
+  "rubric": "suspend 调 pinctrl_pm_select_sleep_state(dev)、resume 调 pinctrl_pm_select_default_state(dev);可选 idle 用 pinctrl_pm_select_idle_state;这些封装内部自己 lookup+select"
+}

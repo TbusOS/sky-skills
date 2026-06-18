@@ -1,0 +1,16 @@
+{
+  "id": "KV-051",
+  "topic": "optional regulator supply vs dummy",
+  "q": "有路供电是可有可无的,DT 里可能没配,怎么拿才不会被 dummy 掩盖?",
+  "kind": "objective",
+  "subsystem": "regulator",
+  "gold_claims": {
+    "api": ["devm_regulator_get_optional", "regulator_get_optional"],
+    "config": ["CONFIG_REGULATOR"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "regulator_acquire", "why": "编造的获取函数" }
+  ],
+  "forbidden": ["用 devm_regulator_get 拿可选供电(会得到 dummy)"],
+  "rubric": "可选供电用 devm_regulator_get_optional,没配时返回错误指针,IS_ERR 判断后跳过;普通 devm_regulator_get 在没配时返 dummy(恒成功),会掩盖配置缺失;CONFIG_REGULATOR 是框架开关"
+}

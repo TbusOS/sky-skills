@@ -1,0 +1,18 @@
+{
+  "id": "KV-053",
+  "topic": "creating a regmap and accessing registers",
+  "q": "I2C 设备有一堆寄存器,想用 regmap 而不是手撸 i2c_transfer,怎么建和读写?",
+  "kind": "objective",
+  "subsystem": "regmap",
+  "gold_claims": {
+    "api": ["devm_regmap_init_i2c", "regmap_read", "regmap_write", "regmap_update_bits"],
+    "symbol": ["regmap_config"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "regmap_read_reg", "why": "编造的读函数,真名 regmap_read" },
+    { "type": "fake-api", "claim": "regmap_write_reg", "why": "编造的写函数,真名 regmap_write" },
+    { "type": "fake-api", "claim": "regmap_modify_bits", "why": "不存在,读改写是 regmap_update_bits" }
+  ],
+  "forbidden": ["手动 read→改→write 改 bit 而不用 regmap_update_bits"],
+  "rubric": "填 struct regmap_config(reg_bits/val_bits 等)用 devm_regmap_init_i2c 建(判 IS_ERR);regmap_read/regmap_write 单寄存器,改 bit 用 regmap_update_bits(原子 RMW)"
+}

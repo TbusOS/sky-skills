@@ -1,0 +1,15 @@
+{
+  "id": "KV-054",
+  "topic": "regmap register cache across suspend/resume",
+  "q": "设备 suspend 后掉电,resume 要把寄存器值恢复回去,regmap cache 怎么配合?",
+  "kind": "objective",
+  "subsystem": "regmap",
+  "gold_claims": {
+    "api": ["regcache_mark_dirty", "regcache_cache_only", "regcache_sync"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "regmap_init_bus_auto", "why": "编造的自动选总线 init" }
+  ],
+  "forbidden": ["resume 不 regcache_sync 就直接访问"],
+  "rubric": "suspend:regcache_mark_dirty 标脏 + regcache_cache_only(true) 转只读缓存;resume:regcache_cache_only(false) 退出 + regcache_sync 把脏值刷回硬件"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "KV-044",
+  "topic": "enabling a clock from a device driver",
+  "q": "驱动里要打开一路 SoC 时钟给外设用,从 DT 拿时钟到使能怎么写?",
+  "kind": "objective",
+  "subsystem": "clk",
+  "gold_claims": {
+    "api": ["devm_clk_get", "clk_prepare_enable", "clk_disable_unprepare", "clk_get_rate", "clk_set_rate"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "clk_turn_on", "why": "编造的开时钟函数" },
+    { "type": "fake-api", "claim": "clk_set_freq", "why": "不存在,设频率是 clk_set_rate" }
+  ],
+  "forbidden": ["只 clk_enable 不先 prepare", "非 devm 的 clk_get 后忘 clk_put"],
+  "rubric": "devm_clk_get 按 clock-names 拿时钟(判 IS_ERR);可睡眠上下文用 clk_prepare_enable 开、clk_disable_unprepare 关,配对;调频用 clk_set_rate/clk_get_rate"
+}

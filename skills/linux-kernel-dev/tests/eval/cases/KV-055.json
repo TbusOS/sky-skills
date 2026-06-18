@@ -1,0 +1,17 @@
+{
+  "id": "KV-055",
+  "topic": "regmap_config required fields and volatile registers",
+  "q": "regmap 读状态寄存器老是拿到旧值,而且有时 init 直接失败,哪里配错了?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "regmap",
+  "gold_claims": {
+    "api": ["regmap_update_bits", "regmap_read_poll_timeout"],
+    "symbol": ["regmap_config"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "regmap_set_reg", "why": "编造的写寄存器函数" }
+  ],
+  "forbidden": ["regmap_config 不设 reg_bits/val_bits", "会变的状态寄存器不标 volatile 就靠 cache 读"],
+  "rubric": "struct regmap_config 必须设 reg_bits 和 val_bits 否则 init 失败;硬件自己改的(状态/数据/FIFO)寄存器要在 volatile_reg 里标成 volatile,否则 regcache 返回陈旧值;轮询状态位用 regmap_read_poll_timeout"
+}

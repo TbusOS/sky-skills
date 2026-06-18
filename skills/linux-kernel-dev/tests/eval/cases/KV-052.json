@@ -1,0 +1,16 @@
+{
+  "id": "KV-052",
+  "topic": "regulator enable/disable reference counting",
+  "q": "多个驱动共用一路 supply,enable/disable 要注意什么?能强制关吗?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "regulator",
+  "gold_claims": {
+    "api": ["regulator_enable", "regulator_disable", "regulator_is_enabled"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "regulator_turn_on", "why": "编造的开函数,真名 regulator_enable" }
+  ],
+  "forbidden": ["用 regulator_force_disable 去修计数不平衡", "disable 没 enable 过的 supply"],
+  "rubric": "regulator_enable/disable 是引用计数,每个消费者各自 enable 各自 disable,必须配平;disable 多于 enable 会警告并可能误关共享 supply;别用 force_disable 修不平衡;查状态 regulator_is_enabled"
+}

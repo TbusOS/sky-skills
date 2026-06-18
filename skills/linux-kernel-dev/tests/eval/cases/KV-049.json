@@ -1,0 +1,18 @@
+{
+  "id": "KV-049",
+  "topic": "default pinctrl state is auto-applied by driver core",
+  "q": "驱动 probe 里需不需要手动选 default 的 pinctrl 态才能让引脚生效?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "pinctrl",
+  "gold_claims": {
+    "api": ["pinctrl_select_state", "pinctrl_lookup_state"],
+    "symbol": ["pinctrl_state"],
+    "config": ["CONFIG_PINCTRL"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "pinmux_select_group", "why": "编造的消费者复用函数" }
+  ],
+  "forbidden": ["在 probe 里手动选 default 态", "说不手动选 default 引脚就不工作"],
+  "rubric": "driver core 在 probe 前已自动应用 default(pinctrl-0)态,普通驱动不要在 probe 里再手动选 default;显式 pinctrl_select_state 只用于运行时切非 default 态(sleep/idle);CONFIG_PINCTRL 是框架开关"
+}

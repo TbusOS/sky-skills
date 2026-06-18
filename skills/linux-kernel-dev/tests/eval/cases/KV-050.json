@@ -1,0 +1,16 @@
+{
+  "id": "KV-050",
+  "topic": "powering a device through a regulator supply",
+  "q": "驱动要给外设上电(DT 里有 vdd-supply),怎么拿 regulator 并使能/调压?",
+  "kind": "objective",
+  "subsystem": "regulator",
+  "gold_claims": {
+    "api": ["devm_regulator_get", "regulator_enable", "regulator_disable", "regulator_get_voltage", "regulator_set_voltage"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "regulator_power_on", "why": "编造的上电函数,真名 regulator_enable" },
+    { "type": "fake-api", "claim": "regulator_set_volt", "why": "不存在,设电压是 regulator_set_voltage" }
+  ],
+  "forbidden": ["在原子/中断上下文调 regulator_enable", "enable/disable 不配对"],
+  "rubric": "devm_regulator_get(dev,\"vdd\") 拿供电判 IS_ERR;进程上下文 regulator_enable 上电、regulator_disable 配对;调压 regulator_set_voltage/regulator_get_voltage"
+}

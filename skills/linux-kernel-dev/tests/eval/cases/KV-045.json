@@ -1,0 +1,17 @@
+{
+  "id": "KV-045",
+  "topic": "clk prepare/enable two-phase and atomic context",
+  "q": "为什么时钟有 clk_prepare 和 clk_enable 两步?能在中断/原子上下文开时钟吗?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "clk",
+  "gold_claims": {
+    "api": ["clk_prepare", "clk_unprepare", "clk_enable", "clk_disable", "clk_prepare_enable"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "clk_enable_prepared", "why": "编造的合并函数,真名是 clk_prepare_enable" },
+    { "type": "fake-api", "claim": "clk_get_frequency", "why": "不存在,取频率是 clk_get_rate" }
+  ],
+  "forbidden": ["在原子/中断上下文调 clk_prepare 或 clk_prepare_enable", "说 clk_enable 会睡眠"],
+  "rubric": "prepare/unprepare 在进程上下文会睡(等 PLL 锁定等);enable/disable 不睡可在原子/中断上下文;拆两阶段就是为先 prepare 再在原子上下文 enable;可睡眠上下文图省事用 clk_prepare_enable"
+}

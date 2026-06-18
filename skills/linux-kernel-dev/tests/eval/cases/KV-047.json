@@ -1,0 +1,16 @@
+{
+  "id": "KV-047",
+  "topic": "switching pinctrl states at runtime",
+  "q": "设备运行时要把引脚从工作态切到另一组配置(比如 sleep),pinctrl 怎么用?",
+  "kind": "objective",
+  "subsystem": "pinctrl",
+  "gold_claims": {
+    "api": ["devm_pinctrl_get", "pinctrl_lookup_state", "pinctrl_select_state"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "pinctrl_apply_state", "why": "编造的应用函数,真名 pinctrl_select_state" },
+    { "type": "fake-api", "claim": "pinctrl_set_state", "why": "不存在的设状态函数" }
+  ],
+  "forbidden": ["lookup 拿到的 state 不判 IS_ERR"],
+  "rubric": "devm_pinctrl_get 拿句柄,pinctrl_lookup_state 按 pinctrl-names 里的名字找态(判 IS_ERR),pinctrl_select_state 切过去;DT 用 pinctrl-names/pinctrl-N 描述"
+}
