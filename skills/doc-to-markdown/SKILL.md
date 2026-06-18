@@ -7,6 +7,7 @@ description: >
   a folder of documents. Trigger on phrases like "convert to markdown", "转成markdown", "转换成md",
   "文档转换", "把文档变成可读的", "提取文档内容", or any request involving turning PDF/DOCX files
   into a text-based readable format with images preserved.
+  Not for the reverse direction: to turn Markdown into PDF, use md-to-pdf instead.
 ---
 
 # Doc-to-Markdown Converter

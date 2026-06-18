@@ -5,6 +5,7 @@ description: >
   Uses PyMuPDF Story HTML rendering with DroidSansFallbackFull font for full CJK + Latin + special character coverage.
   Trigger on phrases like "markdown to pdf", "md转pdf", "生成pdf", "导出pdf", "markdown导出",
   or any request to convert .md files to PDF with proper Chinese rendering and bookmarks.
+  Not for the reverse direction: to turn PDF/DOCX into Markdown, use doc-to-markdown instead.
 ---
 
 # Markdown to PDF Converter
