@@ -41,6 +41,9 @@
 - KB-RESET-001 · 复位线被多设备共用必须 devm_reset_control_get_shared(引用计数,最后一个 assert 才真复位);独占线才用 *_exclusive,给共用线用 exclusive 会失败 · KV-057 · range：版本无关
 - KB-PWM-001 · pwm_apply_state 已改名 pwm_apply_might_sleep(旧名新内核编译错);用 apply 一次性写整个 state,别用 pwm_config+pwm_enable 老序列(会毛刺);原子上下文用 pwm_apply_atomic · KV-060 · range：apply 改名见目标树
 - KB-IIO-001 · IIO 私有数据跟 iio_dev 一起分配:devm_iio_device_alloc(dev,sizeof(state)) + iio_priv() 取,别单独 kmalloc;register 放最后(注册即对用户态可见) · KV-063 · range：版本无关
+- KB-THERMAL-001 · thermal_zone_device_ops.get_temp 回填的温度单位是毫摄氏度(m°C,25000=25°C),回填摄氏度会被当 0.025°C 致 trip 不触发;OF 注册用 devm_thermal_of_zone_register(旧名 thermal_zone_of_sensor_register 已改) · KV-067 · range：注册接口名见目标树
+- KB-WDT-001 · nowayout(watchdog_set_nowayout / CONFIG_WATCHDOG_NOWAYOUT)置位后看门狗 start 即停不掉,关 /dev/watchdog 也不停,别假设 .stop 必被调;watchdog_stop_on_reboot 避免干净重启被复位;max_hw_heartbeat_ms 让框架代喂别自开线程 · KV-069 · range：版本无关
+- KB-RTC-001 · struct rtc_time 遵循 struct tm:tm_year 自 1900 起(2025→125)、tm_mon 0-11(一月→0)、tm_mday 1 起;用 rtc_time64_to_tm/rtc_tm_to_time64 转换、rtc_valid_tm 校验,别手算 · KV-072 · range：版本无关
 
 ## 条目
 
@@ -428,4 +431,60 @@
   ```
 - linked_eval_case：KV-063
 - provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 iio.h alloc/priv/register;子系统:iio）
+- fires/catches：0 / 0
+
+### KB-THERMAL-001：get_temp 回填的温度单位是毫摄氏度
+
+- symptom：thermal zone 注册成功但 trip 点从不触发、冷却设备从不启动；或读出的温度看着是个位数。
+- root cause：`thermal_zone_device_ops.get_temp(tz, int *temp)` 约定回填**毫摄氏度**(m°C)——25°C 应填 25000。如果按摄氏度回填 25，框架理解成 0.025°C，远低于任何 trip，所以热管理形同虚设。
+- fix：`get_temp` 把传感器读数转成毫摄氏度再回填(×1000 或按传感器换算)；温度变化主动调 `thermal_zone_device_update` 让框架重新评估。OF 注册用 `devm_thermal_of_zone_register`(旧名 `thermal_zone_of_sensor_register` / `thermal_zone_device_register` 已被改名/替代,按目标树确认)。
+- trigger：见到 `get_temp` 回填的值没换算成毫摄氏度,或问"thermal trip 不触发 / get_temp 单位"。
+- range：版本无关(单位约定长期不变);注册接口名按目标树。
+- scope/limits：约束 get_temp 单位与注册接口;符号名按目标树 `include/linux/thermal.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: devm_thermal_of_zone_register, thermal_zone_device_update
+  symbol: thermal_zone_device_ops
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-067
+- provenance：self（真树核对 thermal.h get_temp 签名与 OF 注册改名:7.0 为 devm_thermal_of_zone_register,thermal_zone_device_register=0;子系统:thermal）
+- fires/catches：0 / 0
+
+### KB-WDT-001：nowayout 下看门狗一旦启动就停不掉
+
+- symptom：以为关掉 `/dev/watchdog` 文件描述符就能停狗，结果板子还是被复位；或干净 reboot 途中被狗咬复位。
+- root cause：`watchdog_set_nowayout`(或 `CONFIG_WATCHDOG_NOWAYOUT`)置位后，看门狗一旦 `start` 就**不允许停**——即使用户态关闭 `/dev/watchdog` 也不停(防呆:守护进程崩了不该放任停狗)。驱动不能假设 `.stop` 一定会被调用。另外干净重启需要 `watchdog_stop_on_reboot` 主动停狗，否则 reboot 途中可能被复位。
+- fix：理解 nowayout 语义，`.stop` 设计成"能停就停、停不掉也不出错"；干净重启用 `watchdog_stop_on_reboot(wdd)`；硬件喂狗间隔比请求超时短时设 `max_hw_heartbeat_ms` 让框架用内核 worker 代喂，别自己开 kernel 线程。
+- trigger：见到假设关 fd 能停狗、或自开线程喂狗、或漏 `watchdog_stop_on_reboot`，或问"watchdog 停不掉 / nowayout / 喂狗"。
+- range：版本无关。
+- scope/limits：约束 nowayout 语义与喂狗方式;API 名按目标树 `include/linux/watchdog.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: watchdog_set_nowayout, watchdog_stop_on_reboot
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-069
+- provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 watchdog.h nowayout/stop_on_reboot;子系统:watchdog）
+- fires/catches：0 / 0
+
+### KB-RTC-001：struct rtc_time 遵循 struct tm 约定(tm_year 自 1900 / tm_mon 0 起)
+
+- symptom：RTC 读/写的时间差一个世纪或差一个月；`set_time` 后再读回来不对。
+- root cause：`struct rtc_time` 字段沿用 C `struct tm` 约定：`tm_year` 是**自 1900 起**的年数(2025 → 125)，`tm_mon` 是 **0–11**(一月=0)，只有 `tm_mday` 是 1 起。把 `tm_year` 当绝对年份(填 2025)或 `tm_mon` 当 1 起(一月填 1)就会把时间写错一个世纪/一个月。
+- fix：年用 `年-1900`、月用 `月-1`(0 起)；秒与 tm 之间用 `rtc_time64_to_tm` / `rtc_tm_to_time64` 转换(别手算闰年)，`rtc_valid_tm` 校验 `read_time` 回填的值。
+- trigger：见到 `tm_year` 赋实际年份、`tm_mon` 当 1 起、或手算秒↔年月日，或问"RTC 时间差一个世纪 / rtc_time 字段"。
+- range：版本无关。
+- scope/limits：约束 rtc_time 字段语义与转换;API 名按目标树 `include/linux/rtc.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: rtc_time64_to_tm, rtc_tm_to_time64
+  symbol: rtc_time
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-072
+- provenance：self（真树核对 rtc.h struct tm 约定 + RTC_TIMESTAMP_BEGIN_1900;子系统:rtc）
 - fires/catches：0 / 0

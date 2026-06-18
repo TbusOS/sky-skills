@@ -1,0 +1,17 @@
+{
+  "id": "KV-069",
+  "topic": "watchdog nowayout semantics",
+  "q": "看门狗 start 之后关掉 /dev/watchdog 能不能停?干净重启会不会被它复位?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "watchdog",
+  "gold_claims": {
+    "api": ["watchdog_set_nowayout", "watchdog_stop_on_reboot"],
+    "config": ["CONFIG_WATCHDOG"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "watchdog_start_timer", "why": "编造的启动函数;上狗是 ops.start" }
+  ],
+  "forbidden": ["假设 nowayout 下关 fd 能停狗", "假设 .stop 一定被调用"],
+  "rubric": "nowayout(watchdog_set_nowayout / CONFIG_WATCHDOG_NOWAYOUT)置位后一旦 start 就停不掉,关 /dev/watchdog 也不停(防呆),驱动别假设 .stop 必被调;watchdog_stop_on_reboot 避免干净重启途中被复位;CONFIG_WATCHDOG 是框架开关"
+}

@@ -219,6 +219,36 @@
       "catches": 0,
       "linked_eval_case": "KV-063",
       "added": "2026-06-18"
+    },
+    {
+      "id": "KB-THERMAL-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "thermal_zone_device_ops.get_temp(tz,int*) 回填的温度单位是毫摄氏度(m°C),25°C 填 25000;按摄氏度填 25 会被当 0.025°C 导致 trip 永不触发、热管理失效。温度变化调 thermal_zone_device_update 通知。OF 注册用 devm_thermal_of_zone_register(旧名 thermal_zone_of_sensor_register/thermal_zone_device_register 已改名/替代,按目标树)。子系统:thermal。用例 KV-067。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-067",
+      "added": "2026-06-18"
+    },
+    {
+      "id": "KB-WDT-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "看门狗 nowayout(watchdog_set_nowayout / CONFIG_WATCHDOG_NOWAYOUT)置位后一旦 start 就停不掉,关 /dev/watchdog 也不停(防呆),驱动别假设 .stop 必被调用。干净重启用 watchdog_stop_on_reboot 避免途中被复位;硬件喂狗间隔比请求超时短时设 max_hw_heartbeat_ms 让框架代喂,别自开 kernel 线程。子系统:watchdog。用例 KV-069。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-069",
+      "added": "2026-06-18"
+    },
+    {
+      "id": "KB-RTC-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "struct rtc_time 遵循 C struct tm 约定:tm_year 是自 1900 起的偏移(2025→125),tm_mon 是 0-11(一月→0),只有 tm_mday 是 1 起。把 tm_year 当绝对年份或 tm_mon 当 1 起会把时间写错一个世纪/一个月。秒与 tm 之间用 rtc_time64_to_tm/rtc_tm_to_time64 转换,rtc_valid_tm 校验,别手算闰年。子系统:rtc。用例 KV-072。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-072",
+      "added": "2026-06-18"
     }
   ]
 }

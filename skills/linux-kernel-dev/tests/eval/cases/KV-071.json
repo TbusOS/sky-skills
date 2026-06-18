@@ -1,0 +1,17 @@
+{
+  "id": "KV-071",
+  "topic": "registering an RTC driver",
+  "q": "写个 RTC 驱动,分配设备、填 ops、注册,骨架怎么搭?",
+  "kind": "objective",
+  "subsystem": "rtc",
+  "gold_claims": {
+    "api": ["devm_rtc_allocate_device", "devm_rtc_register_device"],
+    "symbol": ["rtc_class_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "rtc_register_dev", "why": "编造的注册函数" },
+    { "type": "fake-api", "claim": "rtc_get_time_now", "why": "不存在的取时函数" }
+  ],
+  "forbidden": ["register 放在设好 ops/range 之前"],
+  "rubric": "devm_rtc_allocate_device 先分配,设 rtc->ops(rtc_class_ops:read_time/set_time/read_alarm/set_alarm)和 range,最后 devm_rtc_register_device 注册(注册即对用户态可见)"
+}

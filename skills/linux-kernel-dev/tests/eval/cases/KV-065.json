@@ -1,0 +1,17 @@
+{
+  "id": "KV-065",
+  "topic": "registering a temperature sensor as a thermal zone",
+  "q": "写个温度传感器驱动,把它暴露成 thermal zone 接入热管理,怎么注册?",
+  "kind": "objective",
+  "subsystem": "thermal",
+  "gold_claims": {
+    "api": ["devm_thermal_of_zone_register", "thermal_zone_device_update"],
+    "symbol": ["thermal_zone_device_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "thermal_register_sensor", "why": "编造的注册函数" },
+    { "type": "fake-api", "claim": "thermal_zone_create", "why": "不存在的创建函数" }
+  ],
+  "forbidden": ["get_temp 回填摄氏度而非毫摄氏度"],
+  "rubric": "实现 thermal_zone_device_ops.get_temp(回填毫摄氏度),用 devm_thermal_of_zone_register 按 DT thermal-zones 注册(判 IS_ERR);温度变化调 thermal_zone_device_update 通知框架"
+}

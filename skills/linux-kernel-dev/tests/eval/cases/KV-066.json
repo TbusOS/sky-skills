@@ -1,0 +1,17 @@
+{
+  "id": "KV-066",
+  "topic": "registering a cooling device",
+  "q": "写个风扇/降频类冷却设备接入热管理,怎么注册和实现状态?",
+  "kind": "objective",
+  "subsystem": "thermal",
+  "gold_claims": {
+    "api": ["thermal_cooling_device_register", "devm_thermal_of_cooling_device_register"],
+    "symbol": ["thermal_cooling_device_ops"],
+    "config": ["CONFIG_THERMAL"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "thermal_zone_get_temperature", "why": "编造的取温函数" }
+  ],
+  "forbidden": ["冷却状态非单调(0 应为不冷却,max_state 最强)"],
+  "rubric": "实现 thermal_cooling_device_ops(get_max_state/get_cur_state/set_cur_state,状态 0=不冷却单调到 max_state);devm_thermal_of_cooling_device_register 注册;CONFIG_THERMAL 是框架开关"
+}

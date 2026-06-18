@@ -1,0 +1,16 @@
+{
+  "id": "KV-073",
+  "topic": "RTC read_time/set_time ops",
+  "q": "RTC 的 read_time/set_time 回调放哪个结构?分配设备用什么?",
+  "kind": "objective",
+  "subsystem": "rtc",
+  "gold_claims": {
+    "api": ["devm_rtc_allocate_device"],
+    "symbol": ["rtc_class_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "rtc_set_datetime", "why": "编造的设时间函数" }
+  ],
+  "forbidden": ["read_time 回填非法 rtc_time 不校验"],
+  "rubric": "read_time/set_time/read_alarm/set_alarm 放 struct rtc_class_ops;设备用 devm_rtc_allocate_device 分配;read_time 回填的 rtc_time 应能过 rtc_valid_tm"
+}

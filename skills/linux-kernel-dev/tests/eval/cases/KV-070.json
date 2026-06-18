@@ -1,0 +1,16 @@
+{
+  "id": "KV-070",
+  "topic": "watchdog ops and info structures",
+  "q": "watchdog 驱动的 ops 和 info 结构各放什么?",
+  "kind": "objective",
+  "subsystem": "watchdog",
+  "gold_claims": {
+    "api": ["watchdog_register_device"],
+    "symbol": ["watchdog_ops", "watchdog_info"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "watchdog_register_dev", "why": "编造的注册函数(少了 ice)" }
+  ],
+  "forbidden": ["在 watchdog_ops 漏 .owner"],
+  "rubric": "watchdog_ops 放 owner/start/stop/ping/set_timeout 等回调;watchdog_info 放 identity 和 options(WDIOF_*);非 devm 用 watchdog_register_device"
+}

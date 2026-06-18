@@ -1,0 +1,18 @@
+{
+  "id": "KV-072",
+  "topic": "rtc_time follows struct tm conventions",
+  "q": "RTC 的 read_time 回填 struct rtc_time,2025 年和一月分别填几?怎么转换?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "rtc",
+  "gold_claims": {
+    "api": ["rtc_time64_to_tm", "rtc_tm_to_time64", "rtc_valid_tm"],
+    "symbol": ["rtc_time"],
+    "config": ["CONFIG_RTC_CLASS"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "rtc_read_clock", "why": "编造的读时钟函数" }
+  ],
+  "forbidden": ["tm_year 填实际年份(2025)", "tm_mon 当 1 起"],
+  "rubric": "struct rtc_time 遵循 struct tm:tm_year 是自 1900 的偏移(2025→125),tm_mon 是 0-11(一月→0),tm_mday 才 1 起;用 rtc_time64_to_tm/rtc_tm_to_time64 转换、rtc_valid_tm 校验,别手算;CONFIG_RTC_CLASS 是框架开关"
+}

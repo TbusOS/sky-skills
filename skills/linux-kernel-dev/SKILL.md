@@ -80,6 +80,9 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 复位 reset（assert·deassert·reset 消费 / exclusive vs shared 引用计数 / DT resets） | `references/subsys/reset.md` | `Documentation/driver-api/reset.rst`、`include/linux/reset.h` |
 | PWM（pwm_get / pwm_state 原子应用 / apply 接口改名·原子 vs 会睡 / DT pwms） | `references/subsys/pwm.md` | `Documentation/driver-api/pwm.rst`、`include/linux/pwm.h` |
 | IIO（写 sensor/ADC 驱动 / iio_priv 私有数据 / channels·info / 触发缓冲采集） | `references/subsys/iio.md` | `Documentation/driver-api/iio/`、`include/linux/iio/iio.h` |
+| 温控 thermal（温度传感器 zone / get_temp 毫摄氏度 / 冷却设备 / OF 注册改名 / DT thermal-zones） | `references/subsys/thermal.md` | `Documentation/driver-api/thermal/`、`include/linux/thermal.h` |
+| 看门狗 watchdog（watchdog_ops 启停喂狗 / nowayout 语义 / max_hw_heartbeat 代喂 / stop_on_reboot） | `references/subsys/watchdog.md` | `Documentation/watchdog/`、`include/linux/watchdog.h` |
+| RTC（rtc_class_ops 读写时间 / rtc_time 遵循 struct tm·tm_year 自 1900 / allocate+register） | `references/subsys/rtc.md` | `Documentation/admin-guide/rtc`、`include/linux/rtc.h` |
 
 目录总览见 `index.md`。
 
