@@ -1,0 +1,17 @@
+{
+  "id": "KV-092",
+  "topic": "registering an MTD device with partitions",
+  "q": "写个 flash 驱动,带 DT 分区注册成 MTD 设备怎么写?",
+  "kind": "objective",
+  "subsystem": "mtd",
+  "gold_claims": {
+    "api": ["mtd_device_parse_register", "mtd_device_unregister"],
+    "symbol": ["mtd_info"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "mtd_register_device", "why": "编造的注册函数,真名 mtd_device_register" },
+    { "type": "fake-api", "claim": "mtd_flash_write", "why": "不存在的写函数,真名 mtd_write" }
+  ],
+  "forbidden": ["不擦直接写 flash"],
+  "rubric": "填 mtd_info(size/erasesize/writesize/_read/_write/_erase),mtd_device_parse_register 解析 DT/cmdline 分区并注册;移除 mtd_device_unregister"
+}

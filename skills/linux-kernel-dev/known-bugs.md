@@ -50,6 +50,9 @@
 - KB-DMA-001 · dmaengine_submit 只把描述符排队返回 cookie,必须再 dma_async_issue_pending 才真把传输推给硬件;漏了 DMA 永不启动。拿通道 dma_request_chan(可返 -EPROBE_DEFER 要传播) · KV-084 · range：版本无关
 - KB-NVMEM-001 · nvmem_cell_read(cell,&len) 返回一块新 kmalloc 的缓冲,用完必须 kfree 否则泄漏;定长值用 nvmem_cell_read_u8/u16 直接拿整数不用 free · KV-087 · range：版本无关
 - KB-MMC-001 · mmc_host_ops.request 处理完(成功或出错)必须 mmc_request_done(host,mrq) 交还核心,否则 MMC 栈一直等、卡挂死;出错路径也要调 · KV-090 · range：版本无关
+- KB-MTD-001 · flash 写前必须先 mtd_erase 擦(不能直接覆写),擦的 offset/length 必须按 mtd->erasesize 对齐否则 -EINVAL;分区用 mtd_device_parse_register · KV-093 · range：版本无关
+- KB-PHY-001 · 通用 PHY 消费顺序 phy_init→phy_power_on,拆除反序 phy_power_off→phy_exit(都引用计数);别和网络 MDIO PHY(phy_connect/phy_device)混 · KV-096 · range：版本无关
+- KB-HWMON-001 · hwmon sysfs 固定单位:温度毫摄氏度(25000=25°C)/电压 mV/风扇 RPM/电流 mA/功率 µW;.read 按此回填;现代用 devm_hwmon_device_register_with_info · KV-099 · range：版本无关
 
 ## 条目
 
@@ -603,4 +606,60 @@
   ```
 - linked_eval_case：KV-090
 - provenance：self（真树核对 mmc/host.h:621 void mmc_request_done(struct mmc_host*, struct mmc_request*);子系统:mmc）
+- fires/catches：0 / 0
+
+### KB-MTD-001：flash 写前必须先擦,且擦区按 erasesize 对齐
+
+- symptom：往 flash 写数据后读回是错的(像写进去的和原有的混在一起);`mtd_erase` 返回 `-EINVAL`。
+- root cause：NAND/NOR flash 不能直接覆写——写操作只能把 bit 往一个方向清,要先擦成全 1 再写。而擦的区域(`erase_info.addr` 和 `.len`)**必须按 `mtd->erasesize` 对齐**,不对齐 `mtd_erase` 直接 `-EINVAL`。不擦就写 → 新旧数据按位与,损坏。
+- fix：写前 `mtd_erase` 擦掉目标区域,offset 和 length 都 `round_*` 到 `mtd->erasesize` 边界;擦后再 `mtd_write`;读写检查 `retlen`。分区注册用 `mtd_device_parse_register`(解析 DT/cmdline 分区)。
+- trigger：见到 `mtd_write` 前没有 `mtd_erase`、或擦区没按 erasesize 对齐,或问 "flash 写了读回是错的 / mtd_erase -EINVAL"。
+- range：版本无关。
+- scope/limits：约束擦-写顺序与对齐;API 名按目标树 `include/linux/mtd/mtd.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: mtd_erase, mtd_write
+  symbol: mtd_info
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-093
+- provenance：self（真树核对 mtd.h erasesize/_erase + 内核子系统知识库内容源;子系统:mtd）
+- fires/catches：0 / 0
+
+### KB-PHY-001：通用 PHY 的 init/power_on 顺序,别和网络 PHY 混
+
+- symptom：PHY 不工作 / 控制器收发异常;或在不该睡的上下文调 PHY 操作;或误用了网络 PHY 的 API(`phy_connect`)却拿的是通用 PHY。
+- root cause：通用 PHY(`drivers/phy`, `struct phy`)消费有固定顺序：`phy_init()` 先(时钟/复位等初始化)、`phy_power_on()` 后(上电);拆除**反序**：`phy_power_off()` 再 `phy_exit()`。两对都是引用计数的。顺序错(没 init 就 power_on、或先 exit 再 power_off)会让 PHY 处于错误状态。另外通用 PHY 和**网络/MDIO PHY**(`struct phy_device` / `phy_connect` / `drivers/net/phy`)是**两个不同框架**,API 不通用,常被混。
+- fix：消费按 `phy_init` → `phy_power_on` 启用、`phy_power_off` → `phy_exit` 拆除;`devm_phy_get` 拿(可 -EPROBE_DEFER 要传播)。确认自己用的是哪套 PHY 框架。
+- trigger：见到 `phy_power_on` 前没 `phy_init`、拆除顺序反了,或把 `phy_connect`/`phy_device` 和 `struct phy` 混用,或问 "PHY init/power_on 顺序 / 通用 PHY vs 网络 PHY"。
+- range：版本无关。
+- scope/limits：约束通用 PHY 消费顺序 + 与网络 PHY 区分;API 名按目标树 `include/linux/phy/phy.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: phy_init, phy_power_on
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-096
+- provenance：self（真树核对 phy/phy.h init/power_on/exit + 内核子系统知识库内容源;子系统:phy）
+- fires/catches：0 / 0
+
+### KB-HWMON-001：hwmon sysfs 值是固定单位
+
+- symptom：lm-sensors / 上层读到的温度、电压数量级不对(温度显示 0.025°C、电压差 1000 倍)。
+- root cause：hwmon 暴露到 sysfs 的值用**固定单位约定**:温度 `tempN_input` 毫摄氏度(m°C,25000=25°C)、电压 `inN_input` 毫伏(mV)、风扇 `fanN_input` 转/分(RPM)、电流 `currN_input` 毫安(mA)、功率 `powerN_input` 微瓦(µW)。`.read` 回调按摄氏度/伏回填就差几个数量级。
+- fix：`hwmon_ops.read` 把传感器读数换算成 hwmon 约定的单位再回填(温度 ×1000 成 m°C 等)。现代用 `devm_hwmon_device_register_with_info`(chip_info + ops + channel info),少手写 sysfs attr group。
+- trigger：见到 `.read` 回填的值没换算成 hwmon 单位,或问 "hwmon 温度/电压数量级不对 / hwmon 单位"。
+- range：版本无关。
+- scope/limits：约束 hwmon read 单位 + 现代注册接口;符号名按目标树 `include/linux/hwmon.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: devm_hwmon_device_register_with_info
+  symbol: hwmon_ops
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-099
+- provenance：self（真树核对 hwmon.h register_with_info + 内核子系统知识库内容源;子系统:hwmon。关联 KB-THERMAL-001 同款毫摄氏度单位）
 - fires/catches：0 / 0

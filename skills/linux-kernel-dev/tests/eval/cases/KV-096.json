@@ -1,0 +1,17 @@
+{
+  "id": "KV-096",
+  "topic": "generic PHY init/power_on ordering",
+  "q": "通用 PHY 的 init / power_on / power_off / exit 调用顺序是怎样的?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "phy",
+  "gold_claims": {
+    "api": ["phy_init", "phy_power_on", "phy_power_off", "phy_exit"],
+    "config": ["CONFIG_GENERIC_PHY"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "phy_turn_on", "why": "编造的上电函数" }
+  ],
+  "forbidden": ["拆除时先 phy_exit 再 phy_power_off", "没 init 就 power_on"],
+  "rubric": "启用顺序 phy_init → phy_power_on;拆除反序 phy_power_off → phy_exit;两对都引用计数;别和网络/MDIO PHY(phy_connect/phy_device)混;CONFIG_GENERIC_PHY 是框架开关"
+}

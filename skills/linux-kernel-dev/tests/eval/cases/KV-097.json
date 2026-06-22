@@ -1,0 +1,16 @@
+{
+  "id": "KV-097",
+  "topic": "writing a generic PHY provider",
+  "q": "写一个通用 PHY 驱动(provider),怎么创建和暴露给 DT?",
+  "kind": "objective",
+  "subsystem": "phy",
+  "gold_claims": {
+    "api": ["devm_phy_create", "devm_of_phy_provider_register"],
+    "symbol": ["phy_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "phy_power_up", "why": "编造的上电函数" }
+  ],
+  "forbidden": ["phy_ops 漏 .owner"],
+  "rubric": "实现 struct phy_ops(init/power_on/power_off/exit/owner),devm_phy_create 创建 phy,devm_of_phy_provider_register 配 of_phy_simple_xlate 暴露给 DT phys"
+}

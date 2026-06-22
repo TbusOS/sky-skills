@@ -1,0 +1,16 @@
+{
+  "id": "KV-094",
+  "topic": "raw NAND scan and chip setup",
+  "q": "裸 NAND 驱动怎么探测芯片建立 mtd?",
+  "kind": "objective",
+  "subsystem": "mtd",
+  "gold_claims": {
+    "api": ["nand_scan", "mtd_device_register"],
+    "symbol": ["nand_chip", "mtd_info"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "mtd_register_device", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["跳过 nand_scan 直接用 mtd"],
+  "rubric": "填 struct nand_chip(读写时序/ECC/oob),nand_scan 探测芯片并建立其 mtd_info,再 mtd_device_register 注册"
+}

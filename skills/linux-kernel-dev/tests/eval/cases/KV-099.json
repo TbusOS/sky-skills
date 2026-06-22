@@ -1,0 +1,18 @@
+{
+  "id": "KV-099",
+  "topic": "hwmon sysfs fixed units",
+  "q": "hwmon 的 read 回填温度/电压,sysfs 用什么单位?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "hwmon",
+  "gold_claims": {
+    "api": ["devm_hwmon_device_register_with_info"],
+    "symbol": ["hwmon_ops", "hwmon_channel_info"],
+    "config": ["CONFIG_HWMON"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "hwmon_register_device", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["温度回填摄氏度而非毫摄氏度", "电压回填伏而非毫伏"],
+  "rubric": "hwmon sysfs 固定单位:温度毫摄氏度(temp1_input,25000=25°C)、电压毫伏(mV)、风扇 RPM、电流毫安(mA)、功率微瓦(µW);hwmon_ops.read 按这些单位回填;CONFIG_HWMON 是框架开关"
+}

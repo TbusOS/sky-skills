@@ -1,0 +1,19 @@
+{
+  "id": "KV-093",
+  "topic": "flash must be erased before write and aligned to erasesize",
+  "q": "往 flash 某偏移写数据失败/数据乱,而且 mtd_erase 返 -EINVAL,怎么回事?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "mtd",
+  "gold_claims": {
+    "api": ["mtd_erase", "mtd_write", "mtd_read"],
+    "symbol": ["mtd_info"],
+    "config": ["CONFIG_MTD"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "mtd_erase_block", "why": "编造的擦除函数,真名 mtd_erase" },
+    { "type": "fake-api", "claim": "mtd_flash_write", "why": "不存在的写函数" }
+  ],
+  "forbidden": ["不擦直接覆写", "擦的区域不按 erasesize 对齐"],
+  "rubric": "flash 写前必须先 mtd_erase 擦成全1(不能直接覆写);擦的 offset 和 length 必须按 mtd->erasesize 对齐否则 -EINVAL;擦后 mtd_write,读 mtd_read;CONFIG_MTD 是框架开关"
+}

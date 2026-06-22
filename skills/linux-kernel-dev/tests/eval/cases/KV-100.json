@@ -1,0 +1,16 @@
+{
+  "id": "KV-100",
+  "topic": "hwmon channel info and ops",
+  "q": "hwmon 的通道(几路温度/电压)和回调放哪些结构?",
+  "kind": "objective",
+  "subsystem": "hwmon",
+  "gold_claims": {
+    "api": ["hwmon_device_register_with_info"],
+    "symbol": ["hwmon_channel_info", "hwmon_chip_info"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "hwmon_register_sensor", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["channel info 数组不以 NULL 结尾"],
+  "rubric": "通道用 HWMON_CHANNEL_INFO 宏建 hwmon_channel_info 数组(NULL 结尾),挂到 hwmon_chip_info.info;ops 是 hwmon_ops;非 devm 用 hwmon_device_register_with_info"
+}

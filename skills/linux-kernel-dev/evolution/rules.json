@@ -309,6 +309,36 @@
       "catches": 0,
       "linked_eval_case": "KV-090",
       "added": "2026-06-22"
+    },
+    {
+      "id": "KB-MTD-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "NAND/NOR flash 不能直接覆写,写前必须 mtd_erase 擦成全1;擦的 offset 和 length 必须按 mtd->erasesize 对齐,否则 mtd_erase 返 -EINVAL;不擦就写新旧数据按位与损坏。擦后 mtd_write,读写检查 retlen。分区用 mtd_device_parse_register。子系统:mtd。用例 KV-093。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-093",
+      "added": "2026-06-22"
+    },
+    {
+      "id": "KB-PHY-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "通用 PHY(drivers/phy, struct phy)消费固定顺序:phy_init 先、phy_power_on 后;拆除反序 phy_power_off 再 phy_exit;两对都引用计数,顺序错 PHY 状态错乱。devm_phy_get 拿(可 -EPROBE_DEFER 要传播)。别和网络/MDIO PHY(struct phy_device/phy_connect/drivers/net/phy)混,是两个不同框架。子系统:phy。用例 KV-096。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-096",
+      "added": "2026-06-22"
+    },
+    {
+      "id": "KB-HWMON-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "hwmon 暴露到 sysfs 的值用固定单位:温度 tempN_input 毫摄氏度(25000=25°C)、电压 inN_input mV、风扇 fanN_input RPM、电流 currN_input mA、功率 powerN_input µW;.read 回调按摄氏度/伏回填就差几个数量级。现代用 devm_hwmon_device_register_with_info(chip_info+ops+channel info)少手写 sysfs attr group。子系统:hwmon。用例 KV-099。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-099",
+      "added": "2026-06-22"
     }
   ]
 }

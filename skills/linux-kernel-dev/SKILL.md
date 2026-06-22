@@ -89,6 +89,9 @@ references. Load a reference only when the task needs it (progressive disclosure
 | DMA engine（slave DMA 消费 / prep·submit·issue_pending 序列 / 通道生命周期 / DT dmas） | `references/subsys/dmaengine.md` | `Documentation/driver-api/dmaengine/`、`include/linux/dmaengine.h` |
 | NVMEM（eeprom/efuse/otp 消费 cell·缓冲要 kfree / 写 provider nvmem_config / DT cells） | `references/subsys/nvmem.md` | `Documentation/driver-api/nvmem.rst`、`include/linux/nvmem-consumer.h` |
 | MMC/SD host（mmc_alloc_host·add / mmc_host_ops / .request 完成必 mmc_request_done） | `references/subsys/mmc.md` | `Documentation/mmc/`、`include/linux/mmc/host.h` |
+| MTD flash（NAND/NOR / 写前必擦 + erasesize 对齐 / mtd_device_parse_register 分区 / nand_scan） | `references/subsys/mtd.md` | `Documentation/driver-api/mtd/`、`include/linux/mtd/mtd.h` |
+| 通用 PHY（USB/PCIe/MIPI phy 消费 init→power_on / 写 provider phy_ops / 别和网络 MDIO PHY 混） | `references/subsys/phy.md` | `Documentation/driver-api/phy/`、`include/linux/phy/phy.h` |
+| 硬件监控 hwmon（register_with_info / sysfs 固定单位 温度毫摄氏度·电压 mV / chip_info·ops·channel） | `references/subsys/hwmon.md` | `Documentation/hwmon/`、`include/linux/hwmon.h` |
 
 目录总览见 `index.md`。
 

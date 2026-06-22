@@ -1,0 +1,16 @@
+{
+  "id": "KV-095",
+  "topic": "consuming a generic PHY from a controller driver",
+  "q": "USB/PCIe 控制器驱动要拿并初始化它的 PHY,怎么写?",
+  "kind": "objective",
+  "subsystem": "phy",
+  "gold_claims": {
+    "api": ["devm_phy_get", "phy_init", "phy_power_on", "phy_power_off", "phy_exit"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "phy_turn_on", "why": "编造的上电函数,真名 phy_power_on" },
+    { "type": "fake-api", "claim": "phy_power_up", "why": "不存在的上电函数" }
+  ],
+  "forbidden": ["没 phy_init 就 phy_power_on", "把通用 PHY 当网络 MDIO PHY"],
+  "rubric": "devm_phy_get 拿 PHY(判 IS_ERR);phy_init 再 phy_power_on 启用;拆除反序 phy_power_off 再 phy_exit;这是通用 PHY 框架不是网络 MDIO PHY"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "KV-098",
+  "topic": "registering a hwmon device with info",
+  "q": "写个硬件监控驱动暴露温度/电压,现代怎么注册?",
+  "kind": "objective",
+  "subsystem": "hwmon",
+  "gold_claims": {
+    "api": ["devm_hwmon_device_register_with_info"],
+    "symbol": ["hwmon_chip_info", "hwmon_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "hwmon_register_sensor", "why": "编造的注册函数" },
+    { "type": "fake-api", "claim": "hwmon_device_create", "why": "不存在的创建函数" }
+  ],
+  "forbidden": ["用旧的手写 sysfs attr group 而非 register_with_info(无理由)"],
+  "rubric": "填 hwmon_chip_info(ops + channel info 数组),实现 hwmon_ops(is_visible/read/write),devm_hwmon_device_register_with_info 注册;首选 with_info 而非旧 sysfs attr group"
+}
