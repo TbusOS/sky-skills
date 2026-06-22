@@ -252,6 +252,38 @@ $ bash ~/.claude/skills/linux-kernel-dev/scripts/checkpatch_gate.sh --tree /path
   </div>
 </section>
 
+<!-- provenance: where the facts come from -->
+<section class="anth-section anth-section--subtle" id="provenance">
+  <div style="max-width:760px; margin:0 auto var(--space-5); text-align:center;">
+    <span class="anth-badge"><span class="lang-en">Where the facts come from</span><span class="lang-zh">事实怎么验证的</span></span>
+    <h2 style="margin:var(--space-3) 0;"><span class="lang-en">Names are machine-proven; usage is sourced from authoritative headers &amp; docs.</span><span class="lang-zh">名字的真假是机器证明的；用法的对错是读权威源写的。</span></h2>
+    <p style="font-size:16px; color:var(--anth-text-secondary); line-height:1.6; font-family:var(--font-body);">
+      <span class="lang-en">Every claim a module makes passes three tiers of sourcing — and they are not equally strong, so here is the honest boundary.</span>
+      <span class="lang-zh">每个模块的每条断言都过三层来源 —— 三层强度不一样，所以这里把可信边界说清楚。</span>
+    </p>
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-4); max-width:1100px; margin:0 auto;">
+    <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-left:4px solid var(--anth-orange); border-radius:var(--radius-lg); background:var(--anth-bg);">
+      <h3 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">1 · Existence — machine-verified</span><span class="lang-zh">1 · 存在性 —— 机器验证</span></h3>
+      <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">Every API / symbol / <code>CONFIG</code> is grepped against a <strong>real kernel source tree</strong> — it must resolve, and every deliberately-wrong corruption must <em>not</em>. Reproducible, this is the fact gate.</span><span class="lang-zh">每个 API / 符号 / <code>CONFIG</code> 都对<strong>真内核源码树</strong> grep —— 必须查得到，故意写错的必须查不到。可复现，这就是事实检查。</span></p>
+    </div>
+    <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+      <h3 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">2 · Semantics — authoritative source</span><span class="lang-zh">2 · 语义 —— 权威源</span></h3>
+      <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">Signatures, struct fields and the gotchas come from the kernel's own headers (<code>include/linux/*.h</code>) and <code>Documentation/</code> — each module cites its source at the top.</span><span class="lang-zh">函数签名、结构字段、那些"坑"来自内核自己的头文件(<code>include/linux/*.h</code>)和 <code>Documentation/</code> —— 每个模块顶部都标了出处。</span></p>
+    </div>
+    <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+      <h3 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">3 · Coverage — seeded, then checked</span><span class="lang-zh">3 · 覆盖 —— 起点 + 复核</span></h3>
+      <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">A kernel knowledge base seeds which APIs a subsystem has — then every entry is cross-checked against the tree, which catches stale or renamed APIs (e.g. an <code>_apply_state</code> that got renamed).</span><span class="lang-zh">一个内核知识库提供"该讲哪些 API"的起点 —— 但每条都再拿真树复核，揪出过时/改名的 API(比如某个被改了名的 <code>_apply_state</code>)。</span></p>
+    </div>
+  </div>
+  <div style="max-width:1100px; margin:var(--space-5) auto 0; padding:var(--space-4) var(--space-6); border:1px solid var(--anth-light-gray); border-left:4px solid var(--anth-orange); border-radius:var(--radius-lg); background:var(--anth-bg);">
+    <p style="font-size:15px; color:var(--anth-text); line-height:1.6; margin:0; font-family:var(--font-body);">
+      <span class="lang-en"><strong>The honest boundary.</strong> Existence is machine-proven and reproducible. Semantics are read from authoritative headers / docs (cited), not runtime-tested. Coverage = the kernel versions you bind — version-sensitive notes say "check against your target tree." Re-verify any claim yourself: <code>fact_gate.mjs &lt;answer&gt; --tree &lt;your tree&gt;</code>.</span>
+      <span class="lang-zh"><strong>诚实的边界。</strong>存在性是机器证明、可复现；语义是读权威头文件 / 文档写的（标了出处），不是运行时跑过验证；覆盖 = 你绑定的内核版本 —— 版本敏感处都标了"按目标树核"。任意一条都可自行复验：<code>fact_gate.mjs &lt;答案&gt; --tree &lt;你的树&gt;</code>。</span>
+    </p>
+  </div>
+</section>
+
 <!-- 2. checkpatch -->
 <section class="anth-section anth-section--subtle">
   <div class="anth-container anth-container--narrow">
