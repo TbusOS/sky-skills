@@ -1,0 +1,17 @@
+{
+  "id": "KV-113",
+  "topic": "writing a DMA controller (dmaengine provider)",
+  "q": "写个 SoC DMA 控制器驱动,实现 dma_device 并注册怎么搭?",
+  "kind": "objective",
+  "subsystem": "dmaengine-provider",
+  "gold_claims": {
+    "api": ["dma_async_device_register", "dma_cap_set"],
+    "symbol": ["dma_device"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "dma_device_register", "why": "编造的注册函数,真名 dma_async_device_register" },
+    { "type": "fake-api", "claim": "dma_controller_register", "why": "不存在的注册函数" }
+  ],
+  "forbidden": ["没 dma_cap_set 声明能力"],
+  "rubric": "填 dma_device:dma_cap_set 声明能力(DMA_SLAVE 等)、实现 device_prep_slave_sg/device_issue_pending/device_tx_status/device_config/device_terminate_all,dma_async_device_register 注册(devm 版 dmaenginem_async_device_register)"
+}

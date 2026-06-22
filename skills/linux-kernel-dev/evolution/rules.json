@@ -369,6 +369,36 @@
       "catches": 0,
       "linked_eval_case": "KV-108",
       "added": "2026-06-22"
+    },
+    {
+      "id": "KB-REGD-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "写 regmap 类 PMIC regulator 驱动:用框架现成 *_regmap helper ops(regulator_enable_regmap/disable_regmap/is_enabled_regmap/get_voltage_sel_regmap/set_voltage_sel_regmap)+ 在 regulator_desc 填寄存器字段(enable_reg/mask、vsel_reg/mask),别手写 ops。电压枚举用 regulator_list_voltage_linear(配 min_uV/uV_step)映射 selector→µV。regulator_config 要给 regmap。子系统:regulator-driver。用例 KV-111。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-111",
+      "added": "2026-06-22"
+    },
+    {
+      "id": "KB-DMAP-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "写 DMA 控制器:注册 dma_device 要 dma_cap_set 声明能力 + 实现 device_issue_pending 和 prep ops;每个描述符完成时必须 complete cookie(dma_cookie_complete)并触发 client 在描述符上注册的回调,漏了消费者永远等不到完成。用 virt-dma(vchan_init/vchan_tx_prep,完成 vchan_cookie_complete)管 cookie/链表,别手撸。子系统:dmaengine-provider。用例 KV-114。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-114",
+      "added": "2026-06-22"
+    },
+    {
+      "id": "KB-IOMMU-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "IOMMU 驱动 unmap_pages 只改页表,必须刷 IOTLB 才能让缓存的旧转换失效、物理页才可复用。框架用 struct iommu_iotlb_gather 收集待刷 IOVA 范围,在合适时机调驱动 .iotlb_sync(或 .iotlb_flush_all)真正刷硬件,freelist 的页 sync 后才释放。不刷设备拿旧转换 DMA 到已释放/重分配内存(数据损坏+安全漏洞)。现代用 .map_pages/.unmap_pages。子系统:iommu。用例 KV-117。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-117",
+      "added": "2026-06-22"
     }
   ]
 }

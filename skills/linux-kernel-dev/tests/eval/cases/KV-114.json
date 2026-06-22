@@ -1,0 +1,18 @@
+{
+  "id": "KV-114",
+  "topic": "DMA controller completion via virt-dma cookie",
+  "q": "写的 DMA 控制器传输发出去了但 client 永远等不到完成,缺了什么?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "dmaengine-provider",
+  "gold_claims": {
+    "api": ["vchan_init", "vchan_tx_prep", "dma_cookie_complete"],
+    "symbol": ["dma_async_tx_descriptor"],
+    "config": ["CONFIG_DMA_ENGINE"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "dmaengine_device_add", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["完成时不 complete cookie / 不触发 client 回调"],
+  "rubric": "用 virt-dma(vchan)层管 cookie/链表:vchan_init 初始化、prep 里 vchan_tx_prep;完成中断里 vchan_cookie_complete(complete cookie + 触发 client 回调),漏了消费者永远等不到完成;CONFIG_DMA_ENGINE 是框架开关"
+}

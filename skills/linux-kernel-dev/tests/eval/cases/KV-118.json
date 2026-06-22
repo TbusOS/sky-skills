@@ -1,0 +1,17 @@
+{
+  "id": "KV-118",
+  "topic": "IOMMU domain allocation and mapping",
+  "q": "IOMMU 的地址转换域怎么建?IOVA 映射用什么?",
+  "kind": "objective",
+  "subsystem": "iommu",
+  "gold_claims": {
+    "api": ["iommu_domain_alloc", "iommu_map", "iommu_unmap"],
+    "symbol": ["iommu_domain"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "iommu_domain_create", "why": "编造的建域函数,真名 iommu_domain_alloc" },
+    { "type": "fake-api", "claim": "iommu_setup_domain", "why": "不存在的函数" }
+  ],
+  "forbidden": ["domain_alloc 不按请求的域类型建域"],
+  "rubric": "iommu_domain_alloc 按类型(IOMMU_DOMAIN_DMA/UNMANAGED/IDENTITY)建 iommu_domain;iommu_map 建立 IOVA→物理映射、iommu_unmap 拆除(拆除后记得刷 IOTLB)"
+}

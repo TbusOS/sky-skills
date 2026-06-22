@@ -1,0 +1,15 @@
+{
+  "id": "KV-115",
+  "topic": "DMA device capability flags and registration",
+  "q": "DMA 控制器怎么声明它支持哪些传输类型?注册用什么?",
+  "kind": "objective",
+  "subsystem": "dmaengine-provider",
+  "gold_claims": {
+    "api": ["dma_cap_set", "dma_async_device_register", "dmaenginem_async_device_register"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "dma_register_device", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["能力位没设导致消费者找不到通道"],
+  "rubric": "dma_cap_set(DMA_SLAVE/DMA_CYCLIC/DMA_MEMCPY 等, cap_mask)声明能力;dma_async_device_register 注册,devm 版 dmaenginem_async_device_register;消费者按能力位匹配通道"
+}

@@ -56,6 +56,9 @@
 - KB-CLKP-001 · clk_ops.enable/.disable 持 enable_lock 自旋锁被调,不能睡(只翻寄存器位);会睡的初始化(等 PLL 锁定/走 I2C)放 .prepare/.unprepare(持 prepare mutex,可睡) · KV-102 · range：版本无关
 - KB-PINCTRLD-001 · pin 控制器必须提供 pinctrl_ops.dt_node_to_map(用 pinconf_generic_dt_node_to_map)否则消费者 DT pin state 解析不出;复用 pinmux_ops.set_mux、电气 pinconf_ops.pin_config_set · KV-105 · range：版本无关
 - KB-MBOX-001 · mailbox 控制器必须告诉核心 TX 完成(txdone_irq→mbox_chan_txdone / txdone_poll→last_tx_done / client knows_txdone→mbox_client_txdone),都不做核心以为 TX 永不完成卡住;收数据 mbox_chan_received_data · KV-108 · range：版本无关
+- KB-REGD-001 · regmap 类 PMIC regulator 驱动用 *_regmap helper ops(regulator_enable_regmap 等)+ regulator_desc 寄存器字段(enable_reg/vsel_reg),别手写 ops;list_voltage 用 regulator_list_voltage_linear 映射 selector→µV · KV-111 · range：版本无关
+- KB-DMAP-001 · 写 DMA 控制器:dma_cap_set 声明能力 + 实现 device_issue_pending/prep,完成时 complete cookie + 触发 client 回调(virt-dma vchan_cookie_complete 一步到位),漏了消费者永等不到完成 · KV-114 · range：版本无关
+- KB-IOMMU-001 · IOMMU unmap 改页表后必须刷 IOTLB(框架 iommu_iotlb_gather 收集 + 调驱动 .iotlb_sync)才能放物理页,不刷设备拿旧转换 DMA 到已释放内存(安全漏洞) · KV-117 · range：版本无关
 
 ## 条目
 
@@ -722,4 +725,61 @@
   ```
 - linked_eval_case：KV-108
 - provenance：self（真树核对 mailbox_controller.h txdone_irq/txdone_poll/last_tx_done + mbox_chan_received_data;子系统:mailbox）
+- fires/catches：0 / 0
+
+### KB-REGD-001：regmap 类 regulator 驱动用 *_regmap helper ops,别手写
+
+- symptom：写 PMIC regulator 驱动时手撸 enable/set_voltage ops 直接读写寄存器,代码冗长且 selector↔电压映射易错。
+- root cause：regulator 框架为 regmap 类设备提供了现成 ops——`regulator_enable_regmap`/`regulator_disable_regmap`/`regulator_is_enabled_regmap`/`regulator_get_voltage_sel_regmap`/`regulator_set_voltage_sel_regmap`,它们按 `regulator_desc` 里填的寄存器字段(`enable_reg`/`enable_mask`、`vsel_reg`/`vsel_mask`)操作。自己手写一遍是重复造轮子且容易错。电压枚举用 `regulator_list_voltage_linear`(配 `min_uV`/`uV_step`)把 selector 映射成 µV。
+- fix：`regulator_ops` 直接挂 `*_regmap` helper,在 `regulator_desc` 填寄存器字段 + `n_voltages`/`min_uV`/`uV_step`;`regulator_config` 里给 `regmap`。仅非线性/特殊设备才手写 ops。
+- trigger：见到 regmap PMIC 驱动手写 enable/set_voltage 操作寄存器、或 list_voltage 与 n_voltages 对不上,或问 "写 regulator 驱动 / regmap helper ops"。
+- range：版本无关。
+- scope/limits：约束 regmap 类 regulator 驱动的 ops 选择;符号名按目标树 `include/linux/regulator/driver.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: regulator_enable_regmap, regulator_set_voltage_sel_regmap
+  symbol: regulator_desc
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-111
+- provenance：self（真树核对 regulator/driver.h *_regmap helper + 内核子系统知识库内容源;子系统:regulator-driver。关联 KB-REG-001 消费侧）
+- fires/catches：0 / 0
+
+### KB-DMAP-001：DMA 控制器完成时必须 complete cookie + 触发 client 回调
+
+- symptom：写的 DMA 控制器,消费者 prep+submit+issue_pending 后传输发出去了,但 completion 回调永不触发、`dma_async_is_tx_complete` 一直 in-progress。
+- root cause：DMA provider 要主动告知核心"某描述符完成":分配/完成 cookie(`dma_cookie_assign`/`dma_cookie_complete`)、把描述符移出在途链表、并调用 client 在描述符上注册的完成回调。漏了这步,消费者侧永远等不到完成。虚拟通道层(virt-dma, `vchan_*`)就是帮你管 cookie 和链表的——`vchan_cookie_complete` 一步完成 cookie + 触发回调。
+- fix：注册 `dma_device` 时 `dma_cap_set` 声明能力、实现 `device_issue_pending` 和 prep ops;用 virt-dma(`vchan_init`/`vchan_tx_prep`),完成中断里 `vchan_cookie_complete(&vd)`。别自己手撸 cookie/链表管理。
+- trigger：见到 DMA 控制器完成路径没有 cookie complete / 没触发 client 回调,或没 `dma_cap_set`,或问 "DMA 控制器传输不完成 / 写 dmaengine provider"。
+- range：版本无关。
+- scope/limits：约束 provider 的完成上报;API 名按目标树 `include/linux/dmaengine.h`、`dma/virt-dma.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: dma_async_device_register, dma_cap_set
+  symbol: dma_device
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-114
+- provenance：self（真树核对 dmaengine.h + virt-dma.h vchan;子系统:dmaengine-provider。关联 KB-DMA-001 消费侧 issue_pending）
+- fires/catches：0 / 0
+
+### KB-IOMMU-001：unmap 后必须刷 IOTLB 才能放物理页
+
+- symptom：IOMMU 驱动 `unmap_pages` 改了页表,但设备仍能通过旧地址访问已 unmap/已释放的物理内存;偶发数据损坏 / DMA 到错误内存。
+- root cause：IOMMU 内部缓存地址转换(IOTLB)。`unmap_pages` 只改页表项,**必须刷 IOTLB** 让缓存的旧转换失效,之后那些物理页才能安全复用。框架用 `struct iommu_iotlb_gather` 收集本批待刷的 IOVA 范围,在合适时机调驱动的 `.iotlb_sync`(或 `.iotlb_flush_all`)真正刷硬件;gather 的 freelist 里的页只有在 sync 之后才释放。漏刷 → 设备拿旧转换 DMA 到已释放/重分配的内存,既是数据损坏也是安全漏洞。
+- fix：`.unmap_pages` 把范围加进 `iommu_iotlb_gather`,实现 `.iotlb_sync` 真正刷硬件 TLB;确保物理页释放发生在 sync 之后。现代用 `.map_pages`/`.unmap_pages`(旧单页 `.map`/`.unmap` 已改,按目标树核)。
+- trigger：见到 IOMMU 驱动 unmap 后没经 IOTLB gather/`.iotlb_sync` 刷缓存,或问 "IOMMU unmap 后设备还能访问 / IOTLB flush"。
+- range：版本无关(IOTLB 一致性要求长期不变;接口名按目标树)。
+- scope/limits：约束 unmap 后的 IOTLB 刷新;API 名按目标树 `include/linux/iommu.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: iommu_unmap, iommu_iotlb_sync
+  symbol: iommu_iotlb_gather
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-117
+- provenance：self（真树核对 iommu.h iommu_iotlb_gather/iotlb_sync + map_pages;子系统:iommu）
 - fires/catches：0 / 0

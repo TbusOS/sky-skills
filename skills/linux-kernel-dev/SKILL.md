@@ -95,6 +95,9 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 写时钟控制器 clk-provider（clk_hw/clk_ops · enable 原子 vs prepare 可睡 · 暴露给 DT · 固定/门控构造器） | `references/subsys/clk-provider.md` | `Documentation/driver-api/clk.rst`、`include/linux/clk-provider.h`（消费见 `clk.md`） |
 | 写 pin 控制器 pinctrl-driver（pinctrl_desc 三组 ops · dt_node_to_map · set_mux · pin_config_set） | `references/subsys/pinctrl-driver.md` | `Documentation/driver-api/pin-control.rst`、`include/linux/pinctrl/`（消费见 `pinctrl.md`） |
 | Mailbox/IPC（client 收发 mbox_send_message · 写控制器 mbox_chan_ops · TX 完成必上报 txdone） | `references/subsys/mailbox.md` | `Documentation/driver-api/mailbox.rst`、`include/linux/mailbox_{client,controller}.h` |
+| 写 PMIC/稳压器 regulator-driver（regulator_desc · *_regmap helper ops · list_voltage 映射） | `references/subsys/regulator-driver.md` | `include/linux/regulator/driver.h`（消费见 `regulator.md`） |
+| 写 DMA 控制器 dmaengine-provider（dma_device · dma_cap_set · virt-dma vchan · 完成 complete cookie） | `references/subsys/dmaengine-provider.md` | `Documentation/driver-api/dmaengine/provider.rst`、`include/linux/dmaengine.h`（消费见 `dmaengine.md`） |
+| IOMMU 驱动（iommu_ops · map_pages/unmap_pages · unmap 后必刷 IOTLB · domain 类型） | `references/subsys/iommu.md` | `Documentation/driver-api/iommu`、`include/linux/iommu.h` |
 
 目录总览见 `index.md`。
 

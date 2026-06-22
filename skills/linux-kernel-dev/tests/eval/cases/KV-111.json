@@ -1,0 +1,18 @@
+{
+  "id": "KV-111",
+  "topic": "regulator regmap helper ops",
+  "q": "regmap 类 PMIC 的 enable/调压 ops 要不要手写访问寄存器?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "regulator-driver",
+  "gold_claims": {
+    "api": ["regulator_enable_regmap", "regulator_set_voltage_sel_regmap", "regulator_get_voltage_sel_regmap", "regulator_list_voltage_linear"],
+    "symbol": ["regulator_desc"],
+    "config": ["CONFIG_REGULATOR"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "regulator_register_ops", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["手写 enable/set_voltage ops 而 regmap helper + desc 字段就够"],
+  "rubric": "regmap 类 PMIC 直接用 *_regmap helper ops(regulator_enable_regmap/regulator_set_voltage_sel_regmap/regulator_get_voltage_sel_regmap),在 regulator_desc 填 enable_reg/mask、vsel_reg/mask;list_voltage 用 regulator_list_voltage_linear(min_uV/uV_step);CONFIG_REGULATOR 是框架开关"
+}

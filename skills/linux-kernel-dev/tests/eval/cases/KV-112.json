@@ -1,0 +1,16 @@
+{
+  "id": "KV-112",
+  "topic": "regulator_desc fields and regulator_dev",
+  "q": "regulator_desc 里电压相关字段填什么?注册返回什么?",
+  "kind": "objective",
+  "subsystem": "regulator-driver",
+  "gold_claims": {
+    "api": ["devm_regulator_register"],
+    "symbol": ["regulator_desc", "regulator_dev"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "regulator_desc_register", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["n_voltages 与 list_voltage 映射对不上"],
+  "rubric": "regulator_desc 填 n_voltages/min_uV/uV_step(给 list_voltage_linear)和 vsel/enable 寄存器字段;devm_regulator_register 返回 struct regulator_dev *"
+}

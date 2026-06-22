@@ -226,7 +226,7 @@
 
       <!-- Subsystem map -->
       <figure style="margin:0 0 var(--space-6);">
-        <svg role="img" aria-label="linux-kernel-dev routes a task to one of thirty-four subsystem expert modules in seven groups: core kernel internals (interrupts, scheduler, memory, filesystems); buses and devices (device tree, i2c, spi, gpio, usb, phy, mailbox); BSP resource frameworks (clocks, pin control, regulators, regmap, reset, pwm, clk provider, pinctrl driver); media, sensors and connectivity (networking, audio, camera, iio); platform services (thermal, watchdog, rtc, power supply, hwmon); human interface (led, input); storage and DMA (mmc, dmaengine, nvmem, mtd)" viewBox="0 0 1180 1388" style="display:block; width:100%; max-width:1100px; height:auto; margin:0 auto;" font-family="Poppins, sans-serif">
+        <svg role="img" aria-label="linux-kernel-dev routes a task to one of thirty-seven subsystem expert modules in seven groups: core kernel internals (interrupts, scheduler, memory, filesystems); buses and devices (device tree, i2c, spi, gpio, usb, phy, mailbox); BSP resource frameworks (clocks, pin control, regulators, regmap, reset, pwm, clk provider, pinctrl driver, regulator driver); media, sensors and connectivity (networking, audio, camera, iio); platform services (thermal, watchdog, rtc, power supply, hwmon); human interface (led, input); storage and DMA (mmc, dmaengine, nvmem, mtd, dma provider, iommu)" viewBox="0 0 1180 1388" style="display:block; width:100%; max-width:1100px; height:auto; margin:0 auto;" font-family="Poppins, sans-serif">
           <title id="map-title">Subsystem module map</title>
           <!-- hub -->
           <rect x="430" y="20" width="320" height="62" rx="12" fill="#d97757"/>
@@ -292,6 +292,8 @@
             <text x="125" y="702" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="125">Clk provider</tspan><tspan class="lang-zh" x="125">时钟驱动</tspan></text>
             <rect x="217" y="662" width="170" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
             <text x="302" y="702" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="302">Pinctrl drv</tspan><tspan class="lang-zh" x="302">引脚驱动</tspan></text>
+            <rect x="394" y="662" width="170" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="479" y="702" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="479">Regulator drv</tspan><tspan class="lang-zh" x="479">稳压器驱动</tspan></text>
           </g>
           <!-- group D: media, sensors & connectivity (bottom-right) -->
           <rect x="600" y="458" width="556" height="292" rx="14" fill="#faf9f5" stroke="#e5e1d8"/>
@@ -342,11 +344,15 @@
             <text x="459" y="1242" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c">NVMEM</text>
             <rect x="596" y="1202" width="250" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
             <text x="721" y="1242" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c">MTD</text>
+            <rect x="334" y="1278" width="250" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="459" y="1318" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="459">DMA provider</tspan><tspan class="lang-zh" x="459">DMA 控制器</tspan></text>
+            <rect x="596" y="1278" width="250" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="721" y="1318" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c">IOMMU</text>
           </g>
         </svg>
         <figcaption style="text-align:center; max-width:760px; margin:var(--space-4) auto 0; font-size:13.5px; color:var(--anth-text-secondary); line-height:1.5; font-family:var(--font-body);">
-          <span class="lang-en">Thirty-four subsystem modules today (plus a build-system reference). Each carries 3 frozen test cases (a right answer that must resolve in a real tree + corruptions that must be caught) and a known-bug — 109 cases, all green — so coverage is measured, not claimed.</span>
-          <span class="lang-zh">目前三十四个子系统模块（外加一份构建系统参考）。每个带 3 个冻结测试用例（正确答案必须在真树查得到 + 故意写错的必须被抓）和一条踩坑记录——共 109 个用例全绿——覆盖是测出来的，不是嘴上说的。</span>
+          <span class="lang-en">Thirty-seven subsystem modules today (plus a build-system reference). Each carries 3 frozen test cases (a right answer that must resolve in a real tree + corruptions that must be caught) and a known-bug — 118 cases, all green — so coverage is measured, not claimed.</span>
+          <span class="lang-zh">目前三十七个子系统模块（外加一份构建系统参考）。每个带 3 个冻结测试用例（正确答案必须在真树查得到 + 故意写错的必须被抓）和一条踩坑记录——共 118 个用例全绿——覆盖是测出来的，不是嘴上说的。</span>
         </figcaption>
       </figure>
 
@@ -439,6 +445,10 @@
           <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">Pinctrl driver</span><span class="lang-zh">写引脚控制器</span></h4>
           <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">Writing a pin controller — <code>pinctrl_desc</code> with the three ops, the DT <code>dt_node_to_map</code>, <code>set_mux</code> and <code>pin_config_set</code>.</span><span class="lang-zh">写 pin 控制器 —— <code>pinctrl_desc</code> + 三组 ops、DT <code>dt_node_to_map</code>、<code>set_mux</code> 和 <code>pin_config_set</code>。</span></p>
         </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">Regulator driver</span><span class="lang-zh">写稳压器驱动</span></h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">Writing a PMIC regulator — the <code>*_regmap</code> helper ops driven by <code>regulator_desc</code> register fields, and <code>list_voltage</code> selector→µV mapping.</span><span class="lang-zh">写 PMIC 稳压器 —— <code>*_regmap</code> helper ops 配 <code>regulator_desc</code> 寄存器字段、<code>list_voltage</code> selector→µV 映射。</span></p>
+        </div>
       </div>
 
       <!-- group D cards: media, sensors & connectivity -->
@@ -522,6 +532,14 @@
         <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
           <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);">MTD</h4>
           <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">NAND / NOR / SPI flash — erase before write (aligned to <code>erasesize</code>), <code>mtd_device_parse_register</code> partitions, <code>nand_scan</code>.</span><span class="lang-zh">NAND / NOR / SPI flash —— 写前必擦（按 <code>erasesize</code> 对齐）、<code>mtd_device_parse_register</code> 分区、<code>nand_scan</code>。</span></p>
+        </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">DMA provider</span><span class="lang-zh">写 DMA 控制器</span></h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">Writing a DMA controller — <code>dma_device</code> with <code>dma_cap_set</code>, the virt-dma (vchan) layer, and completing the cookie + client callback.</span><span class="lang-zh">写 DMA 控制器 —— <code>dma_device</code> + <code>dma_cap_set</code>、virt-dma(vchan)层、完成 cookie + 触发 client 回调。</span></p>
+        </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);">IOMMU</h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">Writing an IOMMU driver — <code>iommu_ops</code> with <code>map_pages</code>/<code>unmap_pages</code>, and flushing the IOTLB after unmap before pages are reused.</span><span class="lang-zh">写 IOMMU 驱动 —— <code>iommu_ops</code> 的 <code>map_pages</code>/<code>unmap_pages</code>、unmap 后放页前必刷 IOTLB。</span></p>
         </div>
       </div>
     </div>

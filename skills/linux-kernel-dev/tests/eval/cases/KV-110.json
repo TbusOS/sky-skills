@@ -1,0 +1,17 @@
+{
+  "id": "KV-110",
+  "topic": "writing a regmap-based PMIC regulator driver",
+  "q": "写个挂 I2C 的 PMIC regulator 驱动,把若干路输出暴露成 regulator 怎么搭?",
+  "kind": "objective",
+  "subsystem": "regulator-driver",
+  "gold_claims": {
+    "api": ["devm_regulator_register"],
+    "symbol": ["regulator_desc", "regulator_ops", "regulator_config"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "regulator_driver_register", "why": "编造的注册函数,真名 devm_regulator_register" },
+    { "type": "fake-api", "claim": "regulator_add_desc", "why": "不存在的函数" }
+  ],
+  "forbidden": ["regulator_config 漏 regmap"],
+  "rubric": "填 regulator_desc(name/id/type/ops/n_voltages/寄存器字段)和 regulator_config(dev/regmap/init_data),devm_regulator_register 注册;ops 用 regulator_ops"
+}
