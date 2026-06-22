@@ -1,0 +1,18 @@
+{
+  "id": "KV-105",
+  "topic": "pin controller dt_node_to_map is needed for DT states",
+  "q": "pin 控制器写好了但消费者从 DT 拿不到 default/sleep state,缺了什么?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "pinctrl-driver",
+  "gold_claims": {
+    "api": ["devm_pinctrl_register", "pinconf_generic_dt_node_to_map"],
+    "symbol": ["pinctrl_ops"],
+    "config": ["CONFIG_PINCTRL"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "pinmux_register", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["没实现/没挂 dt_node_to_map"],
+  "rubric": "消费者的 DT pin state 靠控制器 pinctrl_ops.dt_node_to_map 翻成核心 map;直接挂通用实现 pinconf_generic_dt_node_to_map + pinconf_generic_dt_free_map;不提供则 DT state 解析不出来;CONFIG_PINCTRL 是框架开关"
+}

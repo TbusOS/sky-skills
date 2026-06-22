@@ -1,0 +1,18 @@
+{
+  "id": "KV-102",
+  "topic": "clk_ops enable/disable are atomic, prepare/unprepare may sleep",
+  "q": "时钟驱动里 PLL 要等锁定(会睡),这段放 clk_ops 的哪个回调?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "clk-provider",
+  "gold_claims": {
+    "api": ["devm_clk_hw_register"],
+    "symbol": ["clk_ops", "clk_hw"],
+    "config": ["CONFIG_COMMON_CLK"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "clk_register_ops", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["在 clk_ops.enable 里等 PLL 锁定/做 I2C", "说 clk_ops.enable 可以睡"],
+  "rubric": "clk_ops.enable/.disable 持 enable_lock 自旋锁被调,不能睡,只翻寄存器位;会睡的初始化(等 PLL 锁定、走 I2C)放 .prepare/.unprepare(持 prepare mutex,可睡);CONFIG_COMMON_CLK 是框架开关"
+}

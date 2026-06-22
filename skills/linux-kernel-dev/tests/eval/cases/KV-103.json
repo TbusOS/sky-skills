@@ -1,0 +1,16 @@
+{
+  "id": "KV-103",
+  "topic": "fixed-rate / gate clock helpers",
+  "q": "固定频率/门控这种简单时钟,要不要手写 clk_ops?",
+  "kind": "objective",
+  "subsystem": "clk-provider",
+  "gold_claims": {
+    "api": ["clk_hw_register_fixed_rate", "clk_hw_register_gate"],
+    "symbol": ["clk_hw"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "clk_hw_add", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["简单固定/门控时钟还手写整套 clk_ops"],
+  "rubric": "固定频率用 clk_hw_register_fixed_rate、门控用 clk_hw_register_gate(还有 _divider/_mux),框架自带 ops 不用手写;返回的是 clk_hw"
+}

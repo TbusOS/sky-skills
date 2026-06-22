@@ -53,6 +53,9 @@
 - KB-MTD-001 · flash 写前必须先 mtd_erase 擦(不能直接覆写),擦的 offset/length 必须按 mtd->erasesize 对齐否则 -EINVAL;分区用 mtd_device_parse_register · KV-093 · range：版本无关
 - KB-PHY-001 · 通用 PHY 消费顺序 phy_init→phy_power_on,拆除反序 phy_power_off→phy_exit(都引用计数);别和网络 MDIO PHY(phy_connect/phy_device)混 · KV-096 · range：版本无关
 - KB-HWMON-001 · hwmon sysfs 固定单位:温度毫摄氏度(25000=25°C)/电压 mV/风扇 RPM/电流 mA/功率 µW;.read 按此回填;现代用 devm_hwmon_device_register_with_info · KV-099 · range：版本无关
+- KB-CLKP-001 · clk_ops.enable/.disable 持 enable_lock 自旋锁被调,不能睡(只翻寄存器位);会睡的初始化(等 PLL 锁定/走 I2C)放 .prepare/.unprepare(持 prepare mutex,可睡) · KV-102 · range：版本无关
+- KB-PINCTRLD-001 · pin 控制器必须提供 pinctrl_ops.dt_node_to_map(用 pinconf_generic_dt_node_to_map)否则消费者 DT pin state 解析不出;复用 pinmux_ops.set_mux、电气 pinconf_ops.pin_config_set · KV-105 · range：版本无关
+- KB-MBOX-001 · mailbox 控制器必须告诉核心 TX 完成(txdone_irq→mbox_chan_txdone / txdone_poll→last_tx_done / client knows_txdone→mbox_client_txdone),都不做核心以为 TX 永不完成卡住;收数据 mbox_chan_received_data · KV-108 · range：版本无关
 
 ## 条目
 
@@ -662,4 +665,61 @@
   ```
 - linked_eval_case：KV-099
 - provenance：self（真树核对 hwmon.h register_with_info + 内核子系统知识库内容源;子系统:hwmon。关联 KB-THERMAL-001 同款毫摄氏度单位）
+- fires/catches：0 / 0
+
+### KB-CLKP-001：clk_ops 的 enable/disable 是原子的,会睡的放 prepare
+
+- symptom：写时钟控制器,在 `clk_ops.enable` 里等 PLL 锁定或走 I2C 配 PMIC,偶发 "scheduling while atomic" / 死锁。
+- root cause：`clk_ops.enable`/`.disable` 由时钟框架在持 `enable_lock`(自旋锁)下调用,**不能睡**——只能翻使能寄存器位。需要睡眠的工作(等 PLL 锁定、通过 I2C/regmap 配置)属于 `.prepare`/`.unprepare`(在持 prepare mutex 下调用,可睡)。这是消费侧 prepare/enable 两阶段在 provider 侧的对应。
+- fix：`.enable`/`.disable` 只做不睡的寄存器操作;把等锁定、I2C 访问等放 `.prepare`/`.unprepare`。固定/门控/分频这类简单时钟用 `clk_hw_register_fixed_rate`/`_gate`/`_divider` 现成构造器。
+- trigger：见到 `clk_ops.enable` 里做会睡的操作,或问 "时钟驱动 enable 能不能睡 / clk_ops prepare vs enable"。
+- range：版本无关。
+- scope/limits：约束 clk_ops 回调的上下文;符号名按目标树 `include/linux/clk-provider.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: devm_clk_hw_register
+  symbol: clk_ops, clk_hw
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-102
+- provenance：self（真树核对 clk-provider.h:"@enable: Enable the clock atomically ... must not sleep" / prepare may sleep;子系统:clk-provider。关联 KB-CLK-001 消费侧两阶段）
+- fires/catches：0 / 0
+
+### KB-PINCTRLD-001：pin 控制器必须提供 dt_node_to_map,否则 DT state 解析不出
+
+- symptom：写了 pin 控制器,消费者 probe 时拿不到 "default"/"sleep" pinctrl state、引脚不按 DT 配置生效。
+- root cause：消费者从 DT 的 pinctrl 子节点拿到的 state,要靠控制器的 `pinctrl_ops.dt_node_to_map` 把 DT 描述翻成核心的 pinctrl map(引脚组 + 配置)。控制器不实现它,DT 里的 pin state 解析不出来,消费者 `pinctrl_lookup_state` 失败。另外复用要 `pinmux_ops.set_mux`、电气配置要 `pinconf_ops.pin_config_set`,漏了对应功能不生效。
+- fix：`pinctrl_ops` 挂上通用实现 `pinconf_generic_dt_node_to_map` + `pinconf_generic_dt_free_map`(或自实现);实现 `pinmux_ops.set_mux`(复用)和 `pinconf_ops.pin_config_set`(上下拉/驱动强度);`pinctrl_desc.pins` 填全。
+- trigger：见到 pin 控制器没挂 `dt_node_to_map`、或缺 `set_mux`/`pin_config_set`,或问 "pinctrl 消费者拿不到 DT state / 写 pin 控制器"。
+- range：版本无关。
+- scope/limits：约束 pin 控制器的三组 ops 与 DT map;符号名按目标树 `include/linux/pinctrl/` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: devm_pinctrl_register, pinconf_generic_dt_node_to_map
+  symbol: pinctrl_desc
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-105
+- provenance：self（真树核对 pinctrl.h/pinconf-generic.h 三组 ops + dt_node_to_map;子系统:pinctrl-driver。关联 KB-PINCTRL-001 消费侧）
+- fires/catches：0 / 0
+
+### KB-MBOX-001：mailbox 控制器必须上报 TX 完成,否则发送卡死
+
+- symptom：写的 mailbox 控制器发一条消息后,后续 `mbox_send_message` 一直阻塞/排队不发;client 的 tx 永不回调。
+- root cause：mailbox 核心要知道"上一条发完了"才发下一条。TX 完成的告知有三种模式:① 控制器有 TX ACK 中断(`txdone_irq=true`)→ 在中断里调 `mbox_chan_txdone(chan, err)`;② 轮询(`txdone_poll=true`)→ 实现 `mbox_chan_ops.last_tx_done` 让核心轮询;③ client 知道何时完成(`knows_txdone`)→ client 调 `mbox_client_txdone`。三个都不做,核心认为 TX 永不完成,后续消息卡住。
+- fix：按硬件能力选一种 txdone 机制并实现对应回调;收到的数据用 `mbox_chan_received_data(chan, msg)` 上报给 client 的 rx_callback;`send_data` 只快速下发即返回,别在里面阻塞等完成。
+- trigger：见到 mailbox 控制器没有任何 txdone 上报(无 `mbox_chan_txdone`/`last_tx_done`/client 无 `knows_txdone`),或 `send_data` 阻塞,或问 "mailbox 发送卡住 / TX 不完成"。
+- range：版本无关。
+- scope/limits：约束控制器的 TX 完成上报与 RX 投递;API 名按目标树 `include/linux/mailbox_controller.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: mbox_chan_txdone, mbox_chan_received_data
+  symbol: mbox_chan_ops
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-108
+- provenance：self（真树核对 mailbox_controller.h txdone_irq/txdone_poll/last_tx_done + mbox_chan_received_data;子系统:mailbox）
 - fires/catches：0 / 0

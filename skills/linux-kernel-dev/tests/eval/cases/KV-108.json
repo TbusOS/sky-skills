@@ -1,0 +1,18 @@
+{
+  "id": "KV-108",
+  "topic": "mailbox controller must signal TX completion",
+  "q": "写的 mailbox 控制器发一条消息后就卡住不发下一条,缺了什么?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "mailbox",
+  "gold_claims": {
+    "api": ["mbox_chan_txdone", "mbox_chan_received_data", "devm_mbox_controller_register"],
+    "symbol": ["mbox_chan_ops"],
+    "config": ["CONFIG_MAILBOX"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "mailbox_register", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["TX 完成既不 txdone、又无 last_tx_done、client 也不 knows_txdone"],
+  "rubric": "控制器必须告诉核心 TX 完成,三选一:txdone_irq→ACK 中断里 mbox_chan_txdone;txdone_poll→实现 mbox_chan_ops.last_tx_done;client knows_txdone→mbox_client_txdone;都不做核心以为 TX 永不完成卡住;收数据用 mbox_chan_received_data;CONFIG_MAILBOX 是框架开关"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "KV-104",
+  "topic": "writing a pin controller driver",
+  "q": "写个 SoC pin 控制器驱动,需要哪几组 ops、怎么注册?",
+  "kind": "objective",
+  "subsystem": "pinctrl-driver",
+  "gold_claims": {
+    "api": ["devm_pinctrl_register"],
+    "symbol": ["pinctrl_desc", "pinctrl_ops", "pinmux_ops", "pinconf_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "pinctrl_controller_register", "why": "编造的注册函数" },
+    { "type": "fake-api", "claim": "pinctrl_add_device", "why": "不存在的注册函数" }
+  ],
+  "forbidden": ["pinctrl_desc.pins 没填"],
+  "rubric": "填 pinctrl_desc(name/pins/npins + 三组 ops:pctlops/pmxops/confops),devm_pinctrl_register 注册;pinctrl_ops 管引脚组+DT、pinmux_ops 管复用、pinconf_ops 管电气"
+}

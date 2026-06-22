@@ -1,0 +1,16 @@
+{
+  "id": "KV-106",
+  "topic": "pinmux and pinconf ops",
+  "q": "pin 控制器里复用和上下拉分别由哪组 ops 实现?",
+  "kind": "objective",
+  "subsystem": "pinctrl-driver",
+  "gold_claims": {
+    "api": ["pinctrl_register"],
+    "symbol": ["pinmux_ops", "pinconf_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "pinctrl_add_device", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["漏 pinmux_ops.set_mux 或 pinconf_ops.pin_config_set"],
+  "rubric": "复用由 pinmux_ops(.set_mux 等)实现,电气配置(上下拉/驱动强度)由 pinconf_ops(.pin_config_set/.pin_config_get)实现;非 devm 用 pinctrl_register"
+}

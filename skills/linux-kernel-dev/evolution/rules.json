@@ -339,6 +339,36 @@
       "catches": 0,
       "linked_eval_case": "KV-099",
       "added": "2026-06-22"
+    },
+    {
+      "id": "KB-CLKP-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "写时钟控制器:clk_ops.enable/.disable 由框架在持 enable_lock 自旋锁下调用,不能睡,只翻使能寄存器位;需要睡眠的工作(等 PLL 锁定、I2C/regmap 配 PMIC)放 .prepare/.unprepare(持 prepare mutex,可睡)。是消费侧 prepare/enable 两阶段的 provider 对应。简单时钟用 clk_hw_register_fixed_rate/_gate/_divider 现成构造器。子系统:clk-provider。用例 KV-102。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-102",
+      "added": "2026-06-22"
+    },
+    {
+      "id": "KB-PINCTRLD-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "写 pin 控制器:消费者的 DT pin state 靠控制器 pinctrl_ops.dt_node_to_map 翻成核心 map,不实现(可直接挂通用 pinconf_generic_dt_node_to_map + pinconf_generic_dt_free_map)则 DT state 解析不出、消费者 lookup_state 失败。复用要 pinmux_ops.set_mux、电气配置要 pinconf_ops.pin_config_set,pinctrl_desc.pins 填全。子系统:pinctrl-driver。用例 KV-105。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-105",
+      "added": "2026-06-22"
+    },
+    {
+      "id": "KB-MBOX-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "mailbox 控制器必须告知核心 TX 完成才发下一条,三选一:txdone_irq→ACK 中断里 mbox_chan_txdone(chan,err);txdone_poll→实现 mbox_chan_ops.last_tx_done;client knows_txdone→client 调 mbox_client_txdone。都不做核心以为 TX 永不完成、后续 mbox_send_message 卡住。收到数据用 mbox_chan_received_data 投给 client rx_callback;send_data 只快速下发即返回别阻塞。子系统:mailbox。用例 KV-108。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-108",
+      "added": "2026-06-22"
     }
   ]
 }

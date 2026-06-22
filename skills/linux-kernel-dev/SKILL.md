@@ -92,6 +92,9 @@ references. Load a reference only when the task needs it (progressive disclosure
 | MTD flash（NAND/NOR / 写前必擦 + erasesize 对齐 / mtd_device_parse_register 分区 / nand_scan） | `references/subsys/mtd.md` | `Documentation/driver-api/mtd/`、`include/linux/mtd/mtd.h` |
 | 通用 PHY（USB/PCIe/MIPI phy 消费 init→power_on / 写 provider phy_ops / 别和网络 MDIO PHY 混） | `references/subsys/phy.md` | `Documentation/driver-api/phy/`、`include/linux/phy/phy.h` |
 | 硬件监控 hwmon（register_with_info / sysfs 固定单位 温度毫摄氏度·电压 mV / chip_info·ops·channel） | `references/subsys/hwmon.md` | `Documentation/hwmon/`、`include/linux/hwmon.h` |
+| 写时钟控制器 clk-provider（clk_hw/clk_ops · enable 原子 vs prepare 可睡 · 暴露给 DT · 固定/门控构造器） | `references/subsys/clk-provider.md` | `Documentation/driver-api/clk.rst`、`include/linux/clk-provider.h`（消费见 `clk.md`） |
+| 写 pin 控制器 pinctrl-driver（pinctrl_desc 三组 ops · dt_node_to_map · set_mux · pin_config_set） | `references/subsys/pinctrl-driver.md` | `Documentation/driver-api/pin-control.rst`、`include/linux/pinctrl/`（消费见 `pinctrl.md`） |
+| Mailbox/IPC（client 收发 mbox_send_message · 写控制器 mbox_chan_ops · TX 完成必上报 txdone） | `references/subsys/mailbox.md` | `Documentation/driver-api/mailbox.rst`、`include/linux/mailbox_{client,controller}.h` |
 
 目录总览见 `index.md`。
 

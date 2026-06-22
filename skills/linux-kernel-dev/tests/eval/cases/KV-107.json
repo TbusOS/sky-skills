@@ -1,0 +1,17 @@
+{
+  "id": "KV-107",
+  "topic": "mailbox client send/receive",
+  "q": "做个 mailbox client,从 DT 拿通道、发消息、收回调怎么写?",
+  "kind": "objective",
+  "subsystem": "mailbox",
+  "gold_claims": {
+    "api": ["mbox_request_channel", "mbox_send_message", "mbox_free_channel"],
+    "symbol": ["mbox_client"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "mbox_send_data", "why": "编造的发送函数,真名 mbox_send_message" },
+    { "type": "fake-api", "claim": "mbox_channel_request", "why": "不存在的拿通道函数" }
+  ],
+  "forbidden": ["非 devm 通道用完不 mbox_free_channel"],
+  "rubric": "填 mbox_client(dev/rx_callback/tx_block/tx_tout),mbox_request_channel 拿通道(判 IS_ERR,byname 用 _byname),mbox_send_message 发(tx_block 时阻塞),收消息进 rx_callback;用完 mbox_free_channel"
+}

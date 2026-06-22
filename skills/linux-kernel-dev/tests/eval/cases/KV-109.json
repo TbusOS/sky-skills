@@ -1,0 +1,16 @@
+{
+  "id": "KV-109",
+  "topic": "registering a mailbox controller",
+  "q": "mailbox 控制器怎么注册?ops 放哪个结构?",
+  "kind": "objective",
+  "subsystem": "mailbox",
+  "gold_claims": {
+    "api": ["devm_mbox_controller_register", "mbox_controller_register"],
+    "symbol": ["mbox_chan_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "mbox_send_data", "why": "编造的发送函数" }
+  ],
+  "forbidden": ["send_data 里阻塞等完成"],
+  "rubric": "填 mbox_controller(ops/chans/num_chans/txdone_irq 等),ops 是 mbox_chan_ops(.send_data/.startup/.shutdown/.last_tx_done);devm_mbox_controller_register 注册;send_data 快速下发即返回,完成靠 txdone 上报"
+}
