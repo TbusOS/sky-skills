@@ -1,0 +1,16 @@
+{
+  "id": "KV-091",
+  "topic": "MMC host_ops callbacks",
+  "q": "MMC 主机驱动的 ops 要实现哪些回调?",
+  "kind": "objective",
+  "subsystem": "mmc",
+  "gold_claims": {
+    "api": ["mmc_alloc_host"],
+    "symbol": ["mmc_host_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "mmc_register_host", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["漏实现 .request 或 .set_ios"],
+  "rubric": "mmc_host_ops 实现 .request(下发请求)、.set_ios(设时钟/总线宽度/电压)、.get_cd(插拔检测)、.get_ro(写保护);host 用 mmc_alloc_host 分配"
+}

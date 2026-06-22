@@ -1,0 +1,16 @@
+{
+  "id": "KV-083",
+  "topic": "slave DMA transfer flow",
+  "q": "驱动要用 DMA 把数据搬到外设 FIFO,从拿通道到发起传输怎么写?",
+  "kind": "objective",
+  "subsystem": "dmaengine",
+  "gold_claims": {
+    "api": ["dma_request_chan", "dmaengine_slave_config", "dmaengine_prep_slave_single", "dmaengine_submit", "dma_async_issue_pending"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "dma_engine_start", "why": "编造的启动函数,真启动是 dma_async_issue_pending" },
+    { "type": "fake-api", "claim": "dmaengine_start_transfer", "why": "不存在的启动函数" }
+  ],
+  "forbidden": ["submit 后漏 dma_async_issue_pending", "DMA buffer 用栈上数组"],
+  "rubric": "dma_request_chan 拿通道(判 IS_ERR);dmaengine_slave_config 配参数;dmaengine_prep_slave_single 备描述符;dmaengine_submit 排队;dma_async_issue_pending 真启动"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "KV-086",
+  "topic": "reading an NVMEM cell from a consumer driver",
+  "q": "驱动要从 efuse/eeprom 读一段 cell(比如 MAC),怎么拿和读?",
+  "kind": "objective",
+  "subsystem": "nvmem",
+  "gold_claims": {
+    "api": ["nvmem_cell_get", "nvmem_cell_read", "nvmem_cell_put"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "nvmem_read_cell", "why": "编造的读函数,真名 nvmem_cell_read" },
+    { "type": "fake-api", "claim": "nvmem_get_cell", "why": "不存在的拿 cell 函数" }
+  ],
+  "forbidden": ["nvmem_cell_read 的缓冲不 kfree"],
+  "rubric": "nvmem_cell_get 按 DT nvmem-cell-names 拿 cell(判 IS_ERR);nvmem_cell_read(cell,&len) 读出缓冲;用完 kfree(buf) + nvmem_cell_put(cell)"
+}

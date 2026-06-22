@@ -1,0 +1,17 @@
+{
+  "id": "KV-089",
+  "topic": "registering an MMC/SD host controller",
+  "q": "写个 MMC/SD 主机控制器驱动,分配 host、填 ops、注册怎么搭?",
+  "kind": "objective",
+  "subsystem": "mmc",
+  "gold_claims": {
+    "api": ["mmc_alloc_host", "mmc_add_host", "mmc_remove_host"],
+    "symbol": ["mmc_host", "mmc_host_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "mmc_register_host", "why": "编造的注册函数,真名 mmc_add_host" },
+    { "type": "fake-api", "claim": "mmc_host_register", "why": "不存在的注册函数" }
+  ],
+  "forbidden": ["mmc_alloc_host 失败后不 mmc_free_host"],
+  "rubric": "mmc_alloc_host 分配(mmc_priv 取私有),填 mmc_host 的 ops(mmc_host_ops)/f_min/f_max/ocr_avail/caps,mmc_add_host 注册;移除 mmc_remove_host + mmc_free_host"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "KV-085",
+  "topic": "DMA channel lifecycle and slave config",
+  "q": "DMA 通道用完怎么释放?slave 参数放哪个结构?",
+  "kind": "objective",
+  "subsystem": "dmaengine",
+  "gold_claims": {
+    "api": ["dma_request_chan", "dma_release_channel"],
+    "symbol": ["dma_slave_config"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "dma_engine_start", "why": "编造的启动函数" }
+  ],
+  "forbidden": ["拿通道返 -EPROBE_DEFER 当错误吞掉"],
+  "rubric": "dma_request_chan 拿通道(可返 -EPROBE_DEFER 要传播给 probe 重试),非 devm 用完 dma_release_channel;slave 参数填 struct dma_slave_config 经 dmaengine_slave_config 下发"
+}

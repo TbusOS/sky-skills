@@ -1,0 +1,17 @@
+{
+  "id": "KV-087",
+  "topic": "nvmem_cell_read returns a buffer the caller must free",
+  "q": "nvmem_cell_read 读出来的数据用完要不要释放?怎么释放?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "nvmem",
+  "gold_claims": {
+    "api": ["nvmem_cell_read", "nvmem_cell_put", "devm_nvmem_cell_get"],
+    "config": ["CONFIG_NVMEM"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "nvmem_read_cell", "why": "编造的读函数" }
+  ],
+  "forbidden": ["nvmem_cell_read 的缓冲不 kfree 直接丢"],
+  "rubric": "nvmem_cell_read(cell,&len) 返回一块新 kmalloc 的缓冲,用完必须 kfree(buf),否则泄漏;定长值用 nvmem_cell_read_u8/u16 直接拿整数不用 free;devm_nvmem_cell_get 随设备自动 put;CONFIG_NVMEM 是框架开关"
+}

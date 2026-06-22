@@ -279,6 +279,36 @@
       "catches": 0,
       "linked_eval_case": "KV-081",
       "added": "2026-06-18"
+    },
+    {
+      "id": "KB-DMA-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "dmaengine_submit(desc) 只把描述符排进通道待发队列返回 cookie,不启动硬件;必须再 dma_async_issue_pending(chan) 才把 pending 传输推给 DMA 控制器,漏了 DMA 永不启动、completion 不触发。拿通道 dma_request_chan 可能返回 -EPROBE_DEFER,要传播给 probe 重试。子系统:dmaengine。用例 KV-084。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-084",
+      "added": "2026-06-22"
+    },
+    {
+      "id": "KB-NVMEM-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "nvmem_cell_read(cell,&len) 内部 kmalloc 一块缓冲返回,所有权交调用者,用完必须 kfree 否则泄漏;长度写进 *len。只取定长整数用 nvmem_cell_read_u8/u16/u32/u64 typed helper(直接写进变量,无需 free)。非 devm 的 nvmem_cell_get 后要 nvmem_cell_put。子系统:nvmem。用例 KV-087。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-087",
+      "added": "2026-06-22"
+    },
+    {
+      "id": "KB-MMC-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "mmc_host_ops.request(host,mrq) 把请求下到控制器后,MMC 核心等驱动回调 mmc_request_done(host,mrq) 才认为完成。所有完成路径(成功+各种错误+超时)都必须调它把 mrq 交还核心(错误码填 mrq->cmd->error/mrq->data->error),漏了或只在成功路径调,MMC 栈一直等、卡挂死。子系统:mmc。用例 KV-090。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-090",
+      "added": "2026-06-22"
     }
   ]
 }

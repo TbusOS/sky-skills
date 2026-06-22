@@ -86,6 +86,9 @@ references. Load a reference only when the task needs it (progressive disclosure
 | LED（led_classdev 注册 / brightness_set 原子上下文 vs blocking / DT init_data） | `references/subsys/led.md` | `Documentation/leds/`、`include/linux/leds.h` |
 | 输入 input（input_dev 注册 / 声明能力 + 上报 + input_sync 帧同步 / 绝对轴范围） | `references/subsys/input.md` | `Documentation/input/`、`include/linux/input.h` |
 | 电源 power-supply（power_supply_desc 注册 / 属性固定微单位 / power_supply_changed 通知 / propval） | `references/subsys/power-supply.md` | `Documentation/power/power_supply_class.rst`、`include/linux/power_supply.h` |
+| DMA engine（slave DMA 消费 / prep·submit·issue_pending 序列 / 通道生命周期 / DT dmas） | `references/subsys/dmaengine.md` | `Documentation/driver-api/dmaengine/`、`include/linux/dmaengine.h` |
+| NVMEM（eeprom/efuse/otp 消费 cell·缓冲要 kfree / 写 provider nvmem_config / DT cells） | `references/subsys/nvmem.md` | `Documentation/driver-api/nvmem.rst`、`include/linux/nvmem-consumer.h` |
+| MMC/SD host（mmc_alloc_host·add / mmc_host_ops / .request 完成必 mmc_request_done） | `references/subsys/mmc.md` | `Documentation/mmc/`、`include/linux/mmc/host.h` |
 
 目录总览见 `index.md`。
 

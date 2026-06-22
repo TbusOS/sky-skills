@@ -47,6 +47,9 @@
 - KB-LED-001 · led_classdev.brightness_set 在原子上下文被调(不能睡);LED 挂 I2C/SPI/regmap(设亮度会睡)要实现 .brightness_set_blocking,别在 .brightness_set 里做总线传输 · KV-075 · range：版本无关
 - KB-INPUT-001 · 一组 input_report_*() 之后必须 input_sync()(发 EV_SYN/SYN_REPORT 标记帧结束)否则事件不下发;能力(input_set_capability/EV_* 位)要在 input_register_device 之前声明,否则上报被静默丢 · KV-078 · range：版本无关
 - KB-PSY-001 · power_supply 属性用固定微单位(电压 µV/电流 µA/电量 µAh/温度 0.1°C/容量 0-100),数量级填错差千倍;状态变化要调 power_supply_changed 发 uevent 否则用户态收不到 · KV-081 · range：版本无关
+- KB-DMA-001 · dmaengine_submit 只把描述符排队返回 cookie,必须再 dma_async_issue_pending 才真把传输推给硬件;漏了 DMA 永不启动。拿通道 dma_request_chan(可返 -EPROBE_DEFER 要传播) · KV-084 · range：版本无关
+- KB-NVMEM-001 · nvmem_cell_read(cell,&len) 返回一块新 kmalloc 的缓冲,用完必须 kfree 否则泄漏;定长值用 nvmem_cell_read_u8/u16 直接拿整数不用 free · KV-087 · range：版本无关
+- KB-MMC-001 · mmc_host_ops.request 处理完(成功或出错)必须 mmc_request_done(host,mrq) 交还核心,否则 MMC 栈一直等、卡挂死;出错路径也要调 · KV-090 · range：版本无关
 
 ## 条目
 
@@ -545,4 +548,59 @@
   ```
 - linked_eval_case：KV-081
 - provenance：self（从内核子系统知识库内容源蒸馏 + 真树核对 power_supply.h 属性单位与 power_supply_changed;子系统:power-supply）
+- fires/catches：0 / 0
+
+### KB-DMA-001：dmaengine_submit 后必须 dma_async_issue_pending 才启动
+
+- symptom：DMA 描述符 prep + submit 了，但传输不发生、completion 回调永不触发、外设收不到数据。
+- root cause：`dmaengine_submit(desc)` 只是把描述符**排进通道的待发队列**并返回一个 cookie，并不启动硬件。必须再调 `dma_async_issue_pending(chan)` 把队列里 pending 的传输真正推给 DMA 控制器。漏了这步，描述符一直躺在队列里。
+- fix：每次 `dmaengine_prep_*` → `dmaengine_submit` 之后，调 `dma_async_issue_pending(chan)` 启动；停止用 `dmaengine_terminate_sync`。拿通道 `dma_request_chan` 可能返回 `-EPROBE_DEFER`，要传播给 probe 重试，别当普通错误吞掉。
+- trigger：见到 `dmaengine_submit` 后没有 `dma_async_issue_pending`，或问 "DMA submit 了不动 / DMA 不启动"。
+- range：版本无关。
+- scope/limits：约束 submit→issue_pending 序列;API 名按目标树 `include/linux/dmaengine.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: dmaengine_submit, dma_async_issue_pending
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-084
+- provenance：self（真树核对 dmaengine.h device_issue_pending="push pending transactions to hardware";子系统:dmaengine）
+- fires/catches：0 / 0
+
+### KB-NVMEM-001：nvmem_cell_read 返回的缓冲要 kfree
+
+- symptom：反复读 NVMEM cell 后内存缓慢泄漏;kmemleak 报 `nvmem_cell_read` 路径的泄漏。
+- root cause：`nvmem_cell_read(cell, &len)` 内部 `kmalloc` 一块缓冲把 cell 内容拷进去，返回这块缓冲的指针、长度写进 `*len`。所有权交给调用者——**用完必须 `kfree`**。当成"框架内部缓冲、不用管"就泄漏。
+- fix：`void *buf = nvmem_cell_read(cell, &len)` 判 `IS_ERR` 后用，用完 `kfree(buf)`。只取定长整数时用 `nvmem_cell_read_u8/u16/u32/u64` 这类 typed helper（直接写进你给的变量，无需 free）。
+- trigger：见到 `nvmem_cell_read` 的返回缓冲没有对应 `kfree`，或问 "nvmem cell 读出来要不要释放"。
+- range：版本无关。
+- scope/limits：约束 nvmem_cell_read 缓冲的释放;API 名按目标树 `include/linux/nvmem-consumer.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: nvmem_cell_read, nvmem_cell_put
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-087
+- provenance：self（真树核对 nvmem-consumer.h:void *nvmem_cell_read(cell, size_t *len);子系统:nvmem）
+- fires/catches：0 / 0
+
+### KB-MMC-001：mmc 的 .request 完成后必须 mmc_request_done,出错路径也要
+
+- symptom：MMC/SD 卡操作卡住不返回、`dd`/挂载 hang;一遇传输错误整个卡挂死。
+- root cause：`mmc_host_ops.request(host, mrq)` 把一个请求下到控制器后，MMC 核心**等驱动回调** `mmc_request_done(host, mrq)` 才认为完成。控制器处理完(无论成功还是出错，通常在完成中断里)必须调它把 `mrq` 交还核心。漏了核心一直等；只在成功路径调、出错路径忘，则一遇错就挂。
+- fix：`.request` 的所有完成路径(成功 + 各种错误 + 超时)都要 `mmc_request_done(host, mrq)`，把错误码填进 `mrq->cmd->error`/`mrq->data->error` 再交还。
+- trigger：见到 `.request` 实现里缺 `mmc_request_done`、或只在成功分支调，或问 "MMC 卡死 / SD 操作 hang"。
+- range：版本无关。
+- scope/limits：约束 .request 的完成回调;API 名按目标树 `include/linux/mmc/host.h` 核。
+- check：
+  ```
+  [CLAIMS]
+  api: mmc_request_done
+  symbol: mmc_host_ops
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-090
+- provenance：self（真树核对 mmc/host.h:621 void mmc_request_done(struct mmc_host*, struct mmc_request*);子系统:mmc）
 - fires/catches：0 / 0

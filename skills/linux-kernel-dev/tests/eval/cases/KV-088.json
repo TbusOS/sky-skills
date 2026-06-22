@@ -1,0 +1,16 @@
+{
+  "id": "KV-088",
+  "topic": "registering an NVMEM provider",
+  "q": "写个 efuse/eeprom 后端,注册成 NVMEM provider 怎么填?",
+  "kind": "objective",
+  "subsystem": "nvmem",
+  "gold_claims": {
+    "api": ["devm_nvmem_register"],
+    "symbol": ["nvmem_config"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "nvmem_register_device", "why": "编造的注册函数" }
+  ],
+  "forbidden": ["nvmem_config 漏 word_size/stride"],
+  "rubric": "填 struct nvmem_config(name/dev/size/word_size/stride/reg_read/reg_write),devm_nvmem_register 注册;cell 偏移在 DT nvmem 节点定义"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "KV-090",
+  "topic": "mmc request must call mmc_request_done when finished",
+  "q": "MMC 控制器 .request 把命令下到硬件后,卡操作一直卡住,缺了什么?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "mmc",
+  "gold_claims": {
+    "api": ["mmc_request_done"],
+    "symbol": ["mmc_host_ops"],
+    "config": ["CONFIG_MMC"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "mmc_finish_request", "why": "编造的完成函数,真名 mmc_request_done" }
+  ],
+  "forbidden": ["只在成功路径调 mmc_request_done,出错路径漏掉"],
+  "rubric": "mmc_host_ops.request 把请求下到硬件,完成(成功或出错,中断里或同步)后必须 mmc_request_done(host,mrq) 交还核心,否则 MMC 栈一直等、卡挂死;出错路径也要调;CONFIG_MMC 是框架开关"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "KV-084",
+  "topic": "dma_async_issue_pending is required to start the transfer",
+  "q": "DMA 描述符 submit 了但传输不动,缺了什么?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "dmaengine",
+  "gold_claims": {
+    "api": ["dmaengine_submit", "dma_async_issue_pending", "dmaengine_terminate_sync"],
+    "config": ["CONFIG_DMA_ENGINE"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "dma_channel_request", "why": "编造的拿通道函数,真名 dma_request_chan" }
+  ],
+  "forbidden": ["以为 dmaengine_submit 会自动启动传输"],
+  "rubric": "dmaengine_submit 只把描述符排队并返回 cookie,必须再调 dma_async_issue_pending 才把传输推给硬件;停止用 dmaengine_terminate_sync;CONFIG_DMA_ENGINE 是框架开关"
+}
