@@ -397,6 +397,77 @@ total: 0 errors, 2 warnings, 4 lines checked
   </div>
 </section>
 
+<!-- 5b. live demo: 7 critics scoring one answer -->
+<section class="anth-section" id="demo">
+  <div class="anth-container anth-container--narrow">
+    <span class="cap-label"><span class="lang-en">05 · Scored, for real</span><span class="lang-zh">05 · 真打一次分</span></span>
+    <h2 style="margin:var(--space-3) 0;"><span class="lang-en">Seven critics, one answer, real scores.</span><span class="lang-zh">七个 critic，评同一个答案，真实分数。</span></h2>
+    <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0 0 var(--space-5); line-height:1.6;">
+      <span class="lang-en">The panel was run for real on <code>tests/eval/demo-answer.md</code> — a platform sensor-driver probe with deliberate defects. Each critic scored its one axis in a fresh context; the numbers below are their actual verdicts, not mock-ups.</span>
+      <span class="lang-zh">打分面板真的对 <code>tests/eval/demo-answer.md</code>（一个故意留缺陷的平台传感器驱动 probe）跑了一遍。每个 critic 在独立上下文里只评自己那一轴；下面是它们的真实裁决，不是摆拍。</span>
+    </p>
+
+    <div class="term" style="margin-bottom:var(--space-5);">
+<span class="dim"># tests/eval/demo-answer.md — sensor_probe() 节选</span>
+s = devm_kzalloc(&amp;pdev->dev, sizeof(*s), GFP_KERNEL);   <span class="bad">// 返回值没查 NULL</span>
+spin_lock_init(&amp;s->lock);
+
+spin_lock_irqsave(&amp;s->lock, flags);
+s->base = devm_ioremap_resource(&amp;pdev->dev, res);       <span class="bad">// 睡眠调用在 spinlock 里!</span>
+s->last = readl(s->base) * 9 / 5 + 32;                  <span class="bad">// 读+换算挤一行;IS_ERR 没查</span>
+spin_unlock_irqrestore(&amp;s->lock, flags);
+return 0;                                               <span class="bad">// 无错误路径</span>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(232px, 1fr)); gap:var(--space-4);">
+      <div style="padding:var(--space-4); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;"><h4 style="font-family:var(--font-heading); font-size:16px; font-weight:600; margin:0; color:var(--anth-text);">correctness</h4><span style="font-family:var(--font-heading); font-size:30px; font-weight:700; color:#c0392b;">48</span></div>
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.1em; color:var(--anth-text-secondary); text-transform:uppercase; margin:2px 0 8px;">weight 28%</div>
+        <p style="font-size:13px; line-height:1.5; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">Real APIs (fact-gate clean), but two runtime bugs and two unchecked NULL returns.</span><span class="lang-zh">API 都真（fact-gate 干净），但两个运行时 bug + 两处返回值没查 NULL。</span></p>
+      </div>
+      <div style="padding:var(--space-4); border:1px solid #c0392b; border-radius:var(--radius-lg); background:#fdf2ef;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;"><h4 style="font-family:var(--font-heading); font-size:16px; font-weight:600; margin:0; color:var(--anth-text);">safety <span style="font-size:10px; font-weight:700; color:#c0392b; letter-spacing:0.1em;">VETO</span></h4><span style="font-family:var(--font-heading); font-size:30px; font-weight:700; color:#c0392b;">22</span></div>
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.1em; color:var(--anth-text-secondary); text-transform:uppercase; margin:2px 0 8px;">weight 22% · 一票否决</div>
+        <p style="font-size:13px; line-height:1.5; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">A sleeping call (<code>devm_ioremap_resource</code>) inside <code>spin_lock_irqsave</code> — Forbidden #1. Vetoes the answer.</span><span class="lang-zh">spin_lock_irqsave 里调睡眠函数 devm_ioremap_resource——Forbidden #1 原子态睡眠，一票否决。</span></p>
+      </div>
+      <div style="padding:var(--space-4); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;"><h4 style="font-family:var(--font-heading); font-size:16px; font-weight:600; margin:0; color:var(--anth-text);">design</h4><span style="font-family:var(--font-heading); font-size:30px; font-weight:700; color:#d97757;">60</span></div>
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.1em; color:var(--anth-text-secondary); text-transform:uppercase; margin:2px 0 8px;">weight 13%</div>
+        <p style="font-size:13px; line-height:1.5; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">A temperature sensor that binds to no framework (hwmon/thermal/iio); the read is dead state.</span><span class="lang-zh">温度传感器没绑任何框架（hwmon/thermal/iio），读到的值成死状态。</span></p>
+      </div>
+      <div style="padding:var(--space-4); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;"><h4 style="font-family:var(--font-heading); font-size:16px; font-weight:600; margin:0; color:var(--anth-text);">testing</h4><span style="font-family:var(--font-heading); font-size:30px; font-weight:700; color:#d97757;">70</span></div>
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.1em; color:var(--anth-text-secondary); text-transform:uppercase; margin:2px 0 8px;">weight 12%</div>
+        <p style="font-size:13px; line-height:1.5; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">KUnit was feasible (the conversion is pure) but there are zero tests, and unchecked returns leave no error path to test.</span><span class="lang-zh">换算是纯逻辑、本可 KUnit，却零测试；返回值没查也让错误路径无从测起。</span></p>
+      </div>
+      <div style="padding:var(--space-4); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;"><h4 style="font-family:var(--font-heading); font-size:16px; font-weight:600; margin:0; color:var(--anth-text);">complexity</h4><span style="font-family:var(--font-heading); font-size:30px; font-weight:700; color:#2f5e33;">80</span></div>
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.1em; color:var(--anth-text-secondary); text-transform:uppercase; margin:2px 0 8px;">weight 9%</div>
+        <p style="font-size:13px; line-height:1.5; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">Short and flat; one dense line fuses an MMIO read, a magic-number conversion, and an assignment.</span><span class="lang-zh">短而扁平；一行把 MMIO 读、魔数换算、赋值挤在一起。</span></p>
+      </div>
+      <div style="padding:var(--space-4); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;"><h4 style="font-family:var(--font-heading); font-size:16px; font-weight:600; margin:0; color:var(--anth-text);">coding-style</h4><span style="font-family:var(--font-heading); font-size:30px; font-weight:700; color:#2f5e33;">88</span></div>
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.1em; color:var(--anth-text-secondary); text-transform:uppercase; margin:2px 0 8px;">weight 8%</div>
+        <p style="font-size:13px; line-height:1.5; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">Would pass checkpatch — SPDX, tabs, K&amp;R, devm. Two lines hit 95 cols (over 80 preferred, under the 100 wall).</span><span class="lang-zh">能过 checkpatch——SPDX、tab、K&amp;R、devm。两行 95 列（超 80 首选，未到 100 告警线）。</span></p>
+      </div>
+      <div style="padding:var(--space-4); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;"><h4 style="font-family:var(--font-heading); font-size:16px; font-weight:600; margin:0; color:var(--anth-text);">completeness</h4><span style="font-family:var(--font-heading); font-size:30px; font-weight:700; color:#d97757;">65</span></div>
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.1em; color:var(--anth-text-secondary); text-transform:uppercase; margin:2px 0 8px;">weight 8%</div>
+        <p style="font-size:13px; line-height:1.5; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">Task scope covered, CLAIMS clean, but all three fallible calls go unchecked — the failure branch is missing.</span><span class="lang-zh">任务范围覆盖、CLAIMS 干净，但三个会失败的调用全没查——失败分支整条缺失。</span></p>
+      </div>
+    </div>
+
+    <div style="margin-top:var(--space-5); padding:var(--space-4) var(--space-5); border:1px solid #c0392b; border-radius:var(--radius-lg); background:#fdf2ef; text-align:center;">
+      <span style="font-family:'JetBrains Mono', monospace; font-size:14px; color:var(--anth-text);">weighted = .28·48 + .22·22 + .13·60 + .12·70 + .09·80 + .08·88 + .08·65 = <strong>53.9</strong></span><br>
+      <span style="font-family:var(--font-heading); font-size:15px; font-weight:700; color:#c0392b;"><span class="lang-en">but safety error → overall FAIL (veto, regardless of total)</span><span class="lang-zh">但 safety 出 error → 总评 FAIL（一票否决，不看总分）</span></span>
+    </div>
+    <p style="font-family:var(--font-body); color:var(--anth-text-secondary); font-size:13px; margin:var(--space-4) 0 0; line-height:1.5; text-align:center;">
+      <span class="lang-en">This is the whole point: a 53.9 average would look like a "needs work" pass, but a sleep-in-spinlock is a crash — so safety's veto is what actually protects the kernel.</span>
+      <span class="lang-zh">这正是重点：53.9 的均分看着像"还行、待改"，但 spinlock 里睡眠是会崩的——safety 的一票否决才是真正护住内核的那道闸。</span>
+    </p>
+  </div>
+</section>
+
 <!-- 6. version drift -->
 <section class="anth-section anth-section--subtle">
   <div class="anth-container anth-container--narrow">
