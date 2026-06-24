@@ -597,6 +597,43 @@ bin/design-review \
   </div>
 </section>
 
+<!-- §9 Stay updated -->
+<section class="anth-section anth-section--subtle" id="stay-updated">
+  <div class="anth-container anth-container--narrow">
+    <span class="anth-badge"><span class="lang-en">09 · Stay updated</span><span class="lang-zh">09 · 保持更新</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">Install once — then Claude tells you when there's an update.</span>
+      <span class="lang-zh">装一次 —— 以后远端更新了，Claude 会主动告诉你。</span>
+    </h2>
+    <p class="lang-en">Cloned the repo and worried you'll drift behind? Install the auto-updater once. Then, on session start and (throttled) while you work, Claude checks the remote and — if it's ahead — tells you <strong>what's new and asks whether to update</strong>. It never touches your repo on its own.</p>
+    <p class="lang-zh">clone 下来怕跟丢？装一次自动更新器即可。之后开会话时、做事中（节流），Claude 会检查远端，领先了就<strong>告诉你更新了啥、问你要不要更新</strong>。它绝不擅自改你的仓库。</p>
+<pre class="anth-code"><code># 在你的 sky-skills clone 里，装一次（先看会做啥可加 --dry-run）
+bash autoupdate/install.sh
+# 重启 Claude Code 生效</code></pre>
+    <p style="margin-top:var(--space-5);">
+      <span class="lang-en">When the remote is ahead, Claude opens with something like this:</span>
+      <span class="lang-zh">当远端领先时，Claude 会这样开口：</span>
+    </p>
+<pre class="anth-code"><code>sky-skills 远端领先 3 个提交：
+· feat: 内核 skill 加测试维度（7 轴打分面板）
+· docs: code review 方法调研页
+· feat: cpufreq / cpuidle / devfreq 三个子系统
+要现在更新吗？确认后我跑 git pull + 给新 skill 补 symlink。</code></pre>
+    <p style="margin-top:var(--space-5);">
+      <span class="lang-en">Say yes and it runs <code>git pull --ff-only</code> + links any new skills. Check anytime yourself with <code>/skills-sync</code>. Watch more than one repo by adding lines to <code>~/.claude/sky-skills-autoupdate.repos</code>.</span>
+      <span class="lang-zh">你说"更新"它就跑 <code>git pull --ff-only</code> + 给新 skill 补 symlink。也可随时用 <code>/skills-sync</code> 主动查。想盯多个仓，往 <code>~/.claude/sky-skills-autoupdate.repos</code> 加几行即可。</span>
+    </p>
+    <p style="margin-top:var(--space-5);">
+      <span class="lang-en">Installed once, it works in <strong>every</strong> Claude Code session on this machine — any directory — because the hook lives in your user-level <code>~/.claude</code> and watches the clone by absolute path, independent of where you start. Scope note: this rides Claude Code's hook mechanism; other CLIs (e.g. Codex) don't run these hooks.</span>
+      <span class="lang-zh">装一次，本机这个用户在<strong>任何目录</strong>开 Claude Code 都生效——hook 在用户级 <code>~/.claude</code>，按绝对路径盯着 clone，跟你在哪开会话无关。适用范围：这套走的是 Claude Code 的 hook 机制；Codex 等其它 CLI 不跑这些 hook，收不到。</span>
+    </p>
+    <blockquote class="anth-quote">
+      <span class="lang-en">Claude Code doesn't poll in the background — so the check rides its lifecycle hooks (session start + prompt submit). Detection is read-only; the pull only happens after you say yes.</span>
+      <span class="lang-zh">Claude Code 不会后台轮询 —— 所以检查挂在它的生命周期 hook 上（开会话 + 提交 prompt）。检测只读；只有你点头后才真的拉取。</span>
+    </blockquote>
+  </div>
+</section>
+
 <!-- Footer -->
 <footer class="anth-footer">
   <div class="anth-footer-grid">
