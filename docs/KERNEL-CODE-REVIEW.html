@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kernel code review — how others do it, how we build it in</title>
+<meta name="description" content="How Google and the Linux kernel community review code, mapped onto the linux-kernel-dev skill: a six-axis critic panel and a checkpatch-to-DCO workflow.">
+<meta property="og:title" content="Kernel code review — borrowed from Google + the kernel community">
+<meta property="og:description" content="Google's 8 review dimensions and the kernel's coding-assistants rules, mapped onto a 6-axis critic panel and submission workflow.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../skills/anthropic-design/assets/anthropic.css">
+<style>
+  html { scroll-padding-top: 84px; }
+  .anth-nav { position: sticky; top: 0; z-index: 50; background: var(--anth-bg); border-bottom: 1px solid var(--anth-light-gray); }
+
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent; border: 1px solid var(--anth-light-gray); color: var(--anth-text);
+    font-family: var(--font-heading); font-size: 13px; font-weight: 500; padding: 6px 12px;
+    border-radius: var(--radius-pill); cursor: pointer; letter-spacing: 0.05em;
+    transition: background var(--duration-sm) var(--ease-anth), border-color var(--duration-sm);
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); border-color: var(--anth-mid-gray); }
+
+  html[data-lang="zh"] body, html[data-lang="zh"] p, html[data-lang="zh"] li, html[data-lang="zh"] td, html[data-lang="zh"] th {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+  }
+  html[data-lang="zh"] h1, html[data-lang="zh"] h2, html[data-lang="zh"] h3, html[data-lang="zh"] h4,
+  html[data-lang="zh"] .anth-badge, html[data-lang="zh"] .cap-label, html[data-lang="zh"] .voice-chip {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+
+  /* Voice switcher */
+  .voice-bar { display:flex; gap:var(--space-3); align-items:center; flex-wrap:wrap; }
+  .voice-bar__label {
+    font-family:var(--font-heading); font-size:12px; letter-spacing:0.15em; text-transform:uppercase;
+    color:var(--anth-text-secondary); font-weight:600; margin-right:var(--space-2);
+  }
+  .voice-chip {
+    display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:var(--radius-pill);
+    font-size:13px; font-weight:600; font-family:var(--font-heading); text-decoration:none;
+    border:1px solid var(--anth-light-gray); color:var(--anth-text);
+    transition:background var(--duration-sm), border-color var(--duration-sm);
+  }
+  .voice-chip:hover { background:var(--anth-light-gray); }
+  .voice-chip--current { background:var(--anth-orange); color:#ffffff; border-color:var(--anth-orange); }
+
+  .cap-label {
+    font-family:var(--font-heading); font-size:11px; font-weight:700; letter-spacing:0.18em;
+    color:var(--anth-orange); text-transform:uppercase;
+  }
+
+  /* Card */
+  .rv-card {
+    padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray);
+    border-radius:var(--radius-lg); background:var(--anth-bg);
+  }
+  .rv-card h4 { font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text); }
+  .rv-card p { font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body); }
+  .rv-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--space-4); }
+
+  /* Mapping table */
+  .rv-table { width:100%; border-collapse:collapse; font-family:var(--font-body); }
+  .rv-table th, .rv-table td {
+    text-align:left; padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--anth-light-gray);
+    font-size:14.5px; vertical-align:top;
+  }
+  .rv-table th {
+    font-family:var(--font-heading); font-size:12px; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--anth-text-secondary); background:var(--anth-bg-subtle);
+  }
+  .rv-table td:first-child { font-weight:600; color:var(--anth-text); white-space:nowrap; }
+  .rv-yes { color:#2f5e33; font-weight:700; }
+  .rv-new { color:var(--anth-orange); font-weight:700; }
+
+  /* Terminal block */
+  .term {
+    background:#1f1e1c; color:#e8e6e0; border-radius:var(--radius-md);
+    padding:var(--space-5); font-family:'JetBrains Mono', monospace;
+    font-size:13px; line-height:1.7; overflow-x:auto; margin:0; border:1px solid #2f2d2a;
+  }
+  .term .dim { color:#8a8780; }
+  .term .ok { color:#86c06a; font-weight:600; }
+  .term .accent { color:#e8b07a; }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="../index.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">sky-skills</a>
+  <div>
+    <a href="../index.html#skills"><span class="lang-en">Skills</span><span class="lang-zh">技能</span></a>
+    <a href="HARNESS-ROADMAP.html"><span class="lang-en">Design harness</span><span class="lang-zh">设计架构</span></a>
+    <a href="KERNEL-HARNESS.html"><span class="lang-en">Kernel harness</span><span class="lang-zh">内核架构</span></a>
+    <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language" title="Switch language">中 / EN</button>
+    <a class="anth-button" href="https://github.com/TbusOS/sky-skills/tree/main/skills/linux-kernel-dev"><span class="lang-en">View on GitHub</span><span class="lang-zh">看源码</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="anth-hero">
+  <div class="anth-container" style="max-width:880px;">
+    <span class="anth-badge" style="background:var(--anth-orange); color:#ffffff; font-weight:600;"><span class="lang-en">Code review · what we borrowed</span><span class="lang-zh">Code review · 借鉴了什么</span></span>
+    <h1 style="margin-top:var(--space-4);">
+      <span class="lang-en">How Google and the kernel<br>review code — and how we build it in.</span>
+      <span class="lang-zh">Google 和内核社区怎么审代码——<br>以及我们怎么把它内建进 skill。</span>
+    </h1>
+    <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.55; max-width:760px; font-family:var(--font-body);">
+      <span class="lang-en">To make AI-written kernel code review-grade, we studied two sources that set the bar: Google's engineering practices (the human review guide plus its 2025 AI review tooling) and the Linux kernel community's own process docs. This page maps what they require onto what <code>linux-kernel-dev</code> actually enforces.</span>
+      <span class="lang-zh">要让 AI 写的内核代码达到能过 review 的水准，我们研究了两个定标准的来源：Google 的工程实践(人工 review 指南 + 它 2025 年的 AI review 工具)，以及 Linux 内核社区自己的流程文档。这一页把它们的要求，对应到 <code>linux-kernel-dev</code> 实际强制了什么。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="#map"><span class="lang-en">See the mapping</span><span class="lang-zh">看对照</span></a>
+      <a class="anth-button anth-button--ghost" href="KERNEL-CAPABILITIES.html"><span class="lang-en">See it run</span><span class="lang-zh">看它干活</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Voice switcher -->
+<section style="padding:0 var(--space-5) var(--space-4);">
+  <div class="anth-container">
+    <div class="voice-bar" style="padding:var(--space-3) 0;">
+      <span class="voice-bar__label"><span class="lang-en">Kernel harness</span><span class="lang-zh">内核架构</span></span>
+      <a class="voice-chip" href="KERNEL-HARNESS.html"><span class="lang-en">Architecture</span><span class="lang-zh">架构</span></a>
+      <a class="voice-chip" href="KERNEL-CAPABILITIES.html"><span class="lang-en">See it work</span><span class="lang-zh">看它干活</span></a>
+      <a class="voice-chip voice-chip--current" href="KERNEL-CODE-REVIEW.html" aria-current="page"><span class="lang-en">Code review</span><span class="lang-zh">代码审查</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- A. Google -->
+<section class="anth-section" id="google">
+  <div class="anth-container anth-container--narrow">
+    <span class="cap-label"><span class="lang-en">01 · How Google reviews</span><span class="lang-zh">01 · Google 怎么审</span></span>
+    <h2 style="margin:var(--space-3) 0;"><span class="lang-en">Eight dimensions, plus AI doing the first pass.</span><span class="lang-zh">八个维度，外加 AI 先过一遍。</span></h2>
+    <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0 0 var(--space-5); line-height:1.6;">
+      <span class="lang-en">Google's open <a href="https://google.github.io/eng-practices/" style="color:var(--anth-orange);">eng-practices</a> guide says the point of review is that <strong>overall code health improves over time</strong> — "there is no perfect code, only better code." A reviewer covers eight things; in 2025 an AI does the mechanical first pass.</span>
+      <span class="lang-zh">Google 开源的 <a href="https://google.github.io/eng-practices/" style="color:var(--anth-orange);">eng-practices</a> 指南说，review 的目的是让<strong>代码整体健康度随时间变好</strong>——"没有完美代码，只有更好的代码"。reviewer 看八件事；2025 年起 AI 先做机械的第一遍。</span>
+    </p>
+    <div class="rv-grid">
+      <div class="rv-card"><h4><span class="lang-en">The 8 review dimensions</span><span class="lang-zh">8 个审查维度</span></h4><p><span class="lang-en">Design (the most important), functionality, complexity, tests, naming, comments, style, documentation. Reviewers balance progress against perfection — don't block a CL over tiny nits.</span><span class="lang-zh">设计(最重要)、功能、复杂度、测试、命名、注释、风格、文档。reviewer 平衡推进与完美——别为小毛病卡住一个 CL。</span></p></div>
+      <div class="rv-card"><h4><span class="lang-en">AI first pass (2025)</span><span class="lang-zh">AI 第一遍(2025)</span></h4><p><span class="lang-en">Gemini Code Assist auto-reviews each PR (summary + bug/style flags); a 2025 "memory" feature accrues an evolving record of the team's standards from PR interactions. AutoCommenter enforces best practices for C/C++/Java/Go/Python.</span><span class="lang-zh">Gemini Code Assist 自动审每个 PR(摘要 + bug/风格标注);2025 年的"记忆"功能从 PR 互动里积累一份会演进的团队规范记录。AutoCommenter 为 C/C++/Java/Go/Python 执行最佳实践。</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- B. Linux kernel -->
+<section class="anth-section anth-section--subtle" id="kernel">
+  <div class="anth-container anth-container--narrow">
+    <span class="cap-label"><span class="lang-en">02 · What the kernel requires</span><span class="lang-zh">02 · 内核社区怎么要求</span></span>
+    <h2 style="margin:var(--space-3) 0;"><span class="lang-en">A toolchain of gates, and a 2025 rule for AI.</span><span class="lang-zh">一串工具闸门，外加一条 2025 年给 AI 的规矩。</span></h2>
+    <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0 0 var(--space-5); line-height:1.6;">
+      <span class="lang-en">The kernel community enforces quality with documented tools and process — not taste. Most relevant to us: a 2025 doc on AI assistants that lines up exactly with our own no-AI-signature rule.</span>
+      <span class="lang-zh">内核社区靠有文档的工具和流程把质量卡住——不靠口味。和我们最相关的：2025 年一份讲 AI 助手的文档，跟我们"不加 AI 署名"的规则完全对上。</span>
+    </p>
+    <div class="rv-grid">
+      <div class="rv-card"><h4><span class="lang-en">Style + static analysis</span><span class="lang-zh">风格 + 静态分析</span></h4><p><span class="lang-en"><code>checkpatch.pl</code> for style; then <code>sparse</code> (types / endianness / <code>__user</code>), <code>smatch</code> (flow), <code>coccinelle</code> (semantic patches), <code>clang-format</code>. Each catches a different class — all have false positives.</span><span class="lang-zh"><code>checkpatch.pl</code> 查风格；再加 <code>sparse</code>(类型/大小端/<code>__user</code>)、<code>smatch</code>(流分析)、<code>coccinelle</code>(语义补丁)、<code>clang-format</code>。各抓一类，都有误报。</span></p></div>
+      <div class="rv-card"><h4><span class="lang-en">SPDX + Signed-off-by</span><span class="lang-zh">SPDX + Signed-off-by</span></h4><p><span class="lang-en">Every source file starts with an SPDX license identifier; every patch carries a <code>Signed-off-by</code> certifying the DCO (<code>git commit -s</code>). All code must be GPL-2.0 compatible.</span><span class="lang-zh">每个源文件首行带 SPDX 许可标识；每个补丁带 <code>Signed-off-by</code> 认证 DCO(<code>git commit -s</code>)。所有代码必须与 GPL-2.0 兼容。</span></p></div>
+      <div class="rv-card"><h4><span class="lang-en">AI assistants (2025)</span><span class="lang-zh">AI 助手(2025)</span></h4><p><span class="lang-en">The <a href="https://docs.kernel.org/process/coding-assistants.html" style="color:var(--anth-orange);">coding-assistants</a> doc: an AI <strong>must not</strong> add <code>Signed-off-by</code> — only a human can certify the DCO. Disclose AI help with <code>Assisted-by:</code>; the human reviews all of it and takes full responsibility.</span><span class="lang-zh"><a href="https://docs.kernel.org/process/coding-assistants.html" style="color:var(--anth-orange);">coding-assistants</a> 文档：AI <strong>绝不</strong>加 <code>Signed-off-by</code>——只有人能认证 DCO。用 <code>Assisted-by:</code> 披露 AI 辅助；人类审查全部并负全责。</span></p></div>
+      <div class="rv-card"><h4><span class="lang-en">Small, single-purpose patches</span><span class="lang-zh">小而单一的补丁</span></h4><p><span class="lang-en">One patch does one thing; a big change is split into a series, each independently reviewable, compilable, and bisect-safe.</span><span class="lang-zh">一个补丁只做一件事；大改动拆成一系列，每个能独立 review、独立编译、不破坏二分。</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- C. Our mapping -->
+<section class="anth-section" id="map">
+  <div class="anth-container anth-container--narrow">
+    <span class="cap-label"><span class="lang-en">03 · Mapped onto the skill</span><span class="lang-zh">03 · 对应到 skill</span></span>
+    <h2 style="margin:var(--space-3) 0;"><span class="lang-en">Google's 8 dimensions → our 6-axis panel.</span><span class="lang-zh">Google 的 8 维 → 我们的 6 轴面板。</span></h2>
+    <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0 0 var(--space-5); line-height:1.6;">
+      <span class="lang-en">Each answer is scored by six fresh-context critics; <strong>design</strong> and <strong>complexity</strong> were added to match Google's top concerns. Kernel work adds one dimension Google doesn't need: <strong>safety</strong>, with a veto — a sleep-in-spinlock is not a nit.</span>
+      <span class="lang-zh">每个答案由六个独立上下文的打分员评；为对齐 Google 最看重的两项，新增了 <strong>设计</strong> 和 <strong>复杂度</strong>。内核活儿多一个 Google 不需要的维度：<strong>safety</strong>，带一票否决——持 spinlock 睡眠不是小毛病。</span>
+    </p>
+    <div style="overflow-x:auto;">
+    <table class="rv-table">
+      <thead><tr>
+        <th><span class="lang-en">Google dimension</span><span class="lang-zh">Google 维度</span></th>
+        <th><span class="lang-en">Our coverage</span><span class="lang-zh">我们怎么覆盖</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Design</td><td><span class="rv-new">kernel-design-critic</span> <span class="lang-en">— fits the subsystem framework, no reinvented wheels (new)</span><span class="lang-zh">—— 融入子系统框架、不重造轮子(新增)</span></td></tr>
+        <tr><td>Functionality</td><td><span class="rv-yes">kernel-correctness-critic</span> + fact_gate <span class="lang-en">— claims grep-verified against a real tree</span><span class="lang-zh">—— 断言对真树 grep 核过</span></td></tr>
+        <tr><td>Complexity</td><td><span class="rv-new">kernel-complexity-critic</span> <span class="lang-en">— could it be simpler, can a maintainer follow it (new)</span><span class="lang-zh">—— 能否更简单、维护者能否看懂(新增)</span></td></tr>
+        <tr><td>Tests</td><td><span class="rv-yes">regression_test</span> + completeness <span class="lang-en">— frozen eval cases; answer's own error/cleanup paths</span><span class="lang-zh">—— 冻结测试用例；答案自身的错误/清理路径</span></td></tr>
+        <tr><td>Naming · Style</td><td><span class="rv-yes">kernel-coding-style-critic</span> + checkpatch_gate <span class="lang-en">— coding-style.rst + kernel's own checkpatch.pl</span><span class="lang-zh">—— coding-style.rst + 内核自带 checkpatch.pl</span></td></tr>
+        <tr><td>Comments · Docs</td><td><span class="rv-yes">kernel-completeness-critic</span> <span class="lang-en">— error handling, cleanup, the claims block</span><span class="lang-zh">—— 错误处理、清理路径、断言块</span></td></tr>
+        <tr><td><span class="lang-en">(kernel-only) Safety</span><span class="lang-zh">(内核独有)安全</span></td><td><span class="rv-yes">kernel-safety-critic</span> <span class="lang-en">— atomic-sleep / UAPI / hardware rules; an error here vetoes the answer</span><span class="lang-zh">—— 原子睡眠/UAPI/硬件规则；这一轴出 error 直接否决</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="font-family:var(--font-body); color:var(--anth-text-secondary); font-size:13.5px; margin:var(--space-4) 0 0; line-height:1.5;">
+      <span class="lang-en">Weights: correctness .30 · safety .25 · design .15 · complexity .10 · coding-style .10 · completeness .10. See the weighted bar on the <a href="KERNEL-CAPABILITIES.html#scoring" style="color:var(--anth-orange);">capabilities page</a>.</span>
+      <span class="lang-zh">权重：correctness .30 · safety .25 · design .15 · complexity .10 · coding-style .10 · completeness .10。加权条见<a href="KERNEL-CAPABILITIES.html#scoring" style="color:var(--anth-orange);">能力页</a>。</span>
+    </p>
+  </div>
+</section>
+
+<!-- D. Key borrowings -->
+<section class="anth-section anth-section--subtle" id="borrow">
+  <div class="anth-container anth-container--narrow">
+    <span class="cap-label"><span class="lang-en">04 · The three we acted on</span><span class="lang-zh">04 · 落地的三条</span></span>
+    <h2 style="margin:var(--space-3) 0;"><span class="lang-en">What changed in the skill.</span><span class="lang-zh">skill 里改了什么。</span></h2>
+    <div class="rv-grid" style="margin-bottom:var(--space-5);">
+      <div class="rv-card"><h4><span class="lang-en">Design + complexity axes</span><span class="lang-zh">设计 + 复杂度两轴</span></h4><p><span class="lang-en">Google treats design as the top review concern; we had no critic for it. Added two, taking the panel from 4 to 6 axes.</span><span class="lang-zh">Google 把设计当 review 头号关注，我们之前没有对应打分员。补了两个，面板从 4 轴到 6 轴。</span></p></div>
+      <div class="rv-card"><h4><span class="lang-en">AI never signs off</span><span class="lang-zh">AI 绝不 sign-off</span></h4><p><span class="lang-en">The kernel's rule became Forbidden Action #11: an AI/tool never adds <code>Signed-off-by</code>; disclose with <code>Assisted-by:</code>; the human signs and owns it.</span><span class="lang-zh">内核这条成了 Forbidden Action 第 11 条：AI/工具绝不加 <code>Signed-off-by</code>；用 <code>Assisted-by:</code> 披露；人类签名并负责。</span></p></div>
+    </div>
+    <div class="term" role="img" aria-label="Example commit trailer: Assisted-by tag present, Signed-off-by added only by a human">
+<span class="dim"># a kernel-bound commit trailer the skill now teaches:</span>
+subsystem: fix the thing in imperative mood
+
+<span class="dim">What / why / side effects.</span>
+
+<span class="accent">Assisted-by:</span> AGENT_NAME:MODEL_VERSION [coccinelle] [sparse]
+<span class="ok">Signed-off-by:</span> A Human &lt;human@example.org&gt;   <span class="dim"># only a human — certifies the DCO</span>
+    </div>
+    <p style="font-family:var(--font-body); color:var(--anth-text-secondary); font-size:13.5px; margin:var(--space-4) 0 0; line-height:1.5;">
+      <span class="lang-en">Third: the submission workflow (<code>patch-workflow.md</code>) gained the static-analysis tools (sparse / smatch / coccinelle / clang-format), SPDX, and the DCO flow — so review-grade output is documented end to end, from checkpatch to sign-off.</span>
+      <span class="lang-zh">第三条：提交流程(<code>patch-workflow.md</code>)补上了静态分析工具(sparse / smatch / coccinelle / clang-format)、SPDX、DCO 流程——从 checkpatch 到 sign-off，能过 review 的产物全程有文档。</span>
+    </p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="anth-section" style="border-top:1px solid var(--anth-light-gray); text-align:center;">
+  <div class="anth-container">
+    <p style="font-family:var(--font-body); color:var(--anth-text-secondary); font-size:14px; margin:0 0 var(--space-3);">
+      <span class="lang-en">Part of the <a href="KERNEL-HARNESS.html" style="color:var(--anth-orange);">linux-kernel-dev</a> harness — a kernel/BSP skill that checks every claim against a real source tree.</span>
+      <span class="lang-zh">属于 <a href="KERNEL-HARNESS.html" style="color:var(--anth-orange);">linux-kernel-dev</a> 架构——一个把每条断言都对真源码树核过的内核/BSP skill。</span>
+    </p>
+    <a class="anth-button" href="https://github.com/TbusOS/sky-skills/tree/main/skills/linux-kernel-dev"><span class="lang-en">Read the skill</span><span class="lang-zh">看 skill 源码</span></a>
+  </div>
+</footer>
+
+<!-- design-review:self-diff v1
+skill: anthropic
+intent: A research/reference page mapping external code-review standards (Google eng-practices + Linux kernel community) onto the linux-kernel-dev skill's gates; same visual language as the other KERNEL-* pages so it reads as one family.
+key-choices:
+  - [reused-template] Adopted KERNEL-CAPABILITIES head/nav/voice-bar/footer + linked anthropic.css rather than inventing a layout — consistency across the kernel-harness page set beats novelty for a reference doc.
+  - [mapping-table] A two-column table (Google dimension -> our coverage) carries the core argument; new axes flagged in orange, existing ones in green, so the eye sees what changed.
+  - [one-terminal] A single dark commit-trailer block shows the Assisted-by/Signed-off-by rule concretely; kept to one to avoid the page reading as a terminal dump.
+tradeoffs:
+  - Static-axis content (no animation/interactive demo) — appropriate for a reference page, but lower visual energy than the capabilities page; mitigated with the card grids and the colored mapping table.
+  - Bilingual doubles copy length; accepted for parity with the rest of the site.
+/design-review:self-diff -->
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+  if (!saved) { saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en'; }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+      btn.setAttribute('aria-pressed', lang === 'zh' ? 'true' : 'false');
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
