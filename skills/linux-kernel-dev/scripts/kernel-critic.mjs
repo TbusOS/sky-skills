@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// kernel-critic.mjs — 准备 6 个 kernel 打分员的 prompt (HARNESS-DESIGN §6.5).
+// kernel-critic.mjs — 准备 7 个 kernel 打分员的 prompt (HARNESS-DESIGN §6.5).
 // 照 design-review/scripts/multi-critic.mjs 的模式:本脚本只“拼 prompt”,真正打分由
-// Claude Code 的 Task 工具并行派给 6 个子 agent,再聚合。
+// Claude Code 的 Task 工具并行派给 7 个子 agent,再聚合。
 //
-//   correctness 0.30 · safety 0.25 · design 0.15 · complexity 0.10 · coding-style 0.10 · completeness 0.10
-//   (对齐 Google eng-practices review 维度:design 是 review 最看重的一项之一;safety 仍是否决轴)
+//   correctness 0.28 · safety 0.22 · design 0.13 · testing 0.12 · complexity 0.09 · coding-style 0.08 · completeness 0.08
+//   (对齐 Google eng-practices review 维度:design/testing 都是 review 核心项;safety 仍是否决轴)
 //
 // 用法:
 //   node kernel-critic.mjs <answer.md> [--case KV-001] [--tree <t>] [--out-dir <dir>]
@@ -23,12 +23,13 @@ const REPO_ROOT = resolve(SKILL, '../..');
 const AGENTS = join(REPO_ROOT, '.claude', 'agents');
 
 const SPECIALISTS = [
-  { axis: 'correctness',  weight: 0.30, agent: 'kernel-correctness-critic.md',  refs: ['references/claims-contract.md'] },
-  { axis: 'safety',       weight: 0.25, agent: 'kernel-safety-critic.md',       refs: ['references/bsp_discipline.md'] },
-  { axis: 'design',       weight: 0.15, agent: 'kernel-design-critic.md',       refs: ['references/bsp_discipline.md'] },
-  { axis: 'complexity',   weight: 0.10, agent: 'kernel-complexity-critic.md',   refs: ['references/coding-style.md'] },
-  { axis: 'coding-style', weight: 0.10, agent: 'kernel-coding-style-critic.md', refs: ['references/coding-style.md'] },
-  { axis: 'completeness', weight: 0.10, agent: 'kernel-completeness-critic.md', refs: ['references/claims-contract.md'] },
+  { axis: 'correctness',  weight: 0.28, agent: 'kernel-correctness-critic.md',  refs: ['references/claims-contract.md'] },
+  { axis: 'safety',       weight: 0.22, agent: 'kernel-safety-critic.md',       refs: ['references/bsp_discipline.md'] },
+  { axis: 'design',       weight: 0.13, agent: 'kernel-design-critic.md',       refs: ['references/bsp_discipline.md'] },
+  { axis: 'testing',      weight: 0.12, agent: 'kernel-testing-critic.md',      refs: ['references/claims-contract.md'] },
+  { axis: 'complexity',   weight: 0.09, agent: 'kernel-complexity-critic.md',   refs: ['references/coding-style.md'] },
+  { axis: 'coding-style', weight: 0.08, agent: 'kernel-coding-style-critic.md', refs: ['references/coding-style.md'] },
+  { axis: 'completeness', weight: 0.08, agent: 'kernel-completeness-critic.md', refs: ['references/claims-contract.md'] },
 ];
 
 function parseArgs(argv) {
@@ -121,12 +122,12 @@ ${refBlocks}
 const aggPath = join(o.outDir, `kernel-critic-AGGREGATE-${base}.md`);
 writeFileSync(aggPath, `# kernel-critic 聚合
 
-6 个角度裁决(各读对应 prompt 文件的子 agent 输出):
+7 个角度裁决(各读对应 prompt 文件的子 agent 输出):
 ${SPECIALISTS.map((s, i) => `- ${s.axis} (权重 ${(s.weight * 100).toFixed(0)}%) → ${promptFiles[i]}`).join('\n')}
 
 ## 你的活
 1. 读每个角度的 JSON 裁决(不看 narrative)。
-2. 加权总分: overall = 0.30·correctness + 0.25·safety + 0.15·design + 0.10·complexity + 0.10·coding-style + 0.10·completeness
+2. 加权总分: overall = 0.28·correctness + 0.22·safety + 0.13·design + 0.12·testing + 0.09·complexity + 0.08·coding-style + 0.08·completeness
 3. 合并 issues,各标来源角度。
 4. **safety 是硬轴**:safety 有 error 级问题 → overall 直接判 fail,不管总分。
 5. 给统一裁决 + 2-3 句:哪轴最低、哪些问题跨轴、最该先修的一件。
@@ -138,5 +139,5 @@ console.log(JSON.stringify({
   answer: o.answer, case: o.case, tree: o.tree || null,
   specialists: SPECIALISTS.map((s, i) => ({ axis: s.axis, weight: s.weight, agent: s.agent, prompt_file: promptFiles[i] })),
   aggregator: aggPath,
-  dispatch: 'Claude Code: Task(subagent_type="kernel-<axis>-critic", prompt=该文件内容) ×6 并行,再用聚合模板合成。safety 有 error → fail。',
+  dispatch: 'Claude Code: Task(subagent_type="kernel-<axis>-critic", prompt=该文件内容) ×7 并行,再用聚合模板合成。safety 有 error → fail。',
 }, null, 2));
