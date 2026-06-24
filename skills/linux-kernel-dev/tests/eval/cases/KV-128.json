@@ -1,0 +1,17 @@
+{
+  "id": "KV-128",
+  "topic": "Registering a cpufreq driver with a frequency table",
+  "q": "给 SoC 写 CPU 调频驱动,怎么注册 cpufreq_driver 并让 governor 拿到频率表?",
+  "kind": "objective",
+  "subsystem": "cpufreq",
+  "gold_claims": {
+    "api": ["cpufreq_register_driver", "cpufreq_unregister_driver", "cpufreq_table_validate_and_sort"],
+    "symbol": ["cpufreq_driver", "cpufreq_policy"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "cpufreq_driver_register", "why": "词序颠倒,真名 cpufreq_register_driver" },
+    { "type": "fake-api", "claim": "cpufreq_set_target", "why": "编造的函数,无此 API" }
+  ],
+  "forbidden": [".target_index 把入参 index 当 kHz 用"],
+  "rubric": "填 cpufreq_driver(.verify/.target_index/.init),cpufreq_register_driver 注册;.init 里 cpufreq_table_validate_and_sort 设好 policy->freq_table 让 core/governor 管;remove 用 cpufreq_unregister_driver"
+}

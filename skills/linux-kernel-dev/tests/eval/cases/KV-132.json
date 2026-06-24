@@ -1,0 +1,18 @@
+{
+  "id": "KV-132",
+  "topic": "cpuidle .enter returns actual state, deep state needs TIMER_STOP",
+  "q": "cpuidle 深睡态唤醒会丢中断/卡死,而且 governor 驻留统计也不对,缺了什么?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "cpuidle",
+  "gold_claims": {
+    "api": ["cpuidle_register_driver", "cpuidle_enter_state"],
+    "symbol": ["cpuidle_state", "cpuidle_driver", "CPUIDLE_FLAG_TIMER_STOP"],
+    "config": ["CONFIG_CPU_IDLE"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "cpuidle_enter_idle", "why": "编造的函数,无此 API" }
+  ],
+  "forbidden": ["停本地 timer 的深睡态不标 CPUIDLE_FLAG_TIMER_STOP", ".enter 返回入参 index 而非实际进入的态", ".enter 里睡眠"],
+  "rubric": ".enter 在关本地中断的原子上下文运行、禁睡眠,返回值必须是实际进入的 state 下标(demote 时返回浅态),governor 靠返回值统计驻留;会停本地 timer 的深睡态必须标 CPUIDLE_FLAG_TIMER_STOP 让 tick 切 broadcast,否则唤醒丢失;CONFIG_CPU_IDLE 是开关"
+}

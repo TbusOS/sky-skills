@@ -1,0 +1,17 @@
+{
+  "id": "KV-131",
+  "topic": "Registering a cpuidle driver with idle states",
+  "q": "给 SoC 写 CPU 空闲态驱动,怎么声明 idle states 并注册?",
+  "kind": "objective",
+  "subsystem": "cpuidle",
+  "gold_claims": {
+    "api": ["cpuidle_register", "cpuidle_unregister", "cpuidle_register_driver"],
+    "symbol": ["cpuidle_driver", "cpuidle_state"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "cpuidle_add_driver", "why": "编造的函数,真名 cpuidle_register_driver" },
+    { "type": "fake-api", "claim": "cpuidle_set_state", "why": "编造的函数,无此 API" }
+  ],
+  "forbidden": ["exit_latency/target_residency 单位填错"],
+  "rubric": "填 cpuidle_driver.states[](每态 .enter/.exit_latency/.target_residency 微秒)+ .state_count;cpuidle_register(register_driver + 各 cpu register_device 一步到位);remove 用 cpuidle_unregister"
+}

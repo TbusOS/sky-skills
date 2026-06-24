@@ -429,6 +429,36 @@
       "catches": 0,
       "linked_eval_case": "KV-126",
       "added": "2026-06-24"
+    },
+    {
+      "id": "KB-CPUFREQ-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "cpufreq core 用 transition_ongoing 标志串行化同一 policy 的频率变更。走 .target_index 时 core 自管;驱动若绕过 core 自己异步改频率(notifier/热限频等),必须 cpufreq_freq_transition_begin(policy,&freqs) 发 PRECHANGE + 改频率 + cpufreq_freq_transition_end(policy,&freqs,0) 发 POSTCHANGE 成对包住。漏 end 则 transition_ongoing 永不清→后续任何调频卡死,依赖频率的状态(loops_per_jiffy)也停旧值。子系统:cpufreq。用例 KV-129。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-129",
+      "added": "2026-06-24"
+    },
+    {
+      "id": "KB-CPUIDLE-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "cpuidle .enter 在关本地中断的原子上下文运行、禁睡眠,返回值必须是实际进入的 state 下标(条件不满足 demote 时返回那个浅态),governor 靠返回值统计驻留,返回入参会让统计错乱。会停本地 timer 的深睡 state 必须 .flags 标 CPUIDLE_FLAG_TIMER_STOP,否则 tick 不切 broadcast、深睡里本地 timer 停摆→唤醒丢失。子系统:cpuidle。用例 KV-132。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-132",
+      "added": "2026-06-24"
+    },
+    {
+      "id": "KB-DEVFREQ-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "devfreq .target(dev,*freq,flags) 收到的 *freq 是 governor 推荐目标,但硬件只支持离散 OPP。必须 devfreq_recommended_opp(内部 dev_pm_opp_find_freq_ceil)取 >= 目标的实际 OPP 并回填 *freq,再 dev_pm_opp_set_rate;直接用推荐值会设到硬件不支持的频率。get_dev_status 要回填真实 busy_time/total_time,否则负载型 governor 决策错。注意这是非-CPU 设备调频,CPU 用 cpufreq。子系统:devfreq。用例 KV-135。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-135",
+      "added": "2026-06-24"
     }
   ]
 }

@@ -1,0 +1,17 @@
+{
+  "id": "KV-130",
+  "topic": "cpufreq target_index switching frequency via OPP",
+  "q": ".target_index 回调拿到 index,怎么切到对应频率?用 OPP 怎么写?",
+  "kind": "objective",
+  "subsystem": "cpufreq",
+  "gold_claims": {
+    "api": ["dev_pm_opp_set_rate", "cpufreq_cpu_get", "cpufreq_cpu_put"],
+    "symbol": ["cpufreq_frequency_table"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "cpufreq_apply_freq", "why": "编造的函数,无此 API" },
+    { "type": "fake-api", "claim": "cpufreq_target_index_set", "why": "编造的函数,无此 API" }
+  ],
+  "forbidden": ["把 index 当频率值直接设硬件"],
+  "rubric": "index 是 policy->freq_table 下标,取 freq_table[index].frequency(kHz)换算成 Hz,用 dev_pm_opp_set_rate 切到对应 OPP;cpufreq_cpu_get/put 取放 policy 引用;频率表单位 kHz、OPP 单位 Hz 差 1000 倍"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "KV-129",
+  "topic": "cpufreq async frequency change needs transition begin/end",
+  "q": "cpufreq 驱动自己异步改了频率,之后调频全卡住,缺了什么?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "cpufreq",
+  "gold_claims": {
+    "api": ["cpufreq_freq_transition_begin", "cpufreq_freq_transition_end", "cpufreq_register_driver"],
+    "symbol": ["cpufreq_policy"],
+    "config": ["CONFIG_CPU_FREQ"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "cpufreq_change_freq", "why": "编造的函数,无此 API" }
+  ],
+  "forbidden": ["异步改频率不发 PRECHANGE/POSTCHANGE 通知", "transition_begin 不配 end"],
+  "rubric": "走 core .target_index 时 core 自动发频率通知;驱动自己异步改频率必须 cpufreq_freq_transition_begin/end 成对包住发 PRECHANGE/POSTCHANGE;漏 end 则 transition_ongoing 标志不清→后续调频卡死,依赖频率的状态(loops_per_jiffy)也失准;CONFIG_CPU_FREQ 是开关"
+}

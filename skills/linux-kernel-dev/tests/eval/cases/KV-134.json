@@ -1,0 +1,17 @@
+{
+  "id": "KV-134",
+  "topic": "Adding a devfreq device with a profile",
+  "q": "给 GPU/总线写按负载调频的驱动,怎么用 devfreq 注册 profile?",
+  "kind": "objective",
+  "subsystem": "devfreq",
+  "gold_claims": {
+    "api": ["devm_devfreq_add_device", "devfreq_add_device"],
+    "symbol": ["devfreq_dev_profile", "devfreq"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "devfreq_register_device", "why": "编造的函数,真名 devfreq_add_device" },
+    { "type": "fake-api", "claim": "devfreq_change_freq", "why": "编造的函数,无此 API" }
+  ],
+  "forbidden": ["get_dev_status 不回填真实利用率"],
+  "rubric": "填 devfreq_dev_profile(.polling_ms/.target/.get_dev_status),devm_devfreq_add_device 注册并选 governor(如 DEVFREQ_GOV_SIMPLE_ONDEMAND);get_dev_status 回填真实 busy_time/total_time 给 governor"
+}

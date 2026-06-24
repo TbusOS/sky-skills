@@ -1,0 +1,18 @@
+{
+  "id": "KV-135",
+  "topic": "devfreq target must snap to a real OPP",
+  "q": "devfreq .target 拿 governor 推荐频率直接设,结果设了硬件不支持的频率,怎么改?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "devfreq",
+  "gold_claims": {
+    "api": ["devfreq_recommended_opp", "dev_pm_opp_set_rate", "devm_devfreq_add_device"],
+    "symbol": ["devfreq_dev_profile"],
+    "config": ["CONFIG_PM_DEVFREQ"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "devfreq_add_profile", "why": "编造的函数,无此 API" }
+  ],
+  "forbidden": [".target 直接用推荐 freq 不取 OPP ceil"],
+  "rubric": ".target 收到的 *freq 是 governor 推荐值,硬件只支持离散 OPP,必须 devfreq_recommended_opp(内部 dev_pm_opp_find_freq_ceil)取 >= 目标的实际 OPP 并回填 *freq,再 dev_pm_opp_set_rate;CONFIG_PM_DEVFREQ 是开关"
+}

@@ -62,6 +62,9 @@
 - KB-LOCK-001 · 同一把锁进程和中断上下文都取时,进程侧必须 spin_lock_irqsave 关本核中断,否则中断打断持锁进程→同核重入死锁;spinlock 临界区禁睡眠 · KV-120 · range：版本无关
 - KB-PM-001 · pm_runtime_get_sync 即使失败(返回负)也已加 usage 引用,错误路径不配平→设备永不 autosuspend;失败补 pm_runtime_put_noidle,或直接用 pm_runtime_resume_and_get(失败自动回退) · KV-123 · range：版本无关
 - KB-DMAMAP-001 · dma_map_single/map_page 可能失败返回无效 dma_addr_t,不能跟 0 比,必须 dma_mapping_error 判断;漏判把无效地址给设备→DMA 到错误物理内存 · KV-126 · range：版本无关
+- KB-CPUFREQ-001 · cpufreq 驱动自己异步改频率必须 cpufreq_freq_transition_begin/end 成对包住(发 PRECHANGE/POSTCHANGE),漏 end 则 transition_ongoing 不清→后续调频卡死 · KV-129 · range：版本无关
+- KB-CPUIDLE-001 · cpuidle .enter 在关中断原子上下文运行须返回实际进入的 state 下标(demote 时返浅态);会停本地 timer 的深睡态必标 CPUIDLE_FLAG_TIMER_STOP 否则唤醒丢失 · KV-132 · range：版本无关
+- KB-DEVFREQ-001 · devfreq .target 收到的是 governor 推荐频率,硬件只支持离散 OPP,必须 devfreq_recommended_opp 取 >= 目标的实际 OPP 再 dev_pm_opp_set_rate,别直接用推荐值 · KV-135 · range：版本无关
 
 ## 条目
 
@@ -843,4 +846,64 @@
   ```
 - linked_eval_case：KV-126
 - provenance：self（真树核对 dma-mapping.h dma_map_single/dma_mapping_error;子系统:dma-mapping）
+- fires/catches：0 / 0
+
+### KB-CPUFREQ-001：异步改频率必须 transition_begin/end 成对，否则调频卡死
+
+- symptom：cpufreq 驱动在某条路径自己改了 CPU 频率后,之后所有调频请求都卡住/无响应;`cpufreq` sysfs 切 governor 也卡。
+- root cause：cpufreq core 维护一个 `transition_ongoing` 标志保证同一 policy 的频率变更串行。走 core 的 `.target_index` 时 core 自己加解这个标志。但驱动若**绕过 core 自己异步改频率**(在 notifier、热限频回调等场景),必须手动 `cpufreq_freq_transition_begin(policy, &freqs)` 置标志 + 发 PRECHANGE 通知,改完 `cpufreq_freq_transition_end(policy, &freqs, 0)` 清标志 + 发 POSTCHANGE。漏 `end` → `transition_ongoing` 永远为真,后续任何 transition 都在等它清除 → 卡死。依赖频率的全局状态(loops_per_jiffy 等)也会停在旧值。
+- fix：自己异步改频率的代码段用 `cpufreq_freq_transition_begin()` ... `cpufreq_freq_transition_end()` 成对包住,`freqs.old`/`freqs.new` 填对。能走 core 的就用 `.target_index` 让 core 管,别自己改。
+- trigger：见到驱动不经 `.target_index` 自己改频率却没 `cpufreq_freq_transition_begin/end`,或问 "cpufreq 调频卡死 / transition_ongoing / 频率通知"。
+- range：版本无关(transition 串行语义长期不变)。
+- scope/limits：约束驱动侧异步改频率的通知配平;走 core `.target_index` 的常规路径 core 自管,不在此列。
+- check：
+  ```
+  [CLAIMS]
+  api: cpufreq_freq_transition_begin, cpufreq_freq_transition_end, cpufreq_register_driver
+  symbol: cpufreq_policy
+  config: CONFIG_CPU_FREQ
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-129
+- provenance：self（真树核对 cpufreq.h freq_transition_begin/end;子系统:cpufreq）
+- fires/catches：0 / 0
+
+### KB-CPUIDLE-001：.enter 返回实际进入的 state，停 timer 的深睡态必标 TIMER_STOP
+
+- symptom：① governor(menu/teo)的驻留统计与实际不符、老选错深度;② 进深睡态后唤醒丢失 / 系统卡死,尤其无外部唤醒时。
+- root cause：① `.enter` 回调返回值是"实际进入的 state 下标"。若条件不满足而 demote 到更浅的 state,必须返回那个**浅态**的下标;返回入参(以为进了深态实际没进)→ governor 按错误数据统计驻留、修正决策。② 进入某 idle state 会停掉本地 timer 时,若没给该 state 标 `CPUIDLE_FLAG_TIMER_STOP`,tick 框架不会把计时切到 broadcast clock,深睡里本地 timer 停摆 → 到期唤醒丢失。另外 `.enter` 在**关本地中断的原子上下文**运行,里面禁止睡眠。
+- fix：`.enter` 返回真正进入的 state index;会停本地 timer 的 state 在 `.flags` 加 `CPUIDLE_FLAG_TIMER_STOP`;`.enter` 内只做不睡眠的低功耗指令。
+- trigger：见到 cpuidle `.enter` 固定返回入参 index,或深睡态没标 `CPUIDLE_FLAG_TIMER_STOP`,或问 "cpuidle 唤醒丢失 / 驻留统计错 / broadcast timer"。
+- range：版本无关(返回值语义与 tick broadcast 要求长期不变)。
+- scope/limits：约束 `.enter` 返回值、TIMER_STOP 标志、原子上下文;state 表设计本身不在此列。
+- check：
+  ```
+  [CLAIMS]
+  api: cpuidle_register_driver, cpuidle_enter_state
+  symbol: cpuidle_state, cpuidle_driver, CPUIDLE_FLAG_TIMER_STOP
+  config: CONFIG_CPU_IDLE
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-132
+- provenance：self（真树核对 cpuidle.h CPUIDLE_FLAG_TIMER_STOP/enter_state;子系统:cpuidle）
+- fires/catches：0 / 0
+
+### KB-DEVFREQ-001：.target 必须取实际 OPP，别直接用 governor 推荐频率
+
+- symptom：devfreq 调频后设备跑在硬件不支持的频率上 / 调频不生效 / 偶发异常;或负载型 governor(simple_ondemand)决策明显不对。
+- root cause：① `.target(dev, *freq, flags)` 收到的 `*freq` 是 governor 按利用率算出的**目标频率**,但硬件只支持离散的几档 OPP。直接拿这个目标值去设硬件 → 设到不存在的频率。必须用 `devfreq_recommended_opp(dev, freq, flags)`(内部 `dev_pm_opp_find_freq_ceil`)取到 >= 目标的实际 OPP,并把 `*freq` 回填成那个实际频率。② `get_dev_status` 不回填真实 `busy_time`/`total_time`,负载型 governor 拿不到利用率,决策全错。
+- fix：`.target` 里先 `devfreq_recommended_opp` 取实际 OPP(并回填 `*freq`),再 `dev_pm_opp_set_rate`;`get_dev_status` 回填真实利用率与 `current_frequency`。
+- trigger：见到 devfreq `.target` 直接用入参 `*freq` 设频率不取 OPP,或 `get_dev_status` 不回填利用率,或问 "devfreq 设到不支持的频率 / governor 决策错"。
+- range：版本无关(OPP 离散性与 target 语义长期不变)。
+- scope/limits：约束 `.target` 取 OPP 与 `get_dev_status` 回填;OPP 表本身的定义不在此列。
+- check：
+  ```
+  [CLAIMS]
+  api: devfreq_recommended_opp, dev_pm_opp_set_rate, devm_devfreq_add_device
+  symbol: devfreq_dev_profile
+  config: CONFIG_PM_DEVFREQ
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-135
+- provenance：self（真树核对 devfreq.h devfreq_recommended_opp + pm_opp.h set_rate;子系统:devfreq）
 - fires/catches：0 / 0

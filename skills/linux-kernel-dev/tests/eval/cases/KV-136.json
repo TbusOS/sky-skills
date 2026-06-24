@@ -1,0 +1,16 @@
+{
+  "id": "KV-136",
+  "topic": "devfreq suspend/resume",
+  "q": "devfreq 设备挂起/恢复时频率状态乱,怎么正确处理?",
+  "kind": "objective",
+  "subsystem": "devfreq",
+  "gold_claims": {
+    "api": ["devfreq_suspend_device", "devfreq_resume_device"],
+    "symbol": ["devfreq"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "devfreq_set_freq", "why": "编造的函数,无此 API" }
+  ],
+  "forbidden": ["挂起恢复不调 devfreq_suspend_device/resume_device"],
+  "rubric": "suspend 回调里 devfreq_suspend_device 冻结调频、resume 回调里 devfreq_resume_device 恢复;不调则挂起期间 governor 仍按旧状态决策、恢复后频率状态错乱"
+}

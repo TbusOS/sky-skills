@@ -1,0 +1,17 @@
+{
+  "id": "KV-133",
+  "topic": "cpuidle per-cpu device registration",
+  "q": "cpuidle 驱动注册后,每个 CPU 的 idle 设备怎么单独注册?",
+  "kind": "objective",
+  "subsystem": "cpuidle",
+  "gold_claims": {
+    "api": ["cpuidle_register_device", "cpuidle_register_driver"],
+    "symbol": ["cpuidle_device"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "cpuidle_enter_deep", "why": "编造的函数,无此 API" },
+    { "type": "fake-api", "claim": "cpuidle_select_state", "why": "编造的函数,无此 API" }
+  ],
+  "forbidden": ["只注册 driver 不注册 per-cpu device"],
+  "rubric": "cpuidle_register_driver 注册一次驱动(全局),再对每个 cpu 的 cpuidle_device 调 cpuidle_register_device;cpuidle_register 是把这两步打包的便捷版"
+}
