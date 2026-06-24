@@ -35,6 +35,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 8. **Never delete upstream code to customize** — default to keeping it + a vendor config gate (`#if defined(CONFIG_<VENDOR>_<PURPOSE>)`). See `references/bsp_discipline.md`.
 9. **Never conclude a hardware state from software observation alone** — read the bytes directly (register/OTP/eFuse dump). See `references/bsp_discipline.md`.
 10. **Never decide a change is safe on the compile dimension alone** — check the 4 dimensions (compile / runtime path / semantics / compliance). See `references/bsp_discipline.md`.
+11. **Never let an AI/tool add `Signed-off-by`** — only a human can certify the DCO. AI-assisted work is disclosed with `Assisted-by:`; the human reviews all of it, ensures SPDX + GPL-2.0 compatibility, and adds their own sign-off. See `references/patch-workflow.md`.
 
 ---
 
@@ -120,7 +121,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 - `scripts/checkpatch_gate.sh` — 用内核自带 `checkpatch.pl` 校代码风格
 - `scripts/kernel-tree.mjs` — 绑内核树（`detect` / `add` / `list` / `clone`），路径存本机配置不入库
 - `scripts/regression_test.mjs` + `tests/eval/cases/*.json` — 回归测试:每条用例的 gold 必须在真树查得到 + 自降解校准（故意改坏必须被抓）+ 覆盖率统计；`--baseline` 记录、`--check` 对比退步
-- `scripts/kernel-critic.mjs` + `.claude/agents/kernel-*-critic.md` — 4 轴打分面板（correctness/safety/coding-style/completeness）prompt 准备,Task 派子 agent 并行评分
+- `scripts/kernel-critic.mjs` + `.claude/agents/kernel-*-critic.md` — 6 轴打分面板（correctness/safety/design/complexity/coding-style/completeness,对齐 Google review 维度;safety 一票否决）prompt 准备,Task 派子 agent 并行评分
 - `/kernel-learn`（`.claude/commands/` + `scripts/kernel_learn_validate.mjs`）— 把踩过的坑沉成原子三件套（规则带 `[CLAIMS]` + 建前fail/建后pass 用例 + 注册），无可执行检查不准建
 - `evolution/{ledger.tsv,rules.json}` + `scripts/version_drift.mjs` — 记录表/规则复用 design-evolve（`evolve-ledger.mjs --ledger=` / `evolve-rules.mjs --registry=`）带 fires/catches；`version_drift.mjs` 拿多版本树对比 gold,报"旧版有新版没"的 API（机器跑出版本漂,不靠手维护）
 - 引具体符号的答案附 `[CLAIMS]` 块（`references/claims-contract.md`）；绑树后跑事实检查,答案标 `[已对 linux <版本> 验证]` 或 `[未验证]`
