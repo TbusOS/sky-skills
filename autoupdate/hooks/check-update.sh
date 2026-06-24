@@ -12,9 +12,15 @@
 
 set -uo pipefail
 
-CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-REPOS_FILE="${SKYUP_REPOS:-$CLAUDE_DIR/sky-skills-autoupdate.repos}"
-CACHE_DIR="$CLAUDE_DIR/.cache/sky-skills-autoupdate"
+# CLI 无关:配置与缓存放统一位置,Claude/Codex/Gemini 共用同一份
+CONF_DIR="${SKYUP_HOME:-$HOME/.config/sky-skills-autoupdate}"
+REPOS_FILE="${SKYUP_REPOS:-$CONF_DIR/repos}"
+CACHE_DIR="$CONF_DIR/cache"
+
+# do-update.sh 的真实路径(脚本自身在 clone/autoupdate/hooks/,更新器在 ../bin/),
+# 任何 CLI 看到提示都能照这个绝对路径跑。
+SELF_DIR="$(cd "$(dirname "$0")" && pwd)"
+DO_UPDATE="$(cd "$SELF_DIR/../bin" 2>/dev/null && pwd)/do-update.sh"
 
 EVENT="UserPromptSubmit"
 MODE="hook"
@@ -89,8 +95,8 @@ fi
 ctx="检测到 skills 仓远端有更新(sky-skills-autoupdate）：
 ${emit_hook}
 请先简洁告诉用户更新了哪些内容，再问是否现在更新。用户确认后运行：
-  bash \"\$HOME/.claude/hooks/sky-skills-autoupdate/bin/do-update.sh\"
-(它做 git pull --ff-only + 给新 skill 补 symlink；若涉及新 skill 或 hook 变更，提醒用户重启 Claude Code。)"
+  bash \"$DO_UPDATE\"
+(它做 git pull --ff-only + 给新 skill 补 symlink；若涉及新 skill 或 hook 变更，提醒用户重启当前 CLI。)"
 
 if command -v jq >/dev/null 2>&1; then
   jq -n --arg ev "$EVENT" --arg ctx "$ctx" \

@@ -11,9 +11,9 @@
 
 set -uo pipefail
 
-CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-REPOS_FILE="${SKYUP_REPOS:-$CLAUDE_DIR/sky-skills-autoupdate.repos}"
-SKILLS_DIR="$CLAUDE_DIR/skills"
+CONF_DIR="${SKYUP_HOME:-$HOME/.config/sky-skills-autoupdate}"
+REPOS_FILE="${SKYUP_REPOS:-$CONF_DIR/repos}"
+SKILLS_DIR="$HOME/.claude/skills"   # 新 skill 补 symlink 仅对 Claude Code 有意义
 
 [ -f "$REPOS_FILE" ] || { echo "没有 repos 配置：$REPOS_FILE（先跑 install.sh）"; exit 1; }
 
@@ -47,8 +47,8 @@ while IFS= read -r line; do
     echo "【${name}】已更新 ${behind} 个提交："
     git -C "$repo" log --no-merges --format='  · %s' "${before}..HEAD" 2>/dev/null | head -20
 
-    # 给新 skill 补 symlink
-    if [ -d "$repo/skills" ]; then
+    # 给新 skill 补 symlink(仅当本机装了 Claude Code,~/.claude 存在)
+    if [ -d "$repo/skills" ] && [ -d "$HOME/.claude" ]; then
       for d in "$repo"/skills/*/; do
         [ -d "$d" ] || continue
         sn="$(basename "$d")"

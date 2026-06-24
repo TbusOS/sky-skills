@@ -624,8 +624,8 @@ bash autoupdate/install.sh
       <span class="lang-zh">你说"更新"它就跑 <code>git pull --ff-only</code> + 给新 skill 补 symlink。也可随时用 <code>/skills-sync</code> 主动查。想盯多个仓，往 <code>~/.claude/sky-skills-autoupdate.repos</code> 加几行即可。</span>
     </p>
     <p style="margin-top:var(--space-5);">
-      <span class="lang-en">Installed once, it works in <strong>every</strong> Claude Code session on this machine — any directory — because the hook lives in your user-level <code>~/.claude</code> and watches the clone by absolute path, independent of where you start. Scope note: this rides Claude Code's hook mechanism; other CLIs (e.g. Codex) don't run these hooks.</span>
-      <span class="lang-zh">装一次，本机这个用户在<strong>任何目录</strong>开 Claude Code 都生效——hook 在用户级 <code>~/.claude</code>，按绝对路径盯着 clone，跟你在哪开会话无关。适用范围：这套走的是 Claude Code 的 hook 机制；Codex 等其它 CLI 不跑这些 hook，收不到。</span>
+      <span class="lang-en">Installed once, it works in <strong>every</strong> session on this machine — any directory — because the config lives at user level and watches the clone by absolute path, independent of where you start. And it's not just Claude Code: the installer detects and wires up whichever of <strong>Claude Code, Codex, and Gemini CLI</strong> you have — all three share the same hook + <code>additionalContext</code> mechanism (Gemini uses <code>BeforeAgent</code> in place of <code>UserPromptSubmit</code>).</span>
+      <span class="lang-zh">装一次，本机这个用户在<strong>任何目录</strong>开会话都生效——配置在用户级，按绝对路径盯着 clone，跟你在哪开会话无关。而且不止 Claude Code：安装器会探测并接入你装了的 <strong>Claude Code、Codex、Gemini CLI</strong>——三家共用同一套 hook + <code>additionalContext</code> 机制(Gemini 用 <code>BeforeAgent</code> 代替 <code>UserPromptSubmit</code>)。</span>
     </p>
     <blockquote class="anth-quote">
       <span class="lang-en">Claude Code doesn't poll in the background — so the check rides its lifecycle hooks (session start + prompt submit). Detection is read-only; the pull only happens after you say yes.</span>
