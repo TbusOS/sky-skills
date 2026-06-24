@@ -1,0 +1,16 @@
+{
+  "id": "KV-127",
+  "topic": "Streaming DMA ownership and cache sync",
+  "q": "streaming 映射的缓冲,设备搬完 CPU 要回读,非一致性架构上读到陈旧数据,怎么处理?",
+  "kind": "objective",
+  "subsystem": "dma-mapping",
+  "gold_claims": {
+    "api": ["dma_map_single", "dma_sync_single_for_cpu", "dma_sync_single_for_device", "dma_unmap_single"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "dma_map_buffer", "why": "编造的函数,真名 dma_map_single" },
+    { "type": "fake-api", "claim": "dma_alloc_dma", "why": "不存在的分配函数" }
+  ],
+  "forbidden": ["streaming 缓冲映射期间 CPU 直接读写不做同步", "映射方向填反"],
+  "rubric": "streaming 缓冲映射后所有权归设备,CPU 要回读先 dma_sync_single_for_cpu,改完交回设备前 dma_sync_single_for_device(非一致性架构靠这做缓存维护);用完 dma_unmap_single;映射方向 DMA_TO/FROM_DEVICE 要对"
+}

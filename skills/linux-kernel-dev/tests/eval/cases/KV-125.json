@@ -1,0 +1,17 @@
+{
+  "id": "KV-125",
+  "topic": "Coherent DMA buffer allocation",
+  "q": "给设备分配一块 CPU 和设备都长期共享的 DMA 缓冲(环形描述符),怎么写?",
+  "kind": "objective",
+  "subsystem": "dma-mapping",
+  "gold_claims": {
+    "api": ["dma_alloc_coherent", "dma_free_coherent", "dma_set_mask_and_coherent"],
+    "symbol": ["dma_addr_t"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "dma_alloc_streaming", "why": "编造的函数,无此 API" },
+    { "type": "fake-api", "claim": "dma_map_coherent", "why": "不存在,coherent 用 dma_alloc_coherent" }
+  ],
+  "forbidden": ["没设 DMA mask 就分配/映射"],
+  "rubric": "先 dma_set_mask_and_coherent 声明设备寻址位宽;长期共享缓冲用 dma_alloc_coherent 拿 CPU 虚拟地址 + dma_addr_t 给设备,CPU/设备随时一致无需手动同步;dma_free_coherent 释放"
+}

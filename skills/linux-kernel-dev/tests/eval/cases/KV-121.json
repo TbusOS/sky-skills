@@ -1,0 +1,16 @@
+{
+  "id": "KV-121",
+  "topic": "RCU read-side protection for read-mostly data",
+  "q": "读多写少的指针,读侧要无锁极快,怎么用 RCU 保护?",
+  "kind": "objective",
+  "subsystem": "locking",
+  "gold_claims": {
+    "api": ["rcu_read_lock", "rcu_read_unlock", "rcu_dereference", "rcu_assign_pointer", "synchronize_rcu"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "rcu_lock_read", "why": "编造的函数,真名 rcu_read_lock" },
+    { "type": "fake-api", "claim": "rcu_deref", "why": "不存在,真名 rcu_dereference" }
+  ],
+  "forbidden": ["RCU 读侧临界区里睡眠/阻塞", "释放旧指针没等 synchronize_rcu"],
+  "rubric": "读侧 rcu_read_lock/unlock 包住,rcu_dereference 读发布的指针;写侧 rcu_assign_pointer 发布新指针,synchronize_rcu 等所有读侧退出后再释放旧的;读侧临界区不能睡眠"
+}

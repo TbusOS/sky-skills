@@ -1,0 +1,16 @@
+{
+  "id": "KV-124",
+  "topic": "Runtime PM autosuspend",
+  "q": "设备频繁用,想空闲一段时间再断电避免抖动,怎么配 autosuspend?",
+  "kind": "objective",
+  "subsystem": "pm-runtime",
+  "gold_claims": {
+    "api": ["pm_runtime_use_autosuspend", "pm_runtime_set_autosuspend_delay", "pm_runtime_mark_last_busy", "pm_runtime_put_autosuspend"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "pm_runtime_wakeup", "why": "编造的函数" },
+    { "type": "fake-api", "claim": "pm_runtime_put_force", "why": "不存在的放引用变体" }
+  ],
+  "forbidden": ["每次用完立即断电导致频繁上下电抖动"],
+  "rubric": "pm_runtime_set_autosuspend_delay 设延时 + pm_runtime_use_autosuspend 开启;每次用完 pm_runtime_mark_last_busy 标记再 pm_runtime_put_autosuspend,空闲到点才真挂,避免频繁上下电"
+}

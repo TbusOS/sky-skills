@@ -399,6 +399,36 @@
       "catches": 0,
       "linked_eval_case": "KV-117",
       "added": "2026-06-22"
+    },
+    {
+      "id": "KB-LOCK-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "同一把锁若进程上下文和中断上下文都取,进程侧必须用 spin_lock_irqsave/spin_unlock_irqrestore 关本核中断再持锁,否则中断打断持锁进程、中断里又取同锁→同核重入死锁(spinlock 忙等不让出 CPU,是真死锁)。spinlock 及一切原子上下文禁止会睡眠的调用(mutex_lock/kmalloc(GFP_KERNEL)/copy_from_user 等),会睡眠的路径标了 might_sleep,CONFIG_DEBUG_ATOMIC_SLEEP 可查。子系统:locking。用例 KV-120。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-120",
+      "added": "2026-06-24"
+    },
+    {
+      "id": "KB-PM-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "pm_runtime_get_sync 即使 resume 失败、返回负值,也已经把 usage 计数加了 1。错误路径直接 return 不配平→计数永久偏高、设备永不 autosuspend。失败分支要补 pm_runtime_put_noidle,或直接用 pm_runtime_resume_and_get(失败时自动回退引用,新代码首选)。子系统:pm-runtime。用例 KV-123。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-123",
+      "added": "2026-06-24"
+    },
+    {
+      "id": "KB-DMAMAP-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "dma_map_single/dma_map_page 可能失败,返回的无效 dma_addr_t 不一定是 0,不能跟 0 比判错,必须用 dma_mapping_error(dev,addr) 判断;漏判把无效地址给设备→DMA 到错误物理内存。前提先 dma_set_mask_and_coherent 声明寻址位宽。streaming 缓冲映射后归设备所有,CPU 回读先 dma_sync_single_for_cpu、交回设备前 dma_sync_single_for_device(非一致性架构靠此做缓存维护)。注意这是 DMA 映射 API,跟做内存搬运的 dmaengine 子系统不是一回事。子系统:dma-mapping。用例 KV-126。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-126",
+      "added": "2026-06-24"
     }
   ]
 }

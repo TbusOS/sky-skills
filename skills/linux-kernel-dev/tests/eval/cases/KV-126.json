@@ -1,0 +1,17 @@
+{
+  "id": "KV-126",
+  "topic": "Must check dma_mapping_error after mapping",
+  "q": "dma_map_single 返回的地址直接给了设备,偶发 DMA 到错误内存,缺了什么检查?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "dma-mapping",
+  "gold_claims": {
+    "api": ["dma_map_single", "dma_mapping_error", "dma_unmap_single"],
+    "config": ["CONFIG_DMA_API_DEBUG"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "dma_check_error", "why": "编造的函数,真名 dma_mapping_error" }
+  ],
+  "forbidden": ["map 后不查 dma_mapping_error 直接用地址", "拿返回地址跟 0 比判错"],
+  "rubric": "dma_map_single/map_page 可能失败返回无效 dma_addr_t,不能跟 0 比,必须 dma_mapping_error(dev,addr) 判断;漏判把无效地址给设备→DMA 到错误物理内存;用完 dma_unmap_single;CONFIG_DMA_API_DEBUG 可查漏 unmap"
+}

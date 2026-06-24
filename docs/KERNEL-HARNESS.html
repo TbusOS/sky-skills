@@ -226,7 +226,7 @@
 
       <!-- Subsystem map -->
       <figure style="margin:0 0 var(--space-6);">
-        <svg role="img" aria-label="linux-kernel-dev routes a task to one of thirty-seven subsystem expert modules in seven groups: core kernel internals (interrupts, scheduler, memory, filesystems); buses and devices (device tree, i2c, spi, gpio, usb, phy, mailbox); BSP resource frameworks (clocks, pin control, regulators, regmap, reset, pwm, clk provider, pinctrl driver, regulator driver); media, sensors and connectivity (networking, audio, camera, iio); platform services (thermal, watchdog, rtc, power supply, hwmon); human interface (led, input); storage and DMA (mmc, dmaengine, nvmem, mtd, dma provider, iommu)" viewBox="0 0 1180 1388" style="display:block; width:100%; max-width:1100px; height:auto; margin:0 auto;" font-family="Poppins, sans-serif">
+        <svg role="img" aria-label="linux-kernel-dev routes a task to one of forty subsystem expert modules in seven groups: core kernel internals (interrupts, scheduler, memory, filesystems, locking, runtime PM, DMA mapping); buses and devices (device tree, i2c, spi, gpio, usb, phy, mailbox); BSP resource frameworks (clocks, pin control, regulators, regmap, reset, pwm, clk provider, pinctrl driver, regulator driver); media, sensors and connectivity (networking, audio, camera, iio); platform services (thermal, watchdog, rtc, power supply, hwmon); human interface (led, input); storage and DMA (mmc, dmaengine, nvmem, mtd, dma provider, iommu)" viewBox="0 0 1180 1388" style="display:block; width:100%; max-width:1100px; height:auto; margin:0 auto;" font-family="Poppins, sans-serif">
           <title id="map-title">Subsystem module map</title>
           <!-- hub -->
           <rect x="430" y="20" width="320" height="62" rx="12" fill="#d97757"/>
@@ -240,18 +240,24 @@
           <path d="M590 82 L302 766" stroke="#c9c4b8" stroke-width="2" fill="none"/>
           <path d="M590 82 L878 766" stroke="#c9c4b8" stroke-width="2" fill="none"/>
           <path d="M590 82 L590 1074" stroke="#c9c4b8" stroke-width="2" fill="none"/>
-          <!-- group A: core kernel internals (top-left) -->
+          <!-- group A: core kernel internals (top-left) — 7 modules, 3-column -->
           <rect x="24" y="150" width="556" height="292" rx="14" fill="#faf9f5" stroke="#e5e1d8"/>
           <text x="302" y="182" text-anchor="middle" font-size="15" font-weight="600" fill="#d97757"><tspan class="lang-en" x="302">Core kernel internals</tspan><tspan class="lang-zh" x="302">核心内核机制</tspan></text>
           <g>
-            <rect x="46" y="202" width="250" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
-            <text x="171" y="242" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="171">Interrupts</tspan><tspan class="lang-zh" x="171">中断</tspan></text>
-            <rect x="308" y="202" width="250" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
-            <text x="433" y="242" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="433">Scheduler</tspan><tspan class="lang-zh" x="433">调度器</tspan></text>
-            <rect x="46" y="278" width="250" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
-            <text x="171" y="318" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="171">Memory</tspan><tspan class="lang-zh" x="171">内存管理</tspan></text>
-            <rect x="308" y="278" width="250" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
-            <text x="433" y="318" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="433">Filesystems</tspan><tspan class="lang-zh" x="433">文件系统</tspan></text>
+            <rect x="40" y="202" width="170" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="125" y="242" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="125">Interrupts</tspan><tspan class="lang-zh" x="125">中断</tspan></text>
+            <rect x="217" y="202" width="170" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="302" y="242" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="302">Scheduler</tspan><tspan class="lang-zh" x="302">调度器</tspan></text>
+            <rect x="394" y="202" width="170" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="479" y="242" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="479">Memory</tspan><tspan class="lang-zh" x="479">内存管理</tspan></text>
+            <rect x="40" y="278" width="170" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="125" y="318" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="125">Filesystems</tspan><tspan class="lang-zh" x="125">文件系统</tspan></text>
+            <rect x="217" y="278" width="170" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="302" y="318" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="302">Locking</tspan><tspan class="lang-zh" x="302">并发加锁</tspan></text>
+            <rect x="394" y="278" width="170" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="479" y="318" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="479">Runtime PM</tspan><tspan class="lang-zh" x="479">运行时电源</tspan></text>
+            <rect x="217" y="354" width="170" height="64" rx="10" fill="#ffffff" stroke="#e5e1d8"/>
+            <text x="302" y="394" text-anchor="middle" font-size="15" font-weight="600" fill="#1f1e1c"><tspan class="lang-en" x="302">DMA mapping</tspan><tspan class="lang-zh" x="302">DMA 映射</tspan></text>
           </g>
           <!-- group B: buses & devices (top-right) -->
           <rect x="600" y="150" width="556" height="292" rx="14" fill="#faf9f5" stroke="#e5e1d8"/>
@@ -351,8 +357,8 @@
           </g>
         </svg>
         <figcaption style="text-align:center; max-width:760px; margin:var(--space-4) auto 0; font-size:13.5px; color:var(--anth-text-secondary); line-height:1.5; font-family:var(--font-body);">
-          <span class="lang-en">Thirty-seven subsystem modules today (plus a build-system reference). Each carries 3 frozen test cases (a right answer that must resolve in a real tree + corruptions that must be caught) and a known-bug — 118 cases, all green — so coverage is measured, not claimed.</span>
-          <span class="lang-zh">目前三十七个子系统模块（外加一份构建系统参考）。每个带 3 个冻结测试用例（正确答案必须在真树查得到 + 故意写错的必须被抓）和一条踩坑记录——共 118 个用例全绿——覆盖是测出来的，不是嘴上说的。</span>
+          <span class="lang-en">Forty subsystem modules today (plus a build-system reference). Each carries 3 frozen test cases (a right answer that must resolve in a real tree + corruptions that must be caught) and a known-bug — 127 cases, all green — so coverage is measured, not claimed.</span>
+          <span class="lang-zh">目前四十个子系统模块（外加一份构建系统参考）。每个带 3 个冻结测试用例（正确答案必须在真树查得到 + 故意写错的必须被抓）和一条踩坑记录——共 127 个用例全绿——覆盖是测出来的，不是嘴上说的。</span>
         </figcaption>
       </figure>
 
@@ -374,6 +380,18 @@
         <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
           <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">Filesystems</span><span class="lang-zh">文件系统</span></h4>
           <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">VFS objects, implementing <code>file_operations</code>, exposing data via debugfs / procfs / seq_file, writing a filesystem.</span><span class="lang-zh">VFS 对象、实现 <code>file_operations</code>、用 debugfs / procfs / seq_file 导出数据、写文件系统。</span></p>
+        </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">Locking</span><span class="lang-zh">并发加锁</span></h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">spinlock vs mutex choice, the <code>irqsave</code> rule for locks shared with IRQ context (or same-core deadlock), no-sleep-in-atomic, RCU for read-mostly data.</span><span class="lang-zh">spinlock 与 mutex 选型、进程和中断共享的锁要 <code>irqsave</code>（否则同核死锁）、原子态禁睡眠、读多写少用 RCU。</span></p>
+        </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">Runtime PM</span><span class="lang-zh">运行时电源</span></h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en"><code>pm_runtime</code> enable + get/put balance — and the <code>get_sync</code> trap (it adds a ref even on failure), autosuspend, <code>dev_pm_ops</code> system-sleep callbacks.</span><span class="lang-zh"><code>pm_runtime</code> enable + get/put 配平——以及 <code>get_sync</code> 的坑（失败也加引用）、autosuspend、<code>dev_pm_ops</code> 系统睡眠回调。</span></p>
+        </div>
+        <div style="padding:var(--space-4) var(--space-5); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
+          <h4 style="font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text);"><span class="lang-en">DMA mapping</span><span class="lang-zh">DMA 映射</span></h4>
+          <p style="font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">The DMA API — coherent vs streaming, the mandatory <code>dma_mapping_error</code> check, DMA mask, cache sync. Not dmaengine.</span><span class="lang-zh">DMA API：coherent 与 streaming、必查 <code>dma_mapping_error</code>、DMA mask、缓存同步。注意不是 dmaengine 子系统。</span></p>
         </div>
       </div>
 

@@ -1,0 +1,17 @@
+{
+  "id": "KV-122",
+  "topic": "Enabling runtime PM and get/put usage",
+  "q": "给设备加运行时电源管理,空闲自动断电、用时上电,probe 里怎么注册和上电?",
+  "kind": "objective",
+  "subsystem": "pm-runtime",
+  "gold_claims": {
+    "api": ["pm_runtime_enable", "pm_runtime_disable", "pm_runtime_get_sync", "pm_runtime_put"],
+    "symbol": ["dev_pm_ops"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "pm_runtime_get_async", "why": "编造的函数,无异步 get 变体,加引用上电用 pm_runtime_get_sync/resume_and_get" },
+    { "type": "fake-api", "claim": "pm_runtime_acquire", "why": "不存在,加引用上电用 pm_runtime_get_sync/resume_and_get" }
+  ],
+  "forbidden": ["pm_runtime_enable 之前就 get/put", "remove 漏 pm_runtime_disable"],
+  "rubric": "用 dev_pm_ops + SET_RUNTIME_PM_OPS 挂回调;probe 里 pm_runtime_enable 后才能 get/put;要用硬件 pm_runtime_get_sync 上电加引用、用完 pm_runtime_put;remove 里 pm_runtime_disable"
+}

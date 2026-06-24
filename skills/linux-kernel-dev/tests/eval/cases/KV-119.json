@@ -1,0 +1,17 @@
+{
+  "id": "KV-119",
+  "topic": "Choosing spinlock vs mutex for shared data",
+  "q": "驱动里一块共享数据被多个上下文访问,该用 spinlock 还是 mutex?怎么写?",
+  "kind": "objective",
+  "subsystem": "locking",
+  "gold_claims": {
+    "api": ["spin_lock_irqsave", "spin_unlock_irqrestore", "mutex_lock", "mutex_unlock"],
+    "symbol": ["spinlock_t"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "spin_lock_irqdisable", "why": "编造的函数,真名 spin_lock_irqsave" },
+    { "type": "fake-api", "claim": "mutex_lock_irqsave", "why": "mutex 不能在中断上下文取,无 irqsave 变体" }
+  ],
+  "forbidden": ["持 spinlock 时调会睡眠的函数"],
+  "rubric": "临界区可能睡眠且只在进程上下文 → mutex(mutex_lock/unlock);数据被中断上下文也碰 → spinlock_t + spin_lock_irqsave/spin_unlock_irqrestore;spinlock 临界区要短且不可睡眠"
+}

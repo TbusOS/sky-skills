@@ -1,0 +1,18 @@
+{
+  "id": "KV-120",
+  "topic": "Lock shared with IRQ context needs irqsave (deadlock)",
+  "q": "一把锁既在进程上下文取、中断里也取,用普通 spin_lock 偶发死锁,缺了什么?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "locking",
+  "gold_claims": {
+    "api": ["spin_lock_irqsave", "spin_unlock_irqrestore", "might_sleep"],
+    "symbol": ["spinlock_t"],
+    "config": ["CONFIG_DEBUG_ATOMIC_SLEEP"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "spin_lock_irqdisable", "why": "编造的函数,真名 spin_lock_irqsave" }
+  ],
+  "forbidden": ["进程态持普通 spin_lock 时被中断打断、中断又取同锁", "持 spinlock 时调睡眠函数"],
+  "rubric": "同一把锁进程和中断上下文都取时,进程侧必须用 spin_lock_irqsave 关本核中断,否则中断打断持锁进程→同核重入死锁;spinlock 临界区禁睡眠(mutex_lock/GFP_KERNEL 等),会触发 might_sleep,CONFIG_DEBUG_ATOMIC_SLEEP 可查"
+}

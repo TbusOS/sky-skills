@@ -59,6 +59,9 @@
 - KB-REGD-001 · regmap 类 PMIC regulator 驱动用 *_regmap helper ops(regulator_enable_regmap 等)+ regulator_desc 寄存器字段(enable_reg/vsel_reg),别手写 ops;list_voltage 用 regulator_list_voltage_linear 映射 selector→µV · KV-111 · range：版本无关
 - KB-DMAP-001 · 写 DMA 控制器:dma_cap_set 声明能力 + 实现 device_issue_pending/prep,完成时 complete cookie + 触发 client 回调(virt-dma vchan_cookie_complete 一步到位),漏了消费者永等不到完成 · KV-114 · range：版本无关
 - KB-IOMMU-001 · IOMMU unmap 改页表后必须刷 IOTLB(框架 iommu_iotlb_gather 收集 + 调驱动 .iotlb_sync)才能放物理页,不刷设备拿旧转换 DMA 到已释放内存(安全漏洞) · KV-117 · range：版本无关
+- KB-LOCK-001 · 同一把锁进程和中断上下文都取时,进程侧必须 spin_lock_irqsave 关本核中断,否则中断打断持锁进程→同核重入死锁;spinlock 临界区禁睡眠 · KV-120 · range：版本无关
+- KB-PM-001 · pm_runtime_get_sync 即使失败(返回负)也已加 usage 引用,错误路径不配平→设备永不 autosuspend;失败补 pm_runtime_put_noidle,或直接用 pm_runtime_resume_and_get(失败自动回退) · KV-123 · range：版本无关
+- KB-DMAMAP-001 · dma_map_single/map_page 可能失败返回无效 dma_addr_t,不能跟 0 比,必须 dma_mapping_error 判断;漏判把无效地址给设备→DMA 到错误物理内存 · KV-126 · range：版本无关
 
 ## 条目
 
@@ -782,4 +785,62 @@
   ```
 - linked_eval_case：KV-117
 - provenance：self（真树核对 iommu.h iommu_iotlb_gather/iotlb_sync + map_pages;子系统:iommu）
+- fires/catches：0 / 0
+
+### KB-LOCK-001：进程+中断共享的锁必须 spin_lock_irqsave，否则同核重入死锁
+
+- symptom：一把 spinlock 在进程上下文和中断处理里都取,普通 `spin_lock` 下偶发整核卡死(单核更易复现);开 lockdep 报可能的死锁。
+- root cause：进程上下文里用普通 `spin_lock` 持锁期间,本核来了中断,中断处理又去取同一把锁——锁已被本核(被打断的进程)持有且不会释放(它正等中断返回),于是同核重入死锁。spinlock 是忙等,不会让出 CPU,所以是真死锁不是阻塞。
+- fix：凡是会被中断上下文取的锁,进程侧一律用 `spin_lock_irqsave(&lock, flags)` / `spin_unlock_irqrestore(&lock, flags)` 关掉本核中断再持锁,杜绝同核重入。另:spinlock 临界区(及一切原子上下文)禁止任何会睡眠的调用(`mutex_lock`、`kmalloc(GFP_KERNEL)`、`copy_from_user` 等),会睡眠的路径标了 `might_sleep`。
+- trigger：锁同时被进程和中断/软中断上下文访问,或问 "spin_lock 偶发死锁 / 中断里取锁 / 持锁能不能睡眠"。
+- range：版本无关(自旋锁与中断的重入语义长期不变)。
+- scope/limits：约束被中断上下文共享的锁;纯进程上下文之间的锁该用 mutex,不在此列。
+- check：
+  ```
+  [CLAIMS]
+  api: spin_lock_irqsave, spin_unlock_irqrestore, might_sleep
+  symbol: spinlock_t
+  config: CONFIG_DEBUG_ATOMIC_SLEEP
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-120
+- provenance：self（真树核对 spinlock.h spin_lock_irqsave + might_sleep;子系统:locking）
+- fires/catches：0 / 0
+
+### KB-PM-001：pm_runtime_get_sync 失败也加了引用，错误路径必须配平
+
+- symptom：某条错误路径走过后,设备再也不进 runtime suspend(一直保持上电);usage_count 看着只增不减。
+- root cause：`pm_runtime_get_sync()` 的语义是"先把 usage 计数加 1,再尝试 resume"。即使 resume 失败、函数返回负值,**那个 +1 已经做了**。很多代码以为"失败就没拿到引用",错误分支直接 `return ret` 不配平 → usage 计数永久偏高,框架认为设备还在用,永不调 `.runtime_suspend`。
+- fix：`pm_runtime_get_sync` 的失败分支补 `pm_runtime_put_noidle(dev)` 把多加的引用还回去;或者直接改用 `pm_runtime_resume_and_get(dev)`——它在 resume 失败时自动回退引用,返回负值即可安全 return(新代码首选)。
+- trigger：见到 `pm_runtime_get_sync` 后错误路径直接 return,或问 "get_sync 失败要不要 put / 设备不挂起 / usage_count 不归零"。
+- range：版本无关(get_sync 的引用语义长期不变;`pm_runtime_resume_and_get` 为较新封装,按目标树核)。
+- scope/limits：约束 runtime PM 的引用配平;系统睡眠回调不在此列。
+- check：
+  ```
+  [CLAIMS]
+  api: pm_runtime_get_sync, pm_runtime_resume_and_get, pm_runtime_put_noidle
+  config: CONFIG_PM
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-123
+- provenance：self（真树核对 pm_runtime.h get_sync/resume_and_get/put_noidle;子系统:pm-runtime）
+- fires/catches：0 / 0
+
+### KB-DMAMAP-001：DMA 映射后必须查 dma_mapping_error，别拿地址跟 0 比
+
+- symptom：偶发设备 DMA 到错误物理内存 / 数据损坏;高地址缓冲或开了 SWIOTLB 时更易触发。
+- root cause：`dma_map_single` / `dma_map_page` **可能失败**(地址超出设备 DMA mask、SWIOTLB bounce buffer 耗尽、IOMMU 映射失败等),失败时返回一个无效的 `dma_addr_t`。这个无效值**不一定是 0**,所以拿返回值跟 0 比判错是错的。漏判直接把无效地址给设备 → 设备 DMA 到错误物理内存。
+- fix：每次 `dma_map_*` 之后立刻 `dma_mapping_error(dev, addr)` 判断,失败就走错误路径(并对已映射的部分 `dma_unmap_*`)。前提是先 `dma_set_mask_and_coherent` 声明设备寻址位宽。streaming 缓冲映射后归设备所有,CPU 要回读须先 `dma_sync_single_for_cpu`、改完交回设备前 `dma_sync_single_for_device`。
+- trigger：见到 `dma_map_single`/`dma_map_page` 返回值没经 `dma_mapping_error` 检查,或拿它跟 0 比;或问 "DMA 映射失败怎么判 / DMA 到错误内存"。
+- range：版本无关(DMA API 的错误检查约定长期不变)。
+- scope/limits：约束 streaming 映射的错误检查与同步;`dma_alloc_coherent` 失败返回 NULL,按指针判,不走 `dma_mapping_error`。
+- check：
+  ```
+  [CLAIMS]
+  api: dma_map_single, dma_mapping_error, dma_unmap_single
+  config: CONFIG_DMA_API_DEBUG
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-126
+- provenance：self（真树核对 dma-mapping.h dma_map_single/dma_mapping_error;子系统:dma-mapping）
 - fires/catches：0 / 0

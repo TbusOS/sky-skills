@@ -64,6 +64,9 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 中断 / 下半部 / threaded IRQ / tasklet / softirq / workqueue 选型 | `references/subsys/interrupts.md` | `Documentation/core-api/genericirq.rst`、`core-api/irq/` |
 | 睡眠/唤醒 / 等待队列 / completion / 抢占 / 调度策略·优先级·亲和性 / CFS·EEVDF·RT·DL | `references/subsys/scheduler.md` | `Documentation/scheduler/` |
 | 内存分配（kmalloc/kvmalloc/vmalloc/alloc_pages/kmem_cache）/ GFP 标志 / 访问用户内存 / 驱动 mmap·缺页 | `references/subsys/memory.md` | `Documentation/mm/`、`core-api/memory-allocation.rst` |
+| 并发加锁（spinlock vs mutex 选型 / 进程+中断共享锁要 irqsave / 原子态禁睡眠 / RCU 读多写少） | `references/subsys/locking.md` | `Documentation/locking/`、`include/linux/spinlock.h`、`mutex.h`、`rcupdate.h` |
+| 运行时电源 runtime PM（pm_runtime_enable / get·put 配平 / get_sync 失败也加引用 / autosuspend / dev_pm_ops 系统睡眠回调） | `references/subsys/pm-runtime.md` | `Documentation/power/runtime_pm.rst`、`include/linux/pm_runtime.h`、`pm.h` |
+| DMA 映射 API（coherent vs streaming 选型 / dma_map 后必查 dma_mapping_error / DMA mask / 缓存同步 · 不是 dmaengine） | `references/subsys/dma-mapping.md` | `Documentation/core-api/dma-api.rst`、`dma-api-howto.rst`、`include/linux/dma-mapping.h` |
 | VFS / file_operations 实现 / 导出数据（debugfs·procfs·sysfs·seq_file）/ 写文件系统·挂载 / page cache | `references/subsys/filesystems.md` | `Documentation/filesystems/` |
 | 设备树消费（compatible 绑定 / of_* 读属性 / 拿 MMIO·中断·时钟·GPIO / 遍历节点 / overlay） | `references/subsys/device-tree.md` | `Documentation/devicetree/`（`.dts`/binding 模板见 `templates.md`） |
 | I2C 设备驱动（i2c_driver 绑定 / smbus·原始传输 / regmap-i2c / probe 签名版本） | `references/subsys/i2c.md` | `Documentation/i2c/`、`include/linux/i2c.h` |
