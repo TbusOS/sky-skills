@@ -34,6 +34,9 @@
 | hero 框图 里 font-size="8" 这种小字 | 渲染下来 <9px 看不清。最小 font-size 给 10 |
 | 多列网格里一张卡孤单独占一行左半边 | 视觉断裂。要么 `grid-column: 1 / -1` 居中 SVG，要么配对另一张 1 列卡 |
 | lineup 卡只塞一个细线小图标居中 | 像 wireframe。做满版 illustration tile |
+| 双语 stat strip 的共享数字带英文单位（`48h`）而 zh label 以"小时内…"开头 | zh 模式读出 "48h 小时" 单位重复（2026-06-13 faq 实抓）。数字也拆 lang spans：`<span class="lang-en">48h</span><span class="lang-zh">48</span>`。**known-bugs 1.41** |
+| SVG 里细描边连线穿过 `<text>` 标签 | 1.8px 的 path 横穿三个标签 = 删除线效果（2026-06-13 team 页实抓，三个 overlap 机械检查都看不见细描边）。连线绕开文字 bbox，或给文字让出线带。**known-bugs 1.43** |
+| changelog 宣称的统计（median gap / 版本号）不从页内数据重算 | 宣称 median 14 天，按页内日期算是 25 天 —— 读者自己能算出来，一处失实全页失信（2026-06-13 实抓）。任何可从页内导出的数字（中位数 / 计数 / 总和 / 版本号）发布前重算一遍。**known-bugs 1.35** |
 
 ## 📋 发布前 checklist（MUST — 三道闸都要 exit 0）
 

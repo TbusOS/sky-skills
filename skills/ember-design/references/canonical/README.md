@@ -22,10 +22,10 @@ quality is anchored at the style's own best.
 | Docs home | `docs-home.html` + `docs-home.md` | ✅ v1 · 2026-04-21 |
 | Blog index | `blog-index.html` + `blog-index.md` | ✅ v1 · 2026-04-30 |
 | Product detail | `product-detail.html` + `product-detail.md` | ✅ v1 · 2026-05-02 |
-| Team | `team.html` + `team.md` | — |
+| Team | `team.html` + `team.md` | ✅ v1 · 2026-06-13 |
 | Comparison | `comparison.html` + `comparison.md` | ✅ v1 · 2026-04-27 |
-| FAQ | `faq.html` + `faq.md` | — |
-| Changelog | `changelog.html` + `changelog.md` | — |
+| FAQ | `faq.html` + `faq.md` | ✅ v1 · 2026-06-13 |
+| Changelog | `changelog.html` + `changelog.md` | ✅ v1 · 2026-06-11 |
 | Feature deep | `feature-deep.html` + `feature-deep.md` | ✅ v1 · 2026-04-28 |
 
 Each page-type's `.md` sibling is **required reading** for any generator

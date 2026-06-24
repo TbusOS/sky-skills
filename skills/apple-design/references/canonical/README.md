@@ -23,9 +23,9 @@ quality is anchored at the style's own best.
 | Comparison | `comparison.html` + `comparison.md` | ✅ v1 · 2026-04-24 |
 | Blog index | `blog-index.html` + `blog-index.md` | ✅ v1 · 2026-04-29 |
 | Product detail | `product-detail.html` + `product-detail.md` | ✅ v1 · 2026-05-02 |
-| Team | `team.html` + `team.md` | — |
-| FAQ | `faq.html` + `faq.md` | — |
-| Changelog | `changelog.html` + `changelog.md` | — |
+| Team | `team.html` + `team.md` | ✅ v1 · 2026-06-11 |
+| FAQ | `faq.html` + `faq.md` | ✅ v1 · 2026-06-11 |
+| Changelog | `changelog.html` + `changelog.md` | ✅ v1 · 2026-06-11 |
 | Feature deep | `feature-deep.html` + `feature-deep.md` | ✅ v1 · 2026-04-28 |
 
 Each page-type's `.md` sibling is **required reading** for any generator

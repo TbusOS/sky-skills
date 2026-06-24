@@ -37,6 +37,9 @@
 | Lineup 卡片塞一个 72×72 细线图标居中 | 像 wireframe。每张都做满版 illustration，传达 skill 内容 |
 | CTA 文字色在深底上对比度 < 4.5 | 可读性 fail。深底用 `#ffffff`，别用 `var(--apple-bg)` 那样的 off-white |
 | 在 nav 里的 button 不加更高特异性 | `.apple-nav a { color: var(--apple-text); opacity: 0.8 }` 会吃掉 `.apple-button` 的 white color，渲染成深字 + 0.8 透明在 blue 上对比度 ~3.58:1 fail AA（2026-04-28 apple/feature-deep canonical 实测踩过）。**必须** `.apple-nav a.apple-button { color:#ffffff; opacity:1 }`。apple.css 已含此规则（2026-04-28 升级），page 内不必重复 |
+| `.apple-link` 文本里手打字面 `›` | `.apple-link::after` 已追加 ` ›`，再写一个渲染成双 chevron（2026-06-13 faq/team/landing 共 31 处实抓）。不要箭头用 `.apple-link--no-arrow`。**known-bugs 1.42** |
+| 双语页 italic 引用块不给 zh 关斜体 | PingFang SC 没有真 italic，display 字号下浏览器对 CJK 做合成斜体，zh 引用读起来廉价难读（2026-06-13 faq + landing 实抓）。zh 字体覆盖必须带 `font-style: normal`，且选择器别 gate 在 `data-lang` 上（如 `blockquote .lang-zh`）。**known-bugs 1.38** |
+| canonical 的 .md / self-diff 写"打算做的"而不是"渲染出来的" | .md 是下一个 critic 的评分标准，声明和渲染不符 = 教错（2026-06-13 changelog 实抓）。完稿后逐句对照截图核对版式声明；改 HTML 必须同 commit 改 .md。**known-bugs 1.37** |
 
 ---
 

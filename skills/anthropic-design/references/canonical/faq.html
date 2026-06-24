@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FAQ — Skypad</title>
+<meta name="description" content="Fourteen straight answers on Skypad pricing, sync and security — from the team, not a chatbot. Not here? A human replies within 48 hours.">
+<meta property="og:title" content="FAQ — Skypad">
+<meta property="og:description" content="Fourteen straight answers on Skypad pricing, sync and security — written by the people who build it.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/anthropic.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+  /* Chinese stack (§H): Poppins → Noto Sans SC (display); Lora → Noto Serif SC (editorial). */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .faq-a,
+  html[data-lang="zh"] figcaption {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .faq-q,
+  html[data-lang="zh"] .faq-kicker,
+  html[data-lang="zh"] .faq-jump,
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .stat-strip .num,
+  html[data-lang="zh"] .stat-strip .lbl {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+
+  /* Hero kicker (orange, carries brand presence in top 500px alongside nav CTA) */
+  .faq-kicker {
+    font-family: var(--font-heading); font-size: 11.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--anth-orange); font-weight: 700;
+  }
+  html[data-lang="zh"] .faq-kicker { text-transform: none; letter-spacing: 0.04em; }
+
+  /* Jump chips — one click from anxiety to answer group */
+  .faq-jump-row {
+    display: flex; gap: var(--space-2); justify-content: center; flex-wrap: wrap;
+    margin-top: var(--space-6);
+  }
+  .faq-jump {
+    font-family: var(--font-heading); font-size: 13px; font-weight: 500;
+    color: var(--anth-text); text-decoration: none;
+    border: 1px solid var(--anth-light-gray); border-radius: var(--radius-pill);
+    background: #ffffff; padding: 9px 18px;
+    transition: background var(--duration-sm) var(--ease-anth);
+  }
+  .faq-jump:hover { background: var(--anth-bg-subtle); }
+  .faq-jump .count { color: var(--anth-text-secondary); margin-left: 6px; }
+
+  /* Stat strip (same sub-pattern as landing; numbers Poppins 700) */
+  .stat-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-5);
+    padding: var(--space-7) var(--space-6); background: #ffffff;
+    border: 1px solid var(--anth-light-gray); border-radius: var(--radius-md);
+  }
+  .stat-strip > div { text-align: center; }
+  .stat-strip .num {
+    display: block; font-family: var(--font-heading); font-size: 44px; font-weight: 700;
+    color: var(--anth-text); letter-spacing: -0.02em; line-height: 1;
+  }
+  .stat-strip .lbl {
+    display: block; margin-top: var(--space-2);
+    font-family: var(--font-heading); font-size: 13px; color: var(--anth-text-secondary);
+    letter-spacing: 0.02em;
+  }
+
+  /* FAQ groups */
+  .faq-group h2 {
+    font-size: 28px; letter-spacing: -0.01em;
+    margin: var(--space-2) 0 var(--space-2);
+  }
+  .faq-group__lead {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+    color: var(--anth-text-secondary); margin: 0 0 var(--space-6); max-width: 620px;
+  }
+
+  /* Accordion — native <details>/<summary>: keyboard + screen-reader behaviour for free */
+  .faq-item {
+    background: #ffffff; border: 1px solid var(--anth-light-gray);
+    border-radius: var(--radius-md); margin-bottom: var(--space-3);
+  }
+  .faq-item[open] { border-color: #d8d4c8; }
+  .faq-q {
+    cursor: pointer; list-style: none;
+    display: flex; align-items: baseline; gap: var(--space-4);
+    padding: 18px 22px;
+    font-family: var(--font-heading); font-size: 17px; font-weight: 600;
+    color: var(--anth-text); line-height: 1.45;
+  }
+  .faq-q::-webkit-details-marker { display: none; }
+  .faq-q:focus-visible {
+    outline: 2px solid var(--anth-orange); outline-offset: 2px;
+    border-radius: var(--radius-md);
+  }
+  .faq-q__chev {
+    margin-left: auto; flex: none; color: var(--anth-orange); font-size: 13px;
+    transition: transform var(--duration-sm) var(--ease-anth);
+  }
+  .faq-item[open] .faq-q__chev { transform: rotate(90deg); }
+  .faq-a {
+    padding: 0 22px 20px;
+    font-family: var(--font-body); font-size: 15.5px; line-height: 1.65;
+    color: var(--anth-text); max-width: 640px;
+  }
+  .faq-a p { margin: 0 0 var(--space-3); }
+  .faq-a p:last-child { margin-bottom: 0; }
+
+  /* E2E sync figure */
+  .faq-figure { margin: 0 0 var(--space-7); }
+  .faq-figure figcaption {
+    font-family: var(--font-body); font-size: 13.5px; line-height: 1.5;
+    color: var(--anth-text-secondary); margin-top: var(--space-3); text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="landing.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">Skypad</a>
+  <div>
+    <a href="landing.html"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="faq.html" aria-current="page">FAQ</a>
+    <a href="changelog.html"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="anth-link anth-link--no-arrow" href="#login" style="font-family:var(--font-heading); color:var(--anth-text); text-decoration:none; font-size:14px;"><span class="lang-en">Sign in</span><span class="lang-zh">登录</span></a>
+    <a class="anth-button" href="#start"><span class="lang-en">Start writing</span><span class="lang-zh">开始写作</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="anth-hero" style="padding-bottom:var(--space-8);">
+  <div class="anth-container" style="max-width:820px;">
+    <span class="faq-kicker"><span class="lang-en">Support · FAQ</span><span class="lang-zh">支持 · 常见问题</span></span>
+    <h1 style="margin-top:var(--space-3);">
+      <span class="lang-en">Fourteen questions.<br>Fourteen straight answers.</span>
+      <span class="lang-zh">十四个问题。<br>十四个直接的回答。</span>
+    </h1>
+    <p style="font-size:19px; color:var(--anth-text-secondary); margin:var(--space-5) auto 0; line-height:1.6; max-width:680px; font-family:var(--font-body);">
+      <span class="lang-en">Everything people ask us about pricing, sync and security — answered by the people who build Skypad, not a chatbot. If yours isn't here, email us; a human replies within 48 hours.</span>
+      <span class="lang-zh">关于定价、同步和安全，大家会问我们的问题都在这里 —— 由做 Skypad 的人回答，不是聊天机器人。如果你的问题不在其中，给我们写邮件，48 小时内有真人回复。</span>
+    </p>
+    <div class="faq-jump-row">
+      <a class="faq-jump" href="#pricing-billing"><span class="lang-en">Pricing &amp; billing</span><span class="lang-zh">定价与账单</span><span class="count">5</span></a>
+      <a class="faq-jump" href="#notes-sync"><span class="lang-en">Notes, sync &amp; devices</span><span class="lang-zh">笔记、同步与设备</span><span class="count">4</span></a>
+      <a class="faq-jump" href="#security-privacy"><span class="lang-en">Security &amp; privacy</span><span class="lang-zh">安全与隐私</span><span class="count">5</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="anth-section anth-section--subtle" style="padding-block:var(--space-7);">
+  <div class="anth-container">
+    <div class="stat-strip">
+      <div><span class="num">14</span><span class="lbl"><span class="lang-en">questions answered below</span><span class="lang-zh">个问题在下方回答</span></span></div>
+      <div><span class="num">0</span><span class="lbl"><span class="lang-en">chatbots between you and a human</span><span class="lang-zh">个聊天机器人挡在你和真人之间</span></span></div>
+      <div><span class="num"><span class="lang-en">48h</span><span class="lang-zh">48</span></span><span class="lbl"><span class="lang-en">first-reply SLA on Pro</span><span class="lang-zh">小时内首次回复（Pro）</span></span></div>
+      <div><span class="num">100%</span><span class="lbl"><span class="lang-en">security audit reports published</span><span class="lang-zh">安全审计报告全部公开</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Group 1 · Pricing & billing -->
+<section class="anth-section faq-group" id="pricing-billing">
+  <div class="anth-container anth-container--narrow">
+    <span class="faq-kicker"><span class="lang-en">Pricing &amp; billing</span><span class="lang-zh">定价与账单</span></span>
+    <h2><span class="lang-en">What it costs, and what it doesn't.</span><span class="lang-zh">要花什么钱，不要花什么钱。</span></h2>
+    <p class="faq-group__lead">
+      <span class="lang-en">The full price list is three lines: Free for solo, Pro $9/month, Team $29/seat/month. These five answers cover everything around those three lines.</span>
+      <span class="lang-zh">完整价目表只有三行：单人免费、Pro $9/月、Team $29/席位/月。下面五个回答覆盖这三行周围的一切。</span>
+    </p>
+
+    <details class="faq-item" open>
+      <summary class="faq-q"><span class="lang-en">Is Free really free forever, or a trial in disguise?</span><span class="lang-zh">免费版真的永久免费，还是变相试用？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">Free forever, and not a trial. The Free plan is the full editor — unlimited notes, Markdown + MDX, export to PDF, Epub and Markdown — running entirely on your machine, no account required. What you pay for on Pro is encrypted sync between devices. If you write on one machine, you may never need to pay us anything.</span>
+          <span class="lang-zh">永久免费，不是试用。免费版就是完整的编辑器 —— 无限笔记、Markdown + MDX、导出 PDF/Epub/Markdown —— 全部在你本机运行，无需注册账号。Pro 收费的部分是跨设备加密同步。如果你只在一台机器上写作，可能永远不需要付我们一分钱。</span>
+        </p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q"><span class="lang-en">What exactly do I get for $9 on Pro?</span><span class="lang-zh">Pro 的 $9 到底买到什么？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">Encrypted cloud sync across 5 devices, unlimited backlinks and the graph view, 90 days of version history, the iOS and Android apps, and publishing any note to <code>name.skypad.page</code>. Pro is $9/month billed yearly, with a 14-day trial — no card up front.</span>
+          <span class="lang-zh">跨 5 台设备的加密云同步、无限反向链接和关系图、90 天版本历史、iOS 和 Android app，以及把任意笔记发布到 <code>name.skypad.page</code>。Pro $9/月、按年付费，有 14 天试用 —— 试用不需要信用卡。</span>
+        </p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q"><span class="lang-en">Do I lose my notes if I cancel Pro?</span><span class="lang-zh">取消 Pro 后会丢笔记吗？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">No. Every note is a plain Markdown file on your own disk — cancelling changes nothing about the files. Sync stops, version history trims to 7 days, and the mobile apps go read-only. Resubscribe later and sync picks up where it left off.</span>
+          <span class="lang-zh">不会。每条笔记都是你磁盘上的纯 Markdown 文件 —— 取消订阅不改变文件本身的任何东西。同步停止，版本历史缩到 7 天，移动端变为只读。以后重新订阅，同步会从停下的地方继续。</span>
+        </p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q"><span class="lang-en">Is there a student or low-income discount?</span><span class="lang-zh">有学生或低收入折扣吗？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">Pro is $3/month if you send a photo of your student ID, or any evidence you're on a public-benefit program. No application form, no review committee — people who need the discount shouldn't have to prove it twice.</span>
+          <span class="lang-zh">Pro 是 $3/月 —— 发一张学生证照片，或任何能证明你在公共福利项目里的材料即可。没有申请表，没有评审委员会：需要折扣的人不该被要求证明两次。</span>
+        </p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q"><span class="lang-en">How does Team billing handle people joining mid-month?</span><span class="lang-zh">Team 账单怎么处理月中加入的成员？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">Seats are prorated by the day: someone joining on the 20th costs a third of that month. Removed seats stay active until the end of the billing cycle, then drop off the invoice. And before you commit at all, the Team plan has a 30-day pilot for up to 5 seats, no credit card — email <code>team@skypad.page</code>.</span>
+          <span class="lang-zh">席位按天折算：20 号加入的人，当月只收三分之一。移除的席位用到当个账单周期结束，下期发票自动减去。在正式购买之前，Team 还有 30 天试点，最多 5 个席位，不需要信用卡 —— 发邮件到 <code>team@skypad.page</code>。</span>
+        </p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- Group 2 · Notes, sync & devices -->
+<section class="anth-section anth-section--subtle faq-group" id="notes-sync">
+  <div class="anth-container anth-container--narrow">
+    <span class="faq-kicker"><span class="lang-en">Notes, sync &amp; devices</span><span class="lang-zh">笔记、同步与设备</span></span>
+    <h2><span class="lang-en">Where your words live, and how they travel.</span><span class="lang-zh">你的文字存在哪里，怎么移动。</span></h2>
+    <p class="faq-group__lead">
+      <span class="lang-en">Local-first means the boring failure modes — lost connection, dead startup, conflicting edits — have boring, predictable answers.</span>
+      <span class="lang-zh">本地优先意味着那些无聊的故障场景 —— 断网、公司倒闭、编辑冲突 —— 都有无聊而可预期的答案。</span>
+    </p>
+
+    <details class="faq-item">
+      <summary class="faq-q"><span class="lang-en">Where do my notes actually live?</span><span class="lang-zh">我的笔记到底存在哪里？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">In a folder of <code>.md</code> files on your disk — <code>~/Skypad</code> by default, or any folder you point it at, including one inside Dropbox or iCloud Drive if that's your thing. There is no proprietary database. Open the folder in VS Code or Obsidian and everything is just there.</span>
+          <span class="lang-zh">在你磁盘上的一个 <code>.md</code> 文件夹里 —— 默认是 <code>~/Skypad</code>，也可以指到任何文件夹，包括 Dropbox 或 iCloud Drive 里的。没有私有数据库。用 VS Code 或 Obsidian 打开那个文件夹，所有东西就在那里。</span>
+        </p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q"><span class="lang-en">What happens if two devices edit the same note offline?</span><span class="lang-zh">两台设备离线时改了同一条笔记，会怎样？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">We keep both versions. The later sync creates a sibling file — <code>meditations (conflict 2026-06-08).md</code> — next to the original, and the app shows the two side by side, so you merge by reading, not by trusting an algorithm. Skypad never silently merges or discards an edit.</span>
+          <span class="lang-zh">两个版本都保留。后同步的那台会在原文件旁边生成 <code>meditations (conflict 2026-06-08).md</code>，应用把两版并排展示，由你读着合并，而不是信任某个算法。Skypad 从不悄悄合并或丢弃任何修改。</span>
+        </p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q"><span class="lang-en">Does Skypad work fully offline?</span><span class="lang-zh">Skypad 能完全离线用吗？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">Completely. Free never opens a network connection at all. On Pro, edits queue locally and sync when you're back online — a flight or a week off-grid changes nothing about how the editor behaves.</span>
+          <span class="lang-zh">完全可以。免费版根本不会发起网络连接。Pro 上，修改先在本地排队，联网后再同步 —— 一趟航班或一周没有网络，编辑器的行为不会有任何变化。</span>
+        </p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q"><span class="lang-en">What counts as one of my 5 Pro devices?</span><span class="lang-zh">Pro 的 5 台设备是怎么算的？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">Any install signed into your vault: Mac, Windows, Linux, iPhone, Android — each counts as one. You can deauthorize an old device from Settings → Devices at any time, which frees the slot immediately. Published <code>name.skypad.page</code> pages don't count; readers aren't devices.</span>
+          <span class="lang-zh">登录了你保险库的任何安装实例都算一台：Mac、Windows、Linux、iPhone、Android。随时可以在「设置 → 设备」里注销旧设备，名额立即释放。发布出去的 <code>name.skypad.page</code> 页面不占名额 —— 读者不是设备。</span>
+        </p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- Group 3 · Security & privacy -->
+<section class="anth-section faq-group" id="security-privacy">
+  <div class="anth-container anth-container--narrow">
+    <span class="faq-kicker"><span class="lang-en">Security &amp; privacy</span><span class="lang-zh">安全与隐私</span></span>
+    <h2><span class="lang-en">What we can't see, and why we can't.</span><span class="lang-zh">我们看不到什么，为什么看不到。</span></h2>
+    <p class="faq-group__lead">
+      <span class="lang-en">"End-to-end encrypted" is the claim people rightly trust least, so here it is as a picture first, then as five answers.</span>
+      <span class="lang-zh">「端到端加密」是大家最有理由不轻信的说法，所以先画给你看，再用五个回答讲清楚。</span>
+    </p>
+  </div>
+
+  <div class="anth-container">
+    <figure class="faq-figure">
+      <svg role="img" aria-label="How one note travels through Skypad sync: encrypted on your device, stored as ciphertext on the server, decrypted only on your other device" viewBox="0 0 920 284" style="display:block; width:100%; height:auto;">
+        <defs>
+          <pattern id="faq-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+          </pattern>
+          <filter id="faq-shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.06"/>
+          </filter>
+          <marker id="faq-arr-o" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+          </marker>
+          <marker id="faq-arr-g" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#788c5d"/>
+          </marker>
+        </defs>
+
+        <!-- Panel -->
+        <rect x="0" y="0" width="920" height="284" rx="14" fill="#ffffff" stroke="#eceadf"/>
+        <rect x="0" y="0" width="920" height="284" rx="14" fill="url(#faq-dots)"/>
+
+        <!-- Title -->
+        <circle cx="28" cy="30" r="3.5" fill="#d97757"/>
+        <text x="40" y="34" font-family="Poppins,sans-serif" font-size="11" font-weight="600" letter-spacing="0.08em" fill="#8c8a7d">ONE NOTE'S JOURNEY THROUGH E2E SYNC</text>
+
+        <!-- Card 1 · your device (focus, orange) -->
+        <g filter="url(#faq-shadow)">
+          <rect x="24" y="80" width="240" height="88" rx="10" fill="#fbeee7" stroke="#d97757" stroke-width="1.5"/>
+        </g>
+        <circle cx="28" cy="84" r="10" fill="#d97757"/>
+        <text x="28" y="88" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="600" fill="#ffffff">1</text>
+        <text x="44" y="112" font-family="Poppins,sans-serif" font-size="13.5" font-weight="600" fill="#141413">Your Mac</text>
+        <text x="44" y="132" font-family="Poppins,sans-serif" font-size="11" fill="#6b6a5f">meditations.md · plaintext</text>
+        <text x="44" y="152" font-family="Poppins,sans-serif" font-size="11" fill="#a84e2e">key derived from your passphrase</text>
+
+        <!-- Card 2 · server (blue) -->
+        <g filter="url(#faq-shadow)">
+          <rect x="340" y="80" width="240" height="88" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+        </g>
+        <rect x="340" y="80" width="4" height="88" rx="2" fill="#6a9bcc"/>
+        <circle cx="344" cy="84" r="10" fill="#6a9bcc"/>
+        <text x="344" y="88" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="600" fill="#ffffff">2</text>
+        <text x="360" y="112" font-family="Poppins,sans-serif" font-size="13.5" font-weight="600" fill="#141413">Skypad server</text>
+        <text x="360" y="132" font-family="Poppins,sans-serif" font-size="11" fill="#6b6a5f">Frankfurt · ciphertext only</text>
+        <text x="360" y="152" font-family="Poppins,sans-serif" font-size="11" fill="#4a7bab">zero keys stored, ever</text>
+
+        <!-- Card 3 · other device (green) -->
+        <g filter="url(#faq-shadow)">
+          <rect x="656" y="80" width="240" height="88" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+        </g>
+        <rect x="656" y="80" width="4" height="88" rx="2" fill="#788c5d"/>
+        <circle cx="660" cy="84" r="10" fill="#788c5d"/>
+        <text x="660" y="88" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="600" fill="#ffffff">3</text>
+        <text x="676" y="112" font-family="Poppins,sans-serif" font-size="13.5" font-weight="600" fill="#141413">Your iPhone</text>
+        <text x="676" y="132" font-family="Poppins,sans-serif" font-size="11" fill="#6b6a5f">decrypts locally · same key</text>
+        <text x="676" y="152" font-family="Poppins,sans-serif" font-size="11" fill="#5d7045">readable again, on your hardware</text>
+
+        <!-- Arrows -->
+        <line x1="270" y1="124" x2="330" y2="124" stroke="#d97757" stroke-width="1.8" marker-end="url(#faq-arr-o)"/>
+        <line x1="586" y1="124" x2="646" y2="124" stroke="#788c5d" stroke-width="1.8" marker-end="url(#faq-arr-g)"/>
+
+        <!-- Step annotations -->
+        <g font-family="Poppins,sans-serif" font-size="11" fill="#6b6a5f" text-anchor="middle">
+          <text x="144" y="198">encrypted before it leaves the device</text>
+          <text x="460" y="198">stores ciphertext + timestamps — nothing readable</text>
+          <text x="776" y="198">decrypted only on hardware you own</text>
+        </g>
+
+        <!-- Protocol pill -->
+        <rect x="310" y="224" width="300" height="36" rx="18" fill="#e2ecf5"/>
+        <text x="460" y="246" text-anchor="middle" font-family="Poppins,sans-serif" font-size="11" font-weight="600" fill="#4a7bab">XChaCha20-Poly1305 · audited every 6 months</text>
+      </svg>
+      <figcaption>
+        <span class="lang-en">How one note travels on Pro sync: encrypted on your device, stored as ciphertext in Frankfurt, decrypted only on your other hardware. The key never leaves machines you own.</span>
+        <span class="lang-zh">一条笔记在 Pro 同步中的旅程：在你的设备上加密，以密文形式存放在法兰克福，只在你的另一台硬件上解密。密钥从不离开你拥有的机器。</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="anth-container anth-container--narrow">
+    <details class="faq-item">
+      <summary class="faq-q"><span class="lang-en">What does "end-to-end encrypted" actually mean here?</span><span class="lang-zh">这里说的「端到端加密」具体指什么？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">Exactly what the diagram above shows. Your note is encrypted on your device with XChaCha20-Poly1305, using a key derived from your passphrase — before a single byte leaves the machine. Skypad's servers store and forward ciphertext; the key never travels. Your other device derives the same key from the same passphrase and decrypts locally.</span>
+          <span class="lang-zh">就是上图画的那样。笔记在你的设备上用 XChaCha20-Poly1305 加密，密钥从你的口令派生 —— 在任何一个字节离开本机之前。Skypad 服务器只存储和转发密文，密钥从不上路。你的另一台设备用同一口令派生出同一把密钥，在本地解密。</span>
+        </p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q"><span class="lang-en">Can Skypad employees read my notes?</span><span class="lang-zh">Skypad 的员工能读我的笔记吗？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">We can't — and "can't" is doing real work in that sentence. The servers hold ciphertext, encrypted filenames, sizes and timestamps; no keys, no plaintext, no titles. A subpoena gets the same ciphertext the diagram shows. This is also why we can't "just restore" your notes if you lose your passphrase.</span>
+          <span class="lang-zh">读不到 —— 这里的「读不到」是技术意义上的，不是公司承诺。服务器上只有密文、加密后的文件名、大小和时间戳；没有密钥，没有明文，没有标题。法院传票拿到的也是上图里那份密文。这也是为什么口令丢了我们没办法「帮你恢复」。</span>
+        </p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q"><span class="lang-en">What if I forget my passphrase?</span><span class="lang-zh">忘记口令了怎么办？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">During setup, Skypad generates a one-time recovery kit — a printable page with a 24-word code. That kit is the only way back in. We can't reset the passphrase for you, because resetting would require us to hold a key, and the entire design is that we don't. Print the kit. Keep it wherever your passport lives.</span>
+          <span class="lang-zh">初次设置时，Skypad 会生成一次性的恢复套件 —— 一页可打印的 24 词代码。忘记口令时，这份套件是唯一的回路。我们没法替你重置口令：重置意味着我们得持有密钥，而整个设计就是我们不持有。把它打印出来，放在你放护照的地方。</span>
+        </p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q"><span class="lang-en">Who audits Skypad, and how often?</span><span class="lang-zh">谁来审计 Skypad，多久一次？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">An independent security firm audits the sync protocol and the desktop and mobile clients every 6 months, and the full report — findings, severity, fixes — is published at <code>skypad.page/security</code>. The latest audit closed in March 2026 with zero critical findings. We have published every report since the first, including the awkward ones.</span>
+          <span class="lang-zh">一家独立安全公司每 6 个月审计一次同步协议和桌面、移动客户端，完整报告 —— 发现、级别、修复 —— 发布在 <code>skypad.page/security</code>。最近一次审计于 2026 年 3 月结束，0 个严重项。从第一份起，每份报告都公开，包括不体面的那几份。</span>
+        </p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-q"><span class="lang-en">Is Skypad GDPR-compliant? Where are the servers?</span><span class="lang-zh">Skypad 符合 GDPR 吗？服务器在哪里？</span><span class="faq-q__chev" aria-hidden="true">▸</span></summary>
+      <div class="faq-a">
+        <p>
+          <span class="lang-en">Sync servers run in Frankfurt, Germany, under EU jurisdiction. We're GDPR-compliant the boring way: minimal metadata, a signed DPA for Team customers, and deletion that actually deletes — close your account and the ciphertext is purged within 30 days. Team plans can additionally pin data residency to the EU or US region.</span>
+          <span class="lang-zh">同步服务器在德国法兰克福，受欧盟司法管辖。我们用最无聊的方式符合 GDPR：最少化的元数据、给 Team 客户的签字 DPA，以及真正删除的删除 —— 注销账号后，密文 30 天内清除。Team 套餐还可以把数据驻留固定在欧盟或美国区。</span>
+        </p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- Still stuck -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container anth-container--narrow" style="text-align:center;">
+    <h2><span class="lang-en">Still stuck? Ask a human.</span><span class="lang-zh">还没解决？问一个真人。</span></h2>
+    <p style="font-size:18px; color:var(--anth-text-secondary); margin:var(--space-4) auto var(--space-6); line-height:1.65; max-width:600px;">
+      <span class="lang-en">Support is two writers and an engineer in Berlin — no ticket-deflection funnel, no bot in front of them. Pro questions get a first reply within 48 hours, Team within 24. Write to <code>support@skypad.page</code>.</span>
+      <span class="lang-zh">支持团队是柏林的两位写作者和一位工程师 —— 没有挡票流程，前面也没有机器人。Pro 的问题 48 小时内首次回复，Team 24 小时。写信到 <code>support@skypad.page</code>。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="mailto:support@skypad.page"><span class="lang-en">Email support</span><span class="lang-zh">邮件联系支持</span></a>
+      <a class="anth-button anth-button--ghost" href="#community"><span class="lang-en">Visit the forum</span><span class="lang-zh">去社区论坛</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="anth-footer">
+  <div class="anth-footer-grid">
+    <div class="anth-footer-group"><h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5><a href="landing.html"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a><a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a><a href="#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a><a href="#changelog"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">For teams</span><span class="lang-zh">团队</span></h5><a href="#teams"><span class="lang-en">Team plan</span><span class="lang-zh">团队版</span></a><a href="#enterprise"><span class="lang-en">Enterprise</span><span class="lang-zh">企业版</span></a><a href="#security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a><a href="#slas">SLAs</a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">Writers</span><span class="lang-zh">作者</span></h5><a href="#guide"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a><a href="#templates"><span class="lang-en">Templates</span><span class="lang-zh">模板</span></a><a href="#showcase"><span class="lang-en">Showcase</span><span class="lang-zh">作品精选</span></a><a href="#community"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5><a href="#about"><span class="lang-en">About</span><span class="lang-zh">关于</span></a><a href="#press"><span class="lang-en">Press</span><span class="lang-zh">媒体</span></a><a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a><a href="#status"><span class="lang-en">Status</span><span class="lang-zh">状态</span></a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">Legal</span><span class="lang-zh">法务</span></h5><a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a><a href="#terms"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a><a href="#dpa">DPA</a><a href="#audit"><span class="lang-en">Audit</span><span class="lang-zh">审计</span></a></div>
+  </div>
+  <div class="anth-footer-legal">
+    <span>Copyright © 2026 Skypad Inc.</span>
+    <span><span class="lang-en">Made in Berlin · Toronto · Kyoto</span><span class="lang-zh">制作于 柏林 · 多伦多 · 京都</span></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: anthropic
+Page-type: faq
+Created: 2026-06-11
+
+Decisions (6):
+1. [no-banner] chose "no top announcement banner" over "borrowing landing's banner pattern". Because: a FAQ page's first job is wayfinding, not shipping news; the banner would push the jump chips below the fold and announce nothing the visitor came for.
+2. [native-details] chose "native <details>/<summary> accordion" over "JS-driven custom accordion". Because: keyboard focus, Enter/Space toggling and screen-reader state come free from the platform and survive JS failure; the only cost is no animated height, which restraint tolerates.
+3. [three-anxiety-groups] chose "3 groups (money / data / trust) with hero jump chips + per-group question counts" over "one flat 14-item list". Because: a visitor arrives with exactly one anxiety; chips get them to their group in one click instead of scanning 14 rows, and the counts promise the scan is short.
+4. [diagram-heads-security] chose "one 3-hop e2e sync flow diagram placed before the security group" over "prose-only answers everywhere". Because: 'end-to-end encrypted' is the claim readers least trust as prose; three numbered hops showing where the key lives argue it better than 60 words, and two answers can then point at the picture instead of re-explaining.
+5. [stat-strip-checkable-numbers] chose "stat strip with checkable support numbers (14 questions / 0 chatbots / 48h SLA / 100% audits published)" over "decorative trust badges or logo wall". Because: a support page earns trust with numbers someone could verify or hold against us, not with logos; it also breaks the otherwise text-only page early (text-desert contract).
+6. [first-item-open] chose "first question pre-opened" over "all 14 collapsed". Because: one open item teaches the interaction and shows the answer depth without doubling page height; opening all of them would bury groups 2-3 two screens down.
+
+Known trade-offs:
+- Native details/summary cannot animate open/close height smoothly without JS; accepted in exchange for built-in a11y and zero-JS robustness.
+- The 14 answers hard-code prices and SLAs from the pricing canonical ($9 Pro, $3 student, $29 seat, 48h/24h reply, 90-day history). Any pricing change must be mirrored here or the FAQ starts lying; accepted because an FAQ that dodges concrete numbers is useless.
+- Labels inside the sync diagram are English-only (same precedent as the landing hero SVG); the zh reader gets the bilingual figcaption plus the bilingual answer below it rather than a second translated SVG to maintain.
+
+/design-review:self-diff -->
+
+</body>
+</html>

@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad changelog — every release, in plain words</title>
+<meta name="description" content="Skypad release notes — mobile apps, encrypted attachments, backlinks, and every fix. Shipped every two to three weeks, written in plain words.">
+<meta property="og:title" content="Skypad changelog — every release, in plain words">
+<meta property="og:description" content="Skypad release notes — mobile apps, encrypted attachments, backlinks, and every fix. Shipped every two to three weeks, written in plain words.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/anthropic.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+  /* Chinese stack (§H): Poppins → Noto Sans SC (display); Lora → Noto Serif SC (editorial). */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .log-entry__lede {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .log-month,
+  html[data-lang="zh"] .log-chip,
+  html[data-lang="zh"] .stat-strip .num,
+  html[data-lang="zh"] .stat-strip .lbl {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] .log-month { letter-spacing: 0.06em; text-transform: none; }
+  html[data-lang="zh"] .log-chip { letter-spacing: 0.04em; text-transform: none; }
+
+  /* Stat strip — same sub-pattern as the landing canonical. */
+  .stat-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-5);
+    padding: var(--space-7) var(--space-6); background: #ffffff;
+    border: 1px solid var(--anth-light-gray); border-radius: var(--radius-md);
+  }
+  .stat-strip > div { text-align: center; }
+  .stat-strip .num {
+    display: block; font-family: var(--font-heading); font-size: 44px; font-weight: 700;
+    color: var(--anth-text); letter-spacing: -0.02em; line-height: 1;
+  }
+  .stat-strip .lbl {
+    display: block; margin-top: var(--space-2);
+    font-family: var(--font-heading); font-size: 13px; color: var(--anth-text-secondary);
+    letter-spacing: 0.02em;
+  }
+
+  /* Month group heading — small h2, sits on the time axis like a chapter mark. */
+  .log-month {
+    font-family: var(--font-heading); font-size: 13px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--anth-text-secondary);
+    margin: var(--space-8) 0 var(--space-2); line-height: 1.4;
+  }
+  .log-month:first-of-type { margin-top: var(--space-6); }
+
+  /* Entry — L8 recipe: left meta rail + hairline top border. No dot rail. */
+  .log-entry {
+    display: grid; grid-template-columns: 132px 1fr; gap: var(--space-6);
+    border-top: 1px solid var(--anth-light-gray);
+    padding: var(--space-7) 0;
+  }
+  .log-entry__meta { display: flex; flex-direction: column; gap: var(--space-2); align-items: flex-start; }
+  .log-version {
+    display: inline-block; font-family: var(--font-heading);
+    font-size: 12.5px; font-weight: 600; letter-spacing: 0.03em;
+    padding: 4px 12px; border-radius: var(--radius-pill);
+  }
+  .log-version--feature { background: var(--anth-orange); color: #ffffff; }
+  .log-version--patch { background: #f0e4d8; color: #7a4b20; }
+  .log-date {
+    font-family: var(--font-heading); font-size: 14px; font-weight: 500;
+    color: var(--anth-text-secondary);
+  }
+  .log-entry__title {
+    font-family: var(--font-heading); font-size: 24px; font-weight: 600;
+    letter-spacing: -0.01em; color: var(--anth-text); margin: 0 0 var(--space-3);
+  }
+  .log-entry__lede {
+    font-family: var(--font-body); font-size: 17px; line-height: 1.65;
+    color: var(--anth-text-secondary); margin: 0 0 var(--space-4);
+  }
+  .log-list { list-style: none; padding: 0; margin: 0; }
+  .log-list li {
+    display: grid; grid-template-columns: 100px 1fr; gap: var(--space-3);
+    align-items: start; padding: var(--space-2) 0;
+    font-family: var(--font-body); font-size: 16px; line-height: 1.65;
+  }
+  .log-list li + li { border-top: 1px dashed var(--anth-light-gray); }
+
+  /* Change-type chip — diagram colour semantics: tint container + solid dot.
+     Labels run one step darker than the diagram-craft label colours so 11px
+     bold text clears 4.5:1 AA on the 16-20% tints. */
+  .log-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    justify-self: start; margin-top: 3px;
+    font-family: var(--font-heading); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: var(--radius-pill);
+  }
+  .log-chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; flex: none; }
+  .log-chip--added    { background: #e5e9dd; color: #4d5e34; }
+  .log-chip--added::before    { background: #788c5d; }
+  .log-chip--changed  { background: #e2ecf5; color: #3a5f87; }
+  .log-chip--changed::before  { background: #6a9bcc; }
+  .log-chip--fixed    { background: #f0e4d8; color: #7a4b20; }
+  .log-chip--fixed::before    { background: #c9913f; }
+  .log-chip--security { background: #f7e4dc; color: #a4452a; }
+  .log-chip--security::before { background: #d97757; }
+  .log-chip--removed  { background: #e7e4d9; color: #565449; }
+  .log-chip--removed::before  { background: #141413; }
+
+  /* In-entry figure breaks out across both grid columns. */
+  .log-entry__figure {
+    grid-column: 1 / -1; margin: var(--space-2) 0 0;
+  }
+  .log-entry__figure svg {
+    display: block; width: 100%; height: auto;
+    background: linear-gradient(135deg, #faf9f5 0%, #f0ede3 100%);
+    border: 1px solid var(--anth-light-gray); border-radius: var(--radius-md);
+  }
+  .log-entry__figure figcaption { margin-top: var(--space-3); }
+
+  .cadence-figure { margin: 0; }
+  .cadence-figure svg { display: block; width: 100%; height: auto; }
+  .cadence-figure figcaption { margin-top: var(--space-3); text-align: center; }
+
+  .log-archive {
+    border-top: 1px solid var(--anth-light-gray);
+    padding-top: var(--space-6); margin-top: var(--space-2);
+    font-family: var(--font-heading); font-size: 14px;
+  }
+
+  /* How we ship — plain numbered rules, no card chrome. */
+  .ship-rule { display: grid; grid-template-columns: 44px 1fr; gap: var(--space-4); margin-bottom: var(--space-5); }
+  .ship-rule__num {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--anth-orange); color: #ffffff;
+    font-family: var(--font-heading); font-size: 14px; font-weight: 600;
+    display: grid; place-items: center; margin-top: 2px;
+  }
+  .ship-rule h3 {
+    font-family: var(--font-heading); font-size: 19px; font-weight: 600;
+    margin: 0 0 var(--space-2); letter-spacing: -0.01em;
+  }
+  .ship-rule p { font-family: var(--font-body); font-size: 16px; line-height: 1.65; margin: 0; }
+
+  .nav-current { font-weight: 600; text-decoration: underline; text-underline-offset: 0.35em; }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="landing.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">Skypad</a>
+  <div>
+    <a href="landing.html#product"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="landing.html#features"><span class="lang-en">Why</span><span class="lang-zh">为什么</span></a>
+    <a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="#releases" class="nav-current" aria-current="page"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="anth-link anth-link--no-arrow" href="#login" style="font-family:var(--font-heading); color:var(--anth-text); text-decoration:none; font-size:14px;"><span class="lang-en">Sign in</span><span class="lang-zh">登录</span></a>
+    <a class="anth-button" href="landing.html#download"><span class="lang-en">Start writing</span><span class="lang-zh">开始写作</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="anth-hero" style="padding-block:var(--space-9);">
+  <div class="anth-container" style="max-width:860px;">
+    <span class="anth-badge"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></span>
+    <h1 style="margin-top:var(--space-4);">
+      <span class="lang-en">Every release.<br>What changed, and why.<br>In plain words.</span>
+      <span class="lang-zh">每一次发布。<br>改了什么，为什么改。<br>都用白话讲清。</span>
+    </h1>
+    <p style="font-size:19px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.6; max-width:680px; font-family:var(--font-body);">
+      <span class="lang-en">Skypad ships every two or three weeks. Each note below is written by the engineer who shipped it — what changed, what broke, what we fixed, with real numbers. Never “improvements and bug fixes.”</span>
+      <span class="lang-zh">Skypad 每两到三周发布一次。下面每一条都由发布它的工程师亲手写——改了什么、坏了什么、修了什么，带真实数字。绝不写「若干改进与问题修复」。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-4); justify-content:center; align-items:center; flex-wrap:wrap;">
+      <a class="anth-button" href="#subscribe"><span class="lang-en">Subscribe to updates</span><span class="lang-zh">订阅更新</span></a>
+      <a class="anth-link" href="#rss" style="font-family:var(--font-heading); font-size:14px;"><span class="lang-en">RSS feed</span><span class="lang-zh">RSS 订阅源</span></a>
+    </div>
+    <p style="margin-top:var(--space-5); color:var(--anth-text-secondary); font-family:var(--font-heading); font-size:13px; letter-spacing:0.02em;">
+      <span class="lang-en">No breaking changes since v2.0 &nbsp;·&nbsp; release notes also land in the app, quietly</span>
+      <span class="lang-zh">v2.0 以来零破坏性变更 · 发布说明也会安静地出现在应用里</span>
+    </p>
+  </div>
+</section>
+
+<!-- Release cadence timeline -->
+<section class="anth-section" style="padding-top:0;">
+  <div class="anth-container anth-container--wide">
+    <figure class="cadence-figure">
+      <svg role="img" aria-label="Skypad release cadence, March to October 2026: four feature releases above the axis, three patch releases below, today marker on June 11, shared vaults and encrypted publishing planned for Q3 and Q4" viewBox="0 0 1180 260">
+        <defs>
+          <pattern id="tl-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+          </pattern>
+        </defs>
+        <rect x="0" y="0" width="1180" height="260" rx="16" fill="#ffffff" stroke="#eceadf"/>
+        <rect x="0" y="0" width="1180" height="260" rx="16" fill="url(#tl-dots)"/>
+
+        <!-- legend -->
+        <g font-family="Poppins, sans-serif" font-size="11" fill="#6b6a5f">
+          <circle cx="42" cy="40" r="5" fill="#d97757"/><text x="54" y="44">feature release</text>
+          <circle cx="160" cy="40" r="5" fill="#c9913f"/><text x="172" y="44">patch</text>
+          <circle cx="230" cy="40" r="5" fill="#ffffff" stroke="#b0aea5" stroke-width="1.4"/><text x="242" y="44">planned</text>
+        </g>
+
+        <!-- today marker -->
+        <line x1="490" y1="58" x2="490" y2="196" stroke="#d97757" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <rect x="442" y="28" width="96" height="20" rx="10" fill="#f4d9cd"/>
+        <text x="490" y="42" text-anchor="middle" font-family="Poppins, sans-serif" font-size="10.5" font-weight="600" fill="#c2613f">today · Jun 11</text>
+
+        <!-- axis -->
+        <line x1="36" y1="138" x2="1144" y2="138" stroke="#d9d5c7" stroke-width="2"/>
+
+        <!-- month ticks -->
+        <g stroke="#d9d5c7" stroke-width="1">
+          <line x1="36" y1="138" x2="36" y2="146"/><line x1="174" y1="138" x2="174" y2="146"/>
+          <line x1="307" y1="138" x2="307" y2="146"/><line x1="445" y1="138" x2="445" y2="146"/>
+          <line x1="579" y1="138" x2="579" y2="146"/><line x1="717" y1="138" x2="717" y2="146"/>
+          <line x1="855" y1="138" x2="855" y2="146"/><line x1="988" y1="138" x2="988" y2="146"/>
+          <line x1="1126" y1="138" x2="1126" y2="146"/>
+        </g>
+        <g font-family="Poppins, sans-serif" font-size="10.5" fill="#8c8a7d" text-anchor="middle">
+          <text x="36" y="216">Mar</text><text x="174" y="216">Apr</text><text x="307" y="216">May</text>
+          <text x="445" y="216">Jun</text><text x="579" y="216">Jul</text><text x="717" y="216">Aug</text>
+          <text x="855" y="216">Sep</text><text x="988" y="216">Oct</text><text x="1126" y="216">Nov</text>
+        </g>
+
+        <!-- feature releases: above the axis -->
+        <g text-anchor="middle" font-family="Poppins, sans-serif">
+          <circle cx="112" cy="138" r="8" fill="#d97757"/><circle cx="112" cy="138" r="2.5" fill="#ffffff"/>
+          <text x="112" y="88" font-size="11.5" font-weight="600" fill="#141413">v2.1.0</text>
+          <text x="112" y="105" font-size="10.5" fill="#8c8a7d">Mar 18</text>
+          <circle cx="236" cy="138" r="8" fill="#d97757"/><circle cx="236" cy="138" r="2.5" fill="#ffffff"/>
+          <text x="236" y="88" font-size="11.5" font-weight="600" fill="#141413">v2.2.0</text>
+          <text x="236" y="105" font-size="10.5" fill="#8c8a7d">Apr 15</text>
+          <circle cx="330" cy="138" r="8" fill="#d97757"/><circle cx="330" cy="138" r="2.5" fill="#ffffff"/>
+          <text x="330" y="88" font-size="11.5" font-weight="600" fill="#141413">v2.3.0</text>
+          <text x="330" y="105" font-size="10.5" fill="#8c8a7d">May 6</text>
+          <circle cx="459" cy="138" r="8" fill="#d97757"/><circle cx="459" cy="138" r="2.5" fill="#ffffff"/>
+          <text x="459" y="88" font-size="11.5" font-weight="600" fill="#141413">v2.4.0</text>
+          <text x="459" y="105" font-size="10.5" fill="#8c8a7d">Jun 4</text>
+        </g>
+
+        <!-- patch releases: below the axis -->
+        <g text-anchor="middle" font-family="Poppins, sans-serif">
+          <circle cx="178" cy="138" r="6" fill="#c9913f"/>
+          <text x="178" y="172" font-size="11.5" font-weight="600" fill="#8a5a2a">v2.1.1</text>
+          <text x="178" y="188" font-size="10.5" fill="#8c8a7d">Apr 2</text>
+          <circle cx="361" cy="138" r="6" fill="#c9913f"/>
+          <text x="361" y="172" font-size="11.5" font-weight="600" fill="#8a5a2a">v2.3.1</text>
+          <text x="361" y="188" font-size="10.5" fill="#8c8a7d">May 13</text>
+          <circle cx="423" cy="138" r="6" fill="#c9913f"/>
+          <text x="423" y="172" font-size="11.5" font-weight="600" fill="#8a5a2a">v2.3.2</text>
+          <text x="423" y="188" font-size="10.5" fill="#8c8a7d">May 27</text>
+        </g>
+
+        <!-- planned: hollow, above the axis -->
+        <g text-anchor="middle" font-family="Poppins, sans-serif">
+          <circle cx="779" cy="138" r="8" fill="#ffffff" stroke="#b0aea5" stroke-width="1.6"/>
+          <text x="779" y="88" font-size="11.5" font-weight="600" fill="#6b6a5f">v2.5</text>
+          <text x="779" y="105" font-size="10.5" fill="#8c8a7d">shared vaults · Q3</text>
+          <circle cx="1051" cy="138" r="8" fill="#ffffff" stroke="#b0aea5" stroke-width="1.6"/>
+          <text x="1051" y="88" font-size="11.5" font-weight="600" fill="#6b6a5f">v3.0</text>
+          <text x="1051" y="105" font-size="10.5" fill="#8c8a7d">encrypted publishing · Q4</text>
+        </g>
+      </svg>
+      <figcaption class="anth-caption">
+        <span class="lang-en">Release cadence, March–June 2026: four feature releases above the axis, three patches below. Shared vaults and encrypted publishing are planned, not promised.</span>
+        <span class="lang-zh">发布节奏，2026 年 3 月至 6 月：轴上方是四次功能发布，下方是三次补丁。共享 vault 与加密发布是计划，不是承诺。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container">
+    <div class="stat-strip">
+      <div><span class="num">7</span><span class="lbl"><span class="lang-en">releases since March</span><span class="lang-zh">次发布（自 3 月起）</span></span></div>
+      <div><span class="num">13</span><span class="lbl"><span class="lang-en">days median between releases</span><span class="lang-zh">天，发布间隔中位数</span></span></div>
+      <div><span class="num">0</span><span class="lbl"><span class="lang-en">breaking changes since v2.0</span><span class="lang-zh">个破坏性变更（v2.0 起）</span></span></div>
+      <div><span class="num">0</span><span class="lbl"><span class="lang-en">AI features added</span><span class="lang-zh">个新增的 AI 功能</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Releases -->
+<section class="anth-section" id="releases" style="padding-top:var(--space-6);">
+  <div class="anth-container anth-container--narrow">
+
+    <h2 class="log-month"><span class="lang-en">June 2026</span><span class="lang-zh">2026 年 6 月</span></h2>
+
+    <article class="log-entry" id="v2-4-0">
+      <div class="log-entry__meta">
+        <span class="log-version log-version--feature">v2.4.0</span>
+        <time class="log-date" datetime="2026-06-04"><span class="lang-en">Jun 4, 2026</span><span class="lang-zh">6 月 4 日</span></time>
+      </div>
+      <div>
+        <h3 class="log-entry__title"><span class="lang-en">Skypad goes mobile.</span><span class="lang-zh">Skypad 移动端来了。</span></h3>
+        <p class="log-entry__lede">
+          <span class="lang-en">The same vault, on your phone. Notes open offline, stay encrypted, and sync only when you ask them to — exactly like the desktop app.</span>
+          <span class="lang-zh">同一个 vault，装进你的手机。笔记离线打开、保持加密、只在你要求时才同步——和桌面版完全一样。</span>
+        </p>
+        <ul class="log-list">
+          <li><span class="log-chip log-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Skypad for iOS and Android. Full vault, offline-first; a 4,000-note vault opens in under a second on a five-year-old phone.</span><span class="lang-zh">Skypad iOS 与 Android 版。完整 vault，离线优先；4,000 条笔记的 vault 在五年前的手机上一秒内打开。</span></span></li>
+          <li><span class="log-chip log-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Per-device keys. Each phone holds its own keypair — revoke a lost device from any other device, without re-encrypting the vault.</span><span class="lang-zh">设备独立密钥。每台手机持有自己的密钥对——丢了设备，从任何其他设备上吊销即可，无需重新加密整个 vault。</span></span></li>
+          <li><span class="log-chip log-chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span><span><span class="lang-en">Sync protocol v3 batches small edits. A typical save now sends 3 KB instead of 18 KB.</span><span class="lang-zh">同步协议 v3 会合并小编辑。一次普通保存现在只发 3 KB，原来是 18 KB。</span></span></li>
+          <li><span class="log-chip log-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">Writing-mode cursor no longer jumps when an external keyboard is attached on iPad.</span><span class="lang-zh">iPad 外接键盘时，写作模式光标不再乱跳。</span></span></li>
+        </ul>
+      </div>
+      <figure class="log-entry__figure">
+        <svg role="img" aria-label="The same Skypad note on a phone and a laptop, each device with its own key, synced over the v3 protocol carrying ciphertext only" viewBox="0 0 660 340" style="max-width:660px; margin:0 auto;">
+          <defs>
+            <marker id="mk-arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+            </marker>
+          </defs>
+          <!-- phone -->
+          <rect x="28" y="24" width="168" height="292" rx="24" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.5"/>
+          <rect x="92" y="38" width="40" height="5" rx="2.5" fill="#e8e6dc"/>
+          <rect x="40" y="56" width="144" height="232" rx="8" fill="#faf9f5"/>
+          <text x="52" y="78" font-family="Poppins, sans-serif" font-size="11" font-weight="600" fill="#141413">Skypad</text>
+          <rect x="50" y="92" width="124" height="64" rx="8" fill="#ffffff" stroke="#e8e6dc"/>
+          <text x="58" y="110" font-family="Poppins, sans-serif" font-size="10.5" font-weight="600" fill="#141413">meditations.md</text>
+          <rect x="58" y="122" width="100" height="5" rx="2.5" fill="#e8e6dc"/>
+          <rect x="58" y="134" width="84" height="5" rx="2.5" fill="#e8e6dc"/>
+          <rect x="50" y="164" width="124" height="52" rx="8" fill="#ffffff" stroke="#e8e6dc"/>
+          <rect x="58" y="176" width="70" height="6" rx="3" fill="#d8d4c8"/>
+          <rect x="58" y="190" width="104" height="5" rx="2.5" fill="#e8e6dc"/>
+          <rect x="58" y="202" width="92" height="5" rx="2.5" fill="#e8e6dc"/>
+          <rect x="50" y="230" width="86" height="20" rx="10" fill="#e2ecf5"/>
+          <text x="93" y="244" text-anchor="middle" font-family="Poppins, sans-serif" font-size="10" font-weight="600" fill="#3a5f87">key · phone</text>
+          <rect x="50" y="258" width="110" height="22" rx="11" fill="#d97757"/>
+          <text x="105" y="273" text-anchor="middle" font-family="Poppins, sans-serif" font-size="10" font-weight="600" letter-spacing="0.06em" fill="#ffffff">SYNCED · E2E</text>
+          <text x="112" y="334" text-anchor="middle" font-family="Poppins, sans-serif" font-size="11" fill="#6b6a5f">iPhone · Android</text>
+
+          <!-- sync path -->
+          <line x1="206" y1="150" x2="350" y2="150" stroke="#d97757" stroke-width="1.8" marker-start="url(#mk-arr)" marker-end="url(#mk-arr)"/>
+          <text x="278" y="134" text-anchor="middle" font-family="Poppins, sans-serif" font-size="10.5" fill="#6b6a5f">sync v3 · ciphertext only</text>
+
+          <!-- laptop -->
+          <rect x="360" y="40" width="272" height="210" rx="10" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.5"/>
+          <circle cx="378" cy="58" r="4.5" fill="#e2857a"/><circle cx="394" cy="58" r="4.5" fill="#e8c180"/><circle cx="410" cy="58" r="4.5" fill="#86a35c"/>
+          <line x1="360" y1="72" x2="632" y2="72" stroke="#f0ede3"/>
+          <text x="384" y="100" font-family="Poppins, sans-serif" font-size="12" font-weight="600" fill="#141413">meditations.md</text>
+          <rect x="384" y="112" width="200" height="5" rx="2.5" fill="#e8e6dc"/>
+          <rect x="384" y="124" width="216" height="5" rx="2.5" fill="#e8e6dc"/>
+          <rect x="384" y="136" width="172" height="5" rx="2.5" fill="#e8e6dc"/>
+          <circle cx="388" cy="164" r="4" fill="#788c5d"/>
+          <text x="398" y="168" font-family="Poppins, sans-serif" font-size="10.5" fill="#6b6a5f">saved just now</text>
+          <rect x="384" y="188" width="92" height="20" rx="10" fill="#e2ecf5"/>
+          <text x="430" y="202" text-anchor="middle" font-family="Poppins, sans-serif" font-size="10" font-weight="600" fill="#3a5f87">key · laptop</text>
+          <rect x="336" y="250" width="320" height="10" rx="5" fill="#f0ede3" stroke="#e3e0d4"/>
+          <text x="496" y="288" text-anchor="middle" font-family="Poppins, sans-serif" font-size="11" fill="#6b6a5f">MacBook</text>
+        </svg>
+        <figcaption class="anth-caption">
+          <span class="lang-en">One vault, two devices, two keys. Sync v3 moves ciphertext only — neither device ever uploads a readable note.</span>
+          <span class="lang-zh">一个 vault，两台设备，两把密钥。同步协议 v3 只传输密文——任何一台设备都不会上传可读的笔记。</span>
+        </figcaption>
+      </figure>
+    </article>
+
+    <h2 class="log-month"><span class="lang-en">May 2026</span><span class="lang-zh">2026 年 5 月</span></h2>
+
+    <article class="log-entry" id="v2-3-2">
+      <div class="log-entry__meta">
+        <span class="log-version log-version--patch">v2.3.2</span>
+        <time class="log-date" datetime="2026-05-27"><span class="lang-en">May 27, 2026</span><span class="lang-zh">5 月 27 日</span></time>
+      </div>
+      <div>
+        <h3 class="log-entry__title"><span class="lang-en">Three fixes, no surprises.</span><span class="lang-zh">三个修复，没有意外。</span></h3>
+        <ul class="log-list">
+          <li><span class="log-chip log-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">CJK input — composing pinyin in writing mode no longer drops the first candidate when an autosave fires mid-composition.</span><span class="lang-zh">中文输入——写作模式下拼音组词时若恰逢自动保存，首个候选词不再丢失。</span></span></li>
+          <li><span class="log-chip log-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">The Linux file watcher now follows symlinked vault folders; external edits show up without a restart.</span><span class="lang-zh">Linux 文件监听现在能跟踪软链接的 vault 目录；外部编辑无需重启即可出现。</span></span></li>
+          <li><span class="log-chip log-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">PDF export honours page margins on A4 paper — long quotes no longer clip at the right edge.</span><span class="lang-zh">PDF 导出在 A4 纸上正确遵守页边距——长引文不再在右边缘被裁掉。</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="log-entry" id="v2-3-1">
+      <div class="log-entry__meta">
+        <span class="log-version log-version--patch">v2.3.1</span>
+        <time class="log-date" datetime="2026-05-13"><span class="lang-en">May 13, 2026</span><span class="lang-zh">5 月 13 日</span></time>
+      </div>
+      <div>
+        <h3 class="log-entry__title"><span class="lang-en">Quick-switcher tune-up.</span><span class="lang-zh">快速跳转的微调。</span></h3>
+        <ul class="log-list">
+          <li><span class="log-chip log-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">⌘K fuzzy match treats hyphens and spaces the same, so "on-solitude" matches "on solitude".</span><span class="lang-zh">⌘K 模糊匹配现在把连字符和空格视为等同，「on-solitude」可以匹配「on solitude」。</span></span></li>
+          <li><span class="log-chip log-chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span><span><span class="lang-en">The switcher ranks recently edited notes above exact-prefix matches. Your last three notes are almost always what you want.</span><span class="lang-zh">跳转列表把最近编辑的笔记排在前缀精确匹配之前。你要找的，几乎总是最近写的那三条。</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="log-entry" id="v2-3-0">
+      <div class="log-entry__meta">
+        <span class="log-version log-version--feature">v2.3.0</span>
+        <time class="log-date" datetime="2026-05-06"><span class="lang-en">May 6, 2026</span><span class="lang-zh">5 月 6 日</span></time>
+      </div>
+      <div>
+        <h3 class="log-entry__title"><span class="lang-en">Backlinks, and search operators.</span><span class="lang-zh">反向链接，和搜索操作符。</span></h3>
+        <p class="log-entry__lede">
+          <span class="lang-en">Two features writers kept asking for — built so they stay out of the way until you reach for them.</span>
+          <span class="lang-zh">两个作者们一直在要的功能——做成不去找它们就不会出现的样子。</span>
+        </p>
+        <ul class="log-list">
+          <li><span class="log-chip log-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Backlinks panel. Every note lists the notes that reference it; ⌘E hides it along with everything else.</span><span class="lang-zh">反向链接面板。每条笔记列出引用它的笔记；⌘E 会连同其他一切一起把它藏起来。</span></span></li>
+          <li><span class="log-chip log-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Search operators: <code>path:reading</code>, <code>before:2026-01</code>, <code>has:todo</code>. Plain words still work exactly as before.</span><span class="lang-zh">搜索操作符：<code>path:reading</code>、<code>before:2026-01</code>、<code>has:todo</code>。普通词语照旧可用。</span></span></li>
+          <li><span class="log-chip log-chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span><span><span class="lang-en">The search index updates incrementally on save. A 12,000-note vault re-indexes in 0.4 s instead of 40 s.</span><span class="lang-zh">搜索索引随保存增量更新。12,000 条笔记的 vault 重建索引从 40 秒降到 0.4 秒。</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <h2 class="log-month"><span class="lang-en">April 2026</span><span class="lang-zh">2026 年 4 月</span></h2>
+
+    <article class="log-entry" id="v2-2-0">
+      <div class="log-entry__meta">
+        <span class="log-version log-version--feature">v2.2.0</span>
+        <time class="log-date" datetime="2026-04-15"><span class="lang-en">Apr 15, 2026</span><span class="lang-zh">4 月 15 日</span></time>
+      </div>
+      <div>
+        <h3 class="log-entry__title"><span class="lang-en">Attachments, encrypted like everything else.</span><span class="lang-zh">附件，和其他一切一样加密。</span></h3>
+        <ul class="log-list">
+          <li><span class="log-chip log-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Attach images and PDFs to notes. Files are encrypted on your device before upload, exactly like note text.</span><span class="lang-zh">笔记可附加图片和 PDF。文件在你的设备上加密后才上传，和笔记正文完全一样。</span></span></li>
+          <li><span class="log-chip log-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Key rotation. Rotate your vault key from Settings; old keys are shredded once re-encryption completes.</span><span class="lang-zh">密钥轮换。在设置里轮换 vault 密钥；重新加密完成后，旧密钥即被销毁。</span></span></li>
+          <li><span class="log-chip log-chip--security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></span><span><span class="lang-en">Spring security audit published at <code>/security</code>. One medium finding (patched before publication), zero high or critical.</span><span class="lang-zh">春季安全审计已发布于 <code>/security</code>。一处中危发现（发布前已修补），高危与严重为零。</span></span></li>
+        </ul>
+      </div>
+      <figure class="log-entry__figure">
+        <svg role="img" aria-label="Attachment encryption flow: a photo file is encrypted on the device with a key that never leaves it, and Skypad servers store ciphertext only" viewBox="0 0 660 156" style="max-width:660px; margin:0 auto;">
+          <defs>
+            <marker id="fl-arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+            </marker>
+            <filter id="fl-shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.06"/>
+            </filter>
+          </defs>
+          <!-- node 1: source file -->
+          <rect x="24" y="24" width="168" height="76" rx="10" fill="#ffffff" stroke="#e3e0d4" filter="url(#fl-shadow)"/>
+          <circle cx="42" cy="50" r="3.5" fill="#6a9bcc"/>
+          <text x="52" y="54" font-family="Poppins, sans-serif" font-size="12.5" font-weight="600" fill="#141413">photo.jpg</text>
+          <text x="52" y="76" font-family="Poppins, sans-serif" font-size="10.5" fill="#6b6a5f">1.8 MB · attached</text>
+          <!-- node 2: encrypt on device (focus) -->
+          <rect x="240" y="24" width="200" height="76" rx="10" fill="#f7e4dc" stroke="#d97757" stroke-width="1.5"/>
+          <g fill="none" stroke="#5d7045" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="260" cy="50" r="6"/>
+            <path d="M266 50h14M275 50v6M280 50v4"/>
+          </g>
+          <text x="286" y="54" font-family="Poppins, sans-serif" font-size="12.5" font-weight="600" fill="#141413">encrypted on device</text>
+          <text x="286" y="76" font-family="Poppins, sans-serif" font-size="10.5" fill="#6b6a5f">XChaCha20 · key stays local</text>
+          <!-- node 3: server -->
+          <rect x="486" y="24" width="150" height="76" rx="10" fill="#ffffff" stroke="#e3e0d4" filter="url(#fl-shadow)"/>
+          <circle cx="504" cy="50" r="3.5" fill="#141413"/>
+          <text x="514" y="54" font-family="Poppins, sans-serif" font-size="12.5" font-weight="600" fill="#141413">Skypad servers</text>
+          <text x="514" y="76" font-family="Poppins, sans-serif" font-size="10.5" fill="#6b6a5f">ciphertext only</text>
+          <!-- arrows + badges -->
+          <line x1="192" y1="62" x2="240" y2="62" stroke="#d97757" stroke-width="1.8" marker-end="url(#fl-arr)"/>
+          <line x1="440" y1="62" x2="486" y2="62" stroke="#d97757" stroke-width="1.8" marker-end="url(#fl-arr)"/>
+          <circle cx="214" cy="62" r="9" fill="#d97757"/>
+          <text x="214" y="66" text-anchor="middle" font-family="Poppins, sans-serif" font-size="10.5" font-weight="600" fill="#ffffff">1</text>
+          <circle cx="461" cy="62" r="9" fill="#d97757"/>
+          <text x="461" y="66" text-anchor="middle" font-family="Poppins, sans-serif" font-size="10.5" font-weight="600" fill="#ffffff">2</text>
+          <!-- note -->
+          <circle cx="28" cy="130" r="3.5" fill="#788c5d"/>
+          <text x="38" y="134" font-family="Poppins, sans-serif" font-size="10.5" fill="#6b6a5f">the key never leaves the device — rotation added in this release</text>
+        </svg>
+        <figcaption class="anth-caption">
+          <span class="lang-en">Attachments take the same path as note text: encrypted on the device, ciphertext on the server, key on your hardware only.</span>
+          <span class="lang-zh">附件走和笔记正文相同的路径：设备上加密，服务器只存密文，密钥只在你的硬件上。</span>
+        </figcaption>
+      </figure>
+    </article>
+
+    <article class="log-entry" id="v2-1-1">
+      <div class="log-entry__meta">
+        <span class="log-version log-version--patch">v2.1.1</span>
+        <time class="log-date" datetime="2026-04-02"><span class="lang-en">Apr 2, 2026</span><span class="lang-zh">4 月 2 日</span></time>
+      </div>
+      <div>
+        <h3 class="log-entry__title"><span class="lang-en">Contrast and cursor fixes.</span><span class="lang-zh">对比度与光标修复。</span></h3>
+        <ul class="log-list">
+          <li><span class="log-chip log-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">Secondary text on the cream theme was hard to read in daylight; contrast is now 5:1 after reader reports.</span><span class="lang-zh">米白主题的次级文字在日光下偏淡；根据读者反馈，对比度已提到 5:1。</span></span></li>
+          <li><span class="log-chip log-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">⌘N inside writing mode opens the new note in writing mode, instead of dropping you back to the full window.</span><span class="lang-zh">写作模式里按 ⌘N，新笔记直接在写作模式打开，而不是把你扔回完整窗口。</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <h2 class="log-month"><span class="lang-en">March 2026</span><span class="lang-zh">2026 年 3 月</span></h2>
+
+    <article class="log-entry" id="v2-1-0">
+      <div class="log-entry__meta">
+        <span class="log-version log-version--feature">v2.1.0</span>
+        <time class="log-date" datetime="2026-03-18"><span class="lang-en">Mar 18, 2026</span><span class="lang-zh">3 月 18 日</span></time>
+      </div>
+      <div>
+        <h3 class="log-entry__title"><span class="lang-en">Small things for long mornings.</span><span class="lang-zh">为漫长清晨准备的小东西。</span></h3>
+        <ul class="log-list">
+          <li><span class="log-chip log-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Word-count goal in writing mode — a quiet number in the corner. No progress bars, no streaks, no confetti.</span><span class="lang-zh">写作模式的字数目标——角落里一个安静的数字。没有进度条，没有连胜记录，没有彩带。</span></span></li>
+          <li><span class="log-chip log-chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span><span><span class="lang-en">Autosave debounce went from 3 s to 1 s. Saves are diff-based, so disk writes stay small.</span><span class="lang-zh">自动保存的防抖从 3 秒缩短到 1 秒。保存按差异写入，磁盘写入量依然很小。</span></span></li>
+          <li><span class="log-chip log-chip--removed"><span class="lang-en">Removed</span><span class="lang-zh">移除</span></span><span><span class="lang-en">The startup tip popover. You told us it was noise; it was.</span><span class="lang-zh">启动时的小提示气泡。你们说它是噪音；它确实是。</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <p class="log-archive">
+      <a class="anth-link" href="#archive"><span class="lang-en">Releases before v2.1 live in the archive</span><span class="lang-zh">v2.1 之前的发布在归档里</span></a>
+    </p>
+
+  </div>
+</section>
+
+<!-- How we ship -->
+<section class="anth-section anth-section--subtle" id="policy">
+  <div class="anth-container anth-container--narrow">
+    <div style="max-width:640px; margin:0 auto var(--space-7); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">How we ship</span><span class="lang-zh">我们怎么发布</span></span>
+      <h2 style="margin-top:var(--space-3);"><span class="lang-en">Three rules this page lives by.</span><span class="lang-zh">这页遵守的三条规则。</span></h2>
+    </div>
+
+    <div class="ship-rule">
+      <span class="ship-rule__num" aria-hidden="true">1</span>
+      <div>
+        <h3><span class="lang-en">No breaking changes outside a major version.</span><span class="lang-zh">大版本之外，不做破坏性变更。</span></h3>
+        <p><span class="lang-en">Your vault is plain Markdown on your disk. Nothing we ship in a 2.x release will ever change how those files are read — that promise only moves at v3.0, with a migration note published first.</span><span class="lang-zh">你的 vault 是磁盘上的普通 Markdown。任何 2.x 发布都不会改变这些文件的读取方式——这条承诺只在 v3.0 才会动，而且会先发迁移说明。</span></p>
+      </div>
+    </div>
+    <div class="ship-rule">
+      <span class="ship-rule__num" aria-hidden="true">2</span>
+      <div>
+        <h3><span class="lang-en">Confirmed data bugs get a patch within 48 hours.</span><span class="lang-zh">确认的数据 bug，48 小时内出补丁。</span></h3>
+        <p><span class="lang-en">Anything that can lose or corrupt a note skips the release train. v2.3.2's CJK composition fix went from report to release in 41 hours.</span><span class="lang-zh">任何可能丢失或损坏笔记的问题都不等发布班车。v2.3.2 的中文组词修复，从收到报告到发布用了 41 小时。</span></p>
+      </div>
+    </div>
+    <div class="ship-rule">
+      <span class="ship-rule__num" aria-hidden="true">3</span>
+      <div>
+        <h3><span class="lang-en">Every note here is written by the engineer who shipped it.</span><span class="lang-zh">每条说明都由发布它的工程师亲手写。</span></h3>
+        <p><span class="lang-en">No marketing pass, no adjectives without numbers. If an entry says “faster”, it says how much, measured on what.</span><span class="lang-zh">没有市场部润色，没有不带数字的形容词。如果某条写了「更快」，就一定写明快了多少、在什么环境下测的。</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Subscribe CTA -->
+<section class="anth-section" id="subscribe">
+  <div class="anth-container anth-container--narrow" style="text-align:center;">
+    <h2><span class="lang-en">Never miss a release.</span><span class="lang-zh">不错过任何一次发布。</span></h2>
+    <p style="font-size:19px; color:var(--anth-text-secondary); margin:var(--space-4) auto var(--space-6); line-height:1.6; max-width:560px;">
+      <span class="lang-en">One email per release, written like the notes above. No product news, no surveys, unsubscribe in one click.</span>
+      <span class="lang-zh">每次发布一封邮件，写法和上面的说明一样。没有产品营销，没有问卷，一键退订。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-4); justify-content:center; align-items:center; flex-wrap:wrap;">
+      <a class="anth-button" href="#email"><span class="lang-en">Subscribe by email</span><span class="lang-zh">邮件订阅</span></a>
+      <a class="anth-link" href="#rss" style="font-family:var(--font-heading); font-size:14px;"><span class="lang-en">RSS feed</span><span class="lang-zh">RSS 订阅源</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="anth-footer">
+  <div class="anth-footer-grid">
+    <div class="anth-footer-group"><h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5><a href="landing.html#features"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a><a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a><a href="landing.html#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a><a href="#releases"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">For teams</span><span class="lang-zh">团队</span></h5><a href="#teams"><span class="lang-en">Team plan</span><span class="lang-zh">团队版</span></a><a href="#enterprise"><span class="lang-en">Enterprise</span><span class="lang-zh">企业版</span></a><a href="#security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a><a href="#slas">SLAs</a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">Writers</span><span class="lang-zh">作者</span></h5><a href="#guide"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a><a href="#templates"><span class="lang-en">Templates</span><span class="lang-zh">模板</span></a><a href="#showcase"><span class="lang-en">Showcase</span><span class="lang-zh">作品精选</span></a><a href="#community"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5><a href="#about"><span class="lang-en">About</span><span class="lang-zh">关于</span></a><a href="#press"><span class="lang-en">Press</span><span class="lang-zh">媒体</span></a><a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a><a href="#status"><span class="lang-en">Status</span><span class="lang-zh">状态</span></a></div>
+    <div class="anth-footer-group"><h5><span class="lang-en">Legal</span><span class="lang-zh">法务</span></h5><a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a><a href="#terms"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a><a href="#dpa">DPA</a><a href="#audit"><span class="lang-en">Audit</span><span class="lang-zh">审计</span></a></div>
+  </div>
+  <div class="anth-footer-legal">
+    <span>Copyright © 2026 Skypad Inc.</span>
+    <span><span class="lang-en">Made in Berlin · Toronto · Kyoto</span><span class="lang-zh">制作于 柏林 · 多伦多 · 京都</span></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: anthropic
+Page-type: changelog
+Created: 2026-06-11
+
+Decisions (5):
+1. [left-meta-rail] chose "132px left meta column (version pill + date) with hairline top borders per entry" over "decorated left timeline rail with vertical line and dots". Because: layout-patterns L8 records the anthropic decision — hairline separation is the restrained version of a time axis; the date column still gives a vertical chronology you can scan top-to-bottom, while a dot rail adds chrome that competes with the entries themselves.
+2. [cadence-timeline-first] chose "one wide synoptic release-cadence timeline above the list (features above the axis, patches below, hollow dots for planned)" over "a small diagram per release entry". Because: the question a changelog answers before any entry is read is 'do they actually ship' — one axis with seven solid dots answers it in a glance; per-entry diagrams would bury that signal and bloat every entry to equal visual weight.
+3. [type-chips-tinted] chose "added/changed/fixed/security/removed chips as 16-20% tint pills with solid 6px hue dots and labels darkened one step below the diagram-craft label colours" over "solid-filled colour chips or bare bold text prefixes". Because: tint container + solid dot is the skill's diagram colour grammar applied to HTML, so the chips read as the same family as the SVGs; solid fills at five hues per screen would blow the 4-14% saturation budget, and the stock label colours miss 4.5:1 AA at 11px on the new deeper tints.
+4. [one-featured-mock] chose "a device-sync mock only inside the headline release (v2.4.0) plus one encryption-flow figure mid-list (v2.2.0)" over "a screenshot for every release". Because: one mock marks which release matters most this quarter and the mid-list figure breaks the ~1800px text run before the text-desert threshold; equal visuals per entry would flatten hierarchy and double page weight for patch notes nobody illustrates.
+5. [bounded-history] chose "7 entries across 4 months with an 'archive' link at the bottom" over "the full release history on one page". Because: the changelog's job is cadence and recency — a bounded window keeps the cadence legible and the page weight honest, while an unbounded list turns into an archive that belongs in docs.
+
+Known trade-offs:
+- The cadence timeline hard-codes release dates in SVG coordinates: every new release means editing both the entry list and the diagram, and a stale 'today' marker starts lying within a week. Accepted as a content-maintenance tax; the synoptic view is worth more than the edit cost.
+- Chip label colours (#4d5e34 / #3a5f87 / #7a4b20 / #a4452a) deviate one step darker from the diagram-craft label column to clear WCAG AA at 11px on the 16-20% tints — palette discipline traded against contrast, documented in changelog.md so the next author doesn't 'correct' them back.
+- SVG labels inside the three figures are English-only (matching the landing canonical's product-mock convention) while all HTML text is bilingual; zh readers get bilingual figcaptions instead of translated diagrams. Accepted to keep diagram text density sane, revisit if zh-first distribution becomes the norm.
+
+/design-review:self-diff -->
+
+</body>
+</html>

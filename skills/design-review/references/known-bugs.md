@@ -133,6 +133,7 @@
 - **How caught**:multi-critic 的 illustration 专家。2026-04-22 首次命中。
 - **Defense**:`visual-audit.mjs` 新 check **figure-no-caption** —— 每一个 `<figure>` 必须含至少一个直接子 `<figcaption>`。
 - **Fix playbook**:在 `</svg>` 后加真的 `<figcaption>`,具体写清(轴含义 / 一行 takeaway / 来源),不是占位"Figure 1: ..."。
+- **复发(2026-06-13)**:ember changelog(medium)又出一个无 figcaption 的 figure,critic 抓的。fixture 复测确认 check 本身能抓裸 figure —— 漏的原因是 **warn 不挡 exit code**:visual-audit 只在 error 时 exit 1,只有 warn 的页面照样过,warn 列表没人读就发布了。提案:figure-no-caption 升 error,且 figcaption 文本非空(≥ 4 字符)才算数(空壳 `<figcaption></figcaption>` 不该过)。visual-audit 改动待人审。
 
 ### 1.20 showcase page 上 cross-skill-smell 误报 (待修)
 - **Reader sees**:一张合法展示 4 个 skill 的 showcase 页(如 `/index.html` 介绍所有 skill),视觉上本来就**需要**显示 apple blue / ember gold / sage green / Fraunces / Instrument Serif 作为 skill 样品。visual-audit 把这些全部判为 cross-skill-smell。
@@ -177,6 +178,7 @@
   - **保留半角**的场景:代码块(`<code>` / `<pre>`)· URL / 路径 · identifier(如 `record_id 882091`)· 仅含数字/字母的 list item(`grep, git, any editor works` 这种 —— 但这种通常在 lang-en 里,zh 侧应用顿号 `、`)
   - 重复性场景用脚本替换:见 2026-04-24 commit 里的 python one-liner · 限定 `<span class="lang-zh">` 范围,避免误伤 en span
 - **延伸**:适用所有使用 anthropic/apple/ember/sage design 的双语页。所有 canonical 的 zh 侧都要过这一条 check。
+- **缺口(2026-06-13)**:字符类只有 `,;:` —— ASCII `?` `!` `(` `)` 贴着 CJK 照样通过(sage changelog + sage faq 共 18 处由 critic 抓出,机械检查 0 报)。提案:把检查的字符类扩为 `[,;:?!()]`,对应全角 `？！（）`;同一位置顺带扫 U+30FB(见 §1.39)。verify.py 改动待人审。
 
 ### 1.23 canonical 页缺 generator self-diff note · critic 没靶子
 - **Reader sees**:critic(solo 或 4 专家)评审 canonical 时只能凭感觉说"布局不错""copy 平衡"等印象级评语,没法指出作者"为什么选 A 不选 B"的取舍站不站得住。下一个作者想 port 这张 canonical 到另一个 skill,得翻 .md 逆向推断设计意图,搬到新 skill 时把作者的 trade-off 搬丢。
@@ -219,6 +221,79 @@
 - **How caught**：2026-06-12 加两个 check（issue #11）。`layout-overflow`——内容型块元素（table/pre/img/video/iframe/canvas/figure/svg）bbox 与直接父容器比对，突破 > 8px → warn，输出子/父 box 全量数据（L/R/W）方便定位；只查 static/relative（absolute 装饰层合法越界，glass aurora 就是），父容器 overflow-x auto/scroll/hidden 全豁免（设计好的横滚/裁切不算）。`margin-auto-offcenter`——**意图必须从 stylesheet 读**（getComputedStyle 把 auto 解析成 used px 值，issue 原型代码在 Chromium 上永远不触发），扫 cssRules 收集 marginLeft/Right 双 auto 的 selector 再测量左右 gap，Δ > 12px → warn；flex/grid 父容器豁免（auto margin 在那里是对齐工具不是居中意图）。实现坑：支持 CSS nesting 的 Chromium 里每条 CSSStyleRule 都自带空 .cssRules，walk 时先判 style 再递归，不能 either/or。标定：repro 双阳性命中（869px 表格突破 / Δ160px 偏移），横滚包裹 + absolute 层 + flex 居中三阴性静音，canonical + docs 全量回归 0 假阳。
 - **Defense**：机器兜底 `layout-overflow` + `margin-auto-offcenter`；宽表的正确写法是包一层横滚容器（glass `.glass-table` 区已有 overflow 配方）。
 - **Rule**：宽内容要么约束宽度要么给它设计好的滚动容器，不准让它刺穿版心。
+
+---
+
+### 1.39 lang-zh 里用片假名中点 ・(U+30FB)当分隔符
+- **Reader sees**:zh 文本里的分隔点比正常间隔号宽、左右间距不对 —— `・` 是片假名中点(全角,日文排版字符),不是中文间隔号 `·`(U+00B7)。
+- **Why**:两个字形肉眼近似,IME / 模型输出容易混入。§1.22 的检查只盯半角 ASCII `,;:`,U+30FB 是全角字符,完全不在字符类里。
+- **How caught**:2026-06-13 candidate canonical critic 评审,anthropic changelog(机械检查 0 报)。
+- **Defense**:待加 —— `verify.py` 提案:zh 标点检查同时扫 lang-zh body 里的 U+30FB,提示换 `·`(U+00B7,或按语义换顿号 `、`)。和 §1.22 的扩展是同一个检查位置。
+- **Rule**:zh 分隔点一律 `·`(U+00B7);日文排版字符不进 lang-zh。
+
+---
+
+### 1.38 双语页 italic 引用在 zh 侧渲染合成斜体(faux italic)
+- **Reader sees**:zh 模式下 display 字号的引用块整段是机器斜过去的中文 —— CJK 字形被 synthetic oblique 强行倾斜,廉价且难读。
+- **Why**:CJK 字体(PingFang SC / Noto SC 系)没有真 italic。EN blockquote 设计上用 italic;zh 侧的字体覆盖只换了 `font-family` 没写 `font-style: normal` → 浏览器对 CJK 做合成斜体。cross-skill-rules §G 的模板只给 `body / p / li` 配了 normal,blockquote 不在选择器里,正好漏。
+- **How caught**:2026-06-13 critic,apple faq(medium)+ apple landing。apple 用 PingFang 系统栈(§H 的例外)最显眼,但类是跨 skill 的 —— 任何 italic 设计元素 + CJK 文本都中(Noto SC 同样没有 italic)。
+- **Defense**:待加 —— `visual-audit.mjs` 提案 **cjk-faux-italic**:flip 到 `data-lang="zh"` 后扫所有含 CJK 的叶子元素,computed `font-style` 是 italic/oblique 且 font-size ≥ 18px → warn。
+- **Fix playbook**:zh 字体覆盖一律带 `font-style: normal`,且写在**不被 data-lang gate** 的选择器上(如 `blockquote .lang-zh`),否则 en 模式下检查不到;zh 侧的强调改用色 / weight / 引号,不用斜体。
+
+---
+
+### 1.37 canonical 的 .md / self-diff 描述意图而非渲染结果(decision-record drift)
+- **Reader sees**:肉眼看页面没问题。但 .md 说 hero 左对齐,渲染是居中;self-diff 宣称"连续 rail",渲染是按月分段。下一个 critic 拿 .md 当 rubric → 按错的标准评;下一个 port 作者照 .md 复刻 → 把没实现的意图当事实搬走。
+- **Why**:.md 在 HTML 改版前写好(或边写边改 HTML,改完忘了回头同步),记录的是当时的打算。机械检查只查 self-diff 的字段齐不齐(§1.23),不查它说的是不是真的 —— 声明是自然语言,没有渲染兜底。
+- **How caught**:2026-06-13 critic,sage team(high)+ apple changelog + sage faq。critic 把 .md 当评分标准对照渲染,正好暴露 drift —— 这也证明 .md 写错比不写更糟。
+- **Defense**:编辑规则,无法机械化:canonical 完稿后,逐句核对 .md / self-diff 里每个**可观察的版式声明**(对齐 / 分段 / 列数 / 颜色 / 组件名)和渲染截图一致;HTML 后续改动必须同 commit 更新 .md。critic 固定评审项:".md 与渲染 diff"。
+- **Rule**:.md 是下一个 critic 的 rubric。每一句版式声明都要对得上渲染,对不上就改文档或改页面,二选一。
+
+---
+
+### 1.36 半套覆盖全局元素样式 → code chip 不可读
+- **Reader sees**:sage faq 的 `<code>` chip 文字几乎隐形 —— 对比度 ~1.2-2.1:1。
+- **Why**:全局 css 给 `code` 配的是**成对**的 color + background;页面局部(inline style 或 page-scoped css)只覆盖了其中一半 —— 改了 `color` 继承全局浅 `background`,或改了 `background` 继承全局绿 `color`。半套覆盖把一对设计好的颜色拆散。contrast 检查的 ctaSelectors 只列按钮 / 徽章类,`code` / `kbd` 不在扫描清单里。
+- **How caught**:2026-06-13 critic,sage faq(high)。
+- **Defense**:待加 —— `visual-audit.mjs` 提案:把 `code, kbd, mark, [class*="chip"]` 加进 contrast 扫描清单(error < 3,warn 3-4.5,和现有按钮一致)。
+- **Rule**:覆盖全局有样式的元素(code / kbd / blockquote)时,color 和 background **必须成对**写;最好把全局规则抄过来整对改,或用现成 modifier class。
+
+---
+
+### 1.35 可导出统计失实(derivable-stat dishonesty)
+- **Reader sees**:changelog 宣称 "median gap 14 天",但按页面自己印出来的发布日期算是 25 天;versioning 图示画着 v3.6.1,页面的 feed 里从没发过这个版本。读者随手一算就能拆穿 —— 一处失实,全页数字失信。
+- **Why**:generator 先写叙事再填数字,数字来自"听起来合理"而不是从页内数据重算;或图示复用模板里的示例版本号,没对照本页 feed。
+- **How caught**:2026-06-13 critic,ember changelog(high)+ sage changelog(medium)。
+- **Defense**:编辑规则(本行 + ember / sage dos-and-donts):任何能从页面自身内容推导的数字(中位数 / 计数 / 总和 / 日期跨度 / 版本号)发布前必须用页内数据重算一遍。部分机械化提案:`verify.py` **version-token cross-check** —— SVG `<text>` 里出现的 `vX.Y.Z` 必须同时出现在页面正文里,否则 warn;中位数 / 计数类无法静态机械化,归 critic 固定评审项。
+- **Rule**:数字的来源只能是页内数据或外部事实,不允许"叙事需要"。
+
+---
+
+### 1.43 SVG 细描边连线穿过 `<text>` = 删除线效果
+- **Reader sees**:图里三个标签像被划了删除线 —— 一条 1.8px 的连线正好横穿文字。
+- **Why**:连线的几何和文字 bbox 撞了,而三个 overlap 检查都看不见细描边:§1.26 svg-shape-over-text 跳过 `fill="none"` 的 shape(描边线没有 fill),且 area ≥ 16px² / pct ≥ 10% 的阈值是为色块调的,1.8px 细线的 y 向交叠永远到不了 10%;§1.8 / §1.25 只看 text × text。另注意:线画在文字**下面**(DOM 序在前)也照样从字缝里透出来读成删除线,所以这个类不能像 §1.26 那样只查 DOM 序在后的 shape。
+- **How caught**:2026-06-13 critic,ember team。
+- **Defense**:待加 —— `visual-audit.mjs` 提案 **svg-stroke-through-text**:对 stroke-only shape(`line` / `fill=none` 的 `path`)不论 DOM 序,横向相交 ≥ 文字宽 60% 且穿过文字中线带 → warn。
+- **Fix playbook**:连线绕行(改 y / 加拐点)或文字挪出线带;线确实要从文字后面过 → 给文字加底色 halo(底 rect 或 `paint-order: stroke` 描白边)再 `data-allow-overlap`。
+
+---
+
+### 1.42 字面箭头写进带 ::after 箭头的链接 → 双箭头
+- **Reader sees**:apple 页链接渲染 "Learn more › ›";anthropic 页 "Read the docs → →"。
+- **Why**:5 个 skill 的 css 都由 `::after` 统一追加链接箭头(apple `\203A`,其余四个 `\2192`);作者按肌肉记忆又在链接文本里手打了一个。HTML 源码看是一个,渲染是两个 —— 不渲染就漏,且 critic 之外没人盯。
+- **How caught**:2026-06-13 critic,apple faq(high)+ team + landing 共 31 处。同类第二次复发:anthropic 2026-06-11(commit 5eea300)清过 32 处字面 `→`。两个 skill 各踩一次 → 必须机械化。
+- **Defense**:待加 —— `verify.py` 提案 **link-arrow-doubled**:扫 `.{prefix}link` 的内文,剥 tag 后含 `›` / `→` 且 class 列表没有 `--no-arrow` modifier → fail。
+- **Fix playbook**:删字面箭头,让 `::after` 出唯一的箭头;真的不要 ::after 箭头 → 加 `--no-arrow` modifier(此时字面箭头才是 sanctioned 的,5eea300 对 no-arrow 链接就是这么处理的)。
+
+---
+
+### 1.41 双语 stat strip 共享数字的单位在 zh 侧重复
+- **Reader sees**:zh 模式下 stat 读出 "**48h 小时**内首次回复" —— 单位出现两次(英文 `h` + 中文"小时")。
+- **Why**:stat strip 的大数字写成共享节点(不分语言),`48h` 自带英文单位;zh label 又以"小时内…"开头。en 模式读 "48h first-reply" 正常,zh 模式两个单位叠加。作者写双语 label 时只用 en 读了一遍。
+- **How caught**:2026-06-13 critic,anthropic faq + ember faq 各中一次(机械检查 0 报)。
+- **Defense**:待加 —— `verify.py` 提案 **zh-unit-doubling**(warn,heuristic):共享数字节点带 EN 单位后缀 + 邻近 lang-zh label 以中文单位词(小时 / 分钟 / 天 / 周 / 个月 / 年)开头 → warn。
+- **Fix playbook**:数字也拆 lang spans —— `<span class="lang-en">48h</span><span class="lang-zh">48</span>`,zh label 保留"小时内…"。单位不属于数字,属于语言。
+- **Rule**:双语页任何"数字 + 单位"组合,发布前用两种语言各读一遍。
 
 ---
 

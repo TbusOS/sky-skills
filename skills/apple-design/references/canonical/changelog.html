@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad changelog — every release, on the record</title>
+<meta name="description" content="Release notes for Skypad: what we added, changed, and fixed in every version of the local-first, end-to-end encrypted notebook. One email per release.">
+<meta property="og:title" content="Skypad changelog — every release, on the record">
+<meta property="og:description" content="What we added, changed, and fixed in every Skypad release — in plain words, version by version. Subscribe for one email per release, no marketing.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/apple.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--apple-line);
+    color: var(--apple-text);
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 980px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .lang-toggle:hover { background: #f5f5f7; }
+  /* Apple §H exception: PingFang SC native. Noto Sans SC as non-Apple fallback. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li {
+    font-family: "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] h4,
+  html[data-lang="zh"] blockquote {
+    font-family: "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", sans-serif;
+    font-weight: 600;
+  }
+
+  /* Subscribe row in hero */
+  .sub-row {
+    display: flex; gap: var(--space-3); justify-content: center; align-items: stretch;
+    max-width: 460px; margin: 0 auto;
+  }
+  .sub-row .apple-input { flex: 1; min-width: 0; background: #ffffff; }
+  .sub-row .apple-button {
+    border: 0; cursor: pointer; font-family: var(--font-display);
+    padding: 10px 22px; font-size: 14px; white-space: nowrap;
+  }
+
+  /* Cadence stats — apple giant numbers, slightly smaller than landing */
+  .cadence-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); text-align: center; }
+  .cadence-stats > div { padding: var(--space-5) var(--space-3); }
+  .cadence-stats .num {
+    display: block; font-family: var(--font-display); font-size: 64px; font-weight: 700;
+    color: var(--apple-text); letter-spacing: -0.035em; line-height: 1;
+  }
+  .cadence-stats .lbl {
+    display: block; margin-top: var(--space-3);
+    font-family: var(--font-display); font-size: 15px; color: var(--apple-text-secondary);
+    letter-spacing: 0; line-height: 1.4;
+  }
+
+  /* Figure frames */
+  .log-figure { margin: 0; }
+  .log-figure figcaption {
+    font-family: var(--font-display); font-size: 13px; color: var(--apple-text-secondary);
+    text-align: center; margin-top: var(--space-4); letter-spacing: 0.01em;
+  }
+
+  /* Release stream — left rail with a continuous time axis */
+  .log-month {
+    font-family: var(--font-display); font-size: 32px; font-weight: 700;
+    letter-spacing: -0.025em; color: var(--apple-text);
+    margin: var(--space-8) 0 var(--space-6); line-height: 1.1;
+  }
+  .log-month:first-of-type { margin-top: var(--space-7); }
+  .log-entry {
+    display: grid; grid-template-columns: 168px 1fr; align-items: start;
+  }
+  .log-meta { padding-top: 2px; padding-right: var(--space-5); }
+  .log-version {
+    display: inline-block; font-family: var(--font-display); font-size: 14px; font-weight: 600;
+    letter-spacing: 0; color: var(--apple-text);
+    background: #f5f5f7; border-radius: 980px; padding: 4px 13px;
+  }
+  .log-entry--latest .log-version { background: #0071E3; color: #ffffff; }
+  .log-date {
+    display: block; margin-top: var(--space-3);
+    font-family: var(--font-display); font-size: 13px; color: var(--apple-text-secondary);
+  }
+  .log-body {
+    position: relative; border-left: 1px solid #d2d2d7;
+    padding: 0 0 var(--space-8) var(--space-7);
+  }
+  .log-entry:last-of-type .log-body { padding-bottom: var(--space-6); }
+  .log-dot {
+    position: absolute; left: -6.5px; top: 6px; width: 12px; height: 12px;
+    border-radius: 50%; background: #1d1d1f; border: 2.5px solid #ffffff;
+    box-shadow: 0 0 0 1px #d2d2d7;
+  }
+  .log-entry--latest .log-dot { background: #0071E3; }
+  .log-entry--patch .log-dot { background: #aeaeb2; }
+  .log-title {
+    font-family: var(--font-display); font-size: 24px; font-weight: 600;
+    letter-spacing: -0.02em; color: var(--apple-text); margin: 0 0 var(--space-2); line-height: 1.15;
+  }
+  .log-lede {
+    font-family: var(--font-display); font-size: 16px; line-height: 1.55;
+    color: var(--apple-text-secondary); margin: 0 0 var(--space-5); max-width: 640px;
+  }
+  .log-changes { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+  .log-changes li {
+    display: grid; grid-template-columns: 76px 1fr; gap: var(--space-4); align-items: baseline;
+    font-family: var(--font-display); font-size: 15px; line-height: 1.5; color: var(--apple-text);
+  }
+  .log-chip {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    text-align: center; padding: 3px 0; border-radius: 980px;
+  }
+  .log-chip--added { background: #0071E3; color: #ffffff; }
+  .log-chip--changed { background: #f5f5f7; color: #1d1d1f; }
+  .log-chip--fixed { background: #f5f5f7; color: #6e6e73; }
+  .log-figure--entry { margin: var(--space-6) 0 var(--space-2); }
+
+  /* Quote band */
+  .pull-quote { background: #000000; color: #ffffff; padding: var(--space-9) 0; }
+  .pull-quote blockquote {
+    font-family: var(--font-display); font-size: 40px; font-weight: 500; font-style: italic;
+    letter-spacing: -0.025em; line-height: 1.22; margin: 0; max-width: 980px;
+  }
+  .pull-quote cite {
+    display: block; margin-top: var(--space-6); font-size: 15px; font-style: normal;
+    color: rgba(255,255,255,0.6); font-family: var(--font-display);
+  }
+
+  @media (max-width: 820px) {
+    .log-entry { grid-template-columns: 1fr; }
+    .log-meta { padding: 0 0 var(--space-3) var(--space-7); }
+    .cadence-stats { grid-template-columns: repeat(2, 1fr); }
+    .sub-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="apple-nav"><div class="apple-nav-inner">
+  <a href="landing.html" style="font-weight:600;">Skypad</a>
+  <div>
+    <a href="landing.html"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a>
+    <a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="blog-index.html"><span class="lang-en">Blog</span><span class="lang-zh">博客</span></a>
+    <a href="changelog.html" style="opacity:1; font-weight:600;" aria-current="page"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-4); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="apple-link apple-link--no-arrow" href="#login"><span class="lang-en">Sign in</span><span class="lang-zh">登录</span></a>
+    <a class="apple-link" href="#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="apple-hero">
+  <div class="apple-container apple-container--hero" style="text-align:center;">
+    <p style="font-family:var(--font-display); font-size:15px; color:#0071E3; font-weight:500; letter-spacing:0.02em; margin:0 0 var(--space-4);">
+      <span class="lang-en">Skypad · Release notes</span>
+      <span class="lang-zh">Skypad · 更新日志</span>
+    </p>
+    <h1 style="font-size:80px; font-weight:700; letter-spacing:-0.035em; line-height:1.04; margin:0 auto var(--space-5); max-width:900px;">
+      <span class="lang-en">Every release,<br>on the record.</span>
+      <span class="lang-zh">每一次发布，<br>都有记录。</span>
+    </h1>
+    <p style="font-family:var(--font-display); font-size:22px; color:var(--apple-text-secondary); line-height:1.45; max-width:640px; margin:0 auto var(--space-7); letter-spacing:-0.01em;">
+      <span class="lang-en">What we added, changed, and fixed — in plain words, version by version. If a change can't be explained in one sentence, it doesn't ship.</span>
+      <span class="lang-zh">我们加了什么、改了什么、修了什么——一个版本一个版本，说人话。一个改动如果没法用一句话讲清楚，就不会发布。</span>
+    </p>
+    <form class="sub-row" action="#subscribe" method="get">
+      <input class="apple-input" type="email" name="email" placeholder="you@example.com" aria-label="Email address for release notes">
+      <button class="apple-button" type="submit"><span class="lang-en">Subscribe</span><span class="lang-zh">订阅更新</span></button>
+    </form>
+    <p style="margin-top:var(--space-4); font-family:var(--font-display); font-size:13px; color:var(--apple-text-secondary); letter-spacing:0.02em;">
+      <span class="lang-en">One email per release. Unsubscribe anytime. <a class="apple-link" href="#rss">RSS</a></span>
+      <span class="lang-zh">每次发布一封邮件。随时退订。<a class="apple-link" href="#rss">RSS</a></span>
+    </p>
+  </div>
+</section>
+
+<!-- Release cadence timeline -->
+<section class="apple-section" style="padding-top:0;">
+  <div class="apple-container apple-container--hero">
+    <figure class="log-figure">
+      <svg role="img" aria-label="Release timeline, March to June 2026: seven shipped versions as ink dots, a blue today marker, and v5.3 upcoming in Q3" viewBox="0 0 1180 232" style="display:block; width:100%; height:auto;" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" font-size="12">
+        <rect width="1180" height="232" fill="#ffffff"/>
+        <!-- axis: solid through shipped range, dashed into the future -->
+        <line x1="56" y1="124" x2="941" y2="124" stroke="#d2d2d7" stroke-width="2"/>
+        <line x1="941" y1="124" x2="1124" y2="124" stroke="#d2d2d7" stroke-width="2" stroke-dasharray="3 5"/>
+
+        <!-- today marker (the single blue narrative) -->
+        <line x1="941" y1="64" x2="941" y2="180" stroke="#0071e3" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <rect x="903" y="38" width="76" height="21" rx="10.5" fill="#eaf3fe"/>
+        <text x="941" y="53" text-anchor="middle" font-size="11.5" font-weight="600" fill="#0071e3" class="lang-en">today</text>
+        <text x="941" y="53" text-anchor="middle" font-size="11.5" font-weight="600" fill="#0071e3" class="lang-zh">今天</text>
+
+        <g text-anchor="middle">
+          <!-- v4.9 · Mar 24 -->
+          <circle cx="70" cy="124" r="8" fill="#1d1d1f"/><circle cx="70" cy="124" r="2.5" fill="#ffffff"/>
+          <text x="70" y="96" font-weight="600" fill="#1d1d1f">v4.9</text>
+          <text x="70" y="156" font-size="11.5" fill="#86868b" class="lang-en">Mar 24</text>
+          <text x="70" y="156" font-size="11.5" fill="#86868b" class="lang-zh">3 月 24 日</text>
+          <!-- v4.9.3 · Apr 7 -->
+          <circle cx="224" cy="124" r="6.5" fill="#aeaeb2"/><circle cx="224" cy="124" r="2" fill="#ffffff"/>
+          <text x="224" y="96" fill="#6e6e73">v4.9.3</text>
+          <text x="224" y="156" font-size="11.5" fill="#86868b" class="lang-en">Apr 7</text>
+          <text x="224" y="156" font-size="11.5" fill="#86868b" class="lang-zh">4 月 7 日</text>
+          <!-- v5.0 milestone · Apr 21 -->
+          <circle cx="378" cy="124" r="10" fill="#1d1d1f"/><circle cx="378" cy="124" r="3" fill="#ffffff"/>
+          <text x="378" y="94" font-weight="600" fill="#1d1d1f">v5.0</text>
+          <text x="378" y="76" font-size="11" fill="#86868b" class="lang-en">sync engine v2</text>
+          <text x="378" y="76" font-size="11" fill="#86868b" class="lang-zh">同步引擎 v2</text>
+          <text x="378" y="156" font-size="11.5" fill="#86868b" class="lang-en">Apr 21</text>
+          <text x="378" y="156" font-size="11.5" fill="#86868b" class="lang-zh">4 月 21 日</text>
+          <!-- v5.0.1 · May 2 -->
+          <circle cx="499" cy="124" r="6.5" fill="#aeaeb2"/><circle cx="499" cy="124" r="2" fill="#ffffff"/>
+          <text x="499" y="96" fill="#6e6e73">v5.0.1</text>
+          <text x="499" y="156" font-size="11.5" fill="#86868b" class="lang-en">May 2</text>
+          <text x="499" y="156" font-size="11.5" fill="#86868b" class="lang-zh">5 月 2 日</text>
+          <!-- v5.1 · May 18 -->
+          <circle cx="675" cy="124" r="8" fill="#1d1d1f"/><circle cx="675" cy="124" r="2.5" fill="#ffffff"/>
+          <text x="675" y="96" font-weight="600" fill="#1d1d1f">v5.1</text>
+          <text x="675" y="156" font-size="11.5" fill="#86868b" class="lang-en">May 18</text>
+          <text x="675" y="156" font-size="11.5" fill="#86868b" class="lang-zh">5 月 18 日</text>
+          <!-- v5.1.2 · Jun 1 -->
+          <circle cx="829" cy="124" r="6.5" fill="#aeaeb2"/><circle cx="829" cy="124" r="2" fill="#ffffff"/>
+          <text x="829" y="96" fill="#6e6e73">v5.1.2</text>
+          <text x="829" y="156" font-size="11.5" fill="#86868b" class="lang-en">Jun 1</text>
+          <text x="829" y="156" font-size="11.5" fill="#86868b" class="lang-zh">6 月 1 日</text>
+          <!-- v5.2 latest · Jun 8 -->
+          <circle cx="906" cy="124" r="8" fill="#1d1d1f"/><circle cx="906" cy="124" r="2.5" fill="#ffffff"/>
+          <text x="897" y="96" font-weight="600" fill="#1d1d1f">v5.2</text>
+          <text x="906" y="178" font-size="11.5" fill="#86868b" class="lang-en">Jun 8</text>
+          <text x="906" y="178" font-size="11.5" fill="#86868b" class="lang-zh">6 月 8 日</text>
+          <!-- v5.3 upcoming -->
+          <circle cx="1100" cy="124" r="8" fill="#ffffff" stroke="#aeaeb2" stroke-width="1.6"/>
+          <text x="1100" y="96" fill="#6e6e73">v5.3</text>
+          <text x="1100" y="156" font-size="11.5" fill="#86868b" class="lang-en">Q3 · planned</text>
+          <text x="1100" y="156" font-size="11.5" fill="#86868b" class="lang-zh">Q3 · 计划中</text>
+        </g>
+
+        <!-- legend -->
+        <g font-size="11.5" fill="#6e6e73">
+          <circle cx="448" cy="212" r="5" fill="#1d1d1f"/>
+          <text x="460" y="216" class="lang-en">feature release</text>
+          <text x="460" y="216" class="lang-zh">功能版本</text>
+          <circle cx="582" cy="212" r="5" fill="#aeaeb2"/>
+          <text x="594" y="216" class="lang-en">patch</text>
+          <text x="594" y="216" class="lang-zh">补丁</text>
+          <circle cx="668" cy="212" r="5" fill="#ffffff" stroke="#aeaeb2" stroke-width="1.4"/>
+          <text x="680" y="216" class="lang-en">upcoming</text>
+          <text x="680" y="216" class="lang-zh">未发布</text>
+        </g>
+      </svg>
+      <figcaption>
+        <span class="lang-en">Seven releases in the last three months — feature releases in ink, patches in gray, v5.3 planned for Q3.</span>
+        <span class="lang-zh">过去三个月发布七个版本——功能版本用墨色、补丁用灰色，v5.3 计划在 Q3。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Cadence stats -->
+<section class="apple-section" style="background:#f5f5f7;">
+  <div class="apple-container apple-container--hero">
+    <div style="text-align:center; max-width:720px; margin:0 auto var(--space-7);">
+      <h2 style="font-size:48px; font-weight:700; letter-spacing:-0.03em; line-height:1.1;">
+        <span class="lang-en">The cadence.</span>
+        <span class="lang-zh">发布的节奏。</span>
+      </h2>
+    </div>
+    <div class="cadence-stats">
+      <div>
+        <span class="num">27</span>
+        <span class="lbl"><span class="lang-en">releases since v4.0</span><span class="lang-zh">个版本，自 v4.0 起</span></span>
+      </div>
+      <div>
+        <span class="num">14</span>
+        <span class="lbl"><span class="lang-en">days, median gap between releases</span><span class="lang-zh">天，相邻发布的中位间隔</span></span>
+      </div>
+      <div>
+        <span class="num">0</span>
+        <span class="lbl"><span class="lang-en">features ever moved out of Free</span><span class="lang-zh">个功能从免费版移走过</span></span>
+      </div>
+      <div>
+        <span class="num">9.4K</span>
+        <span class="lbl"><span class="lang-en">release-note subscribers</span><span class="lang-zh">位更新日志订阅者</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Release stream -->
+<section class="apple-section" id="releases">
+  <div class="apple-container">
+    <h2 style="font-size:48px; font-weight:700; letter-spacing:-0.03em; line-height:1.1; text-align:center; margin-bottom:var(--space-2);">
+      <span class="lang-en">Release history.</span>
+      <span class="lang-zh">发布历史。</span>
+    </h2>
+
+    <h3 class="log-month"><span class="lang-en">June 2026</span><span class="lang-zh">2026 年 6 月</span></h3>
+
+    <article class="log-entry log-entry--latest">
+      <div class="log-meta">
+        <span class="log-version">v5.2</span>
+        <span class="log-date"><span class="lang-en">June 8, 2026</span><span class="lang-zh">2026 年 6 月 8 日</span></span>
+      </div>
+      <div class="log-body">
+        <span class="log-dot" aria-hidden="true"></span>
+        <h4 class="log-title"><span class="lang-en">Graph view, rebuilt.</span><span class="lang-zh">关系图，重写。</span></h4>
+        <p class="log-lede">
+          <span class="lang-en">The old graph fell over past a few thousand notes. The new renderer draws on the GPU and stays at 60 fps with vaults ten times that size.</span>
+          <span class="lang-zh">旧的关系图超过几千条笔记就卡。新渲染器跑在 GPU 上，库再大十倍也保持 60 fps。</span>
+        </p>
+        <ul class="log-changes">
+          <li><span class="log-chip log-chip--added">Added</span><span><span class="lang-en">Graph view rebuilt on WebGPU — 60 fps with 10,000+ notes, Canvas2D fallback for older machines.</span><span class="lang-zh">关系图改用 WebGPU 渲染——一万条笔记以上仍 60 fps，老机器回退 Canvas2D。</span></span></li>
+          <li><span class="log-chip log-chip--added">Added</span><span><span class="lang-en">Command palette (⌘K) — jump to any note, command, or setting without touching the mouse.</span><span class="lang-zh">命令面板（⌘K）——不碰鼠标，直达任意笔记、命令或设置。</span></span></li>
+          <li><span class="log-chip log-chip--changed">Changed</span><span><span class="lang-en">Backlinks panel now groups results by folder instead of one flat list.</span><span class="lang-zh">反向链接面板按文件夹分组，不再是一条平铺长列表。</span></span></li>
+          <li><span class="log-chip log-chip--fixed">Fixed</span><span><span class="lang-en">Cursor no longer jumps to the title when typing with an external keyboard on iOS.</span><span class="lang-zh">修复 iOS 外接键盘输入时光标跳回标题的问题。</span></span></li>
+        </ul>
+        <figure class="log-figure log-figure--entry">
+          <svg role="img" aria-label="Skypad graph view: a window showing a note graph with one selected note highlighted in blue and its connections" viewBox="0 0 760 392" style="display:block; width:100%; height:auto; border-radius:14px; box-shadow:0 18px 44px -16px rgba(0,0,0,0.16), 0 3px 10px -3px rgba(0,0,0,0.08);" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+            <rect width="760" height="392" rx="14" fill="#ffffff"/>
+            <!-- window chrome -->
+            <path d="M0 14a14 14 0 0114-14h732a14 14 0 0114 14v26H0z" fill="#f5f5f7"/>
+            <g transform="translate(18 20)">
+              <circle cx="0" cy="0" r="5.5" fill="#FF5F57"/>
+              <circle cx="17" cy="0" r="5.5" fill="#FEBC2E"/>
+              <circle cx="34" cy="0" r="5.5" fill="#28C840"/>
+            </g>
+            <text x="380" y="25" text-anchor="middle" font-size="12" fill="#6e6e73">graph · Skypad</text>
+            <line x1="0" y1="40" x2="760" y2="40" stroke="#d2d2d7"/>
+            <!-- edges -->
+            <g stroke="#d2d2d7" stroke-width="1.3">
+              <line x1="180" y1="150" x2="92" y2="96"/>
+              <line x1="180" y1="150" x2="120" y2="232"/>
+              <line x1="300" y1="120" x2="430" y2="92"/>
+              <line x1="300" y1="120" x2="180" y2="150"/>
+              <line x1="430" y1="92" x2="560" y2="130"/>
+              <line x1="560" y1="130" x2="640" y2="220"/>
+              <line x1="470" y1="280" x2="560" y2="130"/>
+              <line x1="470" y1="280" x2="320" y2="310"/>
+              <line x1="320" y1="310" x2="120" y2="232"/>
+              <line x1="640" y1="220" x2="688" y2="300"/>
+            </g>
+            <!-- selected node's edges (blue narrative) -->
+            <g stroke="#0071e3" stroke-width="1.6">
+              <line x1="380" y1="205" x2="300" y2="120"/>
+              <line x1="380" y1="205" x2="470" y2="280"/>
+              <line x1="380" y1="205" x2="560" y2="130"/>
+              <line x1="380" y1="205" x2="180" y2="150"/>
+            </g>
+            <!-- nodes -->
+            <g>
+              <circle cx="92" cy="96" r="7" fill="#aeaeb2"/>
+              <circle cx="120" cy="232" r="8" fill="#6e6e73"/>
+              <circle cx="180" cy="150" r="10" fill="#1d1d1f"/>
+              <circle cx="300" cy="120" r="9" fill="#1d1d1f"/>
+              <circle cx="430" cy="92" r="7" fill="#aeaeb2"/>
+              <circle cx="560" cy="130" r="9" fill="#6e6e73"/>
+              <circle cx="640" cy="220" r="7" fill="#aeaeb2"/>
+              <circle cx="688" cy="300" r="6" fill="#aeaeb2"/>
+              <circle cx="470" cy="280" r="8" fill="#6e6e73"/>
+              <circle cx="320" cy="310" r="7" fill="#aeaeb2"/>
+            </g>
+            <!-- selected node -->
+            <circle cx="380" cy="205" r="13" fill="#0071e3"/>
+            <circle cx="380" cy="205" r="4" fill="#ffffff"/>
+            <g>
+              <rect x="404" y="188" width="130" height="34" rx="9" fill="#ffffff"/>
+              <rect x="404" y="188" width="130" height="34" rx="9" fill="none" stroke="#0071e3" stroke-width="1.5"/>
+              <text x="416" y="209" font-size="12.5" font-weight="600" fill="#1d1d1f">on-stillness.md</text>
+            </g>
+            <!-- node labels -->
+            <g font-size="11" fill="#86868b">
+              <text x="160" y="132">meditations.md</text>
+              <text x="282" y="102">on-solitude.md</text>
+              <text x="540" y="112">reading/index</text>
+              <text x="446" y="302">daily/2026-06-08</text>
+            </g>
+            <!-- status bar -->
+            <line x1="0" y1="356" x2="760" y2="356" stroke="#e8e8ed"/>
+            <g font-size="11" fill="#86868b">
+              <text x="20" y="377">10,482 notes · 31,650 links</text>
+              <text x="676" y="377" class="lang-en">60 fps</text>
+              <text x="676" y="377" class="lang-zh">60 fps</text>
+            </g>
+          </svg>
+          <figcaption>
+            <span class="lang-en">The rebuilt graph view — the selected note and its four links carry the only color on the canvas.</span>
+            <span class="lang-zh">重写后的关系图——被选中的笔记和它的四条链接，是画布上唯一的颜色。</span>
+          </figcaption>
+        </figure>
+      </div>
+    </article>
+
+    <article class="log-entry log-entry--patch">
+      <div class="log-meta">
+        <span class="log-version">v5.1.2</span>
+        <span class="log-date"><span class="lang-en">June 1, 2026</span><span class="lang-zh">2026 年 6 月 1 日</span></span>
+      </div>
+      <div class="log-body">
+        <span class="log-dot" aria-hidden="true"></span>
+        <h4 class="log-title"><span class="lang-en">Maintenance.</span><span class="lang-zh">维护版本。</span></h4>
+        <ul class="log-changes">
+          <li><span class="log-chip log-chip--fixed">Fixed</span><span><span class="lang-en">Flatpak build no longer crashes on save when the home directory is on NFS.</span><span class="lang-zh">修复 Flatpak 构建在 NFS 主目录下保存时崩溃的问题。</span></span></li>
+          <li><span class="log-chip log-chip--fixed">Fixed</span><span><span class="lang-en">Chinese IME no longer double-inputs the first character in note titles.</span><span class="lang-zh">修复中文输入法在笔记标题首字重复上屏的问题。</span></span></li>
+          <li><span class="log-chip log-chip--changed">Changed</span><span><span class="lang-en">Bundled spellcheck dictionaries updated to Hunspell 2026.05.</span><span class="lang-zh">内置拼写检查词典更新到 Hunspell 2026.05。</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <h3 class="log-month"><span class="lang-en">May 2026</span><span class="lang-zh">2026 年 5 月</span></h3>
+
+    <article class="log-entry">
+      <div class="log-meta">
+        <span class="log-version">v5.1</span>
+        <span class="log-date"><span class="lang-en">May 18, 2026</span><span class="lang-zh">2026 年 5 月 18 日</span></span>
+      </div>
+      <div class="log-body">
+        <span class="log-dot" aria-hidden="true"></span>
+        <h4 class="log-title"><span class="lang-en">Templates and publish themes.</span><span class="lang-zh">模板与发布主题。</span></h4>
+        <ul class="log-changes">
+          <li><span class="log-chip log-chip--added">Added</span><span><span class="lang-en">Note templates — define a skeleton once, new notes start from it. Plain Markdown files, like everything else.</span><span class="lang-zh">笔记模板——骨架定义一次，新笔记从它开始。和其他一切一样，就是普通 Markdown 文件。</span></span></li>
+          <li><span class="log-chip log-chip--added">Added</span><span><span class="lang-en">Three themes for published pages on <code>name.skypad.page</code>: Paper, Mono, and Night.</span><span class="lang-zh"><code>name.skypad.page</code> 公开页新增三套主题：Paper、Mono、Night。</span></span></li>
+          <li><span class="log-chip log-chip--changed">Changed</span><span><span class="lang-en">PDF export now embeds system fonts, so printed notes match what you see on screen.</span><span class="lang-zh">PDF 导出改为内嵌系统字体，打印效果和屏幕一致。</span></span></li>
+          <li><span class="log-chip log-chip--fixed">Fixed</span><span><span class="lang-en">Backlink counts were off by one when a note linked to itself.</span><span class="lang-zh">修复笔记链接自己时反向链接计数差一的问题。</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="log-entry log-entry--patch">
+      <div class="log-meta">
+        <span class="log-version">v5.0.1</span>
+        <span class="log-date"><span class="lang-en">May 2, 2026</span><span class="lang-zh">2026 年 5 月 2 日</span></span>
+      </div>
+      <div class="log-body">
+        <span class="log-dot" aria-hidden="true"></span>
+        <h4 class="log-title"><span class="lang-en">Patches after the big one.</span><span class="lang-zh">大版本之后的补丁。</span></h4>
+        <ul class="log-changes">
+          <li><span class="log-chip log-chip--fixed">Fixed</span><span><span class="lang-en">Sync-conflict banner sometimes stayed on screen after the conflict was resolved.</span><span class="lang-zh">修复同步冲突横幅在冲突解决后偶尔不消失的问题。</span></span></li>
+          <li><span class="log-chip log-chip--fixed">Fixed</span><span><span class="lang-en">Windows tray icon rendered blurry on 150% display scaling.</span><span class="lang-zh">修复 Windows 托盘图标在 150% 缩放下发虚的问题。</span></span></li>
+          <li><span class="log-chip log-chip--changed">Changed</span><span><span class="lang-en">Relay reconnect now backs off exponentially instead of retrying every second.</span><span class="lang-zh">中继重连改为指数退避，不再每秒重试。</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <h3 class="log-month"><span class="lang-en">April 2026</span><span class="lang-zh">2026 年 4 月</span></h3>
+
+    <article class="log-entry">
+      <div class="log-meta">
+        <span class="log-version">v5.0</span>
+        <span class="log-date"><span class="lang-en">April 21, 2026</span><span class="lang-zh">2026 年 4 月 21 日</span></span>
+      </div>
+      <div class="log-body">
+        <span class="log-dot" aria-hidden="true"></span>
+        <h4 class="log-title"><span class="lang-en">Sync engine v2.</span><span class="lang-zh">同步引擎 v2。</span></h4>
+        <p class="log-lede">
+          <span class="lang-en">The biggest release since 4.0. Sync was rewritten from scratch around CRDT merge — edits from any device converge without "pick a version" dialogs, even after weeks offline.</span>
+          <span class="lang-zh">4.0 以来最大的一次发布。同步围绕 CRDT 合并彻底重写——任何设备上的编辑都能自动收敛，离线几周回来也不会弹"选一个版本"对话框。</span>
+        </p>
+        <ul class="log-changes">
+          <li><span class="log-chip log-chip--changed">Changed</span><span><span class="lang-en">Sync engine rewritten: CRDT merge, offline-first, conflict dialogs gone for text edits.</span><span class="lang-zh">同步引擎重写：CRDT 合并、离线优先，文本编辑不再出现冲突对话框。</span></span></li>
+          <li><span class="log-chip log-chip--added">Added</span><span><span class="lang-en">Device list in settings — see every synced device, revoke any of them with one click.</span><span class="lang-zh">设置中新增设备列表——看到每台已同步设备，一键吊销任意一台。</span></span></li>
+          <li><span class="log-chip log-chip--added">Added</span><span><span class="lang-en">Encrypted attachments up to 200 MB per file, stored next to your notes.</span><span class="lang-zh">加密附件支持单文件 200 MB，和笔记存放在一起。</span></span></li>
+          <li><span class="log-chip log-chip--fixed">Fixed</span><span><span class="lang-en">Fourteen long-standing sync edge cases, including the renamed-folder loop from v4.6.</span><span class="lang-zh">修复十四个长期存在的同步边界问题，包括 v4.6 起的文件夹改名循环。</span></span></li>
+        </ul>
+        <figure class="log-figure log-figure--entry">
+          <svg role="img" aria-label="Sync engine v2 data path: plaintext stays on your devices, the relay only ever stores ciphertext" viewBox="0 0 760 196" style="display:block; width:100%; height:auto;" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+            <defs>
+              <filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
+                <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.08"/>
+              </filter>
+              <marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+                <path d="M0 0L8 4L0 8z" fill="#aeaeb2"/>
+              </marker>
+            </defs>
+            <rect width="760" height="196" fill="#ffffff"/>
+            <!-- cards -->
+            <g filter="url(#soft)">
+              <rect x="24" y="42" width="158" height="84" rx="14" fill="#ffffff"/>
+              <rect x="402" y="42" width="158" height="84" rx="14" fill="#ffffff"/>
+              <rect x="588" y="42" width="148" height="84" rx="14" fill="#ffffff"/>
+            </g>
+            <!-- focus card: encrypt on device -->
+            <rect x="212" y="42" width="160" height="84" rx="14" fill="#ffffff" stroke="#0071e3" stroke-width="1.5" filter="url(#soft)"/>
+            <g text-anchor="middle">
+              <text x="103" y="78" font-size="13.5" font-weight="600" fill="#1d1d1f" class="lang-en">Your Mac</text>
+              <text x="103" y="78" font-size="13.5" font-weight="600" fill="#1d1d1f" class="lang-zh">你的 Mac</text>
+              <text x="103" y="100" font-size="11.5" fill="#86868b" class="lang-en">plaintext, on disk</text>
+              <text x="103" y="100" font-size="11.5" fill="#86868b" class="lang-zh">明文，在本地磁盘</text>
+              <text x="292" y="78" font-size="13.5" font-weight="600" fill="#0071e3" class="lang-en">Encrypt on device</text>
+              <text x="292" y="78" font-size="13.5" font-weight="600" fill="#0071e3" class="lang-zh">设备上加密</text>
+              <text x="292" y="100" font-size="11.5" fill="#86868b">XChaCha20 · CRDT</text>
+              <text x="481" y="78" font-size="13.5" font-weight="600" fill="#1d1d1f" class="lang-en">Relay</text>
+              <text x="481" y="78" font-size="13.5" font-weight="600" fill="#1d1d1f" class="lang-zh">中继服务器</text>
+              <text x="481" y="100" font-size="11.5" fill="#86868b" class="lang-en">ciphertext only</text>
+              <text x="481" y="100" font-size="11.5" fill="#86868b" class="lang-zh">只存密文</text>
+              <text x="662" y="78" font-size="13.5" font-weight="600" fill="#1d1d1f" class="lang-en">Your iPhone</text>
+              <text x="662" y="78" font-size="13.5" font-weight="600" fill="#1d1d1f" class="lang-zh">你的 iPhone</text>
+              <text x="662" y="100" font-size="11.5" fill="#86868b" class="lang-en">decrypt &amp; merge</text>
+              <text x="662" y="100" font-size="11.5" fill="#86868b" class="lang-zh">解密并合并</text>
+            </g>
+            <!-- connectors -->
+            <g stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#arr)">
+              <line x1="182" y1="84" x2="206" y2="84"/>
+              <line x1="372" y1="84" x2="396" y2="84"/>
+              <line x1="560" y1="84" x2="582" y2="84"/>
+            </g>
+            <!-- annotation -->
+            <g text-anchor="middle" font-size="11.5" fill="#86868b">
+              <text x="380" y="166" class="lang-en">Keys never leave your devices — the relay cannot read a single note.</text>
+              <text x="380" y="166" class="lang-zh">密钥从不离开你的设备——中继读不到任何一条笔记。</text>
+            </g>
+          </svg>
+          <figcaption>
+            <span class="lang-en">Sync v2 data path: CRDT merge converges edits from every device — no "pick a version" dialogs.</span>
+            <span class="lang-zh">同步 v2 的数据路径：CRDT 合并让各设备的编辑自动收敛——不再弹"选一个版本"对话框。</span>
+          </figcaption>
+        </figure>
+      </div>
+    </article>
+
+    <article class="log-entry log-entry--patch">
+      <div class="log-meta">
+        <span class="log-version">v4.9.3</span>
+        <span class="log-date"><span class="lang-en">April 7, 2026</span><span class="lang-zh">2026 年 4 月 7 日</span></span>
+      </div>
+      <div class="log-body">
+        <span class="log-dot" aria-hidden="true"></span>
+        <h4 class="log-title"><span class="lang-en">Two stubborn bugs.</span><span class="lang-zh">两个顽固 bug。</span></h4>
+        <ul class="log-changes">
+          <li><span class="log-chip log-chip--fixed">Fixed</span><span><span class="lang-en">Search index no longer rebuilds in a loop on Android after restoring from backup.</span><span class="lang-zh">修复 Android 从备份恢复后搜索索引循环重建的问题。</span></span></li>
+          <li><span class="log-chip log-chip--fixed">Fixed</span><span><span class="lang-en">Dark mode no longer flashes white for one frame at launch on macOS.</span><span class="lang-zh">修复 macOS 启动时深色模式闪一帧白屏的问题。</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <h3 class="log-month"><span class="lang-en">March 2026</span><span class="lang-zh">2026 年 3 月</span></h3>
+
+    <article class="log-entry">
+      <div class="log-meta">
+        <span class="log-version">v4.9</span>
+        <span class="log-date"><span class="lang-en">March 24, 2026</span><span class="lang-zh">2026 年 3 月 24 日</span></span>
+      </div>
+      <div class="log-body">
+        <span class="log-dot" aria-hidden="true"></span>
+        <h4 class="log-title"><span class="lang-en">Backlinks panel.</span><span class="lang-zh">反向链接面板。</span></h4>
+        <ul class="log-changes">
+          <li><span class="log-chip log-chip--added">Added</span><span><span class="lang-en">Backlinks panel in the sidebar — every note that links here, with surrounding context.</span><span class="lang-zh">侧栏新增反向链接面板——每条链接到这里的笔记，带上下文。</span></span></li>
+          <li><span class="log-chip log-chip--added">Added</span><span><span class="lang-en">Unlinked mentions — notes that name this one without a <code>[[link]]</code>, one click to connect.</span><span class="lang-zh">未链接提及——提到这条笔记却没加 <code>[[链接]]</code> 的地方，一键补上。</span></span></li>
+          <li><span class="log-chip log-chip--changed">Changed</span><span><span class="lang-en">The pre-4.0 graph renderer is deprecated and will be removed in v5.2.</span><span class="lang-zh">4.0 之前的旧关系图渲染器进入废弃期，将在 v5.2 移除。</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <p style="text-align:center; margin-top:var(--space-7);">
+      <a class="apple-link" href="#archive"><span class="lang-en">Releases before v4.9 — full archive</span><span class="lang-zh">v4.9 之前的版本——完整存档</span></a>
+    </p>
+  </div>
+</section>
+
+<!-- Pull quote on black -->
+<section class="pull-quote">
+  <div class="apple-container apple-container--hero">
+    <blockquote>
+      <span class="lang-en">"Release notes are a promise. If we can't explain a change in one sentence, we don't ship it."</span>
+      <span class="lang-zh">"更新日志是一种承诺。一个改动如果没法用一句话讲清楚，我们就不发布它。"</span>
+    </blockquote>
+    <cite>
+      <span class="lang-en">— Mara Lindqvist, engineering lead, Skypad</span>
+      <span class="lang-zh">— Mara Lindqvist，Skypad 工程负责人</span>
+    </cite>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="apple-section" style="background:#f5f5f7; text-align:center;" id="subscribe">
+  <div class="apple-container">
+    <h2 style="font-size:56px; font-weight:700; letter-spacing:-0.03em; line-height:1.08;">
+      <span class="lang-en">Never miss a release.</span>
+      <span class="lang-zh">不错过任何一次发布。</span>
+    </h2>
+    <p style="font-family:var(--font-display); font-size:20px; color:var(--apple-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.45; max-width:560px; letter-spacing:-0.005em;">
+      <span class="lang-en">One plain-text email per release — what changed and why, nothing else. About two a month.</span>
+      <span class="lang-zh">每次发布一封纯文本邮件——改了什么、为什么改，没有别的。每月大约两封。</span>
+    </p>
+    <form class="sub-row" action="#subscribe" method="get">
+      <input class="apple-input" type="email" name="email" placeholder="you@example.com" aria-label="Email address for release notes">
+      <button class="apple-button" type="submit"><span class="lang-en">Subscribe</span><span class="lang-zh">订阅更新</span></button>
+    </form>
+    <p style="margin-top:var(--space-5); font-family:var(--font-display); font-size:12.5px; color:var(--apple-text-secondary); letter-spacing:0.02em;">
+      <span class="lang-en">Prefer a feed? <a class="apple-link" href="#rss">RSS</a> &nbsp;·&nbsp; Current version: v5.2 · June 8, 2026</span>
+      <span class="lang-zh">想用订阅源？<a class="apple-link" href="#rss">RSS</a>　·　当前版本：v5.2 · 2026 年 6 月 8 日</span>
+    </p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="apple-footer">
+  <div class="apple-footer-grid">
+    <div class="apple-footer-group"><h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5><a href="landing.html"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a><a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a><a href="#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a><a href="changelog.html"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a></div>
+    <div class="apple-footer-group"><h5><span class="lang-en">For teams</span><span class="lang-zh">团队</span></h5><a href="#teams"><span class="lang-en">Team plan</span><span class="lang-zh">团队版</span></a><a href="#enterprise"><span class="lang-en">Enterprise</span><span class="lang-zh">企业版</span></a><a href="#security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a><a href="#slas">SLAs</a></div>
+    <div class="apple-footer-group"><h5><span class="lang-en">Writers</span><span class="lang-zh">作者</span></h5><a href="#guide"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a><a href="#templates"><span class="lang-en">Templates</span><span class="lang-zh">模板</span></a><a href="#showcase"><span class="lang-en">Showcase</span><span class="lang-zh">作品精选</span></a><a href="#community"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a></div>
+    <div class="apple-footer-group"><h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5><a href="#about"><span class="lang-en">About</span><span class="lang-zh">关于</span></a><a href="#press"><span class="lang-en">Press</span><span class="lang-zh">媒体</span></a><a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a><a href="#status"><span class="lang-en">Status</span><span class="lang-zh">状态</span></a></div>
+    <div class="apple-footer-group"><h5><span class="lang-en">Legal</span><span class="lang-zh">法务</span></h5><a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a><a href="#terms"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a><a href="#dpa">DPA</a><a href="#audit"><span class="lang-en">Audit</span><span class="lang-zh">审计</span></a></div>
+  </div>
+  <div class="apple-footer-legal">
+    <span>Copyright © 2026 Skypad Inc.</span>
+    <span><span class="lang-en">Made in Berlin · Toronto · Kyoto</span><span class="lang-zh">制作于 柏林 · 多伦多 · 京都</span></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: apple
+Page-type: changelog
+Created: 2026-06-11
+
+Decisions (5):
+1. [left-rail-not-cards] chose "month-segmented vertical hairline rail with version dots, entries hanging off it" over "a stack of free-floating release cards". Because: the brief for a changelog is the time axis itself — disconnected cards read as a blog index and lose the 'one product moving forward' narrative; a single #d2d2d7 rail with ink/gray/blue dots gives the page a spine the eye can run down, and dot color doubles as release-weight encoding (ink = feature, gray = patch, blue = latest).
+2. [meta-column-not-inline-badge] chose "168px left meta column (version pill + date) beside the rail" over "version badge inline above each entry title". Because: with 7 entries the inline badge forces the eye to re-find the version inside running text every time; a fixed column makes the page scannable as a table (scan versions down the left, read details on demand) while keeping each entry a single grid row — this is the structural point where the borrowed landing contract was discarded.
+3. [blue-budget-to-added-and-latest] chose "solid #0071E3 chip for Added only, grayscale chips for Changed/Fixed, blue version pill + dot for the latest release" over "three-color semantic chips (green/blue/orange) like keepachangelog". Because: apple's diagram grammar is grayscale + one blue narrative; multi-hue chips are anthropic's language and a cross-skill smell. 'What's new' is the one thing a changelog reader scans for, so Added owns the blue; Changed keeps ink text, Fixed drops to secondary gray — the weight ladder survives black-and-white printing. Solid blue chip (white text, 4.7:1) was picked over #eaf3fe tint chip (blue text, ~4.2:1) to clear the 4.5:1 contrast gate without an intentional-warn exemption.
+4. [cadence-before-entries] chose "release-cadence timeline SVG + 4 giant stats (27 releases / 14-day median / 0 removed from Free / 9.4K subscribers) before the entry stream" over "diving straight into the newest entry". Because: individual entries prove activity, not reliability — the timeline and the median-gap stat answer the reader's real question ('is this product alive and steadily maintained?') in one screen, and they satisfy the diagram-density contract's 'time evolution → timeline / numbers → stat callout' rows before 4,000px of list begins.
+5. [two-entry-figures-only] chose "inline figures for exactly two entries (v5.2 graph-view window mock, v5.0 sync-v2 data path)" over "an illustration per release". Because: a figure per entry inflates patch releases ('two stubborn bugs' does not deserve a diagram) and flattens the hierarchy between feature releases and maintenance; giving figures only to the two releases that introduced visible/architectural surface keeps figure = significance, and the two figures land at ~1 visual per 1.5 screens, inside the text-desert budget.
+
+Known trade-offs:
+- The 168px meta column collapses above the body on viewports under 820px, which weakens the rail-as-time-axis reading on phones (the dot stays, the alignment story doesn't). Accepted: changelog traffic is dominated by desktop, and the alternative (keeping two columns on mobile) crushes the change list to ~180px.
+- Release content is fictional and pinned to specific dates (Mar 24 – Jun 8, 2026), so the cadence timeline SVG hard-codes node x-positions proportional to those dates; adding a release means recomputing positions by hand. Accepted because a date-proportional axis is the difference between a timeline and a decorated list — equal spacing would lie about the cadence the stats section brags about.
+- "Added" chips use solid brand blue, which spends apple's accent budget on repeated small elements (up to 2-3 per entry) instead of one hero moment. Accepted: chips are 11px and low-coverage, and a changelog's only recurring semantic really is the change type — but a future dark-mode pass will need to re-check the chip contrast.
+
+/design-review:self-diff -->
+
+</body>
+</html>

@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad — nine people, three cities, one notebook</title>
+<meta name="description" content="Meet the nine people who make Skypad: three full-time makers in Berlin, Toronto and Kyoto, six friends of the house, and how we hire.">
+<meta property="og:title" content="Skypad — the team">
+<meta property="og:description" content="Nine people, three cities, no managers. The workshop behind the notebook.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/ember.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid rgba(73, 45, 34, 0.2);
+    color: var(--ember-text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+  .lang-toggle:hover { background: rgba(196, 148, 100, 0.12); }
+  /* Chinese (§H): Fraunces → Noto Serif SC; Inter → Noto Sans SC. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .ember-lead,
+  html[data-lang="zh"] .feat-body,
+  html[data-lang="zh"] .member-bio {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .feat-title,
+  html[data-lang="zh"] .member-name,
+  html[data-lang="zh"] .giant-num,
+  html[data-lang="zh"] .hero-headline em,
+  html[data-lang="zh"] .section-eyebrow + h2 em {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .ember-quote {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .ember-badge,
+  html[data-lang="zh"] .eyebrow,
+  html[data-lang="zh"] .member-loc {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+    text-transform: none;
+    letter-spacing: 0.04em;
+  }
+
+  /* Hero headline — Fraunces roman, with one italic accent (§J) */
+  .hero-headline {
+    font-family: 'Fraunces', serif; font-weight: 400; font-style: normal;
+    font-size: 84px; line-height: 1.04; letter-spacing: -0.02em;
+    color: var(--ember-text); margin: 0 auto; max-width: 880px;
+  }
+  .hero-headline em {
+    font-style: italic; font-weight: 400;
+    color: #312520;
+  }
+  .section-title {
+    font-family: 'Fraunces', serif; font-weight: 400; font-style: normal;
+    font-size: 56px; line-height: 1.1; letter-spacing: -0.02em;
+    color: var(--ember-text); margin: 0;
+  }
+  .section-title em { font-style: italic; font-weight: 400; }
+  .section-title--md { font-size: 48px; }
+
+  .eyebrow {
+    display: inline-block; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #8a7564; margin-bottom: var(--space-4);
+  }
+
+  .accent-strip {
+    height: 1px; width: 48px; background: #c49464; display: block;
+  }
+  .accent-strip--center { margin: 0 auto var(--space-5); }
+
+  /* Member grid — two tiers: the three (lead) + the six (compact) */
+  .member-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); }
+  .member-card {
+    background: #ffffff; border: 1px solid rgba(73, 45, 34, 0.12);
+    border-radius: var(--radius-md); padding: var(--space-6);
+  }
+  .member-card--lead { padding: var(--space-7); }
+  .member-avatar {
+    display: block; width: 88px; height: 88px; border-radius: 50%;
+    margin-bottom: var(--space-5);
+  }
+  .member-card--lead .member-avatar { width: 112px; height: 112px; }
+  .member-name {
+    font-family: 'Fraunces', serif; font-weight: 500; font-style: normal;
+    font-size: 22px; line-height: 1.25; letter-spacing: -0.005em;
+    color: var(--ember-text); margin: 0;
+  }
+  .member-card--lead .member-name { font-size: 26px; letter-spacing: -0.01em; }
+  .member-loc {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: #8a7564;
+    margin: var(--space-2) 0 var(--space-3);
+  }
+  .member-bio {
+    font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.6;
+    color: var(--ember-text); margin: 0;
+  }
+  .member-group-label {
+    display: flex; align-items: center; gap: var(--space-4);
+    margin: var(--space-8) 0 var(--space-5);
+  }
+  .member-group-label .accent-strip { flex: none; }
+  .member-group-label .eyebrow { margin-bottom: 0; }
+
+  /* Giant stats — Fraunces roman numerals (same as landing) */
+  .giant-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); text-align: center; }
+  .giant-stats > div { padding: var(--space-5) var(--space-3); position: relative; }
+  .giant-stats > div:not(:last-child)::after {
+    content: ""; position: absolute; right: 0; top: 20%; height: 60%;
+    width: 1px; background: rgba(73, 45, 34, 0.12);
+  }
+  .giant-num {
+    display: block; font-family: 'Fraunces', serif; font-weight: 400; font-style: normal;
+    font-size: 76px; color: var(--ember-text); letter-spacing: -0.025em; line-height: 1;
+  }
+  .giant-num-label {
+    display: block; margin-top: var(--space-4);
+    font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--ember-text);
+    line-height: 1.45; max-width: 200px; margin-left: auto; margin-right: auto;
+  }
+
+  /* Day-travels-west diagram */
+  .day-figure { margin: var(--space-8) 0 0; }
+  .day-figure svg { display: block; width: 100%; height: auto; }
+  .day-figure figcaption {
+    margin-top: var(--space-5); text-align: center;
+    font-family: 'Inter', sans-serif; font-size: 13.5px; line-height: 1.55;
+    color: #8a7564; max-width: 640px; margin-left: auto; margin-right: auto;
+  }
+
+  /* House-rules cards (same grammar as landing feat cards) */
+  .feat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-top: var(--space-8); }
+  .feat-card {
+    background: #ffffff; border: 1px solid rgba(73, 45, 34, 0.12);
+    border-radius: var(--radius-md); padding: var(--space-7);
+    display: flex; flex-direction: column;
+  }
+  .feat-icon {
+    width: 56px; height: 56px; display: grid; place-items: center;
+    background: rgba(196, 148, 100, 0.14); border-radius: 50%;
+    margin-bottom: var(--space-5);
+  }
+  .feat-title {
+    font-family: 'Fraunces', serif; font-weight: 500; font-style: normal;
+    font-size: 26px; color: var(--ember-text); margin: 0 0 var(--space-3);
+    line-height: 1.22; letter-spacing: -0.01em;
+  }
+  .feat-body {
+    font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.65;
+    color: var(--ember-text); margin: 0; flex: 1;
+  }
+
+  /* Pull-quote on dark — italic earned here */
+  .pull-quote-dark {
+    background: #312520; color: #ffffff; padding: var(--space-10) 0;
+  }
+  .pull-quote-dark blockquote {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 400;
+    font-size: 38px; line-height: 1.35; color: #ffffff;
+    margin: 0; max-width: 920px;
+  }
+  .pull-quote-dark cite {
+    display: block; margin-top: var(--space-6);
+    font-family: 'Inter', sans-serif; font-style: normal; font-size: 15px;
+    color: #d9b892; letter-spacing: 0.04em;
+  }
+
+  /* Open-seat card in the hiring section */
+  .seat-card {
+    background: #ffffff; border: 1px solid rgba(73, 45, 34, 0.12);
+    border-radius: var(--radius-md); padding: var(--space-6) var(--space-7);
+    max-width: 620px; margin: var(--space-7) auto;
+    text-align: left;
+  }
+  .seat-card .member-loc { margin-top: 0; }
+  .seat-card h3 {
+    font-family: 'Fraunces', serif; font-weight: 500; font-style: normal;
+    font-size: 24px; line-height: 1.25; color: var(--ember-text);
+    margin: 0 0 var(--space-2);
+  }
+  .seat-card p {
+    font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.6;
+    color: var(--ember-text); margin: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="ember-nav"><div class="ember-nav-inner">
+  <a href="landing.html" class="ember-nav-brand">Skypad</a>
+  <div>
+    <a href="landing.html"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="landing.html#features"><span class="lang-en">Craft</span><span class="lang-zh">工艺</span></a>
+    <a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="#team" aria-current="page"><span class="lang-en">Team</span><span class="lang-zh">团队</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a href="#login" style="font-size:14px; color:var(--ember-text); text-decoration:none;"><span class="lang-en">Sign in</span><span class="lang-zh">登录</span></a>
+    <a class="ember-button" href="landing.html"><span class="lang-en">Start writing</span><span class="lang-zh">开始写作</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="ember-hero" id="team" style="padding-top:var(--space-10); padding-bottom:var(--space-9);">
+  <div class="ember-container" style="max-width:960px; text-align:center;">
+    <span class="accent-strip accent-strip--center"></span>
+    <span class="ember-badge" style="display:inline-block; margin-bottom:var(--space-5);"><span class="lang-en">Berlin · Toronto · Kyoto</span><span class="lang-zh">柏林 · 多伦多 · 京都</span></span>
+    <h1 class="hero-headline">
+      <span class="lang-en">The workshop behind<br><em>the notebook.</em></span>
+      <span class="lang-zh">记事本背后的<br><em>工坊</em>。</span>
+    </h1>
+    <p class="ember-lead" style="margin:var(--space-6) auto 0; max-width:680px; font-size:21px; line-height:1.55;">
+      <span class="lang-en">Skypad is three people who build it all day, and six friends of the house who lend a few hours a week. No managers, no office, no growth team. This page is all of us.</span>
+      <span class="lang-zh">Skypad 由三个整天做它的人，加六位每周帮几个小时的朋友一起完成。没有经理，没有办公室，没有增长团队。这一页，就是我们全部。</span>
+    </p>
+  </div>
+</section>
+
+<!-- Members -->
+<section class="ember-section" style="padding-top:0; padding-bottom:var(--space-10);" id="people">
+  <div class="ember-container ember-container--wide">
+    <div style="max-width:720px; margin:0 auto; text-align:center;">
+      <span class="accent-strip accent-strip--center"></span>
+      <span class="eyebrow"><span class="lang-en">Everyone, by name</span><span class="lang-zh">每个人，都有名字</span></span>
+      <h2 class="section-title">
+        <span class="lang-en">The three, and <em>the six.</em></span>
+        <span class="lang-zh">三个人，与<em>六位朋友</em>。</span>
+      </h2>
+      <p class="ember-lead" style="font-size:19px; margin-top:var(--space-5); max-width:620px; margin-left:auto; margin-right:auto;">
+        <span class="lang-en">Three of us sign every release. Six more lend their craft a few hours a week — support, audits, translations, the Journal. Nobody on this page is a stock photo.</span>
+        <span class="lang-zh">每个版本都由我们三个人署名。另外六位每周投入几小时手艺——支持、审计、翻译、杂志。这一页上没有一张图库照片。</span>
+      </p>
+    </div>
+
+    <div class="member-group-label">
+      <span class="accent-strip"></span>
+      <span class="eyebrow"><span class="lang-en">The three — full-time</span><span class="lang-zh">三个全职的人</span></span>
+    </div>
+    <div class="member-grid">
+      <article class="member-card member-card--lead">
+        <svg class="member-avatar" viewBox="0 0 120 120" role="img" aria-label="Geometric portrait of Mara Lindqvist — bob haircut, gold earring">
+          <rect width="120" height="120" fill="#fbeedd"/>
+          <path d="M22 120 a38 38 0 0 1 76 0 Z" fill="#492d22"/>
+          <circle cx="60" cy="52" r="23" fill="#ffffff"/>
+          <path d="M33 56 a27 27 0 0 1 54 0 v12 h-9 v-14 a18 18 0 0 0 -36 0 v14 h-9 Z" fill="#312520"/>
+          <path d="M42 48 q18 -11 36 0 l-2 -6 q-16 -9 -32 0 Z" fill="#312520"/>
+          <circle cx="85" cy="62" r="3.2" fill="#c49464"/>
+        </svg>
+        <h3 class="member-name">Mara Lindqvist</h3>
+        <p class="member-loc"><span class="lang-en">Berlin · Design &amp; type</span><span class="lang-zh">柏林 · 设计与字体</span></p>
+        <p class="member-bio">
+          <span class="lang-en">Draws every screen by hand and guards the two-font rule. The gold hairline is hers.</span>
+          <span class="lang-zh">亲手画每一个界面，守着「只用两种字体」的规矩。那条金色细线是她的。</span>
+        </p>
+      </article>
+      <article class="member-card member-card--lead">
+        <svg class="member-avatar" viewBox="0 0 120 120" role="img" aria-label="Geometric portrait of Tomas Oduya — round glasses, gold collar pin">
+          <rect width="120" height="120" fill="#fbeedd"/>
+          <path d="M22 120 a38 38 0 0 1 76 0 Z" fill="#6b5a4f"/>
+          <circle cx="60" cy="52" r="23" fill="#ffffff"/>
+          <path d="M36 47 a24 24 0 0 1 48 0 v-2 a24 24 0 0 0 -48 0 Z M37 44 q23 -14 46 0 l-2 -8 q-21 -12 -42 0 Z" fill="#312520"/>
+          <circle cx="50" cy="54" r="7" fill="none" stroke="#312520" stroke-width="2"/>
+          <circle cx="70" cy="54" r="7" fill="none" stroke="#312520" stroke-width="2"/>
+          <line x1="57" y1="54" x2="63" y2="54" stroke="#312520" stroke-width="2"/>
+          <circle cx="60" cy="93" r="3.2" fill="#c49464"/>
+        </svg>
+        <h3 class="member-name">Tomas Oduya</h3>
+        <p class="member-loc"><span class="lang-en">Toronto · Sync &amp; encryption</span><span class="lang-zh">多伦多 · 同步与加密</span></p>
+        <p class="member-bio">
+          <span class="lang-en">Wrote the sync engine twice — the second time so it could never read your notes.</span>
+          <span class="lang-zh">同步引擎写了两遍——第二遍是为了让它永远读不到你的笔记。</span>
+        </p>
+      </article>
+      <article class="member-card member-card--lead">
+        <svg class="member-avatar" viewBox="0 0 120 120" role="img" aria-label="Geometric portrait of Rei Nakamura — long hair, gold hairpin">
+          <rect width="120" height="120" fill="#fbeedd"/>
+          <path d="M24 120 a36 36 0 0 1 72 0 Z" fill="#8a7564"/>
+          <path d="M34 50 a26 26 0 0 1 52 0 v46 h-12 v-40 h-28 v40 h-12 Z" fill="#312520"/>
+          <circle cx="60" cy="52" r="20" fill="#ffffff"/>
+          <path d="M40 50 a20 20 0 0 1 40 0 v-3 a20 20 0 0 0 -40 0 Z M41 47 q19 -12 38 0 l-2 -7 q-17 -10 -34 0 Z" fill="#312520"/>
+          <rect x="76" y="36" width="12" height="3" rx="1.5" fill="#c49464" transform="rotate(24 82 37.5)"/>
+        </svg>
+        <h3 class="member-name">Rei Nakamura</h3>
+        <p class="member-loc"><span class="lang-en">Kyoto · Editor core</span><span class="lang-zh">京都 · 编辑器内核</span></p>
+        <p class="member-bio">
+          <span class="lang-en">Keeps a blank page opening in under a second — on a ten-year-old laptop.</span>
+          <span class="lang-zh">让空白页在一秒内打开——哪怕是十年前的旧电脑。</span>
+        </p>
+      </article>
+    </div>
+
+    <div class="member-group-label">
+      <span class="accent-strip"></span>
+      <span class="eyebrow"><span class="lang-en">Friends of the house — a few hours a week</span><span class="lang-zh">工坊的朋友——每周几小时</span></span>
+    </div>
+    <div class="member-grid">
+      <article class="member-card">
+        <svg class="member-avatar" viewBox="0 0 120 120" role="img" aria-label="Geometric portrait of Hana Sato — hair bun with gold tie">
+          <rect width="120" height="120" fill="#fbeedd"/>
+          <path d="M24 120 a36 36 0 0 1 72 0 Z" fill="#312520"/>
+          <circle cx="60" cy="24" r="9" fill="#312520"/>
+          <rect x="52" y="30" width="16" height="3.5" rx="1.75" fill="#c49464"/>
+          <circle cx="60" cy="54" r="22" fill="#ffffff"/>
+          <path d="M38 52 a22 22 0 0 1 44 0 v-2 a22 22 0 0 0 -44 0 Z M39 49 q21 -13 42 0 l-2 -8 q-19 -11 -38 0 Z" fill="#312520"/>
+        </svg>
+        <h3 class="member-name">Hana Sato</h3>
+        <p class="member-loc"><span class="lang-en">Kyoto · iOS &amp; Android</span><span class="lang-zh">京都 · iOS 与 Android</span></p>
+        <p class="member-bio">
+          <span class="lang-en">Builds the phone apps so the bus ride home counts as writing time.</span>
+          <span class="lang-zh">做手机端，让回家的公交也算写作时间。</span>
+        </p>
+      </article>
+      <article class="member-card">
+        <svg class="member-avatar" viewBox="0 0 120 120" role="img" aria-label="Geometric portrait of Jonas Weber — short hair and beard, gold earpiece">
+          <rect width="120" height="120" fill="#fbeedd"/>
+          <path d="M22 120 a38 38 0 0 1 76 0 Z" fill="#492d22"/>
+          <circle cx="60" cy="52" r="22" fill="#ffffff"/>
+          <path d="M44 66 a16 16 0 0 0 32 0 v8 a16 16 0 0 1 -32 0 Z" fill="#8a7564"/>
+          <path d="M38 50 a22 22 0 0 1 44 0 v-2 a22 22 0 0 0 -44 0 Z M39 47 q21 -13 42 0 l-3 -8 q-18 -10 -36 0 Z" fill="#6b5a4f"/>
+          <circle cx="38" cy="56" r="3.2" fill="#c49464"/>
+        </svg>
+        <h3 class="member-name">Jonas Weber</h3>
+        <p class="member-loc"><span class="lang-en">Berlin · Support</span><span class="lang-zh">柏林 · 用户支持</span></p>
+        <p class="member-bio">
+          <span class="lang-en">Answers most of the support mail himself, usually before lunch.</span>
+          <span class="lang-zh">大部分支持邮件由他亲自回，通常赶在午饭前。</span>
+        </p>
+      </article>
+      <article class="member-card">
+        <svg class="member-avatar" viewBox="0 0 120 120" role="img" aria-label="Geometric portrait of Priya Raman — long straight hair, gold necklace">
+          <rect width="120" height="120" fill="#fbeedd"/>
+          <path d="M26 120 a34 34 0 0 1 68 0 Z" fill="#6b5a4f"/>
+          <path d="M36 50 a24 24 0 0 1 48 0 v42 h-10 v-38 h-28 v38 h-10 Z" fill="#312520"/>
+          <circle cx="60" cy="52" r="19" fill="#ffffff"/>
+          <path d="M41 50 a19 19 0 0 1 38 0 v-3 a19 19 0 0 0 -38 0 Z M42 47 q18 -11 36 0 l-2 -7 q-16 -9 -32 0 Z" fill="#312520"/>
+          <path d="M50 84 a10 6 0 0 0 20 0" fill="none" stroke="#c49464" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+        <h3 class="member-name">Priya Raman</h3>
+        <p class="member-loc"><span class="lang-en">Toronto · Security audit</span><span class="lang-zh">多伦多 · 安全审计</span></p>
+        <p class="member-bio">
+          <span class="lang-en">Runs the six-month audit and publishes every finding — fixed or not.</span>
+          <span class="lang-zh">负责每六个月一次的安全审计，所有发现都公开，修没修都写。</span>
+        </p>
+      </article>
+      <article class="member-card">
+        <svg class="member-avatar" viewBox="0 0 120 120" role="img" aria-label="Geometric portrait of Camille Roy — curly hair, gold round glasses">
+          <rect width="120" height="120" fill="#fbeedd"/>
+          <path d="M24 120 a36 36 0 0 1 72 0 Z" fill="#312520"/>
+          <circle cx="60" cy="52" r="21" fill="#ffffff"/>
+          <circle cx="42" cy="38" r="9" fill="#6b5a4f"/>
+          <circle cx="56" cy="31" r="10" fill="#6b5a4f"/>
+          <circle cx="71" cy="33" r="9" fill="#6b5a4f"/>
+          <circle cx="81" cy="43" r="8" fill="#6b5a4f"/>
+          <circle cx="51" cy="55" r="6.5" fill="none" stroke="#c49464" stroke-width="2"/>
+          <circle cx="69" cy="55" r="6.5" fill="none" stroke="#c49464" stroke-width="2"/>
+          <line x1="57.5" y1="55" x2="62.5" y2="55" stroke="#c49464" stroke-width="2"/>
+        </svg>
+        <h3 class="member-name">Camille Roy</h3>
+        <p class="member-loc"><span class="lang-en">Toronto · Docs &amp; guide</span><span class="lang-zh">多伦多 · 文档与指南</span></p>
+        <p class="member-bio">
+          <span class="lang-en">Writes the manual the way she writes letters: short, warm, complete.</span>
+          <span class="lang-zh">把手册当信写：短、暖、完整。</span>
+        </p>
+      </article>
+      <article class="member-card">
+        <svg class="member-avatar" viewBox="0 0 120 120" role="img" aria-label="Geometric portrait of Diego Fuentes — flat cap with gold button">
+          <rect width="120" height="120" fill="#fbeedd"/>
+          <path d="M22 120 a38 38 0 0 1 76 0 Z" fill="#8a7564"/>
+          <circle cx="60" cy="54" r="22" fill="#ffffff"/>
+          <path d="M36 48 a24 22 0 0 1 48 0 Z" fill="#492d22"/>
+          <rect x="32" y="45" width="56" height="5" rx="2.5" fill="#492d22"/>
+          <circle cx="60" cy="36" r="3" fill="#c49464"/>
+        </svg>
+        <h3 class="member-name">Diego Fuentes</h3>
+        <p class="member-loc"><span class="lang-en">Berlin · The Journal</span><span class="lang-zh">柏林 · 杂志编辑</span></p>
+        <p class="member-bio">
+          <span class="lang-en">Edits the Skypad Journal and finds the writers worth quoting.</span>
+          <span class="lang-zh">编辑 Skypad 杂志，找到那些值得引用的作者。</span>
+        </p>
+      </article>
+      <article class="member-card">
+        <svg class="member-avatar" viewBox="0 0 120 120" role="img" aria-label="Geometric portrait of Lena Horvat — short crop hair, gold scarf">
+          <rect width="120" height="120" fill="#fbeedd"/>
+          <path d="M24 120 a36 36 0 0 1 72 0 Z" fill="#312520"/>
+          <circle cx="60" cy="52" r="22" fill="#ffffff"/>
+          <path d="M38 52 a22 22 0 0 1 44 0 v-4 a22 22 0 0 0 -44 0 Z M39 49 q21 -14 42 0 l-2 -9 q-19 -11 -38 0 Z" fill="#8a7564"/>
+          <path d="M40 88 q20 8 40 0 v6 q-20 8 -40 0 Z" fill="#c49464"/>
+        </svg>
+        <h3 class="member-name">Lena Horvat</h3>
+        <p class="member-loc"><span class="lang-en">Kyoto · Localization</span><span class="lang-zh">京都 · 本地化</span></p>
+        <p class="member-bio">
+          <span class="lang-en">Carries Skypad into eleven languages without losing its voice.</span>
+          <span class="lang-zh">把 Skypad 带进十一种语言，而不丢掉它的语气。</span>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Giant stats -->
+<section class="ember-section" style="background:#fbeedd; padding-block:var(--space-10);">
+  <div class="ember-container ember-container--wide">
+    <div style="text-align:center; max-width:680px; margin:0 auto var(--space-9);">
+      <span class="accent-strip accent-strip--center"></span>
+      <span class="eyebrow"><span class="lang-en">Counted</span><span class="lang-zh">数一数</span></span>
+      <h2 class="section-title section-title--md">
+        <span class="lang-en">The whole company, <em>in four numbers.</em></span>
+        <span class="lang-zh">整个公司，<em>四个数字</em>。</span>
+      </h2>
+    </div>
+
+    <div class="giant-stats">
+      <div>
+        <span class="giant-num">9</span>
+        <span class="giant-num-label"><span class="lang-en">people — all of them on this page</span><span class="lang-zh">个人——全都在这一页上</span></span>
+      </div>
+      <div>
+        <span class="giant-num">3</span>
+        <span class="giant-num-label"><span class="lang-en">cities, three of us in each</span><span class="lang-zh">座城市，每城三人</span></span>
+      </div>
+      <div>
+        <span class="giant-num">0</span>
+        <span class="giant-num-label"><span class="lang-en">managers · investors · open offices</span><span class="lang-zh">个经理 · 投资人 · 开放式办公室</span></span>
+      </div>
+      <div>
+        <span class="giant-num">1</span>
+        <span class="giant-num-label"><span class="lang-en">hire planned for 2026, at most</span><span class="lang-zh">个名额 · 2026 年至多招一人</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How the day travels -->
+<section class="ember-section" style="padding-block:var(--space-10);" id="how">
+  <div class="ember-container">
+    <div style="max-width:720px; margin:0 auto; text-align:center;">
+      <span class="accent-strip accent-strip--center"></span>
+      <span class="eyebrow"><span class="lang-en">How we work</span><span class="lang-zh">我们怎么工作</span></span>
+      <h2 class="section-title">
+        <span class="lang-en">The day travels <em>west.</em></span>
+        <span class="lang-zh">一天，向<em>西</em>走。</span>
+      </h2>
+      <p class="ember-lead" style="font-size:19px; margin-top:var(--space-5); max-width:640px; margin-left:auto; margin-right:auto;">
+        <span class="lang-en">No standing meetings. Kyoto starts the day, Berlin carries it, Toronto closes it — each city leaves written notes for the next, like a ship's logbook.</span>
+        <span class="lang-zh">没有例会。京都开始这一天，柏林接着，多伦多收尾——每座城市给下一座留下书面交接，像一本航海日志。</span>
+      </p>
+    </div>
+
+    <figure class="day-figure">
+      <svg viewBox="0 0 960 300" role="img" aria-label="One working day across Kyoto, Berlin and Toronto on a UTC timeline; a gold handoff line passes the day west from city to city" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <marker id="dayw-arrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c49464"/>
+          </marker>
+        </defs>
+
+        <!-- group container: warm beige, mono small label -->
+        <rect width="960" height="300" rx="16" fill="#fbeedd" stroke="#e6d9bf"/>
+        <text x="28" y="38" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="11" letter-spacing="1.1" fill="#8a7564">ONE DAY · THREE CITIES</text>
+        <text x="932" y="38" font-size="11" fill="#8a7564" text-anchor="end">written handoffs · no standing calls</text>
+
+        <!-- hour grid: hairlines every 6h -->
+        <g stroke="#e6d9bf" stroke-width="1">
+          <line x1="170" y1="56" x2="170" y2="240"/>
+          <line x1="360.5" y1="56" x2="360.5" y2="240"/>
+          <line x1="551" y1="56" x2="551" y2="240"/>
+          <line x1="741.5" y1="56" x2="741.5" y2="240"/>
+          <line x1="932" y1="56" x2="932" y2="240"/>
+        </g>
+        <g font-size="10.5" fill="#8a7564" text-anchor="middle">
+          <text x="170" y="262">00:00</text>
+          <text x="360.5" y="262">06:00</text>
+          <text x="551" y="262">12:00</text>
+          <text x="741.5" y="262">18:00</text>
+          <text x="936" y="262" text-anchor="end">24:00 UTC</text>
+        </g>
+
+        <!-- lane labels -->
+        <g font-size="13" font-weight="600" fill="#312520">
+          <text x="28" y="86">Kyoto</text>
+          <text x="28" y="146">Berlin</text>
+          <text x="28" y="206">Toronto</text>
+        </g>
+        <g font-size="10.5" fill="#8a7564">
+          <text x="28" y="102">UTC+9 · Rei · Hana · Lena</text>
+          <text x="28" y="162">UTC+2 · Mara · Jonas · Diego</text>
+          <text x="28" y="222">UTC−4 · Tomas · Priya · Camille</text>
+        </g>
+
+        <!-- working blocks: tint, 09:00–17:00 local mapped to UTC -->
+        <rect x="170" y="70" width="254" height="36" rx="8" fill="#f5e5c8"/>
+        <rect x="392.25" y="130" width="254" height="36" rx="8" fill="#f5e5c8"/>
+        <rect x="582.75" y="190" width="254" height="36" rx="8" fill="#f5e5c8"/>
+        <g font-size="10.5" fill="#6b5a4f" text-anchor="middle">
+          <text x="297" y="101">09:00 – 17:00 JST</text>
+          <text x="519" y="161">09:00 – 17:00 CEST</text>
+          <text x="710" y="221">09:00 – 17:00 EDT</text>
+        </g>
+
+        <!-- gold handoff path: the single narrative focus -->
+        <path d="M 174,88 H 384.25 Q 392.25,88 392.25,96 V 140 Q 392.25,148 400.25,148 H 574.75 Q 582.75,148 582.75,156 V 200 Q 582.75,208 590.75,208 H 830" fill="none" stroke="#c49464" stroke-width="1.8" marker-end="url(#dayw-arrG)"/>
+        <g font-size="10.5" fill="#8a7564">
+          <text x="406" y="122">handoff · 07:00 UTC</text>
+          <text x="597" y="182">handoff · 13:00 UTC</text>
+        </g>
+
+        <!-- numbered badges: gold disc + dark text, on the path -->
+        <g font-size="11" font-weight="700" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">
+          <circle cx="174" cy="88" r="10" fill="#c49464"/><text x="174" y="92" fill="#312520">1</text>
+          <circle cx="392.25" cy="118" r="10" fill="#c49464"/><text x="392.25" y="122" fill="#312520">2</text>
+          <circle cx="582.75" cy="178" r="10" fill="#c49464"/><text x="582.75" y="182" fill="#312520">3</text>
+        </g>
+      </svg>
+      <figcaption>
+        <span class="lang-en">One working day in UTC. The gold line is the handoff — notes passed west at 07:00 and 13:00, no calls required.</span>
+        <span class="lang-zh">以 UTC 计的一个工作日。金线是交接——笔记在 07:00 与 13:00 向西传递，不需要开会。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- House rules -->
+<section class="ember-section" style="background:#fbeedd; padding-block:var(--space-10);" id="values">
+  <div class="ember-container ember-container--wide">
+    <div style="max-width:720px; margin:0 auto; text-align:center;">
+      <span class="accent-strip accent-strip--center"></span>
+      <span class="eyebrow"><span class="lang-en">House rules</span><span class="lang-zh">工坊的规矩</span></span>
+      <h2 class="section-title">
+        <span class="lang-en">Three habits, <em>kept.</em></span>
+        <span class="lang-zh">三个习惯，<em>一直守着</em>。</span>
+      </h2>
+    </div>
+
+    <div class="feat-row">
+      <article class="feat-card">
+        <div class="feat-icon">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#c49464" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 4h12M10 28h12M11 4c0 6 4 8 5 10 1-2 5-4 5-10M11 28c0-6 4-8 5-10 1 2 5 4 5 10"/>
+          </svg>
+        </div>
+        <h3 class="feat-title"><span class="lang-en">Slow is a feature.</span><span class="lang-zh">慢，是功能。</span></h3>
+        <p class="feat-body">
+          <span class="lang-en">One release each season — finished, or not at all. We'd rather ship a quiet October than promise a loud March.</span>
+          <span class="lang-zh">每季一个版本——做完才发，做不完就不发。宁要一个安静的十月，不要一个喧哗的三月的承诺。</span>
+        </p>
+      </article>
+      <article class="feat-card">
+        <div class="feat-icon">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#c49464" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="8" width="24" height="17" rx="2"/>
+            <polyline points="5,10 16,18 27,10"/>
+          </svg>
+        </div>
+        <h3 class="feat-title"><span class="lang-en">Everyone answers mail.</span><span class="lang-zh">每个人都回邮件。</span></h3>
+        <p class="feat-body">
+          <span class="lang-en">Tuesday mornings, all nine of us read support mail — founders included. Nothing teaches the product like the person it confused.</span>
+          <span class="lang-zh">每周二上午，九个人一起读支持邮件，创始人也不例外。没有什么比被产品困住的那个人，更能教我们做产品。</span>
+        </p>
+      </article>
+      <article class="feat-card">
+        <div class="feat-icon">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#c49464" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 6h14a4 4 0 014 4v16H10a4 4 0 01-4-4z"/>
+            <path d="M11 12h8M11 17h8M11 22h5"/>
+          </svg>
+        </div>
+        <h3 class="feat-title"><span class="lang-en">Handoffs, not meetings.</span><span class="lang-zh">交接，而不是会议。</span></h3>
+        <p class="feat-body">
+          <span class="lang-en">The logbook note at the end of each city's day is the only ritual we keep. If it can't be written down, it isn't decided yet.</span>
+          <span class="lang-zh">每座城市一天结束时的日志，是我们唯一保留的仪式。写不下来的事，就还没有定。</span>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Pull quote on dark chocolate — italic earned -->
+<section class="pull-quote-dark">
+  <div class="ember-container" style="text-align:center; max-width:940px;">
+    <blockquote class="ember-quote">
+      <span class="lang-en">We don't want Skypad to be big. We want it to be finished — the way a good chair is finished.</span>
+      <span class="lang-zh">我们不想让 Skypad 变大。我们想让它被做完——像一把好椅子那样，被做完。</span>
+    </blockquote>
+    <cite>
+      <span aria-hidden="true" style="display:inline-block; width:20px; height:1.5px; background:#c49464; vertical-align:middle; margin-right:8px;"></span>
+      <span class="lang-en">Mara Lindqvist — co-founder, Berlin</span>
+      <span class="lang-zh">Mara Lindqvist——联合创始人，柏林</span>
+    </cite>
+  </div>
+</section>
+
+<!-- Hiring -->
+<section class="ember-section" style="text-align:center; padding-block:var(--space-10);" id="join">
+  <div class="ember-container" style="max-width:760px;">
+    <span class="accent-strip accent-strip--center"></span>
+    <span class="eyebrow"><span class="lang-en">Join</span><span class="lang-zh">加入</span></span>
+    <h2 class="section-title">
+      <span class="lang-en">We hire <em>slowly.</em></span>
+      <span class="lang-zh">我们招人，<em>很慢</em>。</span>
+    </h2>
+    <p class="ember-lead" style="margin:var(--space-5) auto 0; max-width:620px;">
+      <span class="lang-en">About one person a year, sometimes none. There's no whiteboard interview — you spend a paid week doing real work with us, and then we both decide. Right now, one seat is open:</span>
+      <span class="lang-zh">一年大约招一个人，有时一个也不招。没有白板面试——你和我们一起做一周有薪的真实工作，然后双方一起决定。现在，有一个空位：</span>
+    </p>
+    <div class="seat-card">
+      <p class="member-loc"><span class="lang-en">Open seat · 2026</span><span class="lang-zh">空位 · 2026</span></p>
+      <h3><span class="lang-en">Support &amp; documentation</span><span class="lang-zh">支持与文档</span></h3>
+      <p>
+        <span class="lang-en">Berlin, or remote on European hours · four days a week. You'll answer real mail from real writers, and make the manual better every time the same question arrives twice.</span>
+        <span class="lang-zh">柏林，或欧洲时区远程 · 每周四天。你会回复真实作者的真实邮件，并在同一个问题第二次出现时，把手册改得更好。</span>
+      </p>
+    </div>
+    <div style="display:flex; gap:var(--space-5); justify-content:center; align-items:center; flex-wrap:wrap;">
+      <a class="ember-button" href="mailto:hello@skypad.app"><span class="lang-en">Write to hello@skypad.app</span><span class="lang-zh">写信给 hello@skypad.app</span></a>
+      <a class="ember-link" href="#how"><span class="lang-en">See how we work first</span><span class="lang-zh">先看看我们怎么工作</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="ember-footer">
+  <div class="ember-footer-grid">
+    <div class="ember-footer-group"><h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5><a href="landing.html#features"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a><a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a><a href="landing.html"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a><a href="#changelog"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">For teams</span><span class="lang-zh">团队</span></h5><a href="#teams"><span class="lang-en">Team plan</span><span class="lang-zh">团队版</span></a><a href="#enterprise"><span class="lang-en">Enterprise</span><span class="lang-zh">企业版</span></a><a href="#security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a><a href="#slas">SLAs</a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">Writers</span><span class="lang-zh">作者</span></h5><a href="#guide"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a><a href="#journal"><span class="lang-en">Journal</span><span class="lang-zh">杂志</span></a><a href="#showcase"><span class="lang-en">Showcase</span><span class="lang-zh">作品精选</span></a><a href="#community"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5><a href="team.html"><span class="lang-en">About</span><span class="lang-zh">关于</span></a><a href="#press"><span class="lang-en">Press</span><span class="lang-zh">媒体</span></a><a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a><a href="#status"><span class="lang-en">Status</span><span class="lang-zh">状态</span></a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">Legal</span><span class="lang-zh">法务</span></h5><a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a><a href="#terms"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a><a href="#dpa">DPA</a><a href="#audit"><span class="lang-en">Audit</span><span class="lang-zh">审计</span></a></div>
+  </div>
+  <div class="ember-footer-legal">
+    <span>Copyright © 2026 Skypad Inc.</span>
+    <span><span class="lang-en">Made in Berlin · Toronto · Kyoto</span><span class="lang-zh">制作于 柏林 · 多伦多 · 京都</span></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: ember
+Page-type: team
+Created: 2026-06-11
+
+Decisions (5):
+1. [three-plus-six-grid] chose "two-tier member grid (3 full-time founders in larger cards, 6 friends of the house in compact cards)" over "one equal 9-card grid". Because: the landing canonical's stat strip claims '3 people on the team' — an equal 9-grid would contradict the established worldview and mask real hierarchy; §I says equal-weight grids that hide weight differences are a layout smell, so the tiers carry the worldview structurally instead of in a footnote.
+2. [sun-handoff-timeline] chose "one UTC timeline diagram (three city lanes, tint working blocks, a single gold handoff path with numbered badges)" over "a world map with location pins, or no diagram at all". Because: 'how a distributed team works' is time-evolution content (diagram-density contract maps it to a timeline); a map shows where people sit but not how the day passes hands, and a single gold path through three lanes is exactly ember's one-gold-narrative grammar from diagram-craft §0.
+3. [geometric-avatars] chose "flat geometric SVG portraits — warm-brown shapes on cream, one small gold accent per person" over "photo placeholders or initial-letter discs". Because: ember's don'ts forbid photo mocks, and initial discs read as an unfinished fallback; geometric portraits keep every stroke inside the palette, give each person a recognizable identity (bob, glasses, bun, cap), and stay printable in black and white.
+4. [hire-slowly-cta] chose "a hiring section that says 'about one person a year, sometimes none' with exactly one named open seat" over "a generic 'we're hiring — see all open roles' job board link". Because: a jobs-board CTA is SaaS voice and would contradict the 'small on purpose' stat strip two screens earlier; one named seat with concrete conditions (Berlin or EU-remote, four days) keeps the page honest and checkable.
+5. [stats-requantified] chose "team-specific stat strip (9 people / 3 cities / 0 managers / 1 hire)" over "reusing the landing page's stats (3 / 18K / 0 / 7)". Because: same component, new facts — the strip's job on this page is to quantify the team page's own claims (who, where, how managed, how fast it grows), not to re-advertise the product.
+
+Known trade-offs:
+- The 3+6 split hard-codes the team size into copy, stats, diagram lane labels and nine avatars at once — adding a tenth person touches four surfaces. Accepted: the page describes a team that changes once a year at most, and the hiring section says so.
+- The timeline is anchored to summer offsets (CEST / EDT); twice a year the real handoff hours drift by one. Accepted: the diagram sells the handoff rhythm, not minute-accurate scheduling, and the UTC axis stays correct.
+- SVG-internal labels are English-only (same policy as the landing product mock); zh readers get the bilingual figcaption instead. Accepted: doubling every label inside the SVG would push the figure past the dense-diagram threshold and clutter the lanes.
+
+/design-review:self-diff -->
+
+</body>
+</html>

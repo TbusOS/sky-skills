@@ -62,6 +62,8 @@
 | 内容密的图(≥20 个 `<text>`)塞 840px 正文列或 960 默认容器 | scale < 0.82 → 渲染字号 < 9px 看不清。§8.1 选档:密图必须 `anth-container anth-container--wide` breakout,1200 不够就拆图,不准缩字号。`dense-diagram-cramped` + 扩域 `diagram-tiny-text` 兜底。**known-bugs 1.29** |
 | viewBox 写大、内容挤中间一窄条"求对齐" | 两侧死空间逼所有标签变小。留白是容器/margin 的事,不是画布的事。内容 bbox 距 viewBox 边 ≤ 24px。`svg-letterbox` 兜底。**known-bugs 1.28** |
 | 工程图全白卡灰线(0 饱和 hue)/ 色点徽章画空心环 | 读作未上色 wireframe。v3 色彩:容器 tint 16-20%(§1 新表)、色点/徽章/提交圆**实心主色**、每图 ≥ 2 hue。`diagram-monochrome` 抓 0-hue。**known-bugs 1.30** |
+| 双语 stat strip 的共享数字带英文单位(`48h`)而 zh label 以"小时内…"开头 | zh 模式读出 "48h 小时" 单位重复(2026-06-13 faq 实抓)。数字也拆 lang spans:`<span class="lang-en">48h</span><span class="lang-zh">48</span>` —— 单位不属于数字,属于语言。**known-bugs 1.41** |
+| `.anth-link` 文本里手打字面 `→` | `.anth-link::after` 已统一追加 →,再写一个渲染成双箭头。2026-06-11(commit 5eea300)清过 32 处,apple 同类 2026-06-13 又中 31 处。不要 ::after 箭头时用 `.anth-link--no-arrow`(此时字面箭头才是对的)。**known-bugs 1.42** |
 
 ---
 

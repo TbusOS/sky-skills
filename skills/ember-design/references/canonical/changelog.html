@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad Changelog — every change, written down</title>
+<meta name="description" content="Release notes for Skypad: every version, what was added, changed and fixed — written as short letters by the people who made the change.">
+<meta property="og:title" content="Skypad Changelog — every change, written down">
+<meta property="og:description" content="Seven releases this year, zero breaking changes. Each one documented as a short letter, not a press release.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/ember.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid rgba(73, 45, 34, 0.2);
+    color: var(--ember-text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+  .lang-toggle:hover { background: rgba(196, 148, 100, 0.12); }
+  /* Chinese (§H): Fraunces → Noto Serif SC; Inter → Noto Sans SC. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .ember-lead,
+  html[data-lang="zh"] .log-intro,
+  html[data-lang="zh"] .log-list {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .log-title,
+  html[data-lang="zh"] .giant-num,
+  html[data-lang="zh"] .hero-headline em,
+  html[data-lang="zh"] .section-title em {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .ember-quote {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .ember-badge,
+  html[data-lang="zh"] .eyebrow,
+  html[data-lang="zh"] .log-month-label,
+  html[data-lang="zh"] .chip {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+    text-transform: none;
+    letter-spacing: 0.04em;
+  }
+
+  /* Hero headline — Fraunces roman, one italic accent */
+  .hero-headline {
+    font-family: 'Fraunces', serif; font-weight: 400; font-style: normal;
+    font-size: 84px; line-height: 1.04; letter-spacing: -0.02em;
+    color: var(--ember-text); margin: 0 auto; max-width: 880px;
+  }
+  .hero-headline em { font-style: italic; font-weight: 400; color: #312520; }
+
+  .section-title {
+    font-family: 'Fraunces', serif; font-weight: 400; font-style: normal;
+    font-size: 48px; line-height: 1.1; letter-spacing: -0.02em;
+    color: var(--ember-text); margin: 0;
+  }
+  .section-title em { font-style: italic; font-weight: 400; }
+
+  .eyebrow {
+    display: inline-block; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #8a7564; margin-bottom: var(--space-4);
+  }
+  .accent-strip { height: 1px; width: 48px; background: #c49464; display: block; }
+  .accent-strip--center { margin: 0 auto var(--space-5); }
+
+  /* Cadence figure */
+  .cadence-figure { margin: 0; }
+  .cadence-figure svg { display: block; width: 100%; height: auto; }
+  .cadence-figure figcaption {
+    margin-top: var(--space-4); text-align: center;
+    font-family: 'Inter', sans-serif; font-size: 13px; color: #8a7564;
+  }
+
+  /* Giant stats — Fraunces italic numerals (typography table: earned) */
+  .giant-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); text-align: center; }
+  .giant-stats > div { padding: var(--space-5) var(--space-3); position: relative; }
+  .giant-stats > div:not(:last-child)::after {
+    content: ""; position: absolute; right: 0; top: 20%; height: 60%;
+    width: 1px; background: rgba(73, 45, 34, 0.12);
+  }
+  .giant-num {
+    display: block; font-family: 'Fraunces', serif; font-weight: 400; font-style: italic;
+    font-size: 72px; color: var(--ember-text); letter-spacing: -0.02em; line-height: 1;
+  }
+  .giant-num-label {
+    display: block; margin-top: var(--space-4);
+    font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--ember-text);
+    line-height: 1.45; max-width: 190px; margin-left: auto; margin-right: auto;
+  }
+
+  /* ---- The log: left meta column + hairline rail + entry cards ---- */
+  .log { position: relative; }
+  .log::before {
+    content: ""; position: absolute; left: 227px; top: 10px; bottom: 10px;
+    width: 1px; background: #e6d9bf;
+  }
+  .log-month {
+    display: grid; grid-template-columns: 200px 56px 1fr; align-items: center;
+    margin: var(--space-8) 0 var(--space-5);
+  }
+  .log-month:first-child { margin-top: 0; }
+  .log-month-label {
+    grid-column: 1; text-align: right;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase; color: #8a7564;
+  }
+  .log-month-tick {
+    grid-column: 2; justify-self: center;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #fff2df; border: 1.5px solid #c49464;
+  }
+  .log-entry {
+    display: grid; grid-template-columns: 200px 56px 1fr; align-items: start;
+    margin-bottom: var(--space-6); position: relative;
+  }
+  .log-meta { grid-column: 1; text-align: right; padding-top: var(--space-5); }
+  .log-date {
+    display: block; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+    letter-spacing: 0.12em; color: #8a7564; margin-bottom: var(--space-3);
+  }
+  .log-version {
+    display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    font-weight: 600; letter-spacing: 0.06em; color: #ffffff;
+    background: #492d22; border-radius: var(--radius-pill); padding: 4px 13px;
+  }
+  .log-version--patch { background: transparent; color: #6b5a4f; border: 1px solid rgba(73, 45, 34, 0.25); }
+  .log-rail { grid-column: 2; justify-self: center; padding-top: 34px; }
+  .log-dot {
+    display: block; width: 11px; height: 11px; border-radius: 50%;
+    background: #c49464; box-shadow: 0 0 0 4px #fff2df;
+  }
+  .log-dot--patch { width: 9px; height: 9px; background: #fff2df; border: 1.5px solid #8a7564; }
+  .log-card {
+    grid-column: 3; background: #ffffff; border: 1px solid rgba(73, 45, 34, 0.12);
+    border-radius: var(--radius-md); padding: var(--space-6) var(--space-7);
+  }
+  .log-title {
+    font-family: 'Fraunces', serif; font-weight: 500; font-style: normal;
+    font-size: 26px; line-height: 1.22; letter-spacing: -0.01em;
+    color: var(--ember-text); margin: 0 0 var(--space-3);
+  }
+  .log-intro {
+    font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.65;
+    color: var(--ember-text); margin: 0;
+  }
+  .log-list {
+    list-style: none; margin: var(--space-5) 0 0; padding: var(--space-5) 0 0;
+    border-top: 1px solid #e6d9bf;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .log-list li {
+    display: grid; grid-template-columns: 92px 1fr; gap: var(--space-4);
+    align-items: baseline;
+    font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.6;
+    color: var(--ember-text);
+  }
+  .log-mock { margin: var(--space-5) 0 0; }
+  .log-mock svg { display: block; width: 100%; height: auto; border-radius: 10px; }
+
+  /* Change-type chips — ember accent syntax: dark ink text, warm tint bg,
+     category carried by the dot's ink (gold = added, chocolate = changed,
+     warm gray = fixed). One hue, three inks. */
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: #492d22; border-radius: 8px; padding: 3px 9px;
+    justify-self: start; white-space: nowrap;
+  }
+  .chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; flex: none; }
+  .chip--added { background: rgba(196, 148, 100, 0.18); }
+  .chip--added::before { background: #c49464; }
+  .chip--changed { background: #f5e5c8; }
+  .chip--changed::before { background: #492d22; }
+  .chip--fixed { background: rgba(73, 45, 34, 0.06); }
+  .chip--fixed::before { background: #8a7564; }
+
+  /* Pull-quote on dark — italic earned here */
+  .pull-quote-dark { background: #312520; color: #ffffff; padding: var(--space-10) 0; }
+  .pull-quote-dark blockquote {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 400;
+    font-size: 36px; line-height: 1.35; color: #ffffff;
+    margin: 0; max-width: 920px;
+  }
+  .pull-quote-dark cite {
+    display: block; margin-top: var(--space-6);
+    font-family: 'Inter', sans-serif; font-style: normal; font-size: 15px;
+    color: #d9b892; letter-spacing: 0.04em;
+  }
+
+  .pipeline-figure { margin: var(--space-8) 0 0; }
+  .pipeline-figure svg { display: block; width: 100%; height: auto; }
+
+  @media (max-width: 900px) {
+    .hero-headline { font-size: 52px; }
+    .section-title { font-size: 36px; }
+    .giant-stats { grid-template-columns: repeat(2, 1fr); }
+    .log::before { display: none; }
+    .log-month, .log-entry { grid-template-columns: 1fr; }
+    .log-month-label { text-align: left; }
+    .log-month-tick, .log-rail { display: none; }
+    .log-meta { text-align: left; padding-top: 0; margin-bottom: var(--space-3); }
+    .log-list li { grid-template-columns: 1fr; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="ember-nav"><div class="ember-nav-inner">
+  <a href="landing.html" class="ember-nav-brand">Skypad</a>
+  <div>
+    <a href="landing.html"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="changelog.html" aria-current="page"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a>
+    <a href="blog-index.html"><span class="lang-en">Journal</span><span class="lang-zh">杂志</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a href="#login" style="font-size:14px; color:var(--ember-text); text-decoration:none;"><span class="lang-en">Sign in</span><span class="lang-zh">登录</span></a>
+    <a class="ember-button" href="landing.html#download"><span class="lang-en">Start writing</span><span class="lang-zh">开始写作</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="ember-hero" style="padding-top:var(--space-10); padding-bottom:var(--space-8);">
+  <div class="ember-container" style="max-width:960px; text-align:center;">
+    <span class="accent-strip accent-strip--center"></span>
+    <span class="ember-badge" style="display:inline-block; margin-bottom:var(--space-5);"><span class="lang-en">Changelog · Skypad 3.x</span><span class="lang-zh">更新日志 · Skypad 3.x</span></span>
+    <h1 class="hero-headline">
+      <span class="lang-en">Every change,<br><em>written down.</em></span>
+      <span class="lang-zh">每一次改动，<br><em>都写下来</em>。</span>
+    </h1>
+    <p class="ember-lead" style="margin:var(--space-6) auto 0; max-width:660px; font-size:21px; line-height:1.55;">
+      <span class="lang-en">Skypad ships slowly, on purpose. When something changes, we write down what, and why, in plain language — the way you'd explain it to a friend across the table.</span>
+      <span class="lang-zh">Skypad 发布得很慢，这是有意的。每次改动，我们都用白话写清楚改了什么、为什么——就像隔着桌子向朋友解释那样。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-5); justify-content:center; align-items:center; flex-wrap:wrap; margin-top:var(--space-7);">
+      <a class="ember-button" href="#subscribe"><span class="lang-en">Subscribe to updates</span><span class="lang-zh">订阅更新</span></a>
+      <a class="ember-link" href="#log"><span class="lang-en">Read the notes</span><span class="lang-zh">直接读记录</span></a>
+    </div>
+    <p style="margin-top:var(--space-6); font-family:'Inter', sans-serif; font-size:13px; color:#8a7564; letter-spacing:0.02em;">
+      <span class="lang-en">One letter per release · no product marketing · unsubscribe in one click</span>
+      <span class="lang-zh">每个版本一封信 · 没有营销邮件 · 一键退订</span>
+    </p>
+  </div>
+</section>
+
+<!-- Release cadence figure -->
+<section class="ember-section" style="padding-top:0; padding-bottom:var(--space-9);">
+  <div class="ember-container ember-container--wide">
+    <figure class="cadence-figure">
+      <svg role="img" aria-label="Release cadence, January to June 2026: seven releases on one timeline — v3.0 through v3.4, with the latest release marked in gold" viewBox="0 0 1080 230" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif">
+        <rect width="1080" height="230" rx="16" fill="#fbeedd" stroke="#e6d9bf"/>
+        <text x="28" y="38" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="11" letter-spacing="1.1" fill="#8a7564">RELEASES · JANUARY — JUNE 2026</text>
+        <text x="1052" y="38" font-size="11" fill="#8a7564" text-anchor="end">7 releases · median gap 25 days</text>
+
+        <!-- axis -->
+        <line x1="60" y1="150" x2="1020" y2="150" stroke="#e6d9bf" stroke-width="1.5"/>
+        <g stroke="#e6d9bf" stroke-width="1">
+          <line x1="90" y1="146" x2="90" y2="154"/>
+          <line x1="270" y1="146" x2="270" y2="154"/>
+          <line x1="450" y1="146" x2="450" y2="154"/>
+          <line x1="630" y1="146" x2="630" y2="154"/>
+          <line x1="810" y1="146" x2="810" y2="154"/>
+          <line x1="975" y1="146" x2="975" y2="154"/>
+        </g>
+        <g font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="0.8" fill="#8a7564" text-anchor="middle">
+          <text x="90" y="182">JAN</text>
+          <text x="270" y="182">FEB</text>
+          <text x="450" y="182">MAR</text>
+          <text x="630" y="182">APR</text>
+          <text x="810" y="182">MAY</text>
+          <text x="975" y="182">JUN</text>
+        </g>
+
+        <!-- major releases: warm-ink dots, mono labels -->
+        <g stroke="#6b5a4f" stroke-width="1.4">
+          <line x1="130" y1="150" x2="130" y2="112"/>
+          <line x1="305" y1="150" x2="305" y2="112"/>
+          <line x1="655" y1="150" x2="655" y2="112"/>
+          <line x1="830" y1="150" x2="830" y2="112"/>
+        </g>
+        <g fill="#ffffff" stroke="#6b5a4f" stroke-width="1.8">
+          <circle cx="130" cy="150" r="6"/>
+          <circle cx="305" cy="150" r="6"/>
+          <circle cx="655" cy="150" r="6"/>
+          <circle cx="830" cy="150" r="6"/>
+        </g>
+        <g font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="12" font-weight="600" fill="#312520" text-anchor="middle">
+          <text x="130" y="102">v3.0</text>
+          <text x="305" y="102">v3.1</text>
+          <text x="655" y="102">v3.2</text>
+          <text x="830" y="102">v3.3</text>
+        </g>
+
+        <!-- patches: smaller, recede further -->
+        <g stroke="#8a7564" stroke-width="1.1">
+          <line x1="475" y1="150" x2="475" y2="126"/>
+          <line x1="884" y1="150" x2="884" y2="126"/>
+        </g>
+        <g fill="#fbeedd" stroke="#8a7564" stroke-width="1.4">
+          <circle cx="475" cy="150" r="4"/>
+          <circle cx="884" cy="150" r="4"/>
+        </g>
+        <g font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="10.5" fill="#8a7564" text-anchor="middle">
+          <text x="475" y="118">v3.1.2</text>
+          <text x="884" y="118">v3.3.1</text>
+        </g>
+
+        <!-- latest release: the page's one gold narrative -->
+        <line x1="990" y1="150" x2="990" y2="96" stroke="#c49464" stroke-width="1.8"/>
+        <circle cx="990" cy="150" r="7" fill="#c49464"/>
+        <rect x="956" y="52" width="68" height="24" rx="8" fill="#f5e5c8" stroke="#c49464" stroke-width="1.5"/>
+        <text x="990" y="68" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="0.8" font-weight="600" fill="#312520" text-anchor="middle">LATEST</text>
+        <text x="990" y="90" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="12" font-weight="700" fill="#312520" text-anchor="middle">v3.4</text>
+      </svg>
+      <figcaption>
+        <span class="lang-en">The year so far. Seven releases — five majors, two patches — none of them broke a single note.</span>
+        <span class="lang-zh">今年到目前为止。七次发布——五个正式版本、两个修订——没有弄坏过任何一条笔记。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Giant stats -->
+<section class="ember-section" style="background:#fbeedd; padding-block:var(--space-10);">
+  <div class="ember-container ember-container--wide">
+    <div style="text-align:center; max-width:680px; margin:0 auto var(--space-9);">
+      <span class="accent-strip accent-strip--center"></span>
+      <span class="eyebrow"><span class="lang-en">By the numbers</span><span class="lang-zh">一些数字</span></span>
+      <h2 class="section-title">
+        <span class="lang-en">Slow, and <em>accountable.</em></span>
+        <span class="lang-zh">慢，但<em>有交代</em>。</span>
+      </h2>
+    </div>
+    <div class="giant-stats">
+      <div>
+        <span class="giant-num">7</span>
+        <span class="giant-num-label"><span class="lang-en">releases this year</span><span class="lang-zh">个版本，今年至今</span></span>
+      </div>
+      <div>
+        <span class="giant-num">25</span>
+        <span class="giant-num-label"><span class="lang-en">days, median gap between releases</span><span class="lang-zh">天，版本之间的中位间隔</span></span>
+      </div>
+      <div>
+        <span class="giant-num">0</span>
+        <span class="giant-num-label"><span class="lang-en">breaking changes since v3.0</span><span class="lang-zh">次破坏性变更，自 v3.0 起</span></span>
+      </div>
+      <div>
+        <span class="giant-num">41</span>
+        <span class="giant-num-label"><span class="lang-en">fixes that began as reader letters</span><span class="lang-zh">处修复源自读者来信</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- The log -->
+<section class="ember-section" style="padding-block:var(--space-10);" id="log">
+  <div class="ember-container ember-container--wide">
+    <div style="max-width:720px; margin:0 auto var(--space-9); text-align:center;">
+      <span class="accent-strip accent-strip--center"></span>
+      <span class="eyebrow"><span class="lang-en">Release notes</span><span class="lang-zh">更新记录</span></span>
+      <h2 class="section-title">
+        <span class="lang-en">What changed, month by month.</span>
+        <span class="lang-zh">逐月记下的每一处改动。</span>
+      </h2>
+      <p class="ember-lead" style="font-size:19px; margin-top:var(--space-5); max-width:600px; margin-left:auto; margin-right:auto;">
+        <span class="lang-en">Each note is written by whoever made the change. Patches get two lines; releases get a letter.</span>
+        <span class="lang-zh">每条记录由做出改动的人执笔。修订只写两行，正式版本则是一封信。</span>
+      </p>
+    </div>
+
+    <div class="log">
+
+      <!-- JUNE -->
+      <div class="log-month">
+        <span class="log-month-label"><span class="lang-en">June 2026</span><span class="lang-zh">2026 年 6 月</span></span>
+        <span class="log-month-tick" aria-hidden="true"></span>
+      </div>
+
+      <article class="log-entry">
+        <div class="log-meta">
+          <span class="log-date">06 · 04 · 2026</span>
+          <span class="log-version">v3.4</span>
+        </div>
+        <div class="log-rail"><span class="log-dot" aria-hidden="true"></span></div>
+        <div class="log-card">
+          <h3 class="log-title"><span class="lang-en">The graph, quieter.</span><span class="lang-zh">关系图，安静了。</span></h3>
+          <p class="log-intro">
+            <span class="lang-en">The backlink graph used to dance every time you opened it. Now it settles, and stays put.</span>
+            <span class="lang-zh">反向链接图以前每次打开都要跳一阵舞。现在它会安定下来，停在原处。</span>
+          </p>
+          <ul class="log-list">
+            <li><span class="chip chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Graph filters — limit the view to one folder or one tag.</span><span class="lang-zh">图谱筛选——只看某个文件夹或某个标签下的链接。</span></span></li>
+            <li><span class="chip chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Hover a node to preview the note without leaving the graph.</span><span class="lang-zh">悬停节点即可预览笔记，不用离开图谱。</span></span></li>
+            <li><span class="chip chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span><span><span class="lang-en">Layout settles in under a second on a 2,000-note graph. It used to take four.</span><span class="lang-zh">两千条笔记的图谱，布局一秒内稳定。以前要四秒。</span></span></li>
+            <li><span class="chip chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">Orphan notes no longer drift off-canvas in small windows.</span><span class="lang-zh">孤立笔记不会再在小窗口里漂出画布。</span></span></li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- MAY -->
+      <div class="log-month">
+        <span class="log-month-label"><span class="lang-en">May 2026</span><span class="lang-zh">2026 年 5 月</span></span>
+        <span class="log-month-tick" aria-hidden="true"></span>
+      </div>
+
+      <article class="log-entry">
+        <div class="log-meta">
+          <span class="log-date">05 · 21 · 2026</span>
+          <span class="log-version log-version--patch">v3.3.1</span>
+        </div>
+        <div class="log-rail"><span class="log-dot log-dot--patch" aria-hidden="true"></span></div>
+        <div class="log-card">
+          <h3 class="log-title"><span class="lang-en">A quiet patch.</span><span class="lang-zh">一个安静的修订。</span></h3>
+          <p class="log-intro">
+            <span class="lang-en">Two sync bugs, both reported by the same careful reader in Osaka. Thank you, M.</span>
+            <span class="lang-zh">两个同步问题，都来自大阪同一位细心读者的报告。谢谢你，M。</span>
+          </p>
+          <ul class="log-list">
+            <li><span class="chip chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">Editing the same note offline on two devices no longer duplicates footnotes on merge.</span><span class="lang-zh">两台设备离线编辑同一条笔记，合并时不再复制脚注。</span></span></li>
+            <li><span class="chip chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">The iOS keyboard no longer covers the last line while a sync banner is visible.</span><span class="lang-zh">同步提示出现时，iOS 键盘不再遮住最后一行。</span></span></li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="log-entry">
+        <div class="log-meta">
+          <span class="log-date">05 · 07 · 2026</span>
+          <span class="log-version">v3.3</span>
+        </div>
+        <div class="log-rail"><span class="log-dot" aria-hidden="true"></span></div>
+        <div class="log-card">
+          <h3 class="log-title"><span class="lang-en">Publish, with footnotes.</span><span class="lang-zh">发布，带上脚注。</span></h3>
+          <p class="log-intro">
+            <span class="lang-en">Your published pages now carry everything the note does — footnotes included.</span>
+            <span class="lang-zh">你发布的页面现在能呈现笔记里的一切——包括脚注。</span>
+          </p>
+          <ul class="log-list">
+            <li><span class="chip chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Footnotes render on <code>skypad.page</code>, with return links back to the text.</span><span class="lang-zh">脚注可以在 <code>skypad.page</code> 上渲染，带返回正文的链接。</span></span></li>
+            <li><span class="chip chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Two new publishing typefaces, both open-source.</span><span class="lang-zh">两款新的发布字体，均为开源。</span></span></li>
+            <li><span class="chip chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span><span><span class="lang-en">Published pages self-host their fonts — your readers never touch a font CDN.</span><span class="lang-zh">发布页字体改为自托管——你的读者不会再请求字体 CDN。</span></span></li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- APRIL -->
+      <div class="log-month">
+        <span class="log-month-label"><span class="lang-en">April 2026</span><span class="lang-zh">2026 年 4 月</span></span>
+        <span class="log-month-tick" aria-hidden="true"></span>
+      </div>
+
+      <article class="log-entry">
+        <div class="log-meta">
+          <span class="log-date">04 · 09 · 2026</span>
+          <span class="log-version">v3.2</span>
+        </div>
+        <div class="log-rail"><span class="log-dot" aria-hidden="true"></span></div>
+        <div class="log-card">
+          <h3 class="log-title"><span class="lang-en">Search that reads Markdown.</span><span class="lang-zh">懂 Markdown 的搜索。</span></h3>
+          <p class="log-intro">
+            <span class="lang-en">We rebuilt search from scratch. It understands headings, code blocks and quotes — and it works on a plane.</span>
+            <span class="lang-zh">我们从头重写了搜索。它能区分标题、代码块和引用——而且在飞机上也能用。</span>
+          </p>
+          <figure class="log-mock">
+            <svg role="img" aria-label="Skypad search window: the query 'walks in:journal' returns three notes with the matched word underlined in gold" viewBox="0 0 760 310" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif">
+              <defs>
+                <filter id="srch-sh" x="-10%" y="-15%" width="120%" height="140%">
+                  <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#492d22" flood-opacity="0.08"/>
+                </filter>
+              </defs>
+              <rect width="760" height="310" rx="12" fill="#fbeedd"/>
+              <rect x="40" y="26" width="680" height="258" rx="10" fill="#ffffff" stroke="#e6d9bf" filter="url(#srch-sh)"/>
+              <g transform="translate(62 46)">
+                <circle cx="0" cy="0" r="4.5" fill="#c49464"/>
+                <circle cx="15" cy="0" r="4.5" fill="#dfc5a4"/>
+                <circle cx="30" cy="0" r="4.5" fill="#8a7564"/>
+              </g>
+              <text x="380" y="50" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="1" fill="#8a7564">SEARCH · SKYPAD</text>
+              <line x1="40" y1="64" x2="720" y2="64" stroke="#e6d9bf"/>
+
+              <!-- query field -->
+              <rect x="64" y="80" width="412" height="34" rx="8" fill="#fdf8ee" stroke="#e6d9bf"/>
+              <text x="80" y="102" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="13" fill="#312520">walks  in:journal</text>
+              <rect x="222" y="86" width="1.6" height="22" fill="#312520"/>
+              <text x="696" y="102" font-size="11.5" fill="#8a7564" text-anchor="end">12 notes · 0.04 s</text>
+
+              <!-- result 1 -->
+              <text x="64" y="148" font-size="13" font-weight="600" fill="#312520">On morning walks</text>
+              <text x="696" y="148" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="10.5" fill="#8a7564" text-anchor="end">journal/2026</text>
+              <text x="64" y="168" font-size="12" fill="#6b5a4f">I don't take walks for exercise. I walk to let the day settle…</text>
+              <rect x="118" y="172" width="34" height="2" fill="#c49464"/>
+              <rect x="180" y="172" width="30" height="2" fill="#c49464"/>
+              <line x1="64" y1="186" x2="696" y2="186" stroke="#e6d9bf"/>
+
+              <!-- result 2 -->
+              <text x="64" y="212" font-size="13" font-weight="600" fill="#312520">April readings</text>
+              <text x="696" y="212" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="10.5" fill="#8a7564" text-anchor="end">journal/2026</text>
+              <text x="64" y="232" font-size="12" fill="#6b5a4f">…the chapter on city walks reads differently after February.</text>
+              <rect x="173" y="236" width="33" height="2" fill="#c49464"/>
+              <line x1="64" y1="250" x2="696" y2="250" stroke="#e6d9bf"/>
+
+              <!-- result 3 -->
+              <text x="64" y="274" font-size="13" font-weight="600" fill="#312520">Letter to self, March</text>
+              <text x="696" y="274" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="10.5" fill="#8a7564" text-anchor="end">journal/2026</text>
+            </svg>
+            <figcaption style="margin-top:var(--space-3); font-family:'Inter', sans-serif; font-size:13px; color:#8a7564;">
+              <span class="lang-en">The new search window. Matches are underlined, filters are plain words.</span>
+              <span class="lang-zh">新的搜索窗口。命中词加下划线，筛选条件就是普通的词。</span>
+            </figcaption>
+          </figure>
+          <ul class="log-list">
+            <li><span class="chip chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Filters: <code>in:journal</code>, <code>before:2026-05</code>, <code>has:code</code>.</span><span class="lang-zh">筛选语法：<code>in:journal</code>、<code>before:2026-05</code>、<code>has:code</code>。</span></span></li>
+            <li><span class="chip chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">CJK-aware segmentation — Chinese and Japanese queries match on word boundaries.</span><span class="lang-zh">中日文分词——按词边界正确命中，不再整句匹配。</span></span></li>
+            <li><span class="chip chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span><span><span class="lang-en">The index lives on your disk. Search is fully offline.</span><span class="lang-zh">索引存在你的磁盘上。搜索完全离线。</span></span></li>
+            <li><span class="chip chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">Smart quotes no longer break exact-phrase search.</span><span class="lang-zh">弯引号不再破坏精确短语搜索。</span></span></li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- MARCH -->
+      <div class="log-month">
+        <span class="log-month-label"><span class="lang-en">March 2026</span><span class="lang-zh">2026 年 3 月</span></span>
+        <span class="log-month-tick" aria-hidden="true"></span>
+      </div>
+
+      <article class="log-entry">
+        <div class="log-meta">
+          <span class="log-date">03 · 18 · 2026</span>
+          <span class="log-version log-version--patch">v3.1.2</span>
+        </div>
+        <div class="log-rail"><span class="log-dot log-dot--patch" aria-hidden="true"></span></div>
+        <div class="log-card">
+          <h3 class="log-title"><span class="lang-en">Small fixes from the February letters.</span><span class="lang-zh">来自二月读者来信的小修复。</span></h3>
+          <ul class="log-list" style="border-top:none; padding-top:0; margin-top:var(--space-4);">
+            <li><span class="chip chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">The cursor no longer jumps after pasting more than 10,000 words.</span><span class="lang-zh">粘贴超过一万词后，光标不再跳动。</span></span></li>
+            <li><span class="chip chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">The device list could crash with more than five devices linked.</span><span class="lang-zh">绑定超过五台设备时，设备列表可能崩溃。</span></span></li>
+            <li><span class="chip chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span><span><span class="lang-en">Updates download as deltas — about 8 MB instead of 60.</span><span class="lang-zh">更新改为增量下载——大约 8 MB，而不是 60 MB。</span></span></li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- FEBRUARY -->
+      <div class="log-month">
+        <span class="log-month-label"><span class="lang-en">February 2026</span><span class="lang-zh">2026 年 2 月</span></span>
+        <span class="log-month-tick" aria-hidden="true"></span>
+      </div>
+
+      <article class="log-entry">
+        <div class="log-meta">
+          <span class="log-date">02 · 12 · 2026</span>
+          <span class="log-version">v3.1</span>
+        </div>
+        <div class="log-rail"><span class="log-dot" aria-hidden="true"></span></div>
+        <div class="log-card">
+          <h3 class="log-title"><span class="lang-en">Five devices, one key each.</span><span class="lang-zh">五台设备，各持一钥。</span></h3>
+          <p class="log-intro">
+            <span class="lang-en">Encryption you can see and manage — not just take on trust.</span>
+            <span class="lang-zh">加密不再只是「请相信我们」，而是看得见、管得住。</span>
+          </p>
+          <ul class="log-list">
+            <li><span class="chip chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Device manager — every device holds its own key. Revoke any of them in one click.</span><span class="lang-zh">设备管理——每台设备一把独立密钥，可一键吊销。</span></span></li>
+            <li><span class="chip chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">Yearly key rotation, automatic and silent.</span><span class="lang-zh">密钥每年自动轮换，静默完成。</span></span></li>
+            <li><span class="chip chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span><span><span class="lang-en">The recovery passphrase is now set up before your first sync, not after.</span><span class="lang-zh">恢复口令改为首次同步前设置，而不是之后。</span></span></li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- JANUARY -->
+      <div class="log-month">
+        <span class="log-month-label"><span class="lang-en">January 2026</span><span class="lang-zh">2026 年 1 月</span></span>
+        <span class="log-month-tick" aria-hidden="true"></span>
+      </div>
+
+      <article class="log-entry">
+        <div class="log-meta">
+          <span class="log-date">01 · 15 · 2026</span>
+          <span class="log-version">v3.0</span>
+        </div>
+        <div class="log-rail"><span class="log-dot" aria-hidden="true"></span></div>
+        <div class="log-card">
+          <h3 class="log-title"><span class="lang-en">The rebind.</span><span class="lang-zh">重新装订。</span></h3>
+          <p class="log-intro">
+            <span class="lang-en">A new editor engine, three years in the making. Everything feels the same — only faster.</span>
+            <span class="lang-zh">全新编辑器引擎，做了三年。一切手感如旧——只是更快了。</span>
+          </p>
+          <ul class="log-list">
+            <li><span class="chip chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span><span><span class="lang-en">New rendering engine — keystroke latency under 8 ms on a 2019 laptop.</span><span class="lang-zh">新渲染引擎——2019 年的笔记本上击键延迟低于 8 ms。</span></span></li>
+            <li><span class="chip chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span><span><span class="lang-en">Themes rebuilt on design tokens. Your old theme migrates automatically.</span><span class="lang-zh">主题改用 design token 重建，旧主题自动迁移。</span></span></li>
+            <li><span class="chip chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span><span><span class="lang-en">Forty-one long-standing editor bugs — the full list is in the release letter.</span><span class="lang-zh">四十一个陈年编辑器问题——完整清单见随版本信。</span></span></li>
+          </ul>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- How a release ships -->
+<section class="ember-section" style="background:#fbeedd; padding-block:var(--space-10);">
+  <div class="ember-container">
+    <div style="max-width:680px; margin:0 auto; text-align:center;">
+      <span class="accent-strip accent-strip--center"></span>
+      <span class="eyebrow"><span class="lang-en">Process</span><span class="lang-zh">流程</span></span>
+      <h2 class="section-title">
+        <span class="lang-en">How a release ships.</span>
+        <span class="lang-zh">一个版本如何发布。</span>
+      </h2>
+      <p class="ember-lead" style="font-size:19px; margin-top:var(--space-5);">
+        <span class="lang-en">Every version walks the same four weeks. If the beta ring finds a regression, the date moves — the bar doesn't.</span>
+        <span class="lang-zh">每个版本都走同样的四周。如果测试圈发现回归，推迟的是日期，不降的是标准。</span>
+      </p>
+    </div>
+    <figure class="pipeline-figure">
+      <svg role="img" aria-label="Release pipeline: build, beta ring, a regressions decision, quiet week, then ship with a letter — regressions loop back to be fixed first" viewBox="0 0 960 240" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <filter id="relpipe-sh" x="-20%" y="-30%" width="140%" height="180%">
+            <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#492d22" flood-opacity="0.08"/>
+          </filter>
+          <marker id="relpipe-arrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c49464"/>
+          </marker>
+          <marker id="relpipe-arrW" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a7564"/>
+          </marker>
+        </defs>
+
+        <rect width="960" height="240" rx="16" fill="#fdf8ee" stroke="#e6d9bf"/>
+        <text x="28" y="36" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace" font-size="11" letter-spacing="1.1" fill="#8a7564">RELEASE PIPELINE · FOUR WEEKS</text>
+        <text x="932" y="36" font-size="11" fill="#8a7564" text-anchor="end">regression found → fix before ship</text>
+
+        <!-- gold happy path -->
+        <g fill="none" stroke="#c49464" stroke-width="1.8">
+          <line x1="192" y1="128" x2="224" y2="128" marker-end="url(#relpipe-arrG)"/>
+          <line x1="392" y1="128" x2="432" y2="128" marker-end="url(#relpipe-arrG)"/>
+          <line x1="536" y1="128" x2="568" y2="128" marker-end="url(#relpipe-arrG)"/>
+          <line x1="736" y1="128" x2="768" y2="128" marker-end="url(#relpipe-arrG)"/>
+        </g>
+        <text x="552" y="116" font-size="11" font-weight="600" fill="#c49464" text-anchor="middle">none</text>
+
+        <!-- regression loop: dashed warm gray back to build -->
+        <path d="M488,168 V192 Q488,200 480,200 H120 Q112,200 112,192 V172" fill="none" stroke="#8a7564" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#relpipe-arrW)"/>
+        <text x="300" y="192" font-size="11" fill="#8a7564" text-anchor="middle">found · fix first</text>
+
+        <!-- step cards -->
+        <g filter="url(#relpipe-sh)">
+          <rect x="32" y="88" width="160" height="80" rx="12" fill="#ffffff"/>
+          <rect x="232" y="88" width="160" height="80" rx="12" fill="#ffffff"/>
+          <rect x="576" y="88" width="160" height="80" rx="12" fill="#ffffff"/>
+          <rect x="776" y="88" width="160" height="80" rx="12" fill="#ffffff"/>
+        </g>
+
+        <!-- decision diamond -->
+        <path d="M488,88 L536,128 L488,168 L440,128 Z" fill="#f5e5c8" stroke="#c49464" stroke-width="1.5"/>
+        <text x="488" y="132" font-size="12" font-weight="600" fill="#312520" text-anchor="middle">Regressions?</text>
+
+        <!-- icons: decorative micro-gold -->
+        <g transform="translate(48,116)" fill="none" stroke="#c49464" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="4" width="16" height="16" rx="3"/>
+          <path d="M9 12 l2.5 2.5 L16 9.5"/>
+        </g>
+        <g transform="translate(248,116)" fill="none" stroke="#c49464" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="9" r="3.5"/><circle cx="17" cy="11" r="3"/>
+          <path d="M3.5 20 c0-3 2.5-5 5.5-5 s5.5 2 5.5 5"/><path d="M15 15.5 c2.8 0 5.5 1.8 5.5 4.5"/>
+        </g>
+        <g transform="translate(592,116)" fill="none" stroke="#c49464" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 7v5l3.5 2.5"/>
+        </g>
+        <g transform="translate(792,116)" fill="none" stroke="#c49464" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 4 L4 11 l6.5 2.5 2.5 6.5 Z"/><path d="M10.5 13.5 L20 4"/>
+        </g>
+
+        <!-- step text -->
+        <g font-size="13" font-weight="600" fill="#312520">
+          <text x="84" y="124">Build</text>
+          <text x="284" y="124">Beta ring</text>
+          <text x="628" y="124">Quiet week</text>
+          <text x="828" y="124">Ship + write</text>
+        </g>
+        <g font-size="11" fill="#8a7564">
+          <text x="84" y="146">nightly · signed</text>
+          <text x="284" y="146">1,400 writers · 2 wks</text>
+          <text x="628" y="146">no new merges</text>
+          <text x="828" y="146">binary + the letter</text>
+        </g>
+
+        <!-- numbered badges -->
+        <g font-size="11" font-weight="700" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">
+          <circle cx="36" cy="92" r="10" fill="#c49464"/><text x="36" y="96" fill="#312520">1</text>
+          <circle cx="236" cy="92" r="10" fill="#c49464"/><text x="236" y="96" fill="#312520">2</text>
+          <circle cx="580" cy="92" r="10" fill="#c49464"/><text x="580" y="96" fill="#312520">3</text>
+          <circle cx="780" cy="92" r="10" fill="#c49464"/><text x="780" y="96" fill="#312520">4</text>
+        </g>
+      </svg>
+      <figcaption>
+        <span class="lang-en">Four weeks, every version. A found regression loops back to build — it never rides along.</span>
+        <span class="lang-zh">每个版本走同样的四周。发现回归就退回构建——绝不带着问题发车。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Pull quote on dark chocolate — italic earned -->
+<section class="pull-quote-dark">
+  <div class="ember-container" style="text-align:center; max-width:940px;">
+    <blockquote class="ember-quote">
+      <span class="lang-en">I read their changelog even when nothing is broken. It's the only release page I know that reads like a letter, not a press release.</span>
+      <span class="lang-zh">什么都没坏的时候，我也会读他们的更新日志。这是我知道的唯一一个读起来像信、而不像新闻稿的发布页。</span>
+    </blockquote>
+    <cite>
+      <span aria-hidden="true" style="display:inline-block; width:20px; height:1.5px; background:#c49464; vertical-align:middle; margin-right:8px;"></span>
+      <span class="lang-en">Tomas Egger — essayist · reading since v2.1</span>
+      <span class="lang-zh">Tomas Egger——随笔作家 · 从 v2.1 读到现在</span>
+    </cite>
+  </div>
+</section>
+
+<!-- Subscribe CTA -->
+<section class="ember-section" style="text-align:center; padding-block:var(--space-10);" id="subscribe">
+  <div class="ember-container" style="max-width:740px;">
+    <span class="accent-strip accent-strip--center"></span>
+    <span class="eyebrow"><span class="lang-en">Subscribe</span><span class="lang-zh">订阅</span></span>
+    <h2 class="section-title" style="font-size:56px;">
+      <span class="lang-en">Hear about the next one.</span>
+      <span class="lang-zh">下一个版本，第一时间收到。</span>
+    </h2>
+    <p class="ember-lead" style="margin:var(--space-5) auto var(--space-6); max-width:560px;">
+      <span class="lang-en">One letter per release, written by whoever made the change. The unsubscribe link sits at the top of every letter, not buried at the bottom.</span>
+      <span class="lang-zh">每个版本一封信，由做出改动的人执笔。退订链接放在每封信的顶部，不藏在底部。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-4); justify-content:center; align-items:center; flex-wrap:wrap;">
+      <a class="ember-button" href="#email"><span class="lang-en">Subscribe by email</span><span class="lang-zh">邮件订阅</span></a>
+      <a class="ember-link" href="#rss"><span class="lang-en">RSS feed</span><span class="lang-zh">RSS 订阅源</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="ember-footer">
+  <div class="ember-footer-grid">
+    <div class="ember-footer-group"><h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5><a href="landing.html"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a><a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a><a href="landing.html#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a><a href="changelog.html"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">For teams</span><span class="lang-zh">团队</span></h5><a href="#teams"><span class="lang-en">Team plan</span><span class="lang-zh">团队版</span></a><a href="#enterprise"><span class="lang-en">Enterprise</span><span class="lang-zh">企业版</span></a><a href="#security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a><a href="#slas">SLAs</a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">Writers</span><span class="lang-zh">作者</span></h5><a href="#guide"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a><a href="blog-index.html"><span class="lang-en">Journal</span><span class="lang-zh">杂志</span></a><a href="#showcase"><span class="lang-en">Showcase</span><span class="lang-zh">作品精选</span></a><a href="#community"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5><a href="#about"><span class="lang-en">About</span><span class="lang-zh">关于</span></a><a href="#press"><span class="lang-en">Press</span><span class="lang-zh">媒体</span></a><a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a><a href="#status"><span class="lang-en">Status</span><span class="lang-zh">状态</span></a></div>
+    <div class="ember-footer-group"><h5><span class="lang-en">Legal</span><span class="lang-zh">法务</span></h5><a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a><a href="#terms"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a><a href="#dpa">DPA</a><a href="#audit"><span class="lang-en">Audit</span><span class="lang-zh">审计</span></a></div>
+  </div>
+  <div class="ember-footer-legal">
+    <span>Copyright © 2026 Skypad Inc.</span>
+    <span><span class="lang-en">Made in Berlin · Toronto · Kyoto</span><span class="lang-zh">制作于 柏林 · 多伦多 · 京都</span></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: ember
+Page-type: changelog
+Created: 2026-06-11
+
+Decisions (6):
+1. [letters-not-release-notes] chose "entries written as short letters (named title + one intro sentence + grouped changes)" over "terse bullet-only release notes". Because: ember's voice is handcraft + intimacy; a bare bullet dump reads as SaaS housekeeping and would contradict the hero's subscribe promise ("one letter per release") in the very next scroll.
+2. [ink-coded-chips] chose "change-type chips on warm tints with category carried by the dot's ink (gold = added, chocolate = changed, warm gray = fixed), all text dark chocolate" over "three-hue chips (green/blue/red)". Because: ember has exactly one accent color; multi-hue chips are anthropic's language and a green/red pair imports cold UI semantics — the warm-ink triplet keeps the category legible (and printable in grayscale) while gold stays the single celebration color for what's new.
+3. [left-rail-time-axis] chose "200px right-aligned meta column (mono date + version pill) + hairline rail with gold dots and month ticks" over "centered cards with floating date pills". Because: a changelog's one non-negotiable reading is time order; a literal vertical rail makes the time axis visible at every scroll position, and the right-aligned mono dates give the page a ledger rhythm that matches ember's bookbinding metaphor.
+4. [cadence-figure-up-top] chose "release-cadence timeline SVG directly under the hero, gold reserved for the latest release marker" over "opening straight into entry cards". Because: the figure answers 'how often do they ship, did anything break' in one glance before any scrolling; per diagram-craft, gold's single narrative is 'the newest thing' — every older release recedes into warm ink, majors heavier than patches.
+5. [one-mock-not-eight] chose "a single in-entry window mock (the v3.2 search release)" over "a screenshot per entry". Because: one paper-feel mock marks the biggest release as the chapter illustration; a mock in all seven entries would flatten hierarchy and turn the ledger into a gallery, and the diagram-density contract asks for rhythm, not saturation.
+6. [stat-strip-cadence-honesty] chose "four italic Fraunces numerals about cadence and accountability (7 releases / 25-day median / 0 breaking / 41 fixes from letters)" over "vanity metrics (downloads, stars, team size)". Because: a changelog's credibility rests on rhythm and breakage, not popularity — '0 breaking changes' is the number a returning reader actually checks, and the italic numerals keep ember's stat-strip signature without adding a fourth italic surface.
+
+Known trade-offs:
+- The meta column + rail spend ~256px of the 1200 container on chrome, leaving entry cards ~880px. Accepted: the ledger reading depends on the fixed axis; below 900px the grid collapses to a stacked layout and the rail disappears.
+- Only v3.2 gets a visual; the latest release (v3.4) is text-only inside the log. Accepted: gold in the cadence figure already celebrates v3.4 — giving the mock to the search release keeps the one-illustration-per-chapter discipline instead of always decorating "latest".
+- The subscribe CTA appears twice (hero buttons + closing band). Slight repetition accepted: changelog visitors split into skimmers who decide at the top and readers who decide after the letters; both need the door where they stand.
+
+/design-review:self-diff -->
+
+</body>
+</html>

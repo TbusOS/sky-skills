@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad Studio — the desktop notebook for keyboard-first writing</title>
+<meta name="description" content="Skypad Studio is the desktop notebook for keyboard-first writing — Markdown-native, local-first, with optional end-to-end encrypted sync.">
+<meta property="og:title" content="Skypad Studio — the desktop notebook for keyboard-first writing">
+<meta property="og:description" content="Markdown-native, local-first, with optional end-to-end encrypted sync. Canonical sage-design product-detail page.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/sage.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--sage-divider);
+    color: var(--sage-ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .lang-toggle:hover { background: #f0f3e2; }
+
+  /* Chinese (§H): Instrument Serif → Noto Serif SC; Inter → Noto Sans SC. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .sage-lead,
+  html[data-lang="zh"] .use-tile p,
+  html[data-lang="zh"] .spec-body,
+  html[data-lang="zh"] .limit-item p,
+  html[data-lang="zh"] .lineup-tagline,
+  html[data-lang="zh"] .lineup-row-value,
+  html[data-lang="zh"] .fig-caption {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .hero-headline,
+  html[data-lang="zh"] .hero-headline em,
+  html[data-lang="zh"] .hero-tagline,
+  html[data-lang="zh"] .section-title,
+  html[data-lang="zh"] .section-title em,
+  html[data-lang="zh"] .glance-num,
+  html[data-lang="zh"] .use-tile h3,
+  html[data-lang="zh"] .lineup-name,
+  html[data-lang="zh"] blockquote {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .sect-marker,
+  html[data-lang="zh"] .glance-lbl,
+  html[data-lang="zh"] .glance-sub,
+  html[data-lang="zh"] .spec-label,
+  html[data-lang="zh"] .limit-num,
+  html[data-lang="zh"] .lineup-eyebrow,
+  html[data-lang="zh"] .lineup-flag,
+  html[data-lang="zh"] .lineup-row-label {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+    text-transform: none;
+    letter-spacing: 0.04em;
+  }
+
+  /* Numbered section markers (sage signature) */
+  .sect-marker {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--sage-text-secondary);
+    margin-bottom: var(--space-4);
+  }
+  .sect-marker--onink { color: #d4e1b8; }
+
+  /* Hero — product name primary, tag-line subordinate, ONE italic accent */
+  .hero-headline {
+    font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 96px; line-height: 1.0; letter-spacing: -0.022em;
+    color: var(--sage-ink); margin: 0;
+  }
+  .hero-headline em { font-style: italic; font-weight: 400; color: var(--sage-ink); }
+  .hero-tagline {
+    display: block;
+    font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 44px; line-height: 1.12; letter-spacing: -0.015em;
+    color: var(--sage-ink); margin-top: var(--space-3);
+  }
+
+  /* Section titles — roman, italic reserved for one accent word */
+  .section-title {
+    font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 60px; line-height: 1.08; letter-spacing: -0.025em;
+    color: var(--sage-ink); margin: var(--space-3) 0 0;
+  }
+  .section-title em { font-style: italic; font-weight: 400; }
+  .section-title--md { font-size: 52px; }
+  .section-title--sm { font-size: 44px; }
+
+  /* 01 · At-a-glance — 4 cells, sage hairlines, roman values */
+  .glance-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4);
+    margin-top: var(--space-7);
+    border-top: 1px solid var(--sage-divider);
+    padding-top: var(--space-6);
+  }
+  .glance-strip > div { padding: var(--space-2) var(--space-4) 0; border-left: 1px solid var(--sage-divider); }
+  .glance-strip > div:first-child { border-left: none; padding-left: 0; }
+  .glance-lbl {
+    display: block;
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--sage-text-secondary);
+    margin-bottom: var(--space-4);
+  }
+  .glance-num {
+    display: block; font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 72px; color: var(--sage-ink); letter-spacing: -0.028em; line-height: 1;
+  }
+  .glance-sub {
+    display: block; margin-top: var(--space-4);
+    font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--sage-text);
+    line-height: 1.5;
+  }
+
+  /* 02 · Window mock plate */
+  .product-frame {
+    background: #f0f3e2;
+    border-radius: 6px; padding: var(--space-5) var(--space-6);
+    border: 1px solid var(--sage-divider);
+    margin: 0;
+  }
+  .fig-caption {
+    font-family: 'Inter', sans-serif; font-size: 14.5px; line-height: 1.6;
+    color: var(--sage-text-secondary);
+    margin-top: var(--space-4); text-align: center;
+  }
+
+  /* 03 · Use tiles — 3-up, schematic on top */
+  .use-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-top: var(--space-8); }
+  .use-tile {
+    background: #ffffff; border: 1px solid var(--sage-divider);
+    border-radius: 4px; padding: var(--space-5);
+    display: flex; flex-direction: column; gap: var(--space-4);
+  }
+  .use-tile svg { width: 100%; height: auto; display: block; border-radius: 3px; background: #fafbf0; border: 1px solid var(--sage-divider); }
+  .use-tile h3 {
+    font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 24px; color: var(--sage-ink); margin: var(--space-1) 0 0; line-height: 1.22;
+    letter-spacing: -0.01em;
+  }
+  .use-tile p {
+    font-family: 'Inter', sans-serif; font-size: 15.5px; line-height: 1.65;
+    color: var(--sage-text); margin: 0;
+  }
+
+  /* 04 · Spec table — model-card rows on the subtle band */
+  .spec-rows { border-top: 1px solid var(--sage-divider); margin-top: var(--space-8); }
+  .spec-row {
+    display: grid; grid-template-columns: 220px 1fr; gap: var(--space-6);
+    padding: var(--space-5) 0;
+    border-bottom: 1px solid var(--sage-divider);
+  }
+  .spec-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--sage-text-secondary);
+    margin: 0; padding-top: 5px;
+  }
+  .spec-body {
+    font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.65;
+    color: var(--sage-text); margin: 0;
+  }
+  .spec-body code, .limit-item code {
+    font-family: 'JetBrains Mono', monospace; font-size: 13.5px;
+    background: #ffffff; border: 1px solid var(--sage-divider);
+    color: var(--sage-ink); padding: 2px 7px; border-radius: 3px;
+  }
+
+  /* 05 · Honest limits — calm white callout, roman prose, NO italic */
+  .limits-box {
+    background: #ffffff; border: 1px solid var(--sage-divider);
+    border-left: 3px solid var(--sage-ink);
+    border-radius: 4px; padding: var(--space-6) var(--space-7);
+    margin-top: var(--space-7);
+    display: flex; flex-direction: column;
+  }
+  .limit-item {
+    display: grid; grid-template-columns: 44px 1fr; gap: var(--space-5);
+    padding: var(--space-5) 0; border-bottom: 1px solid var(--sage-divider);
+    align-items: baseline;
+  }
+  .limit-item:last-child { border-bottom: none; padding-bottom: var(--space-2); }
+  .limit-item:first-child { padding-top: var(--space-2); }
+  .limit-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.14em; color: var(--sage-text-secondary);
+  }
+  .limit-item p {
+    font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.65;
+    color: var(--sage-text); margin: 0;
+  }
+  .limit-item p strong { font-weight: 600; color: var(--sage-ink); }
+
+  /* 06 · Lineup — current product raised in the middle (§I symmetric hero) */
+  .lineup-grid {
+    display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: var(--space-5);
+    align-items: stretch; margin-top: var(--space-8);
+  }
+  .lineup-card {
+    background: #ffffff; border: 1px solid var(--sage-divider);
+    border-radius: 4px; padding: var(--space-6);
+    display: flex; flex-direction: column; gap: var(--space-3);
+  }
+  .lineup-card--current {
+    border-color: var(--sage-ink);
+    box-shadow: 0 0 0 1px var(--sage-ink);
+  }
+  .lineup-flag {
+    display: inline-block; align-self: flex-start;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    background: var(--sage-ink); color: #ffffff;
+    padding: 4px 10px; border-radius: 3px;
+    margin-bottom: var(--space-2);
+  }
+  .lineup-eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--sage-text-secondary); margin: 0;
+  }
+  .lineup-name {
+    font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 28px; color: var(--sage-ink); margin: 0; line-height: 1.15;
+    letter-spacing: -0.012em;
+  }
+  .lineup-tagline {
+    font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.55;
+    color: var(--sage-text-secondary); margin: 0;
+  }
+  .lineup-rows {
+    display: flex; flex-direction: column;
+    margin-top: var(--space-3); border-top: 1px solid var(--sage-divider);
+  }
+  .lineup-row {
+    display: grid; grid-template-columns: 96px 1fr; gap: var(--space-4);
+    padding: var(--space-3) 0; border-bottom: 1px solid var(--sage-divider);
+    align-items: baseline;
+  }
+  .lineup-row:last-child { border-bottom: none; }
+  .lineup-row-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--sage-text-secondary);
+  }
+  .lineup-row-value {
+    font-family: 'Inter', sans-serif; font-size: 14.5px; line-height: 1.55;
+    color: var(--sage-text);
+  }
+  .lineup-card .sage-link { margin-top: auto; padding-top: var(--space-4); font-size: 15px; align-self: flex-start; }
+
+  /* 08 · Pull-quote band — italic earned here */
+  .pull-quote-dark {
+    background: var(--sage-ink); color: #ffffff; padding: var(--space-10) 0;
+  }
+  .pull-quote-dark blockquote {
+    font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
+    font-size: 38px; line-height: 1.35; color: #ffffff;
+    margin: var(--space-4) 0 0; max-width: 920px;
+    display: inline-block;
+  }
+  .pull-quote-dark cite {
+    display: block; margin-top: var(--space-6);
+    font-family: 'Inter', sans-serif; font-style: normal; font-size: 14.5px;
+    color: #97B077; letter-spacing: 0.05em;
+  }
+
+  /* Responsive (reading on smaller screens; gates run at 1440) */
+  @media (max-width: 900px) {
+    .hero-headline { font-size: 56px; }
+    .hero-tagline { font-size: 30px; }
+    .section-title { font-size: 40px; }
+    .section-title--md, .section-title--sm { font-size: 34px; }
+    .glance-strip { grid-template-columns: repeat(2, 1fr); row-gap: var(--space-6); }
+    .glance-strip > div:nth-child(3) { border-left: none; padding-left: 0; }
+    .glance-num { font-size: 52px; }
+    .use-grid3 { grid-template-columns: 1fr; }
+    .spec-row { grid-template-columns: 1fr; gap: var(--space-2); }
+    .lineup-grid { grid-template-columns: 1fr; }
+    .pull-quote-dark blockquote { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="sage-nav"><div class="sage-nav-inner">
+  <a href="landing.html" class="sage-nav-brand">Skypad</a>
+  <div>
+    <a href="#" style="border-bottom:1px solid var(--sage-sage); padding-bottom:2px;">Studio</a>
+    <a href="#reader">Reader</a>
+    <a href="#sync">Sync</a>
+    <a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="docs-home.html"><span class="lang-en">Docs</span><span class="lang-zh">文档</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a href="#login" style="font-size:14px; color:var(--sage-ink); text-decoration:none;"><span class="lang-en">Sign in</span><span class="lang-zh">登录</span></a>
+    <a class="sage-button" href="#download"><span class="lang-en">Try Studio</span><span class="lang-zh">试用 Studio</span></a>
+  </div>
+</div></nav>
+
+<!-- 00 · Hero -->
+<header class="sage-section" style="padding-top:var(--space-9); padding-bottom:var(--space-8);">
+  <div class="sage-container sage-container--wide">
+    <span class="sect-marker">00 · <span class="lang-en">Skypad Studio</span><span class="lang-zh">Skypad Studio</span></span>
+    <h1 class="hero-headline">
+      <span class="lang-en">Skypad Studio<span class="hero-tagline">the desktop notebook for <em>keyboard-first</em> writing.</span></span>
+      <span class="lang-zh">Skypad Studio<span class="hero-tagline">给键盘优先写作的桌面笔记本。</span></span>
+    </h1>
+    <p class="sage-lead" style="margin-top:var(--space-6); max-width:720px; font-size:21px; line-height:1.55;">
+      <span class="lang-en">A Markdown-native desktop editor for writers who keep both hands on the keys. Local files, optional end-to-end encrypted sync, and three shortcuts that cover the whole day.</span>
+      <span class="lang-zh">为双手不离键盘的写作者准备的 Markdown 原生桌面编辑器。本地文件，可选的端到端加密同步，三个快捷键覆盖一整天的写作。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-5); align-items:center; margin-top:var(--space-7); flex-wrap:wrap;">
+      <a class="sage-button" href="#download"><span class="lang-en">Download Studio — 14-day trial</span><span class="lang-zh">下载 Studio——14 天试用</span></a>
+      <a class="sage-link" href="pricing.html"><span class="lang-en">Read the pricing</span><span class="lang-zh">阅读定价</span></a>
+    </div>
+    <p style="margin-top:var(--space-6); margin-bottom:0; font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--sage-text-secondary); letter-spacing:0.12em;">
+      <span class="lang-en">MACOS · WINDOWS · LINUX &nbsp;·&nbsp; RELEASED 2025-Q4 · V1.4</span>
+      <span class="lang-zh" style="font-family:'Noto Sans SC', 'PingFang SC', sans-serif; letter-spacing:0.04em;">macOS · Windows · Linux · 2025-Q4 发布 · v1.4</span>
+    </p>
+
+    <!-- 01 · At a glance -->
+    <div style="margin-top:var(--space-8);">
+      <span class="sect-marker" style="margin-bottom:0;">01 · <span class="lang-en">At a glance</span><span class="lang-zh">一眼看清</span></span>
+      <div class="glance-strip">
+        <div>
+          <span class="glance-lbl"><span class="lang-en">Launch to type</span><span class="lang-zh">启动到输入</span></span>
+          <span class="glance-num">80&hairsp;ms</span>
+          <span class="glance-sub"><span class="lang-en">cold start to a blinking cursor</span><span class="lang-zh">冷启动到光标开始闪烁</span></span>
+        </div>
+        <div>
+          <span class="glance-lbl"><span class="lang-en">File format</span><span class="lang-zh">文件格式</span></span>
+          <span class="glance-num">.md</span>
+          <span class="glance-sub"><span class="lang-en">plain Markdown on your own disk</span><span class="lang-zh">你自己磁盘上的纯 Markdown</span></span>
+        </div>
+        <div>
+          <span class="glance-lbl"><span class="lang-en">Platforms</span><span class="lang-zh">平台</span></span>
+          <span class="glance-num">3</span>
+          <span class="glance-sub">macOS · Windows · Linux</span>
+        </div>
+        <div>
+          <span class="glance-lbl"><span class="lang-en">Sync model</span><span class="lang-zh">同步模型</span></span>
+          <span class="glance-num">E2E</span>
+          <span class="glance-sub"><span class="lang-en">encrypted sync · off by default</span><span class="lang-zh">端到端加密同步，默认关闭</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 02 · The Studio window -->
+<section class="sage-section" style="padding-top:var(--space-8); padding-bottom:var(--space-9);" id="window">
+  <div class="sage-container sage-container--wide">
+    <div style="max-width:720px; margin-bottom:var(--space-7);">
+      <span class="sect-marker">02 · <span class="lang-en">The Studio window</span><span class="lang-zh">Studio 主窗口</span></span>
+      <h2 class="section-title section-title--sm">
+        <span class="lang-en">One window, three panes.</span>
+        <span class="lang-zh">一扇窗，三栏。</span>
+      </h2>
+      <p class="sage-lead" style="max-width:640px; margin-top:var(--space-5); font-size:18px;">
+        <span class="lang-en">Vault on the left, prose in the middle, backlinks on the right. Nothing ever opens over your text — both side panes fold away with ⌘ E.</span>
+        <span class="lang-zh">左边是仓库，中间是正文，右边是反向链接。没有任何东西会盖在文字上面——两个侧栏用 ⌘ E 一键收起。</span>
+      </p>
+    </div>
+    <figure class="product-frame">
+      <svg role="img" aria-label="Skypad Studio editor window with three panes: a vault file list on the left, the note being written in the middle, and computed backlinks on the right" viewBox="0 0 1160 560" style="display:block; width:100%; height:auto; border-radius:4px; background:#ffffff; border:1px solid var(--sage-divider);">
+        <!-- title bar -->
+        <rect width="1160" height="40" fill="#f0f3e2"/>
+        <g transform="translate(20 20)">
+          <circle cx="0" cy="0" r="5.5" fill="#97B077"/>
+          <circle cx="18" cy="0" r="5.5" fill="#c9d1b3"/>
+          <circle cx="36" cy="0" r="5.5" fill="#6d6f82"/>
+        </g>
+        <text x="580" y="25" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12" fill="#6d6f82">winter-light.md · Skypad Studio</text>
+        <line x1="0" y1="40" x2="1160" y2="40" stroke="#e5e8da"/>
+
+        <!-- left pane · vault -->
+        <rect x="0" y="40" width="232" height="520" fill="#fafbf0"/>
+        <line x1="232" y1="40" x2="232" y2="560" stroke="#e5e8da"/>
+        <text x="22" y="76" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82" letter-spacing="0.14em">01 · VAULT</text>
+        <text x="22" y="108" font-family="'Inter', sans-serif" font-size="13" fill="#2a2c40">▾ essays</text>
+        <rect x="12" y="120" width="208" height="24" fill="#eef2de" rx="3"/>
+        <text x="36" y="136" font-family="'Inter', sans-serif" font-size="13" font-weight="600" fill="#2a2c40">● winter-light.md</text>
+        <text x="36" y="164" font-family="'Inter', sans-serif" font-size="13" fill="#6d6f82">○ tide-tables.md</text>
+        <text x="36" y="190" font-family="'Inter', sans-serif" font-size="13" fill="#6d6f82">○ on-walking.md</text>
+        <text x="22" y="222" font-family="'Inter', sans-serif" font-size="13" fill="#2a2c40">▸ daily</text>
+        <text x="22" y="248" font-family="'Inter', sans-serif" font-size="13" fill="#2a2c40">▸ field-notes</text>
+        <text x="22" y="274" font-family="'Inter', sans-serif" font-size="13" fill="#2a2c40">▸ archive</text>
+        <text x="22" y="544" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82" letter-spacing="0.14em">1,842 NOTES</text>
+
+        <!-- middle pane · editor -->
+        <g transform="translate(276 76)">
+          <text x="0" y="0" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="0.16em" fill="#6d6f82">02 · EDITOR</text>
+          <text x="0" y="46" font-family="'Instrument Serif', serif" font-size="36" font-weight="400" fill="#393C54" letter-spacing="-0.02em">Winter light</text>
+          <text x="0" y="72" font-family="'Inter', sans-serif" font-size="12.5" fill="#6d6f82">essays · 1,204 words · edited just now</text>
+          <rect x="0" y="90" width="18" height="1.5" fill="#97B077"/>
+
+          <g font-family="Georgia, serif" font-size="16" fill="#2a2c40">
+            <text x="0" y="128">The light in January is honest. It arrives late,</text>
+            <text x="0" y="154">leaves early, and does not flatter anything</text>
+            <text x="0" y="180">it touches — which is exactly why the drafts</text>
+            <text x="0" y="206">written by it tend to survive revision.</text>
+          </g>
+
+          <text x="0" y="252" font-family="'JetBrains Mono', monospace" font-size="13" fill="#97B077">##</text>
+          <g font-family="Georgia, serif" font-size="16" fill="#2a2c40">
+            <text x="26" y="252">What the window teaches</text>
+            <text x="0" y="290">Keep the sentence. Lose the ornament. Each</text>
+            <text x="0" y="316">draft loses a layer until only weather is left.</text>
+          </g>
+
+          <rect x="346" y="304" width="2" height="20" fill="#97B077">
+            <animate attributeName="opacity" values="1;0;1" dur="1.2s" repeatCount="indefinite"/>
+          </rect>
+        </g>
+
+        <!-- right pane · backlinks -->
+        <rect x="872" y="40" width="288" height="520" fill="#fafbf0"/>
+        <line x1="872" y1="40" x2="872" y2="560" stroke="#e5e8da"/>
+        <text x="894" y="76" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82" letter-spacing="0.14em">03 · BACKLINKS</text>
+        <text x="894" y="108" font-family="'Inter', sans-serif" font-size="12.5" fill="#2a2c40">· daily/2026-01-14</text>
+        <text x="894" y="134" font-family="'Inter', sans-serif" font-size="12.5" fill="#2a2c40">· essays/on-walking</text>
+        <text x="894" y="160" font-family="'Inter', sans-serif" font-size="12.5" fill="#2a2c40">· field-notes/first-frost</text>
+        <line x1="894" y1="186" x2="1138" y2="186" stroke="#e5e8da"/>
+        <text x="894" y="214" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82" letter-spacing="0.14em">COMPUTED IN 18 MS</text>
+        <!-- small local graph -->
+        <g>
+          <line x1="1016" y1="300" x2="950" y2="356" stroke="#c9d1b3" stroke-width="0.8"/>
+          <line x1="1016" y1="300" x2="1082" y2="348" stroke="#c9d1b3" stroke-width="0.8"/>
+          <line x1="1016" y1="300" x2="1030" y2="384" stroke="#c9d1b3" stroke-width="0.8"/>
+          <line x1="950" y1="356" x2="1030" y2="384" stroke="#c9d1b3" stroke-width="0.8"/>
+          <circle cx="1016" cy="300" r="7" fill="#97B077"/>
+          <circle cx="950" cy="356" r="4.5" fill="#393C54"/>
+          <circle cx="1082" cy="348" r="4.5" fill="#393C54"/>
+          <circle cx="1030" cy="384" r="3.5" fill="#6d6f82"/>
+        </g>
+
+        <!-- status bar -->
+        <line x1="232" y1="520" x2="1160" y2="520" stroke="#e5e8da"/>
+        <text x="276" y="544" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82" letter-spacing="0.14em">SAVED · JUST NOW</text>
+        <text x="540" y="544" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82" letter-spacing="0.14em">1,204 WORDS · 6 MIN</text>
+        <text x="1014" y="544" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82" letter-spacing="0.14em">E2E · SYNC OFF</text>
+      </svg>
+      <figcaption class="fig-caption">
+        <span class="lang-en">The Studio window at rest — vault, editor, and backlinks computed in 18&hairsp;ms. Both side panes fold away with ⌘ E.</span>
+        <span class="lang-zh">静止状态下的 Studio 窗口——仓库、编辑器，以及 18ms 算完的反向链接。两个侧栏用 ⌘ E 收起。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 03 · Use cases -->
+<section class="sage-section" style="padding-block:var(--space-9);" id="uses">
+  <div class="sage-container sage-container--wide">
+    <div style="max-width:720px;">
+      <span class="sect-marker">03 · <span class="lang-en">Use cases</span><span class="lang-zh">用途</span></span>
+      <h2 class="section-title section-title--md">
+        <span class="lang-en">Three jobs it does <em>well.</em></span>
+        <span class="lang-zh">三件它做得<em>好</em>的事。</span>
+      </h2>
+      <p class="sage-lead" style="max-width:620px; margin-top:var(--space-5); font-size:18px;">
+        <span class="lang-en">Studio was designed for these. If your work isn't on this list, read the honest limits further down before you start the trial.</span>
+        <span class="lang-zh">Studio 当初就是为这些场景设计的。如果你的写作不在这张清单上，开始试用之前请先读下面的「诚实的局限」。</span>
+      </p>
+    </div>
+
+    <div class="use-grid3">
+      <article class="use-tile">
+        <svg viewBox="0 0 240 150" role="img" aria-label="A long-form draft: a single page with a heading, paragraph lines, a sage cursor, and a word counter reading 1,204 words, saved">
+          <rect x="28" y="16" width="184" height="118" rx="3" fill="#ffffff" stroke="#e5e8da"/>
+          <rect x="44" y="32" width="104" height="7" rx="1" fill="#393C54"/>
+          <rect x="44" y="46" width="64" height="3" rx="1" fill="#6d6f82" opacity="0.5"/>
+          <rect x="44" y="60" width="152" height="2.5" rx="1" fill="#c9d1b3"/>
+          <rect x="44" y="69" width="140" height="2.5" rx="1" fill="#c9d1b3"/>
+          <rect x="44" y="78" width="148" height="2.5" rx="1" fill="#c9d1b3"/>
+          <rect x="44" y="87" width="120" height="2.5" rx="1" fill="#c9d1b3"/>
+          <rect x="44" y="96" width="84" height="2.5" rx="1" fill="#c9d1b3"/>
+          <rect x="132" y="92" width="2" height="10" fill="#97B077"/>
+          <text x="44" y="124" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82" letter-spacing="0.1em">1,204 WORDS · SAVED</text>
+        </svg>
+        <h3><span class="lang-en">Long-form drafts</span><span class="lang-zh">长文草稿</span></h3>
+        <p>
+          <span class="lang-en">Essays, chapters, weekly letters. The blank page opens in 80&hairsp;ms and every save writes straight to disk — the draft is recoverable from the filesystem, not from a cloud queue.</span>
+          <span class="lang-zh">随笔、章节、周更。空白页 80ms 打开，每次保存直接写进磁盘——草稿从文件系统就能恢复，不依赖云端队列。</span>
+        </p>
+      </article>
+
+      <article class="use-tile">
+        <svg viewBox="0 0 240 150" role="img" aria-label="Research notes: a note with a citation labeled arXiv:2304.01234 on the left, and a small backlink graph of connected notes on the right">
+          <rect x="18" y="16" width="126" height="118" rx="3" fill="#ffffff" stroke="#e5e8da"/>
+          <rect x="32" y="32" width="74" height="6" rx="1" fill="#393C54"/>
+          <rect x="32" y="48" width="98" height="2.5" rx="1" fill="#c9d1b3"/>
+          <rect x="32" y="57" width="90" height="2.5" rx="1" fill="#c9d1b3"/>
+          <rect x="32" y="66" width="96" height="2.5" rx="1" fill="#c9d1b3"/>
+          <rect x="32" y="75" width="72" height="2.5" rx="1" fill="#c9d1b3"/>
+          <rect x="32" y="92" width="18" height="1.5" fill="#97B077"/>
+          <text x="32" y="118" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82" letter-spacing="0.04em">arXiv:2304.01234</text>
+          <line x1="196" y1="48" x2="170" y2="84" stroke="#c9d1b3" stroke-width="0.8"/>
+          <line x1="196" y1="48" x2="218" y2="92" stroke="#c9d1b3" stroke-width="0.8"/>
+          <line x1="170" y1="84" x2="196" y2="118" stroke="#c9d1b3" stroke-width="0.8"/>
+          <line x1="218" y1="92" x2="196" y2="118" stroke="#c9d1b3" stroke-width="0.8"/>
+          <circle cx="196" cy="48" r="6" fill="#97B077"/>
+          <circle cx="170" cy="84" r="4" fill="#393C54"/>
+          <circle cx="218" cy="92" r="4" fill="#393C54"/>
+          <circle cx="196" cy="118" r="3" fill="#6d6f82"/>
+        </svg>
+        <h3><span class="lang-en">Research notes</span><span class="lang-zh">研究笔记</span></h3>
+        <p>
+          <span class="lang-en">Linked Markdown with citation autocomplete — BibTeX or arXiv ID. Backlinks are computed in 18&hairsp;ms, and frontmatter is plain YAML that any other tool can read.</span>
+          <span class="lang-zh">Markdown 互链，引用自动补全——支持 BibTeX 或 arXiv ID。反向链接 18ms 算完，frontmatter 是任何工具都能读的纯 YAML。</span>
+        </p>
+      </article>
+
+      <article class="use-tile">
+        <svg viewBox="0 0 240 150" role="img" aria-label="A daily log: four dated entries stacked as rows, today highlighted in sage, with the command-N shortcut chip below">
+          <rect x="24" y="14" width="192" height="22" rx="3" fill="#ffffff" stroke="#97B077" stroke-width="1.5"/>
+          <text x="34" y="29" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#393C54">01-15</text>
+          <circle cx="92" cy="25" r="2.5" fill="#97B077"/>
+          <rect x="104" y="23" width="96" height="3" rx="1" fill="#c9d1b3"/>
+          <rect x="24" y="42" width="192" height="22" rx="3" fill="#ffffff" stroke="#e5e8da"/>
+          <text x="34" y="57" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82">01-14</text>
+          <rect x="104" y="51" width="84" height="3" rx="1" fill="#c9d1b3"/>
+          <rect x="24" y="70" width="192" height="22" rx="3" fill="#ffffff" stroke="#e5e8da"/>
+          <text x="34" y="85" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82">01-13</text>
+          <rect x="104" y="79" width="92" height="3" rx="1" fill="#c9d1b3"/>
+          <rect x="24" y="98" width="192" height="22" rx="3" fill="#ffffff" stroke="#e5e8da"/>
+          <text x="34" y="113" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82">01-12</text>
+          <rect x="104" y="107" width="72" height="3" rx="1" fill="#c9d1b3"/>
+          <rect x="24" y="128" width="44" height="17" rx="3" fill="#ffffff" stroke="#e5e8da"/>
+          <text x="33" y="140" font-family="'JetBrains Mono', monospace" font-size="11" fill="#393C54">⌘ N</text>
+          <text x="78" y="140" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82" letter-spacing="0.1em">OPENS TODAY</text>
+        </svg>
+        <h3><span class="lang-en">Daily log</span><span class="lang-zh">每日日志</span></h3>
+        <p>
+          <span class="lang-en">⌘ N from anywhere opens today's note in the daily folder. One file per day, dated filenames, and yesterday is always one backlink away.</span>
+          <span class="lang-zh">在任何地方按 ⌘ N，就打开 daily 文件夹里今天的笔记。一天一个文件，文件名带日期，昨天永远只隔一条反向链接。</span>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 04 · Spec table -->
+<section class="sage-section" style="background:var(--sage-bg-subtle); padding-block:var(--space-9);" id="specs">
+  <div class="sage-container sage-container--wide">
+    <div style="max-width:720px;">
+      <span class="sect-marker">04 · <span class="lang-en">Specifications</span><span class="lang-zh">规格</span></span>
+      <h2 class="section-title section-title--sm">
+        <span class="lang-en">The numbers, plainly.</span>
+        <span class="lang-zh">数字，照实说。</span>
+      </h2>
+      <p class="sage-lead" style="max-width:620px; margin-top:var(--space-5); font-size:18px;">
+        <span class="lang-en">Six rows a tester could verify in an afternoon. When a number changes between releases, this table changes first.</span>
+        <span class="lang-zh">六行规格，一个下午就能逐条核实。版本之间哪个数字变了，先改的就是这张表。</span>
+      </p>
+    </div>
+
+    <div class="spec-rows">
+      <div class="spec-row">
+        <p class="spec-label"><span class="lang-en">Storage format</span><span class="lang-zh">存储格式</span></p>
+        <p class="spec-body">
+          <span class="lang-en">Plain Markdown files in <code>~/Documents/Skypad/</code>. The index lives at <code>~/.skypad/index.db</code> and can be rebuilt from the files at any time. Tested to <code>50,000</code> notes without slowdown.</span>
+          <span class="lang-zh">纯 Markdown 文件，存在 <code>~/Documents/Skypad/</code>。索引在 <code>~/.skypad/index.db</code>，任何时候都能从文件重建。测到 <code>50,000</code> 条笔记不掉速。</span>
+        </p>
+      </div>
+      <div class="spec-row">
+        <p class="spec-label"><span class="lang-en">Search latency</span><span class="lang-zh">搜索延迟</span></p>
+        <p class="spec-body">
+          <span class="lang-en">⌘ K full-text search returns in under <code>90&hairsp;ms</code> on a 50,000-note vault. Keystroke-to-render stays under <code>12&hairsp;ms</code> median, <code>p99 21&hairsp;ms</code>, on an M2 Air with a 100k-character buffer.</span>
+          <span class="lang-zh">⌘ K 全文搜索在 50,000 条笔记的仓库上 <code>90ms</code> 内返回。击键到渲染中位数低于 <code>12ms</code>，<code>p99 21ms</code>（M2 Air，10 万字 buffer）。</span>
+        </p>
+      </div>
+      <div class="spec-row">
+        <p class="spec-label"><span class="lang-en">Shortcuts</span><span class="lang-zh">快捷键</span></p>
+        <p class="spec-body">
+          <span class="lang-en">Three chords cover the day — ⌘ N new note, ⌘ K switcher, ⌘ E writing mode; the full palette is six keys. Layouts: QWERTY · Dvorak · Colemak · AZERTY · Workman, custom mapping via <code>~/.skypad/keys.toml</code>.</span>
+          <span class="lang-zh">三个和弦覆盖一天——⌘ N 新建，⌘ K 跳转，⌘ E 写作模式；完整面板共六个键。键盘布局：QWERTY · Dvorak · Colemak · AZERTY · Workman，自定义映射写在 <code>~/.skypad/keys.toml</code>。</span>
+        </p>
+      </div>
+      <div class="spec-row">
+        <p class="spec-label"><span class="lang-en">Versions kept</span><span class="lang-zh">版本保留</span></p>
+        <p class="spec-body">
+          <span class="lang-en">Every save is a local snapshot, stored as plain Markdown diffs in <code>~/.skypad/history/</code>. Pro keeps 90 days of history; on Free, history trims to the last 7 days.</span>
+          <span class="lang-zh">每次保存都是一个本地快照，以纯 Markdown diff 形式存在 <code>~/.skypad/history/</code>。Pro 保留 90 天历史；免费版保留最近 7 天。</span>
+        </p>
+      </div>
+      <div class="spec-row">
+        <p class="spec-label"><span class="lang-en">Import &amp; export</span><span class="lang-zh">导入与导出</span></p>
+        <p class="spec-body">
+          <span class="lang-en">Import: point Studio at any folder of <code>.md</code> files — it opens as a vault, nothing is converted. Export: Markdown · plain text · PDF (LaTeX-rendered) · Epub · JSON · plain HTML. All offline, no cloud round-trip.</span>
+          <span class="lang-zh">导入：把 Studio 指向任何一个装 <code>.md</code> 文件的文件夹，它直接作为仓库打开，不做任何转换。导出：Markdown、纯文本、PDF（LaTeX 排版）、Epub、JSON、纯 HTML。全部离线完成，不经过云端。</span>
+        </p>
+      </div>
+      <div class="spec-row">
+        <p class="spec-label"><span class="lang-en">Encryption</span><span class="lang-zh">加密</span></p>
+        <p class="spec-body">
+          <span class="lang-en">Sync, when you turn it on, is end-to-end encrypted with a key derived on your machine — servers only ever see ciphertext. Zero telemetry. An open-source security audit is published every six months.</span>
+          <span class="lang-zh">同步在你主动开启时才运行，端到端加密，密钥在你的机器上派生——服务器只见过密文。零遥测。每六个月发布一次开源安全审计。</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 · Honest limits -->
+<section class="sage-section" style="padding-block:var(--space-9);" id="limits">
+  <div class="sage-container sage-container--wide">
+    <div style="max-width:720px;">
+      <span class="sect-marker">05 · <span class="lang-en">Honest limits</span><span class="lang-zh">诚实的局限</span></span>
+      <h2 class="section-title section-title--sm">
+        <span class="lang-en">What Studio is not.</span>
+        <span class="lang-zh">Studio 不是什么。</span>
+      </h2>
+      <p class="sage-lead" style="max-width:620px; margin-top:var(--space-5); font-size:18px;">
+        <span class="lang-en">Three limits we would rather you read before the trial, not after it.</span>
+        <span class="lang-zh">三条局限，我们希望你在试用之前读到，而不是之后。</span>
+      </p>
+    </div>
+
+    <div class="limits-box" style="max-width:880px;">
+      <div class="limit-item">
+        <span class="limit-num">01</span>
+        <p>
+          <span class="lang-en"><strong>No real-time co-editing.</strong> Two cursors in one note is not what Studio is for. For live collaboration, Notion, Google Docs, or Hedgedoc will serve you better.</span>
+          <span class="lang-zh"><strong>没有实时协同编辑。</strong>一篇笔记里出现两个光标不是 Studio 的方向。要实时协作，Notion、Google Docs 或 Hedgedoc 都比它合适。</span>
+        </p>
+      </div>
+      <div class="limit-item">
+        <span class="limit-num">02</span>
+        <p>
+          <span class="lang-en"><strong>No database views, no web clipper.</strong> Studio is a notebook, not Airtable and not a read-it-later inbox. For linked tables with formulas, use Obsidian DataView or a real database.</span>
+          <span class="lang-zh"><strong>没有数据库视图，也没有网页剪藏。</strong>Studio 是笔记本，不是 Airtable，也不是稍后读收件箱。要带公式的关联表，请用 Obsidian DataView 或真正的数据库。</span>
+        </p>
+      </div>
+      <div class="limit-item">
+        <span class="limit-num">03</span>
+        <p>
+          <span class="lang-en"><strong>Mobile is a read-mostly companion.</strong> Phones browse and capture through Skypad Reader; editing waits until you are back at the desk, then syncs in.</span>
+          <span class="lang-zh"><strong>手机端是以读为主的伴侣应用。</strong>手机上用 Skypad Reader 浏览和捕获；编辑等你回到桌面再做，然后同步回来。</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 · The lineup -->
+<section class="sage-section" style="background:#fafbf0; padding-block:var(--space-9);" id="lineup">
+  <div class="sage-container sage-container--wide">
+    <div style="max-width:720px;">
+      <span class="sect-marker">06 · <span class="lang-en">The lineup</span><span class="lang-zh">三件套</span></span>
+      <h2 class="section-title section-title--sm">
+        <span class="lang-en">Studio in the lineup.</span>
+        <span class="lang-zh">三件套里的 Studio。</span>
+      </h2>
+      <p class="sage-lead" style="max-width:620px; margin-top:var(--space-5); font-size:18px;">
+        <span class="lang-en">Three apps, one vault. Studio writes, Reader captures, Sync moves the bytes between them.</span>
+        <span class="lang-zh">三个应用，一个仓库。Studio 负责写，Reader 负责捕获，Sync 负责在两者之间搬运字节。</span>
+      </p>
+    </div>
+
+    <div class="lineup-grid">
+      <article class="lineup-card" id="reader">
+        <p class="lineup-eyebrow">Skypad Reader</p>
+        <h3 class="lineup-name">Reader</h3>
+        <p class="lineup-tagline">
+          <span class="lang-en">Mobile capture and read-only browsing.</span>
+          <span class="lang-zh">移动端捕获与只读浏览。</span>
+        </p>
+        <div class="lineup-rows">
+          <div class="lineup-row">
+            <span class="lineup-row-label"><span class="lang-en">Best for</span><span class="lang-zh">适合</span></span>
+            <span class="lineup-row-value"><span class="lang-en">Voice memos · reading offline</span><span class="lang-zh">语音备忘 · 离线阅读</span></span>
+          </div>
+          <div class="lineup-row">
+            <span class="lineup-row-label"><span class="lang-en">Platform</span><span class="lang-zh">平台</span></span>
+            <span class="lineup-row-value">iOS · Android</span>
+          </div>
+          <div class="lineup-row">
+            <span class="lineup-row-label"><span class="lang-en">Price</span><span class="lang-zh">价格</span></span>
+            <span class="lineup-row-value"><span class="lang-en">Free</span><span class="lang-zh">免费</span></span>
+          </div>
+        </div>
+        <a class="sage-link" href="pricing.html"><span class="lang-en">Compare in pricing</span><span class="lang-zh">在价目表里对比</span></a>
+      </article>
+
+      <article class="lineup-card lineup-card--current">
+        <span class="lineup-flag"><span class="lang-en">You are here</span><span class="lang-zh">本页</span></span>
+        <p class="lineup-eyebrow">Skypad Studio</p>
+        <h3 class="lineup-name">Studio</h3>
+        <p class="lineup-tagline">
+          <span class="lang-en">The desktop notebook · keyboard-first writing.</span>
+          <span class="lang-zh">桌面笔记本 · 键盘优先写作。</span>
+        </p>
+        <div class="lineup-rows">
+          <div class="lineup-row">
+            <span class="lineup-row-label"><span class="lang-en">Best for</span><span class="lang-zh">适合</span></span>
+            <span class="lineup-row-value"><span class="lang-en">Long-form writing · research notes</span><span class="lang-zh">长文写作 · 研究笔记</span></span>
+          </div>
+          <div class="lineup-row">
+            <span class="lineup-row-label"><span class="lang-en">Platform</span><span class="lang-zh">平台</span></span>
+            <span class="lineup-row-value">macOS · Windows · Linux</span>
+          </div>
+          <div class="lineup-row">
+            <span class="lineup-row-label"><span class="lang-en">Price</span><span class="lang-zh">价格</span></span>
+            <span class="lineup-row-value"><span class="lang-en">$9 / month, on Pro</span><span class="lang-zh">$9 / 月（Pro 档）</span></span>
+          </div>
+        </div>
+        <a class="sage-link" href="#specs"><span class="lang-en">Back to the specs</span><span class="lang-zh">回到规格</span></a>
+      </article>
+
+      <article class="lineup-card" id="sync">
+        <p class="lineup-eyebrow">Skypad Sync</p>
+        <h3 class="lineup-name">Sync</h3>
+        <p class="lineup-tagline">
+          <span class="lang-en">End-to-end encrypted vault sync.</span>
+          <span class="lang-zh">端到端加密的仓库同步。</span>
+        </p>
+        <div class="lineup-rows">
+          <div class="lineup-row">
+            <span class="lineup-row-label"><span class="lang-en">Best for</span><span class="lang-zh">适合</span></span>
+            <span class="lineup-row-value"><span class="lang-en">Two or more devices</span><span class="lang-zh">两台及以上设备</span></span>
+          </div>
+          <div class="lineup-row">
+            <span class="lineup-row-label"><span class="lang-en">Platform</span><span class="lang-zh">平台</span></span>
+            <span class="lineup-row-value"><span class="lang-en">Server-side · pairs with Studio + Reader</span><span class="lang-zh">服务端 · 配合 Studio 与 Reader</span></span>
+          </div>
+          <div class="lineup-row">
+            <span class="lineup-row-label"><span class="lang-en">Price</span><span class="lang-zh">价格</span></span>
+            <span class="lineup-row-value"><span class="lang-en">Included with Pro</span><span class="lang-zh">包含在 Pro 内</span></span>
+          </div>
+        </div>
+        <a class="sage-link" href="pricing.html"><span class="lang-en">Compare in pricing</span><span class="lang-zh">在价目表里对比</span></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 07 · Pricing -->
+<section class="sage-section" style="padding-block:var(--space-8); text-align:center;" id="pricing">
+  <div class="sage-container" style="max-width:720px;">
+    <span class="sect-marker">07 · <span class="lang-en">Pricing</span><span class="lang-zh">定价</span></span>
+    <h2 class="section-title section-title--sm" style="margin:var(--space-3) auto 0;"><span class="lang-en">One tier, one <em>trial.</em></span><span class="lang-zh">一档订阅，一次<em>试用。</em></span></h2>
+    <p class="sage-lead" style="margin:var(--space-4) auto 0; max-width:640px;">
+      <span class="lang-en">Studio is included on the Pro tier — $9 a month, with a 14-day full-feature trial — and the Team tier at $29 a seat a month. <a class="sage-link" href="pricing.html">See the full price list</a></span>
+      <span class="lang-zh">Studio 包含在 Pro 档——每月 $9，含 14 天全功能试用——以及 Team 档，每席位每月 $29。<a class="sage-link" href="pricing.html">查看完整价目表</a></span>
+    </p>
+  </div>
+</section>
+
+<!-- 08 · Field notes — pull quote on ink, italic earned -->
+<section class="pull-quote-dark" id="field-notes">
+  <div class="sage-container" style="text-align:center; max-width:940px;">
+    <span class="sect-marker sect-marker--onink">08 · <span class="lang-en">Field notes</span><span class="lang-zh">田野笔记</span></span>
+    <blockquote>
+      <span class="lang-en">Somewhere in the second week I stopped reaching for the mouse. Studio is the first editor my hands never leave — and the first one I stopped noticing.</span>
+      <span class="lang-zh">大概在第二周的某一天，我不再伸手去够鼠标。Studio 是第一个让我双手从不离开键盘的编辑器——也是第一个让我忘记它存在的编辑器。</span>
+    </blockquote>
+    <cite>
+      <span aria-hidden="true" style="display:inline-block; width:20px; height:1.5px; background:#97B077; vertical-align:middle; margin-right:8px;"></span>
+      <span class="lang-en">Tomas Lindqvist — science journalist · Studio since v1.0</span>
+      <span class="lang-zh">Tomas Lindqvist——科学记者 · 从 v1.0 用到现在</span>
+    </cite>
+  </div>
+</section>
+
+<!-- 09 · Start -->
+<section class="sage-section" style="text-align:center; padding-block:var(--space-10);" id="download">
+  <div class="sage-container" style="max-width:720px;">
+    <span class="sect-marker">09 · <span class="lang-en">Start</span><span class="lang-zh">开始</span></span>
+    <h2 class="section-title section-title--md">
+      <span class="lang-en">Open a folder. Start typing.</span>
+      <span class="lang-zh">打开一个文件夹，开始打字。</span>
+    </h2>
+    <p class="sage-lead" style="max-width:560px; margin:var(--space-5) auto var(--space-6);">
+      <span class="lang-en">Download Studio, point it at a folder of Markdown files, and write. The 14-day trial unlocks everything on this page — no credit card to start.</span>
+      <span class="lang-zh">下载 Studio，把它指向一个装 Markdown 文件的文件夹，然后写。14 天试用解锁本页提到的一切——开始时不需要信用卡。</span>
+    </p>
+    <div style="display:flex; gap:var(--space-5); justify-content:center; align-items:center; flex-wrap:wrap;">
+      <a class="sage-button" href="#download"><span class="lang-en">Download Studio</span><span class="lang-zh">下载 Studio</span></a>
+      <a class="sage-link" href="docs-home.html"><span class="lang-en">Read the docs</span><span class="lang-zh">阅读文档</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="sage-footer">
+  <div class="sage-footer-grid">
+    <div class="sage-footer-group"><h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5><a href="landing.html"><span class="lang-en">Overview</span><span class="lang-zh">概览</span></a><a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a><a href="#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a><a href="changelog.html"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a></div>
+    <div class="sage-footer-group"><h5><span class="lang-en">For teams</span><span class="lang-zh">团队</span></h5><a href="#teams"><span class="lang-en">Team plan</span><span class="lang-zh">团队版</span></a><a href="#enterprise"><span class="lang-en">Enterprise</span><span class="lang-zh">企业版</span></a><a href="#security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a><a href="#slas">SLAs</a></div>
+    <div class="sage-footer-group"><h5><span class="lang-en">Writers</span><span class="lang-zh">作者</span></h5><a href="#guide"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a><a href="#field-notes"><span class="lang-en">Field notes</span><span class="lang-zh">田野笔记</span></a><a href="#showcase"><span class="lang-en">Showcase</span><span class="lang-zh">作品精选</span></a><a href="#community"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a></div>
+    <div class="sage-footer-group"><h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5><a href="team.html"><span class="lang-en">About</span><span class="lang-zh">关于</span></a><a href="#press"><span class="lang-en">Press</span><span class="lang-zh">媒体</span></a><a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a><a href="#status"><span class="lang-en">Status</span><span class="lang-zh">状态</span></a></div>
+    <div class="sage-footer-group"><h5><span class="lang-en">Legal</span><span class="lang-zh">法务</span></h5><a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a><a href="#terms"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a><a href="#dpa">DPA</a><a href="#audit"><span class="lang-en">Audit</span><span class="lang-zh">审计</span></a></div>
+  </div>
+  <div class="sage-footer-legal">
+    <span>Copyright © 2026 Skypad Inc.</span>
+    <span><span class="lang-en">Made in Berlin · Toronto · Kyoto</span><span class="lang-zh">制作于 柏林 · 多伦多 · 京都</span></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: sage
+Page-type: product-detail
+Created: 2026-06-13
+
+Decisions (6):
+1. [hero-name-plus-tagline] chose "h1 = product name at 96px + 44px roman tag-line inside the same h1, single italic accent on 'keyboard-first'" over "landing-style aphorism hero ('A quieter place to think')". Because: a product-detail page's subject is the product name — an aphorism h1 would bury the noun the page documents; keeping the tag-line inside the h1 at section-title size keeps the name primary and gives §J its one earned accent without a second heading level.
+2. [glance-strip-as-almanac-stat] chose "4-cell at-a-glance with Instrument Serif 72px roman values (80 ms / .md / 3 / E2E) and JetBrains Mono labels" over "anthropic's 19px text-value glance bar". Because: sage states facts in almanac voice — roman numerals at stat scale reuse the landing giant-stat grammar, so the strip reads as sage rather than a port of another skill's quick-facts bar.
+3. [window-mock-three-panes] chose "one 1160x560 three-pane window mock (01 · VAULT / 02 · EDITOR / 03 · BACKLINKS) as a single library plate" over "three separate cropped screenshots". Because: sage shows the whole product in one calm plate; the mono pane eyebrows extend the landing mock's grammar, and a single figure keeps the page's diagram rhythm without screenshot clutter.
+4. [lineup-middle-raised] chose "3-card lineup at 1fr 1.15fr 1fr with the current product centered + ink 'You are here' flag" over "anthropic's 2px accent border on an equal-width grid". Because: §I — decoration should not do the grid's job; raising the middle column is the sanctioned symmetric-hero pattern, and the ink flag is the library call-number gesture sage pricing already uses for its featured tier.
+5. [site-facts-over-cross-skill-parity] chose "every checkable fact follows sage's own pricing.html — $9 Pro / $29 seat / 14-day trial, 90-day Pro history, sync included with Pro, Epub among the exports" over "the $8 / $16 / 30-day fact sheet and feature list shared by the anthropic, apple, and ember product-detail canonicals". Because: this page links straight to pricing.html, and a reader who clicks through must not catch the site contradicting itself one page apart; intra-site consistency is a grep obligation over every fact, not just the headline prices, and the older product-detail trio carries the stale numbers.
+6. [limits-roman-callout] chose "honest limits as a white callout with ink left rule, mono indices 01/02/03, roman prose" over "an italic editorial aside". Because: the limits section is the page's most trust-bearing copy — italic would aestheticize it; mono indices keep sage's numbering grammar while the prose stays plain.
+
+Known trade-offs:
+- All product/pricing facts (price, trial, 90-day Pro history, sync-included-with-Pro, Epub export) match sage's own pricing.html and faq.html, while the anthropic/apple/ember product-detail canonicals still carry the older $8 / $16 / 30-day fact sheet and price sync as a $3 add-on. The two cannot both be right inside the Skypad universe; intra-site consistency won here, and the older product-detail trio needs a follow-up reconciliation pass. (Upstream debt noted separately: pricing.html says Pro = 90-day history while faq.html says 12 months — resolve at the source, not on this page.)
+- The window mock renders the selected note title in Instrument Serif inside the SVG — the product's internal typography, not a page heading; a fast reader may still count it against the italic/display budget (same documented caveat as landing.md §4).
+- At-a-glance values at 72px sit visually close to the 96px hero, creating a mild twin-peaks stack at the top of the page. Accepted because shrinking the values would undersell the almanac voice — the same trade the landing's stat strip makes.
+- 'No web clipper' in limit 02 goes one fact beyond the shared sibling fact sheet (which lists co-editing / database views / mobile only). It contradicts nothing and answers a question keyboard-first writers actually ask, so it stays.
+
+/design-review:self-diff -->
+
+</body>
+</html>

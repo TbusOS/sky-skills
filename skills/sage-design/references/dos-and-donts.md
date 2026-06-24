@@ -35,6 +35,9 @@
 | 外链/按钮颜色对比度 < 4.5 | 失读障碍/夜间阅读会看不清。visual-audit 会扫 |
 | `transition: all` | 性能差 + 视觉跳动。只 transition 具体属性 |
 | Instrument Serif 做正文 | 衬线长文阅读疲劳，Instrument Serif 只做 display + italic pull-quote |
+| 局部覆盖全局 `<code>` 样式只改一半（只 color 或只 background） | 另一半从全局继承 → chip 对比度 1.2-2.1:1 不可读（2026-06-13 faq 实抓，high）。覆盖 code/kbd/blockquote 这类全局有样式的元素，color + background **必须成对**写。**known-bugs 1.36** |
+| changelog / 图示里的数字、版本号不从页内数据重算 | versioning 图画了 v3.6.1，页面 feed 根本没发过这个版本（2026-06-13 实抓）。可导出的数字（中位数 / 计数 / 版本）发布前用页内内容重算。**known-bugs 1.35** |
+| canonical 的 .md / self-diff 写"打算做的"而不是"渲染出来的" | .md 说 hero 左对齐，渲染是居中；self-diff 说连续 rail，渲染按月分段（2026-06-13 team/faq 实抓）。.md 是下一个 critic 的 rubric —— 完稿后逐句对照截图，改 HTML 同 commit 改 .md。**known-bugs 1.37** |
 
 ## 📋 发布前 checklist（MUST — 三道闸都要 exit 0）
 

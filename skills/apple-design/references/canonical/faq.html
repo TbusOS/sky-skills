@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad — Support &amp; FAQ</title>
+<meta name="description" content="Answers to the questions Skypad writers actually ask: pricing and refunds, end-to-end encryption, sync, imports, and what happens when you cancel.">
+<meta property="og:title" content="Skypad — Support &amp; FAQ">
+<meta property="og:description" content="Pricing, refunds, end-to-end encryption, sync, imports — the questions Skypad writers actually ask, answered plainly.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/apple.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--apple-divider);
+    color: var(--apple-text);
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 980px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .lang-toggle:hover { background: #f5f5f7; }
+  /* Apple §H exception: PingFang SC native. Noto Sans SC as non-Apple fallback. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .faq-a,
+  html[data-lang="zh"] figcaption {
+    font-family: "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .faq-q,
+  html[data-lang="zh"] blockquote {
+    font-family: "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", sans-serif;
+    font-weight: 600;
+    font-style: normal;
+  }
+
+  /* Topic jump chips in hero */
+  .topic-chips { display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap; }
+  .topic-chip {
+    display:inline-block; padding:9px 18px; border:1px solid var(--apple-divider);
+    border-radius:980px; font-family:var(--font-display); font-size:14px; font-weight:500;
+    color:var(--apple-text); text-decoration:none; letter-spacing:0;
+    transition: background var(--duration-sm) var(--ease-apple-out), border-color var(--duration-sm) var(--ease-apple-out);
+  }
+  .topic-chip:hover { background:#f5f5f7; border-color:#bdbdc2; }
+
+  /* Giant support-promise stats */
+  .giant-stats { display:grid; grid-template-columns:repeat(4, 1fr); gap:var(--space-4); text-align:center; }
+  .giant-stats > div { padding:var(--space-5) var(--space-3); }
+  .giant-stats .num {
+    display:block; font-family:var(--font-display); font-size:72px; font-weight:700;
+    color:var(--apple-text); letter-spacing:-0.035em; line-height:1;
+  }
+  .giant-stats .lbl {
+    display:block; margin-top:var(--space-3);
+    font-family:var(--font-display); font-size:15px; color:var(--apple-text-secondary);
+    letter-spacing:0; line-height:1.4;
+  }
+
+  /* FAQ column */
+  .faq-col { max-width:860px; margin:0 auto; }
+  .faq-group { margin-bottom:var(--space-9); scroll-margin-top:96px; }
+  .faq-group:last-child { margin-bottom:0; }
+  .faq-group > h2 {
+    font-family:var(--font-display); font-size:48px; font-weight:700;
+    letter-spacing:-0.03em; line-height:1.08; color:var(--apple-text);
+    margin:0 0 var(--space-3);
+  }
+  .faq-group-sub {
+    font-family:var(--font-display); font-size:18px; color:var(--apple-text-secondary);
+    line-height:1.5; margin:0 0 var(--space-6); max-width:680px; letter-spacing:-0.005em;
+  }
+
+  /* details/summary accordion — native, keyboard-accessible */
+  .faq-item { border-bottom:1px solid var(--apple-divider); }
+  .faq-item:first-of-type { border-top:1px solid var(--apple-divider); }
+  .faq-q {
+    list-style:none; display:flex; align-items:center; justify-content:space-between;
+    gap:var(--space-5); padding:var(--space-5) 0; cursor:pointer;
+    font-family:var(--font-display); font-size:19px; font-weight:600;
+    color:var(--apple-text); letter-spacing:-0.01em; line-height:1.35;
+  }
+  .faq-q::-webkit-details-marker { display:none; }
+  .faq-q:focus-visible { outline:2px solid #0071E3; outline-offset:4px; border-radius:8px; }
+  .faq-chevron {
+    flex:0 0 auto; width:28px; height:28px; display:grid; place-items:center;
+    border-radius:50%; background:#f5f5f7;
+    transition: transform var(--duration-sm) var(--ease-apple-out);
+  }
+  .faq-item[open] .faq-chevron { transform:rotate(45deg); }
+  .faq-a {
+    margin:0; padding:0 var(--space-8) var(--space-5) 0;
+    font-family:var(--font-display); font-size:16px; line-height:1.6;
+    color:var(--apple-text-secondary); max-width:760px;
+  }
+  .faq-a code {
+    font-family:var(--font-mono); font-size:0.88em; background:#f5f5f7;
+    padding:2px 6px; border-radius:6px; color:var(--apple-text);
+  }
+
+  /* Figures */
+  .faq-figure { margin:var(--space-7) 0 var(--space-2); }
+  .faq-figure svg { display:block; width:100%; height:auto; }
+  .faq-figure figcaption {
+    margin-top:var(--space-4); font-family:var(--font-display); font-size:13.5px;
+    color:var(--apple-text-secondary); letter-spacing:0.01em; text-align:center;
+  }
+
+  /* Black pull-quote band */
+  .pull-quote { background:#000000; color:#ffffff; padding:var(--space-9) 0; }
+  .pull-quote blockquote {
+    font-family:var(--font-display); font-size:44px; font-weight:500; font-style:italic;
+    letter-spacing:-0.025em; line-height:1.2; margin:0; max-width:980px;
+  }
+  .pull-quote cite {
+    display:block; margin-top:var(--space-6); font-size:15px; font-style:normal;
+    color:rgba(255,255,255,0.6); font-family:var(--font-display);
+  }
+
+  /* Support channel cards */
+  .channel-row { display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-5); margin-top:var(--space-7); text-align:left; }
+  .channel-card {
+    background:#ffffff; border:1px solid var(--apple-divider); border-radius:24px;
+    padding:var(--space-6); display:flex; flex-direction:column;
+  }
+  .channel-icon {
+    width:48px; height:48px; display:grid; place-items:center;
+    background:#f5f5f7; border-radius:12px; margin-bottom:var(--space-5);
+  }
+  .channel-card h3 {
+    font-family:var(--font-display); font-size:22px; font-weight:600; letter-spacing:-0.015em;
+    color:var(--apple-text); margin:0 0 var(--space-3); line-height:1.2;
+  }
+  .channel-card p {
+    font-family:var(--font-display); font-size:15px; line-height:1.55;
+    color:var(--apple-text-secondary); margin:0 0 var(--space-5); flex:1;
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="apple-nav"><div class="apple-nav-inner">
+  <a href="landing.html" style="font-weight:600;">Skypad</a>
+  <div>
+    <a href="landing.html#product"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="#faq"><span class="lang-en">Support</span><span class="lang-zh">支持</span></a>
+    <a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-4); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="apple-link apple-link--no-arrow" href="#login"><span class="lang-en">Sign in</span><span class="lang-zh">登录</span></a>
+    <a class="apple-link" href="landing.html#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<section class="apple-hero">
+  <div class="apple-container apple-container--hero" style="text-align:center;">
+    <p style="font-family:var(--font-display); font-size:15px; color:#0071E3; font-weight:500; letter-spacing:0.02em; margin:0 0 var(--space-4);">
+      <span class="lang-en">Support · Skypad 5</span>
+      <span class="lang-zh">支持 · Skypad 5</span>
+    </p>
+    <h1 style="font-size:80px; font-weight:700; letter-spacing:-0.035em; line-height:1.04; margin:0 auto var(--space-5); max-width:980px;">
+      <span class="lang-en">Questions,<br>answered.</span>
+      <span class="lang-zh">问题，<br>都有答案。</span>
+    </h1>
+    <p style="font-family:var(--font-display); font-size:22px; color:var(--apple-text-secondary); line-height:1.45; max-width:680px; margin:0 auto var(--space-7); letter-spacing:-0.01em;">
+      <span class="lang-en">The fourteen questions writers actually email us. Answered the way we'd want to be answered — specific, short, no ticket number.</span>
+      <span class="lang-zh">作者们真的会写邮件来问的十四个问题。用我们自己希望被回答的方式回答——具体、简短、不给你工单编号。</span>
+    </p>
+    <div class="topic-chips">
+      <a class="topic-chip" href="#pricing-billing"><span class="lang-en">Pricing &amp; billing</span><span class="lang-zh">定价与付费</span></a>
+      <a class="topic-chip" href="#sync-security"><span class="lang-en">Sync, security &amp; your data</span><span class="lang-zh">同步、安全与数据</span></a>
+      <a class="topic-chip" href="#editor-platforms"><span class="lang-en">Editor &amp; platforms</span><span class="lang-zh">编辑器与平台</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Support promises — giant stats -->
+<section class="apple-section" style="background:#f5f5f7;">
+  <div class="apple-container apple-container--hero">
+    <div class="giant-stats">
+      <div>
+        <span class="num">4h</span>
+        <span class="lbl"><span class="lang-en">median first reply, 7 days a week</span><span class="lang-zh">首封回复中位数，每周 7 天</span></span>
+      </div>
+      <div>
+        <span class="num">92%</span>
+        <span class="lbl"><span class="lang-en">of questions solved in one reply</span><span class="lang-zh">的问题一封回复内解决</span></span>
+      </div>
+      <div>
+        <span class="num">0</span>
+        <span class="lbl"><span class="lang-en">chatbots — a human answers</span><span class="lang-zh">个聊天机器人——由真人回复</span></span>
+      </div>
+      <div>
+        <span class="num">30</span>
+        <span class="lbl"><span class="lang-en">days money-back, no questions asked</span><span class="lang-zh">天内退款，不问原因</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="apple-section" id="faq">
+  <div class="apple-container apple-container--hero">
+    <div class="faq-col">
+
+      <!-- Group 1 · Pricing & billing -->
+      <div class="faq-group" id="pricing-billing">
+        <h2><span class="lang-en">Pricing &amp; billing.</span><span class="lang-zh">定价与付费。</span></h2>
+        <p class="faq-group-sub">
+          <span class="lang-en">Free is free forever. Pro is $9 a month or $90 a year. Team is $29 a seat. Everything below follows from that.</span>
+          <span class="lang-zh">免费版永久免费。Pro 每月 $9 或每年 $90。Team 每席位 $29。下面的一切都由此而来。</span>
+        </p>
+
+        <details class="faq-item" open>
+          <summary class="faq-q">
+            <span><span class="lang-en">If I cancel Pro, do I lose my notes?</span><span class="lang-zh">取消 Pro 后，我的笔记会丢吗？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">No. Every note is a plain <code>.md</code> file on your own disk — cancelling stops sync and publishing, nothing else. Your files stay exactly where they are, readable by any editor, forever.</span>
+            <span class="lang-zh">不会。每条笔记都是你磁盘上的纯 <code>.md</code> 文件——取消只是停掉同步和发布，别的什么都不动。文件原地不动，任何编辑器都能打开，永远如此。</span>
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q">
+            <span><span class="lang-en">Monthly or annual — can I switch later?</span><span class="lang-zh">按月还是按年——以后能切换吗？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">Yes, any time, from Settings → Billing. Annual is $90 — two months free against monthly. Switching mid-cycle is prorated to the day; the difference is credited to your next invoice automatically.</span>
+            <span class="lang-zh">可以，随时在「设置 → 付费」切换。按年是 $90——比按月省两个月。周期中途切换按天折算，差额自动抵扣到下一张账单。</span>
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q">
+            <span><span class="lang-en">What's the refund policy?</span><span class="lang-zh">退款政策是什么？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">30 days, no questions asked, on any first purchase of Pro or Team. Email <code>billing@skypad.app</code> from your account address; the refund lands in 3–5 business days. After 30 days we prorate instead of refusing.</span>
+            <span class="lang-zh">首次购买 Pro 或 Team，30 天内退款，不问原因。用账户邮箱发信到 <code>billing@skypad.app</code>，退款 3–5 个工作日到账。超过 30 天我们按比例折算，而不是直接拒绝。</span>
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q">
+            <span><span class="lang-en">I'm a student or on a low income. Is there a discount?</span><span class="lang-zh">我是学生或收入有限，有折扣吗？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">Yes — 50% off Pro. A school email address qualifies automatically; if you don't have one, a one-line self-declaration is enough. We don't ask for documents, and we don't expire the discount mid-degree.</span>
+            <span class="lang-zh">有——Pro 半价。学校邮箱自动通过；没有的话，一句话的自我声明就够了。我们不要证明材料，也不会在你读到一半时取消折扣。</span>
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q">
+            <span><span class="lang-en">How do Team seats work when people join or leave?</span><span class="lang-zh">成员加入或离开时，Team 席位怎么算？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">Add or remove seats any day; billing is prorated to the day on the next invoice. A removed member's personal vault stays on their device — only access to shared workspaces ends. Teams up to 10 seats can trial for 14 days, no card.</span>
+            <span class="lang-zh">任意一天都可以增减席位，下一张账单按天折算。被移除成员的个人笔记库仍留在其设备上——只是失去共享工作空间的访问权。10 席以内的团队可免费试用 14 天，无需信用卡。</span>
+          </p>
+        </details>
+      </div>
+
+      <!-- Group 2 · Sync, security & your data -->
+      <div class="faq-group" id="sync-security">
+        <h2><span class="lang-en">Sync, security &amp; your data.</span><span class="lang-zh">同步、安全与数据。</span></h2>
+        <p class="faq-group-sub">
+          <span class="lang-en">The short version: your notes are encrypted before they leave your device, and the keys never do.</span>
+          <span class="lang-zh">一句话版本：笔记离开你的设备之前已经加密，而密钥永远不离开。</span>
+        </p>
+
+        <figure class="faq-figure">
+          <svg role="img" aria-label="End-to-end encryption flow: notes are encrypted on your Mac, the Skypad Cloud relay stores ciphertext only, and your iPhone decrypts locally" viewBox="0 0 960 312">
+            <defs>
+              <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+              </filter>
+              <marker id="arrowblue" markerWidth="8" markerHeight="8" refX="6" refY="3.5" orient="auto">
+                <path d="M0 0L7 3.5L0 7Z" fill="#0071e3"/>
+              </marker>
+            </defs>
+
+            <!-- Your Mac -->
+            <g filter="url(#soft)">
+              <rect x="28" y="92" width="220" height="96" rx="14" fill="#ffffff"/>
+            </g>
+            <g fill="none" stroke="#6e6e73" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="52" y="118" width="30" height="20" rx="3"/>
+              <path d="M46 142h42"/>
+            </g>
+            <text x="106" y="128" font-family="-apple-system, 'SF Pro Display', sans-serif" font-size="14.5" font-weight="600" fill="#1d1d1f">Your Mac</text>
+            <text x="106" y="148" font-family="-apple-system, 'SF Pro Text', sans-serif" font-size="11.5" fill="#86868b">plaintext + your key</text>
+            <rect x="52" y="206" width="172" height="28" rx="10" fill="#f5f5f7"/>
+            <text x="138" y="224" text-anchor="middle" font-family="-apple-system, 'SF Pro Text', sans-serif" font-size="11" fill="#6e6e73">key never leaves device</text>
+
+            <!-- Skypad Cloud group -->
+            <rect x="338" y="56" width="284" height="200" rx="18" fill="#f5f5f7"/>
+            <text x="362" y="88" font-family="-apple-system, 'SF Pro Text', sans-serif" font-size="12" font-weight="500" fill="#86868b">Skypad Cloud</text>
+            <g filter="url(#soft)">
+              <rect x="366" y="104" width="228" height="64" rx="14" fill="#ffffff"/>
+            </g>
+            <text x="390" y="131" font-family="-apple-system, 'SF Pro Display', sans-serif" font-size="14" font-weight="600" fill="#1d1d1f">Storage relay</text>
+            <text x="390" y="151" font-family="-apple-system, 'SF Pro Text', sans-serif" font-size="11.5" fill="#86868b">no keys · no plaintext</text>
+            <rect x="394" y="192" width="172" height="30" rx="10" fill="#eaf3fe" stroke="#0071e3" stroke-width="1.5"/>
+            <text x="480" y="211" text-anchor="middle" font-family="-apple-system, 'SF Pro Text', sans-serif" font-size="11.5" font-weight="600" fill="#0071e3">ciphertext only</text>
+
+            <!-- Your iPhone -->
+            <g filter="url(#soft)">
+              <rect x="712" y="92" width="220" height="96" rx="14" fill="#ffffff"/>
+            </g>
+            <g fill="none" stroke="#6e6e73" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="740" y="116" width="18" height="30" rx="4"/>
+              <path d="M746 140h6"/>
+            </g>
+            <text x="782" y="128" font-family="-apple-system, 'SF Pro Display', sans-serif" font-size="14.5" font-weight="600" fill="#1d1d1f">Your iPhone</text>
+            <text x="782" y="148" font-family="-apple-system, 'SF Pro Text', sans-serif" font-size="11.5" fill="#86868b">plaintext + your key</text>
+            <rect x="736" y="206" width="172" height="28" rx="10" fill="#f5f5f7"/>
+            <text x="822" y="224" text-anchor="middle" font-family="-apple-system, 'SF Pro Text', sans-serif" font-size="11" fill="#6e6e73">key never leaves device</text>
+
+            <!-- Main encrypted path (the one blue narrative) -->
+            <path d="M248 140H330" fill="none" stroke="#0071e3" stroke-width="1.8" marker-end="url(#arrowblue)"/>
+            <path d="M622 140H704" fill="none" stroke="#0071e3" stroke-width="1.8" marker-end="url(#arrowblue)"/>
+            <text x="289" y="124" text-anchor="middle" font-family="-apple-system, 'SF Pro Text', sans-serif" font-size="11" fill="#86868b">encrypt</text>
+            <text x="663" y="124" text-anchor="middle" font-family="-apple-system, 'SF Pro Text', sans-serif" font-size="11" fill="#86868b">decrypt</text>
+            <circle cx="270" cy="140" r="10" fill="#0071e3"/>
+            <text x="270" y="144" text-anchor="middle" font-family="-apple-system, 'SF Pro Text', sans-serif" font-size="11" font-weight="600" fill="#ffffff">1</text>
+            <circle cx="394" cy="207" r="10" fill="#0071e3"/>
+            <text x="394" y="211" text-anchor="middle" font-family="-apple-system, 'SF Pro Text', sans-serif" font-size="11" font-weight="600" fill="#ffffff">2</text>
+            <circle cx="685" cy="140" r="10" fill="#0071e3"/>
+            <text x="685" y="144" text-anchor="middle" font-family="-apple-system, 'SF Pro Text', sans-serif" font-size="11" font-weight="600" fill="#ffffff">3</text>
+          </svg>
+          <figcaption>
+            <span class="lang-en">What "end-to-end encrypted" means here: notes are sealed on your device (1), the relay stores ciphertext it cannot read (2), and only your other devices can open it (3).</span>
+            <span class="lang-zh">「端到端加密」在这里的含义：笔记在你的设备上封好（1），中转服务器只存它读不了的密文（2），只有你的其他设备能打开（3）。</span>
+          </figcaption>
+        </figure>
+
+        <details class="faq-item" open>
+          <summary class="faq-q">
+            <span><span class="lang-en">What does "end-to-end encrypted" actually mean?</span><span class="lang-zh">「端到端加密」具体指什么？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">Each note is encrypted on your device with AES-256-GCM before sync. The key is derived from your passphrase and never uploaded — see the figure above. Our servers store ciphertext they cannot decrypt; neither can we, a subpoena, or an attacker who steals our database.</span>
+            <span class="lang-zh">每条笔记在同步前就在你的设备上用 AES-256-GCM 加密。密钥由你的口令派生，从不上传——见上图。我们的服务器只存解不开的密文；我们解不开，传票解不开，偷走数据库的攻击者也解不开。</span>
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q">
+            <span><span class="lang-en">What happens if I lose all my devices?</span><span class="lang-zh">如果我所有设备都丢了怎么办？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">Your 24-word recovery phrase — generated at setup, shown once — restores everything on a new device. Without it and without any signed-in device, your notes are unrecoverable, by us included. That's not a gap in our support; it's the design that makes the previous answer true.</span>
+            <span class="lang-zh">初始设置时生成、只显示一次的 24 个单词恢复短语，可以在新设备上恢复全部内容。如果恢复短语和已登录设备都没有了，笔记就无法找回——我们也不行。这不是支持的漏洞，正是让上一条回答成立的设计。</span>
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q">
+            <span><span class="lang-en">Where are the servers, and can I choose the region?</span><span class="lang-zh">服务器在哪里？可以选区域吗？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">Frankfurt (EU) and Oregon (US). You pick a region at sign-up and can migrate later from Settings — migration re-uploads ciphertext, so the move changes nothing about who can read your notes. Team plans include a GDPR data-processing agreement.</span>
+            <span class="lang-zh">法兰克福（欧盟）和俄勒冈（美国）。注册时选择区域，之后可以在设置里迁移——迁移只是重新上传密文，谁能读你的笔记这件事不会因此改变。Team 套餐包含 GDPR 数据处理协议。</span>
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q">
+            <span><span class="lang-en">How do I get all my data out?</span><span class="lang-zh">怎么把我的全部数据导出来？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">Your vault already is the export — a folder of <code>.md</code> files and attachments on your disk. For a portable copy, File → Export Vault produces one zip. Individual notes export to PDF and Epub. There is no "request your archive and wait 48 hours" step, because there's nothing to request.</span>
+            <span class="lang-zh">你的笔记库本身就是导出结果——磁盘上一个装着 <code>.md</code> 文件和附件的文件夹。要一份便携副本，「文件 → 导出笔记库」会生成一个 zip。单条笔记可导出 PDF 和 Epub。没有「申请归档并等待 48 小时」这一步，因为没什么可申请的。</span>
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q">
+            <span><span class="lang-en">Has the encryption been audited by anyone outside Skypad?</span><span class="lang-zh">加密方案有 Skypad 之外的人审计过吗？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">Yes. An independent security firm audits the sync protocol and clients every six months; the full reports — findings, severities, and our fixes — are published unedited at <code>skypad.app/audit</code>. The editor core is open source, so you can also read the encryption code yourself.</span>
+            <span class="lang-zh">有。一家独立安全公司每六个月审计一次同步协议和客户端；完整报告——问题、严重级别和我们的修复——原样发布在 <code>skypad.app/audit</code>。编辑器内核开源，你也可以自己读加密相关的代码。</span>
+          </p>
+        </details>
+      </div>
+
+      <!-- Group 3 · Editor & platforms -->
+      <div class="faq-group" id="editor-platforms">
+        <h2><span class="lang-en">Editor &amp; platforms.</span><span class="lang-zh">编辑器与平台。</span></h2>
+        <p class="faq-group-sub">
+          <span class="lang-en">One editor, five platforms, no feature held hostage on any of them.</span>
+          <span class="lang-zh">一个编辑器，五个平台，任何平台都不扣留功能。</span>
+        </p>
+
+        <figure class="faq-figure">
+          <svg role="img" aria-label="Skypad runs on five platforms: macOS 12 and later, Windows 10 and later, Linux via AppImage or Flatpak, iOS 16 and later, Android 11 and later" viewBox="0 0 960 232">
+            <g fill="none" stroke="#aeaeb2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <!-- laptop -->
+              <rect x="48" y="48" width="124" height="78" rx="8"/>
+              <path d="M34 126h152l-10 14H44z"/>
+              <!-- desktop monitor -->
+              <rect x="252" y="44" width="116" height="76" rx="8"/>
+              <path d="M298 120v14M278 134h44"/>
+              <!-- linux terminal square -->
+              <rect x="452" y="48" width="92" height="76" rx="8"/>
+              <path d="M468 70l12 10-12 10M488 90h22"/>
+              <!-- iphone -->
+              <rect x="638" y="36" width="52" height="96" rx="10"/>
+              <path d="M658 122h12"/>
+              <!-- android phone -->
+              <rect x="806" y="36" width="52" height="96" rx="10"/>
+              <circle cx="832" cy="120" r="2.5"/>
+            </g>
+            <!-- one blue accent: the writing cursor on the laptop screen -->
+            <path d="M68 66h56M68 80h44" stroke="#d2d2d7" stroke-width="2" stroke-linecap="round"/>
+            <rect x="116" y="74" width="2" height="12" fill="#0071e3"/>
+            <g font-family="-apple-system, 'SF Pro Display', sans-serif" font-size="13.5" font-weight="600" fill="#1d1d1f" text-anchor="middle">
+              <text x="110" y="172">macOS</text>
+              <text x="310" y="172">Windows</text>
+              <text x="498" y="172">Linux</text>
+              <text x="664" y="172">iOS</text>
+              <text x="832" y="172">Android</text>
+            </g>
+            <g font-family="-apple-system, 'SF Pro Text', sans-serif" font-size="11.5" fill="#86868b" text-anchor="middle">
+              <text x="110" y="192">12 or later</text>
+              <text x="310" y="192">10 or later</text>
+              <text x="498" y="192">AppImage · Flatpak</text>
+              <text x="664" y="192">16 or later</text>
+              <text x="832" y="192">11 or later</text>
+            </g>
+          </svg>
+          <figcaption>
+            <span class="lang-en">Every platform gets the same editor, the same sync, and the same release day.</span>
+            <span class="lang-zh">每个平台拿到同一个编辑器、同一套同步，以及同一天的版本发布。</span>
+          </figcaption>
+        </figure>
+
+        <details class="faq-item" open>
+          <summary class="faq-q">
+            <span><span class="lang-en">Is there an AI assistant in the editor?</span><span class="lang-zh">编辑器里有 AI 助手吗？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">No, and there won't be. No autocomplete, no rewriting, no summaries — that's a product decision, not a missing feature. Your words form in your head, in your voice. If you want AI on your notes, the files are plain Markdown; point any tool at them, deliberately, outside the editor.</span>
+            <span class="lang-zh">没有，以后也不会有。没有自动补全、没有改写、没有摘要——这是产品决定，不是功能缺失。你的文字在你脑子里、用你的语气形成。想对笔记用 AI？文件就是纯 Markdown，在编辑器之外、有意识地把任何工具指向它们就行。</span>
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q">
+            <span><span class="lang-en">Can I import from Notion, Obsidian, Evernote, or Apple Notes?</span><span class="lang-zh">能从 Notion、Obsidian、Evernote 或 Apple 备忘录导入吗？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">Yes — File → Import handles all four, plus Bear and Day One. Obsidian vaults need no conversion at all (they're already Markdown folders). The Notion and Evernote importers keep attachments, internal links, and creation dates; a dry-run preview shows what will land where before anything is written.</span>
+            <span class="lang-zh">能——「文件 → 导入」支持这四个，外加 Bear 和 Day One。Obsidian 笔记库完全不需要转换（它本来就是 Markdown 文件夹）。Notion 和 Evernote 导入器保留附件、内部链接和创建日期；写入任何文件之前，预览模式会先展示什么内容会落到哪里。</span>
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q">
+            <span><span class="lang-en">Does it work fully offline?</span><span class="lang-zh">完全离线能用吗？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">Completely — offline is the default state, not a degraded mode. Notes live on disk, search runs locally, and sync simply resumes when you're back online. If two devices edited the same note while offline, you get both versions side by side; we never auto-discard either one.</span>
+            <span class="lang-zh">完全可以——离线是默认状态，不是降级模式。笔记存在磁盘上，搜索在本地运行，恢复联网后同步自动继续。如果两台设备离线时改了同一条笔记，两个版本会并排呈现；我们绝不自动丢弃任何一个。</span>
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q">
+            <span><span class="lang-en">Are there plugins or themes?</span><span class="lang-zh">有插件或主题吗？</span></span>
+            <span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg></span>
+          </summary>
+          <p class="faq-a">
+            <span class="lang-en">Themes yes — light, dark, and four typography presets. Plugins no: a plugin API would turn the quiet editor into a platform, and every platform eventually grows a notification system. What we offer instead is the open format — your <code>.md</code> files work with the whole Markdown tool world outside the app.</span>
+            <span class="lang-zh">主题有——浅色、深色，外加四套排版预设。插件没有：插件 API 会把安静的编辑器变成一个平台，而每个平台最终都会长出通知系统。我们给的替代方案是开放格式——你的 <code>.md</code> 文件可以和应用之外整个 Markdown 工具世界协作。</span>
+          </p>
+        </details>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Pull quote on black -->
+<section class="pull-quote">
+  <div class="apple-container apple-container--hero">
+    <blockquote>
+      <span class="lang-en">“Support is part of the product. The person who answers your email also ships the code.”</span>
+      <span class="lang-zh">「支持就是产品的一部分。回你邮件的人，也是写代码发版本的人。」</span>
+    </blockquote>
+    <cite>
+      <span class="lang-en">— Skypad support principle, unchanged since v1</span>
+      <span class="lang-zh">— Skypad 支持原则，自 v1 起未变</span>
+    </cite>
+  </div>
+</section>
+
+<!-- Still stuck — support channels -->
+<section class="apple-section" style="background:#f5f5f7;" id="contact">
+  <div class="apple-container apple-container--hero" style="text-align:center;">
+    <h2 style="font-size:56px; font-weight:700; letter-spacing:-0.03em; line-height:1.08;">
+      <span class="lang-en">Still stuck?</span>
+      <span class="lang-zh">还没解决？</span>
+    </h2>
+    <p style="font-family:var(--font-display); font-size:20px; color:var(--apple-text-secondary); margin:var(--space-5) auto 0; line-height:1.45; max-width:620px; letter-spacing:-0.005em;">
+      <span class="lang-en">Three doors, each leading to a human. Pick the one that matches your question.</span>
+      <span class="lang-zh">三扇门，门后都是真人。挑一扇和你的问题对得上的。</span>
+    </p>
+
+    <div class="channel-row">
+      <article class="channel-card">
+        <div class="channel-icon">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#0071E3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="8" width="24" height="18" rx="3"/>
+            <path d="M4 11l12 9 12-9"/>
+          </svg>
+        </div>
+        <h3><span class="lang-en">Email support</span><span class="lang-zh">邮件支持</span></h3>
+        <p>
+          <span class="lang-en">For account, billing, and sync questions. Write in English or 中文 to <code>support@skypad.app</code> — median first reply is 4 hours, 7 days a week.</span>
+          <span class="lang-zh">账户、付费和同步问题。中英文均可，写信到 <code>support@skypad.app</code>——首封回复中位数 4 小时，每周 7 天。</span>
+        </p>
+        <a class="apple-link" href="mailto:support@skypad.app"><span class="lang-en">Email us</span><span class="lang-zh">给我们写信</span></a>
+      </article>
+
+      <article class="channel-card">
+        <div class="channel-icon">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#0071E3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 8h20v14H14l-6 5v-5H6z"/>
+            <path d="M11 14h10M11 18h6"/>
+          </svg>
+        </div>
+        <h3><span class="lang-en">Writers' forum</span><span class="lang-zh">作者论坛</span></h3>
+        <p>
+          <span class="lang-en">For workflow ideas, templates, and "how do you organize your vault" questions. 18,000 writers, searchable archive, no algorithmic feed.</span>
+          <span class="lang-zh">工作流想法、模板，以及「你的笔记库怎么组织」这类问题。18,000 位作者，可搜索的历史存档，没有算法推送流。</span>
+        </p>
+        <a class="apple-link" href="#forum"><span class="lang-en">Browse the forum</span><span class="lang-zh">逛逛论坛</span></a>
+      </article>
+
+      <article class="channel-card">
+        <div class="channel-icon">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#0071E3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 4l10 4v8c0 6-4 10-10 12C10 26 6 22 6 16V8z"/>
+            <path d="M12 16l3 3 5-6"/>
+          </svg>
+        </div>
+        <h3><span class="lang-en">Security disclosures</span><span class="lang-zh">安全披露</span></h3>
+        <p>
+          <span class="lang-en">Found a vulnerability? Mail <code>security@skypad.app</code> (PGP key published). We acknowledge within 24 hours and credit every valid report in the audit page.</span>
+          <span class="lang-zh">发现漏洞？发信到 <code>security@skypad.app</code>（PGP 公钥已公布）。我们 24 小时内确认，并在审计页面署名感谢每一份有效报告。</span>
+        </p>
+        <a class="apple-link" href="#security-policy"><span class="lang-en">Read the policy</span><span class="lang-zh">阅读披露政策</span></a>
+      </article>
+    </div>
+
+    <p style="margin-top:var(--space-7); font-family:var(--font-display); font-size:12.5px; color:var(--apple-text-secondary); letter-spacing:0.02em;">
+      <span class="lang-en">No chatbots. No ticket queues. The 92% one-reply rate is measured monthly and published in the changelog.</span>
+      <span class="lang-zh">没有聊天机器人，没有工单队列。92% 的一封解决率每月统计，并发布在更新日志里。</span>
+    </p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="apple-footer">
+  <div class="apple-footer-grid">
+    <div class="apple-footer-group"><h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5><a href="landing.html#features"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a><a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a><a href="landing.html#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a><a href="#changelog"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a></div>
+    <div class="apple-footer-group"><h5><span class="lang-en">For teams</span><span class="lang-zh">团队</span></h5><a href="#teams"><span class="lang-en">Team plan</span><span class="lang-zh">团队版</span></a><a href="#enterprise"><span class="lang-en">Enterprise</span><span class="lang-zh">企业版</span></a><a href="#security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a><a href="#slas">SLAs</a></div>
+    <div class="apple-footer-group"><h5><span class="lang-en">Writers</span><span class="lang-zh">作者</span></h5><a href="#guide"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a><a href="#templates"><span class="lang-en">Templates</span><span class="lang-zh">模板</span></a><a href="#showcase"><span class="lang-en">Showcase</span><span class="lang-zh">作品精选</span></a><a href="#community"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a></div>
+    <div class="apple-footer-group"><h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5><a href="#about"><span class="lang-en">About</span><span class="lang-zh">关于</span></a><a href="#press"><span class="lang-en">Press</span><span class="lang-zh">媒体</span></a><a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a><a href="#status"><span class="lang-en">Status</span><span class="lang-zh">状态</span></a></div>
+    <div class="apple-footer-group"><h5><span class="lang-en">Legal</span><span class="lang-zh">法务</span></h5><a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a><a href="#terms"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a><a href="#dpa">DPA</a><a href="#audit"><span class="lang-en">Audit</span><span class="lang-zh">审计</span></a></div>
+  </div>
+  <div class="apple-footer-legal">
+    <span>Copyright © 2026 Skypad Inc.</span>
+    <span><span class="lang-en">Made in Berlin · Toronto · Kyoto</span><span class="lang-zh">制作于 柏林 · 多伦多 · 京都</span></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: apple
+Page-type: faq
+Created: 2026-06-11
+
+Decisions (6):
+1. [details-accordion-not-js] chose "native <details>/<summary> accordion with a rotating plus chevron" over "a JS-driven accordion with animated height". Because: keyboard and screen-reader behavior come free with the native element, the page degrades to fully-readable with JS disabled, and apple's restraint values zero-dependency interaction over a height tween.
+2. [three-groups-one-column] chose "a single 860px centered column with three 48px group headers and hero jump chips" over "a sticky sidebar + content two-column support layout". Because: fourteen questions don't justify permanent navigation chrome; three pill chips in the hero handle jumping once, and one column preserves apple's centered-statement reading rhythm instead of splitting attention.
+3. [e2e-diagram-answers-the-question] chose "answering 'what does end-to-end encrypted mean' with a 960px grayscale flow diagram (blue spent on the encrypted path + the ciphertext-only chip)" over "a prose-only answer". Because: it is the page's highest-stakes trust question and its structure (device → relay → device) reads instantly as a picture, while prose forces each reader to rebuild the same picture in their head.
+4. [stats-are-support-promises] chose "four 72px stat numbers stating measurable support promises (4h median reply · 92% one-reply rate · 0 chatbots · 30-day refund)" over "a search-bar hero like typical help centers". Because: a search bar promises tooling this page doesn't have; concrete promises set expectations the FAQ then has to keep, and reuse apple's giant-number trust pattern from the landing canonical.
+5. [first-question-open] chose "first <details> of each group open by default" over "all items collapsed". Because: an all-collapsed page reads as a wall of identical rows and hides the answer typography entirely; one open item per group shows the interaction pattern and gives each group a visual anchor.
+6. [equal-channel-cards] chose "three equal-width support-channel cards" over "1 hero channel + 2 compact alternatives (§I default)". Because: email, forum and security disclosure serve disjoint audiences — ranking them would misroute users; §I permits equal weight when the weights are genuinely equal, which is exactly this case.
+
+Known trade-offs:
+- Native details/summary cannot animate open/close height without JS, so expansion is instant rather than apple-eased. Accepted: free a11y outweighs a tween on a support page.
+- SVG diagram labels are English-only (same precedent as the landing product-mock SVG); zh readers get bilingual figcaptions but monolingual diagram internals.
+- Opening one item per group makes the first paint taller and pre-answers questions a visitor may not have; collapsed-by-default would be denser but was rejected per decision 5.
+
+/design-review:self-diff -->
+
+</body>
+</html>

@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skypad changelog — what changed, and why</title>
+<meta name="description" content="Every Skypad release since January 2026 — what we added, fixed and changed, written by hand in plain words. Subscribe by email, RSS or JSON feed.">
+<meta property="og:title" content="Skypad changelog — what changed, and why">
+<meta property="og:description" content="Every Skypad release since January 2026 — what we added, fixed and changed, written by hand in plain words. Subscribe by email, RSS or JSON feed.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/sage.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--sage-divider);
+    color: var(--sage-ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .lang-toggle:hover { background: #f0f3e2; }
+  /* Chinese (§H): Instrument Serif → Noto Serif SC; Inter → Noto Sans SC. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .sage-lead,
+  html[data-lang="zh"] .chg-text,
+  html[data-lang="zh"] figcaption {
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .rel-title,
+  html[data-lang="zh"] .giant-num,
+  html[data-lang="zh"] .hero-headline em,
+  html[data-lang="zh"] .section-title em,
+  html[data-lang="zh"] blockquote {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+    font-style: normal !important;
+  }
+  html[data-lang="zh"] .sect-marker,
+  html[data-lang="zh"] .feed-month .m-lbl,
+  html[data-lang="zh"] .giant-stats .lbl,
+  html[data-lang="zh"] .chg-chip,
+  html[data-lang="zh"] .kbd-row .tag {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+    text-transform: none;
+    letter-spacing: 0.04em;
+  }
+
+  /* Numbered section markers (sage signature) */
+  .sect-marker {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--sage-text-secondary);
+    margin-bottom: var(--space-4);
+  }
+
+  /* Hero headline — Instrument Serif roman, italic ONLY on one accent word */
+  .hero-headline {
+    font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 88px; line-height: 1.04; letter-spacing: -0.022em;
+    color: var(--sage-ink); margin: 0;
+  }
+  .hero-headline em { font-style: italic; font-weight: 400; color: var(--sage-ink); }
+
+  .section-title {
+    font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 52px; line-height: 1.08; letter-spacing: -0.025em;
+    color: var(--sage-ink); margin: var(--space-3) 0 0;
+  }
+  .section-title em { font-style: italic; font-weight: 400; }
+  .section-title--sm { font-size: 44px; }
+
+  /* Subscribe form (hero, top CTA) */
+  .sub-form {
+    display: flex; gap: var(--space-3); justify-content: center;
+    max-width: 540px; margin: var(--space-7) auto 0; flex-wrap: wrap;
+  }
+  .sub-form .sage-input { flex: 1; min-width: 240px; max-width: 360px; }
+
+  /* Giant stats — Instrument Serif roman (landing syntax) */
+  .giant-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); text-align: left; }
+  .giant-stats > div { padding: var(--space-5) var(--space-4); border-left: 1px solid var(--sage-divider); }
+  .giant-stats > div:first-child { border-left: none; padding-left: 0; }
+  .giant-num {
+    display: block; font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 76px; color: var(--sage-ink); letter-spacing: -0.028em; line-height: 1;
+  }
+  .giant-stats .lbl {
+    display: block; margin-top: var(--space-4);
+    font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--sage-text);
+    line-height: 1.5;
+  }
+
+  /* Diagram figure card */
+  .fig-card {
+    background: #ffffff; border: 1px solid var(--sage-divider);
+    border-radius: 6px; padding: var(--space-5) var(--space-6);
+    margin: 0;
+  }
+  .fig-card svg { display: block; width: 100%; height: auto; }
+  .fig-card figcaption {
+    font-family: 'Inter', sans-serif; font-size: 13.5px; line-height: 1.55;
+    color: var(--sage-text-secondary); margin-top: var(--space-4);
+  }
+
+  /* Release feed — single hairline rail = the literal time axis */
+  .feed { position: relative; margin-top: var(--space-8); }
+  .feed::before {
+    content: ""; position: absolute; left: 8px; top: 8px; bottom: 8px;
+    width: 1px; background: var(--sage-divider);
+  }
+  .feed-month { position: relative; padding-left: 44px; margin: var(--space-8) 0 var(--space-5); }
+  .feed-month:first-child { margin-top: 0; }
+  .feed-month::before {
+    content: ""; position: absolute; left: 8px; top: 50%;
+    width: 22px; height: 1px; background: #c9d6a8; transform: translateY(-50%);
+  }
+  .feed-month .m-lbl {
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--sage-text-secondary);
+  }
+  .release {
+    position: relative; margin-left: 44px; margin-bottom: var(--space-5);
+    background: #ffffff; border: 1px solid var(--sage-divider);
+    border-radius: 4px; padding: var(--space-6);
+  }
+  .release::before {
+    content: ""; position: absolute; left: -36px; top: 36px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--sage-ink); transform: translate(-50%, -50%);
+  }
+  .release--patch::before {
+    width: 7px; height: 7px; background: #ffffff;
+    border: 1.5px solid var(--sage-text-secondary);
+  }
+  /* The page's ONE green-edged card: the latest release (sage focus-card syntax) */
+  .release--latest { border: 1.5px solid var(--sage-sage); }
+  .release--latest::before { background: var(--sage-sage); }
+
+  .release-head { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+  .rel-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 600;
+    letter-spacing: 0.06em; background: var(--sage-ink); color: #ffffff;
+    padding: 3px 10px; border-radius: 3px;
+  }
+  .rel-date {
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    letter-spacing: 0.08em; color: var(--sage-text-secondary);
+  }
+  .rel-title {
+    font-family: 'Instrument Serif', serif; font-weight: 400; font-style: normal;
+    font-size: 27px; line-height: 1.22; letter-spacing: -0.015em;
+    color: var(--sage-ink); margin: var(--space-3) 0 0;
+  }
+
+  /* Change list — chip triad: tint (added) / ink (fixed) / hairline (changed) */
+  .chg-list { list-style: none; margin: var(--space-4) 0 0; padding: 0; }
+  .chg-list li {
+    display: grid; grid-template-columns: 92px 1fr; gap: var(--space-4);
+    align-items: baseline; padding: 9px 0;
+    border-bottom: 1px solid var(--sage-divider);
+  }
+  .chg-list li:last-child { border-bottom: none; padding-bottom: 2px; }
+  .chg-text {
+    font-family: 'Inter', sans-serif; font-size: 15.5px; line-height: 1.6;
+    color: var(--sage-text);
+  }
+  .chg-chip {
+    display: inline-block; width: 100%; text-align: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 3px 0; border-radius: 3px;
+  }
+  .chg-chip--added { background: #d4e1b8; color: var(--sage-ink); }
+  .chg-chip--fixed { background: var(--sage-ink); color: #ffffff; }
+  .chg-chip--changed { background: #ffffff; border: 1px solid var(--sage-divider); color: var(--sage-text-secondary); }
+  .chg-chip--latest {
+    width: auto; padding: 3px 10px;
+    background: #f0f3e2; border: 1px solid var(--sage-sage); color: var(--sage-ink);
+  }
+  .release .fig-card { margin-top: var(--space-5); background: #fafbf0; }
+
+  /* Pull-quote — italic earned */
+  .pull-quote-dark { background: var(--sage-ink); color: #ffffff; padding: var(--space-10) 0; }
+  .pull-quote-dark blockquote {
+    font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
+    font-size: 38px; line-height: 1.35; color: #ffffff;
+    margin: 0; max-width: 920px;
+  }
+  .pull-quote-dark cite {
+    display: block; margin-top: var(--space-6);
+    font-family: 'Inter', sans-serif; font-style: normal; font-size: 15px;
+    color: #97B077; letter-spacing: 0.05em;
+  }
+
+  /* Versioning section — 2-col craft grid (landing §7 syntax) */
+  .craft-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: var(--space-8); align-items: center; }
+
+  /* Feed endpoints — kbd-row syntax (landing §7) */
+  .kbd-row {
+    display: grid; grid-template-columns: 88px 1fr; gap: var(--space-5);
+    align-items: baseline; padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--sage-divider);
+  }
+  .kbd-row kbd {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+    background: #ffffff; padding: 4px 10px; border-radius: 3px;
+    border: 1px solid var(--sage-divider); color: var(--sage-ink);
+    text-align: center;
+  }
+  .kbd-row .tag {
+    font-family: 'Inter', sans-serif; font-size: 15.5px; color: var(--sage-text); line-height: 1.5;
+  }
+  .kbd-row .tag code { white-space: nowrap; }
+
+  @media (max-width: 768px) {
+    .hero-headline { font-size: 48px; }
+    .section-title { font-size: 36px; }
+    .section-title--sm { font-size: 32px; }
+    .giant-stats { grid-template-columns: repeat(2, 1fr); }
+    .craft-grid { grid-template-columns: 1fr; }
+    .chg-list li { grid-template-columns: 76px 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="sage-nav"><div class="sage-nav-inner">
+  <a href="landing.html" class="sage-nav-brand">Skypad</a>
+  <div>
+    <a href="landing.html"><span class="lang-en">Product</span><span class="lang-zh">产品</span></a>
+    <a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a>
+    <a href="#releases" aria-current="page" style="color:var(--sage-ink); font-weight:600;"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a>
+    <a href="blog-index.html"><span class="lang-en">Field notes</span><span class="lang-zh">田野笔记</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a href="#login" style="font-size:14px; color:var(--sage-ink); text-decoration:none;"><span class="lang-en">Sign in</span><span class="lang-zh">登录</span></a>
+    <a class="sage-button" href="landing.html#download"><span class="lang-en">Start writing</span><span class="lang-zh">开始写作</span></a>
+  </div>
+</div></nav>
+
+<!-- Hero + subscribe CTA -->
+<section class="sage-hero" style="padding-top:var(--space-10); padding-bottom:var(--space-9);" id="subscribe">
+  <div class="sage-container" style="max-width:940px;">
+    <span class="sect-marker">00 · <span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></span>
+    <h1 class="hero-headline">
+      <span class="lang-en">What changed,<br><em>and why.</em></span>
+      <span class="lang-zh">改了什么，<br><em>为什么</em>改。</span>
+    </h1>
+    <p class="sage-lead" style="margin-top:var(--space-6); max-width:680px; margin-inline:auto; font-size:21px; line-height:1.55;">
+      <span class="lang-en">One entry per release since January. Features we added, bugs we fixed, behaviour we changed — written by the people who shipped it, in plain words.</span>
+      <span class="lang-zh">自一月起，每个版本一条记录。新增的功能、修复的问题、调整的行为——由做这个版本的人亲手写下，全是白话。</span>
+    </p>
+    <form class="sub-form" action="#subscribe" method="get">
+      <label class="sage-sr-only" for="sub-email"><span class="lang-en">Email address</span><span class="lang-zh">邮箱地址</span></label>
+      <input class="sage-input" type="email" id="sub-email" name="email" placeholder="you@example.com" autocomplete="email">
+      <button type="submit" class="sage-button"><span class="lang-en">Subscribe to updates</span><span class="lang-zh">订阅更新</span></button>
+    </form>
+    <p style="margin-top:var(--space-5); font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--sage-text-secondary); letter-spacing:0.12em;">
+      <span class="lang-en">RELEASES ONLY · NO MARKETING · UNSUBSCRIBE ANY TIME</span>
+      <span class="lang-zh" style="font-family:'Noto Sans SC', 'PingFang SC', sans-serif; letter-spacing:0.04em;">只发版本通知 · 没有营销邮件 · 随时退订</span>
+    </p>
+  </div>
+</section>
+
+<!-- 01 · The rhythm: release-train timeline + stats -->
+<section class="sage-section" style="background:#f0f3e2; padding-block:var(--space-10);" id="rhythm">
+  <div class="sage-container sage-container--wide">
+    <div style="max-width:680px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="sect-marker">01 · <span class="lang-en">The rhythm</span><span class="lang-zh">节奏</span></span>
+      <h2 class="section-title section-title--sm">
+        <span class="lang-en">Small releases, <em>often.</em></span>
+        <span class="lang-zh">小步发布，<em>勤快</em>发布。</span>
+      </h2>
+      <p class="sage-lead" style="max-width:600px; margin:var(--space-5) auto 0; font-size:18px;">
+        <span class="lang-en">A minor release roughly every three weeks, a patch whenever a fix can't wait. No release trains held for marketing moments.</span>
+        <span class="lang-zh">大约每三周一个次版本；修复等不了就出补丁。不为营销节点压着版本不发。</span>
+      </p>
+    </div>
+
+    <figure class="fig-card">
+      <svg viewBox="0 0 1120 248" role="img" aria-label="The v3.x release train from January to June 2026: minor releases v3.1 through v3.6 on tall stems, patch releases v3.3.2 and v3.5.1 on short stems, with v3.6 marked as the latest release">
+        <text x="24" y="34" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" letter-spacing="1.5" fill="#6d6f82">2026 · V3.X RELEASE TRAIN</text>
+        <text x="1096" y="34" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82"><tspan fill="#393C54">●</tspan> MINOR — FEATURES&#160;&#160;&#160;○ PATCH — FIXES</text>
+
+        <!-- time axis -->
+        <line x1="24" y1="196" x2="1096" y2="196" stroke="#6d6f82" stroke-width="1"/>
+        <g stroke="#6d6f82" stroke-width="1">
+          <line x1="24" y1="196" x2="24" y2="204"/>
+          <line x1="203" y1="196" x2="203" y2="204"/>
+          <line x1="382" y1="196" x2="382" y2="204"/>
+          <line x1="560" y1="196" x2="560" y2="204"/>
+          <line x1="739" y1="196" x2="739" y2="204"/>
+          <line x1="918" y1="196" x2="918" y2="204"/>
+          <line x1="1096" y1="196" x2="1096" y2="204"/>
+        </g>
+        <g font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82" text-anchor="middle">
+          <text x="113" y="226">JAN</text>
+          <text x="292" y="226">FEB</text>
+          <text x="471" y="226">MAR</text>
+          <text x="649" y="226">APR</text>
+          <text x="828" y="226">MAY</text>
+          <text x="1007" y="226">JUN</text>
+        </g>
+
+        <!-- minor releases: ink stems + ink nodes -->
+        <g stroke="#393C54" stroke-width="1.4">
+          <line x1="111" y1="196" x2="111" y2="120"/>
+          <line x1="267" y1="196" x2="267" y2="120"/>
+          <line x1="399" y1="196" x2="399" y2="120"/>
+          <line x1="644" y1="196" x2="644" y2="120"/>
+          <line x1="774" y1="196" x2="774" y2="120"/>
+        </g>
+        <g fill="#393C54">
+          <circle cx="111" cy="112" r="7"/>
+          <circle cx="267" cy="112" r="7"/>
+          <circle cx="399" cy="112" r="7"/>
+          <circle cx="644" cy="112" r="7"/>
+          <circle cx="774" cy="112" r="7"/>
+        </g>
+        <g font-family="'Inter', sans-serif" font-size="13" font-weight="600" fill="#393C54" text-anchor="middle">
+          <text x="111" y="92">v3.1</text>
+          <text x="267" y="92">v3.2</text>
+          <text x="399" y="92">v3.3</text>
+          <text x="644" y="92">v3.4</text>
+          <text x="774" y="92">v3.5</text>
+        </g>
+
+        <!-- patch releases: short grey stems + hollow nodes -->
+        <g stroke="#6d6f82" stroke-width="1.2">
+          <line x1="526" y1="196" x2="526" y2="164"/>
+          <line x1="866" y1="196" x2="866" y2="164"/>
+        </g>
+        <circle cx="526" cy="157" r="5.5" fill="#ffffff" stroke="#6d6f82" stroke-width="1.4"/>
+        <circle cx="866" cy="157" r="5.5" fill="#ffffff" stroke="#6d6f82" stroke-width="1.4"/>
+        <g font-family="'Inter', sans-serif" font-size="11.5" fill="#6d6f82" text-anchor="middle">
+          <text x="526" y="139">v3.3.2</text>
+          <text x="866" y="139">v3.5.1</text>
+        </g>
+
+        <!-- latest release: the figure's single sage narrative -->
+        <line x1="971" y1="196" x2="971" y2="120" stroke="#97B077" stroke-width="1.8"/>
+        <circle cx="971" cy="112" r="7.5" fill="#97B077"/>
+        <rect x="911" y="58" width="120" height="28" rx="6" fill="#f0f3e2" stroke="#97B077" stroke-width="1.5"/>
+        <text x="971" y="77" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12.5" font-weight="600" fill="#393C54">v3.6 · LATEST</text>
+      </svg>
+      <figcaption>
+        <span class="lang-en">The v3.x release train, January–June 2026. Minor releases carry features; patches carry only fixes. Median gap between releases: 21 days.</span>
+        <span class="lang-zh">v3.x 发布列车，2026 年 1 月至 6 月。次版本带功能，补丁版本只带修复。版本之间的中位间隔：21 天。</span>
+      </figcaption>
+    </figure>
+
+    <div class="giant-stats" style="margin-top:var(--space-8);">
+      <div>
+        <span class="giant-num">8</span>
+        <span class="lbl"><span class="lang-en">releases since January</span><span class="lang-zh">个版本，自一月起</span></span>
+      </div>
+      <div>
+        <span class="giant-num">21</span>
+        <span class="lbl"><span class="lang-en">days, median gap between releases</span><span class="lang-zh">天，版本中位间隔</span></span>
+      </div>
+      <div>
+        <span class="giant-num">0</span>
+        <span class="lbl"><span class="lang-en">breaking changes since v3.0</span><span class="lang-zh">次破坏性变更，自 v3.0 起</span></span>
+      </div>
+      <div>
+        <span class="giant-num">3</span>
+        <span class="lbl"><span class="lang-en">people who write every entry by hand</span><span class="lang-zh">个人，亲手写下每条记录</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 · Releases: the feed -->
+<section class="sage-section" style="padding-block:var(--space-10);" id="releases">
+  <div class="sage-container">
+    <span class="sect-marker">02 · <span class="lang-en">Releases</span><span class="lang-zh">版本</span></span>
+    <h2 class="section-title section-title--sm">
+      <span class="lang-en">Every release, newest first.</span>
+      <span class="lang-zh">全部版本，最新在前。</span>
+    </h2>
+
+    <div class="feed">
+
+      <div class="feed-month"><span class="m-lbl"><span class="lang-en">June 2026</span><span class="lang-zh">2026 年 6 月</span></span></div>
+
+      <article class="release release--latest" id="v3-6">
+        <header class="release-head">
+          <span class="rel-badge">v3.6</span>
+          <time class="rel-date" datetime="2026-06-09">2026-06-09</time>
+          <span class="chg-chip chg-chip--latest"><span class="lang-en">Latest</span><span class="lang-zh">最新</span></span>
+        </header>
+        <h3 class="rel-title"><span class="lang-en">Publish themes &amp; footnotes</span><span class="lang-zh">发布主题与脚注</span></h3>
+        <ul class="chg-list">
+          <li>
+            <span class="chg-chip chg-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span>
+            <span class="chg-text"><span class="lang-en">Three themes for published pages at <code>name.skypad.page</code> — Quiet, Folio and Mono. Pick per note or per vault.</span><span class="lang-zh"><code>name.skypad.page</code> 公开页新增三套主题——Quiet、Folio、Mono。可按笔记或按 vault 选择。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span>
+            <span class="chg-text"><span class="lang-en">Footnotes render in the editor and on published pages. Plain Markdown syntax, <code>[^1]</code>, nothing proprietary.</span><span class="lang-zh">脚注在编辑器和公开页里都能渲染。就是普通 Markdown 语法 <code>[^1]</code>，没有私有格式。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span>
+            <span class="chg-text"><span class="lang-en">Publish settings moved into the note inspector — one panel instead of two dialogs.</span><span class="lang-zh">发布设置移入笔记检查器——一个面板，代替原来的两个对话框。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span>
+            <span class="chg-text"><span class="lang-en">Custom-domain HTTPS certificates on Team plans no longer stall during renewal.</span><span class="lang-zh">Team 版自定义域名的 HTTPS 证书续期不再卡住。</span></span>
+          </li>
+        </ul>
+      </article>
+
+      <div class="feed-month"><span class="m-lbl"><span class="lang-en">May 2026</span><span class="lang-zh">2026 年 5 月</span></span></div>
+
+      <article class="release release--patch" id="v3-5-1">
+        <header class="release-head">
+          <span class="rel-badge">v3.5.1</span>
+          <time class="rel-date" datetime="2026-05-22">2026-05-22</time>
+        </header>
+        <h3 class="rel-title"><span class="lang-en">Sync fixes</span><span class="lang-zh">同步修复</span></h3>
+        <ul class="chg-list">
+          <li>
+            <span class="chg-chip chg-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span>
+            <span class="chg-text"><span class="lang-en">iOS no longer creates conflict copies when a device clock is skewed by more than a minute.</span><span class="lang-zh">iOS 设备时钟偏差超过一分钟时，不再产生冲突副本。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span>
+            <span class="chg-text"><span class="lang-en">The vault-unlock prompt could loop on macOS after waking from sleep.</span><span class="lang-zh">macOS 唤醒后，vault 解锁提示可能循环弹出的问题。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span>
+            <span class="chg-text"><span class="lang-en">The backlinks panel flashed empty for a frame while sync was running.</span><span class="lang-zh">同步进行中，反向链接面板会闪空一帧的问题。</span></span>
+          </li>
+        </ul>
+      </article>
+
+      <article class="release" id="v3-5">
+        <header class="release-head">
+          <span class="rel-badge">v3.5</span>
+          <time class="rel-date" datetime="2026-05-06">2026-05-06</time>
+        </header>
+        <h3 class="rel-title"><span class="lang-en">Quick switcher, rebuilt</span><span class="lang-zh">快速跳转，重写</span></h3>
+        <ul class="chg-list">
+          <li>
+            <span class="chg-chip chg-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span>
+            <span class="chg-text"><span class="lang-en">⌘K now matches headings and block references inside notes, not just note titles.</span><span class="lang-zh">⌘K 现在能匹配笔记内的标题和块引用，不再只匹配笔记名。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span>
+            <span class="chg-text"><span class="lang-en">Fuzzy matching prefers notes you edited recently — the note you want is almost always the first row.</span><span class="lang-zh">模糊匹配优先最近编辑过的笔记——你要找的那条，几乎总在第一行。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span>
+            <span class="chg-text"><span class="lang-en">The switcher index now lives in memory. Opening it takes 12 ms on a five-year-old laptop.</span><span class="lang-zh">跳转索引常驻内存。在一台五年前的笔记本上，打开只要 12 毫秒。</span></span>
+          </li>
+        </ul>
+        <figure class="fig-card">
+          <svg viewBox="0 0 760 360" role="img" aria-label="The rebuilt quick switcher: a Skypad window with the command palette open, the query 'still' matching the note On stillness, a heading inside meditations.md, a daily note and On solitude, with the first result selected">
+            <rect x="0.5" y="0.5" width="759" height="359" rx="8" fill="#ffffff" stroke="#e5e8da"/>
+            <path d="M0.5,8.5 a8,8 0 0 1 8,-8 H751.5 a8,8 0 0 1 8,8 V36 H0.5 Z" fill="#f0f3e2"/>
+            <line x1="0.5" y1="36" x2="759.5" y2="36" stroke="#e5e8da"/>
+            <g transform="translate(20 18)">
+              <circle cx="0" cy="0" r="5.5" fill="#97B077"/>
+              <circle cx="18" cy="0" r="5.5" fill="#c9d1b3"/>
+              <circle cx="36" cy="0" r="5.5" fill="#6d6f82"/>
+            </g>
+            <text x="380" y="22" text-anchor="middle" font-family="'Inter', sans-serif" font-size="11.5" fill="#6d6f82">vault · Skypad</text>
+
+            <!-- dimmed editor behind the palette -->
+            <g fill="#eef2de">
+              <rect x="36" y="64" width="240" height="7" rx="2"/>
+              <rect x="36" y="84" width="640" height="5" rx="2"/>
+              <rect x="36" y="100" width="600" height="5" rx="2"/>
+              <rect x="36" y="330" width="560" height="5" rx="2"/>
+            </g>
+
+            <!-- palette -->
+            <rect x="130" y="64" width="500" height="252" rx="8" fill="#ffffff" stroke="#c9d1b3" stroke-width="1.2"/>
+            <rect x="146" y="80" width="468" height="38" rx="6" fill="#f8faec" stroke="#e5e8da"/>
+            <text x="162" y="104" font-family="'Inter', sans-serif" font-size="13.5" font-weight="600" fill="#393C54">still</text>
+            <rect x="192" y="90" width="2" height="18" fill="#393C54"/>
+            <text x="600" y="103" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82">ESC</text>
+
+            <!-- selected result: the figure's single sage narrative -->
+            <rect x="146" y="130" width="468" height="38" rx="6" fill="#f0f3e2" stroke="#97B077" stroke-width="1.5"/>
+            <text x="162" y="154" font-family="'Inter', sans-serif" font-size="13" font-weight="600" fill="#393C54">On stillness</text>
+            <text x="600" y="153" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82">reading/on-stillness.md</text>
+
+            <text x="162" y="196" font-family="'Inter', sans-serif" font-size="13" fill="#2a2c40">Stillness — § Morning practice</text>
+            <text x="600" y="195" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82">meditations.md</text>
+            <line x1="146" y1="210" x2="614" y2="210" stroke="#e5e8da"/>
+
+            <text x="162" y="238" font-family="'Inter', sans-serif" font-size="13" fill="#2a2c40">Morning stillness, before mail</text>
+            <text x="600" y="237" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82">daily/2026-05-04.md</text>
+            <line x1="146" y1="252" x2="614" y2="252" stroke="#e5e8da"/>
+
+            <text x="162" y="280" font-family="'Inter', sans-serif" font-size="13" fill="#2a2c40">On solitude</text>
+            <text x="600" y="279" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82">reading/on-solitude.md</text>
+
+            <line x1="130" y1="296" x2="630" y2="296" stroke="#e5e8da"/>
+            <text x="146" y="310" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82">↑↓ NAVIGATE · ↵ OPEN</text>
+            <text x="614" y="310" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82">INDEX IN MEMORY · 12 MS</text>
+          </svg>
+          <figcaption>
+            <span class="lang-en">The rebuilt switcher matching the query “still” against note titles, headings and daily notes — the second result is a heading, new in v3.5.</span>
+            <span class="lang-zh">重写后的跳转器用「still」同时匹配笔记名、标题和日记——第二条结果是一个笔记内标题，v3.5 的新能力。</span>
+          </figcaption>
+        </figure>
+      </article>
+
+      <div class="feed-month"><span class="m-lbl"><span class="lang-en">April 2026</span><span class="lang-zh">2026 年 4 月</span></span></div>
+
+      <article class="release" id="v3-4">
+        <header class="release-head">
+          <span class="rel-badge">v3.4</span>
+          <time class="rel-date" datetime="2026-04-14">2026-04-14</time>
+        </header>
+        <h3 class="rel-title"><span class="lang-en">On-device search index</span><span class="lang-zh">设备本地搜索索引</span></h3>
+        <ul class="chg-list">
+          <li>
+            <span class="chg-chip chg-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span>
+            <span class="chg-text"><span class="lang-en">Full-vault search runs entirely on your device. It works offline, and no query ever leaves your machine.</span><span class="lang-zh">全 vault 搜索完全在你的设备上运行。离线可用，任何查询都不会离开你的机器。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span>
+            <span class="chg-text"><span class="lang-en">The index updates incrementally on save instead of rebuilding at launch — cold start is 4× faster on large vaults.</span><span class="lang-zh">索引改为保存时增量更新，不再在启动时重建——大 vault 冷启动快 4 倍。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span>
+            <span class="chg-text"><span class="lang-en">Search terms with diacritics (café, naïve) now match their unaccented spellings too.</span><span class="lang-zh">带变音符的搜索词（café、naïve）现在也能匹配不带符号的写法。</span></span>
+          </li>
+        </ul>
+      </article>
+
+      <div class="feed-month"><span class="m-lbl"><span class="lang-en">March 2026</span><span class="lang-zh">2026 年 3 月</span></span></div>
+
+      <article class="release release--patch" id="v3-3-2">
+        <header class="release-head">
+          <span class="rel-badge">v3.3.2</span>
+          <time class="rel-date" datetime="2026-03-25">2026-03-25</time>
+        </header>
+        <h3 class="rel-title"><span class="lang-en">Export &amp; Linux fixes</span><span class="lang-zh">导出与 Linux 修复</span></h3>
+        <ul class="chg-list">
+          <li>
+            <span class="chg-chip chg-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span>
+            <span class="chg-text"><span class="lang-en">PDF margins on A4 paper matched Letter by mistake — A4 now gets its own geometry.</span><span class="lang-zh">A4 纸的 PDF 页边距错用了 Letter 的值——A4 现在有自己的版面参数。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span>
+            <span class="chg-text"><span class="lang-en">Wiki-link autocomplete stopped working inside nested list items.</span><span class="lang-zh">嵌套列表项里 wiki 链接自动补全失效的问题。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span>
+            <span class="chg-text"><span class="lang-en">The Linux tray icon rendered blurry on fractional-scale displays.</span><span class="lang-zh">Linux 托盘图标在分数缩放屏幕上发虚的问题。</span></span>
+          </li>
+        </ul>
+      </article>
+
+      <article class="release" id="v3-3">
+        <header class="release-head">
+          <span class="rel-badge">v3.3</span>
+          <time class="rel-date" datetime="2026-03-03">2026-03-03</time>
+        </header>
+        <h3 class="rel-title"><span class="lang-en">PDF export, retypeset</span><span class="lang-zh">PDF 导出，重新排版</span></h3>
+        <ul class="chg-list">
+          <li>
+            <span class="chg-chip chg-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span>
+            <span class="chg-text"><span class="lang-en">A new PDF engine with real hyphenation and widow control — exported essays finally look typeset, not printed-from-a-browser.</span><span class="lang-zh">新 PDF 引擎，带真正的断字和孤行控制——导出的文章终于像排过版，而不是浏览器直接打印。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span>
+            <span class="chg-text"><span class="lang-en">Page-size presets: A4, Letter and A5.</span><span class="lang-zh">页面尺寸预设：A4、Letter、A5。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span>
+            <span class="chg-text"><span class="lang-en">The default export serif now matches the editor's reading face.</span><span class="lang-zh">导出默认衬线字体改为与编辑器阅读字体一致。</span></span>
+          </li>
+        </ul>
+        <figure class="fig-card">
+          <svg viewBox="0 0 720 240" role="img" aria-label="PDF export before and after v3.3: the old engine produced ragged line endings and a widowed last line; the new engine produces even, justified lines">
+            <defs>
+              <marker id="sgcl-arr-ink" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#393C54"/>
+              </marker>
+            </defs>
+            <!-- before page: ragged + widow -->
+            <rect x="24" y="24" width="280" height="176" rx="4" fill="#ffffff" stroke="#e5e8da"/>
+            <g fill="#c9d1b3">
+              <rect x="48" y="48" width="200" height="5" rx="2"/>
+              <rect x="48" y="66" width="232" height="5" rx="2"/>
+              <rect x="48" y="84" width="168" height="5" rx="2"/>
+              <rect x="48" y="102" width="220" height="5" rx="2"/>
+              <rect x="48" y="120" width="148" height="5" rx="2"/>
+              <rect x="48" y="138" width="212" height="5" rx="2"/>
+            </g>
+            <rect x="48" y="172" width="56" height="5" rx="2" fill="#6d6f82"/>
+            <text x="164" y="226" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82">BEFORE · v3.2 ENGINE</text>
+
+            <!-- arrow -->
+            <line x1="316" y1="112" x2="402" y2="112" stroke="#393C54" stroke-width="1.6" marker-end="url(#sgcl-arr-ink)"/>
+            <text x="360" y="98" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d6f82">RETYPESET</text>
+
+            <!-- after page: justified, sage edge = the figure's single green -->
+            <rect x="416" y="24" width="280" height="176" rx="4" fill="#ffffff" stroke="#97B077" stroke-width="1.5"/>
+            <g fill="#c9d1b3">
+              <rect x="440" y="48" width="232" height="5" rx="2"/>
+              <rect x="440" y="66" width="232" height="5" rx="2"/>
+              <rect x="440" y="84" width="232" height="5" rx="2"/>
+              <rect x="440" y="102" width="232" height="5" rx="2"/>
+              <rect x="440" y="120" width="232" height="5" rx="2"/>
+              <rect x="440" y="138" width="232" height="5" rx="2"/>
+              <rect x="440" y="156" width="232" height="5" rx="2"/>
+              <rect x="440" y="174" width="140" height="5" rx="2"/>
+            </g>
+            <text x="556" y="226" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#393C54">AFTER · v3.3 ENGINE</text>
+          </svg>
+          <figcaption>
+            <span class="lang-en">Same note, two engines. The v3.2 export left ragged endings and a widowed line; v3.3 justifies, hyphenates and keeps paragraphs whole.</span>
+            <span class="lang-zh">同一篇笔记，两个引擎。v3.2 导出右边参差、末行成孤行；v3.3 两端对齐、自动断字、段落保持完整。</span>
+          </figcaption>
+        </figure>
+      </article>
+
+      <div class="feed-month"><span class="m-lbl"><span class="lang-en">February 2026</span><span class="lang-zh">2026 年 2 月</span></span></div>
+
+      <article class="release" id="v3-2">
+        <header class="release-head">
+          <span class="rel-badge">v3.2</span>
+          <time class="rel-date" datetime="2026-02-10">2026-02-10</time>
+        </header>
+        <h3 class="rel-title"><span class="lang-en">Encrypted attachments</span><span class="lang-zh">附件加密</span></h3>
+        <ul class="chg-list">
+          <li>
+            <span class="chg-chip chg-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span>
+            <span class="chg-text"><span class="lang-en">Images and PDFs are now encrypted with the same key as your notes. Our servers see ciphertext for everything.</span><span class="lang-zh">图片和 PDF 现在与笔记共用同一把密钥加密。我们的服务器看到的一切都是密文。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span>
+            <span class="chg-text"><span class="lang-en">Attachments moved inside the vault folder, so one folder backs up your entire vault.</span><span class="lang-zh">附件移入 vault 文件夹——备份一个文件夹，就备份了整个 vault。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span>
+            <span class="chg-text"><span class="lang-en">Drag-and-drop from Windows Explorer dropped files silently when a filename contained <code>#</code>.</span><span class="lang-zh">从 Windows 资源管理器拖入文件时，文件名带 <code>#</code> 会被静默丢弃的问题。</span></span>
+          </li>
+        </ul>
+      </article>
+
+      <div class="feed-month"><span class="m-lbl"><span class="lang-en">January 2026</span><span class="lang-zh">2026 年 1 月</span></span></div>
+
+      <article class="release" id="v3-1">
+        <header class="release-head">
+          <span class="rel-badge">v3.1</span>
+          <time class="rel-date" datetime="2026-01-15">2026-01-15</time>
+        </header>
+        <h3 class="rel-title"><span class="lang-en">Android tablet layout</span><span class="lang-zh">Android 平板版式</span></h3>
+        <ul class="chg-list">
+          <li>
+            <span class="chg-chip chg-chip--added"><span class="lang-en">Added</span><span class="lang-zh">新增</span></span>
+            <span class="chg-text"><span class="lang-en">A two-pane layout on Android tablets — file tree on the left, note on the right, just like the desktop.</span><span class="lang-zh">Android 平板新增双栏版式——左边文件树，右边笔记，和桌面端一致。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--changed"><span class="lang-en">Changed</span><span class="lang-zh">调整</span></span>
+            <span class="chg-text"><span class="lang-en">External keyboards on Android now get the full desktop shortcut set, ⌘K included.</span><span class="lang-zh">Android 外接键盘现在支持完整的桌面快捷键，包括 ⌘K。</span></span>
+          </li>
+          <li>
+            <span class="chg-chip chg-chip--fixed"><span class="lang-en">Fixed</span><span class="lang-zh">修复</span></span>
+            <span class="chg-text"><span class="lang-en">The cursor no longer jumps while composing with pinyin and other IMEs.</span><span class="lang-zh">使用拼音等输入法组字时，光标不再跳动。</span></span>
+          </li>
+        </ul>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- Pull quote on dark — italic earned -->
+<section class="pull-quote-dark">
+  <div class="sage-container" style="text-align:center; max-width:940px;">
+    <blockquote>
+      <span class="lang-en">If we can't explain a change in one plain sentence, it isn't finished. The sentence is part of the change.</span>
+      <span class="lang-zh">如果一个变更没法用一句白话说清，它就还没做完。那句话本身，就是变更的一部分。</span>
+    </blockquote>
+    <cite>
+      <span aria-hidden="true" style="display:inline-block; width:20px; height:1.5px; background:#97B077; vertical-align:middle; margin-right:8px;"></span>
+      <span class="lang-en">Skypad release checklist — a pinned note in the team vault</span>
+      <span class="lang-zh">Skypad 发布检查单——团队 vault 里置顶的一条笔记</span>
+    </cite>
+  </div>
+</section>
+
+<!-- 03 · Versioning -->
+<section class="sage-section" style="background:#fafbf0; padding-block:var(--space-10);" id="versioning">
+  <div class="sage-container sage-container--wide">
+    <div class="craft-grid">
+      <div>
+        <span class="sect-marker">03 · <span class="lang-en">Versioning</span><span class="lang-zh">版本号</span></span>
+        <h2 class="section-title section-title--sm">
+          <span class="lang-en">Three numbers,<br>one promise.</span>
+          <span class="lang-zh">三个数字，<br>一个承诺。</span>
+        </h2>
+        <p class="sage-lead" style="max-width:460px; font-size:17px; margin-top:var(--space-5);">
+          <span class="lang-en">The middle number is the only one that usually moves: features land there, roughly every three weeks, and nothing breaks. Patches carry fixes only, shipped within the week. The first number is reserved for note-format changes — it hasn't moved since v3.0 in 2021.</span>
+          <span class="lang-zh">平时只有中间那个数字在动：功能在这里落地，大约三周一次，什么都不会坏。补丁只带修复，当周就发。第一个数字留给笔记格式的变更——自 2021 年 v3.0 起，它再没动过。</span>
+        </p>
+        <p style="max-width:460px; font-size:15.5px; line-height:1.65; color:var(--sage-text);">
+          <span class="lang-en">When we retire a behaviour, the old way keeps working for two more minor releases, and the entry above says so in plain words.</span>
+          <span class="lang-zh">要淘汰某个行为时，旧行为还会继续工作两个次版本，而且上面的记录会用白话写明这件事。</span>
+        </p>
+      </div>
+      <figure class="fig-card" style="background:#ffffff;">
+        <svg viewBox="0 0 640 188" role="img" aria-label="How Skypad version numbers work: major, minor and patch fields drawn like a register diagram, with the minor field highlighted as the one where features land">
+          <g font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" letter-spacing="1.5" fill="#6d6f82" text-anchor="middle">
+            <text x="114" y="34">MAJOR</text>
+            <text x="330" y="34">MINOR</text>
+            <text x="536" y="34">PATCH</text>
+          </g>
+
+          <rect x="24" y="48" width="180" height="68" rx="8" fill="#ffffff" stroke="#e5e8da"/>
+          <!-- focus field: tint + sage edge + 4px top bar (register-bitfield syntax) -->
+          <rect x="240" y="48" width="180" height="68" rx="8" fill="#f0f3e2" stroke="#97B077" stroke-width="1.5"/>
+          <rect x="244" y="48" width="172" height="4" rx="2" fill="#97B077"/>
+          <rect x="456" y="48" width="160" height="68" rx="8" fill="#ffffff" stroke="#e5e8da"/>
+
+          <g font-family="'Inter', sans-serif" font-size="26" font-weight="600" fill="#393C54" text-anchor="middle">
+            <text x="114" y="91">3</text>
+            <text x="330" y="91">5</text>
+            <text x="536" y="91">1</text>
+          </g>
+          <g font-family="'Inter', sans-serif" font-size="24" fill="#6d6f82" text-anchor="middle">
+            <text x="222" y="90">·</text>
+            <text x="438" y="90">·</text>
+          </g>
+
+          <g text-anchor="middle" font-family="'Inter', sans-serif">
+            <text x="114" y="146" font-size="12" fill="#6d6f82">format breaks</text>
+            <text x="114" y="164" font-size="11.5" fill="#6d6f82">none since v3.0 — 2021</text>
+            <text x="330" y="146" font-size="12.5" font-weight="600" fill="#393C54">features ship here</text>
+            <text x="330" y="164" font-size="11.5" fill="#6d6f82">every ~3 weeks, nothing breaks</text>
+            <text x="536" y="146" font-size="12" fill="#6d6f82">fixes only</text>
+            <text x="536" y="164" font-size="11.5" fill="#6d6f82">shipped within the week</text>
+          </g>
+        </svg>
+        <figcaption>
+          <span class="lang-en">How Skypad versions. The middle field is where features land; nothing to its left has moved in five years.</span>
+          <span class="lang-zh">Skypad 的版本号规则。功能落在中间这一位；它左边的数字，五年没动过。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 04 · Follow -->
+<section class="sage-section" style="padding-block:var(--space-10);" id="follow">
+  <div class="sage-container sage-container--narrow" style="text-align:center;">
+    <span class="sect-marker">04 · <span class="lang-en">Follow</span><span class="lang-zh">订阅</span></span>
+    <h2 class="section-title section-title--sm">
+      <span class="lang-en">Follow the work.</span>
+      <span class="lang-zh">跟着每个版本走。</span>
+    </h2>
+    <p class="sage-lead" style="max-width:520px; margin:var(--space-5) auto var(--space-7);">
+      <span class="lang-en">Three feeds, same words. Pick whichever your reader speaks — we send nothing else through any of them.</span>
+      <span class="lang-zh">三种订阅源，同样的内容。挑你的阅读器认识的那种——任何一条渠道里，我们都不发别的东西。</span>
+    </p>
+    <div style="text-align:left;">
+      <div class="kbd-row">
+        <kbd>EMAIL</kbd>
+        <span class="tag"><a class="sage-link" href="#subscribe"><span class="lang-en">Release notes in your inbox</span><span class="lang-zh">版本通知直达邮箱</span></a></span>
+      </div>
+      <div class="kbd-row">
+        <kbd>RSS</kbd>
+        <span class="tag"><code>skypad.page/changelog/rss.xml</code></span>
+      </div>
+      <div class="kbd-row" style="border-bottom:none;">
+        <kbd>JSON</kbd>
+        <span class="tag"><code>skypad.page/changelog/feed.json</code></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="sage-footer">
+  <div class="sage-footer-grid">
+    <div class="sage-footer-group"><h5><span class="lang-en">Product</span><span class="lang-zh">产品</span></h5><a href="landing.html"><span class="lang-en">Features</span><span class="lang-zh">功能</span></a><a href="pricing.html"><span class="lang-en">Pricing</span><span class="lang-zh">定价</span></a><a href="landing.html#download"><span class="lang-en">Download</span><span class="lang-zh">下载</span></a><a href="#releases"><span class="lang-en">Changelog</span><span class="lang-zh">更新日志</span></a></div>
+    <div class="sage-footer-group"><h5><span class="lang-en">For teams</span><span class="lang-zh">团队</span></h5><a href="#teams"><span class="lang-en">Team plan</span><span class="lang-zh">团队版</span></a><a href="#enterprise"><span class="lang-en">Enterprise</span><span class="lang-zh">企业版</span></a><a href="#security"><span class="lang-en">Security</span><span class="lang-zh">安全</span></a><a href="#slas">SLAs</a></div>
+    <div class="sage-footer-group"><h5><span class="lang-en">Writers</span><span class="lang-zh">作者</span></h5><a href="#guide"><span class="lang-en">Writing guide</span><span class="lang-zh">写作指南</span></a><a href="blog-index.html"><span class="lang-en">Field notes</span><span class="lang-zh">田野笔记</span></a><a href="#showcase"><span class="lang-en">Showcase</span><span class="lang-zh">作品精选</span></a><a href="#community"><span class="lang-en">Community</span><span class="lang-zh">社区</span></a></div>
+    <div class="sage-footer-group"><h5><span class="lang-en">Company</span><span class="lang-zh">公司</span></h5><a href="#about"><span class="lang-en">About</span><span class="lang-zh">关于</span></a><a href="#press"><span class="lang-en">Press</span><span class="lang-zh">媒体</span></a><a href="#contact"><span class="lang-en">Contact</span><span class="lang-zh">联系</span></a><a href="#status"><span class="lang-en">Status</span><span class="lang-zh">状态</span></a></div>
+    <div class="sage-footer-group"><h5><span class="lang-en">Legal</span><span class="lang-zh">法务</span></h5><a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-zh">隐私</span></a><a href="#terms"><span class="lang-en">Terms</span><span class="lang-zh">条款</span></a><a href="#dpa">DPA</a><a href="#audit"><span class="lang-en">Audit</span><span class="lang-zh">审计</span></a></div>
+  </div>
+  <div class="sage-footer-legal">
+    <span>Copyright © 2026 Skypad Inc.</span>
+    <span><span class="lang-en">Made in Berlin · Toronto · Kyoto</span><span class="lang-zh">制作于 柏林 · 多伦多 · 京都</span></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: sage
+Page-type: changelog
+Created: 2026-06-11
+
+Decisions (5):
+1. [single-rail-feed] chose "one vertical hairline rail in the 960 container, month ticks + entry dots on it, white cards hanging off it" over "two-column zigzag timeline / borderless prose list". Because: a changelog is read top-to-bottom newest-first, so the rail makes the time axis literal — the sage hairline IS the timeline; a zigzag doubles eye travel for zero information, and borderless prose loses the entry boundaries that make scanning by version possible.
+2. [latest-gets-the-green] chose "exactly one sage-edged card (v3.6) + sage dot on the rail + sage stem/chip on the cadence SVG" over "sage accents on every ADDED chip / no focus at all". Because: diagram-craft's green-single-focus budget applied at page scale — 'what is the newest release' is the one question every changelog visitor brings, so the page's only green edge answers it; green on every chip would spend the budget eight times over.
+3. [chips-tint-ink-hairline] chose "ADDED = pale-sage tint + ink text, FIXED = ink fill + white text, CHANGED = white + hairline + grey" over "three saturated colour-coded chips (green / red / orange)". Because: white-on-sage measures 2.4:1 (fails AA, design-tokens measured); red and orange are off-palette and read as other skills; the tint/ink/hairline triad stays distinguishable in black-and-white print while keeping sage's quiet grammar.
+4. [cadence-before-feed] chose "release-train SVG + median-gap stat strip in section 01, before any entry" over "opening directly with the entry list". Because: eight entries answer 'what changed' but not 'can I rely on the cadence' — the train plus the 21-day median answers the trust question in one screen, and it pays the diagram-density contract before ~2400px of feed.
+5. [versioning-register-syntax] chose "3 · 6 · 1 drawn as a register-bitfield-style diagram with the MINOR field tinted + sage-edged" over "a prose paragraph about semver". Because: semver in prose is a wall of conditionals; the bitfield syntax shows 'which digit moves and what it promises' at a glance, and it reuses an existing sage diagram grammar instead of inventing a new one.
+
+Known trade-offs:
+- SVG interior text is English-only even in zh mode (same precedent as the landing editor mock: diagrams are product/engineering representations; the bilingual layer lives in the figcaptions). A zh reader gets bilingual captions over English diagrams.
+- Every entry card has the same width regardless of weight — v3.5 with its window mock and a three-line patch release occupy the same 960-container column, so patch cards carry visible whitespace. Accepted: variable-width cards would break the rail's vertical rhythm, and the rhythm is the page's time axis.
+- Month markers and section markers share the mono-uppercase grammar, so two label systems coexist on one page; they are distinguished by position (on the rail vs at section heads), not by style. A reader who notices will see one grammar doing two jobs — accepted as cheaper than inventing a second label style.
+
+/design-review:self-diff -->
+
+</body>
+</html>
