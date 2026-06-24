@@ -199,8 +199,8 @@
         <h3 class="comp-card__title"><span class="lang-en">Patch submission</span><span class="lang-zh">提交补丁</span></h3>
         <span class="comp-card__weak-label"><span class="lang-en">Ship upstream</span><span class="lang-zh">发上游</span></span>
         <p class="comp-card__weak">
-          <span class="lang-en"><code>git format-patch</code>, a clean <code>checkpatch.pl</code> run, and the <code>submitting-patches.rst</code> conventions — so it's LKML-ready, not just compiling.</span>
-          <span class="lang-zh"><code>git format-patch</code>、过一遍 <code>checkpatch.pl</code>、守 <code>submitting-patches.rst</code> 规矩——做到能发 LKML，而不只是能编过。</span>
+          <span class="lang-en"><code>git format-patch</code>, a clean <code>checkpatch.pl</code> run plus deeper static analysis (sparse / smatch / coccinelle), SPDX + DCO sign-off, and the kernel's rule that an AI never adds <code>Signed-off-by</code> (disclose with <code>Assisted-by</code>) — so it's LKML-ready, not just compiling.</span>
+          <span class="lang-zh"><code>git format-patch</code>、过 <code>checkpatch.pl</code> 加更深的静态分析（sparse / smatch / coccinelle）、SPDX + DCO sign-off、以及内核那条"AI 绝不加 <code>Signed-off-by</code>"（用 <code>Assisted-by</code> 披露）的规矩——做到能发 LKML，而不只是能编过。</span>
         </p>
       </article>
 
@@ -665,7 +665,7 @@
           <circle cx="445" cy="278" r="13" fill="#2f5e33"></circle>
           <text x="445" y="283" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" font-weight="700" fill="#ffffff">3</text>
           <text x="502" y="306" text-anchor="middle" font-family="Poppins, sans-serif" font-size="14.5" font-weight="600" fill="#1f1e1c"><tspan class="lang-en">Scoring panel</tspan><tspan class="lang-zh">打分面板</tspan></text>
-          <text x="502" y="326" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" fill="#5c5a54">4 axes</text>
+          <text x="502" y="326" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" fill="#5c5a54">7 axes</text>
         </g>
         <!-- 4 learn (orange) -->
         <g>
@@ -765,8 +765,8 @@
         <code class="comp-card__path">.claude/agents/kernel-*-critic.md · scripts/kernel-critic.mjs</code>
         <span class="comp-card__weak-label"><span class="lang-en">Model weakness</span><span class="lang-zh">对应弱点</span></span>
         <p class="comp-card__weak">
-          <span class="lang-en">One reviewer scoring its own work praises uniformly. Four fresh-context specialists score one axis each — correctness (0.35), safety (0.30), coding-style (0.20), completeness (0.15). Safety is weighted high and an error there fails the answer outright; a sleep-in-spinlock can brick a board.</span>
-          <span class="lang-zh">一个评审评自己的活会一律说好。四个 fresh-context 专家各守一轴——correctness(0.35)、safety(0.30)、coding-style(0.20)、completeness(0.15)。safety 权重高，这一轴出 error 直接判 fail；持 spinlock 睡眠能把板子搞砖。</span>
+          <span class="lang-en">One reviewer scoring its own work praises uniformly. Seven fresh-context specialists score one axis each — correctness (0.28), safety (0.22), design (0.13), testing (0.12), complexity (0.09), coding-style (0.08), completeness (0.08), aligned with Google's review dimensions. Safety is weighted high and an error there fails the answer outright; a sleep-in-spinlock can brick a board.</span>
+          <span class="lang-zh">一个评审评自己的活会一律说好。七个 fresh-context 专家各守一轴——correctness(0.28)、safety(0.22)、design(0.13)、testing(0.12)、complexity(0.09)、coding-style(0.08)、completeness(0.08)，对齐 Google 的 review 维度。safety 权重高，这一轴出 error 直接判 fail；持 spinlock 睡眠能把板子搞砖。</span>
         </p>
       </article>
 
@@ -888,7 +888,7 @@
       <tbody>
         <tr><td><span class="lang-en">visual-audit (rendered, heuristic)</span><span class="lang-zh">visual-audit(渲染，启发式)</span></td><td><span class="map-arrow">→</span> <span class="mono">fact_gate.mjs</span> <span class="lang-en">(symbol exists in tree)</span><span class="lang-zh">(符号在树里实存)</span></td></tr>
         <tr><td><span class="lang-en">verify.py (structural)</span><span class="lang-zh">verify.py(结构)</span></td><td><span class="map-arrow">→</span> <span class="mono">checkpatch_gate.sh</span> <span class="lang-en">(kernel's own tool)</span><span class="lang-zh">(内核自带工具)</span></td></tr>
-        <tr><td><span class="lang-en">multi-critic (4 weighted LLM)</span><span class="lang-zh">multi-critic(4 加权 LLM)</span></td><td><span class="map-arrow">→</span> <span class="lang-en">4 kernel critics</span><span class="lang-zh">4 个内核打分员</span></td></tr>
+        <tr><td><span class="lang-en">multi-critic (weighted LLM panel)</span><span class="lang-zh">multi-critic(加权 LLM 面板)</span></td><td><span class="map-arrow">→</span> <span class="lang-en">7 kernel critics</span><span class="lang-zh">7 个内核打分员</span></td></tr>
         <tr><td><span class="lang-en">design-learner</span><span class="lang-zh">design-learner</span></td><td><span class="map-arrow">→</span> <span class="mono">/kernel-learn</span> <span class="lang-en">(atomic triple)</span><span class="lang-zh">(原子三件套)</span></td></tr>
         <tr><td><span class="lang-en">evolve-ledger / evolve-rules</span><span class="lang-zh">evolve-ledger / evolve-rules</span></td><td><span class="map-arrow">→</span> <span class="lang-en">reused as-is / one-flag patch</span><span class="lang-zh">原样复用 / 加一个开关</span></td></tr>
       </tbody>
