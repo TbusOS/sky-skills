@@ -736,6 +736,18 @@ const auditFn = (arg) => {
       return false;
     };
     const isAncestor = (a, b) => { for (let n = b.parentElement; n; n = n.parentElement) if (n === a) return true; return false; };
+    // The content of a collapsed native <details> is NOT painted (only its
+    // <summary> is), yet Chromium still reports getClientRects()/computed
+    // visibility:visible for it — so a closed accordion answer is invisible
+    // on screen but geometrically "present", and naively overlaps the next
+    // question. Skip any node inside a closed <details> that isn't its summary.
+    // (known-bugs §1.40)
+    const inClosedDetails = (el) => {
+      const d = el.closest && el.closest('details:not([open])');
+      if (!d) return false;
+      const summary = d.querySelector(':scope > summary');
+      return !(summary && summary.contains(el));
+    };
     const leaves = [...document.querySelectorAll('*')].filter((el) => {
       if (el.children.length > 0) return false;
       const txt = (el.textContent || '').trim();
@@ -744,6 +756,7 @@ const auditFn = (arg) => {
       if (r.width < 4 || r.height < 4) return false;
       const cs = getComputedStyle(el);
       if (cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity === 0) return false;
+      if (inClosedDetails(el)) return false;
       if (allowOverlap(el)) return false;
       return true;
     });

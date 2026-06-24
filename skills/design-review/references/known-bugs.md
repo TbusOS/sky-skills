@@ -224,6 +224,15 @@
 
 ---
 
+### 1.40 闭合 `<details>` 手风琴的内容被几何检查当成可见 → 假叠字
+- **Reader sees**:截图上手风琴正常收起、只显示问题,排版干净;但 visual-audit 报一堆 `text-overlap` warning,把"看不见的答案"和"后面的问题"算成叠了。4 张 faq canonical(anthropic/apple/ember/sage)各报 7–16 条,全标 §1.34 的 `[only at 1024px]`,更像真窄屏 bug。
+- **Why**:原生 `<details>` 闭合时只绘制 `<summary>`,其余内容不画。但 Chromium 仍给闭合内容返回非零 `getClientRects()`、computed `visibility:visible`/`display:block`/`opacity:1` —— 布局算了、只是不绘制。text-overlap 的 leaf 过滤只挡 `display:none`/`visibility:hidden`/`opacity:0`,挡不住这种"几何在、像素不在"的幽灵内容,于是闭合答案的文字和下一个问题的文字被判重叠。1440 主跑因宽列下文字横向不够叠没触发,1024 第二视口窄列换行后越阈值 → 被 §1.34 标成窄屏 warn。
+- **How caught**:2026-06-25 过 WIP faq 页,机械门报"叠"但截图干净,playwright 实测 `openCount:1` 却 `visAnswers:14`、闭合答案 box 溢出盖住后项 → 定位是闭合 details 的幽灵几何,不是真叠。
+- **Defense**:visual-audit text-overlap 的 leaf 过滤加 `inClosedDetails(el)` —— 元素最近的 `details:not([open])` 祖先存在、且不在该 details 的 `<summary>` 内 → 跳过(闭合内容不绘制)。两个视口共用同一 check,一改都好。影响面:仅含闭合 `<details>` 的页;现有已提交 canonical 无一用 details,零回归。
+- **Rule**:几何 / 重叠检查不能只信 `getClientRects()` + computed visibility —— 闭合 `<details>` 的内容"测得到、画不出"。判可见性要把闭合 details 的非-summary 内容也算隐藏;同类幽灵(`content-visibility:hidden`、`hidden` 属性、`inert` 子树)日后出现就在同一过滤点扩展。
+
+---
+
 ### 1.39 lang-zh 里用片假名中点 ・(U+30FB)当分隔符
 - **Reader sees**:zh 文本里的分隔点比正常间隔号宽、左右间距不对 —— `・` 是片假名中点(全角,日文排版字符),不是中文间隔号 `·`(U+00B7)。
 - **Why**:两个字形肉眼近似,IME / 模型输出容易混入。§1.22 的检查只盯半角 ASCII `,;:`,U+30FB 是全角字符,完全不在字符类里。
