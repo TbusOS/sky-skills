@@ -19,6 +19,8 @@ Extra pages beyond the four flagship `index.html`:
 - [`anthropic-design/diagrams.html`](./anthropic-design/diagrams.html) — 23-diagram gallery (registers, SoC blocks, waveforms, schedulers …)
 - [`apple-design/diagrams.html`](./apple-design/diagrams.html) — 12-diagram gallery, same diagram types in Apple's clean geometric style
 - [`glass-design/diagrams.html`](./glass-design/diagrams.html) — 14-diagram gallery as frosted panels on the aurora field (theme-proof SVG ink)
+- [`eclat-design/diagrams.html`](./eclat-design/diagrams.html) — 8-composition lookbook: spotlit product, lineup, spec reveal, the moment, pricing, in-the-box, benchmarks, detail (cinematic, not code diagrams)
+- [`lectern-design/diagrams.html`](./lectern-design/diagrams.html) — 9-visual board pack: line / bar / donut / 100%-stacked / cohort heatmap charts, KPI cards, a roadmap timeline and a RAG decisions table
 
 ## Local preview
 
