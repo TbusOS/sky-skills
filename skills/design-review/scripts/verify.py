@@ -107,6 +107,28 @@ SKILLS: dict[str, dict] = {
         "container_modifiers": ("narrow", "wide"),
         "hero_advice": "glass-container (default 1040px) or glass-container--wide (1280px)",
     },
+    "eclat": {
+        "prefix": "eclat-",
+        "css": "eclat.css",
+        "dir": "eclat-design",
+        # eclat heroes are full-bleed cinematic (.eclat-hero), not a width-constrained
+        # container; .eclat-wrap (1280) holds the in-flow sections.
+        "narrow_hero": {"eclat-container--narrow"},
+        "acceptable_hero": {"eclat-wrap", "eclat-hero", "eclat-stage"},
+        "container_modifiers": ("narrow", "wide"),
+        "hero_advice": "eclat-wrap (1280px) or the full-bleed eclat-hero",
+    },
+    "lectern": {
+        "prefix": "lectern-",
+        "css": "lectern.css",
+        "dir": "lectern-design",
+        # lectern is a briefing deck: a .lectern-title block, not a full-bleed hero.
+        # The hero-container check is skipped when no .lectern-hero exists.
+        "narrow_hero": {"lectern-container--narrow"},
+        "acceptable_hero": {"lectern-wrap", "lectern-title"},
+        "container_modifiers": ("narrow", "wide"),
+        "hero_advice": "lectern-wrap (1080px)",
+    },
 }
 
 PLACEHOLDER_PATTERN = re.compile(
