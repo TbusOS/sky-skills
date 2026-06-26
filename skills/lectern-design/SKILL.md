@@ -32,7 +32,10 @@ Generates business-briefing HTML: a serif headline states the conclusion; a numb
 ## §4 阅读顺序
 
 1. `references/dos-and-donts.md` — 品位边界(可信而不营销 · 低饱和图表配色法 · 状态药丸非 RAG 点 · 可导出数字要重算)
-2. `references/canonical/review.html` + 其它页型 — 对应页型的 canonical(含 self-diff 决策块)
+2. 对应页型的 canonical(每个都配 `.md` 速读 + 页内 self-diff 决策块):
+   - `references/canonical/review.html` — **评审**:季度/董事会评审,KPI + 趋势图 + 决议表(数据前置的回顾)
+   - `references/canonical/agenda.html` — **议程**:会前工作会议程,目标 + 时间块排期 + 参会 + 预读(向前看,分类药丸非 RAG,故意不放图表)
+   - `references/canonical/minutes.html` — **纪要**:会后记录,出席含缺席 + 决定记录(带票数/异议)+ 行动项表(RAG 药丸取字面义,带 status-as-of 日期)
 
 ## §5 发布前检查(MUST)
 
