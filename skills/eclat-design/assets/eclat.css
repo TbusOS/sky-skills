@@ -1,0 +1,175 @@
+/* eclat-design — 发布会 / 暗调电影感 keynote
+ * Source of truth for eclat tokens + components. Mirrors SKILL.md §tokens.
+ * Matte near-black canvas · bone type · cool spotlight + warm rim · product hero.
+ * NOT glassy: no backdrop-filter, no aurora. The drama is light + scale + void.
+ */
+
+:root {
+  /* ground + ink */
+  --eclat-ink:        #040406;   /* page ground — warm near-black, never pure #000 */
+  --eclat-ink-2:      #0a0b10;   /* raised panel / card */
+  --eclat-ink-3:      #11121a;   /* one step up */
+  --eclat-bone:       #f6f3ec;   /* headlines, primary text — warm off-white */
+  --eclat-mut:        #9899a6;   /* body / captions */
+  --eclat-faint:      #6f7079;   /* meta, cues */
+  --eclat-line:       #1a1b24;   /* hairline rules */
+
+  /* light — the only saturated players. cool spotlight, warm rim, one flare accent */
+  --eclat-cool:       #bcd2ff;   /* cool spotlight / rim highlight */
+  --eclat-warm:       #ffb27a;   /* warm edge light */
+  --eclat-flare:      #ff5b34;   /* single accent — CTA, one live dot */
+  --eclat-flare-soft: #ff7a4d;
+
+  /* type — Apple-keynote register via system SF Pro Display; mono for eyebrows */
+  --eclat-font-display: -apple-system, "SF Pro Display", "Helvetica Neue", system-ui, Arial, sans-serif;
+  --eclat-font-body:    -apple-system, "SF Pro Text", "Helvetica Neue", system-ui, Arial, sans-serif;
+  --eclat-font-mono:    ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+
+  /* scale + rhythm */
+  --eclat-radius:     22px;
+  --eclat-radius-sm:  14px;
+  --eclat-pill:       999px;
+  --eclat-maxw:       1280px;
+  --eclat-gutter:     56px;
+}
+
+/* ---------- base ---------- */
+.eclat-body {
+  margin: 0; background: var(--eclat-ink); color: var(--eclat-bone);
+  font-family: var(--eclat-font-body); -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.eclat-wrap { max-width: var(--eclat-maxw); margin: 0 auto; padding: 0 var(--eclat-gutter); }
+
+/* ---------- nav ---------- */
+.eclat-nav { position: absolute; top: 0; left: 0; right: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 84px; max-width: var(--eclat-maxw); margin: 0 auto; padding: 0 var(--eclat-gutter); }
+.eclat-nav-brand { font-family: var(--eclat-font-display); font-weight: 600; letter-spacing: .02em; font-size: 17px; color: var(--eclat-bone); text-decoration: none; }
+.eclat-nav-links { display: flex; gap: 40px; }
+.eclat-nav-links a { color: #9a9ba6; font-size: 13.5px; text-decoration: none; }
+.eclat-nav-links a:hover { color: var(--eclat-bone); }
+.eclat-nav-live { font-size: 13px; color: var(--eclat-bone); border: 1px solid #26262f; border-radius: var(--eclat-pill); padding: 8px 16px; text-decoration: none; }
+.eclat-nav-live::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--eclat-flare); margin-right: 7px; vertical-align: 1px; }
+.eclat-nav-actions { display: flex; align-items: center; }
+
+/* ---------- hero — a full-screen cinematic moment ---------- */
+.eclat-hero { position: relative; min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; overflow: hidden; text-align: center; }
+.eclat-hero-bg { position: absolute; inset: 0; pointer-events: none; }
+.eclat-hero-cool { position: absolute; top: -14%; left: 50%; transform: translateX(-50%);
+  width: 1300px; height: 900px;
+  background: radial-gradient(closest-side, rgba(150,185,255,.18), rgba(150,185,255,.04) 46%, transparent 70%); }
+.eclat-hero-warm { position: absolute; bottom: -8%; left: 50%; transform: translateX(-50%);
+  width: 1000px; height: 600px;
+  background: radial-gradient(closest-side, rgba(255,150,90,.16), transparent 68%); }
+.eclat-hero-vig { position: absolute; inset: 0;
+  background: radial-gradient(120% 80% at 50% 42%, transparent 40%, rgba(0,0,0,.6) 100%); }
+.eclat-eyebrow { position: relative; z-index: 2; font-family: var(--eclat-font-mono);
+  font-size: 13px; letter-spacing: .4em; color: #cdbfae; text-transform: uppercase; }
+.eclat-hero-title { position: relative; z-index: 2; margin: 32px auto 0;
+  font-family: var(--eclat-font-display); font-size: clamp(64px, 12.5vw, 176px);
+  line-height: .92; letter-spacing: -.05em; font-weight: 600; }
+.eclat-hero-title .eclat-thin { display: block; font-weight: 200; color: #d7d2c8; }
+.eclat-hero-sub { position: relative; z-index: 2; color: var(--eclat-mut);
+  font-size: 21px; line-height: 1.5; max-width: 34ch; margin: 34px auto 0; }
+.eclat-ctas { position: relative; z-index: 2; display: flex; gap: 14px; justify-content: center; margin-top: 40px; flex-wrap: wrap; }
+.eclat-btn { background: var(--eclat-flare); color: #1a0a05; font-weight: 600;
+  padding: 15px 28px; border-radius: var(--eclat-pill); font-size: 15px; text-decoration: none; border: 0; cursor: pointer; }
+.eclat-btn:hover { background: var(--eclat-flare-soft); }
+.eclat-btn--ghost { background: transparent; color: var(--eclat-bone); border: 1px solid #2c2d39; }
+.eclat-btn--ghost:hover { border-color: #44454f; background: transparent; }
+
+/* product hero — hybrid slot: holds the SVG abstract OR an <img> render */
+.eclat-stage { position: relative; z-index: 1; margin-top: 34px; width: min(540px, 82vw); }
+.eclat-stage-media { display: block; width: 100%; height: auto; }
+
+/* scroll cue */
+.eclat-cue { position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%); z-index: 2;
+  color: var(--eclat-faint); font-family: var(--eclat-font-mono); font-size: 12px; letter-spacing: .2em;
+  text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.eclat-cue-chev { width: 16px; height: 16px; border-right: 1.5px solid #5a5b64; border-bottom: 1.5px solid #5a5b64; transform: rotate(45deg); }
+
+/* ---------- spec strip ---------- */
+.eclat-specs { display: grid; grid-template-columns: repeat(4, minmax(max-content, 1fr));
+  border-top: 1px solid var(--eclat-line); border-bottom: 1px solid var(--eclat-line); }
+.eclat-specs-item { padding: 34px 24px; text-align: center; border-right: 1px solid var(--eclat-line); }
+.eclat-specs-item:last-child { border-right: 0; }
+.eclat-specs-num { font-family: var(--eclat-font-display); font-size: 46px; font-weight: 600; letter-spacing: -.03em; }
+.eclat-specs-num .eclat-unit { font-size: 20px; color: var(--eclat-mut); font-weight: 400; letter-spacing: 0; }
+.eclat-specs-num .eclat-hl { color: var(--eclat-flare); }
+.eclat-specs-label { color: var(--eclat-mut); font-size: 13px; margin-top: 8px; }
+
+/* ---------- "one more thing" — full-screen single-stat moment ---------- */
+.eclat-moment { min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; position: relative; overflow: hidden; border-top: 1px solid #121219; }
+/* dual-temperature: cool main spotlight + a warm under-glow to one side (identity rule) */
+.eclat-moment-glow { position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(42% 52% at 50% 44%, rgba(120,150,255,.14), transparent 70%),
+    radial-gradient(34% 42% at 64% 84%, rgba(255,150,90,.11), transparent 68%); }
+.eclat-moment-kicker { position: relative; z-index: 2; font-family: var(--eclat-font-mono);
+  font-size: 13px; letter-spacing: .4em; text-transform: uppercase; color: var(--eclat-faint); margin-bottom: 30px; }
+/* the one place a metal gradient on a numeral is sanctioned (display-only, see dos-and-donts) */
+.eclat-bignum { position: relative; z-index: 2; font-family: var(--eclat-font-display);
+  font-size: clamp(120px, 24vw, 340px); line-height: .8; font-weight: 600; letter-spacing: -.06em;
+  background: linear-gradient(180deg, #ffffff, #7f8aa3); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.eclat-moment-cap { position: relative; z-index: 2; color: var(--eclat-mut); font-size: 20px; line-height: 1.5; margin-top: 30px; max-width: 30ch; }
+
+/* ---------- feature reveal ---------- */
+.eclat-feat { display: grid; grid-template-columns: 1fr 1fr; gap: 54px; align-items: center; padding: 110px 0; }
+.eclat-feat-title { font-family: var(--eclat-font-display); font-size: 32px; letter-spacing: -.02em; line-height: 1.15; margin: 0 0 18px; font-weight: 600; }
+.eclat-feat-body { color: var(--eclat-mut); font-size: 16px; line-height: 1.7; margin: 0; }
+.eclat-feat-card { background: linear-gradient(180deg, var(--eclat-ink-3), var(--eclat-ink-2)); border: 1px solid var(--eclat-line); border-radius: var(--eclat-radius); height: 300px; overflow: hidden; }
+.eclat-feat-card svg { display: block; width: 100%; height: 100%; }
+
+/* ---------- page header (non-launch pages: a tighter hero) ---------- */
+.eclat-pagehead { position: relative; padding: 156px 0 72px; text-align: center; overflow: hidden; }
+.eclat-pagehead-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%);
+  width: 1100px; height: 620px; pointer-events: none;
+  background:
+    radial-gradient(closest-side at 50% 38%, rgba(150,185,255,.14), transparent 70%),
+    radial-gradient(closest-side at 62% 86%, rgba(255,150,90,.09), transparent 62%); }
+.eclat-pagehead-title { position: relative; z-index: 2; margin: 26px auto 0; font-family: var(--eclat-font-display);
+  font-size: clamp(48px, 7vw, 104px); line-height: .98; letter-spacing: -.04em; font-weight: 600; }
+.eclat-pagehead-sub { position: relative; z-index: 2; color: var(--eclat-mut);
+  font-size: 19px; line-height: 1.55; max-width: 46ch; margin: 24px auto 0; }
+
+/* ---------- generic section spacing ---------- */
+.eclat-section { padding: 96px 0; }
+
+/* ---------- section head ---------- */
+.eclat-section-head { text-align: center; margin: 0 0 46px; }
+.eclat-section-kicker { font-family: var(--eclat-font-mono); font-size: 12.5px; letter-spacing: .34em; text-transform: uppercase; color: var(--eclat-faint); }
+.eclat-section-title { font-family: var(--eclat-font-display); font-size: clamp(32px, 4.5vw, 56px); letter-spacing: -.03em; font-weight: 600; margin: 14px 0 0; }
+
+/* ---------- spec grid + cards ---------- */
+.eclat-spec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.eclat-spec-card { background: var(--eclat-ink-2); border: 1px solid var(--eclat-line); border-radius: var(--eclat-radius); padding: 30px; }
+.eclat-spec-card-label { font-family: var(--eclat-font-mono); font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--eclat-flare-soft); margin: 0 0 18px; }
+.eclat-spec-card-value { font-family: var(--eclat-font-display); font-size: 44px; font-weight: 600; letter-spacing: -.03em; }
+.eclat-spec-card-value .eclat-unit { font-size: 18px; color: var(--eclat-mut); font-weight: 400; letter-spacing: 0; }
+.eclat-spec-card-detail { color: var(--eclat-mut); font-size: 14.5px; line-height: 1.6; margin: 12px 0 0; }
+
+/* ---------- spec table (dark) ---------- */
+.eclat-spec-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.eclat-spec-table th { text-align: left; font-family: var(--eclat-font-mono); font-size: 11.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--eclat-flare-soft); font-weight: 600; padding: 26px 0 12px; border-bottom: 1px solid var(--eclat-line); }
+.eclat-spec-table td { padding: 14px 0; border-bottom: 1px solid var(--eclat-line); vertical-align: top; }
+.eclat-spec-table td:first-child { color: var(--eclat-mut); width: 38%; }
+.eclat-spec-table td:last-child { color: var(--eclat-bone); }
+
+/* ---------- focus (keyboard visibility) ---------- */
+.eclat-body a:focus-visible,
+.eclat-body button:focus-visible {
+  outline: 2px solid var(--eclat-cool); outline-offset: 3px; border-radius: 6px;
+}
+
+/* ---------- closing availability band ---------- */
+.eclat-close { text-align: center; padding: 116px 0 96px; }
+.eclat-close-title { font-family: var(--eclat-font-display); font-size: clamp(40px, 6vw, 80px);
+  letter-spacing: -.03em; line-height: 1.0; font-weight: 600; margin: 0 0 34px; }
+.eclat-close .eclat-ctas { justify-content: center; margin-top: 0; }
+
+/* ---------- footer ---------- */
+.eclat-footer { border-top: 1px solid var(--eclat-line); padding: 34px 0; color: #5d5e69; font-size: 13px; text-align: center; }
