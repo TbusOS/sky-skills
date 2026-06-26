@@ -1,14 +1,16 @@
 # Demos
 
-Same story, five aesthetics. Each demo is a single flagship HTML page showcasing the respective design skill on realistic, self-referential content (this repository itself). Every demo ships the same three programming-focused hero diagrams — **code architecture**, **SoC block diagram**, and **multi-repo git collaboration flow** — so you can compare how each aesthetic handles information-dense visuals.
+Same story, seven aesthetics. Each demo is a single flagship HTML page showcasing the respective design skill on realistic, self-referential content (this repository itself). The five programming-doc aesthetics ship the same three hero diagrams — **code architecture**, **SoC block diagram**, and **multi-repo git collaboration flow** — so you can compare how each handles information-dense visuals. **eclat** (keynote) and **lectern** (boardroom) are presentation skins, so they tell the repo's story in their own idiom — a product launch, a board review — rather than the code diagrams.
 
 | Demo | Renders | Character |
 |---|---|---|
 | [`apple-design/`](./apple-design/index.html) | `skills/apple-design/` | SF Pro, white/pale-gray alternating sections, hero-wide diagrams, full-bleed product tiles, text-link CTAs, dark section |
 | [`anthropic-design/`](./anthropic-design/index.html) | `skills/anthropic-design/` | Warm cream, Poppins + Lora serif, orange filled pills, editorial cards, pull quote, bar chart, 3-tier pricing |
+| [`eclat-design/`](./eclat-design/index.html) | `skills/eclat-design/` | Matte near-black keynote, SF Pro, cool spotlight + warm rim + one flare accent, spotlit-monolith hero, full-screen "0" moment — the repo as a product launch |
 | [`ember-design/`](./ember-design/index.html) | `skills/ember-design/` | Deep cream + chocolate + gold, Fraunces display serif + Inter body, coffee-bean hero SVG, gold-quoted pull-quote, handcraft feel |
-| [`sage-design/`](./sage-design/index.html) | `skills/sage-design/` | Rice-paper cream + sage green + deep indigo, Instrument Serif display + Inter body + JetBrains Mono section numbers, quiet Nordic minimalism |
 | [`glass-design/`](./glass-design/index.html) | `skills/glass-design/` | Apple liquid-glass: deep-navy canvas + aurora blobs + frosted panels + solid cyan accent, Space Grotesk + Inter, dark/light dual theme, freezable motion engine |
+| [`lectern-design/`](./lectern-design/index.html) | `skills/lectern-design/` | Light paper, serif titles, low-saturation navy bar chart, KPI cards, status pills, a recommendation decisions table — the repo as a board review |
+| [`sage-design/`](./sage-design/index.html) | `skills/sage-design/` | Rice-paper cream + sage green + deep indigo, Instrument Serif display + Inter body + JetBrains Mono section numbers, quiet Nordic minimalism |
 | [`gated-dual-clone/`](./gated-dual-clone/index.html) | `skills/gated-dual-clone/` | Anthropic voice, single-purpose page explaining the 2/3-clone git topology and its safety gates |
 
 Extra pages beyond the four flagship `index.html`:
@@ -26,9 +28,11 @@ python3 -m http.server 8000
 # then open any of:
 #   http://localhost:8000/demos/apple-design/index.html
 #   http://localhost:8000/demos/anthropic-design/index.html
+#   http://localhost:8000/demos/eclat-design/index.html
 #   http://localhost:8000/demos/ember-design/index.html
-#   http://localhost:8000/demos/sage-design/index.html
 #   http://localhost:8000/demos/glass-design/index.html
+#   http://localhost:8000/demos/lectern-design/index.html
+#   http://localhost:8000/demos/sage-design/index.html
 ```
 
 All demos reference CSS via relative paths:
