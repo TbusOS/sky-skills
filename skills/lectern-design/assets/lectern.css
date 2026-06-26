@@ -1,0 +1,108 @@
+/* lectern-design — 会议室 / 商务简报 deck
+ * Source of truth for lectern tokens + components. Mirrors SKILL.md §tokens.
+ * Light paper · serif titles · structured · navy accent + status colours · data-forward.
+ * The register: a board review that respects the reader's time. Credible, not loud.
+ */
+
+:root {
+  /* paper + ink */
+  --lectern-paper:   #f5f6f8;   /* page ground — cool off-white */
+  --lectern-card:    #ffffff;   /* panels, cards */
+  --lectern-ink:     #16203a;   /* headlines */
+  --lectern-ink-2:   #3a455e;   /* body */
+  --lectern-mut:     #76819a;   /* captions, meta, secondary */
+  --lectern-line:    #e3e7ee;   /* hairline rules / borders */
+
+  /* accent + status */
+  --lectern-navy:    #1d3a6e;   /* primary accent — rules, emphasis, chart-1 */
+  --lectern-navy-2:  #2f5bb0;   /* secondary — chart-2, kickers */
+  --lectern-navy-3:  #7d9bd0;   /* chart-3 / tertiary */
+  --lectern-teal:    #0f857a;   /* positive / up */
+  --lectern-amber:   #c98a1a;   /* in-progress / caution */
+  --lectern-rose:    #bb4a55;   /* negative / blocked / confidential */
+
+  /* type — serif titles (considered, not generic) + system sans body */
+  --lectern-font-serif: Georgia, "Times New Roman", "Songti SC", serif;
+  --lectern-font-sans:  -apple-system, "Inter", "Segoe UI", system-ui, Arial, sans-serif;
+  --lectern-font-mono:  ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+
+  --lectern-radius:   12px;
+  --lectern-maxw:     1080px;
+  --lectern-gutter:   40px;
+  --lectern-shadow:   0 1px 2px rgba(22,32,58,.04), 0 8px 24px rgba(22,32,58,.06);
+}
+
+/* ---------- base ---------- */
+.lectern-body { margin: 0; background: var(--lectern-paper); color: var(--lectern-ink);
+  font-family: var(--lectern-font-sans); -webkit-font-smoothing: antialiased; }
+.lectern-wrap { max-width: var(--lectern-maxw); margin: 0 auto; padding: 0 var(--lectern-gutter); }
+
+/* ---------- top bar ---------- */
+.lectern-topbar { background: var(--lectern-card); border-bottom: 1px solid var(--lectern-line); }
+.lectern-topbar-inner { display: flex; align-items: center; justify-content: space-between;
+  height: 60px; max-width: var(--lectern-maxw); margin: 0 auto; padding: 0 var(--lectern-gutter); }
+.lectern-topbar-brand { font-weight: 700; letter-spacing: .02em; font-size: 15px; color: var(--lectern-ink); }
+.lectern-topbar-brand .lectern-sq { display: inline-block; width: 13px; height: 13px; background: var(--lectern-navy); border-radius: 3px; margin-right: 8px; vertical-align: -1px; }
+.lectern-topbar-right { display: flex; gap: 16px; align-items: center; }
+.lectern-topbar-meta { color: var(--lectern-mut); font-size: 12.5px; letter-spacing: .04em; }
+.lectern-conf { color: var(--lectern-rose); font-size: 11px; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; border: 1px solid #ecd2d5; background: #fbf1f2; padding: 4px 10px; border-radius: 6px; }
+
+/* ---------- title slide ---------- */
+.lectern-title { padding: 64px 0 8px; }
+.lectern-kicker { font-family: var(--lectern-font-mono); font-size: 12px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--lectern-navy-2); font-weight: 600; margin-bottom: 18px; }
+.lectern-h1 { font-family: var(--lectern-font-serif); font-size: clamp(38px, 5.4vw, 56px);
+  letter-spacing: -.02em; line-height: 1.05; font-weight: 600; margin: 0; }
+.lectern-lede { color: var(--lectern-ink-2); font-size: 17px; line-height: 1.6; max-width: 62ch; margin: 18px 0 0; }
+
+/* ---------- agenda ---------- */
+.lectern-agenda { display: flex; border: 1px solid var(--lectern-line);
+  border-radius: var(--lectern-radius); background: var(--lectern-card); margin-top: 34px; overflow: hidden; box-shadow: var(--lectern-shadow); }
+.lectern-agenda-item { flex: 1; padding: 18px 22px; border-right: 1px solid var(--lectern-line); }
+.lectern-agenda-item:last-child { border-right: 0; }
+.lectern-agenda-num { font-family: var(--lectern-font-serif); color: var(--lectern-navy-2); font-size: 14px; font-weight: 700; }
+.lectern-agenda-t { font-size: 14.5px; margin-top: 4px; font-weight: 500; }
+.lectern-agenda-s { color: var(--lectern-mut); font-size: 12.5px; margin-top: 3px; }
+
+/* ---------- section label ---------- */
+.lectern-seclabel { display: flex; align-items: center; gap: 12px; margin: 56px 0 22px; }
+.lectern-seclabel-i { font-family: var(--lectern-font-serif); color: var(--lectern-navy); font-weight: 700; font-size: 15px; }
+.lectern-seclabel-h { font-size: 22px; font-weight: 600; letter-spacing: -.01em; margin: 0; }
+.lectern-seclabel-rule { flex: 1; height: 1px; background: var(--lectern-line); }
+
+/* ---------- KPI cards ---------- */
+.lectern-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.lectern-kpi { background: var(--lectern-card); border: 1px solid var(--lectern-line); border-radius: var(--lectern-radius); padding: 20px; box-shadow: var(--lectern-shadow); }
+.lectern-kpi-lab { color: var(--lectern-mut); font-size: 12.5px; font-weight: 500; }
+.lectern-kpi-val { font-size: 38px; font-weight: 600; letter-spacing: -.025em; margin-top: 10px; }
+.lectern-kpi-d { font-size: 12.5px; margin-top: 8px; font-weight: 600; }
+.lectern-up { color: var(--lectern-teal); }
+.lectern-down { color: var(--lectern-rose); }
+
+/* ---------- panels (charts / tables) ---------- */
+.lectern-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; margin-top: 16px; }
+.lectern-panel { background: var(--lectern-card); border: 1px solid var(--lectern-line); border-radius: var(--lectern-radius); padding: 22px; box-shadow: var(--lectern-shadow); }
+.lectern-panel-h { font-size: 14px; font-weight: 600; color: var(--lectern-ink); margin: 0; }
+.lectern-panel-sub { color: var(--lectern-mut); font-size: 12px; margin: 2px 0 14px; }
+
+/* ---------- decisions table ---------- */
+.lectern-tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.lectern-tbl th { text-align: left; color: var(--lectern-mut); font-weight: 500; font-size: 11.5px;
+  letter-spacing: .04em; text-transform: uppercase; padding: 0 12px 10px; border-bottom: 1px solid var(--lectern-line); }
+.lectern-tbl td { padding: 13px 12px; border-bottom: 1px solid var(--lectern-line); color: var(--lectern-ink-2); vertical-align: top; }
+.lectern-tbl td.lectern-owner { color: var(--lectern-ink); font-weight: 500; }
+.lectern-pill { font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.lectern-pill--done { background: #e7f3f0; color: var(--lectern-teal); }
+.lectern-pill--prog { background: #fef4e2; color: var(--lectern-amber); }
+.lectern-pill--block { background: #fbecee; color: var(--lectern-rose); }
+
+/* ---------- focus (keyboard visibility) ---------- */
+.lectern-body a:focus-visible,
+.lectern-body button:focus-visible {
+  outline: 2px solid var(--lectern-navy-2); outline-offset: 3px; border-radius: 6px;
+}
+
+/* ---------- footer ---------- */
+.lectern-footer { color: var(--lectern-mut); font-size: 12px; text-align: center;
+  padding: 34px 0; margin-top: 48px; border-top: 1px solid var(--lectern-line); }
