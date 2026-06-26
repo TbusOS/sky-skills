@@ -1,12 +1,12 @@
 ---
 name: eclat-design
-description: 产品发布会 / keynote 风格的 HTML 页面生成 —— 矩阵近黑哑光画布 + 满屏巨字 + 聚光/地面反射 + 单一 flare 高光 + 产品 hero(SVG 抽象或真渲染图)+ 满屏"时刻"叙事。暗调电影感,克制如熄了灯的发布厅。TRIGGER 当用户提到 发布会 / 产品发布 / keynote / 新品发布 / 苹果发布会风格 / launch event / product launch / 暗调电影感发布页 / "one more thing" 风格时使用。DO NOT TRIGGER:玻璃拟态/aurora(用 glass)、会议室/商务汇报 deck(用 lectern)、浅白消费极简官网(用 apple)。
+description: 产品发布会 / keynote 风格的 HTML 页面生成 —— 近黑哑光画布 + 满屏巨字 + 聚光/地面反射 + 单一 flare 高光 + 产品 hero(SVG 抽象或真渲染图)+ 满屏"时刻"叙事。暗调电影感,克制如熄了灯的发布厅。TRIGGER 当用户提到 发布会 / 产品发布 / keynote / 新品发布 / 苹果发布会风格 / launch event / product launch / 暗调电影感发布页 / "one more thing" 风格时使用。DO NOT TRIGGER:玻璃拟态/aurora(用 glass)、会议室/商务汇报 deck(用 lectern)、浅白消费极简官网(用 apple)。
 last-verified: 2026-06-26
 ---
 
 # Eclat Design — 发布会 / keynote HTML 风格
 
-生成产品发布会质感的 HTML:矩阵近黑画布上,产品被聚光从黑暗里打亮、落在有反射的地面上;铺屏的巨字一行一个气口;颜色极度克制 —— 唯一饱和的是冷白聚光、暖橙边光,和一个 flare 高光(CTA + 一颗直播红点)。**哑光,不是玻璃**:零 backdrop-filter、零 aurora。戏剧来自光、尺度和留白。
+生成产品发布会质感的 HTML:哑光近黑画布上,产品被聚光从黑暗里打亮、落在有反射的地面上;铺屏的巨字一行一个气口;颜色极度克制 —— 唯一饱和的是冷白聚光、暖橙边光,和一个 flare 高光(CTA + 一颗直播红点)。**哑光,不是玻璃**:零 backdrop-filter、零 aurora。戏剧来自光、尺度和留白。
 Generates product-keynote HTML: a matte near-black stage where the product is lit out of the dark by a spotlight and sits on a reflective floor; full-bleed headlines that each take one breath; colour kept to cool spotlight + warm rim + one flare accent. Matte, never glass.
 
 ## §1 使用方式
