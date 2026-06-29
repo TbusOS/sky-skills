@@ -162,6 +162,34 @@ const SKILL_SIGNATURES = {
     ],
     forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora'],
   },
+  eclat: {
+    name: 'eclat flare',
+    accents: [[255, 91, 52]],           // #ff5b34 — flare CTA + live dot (only saturated foreground)
+    threshold: 0.00002,                  // dark cinematic hero puts the CTA mid-screen; catch total absence only
+    // anthropic orange OMITTED on purpose: eclat's flare-soft #ff7a4d is within
+    // TOL 55 of #d97757, so forbidding it would false-flag eclat's own warm family.
+    forbiddenColors: [
+      { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
+      { rgb: [151, 176, 119], note: 'sage green #97B077' },
+      { rgb: [196, 148, 100], note: 'ember gold #c49464' },
+      { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
+    ],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
+  },
+  lectern: {
+    name: 'lectern navy',
+    accents: [[29, 58, 110], [47, 91, 176]],   // #1d3a6e + #2f5bb0
+    threshold: 0.0002,                          // navy square + kicker + agenda numbers carry it in the top region
+    // apple blue OMITTED: lectern is a navy/blue-family skin; forbidding apple's
+    // blue would risk flagging lectern's own chart blues.
+    forbiddenColors: [
+      { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
+      { rgb: [196, 148, 100], note: 'ember gold #c49464' },
+      { rgb: [151, 176, 119], note: 'sage green #97B077' },
+      { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
+    ],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
+  },
 };
 
 function detectSkill(target, html) {
