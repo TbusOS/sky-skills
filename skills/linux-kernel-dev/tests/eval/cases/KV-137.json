@@ -1,0 +1,23 @@
+{
+  "id": "KV-137",
+  "topic": "sync_file fd-backed fence error path must fput before fd_install",
+  "q": "用 sync_file_create() 建了 fence,准备经一个 fd 交给用户态,但把 fence fd 回填用户态的 copy_to_user 失败了。fd_install 之前的这条错误路径该怎么清理才不泄漏?",
+  "kind": "objective",
+  "canary": true,
+  "subsystem": "dma-buf",
+  "gold_claims": {
+    "api": ["sync_file_create", "fput", "dma_fence_put", "put_unused_fd", "fd_install"],
+    "symbol": ["sync_file", "dma_fence"]
+  },
+  "corruptions": [
+    { "type": "fake-api", "claim": "sync_file_fput", "why": "编造的;释放 sync_file 建出的 file 用 fput(sync_file->file),没有 sync_file_fput" },
+    { "type": "fake-api", "claim": "dma_fence_put_file", "why": "不存在的 API" },
+    { "type": "fake-api", "claim": "sync_file_release_fd", "why": "不存在;错以为有一个连带释放 fd+file 的接口" }
+  ],
+  "forbidden": [
+    "错误路径只 dma_fence_put + put_unused_fd 而漏掉 fput(sync_file->file)",
+    "以为 put_unused_fd 会连带释放 sync_file_create 建出的 struct file",
+    "在 sync_file_create 失败(尚无 file)那条路径上也 fput"
+  ],
+  "rubric": "sync_file_create() 成功即建出 refcount=1 的 struct file(内含 sync_file,持 dma_fence 一份引用);只有 fd_install 才把所有权随 fd 转移给用户态。fd_install 之前的任何错误返回(尤其 copy_to_user 回填 fd 失败)必须 fput(sync_file->file),否则 file+sync_file+dma_fence 整条泄漏(put_unused_fd 只回收 fd 号不放 file)。create 自身失败那条尚无 file 不能 fput。对照 mainline drivers/dma-buf/sw_sync.c 的 sw_sync_ioctl_create_fence:copy_to_user 失败先 fput 再 put_unused_fd。"
+}

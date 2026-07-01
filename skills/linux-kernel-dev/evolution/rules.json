@@ -459,6 +459,16 @@
       "catches": 0,
       "linked_eval_case": "KV-135",
       "added": "2026-06-24"
+    },
+    {
+      "id": "KB-SYNC-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "sync_file_create(fence) 成功即建出 refcount=1 的 struct file(内含 sync_file,对 dma_fence 持一份引用),只有 fd_install 才把所有权随 fd 转移给用户态。fd_install 之前的任何错误返回(尤其 copy_to_user 回填 fence fd 失败)必须 fput(sync_file->file),否则 file+sync_file+dma_fence 整条泄漏(put_unused_fd 只回收 fd 号,不释放 file);非特权可反复触发,内核 slab 线性增长无上限。create 自身失败那条尚无 file,不能 fput。对照 mainline drivers/dma-buf/sw_sync.c 的 sw_sync_ioctl_create_fence:copy_to_user 失败先 fput 再 put_unused_fd。子系统:dma-buf/sync_file。用例 KV-137。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-137",
+      "added": "2026-07-01"
     }
   ]
 }

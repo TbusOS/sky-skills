@@ -65,6 +65,7 @@
 - KB-CPUFREQ-001 · cpufreq 驱动自己异步改频率必须 cpufreq_freq_transition_begin/end 成对包住(发 PRECHANGE/POSTCHANGE),漏 end 则 transition_ongoing 不清→后续调频卡死 · KV-129 · range：版本无关
 - KB-CPUIDLE-001 · cpuidle .enter 在关中断原子上下文运行须返回实际进入的 state 下标(demote 时返浅态);会停本地 timer 的深睡态必标 CPUIDLE_FLAG_TIMER_STOP 否则唤醒丢失 · KV-132 · range：版本无关
 - KB-DEVFREQ-001 · devfreq .target 收到的是 governor 推荐频率,硬件只支持离散 OPP,必须 devfreq_recommended_opp 取 >= 目标的实际 OPP 再 dev_pm_opp_set_rate,别直接用推荐值 · KV-135 · range：版本无关
+- KB-SYNC-001 · sync_file_create() 建出 refcount=1 的 struct file,只有 fd_install 才转移所有权;fd_install 之前的错误路径(尤其 copy_to_user 回填 fd 失败)必须 fput(sync_file->file),只 dma_fence_put+put_unused_fd 会漏掉 file→file/sync_file/dma_fence 整条泄漏,对照 mainline sw_sync.c · KV-137 · range：dma_fence 时代(≥4.10)
 
 ## 条目
 
@@ -906,4 +907,23 @@
   ```
 - linked_eval_case：KV-135
 - provenance：self（真树核对 devfreq.h devfreq_recommended_opp + pm_opp.h set_rate;子系统:devfreq）
+- fires/catches：0 / 0
+
+### KB-SYNC-001：sync_file_create() 后、fd_install 之前的错误路径必须 fput(sync_file->file)
+
+- symptom：用 sync_file_create() 建 fence 并经 fd 交给用户态的 ioctl，错误路径(尤其 copy_to_user 回填 fence fd 失败那一步)每触发一次就泄漏一份 struct file + sync_file + dma_fence；非特权进程可反复触发，内核 slab 线性增长、无上限，最终 OOM，也是可控的堆 grooming 基元。
+- root cause：sync_file_create(fence) 成功即建出一个 refcount=1 的 struct file(内含 sync_file，且对 fence 持有一份引用)。只有 fd_install 才把这份所有权随 fd 转移给用户态。fd_install 之前的任何错误返回，如果只做 dma_fence_put + put_unused_fd 而漏掉 fput(sync_file->file)，file 引用就永不归零，连带 sync_file 与 dma_fence 整条泄漏。put_unused_fd 只回收 fd 号，不释放已建出的 file。
+- fix：新增一条错误出口，先 fput(sync_file->file) 再落到 dma_fence_put / put_unused_fd；只让"sync_file_create 已成功"之后的错误路径(copy_to_user 失败等)走它——create 自身失败那条尚无 file，不能 fput。对照 mainline drivers/dma-buf/sw_sync.c 的 sw_sync_ioctl_create_fence：copy_to_user 失败先 fput(sync_file->file) 再 put_unused_fd。
+- trigger：见到 sync_file_create() 之后的错误路径只有 dma_fence_put / put_unused_fd 而无 fput(sync_file->file)，或问"sync_file fd ioctl 错误清理 / fd_install 之前返回怎么放 file / create-fence 泄漏"。
+- range：dma_fence 时代(≥4.10，fence→dma_fence 改名后)；SW-sync 及任何 sync_file_create + fd 组合的 ioctl 适用。
+- scope/limits：约束 fd_install 之前错误路径对 file 的释放；create 失败(尚无 file)那条不 fput。API 名按目标树 include/linux/sync_file.h / include/linux/file.h 核。
+- check：
+  ```
+  [CLAIMS]
+  api: sync_file_create, fput, dma_fence_put, put_unused_fd, fd_install
+  symbol: sync_file, dma_fence
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-137
+- provenance：self（真树核对 sync_file.h/file.h fd-backed fence 生命周期 + mainline sw_sync.c 对照;子系统:dma-buf/sync_file）
 - fires/catches：0 / 0
