@@ -481,7 +481,7 @@ CTA:        .anth-button primary
 - 不要 emoji 表情（"🤔 Nothing here"）；anthropic 用抽象 SVG，不用 emoji
 - 文案见 ux-writing.md（"No conversations yet" 不写 "Oops! It looks like you haven't created..."）
 
-### L11 · Info-dense 工程规格页（register map / fuse 布局 / 多维摘要）
+### L11 · Info-dense 工程规格页（register map / 位域布局 / 多维摘要）
 
 工程文档的数据密度和营销页是两种形状：读者在**解码**不在浏览，`file:line`
 引用和 code ref 高频出现。直接套 anth-card / report-table 会过载——单 SVG 塞
@@ -501,7 +501,7 @@ grid:        2×2,gap var(--space-4)
              一行 citation footer(mono 12px,var(--anth-text-secondary),file:line)
 ```
 
-**B · 寄存器 / fuse / 内存布局 → HTML 卡片网格**（替代一张大 SVG）
+**B · 寄存器 / 位域 / 内存布局 → HTML 卡片网格**（替代一张大 SVG）
 
 ```
 区域:        每个 region 一个 panel(h3 标题 + 一句 caption)
@@ -533,6 +533,6 @@ grid:        repeat(auto-fill,minmax(200px,1fr)),gap var(--space-3)
 ├─ 状态浮层                    → L6 modal
 ├─ 时间线                       → L8 changelog
 ├─ 空数据                       → L10 empty state
-├─ 工程规格(register/fuse/多维) → L11 info-dense
+├─ 工程规格(register/位域/多维) → L11 info-dense
 └─ 都不是 → 回 §1-§6 找最近的版式 + dos-and-donts.md 对照检查
 ```

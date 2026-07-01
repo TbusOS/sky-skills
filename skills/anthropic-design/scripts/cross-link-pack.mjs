@@ -5,7 +5,7 @@
  *
  * Why: md-pack handles .md → mirror.html, but a doc set's main HTMLs may
  * also link to other .html files in adjacent repo dirs (e.g. a sibling
- * "task15 原理" page).  Those references are silently broken once the
+ * "design rationale" page).  Those references are silently broken once the
  * pack dir is copied elsewhere.  This script folds those targets in.
  *
  * Usage:
@@ -18,9 +18,9 @@
  *
  * Example:
  *   node cross-link-pack.mjs \
- *     --pack-root docs/avb-decision \
- *     --out       docs/avb-decision/_md \
- *     docs/avb-decision/*.html
+ *     --pack-root docs/handbook \
+ *     --out       docs/handbook/_md \
+ *     docs/handbook/*.html
  *
  * Behavior:
  *   1. Scan every <a href="*.html"> in <html...>.

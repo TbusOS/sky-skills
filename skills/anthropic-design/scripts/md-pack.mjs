@@ -19,8 +19,8 @@
  * Example:
  *   node md-pack.mjs \
  *     --base /repo/docs \
- *     --out  /repo/docs/avb-decision/_md \
- *     /repo/docs/avb-decision/*.html
+ *     --out  /repo/docs/handbook/_md \
+ *     /repo/docs/handbook/*.html
  *
  * What it does:
  *   1. Scan every <a href="*.md"> in the supplied HTML files.

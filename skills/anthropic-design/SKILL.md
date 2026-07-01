@@ -178,8 +178,8 @@ node skills/anthropic-design/scripts/md-rewrite-links.mjs <file.html> [...]
 ```bash
 node skills/anthropic-design/scripts/md-pack.mjs \
   --base docs \
-  --out  docs/avb-decision/_md \
-  docs/avb-decision/*.html
+  --out  docs/handbook/_md \
+  docs/handbook/*.html
 ```
 
 行为：
@@ -197,14 +197,14 @@ node skills/anthropic-design/scripts/md-pack.mjs \
 
 #### 4. `cross-link-pack.mjs` · 把跨目录 sibling .html 也折叠进来
 
-md-pack 处理 .md，cross-link-pack 处理 .html。当主 HTML 链到 secure-boot-guide 其他目录里的兄弟 .html（不是镜像），cp 走主目录后这些链就坏。cross-link-pack 把那些 .html 直接拷到 `_md/`（同款扁平命名），并 rewrite 主 HTML 的 href。
+md-pack 处理 .md，cross-link-pack 处理 .html。当主 HTML 链到同一文档集其他目录里的兄弟 .html（不是镜像），cp 走主目录后这些链就坏。cross-link-pack 把那些 .html 直接拷到 `_md/`（同款扁平命名），并 rewrite 主 HTML 的 href。
 
 ```bash
 node skills/anthropic-design/scripts/cross-link-pack.mjs \
-  --pack-root docs/avb-decision \
+  --pack-root docs/handbook \
   --base      docs \
-  --out       docs/avb-decision/_md \
-  docs/avb-decision/*.html
+  --out       docs/handbook/_md \
+  docs/handbook/*.html
 ```
 
 注意：被 cp 进来的 sibling .html 内部如果还有相对引用（图片 / 子链接 / CSS），那些引用在新位置可能 broken；脚本会扫并 warn。脚本只管把 sibling .html 拽过来，不试图也把 sibling 的依赖一起拽——遵循 single-responsibility，避免无限递归打包。

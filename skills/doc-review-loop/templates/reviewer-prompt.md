@@ -123,9 +123,9 @@ C 级 = 表述拗口 / 用了禁用词 / 结构能优化 / 数字能更精确
 | **commit 引用** | `git log <hash>` / `git show <hash>` 看这个 commit 真存在吗 / 内容对吗 / 作者对吗 | hash 编造 / 时间错 / message 不对 |
 | **grep 命中数 / "0 hits"** | 自己跑同样的 grep 命令，看真的 0 hits 吗 | grep pattern 漏写一个 case，writer 报 0 hits 是错的 |
 | **配置 / 默认值** | `Read <file>` 找到 Kconfig / .config / Makefile 的真实定义 | 默认值过期 / writer 看错版本 |
-| **算式 / 单位换算** | 自己手算 + Python 验证 | 0x20000 × 512 是 64 MB 还是 16 MB 这种算错 |
-| **实际 build 产物** | `ls -la <build_output>/*.img` 看实际文件大小 | writer 用旧 build 数据 / 用错 product |
-| **分区表 / mtdparts** | `cat <partition layout file>` 看 sector × 512 算 MB 自己验 | 文档里 N MB 和 0xN sec 不一致 |
+| **算式 / 单位换算** | 自己手算 + Python 验证 | 50000 行 × 2 KB 是 100 MB 还是 1 GB 这种算错 |
+| **实际构建产物** | `ls -la <artifact_dir>/*.tar.gz` 看实际文件大小 | writer 用旧构建数据 / 用错版本 |
+| **表行数 / 数据量** | `SELECT count(*)` / `wc -l` 自己数再对 | 文档里 N 行和实际不一致 |
 | **跨文档引用 doc N 第 X 章** | `Read` 那个 doc 看第 X 章真的是文档说的内容吗 | 老 doc 已修订，新 doc 引用错版本 |
 
 **在评审报告里**，每个 A/B 级问题都要写：
