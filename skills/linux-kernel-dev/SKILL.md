@@ -46,7 +46,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 内核代码风格 / 审码 | `references/coding-style.md` | `Documentation/process/coding-style.rst` |
 | 新建 module / driver / chardev / Makefile / Kconfig / DT | `references/templates.md` | `Documentation/kbuild/`, `Documentation/devicetree/bindings/` |
 | 锁 / 并发 / 原子 | `references/concurrency.md` | `Documentation/locking/`, `memory-barriers.txt`, `atomic_t.txt` |
-| 调试（printk / ftrace / oops / 工具） | `references/debugging.md` | `Documentation/admin-guide/`, `dev-tools/` |
+| 调试（printk / ftrace / drgn 活体检查 / trace-cmd 分析 / oops / 工具） | `references/debugging.md` | `Documentation/admin-guide/`, `dev-tools/`, drgn/trace-cmd 官方文档 |
 | 内核 API 速查 | `references/api-quick-ref.md` | `Documentation/core-api/`, `driver-api/` |
 | 提交 patch / checkpatch / format-patch | `references/patch-workflow.md` | `Documentation/process/submitting-patches.rst` |
 | **BSP 定制纪律**（defconfig / 上游 gate / 硬件调试 / 改动分析 / 冲突解决） | `references/bsp_discipline.md` | 通用工程纪律 |
