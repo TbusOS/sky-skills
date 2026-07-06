@@ -293,6 +293,56 @@ Hero（标题 + 副标 + 橙色 CTA）→ 3 张能力卡 → 客户引用轮播�
 
 ---
 
+## 版心与阅读纪律（2026-07-06 用户反馈四坑 · 写任何页面前过一遍）
+
+用户对存量产物反复反馈的 4 类问题，每条都有机器闸兜底——generator 侧先按规则写对，别等闸抓：
+
+### A · 版心不许全页窄列（对应 known-bugs §1.44 `narrow-content-column`）
+
+- 720 窄列**只给纯 prose**（长文正文 / verdict 段）。表格、figure、多列 grid、代码块一律 960（`anth-container`）或 1200（`anth-container anth-container--wide`）。
+- 同一页混用容器档位是**正常的**：窄列 prose → wide figure → 回窄列。整页只套一个窄容器 = 1440 屏上左右各 400px 死空白、内容挤成一条 —— 这就是被反馈的样子。
+- 机器闸：整页最宽内容块 < 640px（viewport ≥ 1280）→ warn。
+
+### B · 对齐让位于可读性 — 密图单独放大（对应 §1.29 / §1.44）
+
+- 图的宽度由**图的内容密度**定档（diagram-craft §8.1 选档表），**不由上文列宽定**。"为了和上面文字对齐把密图压进窄列" 是被点名的反馈原话——图看不清等于没画。
+- breakout 是默认动作，不需要犹豫：
+
+  ```html
+  </div>  <!-- 结束当前窄容器 -->
+  <div class="anth-container anth-container--wide">
+    <figure>…密图…<figcaption>…</figcaption></figure>
+  </div>
+  <div class="anth-container anth-container--narrow">  <!-- 回窄列继续 prose -->
+  ```
+
+- **grid 单元格里禁放 ≥20 label 的密图**——单元格宽度天然不够，要么图独占全行（`grid-column: 1 / -1`），要么拆图。
+- 机器闸：`dense-diagram-cramped`（≥20 label < 760px）+ `diagram-tiny-text`（渲染 < 9px）。
+
+### C · prose 分段纪律（对应 §1.45 `prose-wall`）
+
+- 单段 ≤ 5 行（渲染 ≈ ≤ 150px）；一段讲一件事。
+- ≥3 个并列要点 → `<ul>` / `<ol>`，不写成顿号长句。
+- 成组论述（背景 / 结论 / 注意事项）→ 装进 `.anth-admonition`（success / warning / danger）或白卡色框，用颜色和边框把段落**分组**，读者扫一眼知道哪块是哪类。
+- 概念关系（流程 / 结构 / 对比）→ 直接上图，图密度合约本来就要求（SKILL.md / diagram-craft §12）。
+- 机器闸：单 `<p>` > 420px 或 ≥4 连续 `<p>` 累计 > 900px 无结构分隔 → warn。
+
+### D · 重叠三大来源（对应 §1.25 两档升级）
+
+HTML 侧文字重叠 90% 来自这三个写法，直接别用：
+
+| 别写 | 换成 |
+|---|---|
+| 文本容器 `height: 40px` 固定高 | `min-height`——内容长了自动撑开，不会压到下一行 |
+| `position: absolute` 摆文字不留 bbox | 正常流 + margin；确需绝对定位（角标 / 徽章）给足 inset 并测过双语两种长度 |
+| 负 margin 把文字往上拉 | 调父容器 gap / padding |
+
+- SVG 侧规则在 diagram-craft §8.2（文字 bbox 互不相交 ≥ 4px、y 间距 ≥ font-size × 1.4）。
+- 机器闸升级：重叠 ≥ 40% 且 ≥ 80px² 现在是 **error**（直接 block），不再是可忽略的 warn。
+- 双语页面注意：EN 和 zh 文案长度差很大，布局要按**较长的那种语言**留空间，交付前两种语言各截一次图。
+
+---
+
 ## Scenario recipes
 
 canonical 没覆盖的版式。遇到时按对应 recipe 写，不要把 §1-§6 的卡片 / 编辑式样硬套上去。

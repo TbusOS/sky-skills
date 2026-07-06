@@ -40,6 +40,10 @@
 | `.apple-link` 文本里手打字面 `›` | `.apple-link::after` 已追加 ` ›`，再写一个渲染成双 chevron（2026-06-13 faq/team/landing 共 31 处实抓）。不要箭头用 `.apple-link--no-arrow`。**known-bugs 1.42** |
 | 双语页 italic 引用块不给 zh 关斜体 | PingFang SC 没有真 italic，display 字号下浏览器对 CJK 做合成斜体，zh 引用读起来廉价难读（2026-06-13 faq + landing 实抓）。zh 字体覆盖必须带 `font-style: normal`，且选择器别 gate 在 `data-lang` 上（如 `blockquote .lang-zh`）。**known-bugs 1.38** |
 | canonical 的 .md / self-diff 写"打算做的"而不是"渲染出来的" | .md 是下一个 critic 的评分标准，声明和渲染不符 = 教错（2026-06-13 changelog 实抓）。完稿后逐句对照截图核对版式声明；改 HTML 必须同 commit 改 .md。**known-bugs 1.37** |
+| 文本容器写死 `height` / `position:absolute` 摆文字 / 负 margin 拉文字 | 文字重叠三大来源(2026-07-06 用户反馈跨美学反复出现)。固定高换 `min-height`;绝对定位只给角标且测过双语两种长度;负 margin 改父容器 gap。重叠 ≥40% 且 ≥80px² 现在是 **error** 直接 block。**known-bugs 1.25 两档升级** |
+| 整页所有区块套同一个窄容器(或自定义 max-width < 640) | 1440 屏左右大片死空白,内容挤成一条(2026-07-06 用户反馈「左右留白太多,中间的字都挤在了一起」)。窄列只给纯 prose,表格/figure/grid 用 `.apple-container--wide` 或 hero 档;同页混用容器档位是正常的。`narrow-content-column` 兜底。**known-bugs 1.44** |
+| 单个 `<p>` 写 15 行以上 / 连续 4+ 长段落中间无结构分隔 | 文字墙(2026-07-06 用户反馈「太多文字没有分段落…阅读不美观」)。单段 ≤5 行;≥3 并列要点改列表;成组论述装进 `.apple-admonition`(info / success / danger)色框分组;概念关系直接上图。`prose-wall` 兜底。**known-bugs 1.45** |
+| 为了和上文列宽对齐,把密图(≥20 label)压进窄列或 grid 单元格 | 对齐让位于可读性——图看不清等于没画(2026-07-06 用户反馈原话「没必要一定要和上面对齐」)。密图 breakout 到 `.apple-container--wide` 独立区块,grid 里独占全行(`grid-column: 1 / -1`)或拆图。**known-bugs 1.29 / 1.44** |
 
 ---
 

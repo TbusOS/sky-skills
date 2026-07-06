@@ -117,7 +117,7 @@ scale = 容器内可用宽 / viewBox 宽
 | 1200 wide（`anth-container anth-container--wide`） | ~1130 | **T ≥ 20 或 C ≥ 4 必须用** | 1080-1280 |
 
 - scale < 0.82 → 升一档；1200 档还不够 → **拆成两张图**，不准缩字号
-- **breakout**：内容图不困在正文窄列里——840px prose 流中需要大图时，结束当前容器，单独开一段 `<div class="anth-container anth-container--wide"><figure>…</figure></div>`，图后再回窄列
+- **breakout（对齐让位于可读性）**：图的宽度由内容密度定档，**不由上文列宽定**——"为了和上面文字对齐把图压小"是用户点名反馈的坑（known-bugs §1.44），图看不清等于没画。prose 流中需要大图时，结束当前容器，单独开一段 `<div class="anth-container anth-container--wide"><figure>…</figure></div>`，图后再回窄列；**grid 单元格里禁放 ≥20 label 的密图**（要么 `grid-column: 1 / -1` 独占全行，要么拆图）
 - **viewBox 紧贴内容**：内容 bbox 距 viewBox 边 ≤ 24px。viewBox 写大、内容挤中间 = 两侧死空间逼所有标签变小
 - 机器闸：`svg-letterbox`（内容 < 72% 渲染宽,known-bugs §1.28）、`dense-diagram-cramped`（≥ 20 text 渲染 < 760px,§1.29）、`diagram-tiny-text`（任何 figure 图渲染 < 9px,不再限 hero）
 

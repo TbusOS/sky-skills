@@ -62,6 +62,10 @@
 | 内容密的图(≥20 个 `<text>`)塞 840px 正文列或 960 默认容器 | scale < 0.82 → 渲染字号 < 9px 看不清。§8.1 选档:密图必须 `anth-container anth-container--wide` breakout,1200 不够就拆图,不准缩字号。`dense-diagram-cramped` + 扩域 `diagram-tiny-text` 兜底。**known-bugs 1.29** |
 | viewBox 写大、内容挤中间一窄条"求对齐" | 两侧死空间逼所有标签变小。留白是容器/margin 的事,不是画布的事。内容 bbox 距 viewBox 边 ≤ 24px。`svg-letterbox` 兜底。**known-bugs 1.28** |
 | 工程图全白卡灰线(0 饱和 hue)/ 色点徽章画空心环 | 读作未上色 wireframe。v3 色彩:容器 tint 16-20%(§1 新表)、色点/徽章/提交圆**实心主色**、每图 ≥ 2 hue。`diagram-monochrome` 抓 0-hue。**known-bugs 1.30** |
+| 文本容器写死 `height` / 用 `position:absolute` 摆文字 / 负 margin 拉文字 | 文字重叠三大来源(2026-07-06 用户反馈"字体重叠、图和字重叠"反复出现)。固定高换 `min-height`;绝对定位只给角标且测过双语两种长度;负 margin 改父容器 gap。重叠 ≥40% 且 ≥80px² 现在是 **error** 直接 block。**known-bugs 1.25 两档升级** |
+| 整页所有 section 套同一个窄容器(或自定义 max-width < 640) | 1440 屏左右各 400px 死空白,内容挤成一条(2026-07-06 用户反馈原话"左右留白太多,中间的字都挤在了一起")。窄列只给纯 prose,表格/figure/grid/代码块用 960/1200;同页混用容器档位是正常的。`narrow-content-column` 兜底。**known-bugs 1.44** |
+| 单个 `<p>` 写 15 行以上 / 连续 4+ 长段落中间无任何结构分隔 | 文字墙(2026-07-06 用户反馈"太多文字没有分段落…阅读不美观")。单段 ≤5 行;≥3 并列要点改列表;成组论述装 `.anth-admonition` / 色框卡分组;概念关系直接上图。`prose-wall` 兜底。**known-bugs 1.45** |
+| 为了和上文列宽对齐,把密图(≥20 label)压进窄列或 grid 单元格 | 对齐让位于可读性——图看不清等于没画(2026-07-06 用户反馈原话"没必要一定要和上面对齐")。密图默认 breakout 到 wide 独立容器,grid 里独占全行或拆图。**known-bugs 1.29 / 1.44,layout-patterns 版心纪律 §B** |
 | 双语 stat strip 的共享数字带英文单位(`48h`)而 zh label 以"小时内…"开头 | zh 模式读出 "48h 小时" 单位重复(2026-06-13 faq 实抓)。数字也拆 lang spans:`<span class="lang-en">48h</span><span class="lang-zh">48</span>` —— 单位不属于数字,属于语言。**known-bugs 1.41** |
 | `.anth-link` 文本里手打字面 `→` | `.anth-link::after` 已统一追加 →,再写一个渲染成双箭头。2026-06-11(commit 5eea300)清过 32 处,apple 同类 2026-06-13 又中 31 处。不要 ::after 箭头时用 `.anth-link--no-arrow`(此时字面箭头才是对的)。**known-bugs 1.42** |
 
@@ -112,14 +116,18 @@ bin/design-review --audit --skill=anthropic --no-visual <dir>/   # 10x 快，先
 
 任何一条 exit 非 0 → **任务没完成**。visual-audit 会报：
 - `[error]` contrast < 3 — 修文字或背景颜色
+- `[error]` text-overlap ≥40% 且 ≥80px² — 字面叠字，改 layout（固定高→min-height / 收绝对定位 / 去负 margin），不许 ship（1.25 两档升级）
+- `[warn]` text-overlap < 40% — near-miss 也要处理：改 layout 或 `data-allow-overlap` 显式声明
 - `[warn]` contrast 3–4.5 — brand-intentional 橙 CTA 视具体情况
 - `[warn]` hero diagram rendered at only X px — 容器太窄，换 `.anth-container--wide`
 - `[warn]` diagram smallest text renders at Xpx — SVG font-size 太小或容器太窄（**所有** figure 图，不只 hero）
 - `[warn]` orphan figure — grid 里孤单非 hero 卡，span 2 或配对
 - `[warn]` svg-letterbox — 内容没撑满 viewBox，紧贴内容重算 viewBox（1.28）
-- `[warn]` dense diagram cramped — ≥20 标签的密图塞窄容器，升 wide 档或拆图（1.29）
+- `[warn]` dense diagram cramped — ≥20 标签的密图塞窄容器，升 wide 档或拆图；对齐让位于可读性（1.29）
 - `[warn]` diagram-monochrome — 工程图 0 饱和 hue 发灰，按 §1 加语义色（1.30）
 - `[warn]` text-desert — 连续 2600px 纯文字无视觉元素，按图密度合约补图（1.31）
+- `[warn]` narrow-content-column — 整页最宽内容块 < 640px，版心被留白吃掉；按容器选择表分级（1.44）
+- `[warn]` prose-wall — 单段 > 420px 或 4+ 连续长段无分隔，拆段 / 列表化 / admonition 色框分组（1.45）
 
 ## 📐 Lineup card 质量底线
 

@@ -38,6 +38,10 @@
 | SVG 墨色写死白 fill | light 模式隐形(2026-06-11 smoke 页实测命中);用 `.glass-svg-*` |
 | 借 apple 蓝 / anthropic 橙 / ember 金 / sage 绿 | cross-skill-smell 互查已登记四色 |
 | `transition: all` / 硬编码 hex | 性能 + 主题切换断裂 |
+| 文本容器写死 `height` / `position:absolute` 摆文字 / 负 margin 拉文字 | 文字重叠三大来源(2026-07-06 用户反馈跨美学反复出现)。固定高换 `min-height`;绝对定位只给角标且测过双语两种长度;负 margin 改父容器 gap。重叠 ≥40% 且 ≥80px² 现在是 **error** 直接 block。**known-bugs 1.25 两档升级** |
+| 整页所有区块套同一个窄容器(或自定义 max-width < 640) | 1440 屏左右大片死空白,内容挤成一条(2026-07-06 用户反馈「左右留白太多,中间的字都挤在了一起」)。窄列只给纯 prose,表格/figure/grid 用 `.glass-container--wide`;同页混用容器档位是正常的。`narrow-content-column` 兜底。**known-bugs 1.44** |
+| 单个 `<p>` 写 15 行以上 / 连续 4+ 长段落中间无结构分隔 | 文字墙(2026-07-06 用户反馈「太多文字没有分段落…阅读不美观」)。单段 ≤5 行;≥3 并列要点改列表;成组论述分装进多个 `.glass-panel` / `.glass-card` 面板分组;概念关系直接上图。`prose-wall` 兜底。**known-bugs 1.45** |
+| 为了和上文列宽对齐,把密图(≥20 label)压进窄列或 grid 单元格 | 对齐让位于可读性——图看不清等于没画(2026-07-06 用户反馈原话「没必要一定要和上面对齐」)。密图 breakout 到 `.glass-container--wide` 独立区块,grid 里独占全行(`grid-column: 1 / -1`)或拆图。**known-bugs 1.29 / 1.44** |
 
 ## 📋 发布前 checklist
 

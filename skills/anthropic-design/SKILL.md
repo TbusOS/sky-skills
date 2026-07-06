@@ -28,7 +28,7 @@ last-verified: 2026-04-19
 
 1. `references/design-tokens.md` — 所有 CSS 变量
 2. `references/typography.md` — 字体层级（Lora serif 正文是核心差异）
-3. `references/layout-patterns.md` — 六类版式骨架 + **容器选择表** + **L1-L10 scenario recipes**（dashboard / form / table / tab / accordion / modal / sidebar / changelog / video / empty-state）
+3. `references/layout-patterns.md` — 六类版式骨架 + **容器选择表** + **版心与阅读纪律（用户反馈四坑：全页窄列 / 密图迁就对齐 / 文字墙 / 重叠三来源，写任何页面前过一遍）** + **L1-L10 scenario recipes**（dashboard / form / table / tab / accordion / modal / sidebar / changelog / video / empty-state）
 4. `references/components.md` — 28 组件（含 §28 Inline SVG 插画模板）+ **C1-C11 scenario recipes**（input / select / check / switch / tab / accordion / toast / dialog / banner / tooltip / skeleton）
 5. `references/diagram-craft.md` — **手工 SVG 图示工艺（画任何架构/流程/层级/时间线图前 MUST 读）**：色彩语义表（颜色做语义不做填充）、嵌套分组、节点卡、连线、编号徽章、布局公式、icon 语法、窗口 mock、图密度合约、反模式
 6. `references/sequence-diagrams.md` — UML 时序图专文（actor / lifeline / step 编号 / 平文本约束）

@@ -278,6 +278,24 @@
 
 ---
 
+### 1.45 文字墙 — 长段落不分段、不用列表 / 色块分组
+- **Reader sees**:页面中部一大块连续文字,没有段落切分、没有列表、没有 callout 色框,读起来喘不过气。用户 2026-07-06 直接反馈:"中间如果出现太多文字没有分段落或者用更清晰的图去表达,或者按颜色框把文字段落进行区分,阅读不美观"。
+- **Why**:text-desert(§1.31)只管"2600px 无**视觉元素**",抓不到"有图但文字本身成墙"——一段 600px 的巨型 `<p>`、或 5 个连续长段落 1200px,都在 2600px 阈值之下溜过。generator 侧也没有"单段落最大行数"的硬规则。
+- **How caught**:用户对存量产物的反馈(多页面反复出现)。
+- **Defense**:`visual-audit.mjs` 新增 **prose-wall**(warn)两个触发条件:(a) 单个 `<p>` 渲染高 > 420px(≈15 行);(b) ≥4 个连续 `<p>` 兄弟累计 > 900px 且中间无 heading / list / figure / table / blockquote / admonition 分隔。`data-allow-prose-wall`(自身或祖先)显式豁免。7 美学 canonical 全量回归 0 假阳。
+- **Fix playbook**:单段 ≤ 5 行;≥3 个并列要点改 `<ul>`;成组论述装进 `.anth-admonition` / 色框卡(各美学的 callout 组件)分组;概念关系改图表达(图密度合约 diagram-craft §12 本来就要求)。
+
+---
+
+### 1.44 全页内容挤在窄列 — 左右留白吃掉版心
+- **Reader sees**:1440 宽的屏幕上左右各 400px+ 空白,正文、表格、图全部挤在中间一条窄列里。用户 2026-07-06 直接反馈:"经常出现左右留白太多,中间的字都挤在了一起"。
+- **Why**:generator 把整页所有 section 都套了同一个窄容器(或自定义 max-width < 640px),没按 layout-patterns 容器选择表分级 —— 720 窄列只该给纯 prose,内容承载块(table / figure / 多列 grid / pre)该用 960 / 1200。此前没有任何机器闸看 HTML 内容列宽(svg-letterbox 只管 SVG 画布内部)。
+- **How caught**:用户对存量产物的反馈。
+- **Defense**:`visual-audit.mjs` 新增 **narrow-content-column**(warn):viewport ≥ 1280 且页高 ≥ 1200px 时,扫全页 p / ul / table / figure / pre / container 等内容块的渲染宽度,**最宽的一块仍 < 640px** → 触发(合法的 720 单栏长文原型不会触发,因为容器本身 ≥ 720)。`<body data-allow-narrow-column>` 豁免。7 美学 canonical 回归 0 假阳。
+- **Fix playbook**:按 layout-patterns 容器选择表分级 —— hero / 表格 / 密图用 960 或 1200 容器,窄列只包 prose;密图直接 breakout(§1.29 / diagram-craft §8.1),对齐让位于可读性。
+
+---
+
 ### 1.43 SVG 细描边连线穿过 `<text>` = 删除线效果
 - **Reader sees**:图里三个标签像被划了删除线 —— 一条 1.8px 的连线正好横穿文字。
 - **Why**:连线的几何和文字 bbox 撞了,而三个 overlap 检查都看不见细描边:§1.26 svg-shape-over-text 跳过 `fill="none"` 的 shape(描边线没有 fill),且 area ≥ 16px² / pct ≥ 10% 的阈值是为色块调的,1.8px 细线的 y 向交叠永远到不了 10%;§1.8 / §1.25 只看 text × text。另注意:线画在文字**下面**(DOM 序在前)也照样从字缝里透出来读成删除线,所以这个类不能像 §1.26 那样只查 DOM 序在后的 shape。
@@ -376,7 +394,8 @@
   - SVG 画图时 y 坐标间距 ≥ font-size × 1.4（即 12px 字至少 17px 行高）。手画 SVG 不要用 11/12px 这种小字 + 直接拿编辑器目测。
   - 双列 grid / flex 里的长 code / 长 URL：父容器 `min-width: 0` + 子元素 `overflow-wrap: anywhere` 或 `word-break: break-all`，强制断词不溢出。
   - 真有意贴叠（tooltip / shadow / decorative layered text）：在该元素或其祖先加 `data-allow-overlap` 显式声明。
-- **Rule**：所有新写 / 改写的 HTML 都要跑 `visual-audit.mjs` 看 `[warn] text-overlap` 行。任何 hit 必须 (a) 改 layout 让 bbox 不交、或 (b) 加 `data-allow-overlap` 显式声明意图。不允许"忽略 warning 直接 ship"。
+- **Rule**：所有新写 / 改写的 HTML 都要跑 `visual-audit.mjs` 看 `text-overlap` 行。任何 hit 必须 (a) 改 layout 让 bbox 不交、或 (b) 加 `data-allow-overlap` 显式声明意图。不允许"忽略 warning 直接 ship"。
+- **2026-07-06 升级（用户反馈重叠反复溜过）**：text-overlap 改**两档严重度** —— 重叠 ≥ smaller bbox **40%** 且面积 ≥ 80px² 时升为 **error**（字面上叠着字，不是 near-miss，直接 block）；其余维持 warn。第二视口 rerun 的发现仍一律 warn（§1.34 语义不变）。
 
 ---
 

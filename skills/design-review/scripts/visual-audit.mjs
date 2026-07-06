@@ -711,6 +711,111 @@ const auditFn = (arg) => {
     }
   }
 
+  // ---------- 2c6) Narrow content column — whole page squeezed (known-bugs §1.44) ----------
+  // User-reported failure class: huge side margins at desktop width with ALL
+  // content crammed into one narrow column. A 720px prose column is a legit
+  // archetype (layout-patterns §2), so the gate only fires when the WIDEST
+  // content block on the whole page is still under 640px at a ≥1280 viewport —
+  // i.e. even the tables/figures/containers never open up. Short pages and
+  // md-mirror docs exempt.
+  if (window.innerWidth >= 1280) {
+    const docH = document.body.scrollHeight;
+    const exempt =
+      docH < 1200 ||
+      document.body.hasAttribute('data-allow-narrow-column') ||
+      !!document.querySelector('.md-banner');
+    if (!exempt) {
+      let maxW = 0;
+      let blocks = 0;
+      let widest = '';
+      document.querySelectorAll(
+        'p, ul, ol, table, figure, pre, blockquote, [class*="container"], main > div, article > div, section > div'
+      ).forEach((el) => {
+        const st = getComputedStyle(el);
+        if (st.display === 'none' || st.visibility === 'hidden') return;
+        const r = el.getBoundingClientRect();
+        if (r.width < 100 || r.height < 20) return;
+        if (!(el.textContent || '').trim()) return;
+        blocks++;
+        if (r.width > maxW) {
+          maxW = r.width;
+          widest = `<${el.tagName.toLowerCase()}${el.className && typeof el.className === 'string' ? '.' + el.className.split(/\s+/)[0] : ''}>`;
+        }
+      });
+      if (blocks >= 5 && maxW > 0 && maxW < 640) {
+        issues.push({
+          kind: 'narrow-content-column',
+          severity: 'warn',
+          maxContentWidth: Math.round(maxW),
+          viewport: window.innerWidth,
+          widest,
+          blocks,
+        });
+      }
+    }
+  }
+
+  // ---------- 2c7) Prose wall — long unbroken paragraph runs (known-bugs §1.45) ----------
+  // User-reported failure class: a mid-page slab of text with no paragraph
+  // breaks, no list, no callout box — unpleasant to read even when the
+  // text-desert gate (no VISUAL for 2600px) doesn't fire. Two triggers:
+  //   (a) a single <p> rendering taller than 420px (~15 lines) — needs
+  //       splitting into paragraphs;
+  //   (b) a run of ≥4 consecutive <p> siblings totalling >900px with no
+  //       structural break (heading/list/figure/table/blockquote/callout)
+  //       between them — needs a list, an admonition/color-frame group,
+  //       or a figure to break the wall.
+  // <element data-allow-prose-wall> (self or ancestor) suppresses.
+  {
+    const allowWall = (el) => {
+      for (let n = el; n; n = n.parentElement) if (n.hasAttribute && n.hasAttribute('data-allow-prose-wall')) return true;
+      return false;
+    };
+    const visible = (el) => {
+      const st = getComputedStyle(el);
+      if (st.display === 'none' || st.visibility === 'hidden') return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 50 && r.height > 10;
+    };
+    // (a) single oversized paragraph
+    document.querySelectorAll('p').forEach((p) => {
+      if (!visible(p) || allowWall(p)) return;
+      if (p.closest('blockquote, figure, [class*="admonition"], [class*="banner"], [class*="card"]')) return;
+      const r = p.getBoundingClientRect();
+      if (r.height > 420) {
+        issues.push({
+          kind: 'prose-wall',
+          severity: 'warn',
+          mode: 'single-paragraph',
+          heightPx: Math.round(r.height),
+          text: (p.textContent || '').trim().slice(0, 60),
+        });
+      }
+    });
+    // (b) consecutive-paragraph run with no structural break
+    const seen = new Set();
+    document.querySelectorAll('p').forEach((start) => {
+      if (seen.has(start) || !visible(start) || allowWall(start)) return;
+      if (start.closest('blockquote, figure, [class*="admonition"], [class*="banner"], [class*="card"]')) return;
+      const run = [start];
+      let n = start.nextElementSibling;
+      while (n && n.tagName === 'P' && visible(n)) { run.push(n); seen.add(n); n = n.nextElementSibling; }
+      if (run.length < 4) return;
+      const top = run[0].getBoundingClientRect().top;
+      const bottom = run[run.length - 1].getBoundingClientRect().bottom;
+      if (bottom - top > 900) {
+        issues.push({
+          kind: 'prose-wall',
+          severity: 'warn',
+          mode: 'paragraph-run',
+          paragraphs: run.length,
+          heightPx: Math.round(bottom - top),
+          text: (start.textContent || '').trim().slice(0, 60),
+        });
+      }
+    });
+  }
+
   // ---------- 5) SVG text overlap audit ----------
   // Catches the class of bug where a rotated decorative label intersects
   // static labels, whose coords looked safe in non-rotated source.
@@ -831,9 +936,13 @@ const auditFn = (arg) => {
         const aSvg = A.el.closest('svg'), bSvg = B.el.closest('svg');
         const inSameSvg = aSvg && aSvg === bSvg;
         const { ra, rb, ox, oy, pct } = hit;
+        // Two-tier severity (user-reported: overlapped text kept shipping while
+        // this stayed a warn). ≥40% of the smaller bbox AND ≥80px² is no longer
+        // a near-miss — glyphs are visibly on top of each other → error.
+        const severe = pct >= 0.40 && ox * oy >= 80;
         issues.push({
           kind: 'text-overlap',
-          severity: 'warn',
+          severity: severe ? 'error' : 'warn',
           location: inSameSvg ? `svg "${aSvg.getAttribute('aria-label') || 'unlabeled'}"` : 'html-flow',
           textA: (A.el.textContent || '').trim().slice(0, 40),
           textB: (B.el.textContent || '').trim().slice(0, 40),
@@ -1792,6 +1901,16 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'text-desert') {
     console.log(
       `  [${i.severity}] text-desert: ${i.gap}px of continuous prose (y ${i.from}→${i.to}, page ${i.pageHeight}px) with no figure/stat/table/mock — diagram-density contract wants ≥1 visual per 1.5 screens; add a flow diagram, stat callout, or window mock (known-bugs 1.31, diagram-craft §12)`
+    );
+  } else if (i.kind === 'narrow-content-column') {
+    console.log(
+      `  [${i.severity}] narrow-content-column: widest content block on the page is only ${i.maxContentWidth}px (${i.widest}, ${i.blocks} blocks scanned) at a ${i.viewport}px viewport — the whole page is squeezed into one narrow column with dead side margins; move content-bearing blocks (tables/figures/grids) to anth-container (960) or anth-container--wide (1200), keep 720 only for pure prose (known-bugs 1.44, layout-patterns 容器选择表)`
+    );
+  } else if (i.kind === 'prose-wall') {
+    console.log(
+      i.mode === 'single-paragraph'
+        ? `  [${i.severity}] prose-wall: single <p> renders ${i.heightPx}px tall ("${i.text}…") — split into paragraphs of ≤5 lines, or convert parallel points into a list / callout boxes (known-bugs 1.45)`
+        : `  [${i.severity}] prose-wall: ${i.paragraphs} consecutive <p> totalling ${i.heightPx}px with no structural break ("${i.text}…") — insert a heading, list, figure, table or admonition/color-frame group to break the wall (known-bugs 1.45)`
     );
   } else if (i.kind === 'orphan-figure') {
     console.log(

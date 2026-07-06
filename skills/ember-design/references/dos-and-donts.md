@@ -37,6 +37,10 @@
 | 双语 stat strip 的共享数字带英文单位（`48h`）而 zh label 以"小时内…"开头 | zh 模式读出 "48h 小时" 单位重复（2026-06-13 faq 实抓）。数字也拆 lang spans：`<span class="lang-en">48h</span><span class="lang-zh">48</span>`。**known-bugs 1.41** |
 | SVG 里细描边连线穿过 `<text>` 标签 | 1.8px 的 path 横穿三个标签 = 删除线效果（2026-06-13 team 页实抓，三个 overlap 机械检查都看不见细描边）。连线绕开文字 bbox，或给文字让出线带。**known-bugs 1.43** |
 | changelog 宣称的统计（median gap / 版本号）不从页内数据重算 | 宣称 median 14 天，按页内日期算是 25 天 —— 读者自己能算出来，一处失实全页失信（2026-06-13 实抓）。任何可从页内导出的数字（中位数 / 计数 / 总和 / 版本号）发布前重算一遍。**known-bugs 1.35** |
+| 文本容器写死 `height` / `position:absolute` 摆文字 / 负 margin 拉文字 | 文字重叠三大来源(2026-07-06 用户反馈跨美学反复出现)。固定高换 `min-height`;绝对定位只给角标且测过双语两种长度;负 margin 改父容器 gap。重叠 ≥40% 且 ≥80px² 现在是 **error** 直接 block。**known-bugs 1.25 两档升级** |
+| 整页所有区块套同一个窄容器(或自定义 max-width < 640) | 1440 屏左右大片死空白,内容挤成一条(2026-07-06 用户反馈「左右留白太多,中间的字都挤在了一起」)。窄列只给纯 prose,表格/figure/grid 用 `.ember-container--wide`;同页混用容器档位是正常的。`narrow-content-column` 兜底。**known-bugs 1.44** |
+| 单个 `<p>` 写 15 行以上 / 连续 4+ 长段落中间无结构分隔 | 文字墙(2026-07-06 用户反馈「太多文字没有分段落…阅读不美观」)。单段 ≤5 行;≥3 并列要点改列表;成组论述装进 `.ember-admonition`(success / warning / danger)暖色框分组;概念关系直接上图。`prose-wall` 兜底。**known-bugs 1.45** |
+| 为了和上文列宽对齐,把密图(≥20 label)压进窄列或 grid 单元格 | 对齐让位于可读性——图看不清等于没画(2026-07-06 用户反馈原话「没必要一定要和上面对齐」)。密图 breakout 到 `.ember-container--wide` 独立区块,grid 里独占全行(`grid-column: 1 / -1`)或拆图。**known-bugs 1.29 / 1.44** |
 
 ## 📋 发布前 checklist（MUST — 三道闸都要 exit 0）
 
