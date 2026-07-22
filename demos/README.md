@@ -18,6 +18,7 @@ Extra pages beyond the four flagship `index.html`:
 - [`anthropic-design/index-v2.html`](./anthropic-design/index-v2.html) — v2 scenario showcase (dashboard / form / table / modal and other non-canonical layouts)
 - [`anthropic-design/diagrams.html`](./anthropic-design/diagrams.html) — 23-diagram gallery (registers, SoC blocks, waveforms, schedulers …)
 - [`apple-design/diagrams.html`](./apple-design/diagrams.html) — 12-diagram gallery, same diagram types in Apple's clean geometric style
+- [`apple-design/motion.html`](./apple-design/motion.html) — motion lab: 8 operable interaction demos (press feedback, interruptible springs, velocity handoff, momentum projection, rubber-band, velocity-decided sheet, one reduced-motion gate)
 - [`glass-design/diagrams.html`](./glass-design/diagrams.html) — 14-diagram gallery as frosted panels on the aurora field (theme-proof SVG ink)
 - [`eclat-design/diagrams.html`](./eclat-design/diagrams.html) — 8-composition lookbook: spotlit product, lineup, spec reveal, the moment, pricing, in-the-box, benchmarks, detail (cinematic, not code diagrams)
 - [`lectern-design/diagrams.html`](./lectern-design/diagrams.html) — 9-visual board pack: line / bar / donut / 100%-stacked / cohort heatmap charts, KPI cards, a roadmap timeline and a RAG decisions table

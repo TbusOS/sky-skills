@@ -1,0 +1,1252 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion Lab — apple-design</title>
+<meta name="description" content="Eight operable demos of the apple-design motion system: press feedback, interruptible springs, velocity handoff, momentum projection, reduced motion.">
+<meta property="og:title" content="Motion Lab — apple-design">
+<meta property="og:description" content="Eight operable demos of the apple-design motion system: press feedback, interruptible springs, velocity handoff, momentum projection, reduced motion.">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="../../skills/apple-design/assets/fonts.css">
+<link rel="stylesheet" href="../../skills/apple-design/assets/apple.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--apple-divider);
+    color: var(--apple-text);
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 980px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .lang-toggle:hover { background: #f5f5f7; }
+  /* Apple §H exception: PingFang SC native. Noto Sans SC as non-Apple fallback. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] figcaption {
+    font-family: "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] em { font-style: normal; font-weight: 600; } /* CJK has no true italic (known-bugs 1.38) */
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3 {
+    font-family: "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", sans-serif;
+    font-weight: 600;
+  }
+
+  .mlab-kicker {
+    font-family: var(--font-display); font-size: 13px; font-weight: 600;
+    color: #0071e3; letter-spacing: 0.01em;
+  }
+  .mlab-intro { font-size: 19px; color: #6e6e73; max-width: 680px; line-height: 1.55; }
+  .mlab-section-note { font-size: 16px; color: #6e6e73; max-width: 680px; line-height: 1.55; margin: 12px 0 44px; }
+
+  .mlab-fig {
+    background: #ffffff; border: 1px solid var(--apple-divider);
+    border-radius: 18px; padding: 36px;
+    margin: 0 0 32px;
+  }
+  .mlab-fig h3 {
+    font-family: var(--font-display); font-size: 21px; font-weight: 600;
+    color: #1d1d1f; margin: 0 0 6px; letter-spacing: -0.005em;
+  }
+  .mlab-fig-lede { font-size: 15px; color: #6e6e73; line-height: 1.55; max-width: 760px; margin: 0 0 24px; }
+  .mlab-cap { font-size: 14px; color: #6e6e73; line-height: 1.55; margin-top: 20px; max-width: 860px; }
+  .mlab-cap strong { color: #1d1d1f; font-weight: 600; }
+
+  /* stage: the operable area inside a figure */
+  .mlab-stage {
+    position: relative;
+    background: #f5f5f7;
+    border-radius: 14px;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .mlab-readout {
+    display: flex; flex-wrap: wrap; gap: 8px 24px;
+    font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, monospace);
+    font-size: 12.5px; color: #6e6e73;
+    font-variant-numeric: tabular-nums;
+    margin-top: 14px; min-height: 18px;
+  }
+  .mlab-readout b { color: #0071e3; font-weight: 600; }
+
+  pre.mlab-code {
+    background: #f5f5f7; border-radius: 12px;
+    padding: 18px 22px; margin: 20px 0 0;
+    font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, monospace);
+    font-size: 12.5px; line-height: 1.6; color: #1d1d1f;
+    overflow-x: auto;
+  }
+  .mlab-fig--onalt pre.mlab-code, .mlab-fig--onalt .mlab-stage { background: #ffffff; }
+
+  /* pill controls used inside stages (actions, not navigation) */
+  .mlab-pill {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid var(--apple-divider);
+    color: #1d1d1f;
+    font-family: var(--font-display);
+    font-size: 13px; font-weight: 500;
+    padding: 6px 14px; border-radius: 980px;
+    cursor: pointer; letter-spacing: 0.01em;
+    transition: background var(--duration-sm) var(--ease-apple-out), transform 100ms var(--ease-apple-out);
+  }
+  .mlab-pill:hover { background: #f5f5f7; }
+  .mlab-pill:active { transform: scale(0.96); }
+  .mlab-pill[disabled] { opacity: 0.4; cursor: default; }
+  .mlab-pill.is-on { background: #0071e3; border-color: #0071e3; color: #ffffff; }
+  .mlab-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
+
+  /* Demo A — press feedback specimens */
+  .mlab-specimen {
+    display: inline-block;
+    background: #0071e3; color: #ffffff;
+    font-family: var(--font-display); font-size: 15px; font-weight: 500;
+    padding: 12px 28px; border-radius: 980px; border: 0;
+    cursor: pointer;
+  }
+  .mlab-specimen--live {
+    transition: transform 100ms var(--ease-apple-out), background var(--duration-sm) var(--ease-apple-out);
+  }
+  .mlab-specimen--live:active { transform: scale(0.96); background: #0077ed; }
+  .mlab-specimen--dead { transition: none; }
+  .mlab-specimen--dead.is-late { background: #0077ed; }
+  .mlab-ab {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  }
+  .mlab-ab-cell {
+    background: #f5f5f7; border-radius: 14px; padding: 40px 24px;
+    display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center;
+  }
+  .mlab-ab-cell p { font-size: 13px; color: #6e6e73; margin: 0; line-height: 1.5; }
+
+  /* Demo B — reveal replay */
+  .mlab-reveal-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 28px; max-width: 620px; margin: 0 auto; }
+  .mlab-reveal-card {
+    background: #ffffff; border-radius: 12px; padding: 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  }
+  .mlab-fig--onalt .mlab-reveal-card { background: #f5f5f7; box-shadow: none; }
+  .mlab-reveal-card .mlab-chip { width: 34px; height: 34px; border-radius: 9px; background: #e8e8ed; margin-bottom: 12px; }
+  .mlab-reveal-card .mlab-chip--blue { background: #0071e3; }
+  .mlab-reveal-card h4 { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: #1d1d1f; margin: 0 0 4px; }
+  .mlab-reveal-card p { font-size: 12.5px; color: #6e6e73; margin: 0; line-height: 1.45; }
+
+  /* Demo C — spatial consistency */
+  .mlab-space-stage { height: 240px; }
+  .mlab-space-panel {
+    position: absolute; top: 20px; bottom: 20px; right: 20px; width: 46%;
+    background: #ffffff; border-radius: 12px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.10);
+    transform: translateX(calc(100% + 40px));
+    display: flex; flex-direction: column; gap: 10px; padding: 20px;
+  }
+  .mlab-space-panel .mlab-bar { height: 10px; border-radius: 5px; background: #e8e8ed; }
+  .mlab-space-panel .mlab-bar--wide { width: 82%; }
+  .mlab-space-panel .mlab-bar--mid { width: 64%; }
+  .mlab-space-panel .mlab-bar--narrow { width: 46%; }
+  .mlab-space-ghost {
+    position: absolute; top: 20px; bottom: 20px; right: 20px; width: 46%;
+    border: 1.5px dashed #d2d2d7; border-radius: 12px;
+  }
+  .mlab-space-hint {
+    position: absolute; left: 24px; top: 50%; transform: translateY(-50%);
+    font-size: 13px; color: #6e6e73; max-width: 38%; line-height: 1.5;
+  }
+
+  /* Demo D — spring playground */
+  .mlab-spring-stage { height: 150px; cursor: crosshair; touch-action: none; }
+  .mlab-ball {
+    position: absolute; top: 50%; left: 0; width: 56px; height: 56px;
+    margin: -28px 0 0 -28px; border-radius: 50%;
+    background: #0071e3;
+    box-shadow: 0 6px 18px rgba(0, 113, 227, 0.35);
+    will-change: transform;
+  }
+  .mlab-slider-row { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; margin-top: 18px; }
+  .mlab-slider-row label {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: #1d1d1f; font-family: var(--font-display);
+  }
+  .mlab-slider-row input[type="range"] { width: 150px; accent-color: #0071e3; }
+  .mlab-slider-row output {
+    font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, monospace);
+    font-size: 12.5px; color: #6e6e73; min-width: 3.2em; font-variant-numeric: tabular-nums;
+  }
+
+  /* Demo E — flick carousel */
+  .mlab-carousel { touch-action: pan-y; cursor: grab; padding: 28px 0; }
+  .mlab-carousel.is-grabbing { cursor: grabbing; }
+  .mlab-track { display: flex; gap: 16px; padding: 0 28px; width: max-content; will-change: transform; }
+  .mlab-card {
+    width: 240px; height: 150px; border-radius: 14px; background: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+    padding: 18px; flex: none;
+  }
+  .mlab-card .mlab-card-idx {
+    font-family: var(--font-display); font-size: 28px; font-weight: 600;
+    color: #d2d2d7; letter-spacing: -0.01em;
+  }
+  .mlab-card.is-target .mlab-card-idx { color: #0071e3; }
+  .mlab-card .mlab-bar { height: 9px; border-radius: 5px; background: #e8e8ed; margin-top: 10px; }
+  .mlab-card .mlab-bar--mid { width: 70%; }
+
+  /* Demo F — rubber band groove */
+  .mlab-groove-stage { height: 170px; }
+  .mlab-groove {
+    position: absolute; left: 8%; right: 8%; top: 50%; height: 10px;
+    margin-top: -5px; border-radius: 5px; background: #e8e8ed;
+  }
+  .mlab-knob {
+    position: absolute; top: 50%; left: 8%; width: 64px; height: 64px;
+    margin: -32px 0 0 -32px; border-radius: 50%;
+    background: #ffffff; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+    cursor: grab; touch-action: none; will-change: transform;
+  }
+  .mlab-knob:active { cursor: grabbing; }
+  .mlab-knob::after {
+    content: ""; position: absolute; inset: 24px; border-radius: 50%; background: #0071e3;
+  }
+  .mlab-finger {
+    position: absolute; top: 18%; bottom: 18%; left: 0; width: 2px;
+    background: #a1a1a6; opacity: 0; will-change: transform, opacity;
+  }
+
+  /* Demo G — sheet in device mock */
+  .mlab-sheet-wrap { display: grid; grid-template-columns: auto 1fr; gap: 36px; align-items: start; }
+  .mlab-sheet-side { padding-top: 48px; }
+  .mlab-phone {
+    width: 280px; height: 560px; border-radius: 44px;
+    background: #1d1d1f; padding: 12px; margin: 0 auto;
+  }
+  .mlab-screen {
+    position: relative; width: 100%; height: 100%;
+    border-radius: 34px; background: #f5f5f7; overflow: hidden;
+  }
+  .mlab-screen-art { padding: 26px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .mlab-screen-art .mlab-bar { height: 12px; border-radius: 6px; background: #e8e8ed; }
+  .mlab-screen-art .mlab-bar--wide { width: 84%; }
+  .mlab-screen-art .mlab-bar--mid { width: 62%; }
+  .mlab-screen-art .mlab-tile { height: 92px; border-radius: 14px; background: #e8e8ed; margin-top: 8px; }
+  .mlab-sheet {
+    position: absolute; left: 0; right: 0; top: 0; height: 100%;
+    border-radius: 22px 22px 0 0; background: #ffffff;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.14);
+    cursor: grab; touch-action: none; will-change: transform;
+    padding: 10px 18px 18px;
+    transform: translateY(78%); /* no-JS resting state = peek detent */
+  }
+  .mlab-sheet.is-grabbing { cursor: grabbing; }
+  .mlab-sheet-handle { width: 40px; height: 5px; border-radius: 3px; background: #d2d2d7; margin: 0 auto 16px; }
+  .mlab-sheet .mlab-bar { height: 10px; border-radius: 5px; background: #f0f0f2; margin-bottom: 10px; }
+  .mlab-sheet .mlab-bar--wide { width: 78%; }
+  .mlab-sheet .mlab-bar--mid { width: 58%; }
+  .mlab-sheet .mlab-bar--narrow { width: 40%; }
+  .mlab-sheet-side p { font-size: 15px; color: #6e6e73; line-height: 1.6; margin: 0 0 16px; max-width: 46ch; }
+  .mlab-sheet-side p strong { color: #1d1d1f; font-weight: 600; }
+
+  /* Demo H — reduced motion toggle */
+  .mlab-switch {
+    position: relative; width: 51px; height: 31px; border-radius: 980px;
+    background: #d2d2d7; border: 0; cursor: pointer; flex: none;
+    transition: background var(--duration-sm) var(--ease-apple-out);
+  }
+  .mlab-switch::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px;
+    border-radius: 50%; background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: transform var(--duration-sm) var(--ease-apple-out);
+  }
+  .mlab-switch[aria-checked="true"] { background: #34c759; }
+  .mlab-switch[aria-checked="true"]::after { transform: translateX(20px); }
+  .mlab-switch-row { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+  .mlab-switch-row span { font-size: 15px; color: #1d1d1f; }
+  .mlab-reduce-stage { height: 130px; }
+  .mlab-reduce-box {
+    position: absolute; top: 50%; left: 40px; width: 52px; height: 52px;
+    margin-top: -26px; border-radius: 12px; background: #0071e3; will-change: transform, opacity;
+  }
+
+  .mlab-values-table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+  .mlab-values-table th, .mlab-values-table td {
+    text-align: left; padding: 12px 16px; font-size: 14px;
+    border-bottom: 1px solid var(--apple-divider);
+  }
+  .mlab-values-table th {
+    font-family: var(--font-display); font-weight: 600; color: #6e6e73;
+    font-size: 12px;
+  }
+  .mlab-values-table td { color: #1d1d1f; font-variant-numeric: tabular-nums; }
+  .mlab-values-table td.mono { font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, monospace); font-size: 13px; }
+
+  @media (max-width: 734px) {
+    .mlab-ab { grid-template-columns: 1fr; }
+    .mlab-sheet-wrap { grid-template-columns: 1fr; }
+    .mlab-phone { width: 240px; height: 480px; }
+    .mlab-reveal-row { grid-template-columns: 1fr; }
+    .mlab-space-ghost {
+    position: absolute; top: 20px; bottom: 20px; right: 20px; width: 46%;
+    border: 1.5px dashed #d2d2d7; border-radius: 12px;
+  }
+  .mlab-space-hint { position: static; transform: none; max-width: none; padding: 20px 24px 0; }
+    .mlab-fig { padding: 24px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="apple-nav"><div class="apple-nav-inner">
+  <a href="../../index.html" style="font-weight:600;">Sky Skills</a>
+  <div>
+    <a href="#layer1"><span class="lang-en">Page motion</span><span class="lang-zh">页面动效</span></a>
+    <a href="#layer2"><span class="lang-en">Gesture feel</span><span class="lang-zh">手势手感</span></a>
+    <a href="#reduced"><span class="lang-en">Reduced motion</span><span class="lang-zh">减动效</span></a>
+    <a href="diagrams.html"><span class="lang-en">Diagrams</span><span class="lang-zh">图示</span></a>
+    <a href="index.html"><span class="lang-en">Demo</span><span class="lang-zh">主 demo</span></a>
+  </div>
+  <div style="display:flex; gap:16px; align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+    <a class="apple-link" href="../../index.html"><span class="lang-en">All skills</span><span class="lang-zh">全部 skill</span></a>
+  </div>
+</div></nav>
+
+<header style="padding:96px 0 64px;">
+  <div class="apple-container apple-container--wide">
+    <span class="mlab-kicker"><span class="lang-en">apple-design · motion lab</span><span class="lang-zh">apple-design · 交互手感实验室</span></span>
+    <h1 style="font-family:var(--font-display); font-size:52px; font-weight:600; letter-spacing:-0.015em; color:#1d1d1f; margin:10px 0 16px; max-width:780px;">
+      <span class="lang-en">Motion you can grab.</span>
+      <span class="lang-zh">抓得住的动效。</span>
+    </h1>
+    <p class="mlab-intro">
+      <span class="lang-en">Every figure on this page is operable — drag it, flick it, interrupt it mid-flight. The system behind them is two layers with one hard boundary: page motion uses easing curves and never bounces; springs live only inside gesture-driven components. Zero dependencies, from WWDC's fluid-interfaces playbook.</span>
+      <span class="lang-zh">这一页的每张图都能上手——拖它、甩它、飞行途中抓住它。背后是带一条硬边界的两层体系：页面动效只用缓动曲线、永不弹跳；弹簧只住在手势驱动的组件里。零依赖，源自 WWDC 流体界面方法。</span>
+    </p>
+  </div>
+</header>
+
+<!-- ===================== HERO: two-tier system ===================== -->
+<section style="padding:0 0 72px;">
+  <div class="apple-container apple-container--hero">
+    <figure class="mlab-fig" style="padding:var(--space-5) var(--space-6);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 460" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif" role="img" aria-label="Two-tier motion system: layer one page motion with easing, layer two gesture components with springs, one boundary rule, one shared reduced-motion gate">
+        <defs>
+          <filter id="mlab-soft" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000000" flood-opacity="0.10"/>
+          </filter>
+          <marker id="mlab-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#0071e3"/>
+          </marker>
+        </defs>
+
+        <rect x="0" y="0" width="1140" height="460" fill="#ffffff"/>
+
+        <!-- tier 1 -->
+        <rect x="40" y="46" width="470" height="270" rx="16" fill="#f5f5f7"/>
+        <text x="72" y="90" font-size="13" font-weight="600" fill="#86868b">Layer 1 · Page motion</text>
+        <text x="72" y="118" font-size="20" font-weight="600" fill="#1d1d1f">Easing curves, fixed durations</text>
+
+        <g filter="url(#mlab-soft)">
+          <rect x="72" y="142" width="192" height="64" rx="12" fill="#ffffff"/>
+        </g>
+        <text x="88" y="169" font-size="13.5" font-weight="600" fill="#1d1d1f">Reveal on scroll</text>
+        <text x="88" y="189" font-size="11.5" fill="#6e6e73">700ms · stagger 80ms</text>
+
+        <g filter="url(#mlab-soft)">
+          <rect x="286" y="142" width="192" height="64" rx="12" fill="#ffffff"/>
+        </g>
+        <text x="302" y="169" font-size="13.5" font-weight="600" fill="#1d1d1f">Hover / tab states</text>
+        <text x="302" y="189" font-size="11.5" fill="#6e6e73">240ms ease-out</text>
+
+        <g filter="url(#mlab-soft)">
+          <rect x="72" y="222" width="192" height="64" rx="12" fill="#ffffff"/>
+        </g>
+        <text x="88" y="249" font-size="13.5" font-weight="600" fill="#1d1d1f">Press feedback</text>
+        <text x="88" y="269" font-size="11.5" fill="#6e6e73">:active · instant</text>
+
+        <g filter="url(#mlab-soft)">
+          <rect x="286" y="222" width="192" height="64" rx="12" fill="#ffffff"/>
+        </g>
+        <text x="302" y="249" font-size="13.5" font-weight="600" fill="#1d1d1f">Enter = exit path</text>
+        <text x="302" y="269" font-size="11.5" fill="#6e6e73">mirrored easing</text>
+
+        <!-- boundary -->
+        <line x1="570" y1="40" x2="570" y2="330" stroke="#a1a1a6" stroke-width="1.5" stroke-dasharray="6 6"/>
+        <g filter="url(#mlab-soft)">
+          <rect x="470" y="330" width="200" height="42" rx="21" fill="#1d1d1f"/>
+        </g>
+        <text x="570" y="356" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Springs never enter</text>
+
+        <!-- tier 2 -->
+        <rect x="630" y="46" width="470" height="270" rx="16" fill="#f5f5f7"/>
+        <text x="662" y="90" font-size="13" font-weight="600" fill="#86868b">Layer 2 · Gesture components</text>
+        <text x="662" y="118" font-size="20" font-weight="600" fill="#1d1d1f">Springs, velocity, interruption</text>
+
+        <!-- spring curve: the single blue story -->
+        <g filter="url(#mlab-soft)">
+          <rect x="662" y="142" width="406" height="90" rx="12" fill="#ffffff"/>
+        </g>
+        <path d="M 680 210 C 720 210, 726 160, 762 160 C 800 160, 800 196, 836 196 C 868 196, 868 178, 900 178 C 932 178, 938 184, 1050 184"
+              fill="none" stroke="#0071e3" stroke-width="2.5" marker-end="url(#mlab-arrow)"/>
+        <circle cx="680" cy="210" r="5" fill="#0071e3"/>
+        <text x="680" y="158" font-size="11.5" fill="#6e6e73">grab</text>
+        <text x="990" y="172" font-size="11.5" fill="#6e6e73">settle</text>
+
+        <g filter="url(#mlab-soft)">
+          <rect x="662" y="248" width="124" height="46" rx="12" fill="#ffffff"/>
+        </g>
+        <text x="724" y="276" font-size="12.5" font-weight="600" fill="#1d1d1f" text-anchor="middle">1:1 tracking</text>
+
+        <g filter="url(#mlab-soft)">
+          <rect x="802" y="248" width="124" height="46" rx="12" fill="#ffffff"/>
+        </g>
+        <text x="864" y="276" font-size="12.5" font-weight="600" fill="#1d1d1f" text-anchor="middle">velocity handoff</text>
+
+        <g filter="url(#mlab-soft)">
+          <rect x="942" y="248" width="126" height="46" rx="12" fill="#ffffff"/>
+        </g>
+        <text x="1005" y="276" font-size="12.5" font-weight="600" fill="#1d1d1f" text-anchor="middle">rubber-band</text>
+
+        <!-- shared gate -->
+        <rect x="40" y="396" width="1060" height="44" rx="12" fill="#f5f5f7"/>
+        <text x="570" y="423" font-size="13" font-weight="600" fill="#86868b" text-anchor="middle">One reduced-motion gate — CSS handled globally · every JS spring checks matchMedia before it glides</text>
+        <line x1="290" y1="316" x2="290" y2="396" stroke="#d2d2d7" stroke-width="1.5"/>
+        <line x1="860" y1="316" x2="860" y2="396" stroke="#d2d2d7" stroke-width="1.5"/>
+      </svg>
+      <figcaption class="mlab-cap">
+        <span class="lang-en"><strong>The whole system in one picture.</strong> Layer 1 animates the page with easing tokens and never overshoots. Layer 2 owns everything a finger can grab — and the blue spring path is the only place bounce is allowed to exist. Both layers drain into a single reduced-motion gate.</span>
+        <span class="lang-zh"><strong>一张图说完整个体系。</strong>第一层用缓动 token 驱动页面，永不过冲；第二层拥有一切手指能抓住的东西——蓝色弹簧路径是弹跳唯一被允许存在的地方。两层最终汇入同一道减动效之门。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== LAYER 1 ===================== -->
+<section id="layer1" class="apple-section apple-section--alt" style="padding:80px 0;">
+  <div class="apple-container apple-container--wide">
+    <h2 style="font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-0.01em; color:#1d1d1f; margin:0;">
+      <span class="lang-en">Layer 1 — page motion</span>
+      <span class="lang-zh">第一层 — 页面动效</span>
+    </h2>
+    <p class="mlab-section-note">
+      <span class="lang-en">Entrances, hovers, presses. Everything here runs on CSS easing tokens — no springs, no physics, no surprises. The craft is in latency: feedback lands on pointer-down, and panels leave the way they came.</span>
+      <span class="lang-zh">入场、悬停、按压。这一层全部跑在 CSS 缓动 token 上——没有弹簧、没有物理、没有意外。工夫在延迟上：反馈落在按下的瞬间，面板从哪来回哪去。</span>
+    </p>
+
+    <!-- Demo A -->
+    <figure class="mlab-fig mlab-fig--onalt">
+      <h3><span class="lang-en">01 · Press feedback — feel the dead button</span><span class="lang-zh">01 · 按压反馈 — 感受一下"死"按钮</span></h3>
+      <p class="mlab-fig-lede">
+        <span class="lang-en">Press and hold each button. The left one responds the instant your finger lands; the right one waits for release plus 220ms — the moment lag appears, directness falls off a cliff.</span>
+        <span class="lang-zh">按住两个按钮各试一次。左边在手指落下的瞬间就有反应；右边等你松手再等 220ms——延迟一出现，"直接操纵"的感觉立刻消失。</span>
+      </p>
+      <div class="mlab-ab">
+        <div class="mlab-ab-cell">
+          <button type="button" class="mlab-specimen mlab-specimen--live"><span class="lang-en">Instant</span><span class="lang-zh">即时反馈</span></button>
+          <p><span class="lang-en">Feedback on <strong>pointer-down</strong>. 100ms scale, nothing waits.</span><span class="lang-zh">反馈在 <strong>pointer-down</strong>。100ms 缩放，不等任何事。</span></p>
+        </div>
+        <div class="mlab-ab-cell">
+          <button type="button" class="mlab-specimen mlab-specimen--dead" id="mlab-dead-btn"><span class="lang-en">Release + 220ms</span><span class="lang-zh">松手 + 220ms</span></button>
+          <p><span class="lang-en">Feedback only after release, artificially delayed. This is what debounces and tap delays feel like.</span><span class="lang-zh">反馈只在松手后，还被人为延迟。防抖和 tap delay 就是这种手感。</span></p>
+        </div>
+      </div>
+      <pre class="mlab-code">.apple-button:active {
+  transform: scale(0.97);        /* lands the moment the pointer does */
+  transition: transform 100ms var(--ease-apple-out);
+}</pre>
+      <figcaption class="mlab-cap">
+        <span class="lang-en"><strong>Rule:</strong> feedback belongs to pointer-down. Anything on the input path that is not essential — debounce, tap delay, transition wait — is a regression.</span>
+        <span class="lang-zh"><strong>规则：</strong>反馈属于 pointer-down。输入路径上一切非必要的东西——防抖、tap delay、过渡等待——都是退步。</span>
+      </figcaption>
+    </figure>
+
+    <!-- Demo B -->
+    <figure class="mlab-fig mlab-fig--onalt">
+      <h3><span class="lang-en">02 · Reveal on scroll — easing, stagger, no bounce</span><span class="lang-zh">02 · 滚动浮现 — 缓动 + 错峰，不弹</span></h3>
+      <p class="mlab-fig-lede">
+        <span class="lang-en">The standard apple-design entrance: 700ms ease-out, 80ms sibling stagger, opacity plus 24px of travel. Replay it — notice it settles without overshoot.</span>
+        <span class="lang-zh">标准的 apple-design 入场：700ms ease-out、兄弟元素错峰 80ms、透明度 + 24px 位移。重放一次——注意它落定时没有过冲。</span>
+      </p>
+      <div class="mlab-controls">
+        <button type="button" class="mlab-pill" id="mlab-replay"><span class="lang-en">Replay</span><span class="lang-zh">重放</span></button>
+      </div>
+      <div class="mlab-stage">
+        <div class="mlab-reveal-row" id="mlab-reveal-row">
+          <div class="mlab-reveal-card"><div class="mlab-chip mlab-chip--blue"></div><h4>Tokens</h4><p><span class="lang-en">One easing pair, three durations.</span><span class="lang-zh">一对缓动，三档时长。</span></p></div>
+          <div class="mlab-reveal-card"><div class="mlab-chip"></div><h4>Stagger</h4><p><span class="lang-en">80ms between siblings, ≤5 per group.</span><span class="lang-zh">兄弟间 80ms，每组 ≤5。</span></p></div>
+          <div class="mlab-reveal-card"><div class="mlab-chip"></div><h4>Budget</h4><p><span class="lang-en">2–3 animated nodes per page.</span><span class="lang-zh">每页 2–3 个动画节点。</span></p></div>
+        </div>
+      </div>
+      <pre class="mlab-code">e.target.style.transition =
+  `opacity 700ms cubic-bezier(0.25,1,0.5,1) ${i * 80}ms,
+   transform 700ms cubic-bezier(0.25,1,0.5,1) ${i * 80}ms`;  /* IntersectionObserver entrance */</pre>
+      <figcaption class="mlab-cap">
+        <span class="lang-en"><strong>Rule:</strong> entrances never overshoot. Bounce belongs to gestures with momentum, and a card fading in has none.</span>
+        <span class="lang-zh"><strong>规则：</strong>入场永不过冲。弹跳属于带动量的手势，而淡入的卡片没有动量。</span>
+      </figcaption>
+    </figure>
+
+    <!-- Demo C -->
+    <figure class="mlab-fig mlab-fig--onalt">
+      <h3><span class="lang-en">03 · Spatial consistency — leave the way you came</span><span class="lang-zh">03 · 空间一致性 — 从哪来，回哪去</span></h3>
+      <p class="mlab-fig-lede">
+        <span class="lang-en">A panel that slides in from the right must dismiss to the right. Play both versions — the broken one exits downward, and the room stops making sense.</span>
+        <span class="lang-zh">从右侧滑入的面板必须向右退出。两个版本各播一次——坏的那个向下退场，空间关系立刻断裂。</span>
+      </p>
+      <div class="mlab-controls">
+        <button type="button" class="mlab-pill" id="mlab-space-good"><span class="lang-en">✓ Same path</span><span class="lang-zh">✓ 同路径</span></button>
+        <button type="button" class="mlab-pill" id="mlab-space-bad"><span class="lang-en">✗ Right in, bottom out</span><span class="lang-zh">✗ 右进下出</span></button>
+      </div>
+      <div class="mlab-stage mlab-space-stage">
+        <p class="mlab-space-hint"><span class="lang-en">The panel anchors to the right edge — its home. Exit through the floor and it no longer has one.</span><span class="lang-zh">面板锚定在右缘——那是它的家。从地板退场，它就没有家了。</span></p>
+        <div class="mlab-space-ghost" aria-hidden="true"></div>
+        <div class="mlab-space-panel" id="mlab-space-panel" aria-hidden="true">
+          <div class="mlab-bar mlab-bar--wide"></div>
+          <div class="mlab-bar mlab-bar--mid"></div>
+          <div class="mlab-bar mlab-bar--narrow"></div>
+        </div>
+      </div>
+      <pre class="mlab-code">/* in from the right … */  transform: translateX(0);
+/* … out to the right */   transform: translateX(calc(100% + 40px));
+/* mirror the easing so the return path matches the way in */</pre>
+      <figcaption class="mlab-cap">
+        <span class="lang-en"><strong>Rule:</strong> if something disappears one way, it must emerge from where it went. Anchor popovers to their trigger with <code>transform-origin</code> for the same reason.</span>
+        <span class="lang-zh"><strong>规则：</strong>东西从哪个方向消失，就该从哪里回来。popover 用 <code>transform-origin</code> 锚定触发元素，也是同一个道理。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== LAYER 2 ===================== -->
+<section id="layer2" style="padding:80px 0;">
+  <div class="apple-container apple-container--wide">
+    <h2 style="font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-0.01em; color:#1d1d1f; margin:0;">
+      <span class="lang-en">Layer 2 — gesture feel</span>
+      <span class="lang-zh">第二层 — 手势手感</span>
+    </h2>
+    <p class="mlab-section-note">
+      <span class="lang-en">Everything below tracks your pointer 1:1, hands your velocity to a spring on release, and can be grabbed back mid-flight. This is where fluid comes from.</span>
+      <span class="lang-zh">下面每个例子都 1:1 跟着指针走，松手时把你的速度交给弹簧，飞行途中随时能被抓回来。"流畅"就是从这里来的。</span>
+    </p>
+
+    <div style="display:flex; flex-wrap:wrap; gap:40px 72px; margin:0 0 44px;">
+      <div class="apple-stat" style="margin:0;">
+        <div class="apple-stat-number" style="font-size:72px;">30</div>
+        <div class="apple-stat-label"><span class="lang-en">lines for the whole spring</span><span class="lang-zh">行代码实现整个弹簧</span></div>
+      </div>
+      <div class="apple-stat" style="margin:0;">
+        <div class="apple-stat-number" style="font-size:72px;">0</div>
+        <div class="apple-stat-label"><span class="lang-en">dependencies, plain rAF</span><span class="lang-zh">依赖，纯 rAF</span></div>
+      </div>
+      <div class="apple-stat" style="margin:0;">
+        <div class="apple-stat-number" style="font-size:72px;">0.998</div>
+        <div class="apple-stat-label"><span class="lang-en">deceleration rate Apple ships</span><span class="lang-zh">Apple 出货的减速率</span></div>
+      </div>
+    </div>
+
+    <!-- Demo D -->
+    <figure class="mlab-fig">
+      <h3><span class="lang-en">04 · Spring playground — interrupt it mid-flight</span><span class="lang-zh">04 · 弹簧试验场 — 飞行途中打断它</span></h3>
+      <p class="mlab-fig-lede">
+        <span class="lang-en">Click anywhere in the strip and the ball springs there. Click again before it settles: the new flight starts from the current position <em>and</em> the current velocity — no jump, no brick wall. Then try Apple's shipped parameter pairs.</span>
+        <span class="lang-zh">在条带里任意位置点击，小球弹簧过去。落定前再点一次：新的飞行从当前位置<em>和</em>当前速度出发——不跳变、不撞墙。然后试试 Apple 出货的参数组。</span>
+      </p>
+      <div class="mlab-controls">
+        <button type="button" class="mlab-pill mlab-preset is-on" data-damping="1" data-response="0.4"><span class="lang-en">Move · 1.0 / 0.4</span><span class="lang-zh">归位 · 1.0 / 0.4</span></button>
+        <button type="button" class="mlab-pill mlab-preset" data-damping="0.8" data-response="0.4"><span class="lang-en">Rotate · 0.8 / 0.4</span><span class="lang-zh">旋转 · 0.8 / 0.4</span></button>
+        <button type="button" class="mlab-pill mlab-preset" data-damping="0.8" data-response="0.3"><span class="lang-en">Sheet · 0.8 / 0.3</span><span class="lang-zh">抽屉 · 0.8 / 0.3</span></button>
+      </div>
+      <div class="mlab-stage mlab-spring-stage" id="mlab-spring-stage">
+        <div class="mlab-ball" id="mlab-ball"></div>
+      </div>
+      <div class="mlab-slider-row">
+        <label><span class="lang-en">damping</span><span class="lang-zh">阻尼</span>
+          <input type="range" id="mlab-damping" min="0.3" max="1" step="0.05" value="1">
+          <output id="mlab-damping-out">1.00</output>
+        </label>
+        <label><span class="lang-en">response</span><span class="lang-zh">响应</span>
+          <input type="range" id="mlab-response" min="0.15" max="0.8" step="0.05" value="0.4">
+          <output id="mlab-response-out">0.40s</output>
+        </label>
+      </div>
+      <div class="mlab-readout" id="mlab-spring-readout"></div>
+      <pre class="mlab-code">const w0 = (2 * Math.PI) / response;               // Apple's two designer params
+v += (-w0*w0*(x - target) - 2*damping*w0*v) * dt;  // semi-implicit Euler
+x += v * dt;                                       // retarget() = interruption</pre>
+      <figcaption class="mlab-cap">
+        <span class="lang-en"><strong>Rule:</strong> always animate from the presentation value. Reading the live position and velocity is what makes interruption seamless — a spring has no fixed duration to wait out.</span>
+        <span class="lang-zh"><strong>规则：</strong>永远从呈现值起动画。读取实时位置和速度，打断才没有接缝——弹簧没有固定时长，不需要等它播完。</span>
+      </figcaption>
+    </figure>
+
+    <!-- Demo E -->
+    <figure class="mlab-fig">
+      <h3><span class="lang-en">05 · Flick carousel — velocity handoff + momentum projection</span><span class="lang-zh">05 · 甩动轮播 — 速度交接 + 动量投射</span></h3>
+      <p class="mlab-fig-lede">
+        <span class="lang-en">Drag the row and let go with a flick. The release velocity projects a landing point — <code>(v/1000)·d/(1−d)</code> — and the track snaps to the card nearest that projection, not nearest your finger. The blue index is the chosen target.</span>
+        <span class="lang-zh">拖动卡片行，然后甩手放开。松手速度投射出滑行落点——<code>(v/1000)·d/(1−d)</code>——轨道吸附到离<em>落点</em>最近的卡片，而不是离手指最近的。蓝色编号就是被选中的目标。</span>
+      </p>
+      <div class="mlab-stage mlab-carousel" id="mlab-carousel">
+        <div class="mlab-track" id="mlab-track">
+          <div class="mlab-card"><div class="mlab-card-idx">01</div><div class="mlab-bar mlab-bar--wide"></div><div class="mlab-bar mlab-bar--mid"></div></div>
+          <div class="mlab-card"><div class="mlab-card-idx">02</div><div class="mlab-bar mlab-bar--wide"></div><div class="mlab-bar mlab-bar--mid"></div></div>
+          <div class="mlab-card"><div class="mlab-card-idx">03</div><div class="mlab-bar mlab-bar--wide"></div><div class="mlab-bar mlab-bar--mid"></div></div>
+          <div class="mlab-card"><div class="mlab-card-idx">04</div><div class="mlab-bar mlab-bar--wide"></div><div class="mlab-bar mlab-bar--mid"></div></div>
+          <div class="mlab-card"><div class="mlab-card-idx">05</div><div class="mlab-bar mlab-bar--wide"></div><div class="mlab-bar mlab-bar--mid"></div></div>
+          <div class="mlab-card"><div class="mlab-card-idx">06</div><div class="mlab-bar mlab-bar--wide"></div><div class="mlab-bar mlab-bar--mid"></div></div>
+        </div>
+      </div>
+      <div class="mlab-readout" id="mlab-carousel-readout"></div>
+      <pre class="mlab-code">const landing = current + project(releaseVelocity);   // where the flick is going
+const target  = nearestSnap(landing);                 // choose from the projection
+spring(current, target, releaseVelocity, apply);      // then hand off the velocity</pre>
+      <figcaption class="mlab-cap">
+        <span class="lang-en"><strong>Rule:</strong> take a small input and make a big output — project the momentum, choose the target from the projection, then hand the velocity to the spring.</span>
+        <span class="lang-zh"><strong>规则：</strong>小输入，大输出——先投射动量，从落点选目标，再把速度交给弹簧。</span>
+      </figcaption>
+    </figure>
+
+    <!-- Demo F -->
+    <figure class="mlab-fig">
+      <h3><span class="lang-en">06 · Rubber-band — soft boundaries</span><span class="lang-zh">06 · 橡皮筋 — 柔性边界</span></h3>
+      <p class="mlab-fig-lede">
+        <span class="lang-en">Drag the knob past either end of the groove. The thin gray line is your actual pointer; the knob falls progressively behind it — resistance that grows with overshoot. Release and it springs home with your velocity.</span>
+        <span class="lang-zh">把旋钮拖出凹槽两端。细灰线是你指针的真实位置；旋钮渐渐落在它后面——阻力随越界量增长。松手后带着你的速度弹回边界。</span>
+      </p>
+      <div class="mlab-stage mlab-groove-stage" id="mlab-groove-stage">
+        <div class="mlab-groove"></div>
+        <div class="mlab-finger" id="mlab-finger"></div>
+        <div class="mlab-knob" id="mlab-knob"></div>
+      </div>
+      <div class="mlab-readout" id="mlab-groove-readout"></div>
+      <pre class="mlab-code">function rubberband(overshoot, dimension, c = 0.55) {
+  return (overshoot * dimension * c) / (dimension + c * Math.abs(overshoot));
+}   /* a hard stop reads as “frozen”; growing resistance reads as “nothing more here” */</pre>
+      <figcaption class="mlab-cap">
+        <span class="lang-en"><strong>Rule:</strong> real things slow before they stop. Resistance that grows with overshoot says “responsive, but there is nothing more here”.</span>
+        <span class="lang-zh"><strong>规则：</strong>真实的东西先减速再停下。随越界增长的阻力在说："我有反应，但这里没有更多了"。</span>
+      </figcaption>
+    </figure>
+
+    <!-- Demo G -->
+    <figure class="mlab-fig">
+      <h3><span class="lang-en">07 · Sheet — velocity decides, not position</span><span class="lang-zh">07 · 抽屉 — 速度说了算，不是位置</span></h3>
+      <p class="mlab-fig-lede">
+        <span class="lang-en">The classic bottom sheet, with Apple's shipped drawer parameters. Two things to try, described on the right.</span>
+        <span class="lang-zh">经典的底部抽屉，用的是 Apple 抽屉出货参数。右边写了两件值得一试的事。</span>
+      </p>
+      <div class="mlab-sheet-wrap">
+        <div class="mlab-phone">
+          <div class="mlab-screen">
+            <div class="mlab-screen-art" aria-hidden="true">
+              <div class="mlab-bar mlab-bar--wide"></div>
+              <div class="mlab-bar mlab-bar--mid"></div>
+              <div class="mlab-tile"></div>
+              <div class="mlab-bar mlab-bar--wide"></div>
+              <div class="mlab-bar mlab-bar--mid"></div>
+            </div>
+            <div class="mlab-sheet" id="mlab-sheet">
+              <div class="mlab-sheet-handle"></div>
+              <div class="mlab-bar mlab-bar--wide"></div>
+              <div class="mlab-bar mlab-bar--mid"></div>
+              <div class="mlab-bar mlab-bar--narrow"></div>
+              <div class="mlab-bar mlab-bar--wide"></div>
+              <div class="mlab-bar mlab-bar--mid"></div>
+            </div>
+          </div>
+        </div>
+        <div class="mlab-sheet-side">
+          <p><span class="lang-en"><strong>Drag the sheet.</strong> Release past halfway while flicking downward and it still closes — the release decision reads the <strong>sign of your velocity</strong>, not where the sheet happens to be.</span><span class="lang-zh"><strong>拖这张抽屉。</strong>拖过一半但往下甩着松手，它照样关闭——松手判定读的是<strong>速度的方向</strong>，不是抽屉恰好在哪。</span></p>
+          <p><span class="lang-en"><strong>Grab it mid-flight.</strong> While it glides, catch it again: it follows from its current on-screen position. Apple ships this pair as damping 0.8, response 0.3.</span><span class="lang-zh"><strong>飞行途中抓住它。</strong>滑行时再抓一次：它从当前屏上位置继续跟手。Apple 给抽屉出货的参数是阻尼 0.8、响应 0.3。</span></p>
+          <div class="mlab-readout" id="mlab-sheet-readout"></div>
+        </div>
+      </div>
+      <pre class="mlab-code">const goOpen = Math.abs(v) > 150 ? v < 0            // fast: the flick direction wins
+                                 : y < travel / 2;  // slow: nearest detent
+spring(y, goOpen ? OPEN : PEEK, v, apply, { damping: 0.8, response: 0.3 });</pre>
+      <figcaption class="mlab-cap">
+        <span class="lang-en"><strong>Rule:</strong> at release, the flick's direction outranks the sheet's position — reading position alone makes fast gestures feel ignored.</span>
+        <span class="lang-zh"><strong>规则：</strong>松手时，甩的方向优先于抽屉的位置——只看位置，快手势会觉得被无视。</span>
+      </figcaption>
+    </figure>
+
+    <figure class="mlab-fig">
+      <h3><span class="lang-en">Apple's shipped values</span><span class="lang-zh">Apple 的出货参数</span></h3>
+      <table class="mlab-values-table">
+        <thead><tr>
+          <th><span class="lang-en">Interaction</span><span class="lang-zh">交互</span></th>
+          <th>damping</th><th>response</th>
+          <th><span class="lang-en">Why</span><span class="lang-zh">为什么</span></th>
+        </tr></thead>
+        <tbody>
+          <tr><td><span class="lang-en">Move / reposition</span><span class="lang-zh">移动 / 归位</span></td><td class="mono">1.0</td><td class="mono">0.4</td><td><span class="lang-en">no momentum in the gesture → no overshoot</span><span class="lang-zh">手势不带动量 → 不许过冲</span></td></tr>
+          <tr><td><span class="lang-en">Rotation</span><span class="lang-zh">旋转</span></td><td class="mono">0.8</td><td class="mono">0.4</td><td><span class="lang-en">spin carries momentum → a little bounce</span><span class="lang-zh">旋转带动量 → 一点回弹</span></td></tr>
+          <tr><td><span class="lang-en">Drawer / sheet</span><span class="lang-zh">抽屉 / sheet</span></td><td class="mono">0.8</td><td class="mono">0.3</td><td><span class="lang-en">flicked shut → snappier, slight give</span><span class="lang-zh">被甩上 → 更快落定，略有余韵</span></td></tr>
+        </tbody>
+      </table>
+      <figcaption class="mlab-cap">
+        <span class="lang-en"><strong>The rule behind the table:</strong> bounce is earned by momentum. A menu that faded in has none; a card you flicked has plenty.</span>
+        <span class="lang-zh"><strong>表格背后的规则：</strong>弹跳是动量挣来的。淡入的菜单没有动量；被你甩出去的卡片有的是。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== REDUCED MOTION ===================== -->
+<section id="reduced" class="apple-section apple-section--alt" style="padding:80px 0;">
+  <div class="apple-container apple-container--wide">
+    <h2 style="font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-0.01em; color:#1d1d1f; margin:0;">
+      <span class="lang-en">One reduced-motion gate</span>
+      <span class="lang-zh">一道减动效之门</span>
+    </h2>
+    <p class="mlab-section-note">
+      <span class="lang-en">CSS is handled globally by apple.css. But rAF springs are JavaScript — the stylesheet cannot stop them. Every spring call on this page checks the same gate first. Flip the switch: every demo above obeys it, live.</span>
+      <span class="lang-zh">CSS 由 apple.css 全局兜底。但 rAF 弹簧是 JavaScript——样式表拦不住它。这一页每次弹簧调用都先过同一道门。拨动开关：上面所有 demo 立刻全部服从。</span>
+    </p>
+
+    <!-- Demo H -->
+    <figure class="mlab-fig mlab-fig--onalt">
+      <h3><span class="lang-en">08 · The gate, demonstrated</span><span class="lang-zh">08 · 这道门，现场演示</span></h3>
+      <div class="mlab-switch-row">
+        <button type="button" class="mlab-switch" id="mlab-reduce-switch" role="switch" aria-checked="false" aria-label="Simulate prefers-reduced-motion"></button>
+        <span><span class="lang-en">Simulate <code>prefers-reduced-motion: reduce</code></span><span class="lang-zh">模拟 <code>prefers-reduced-motion: reduce</code></span></span>
+      </div>
+      <div class="mlab-controls">
+        <button type="button" class="mlab-pill" id="mlab-reduce-play"><span class="lang-en">Send the box across</span><span class="lang-zh">让方块过去</span></button>
+      </div>
+      <div class="mlab-stage mlab-reduce-stage" id="mlab-reduce-stage">
+        <div class="mlab-reduce-box" id="mlab-reduce-box"></div>
+      </div>
+      <div class="mlab-readout" id="mlab-reduce-readout"></div>
+      <figcaption class="mlab-cap">
+        <span class="lang-en"><strong>Reduced motion ≠ no feedback.</strong> Dragging still tracks 1:1 — that is direct manipulation, not animation. What disappears is the glide: springs and projections collapse to a short cross-fade at the destination. The real OS setting works here too, not just the switch.</span>
+        <span class="lang-zh"><strong>减动效 ≠ 没反馈。</strong>拖拽仍然 1:1 跟手——那是直接操纵，不是动画。消失的是滑行：弹簧和投射塌缩成落点处一次短暂的淡入。系统级设置在这页同样生效，不只是这个开关。</span>
+      </figcaption>
+      <pre class="mlab-code">const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (reduce) { jumpTo(target); fadeIn(120); }   // no glide, keep the outcome
+else        { spring(current, target, velocity, apply); }</pre>
+    </figure>
+
+    <div style="margin-top:12px;">
+      <a class="apple-link" href="https://github.com/TbusOS/sky-skills/blob/main/skills/apple-design/references/motion.md"><span class="lang-en">Read the full playbook, motion.md</span><span class="lang-zh">读完整规则 motion.md</span></a>
+      <a class="apple-link" style="margin-left:var(--space-5);" href="diagrams.html"><span class="lang-en">Diagram gallery</span><span class="lang-zh">图示案例库</span></a>
+    </div>
+  </div>
+</section>
+
+<footer class="apple-footer" style="padding:40px 0;">
+  <div class="apple-container apple-container--wide">
+    <p class="apple-footer-legal" style="margin:0;">
+      <span class="lang-en">Distilled from Apple WWDC “Designing Fluid Interfaces” (2018), adapted for the web via <a href="https://github.com/emilkowalski/skills" style="color:inherit;">emilkowalski/skills</a> (MIT). Part of the sky-skills apple-design system.</span>
+      <span class="lang-zh">提炼自 Apple WWDC《Designing Fluid Interfaces》(2018)，经 <a href="https://github.com/emilkowalski/skills" style="color:inherit;">emilkowalski/skills</a>（MIT）转译为 web。属于 sky-skills apple-design 体系。</span>
+    </p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- the shared gate (Demo 08 flips simulate; every spring checks it) ---------- */
+  var simulateReduce = false;
+  function prefersReduce() {
+    return simulateReduce || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /* ---------- 30-line zero-dependency spring (see motion.md layer 2) ---------- */
+  function spring(from, target, v0, onUpdate, opts) {
+    opts = opts || {};
+    var damping = opts.damping == null ? 1 : opts.damping;
+    var response = opts.response == null ? 0.4 : opts.response;
+    var w0 = (2 * Math.PI) / response;
+    var x = from, v = v0 || 0, t = target, raf = 0;
+    var last = performance.now();
+    function tick(now) {
+      var dt = Math.min((now - last) / 1000, 1 / 30);
+      last = now;
+      v += (-w0 * w0 * (x - t) - 2 * damping * w0 * v) * dt;
+      x += v * dt;
+      if (Math.abs(v) < 4 && Math.abs(x - t) < 0.3) {
+        x = t; v = 0; onUpdate(t);
+        if (opts.onDone) opts.onDone();
+        return;
+      }
+      onUpdate(x);
+      raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
+    return {
+      retarget: function (nt) { t = nt; },
+      stop: function () { cancelAnimationFrame(raf); },
+      value: function () { return x; },
+      velocity: function () { return v; }
+    };
+  }
+
+  /* Apple's projection (exponential decay, not v²/2a) and rubber-band */
+  function project(v, d) {
+    d = d || 0.998;
+    return (v / 1000) * d / (1 - d);
+  }
+  function rubberband(over, dim, c) {
+    c = c || 0.55;
+    return (over * dim * c) / (dim + c * Math.abs(over));
+  }
+
+  /* velocity from the last few pointermove samples */
+  function makeTracker() {
+    var s = [];
+    return {
+      push: function (val) {
+        s.push({ t: performance.now(), v: val });
+        while (s.length > 5) s.shift();
+      },
+      velocity: function () {
+        if (s.length < 2) return 0;
+        var a = s[0], b = s[s.length - 1];
+        var dt = (b.t - a.t) / 1000;
+        return dt > 0.001 ? (b.v - a.v) / dt : 0;
+      },
+      reset: function () { s.length = 0; }
+    };
+  }
+
+  function bi(en, zh) {
+    return '<span class="lang-en">' + en + '</span><span class="lang-zh">' + zh + '</span>';
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+
+    /* ================= Demo A · dead button ================= */
+    var dead = document.getElementById('mlab-dead-btn');
+    if (dead) {
+      dead.addEventListener('click', function () {
+        setTimeout(function () {
+          dead.classList.add('is-late');
+          setTimeout(function () { dead.classList.remove('is-late'); }, 180);
+        }, 220);
+      });
+    }
+
+    /* ================= Demo B · reveal replay ================= */
+    var replay = document.getElementById('mlab-replay');
+    var revealRow = document.getElementById('mlab-reveal-row');
+    if (replay && revealRow) {
+      replay.addEventListener('click', function () {
+        var cards = revealRow.querySelectorAll('.mlab-reveal-card');
+        cards.forEach(function (c) {
+          c.style.transition = 'none';
+          c.style.opacity = '0';
+          c.style.transform = 'translateY(24px)';
+        });
+        void revealRow.offsetHeight;
+        cards.forEach(function (c, i) {
+          if (prefersReduce()) {
+            c.style.transition = 'opacity 200ms ease';
+            c.style.transform = 'none';
+            c.style.opacity = '1';
+          } else {
+            c.style.transition = 'opacity 700ms cubic-bezier(0.25,1,0.5,1) ' + (i * 80) + 'ms, transform 700ms cubic-bezier(0.25,1,0.5,1) ' + (i * 80) + 'ms';
+            c.style.opacity = '1';
+            c.style.transform = 'translateY(0)';
+          }
+        });
+      });
+    }
+
+    /* ================= Demo C · spatial consistency ================= */
+    var panel = document.getElementById('mlab-space-panel');
+    var goodBtn = document.getElementById('mlab-space-good');
+    var badBtn = document.getElementById('mlab-space-bad');
+    if (panel && goodBtn && badBtn) {
+      var playing = false;
+      var HOME = 'translateX(calc(100% + 40px))';
+      function play(exitTransform) {
+        if (playing) return;
+        playing = true;
+        goodBtn.disabled = true;
+        badBtn.disabled = true;
+        var ease = 'cubic-bezier(0.25, 1, 0.5, 1)';
+        if (prefersReduce()) {
+          panel.style.transition = 'opacity 200ms ease';
+          panel.style.transform = 'translateX(0)';
+          panel.style.opacity = '1';
+          setTimeout(function () {
+            panel.style.opacity = '0';
+            setTimeout(function () {
+              panel.style.transition = 'none';
+              panel.style.transform = HOME;
+              panel.style.opacity = '1';
+              playing = false;
+              goodBtn.disabled = false;
+              badBtn.disabled = false;
+            }, 260);
+          }, 900);
+          return;
+        }
+        panel.style.transition = 'transform 400ms ' + ease;
+        panel.style.transform = 'translateX(0)';
+        setTimeout(function () {
+          panel.style.transition = 'transform 400ms cubic-bezier(0.5, 0, 0.75, 0)';
+          panel.style.transform = exitTransform;
+          setTimeout(function () {
+            panel.style.transition = 'none';
+            panel.style.transform = HOME;
+            playing = false;
+            goodBtn.disabled = false;
+            badBtn.disabled = false;
+          }, 460);
+        }, 1000);
+      }
+      goodBtn.addEventListener('click', function () { play(HOME); });
+      badBtn.addEventListener('click', function () { play('translateY(calc(100% + 40px))'); });
+    }
+
+    /* ================= Demo D · spring playground ================= */
+    var stage = document.getElementById('mlab-spring-stage');
+    var ball = document.getElementById('mlab-ball');
+    var dampingIn = document.getElementById('mlab-damping');
+    var responseIn = document.getElementById('mlab-response');
+    var dampingOut = document.getElementById('mlab-damping-out');
+    var responseOut = document.getElementById('mlab-response-out');
+    var springReadout = document.getElementById('mlab-spring-readout');
+    if (stage && ball) {
+      var ballX = 80;
+      var handle = null;
+      function drawBall(x) {
+        ballX = x;
+        ball.style.transform = 'translateX(' + x + 'px)';
+      }
+      drawBall(80);
+      function syncOutputs() {
+        dampingOut.textContent = Number(dampingIn.value).toFixed(2);
+        responseOut.textContent = Number(responseIn.value).toFixed(2) + 's';
+        document.querySelectorAll('.mlab-preset').forEach(function (p) {
+          p.classList.toggle('is-on',
+            Number(p.dataset.damping) === Number(dampingIn.value) &&
+            Number(p.dataset.response) === Number(responseIn.value));
+        });
+      }
+      dampingIn.addEventListener('input', syncOutputs);
+      responseIn.addEventListener('input', syncOutputs);
+      document.querySelectorAll('.mlab-preset').forEach(function (p) {
+        p.addEventListener('click', function () {
+          dampingIn.value = p.dataset.damping;
+          responseIn.value = p.dataset.response;
+          syncOutputs();
+        });
+      });
+      stage.addEventListener('pointerdown', function (e) {
+        var rect = stage.getBoundingClientRect();
+        var pad = 34;
+        var targetX = Math.min(Math.max(e.clientX - rect.left, pad), rect.width - pad);
+        var fromX = ballX;
+        var v0 = handle ? handle.velocity() : 0;
+        if (handle) handle.stop();
+        if (prefersReduce()) {
+          drawBall(targetX);
+          springReadout.innerHTML = bi('reduced motion: jumped to target', '减动效：直接落到目标');
+          return;
+        }
+        handle = spring(fromX, targetX, v0, drawBall, {
+          damping: Number(dampingIn.value),
+          response: Number(responseIn.value)
+        });
+        springReadout.innerHTML =
+          bi('from ', '起点 ') + '<b>' + Math.round(fromX) + 'px</b>' +
+          bi(' · inherited velocity ', ' · 继承速度 ') + '<b>' + Math.round(v0) + 'px/s</b>' +
+          bi(' · target ', ' · 目标 ') + '<b>' + Math.round(targetX) + 'px</b>';
+      });
+    }
+
+    /* ================= Demo E · flick carousel ================= */
+    var carousel = document.getElementById('mlab-carousel');
+    var track = document.getElementById('mlab-track');
+    var carouselReadout = document.getElementById('mlab-carousel-readout');
+    if (carousel && track) {
+      var STEP = 256; /* card 240 + gap 16 */
+      var trackX = 0;
+      var cHandle = null;
+      var cards = track.querySelectorAll('.mlab-card');
+      function bounds() {
+        var min = Math.min(0, carousel.clientWidth - track.scrollWidth - 28);
+        return { min: min, max: 0 };
+      }
+      function drawTrack(x) {
+        trackX = x;
+        track.style.transform = 'translateX(' + x + 'px)';
+      }
+      function markTarget(idx) {
+        cards.forEach(function (c, i) { c.classList.toggle('is-target', i === idx); });
+      }
+      var cTracker = makeTracker();
+      var cDrag = null;
+      carousel.addEventListener('pointerdown', function (e) {
+        if (cHandle) { cHandle.stop(); cHandle = null; }
+        carousel.setPointerCapture(e.pointerId);
+        carousel.classList.add('is-grabbing');
+        cDrag = { startPointer: e.clientX, base: trackX, locked: false };
+        cTracker.reset();
+        cTracker.push(trackX);
+      });
+      carousel.addEventListener('pointermove', function (e) {
+        if (!cDrag) return;
+        var dx = e.clientX - cDrag.startPointer;
+        if (!cDrag.locked) {
+          if (Math.abs(dx) < 10) return;      /* 10px hysteresis before committing */
+          cDrag.locked = true;
+          cDrag.startPointer = e.clientX;      /* re-base so there is no 10px jump */
+          dx = 0;
+        }
+        var b = bounds();
+        var raw = cDrag.base + dx;
+        var shown = raw;
+        if (raw > b.max) shown = b.max + rubberband(raw - b.max, carousel.clientWidth);
+        if (raw < b.min) shown = b.min + rubberband(raw - b.min, carousel.clientWidth);
+        drawTrack(shown);
+        cTracker.push(shown);
+      });
+      function carouselRelease(e) {
+        if (!cDrag) return;
+        cDrag = null;
+        carousel.classList.remove('is-grabbing');
+        var b = bounds();
+        var v = cTracker.velocity();
+        var landing = trackX + project(v);
+        var idx = Math.round(Math.min(Math.max(-landing, 0), -b.min) / STEP);
+        var target = Math.max(b.min, Math.min(0, -idx * STEP));
+        markTarget(idx);
+        carouselReadout.innerHTML =
+          bi('release velocity ', '松手速度 ') + '<b>' + Math.round(v) + 'px/s</b>' +
+          bi(' · projected landing ', ' · 投射落点 ') + '<b>' + Math.round(landing) + 'px</b>' +
+          bi(' · snapped to card ', ' · 吸附到卡片 ') + '<b>' + ('0' + (idx + 1)).slice(-2) + '</b>';
+        if (prefersReduce()) { drawTrack(target); return; }
+        cHandle = spring(trackX, target, v, drawTrack, { damping: 1, response: 0.4 });
+      }
+      carousel.addEventListener('pointerup', carouselRelease);
+      carousel.addEventListener('pointercancel', carouselRelease);
+    }
+
+    /* ================= Demo F · rubber band ================= */
+    var grooveStage = document.getElementById('mlab-groove-stage');
+    var knob = document.getElementById('mlab-knob');
+    var finger = document.getElementById('mlab-finger');
+    var grooveReadout = document.getElementById('mlab-groove-readout');
+    if (grooveStage && knob) {
+      var knobX = 0;
+      var gHandle = null;
+      function grooveWidth() { return grooveStage.clientWidth * 0.84; }
+      function drawKnob(x) {
+        knobX = x;
+        knob.style.transform = 'translateX(' + x + 'px)';
+      }
+      var gTracker = makeTracker();
+      var gDrag = null;
+      knob.addEventListener('pointerdown', function (e) {
+        if (gHandle) { gHandle.stop(); gHandle = null; }
+        knob.setPointerCapture(e.pointerId);
+        gDrag = { startPointer: e.clientX, base: knobX };
+        gTracker.reset();
+        gTracker.push(knobX);
+      });
+      knob.addEventListener('pointermove', function (e) {
+        if (!gDrag) return;
+        var raw = gDrag.base + (e.clientX - gDrag.startPointer);
+        var max = grooveWidth();
+        var shown = raw;
+        if (raw < 0) shown = rubberband(raw, max);
+        if (raw > max) shown = max + rubberband(raw - max, max);
+        drawKnob(shown);
+        gTracker.push(shown);
+        finger.style.opacity = '1';
+        finger.style.transform = 'translateX(' + (grooveStage.clientWidth * 0.08 + Math.min(Math.max(raw, -80), max + 80)) + 'px)';
+        var over = raw < 0 ? raw : (raw > max ? raw - max : 0);
+        grooveReadout.innerHTML = over === 0
+          ? bi('inside bounds — tracking 1:1', '边界内 — 1:1 跟手')
+          : bi('overshoot ', '越界 ') + '<b>' + Math.round(Math.abs(over)) + 'px</b>' +
+            bi(' → shown as ', ' → 呈现为 ') + '<b>' + Math.round(Math.abs(shown - (raw < 0 ? 0 : max))) + 'px</b>';
+      });
+      function grooveRelease() {
+        if (!gDrag) return;
+        gDrag = null;
+        finger.style.opacity = '0';
+        var max = grooveWidth();
+        var target = Math.min(Math.max(knobX, 0), max);
+        var v = gTracker.velocity();
+        if (prefersReduce()) { drawKnob(target); return; }
+        gHandle = spring(knobX, target, v, drawKnob, { damping: 1, response: 0.35 });
+      }
+      knob.addEventListener('pointerup', grooveRelease);
+      knob.addEventListener('pointercancel', grooveRelease);
+    }
+
+    /* ================= Demo G · sheet ================= */
+    var sheet = document.getElementById('mlab-sheet');
+    var sheetReadout = document.getElementById('mlab-sheet-readout');
+    if (sheet) {
+      var screen = sheet.parentElement;
+      var sHandle = null;
+      var sheetY = 0;
+      function positions() {
+        var h = screen.clientHeight;
+        return { open: h * 0.18, peek: h * 0.78 };
+      }
+      function drawSheet(y) {
+        sheetY = y;
+        sheet.style.transform = 'translateY(' + y + 'px)';
+      }
+      requestAnimationFrame(function () { drawSheet(positions().peek); });
+      var sTracker = makeTracker();
+      var sDrag = null;
+      sheet.addEventListener('pointerdown', function (e) {
+        var grabbedMidFlight = !!sHandle;
+        if (sHandle) { sHandle.stop(); sHandle = null; }
+        sheet.setPointerCapture(e.pointerId);
+        sheet.classList.add('is-grabbing');
+        sDrag = { startPointer: e.clientY, base: sheetY };
+        sTracker.reset();
+        sTracker.push(sheetY);
+        if (grabbedMidFlight) {
+          sheetReadout.innerHTML = bi('grabbed mid-flight — following from the current value',
+            '飞行途中被抓住 — 从当前呈现值继续跟手');
+        }
+      });
+      sheet.addEventListener('pointermove', function (e) {
+        if (!sDrag) return;
+        var p = positions();
+        var raw = sDrag.base + (e.clientY - sDrag.startPointer);
+        var shown = raw;
+        if (raw < p.open) shown = p.open + rubberband(raw - p.open, screen.clientHeight);
+        if (raw > p.peek) shown = p.peek + rubberband(raw - p.peek, screen.clientHeight);
+        drawSheet(shown);
+        sTracker.push(shown);
+      });
+      function sheetRelease() {
+        if (!sDrag) return;
+        sDrag = null;
+        sheet.classList.remove('is-grabbing');
+        var p = positions();
+        var v = sTracker.velocity();
+        var travel = p.peek - p.open;
+        var frac = (sheetY - p.open) / travel;
+        var goOpen = Math.abs(v) > 150 ? v < 0 : frac < 0.5;
+        var target = goOpen ? p.open : p.peek;
+        sheetReadout.innerHTML =
+          bi('released at ', '松手位置 ') + '<b>' + Math.round((1 - frac) * 100) + '%</b>' +
+          bi(' open · velocity ', ' 开 · 速度 ') + '<b>' + Math.round(v) + 'px/s</b>' +
+          (Math.abs(v) > 150
+            ? bi(' · fast — direction wins → ', ' · 快 — 方向说了算 → ')
+            : bi(' · slow — nearest detent → ', ' · 慢 — 就近落位 → ')) +
+          '<b>' + (goOpen ? bi('open', '打开') : bi('closed', '关闭')) + '</b>';
+        if (prefersReduce()) { drawSheet(target); return; }
+        sHandle = spring(sheetY, target, v, drawSheet, {
+          damping: 0.8, response: 0.3,
+          onDone: function () { sHandle = null; }
+        });
+      }
+      sheet.addEventListener('pointerup', sheetRelease);
+      sheet.addEventListener('pointercancel', sheetRelease);
+      window.addEventListener('resize', function () {
+        drawSheet(positions().peek);
+      });
+    }
+
+    /* ================= Demo H · the gate ================= */
+    var reduceSwitch = document.getElementById('mlab-reduce-switch');
+    var reducePlay = document.getElementById('mlab-reduce-play');
+    var reduceStage = document.getElementById('mlab-reduce-stage');
+    var reduceBox = document.getElementById('mlab-reduce-box');
+    var reduceReadout = document.getElementById('mlab-reduce-readout');
+    if (reduceSwitch && reduceBox) {
+      var rHandle = null;
+      var rAtStart = true;
+      reduceSwitch.addEventListener('click', function () {
+        simulateReduce = !simulateReduce;
+        reduceSwitch.setAttribute('aria-checked', String(simulateReduce));
+        reduceReadout.innerHTML = simulateReduce
+          ? bi('gate closed — every spring on this page now jumps + fades', '门已关 — 全页所有弹簧现在直接落位 + 淡入')
+          : bi('gate open — springs glide again', '门已开 — 弹簧恢复滑行');
+      });
+      reducePlay.addEventListener('click', function () {
+        if (rHandle) { rHandle.stop(); rHandle = null; }
+        var from = rAtStart ? 0 : reduceStage.clientWidth - 132;
+        var target = rAtStart ? reduceStage.clientWidth - 132 : 0;
+        rAtStart = !rAtStart;
+        function draw(x) { reduceBox.style.transform = 'translateX(' + x + 'px)'; }
+        if (prefersReduce()) {
+          reduceBox.style.transition = 'opacity 120ms ease';
+          reduceBox.style.opacity = '0';
+          setTimeout(function () {
+            draw(target);
+            reduceBox.style.opacity = '1';
+          }, 130);
+          return;
+        }
+        reduceBox.style.transition = 'none';
+        reduceBox.style.opacity = '1';
+        rHandle = spring(from, target, 0, draw, { damping: 1, response: 0.5 });
+      });
+    }
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: apple-design
+Page-type: motion-lab (demo)
+Created: 2026-07-22
+Decisions:
+- [live-specimens] chose "every figure is an operable widget with a numeric readout" over "static illustrations of motion". Because: the subject is feel, and feel does not survive a screenshot; the readouts (velocity, projection, overshoot) make the invisible math visible at the moment you produce it.
+- [two-tier-hero] chose "one hero SVG stating the layer-1/layer-2 boundary with springs as the only blue" over "opening with the demos". Because: the page's thesis is the boundary, not the tricks; the single blue path answers 'where does the blue go' — springs are the story.
+- [dead-button] chose "shipping a deliberately broken specimen next to the correct one in Demo 01 and 03" over "showing only correct behavior". Because: feel is differential — instant feedback only reads as instant next to its absence; same for the wrong exit path.
+- [layer1-css-only] chose "layer-1 demos animate with CSS easing tokens, springs appear only from Demo 04 on" over "using the spring helper everywhere for code reuse". Because: the page must eat the boundary it teaches; a bouncing reveal would contradict the hero diagram.
+- [global-gate-switch] chose "Demo 08's switch flips one global flag read by every spring call on the page" over "a self-contained mini-demo". Because: the lesson is 'one gate, not per-module logic' — flipping it and re-flicking Demo 05 proves the gate is real, live.
+- [specimen-pills] chose "gray pill buttons (lang-toggle language) for demo controls, blue only for specimens under test" over "apple-link text links". Because: replay/play are actions not navigation, and the specimen being blue keeps the eye on the subject of each figure.
+- [svg-english] chose "English-only labels inside the hero SVG with bilingual figcaption" over "duplicated bilingual SVG text". Because: gallery precedent (diagrams.html) — SVG text pairs bloat the canvas and desync; the figcaption carries the zh narrative.
+Known trade-offs:
+- Direction-lock (touch-action pan-y + 10px hysteresis) is only fully experiencable on a touch device; on desktop the carousel readout shows the hysteresis re-base but vertical-scroll competition never occurs.
+- The sheet's screen content is abstract gray bars, not real UI copy — avoids text-overlap flags while the sheet covers it, at the cost of realism.
+- Code snippets are abridged to the load-bearing lines; the complete 30-line spring lives in references/motion.md and is linked, not duplicated in full.
+/design-review:self-diff -->
+</body>
+</html>
