@@ -12,6 +12,7 @@
 - 前景彩色只有一个:实心 cyan(eyebrow / 按钮 / hairline / glow 节点)
 - 文字落玻璃面板(R1);直接落光场的只有 ≥32px 的 display 大字(hero h1 / pull-quote)—— "玻璃—无玻璃"的节奏本身是设计语言
 - hover 才有 sheen,进视口才 reveal,每视口至多一个 tilt —— 动效是标点不是正文
+- 按钮按下即时 `scale(0.97)`(glass.css 自带);弹簧只属于指针驱动模块,手感规则见 motion.md §4
 - 双主题 SVG 用 `.glass-svg-*` 类上色
 - 用 token,零写死 hex
 - 零 italic:Space Grotesk 没有 italic 字形,这是 glass 与其他四个 skill 的差异点之一 —— 层级全靠 size / weight / spacing
@@ -32,6 +33,7 @@
 | cyan 文字用在 light 模式(写死 hex) | 白底 1.6:1;必须走 `--glass-accent-ink` token |
 | 白字放在 cyan 按钮上 | 1.9:1 fail;按钮配方锁死 `--glass-button-ink` 深字 |
 | 每张卡都 tilt / 都扫光 / 全页 reveal | 动画预算;全员起舞 = 廉价 |
+| 手势 / 动画模块自带 reduced-motion 判断,不走 `data-motion="off"` 统一门 | 两套门必然漂移;冻结契约的字节一致验收会抓不住它(motion.md §4) |
 | 不透明面板 + blur 声明装玻璃 | `glass-fake-glass` 检查(error):blur 必须真的透出背景 |
 | reveal 初始态裸写 `opacity:0` | 绕过冻结门控;`glass-reveal-stuck` 检查(error)+ 全页截图下半截空白 |
 | count-up 终值只在 JS 里 | 无 JS / 冻结下页面是错的;`glass-countup-mismatch` 检查 |

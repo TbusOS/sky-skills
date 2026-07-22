@@ -159,11 +159,17 @@ small,
   font-size: 14px;
   font-weight: 400;
   text-decoration: none;
-  transition: background var(--duration-sm) var(--ease-apple-out);
+  transition: background var(--duration-sm) var(--ease-apple-out),
+    transform 100ms var(--ease-apple-out);
 }
 
 .apple-button:hover {
   background: var(--apple-link-hover);
+}
+
+/* 反馈在按下瞬间,不在松开 —— 见 references/motion.md 按压反馈 */
+.apple-button:active {
+  transform: scale(0.97);
 }
 
 .apple-button--secondary {
@@ -843,5 +849,16 @@ mark {
   *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+  }
+}
+
+/* 只管 CSS;JS spring / rAF 动画必须自查 matchMedia,见 references/motion.md */
+
+@media (prefers-reduced-transparency: reduce) {
+  .apple-nav,
+  .apple-search-overlay {
+    background: var(--apple-bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }

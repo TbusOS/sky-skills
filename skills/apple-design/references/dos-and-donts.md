@@ -15,6 +15,7 @@
 - 圆角 12px 卡片
 - 无衬线正文，Text 用于 <24px 场景
 - 使用 `var(--duration-sm)` 等 token，不写死毫秒
+- 按钮按压反馈：`.apple-button:active` 即时 `scale(0.97)`（apple.css 已内置）；手势组件的 spring 手感规则见 `motion.md` 第二层
 - `.apple-link::after` 的 `›` 如不需要用 `.apple-link--no-arrow` 取消
 - **Hero 段**用 `.apple-container--hero`（1280px），让 SoC / code-arch / multi-repo 这类信息密集框图有足够空间
 
@@ -25,7 +26,9 @@
 | 紫色 / 彩虹渐变 | AI slop 标志 |
 | 饼图 / 3D 柱图 / 霓虹光效 | 非 Apple 语言 |
 | Inter / Roboto 作标题字 | 破坏 SF Pro 统一感 |
-| 反弹 / 弹簧 / rotation 入场 | Apple easing 是 `cubic-bezier(0.25, 1, 0.5, 1)` |
+| 反弹 / 弹簧 / rotation **入场** | 入场 / 浮现 / hover 只用 `cubic-bezier(0.25, 1, 0.5, 1)`。弹簧只属于手势驱动组件（拖拽轮播 / 滑块 / sheet），且默认临界阻尼无过冲——边界见 `motion.md` 两层体系 |
+| JS 驱动动画（rAF / spring）不查 `prefers-reduced-motion` | apple.css 的全局 0.01ms 兜底只管 CSS；JS 动画不受管，减动效用户照样满屏动。JS 动画入口先 `matchMedia` 自查 |
+| 面板右进下出 / popover 从自身中心缩放 | 空间一致性：从哪来回哪去；菜单 `transform-origin` 锚定触发元素，不然按钮和内容的空间关系断裂 |
 | `transition: all` | 性能差 + 视觉跳动。显式列属性 |
 | 硬编码 `#FFFFFF` | 用 `var(--apple-bg)` 才能跟主题变 |
 | 把 `[hero image]` / `[icon]` / `[photo]` 留在产物里 | 上线即暴露空白格子。必须放**真 inline SVG** |
@@ -77,4 +80,4 @@ node skills/apple-design/scripts/screenshot.mjs <path/to/your.html> shot.png
 2. 最小 SVG 字体 ≥ 10 (viewBox 坐标)，渲染 ≥ 9px
 3. 有 stage labels（`01 · INPUT · 02 · MATCHER · 03 · DECISION`）引导视线
 4. 用 soft shadow（blur 4–8, dy 5–12, alpha 0.10–0.14）而非粗描边
-5. 至少一个细节 texture（dotted grid / subtle gradient / radial glow）让它不像 ppt
+5. 至少一个细节 texture（subtle gradient / radial glow / 柔影层次）让它不像 ppt——**不含 dotted grid**，那是 anthropic 的方言（diagram-craft §0/§11，2026-07-22 motion lab critic 实抓）

@@ -34,11 +34,12 @@
 | SVG path-draw | IO 进视口 | `svg[data-draw]` | 1100ms ease-out,逐条 stagger 90ms,≤8 条 | 每页 ≤2 张图开 draw,集中给 featured |
 | count-up | IO threshold 0.4 | `data-count-to="N"`(+ 可选 `data-count-prefix/suffix`) | 1200ms easeOutExpo,tabular-nums | stat 数字专用 |
 | 视差 | scroll + rAF | `data-parallax="0.08"` | 位移 clamp ±40px | **禁用于文字块**,只给装饰层 |
+| 按压反馈 | `:active` | `.glass-button`(自带) | 即时 `scale(0.97)`,transition 已含 transform | 所有可点元素;反馈在按下不在松开 |
 | 液态光标 v2(真折射水珠) | pointermove + rAF 弹簧 + backdrop-filter 位移透镜 | 自动(`<html data-no-liquid>` 退出;`.glass-cursor-toggle` 运行时切换,localStorage `sky-cursor`) | 弹簧 k=0.22 d=0.72;6 档等面积拉伸椭圆;快划拖连续水流(失稳缩颈断珠,920ms 蒸发);停驻 140ms 回抽尾流;双击爆裂→450ms 后汇聚;`data-water-refr`(默认 52)/`data-water-tint`(默认 12)可调;水流折射层默认关、`data-water-trail-refr` opt-in(60fps vs 27fps 实测,canvas 水流照常可见) | 仅 hover+fine 指针 + `backdrop-filter:url()` 支持;light 主题自动换高光烘焙;冻结下不安装,截图永远看不到它 |
 
 ## 2. 禁项
 
-- 反弹 / 弹簧 / rotation 入场 —— glass 的 easing 只有 `cubic-bezier(0.22,1,0.36,1)`
+- 反弹 / 弹簧 / rotation **入场** —— 入场 / 浮现 / hover 只用 `cubic-bezier(0.22,1,0.36,1)`;弹簧只属于指针驱动模块(液态光标 / tilt 回弹 / 可拖组件),规则见 §4
 - `transition: all`
 - 每张卡都 tilt / 都扫光 —— 全员起舞 = 廉价
 - scale > 1.15 的 hover 放大
@@ -62,3 +63,38 @@
 ```
 
 JS 引擎在 `assets/glass.js`,一份源,canonical / demos 相对路径引用,**不要每页拷一份**(拷贝漂移)。lang-toggle 是例外:按全站契约 inline 在每页(sprint-contract §5)。
+
+## 4. 手势交互 — spring 层(指针驱动模块专用)
+
+入场 / 浮现 / hover 永远走 §1 的缓动表;**弹簧只属于指针驱动的模块**。
+glass 已有两个成员:液态光标(rAF 弹簧 k=0.22 d=0.72)和 3D tilt。
+新增可拖组件(轮播 / 对比滑块 / 可拖 sheet)也归这层。
+
+### 手感五条
+
+1. **1:1 跟手**:`setPointerCapture` 保证指针出界继续跟踪;记住**抓取点偏移**
+   (抓边缘跟边缘,吸到中心 = 穿帮);记录最近几个 `pointermove` 的位置 + 时间戳,松手要算速度。
+2. **可中断**:回弹 / 归位途中指针回来,从**当前呈现值**继续跟,不跳变。
+   tilt 回弹照此升级:临界阻尼 spring 替代固定 400ms 过渡,中途重新进入无缝接管。
+3. **速度交接**:松手把指针速度传给 spring 作初速度,拖拽和滑行之间没有接缝。
+4. **动量投射**:`(v/1000)·d/(1−d)`(d≈0.998)投射滑行落点,吸附离**落点**最近的目标;
+   松手判定用**速度方向**不用位置(拖过一半但往回甩 = 收回去)。
+5. **橡皮筋**:`(over·dim·0.55)/(dim+0.55·|over|)`,边界渐进阻力,不硬停。
+
+阻尼纪律:归位 / 回弹用临界阻尼(不弹);只有松手带动量的甩才许欠阻尼(~0.8)。
+2D 拆 X / Y 两条独立 spring;只动 `transform` / `opacity`。
+水平拖拽组件加 `touch-action: pan-y` + 前 ~10px 方向锁,垂直滚动留给浏览器。
+
+零依赖 spring 实现(rAF 半隐式欧拉,~20 行,`retarget()` 即中断)抄
+`~/.claude/skills/apple-design/references/motion.md` 第二层,一份源不重复贴。
+
+### 冻结契约整合(硬规则)
+
+- **装饰性指针模块**(tilt / 液态光标 / 视差):冻结下**不安装**——现行契约不变。
+- **功能性手势模块**(可拖轮播这类导航组件):冻结下**仍可拖**——拖拽是直接操纵不是动画;
+  但松手后不滑行不弹,直接落到最近吸附点。静止终态 = 静态 markup,截图字节一致验收照常成立。
+- 新模块一律挂在 `html.js-enabled:not([data-motion="off"])` 同一道门后,
+  **禁止自带一套 reduced-motion 判断**——两套门必然漂移。
+
+来源:WWDC *Designing Fluid Interfaces* (2018) 的 web 化提炼,
+改编自 [emilkowalski/skills](https://github.com/emilkowalski/skills)(MIT)。

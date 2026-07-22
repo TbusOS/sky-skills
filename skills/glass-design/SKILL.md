@@ -33,7 +33,7 @@ glass 风格 / glassmorphism / 玻璃拟态 / 液态玻璃 / liquid glass / auro
 1. `references/glass-material.md` — 三层材质配方 + aurora 体系 + 折射环(skill 的物理学)
 2. `references/design-tokens.md` — 双主题 token 全表
 3. `references/dos-and-donts.md` — 品位边界(aurora ≠ AI slop 的那条线)
-4. `references/motion.md` — 7 种动画 + 冻结契约(截图检查依赖)
+4. `references/motion.md` — 7 种动画 + 冻结契约(截图检查依赖)+ §4 手势交互 spring 层(跟手 / 可中断 / 速度交接,冻结契约整合)
 5. `references/typography.md` — Space Grotesk / Inter / JetBrains Mono / Noto Sans SC 字号表
 6. `references/layout-patterns.md` — 容器档位 + 区块节奏
 7. `references/diagram-craft.md` — 暗玻璃 SVG 图示工艺(双主题 SVG 必须 token 化)
