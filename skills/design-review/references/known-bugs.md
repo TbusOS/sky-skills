@@ -278,6 +278,36 @@
 
 ---
 
+### 1.48 整卡片套 `<a>` → 卡内 `<h3>`/`<p>` 继承链接色不是正文色
+- **Reader sees**:一张卡片的标题和正文整段是链接色(橙 / 蓝 / 紫),不是正文墨色,整块读起来像"一整块巨型链接"。
+- **Why**:整张卡片用 `<a class="anth-card">`(或类似)包裹,anchor 自身是链接色;卡内 `<h3>`/`<p>` 没做 color 复位 → 继承 anchor 的链接色。正文该是 `--anth-text` / `--anth-text-secondary`。
+- **How caught**:2026-07-15 design-critic;机械闸(verify.py + 旧 visual-audit)0 报。
+- **Defense**:`visual-audit.mjs` 新增 **anchor-card-color-leak**(warn,§12g):某 `<a>` 自身 computed color 是"链接色"(非墨色 —— 亮或高饱和)时,扫其 `h1–h4` / `p` 后代,后代 computed color ≈ anchor 色且同样非墨色 → warn。判据读 anchor **自身**的颜色,跨 skill 通用(橙 / 蓝 / 紫都吃)。行内文本链接没有 h/p 后代,永不触发;已正确复位的卡片 anchor(如 canonical `.canon-card` 自设 `color:var(--anth-text)`,墨色)开头就被跳过。10 张 anthropic canonical 回归 0 假阳,正样双命中(h3 + p 继承橙色)。
+- **Fix playbook**:卡片 anchor 给标题 / 正文显式复位 —— `.navcard h3, .navcard p { color: var(--anth-text) }`(正文用 `--anth-text-secondary`);或卡片别整块套 `<a>`,只在标题或"了解更多"处放链接。
+- **Rule**:任何把内容块整体包进 `<a>` 的写法,块内的 heading / 正文都要显式复位到正文墨色。
+
+---
+
+### 1.47 块级 `.anth-code` 误套到行内 `<code>` → 撑出高框压叠上下文
+- **Reader sees**:一行正文里的行内代码变成一个 ~80px 高的框,盖住上下两行文字 —— 连带引发一批 text-overlap。
+- **Why**:`.anth-code` 是给块级 `<pre>` 设计的代码样式(padding:32px)。作者按肌肉记忆把它套到行内 `<code class="anth-code">` 上,32px 上下 padding 把行内盒撑到 ~80px 高,纵向压盖相邻行。
+- **How caught**:2026-07-15 design-critic;根因是它间接触发的一批 text-overlap,直接判据此前没有。
+- **Defense**:`visual-audit.mjs` 新增 **inline-code-block-padding**(warn,§12f):行内 `<code>`(祖先非 `<pre>`、display 非 block/flex/grid)渲染高度 ≥ 2× font-size **且**上下 padding 合计 ≥ font-size → warn。换行的行内代码也会变高,但它 padding 只有几 px,padding 闸把两者分开。正确行内 `<code>`(padding 2px 6px)两闸都不过。10 canonical 回归 0 假阳,正样命中(82px 高 / 64px padding)。
+- **Fix playbook**:行内代码用裸 `<code>`(anthropic.css 已给 padding:2px 6px);`.anth-code` 只留给块级 `<pre>`。
+- **Rule**:块级组件样式(大 padding / 大圆角)不往行内元素上套。
+
+---
+
+### 1.46 hero 内层窄块只设 max-width 不设 margin:auto → 整块左贴边
+- **Reader sees**:hero 看着"文字居中"其实整块偏左 —— 1440 视口下 hero 版心偏左 ~166–310px,右边一大片空。text-align:center 把**文字**在窄块里居中,骗过肉眼,块本身贴着左边缘。
+- **Why**:anthropic hero 版式是 `.anth-hero`(全宽 + text-align:center)里套一个 max-width 窄块(820 / 860 等)收窄版心。窄块靠 `margin:0 auto` 才居中;作者只写了 max-width 忘了 margin auto → margin-left 算成 0,块左贴边。§1.32b 的 margin-auto-offcenter 只测**已经被 margin:auto 规则命中**的块(有居中意图、执行坏了),这类是相反盲区 —— 压根没有居中意图,它看不见。
+- **How caught**:2026-07-15 design-critic;机械闸(verify.py + 旧 visual-audit)0 报。
+- **Defense**:`visual-audit.mjs` 新增 **hero-anchored-left**(warn,§12e):`.anth-hero` 内 display:block 的 div / section / header / article,设了有效 max-width、比父窄 ≥ 48px、宽 ≥ 200px,且**不**被 margin:auto 规则 / 内联样式命中(命中的归 §1.32b),渲染后 leftGap < rightGap 且 Δ > 64px(左贴边)→ warn。`.anth-container` 自带 `margin:0 auto`,渲染 Δ≈0 且在 autoSelectors 里,双重豁免。10 canonical 回归 0 假阳,正样命中(Δ620px repro)。注意跑回归时静态服务器要 root 在能让 `../../assets/*.css` 解析到的目录(root 在 canonical 目录会 404 掉 anthropic.css,页面裸渲染 → 整页左贴边 → 假阳一片)。
+- **Fix playbook**:hero 内层块直接用 `.anth-container`(已含 `margin:0 auto`),或显式补 `margin-left:auto; margin-right:auto`(等价 `margin-inline:auto`)。只写 max-width 不写 margin auto 的窄块一律左贴边。
+- **Rule**:任何靠 max-width 收窄的居中块,max-width 和 margin:auto 成对出现,缺一不可。
+
+---
+
 ### 1.45 文字墙 — 长段落不分段、不用列表 / 色块分组
 - **Reader sees**:页面中部一大块连续文字,没有段落切分、没有列表、没有 callout 色框,读起来喘不过气。用户 2026-07-06 直接反馈:"中间如果出现太多文字没有分段落或者用更清晰的图去表达,或者按颜色框把文字段落进行区分,阅读不美观"。
 - **Why**:text-desert(§1.31)只管"2600px 无**视觉元素**",抓不到"有图但文字本身成墙"——一段 600px 的巨型 `<p>`、或 5 个连续长段落 1200px,都在 2600px 阈值之下溜过。generator 侧也没有"单段落最大行数"的硬规则。

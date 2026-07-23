@@ -1728,6 +1728,136 @@ const auditFn = (arg) => {
     });
   }
 
+  // ---------- 12e) hero content left-anchored — max-width without margin:auto (§1.46) ----------
+  // .anth-hero is full-width + text-align:center. Authors add an inner max-width
+  // block to hold the measure but forget margin-inline:auto, so the block hugs
+  // the left content edge (~160px off centre) while inherited text-align keeps
+  // the TEXT centred inside it — the eye reads "centred", the box isn't. §1.32b
+  // only measures blocks a margin:auto rule ALREADY targets (intent present,
+  // execution broken); this catches the opposite blind spot — a constrained hero
+  // block with NO centring intent at all. anthropic-scoped via the .anth-hero locus.
+  {
+    const heroSeen = new Set();
+    const styleAuto = (el) =>
+      /margin(?:-left|-right|-inline)?\s*:\s*(?:[^;]*\s)?auto/i.test(el.getAttribute('style') || '');
+    const ruleAuto = (el) => {
+      for (const sel of autoSelectors) { try { if (el.matches(sel)) return true; } catch (e) { /* bad selector */ } }
+      return false;
+    };
+    document.querySelectorAll('.anth-hero div, .anth-hero section, .anth-hero header, .anth-hero article').forEach((el) => {
+      if (heroSeen.has(el)) return; heroSeen.add(el);
+      const st = getComputedStyle(el);
+      if (st.display === 'none' || st.visibility === 'hidden') return;
+      if (st.display.indexOf('inline') === 0) return;
+      if (st.display.includes('flex') || st.display.includes('grid')) return;
+      if (st.position === 'absolute' || st.position === 'fixed') return;
+      const maxW = parseFloat(st.maxWidth);
+      if (st.maxWidth === 'none' || !isFinite(maxW) || maxW <= 0) return; // must be measure-constrained
+      const parent = el.parentElement; if (!parent) return;
+      const pst = getComputedStyle(parent);
+      if (pst.display.includes('flex') || pst.display.includes('grid')) return;
+      const r = el.getBoundingClientRect();
+      const pr = parent.getBoundingClientRect();
+      if (r.width < 200) return;                    // skip small chips/badges
+      if (pr.width - r.width < 48) return;           // max-width isn't meaningfully narrower than parent
+      if (styleAuto(el) || ruleAuto(el)) return;     // centred via margin:auto → §1.32b handles it, not here
+      const lGap = r.left - pr.left;
+      const rGap = pr.right - r.right;
+      const delta = Math.abs(lGap - rGap);
+      if (lGap < rGap && delta > 64) {               // hugs the LEFT edge, big rightward dead space
+        issues.push({
+          kind: 'hero-anchored-left',
+          severity: 'warn',
+          selector: sigSelector(el),
+          maxWidth: Math.round(maxW),
+          leftGap: Math.round(lGap),
+          rightGap: Math.round(rGap),
+          delta: Math.round(delta),
+        });
+      }
+    });
+  }
+
+  // ---------- 12f) inline <code> carrying block-level padding (§1.47) ----------
+  // .anth-code is a BLOCK code style (padding:32px, meant for <pre>). Misapplied
+  // to inline <code class="anth-code"> it inflates the inline box to ~80px tall,
+  // overlapping the lines above/below (a text-overlap generator). Flag inline
+  // <code> (parent not <pre>, not display:block) whose rendered height ≥ 2× its
+  // font-size AND whose vertical padding alone ≥ its font-size — a wrapped inline
+  // code is tall too, but its padding stays a few px, so the padding gate isolates
+  // the block-padding leak.
+  {
+    document.querySelectorAll('code').forEach((el) => {
+      const st = getComputedStyle(el);
+      if (st.display === 'none' || st.visibility === 'hidden') return;
+      if (el.closest('pre')) return;                                   // block code — fine
+      if (st.display === 'block' || st.display.includes('flex') || st.display.includes('grid')) return;
+      const txt = (el.textContent || '').trim();
+      if (!txt) return;
+      const fs = parseFloat(st.fontSize) || 0;
+      if (fs < 6) return;
+      const r = el.getBoundingClientRect();
+      if (r.height < 1) return;
+      const padY = (parseFloat(st.paddingTop) || 0) + (parseFloat(st.paddingBottom) || 0);
+      if (r.height >= fs * 2 && padY >= fs) {
+        issues.push({
+          kind: 'inline-code-block-padding',
+          severity: 'warn',
+          selector: sigSelector(el),
+          text: txt.slice(0, 24),
+          renderedH: Math.round(r.height),
+          fontSize: Math.round(fs),
+          padY: Math.round(padY),
+        });
+      }
+    });
+  }
+
+  // ---------- 12g) card/anchor descendant heading/paragraph inherits link colour (§1.48) ----------
+  // A whole card wrapped in <a> (e.g. <a class="anth-card">) with no colour reset:
+  // its <h2>/<h3>/<p> inherit the anchor's LINK colour (orange/blue/purple) instead
+  // of body ink, so the card copy reads as one giant link. Flag when a heading/
+  // paragraph descendant's computed colour ≈ its ancestor anchor's colour AND that
+  // colour is a saturated/bright link colour, not body ink. Skill-agnostic: reads
+  // the anchor's OWN colour, so it works whatever the skill's link hue is. Inline
+  // text links carry no h/p descendants → never trip; a correctly reset card-anchor
+  // (e.g. .canon-card sets color:var(--anth-text)) is ink → skipped up front.
+  {
+    const chan = (c) => [c.r, c.g, c.b];
+    const dist2 = (a, b) => { const d0 = a[0]-b[0], d1 = a[1]-b[1], d2 = a[2]-b[2]; return d0*d0 + d1*d1 + d2*d2; };
+    // "body ink" = near-black text or a desaturated gray (secondary text); a link
+    // colour is neither (orange / blue / purple are bright and/or saturated).
+    const isInk = (c) => {
+      const mx = Math.max(c.r, c.g, c.b), mn = Math.min(c.r, c.g, c.b);
+      const sat = mx === 0 ? 0 : (mx - mn) / mx;
+      return mx < 130 || sat < 0.18;
+    };
+    document.querySelectorAll('a').forEach((a) => {
+      const linkCol = parseRgb(getComputedStyle(a).color);
+      if (!linkCol) return;
+      if (isInk(linkCol)) return;                       // anchor already uses body ink → nothing leaks
+      const lk = chan(linkCol);
+      a.querySelectorAll('h1, h2, h3, h4, p').forEach((el) => {
+        const st = getComputedStyle(el);
+        if (st.display === 'none' || st.visibility === 'hidden') return;
+        if (!(el.textContent || '').trim()) return;
+        const col = parseRgb(st.color);
+        if (!col) return;
+        if (isInk(col)) return;                          // descendant properly reset to ink
+        if (dist2(chan(col), lk) <= 16 * 16) {           // descendant colour == the anchor's link colour
+          issues.push({
+            kind: 'anchor-card-color-leak',
+            severity: 'warn',
+            selector: sigSelector(el),
+            tag: el.tagName.toLowerCase(),
+            text: (el.textContent || '').trim().slice(0, 24),
+            color: st.color,
+          });
+        }
+      });
+    });
+  }
+
   return issues;
 };
 const evalArg = { crossSkill: crossSkillData, focusInExternalCss, remoteCssPresent, theme: themeArg };
@@ -2047,6 +2177,18 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'glass-aurora-text') {
     console.log(
       `  [${i.severity}] glass-aurora-text: SVG text "${i.text}" computes to ${i.fill} (${i.hue}) on the dark theme — aurora hues are geometry/blob colors, not ink; route indigo labels through .glass-svg-ref-ink, never use violet/pink as text (known-bugs 6.4)`
+    );
+  } else if (i.kind === 'hero-anchored-left') {
+    console.log(
+      `  [${i.severity}] hero-anchored-left: <${i.selector}> has max-width:${i.maxWidth}px but no margin-inline:auto — it hugs the left edge (leftGap=${i.leftGap}px rightGap=${i.rightGap}px, Δ${i.delta}px); text-align:center makes the TEXT look centred while the block sits ~${Math.round(i.delta / 2)}px off the visual centre. Add margin-left/right:auto (or use .anth-container) (known-bugs 1.46)`
+    );
+  } else if (i.kind === 'inline-code-block-padding') {
+    console.log(
+      `  [${i.severity}] inline-code-block-padding: inline <code> "${i.text}" renders ${i.renderedH}px tall at ${i.fontSize}px font with ${i.padY}px vertical padding (${i.selector}) — a block code style (.anth-code, padding:32px) is misapplied to inline code; the tall box overlaps neighbouring lines. Use plain <code> for inline, reserve .anth-code for <pre> (known-bugs 1.47)`
+    );
+  } else if (i.kind === 'anchor-card-color-leak') {
+    console.log(
+      `  [${i.severity}] anchor-card-color-leak: <${i.tag}> "${i.text}" inside a card-wrapping <a> computes color ${i.color} — it inherited the anchor's link colour instead of body ink, so the card copy reads as a giant link (${i.selector}). Reset color on the anchor's headings/paragraphs (e.g. .navcard h3,.navcard p{color:var(--anth-text)}) (known-bugs 1.48)`
     );
   }
 }

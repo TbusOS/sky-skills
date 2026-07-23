@@ -68,6 +68,9 @@
 | 为了和上文列宽对齐,把密图(≥20 label)压进窄列或 grid 单元格 | 对齐让位于可读性——图看不清等于没画(2026-07-06 用户反馈原话"没必要一定要和上面对齐")。密图默认 breakout 到 wide 独立容器,grid 里独占全行或拆图。**known-bugs 1.29 / 1.44,layout-patterns 版心纪律 §B** |
 | 双语 stat strip 的共享数字带英文单位(`48h`)而 zh label 以"小时内…"开头 | zh 模式读出 "48h 小时" 单位重复(2026-06-13 faq 实抓)。数字也拆 lang spans:`<span class="lang-en">48h</span><span class="lang-zh">48</span>` —— 单位不属于数字,属于语言。**known-bugs 1.41** |
 | `.anth-link` 文本里手打字面 `→` | `.anth-link::after` 已统一追加 →,再写一个渲染成双箭头。2026-06-11(commit 5eea300)清过 32 处,apple 同类 2026-06-13 又中 31 处。不要 ::after 箭头时用 `.anth-link--no-arrow`(此时字面箭头才是对的)。**known-bugs 1.42** |
+| `.anth-hero` 内层窄块只写 `max-width` 不写 `margin:auto` | text-align:center 只居中**文字**,块本身 margin-left 算成 0、左贴边,整块版心偏左 ~166–310px,肉眼以为居中。hero 内层块直接用 `.anth-container`(自带 `margin:0 auto`),或显式补 `margin-left:auto; margin-right:auto`。max-width 和 margin:auto 成对出现,缺一不可。**known-bugs 1.46** |
+| 行内 `<code>` 套 `.anth-code` | `.anth-code` 是块级 `<pre>` 的样式(padding:32px),套到行内代码上把盒撑到 ~80px 高、压叠上下行,引发一批 text-overlap。行内代码用裸 `<code>`(anthropic.css 已给 padding:2px 6px),`.anth-code` 只留给块级 `<pre>`。**known-bugs 1.47** |
+| 整张卡片用 `<a>` 包裹却不给卡内 `<h3>`/`<p>` 复位 color | 标题/正文继承 anchor 的链接色(橙/蓝/紫),不是正文墨色,整块读成"巨型链接"。给卡片 anchor 的标题/正文显式复位:`.navcard h3,.navcard p{color:var(--anth-text)}`(正文用 `--anth-text-secondary`);或别整块套 `<a>`,只在标题 / "了解更多" 处放链接。**known-bugs 1.48** |
 
 ---
 
