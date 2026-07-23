@@ -11,6 +11,7 @@ import re
 import os
 import sys
 import argparse
+import unicodedata
 import fitz
 
 
@@ -237,11 +238,17 @@ def build_pdf(md_path, pdf_path, font_path):
     css = build_css(font_path)
     html_body = md_to_html(md_path)
 
-    # Extract headings for bookmarks
+    # Extract headings for bookmarks.
+    # Un-escape the entities inline_format() introduced — otherwise a heading like
+    # "路径 <version>" becomes "路径 &lt;version&gt;" here while the rendered page
+    # shows "路径 <version>", and the bookmark lookup below can never match it.
     headings = []
     for m in re.finditer(r'<(h[1-3])>(.*?)</\1>', html_body):
         level = int(m.group(1)[1])
         title = re.sub(r'<[^>]+>', '', m.group(2))
+        title = (title.replace('&lt;', '<')
+                      .replace('&gt;', '>')
+                      .replace('&amp;', '&'))
         headings.append((level, title))
 
     full_html = f'<!DOCTYPE html><html><head><meta charset="utf-8"/></head><body>{html_body}</body></html>'
@@ -272,19 +279,58 @@ def build_pdf(md_path, pdf_path, font_path):
             fontsize=8, color=(0.6, 0.6, 0.6)
         )
 
-    # Add bookmarks by searching heading text
+    # Add bookmarks by locating each heading's text in the rendered pages.
+    #
+    # Three things matter here, all learned from real breakage:
+    #
+    # 1. search_for() silently fails on some headings (observed with 、（）/ and
+    #    enclosed numerals like ②④ in CJK docs). The old code fell back to page 1,
+    #    so those bookmarks jumped to the top of the document instead of their
+    #    real page. Now we fall back to a normalized get_text() line scan, which
+    #    matches those headings reliably.
+    # 2. Search starts from the previous heading's page, not page 1. Headings are
+    #    monotonically ordered in the document, so scanning from the start lets a
+    #    later heading match an earlier page that merely repeats the same words.
+    # 3. If everything fails, inherit the previous heading's page rather than 1 —
+    #    being off by one section beats jumping to the cover.
+    def _norm(s):
+        return unicodedata.normalize("NFC", s).strip()
+
+    page_lines = [
+        [_norm(line) for line in doc[pn].get_text().split("\n")]
+        for pn in range(len(doc))
+    ]
+
     toc = []
+    last_page = 1
     for level, title in headings:
-        search = title[:15]
-        found = False
-        for pn in range(len(doc)):
-            results = doc[pn].search_for(search)
-            if results:
-                toc.append([level, title, pn + 1, results[0].y0])
-                found = True
+        target = _norm(title)
+        hit_page, hit_y = None, None
+
+        # Pass 1: native search, exact title first then a truncated prefix.
+        for probe in (title, title[:15]):
+            if not probe:
+                continue
+            for pn in range(last_page - 1, len(doc)):
+                results = doc[pn].search_for(probe)
+                if results:
+                    hit_page, hit_y = pn + 1, results[0].y0
+                    break
+            if hit_page:
                 break
-        if not found:
-            toc.append([level, title, 1])
+
+        # Pass 2: text-line fallback for headings search_for cannot match.
+        if hit_page is None:
+            for pn in range(last_page - 1, len(doc)):
+                if any(target == line or target in line for line in page_lines[pn]):
+                    hit_page = pn + 1
+                    break
+
+        if hit_page is None:
+            hit_page = last_page
+
+        last_page = hit_page
+        toc.append([level, title, hit_page] + ([hit_y] if hit_y is not None else []))
 
     if toc:
         doc.set_toc(toc)

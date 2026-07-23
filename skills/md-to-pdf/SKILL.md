@@ -91,6 +91,38 @@ print(doc[0].get_text()[:300])
 
 This font is bundled in Android SDK at `frameworks/base/data/fonts/DroidSansFallbackFull.ttf`.
 
+## Bookmark accuracy
+
+Bookmarks are located by finding each heading's text in the rendered pages, with
+three safeguards (added 2026-07-23 after real breakage in a CJK document):
+
+1. **Fallback beyond `search_for()`** — PyMuPDF's `search_for()` silently fails on
+   some headings (observed with `、（）/` and enclosed numerals like `②④`). It used to
+   fall back to page 1, so those bookmarks jumped to the cover. Now a normalized
+   `get_text()` line scan catches them.
+2. **Monotonic search** — each heading is searched from the previous heading's page
+   onward, so a later heading can't match an earlier page that repeats the same words.
+3. **HTML entities un-escaped** — a heading like `路径 <version>` is `&lt;version&gt;`
+   in the intermediate HTML but renders as `<version>`; without un-escaping, the
+   lookup could never match.
+
+Verify after generating:
+
+```python
+import fitz, unicodedata
+def norm(s): return unicodedata.normalize("NFC", s).strip()
+d = fitz.open("output.pdf")
+lines = [[norm(l) for l in d[i].get_text().split("\n")] for i in range(len(d))]
+for lvl, title, pg in d.get_toc():
+    key = norm(title)
+    real = next((i+1 for i, ls in enumerate(lines) if any(key == l or key in l for l in ls)), None)
+    if real != pg:
+        print(f"BAD: {title} -> bookmark p{pg}, actually p{real}")
+```
+
+Regression baseline: two CJK documents (8 pages / 19 bookmarks and 11 pages /
+28 bookmarks) both report 0 mismatched bookmarks.
+
 ## Edge Cases
 
 - **No CJK font available**: Script exits with error message. User must provide `--font`.
