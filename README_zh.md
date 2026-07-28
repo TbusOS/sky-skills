@@ -29,6 +29,7 @@
 | [wechat-video-publisher](skills/wechat-video-publisher/) | ZH | 微信公众号视频制作全流水线 —— edge-tts 配音、Playwright 逐帧录制、ffmpeg 字幕烧录、微信兼容 inline-style 文章模板 |
 | [doc-to-markdown](skills/doc-to-markdown/) | EN/ZH | 文档转 Markdown —— 批量 PDF/DOCX 转换为格式清晰的 Markdown，自动提取图片、表格转换、EMF/WMF 处理、中文支持 |
 | [md-to-pdf](skills/md-to-pdf/) | EN/ZH | Markdown 转 PDF —— 基于 PyMuPDF Story HTML 渲染，完整中文支持、自动书签、页码 |
+| [tech-pdf-reader](skills/tech-pdf-reader/) | ZH | **技术 PDF 阅读** —— datasheet、原理图、协议文档，答案常在时序图和引脚表里而不在文字层。按关键词定位章节、把整页渲染出来让图真的看得见、渲染失败时兜底抠内嵌图。核心纪律是把**「工具不行」**和**「文件坏了」**分开 —— 二者现象相同（都是空白），处理方式完全相反。`scripts/pdf_probe.py` 逐页报文字层 / 内嵌图数 / 有无 `/Contents`，遍历对象图区分「引用断了还能修」和「内容真的不在文件里」，再读 `Page N of M` 页脚揪出截断副本。技术参数错一位就是硬件问题，所以读不到就写读不到，绝不按「应该是这样」补全 |
 | [apple-design](skills/apple-design/) | EN/ZH | 以 **apple.com** 网页美学渲染 HTML/CSS —— SF Pro 字体、白/浅灰/黑交替段落、克制的文字链、巨字号统计、产品摄影主导、手工 SVG 流程图。**diagram-craft v3 (2026-06) 新增：** 内核级 SVG 制图规范（先定尺寸、tint 填充、每图 ≥2 个色相）+ 模板库扩到 14 件 —— 见[图表画廊](demos/apple-design/diagrams.html) |
 | [anthropic-design](skills/anthropic-design/) | EN/ZH | 以 **anthropic.com** 网页美学渲染 HTML/CSS —— 暖米白 + 橙色强调、Poppins 标题 + Lora 衬线正文、实心胶囊按钮、编辑式卡片、抽象 SVG 插画、低饱和图表。**v2 (2026-04) 新增：** 给 canonical 没覆盖的版式 / 控件 / 动效 / 文案各加一层 scenario recipes（dashboard / form / table / tab / accordion / modal / sidebar / changelog / video / empty-state · input / select / check / switch / toast / dialog / banner / tooltip / skeleton · hero / stagger / hover / route），加一份 `references/ux-writing.md`（CTA / empty / error / placeholder / 禁用词清单），所有 recipe class 已落到 `assets/anthropic.css`。配 `bin/design-review --audit <dir-or-url>` 批量审存量页面。**v3 (2026-05) 新增：** `scripts/` 下 4 件套 md 渲染管线 —— `md-mirror`（1 个 `.md` → 1 个 anthropic 风格 `.html`，内联 CSS）/ `md-rewrite-links`（原地 `.md`→`.html` href 替换）/ `md-pack`（把链到的 `.md` 折叠到扁平 `_md/` 子目录 + 重写 href + basename 救援源文档 `../` typo）/ `cross-link-pack`（跨目录 sibling `.html` 也折叠进同款 `_md/`）。在文档目录跑 pack + cross-link-pack 一次，`cp -r` 到任何地方所有链接全活。**diagram-craft v3 (2026-06) 新增：** 内核级 SVG 制图规范 + 模板库扩到 14 件（register-bitfield / soc-block / hw-timing-waveform / sched-timeline……）—— 见 [23 图画廊](demos/anthropic-design/diagrams.html) |
 | [ember-design](skills/ember-design/) | EN/ZH | 以 **手作编辑** 美学渲染 HTML/CSS —— 暖米 (#fff2df) + 深巧克力 (#312520) + 棕色 CTA (#492d22) + 金色 (#c49464)，Fraunces 展示衬线 + Inter 正文。适合咖啡工坊 / 精品酒店 / 文学期刊 / 独立品牌。**diagram-craft (2026-06) 新增：** 暖棕灰阶结构 + 金单焦点制图规范 + 8 件 SVG 图示模板 —— 见 [8 图画廊](demos/ember-design/diagrams.html) |
@@ -50,7 +51,7 @@
 
 > **两种安装作用域。** 装到某个项目的 `.claude/skills/` 只在那个仓库生效；装到 `~/.claude/skills/` 在本机所有仓库生效。下面命令都用用户级 `~/.claude/skills/`，要装到项目级把目的地换掉即可。完整双语安装指南见 [docs/INSTALL.html](docs/INSTALL.html)。
 >
-> **注意——仓库里有两种 skill。** 有的是单个 `SKILL.md` 文件（如 `linux-kernel-dev` / `md-to-pdf`），有的是 `SKILL.md` + `scripts/` + `references/` + `templates/` 的整目录 —— 包括 5 个设计 skill（`apple-design` / `anthropic-design` / `ember-design` / `sage-design` / `glass-design`），以及 `design-review` / `gated-dual-clone` / `gated-dual-clone-audit`。**多文件 skill 必须按整目录安装**——只 copy 单 `SKILL.md` 会让 skill 起来但脚本跑不动。另外 `design-review` learning loop 用的 `design-learner` agent 不在 skill 目录里：要单独把 `.claude/agents/design-learner.md` 复制到你的 `~/.claude/agents/`。
+> **注意——仓库里有两种 skill。** 有的是单个 `SKILL.md` 文件（如 `linux-kernel-dev` / `md-to-pdf`），有的是 `SKILL.md` + `scripts/` + `references/` + `templates/` 的整目录 —— 包括 5 个设计 skill（`apple-design` / `anthropic-design` / `ember-design` / `sage-design` / `glass-design`），以及 `design-review` / `gated-dual-clone` / `gated-dual-clone-audit` / `tech-pdf-reader`。**多文件 skill 必须按整目录安装**——只 copy 单 `SKILL.md` 会让 skill 起来但脚本跑不动。另外 `design-review` learning loop 用的 `design-learner` agent 不在 skill 目录里：要单独把 `.claude/agents/design-learner.md` 复制到你的 `~/.claude/agents/`。
 >
 > **装完之后退出 Claude Code 重进**——skill 清单是启动时扫描一次冻结的。
 
@@ -108,6 +109,7 @@ claude install github:TbusOS/sky-skills/skills/design-review
 
 下面详解 5 个 skill，其余的以各自 `SKILL.md` 为准：
 [md-to-pdf](skills/md-to-pdf/SKILL.md) ·
+[tech-pdf-reader](skills/tech-pdf-reader/SKILL.md) ·
 [ember-design](skills/ember-design/SKILL.md) ·
 [sage-design](skills/sage-design/SKILL.md) ·
 [glass-design](skills/glass-design/SKILL.md) ·
