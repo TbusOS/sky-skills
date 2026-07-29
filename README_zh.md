@@ -6,18 +6,22 @@
 
 ## 在线 Demo
 
-五个设计类 skill 各自配备了一份单页 flagship demo，位于 [`demos/`](./demos/) 目录 —— 同一份内容，五种美学呈现：
+七个设计类 skill 各自配备了一份单页 flagship demo，位于 [`demos/`](./demos/) 目录 —— 同一份内容，七种美学呈现：
 
 - [**apple-design demo**](./demos/apple-design/index.html) —— apple.com 的冷感克制
 - [**anthropic-design demo**](./demos/anthropic-design/index.html) —— anthropic.com 的暖编辑感
 - [**ember-design demo**](./demos/ember-design/index.html) —— 手作 · 暖棕 · 文学式的咖啡色系（米白 + 巧克力 + 金）
 - [**sage-design demo**](./demos/sage-design/index.html) —— 安静 · 北欧极简（米黄 + 抹茶绿 + 深靛蓝）
 - [**glass-design demo**](./demos/glass-design/index.html) —— Apple 液态玻璃 / aurora 玻璃拟态（深藏青 + cyan + 毛玻璃面板，dark/light 双主题）
+- [**eclat-design demo**](./demos/eclat-design/index.html) —— 产品发布会 keynote，哑光电影舞台（近黑 #040406 + 骨白 #f6f3ec + 单一冷蓝高光）
+- [**lectern-design demo**](./demos/lectern-design/index.html) —— 会议室汇报 deck（纸白 #f5f6f8 + 深蓝墨 #16203a，KPI 卡 + 决议表）
 - [**anthropic 图表画廊**](./demos/anthropic-design/diagrams.html) —— 23 幅手工 SVG 图（寄存器、SoC 框图、时序波形、调度时间线……）
 - [**apple 图表画廊**](./demos/apple-design/diagrams.html) —— 同类图型的 apple.com 干净几何风版本，共 14 幅
 - [**ember 图表画廊**](./demos/ember-design/diagrams.html) —— 同类图型的暖棕 + 金单焦点版本，共 8 幅
 - [**sage 图表画廊**](./demos/sage-design/diagrams.html) —— 同类图型的抹茶绿 + 靛蓝墨版本，共 8 幅
 - [**glass 图表画廊**](./demos/glass-design/diagrams.html) —— 同类图型的暗玻璃版本，共 14 幅（aurora 光场上的毛玻璃面板，SVG 墨色主题免疫）
+- [**eclat lookbook**](./demos/eclat-design/diagrams.html) —— 8 幅电影感发布会构图（聚光产品、产品线、参数揭示、那一刻、定价、开箱、跑分、细节）
+- [**lectern board pack**](./demos/lectern-design/diagrams.html) —— 8 个会议室面板：折线 / 条形 / 环形 / 构成 / 分群留存图，加路线图时间线、KPI 块和决议表
 
 本地预览：在仓库根目录执行 `python3 -m http.server 8000`，然后打开上面的 URL。
 
@@ -35,11 +39,15 @@
 | [ember-design](skills/ember-design/) | EN/ZH | 以 **手作编辑** 美学渲染 HTML/CSS —— 暖米 (#fff2df) + 深巧克力 (#312520) + 棕色 CTA (#492d22) + 金色 (#c49464)，Fraunces 展示衬线 + Inter 正文。适合咖啡工坊 / 精品酒店 / 文学期刊 / 独立品牌。**diagram-craft (2026-06) 新增：** 暖棕灰阶结构 + 金单焦点制图规范 + 8 件 SVG 图示模板 —— 见 [8 图画廊](demos/ember-design/diagrams.html) |
 | [sage-design](skills/sage-design/) | EN/ZH | 以 **安静 · 北欧极简** 美学渲染 HTML/CSS —— 米黄 (#f8faec) + 抹茶绿 (#97B077) + 深靛蓝 (#393C54)，Instrument Serif + Inter + JetBrains Mono。适合阅读 app / 植物工作室 / 现代期刊 / 安静的科技品牌。**diagram-craft (2026-06) 新增：** 绿单焦点 + 靛蓝墨制图规范 + 8 件 SVG 图示模板 —— 见 [8 图画廊](demos/sage-design/diagrams.html) |
 | [glass-design](skills/glass-design/) | EN/ZH | 以 **Apple 液态玻璃 / aurora 玻璃拟态** 美学渲染 HTML/CSS —— 深藏青画布 (#0B1020) + aurora 光晕 + 三层毛玻璃面板（真 `backdrop-filter` + 1px 渐变折射环）+ 唯一前景彩色 cyan (#22D3EE)，Space Grotesk + Inter + JetBrains Mono。**dark/light 双主题**（`data-theme`，三闸双跑）+ **可冻结动画引擎**（`glass.js`：滚动浮现 / count-up / 3D tilt / SVG 路径绘制 / 视差，`prefers-reduced-motion` 下全部塌缩为静态 markup，截图确定性）。为图表 / 图示 / 数据类内容的高冲击力展示而生 —— 见 [图示画廊 canonical](skills/glass-design/references/canonical/diagram-gallery.html) 与 14 件 SVG 图示模板 |
-| [design-review](skills/design-review/) | EN/ZH | **5 个设计 skill 的独立评审员** —— 四道闸（`verify.py` 静态 + `visual-audit.mjs` Playwright 渲染 + `screenshot.mjs` 截图 + `critic.mjs` LLM 审美评审）+ 仓库内已知 bug 清单。另带 `multi-critic.mjs`（4 个固定权重的专项评审员）、learning loop（critic 抓到的问题经 `design-learner` agent 固化成新闸规则）、`bin/design-review` CLI 三模式（`--plan` / `--critic` / `--audit`）。参考 Anthropic 的 [harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)：generator 和 evaluator 分离，reviewer 不继承 generator 的立场。完整 [8 组件 harness 路线图](docs/HARNESS-ROADMAP.html)（用 4 种设计声音各渲一版） |
+| [eclat-design](skills/eclat-design/) | ZH | 以**产品发布会 keynote** 美学渲染 HTML/CSS —— 近黑哑光画布 (#040406) + 骨白字 (#f6f3ec) + 满屏巨字标题 + 聚光与地面反射 + 单一冷蓝 flare (#bcd2ff) + 产品 hero + 满屏「那一刻」叙事。暗调电影感，克制如熄了灯的发布厅。**不要**用它做玻璃拟态（那是 `glass-design`）、会议室 deck（`lectern-design`）或浅白消费极简官网（`apple-design`）—— 见 [8 图 lookbook](demos/eclat-design/diagrams.html) |
+| [lectern-design](skills/lectern-design/) | ZH | 以**会议室汇报 deck** 美学渲染 HTML/CSS —— 纸白画布 (#f5f6f8) + 衬线标题 + 深蓝墨 (#16203a) + 低饱和深蓝图表 (#1d3a6e) + 结构化议程 / 章节 + KPI 卡 + 决议·行动项表 + 状态药丸。对内、商务、数据前置，可信而不喧哗，像一份尊重读者时间的董事会评审 —— 见 [8 面板 board pack](demos/lectern-design/diagrams.html) |
+| [design-review](skills/design-review/) | EN/ZH | **7 个设计 skill 的独立评审员** —— 四道闸（`verify.py` 静态 + `visual-audit.mjs` Playwright 渲染 + `screenshot.mjs` 截图 + `critic.mjs` LLM 审美评审）+ 仓库内已知 bug 清单。另带 `multi-critic.mjs`（4 个固定权重的专项评审员）、learning loop（critic 抓到的问题经 `design-learner` agent 固化成新闸规则）、`bin/design-review` CLI 三模式（`--plan` / `--critic` / `--audit`）。参考 Anthropic 的 [harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)：generator 和 evaluator 分离，reviewer 不继承 generator 的立场。完整 [8 组件 harness 路线图](docs/HARNESS-ROADMAP.html)（用 4 种设计声音各渲一版） |
 | [gated-dual-clone](skills/gated-dual-clone/) | EN/ZH | **双仓库 git 工作流搭建器(2 仓默认 · 可选 3 仓加 reproducibility 关卡)。** 适用于上游分支受保护(必须走 MR / PR)、编译重会污染工作树的项目。一条命令创建 `gateway` 仓库(push 源) + `satellite` 仓库(只读编译树)——编译树在物理上够不到远程。搭完自动跑三道安全闸:协议墙、显式 push-URL 禁用、pre-push hook。加 `--clean-verify-dir` 启用第 3 仓(冷盘冷启动)+ stamp-match pre-push 关卡,没经从零全量编认证的 commit 推不出。完整[设计稿](docs/design-mr-gated-dual-repo.md) + [anthropic demo](demos/gated-dual-clone/index.html) |
 | [gated-dual-clone-audit](skills/gated-dual-clone-audit/) | EN/ZH | **独立评估器**,和 `gated-dual-clone` 配对。不 import 任何 generator 代码,只读成品拓扑 · 重验安全闸。四层:structural(文件系统 / hook / hardlink, 8 闸) → configuration(git-config, 8 闸) → behavioural(安全 `--dry-run` + 直接调 hook, 3 闸) → taste(LLM critic subagent · 不阻塞 exit code)。传 `--clean-verify-dir` 自动加 4 gate(S9-S11 + C9 + B4)覆盖 3 仓拓扑。可按需跑、作 `pre-push` hook 跑、作 cron drift 检查跑。`--json` 喂给 `learning-loop` 固化野外 drift。和 `design-review` 一样的 generator / evaluator 分离原则 |
 | [doc-review-loop](skills/doc-review-loop/) | ZH | **给认真的决策书做的双 agent 评审循环。** `writer` agent 拿代码 / 实测证据出稿，`reviewer` agent 扮演没接触过项目的严苛 PM，每个论断都质疑，问题分 A (阻塞) / B (必改) / C (建议改) 三档。主对话把 reviewer 问题清单喂回 writer 出 v2，最多 3 轮。每轮 diff + reviewer 问题留在 `<doc>.review.log`。触发：发版评审决策、跨团队对齐、复杂改动论证、改 vs 不改类问题。**不要触发** 简单 README、单页 memo、个人笔记 —— 杀鸡用牛刀 |
-| [design-planner](skills/design-planner/) | ZH | **brief→sprint contract 计划器**，服务 5 个设计 skill —— 在写任何 HTML 之前把一句模糊需求展开成 page-type + 受众 + section 计划 + 硬指标（图密度 / 双语 / 品牌），包装 `bin/design-review --plan`。没有 canonical 的 page-type 借最近的结构并标注 LOW-CONFIDENCE |
+| [design-planner](skills/design-planner/) | ZH | **brief→sprint contract 计划器**，服务 7 个设计 skill —— 在写任何 HTML 之前把一句模糊需求展开成 page-type + 受众 + section 计划 + 硬指标（图密度 / 双语 / 品牌），包装 `bin/design-review --plan`。没有 canonical 的 page-type 借最近的结构并标注 LOW-CONFIDENCE |
+| [design-evolve](skills/design-evolve/) | EN | **自进化循环（harness 组件 09）** —— 让 harness 自己提出更好的生成器规则 / 模板 / 手法，只保留分数确实更高的那些。每轮：诊断最弱的评审轴 → 提一个改动 → 重新生成 → 用**冻结的**评审器打分 → 严格高于锁定基线、且没有任何留出的 canonical 退步，才保留，否则 `git revert`。评审器保持冻结，生成器就没法靠挪动标尺取胜 |
+| [skills-sync](skills/skills-sync/) | ZH | **手动检查并更新 skills 仓。** 检测远端是否领先、列出更新了什么（commit 标题），用户确认后才跑 `git pull --ff-only` 并给新到的 skill 补 symlink。不擅自更新；本地有改动或分支已分叉时中止 pull 并如实报告 |
 
 ## 什么是 Claude Code Skills？
 
@@ -51,7 +59,7 @@
 
 > **两种安装作用域。** 装到某个项目的 `.claude/skills/` 只在那个仓库生效；装到 `~/.claude/skills/` 在本机所有仓库生效。下面命令都用用户级 `~/.claude/skills/`，要装到项目级把目的地换掉即可。完整双语安装指南见 [docs/INSTALL.html](docs/INSTALL.html)。
 >
-> **注意——仓库里有两种 skill。** 有的是单个 `SKILL.md` 文件（如 `linux-kernel-dev` / `md-to-pdf`），有的是 `SKILL.md` + `scripts/` + `references/` + `templates/` 的整目录 —— 包括 5 个设计 skill（`apple-design` / `anthropic-design` / `ember-design` / `sage-design` / `glass-design`），以及 `design-review` / `gated-dual-clone` / `gated-dual-clone-audit` / `tech-pdf-reader`。**多文件 skill 必须按整目录安装**——只 copy 单 `SKILL.md` 会让 skill 起来但脚本跑不动。另外 `design-review` learning loop 用的 `design-learner` agent 不在 skill 目录里：要单独把 `.claude/agents/design-learner.md` 复制到你的 `~/.claude/agents/`。
+> **注意——仓库里有两种 skill。** 有的是单个 `SKILL.md` 文件（如 `linux-kernel-dev` / `md-to-pdf`），有的是 `SKILL.md` + `scripts/` + `references/` + `templates/` 的整目录 —— 包括 7 个设计 skill（`apple-design` / `anthropic-design` / `ember-design` / `sage-design` / `glass-design` / `eclat-design` / `lectern-design`），以及 `design-review` / `gated-dual-clone` / `gated-dual-clone-audit` / `tech-pdf-reader`。**多文件 skill 必须按整目录安装**——只 copy 单 `SKILL.md` 会让 skill 起来但脚本跑不动。另外 `design-review` learning loop 用的 `design-learner` agent 不在 skill 目录里：要单独把 `.claude/agents/design-learner.md` 复制到你的 `~/.claude/agents/`。
 >
 > **装完之后退出 Claude Code 重进**——skill 清单是启动时扫描一次冻结的。
 
