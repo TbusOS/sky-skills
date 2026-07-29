@@ -9,7 +9,7 @@
 //
 // Usage:
 //   node skills/design-review/scripts/sprint-contract.mjs \
-//     --skill=<anthropic|apple|ember|sage|glass> \
+//     --skill=<anthropic|apple|ember|sage|glass|eclat|lectern> \
 //     --page=<pricing|landing|docs-home|feature-deep|any-other-type>
 //
 // Unknown page-types are accepted: the contract borrows structure from
@@ -25,7 +25,7 @@ import process from 'node:process';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
 
-const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage', 'glass'];
+const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage', 'glass', 'eclat', 'lectern'];
 const VALID_PAGES = ['pricing', 'landing', 'docs-home', 'feature-deep'];
 
 // Unknown page-types are not rejected — they borrow structure from the
@@ -99,6 +99,27 @@ const BRAND = {
     forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora'],
     forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#c49464 (ember)', '#97B077 (sage)'],
   },
+  eclat: {
+    accent: '#ff5b34',
+    name: 'eclat flare',
+    minCoverage: '0.002%',
+    howTo: 'the flare is the ONLY saturated foreground color, and it lives in just four places: the filled CTA, one live dot (flare itself — never a second red like #ff4d4d), at most ONE emphasized hero number (`.eclat-hl`), and the product\'s own accent inside a UI mock. Everything else is cool-white spotlight or warm rim light. The threshold is deliberately low — a dark cinematic hero puts the CTA mid-screen, so the gate only catches total absence',
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
+    // anthropic orange is NOT forbidden here: eclat's own flare-soft #ff7a4d sits
+    // within the matcher's TOL 55 of #d97757, so listing it would flag eclat's
+    // own warm family. Mirrors the same omission in visual-audit.mjs.
+    forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#c49464 (ember)', '#22D3EE (glass)'],
+  },
+  lectern: {
+    accent: '#1d3a6e / #2f5bb0',
+    name: 'lectern navy',
+    minCoverage: '0.02%',
+    howTo: 'the navy carries itself in the top region: a solid navy square in the masthead, the section kicker, and the numbered agenda markers. This is a briefing deck, not a launch page — there is no full-bleed hero to lean on, so keep the navy in structural furniture rather than one big CTA',
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
+    // apple blue is NOT forbidden here: lectern is itself a navy/blue-family skin
+    // and its chart blues would false-flag. Mirrors visual-audit.mjs.
+    forbiddenColors: ['#d97757 (anthropic)', '#c49464 (ember)', '#97B077 (sage)', '#22D3EE (glass)'],
+  },
 };
 
 // Per-skill diagram sizing + color-presence contract (mirror of each skill's
@@ -123,6 +144,14 @@ const DIAGRAM = {
   glass: {
     tiers: '720 prose column (≤10 labels) · 1040 `glass-container` (≤18 labels) · 1280 `glass-container glass-container--wide` (**MUST when ≥20 labels or ≥4 cols**)',
     color: 'Dark-glass diagram language: node fills rgba(255,255,255,0.06) + 1px white-alpha strokes (same material as the page panels), ≤3 cyan glow nodes per diagram as the semantic focus. diagram-monochrome applies — zero saturated hues means the cyan focus is missing. Violet/pink NEVER appear inside diagrams.',
+  },
+  eclat: {
+    tiers: '1280 `eclat-wrap` holds the in-flow sections (this is the working tier for diagrams) · full-bleed `eclat-hero` / `eclat-stage` are cinematic stages, not width-constrained containers — do not hang a dense figure off them',
+    color: 'Dark cinematic ground: figures are built from cool-white spotlight and warm rim light, NOT from a palette. The flare #ff5b34 is the single saturated accent and marks at most one focus per figure. A second highlight hue — purple gradient, neon cyan, multi-color buttons — is the recognized template tell and breaks the identity outright.',
+  },
+  lectern: {
+    tiers: '1080 `lectern-wrap` (the deck body; there is no full-bleed hero tier — `lectern-title` is a title block, not a stage)',
+    color: 'Low saturation is how a briefing deck earns trust. Pick by data type: ordered / continuous (tiers, time) takes a SINGLE-hue lightness ramp — `#1d3a6e → #2f5bb0 → #7d9bd0`; only genuinely unrelated categories get multiple hues, and those must lock to one lightness band. Line charts: solid = actual, gray dashed = plan. Rainbow palettes and high-saturation blocks read as a document that cannot be trusted.',
   },
 };
 
@@ -160,7 +189,7 @@ sprint-contract.mjs — generate a contract for a new page
 
 Usage:
   node skills/design-review/scripts/sprint-contract.mjs \\
-    --skill=<anthropic|apple|ember|sage|glass> \\
+    --skill=<anthropic|apple|ember|sage|glass|eclat|lectern> \\
     --page=<pricing|landing|docs-home|feature-deep|any-other-type> \\
     [--format=md|json]
 

@@ -33,6 +33,18 @@ else scores composition, copy, and illustration — stay in your lane.
      flips to #F2F5FA / #0D1220)`. Violet or pink appearing as TEXT, icon
      or button fill = error (that's the AI-slop gradient line this skill
      polices hardest).
+   - eclat: `#ff5b34 (flare — the ONLY saturated foreground color)`,
+     `#040406 (ink canvas)`, `#f6f3ec (bone type)`, `#bcd2ff (cool
+     spotlight)`, `#ffb27a (warm rim light)`. `#ff7a4d (flare-soft)` is
+     the flare's own hover/gradient partner, not a 6th hue. A second UI
+     highlight family — violet gradient, neon cyan, multi-color buttons —
+     = error; that is the template tell this skill polices hardest.
+   - lectern: `#1d3a6e (navy)`, `#16203a (ink)`, `#f5f6f8 (paper)`,
+     `#2f5bb0 (mid-navy — the chart ramp's second stop)`, plus a status
+     trio used ONLY for state, never decoration: `#0f857a (teal — on
+     track)`, `#c98a1a (amber — at risk)`, `#bb4a55 (rose — blocked /
+     Confidential)`. Ordered data must ride the single-hue navy ramp
+     `#1d3a6e → #2f5bb0 → #7d9bd0`; a rainbow chart = error.
 
    Any hex outside these + the near-whites = potential 6th hue. Flag
    each occurrence.
@@ -52,6 +64,12 @@ else scores composition, copy, and illustration — stay in your lane.
    - glass aurora cyan ≥ 0.2% (SOLID cyan only — eyebrow, nav CTA,
      hairline; blobs blend toward the navy canvas and don't count.
      Checked in dark theme only; light is the variant, dark is canon)
+   - eclat flare ≥ 0.002% (deliberately low: a dark cinematic hero puts
+     the CTA mid-screen, so the gate only catches TOTAL absence — judge
+     the qualitative question yourself, not the pixel count)
+   - lectern navy ≥ 0.02% (carried by structural furniture — masthead
+     square, section kicker, numbered agenda markers — not by a big CTA;
+     a briefing deck has no full-bleed hero to lean on)
 
    visual-audit already runs the pixel count; your job is qualitative:
    does the first viewport SAY "this is a <skill> page" at a glance?
@@ -64,6 +82,13 @@ else scores composition, copy, and illustration — stay in your lane.
    - apple is the explicit exception (system PingFang is apple-native)
    - glass pairs sans↔sans: Noto Sans SC for both display and body
      (already wired in glass.css; flag page-level overrides)
+   - eclat is an apple-style exception: its display/body tokens are the
+     system stack (SF Pro Display / SF Pro Text), which resolves CJK
+     natively — do not demand Noto SC here
+   - lectern already carries CJK inside the token itself
+     (`--lectern-font-serif: Georgia, "Times New Roman", "Songti SC"`);
+     its sans is a system stack. Flag page-level overrides that drop
+     Songti SC from the serif chain
 
    Flag any regression to `Inter, PingFang SC, ...` as an error.
 
@@ -77,6 +102,18 @@ else scores composition, copy, and illustration — stay in your lane.
      ring; solid-cyan trio in the hero (mono eyebrow + filled CTA + 2px
      hairline); zero italic anywhere (Space Grotesk has no italic cut);
      dual-theme toggle in the nav
+   - eclat: a non-empty `.eclat-stage` product hero (a launch with no
+     product on stage does not hold); two-temperature lighting — cool
+     white key (`--eclat-cool`) plus warm rim on one side (`--eclat-warm`),
+     since a single temperature renders flat; one key spec blown up as a
+     full-screen `.eclat-bignum` "moment" rather than packed into a dense
+     spec table (dense tables are lectern's job)
+   - lectern: numbered agenda / section structure; a decisions section
+     placed EARLY with a decision·owner·due·status table (a deck exists to
+     get things decided — never bury it behind the charts); "Confidential"
+     in the topbar, which also anchors the rose status color; high data
+     density on purpose (one screen carrying a KPI row + two charts + a
+     table) — the exact opposite of eclat's one-beat-per-screen
 
    If 2+ signature moves are missing, the page "isn't this skill" even
    if token use is correct.

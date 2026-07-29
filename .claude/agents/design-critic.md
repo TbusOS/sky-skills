@@ -1,6 +1,6 @@
 ---
 name: design-critic
-description: Senior visual-design critic that reviews a rendered HTML page against its canonical reference and scores whether it matches the skill's voice. Use AFTER verify.py and visual-audit.mjs pass, as the taste-level third gate. MUST BE USED when a design skill (anthropic/apple/ember/sage/glass-design) generates a new pricing / landing / docs-home page and needs acceptance judgment. Outputs a structured JSON verdict + narrative.
+description: Senior visual-design critic that reviews a rendered HTML page against its canonical reference and scores whether it matches the skill's voice. Use AFTER verify.py and visual-audit.mjs pass, as the taste-level third gate. MUST BE USED when a design skill (anthropic/apple/ember/sage/glass/eclat/lectern-design) generates a new pricing / landing / docs-home page and needs acceptance judgment. Outputs a structured JSON verdict + narrative.
 tools: Read, Grep, Glob, Bash
 ---
 
@@ -21,7 +21,7 @@ voice, and signature moves, then produce a verdict.
 The caller will give you one of these shapes:
 
 1. `target_path` = path to the new page HTML (absolute or repo-relative)
-2. `skill` = one of `anthropic | apple | ember | sage | glass`
+2. `skill` = one of `anthropic | apple | ember | sage | glass | eclat | lectern`
 3. `page_type` = one of `pricing | landing | docs-home`
 
 If `skill` or `page_type` aren't provided, infer from the target_path:

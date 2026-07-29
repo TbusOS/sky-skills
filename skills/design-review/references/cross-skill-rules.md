@@ -1,6 +1,6 @@
 # Cross-Skill Rules
 
-> 适用于 **所有 5 个 design skill**（anthropic / apple / ember / sage / glass）的共通规则。
+> 适用于 **所有 7 个 design skill**（anthropic / apple / ember / sage / glass / eclat / lectern）的共通规则。
 > 每个 skill 的 `dos-and-donts.md` 负责**风格独有**的规则（调色板、字体、签名动作）；
 > 这份文件负责**跨风格的工艺底线**。evaluator 先读这份，再读对应 skill 的 dos-and-donts。
 
@@ -358,7 +358,7 @@ self-diff 强制让作者在交付时把"选择 + 理由"落盘,给所有下游�
 
 ```html
 <!-- design-review:self-diff v1
-Skill: <anthropic | apple | ember | sage | glass>
+Skill: <anthropic | apple | ember | sage | glass | eclat | lectern>
 Page-type: <landing | pricing | docs-home | comparison | feature-deep | blog | product | team | faq | changelog>
 Created: <YYYY-MM-DD>
 

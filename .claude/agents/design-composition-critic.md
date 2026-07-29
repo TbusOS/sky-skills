@@ -50,7 +50,7 @@ illustration. Stay in your lane.
 
 The caller gives you:
 1. `target_path` — HTML file to review
-2. `skill` — one of anthropic / apple / ember / sage / glass
+2. `skill` — one of anthropic / apple / ember / sage / glass / eclat / lectern
 3. `page_type` — one of pricing / landing / docs-home / feature-deep
 
 If missing, infer from path. If still ambiguous, stop and say so.

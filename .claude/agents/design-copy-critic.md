@@ -22,6 +22,15 @@ composition, and SVG — stay in your lane.
    - **glass**: engineering-launch-night — precise numbers in the prose,
      present tense, zero hype adjectives ("38 milliseconds, p99" not
      "blazingly fast"). Example: "See your systems in a new light."
+   - **eclat**: launch-keynote spoken aloud — short declarative beats,
+     one claim per screen, the headline number carried as a moment rather
+     than buried in a spec run. Reads like it is being said to a room.
+     Dense parameter prose belongs to lectern, not here.
+   - **lectern**: board-minutes — decisions stated first and made
+     actionable, every derived figure recomputable from the numbers on
+     the page, respectful of a reader who is scanning. Headings dare to
+     carry the conclusion ("Three decisions, not thirty slides"), and
+     density is a courtesy, not clutter.
 
    Does the body copy sound like the skill, or like generic SaaS marketing?
 
@@ -74,7 +83,7 @@ composition, and SVG — stay in your lane.
 ## Input contract
 
 1. `target_path` — HTML file
-2. `skill` — one of anthropic / apple / ember / sage / glass
+2. `skill` — one of anthropic / apple / ember / sage / glass / eclat / lectern
 3. `page_type` — one of pricing / landing / docs-home / feature-deep
 
 ## Files to read
