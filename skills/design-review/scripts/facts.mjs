@@ -79,6 +79,10 @@ const CORE_SURFACES = [
   'docs/HARNESS-ROADMAP.ember.html',
   'docs/HARNESS-ROADMAP.sage.html',
   'docs/HARNESS-ROADMAP.glass.html',
+  'docs/KERNEL-HARNESS.html',
+  'docs/KERNEL-CAPABILITIES.html',
+  'docs/KERNEL-CODE-REVIEW.html',
+  'docs/KERNEL-REPOS-SURVEY.html',
 ];
 
 // The flagship demos retell the repo in each aesthetic. They make the same
@@ -200,6 +204,24 @@ function buildChecks(truth) {
       ],
     },
     {
+      id: 'kernel-eval-cases',
+      truth: truth.kernel.cases,
+      what: 'linux-kernel-dev eval cases on disk',
+      patterns: [
+        new RegExp(`\\b(\\d+)\\s+(?:eval\\s+)?cases\\b`, 'gi'),
+        new RegExp(`(\\d+)\\s*个?用例`, 'g'),
+      ],
+    },
+    {
+      id: 'kernel-subsystems',
+      truth: truth.kernel.subsys,
+      what: 'linux-kernel-dev subsystem modules on disk',
+      patterns: [
+        new RegExp(`(\\d+)\\s*个?子系统`, 'g'),
+        new RegExp(`\\b(\\d+)\\s+subsystems?\\b`, 'gi'),
+      ],
+    },
+    {
       id: 'known-bugs',
       truth: truth.knownBugs.total,
       what: 'known-bug entries catalogued',
@@ -242,6 +264,25 @@ async function deriveTruth() {
   const ids = [...kbText.matchAll(/^###\s+(\d+\.\d+[a-z]?)\s/gm)].map((m) => m[1]);
   const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
 
+  // linux-kernel-dev keeps its own counts, published on the four KERNEL-*.html
+  // pages. They drifted the same way the design ones did — 136 on the page
+  // against 137 on disk even before the last round added three more.
+  const kdir = 'skills/linux-kernel-dev';
+  const caseDir = resolve(REPO_ROOT, `${kdir}/tests/eval/cases`);
+  const cases = (await exists(caseDir))
+    ? (await readdir(caseDir)).filter((f) => f.endsWith('.json')).length : 0;
+  const subsysDir = resolve(REPO_ROOT, `${kdir}/references/subsys`);
+  const subsys = (await exists(subsysDir))
+    ? (await readdir(subsysDir)).filter((f) => f.endsWith('.md')).length : 0;
+  let kRules = 0;
+  const rulesPath = resolve(REPO_ROOT, `${kdir}/evolution/rules.json`);
+  if (await exists(rulesPath)) {
+    try {
+      const parsed = JSON.parse(await readFile(rulesPath, 'utf-8'));
+      kRules = (parsed.rules || parsed).length || 0;
+    } catch { kRules = 0; }
+  }
+
   const families = { systems: 0, design: 0, harness: 0 };
   for (const s of skills) if (ROSTER[s]) families[ROSTER[s]] += 1;
 
@@ -249,6 +290,7 @@ async function deriveTruth() {
     skills: { total: skills.length, design: design.length, list: skills, families },
     canonical: { total: canonicalTotal, perSkill },
     knownBugs: { total: ids.length, dupes: [...new Set(dupes)] },
+    kernel: { cases, subsys, rules: kRules },
   };
 }
 
@@ -363,6 +405,8 @@ function printTruth(truth) {
     console.log(`      ${s.replace(/-design$/, '').padEnd(12)}${n}`);
   }
   console.log(`  known-bugs        ${truth.knownBugs.total}`);
+  console.log(`  kernel eval cases ${truth.kernel.cases}` +
+    `  (subsystems ${truth.kernel.subsys} · rules ${truth.kernel.rules})`);
   if (truth.knownBugs.dupes.length) {
     console.log(`      duplicate ids: ${truth.knownBugs.dupes.join(', ')}`);
   }
