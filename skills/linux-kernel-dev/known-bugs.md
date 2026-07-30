@@ -66,7 +66,7 @@
 - KB-CPUIDLE-001 · cpuidle .enter 在关中断原子上下文运行须返回实际进入的 state 下标(demote 时返浅态);会停本地 timer 的深睡态必标 CPUIDLE_FLAG_TIMER_STOP 否则唤醒丢失 · KV-132 · range：版本无关
 - KB-DEVFREQ-001 · devfreq .target 收到的是 governor 推荐频率,硬件只支持离散 OPP,必须 devfreq_recommended_opp 取 >= 目标的实际 OPP 再 dev_pm_opp_set_rate,别直接用推荐值 · KV-135 · range：版本无关
 - KB-SYNC-001 · sync_file_create() 建出 refcount=1 的 struct file,只有 fd_install 才转移所有权;fd_install 之前的错误路径(尤其 copy_to_user 回填 fd 失败)必须 fput(sync_file->file),只 dma_fence_put+put_unused_fd 会漏掉 file→file/sync_file/dma_fence 整条泄漏,对照 mainline sw_sync.c · KV-137 · range：dma_fence 时代(≥4.10)
-- KB-I2C-002 · 老 BSP 树(<=5.1)动态建 i2c client 用 i2c_new_device;新内核文档里的 i2c_new_client_device 在这类树上不存在(同族:proc_ops 5.6+、单参 .probe 6.x+) · KV-419-I2C-NEWDEV · range：i2c_new_device <=5.1 / i2c_new_client_device >=5.2
+- KB-I2C-002 · 老 BSP 树(<=5.2)动态建 i2c client 用 i2c_new_device;新内核文档里的 i2c_new_client_device 在这类树上不存在(同族:proc_ops 5.6+、单参 .probe 6.11+) · KV-419-I2C-NEWDEV · range：i2c_new_client_device >=5.3 / i2c_new_device 到 5.7 仍在、5.8 删除 / 并存窗口 5.3–5.7
 - KB-BSP-001 · 厂商 BSP 的 device tree 在内核树【外部】,靠 symlink 挂进 arch/<arch>/boot/dts/;grep -r 不跟 symlink 会 0 命中,把真实存在的 compatible/节点误判为不存在,必须用 grep -R · KV-BSP-DTS-SYMLINK · range：版本无关
 - KB-PM-002 · 老树(<=5.9)没有 pm_runtime_resume_and_get;pm_runtime_get_sync 【失败时也已经加过引用】,早返回必须先 pm_runtime_put_noidle,否则设备再也不会 suspend · KV-419-PM-GETSYNC · range：<=5.9(resume_and_get 5.10 引入)
 
@@ -931,15 +931,15 @@
 - provenance：self（真树核对 sync_file.h/file.h fd-backed fence 生命周期 + mainline sw_sync.c 对照;子系统:dma-buf/sync_file）
 - fires/catches：0 / 0
 
-### KB-I2C-002：老 BSP 树(<=5.1)动态建 i2c client 用 `i2c_new_device`，新内核文档里的 `i2c_new_client_device` 在树上根本不存在
+### KB-I2C-002：老 BSP 树(<=5.2)动态建 i2c client 用 `i2c_new_device`，新内核文档里的 `i2c_new_client_device` 在树上根本不存在
 
 - symptom：照当前内核文档 / 上游驱动写的代码，在厂商 BSP 上报 `implicit declaration of function 'i2c_new_client_device'`，或链接期 undefined。
-- root cause：i2c 核心在 5.2 把 `i2c_new_device()` / `i2c_new_dummy()` 换成了 `i2c_new_client_device()` / `i2c_new_dummy_device()`（后者返回 `ERR_PTR` 而非 `NULL`，错误处理写法也跟着变）。厂商 BSP 长期停在 4.9 / 4.14 / 4.19，**只有旧的一代**。同族的版本坑：procfs 的 `struct proc_ops` 是 5.6 才有（老树上仍是 `struct file_operations`）；i2c_driver 的单参 `.probe` 是 6.x 的形态。
+- root cause：i2c 核心分三段演进（在主线 git 上逐 tag 实测，见下方 check）：**≤5.2 只有旧一代** `i2c_new_device()` / `i2c_new_dummy()`；**5.3 引入**新一代 `i2c_new_client_device()` / `i2c_new_dummy_device()`（返回 `ERR_PTR` 而非 `NULL`，错误处理写法跟着变）；**旧一代到 5.7 都还在，5.8 才删除**。所以 5.3–5.7 是新旧并存窗口，只有跨过 5.8 才是非改不可。厂商 BSP 长期停在 4.9 / 4.14 / 4.19，**只有旧的一代**。同族的版本坑：procfs 的 `struct proc_ops` 是 5.6 才有（老树上仍是 `struct file_operations`）；platform/i2c 的 `.remove` 改 `void` 返回是 6.11。
 - fix：**先确定目标树的版本，再决定用哪一代 API —— 不是"用最新的"**。在树里 grep 比读文档可靠：`grep -RIl "\bi2c_new_client_device\b" <tree>/drivers/i2c <tree>/include/linux`，0 命中即这棵树只有旧 API。反方向同样成立：老 API 在新树上已被删除。
 - 附带细节（容易漏）：`.probe_new`（单参）**4.19 就已经提供**，与双参 `.probe` 并存于 `include/linux/i2c.h`。所以在 4.19 上写新驱动不必被迫用双参签名；6.x 只是把 `probe_new` 改名回 `probe`。既有条目 KB-I2C-001 只写了"6.x 起单参"，没提过渡期起点。
-- trigger：厂商 BSP / vendor kernel / 4.9 / 4.14 / 4.19 / msm- / 动态注册 i2c 设备 / `implicit declaration i2c_new_client_device`
-- range：`i2c_new_device` <= 5.1；`i2c_new_client_device` >= 5.2
-- scope/limits：版本敏感条目。本条的 gold 在 <=5.1 树上成立；在 >=5.2 树上 gold 与 corruption 互换，用 `version_drift.mjs` 核实目标树。
+- trigger：厂商 BSP / vendor kernel / 4.9 / 4.14 / 4.19 / 动态注册 i2c 设备 / `implicit declaration i2c_new_client_device`
+- range：`i2c_new_client_device` / `i2c_new_dummy_device` >= 5.3；`i2c_new_device` / `i2c_new_dummy` 到 5.7 仍在、5.8 删除；并存窗口 5.3–5.7
+- scope/limits：版本敏感条目。本条的 gold 在 <=5.2 树上成立；5.3–5.7 两代并存、gold 与 corruption 都能查到；>=5.8 起两者互换。用 `version_drift.mjs` 核实目标树。
 - check：
   ```
   [CLAIMS]

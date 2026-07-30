@@ -474,7 +474,7 @@
       "id": "KB-I2C-002",
       "surface": "known-bug",
       "skill": "linux-kernel-dev",
-      "text": "老 BSP 树(<=5.1)动态建 i2c client 用 i2c_new_device;新内核文档的 i2c_new_client_device 在这类树上不存在。同族版本坑:proc_ops 5.6+、单参 .probe 6.x+。写代码前先查目标树版本,别默认用最新 API。用例 KV-419-I2C-NEWDEV。",
+      "text": "老 BSP 树(<=5.2)动态建 i2c client 用 i2c_new_device;新内核文档的 i2c_new_client_device 是 5.3 才引入,在这类树上不存在。旧一代到 5.7 仍在、5.8 才删除,5.3–5.7 是并存窗口。同族版本坑:proc_ops 5.6+、.remove 改 void 返回 6.11+。写代码前先查目标树版本,别默认用最新 API。用例 KV-419-I2C-NEWDEV。",
       "fires": 0,
       "catches": 0,
       "linked_eval_case": "KV-419-I2C-NEWDEV",
