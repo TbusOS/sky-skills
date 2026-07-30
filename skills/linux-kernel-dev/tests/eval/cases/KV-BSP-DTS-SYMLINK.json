@@ -1,0 +1,30 @@
+{
+  "id": "KV-BSP-DTS-SYMLINK",
+  "topic": "vendor device trees mounted into the kernel tree by symlink",
+  "q": "On a vendor BSP, decide whether a compatible string used by a board .dtsi exists in the tree, when arch/<arch>/boot/dts/vendor is a symlink pointing outside the kernel tree.",
+  "kind": "objective",
+  "canary": false,
+  "range": "version-independent (directory layout convention, not a kernel API)",
+  "requires_tree": "vendor BSP whose dts directory is a symlink to a path outside the kernel tree. On an upstream tree there is no such symlink, so this case degenerates to always-pass and has no discriminating power.",
+  "gold_claims": {
+    "api": ["of_find_i2c_adapter_by_node", "of_parse_phandle", "of_node_put"],
+    "compatible": ["goodix,gt1x"]
+  },
+  "corruptions": [
+    {
+      "type": "fake-compatible",
+      "claim": "acme,nonexistent-touch-v9",
+      "why": "invented compatible; must still be caught after the grep -R fix, i.e. the fix must not turn the gate into a rubber stamp"
+    },
+    {
+      "type": "fake-api",
+      "claim": "of_find_i2c_adapter_by_phandle",
+      "why": "invented variant of of_find_i2c_adapter_by_node"
+    }
+  ],
+  "forbidden": [
+    "concluding a compatible does not exist from a grep -r that never followed the symlink",
+    "conflating absent-from-dts with absent-from-driver-of_match_table"
+  ],
+  "rubric": "Searches with grep -R (or resolves the symlink first). Distinguishes 'not in any dts' from 'in dts but no driver claims it' - the latter yields a client that registers but never binds."
+}

@@ -6,12 +6,27 @@
   "canary": true,
   "subsystem": "pm-runtime",
   "gold_claims": {
-    "api": ["pm_runtime_get_sync", "pm_runtime_resume_and_get", "pm_runtime_put_noidle"],
-    "config": ["CONFIG_PM"]
+    "api": [
+      "pm_runtime_get_sync",
+      "pm_runtime_resume_and_get",
+      "pm_runtime_put_noidle"
+    ],
+    "config": [
+      "CONFIG_PM"
+    ]
   },
   "corruptions": [
-    { "type": "fake-api", "claim": "pm_runtime_get_async", "why": "编造的函数,真名 pm_runtime_get/get_sync" }
+    {
+      "type": "fake-api",
+      "claim": "pm_runtime_get_async",
+      "why": "编造的函数,真名 pm_runtime_get/get_sync"
+    }
   ],
-  "forbidden": ["get_sync 失败直接 return 不配平引用", "以为失败就没加引用"],
-  "rubric": "pm_runtime_get_sync 即使返回负值也已把 usage 计数加 1,错误路径不配平→计数永久偏高、设备永不 autosuspend;失败分支要 pm_runtime_put_noidle,或直接用 pm_runtime_resume_and_get(失败自动回退引用);CONFIG_PM 是开关"
+  "forbidden": [
+    "get_sync 失败直接 return 不配平引用",
+    "以为失败就没加引用"
+  ],
+  "rubric": "pm_runtime_get_sync 即使返回负值也已把 usage 计数加 1,错误路径不配平→计数永久偏高、设备永不 autosuspend;失败分支要 pm_runtime_put_noidle,或直接用 pm_runtime_resume_and_get(失败自动回退引用);CONFIG_PM 是开关",
+  "range": ">= 5.10 (pm_runtime_resume_and_get); on older trees use pm_runtime_get_sync + pm_runtime_put_noidle on failure",
+  "requires_tree": "gold claims resolve only on a tree in the range above; on a vintage BSP tree this case reports gold-miss, which is version drift rather than a broken case"
 }

@@ -106,7 +106,12 @@ function grepCount(tree, pattern, globs) {
     if (globs && globs.length) { args.push('--'); for (const g of globs) args.push(g); }
   } else {
     cmd = 'grep';
-    args = ['-rIlE', pattern];
+    // -R, not -r: vendor BSPs mount their device trees into the kernel tree
+    // through a symlink that points outside it (e.g. arch/<arch>/boot/dts/vendor
+    // -> ../../../vendor/<soc>/devicetree-<ver>). With -r those files are never
+    // read and every compatible that only exists in the vendor dts is reported
+    // as a hallucination.
+    args = ['-RIlE', pattern];
     if (globs && globs.length) for (const g of globs) args.push(`--include=${g}`);
     args.push(tree);
   }

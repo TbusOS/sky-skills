@@ -1,0 +1,35 @@
+{
+  "id": "KV-419-PM-GETSYNC",
+  "topic": "runtime PM reference balance on a vintage tree (no resume_and_get)",
+  "q": "On a 4.19-era BSP kernel, resume a device at the top of an operation and release it afterwards, keeping the runtime PM reference count balanced even when the resume fails.",
+  "kind": "objective",
+  "canary": false,
+  "range": "<= 5.9 (pm_runtime_resume_and_get was added in 5.10)",
+  "requires_tree": "vintage BSP tree without pm_runtime_resume_and_get; on >= 5.10 the corruption below becomes a real API and this case loses its discriminating power",
+  "gold_claims": {
+    "api": [
+      "pm_runtime_get_sync",
+      "pm_runtime_put_noidle",
+      "pm_runtime_put",
+      "pm_runtime_enable",
+      "pm_runtime_disable"
+    ],
+    "config": ["CONFIG_PM"]
+  },
+  "corruptions": [
+    {
+      "type": "fake-api",
+      "claim": "pm_runtime_resume_and_get",
+      "why": "5.10+. It exists precisely to fix the get_sync-takes-a-reference-even-on-failure trap, so it is the first thing current docs suggest - and it is absent here. On this tree the trap must be handled by hand."
+    },
+    {
+      "type": "fake-api",
+      "claim": "pm_runtime_get_sync_or_put",
+      "why": "invented"
+    }
+  ],
+  "forbidden": [
+    "returning on pm_runtime_get_sync failure without pm_runtime_put_noidle - get_sync takes the reference before it attempts the resume, so an early return leaks it and the device never suspends again"
+  ],
+  "rubric": "On failure of pm_runtime_get_sync, drops the reference with pm_runtime_put_noidle before returning. Does not reach for pm_runtime_resume_and_get, which this tree does not have."
+}

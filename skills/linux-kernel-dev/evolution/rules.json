@@ -469,6 +469,36 @@
       "catches": 0,
       "linked_eval_case": "KV-137",
       "added": "2026-07-01"
+    },
+    {
+      "id": "KB-I2C-002",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "老 BSP 树(<=5.1)动态建 i2c client 用 i2c_new_device;新内核文档的 i2c_new_client_device 在这类树上不存在。同族版本坑:proc_ops 5.6+、单参 .probe 6.x+。写代码前先查目标树版本,别默认用最新 API。用例 KV-419-I2C-NEWDEV。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-419-I2C-NEWDEV",
+      "added": "2026-07-29"
+    },
+    {
+      "id": "KB-BSP-001",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "厂商 BSP 的 device tree 在内核树外部,靠 symlink 挂进 arch/<arch>/boot/dts/;grep -r 不跟 symlink 会 0 命中,把真实存在的 compatible 误判为幻觉。BSP 上搜 dts 一律 grep -R。用例 KV-BSP-DTS-SYMLINK。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-BSP-DTS-SYMLINK",
+      "added": "2026-07-29"
+    },
+    {
+      "id": "KB-PM-002",
+      "surface": "known-bug",
+      "skill": "linux-kernel-dev",
+      "text": "老树(<=5.9)无 pm_runtime_resume_and_get;pm_runtime_get_sync 失败时引用已加,早返回必须先 pm_runtime_put_noidle。用例 KV-419-PM-GETSYNC。",
+      "fires": 0,
+      "catches": 0,
+      "linked_eval_case": "KV-419-PM-GETSYNC",
+      "added": "2026-07-29"
     }
   ]
 }

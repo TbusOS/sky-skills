@@ -6,13 +6,29 @@
   "canary": true,
   "subsystem": "iommu",
   "gold_claims": {
-    "api": ["iommu_unmap", "iommu_iotlb_sync"],
-    "symbol": ["iommu_iotlb_gather"],
-    "config": ["CONFIG_IOMMU_API"]
+    "api": [
+      "iommu_unmap",
+      "iommu_iotlb_sync"
+    ],
+    "symbol": [
+      "iommu_iotlb_gather"
+    ],
+    "config": [
+      "CONFIG_IOMMU_API"
+    ]
   },
   "corruptions": [
-    { "type": "fake-api", "claim": "iommu_map_page", "why": "编造的映射函数" }
+    {
+      "type": "fake-api",
+      "claim": "iommu_map_page",
+      "why": "编造的映射函数"
+    }
   ],
-  "forbidden": ["unmap 后不刷 IOTLB 就放物理页", "以为改页表就够"],
-  "rubric": "IOMMU 缓存地址转换(IOTLB),unmap_pages 改页表后必须刷 IOTLB 才能让缓存失效、物理页才可复用;框架用 iommu_iotlb_gather 收集范围、在合适时机调驱动 .iotlb_sync 真正刷;不刷设备拿旧转换 DMA 到已释放内存(安全漏洞);CONFIG_IOMMU_API 是开关"
+  "forbidden": [
+    "unmap 后不刷 IOTLB 就放物理页",
+    "以为改页表就够"
+  ],
+  "rubric": "IOMMU 缓存地址转换(IOTLB),unmap_pages 改页表后必须刷 IOTLB 才能让缓存失效、物理页才可复用;框架用 iommu_iotlb_gather 收集范围、在合适时机调驱动 .iotlb_sync 真正刷;不刷设备拿旧转换 DMA 到已释放内存(安全漏洞);CONFIG_IOMMU_API 是开关",
+  "range": ">= 5.4 (iommu_iotlb_sync / iommu_iotlb_gather); on <= 5.3 trees the equivalents are iommu_tlb_sync + iommu_tlb_range_add",
+  "requires_tree": "gold claims resolve only on a tree in the range above; on a vintage BSP tree this case reports gold-miss, which is version drift rather than a broken case"
 }

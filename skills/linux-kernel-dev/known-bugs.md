@@ -66,6 +66,9 @@
 - KB-CPUIDLE-001 · cpuidle .enter 在关中断原子上下文运行须返回实际进入的 state 下标(demote 时返浅态);会停本地 timer 的深睡态必标 CPUIDLE_FLAG_TIMER_STOP 否则唤醒丢失 · KV-132 · range：版本无关
 - KB-DEVFREQ-001 · devfreq .target 收到的是 governor 推荐频率,硬件只支持离散 OPP,必须 devfreq_recommended_opp 取 >= 目标的实际 OPP 再 dev_pm_opp_set_rate,别直接用推荐值 · KV-135 · range：版本无关
 - KB-SYNC-001 · sync_file_create() 建出 refcount=1 的 struct file,只有 fd_install 才转移所有权;fd_install 之前的错误路径(尤其 copy_to_user 回填 fd 失败)必须 fput(sync_file->file),只 dma_fence_put+put_unused_fd 会漏掉 file→file/sync_file/dma_fence 整条泄漏,对照 mainline sw_sync.c · KV-137 · range：dma_fence 时代(≥4.10)
+- KB-I2C-002 · 老 BSP 树(<=5.1)动态建 i2c client 用 i2c_new_device;新内核文档里的 i2c_new_client_device 在这类树上不存在(同族:proc_ops 5.6+、单参 .probe 6.x+) · KV-419-I2C-NEWDEV · range：i2c_new_device <=5.1 / i2c_new_client_device >=5.2
+- KB-BSP-001 · 厂商 BSP 的 device tree 在内核树【外部】,靠 symlink 挂进 arch/<arch>/boot/dts/;grep -r 不跟 symlink 会 0 命中,把真实存在的 compatible/节点误判为不存在,必须用 grep -R · KV-BSP-DTS-SYMLINK · range：版本无关
+- KB-PM-002 · 老树(<=5.9)没有 pm_runtime_resume_and_get;pm_runtime_get_sync 【失败时也已经加过引用】,早返回必须先 pm_runtime_put_noidle,否则设备再也不会 suspend · KV-419-PM-GETSYNC · range：<=5.9(resume_and_get 5.10 引入)
 
 ## 条目
 
@@ -926,4 +929,64 @@
   ```
 - linked_eval_case：KV-137
 - provenance：self（真树核对 sync_file.h/file.h fd-backed fence 生命周期 + mainline sw_sync.c 对照;子系统:dma-buf/sync_file）
+- fires/catches：0 / 0
+
+### KB-I2C-002：老 BSP 树(<=5.1)动态建 i2c client 用 `i2c_new_device`，新内核文档里的 `i2c_new_client_device` 在树上根本不存在
+
+- symptom：照当前内核文档 / 上游驱动写的代码，在厂商 BSP 上报 `implicit declaration of function 'i2c_new_client_device'`，或链接期 undefined。
+- root cause：i2c 核心在 5.2 把 `i2c_new_device()` / `i2c_new_dummy()` 换成了 `i2c_new_client_device()` / `i2c_new_dummy_device()`（后者返回 `ERR_PTR` 而非 `NULL`，错误处理写法也跟着变）。厂商 BSP 长期停在 4.9 / 4.14 / 4.19，**只有旧的一代**。同族的版本坑：procfs 的 `struct proc_ops` 是 5.6 才有（老树上仍是 `struct file_operations`）；i2c_driver 的单参 `.probe` 是 6.x 的形态。
+- fix：**先确定目标树的版本，再决定用哪一代 API —— 不是"用最新的"**。在树里 grep 比读文档可靠：`grep -RIl "\bi2c_new_client_device\b" <tree>/drivers/i2c <tree>/include/linux`，0 命中即这棵树只有旧 API。反方向同样成立：老 API 在新树上已被删除。
+- 附带细节（容易漏）：`.probe_new`（单参）**4.19 就已经提供**，与双参 `.probe` 并存于 `include/linux/i2c.h`。所以在 4.19 上写新驱动不必被迫用双参签名；6.x 只是把 `probe_new` 改名回 `probe`。既有条目 KB-I2C-001 只写了"6.x 起单参"，没提过渡期起点。
+- trigger：厂商 BSP / vendor kernel / 4.9 / 4.14 / 4.19 / msm- / 动态注册 i2c 设备 / `implicit declaration i2c_new_client_device`
+- range：`i2c_new_device` <= 5.1；`i2c_new_client_device` >= 5.2
+- scope/limits：版本敏感条目。本条的 gold 在 <=5.1 树上成立；在 >=5.2 树上 gold 与 corruption 互换，用 `version_drift.mjs` 核实目标树。
+- check：
+  ```
+  [CLAIMS]
+  api: i2c_new_device, i2c_unregister_device, i2c_verify_client, of_find_i2c_adapter_by_node, i2c_put_adapter, device_find_child, put_device
+  symbol: I2C_NAME_SIZE
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-419-I2C-NEWDEV
+- provenance：self-distilled（2026-07-29，4.19.157 BSP 实测：`i2c_new_device` 11 处 / `i2c_new_client_device` 0 处 / `i2c_new_dummy` 2 处 / `i2c_new_dummy_device` 0 处 / `struct proc_ops` 0 处 / `i2c.h` 双参 `.probe` 与单参 `.probe_new` 并存）
+- fires/catches：0 / 0
+
+### KB-BSP-001：厂商 BSP 的 device tree 在内核树【外部】，靠 symlink 挂进来；`grep -r` 不跟 symlink 会把真实存在的东西误判成不存在
+
+- symptom：明明 `.dtsi` 里写着的 compatible / 节点 / 属性，在内核树里 `grep -r` 得到 0 命中。据此得出"这个 compatible 不存在 / 是幻觉 / 没人用"的结论，全错。
+- root cause：厂商 BSP 不把 device tree 放在内核树里，而是放在树外的 vendor 目录，再用一条 symlink 挂进 `arch/<arch>/boot/dts/`。**`grep -r` 默认不跟随 symlink**（要 `-R`），于是整棵 vendor dts 从未被读到。`git grep` 也够不到——它的作用域是内核子树，而 symlink 目标在子树之外。
+- fix：在 BSP 树上搜 dts 一律用 **`grep -R`**；下结论前先 `ls -ld <path>` 确认那一级是不是 symlink。判断"某 compatible 是否存在"时区分两种不存在：**dts 里没有** vs **驱动 `of_match_table` 里没有**——后者意味着节点建得出 client 但永远绑不上驱动。
+- trigger：BSP / vendor kernel / SoC 厂商内核树 / 找 dts 节点 grep 0 命中 / `arch/*/boot/dts/vendor`
+- range：版本无关（是目录布局约定，不是内核 API）
+- scope/limits：上游 linux 树没有这层 symlink，本条只在厂商 BSP 上触发。
+- check：`scripts/fact_gate.mjs` 的非 git 分支已改用 `grep -RIlE`（本条即由此修复驱动）；回归验证见 linked case。
+- linked_eval_case：KV-BSP-DTS-SYMLINK
+- provenance：self-distilled（2026-07-29 实测：同一棵 4.19 BSP 树上，`grep -rIlE "silead,gsl-tp" --include=*.dtsi` 得 **0**，`grep -RIlE` 同参数得 **4**；该 compatible 真实存在于经 symlink 挂载的 vendor dts。fact_gate 因此把它误报为 HALLUCINATION）
+- fires/catches：0 / 0
+
+### KB-PM-002：老树(<=5.9)没有 `pm_runtime_resume_and_get`，`get_sync` 失败也已加引用，早返回必须手工 `put_noidle`
+
+- symptom：设备用过一次之后再也不进 runtime suspend，功耗下不去；或 `pm_runtime_disable` 时卡住。表现滞后，很难关联到某次失败的 resume。
+- root cause：`pm_runtime_get_sync()` **先递增引用计数、再去尝试 resume**。resume 失败时它返回负值，但**那个引用已经加上了**。写成 `if (ret < 0) return ret;` 就漏掉一个引用，`usage_count` 永远回不到 0。上游为此在 **5.10** 加了 `pm_runtime_resume_and_get()`（失败时自己 put）。**老 BSP 树上没有这个函数**，当前文档和上游驱动的写法照抄不过来。
+- fix：老树上手工补：
+  ```c
+  ret = pm_runtime_get_sync(dev);
+  if (ret < 0) {
+          pm_runtime_put_noidle(dev);   /* get_sync 失败时引用已加，必须还回去 */
+          return ret;
+  }
+  ```
+  用 `put_noidle` 而不是 `put`：此刻设备并没有真的起来，不该触发 idle 回调。
+- trigger：厂商 BSP / vendor kernel / 4.9 / 4.14 / 4.19 / runtime PM / `pm_runtime_get_sync` / 设备不进 suspend / `implicit declaration pm_runtime_resume_and_get`
+- range：`pm_runtime_resume_and_get` >= 5.10；本条针对 <= 5.9
+- scope/limits：>= 5.10 的树上直接用 `pm_runtime_resume_and_get` 即可，本条的 corruption 在那种树上会变成真 API，用例失去判别力（已在用例的 `requires_tree` 标注）。
+- check：
+  ```
+  [CLAIMS]
+  api: pm_runtime_get_sync, pm_runtime_put_noidle, pm_runtime_put, pm_runtime_enable, pm_runtime_disable
+  config: CONFIG_PM
+  [/CLAIMS]
+  ```
+- linked_eval_case：KV-419-PM-GETSYNC
+- provenance：self-distilled（2026-07-29，4.19.157 BSP 实测：`pm_runtime_get_sync` 6 处 / `pm_runtime_put_noidle` 3 处 / `pm_runtime_resume_and_get` **0 处**。同批发现的还有 IOMMU：`iommu_iotlb_sync` / `iommu_iotlb_gather` 在 4.19 上 0 处，对应物是 `iommu_tlb_sync` + `iommu_tlb_range_add`）
 - fires/catches：0 / 0

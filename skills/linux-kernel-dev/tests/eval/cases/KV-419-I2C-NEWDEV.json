@@ -1,0 +1,41 @@
+{
+  "id": "KV-419-I2C-NEWDEV",
+  "topic": "vintage-tree i2c client creation API",
+  "q": "On a 4.19-era BSP kernel, create an i2c client at runtime from a device tree node: resolve the adapter, drop whatever already owns the address, register the new client, and release the adapter reference.",
+  "kind": "objective",
+  "canary": false,
+  "range": "<= 5.1 (i2c_new_device removed in favour of i2c_new_client_device in 5.2)",
+  "gold_claims": {
+    "api": [
+      "i2c_new_device",
+      "i2c_unregister_device",
+      "i2c_verify_client",
+      "of_find_i2c_adapter_by_node",
+      "i2c_put_adapter",
+      "device_find_child",
+      "put_device"
+    ]
+  },
+  "corruptions": [
+    {
+      "type": "fake-api",
+      "claim": "i2c_new_client_device",
+      "why": "5.2+ only. Copying current kernel docs onto a 4.19 BSP compiles nowhere; the tree has no such symbol."
+    },
+    {
+      "type": "fake-api",
+      "claim": "i2c_new_dummy_device",
+      "why": "5.2+ replacement for i2c_new_dummy; absent on 4.19."
+    },
+    {
+      "type": "fake-api",
+      "claim": "devm_i2c_new_dummy_device_v2",
+      "why": "invented variant"
+    }
+  ],
+  "forbidden": [
+    "device_find_child without a matching put_device",
+    "keeping the adapter reference after probe fails"
+  ],
+  "rubric": "Uses the API generation that exists in the target tree, not the one in current docs. Balances the adapter and device references on every path."
+}

@@ -35,6 +35,26 @@ if [ -z "$CHECKPATCH" ]; then
     CHECKPATCH="$KDIR/scripts/checkpatch.pl"
   fi
 fi
+
+# Fall back to a tree bound with kernel-tree.mjs. The error message below tells
+# users to bind a tree, so this gate has to actually honour that binding.
+if [ -z "$CHECKPATCH" ]; then
+  CFG="${XDG_CONFIG_HOME:-$HOME/.config}/linux-kernel-dev/trees.json"
+  if [ -f "$CFG" ] && command -v node >/dev/null 2>&1; then
+    BOUND=$(node -e '
+      const fs = require("fs");
+      try {
+        const c = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+        const trees = c.trees || [];
+        const t = trees.find(x => x.version === c.default) || trees[0];
+        if (t && t.path) process.stdout.write(t.path);
+      } catch (e) { /* unreadable config is not an error here */ }
+    ' "$CFG" 2>/dev/null)
+    if [ -n "$BOUND" ] && [ -f "$BOUND/scripts/checkpatch.pl" ]; then
+      CHECKPATCH="$BOUND/scripts/checkpatch.pl"
+    fi
+  fi
+fi
 [ -n "$CHECKPATCH" ] && [ -f "$CHECKPATCH" ] || {
   echo "[checkpatch-gate] gate-error: checkpatch.pl not found." >&2
   echo "  pass --checkpatch <path> or --tree <kernel-tree>, or bind a tree (kernel-tree.mjs add)." >&2
