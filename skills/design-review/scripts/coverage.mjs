@@ -24,8 +24,16 @@ import process from 'node:process';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
 
-// The target matrix. Light skills share a 10-type core; glass has its own set
-// (it is the dashboard/report/diagram skill, not a marketing-site skill).
+// The target matrix. Marketing-site skills share a 10-type core; the rest each
+// carry the page-types their own voice is actually for — a keynote skill has no
+// "pricing" page and a board deck has no "landing", so the matrix is ragged by
+// design, not incomplete.
+//
+// Every design skill on disk MUST appear here. A skill missing from this table
+// is invisible to the tracker, which then reports "matrix complete" while real
+// canonicals sit uncounted — exactly how 44/44 outlived the arrival of eclat
+// and lectern (6 canonicals unseen). facts.mjs now gates that: TARGET keys are
+// checked against skills/*-design/ on disk.
 const CORE = ['landing', 'pricing', 'docs-home', 'feature-deep', 'comparison',
   'blog-index', 'product-detail', 'team', 'faq', 'changelog'];
 const TARGET = {
@@ -34,6 +42,8 @@ const TARGET = {
   ember: CORE,
   sage: CORE,
   glass: ['landing', 'dashboard', 'data-report', 'diagram-gallery'],
+  eclat: ['launch', 'pre-order', 'spec'],
+  lectern: ['agenda', 'minutes', 'review'],
 };
 
 function parseArgs(argv) {

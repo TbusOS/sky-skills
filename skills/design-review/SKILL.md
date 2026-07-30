@@ -148,13 +148,14 @@ node skills/design-review/scripts/learning-loop.mjs \
 | Phase | 组件 | 状态 |
 |---|---|---|
 | 0 · 独立脚本 | verify / visual-audit / screenshot | **done** |
-| 1 · 多风格 known-bugs 库 | 9 → 26 条 | **done · 扩展中** |
+| 1 · 多风格 known-bugs 库 | 实时计数见 `--facts --list` | **done · 扩展中** |
 | 2a · canonical 参考库 | 计数见 `--coverage` | **next** · 每 session 1-2 张递进 |
 | 3 · generator self-diff | 强制自评 note | 部分完成 |
 | 5 · multi-critic | 4 专家并行 + 聚合 | **done** (2026-04-22) |
 | 6 · `/design-loop` 编排 | planner → gen → review → critic × 3 轮 | Future(依赖 Phase 01 planner)|
 | 7 · learning-loop | `design-learner` + `learning-loop.mjs` | **done** (2026-04-22) |
 | 8 · library-grower | 5 张优秀产物 → 自动蒸馏新 canonical | Future(等 10+ 真实页数据)|
+| 10 · facts 闸 | `facts.mjs` —— 展示页宣称的数字 vs 磁盘真值,不符即非 0 退出 | **done** (2026-07-30) |
 
 ## 生命周期规则
 

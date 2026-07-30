@@ -59,6 +59,10 @@
 #   --regress [...]    Pass through to regression-gate.mjs (--baseline |
 #                      --check --skill=X): held-out anti-overfit gate.
 #   --coverage [...]   Pass through to coverage.mjs (component 02): the canonical
+#   --facts [...]     Pass through to facts.mjs. Checks every published count
+#                     (skills, design skills, canonicals, known-bugs) against
+#                     what is actually on disk; --list prints the truth,
+#                     --strict also gates the showcase demos. Exit 1 on drift.
 #                      library skill×page-type matrix, gaps, and uncommitted pages.
 #   --loop [...]       Pass through to design-loop.mjs (component 06): the
 #                      deterministic /design-loop driver — --init / --record /
@@ -140,6 +144,7 @@ case "${1:-}" in
   --rules)   shift; exec node "$EVOLVE_SCRIPTS/evolve-rules.mjs" "$@" ;;
   --regress) shift; exec node "$EVOLVE_SCRIPTS/regression-gate.mjs" "$@" ;;
   --coverage) shift; exec node "$EVOLVE_SCRIPTS/coverage.mjs" "$@" ;;
+  --facts)   shift; exec node "$EVOLVE_SCRIPTS/facts.mjs" "$@" ;;
   --loop)    shift; exec node "$EVOLVE_SCRIPTS/design-loop.mjs" "$@" ;;
   --evolve)
     cat <<'EVO'
