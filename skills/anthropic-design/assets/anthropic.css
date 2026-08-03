@@ -199,6 +199,25 @@ p {
   padding-block: var(--space-10);
 }
 
+/* A hero's inner block is usually width-constrained (max-width:820 or so) inside
+   a 1200 container. Without auto side margins it sits flush left while its own
+   text-align:center keeps the text centred *within the block* — so it reads as
+   centred to the eye and only a measurement shows the whole hero sitting ~166px
+   left of the viewport centre. Auto margins are a no-op for full-width children,
+   so this only bites where it should. Note an inline `margin: … 0` on a child
+   still wins over this rule — templates emit `margin: … auto` for that reason. */
+.anth-hero .anth-container > * {
+  margin-inline: auto;
+}
+
+/* A card that is itself the link: without this its headings and body text
+   inherit the browser's default link blue instead of the page ink. */
+a.anth-card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
 /* ---------- Section F: Stat ---------- */
 .anth-stat {
   text-align: center;
@@ -507,6 +526,19 @@ code {
   background: var(--anth-bg-subtle);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
+}
+
+/* `.anth-code` is a block panel (32px padding) for <pre>, but the name reads
+   like "inline code", so it gets written as <code class="anth-code">. On an
+   inline box that padding inflates the line to ~80px and overlaps the lines
+   above and below, which then shows up as a scatter of text-overlap warnings
+   whose single root cause is this one misuse. Falling back to inline metrics
+   makes the mistake harmless; block panels keep matching pre.anth-code. */
+code.anth-code:not(pre code) {
+  padding: 2px 6px;
+  font-size: 0.93em;
+  border-radius: var(--radius-sm);
+  overflow-x: visible;
 }
 
 kbd {

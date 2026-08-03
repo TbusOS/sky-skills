@@ -293,7 +293,7 @@
 - **Why**:`.anth-code` 是给块级 `<pre>` 设计的代码样式(padding:32px)。作者按肌肉记忆把它套到行内 `<code class="anth-code">` 上,32px 上下 padding 把行内盒撑到 ~80px 高,纵向压盖相邻行。
 - **How caught**:2026-07-15 design-critic;根因是它间接触发的一批 text-overlap,直接判据此前没有。
 - **Defense**:`visual-audit.mjs` 新增 **inline-code-block-padding**(warn,§12f):行内 `<code>`(祖先非 `<pre>`、display 非 block/flex/grid)渲染高度 ≥ 2× font-size **且**上下 padding 合计 ≥ font-size → warn。换行的行内代码也会变高,但它 padding 只有几 px,padding 闸把两者分开。正确行内 `<code>`(padding 2px 6px)两闸都不过。10 canonical 回归 0 假阳,正样命中(82px 高 / 64px padding)。
-- **Fix playbook**:行内代码用裸 `<code>`(anthropic.css 已给 padding:2px 6px);`.anth-code` 只留给块级 `<pre>`。
+- **Fix playbook**:行内代码用裸 `<code>`(anthropic.css 已给 padding:2px 6px);`.anth-code` 只留给块级 `<pre>`。2026-08-03 起 anthropic.css 加了 `code.anth-code:not(pre code)` 回落规则,加载该样式表的页面误套已无害;本检查继续守住不加载它的页面(如内联样式导出页)。
 - **Rule**:块级组件样式(大 padding / 大圆角)不往行内元素上套。
 
 ---
