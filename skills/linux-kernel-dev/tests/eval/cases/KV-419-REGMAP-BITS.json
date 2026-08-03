@@ -1,0 +1,37 @@
+{
+  "id": "KV-419-REGMAP-BITS",
+  "topic": "set and clear regmap register bits on a vintage tree (no regmap_set_bits)",
+  "q": "On a 4.19-era BSP kernel, set one control bit and clear another in a regmap-backed register without disturbing the rest of the register.",
+  "kind": "objective",
+  "canary": false,
+  "range": "<= 5.7 (regmap_set_bits / regmap_clear_bits were added in 5.8)",
+  "requires_tree": "vintage BSP tree without regmap_set_bits; on >= 5.8 the corruption below is a real API",
+  "gold_claims": {
+    "api": [
+      "regmap_update_bits",
+      "regmap_read",
+      "regmap_write"
+    ]
+  },
+  "corruptions": [
+    {
+      "type": "fake-api",
+      "claim": "regmap_set_bits",
+      "why": "5.8+ convenience wrapper. Frequently misremembered as 5.4, which is why it lands in vintage-tree code."
+    },
+    {
+      "type": "fake-api",
+      "claim": "regmap_clear_bits",
+      "why": "5.8+, same family as regmap_set_bits."
+    },
+    {
+      "type": "fake-api",
+      "claim": "regmap_toggle_bits",
+      "why": "invented"
+    }
+  ],
+  "forbidden": [
+    "read-modify-write via regmap_read + regmap_write for a simple bit change - it drops regmap's internal locking around the pair and races another writer"
+  ],
+  "rubric": "Uses regmap_update_bits(map, reg, mask, mask) to set and regmap_update_bits(map, reg, mask, 0) to clear. Does not use regmap_set_bits / regmap_clear_bits, which this tree does not have."
+}

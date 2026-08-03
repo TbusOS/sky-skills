@@ -1,0 +1,39 @@
+{
+  "id": "KV-419-FOLIO",
+  "topic": "take and drop a page reference on a vintage tree (pre-folio)",
+  "q": "On a 4.19-era BSP kernel, pin a page for the duration of a DMA transfer and release it afterwards.",
+  "kind": "objective",
+  "canary": false,
+  "range": "<= 5.15 (folio_put arrived in 5.16, folio_get in 5.17 - the folio API landed in batches, not in one release)",
+  "requires_tree": "vintage BSP tree without the folio API; note that even on newer trees the folio symbols did not all appear together",
+  "gold_claims": {
+    "api": [
+      "get_page",
+      "put_page",
+      "dma_map_page",
+      "dma_unmap_page",
+      "dma_mapping_error"
+    ]
+  },
+  "corruptions": [
+    {
+      "type": "fake-api",
+      "claim": "folio_get",
+      "why": "5.17+. The folio API landed in batches - folio_put is one release older - so 'the folio API' is not a single version boundary."
+    },
+    {
+      "type": "fake-api",
+      "claim": "folio_put",
+      "why": "5.16+; absent here."
+    },
+    {
+      "type": "fake-api",
+      "claim": "page_folio_get",
+      "why": "invented"
+    }
+  ],
+  "forbidden": [
+    "comparing a dma_addr_t against 0 to detect a mapping failure instead of calling dma_mapping_error"
+  ],
+  "rubric": "Uses get_page / put_page around the DMA mapping and checks dma_mapping_error. Does not use folio_get / folio_put, which this tree does not have."
+}

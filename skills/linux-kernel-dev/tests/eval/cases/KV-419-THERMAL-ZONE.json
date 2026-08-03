@@ -1,0 +1,36 @@
+{
+  "id": "KV-419-THERMAL-ZONE",
+  "topic": "register a thermal sensor from a driver on a vintage tree",
+  "q": "On a 4.19-era BSP kernel, register a driver-provided temperature sensor with the thermal framework so it can be bound from device tree.",
+  "kind": "objective",
+  "canary": false,
+  "range": "<= 6.0 (devm_thermal_of_zone_register arrived in 6.1)",
+  "requires_tree": "vintage BSP tree with the thermal_zone_of_sensor_register family; on >= 6.1 the corruption below is a real API",
+  "gold_claims": {
+    "api": [
+      "thermal_zone_of_sensor_register",
+      "thermal_zone_of_sensor_unregister"
+    ]
+  },
+  "corruptions": [
+    {
+      "type": "fake-api",
+      "claim": "devm_thermal_of_zone_register",
+      "why": "6.1+ replacement. Frequently misremembered as 6.0."
+    },
+    {
+      "type": "fake-api",
+      "claim": "thermal_of_zone_register",
+      "why": "6.1+ non-devm form of the same replacement; also absent here."
+    },
+    {
+      "type": "fake-api",
+      "claim": "devm_thermal_zone_of_sensor_register_v2",
+      "why": "invented"
+    }
+  ],
+  "forbidden": [
+    "returning success from the .get_temp callback without writing the out parameter - the framework then reads a stale or uninitialised temperature"
+  ],
+  "rubric": "Registers with thermal_zone_of_sensor_register and unregisters on remove. Does not use devm_thermal_of_zone_register, which this tree does not have."
+}

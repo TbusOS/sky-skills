@@ -1,0 +1,32 @@
+{
+  "id": "KV-419-PLATFORM-REMOVE",
+  "topic": "platform_driver remove callback on a vintage tree (before the two-step remove migration)",
+  "q": "On a 4.19-era BSP kernel, write the remove path of a platform driver that tears down what probe set up.",
+  "kind": "objective",
+  "canary": false,
+  "range": "<= 6.2 (.remove_new existed 6.3-6.12; .remove itself became void in 6.11)",
+  "requires_tree": "vintage BSP tree whose platform_driver has only int (*remove); on 6.3-6.12 .remove_new exists and on >= 6.11 .remove itself returns void",
+  "gold_claims": {
+    "api": [
+      "platform_driver_register",
+      "platform_set_drvdata",
+      "platform_get_drvdata"
+    ]
+  },
+  "corruptions": [
+    {
+      "type": "fake-api",
+      "claim": "remove_new",
+      "why": "6.3+ transitional field, deleted again in 6.13. It is scaffolding for a two-step migration and is often copied as if it were the final shape."
+    },
+    {
+      "type": "fake-api",
+      "claim": "platform_driver_unregister_new",
+      "why": "invented"
+    }
+  ],
+  "forbidden": [
+    "relying on a non-zero return from .remove to abort unbinding - the core ignores the value and the device is unbound regardless"
+  ],
+  "rubric": "Implements int (*remove)(struct platform_device *) and returns 0. Does not use .remove_new, which this tree does not have, and does not treat the return value as able to refuse removal."
+}

@@ -71,7 +71,7 @@ git grep -q '\bdevm_platform_ioremap_resource\b' v5.1 -- include/linux/platform_
 - 现象: 老树上要写成 `platform_get_resource()` + `devm_ioremap_resource()` 两步。
 - 处理: >=5.1 用一步的；<=5.0 用两步式，且 `platform_get_resource()` 返回 NULL 也要判。
 - last_validated_against: 主线 v5.0 无 / v5.1 有；4.19 BSP 树 0 命中
-- linked_eval_case: 暂无
+- linked_eval_case: KV-419-IOREMAP
 
 ### `regmap_set_bits` / `regmap_clear_bits`
 
@@ -80,7 +80,7 @@ git grep -q '\bdevm_platform_ioremap_resource\b' v5.1 -- include/linux/platform_
 - 处理: <=5.7 用 `regmap_update_bits(map, reg, mask, mask)` 置位、
   `regmap_update_bits(map, reg, mask, 0)` 清位——语义完全等价，只是啰嗦。
 - last_validated_against: 主线 v5.7 无 / v5.8 有；4.19 BSP 树 0 命中
-- linked_eval_case: 暂无
+- linked_eval_case: KV-419-REGMAP-BITS
 
 ### `tasklet_setup` 与回调签名
 
@@ -89,7 +89,7 @@ git grep -q '\bdevm_platform_ioremap_resource\b' v5.1 -- include/linux/platform_
   `struct tasklet_struct *t`，配合 `from_tasklet()` 取宿主结构。老树只有 `tasklet_init()`。
 - 处理: <=5.8 用 `tasklet_init()`，回调收 `unsigned long`，自己 cast 回结构指针。
 - last_validated_against: 主线 v5.8 无 / v5.9 有；4.19 BSP 树 0 命中
-- linked_eval_case: 暂无
+- linked_eval_case: KV-419-TASKLET
 
 ### `struct proc_ops`（procfs 不再复用 `file_operations`）
 
@@ -98,8 +98,8 @@ git grep -q '\bdevm_platform_ioremap_resource\b' v5.1 -- include/linux/platform_
   换成 `struct proc_ops *`。老树上写 `proc_ops` 直接编不过。
 - 处理: <=5.5 用 `struct file_operations`（`.owner` / `.open` / `.read` / `.llseek`）；
   >=5.6 用 `struct proc_ops`（`.proc_open` / `.proc_read` / `.proc_lseek`，无 `.owner`）。
-- last_validated_against: 主线 v5.5 无 / v5.6 有；4.19 BSP 树 0 命中
-- linked_eval_case: 暂无
+- last_validated_against: 主线 v5.5 无 / v5.6 有；4.19 BSP 树的 `include/` 里**无**该结构定义，但全树 `grep` 会命中——若干厂商驱动的 `.c` 里写了 `struct proc_ops`（未被编入），另有一处是名为 `proc_ops` 的 `struct file_operations` 变量。判这条要看头文件，不能靠全树词频
+- linked_eval_case: 无 —— **事实检查判不了**。它按符号是否在树里出现来判,而本条的判据是「`struct proc_ops` 有没有定义」。实测这棵 4.19 树:`include/` 里没有该结构定义,但若干厂商驱动的 `.c` 里写了 `struct proc_ops`(未被编入),于是全树扫描认定「存在」,corruption 抓不住。要判这条得看头文件里的定义,不是全树词频。
 
 ### `class_create()` 去掉 `owner` 参数
 
@@ -109,7 +109,7 @@ git grep -q '\bdevm_platform_ioremap_resource\b' v5.1 -- include/linux/platform_
 - 处理: 按目标树版本写。要同时支持两代就用 `LINUX_VERSION_CODE` 分支。
 - last_validated_against: 主线 v6.3 为 `#define class_create(owner, name)` /
   v6.4 为 `struct class * __must_check class_create(const char *name)`
-- linked_eval_case: 暂无
+- linked_eval_case: 无 —— **事实检查判不了**。`class_create` 两代都在,变的是参数个数;符号存在性看不出 arity。要判这条得比对原型或实际编译。
 
 ### `platform_driver` 的 `.remove` / `.remove_new` 两次改形
 
@@ -122,7 +122,7 @@ git grep -q '\bdevm_platform_ioremap_resource\b' v5.1 -- include/linux/platform_
   新代码不要写它。
 - last_validated_against: 主线逐 tag——`remove_new` v6.2 无 / v6.3 有 / v6.13 无；
   `.remove` v6.10 为 `int` / v6.11 为 `void`
-- linked_eval_case: 暂无
+- linked_eval_case: KV-419-PLATFORM-REMOVE
 
 ### `devm_thermal_of_zone_register`
 
@@ -130,7 +130,7 @@ git grep -q '\bdevm_platform_ioremap_resource\b' v5.1 -- include/linux/platform_
 - 现象: 老树上是 `thermal_zone_of_sensor_register()` 一族。**常被误记为 6.0**。
 - 处理: 按树版本选；两代的注销方式也不同（devm 版不用手工注销）。
 - last_validated_against: 主线 v6.0 无 / v6.1 有
-- linked_eval_case: 暂无
+- linked_eval_case: KV-419-THERMAL-ZONE
 
 ### `pwm_apply_might_sleep`
 
@@ -139,7 +139,7 @@ git grep -q '\bdevm_platform_ioremap_resource\b' v5.1 -- include/linux/platform_
   在名字里挑明它可能睡眠。**常被误记为 6.7**。
 - 处理: <=6.7 用 `pwm_apply_state()`；>=6.8 用新名。两者都不能在原子上下文调。
 - last_validated_against: 主线 v6.7 无 / v6.8 有
-- linked_eval_case: 暂无
+- linked_eval_case: KV-419-PWM-APPLY
 
 ### Android ION 从主线移除
 
@@ -150,7 +150,7 @@ git grep -q '\bdevm_platform_ioremap_resource\b' v5.1 -- include/linux/platform_
   通用 API，实现在 `drivers/dma-buf/dma-heap.c`。厂商 BSP 常年自带 ION，
   是**下游保留**，不代表上游还有。
 - last_validated_against: 主线 v5.10 有该目录 / v5.11 无
-- linked_eval_case: 暂无
+- linked_eval_case: KV-419-ION-DMAHEAP
 
 ### folio API 是分批落地的
 
@@ -160,7 +160,7 @@ git grep -q '\bdevm_platform_ioremap_resource\b' v5.1 -- include/linux/platform_
 - 处理: 驱动侧绝大多数场景不需要动；确实要用时**按目标树逐符号查**，
   别假设整套 API 同时可用——`folio_put` 比 `folio_get` 早一个版本就是现成的反例。
 - last_validated_against: 主线 v5.15 无 `folio_put` / v5.16 有；v5.16 无 `folio_get` / v5.17 有
-- linked_eval_case: 暂无
+- linked_eval_case: KV-419-FOLIO
 
 ## 查过但**不属于**版本差异的（免得重复调查）
 

@@ -1,0 +1,33 @@
+{
+  "id": "KV-419-IOREMAP",
+  "topic": "map a platform device's MMIO on a vintage tree (no devm_platform_ioremap_resource)",
+  "q": "In a platform driver probe on a 4.19-era BSP kernel, map the device's first MMIO region with device-managed lifetime, handling the failure paths.",
+  "kind": "objective",
+  "canary": false,
+  "range": "<= 5.0 (devm_platform_ioremap_resource was added in 5.1)",
+  "requires_tree": "vintage BSP tree without devm_platform_ioremap_resource; on >= 5.1 the corruption below is a real API and this case loses its discriminating power",
+  "gold_claims": {
+    "api": [
+      "platform_get_resource",
+      "devm_ioremap_resource",
+      "platform_get_irq",
+      "devm_request_irq"
+    ]
+  },
+  "corruptions": [
+    {
+      "type": "fake-api",
+      "claim": "devm_platform_ioremap_resource",
+      "why": "5.1+. It folds platform_get_resource + devm_ioremap_resource into one call, so it is the first thing current docs reach for - and it does not exist here."
+    },
+    {
+      "type": "fake-api",
+      "claim": "devm_platform_get_and_ioremap_resource_v2",
+      "why": "invented variant"
+    }
+  ],
+  "forbidden": [
+    "passing the resource straight to devm_ioremap_resource without checking platform_get_resource for NULL - devm_ioremap_resource does check, but reading res->start before that call dereferences NULL"
+  ],
+  "rubric": "Uses the two-step platform_get_resource + devm_ioremap_resource form and checks the returned pointer with IS_ERR. Does not reach for devm_platform_ioremap_resource, which this tree does not have."
+}

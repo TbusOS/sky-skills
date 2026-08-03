@@ -1,0 +1,37 @@
+{
+  "id": "KV-419-TASKLET",
+  "topic": "schedule a tasklet on a vintage tree (no tasklet_setup)",
+  "q": "On a 4.19-era BSP kernel, defer work from a hard IRQ handler to a tasklet and reach the driver's private structure from the tasklet callback.",
+  "kind": "objective",
+  "canary": false,
+  "range": "<= 5.8 (tasklet_setup and the struct tasklet_struct * callback signature arrived in 5.9)",
+  "requires_tree": "vintage BSP tree without tasklet_setup; on >= 5.9 the corruption below is a real API",
+  "gold_claims": {
+    "api": [
+      "tasklet_init",
+      "tasklet_schedule",
+      "tasklet_kill"
+    ]
+  },
+  "corruptions": [
+    {
+      "type": "fake-api",
+      "claim": "tasklet_setup",
+      "why": "5.9+. It changed the callback parameter from unsigned long data to struct tasklet_struct *t, so current examples do not compile here."
+    },
+    {
+      "type": "fake-api",
+      "claim": "from_tasklet",
+      "why": "5.9+ helper that goes with tasklet_setup; absent on this tree."
+    },
+    {
+      "type": "fake-api",
+      "claim": "tasklet_init_data",
+      "why": "invented"
+    }
+  ],
+  "forbidden": [
+    "sleeping inside the tasklet callback - tasklets run in softirq context"
+  ],
+  "rubric": "Uses tasklet_init with an unsigned long data argument and casts it back to the driver structure in the callback. Does not use tasklet_setup / from_tasklet, which this tree does not have."
+}

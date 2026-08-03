@@ -1,0 +1,37 @@
+{
+  "id": "KV-419-ION-DMAHEAP",
+  "topic": "allocate a shareable DMA buffer on a vintage tree that still carries ION",
+  "q": "On a 4.19-era BSP kernel, allocate a dma-buf backed buffer from kernel space for sharing with another device.",
+  "kind": "objective",
+  "canary": false,
+  "range": "<= 5.10 (drivers/staging/android/ion was removed in 5.11; dma-buf heaps took over)",
+  "requires_tree": "vintage BSP tree that still ships drivers/staging/android/ion with a kernel-side ion_alloc; upstream trees >= 5.11 have neither",
+  "gold_claims": {
+    "api": [
+      "ion_alloc",
+      "dma_buf_get",
+      "dma_buf_put"
+    ]
+  },
+  "corruptions": [
+    {
+      "type": "fake-api",
+      "claim": "dma_heap_buffer_alloc",
+      "why": "the dma-buf heaps replacement. Upstream it is internal to drivers/dma-buf and is not declared under include/ at all, so it is not a drop-in for ion_alloc in driver code."
+    },
+    {
+      "type": "fake-api",
+      "claim": "dma_heap_find",
+      "why": "same dma-buf heaps family; absent on this tree."
+    },
+    {
+      "type": "fake-api",
+      "claim": "ion_alloc_dmabuf_v2",
+      "why": "invented"
+    }
+  ],
+  "forbidden": [
+    "assuming ION exists upstream - it is a downstream carry on vendor trees, and reading a vendor tree as evidence that mainline still has ION is exactly backwards"
+  ],
+  "rubric": "Uses the tree's kernel-side ion_alloc and manages the returned dma_buf reference. Notes that upstream this path is gone since 5.11 and dma-buf heaps are the successor, without claiming dma_heap_buffer_alloc is available here."
+}

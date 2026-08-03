@@ -1,0 +1,37 @@
+{
+  "id": "KV-419-PWM-APPLY",
+  "topic": "apply a PWM state on a vintage tree (no pwm_apply_might_sleep)",
+  "q": "On a 4.19-era BSP kernel, change a PWM channel's period and duty cycle from process context.",
+  "kind": "objective",
+  "canary": false,
+  "range": "<= 6.7 (pwm_apply_state was renamed pwm_apply_might_sleep in 6.8)",
+  "requires_tree": "vintage BSP tree with pwm_apply_state; on >= 6.8 the corruption below is the real name",
+  "gold_claims": {
+    "api": [
+      "pwm_apply_state",
+      "pwm_get_state",
+      "pwm_init_state"
+    ]
+  },
+  "corruptions": [
+    {
+      "type": "fake-api",
+      "claim": "pwm_apply_might_sleep",
+      "why": "6.8+ rename of pwm_apply_state, done to put the sleeping behaviour in the name. Frequently misremembered as 6.7."
+    },
+    {
+      "type": "fake-api",
+      "claim": "pwm_apply_atomic",
+      "why": "6.8+ companion for the atomic path; also absent here."
+    },
+    {
+      "type": "fake-api",
+      "claim": "pwm_apply_state_sleep",
+      "why": "invented"
+    }
+  ],
+  "forbidden": [
+    "calling the apply helper from atomic context - both the old and the new name may sleep, the rename only made that visible"
+  ],
+  "rubric": "Fills a struct pwm_state (via pwm_init_state / pwm_get_state) and applies it with pwm_apply_state from process context. Does not use pwm_apply_might_sleep, which this tree does not have."
+}
