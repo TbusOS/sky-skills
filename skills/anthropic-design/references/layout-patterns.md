@@ -288,6 +288,33 @@ Hero（标题 + 副标 + 橙色 CTA）→ 3 张能力卡 → 客户引用轮播�
 | 数据报告 / pricing 表 | `.anth-container--wide` | 1200 | 多列图表 / 比较表 |
 | Enterprise / logo 墙 | `.anth-container--wide` | 1200 | 6 列 logo + 价值 props |
 | Install / 短聚焦段 | `.anth-container--narrow` | 720 | 聚焦单栏内容 |
+| **工程密图 / 宽表**（位域、地址空间、时序波形） | figure 自身突破版心 | **≤ 1680,且左右各留 ≥16px** | 1200 挡不住的图型：拆开就丢掉信息（地址布局拆了没有线性关系、位域拆了看不出位宽比例）。缩到版心只会把标签压到读不动，而 diagram-craft 的判据是"看不清 = 没画" |
+
+### 突破版心（full-bleed）怎么写才合法
+
+`visual-audit` 会豁免**有意的、居中的、受控的**突破，四条同时满足才放行：
+
+1. 元素是 `<figure>` / `<table>` / `<pre>`，不是正文块
+2. **在视口里居中**（判的是几何结果，不挑 CSS 写法）
+3. 不越出视口，且文档不横向滚动 —— 真正的 bug 是 `<body>` 上出现横向滚动条
+4. 宽度 ≤ 1680 且左右各留 ≥16px
+
+```css
+.figwide{
+  width: min(1680px, calc(100vw - 56px));
+  margin-left: calc(50% - min(1680px, 100vw - 56px) / 2);
+  max-width: none;
+}
+.figwide svg{ width:100%; height:auto; display:block }
+@media (max-width:1200px){ .figwide{ margin-inline:0; overflow-x:auto } }   /* 窄屏退化,必写 */
+```
+
+**两个反面**：
+
+- `width:100vw` 不封顶 —— 在 1440 上看着对，落到 2560 显示器就是一条横幅，眼睛得横着走。
+  闸报 `figure-fullbleed-uncapped`（判据是"图宽 = 视口宽"，在任何视口都测得出来）。
+- `position:relative; left:50%; transform:translateX(-50%)` —— **`left` 对 relative 元素是相对自身静态位置偏移，不是相对父容器左边缘**。
+  父容器有内边距时算出来是偏心的（实测偏 40px、右侧越出视口 12px、页面真的在横滚），闸会照常报 `layout-overflow`。
 
 ⚠️ **最常见错误**：把 hero 包在 `.anth-container--narrow` —— 720 是长文阅读宽度，不是 hero 宽度。hero 至少用 960。
 

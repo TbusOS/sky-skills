@@ -442,6 +442,22 @@
 
 ---
 
+### 1.49 figure 突破版心被判溢出 → 规则在逼着把图缩小或拆碎
+
+- **Reader sees**：一张按 diagram-craft 升到最大容器档(1200)仍然嫌小的工程密图，做成突破版心的 full-bleed 之后观感才对，却被 `layout-overflow` 报警；而它给的两条建议(加横向滚动条 / 缩回版心)恰恰是 diagram-craft 要避免的两件事。
+- **Why**：`layout-overflow`(§1.32)只看几何关系(child 右边界 > parent 右边界)，不区分「内容撑破容器」和「有意的居中突破」。它豁免了 `position: absolute/fixed/sticky` 和会滚动/裁剪的父元素，而标准 full-bleed 用的是 `position:relative` 或负边距，**一个豁免都不沾**。合起来的效果是：容器档 1200 封顶 + full-bleed 被判警告 = 密图只剩「缩小」或「拆开」两条路，而有些图型拆开就丢信息(地址布局拆了没有线性关系、位域拆了看不出位宽比例)。
+- **Defense**：`visual-audit.mjs` 给 `layout-overflow` 加 full-bleed 豁免，四条同时满足才放行：① 是 `<figure>`/`<table>`/`<pre>` ② **在视口里居中**(判几何结果，不挑 CSS 写法 —— 作者至少有四种写法，按属性匹配总会漏掉没列进去的那种) ③ 不越出视口且文档不横滚 ④ 宽 ≤1680 且左右各留 ≥16px。另加 `figure-fullbleed-uncapped`(warn)：图宽 = 视口宽即判定这条 full-bleed 没写上限 —— 审计只跑 1440 和更窄的复查，看不到宽屏，但「没有上限」这个事实在任何视口都测得出来。
+- **Fix playbook**：见 `anthropic-design/references/layout-patterns.md` 的「突破版心怎么写才合法」。注意 `position:relative` 上的 `left:50%` 是相对**自身静态位置**偏移、不是相对父容器左边缘，父容器有内边距时算出来是偏心的(实测偏 40px、右越视口 12px、页面真的在横滚)。
+- **Applies to**：全 7 个设计 skill(检查在 cross-skill 层)。
+
+### 1.50 密图标签落在 9–10px：过了 9px 硬底线，却没人提醒
+
+- **Reader sees**：一张 20+ 标签的图渲染在 1000px 左右，标签实际只有 9 点几 px，读着吃力 —— 但 `diagram-tiny-text` 要 <9px 才报、`dense-diagram-cramped` 要渲染宽 <760px 才报，两条闸都不响。
+- **Why**：760 那条是按「塞不塞得下」标的，不是按「读不读得动」标的。760–1200 之间成了真空。
+- **Defense**：`visual-audit.mjs` 新增 **dense-diagram-labels-small**(warn)：`text ≥ 20` 且最小标签渲染 <9.5px 且渲染宽 ≥760(760 以下归 cramped)。阈值是量出来的不是拍的 —— 语料 11 张密图最小标签在 9.955–11.9px 之间(即 diagram-craft 规定的 11px 源 × 0.906 缩放)，**报在那之上等于拿自己的规范判自己违规**，所以设在其下、又高于 9px 硬底线。首跑在 index.html 抓到 2 张(9.12 / 9.24px，而该页自身常规是 9.68)，已提源字号修掉。
+- **Fix playbook**：提源 font-size 到 11，或给图升一档容器(必要时到 full-bleed，见 1.49)。**别靠缩 viewBox 硬塞**。
+- **Applies to**：全 7 个设计 skill。
+
 ## 2. anthropic-design
 
 ### 2.1 cream 在橙 CTA 上 = 2.96（fail AA）

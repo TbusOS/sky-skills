@@ -595,6 +595,42 @@ const auditFn = (arg) => {
     if (rect.width === 0) return;
     if (svg.getAttribute('aria-hidden') === 'true') return;
     const textCount = svg.querySelectorAll('text').length;
+
+    // Second tier, by legibility rather than by container width. The width test
+    // below asks "did it fit"; this one asks "can it be read". Between the two
+    // sat a blind spot: a dense diagram rendered around 1000px clears the 760
+    // width bar and clears diagram-tiny-text's 9px hard floor, yet its labels
+    // can still land under 10px.
+    //
+    // The line is set from measurement, not taste. Across all 11 dense diagrams
+    // in the canonical corpus the smallest label sits at 9.955-11.9px — the
+    // 11px-source × 0.906-scale that diagram-craft already prescribes. Warning
+    // above that would flag the reference library against its own spec, so this
+    // fires below it: 9.5px is worse than anything the corpus ships while still
+    // clearing the 9px hard floor. Raising the comfort bar to 10-11px is a
+    // library-wide decision (it would move 7 canonicals), not a gate tweak.
+    const denseLabelFloor = (() => {
+      if (textCount < 20) return null;
+      const vb = (svg.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number);
+      const scale = vb.length === 4 && vb[2] > 0 ? rect.width / vb[2] : 1;
+      let min = Infinity;
+      svg.querySelectorAll('text').forEach((t) => {
+        const fs = parseFloat(getComputedStyle(t).fontSize);
+        if (Number.isFinite(fs) && fs > 0) min = Math.min(min, fs * scale);
+      });
+      return Number.isFinite(min) ? min : null;
+    })();
+    if (denseLabelFloor !== null && denseLabelFloor < 9.5 && rect.width >= 760) {
+      issues.push({
+        kind: 'dense-diagram-labels-small',
+        severity: 'warn',
+        textCount,
+        renderedWidth: Math.round(rect.width),
+        labelPx: Math.round(denseLabelFloor * 10) / 10,
+        label: svg.getAttribute('aria-label') || 'unlabeled',
+      });
+    }
+
     if (textCount >= 20 && rect.width < 760) {
       issues.push({
         kind: 'dense-diagram-cramped',
@@ -1545,6 +1581,8 @@ const auditFn = (arg) => {
   // scroll or clip horizontally are exempt, breakout must exceed 8px.
   const sigSelector = (el) =>
     el.tagName.toLowerCase() + (el.classList.length ? '.' + [...el.classList].slice(0, 3).join('.') : '');
+  const FULL_BLEED_MAX = 1680;     // ceiling for a licensed break-out
+  const FULL_BLEED_GUTTER = 16;    // minimum breathing room from the viewport edge
   document.querySelectorAll('table, pre, img, video, iframe, canvas, figure, svg').forEach((el) => {
     if (el.closest('svg') && el.tagName.toLowerCase() !== 'svg') return; // shapes inside svg
     const st = getComputedStyle(el);
@@ -1561,6 +1599,78 @@ const auditFn = (arg) => {
     const rightBreak = r.right - pr.right;
     const leftBreak = pr.left - r.left;
     const breakPx = Math.max(rightBreak, leftBreak);
+
+    // A figure wider than the text column is standard editorial layout, not a
+    // bug — engineering diagrams (bitfields, address maps, timing waveforms)
+    // need horizontal room, and the container ladder tops out at 1200. Flagging
+    // those pushed authors toward the two things the rule exists to prevent:
+    // shrinking labels below legibility, or hiding the figure behind a
+    // scrollbar. What actually breaks a page is content escaping the VIEWPORT,
+    // which is what puts a horizontal scrollbar on <body>.
+    //
+    // Exempt only a deliberate, centred, contained break-out — all four:
+    //   1. it is a figure/table/pre wrapper, not a run of body text
+    //   2. it is centred out of the column on purpose (translateX(-50%) with
+    //      left/right ~50%, or negative inline margins), not burst by content
+    //   3. it stays inside the viewport — the real defect is a body scrollbar
+    //   4. the document itself is not scrolling sideways
+    const fullBleedExempt = (() => {
+      if (breakPx <= 8) return false;
+      if (!/^(figure|table|pre)$/.test(el.tagName.toLowerCase())) return false;
+      // clientWidth, not innerWidth: 100vw counts the scrollbar gutter, so a
+      // width:100vw block sits a scrollbar-width past the real viewport edge.
+      const vw = document.documentElement.clientWidth;
+      const slack = 2;
+      // Judge the result, not the recipe. Authors reach break-out through at
+      // least four idioms — translateX(-50%), symmetric negative margins,
+      // margin-left:calc(50% - 50vw), grid full-bleed columns — and matching on
+      // CSS properties missed whichever one was not on the list. What every
+      // deliberate break-out has in common is that it lands centred on the
+      // viewport; content that merely burst its container does not.
+      const centred = Math.abs((r.left + r.right) / 2 - vw / 2) <= 4;
+      if (!centred) return false;
+      if (r.left < -slack || r.right > vw + slack) return false;
+      if (document.documentElement.scrollWidth > vw + slack) return false;
+      // Breaking out of the column is licensed; growing without limit is not.
+      // Past a point a diagram stops being easier to read and becomes a banner
+      // the eye has to travel across, and on a 2560 monitor an uncapped rule
+      // would bless a 2560px-wide figure. Two bounds, both measured rather than
+      // taste: the corpus's 52 figures top out at 1232px and none passes 1300,
+      // and FULL_BLEED_MAX is the ceiling this repo's own full-bleed pages
+      // already use. Edge-to-edge is refused too — editorial break-out keeps a
+      // gutter, and a figure touching the viewport edge reads as a layout bug.
+      if (r.width > FULL_BLEED_MAX) return false;
+      if (r.left < FULL_BLEED_GUTTER - slack || r.right > vw - FULL_BLEED_GUTTER + slack) return false;
+      return true;
+    })();
+    if (fullBleedExempt) return;
+
+    // A break-out that fills the viewport exactly has no ceiling written into
+    // it — `width:100vw` renders 1440 here and 2560 on a wide monitor, where
+    // the figure stops being readable and becomes a banner. The audit only ever
+    // visits 1440 and the narrower second pass, so the wide-screen failure is
+    // not observable directly; what IS observable at any width is the tell that
+    // no cap exists, which is the figure measuring the full viewport. Flag that
+    // instead of the generic overflow advice, which would send the author to
+    // add a scrollbar — the opposite of what they want.
+    {
+      const vw0 = document.documentElement.clientWidth;
+      const centred0 = Math.abs((r.left + r.right) / 2 - vw0 / 2) <= 4;
+      if (breakPx > 8 && centred0
+          && /^(figure|table|pre)$/.test(el.tagName.toLowerCase())
+          && r.width >= vw0 - 1 && document.documentElement.scrollWidth <= vw0 + 2) {
+        issues.push({
+          kind: 'figure-fullbleed-uncapped',
+          severity: 'warn',
+          selector: sigSelector(el),
+          renderedWidth: Math.round(r.width),
+          cap: FULL_BLEED_MAX,
+          gutter: FULL_BLEED_GUTTER,
+        });
+        return;
+      }
+    }
+
     if (breakPx > 8) {
       issues.push({
         kind: 'layout-overflow',
@@ -2019,6 +2129,14 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'svg-letterbox') {
     console.log(
       `  [${i.severity}] svg-letterbox in "${i.label}": content fills only ${i.fillPct}% of the rendered ${i.axis} — shrink the viewBox to hug content (≤24px margins) or spread content across the canvas; dead margins shrink every label (known-bugs 1.28, diagram-craft §8)`
+    );
+  } else if (i.kind === 'figure-fullbleed-uncapped') {
+    console.log(
+      `  [${i.severity}] figure-fullbleed-uncapped: ${i.selector} fills the viewport edge to edge (${i.renderedWidth}px, no gutter) — a break-out past the text column is licensed, growing without a ceiling is not: this renders ${i.renderedWidth}px here and the full width of whatever monitor it lands on. Cap it, e.g. width:min(${i.cap}px, calc(100vw - ${i.gutter * 2}px)) centred on the viewport (the canonical corpus tops out at 1232px)`
+    );
+  } else if (i.kind === 'dense-diagram-labels-small') {
+    console.log(
+      `  [${i.severity}] dense-diagram-labels-small: "${i.label}" has ${i.textCount} labels, smallest renders at ${i.labelPx}px (svg ${i.renderedWidth}px wide) — above the 9px hard floor but below the ~9.96px floor the canonical library holds. Widen the tier (up to a contained full-bleed) or raise the source font-size; shrinking labels to fit is what this check exists to stop (known-bugs 1.49, diagram-craft §8)`
     );
   } else if (i.kind === 'dense-diagram-cramped') {
     console.log(
