@@ -164,6 +164,12 @@ function buildChecks(truth) {
         // below", where the number counts sections of this page, not the repo.
         new RegExp(`\\b(${EN_WORDS})\\s+skills\\b(?=\\s*[.,"<]|\\s+and\\b)`, 'gi'),
         new RegExp(`\\b(\\d+)\\s+skills[.·]`, 'g'),
+        // Stat-block phrasings from the demos: "13 skills total", "14 skills in
+        // one repository", "13 focused skills, each under one folder".
+        new RegExp(`\\b${d}\\s+(?:focused\\s+)?skills\\s+(?:total\\b|in\\s+(?:one\\s+)?repo)`, 'gi'),
+        new RegExp(`\\b${d}\\s+focused\\s+skills\\b`, 'gi'),
+        new RegExp(`${z}\\s*个技能在`, 'g'),
+        new RegExp(`${z}\\s*个专注的\\s*skill`, 'g'),
         new RegExp(`全部\\s*${z}\\s*个\\s*skill`, 'g'),
         new RegExp(`匹配到\\s*${z}\\s*个\\s*skill`, 'g'),
         new RegExp(`${z}\\s*个\\s*skill\\s*(?:。|一张表|分三族)`, 'g'),
@@ -349,8 +355,10 @@ async function auditCoverageTarget(truth) {
 // one is counted in the run's output so they stay visible.
 const IGNORE_RE = /facts-ignore:\s*(\S.*?)\s*(?:-->|$)/;
 
-function suppression(lines, i) {
-  for (const cand of [lines[i], lines[i - 1]]) {
+// Looks at the RAW lines: the marker is an HTML comment, and the tag-stripping
+// pass used for matching removes it entirely.
+function suppression(rawLines, i) {
+  for (const cand of [rawLines[i], rawLines[i - 1]]) {
     const m = cand === undefined ? null : cand.match(IGNORE_RE);
     if (m) return m[1];
   }
@@ -368,7 +376,23 @@ async function scanSurfaces(checks, surfaces) {
         text: 'listed as a surface but not found on disk' });
       continue;
     }
-    const lines = (await readFile(abs, 'utf-8')).split('\n');
+    const raw = (await readFile(abs, 'utf-8')).split('\n');
+
+    // Match against tag-stripped text, not raw HTML. A claim is regularly split
+    // across elements — `<span>18</span><span>skills in one repo</span>` — and
+    // on the raw line the markup sits between the number and the noun, so every
+    // pattern misses it. Stat blocks go further and put the number on its own
+    // line above its label, so a line whose entire text is a number is joined
+    // with the next line before matching. Both shapes were carrying stale counts
+    // that the first version of this gate reported as clean.
+    const text = raw.map((l) => l.replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/gi, ' '));
+    const lines = text.map((t, i) => (
+      // A zero-padded number is a section marker (01 · 02 · 03), not a stat.
+      // Joining those produced "02 Design aesthetics" → "2 design aesthetics".
+      /^\s*\d+\s*$/.test(t) && !/^\s*0\d/.test(t) && text[i + 1] !== undefined
+        ? `${t.trim()} ${text[i + 1]}` : t
+    ));
+
     lines.forEach((line, i) => {
       for (const check of checks) {
         for (const re of check.patterns) {
@@ -378,7 +402,7 @@ async function scanSurfaces(checks, surfaces) {
             if (isOrdinal(line, m.index)) continue;
             const claimed = toNumber(m[1]);
             if (claimed === null || claimed === check.truth) continue;
-            const why = suppression(lines, i);
+            const why = suppression(raw, i);
             const hit = {
               file: rel, line: i + 1, id: check.id,
               claimed, truth: check.truth, what: check.what,
