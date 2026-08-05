@@ -23,6 +23,43 @@ diff configs/<board>_defconfig defconfig                 # 理解差异再 cp
 - B（正常）：符号值 = Kconfig `default`，savedefconfig 最小化时自然省略，`.config` 里仍取 default，功能照编入。
 - 切忌看到省略就惊呼"污染/失效"——先分清 A/B。
 
+### 反向的坑更危险：写进 defconfig ≠ 生效（**跑闸，别肉眼看**）
+
+上面讲的是"defconfig 里没有但生效了"。反过来那种更难发现：**defconfig 里明写着
+`=y`，Kconfig 却把它悄悄丢了** —— 符号在本 arch 不存在、`depends on` 不满足、
+或早已被上游删除。defconfig 读起来一切正常，评审的人看到 `CONFIG_VMAP_STACK=y`
+就以为加固开着，实际一条没生效。
+
+**别指望读 `savedefconfig` 的 diff 发现它**：savedefconfig 会重排序并最小化，
+真正的 3 行问题会淹没在几百行排序噪声里。可靠判据是**按符号比对、无视顺序**：
+defconfig 声明值 vs `.config` 实际落值。
+
+```bash
+scripts/defconfig_gate.mjs \
+    --defconfig <path>/configs/<board>_defconfig \
+    --config    <build-out>/.config \
+    --tree      <kernel-tree>          # 有 --tree 才能分开"死行"与"依赖不满足"
+# exit 0 全部生效 / 1 有声明未生效 / 3 闸本身出错
+scripts/defconfig_gate.mjs --selftest  # 自降解校准：每类缺陷种一个，必须被抓
+```
+
+`--config` 用**真实构建产出的那份 `.config`**，比在这里重新推导一份更硬，
+也免掉整套交叉编译环境。
+
+判定分类：`honored` / `changed`（值被覆盖）/ `dropped`（声明了但没落地，再细分
+`undefined-symbol` = 上面的 A 类死行、`unreachable` = 依赖或 arch 不满足）/
+`contradicted`（写了 `# X is not set`，`.config` 里却是 `y`）/ `missing-space`。
+
+**`missing-space` 这类值得单说**：`#CONFIG_X is not set` —— `#` 后**少一个空格**。
+Kconfig 认的"未设置"形式必须是 `# CONFIG_X is not set`（带空格）；少了空格就是
+一条纯注释，被完全无视，符号**没有被关掉**。这种行往往一整块地出现（有人批量
+想关掉一组选项），结果**一条都没生效**；而取值碰巧等于默认值时不会有任何症状
+—— 直到哪天上游把默认值改了。
+
+**别把它和"正常注释掉一行"搞混**：`#CONFIG_X=v` 是把一条赋值语句停用，这是
+常规做法、不是缺陷，闸只计数不报警。两者的区别在于作者的意图：前者想让 Kconfig
+读到并执行"关掉"，后者想让 Kconfig 什么都别读到。
+
 ## 2. 硬件状态调试必须直接读字节
 
 调硬件状态（寄存器 / OTP / eFuse / flash / sensor flag）**先加打印直接读出字节再下结论**。**禁止**"软件观察 → 推断硬件"的链条——链越长越容易错（中间任一跳的软件 bug 会让结论和硬件脱钩）。
