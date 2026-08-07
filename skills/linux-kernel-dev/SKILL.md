@@ -51,6 +51,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 | 提交 patch / checkpatch / format-patch / b4 系列投递 / virtme-ng 启动验证 | `references/patch-workflow.md` | `Documentation/process/submitting-patches.rst`, b4/virtme-ng 官方文档 |
 | **BSP 定制纪律**（defconfig / 上游 gate / 硬件调试 / 改动分析 / 冲突解决） | `references/bsp_discipline.md` | 通用工程纪律 |
 | **构建系统**（Kbuild Makefile / Kconfig 语言 / 配置流程 / 交叉编译 / in-tree·out-of-tree / 模块要素） | `references/build.md` | `Documentation/kbuild/` |
+| **ARM 内存类型 / 对齐 / 异常入口**（Normal·Device·Strongly-ordered 契约差别 · SO 上非对齐为何必错 · Data Abort 硬件动作 · XN→Permission fault · arm32 自解压器那条界与 arm64 为何没有 · 镜像增量怎么传导） | `references/arm-memory-model.md` | ARM DDI 0406C.d · `Documentation/arch/arm{,64}/booting.rst` |
 | 跨内核版本差异 | `references/kernel_version_deltas.md` | 各版本树 + `Documentation` |
 | **答案验证契约**（引具体符号时附 `[CLAIMS]`） | `references/claims-contract.md` | 事实检查 靶子 |
 | 该做 / 不该做速查 | `dos-and-donts.md` | 本 skill 积累 |
@@ -120,6 +121,8 @@ references. Load a reference only when the task needs it (progressive disclosure
 - `scripts/fact_gate.mjs` — 查答案 `[CLAIMS]` 里的 API / CONFIG / 符号 / compatible 是否在真内核树**实存**（树无关 `--tree`；exit 0 干净 / 1 有幻觉 / 3 检查坏不算 fail）
 - `scripts/checkpatch_gate.sh` — 用内核自带 `checkpatch.pl` 校代码风格
 - `scripts/defconfig_gate.mjs` — 查 defconfig 里**写了却没生效**的行(符号本 arch 不存在 / `depends on` 不满足 / 上游已删)。按符号比对声明值与 `.config` 实际落值,**无视顺序** —— `savedefconfig` 的 diff 会被重排序淹没,3 行真问题藏在几百行噪声里。另报 `#CONFIG_X`(`#` 后缺空格 ⇒ Kconfig 视为纯注释)。`--selftest` 做自降解校准;exit 0 全生效 / 1 有声明未生效 / 3 闸坏。规则见 `references/bsp_discipline.md §1`
+- `scripts/decompressor_limit_check.sh` — 判断一棵树会不会踩 arm32 解压器那条可执行窗口上界（两级判据：先架构后 BSP；两边都有/都没有 `configs/vendor` 时诚实报「未判定」要求 `--arch`，不猜）
+- `scripts/binary_diff_classify.py` — 两个二进制的差异是**真实代码变化**还是**地址整体平移**（按 32 位字解码统计 delta 分布；`--limit` 划出未压缩区，否则压缩载荷雪崩淹没一切；带 `--self-test`）
 - `scripts/kernel-tree.mjs` — 绑内核树（`detect` / `add` / `list` / `clone`），路径存本机配置不入库
 - `scripts/regression_test.mjs` + `tests/eval/cases/*.json` — 回归测试:每条用例的 gold 必须在真树查得到 + 自降解校准（故意改坏必须被抓）+ 覆盖率统计；`--baseline` 记录、`--check` 对比退步
 - `scripts/kernel-critic.mjs` + `.claude/agents/kernel-*-critic.md` — 7 轴打分面板（correctness/safety/design/testing/complexity/coding-style/completeness,对齐 Google review 维度;safety 一票否决）prompt 准备,Task 派子 agent 并行评分
