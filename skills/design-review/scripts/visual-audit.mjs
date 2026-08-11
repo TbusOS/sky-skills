@@ -642,6 +642,74 @@ const auditFn = (arg) => {
     }
   });
 
+  // ---------- 2c3b) Diagram grown past the corpus ceiling (known-bugs §1.52) ----------
+  // The reverse of 2c3. Every diagram gate above asks "is it too small to
+  // read"; none asked "has it grown so tall it stops being a figure". A
+  // diagram that fills more than a screen is no longer glanceable — the
+  // reader scrolls to see one picture, and the density that makes a figure
+  // worth having has been spent on air.
+  //
+  // The ceiling comes from the canonical corpus, not from taste: 87 diagrams
+  // (svg carrying >=3 <text>) across all 50 canonical pages measure
+  // min 140 / p50 255 / p75 347 / p95 475 / max 525 px at a 1440 viewport.
+  // 640 sits 22% above the tallest reference page ships, so clearing it means
+  // the figure is outside anything the library does — usually one of:
+  //   - the block escaped its container and renders at viewport width, which
+  //     scales the whole viewBox up (see content-outside-container below);
+  //   - rows/steps laid out with 60-90px pitch that reads fine at 40-55px;
+  //   - two figures merged into one that should be split.
+  // The relative arm catches the same failure on pages whose own baseline is
+  // smaller than the corpus: one figure towering over its neighbours.
+  const figHeights = [];
+  document.querySelectorAll('figure svg').forEach((svg) => {
+    if (svg.getAttribute('aria-hidden') === 'true') return;
+    const r = svg.getBoundingClientRect();
+    if (r.width === 0 || svg.querySelectorAll('text').length < 3) return;
+    figHeights.push({ h: r.height, svg });
+  });
+  if (figHeights.length) {
+    const sorted = figHeights.map((f) => f.h).sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)];
+    figHeights.forEach(({ h, svg }) => {
+      const overCorpus = h > 640;
+      const overPage = figHeights.length >= 4 && median > 0 && h > median * 2.5;
+      if (!overCorpus && !overPage) return;
+      if (svg.closest('[data-allow-tall]')) return;
+      issues.push({
+        kind: 'diagram-oversized',
+        severity: 'warn',
+        renderedHeight: Math.round(h),
+        pageMedian: Math.round(median),
+        ratio: median > 0 ? Math.round((h / median) * 10) / 10 : null,
+        reason: overCorpus ? (overPage ? 'corpus+page' : 'corpus') : 'page',
+        label: svg.getAttribute('aria-label') || 'unlabeled',
+      });
+    });
+  }
+
+  // ---------- 2c3c) Content block sitting outside every container (known-bugs §1.52) ----------
+  // A heading/paragraph/figure that is a direct child of <body> has no
+  // container to constrain it: it renders at viewport width instead of the
+  // 960/1200 column, so prose loses its measure and any svg inside scales up
+  // with it. Easy to introduce by inserting before a section marker comment
+  // without checking the preceding </section>; nothing else in this file
+  // looks at ancestry, so it used to pass every gate while visibly breaking
+  // the page rhythm.
+  ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'FIGURE', 'TABLE', 'UL', 'OL', 'PRE', 'BLOCKQUOTE']
+    .forEach((tag) => {
+      [...document.body.children]
+        .filter((el) => el.tagName === tag)
+        .forEach((el) => {
+          issues.push({
+            kind: 'content-outside-container',
+            severity: 'warn',
+            tag,
+            renderedWidth: Math.round(el.getBoundingClientRect().width),
+            text: (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 48),
+          });
+        });
+    });
+
   // ---------- 2c4) Monochrome engineering diagram — skill whitelist (known-bugs §1.30) ----------
   // Reverse gate to saturated-band: a diagram with ZERO saturated hues (white
   // cards + gray strokes + gray text) reads as an unfinished wireframe.
@@ -2137,6 +2205,20 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'dense-diagram-labels-small') {
     console.log(
       `  [${i.severity}] dense-diagram-labels-small: "${i.label}" has ${i.textCount} labels, smallest renders at ${i.labelPx}px (svg ${i.renderedWidth}px wide) — above the 9px hard floor but below the ~9.96px floor the canonical library holds. Widen the tier (up to a contained full-bleed) or raise the source font-size; shrinking labels to fit is what this check exists to stop (known-bugs 1.49, diagram-craft §8)`
+    );
+  } else if (i.kind === 'diagram-oversized') {
+    const why =
+      i.reason === 'page'
+        ? `${i.ratio}x this page's median figure (${i.pageMedian}px)`
+        : i.reason === 'corpus+page'
+          ? `past the 640px corpus ceiling and ${i.ratio}x this page's median (${i.pageMedian}px)`
+          : 'past the 640px corpus ceiling';
+    console.log(
+      `  [${i.severity}] diagram-oversized: "${i.label}" renders ${i.renderedHeight}px tall — ${why}. The canonical corpus tops out at 525px (87 diagrams, p50 255); a figure taller than a screen stops being glanceable. Check first whether the block escaped its container (see content-outside-container), then tighten row pitch / box heights, or split it into two figures. Add data-allow-tall on the figure if the height is deliberate (known-bugs 1.52)`
+    );
+  } else if (i.kind === 'content-outside-container') {
+    console.log(
+      `  [${i.severity}] content-outside-container: <${i.tag.toLowerCase()}> "${i.text}" is a direct child of <body> (renders ${i.renderedWidth}px) — no container, so prose loses its measure and any svg inside scales to viewport width. Move it inside the section it belongs to; this usually happens when new content is inserted before a section marker comment without checking the preceding </section> (known-bugs 1.52)`
     );
   } else if (i.kind === 'dense-diagram-cramped') {
     console.log(

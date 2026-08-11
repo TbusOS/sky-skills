@@ -466,6 +466,25 @@
 - **Fix playbook**：`<b>x</b>` → `<tspan font-weight="600">x</tspan>`;换字体/字号/颜色同理都走 `tspan` 属性,别用 `<code>`。
 - **Applies to**：全 7 个设计 skill(任何手工 SVG 图)。
 
+### 1.52 图长到一屏以上 / 内容块掉在所有容器之外 —— 两道闸都看不见
+
+- **Reader sees**：某一张图明显比同页其他图大一圈,滚一屏才看完;它周围的正文也比别处更靠边、更长行。整页节奏在那一段断掉。
+- **Why**：两个独立成因,常常一起出现。
+  ① **图自己长太高**：行距/框高/留白按 60-90px 步距铺,内容其实 40-55px 就够;或两张图并成了一张。
+  ② **内容块脱离容器**(更隐蔽)：新内容插在 `<!-- ==== N ==== -->` 这类小节标记之前,却没检查那位置在不在上一节的 `</section>` 里,于是整块成了 `<body>` 直接子元素 —— **没有容器约束,svg 按视口宽渲染而不是 960/1200 列宽**,viewBox 被整体放大(1440/1200 = 放大 20%),字号跟着一起变大;正文同时丢掉 `max-width`,行长失控。
+  之前所有图相关的闸都只问"是不是太小看不清"(`dense-diagram-cramped` / `dense-diagram-labels-small` / `diagram-tiny-text` / `svg-letterbox` / `diagram-narrow`),没有一条问"是不是长过头";`verify.py` 查的是 placeholder / BEM / undefined class,不看 DOM 层级归属。所以这类页面能全闸通过。
+- **Defense**：`visual-audit.mjs` 新增两条 warn。
+  - `diagram-oversized`：渲染高度 > **640px**,或(同页 ≥4 张图时)> 同页中位数 × 2.5。640 这个数取自参考库实测 —— 全部 50 个 canonical 页共 87 张图(带 ≥3 个 `<text>` 的 svg)在 1440 视口下是 `min 140 / p50 255 / p75 347 / p95 475 / **max 525**`,640 比参考库最高的那张还高 22%,越过它说明已经不在库的做法范围内。图确实需要更高时,在 `<figure>` 上加 `data-allow-tall` 豁免。
+  - `content-outside-container`：`<body>` 的直接子元素里出现 `h1-h6 / p / figure / table / ul / ol / pre / blockquote`,报出标签、前 48 字和渲染宽度(游离 figure 通常直接显示成视口宽,一眼可辨)。
+- **Fix playbook**：先查是不是掉出容器 —— 把内容移回它该在的 `</section>` 之前,图的 scale 会立刻从 1.20 回到 1.00,高度自动缩 20%;仍超标再压行距与框高,或拆成两张图。自查:
+  ```js
+  [...document.querySelectorAll('figure svg')].map(s => s.getBoundingClientRect().width / 1200)  // 应为 1.00
+  [...document.body.children].filter(e => !['SECTION','NAV','HEADER','FOOTER','SCRIPT','STYLE'].includes(e.tagName))  // 应为空
+  ```
+- **回归实测**：一个 14 图的长页,插入两块内容时掉出 `</section>` → 图渲染 881 / 1015px(同页中位数 340)。新规则报 `diagram-oversized`(1015px,3x median)+ 8 处 `content-outside-container`(figure 1440px / p 660px)。移回容器并压紧后为 452 / 546px,两条规则均不再触发。**参考库 50 页全扫 0 误报。**
+- **Applies to**：全 7 个设计 skill。
+
+
 ## 2. anthropic-design
 
 ### 2.1 cream 在橙 CTA 上 = 2.96（fail AA）
