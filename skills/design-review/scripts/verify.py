@@ -347,6 +347,41 @@ def check_file(
     if opens != closes:
         errors.append(f"{path}: unbalanced <svg> tags ({opens} open, {closes} close)")
 
+    # 5b. HTML-only inline tags inside <svg> — silent renderer corruption.
+    # SVG has no <b>/<i>/<code>/<br>. Browsers do not error: they break out of
+    # foreign-content parsing at that tag, so everything AFTER it in the same
+    # <svg> escapes into the HTML flow as loose text. The diagram looks
+    # half-drawn with a paragraph of stray words below it, and neither tag
+    # balance (#5) nor any CSS check notices. Inside <text>, only <tspan>,
+    # <textPath>, <tref> and <a> are legal — use
+    # <tspan font-weight="600"> instead of <b>.
+    illegal_in_svg = ("b", "i", "u", "em", "strong", "code", "br", "span",
+                      "p", "div", "small", "sup", "sub", "mark")
+    svg_tag_re = re.compile(r"<(" + "|".join(illegal_in_svg) + r")(?=[\s/>])",
+                            re.IGNORECASE)
+    def _blank_keep_offsets(m):
+        # Preserve length and newlines so reported line numbers stay accurate.
+        return re.sub(r"[^\n]", " ", m.group(0))
+
+    for sm in re.finditer(r"<svg\b.*?</svg>", html, re.DOTALL | re.IGNORECASE):
+        # <foreignObject> is the one place where HTML is legal inside SVG.
+        block = re.sub(r"<foreignObject\b.*?</foreignObject>",
+                       _blank_keep_offsets, sm.group(0),
+                       flags=re.DOTALL | re.IGNORECASE)
+        seen = set()
+        for tm in svg_tag_re.finditer(block):
+            tag = tm.group(1).lower()
+            if tag in seen:
+                continue
+            seen.add(tag)
+            line = html.count("\n", 0, sm.start() + tm.start()) + 1
+            errors.append(
+                f"{path}:{line}: <{tag}> inside <svg> — not an SVG element; "
+                f"the renderer drops out of the SVG here and everything after "
+                f"it leaks into the page as loose text. "
+                f"Use <tspan font-weight=\"600\"> for emphasis."
+            )
+
     # 6. Modifier-only container (BEM bug)
     mod_re = re.compile(
         re.escape(prefix) + r"container--(?:"

@@ -458,6 +458,14 @@
 - **Fix playbook**：提源 font-size 到 11，或给图升一档容器(必要时到 full-bleed，见 1.49)。**别靠缩 viewBox 硬塞**。
 - **Applies to**：全 7 个设计 skill。
 
+### 1.51 `<b>` / `<code>` 写进 `<svg>`：图从那里断掉，后半截漏成正文
+
+- **Reader sees**：图只画出前半,缺的那部分变成图下方一段没有排版的散字。乍看像"内容写多了溢出",其实是 SVG 被截断。
+- **Why**：SVG 里没有 `<b>`/`<i>`/`<code>`/`<br>`/`<span>`。浏览器**不报错**,它在遇到非 SVG 元素时退出 foreign-content 解析,该 `<svg>` 内**其后所有内容**都按 HTML 处理,于是漏进页面文字流。`<text>` 内合法子元素只有 `<tspan>` / `<textPath>` / `<tref>` / `<a>`;强调要写 `<tspan font-weight="600">`。既有的 `<svg>` 标签配平检查(verify #5)看不见这类问题 —— 标签是配平的,坏的是**内容**。
+- **Defense**：`verify.py` 新增 **5b**(error)：逐个 `<svg>` 块扫 14 个 HTML-only 内联标签,报 `file:line` + 替换建议。`<foreignObject>` 内 HTML 合法,已按等长空白掩码豁免(掩码保留换行,行号不偏)。反例注入实测:改一处 `tspan`→`b` 立刻报在准确行;正例 0 error。存量 150 个 html 扫出 3 处(`<title><span>` 形式,SVG `<title>` 同样只能含纯文本)。
+- **Fix playbook**：`<b>x</b>` → `<tspan font-weight="600">x</tspan>`;换字体/字号/颜色同理都走 `tspan` 属性,别用 `<code>`。
+- **Applies to**：全 7 个设计 skill(任何手工 SVG 图)。
+
 ## 2. anthropic-design
 
 ### 2.1 cream 在橙 CTA 上 = 2.96（fail AA）
