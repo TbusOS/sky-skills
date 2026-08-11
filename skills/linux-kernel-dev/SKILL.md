@@ -35,7 +35,8 @@ references. Load a reference only when the task needs it (progressive disclosure
 8. **Never delete upstream code to customize** — default to keeping it + a vendor config gate (`#if defined(CONFIG_<VENDOR>_<PURPOSE>)`). See `references/bsp_discipline.md`.
 9. **Never conclude a hardware state from software observation alone** — read the bytes directly (register/OTP/eFuse dump). See `references/bsp_discipline.md`.
 10. **Never decide a change is safe on the compile dimension alone** — check the 4 dimensions (compile / runtime path / semantics / compliance). See `references/bsp_discipline.md`.
-11. **Never let an AI/tool add `Signed-off-by`** — only a human can certify the DCO. AI-assisted work is disclosed with `Assisted-by:`; the human reviews all of it, ensures SPDX + GPL-2.0 compatibility, and adds their own sign-off. See `references/patch-workflow.md`.
+11. **Never change an existing function's contract without enumerating every call site** — 返回值含义、参数取值空间、副作用、错误约定,任何一项变了都要逐个调用点确认。**类型不变时编译器一声不吭**,静默的行为改变比编译错误危险得多。跑 `scripts/check_api_change.sh <函数名>`,方法见 `references/api-contract-change.md`。
+12. **Never let an AI/tool add `Signed-off-by`** — only a human can certify the DCO. AI-assisted work is disclosed with `Assisted-by:`; the human reviews all of it, ensures SPDX + GPL-2.0 compatibility, and adds their own sign-off. See `references/patch-workflow.md`.
 
 ---
 
@@ -53,6 +54,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 | **构建系统**（Kbuild Makefile / Kconfig 语言 / 配置流程 / 交叉编译 / in-tree·out-of-tree / 模块要素） | `references/build.md` | `Documentation/kbuild/` |
 | **ARM 内存类型 / 对齐 / 异常入口**（Normal·Device·Strongly-ordered 契约差别 · SO 上非对齐为何必错 · Data Abort 硬件动作 · XN→Permission fault · arm32 自解压器那条界与 arm64 为何没有 · 镜像增量怎么传导） | `references/arm-memory-model.md` | ARM DDI 0406C.d · `Documentation/arch/arm{,64}/booting.rst` |
 | 跨内核版本差异 | `references/kernel_version_deltas.md` | 各版本树 + `Documentation` |
+| **接口契约变更**（改返回值语义/参数取值空间/副作用前,枚举所有调用点） | `references/api-contract-change.md` | 通用工程纪律 |
 | **答案验证契约**（引具体符号时附 `[CLAIMS]`） | `references/claims-contract.md` | 事实检查 靶子 |
 | 该做 / 不该做速查 | `dos-and-donts.md` | 本 skill 积累 |
 | 已知坑（gotchas） | `known-bugs.md` | 本 skill 积累 |
