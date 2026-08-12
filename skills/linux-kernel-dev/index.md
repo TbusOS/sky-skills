@@ -19,6 +19,7 @@ linux-kernel-dev/
     ├── api-quick-ref.md     # ← core-api/ + driver-api/
     ├── patch-workflow.md    # ← process/submitting-patches.rst
     ├── bsp_discipline.md    # 通用 BSP 纪律（defconfig/上游gate/硬件读字节/4维度/冲突6步）
+    ├── change-discipline.md # 改动边界：每行指回需求/四类过度设计/级联·隐形决策·错误抽象
     ├── kernel_version_deltas.md  # 跨版本差异（版本敏感知识集中处）   [骨架/待核]
     └── claims-contract.md    # [CLAIMS] 答案验证契约（事实检查 靶子）
 ├── scripts/                 # 客观检查（P1）+ 回归测试（P2）
@@ -28,6 +29,7 @@ linux-kernel-dev/
 │   ├── regression_test.mjs   # 回归测试:gold 用例 + 自降解校准 + 覆盖率
 │   ├── kernel-critic.mjs     # 打分面板 prompt 准备（P3，4 轴）
 │   ├── kernel_learn_validate.mjs  # /kernel-learn 原子三件套确定性验证（P3）
+│   ├── diff_discipline.mjs   # 提交前 diff 自检:越界/重排版/级联/多余旋钮（--selftest）
 │   └── version_drift.mjs     # 版本适配:多版本树对比,报 rotted（P4）
 ├── tests/eval/              # 测试用例（P2）
 │   ├── cases/*.json          # 每条:gold_claims + corruptions + objective/subjective
@@ -51,6 +53,7 @@ linux-kernel-dev/
 | 查 API | `references/api-quick-ref.md` |
 | 提 patch | `references/patch-workflow.md` |
 | 板级/厂商定制、defconfig、迁移冲突 | `references/bsp_discipline.md` |
+| **提交前看 diff**（改超范围没有 / 多加了旋钮没有） | `references/change-discipline.md` + `scripts/diff_discipline.mjs` |
 | 跨内核版本 | `references/kernel_version_deltas.md` |
 | 引擎设计/状态 | `HARNESS-DESIGN.md` |
 

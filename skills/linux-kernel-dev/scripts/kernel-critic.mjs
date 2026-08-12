@@ -27,7 +27,7 @@ const SPECIALISTS = [
   { axis: 'safety',       weight: 0.22, agent: 'kernel-safety-critic.md',       refs: ['references/bsp_discipline.md'] },
   { axis: 'design',       weight: 0.13, agent: 'kernel-design-critic.md',       refs: ['references/bsp_discipline.md'] },
   { axis: 'testing',      weight: 0.12, agent: 'kernel-testing-critic.md',      refs: ['references/claims-contract.md'] },
-  { axis: 'complexity',   weight: 0.09, agent: 'kernel-complexity-critic.md',   refs: ['references/coding-style.md'] },
+  { axis: 'complexity',   weight: 0.09, agent: 'kernel-complexity-critic.md',   refs: ['references/coding-style.md', 'references/change-discipline.md'] },
   { axis: 'coding-style', weight: 0.08, agent: 'kernel-coding-style-critic.md', refs: ['references/coding-style.md'] },
   { axis: 'completeness', weight: 0.08, agent: 'kernel-completeness-critic.md', refs: ['references/claims-contract.md'] },
 ];
