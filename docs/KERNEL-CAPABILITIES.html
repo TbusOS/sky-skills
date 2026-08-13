@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kernel Harness — see it work</title>
-<meta name="description" content="The linux-kernel-dev engine, running. Real output: the fact gate catches a made-up CONFIG, the regression test guards it, version drift flags ion_alloc.">
+<meta name="description" content="The linux-kernel-dev engine, running. Real output: the fact gate catches a made-up CONFIG, the diff gate stops an out-of-scope change, drift flags ion_alloc.">
 <meta property="og:title" content="Kernel Harness — see it work">
-<meta property="og:description" content="Real terminal output from every gate: hallucination caught, regression guarded, version drift flagged.">
+<meta property="og:description" content="Real terminal output from the core gates: hallucination caught, out-of-scope diff stopped, regression guarded, version drift flagged.">
 <meta property="og:type" content="article">
 <link rel="stylesheet" href="../skills/anthropic-design/assets/fonts.css">
 <link rel="stylesheet" href="../skills/anthropic-design/assets/anthropic.css">
@@ -99,8 +99,8 @@
       <span class="lang-zh">不是承诺。<br>这是它真在跑。</span>
     </h1>
     <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.55; max-width:740px; font-family:var(--font-body);">
-      <span class="lang-en">Every block below is real output from the scripts in the skill, run against a real 6.1 source tree and a 7.0 tree. The fact gate catches a made-up <code>CONFIG_*</code>. The regression test proves the gate can tell good from bad. The learn validator refuses a rule with no executable check. Version drift flags an API that vanished between kernels.</span>
-      <span class="lang-zh">下面每一块都是 skill 里脚本的真实输出，对着一棵真实 6.1 源码树和一棵 7.0 树跑出来的。事实检查抓出编造的 <code>CONFIG_*</code>。回归测试证明检查真能分好坏。学习验证器拒掉没有可执行检查的规则。版本漂移标出在内核之间消失的 API。</span>
+      <span class="lang-en">Every block below is real output from the scripts in the skill, run against a real 6.1 source tree and a 7.0 tree. The fact gate catches a made-up <code>CONFIG_*</code>. The diff gate stops a change that grew past what was asked. The regression test proves the gate can tell good from bad. The learn validator refuses a rule with no executable check. Version drift flags an API that vanished between kernels.</span>
+      <span class="lang-zh">下面每一块都是 skill 里脚本的真实输出，对着一棵真实 6.1 源码树和一棵 7.0 树跑出来的。事实检查抓出编造的 <code>CONFIG_*</code>。diff 检查拦下改超了要求范围的改动。回归测试证明检查真能分好坏。学习验证器拒掉没有可执行检查的规则。版本漂移标出在内核之间消失的 API。</span>
     </p>
     <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
       <a class="anth-button" href="#fact"><span class="lang-en">Watch it catch a hallucination</span><span class="lang-zh">看它抓幻觉</span></a>
@@ -307,12 +307,39 @@ total: 0 errors, 2 warnings, 4 lines checked
   </div>
 </section>
 
-<!-- 3. regression -->
+<!-- 3. diff discipline -->
 <section class="anth-section">
   <div class="anth-container anth-container--narrow">
     <div class="cap">
       <div>
-        <span class="cap-label"><span class="lang-en">03 · Regression + self-degradation</span><span class="lang-zh">03 · 回归 + 自降解校准</span></span>
+        <span class="cap-label"><span class="lang-en">03 · Change boundary</span><span class="lang-zh">03 · 改动边界</span></span>
+        <h2 style="margin:var(--space-3) 0;"><span class="lang-en">It reads the diff as a whole, not hunk by hunk.</span><span class="lang-zh">它把 diff 当整体看，不是一个 hunk 一个 hunk 看。</span></h2>
+        <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0;">
+          <span class="lang-en">Two kinds of damage survive a hunk-by-hunk read, because every hunk looks reasonable alone: the change grew past what was asked (a variable renamed in passing, an include block resorted), and things nobody asked for got added (one more <code>module_param</code>, a wrapper with a single call site). The other gates miss this by construction — checkpatch judges single lines, the fact gate judges symbols. None of them asks <em>where this change should have stopped</em>. Without <code>--scope</code> it reports <strong>skipped</strong>, never clean: with no declared boundary there is nothing to have crossed, and silence would read as approval.</span>
+          <span class="lang-zh">有两类问题逐个 hunk 读 diff 时看不出来，因为每个 hunk 单看都合理：改超了要求的范围（顺手改的变量名、重排的 include），和加了没人要的东西（多一个 <code>module_param</code>、一层只有一个调用点的包装）。别的检查天生管不到这个——checkpatch 看单行，事实检查看符号，没有一条问<em>「这次改动该到哪为止」</em>。不给 <code>--scope</code> 时报 <strong>skipped</strong> 而不是 clean：没声明范围就无从判断越没越界，这种情况下沉默等于说没问题。</span>
+        </p>
+      </div>
+      <pre class="term"><span class="dim">$ node scripts/diff_discipline.mjs --diff bsp-fix.patch --scope 'drivers/i2c/**'</span>
+=== diff discipline: 3 file(s), 2 area(s), 3 finding(s)
+  <span class="bad">ERROR  out-of-scope</span>  drivers/spi/spi-bar.c:10
+      no --scope pattern covers this file
+  <span class="accent">WARN  speculative-knob</span>  drivers/i2c/busses/i2c-foo.c
+      adds module parameter "foo_retries" -- who sets it, and what breaks if it is wrong?
+  <span class="accent">WARN  reformat-only</span>  drivers/i2c/busses/i2c-foo.h:12
+      2 line(s) differ only in whitespace
+
+  The test is per line: can you point at the request that made this line
+  necessary? "while I was in there" is not such a reason -- revert it.   <span class="dim">(exit 1)</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- 4. regression -->
+<section class="anth-section">
+  <div class="anth-container anth-container--narrow">
+    <div class="cap">
+      <div>
+        <span class="cap-label"><span class="lang-en">04 · Regression + self-degradation</span><span class="lang-zh">04 · 回归 + 自降解校准</span></span>
         <h2 style="margin:var(--space-3) 0;"><span class="lang-en">It proves the gate can tell good from bad.</span><span class="lang-zh">它证明检查真能分好坏。</span></h2>
         <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0;">
           <span class="lang-en">Each case carries a known-good answer (<em>gold</em>) and deliberate corruptions. The runner asserts gold resolves <strong>and</strong> every corruption is caught — a self-degradation check. Coverage is tracked: if too few cases actually ran against a tree, the whole run is marked untrustworthy.</span>
@@ -329,12 +356,12 @@ total: 0 errors, 2 warnings, 4 lines checked
   </div>
 </section>
 
-<!-- 4. kernel-learn -->
+<!-- 5. kernel-learn -->
 <section class="anth-section anth-section--subtle">
   <div class="anth-container anth-container--narrow">
     <div class="cap">
       <div>
-        <span class="cap-label"><span class="lang-en">04 · Learning loop</span><span class="lang-zh">04 · 学习循环</span></span>
+        <span class="cap-label"><span class="lang-en">05 · Learning loop</span><span class="lang-zh">05 · 学习循环</span></span>
         <h2 style="margin:var(--space-3) 0;"><span class="lang-en">No executable check, no rule.</span><span class="lang-zh">没有可执行检查，就不准建规则。</span></h2>
         <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0;">
           <span class="lang-en">When a trap is solved, <code>/kernel-learn</code> mints an atomic triple — a rule with an embedded <code>[CLAIMS]</code> check, a frozen case that fails before / passes after, and a registration. The validator is deterministic: a rule with a real check is accepted; a prose-only rule is rejected.</span>
@@ -351,16 +378,16 @@ total: 0 errors, 2 warnings, 4 lines checked
   </div>
 </section>
 
-<!-- 5. scoring panel -->
+<!-- 6. scoring panel -->
 <section class="anth-section">
   <div class="anth-container anth-container--wide">
     <div class="cap">
       <div>
-        <span class="cap-label"><span class="lang-en">05 · Scoring panel</span><span class="lang-zh">05 · 打分面板</span></span>
+        <span class="cap-label"><span class="lang-en">06 · Scoring panel</span><span class="lang-zh">06 · 打分面板</span></span>
         <h2 style="margin:var(--space-3) 0;"><span class="lang-en">Seven specialists, safety weighted highest.</span><span class="lang-zh">七个专家，safety 权重最高。</span></h2>
         <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0 0 var(--space-5);">
           <span class="lang-en">After the objective checks settle the facts, seven fresh-context critics each score one axis — correctness, safety, design, testing, complexity, coding-style, completeness (aligned with Google's review dimensions). Safety carries the most weight and an error there fails the answer outright — in kernel code a sleep-in-spinlock is not a style nit.</span>
-          <span class="lang-zh">客观检查把事实定下后，七个 fresh-context 打分员各评一轴——正确性、安全、设计、测试、复杂度、编码风格、完整性（对齐 Google 的 review 维度）。safety 权重最大，这一轴出 error 直接判 fail——内核里持 spinlock 睡眠不是小毛病。</span>
+          <span class="lang-zh">客观检查把事实定下后，七个 fresh-context 打分员各评一轴——正确性、安全、设计、测试、复杂度、编码风格、完整性（对应 Google 的 review 维度）。safety 权重最大，这一轴出 error 直接判 fail——内核里持 spinlock 睡眠不是小毛病。</span>
         </p>
       </div>
       <figure style="margin:0;">
@@ -400,7 +427,7 @@ total: 0 errors, 2 warnings, 4 lines checked
 <!-- 5b. live demo: 7 critics scoring one answer -->
 <section class="anth-section" id="demo">
   <div class="anth-container anth-container--narrow">
-    <span class="cap-label"><span class="lang-en">06 · Scored, for real</span><span class="lang-zh">06 · 真打一次分</span></span>
+    <span class="cap-label"><span class="lang-en">07 · Scored, for real</span><span class="lang-zh">07 · 真打一次分</span></span>
     <h2 style="margin:var(--space-3) 0;"><span class="lang-en">Seven critics, one answer, real scores.</span><span class="lang-zh">七个 critic，评同一个答案，真实分数。</span></h2>
     <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0 0 var(--space-5); line-height:1.6;">
       <span class="lang-en">The panel was run for real on <code>tests/eval/demo-answer.md</code> — a platform sensor-driver probe with deliberate defects. Each critic scored its one axis in a fresh context; the numbers below are their actual verdicts, not mock-ups.</span>
@@ -468,12 +495,12 @@ return 0;                                               <span class="bad">// 无
   </div>
 </section>
 
-<!-- 6. version drift -->
+<!-- 8. version drift -->
 <section class="anth-section anth-section--subtle">
   <div class="anth-container anth-container--narrow">
     <div class="cap">
       <div>
-        <span class="cap-label"><span class="lang-en">07 · Version drift</span><span class="lang-zh">07 · 版本漂移</span></span>
+        <span class="cap-label"><span class="lang-en">08 · Version drift</span><span class="lang-zh">08 · 版本漂移</span></span>
         <h2 style="margin:var(--space-3) 0;"><span class="lang-en">It found ion_alloc vanished between 6.1 and 7.0.</span><span class="lang-zh">它发现 ion_alloc 在 6.1 到 7.0 之间没了。</span></h2>
         <p style="font-family:var(--font-body); color:var(--anth-text); font-size:16px; margin:0;">
           <span class="lang-en">Point the detector at two version trees and it runs the gold claims against each, then reports what changed. <code>ion_alloc</code> resolves in 6.1 but not 7.0 — flagged ROTTED, machine-found. That is the signal to version-tag the knowledge instead of letting it rot silently.</span>

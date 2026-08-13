@@ -98,12 +98,20 @@ function parseArgs(argv) {
 
 function parseDiff(text) {
   const files = []
-  let cur = null, hunk = null
+  // `diff --git` is optional: plain `diff -u`, quilt and most vendor patches
+  // start each file at `--- `. So `--- ` opens a new file too, EXCEPT when a
+  // `diff --git` line just opened one for it -- otherwise every git patch
+  // would be counted twice. Without this, a non-git patch collapses into a
+  // single file record wearing the LAST file's path: the file count is wrong,
+  // findings are blamed on the wrong file, and out-of-scope goes silent
+  // whenever that last file happens to be inside --scope.
+  let cur = null, hunk = null, fromGit = false
   for (const line of text.split('\n')) {
     const git = line.match(/^diff --git a\/(.+?) b\/(.+)$/)
-    if (git) { cur = newFile(git[2]); files.push(cur); hunk = null; continue }
+    if (git) { cur = newFile(git[2]); files.push(cur); hunk = null; fromGit = true; continue }
     if (line.startsWith('--- ')) {
-      if (!cur) { cur = newFile('(unknown)'); files.push(cur); hunk = null }
+      if (fromGit) { fromGit = false; continue }
+      cur = newFile('(unknown)'); files.push(cur); hunk = null
       continue
     }
     if (line.startsWith('+++ ')) {
@@ -296,6 +304,22 @@ const OUT_OF_SCOPE_DIFF = CLEAN_DIFF + `diff --git a/drivers/spi/spi-bar.c b/dri
 +	int nwords;
 `
 
+// No `diff --git` headers -- what `diff -u`, quilt and most vendor patches
+// look like. Every fixture above is a git patch, which is how the parser bug
+// this guards against survived: two files collapsed into one record wearing
+// the last file's path.
+const PLAIN_UNIFIED_TWO_FILES = `--- a/drivers/i2c/busses/i2c-foo.c
++++ b/drivers/i2c/busses/i2c-foo.c
+@@ -8,0 +9,2 @@
++static int retries = 3;
++module_param(retries, int, 0644);
+--- a/drivers/spi/spi-bar.c
++++ b/drivers/spi/spi-bar.c
+@@ -10,3 +10,3 @@
+-	int n_words;
++	int nwords;
+`
+
 const REFORMAT_DIFF = `diff --git a/drivers/i2c/busses/i2c-foo.c b/drivers/i2c/busses/i2c-foo.c
 --- a/drivers/i2c/busses/i2c-foo.c
 +++ b/drivers/i2c/busses/i2c-foo.c
@@ -388,6 +412,15 @@ function selftest() {
     ['missing --scope is reported as skipped, not as clean',
       () => analyse(parseDiff(OUT_OF_SCOPE_DIFF), { ...base }),
       r => r.notes.some(n => n.includes('out-of-scope check skipped'))],
+    ['a patch without `diff --git` still splits into separate files',
+      () => parseDiff(PLAIN_UNIFIED_TWO_FILES),
+      fs => fs.length === 2 &&
+            fs[0].path === 'drivers/i2c/busses/i2c-foo.c' &&
+            fs[1].path === 'drivers/spi/spi-bar.c'],
+    ['on such a patch each finding names the file it really came from',
+      () => analyse(parseDiff(PLAIN_UNIFIED_TWO_FILES), { ...base, scope: 'drivers/i2c/**' }),
+      r => r.findings.some(f => f.kind === 'speculative-knob' && f.path === 'drivers/i2c/busses/i2c-foo.c') &&
+           r.findings.some(f => f.kind === 'out-of-scope' && f.path === 'drivers/spi/spi-bar.c')],
   ]
   let bad = 0
   console.log('selftest: each check must fire on its planted defect and stay quiet otherwise\n')
