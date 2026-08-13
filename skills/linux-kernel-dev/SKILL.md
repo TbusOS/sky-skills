@@ -45,7 +45,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 
 ## References (load on demand)
 
-| 任务 | 加载 | 权威源（对齐） |
+| 任务 | 加载 | 权威源（依据） |
 |---|---|---|
 | 内核代码风格 / 审码 | `references/coding-style.md` | `Documentation/process/coding-style.rst` |
 | 新建 module / driver / chardev / Makefile / Kconfig / DT | `references/templates.md` | `Documentation/kbuild/`, `Documentation/devicetree/bindings/` |
@@ -57,7 +57,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 | **构建系统**（Kbuild Makefile / Kconfig 语言 / 配置流程 / 交叉编译 / in-tree·out-of-tree / 模块要素） | `references/build.md` | `Documentation/kbuild/` |
 | **ARM 内存类型 / 对齐 / 异常入口**（Normal·Device·Strongly-ordered 契约差别 · SO 上非对齐为何必错 · Data Abort 硬件动作 · XN→Permission fault · arm32 自解压器那条界与 arm64 为何没有 · 镜像增量怎么传导） | `references/arm-memory-model.md` | ARM DDI 0406C.d · `Documentation/arch/arm{,64}/booting.rst` |
 | 跨内核版本差异 | `references/kernel_version_deltas.md` | 各版本树 + `Documentation` |
-| **接口契约变更**（改返回值语义/参数取值空间/副作用前,枚举所有调用点） | `references/api-contract-change.md` | 通用工程纪律 |
+| **接口契约变更**（改返回值语义/参数取值空间/副作用前,枚举所有调用点;加 `EXPORT_SYMBOL` 前先问它是不是真的要给可加载模块用 —— 生产者和消费者都进 vmlinux 就不需要导出,非 static 定义加头文件原型就够,多余的导出等于对外宣称"这是公开接口") | `references/api-contract-change.md` + `scripts/check_export_symbol.sh` | 通用工程纪律 |
 | **执行上下文**（从 grep 结果推系统行为前:守卫链 / WHO·WHEN·ELSE 三问 / init.rc·Kconfig·Makefile·DTS 等块结构语言 / 被质疑时先核对自己产出） | `references/execution-context.md` | 通用工程纪律 |
 | **改既有代码五步流程**（考古找设计意图 → 读子系统规范 → 上下文·并发·**多核 SMP** → 影响面 → 方案优先级;含"原设计对不对"的三档判断） | `references/modifying-existing-code.md` | 通用工程纪律 |
 | **改动边界**（提交前看 diff:每行能否指回需求 / 四类过度设计的内核形态 / 级联改动·隐形决策·错误的抽象) | `references/change-discipline.md` + `scripts/diff_discipline.mjs` | 通用工程纪律 |
@@ -67,9 +67,9 @@ references. Load a reference only when the task needs it (progressive disclosure
 
 ### 子系统模块（按需路由）
 
-深入具体内核子系统时加载对应模块（命中才读，progressive disclosure），每个对齐该子系统的 `Documentation/<subsys>/`，并配套 eval 用例进 harness（fact_gate + 回归测）。
+深入具体内核子系统时加载对应模块（命中才读，progressive disclosure），每个对应该子系统的 `Documentation/<subsys>/`，并配套 eval 用例进 harness（fact_gate + 回归测）。
 
-| 任务命中 | 加载 | 权威源（对齐） |
+| 任务命中 | 加载 | 权威源（依据） |
 |---|---|---|
 | 中断 / 下半部 / threaded IRQ / tasklet / softirq / workqueue 选型 | `references/subsys/interrupts.md` | `Documentation/core-api/genericirq.rst`、`core-api/irq/` |
 | 睡眠/唤醒 / 等待队列 / completion / 抢占 / 调度策略·优先级·亲和性 / CFS·EEVDF·RT·DL | `references/subsys/scheduler.md` | `Documentation/scheduler/` |
@@ -134,7 +134,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 - `scripts/binary_diff_classify.py` — 两个二进制的差异是**真实代码变化**还是**地址整体平移**（按 32 位字解码统计 delta 分布；`--limit` 划出未压缩区，否则压缩载荷雪崩淹没一切；带 `--self-test`）
 - `scripts/kernel-tree.mjs` — 绑内核树（`detect` / `add` / `list` / `clone`），路径存本机配置不入库
 - `scripts/regression_test.mjs` + `tests/eval/cases/*.json` — 回归测试:每条用例的 gold 必须在真树查得到 + 自降解校准（故意改坏必须被抓）+ 覆盖率统计；`--baseline` 记录、`--check` 对比退步
-- `scripts/kernel-critic.mjs` + `.claude/agents/kernel-*-critic.md` — 7 轴打分面板（correctness/safety/design/testing/complexity/coding-style/completeness,对齐 Google review 维度;safety 一票否决）prompt 准备,Task 派子 agent 并行评分
+- `scripts/kernel-critic.mjs` + `.claude/agents/kernel-*-critic.md` — 7 轴打分面板（correctness/safety/design/testing/complexity/coding-style/completeness,对应 Google review 维度;safety 一票否决）prompt 准备,Task 派子 agent 并行评分
 - `/kernel-learn`（`.claude/commands/` + `scripts/kernel_learn_validate.mjs`）— 把踩过的坑沉成原子三件套（规则带 `[CLAIMS]` + 建前fail/建后pass 用例 + 注册），无可执行检查不准建
 - `evolution/{ledger.tsv,rules.json}` + `scripts/version_drift.mjs` — 记录表/规则复用 design-evolve（`evolve-ledger.mjs --ledger=` / `evolve-rules.mjs --registry=`）带 fires/catches；`version_drift.mjs` 拿多版本树对比 gold,报"旧版有新版没"的 API（机器跑出版本漂,不靠手维护）
 - 引具体符号的答案附 `[CLAIMS]` 块（`references/claims-contract.md`）；绑树后跑事实检查,答案标 `[已对 linux <版本> 验证]` 或 `[未验证]`

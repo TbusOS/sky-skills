@@ -44,7 +44,7 @@
 | [design-review](skills/design-review/) | EN/ZH | **7 个设计 skill 的独立评审员** —— 四道闸（`verify.py` 静态 + `visual-audit.mjs` Playwright 渲染 + `screenshot.mjs` 截图 + `critic.mjs` LLM 审美评审）+ 仓库内已知 bug 清单。另带 `multi-critic.mjs`（4 个固定权重的专项评审员）、learning loop（critic 抓到的问题经 `design-learner` agent 固化成新闸规则）、`bin/design-review` CLI 三模式（`--plan` / `--critic` / `--audit`）。参考 Anthropic 的 [harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)：generator 和 evaluator 分离，reviewer 不继承 generator 的立场。完整 [8 组件 harness 路线图](docs/HARNESS-ROADMAP.html)（用 4 种设计声音各渲一版） |
 | [gated-dual-clone](skills/gated-dual-clone/) | EN/ZH | **双仓库 git 工作流搭建器(2 仓默认 · 可选 3 仓加 reproducibility 关卡)。** 适用于上游分支受保护(必须走 MR / PR)、编译重会污染工作树的项目。一条命令创建 `gateway` 仓库(push 源) + `satellite` 仓库(只读编译树)——编译树在物理上够不到远程。搭完自动跑三道安全闸:协议墙、显式 push-URL 禁用、pre-push hook。加 `--clean-verify-dir` 启用第 3 仓(冷盘冷启动)+ stamp-match pre-push 关卡,没经从零全量编认证的 commit 推不出。完整[设计稿](docs/design-mr-gated-dual-repo.md) + [anthropic demo](demos/gated-dual-clone/index.html) |
 | [gated-dual-clone-audit](skills/gated-dual-clone-audit/) | EN/ZH | **独立评估器**,和 `gated-dual-clone` 配对。不 import 任何 generator 代码,只读成品拓扑 · 重验安全闸。四层:structural(文件系统 / hook / hardlink, 8 闸) → configuration(git-config, 8 闸) → behavioural(安全 `--dry-run` + 直接调 hook, 3 闸) → taste(LLM critic subagent · 不阻塞 exit code)。传 `--clean-verify-dir` 自动加 4 gate(S9-S11 + C9 + B4)覆盖 3 仓拓扑。可按需跑、作 `pre-push` hook 跑、作 cron drift 检查跑。`--json` 喂给 `learning-loop` 固化野外 drift。和 `design-review` 一样的 generator / evaluator 分离原则 |
-| [doc-review-loop](skills/doc-review-loop/) | ZH | **给认真的决策书做的双 agent 评审循环。** `writer` agent 拿代码 / 实测证据出稿，`reviewer` agent 扮演没接触过项目的严苛 PM，每个论断都质疑，问题分 A (阻塞) / B (必改) / C (建议改) 三档。主对话把 reviewer 问题清单喂回 writer 出 v2，最多 3 轮。每轮 diff + reviewer 问题留在 `<doc>.review.log`。触发：发版评审决策、跨团队对齐、复杂改动论证、改 vs 不改类问题。**不要触发** 简单 README、单页 memo、个人笔记 —— 杀鸡用牛刀 |
+| [doc-review-loop](skills/doc-review-loop/) | ZH | **给认真的决策书做的双 agent 评审循环。** `writer` agent 拿代码 / 实测证据出稿，`reviewer` agent 扮演没接触过项目的严苛 PM，每个论断都质疑，问题分 A (阻塞) / B (必改) / C (建议改) 三档。主对话把 reviewer 问题清单喂回 writer 出 v2，最多 3 轮。每轮 diff + reviewer 问题留在 `<doc>.review.log`。触发：发版评审决策、跨团队统一口径、复杂改动论证、改 vs 不改类问题。**不要触发** 简单 README、单页 memo、个人笔记 —— 杀鸡用牛刀 |
 | [design-planner](skills/design-planner/) | ZH | **brief→sprint contract 计划器**，服务 7 个设计 skill —— 在写任何 HTML 之前把一句模糊需求展开成 page-type + 受众 + section 计划 + 硬指标（图密度 / 双语 / 品牌），包装 `bin/design-review --plan`。没有 canonical 的 page-type 借最近的结构并标注 LOW-CONFIDENCE |
 | [design-evolve](skills/design-evolve/) | EN | **自进化循环（harness 组件 09）** —— 让 harness 自己提出更好的生成器规则 / 模板 / 手法，只保留分数确实更高的那些。每轮：诊断最弱的评审轴 → 提一个改动 → 重新生成 → 用**冻结的**评审器打分 → 严格高于锁定基线、且没有任何留出的 canonical 退步，才保留，否则 `git revert`。评审器保持冻结，生成器就没法靠挪动标尺取胜 |
 | [skills-sync](skills/skills-sync/) | ZH | **手动检查并更新 skills 仓。** 检测远端是否领先、列出更新了什么（commit 标题），用户确认后才跑 `git pull --ff-only` 并给新到的 skill 补 symlink。不擅自更新；本地有改动或分支已分叉时中止 pull 并如实报告 |
@@ -59,7 +59,7 @@
 
 > **两种安装作用域。** 装到某个项目的 `.claude/skills/` 只在那个仓库生效；装到 `~/.claude/skills/` 在本机所有仓库生效。下面命令都用用户级 `~/.claude/skills/`，要装到项目级把目的地换掉即可。完整双语安装指南见 [docs/INSTALL.html](docs/INSTALL.html)。
 >
-> **注意——仓库里有两种 skill。** 有的是单个 `SKILL.md` 文件（如 `linux-kernel-dev` / `md-to-pdf`），有的是 `SKILL.md` + `scripts/` + `references/` + `templates/` 的整目录 —— 包括 7 个设计 skill（`apple-design` / `anthropic-design` / `ember-design` / `sage-design` / `glass-design` / `eclat-design` / `lectern-design`），以及 `design-review` / `gated-dual-clone` / `gated-dual-clone-audit` / `tech-pdf-reader`。**多文件 skill 必须按整目录安装**——只 copy 单 `SKILL.md` 会让 skill 起来但脚本跑不动。另外 `design-review` learning loop 用的 `design-learner` agent 不在 skill 目录里：要单独把 `.claude/agents/design-learner.md` 复制到你的 `~/.claude/agents/`。
+> **注意——仓库里有两种 skill。** 只有四个是光杆 `SKILL.md`：`skills-sync` / `design-planner` / `design-evolve` / `wechat-video-publisher`。**其余十五个在 `SKILL.md` 之外还带 `scripts/` / `references/` / `templates/`，必须按整目录安装**——只 copy 单 `SKILL.md` 会让 skill 起来但脚本跑不动。看着小的也在此列（`md-to-pdf` / `doc-to-markdown` / `tech-pdf-reader` 各带一个脚本），最大的 `linux-kernel-dev` 有 233 个文件。另外 `design-review` learning loop 用的 `design-learner` agent 不在 skill 目录里：要单独把 `.claude/agents/design-learner.md` 复制到你的 `~/.claude/agents/`。
 >
 > **装完之后退出 Claude Code 重进**——skill 清单是启动时扫描一次冻结的。
 
@@ -69,10 +69,11 @@
 git clone https://github.com/TbusOS/sky-skills.git
 
 # 单文件 skill
-cp sky-skills/skills/linux-kernel-dev/SKILL.md \
-  ~/.claude/skills/linux-kernel-dev.md
+cp sky-skills/skills/skills-sync/SKILL.md \
+  ~/.claude/skills/skills-sync.md
 
 # 多文件 skill —— 整目录复制
+cp -r sky-skills/skills/linux-kernel-dev       ~/.claude/skills/
 cp -r sky-skills/skills/gated-dual-clone       ~/.claude/skills/
 cp -r sky-skills/skills/gated-dual-clone-audit ~/.claude/skills/
 cp -r sky-skills/skills/design-review          ~/.claude/skills/
@@ -85,10 +86,11 @@ git clone https://github.com/TbusOS/sky-skills.git
 cd sky-skills
 
 # 单文件 skill
-ln -s "$(pwd)/skills/linux-kernel-dev/SKILL.md" \
-  ~/.claude/skills/linux-kernel-dev.md
+ln -s "$(pwd)/skills/skills-sync/SKILL.md" \
+  ~/.claude/skills/skills-sync.md
 
 # 多文件 skill —— 整目录 symlink
+ln -s "$(pwd)/skills/linux-kernel-dev"       ~/.claude/skills/linux-kernel-dev
 ln -s "$(pwd)/skills/gated-dual-clone"       ~/.claude/skills/gated-dual-clone
 ln -s "$(pwd)/skills/gated-dual-clone-audit" ~/.claude/skills/gated-dual-clone-audit
 ln -s "$(pwd)/skills/design-review"          ~/.claude/skills/design-review
@@ -178,7 +180,7 @@ claude install github:TbusOS/sky-skills/skills/design-review
 - **图表** —— 14 个手工 SVG 模板（flow / architecture / hierarchy / timeline / sequence / register-bitfield / soc-block / hw-timing-waveform / sched-timeline / build-pipeline / function-flowchart / algorithm-ringbuffer / deployment / state-machine），苹果风圆角矩形 + 细灰描边 —— 全部可在[图表画廊](demos/apple-design/diagrams.html)预览
 - **交付** —— 纯 `apple.css`（零构建），配套 Tailwind preset
 
-**自动触发条件：** 用户说"apple 风格"/"apple style"/"苹果官网风格"/"like apple.com"，或要求做落地页 / 幻灯片 / 文档 / 图表 / 选配器对齐苹果官网。
+**自动触发条件：** 用户说"apple 风格"/"apple style"/"苹果官网风格"/"like apple.com"，或要求做落地页 / 幻灯片 / 文档 / 图表 / 选配器贴合苹果官网。
 **不触发于：** iOS/macOS 原生应用界面（用 Apple HIG 专属 skill），或泛泛的"做个好看页面"。
 
 ### anthropic-design

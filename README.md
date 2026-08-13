@@ -59,7 +59,7 @@ For example, when you start editing a kernel module, the `linux-kernel-dev` skil
 
 > **Two install scopes.** Copying into a project's `.claude/skills/` makes a skill available in that repository only; copying into `~/.claude/skills/` makes it available in every repository on your machine. The commands below use the user-level `~/.claude/skills/` — swap the destination for project-level installs. Full bilingual walkthrough: [docs/INSTALL.html](docs/INSTALL.html).
 >
-> **Heads up — two kinds of skills in this repo.** Some skills are a single `SKILL.md` file (e.g. `linux-kernel-dev`, `md-to-pdf`). Others bundle `SKILL.md` + `scripts/` + `references/` + `templates/` — that includes the seven design skills (`apple-design` / `anthropic-design` / `ember-design` / `sage-design` / `glass-design` / `eclat-design` / `lectern-design`) plus `design-review`, `gated-dual-clone`, `gated-dual-clone-audit` and `tech-pdf-reader`. **Multi-file skills must be installed as the whole directory** — a single-file copy leaves the skill unable to run its scripts. Note the `design-learner` agent used by `design-review`'s learning loop is not part of the skill directory: copy `.claude/agents/design-learner.md` into your `~/.claude/agents/` separately.
+> **Heads up — two kinds of skills in this repo.** Only four are a lone `SKILL.md`: `skills-sync`, `design-planner`, `design-evolve`, `wechat-video-publisher`. **The other fifteen bundle `scripts/` / `references/` / `templates/` alongside `SKILL.md` and must be installed as the whole directory** — a single-file copy leaves the skill unable to run its scripts. That includes the small-looking ones (`md-to-pdf`, `doc-to-markdown` and `tech-pdf-reader` each carry one script) and the largest one (`linux-kernel-dev` is 233 files). Note the `design-learner` agent used by `design-review`'s learning loop is not part of the skill directory: copy `.claude/agents/design-learner.md` into your `~/.claude/agents/` separately.
 >
 > **After installation, restart your Claude Code session** so the skill registry picks up the new entries.
 
@@ -69,10 +69,11 @@ For example, when you start editing a kernel module, the `linux-kernel-dev` skil
 git clone https://github.com/TbusOS/sky-skills.git
 
 # Single-file skill
-cp sky-skills/skills/linux-kernel-dev/SKILL.md \
-  ~/.claude/skills/linux-kernel-dev.md
+cp sky-skills/skills/skills-sync/SKILL.md \
+  ~/.claude/skills/skills-sync.md
 
 # Multi-file skill — copy the whole directory
+cp -r sky-skills/skills/linux-kernel-dev       ~/.claude/skills/
 cp -r sky-skills/skills/gated-dual-clone       ~/.claude/skills/
 cp -r sky-skills/skills/gated-dual-clone-audit ~/.claude/skills/
 cp -r sky-skills/skills/design-review          ~/.claude/skills/
@@ -85,10 +86,11 @@ git clone https://github.com/TbusOS/sky-skills.git
 cd sky-skills
 
 # Single-file skill
-ln -s "$(pwd)/skills/linux-kernel-dev/SKILL.md" \
-  ~/.claude/skills/linux-kernel-dev.md
+ln -s "$(pwd)/skills/skills-sync/SKILL.md" \
+  ~/.claude/skills/skills-sync.md
 
 # Multi-file skill — symlink the whole directory
+ln -s "$(pwd)/skills/linux-kernel-dev"       ~/.claude/skills/linux-kernel-dev
 ln -s "$(pwd)/skills/gated-dual-clone"       ~/.claude/skills/gated-dual-clone
 ln -s "$(pwd)/skills/gated-dual-clone-audit" ~/.claude/skills/gated-dual-clone-audit
 ln -s "$(pwd)/skills/design-review"          ~/.claude/skills/design-review
