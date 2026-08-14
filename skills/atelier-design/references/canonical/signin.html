@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loka — sign in</title>
+<meta name="description" content="The sign-in screen: one glass card on the wallpaper, a side panel that says what is behind the door, and an error state that names what to do next.">
+<meta property="og:title" content="Loka — sign in">
+<meta property="og:description" content="One glass card on the wallpaper, a side panel that says what is behind the door, and an error that names the fix.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/atelier.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  .page-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5);
+  }
+  .head-tools { display: flex; align-items: center; gap: var(--space-3); }
+
+  .auth { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); }
+  .auth__form { padding: var(--space-8) var(--space-7); }
+  /* Colour comes from .atl-inksurface — see atelier.css. Setting it here by
+     hand is how the muted caption at the bottom went invisible the first time. */
+  .auth__side {
+    padding: var(--space-8) var(--space-7);
+    display: flex; flex-direction: column; gap: var(--space-5);
+  }
+  .form-stack { display: flex; flex-direction: column; gap: var(--space-4); max-width: 380px; }
+  .alert {
+    display: flex; gap: var(--space-3); align-items: flex-start;
+    padding: 13px var(--space-4);
+    border-radius: var(--radius-sm);
+    background: rgba(198, 69, 63, 0.09);
+    border: 1px solid rgba(198, 69, 63, 0.28);
+    font-size: 13px;
+  }
+  .alert svg { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--atl-down); }
+  .divider {
+    display: flex; align-items: center; gap: var(--space-3);
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--atl-ink-3);
+  }
+  .divider::before, .divider::after {
+    content: ""; flex: 1; height: 1px; background: var(--atl-line);
+  }
+  .side-stat { display: flex; align-items: center; gap: var(--space-4); }
+  .side-stat__n {
+    display: block; font-size: 27px; font-weight: 800;
+    letter-spacing: -0.03em; font-variant-numeric: tabular-nums;
+  }
+  .side-stat__k { display: block; font-size: 12px; color: var(--atl-ink-card-ink-2); }
+  @media (max-width: 860px) {
+    .auth { grid-template-columns: minmax(0, 1fr); }
+    .auth__form, .auth__side { padding: var(--space-6) var(--space-5); }
+  }
+</style>
+</head>
+<body>
+
+<div class="atl-wall"></div>
+
+<div class="atl-page atl-page--narrow">
+
+  <div class="page-head">
+    <span class="atl-kicker">
+      <span class="lang-en">atelier-design · canonical · signin</span>
+      <span class="lang-zh">atelier-design · 范本页 · 登录</span>
+    </span>
+    <div class="head-tools">
+      <div class="atl-langtoggle lang-toggle">
+        <button type="button" class="is-active" data-lang-toggle="en">EN</button>
+        <button type="button" data-lang-toggle="zh">中文</button>
+      </div>
+      <button type="button" class="atl-iconbtn" data-theme-toggle aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v2M12 19v2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M3 12h2M19 12h2M5.6 18.4L7 17M17 7l1.4-1.4"/><circle cx="12" cy="12" r="3.6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="atl-app atl-app--full">
+    <div class="auth">
+
+      <!-- ---------- Form ---------- -->
+      <div class="auth__form">
+        <div class="atl-brand" style="padding:0; margin-bottom:var(--space-7);">
+          <span class="atl-brand__mark">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M12 3l7.5 4.3v9L12 20.6 4.5 16.3v-9z"/><path d="M12 8.4l3.2 1.8v3.6L12 15.6l-3.2-1.8v-3.6z"/></svg>
+          </span>
+          <span>
+            <span class="atl-brand__name">Loka</span>
+            <span class="atl-brand__sub">People Ops</span>
+          </span>
+        </div>
+
+        <h1 style="font-size:33px; margin-bottom:var(--space-2);">
+          <span class="lang-en">Sign in</span><span class="lang-zh">登录</span>
+        </h1>
+        <p class="atl-muted" style="font-size:14px; margin-bottom:var(--space-6);">
+          <span class="lang-en">Use the address your workspace owner invited. Personal addresses are not linked.</span>
+          <span class="lang-zh">请使用工作区所有者邀请的邮箱。个人邮箱没有绑定。</span>
+        </p>
+
+        <div class="form-stack">
+          <div class="alert" role="status">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16.2v.01"/></svg>
+            <span>
+              <b><span class="lang-en">That address is not on this workspace.</span><span class="lang-zh">该邮箱不在这个工作区里。</span></b>
+              <span style="display:block; margin-top:3px; color:var(--atl-ink-2);">
+                <span class="lang-en">Loka found it on <b>loka.example/studio</b>. Open that workspace, or ask Carla Sandoval to invite this address here.</span>
+                <span class="lang-zh">Loka 在 <b>loka.example/studio</b> 找到了它。可以去那个工作区，或者请 Carla Sandoval 把这个邮箱邀请到这里。</span>
+              </span>
+            </span>
+          </div>
+
+          <label class="atl-field">
+            <span class="atl-field__label"><span class="lang-en">Work email</span><span class="lang-zh">工作邮箱</span></span>
+            <input class="atl-input" type="email" value="judy.abbott@example.test" autocomplete="username">
+          </label>
+
+          <label class="atl-field">
+            <span class="atl-field__label"><span class="lang-en">Password</span><span class="lang-zh">密码</span></span>
+            <input class="atl-input" type="password" value="············" autocomplete="current-password">
+          </label>
+
+          <div class="atl-row atl-row--between atl-row--wrap">
+            <label class="atl-check" style="padding:0;">
+              <input type="checkbox" checked>
+              <span class="lang-en">Keep me signed in for 30 days</span><span class="lang-zh">30 天内保持登录</span>
+            </label>
+            <a href="#reset" style="font-size:13px; font-weight:700;">
+              <span class="lang-en">Reset password</span><span class="lang-zh">重置密码</span>
+            </a>
+          </div>
+
+          <button type="button" class="atl-btn" style="width:100%;">
+            <span class="lang-en">Sign in</span><span class="lang-zh">登录</span>
+          </button>
+
+          <span class="divider"><span class="lang-en">or</span><span class="lang-zh">或</span></span>
+
+          <button type="button" class="atl-btn atl-btn--ghost" style="width:100%;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="2.4"/><path d="M8 10.5V7.2a4 4 0 018 0v3.3"/></svg>
+            <span class="lang-en">Continue with SSO</span><span class="lang-zh">使用单点登录</span>
+          </button>
+
+          <p class="atl-muted" style="font-size:12px; margin:var(--space-2) 0 0;">
+            <span class="lang-en">SSO is required for the Jakarta entity. If your address ends in @jakarta.example.test, the password field above will not work.</span>
+            <span class="lang-zh">雅加达实体必须走单点登录。如果你的邮箱以 @jakarta.example.test 结尾，上面的密码框不起作用。</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- ---------- Side panel: the one ink surface ---------- -->
+      <div class="auth__side atl-inksurface">
+        <span class="atl-chip" style="background:rgba(255,255,255,0.13); color:inherit; align-self:flex-start;">
+          <span class="lang-en">Cycle Q3 · closes 30 Sep</span><span class="lang-zh">三季度周期 · 9 月 30 日封账</span>
+        </span>
+
+        <h2 style="font-size:25px; letter-spacing:-0.026em;">
+          <span class="lang-en">What is waiting inside</span><span class="lang-zh">进去之后有什么</span>
+        </h2>
+
+        <div class="side-stat">
+          <span class="atl-orb">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 3h8l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+          </span>
+          <span>
+            <span class="side-stat__n">6</span>
+            <span class="side-stat__k"><span class="lang-en">reviews awaiting your score</span><span class="lang-zh">份评估等你打分</span></span>
+          </span>
+        </div>
+
+        <div class="side-stat">
+          <span class="atl-orb">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+          </span>
+          <span>
+            <span class="side-stat__n">3</span>
+            <span class="side-stat__k"><span class="lang-en">interviews on your calendar today</span><span class="lang-zh">场面试在今天的日程上</span></span>
+          </span>
+        </div>
+
+        <div class="side-stat">
+          <span class="atl-orb">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 20V9.5M10 20V4.5M16 20v-8M22 20H2"/></svg>
+          </span>
+          <span>
+            <span class="side-stat__n">1</span>
+            <span class="side-stat__k"><span class="lang-en">compensation change not yet entered</span><span class="lang-zh">项调薪还没录入</span></span>
+          </span>
+        </div>
+
+        <p class="atl-muted" style="margin:auto 0 0; font-size:12.5px;">
+          <span class="lang-en">These counts come from the last session on this device and may be stale. They are shown before sign-in on purpose: the reason to sign in is more useful than a stock photograph.</span>
+          <span class="lang-zh">这些数字来自本设备上一次会话，可能已过期。特意放在登录前展示：给一个进去的理由，比放一张图库照片有用。</span>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="atl-foot">
+    <span>
+      <span class="lang-en">Canonical page · atelier-design · credentials are illustrative</span>
+      <span class="lang-zh">范本页 · atelier-design · 凭据为示意</span>
+    </span>
+    <span class="atl-mono">v1 · 2026-08-14</span>
+  </footer>
+</div>
+
+<script src="../../assets/atelier.js"></script>
+
+<!-- design-review:self-diff v1
+Skill: atelier
+Page-type: signin
+Created: 2026-08-14
+
+Decisions (5):
+1. [split-card-not-centred-box] chose "one shell split into form and ink panel" over "a 400px card floating dead centre". Because: the centred box is the single most template-looking screen in this aesthetic — every glassmorphism kit ships one. Splitting the shell puts the skill's own anchor move (exactly one ink surface) to work and gives the page something to say.
+2. [error-names-the-fix] chose "'That address is not on this workspace — Loka found it on loka.example/studio; open that workspace or ask Carla to invite it here'" over "'Invalid credentials'". Because: the generic message is the correct answer to a security question nobody asked here — the address exists, the user owns it, and the only real question is which door to use. Naming the other workspace and the person who can fix it turns a dead end into a next step.
+3. [sso-constraint-stated-before-failure] chose "warning that @jakarta addresses cannot use the password field" over "letting them try and fail". Because: this is a rule the product knows and the user does not, and the cheapest place to say it is above the button, not after the third attempt.
+4. [reason-to-enter-not-a-photograph] chose "three counts from the last session on this device" over "a hero image or a customer quote". Because: the ink panel is prime real estate on the one screen where the user has no information. Three numbers answer 'why now'. The caption admits they may be stale, which is the honest cost of showing them pre-auth.
+5. [orbs-carry-the-brand-here] chose "three gradient orbs in the ink panel" over "line icons". Because: this page has no KPI row, no chart and no meters — with no orbs it would carry almost no rose at all and fail the brand-presence gate, correctly, because it would no longer look like this skill.
+
+Known trade-offs:
+- The error banner is rendered on load. A sign-in page in its resting state has no error, but the error state is the part of this screen that carries all the design decisions, so the canonical shows it.
+- Pre-auth counts are a genuine privacy trade: they leak that this device signed in before and roughly what that person does. It is defensible on a device-local cache and indefensible from a server lookup; a real build must make that distinction, and this page cannot.
+- The password field holds dots as a literal value rather than a real masked entry, so it screenshots deterministically but is not a working control.
+- No sign-up path. This is a workspace product where accounts arrive by invitation, so the missing link is deliberate, not an omission.
+/design-review:self-diff -->
+
+</body>
+</html>

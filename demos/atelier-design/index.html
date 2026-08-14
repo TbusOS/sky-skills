@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>atelier-design — warm-glass product UI</title>
+<meta name="description" content="atelier-design: the sky-skills design skill that draws applications, not pages. Warm gradient wallpaper, one frosted app shell, gradient orbs, and live interaction.">
+<meta property="og:title" content="atelier-design — warm-glass product UI">
+<meta property="og:description" content="The only sky-skills design skill that draws applications. Warm wallpaper, one frosted shell, gradient orbs, and interaction you can click.">
+<link rel="stylesheet" href="../../skills/atelier-design/assets/fonts.css">
+<link rel="stylesheet" href="../../skills/atelier-design/assets/atelier.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  .page-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-6);
+  }
+  .head-tools { display: flex; align-items: center; gap: var(--space-3); }
+
+  .lede { max-width: 62ch; font-size: 17px; line-height: 1.62; }
+  .section { margin-top: var(--space-8); }
+  .section__head { margin-bottom: var(--space-5); }
+  .section__head p { margin: var(--space-2) 0 0; max-width: 70ch; font-size: 14px; }
+
+  .screen-card { display: block; text-decoration: none; color: inherit; }
+  .screen-card__n {
+    display: block; font-family: var(--font-mono); font-size: 11px;
+    color: var(--atl-ink-3); letter-spacing: 0.06em;
+  }
+  .screen-card__t { display: block; font-size: 17px; font-weight: 800; margin: 5px 0 6px; letter-spacing: -0.02em; }
+  .screen-card__d { display: block; font-size: 13px; color: var(--atl-ink-2); }
+  .screen-card__go { display: inline-block; margin-top: var(--space-3); font-size: 13px; font-weight: 700; color: var(--atl-accent-ink); }
+
+  /* The layers must composite over the WALLPAPER. Nesting them inside a 0.80
+     card made all three alphas land on the same opaque base and render
+     identically — the demo demonstrated nothing. */
+  .layer-demo {
+    display: grid; grid-template-columns: repeat(3, minmax(0,1fr));
+    border-radius: var(--radius-md); overflow: hidden;
+    border: 1px solid var(--atl-shell-border);
+    -webkit-backdrop-filter: blur(var(--atl-blur)) saturate(168%);
+    backdrop-filter: blur(var(--atl-blur)) saturate(168%);
+  }
+  .layer + .layer { border-left: 1px solid var(--atl-line); }
+  .layer { padding: var(--space-5); text-align: center; }
+  .layer__a { display: block; font-family: var(--font-mono); font-size: 19px; font-weight: 500; }
+  .layer__k { display: block; font-size: 11.5px; color: var(--atl-ink-3); margin-top: 4px; }
+  .layer--1 { background: var(--atl-shell-bg); }
+  .layer--2 { background: var(--atl-card-bg); }
+  .layer--3 { background: var(--atl-card-2-bg); }
+
+  .swatch-row { display: flex; gap: var(--space-4); flex-wrap: wrap; }
+  .swatch-chip { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
+  .swatch-dot { width: 26px; height: 26px; border-radius: 9px; flex: none; }
+
+  .lab-note { font-size: 12.5px; color: var(--atl-ink-3); margin-top: var(--space-3); }
+  .mini-rail { display: flex; flex-direction: column; gap: 2px; }
+  .chart-body { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: var(--space-3); }
+
+  .route-map {
+    border-radius: var(--radius-md);
+    background-color: var(--atl-track);
+    background-image: radial-gradient(currentColor 1.1px, transparent 1.2px);
+    background-size: 13px 13px;
+    color: rgba(88, 62, 50, 0.22);
+    padding: var(--space-4);
+  }
+  html[data-theme="dark"] .route-map { color: rgba(255, 224, 208, 0.26); }
+
+  .donut-legend { display: flex; flex-direction: column; gap: 9px; }
+  .donut-legend__row { display: flex; align-items: center; gap: 9px; font-size: 12.5px; }
+  .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+
+  .rule { display: grid; grid-template-columns: 34px minmax(0,1fr); gap: var(--space-4); align-items: start; }
+  .rule__n {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--atl-grad); color: #fff;
+    display: grid; place-items: center; font-weight: 800; font-size: 13px;
+  }
+  .rule__t { display: block; font-weight: 800; font-size: 15px; margin-bottom: 4px; }
+  .rule__b { display: block; font-size: 13.5px; color: var(--atl-ink-2); }
+
+  .compare { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .compare th, .compare td { text-align: left; padding: 11px var(--space-4); border-bottom: 1px solid var(--atl-line); vertical-align: top; }
+  .compare th { font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--atl-ink-3); }
+  .compare tr:last-child td { border-bottom: 0; }
+</style>
+</head>
+<body>
+
+<div class="atl-wall"></div>
+
+<div class="atl-page atl-page--wide">
+
+  <div class="page-head">
+    <span class="atl-kicker">sky-skills · atelier-design · demo</span>
+    <div class="head-tools">
+      <div class="atl-langtoggle lang-toggle">
+        <button type="button" class="is-active" data-lang-toggle="en">EN</button>
+        <button type="button" data-lang-toggle="zh">中文</button>
+      </div>
+      <button type="button" class="atl-iconbtn" data-theme-toggle aria-label="Toggle light and dark theme">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v2M12 19v2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M3 12h2M19 12h2M5.6 18.4L7 17M17 7l1.4-1.4"/><circle cx="12" cy="12" r="3.6"/></svg>
+      </button>
+      <a class="atl-btn atl-btn--sm" href="../../index.html">
+        <span class="lang-en">All skills</span><span class="lang-zh">全部 skill</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="atl-app atl-app--full">
+    <main class="atl-main">
+
+      <!-- ================= HERO ================= -->
+      <header>
+        <div class="atl-row" style="gap:var(--space-4); margin-bottom:var(--space-5);">
+          <span class="atl-orb atl-orb--lg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l7.5 4.3v9L12 20.6 4.5 16.3v-9z"/><path d="M12 8.4l3.2 1.8v3.6L12 15.6l-3.2-1.8v-3.6z"/></svg>
+          </span>
+          <div>
+            <h1 style="font-size:44px; letter-spacing:-0.035em;">atelier-design</h1>
+            <span class="atl-brand__sub">
+              <span class="lang-en">warm-glass product UI</span><span class="lang-zh">暖玻璃产品界面</span>
+            </span>
+          </div>
+        </div>
+
+        <p class="lede">
+          <span class="lang-en">The other seven design skills in this repo draw <b>documents</b> — landing pages, pricing tables, docs sites, decks. This one draws <b>applications</b>: sidebars, KPI rows, filter panels, record tables, booking flows, settings forms. Its JavaScript is not decoration, it is half the deliverable.</span>
+          <span class="lang-zh">这个仓库里另外七个设计 skill 画的是<b>文档</b>——落地页、定价表、文档站、汇报 deck。这一个画的是<b>应用</b>：侧栏、KPI 行、筛选面板、记录表、预订流、设置表单。它的 JavaScript 不是装饰，是交付物的一半。</span>
+        </p>
+
+        <div class="atl-row atl-row--wrap" style="margin-top:var(--space-5); gap:var(--space-3);">
+          <span class="atl-chip atl-chip--accent">
+            <span class="lang-en">5 canonical screens</span><span class="lang-zh">5 个范本页</span>
+          </span>
+          <span class="atl-chip">
+            <span class="lang-en">2 themes</span><span class="lang-zh">双主题</span>
+          </span>
+          <span class="atl-chip">
+            <span class="lang-en">12 attribute-driven behaviours</span><span class="lang-zh">12 种属性驱动交互</span>
+          </span>
+          <span class="atl-chip">
+            <span class="lang-en">bilingual EN / 中文</span><span class="lang-zh">中英双语</span>
+          </span>
+        </div>
+      </header>
+
+      <!-- ================= THE FIVE SCREENS ================= -->
+      <section class="section">
+        <div class="section__head">
+          <h2 style="font-size:26px;">
+            <span class="lang-en">The five screens</span><span class="lang-zh">五个屏幕</span>
+          </h2>
+          <p class="atl-muted">
+            <span class="lang-en">A whole product path, from the front door to the deepest record. Every one of them passes all three review gates and has been looked at by a human.</span>
+            <span class="lang-zh">一条完整的产品路径，从门口一直到最深的那条记录。五个页面全部通过三道审查闸，并且都被人眼看过。</span>
+          </p>
+        </div>
+
+        <div class="atl-grid atl-grid--3">
+          <a class="atl-card screen-card" href="../../skills/atelier-design/references/canonical/signin.html">
+            <span class="screen-card__n">01 · signin</span>
+            <span class="screen-card__t"><span class="lang-en">Sign in</span><span class="lang-zh">登录</span></span>
+            <span class="screen-card__d">
+              <span class="lang-en">A split shell instead of the centred box every glass kit ships. The error names the fix, not the failure.</span>
+              <span class="lang-zh">分栏壳，而不是每个玻璃套件都送的居中方框。错误提示给的是下一步，不是"操作失败"。</span>
+            </span>
+            <span class="screen-card__go"><span class="lang-en">Open →</span><span class="lang-zh">打开 →</span></span>
+          </a>
+
+          <a class="atl-card screen-card" href="../../skills/atelier-design/references/canonical/dashboard.html">
+            <span class="screen-card__n">02 · dashboard</span>
+            <span class="screen-card__t"><span class="lang-en">Console</span><span class="lang-zh">控制台</span></span>
+            <span class="screen-card__d">
+              <span class="lang-en">KPI row, seven-cycle bar chart, ranked list, one ink card, a sortable table, and a rail that really routes.</span>
+              <span class="lang-zh">KPI 行、七周期柱状图、绩效榜、一张暗卡、可排序表格，以及一条真能切换的侧栏。</span>
+            </span>
+            <span class="screen-card__go"><span class="lang-en">Open →</span><span class="lang-zh">打开 →</span></span>
+          </a>
+
+          <a class="atl-card screen-card" href="../../skills/atelier-design/references/canonical/booking.html">
+            <span class="screen-card__n">03 · booking</span>
+            <span class="screen-card__t"><span class="lang-en">Search &amp; book</span><span class="lang-zh">搜索与预订</span></span>
+            <span class="screen-card__d">
+              <span class="lang-en">No rail at all. Filter accordions, expandable fare rows, an itinerary timeline and a schematic route figure.</span>
+              <span class="lang-zh">完全没有侧栏。折叠筛选、可展开票价行、行程时间轴，还有一张航线示意图。</span>
+            </span>
+            <span class="screen-card__go"><span class="lang-en">Open →</span><span class="lang-zh">打开 →</span></span>
+          </a>
+
+          <a class="atl-card screen-card" href="../../skills/atelier-design/references/canonical/detail.html">
+            <span class="screen-card__n">04 · detail</span>
+            <span class="screen-card__t"><span class="lang-en">Record</span><span class="lang-zh">记录详情</span></span>
+            <span class="screen-card__d">
+              <span class="lang-en">Area chart with a reference line, a four-slice donut, compensation bars, and a change trail across three tab panes.</span>
+              <span class="lang-zh">带参照线的面积图、四片环图、薪酬变更条，以及跨三组标签页的变更轨迹。</span>
+            </span>
+            <span class="screen-card__go"><span class="lang-en">Open →</span><span class="lang-zh">打开 →</span></span>
+          </a>
+
+          <a class="atl-card screen-card" href="../../skills/atelier-design/references/canonical/settings.html">
+            <span class="screen-card__n">05 · settings</span>
+            <span class="screen-card__t"><span class="lang-en">Settings</span><span class="lang-zh">设置</span></span>
+            <span class="screen-card__d">
+              <span class="lang-en">The screen nobody designs. Every switch states its consequence; the destructive action takes four deliberate acts.</span>
+              <span class="lang-zh">没人愿意设计的那一屏。每个开关都写清打开后会怎样；破坏性操作要四个刻意的动作。</span>
+            </span>
+            <span class="screen-card__go"><span class="lang-en">Open →</span><span class="lang-zh">打开 →</span></span>
+          </a>
+
+          <div class="atl-card atl-card--ink">
+            <span class="screen-card__n" style="color:var(--atl-ink-card-ink-2);">
+              <span class="lang-en">source</span><span class="lang-zh">来源</span>
+            </span>
+            <span class="screen-card__t">
+              <span class="lang-en">Where this comes from</span><span class="lang-zh">这套语言从哪来</span>
+            </span>
+            <span class="screen-card__d atl-muted">
+              <span class="lang-en">Reconstructed from the dashboard work of Ghani Pradita (Paperpillar, Yogyakarta). Nothing is traced — palette, type, components, copy and data are all rewritten. Only the grammar is borrowed.</span>
+              <span class="lang-zh">重建自 Ghani Pradita（印尼日惹 Paperpillar）的仪表盘作品。没有照抄任何一稿——配色、排版、组件、文案、数据全部重写，借的只是这套语言的语法。</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= MATERIAL ================= -->
+      <section class="section">
+        <div class="section__head">
+          <h2 style="font-size:26px;">
+            <span class="lang-en">Glass is chrome, opacity is data</span><span class="lang-zh">玻璃是外壳，不透明度是数据</span>
+          </h2>
+          <p class="atl-muted">
+            <span class="lang-en">The single rule that keeps this aesthetic readable: the more a surface carries numbers, the more opaque it gets. Only the shell blurs — nesting a second backdrop-filter costs a full filter pass per frame and is invisible at 0.80 alpha.</span>
+            <span class="lang-zh">让这套美学保持可读的唯一一条规矩：一个表面越承载数字，就越往不透明走。只有外壳做模糊——再套一层 backdrop-filter，每帧多跑一整条滤镜链，而在 0.80 不透明度下根本看不出来。</span>
+          </p>
+        </div>
+
+        <div class="atl-grid atl-grid--main-side">
+          <div>
+            <div class="layer-demo">
+              <div class="layer layer--1">
+                <span class="layer__a">0.52</span>
+                <span class="layer__k"><span class="lang-en">shell · blur 40px</span><span class="lang-zh">外壳 · 模糊 40px</span></span>
+              </div>
+              <div class="layer layer--2">
+                <span class="layer__a">0.80</span>
+                <span class="layer__k"><span class="lang-en">data card</span><span class="lang-zh">数据卡</span></span>
+              </div>
+              <div class="layer layer--3">
+                <span class="layer__a">0.94</span>
+                <span class="layer__k"><span class="lang-en">table · expanded</span><span class="lang-zh">表格 · 展开态</span></span>
+              </div>
+            </div>
+            <p class="atl-muted" style="margin:var(--space-4) 0 0; font-size:12.5px;">
+              <span class="lang-en">These three sit directly on the wallpaper so the difference is visible — nested inside a card they would all composite over the same opaque base and look identical. Test for yourself: if you can see the wallpaper shifting behind a KPI number, the alpha is too high.</span>
+              <span class="lang-zh">这三格直接压在壁纸上，差别才看得出来——套进卡片里，三者会合成在同一个不透明底上，看起来完全一样。自测判据：如果你能透过 KPI 数字看见壁纸的颜色变化，alpha 就开大了。</span>
+            </p>
+          </div>
+
+          <div class="atl-card">
+            <div class="atl-card__head">
+              <h3 class="atl-card__title" style="font-size:16px;">
+                <span class="lang-en">Palette</span><span class="lang-zh">配色</span>
+              </h3>
+            </div>
+            <div class="swatch-row" style="flex-direction:column; gap:var(--space-3);">
+              <span class="swatch-chip"><span class="swatch-dot" style="background:var(--atl-grad);"></span>
+                <span><span class="lang-en">Gradient · orbs, bars, meters</span><span class="lang-zh">渐变 · 圆球 / 柱 / 进度条</span></span></span>
+              <span class="swatch-chip"><span class="swatch-dot" style="background:#DD4F92;"></span>
+                <span>#DD4F92 <span class="atl-muted"><span class="lang-en">rose · identity</span><span class="lang-zh">玫红 · 身份色</span></span></span></span>
+              <span class="swatch-chip"><span class="swatch-dot" style="background:#F5854F;"></span>
+                <span>#F5854F <span class="atl-muted"><span class="lang-en">coral · gradient only</span><span class="lang-zh">珊瑚 · 只在渐变里</span></span></span></span>
+              <span class="swatch-chip"><span class="swatch-dot" style="background:#C13877;"></span>
+                <span>#C13877 <span class="atl-muted"><span class="lang-en">rose as text · 5.1:1</span><span class="lang-zh">玫红作文字 · 5.1:1</span></span></span></span>
+              <span class="swatch-chip"><span class="swatch-dot" style="background:var(--atl-ink-card-bg);"></span>
+                <span>#211C1A <span class="atl-muted"><span class="lang-en">the one ink card</span><span class="lang-zh">那一张暗卡</span></span></span></span>
+            </div>
+            <p class="atl-muted" style="margin:var(--space-4) 0 0; font-size:12.5px;">
+              <span class="lang-en">White text on the coral stop measures 2.5:1 — it fails AA at every size. That is why the gradient never carries text and filled buttons use the solid deep rose.</span>
+              <span class="lang-zh">白字压在珊瑚端实测只有 2.5:1，任何字号都不过 AA。所以渐变永远不承载文字，实心按钮用的是那个更深的玫红。</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= INTERACTION LAB ================= -->
+      <section class="section">
+        <div class="section__head">
+          <h2 style="font-size:26px;">
+            <span class="lang-en">Interaction lab — everything below is live</span><span class="lang-zh">交互实验室 —— 下面的都能点</span>
+          </h2>
+          <p class="atl-muted">
+            <span class="lang-en">Every behaviour is a <code>data-*</code> attribute on markup. A page written with this skill contains no atelier JavaScript at all. Click things.</span>
+            <span class="lang-zh">每个行为都是写在 markup 上的 <code>data-*</code> 属性。用这个 skill 写出来的页面里一行 atelier JS 都没有。随便点。</span>
+          </p>
+        </div>
+
+        <div class="atl-grid atl-grid--2">
+
+          <!-- routing -->
+          <div class="atl-card">
+            <div class="atl-card__head">
+              <h3 class="atl-card__title" style="font-size:16px;">
+                <span class="lang-en">Rail routing</span><span class="lang-zh">侧栏路由</span>
+              </h3>
+              <code>data-route</code>
+            </div>
+            <div class="atl-grid" style="grid-template-columns:150px minmax(0,1fr); gap:var(--space-4);">
+              <nav class="mini-rail">
+                <button type="button" class="atl-nav is-active" data-route="lab-a" aria-current="page">
+                  <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7.5" height="9" rx="2"/><rect x="13.5" y="3" width="7.5" height="5.5" rx="2"/><rect x="13.5" y="12" width="7.5" height="9" rx="2"/><rect x="3" y="15.5" width="7.5" height="5.5" rx="2"/></svg>
+                  <span class="lang-en">Overview</span><span class="lang-zh">总览</span>
+                </button>
+                <button type="button" class="atl-nav" data-route="lab-b">
+                  <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.4"/><path d="M3 20c0-3.3 2.7-5.4 6-5.4s6 2.1 6 5.4"/></svg>
+                  <span class="lang-en">People</span><span class="lang-zh">成员</span>
+                  <span class="atl-nav__badge">12</span>
+                </button>
+                <button type="button" class="atl-nav" data-route="lab-c">
+                  <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M14 3v5h5"/></svg>
+                  <span class="lang-en">Files</span><span class="lang-zh">文件</span>
+                </button>
+              </nav>
+              <div>
+                <div class="atl-pane" data-pane="lab-a">
+                  <p style="margin:0; font-size:13.5px;">
+                    <span class="lang-en">Every pane's markup ships in the page and toggles with <code>[hidden]</code>. Nothing is fetched, nothing is built at runtime — a reader with JavaScript off still has all of it in the DOM.</span>
+                    <span class="lang-zh">所有面板的 markup 都写在页面里，用 <code>[hidden]</code> 切换。不 fetch、不在运行时构建——JS 关掉，内容依然全在 DOM 里。</span>
+                  </p>
+                </div>
+                <div class="atl-pane" data-pane="lab-b" hidden>
+                  <p style="margin:0; font-size:13.5px;">
+                    <span class="lang-en">This is the second pane. You did not download it just now — it has been sitting in the HTML since page load, which is exactly the point.</span>
+                    <span class="lang-zh">这是第二个面板。它不是你刚才下载的——从页面加载起它就在 HTML 里，这正是重点。</span>
+                  </p>
+                </div>
+                <div class="atl-pane" data-pane="lab-c" hidden>
+                  <p style="margin:0; font-size:13.5px;">
+                    <span class="lang-en">A third. Switching a pane also replays the count-up and grow animations inside it, so a chart revealed by a click still animates.</span>
+                    <span class="lang-zh">第三个。切换面板会重跑面板内的数字滚动和条形生长，所以点开才出现的图依然有动画。</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- count-up + segmented -->
+          <div class="atl-card">
+            <div class="atl-card__head">
+              <h3 class="atl-card__title" style="font-size:16px;">
+                <span class="lang-en">Count-up &amp; segmented</span><span class="lang-zh">数字滚动与分段控件</span>
+              </h3>
+              <code>data-count-to</code>
+            </div>
+            <div class="atl-row atl-row--between atl-row--wrap" style="margin-bottom:var(--space-4);">
+              <span class="atl-figure">
+                <span class="atl-figure__value"><span data-count-to="147280">147,280</span></span>
+              </span>
+              <div class="atl-seg">
+                <button type="button" class="atl-seg__btn is-active" data-seg-group="demo"><span class="lang-en">Monthly</span><span class="lang-zh">按月</span></button>
+                <button type="button" class="atl-seg__btn" data-seg-group="demo"><span class="lang-en">Weekly</span><span class="lang-zh">按周</span></button>
+              </div>
+            </div>
+            <p class="lab-note" style="margin-top:0;">
+              <span class="lang-en">The final string <code>147,280</code> is written in the markup. JS animates toward it and then restores the original text — so the comma is never reconstructed and never drifts. The segmented control is <b>decorative on purpose</b>: switching it does not rewrite the figure, because a reference page must not display data it cannot source.</span>
+              <span class="lang-zh">终值 <code>147,280</code> 写在 markup 里。JS 朝它滚动，结束后恢复原始文本——所以千分位逗号永远不会被重建、也就不会漂。分段控件<b>是故意做成装饰的</b>：切换它不会改写数字，因为范本页不能显示查不到来源的数据。</span>
+            </p>
+          </div>
+
+          <!-- accordion -->
+          <div class="atl-card">
+            <div class="atl-card__head">
+              <h3 class="atl-card__title" style="font-size:16px;">
+                <span class="lang-en">Accordion &amp; switch</span><span class="lang-zh">手风琴与开关</span>
+              </h3>
+              <code>data-accordion</code>
+            </div>
+            <div class="atl-accordion">
+              <button type="button" class="atl-accordion__head" data-accordion aria-expanded="true">
+                <span><span class="lang-en">Why every switch has two lines</span><span class="lang-zh">为什么每个开关都是两行</span></span>
+                <span class="atl-accordion__sign">−</span>
+              </button>
+              <div class="atl-accordion__body">
+                <div class="atl-row atl-row--between" style="align-items:flex-start; gap:var(--space-4);">
+                  <span>
+                    <span style="display:block; font-weight:700; font-size:14px;">
+                      <span class="lang-en">Lock scores at the deadline</span><span class="lang-zh">截止后锁定评分</span>
+                    </span>
+                    <span class="atl-muted" style="display:block; font-size:12.5px; margin-top:3px;">
+                      <span class="lang-en">On: late reviews land in the NEXT cycle. This is what put 34 reviews into July and dropped June to 31%.</span>
+                      <span class="lang-zh">开启后，迟交的评估会落入下一个周期。研发那 34 份就是这样落到 7 月，把 6 月压到 31% 的。</span>
+                    </span>
+                  </span>
+                  <button type="button" class="atl-switch is-on" data-switch role="switch" aria-checked="true" aria-label="Lock scores at the deadline"></button>
+                </div>
+              </div>
+            </div>
+            <div class="atl-accordion">
+              <button type="button" class="atl-accordion__head" data-accordion aria-expanded="false">
+                <span><span class="lang-en">Collapsed by default</span><span class="lang-zh">默认折叠的一组</span></span>
+                <span class="atl-accordion__sign">+</span>
+              </button>
+              <div class="atl-accordion__body" hidden>
+                <p style="margin:0; font-size:13.5px;">
+                  <span class="lang-en">Settings are the screen people change while guessing — and the guess is where the damage happens. A label plus a toggle tells you what it is called. Two lines tell you what happens.</span>
+                  <span class="lang-zh">设置是人们一边猜一边改的地方，而伤害就发生在猜的那一刻。一个标签加一个开关，只告诉你它叫什么；两行才告诉你会发生什么。</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- sortable table -->
+          <div class="atl-card atl-card--flush">
+            <div class="atl-card__head" style="padding:var(--space-5) var(--space-5) 0; margin-bottom:var(--space-3);">
+              <h3 class="atl-card__title" style="font-size:16px;">
+                <span class="lang-en">Sortable table</span><span class="lang-zh">可排序表格</span>
+              </h3>
+              <code>data-sort</code>
+            </div>
+            <div class="atl-scroll">
+              <table class="atl-table">
+                <thead>
+                  <tr>
+                    <th><button type="button" class="atl-table__sort" data-sort="name"><span class="lang-en">Name</span><span class="lang-zh">姓名</span></button></th>
+                    <th><button type="button" class="atl-table__sort" data-sort="team"><span class="lang-en">Team</span><span class="lang-zh">团队</span></button></th>
+                    <th style="width:150px;"><button type="button" class="atl-table__sort" data-sort="score"><span class="lang-en">Score</span><span class="lang-zh">评分</span></button></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-col="name" style="font-weight:700;">Judy Abbott</td>
+                    <td data-col="team" class="atl-muted">Studio</td>
+                    <td data-col="score" data-value="92"><span class="atl-row"><span class="atl-meter" style="flex:1;"><span class="atl-meter__fill" style="width:92%" data-grow="width"></span></span><span class="atl-mono" style="font-size:12px;">92</span></span></td>
+                  </tr>
+                  <tr>
+                    <td data-col="name" style="font-weight:700;">Martin Feeney</td>
+                    <td data-col="team" class="atl-muted">Platform</td>
+                    <td data-col="score" data-value="78"><span class="atl-row"><span class="atl-meter" style="flex:1;"><span class="atl-meter__fill" style="width:78%" data-grow="width"></span></span><span class="atl-mono" style="font-size:12px;">78</span></span></td>
+                  </tr>
+                  <tr>
+                    <td data-col="name" style="font-weight:700;">Ellen Streich</td>
+                    <td data-col="team" class="atl-muted">Field</td>
+                    <td data-col="score" data-value="66"><span class="atl-row"><span class="atl-meter" style="flex:1;"><span class="atl-meter__fill" style="width:66%" data-grow="width"></span></span><span class="atl-mono" style="font-size:12px;">66</span></span></td>
+                  </tr>
+                  <tr>
+                    <td data-col="name" style="font-weight:700;">Toni Bergstrom</td>
+                    <td data-col="team" class="atl-muted">People</td>
+                    <td data-col="score" data-value="34"><span class="atl-row"><span class="atl-meter" style="flex:1;"><span class="atl-meter__fill" style="width:34%" data-grow="width"></span></span><span class="atl-mono" style="font-size:12px;">34</span></span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="lab-note" style="padding:0 var(--space-5) var(--space-5);">
+              <span class="lang-en">Click a header. Sorting reads <code>data-value</code> when present, so a cell can display “IDR 28.5M” and sort as 28500000.</span>
+              <span class="lang-zh">点表头。排序优先读 <code>data-value</code>，所以单元格可以显示「IDR 28.5M」而按 28500000 排序。</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= CHART GALLERY ================= -->
+      <section class="section">
+        <div class="section__head">
+          <h2 style="font-size:26px;">
+            <span class="lang-en">Charts — one ramp, one neutral track</span><span class="lang-zh">图表 —— 一条渐变，一层中性轨道</span>
+          </h2>
+          <p class="atl-muted">
+            <span class="lang-en">Every series figure is the coral→rose ramp over <code>--atl-track</code>. The track is not decoration: without it a 31% bar only reads as “short”; with it, it reads as “31 out of 100”. Second hues are reserved for reference geometry, verdicts, and composition slices — never for series.</span>
+            <span class="lang-zh">所有序列图形都是珊瑚→玫红渐变压在 <code>--atl-track</code> 上。轨道不是装饰：没有它，31% 的柱子只读作「矮」；有了它，它读作「100 里的 31」。第二个色只留给参照几何、判断结论和构成切片——绝不用于序列。</span>
+          </p>
+        </div>
+
+        <div class="atl-grid atl-grid--2">
+
+          <!-- bars -->
+          <div class="atl-card">
+            <div class="atl-card__head">
+              <h3 class="atl-card__title" style="font-size:16px;">
+                <span class="lang-en">Round-cap bars over a track</span><span class="lang-zh">灰轨道 + 圆头柱</span>
+              </h3>
+              <span class="atl-legend">
+                <span><span class="atl-legend__dot"></span><span class="lang-en">value</span><span class="lang-zh">实际</span></span>
+                <span><span class="atl-legend__dot atl-legend__dot--muted"></span><span class="lang-en">ceiling</span><span class="lang-zh">上限</span></span>
+              </span>
+            </div>
+            <div class="chart-body">
+              <div class="atl-axis" aria-hidden="true"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
+              <div class="atl-bars" role="img" aria-label="Seven months: 44, 79, 62, 63, 31, 55, 58 percent">
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:44%" data-grow></span></div><span class="atl-bars__tick">Feb</span></div>
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:79%" data-grow></span></div><span class="atl-bars__tick">Mar</span></div>
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:62%" data-grow></span></div><span class="atl-bars__tick">Apr</span></div>
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:63%" data-grow></span></div><span class="atl-bars__tick">May</span></div>
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:31%" data-grow></span></div><span class="atl-bars__tick">Jun</span></div>
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:55%" data-grow></span></div><span class="atl-bars__tick">Jul</span></div>
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:58%" data-grow></span></div><span class="atl-bars__tick">Aug</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- area + reference -->
+          <div class="atl-card">
+            <div class="atl-card__head">
+              <h3 class="atl-card__title" style="font-size:16px;">
+                <span class="lang-en">Area with a reference line</span><span class="lang-zh">面积图 + 参照线</span>
+              </h3>
+              <span class="atl-delta atl-delta--up">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M12 6l8 10H4z"/></svg>+14
+              </span>
+            </div>
+            <svg viewBox="0 0 520 180" width="100%" height="186" role="img"
+                 aria-label="Score rose from 71 to 92 over seven cycles, staying above the team median which moved from 66 to 71">
+              <defs>
+                <linearGradient id="atl-demo-area" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#DD4F92" stop-opacity="0.30"/>
+                  <stop offset="100%" stop-color="#F5854F" stop-opacity="0.02"/>
+                </linearGradient>
+                <linearGradient id="atl-demo-line" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#F5854F"/><stop offset="100%" stop-color="#DD4F92"/>
+                </linearGradient>
+              </defs>
+              <g stroke="var(--atl-line)" stroke-width="1">
+                <line x1="16" y1="20" x2="506" y2="20"/><line x1="16" y1="60" x2="506" y2="60"/>
+                <line x1="16" y1="100" x2="506" y2="100"/>
+              </g>
+              <polyline points="30,96 108,93 186,91 264,87 342,85 420,82 496,80"
+                        fill="none" stroke="var(--atl-line-strong)" stroke-width="2" stroke-dasharray="5 5"/>
+              <path d="M30,84 L108,76 L186,80 L264,64 L342,52 L420,48 L496,36 L496,150 L30,150 Z" fill="url(#atl-demo-area)"/>
+              <polyline points="30,84 108,76 186,80 264,64 342,52 420,48 496,36"
+                        fill="none" stroke="url(#atl-demo-line)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <g fill="#fff" stroke="#DD4F92" stroke-width="2.4">
+                <circle cx="30" cy="84" r="4"/><circle cx="108" cy="76" r="4"/><circle cx="186" cy="80" r="4"/>
+                <circle cx="264" cy="64" r="4"/><circle cx="342" cy="52" r="4"/><circle cx="420" cy="48" r="4"/>
+              </g>
+              <circle cx="496" cy="36" r="5.5" fill="#DD4F92" stroke="#fff" stroke-width="2.4"/>
+              <text x="496" y="26" text-anchor="end" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="800" fill="var(--atl-ink)">92</text>
+              <text x="496" y="112" text-anchor="end" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="var(--atl-ink-3)">median 71</text>
+              <g font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="600" fill="var(--atl-ink-3)" text-anchor="middle">
+                <text x="30" y="172">Q1 25</text><text x="186" y="172">Q3 25</text>
+                <text x="342" y="172">Q1 26</text><text x="496" y="172">Q3 26</text>
+              </g>
+            </svg>
+            <p class="lab-note">
+              <span class="lang-en">All <code>&lt;text&gt;</code> is painted last. A translucent area fill drawn after a label covers it — that exact bug was caught by the review gate on this skill's own detail page.</span>
+              <span class="lang-zh">所有 <code>&lt;text&gt;</code> 最后绘制。半透明面积填充画在标签之后会把它盖住——这个 bug 就是审查闸在本 skill 自己的 detail 页上抓到的。</span>
+            </p>
+          </div>
+
+          <!-- donut -->
+          <div class="atl-card">
+            <div class="atl-card__head">
+              <h3 class="atl-card__title" style="font-size:16px;">
+                <span class="lang-en">Donut — four slices, hard ceiling</span><span class="lang-zh">环图 —— 四片，硬上限</span>
+              </h3>
+            </div>
+            <div class="atl-row" style="gap:var(--space-5); align-items:center;">
+              <svg viewBox="0 0 120 120" width="112" height="112" role="img"
+                   aria-label="Weekly split: product design 46 percent, design system 24, mentoring 18, recruiting 12">
+                <circle cx="60" cy="60" r="46" fill="none" stroke="var(--atl-track)" stroke-width="17"/>
+                <circle cx="60" cy="60" r="46" fill="none" stroke="#DD4F92" stroke-width="17" stroke-dasharray="133 156" transform="rotate(-90 60 60)"/>
+                <circle cx="60" cy="60" r="46" fill="none" stroke="#F5854F" stroke-width="17" stroke-dasharray="69 220" stroke-dashoffset="-133" transform="rotate(-90 60 60)"/>
+                <circle cx="60" cy="60" r="46" fill="none" stroke="#F6B24C" stroke-width="17" stroke-dasharray="52 237" stroke-dashoffset="-202" transform="rotate(-90 60 60)"/>
+                <text x="60" y="58" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="19" font-weight="800" fill="var(--atl-ink)">38</text>
+                <text x="60" y="73" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="10" font-weight="600" fill="var(--atl-ink-3)">hrs/wk</text>
+              </svg>
+              <div class="donut-legend">
+                <span class="donut-legend__row"><span class="sw" style="background:#DD4F92;"></span><span><span class="lang-en">Product design</span><span class="lang-zh">产品设计</span> <b>46%</b></span></span>
+                <span class="donut-legend__row"><span class="sw" style="background:#F5854F;"></span><span><span class="lang-en">Design system</span><span class="lang-zh">设计系统</span> <b>24%</b></span></span>
+                <span class="donut-legend__row"><span class="sw" style="background:#F6B24C;"></span><span><span class="lang-en">Mentoring</span><span class="lang-zh">带人</span> <b>18%</b></span></span>
+                <span class="donut-legend__row"><span class="sw" style="background:var(--atl-track);"></span><span><span class="lang-en">Recruiting</span><span class="lang-zh">招聘</span> <b>12%</b></span></span>
+              </div>
+            </div>
+            <p class="lab-note">
+              <span class="lang-en">Four is the ceiling. Past four the arcs stop being comparable and the chart needs a legend to be readable at all — which means it has stopped working.</span>
+              <span class="lang-zh">四片是上限。超过四片弧长不再可比，图必须靠图例才读得懂——那说明它已经不工作了。</span>
+            </p>
+          </div>
+
+          <!-- route + hbar -->
+          <div class="atl-card">
+            <div class="atl-card__head">
+              <h3 class="atl-card__title" style="font-size:16px;">
+                <span class="lang-en">Schematic figure &amp; proportion bars</span><span class="lang-zh">示意图与比例条</span>
+              </h3>
+            </div>
+            <figure style="margin:0 0 var(--space-4);">
+              <div class="route-map">
+                <svg viewBox="0 0 320 130" width="100%" height="140" role="img"
+                     aria-label="Great-circle route from Yogyakarta to Singapore, 1157 kilometres, 2 hours 22 minutes">
+                  <path d="M26 108 C 96 34, 224 16, 296 46" fill="none" stroke="var(--atl-rose)" stroke-width="2.6" stroke-linecap="round"/>
+                  <circle cx="26" cy="108" r="7" fill="#fff" stroke="var(--atl-rose)" stroke-width="2.6"/>
+                  <circle cx="296" cy="46" r="7" fill="var(--atl-rose)" stroke="#fff" stroke-width="2.6"/>
+                  <text x="26" y="128" text-anchor="start" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="var(--atl-ink)">YIA</text>
+                  <text x="296" y="30" text-anchor="end" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="var(--atl-ink)">SIN</text>
+                  <text x="161" y="44" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" fill="var(--atl-ink-2)">1 157 km</text>
+                </svg>
+              </div>
+              <figcaption class="lab-note">
+                <span class="lang-en">The dot field is a CSS <code>radial-gradient</code>, so the SVG holds six elements instead of four hundred circles — and the caption admits it is schematic, not a navigation chart.</span>
+                <span class="lang-zh">点阵是 CSS <code>radial-gradient</code>，所以 SVG 里只有 6 个元素而不是 400 个圆点——说明里也直说它是示意图，不是航行图。</span>
+              </figcaption>
+            </figure>
+
+            <div class="atl-hbar" style="margin-bottom:9px;">
+              <span class="atl-hbar__fill" style="width:11.7%" data-grow="width"></span>
+              <span class="atl-hbar__value">11.7%</span>
+            </div>
+            <div class="atl-hbar" style="margin-bottom:9px;">
+              <span class="atl-hbar__fill" style="width:32.1%" data-grow="width"></span>
+              <span class="atl-hbar__value">32.1%</span>
+            </div>
+            <div class="atl-hbar">
+              <span class="atl-hbar__fill" style="width:56.2%" data-grow="width"></span>
+              <span class="atl-hbar__value">56.2%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= RULES ================= -->
+      <section class="section">
+        <div class="section__head">
+          <h2 style="font-size:26px;">
+            <span class="lang-en">Three rules that do not bend</span><span class="lang-zh">三条不可让步的规矩</span>
+          </h2>
+        </div>
+        <div class="atl-grid atl-grid--3">
+          <div class="atl-card">
+            <div class="rule">
+              <span class="rule__n">1</span>
+              <span>
+                <span class="rule__t"><span class="lang-en">The gradient never carries text</span><span class="lang-zh">渐变永远不承载文字</span></span>
+                <span class="rule__b">
+                  <span class="lang-en">White on the coral stop is 2.5:1 — failing AA at every size. Filled buttons take the solid deep rose (5.1:1) or the near-black default. The ramp lives on orbs, bars, meters and the brand mark.</span>
+                  <span class="lang-zh">白字压在珊瑚端是 2.5:1，任何字号都不过 AA。实心按钮用更深的玫红（5.1:1）或默认近黑。渐变只出现在圆球、柱子、进度条和品牌标记上。</span>
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="atl-card">
+            <div class="rule">
+              <span class="rule__n">2</span>
+              <span>
+                <span class="rule__t"><span class="lang-en">Glass is chrome, opacity is data</span><span class="lang-zh">玻璃是外壳，不透明度是数据</span></span>
+                <span class="rule__b">
+                  <span class="lang-en">0.52 shell → 0.80 data card → 0.94 table. Numbers over a moving gradient are numbers you read twice, and nobody pays that for prettier glass.</span>
+                  <span class="lang-zh">外壳 0.52 → 数据卡 0.80 → 表格 0.94。数字压在会动的渐变上要读两遍，没人愿意为「更好看的玻璃」付这个代价。</span>
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="atl-card">
+            <div class="rule">
+              <span class="rule__n">3</span>
+              <span>
+                <span class="rule__t"><span class="lang-en">Exactly one ink card per screen</span><span class="lang-zh">每屏恰好一张暗卡</span></span>
+                <span class="rule__b">
+                  <span class="lang-en">On a page this light, the dark card is where the eye lands first. Two of them split the landing and neither wins. It holds the thing that needs doing, not the summary.</span>
+                  <span class="lang-zh">在这么亮的页面上，暗卡是视线第一落点。两张就分裂了落点，两张都不赢。它装的是要做的事，不是汇总。</span>
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= BOUNDARY ================= -->
+      <section class="section">
+        <div class="section__head">
+          <h2 style="font-size:26px;">
+            <span class="lang-en">When NOT to use it</span><span class="lang-zh">什么时候别用它</span>
+          </h2>
+          <p class="atl-muted">
+            <span class="lang-en">There are eight design skills in this repo. Picking the wrong one costs more than picking none.</span>
+            <span class="lang-zh">这个仓里有八个设计 skill。选错一个，比不选还贵。</span>
+          </p>
+        </div>
+        <div class="atl-card atl-card--flush">
+          <div class="atl-scroll">
+            <table class="compare">
+              <thead>
+                <tr>
+                  <th><span class="lang-en">If you are making…</span><span class="lang-zh">如果你要做的是……</span></th>
+                  <th><span class="lang-en">Use</span><span class="lang-zh">用哪个</span></th>
+                  <th><span class="lang-en">Why not atelier</span><span class="lang-zh">为什么不是 atelier</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="lang-en">A dark aurora-glass showcase page</span><span class="lang-zh">深藏青 aurora 玻璃的展示页</span></td>
+                  <td><code>glass</code></td>
+                  <td><span class="lang-en">Both are glass, but glass is a deep-navy canvas with cyan and light blobs. atelier is daylight, warm, and draws applications.</span><span class="lang-zh">两个都是玻璃，但 glass 是深藏青底 + cyan + 光晕。atelier 是亮底暖色，而且画的是应用。</span></td>
+                </tr>
+                <tr>
+                  <td><span class="lang-en">A landing page, pricing table or docs site</span><span class="lang-zh">落地页、定价表、文档站</span></td>
+                  <td><code>anthropic</code> · <code>apple</code> · <code>sage</code> · <code>ember</code></td>
+                  <td><span class="lang-en">atelier has no hero tier at all. An application has no hero.</span><span class="lang-zh">atelier 根本没有 hero 档。应用没有 hero。</span></td>
+                </tr>
+                <tr>
+                  <td><span class="lang-en">A product launch / keynote</span><span class="lang-zh">产品发布会 / keynote</span></td>
+                  <td><code>eclat</code></td>
+                  <td><span class="lang-en">Cinematic dark and full-bleed moments are a different language entirely.</span><span class="lang-zh">暗调电影感和满屏「时刻」是另一套完全不同的语言。</span></td>
+                </tr>
+                <tr>
+                  <td><span class="lang-en">A boardroom review deck</span><span class="lang-zh">会议室商务汇报 deck</span></td>
+                  <td><code>lectern</code></td>
+                  <td><span class="lang-en">Gradient orbs read as consumer SaaS. A board pack needs to read as trustworthy, which means low saturation.</span><span class="lang-zh">渐变圆球读作消费级 SaaS。汇报材料需要读作可信，那意味着低饱和。</span></td>
+                </tr>
+                <tr>
+                  <td><span class="lang-en">Anything that gets printed or exported to PDF</span><span class="lang-zh">要打印或导出 PDF 的东西</span></td>
+                  <td><span class="lang-en">any non-glass skill</span><span class="lang-zh">任何非玻璃 skill</span></td>
+                  <td><span class="lang-en"><code>backdrop-filter</code> does not enter the print pipeline. The shell would print as a flat white box.</span><span class="lang-zh"><code>backdrop-filter</code> 不进打印管线。外壳会打印成一个白方块。</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= FOOTER CTA ================= -->
+      <section class="section">
+        <div class="atl-card atl-card--ink">
+          <div class="atl-row atl-row--between atl-row--wrap" style="gap:var(--space-5);">
+            <div style="max-width:56ch;">
+              <h2 class="atl-card__title" style="font-size:21px;">
+                <span class="lang-en">Run the gates before you ship</span><span class="lang-zh">交付前先跑闸</span>
+              </h2>
+              <p class="atl-muted" style="margin:var(--space-3) 0 0; font-size:13.5px;">
+                <span class="lang-en">Three gates — structural, rendered, screenshot — must all be green. And the screenshot must be looked at: on the day this skill was built, the machine gates passed three problems only a human eye caught. Necessary, not sufficient.</span>
+                <span class="lang-zh">三道闸——结构、渲染、截图——必须全绿。而且截图必须人眼看过：这个 skill 建成当天，机器闸放过了三个只有人眼能发现的问题。三闸是必要条件，不是充分条件。</span>
+              </p>
+            </div>
+            <code style="background:rgba(255,255,255,0.12); font-size:12.5px; padding:10px 14px;">bin/design-review --skill=atelier your-page.html</code>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="atl-foot">
+    <span>
+      <span class="lang-en">sky-skills · atelier-design · all figures on this page are illustrative</span>
+      <span class="lang-zh">sky-skills · atelier-design · 本页所有数据均为示意</span>
+    </span>
+    <span class="atl-mono">v1 · 2026-08-14</span>
+  </footer>
+</div>
+
+<script src="../../skills/atelier-design/assets/atelier.js"></script>
+</body>
+</html>

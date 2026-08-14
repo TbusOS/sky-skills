@@ -190,6 +190,27 @@ const SKILL_SIGNATURES = {
     ],
     forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
   },
+  atelier: {
+    name: 'atelier rose',
+    accents: [[221, 79, 146]],          // #DD4F92 — the identity color. The coral
+                                        // partner #F5854F is NOT listed: it only
+                                        // ever appears inside the gradient, which
+                                        // blends and does not match cleanly.
+    threshold: 0.0006,                  // rose lives in gradient orbs, the brand
+                                        // mark, meter fills and the active tab
+                                        // rule — small objects, many of them.
+    // anthropic orange OMITTED on purpose: atelier's coral #F5854F sits within
+    // the matcher's TOL 55 of #d97757, so listing it would flag atelier's own
+    // warm family. Same reasoning as eclat's omission above.
+    forbiddenColors: [
+      { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
+      { rgb: [151, 176, 119], note: 'sage green #97B077' },
+      { rgb: [196, 148, 100], note: 'ember gold #c49464' },
+      { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
+      { rgb: [29, 58, 110], note: 'lectern navy #1d3a6e' },
+    ],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
+  },
 };
 
 function detectSkill(target, html) {
@@ -1217,9 +1238,23 @@ const auditFn = (arg) => {
       // Background check is relative to parent: if child and parent render
       // the same colour, there's no visual boundary.
       const cStyle = getComputedStyle(c);
-      const hasBorder = ['Top','Right','Bottom','Left'].some(
+      const borderSides = ['Top','Right','Bottom','Left'].filter(
         (s) => parseFloat(cStyle[`border${s}Width`]) > 0
       );
+      // A cell whose ONLY borders run down the inline axis is a divider in a
+      // segmented strip, not a card outline — think a KPI row where four
+      // cells share one rounded container and are separated by hairlines.
+      // Counting that as a card made every divided stat strip report three
+      // "hollow cards", which is the false-positive shape that teaches people
+      // to skip the report. A real card still has a full outline, a shadow,
+      // or a distinct background, all of which are tested below.
+      // (Sibling of the existing ≥36px stat-strip exemption above: that one
+      // catches strips whose number is huge, this one catches strips whose
+      // number is normal-sized because there are four of them in a row.)
+      const dividerOnly =
+        borderSides.length > 0 &&
+        borderSides.every((s) => s === 'Left' || s === 'Right');
+      const hasBorder = borderSides.length > 0 && !dividerOnly;
       const hasShadow = cStyle.boxShadow && cStyle.boxShadow !== 'none';
       const parentBg = getComputedStyle(el).backgroundColor;
       const hasDistinctBg =

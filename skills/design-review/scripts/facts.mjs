@@ -53,6 +53,7 @@ const ROSTER = {
   'glass-design': 'design',
   'eclat-design': 'design',
   'lectern-design': 'design',
+  'atelier-design': 'design',
 
   'design-review': 'harness',
   'design-planner': 'harness',

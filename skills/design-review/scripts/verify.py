@@ -129,6 +129,18 @@ SKILLS: dict[str, dict] = {
         "container_modifiers": ("narrow", "wide"),
         "hero_advice": "lectern-wrap (1080px)",
     },
+    "atelier": {
+        "prefix": "atl-",
+        "css": "atelier.css",
+        "dir": "atelier-design",
+        # atelier draws APPLICATIONS, not documents: there is no hero tier at
+        # all. The page is a .atl-page holding one .atl-app glass shell, so the
+        # hero-container check never fires (no .atl-hero exists by design).
+        "narrow_hero": {"atl-page--narrow"},
+        "acceptable_hero": {"atl-page", "atl-page--wide", "atl-app"},
+        "container_modifiers": ("narrow", "wide"),
+        "hero_advice": "atl-page (1280px) or atl-page--wide (1440px)",
+    },
 }
 
 PLACEHOLDER_PATTERN = re.compile(
@@ -169,8 +181,17 @@ class HeroContainerFinder(HTMLParser):
 
 
 def defined_classes(css_text: str, prefix: str) -> set[str]:
-    # Prefix has a trailing '-'; match e.g. `.sage-[a-z0-9-]+`.
-    pattern = re.compile(r"\.(" + re.escape(prefix) + r"[a-z0-9-]+)")
+    # Prefix has a trailing '-'; match e.g. `.sage-[a-z0-9_-]+`.
+    #
+    # The underscore is NOT optional. used_classes() splits the HTML class
+    # attribute on whitespace, so it yields the whole token `atl-brand__name`;
+    # if this pattern stops at the underscore it only learns `atl-brand`, and
+    # every BEM element class in the stylesheet is reported "undefined" even
+    # though it is defined one line above. anthropic.css has carried
+    # `.anth-dialog__actions` since before this was noticed — the bug stayed
+    # latent only because no page had used that class yet. atelier-design uses
+    # 65 BEM element classes and surfaced it on its first canonical.
+    pattern = re.compile(r"\.(" + re.escape(prefix) + r"[a-z0-9_-]+)")
     return {m.group(1) for m in pattern.finditer(css_text)}
 
 
@@ -533,20 +554,26 @@ def check_file(
         title_m = re.search(r"<title[^>]*>(.*?)</title>", html, re.I | re.DOTALL)
         if not title_m or not title_m.group(1).strip():
             warnings.append(f"{path}: SEO — missing or empty <title>")
+        # The capture is quote-aware via a backreference. The old `[^"\']*`
+        # excluded BOTH quote characters, so an apostrophe inside a
+        # double-quoted attribute truncated the value: content="Loka's people
+        # console — …" measured as 4 chars ("Loka") and warned about a
+        # description that was in fact 180 chars long. Any English possessive
+        # in a description hit this.
         desc_m = re.search(
-            r'<meta[^>]+name=["\']description["\'][^>]*content=["\']([^"\']*)["\']',
+            r'<meta[^>]+name=["\']description["\'][^>]*content=(["\'])(.*?)\1',
             html,
-            re.I,
+            re.I | re.DOTALL,
         ) or re.search(
             # attribute order flipped: content= before name=
-            r'<meta[^>]+content=["\']([^"\']*)["\'][^>]*name=["\']description["\']',
+            r'<meta[^>]+content=(["\'])(.*?)\1[^>]*name=["\']description["\']',
             html,
-            re.I,
+            re.I | re.DOTALL,
         )
         if not desc_m:
             warnings.append(f'{path}: SEO — missing <meta name="description">')
         else:
-            desc_len = len(desc_m.group(1).strip())
+            desc_len = len(desc_m.group(2).strip())
             if not 50 <= desc_len <= 160:
                 warnings.append(
                     f"{path}: SEO — meta description is {desc_len} chars "

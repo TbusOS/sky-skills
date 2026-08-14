@@ -9,7 +9,7 @@
 //
 // Usage:
 //   node skills/design-review/scripts/sprint-contract.mjs \
-//     --skill=<anthropic|apple|ember|sage|glass|eclat|lectern> \
+//     --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier> \
 //     --page=<pricing|landing|docs-home|feature-deep|any-other-type>
 //
 // Unknown page-types are accepted: the contract borrows structure from
@@ -25,7 +25,7 @@ import process from 'node:process';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
 
-const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage', 'glass', 'eclat', 'lectern'];
+const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage', 'glass', 'eclat', 'lectern', 'atelier'];
 const VALID_PAGES = ['pricing', 'landing', 'docs-home', 'feature-deep'];
 
 // Unknown page-types are not rejected — they borrow structure from the
@@ -120,6 +120,16 @@ const BRAND = {
     // and its chart blues would false-flag. Mirrors visual-audit.mjs.
     forbiddenColors: ['#d97757 (anthropic)', '#c49464 (ember)', '#97B077 (sage)', '#22D3EE (glass)'],
   },
+  atelier: {
+    accent: '#DD4F92',
+    name: 'atelier rose',
+    minCoverage: '0.06%',
+    howTo: 'the rose is carried by SMALL objects repeated often, not one big CTA: the brand mark in the rail, a filled coral→rose orb on every KPI, meter and bar fills, the active tab underline, and accent chips. The coral #F5854F never appears alone — it is the top stop of the gradient and nothing else. If a screen has no orbs it will fail this gate, and it should: orbs are the identity',
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
+    // anthropic orange is NOT forbidden here: atelier's coral #F5854F sits
+    // within the matcher's TOL 55 of #d97757. Mirrors visual-audit.mjs.
+    forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#c49464 (ember)', '#22D3EE (glass)', '#1d3a6e (lectern)'],
+  },
 };
 
 // Per-skill diagram sizing + color-presence contract (mirror of each skill's
@@ -152,6 +162,10 @@ const DIAGRAM = {
   lectern: {
     tiers: '1080 `lectern-wrap` (the deck body; there is no full-bleed hero tier — `lectern-title` is a title block, not a stage)',
     color: 'Low saturation is how a briefing deck earns trust. Pick by data type: ordered / continuous (tiers, time) takes a SINGLE-hue lightness ramp — `#1d3a6e → #2f5bb0 → #7d9bd0`; only genuinely unrelated categories get multiple hues, and those must lock to one lightness band. Line charts: solid = actual, gray dashed = plan. Rainbow palettes and high-saturation blocks read as a document that cannot be trusted.',
+  },
+  atelier: {
+    tiers: '1280 `atl-page` (the working tier — one `atl-app` glass shell sits inside it) · 1440 `atl-page--wide` (**MUST when the shell carries the 244px rail plus a 4-column KPI row**) · there is no hero tier: this skill draws applications, and an application has no hero',
+    color: 'Charts are built from ONE ramp — the coral→rose `--atl-grad` — over a neutral `--atl-track`. The track is not decoration: it is what turns a column into a gauge, and it is why a 31% bar still reads as "31 out of 100" rather than "short". Second hues are reserved for verdicts (`--atl-up` / `--atl-down` / `--atl-warn`) and never for series. A rainbow series palette is the generic-admin-template tell.',
   },
 };
 
@@ -189,7 +203,7 @@ sprint-contract.mjs — generate a contract for a new page
 
 Usage:
   node skills/design-review/scripts/sprint-contract.mjs \\
-    --skill=<anthropic|apple|ember|sage|glass|eclat|lectern> \\
+    --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier> \\
     --page=<pricing|landing|docs-home|feature-deep|any-other-type> \\
     [--format=md|json]
 

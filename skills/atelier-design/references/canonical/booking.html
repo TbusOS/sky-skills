@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maburo — flight search</title>
+<meta name="description" content="Maburo flight search: a filter rail, three fare rows, and one row expanded into its full itinerary — times, aircraft, and what the fare includes.">
+<meta property="og:title" content="Maburo — flight search">
+<meta property="og:description" content="A filter rail, three fare rows and one expanded itinerary — the search screen every travel product has to get right.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/atelier.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  .page-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5);
+  }
+  .head-tools { display: flex; align-items: center; gap: var(--space-3); }
+
+  .search-bar {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+    gap: var(--space-4);
+    align-items: end;
+    padding: var(--space-5) 0 var(--space-5);
+    border-top: 1px solid var(--atl-line);
+    border-bottom: 1px solid var(--atl-line);
+  }
+  .search-slot { display: flex; flex-direction: column; gap: 5px; }
+  .search-slot__value {
+    display: flex; align-items: center; gap: 9px;
+    font-size: 16px; font-weight: 700; letter-spacing: -0.015em;
+  }
+  .search-slot__value svg { width: 16px; height: 16px; opacity: 0.55; flex: none; }
+
+  .layout { display: grid; grid-template-columns: 276px minmax(0, 1fr); gap: var(--space-5); }
+  .slider-track {
+    position: relative; height: 3px; border-radius: 3px;
+    background: var(--atl-track); margin: 20px 8px 6px;
+  }
+  .slider-fill {
+    position: absolute; top: 0; bottom: 0; left: 12%; right: 38%;
+    border-radius: 3px; background: var(--atl-grad);
+  }
+  .slider-knob {
+    position: absolute; top: 50%; width: 15px; height: 15px; border-radius: 50%;
+    background: #fff; border: 2px solid var(--atl-rose);
+    transform: translate(-50%, -50%); box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  }
+
+  .detail-tabs { padding: 0 var(--space-5); }
+  .detail-body { padding: var(--space-5); }
+  .facility-grid {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px var(--space-5);
+  }
+  .fare-line {
+    display: flex; justify-content: space-between; gap: var(--space-4);
+    padding: 9px 0; border-bottom: 1px dashed var(--atl-line);
+    font-size: 13.5px;
+  }
+  .fare-line:last-child { border-bottom: 0; }
+  .fare-line b { font-variant-numeric: tabular-nums; }
+
+  /* Dot field for the route figure: CSS-generated, so the SVG carries only
+     the two airports and the great-circle arc — the information — instead of
+     four hundred hand-written <circle> elements. */
+  .route-map {
+    position: relative;
+    border-radius: var(--radius-md);
+    background-color: var(--atl-track);
+    background-image: radial-gradient(currentColor 1.1px, transparent 1.2px);
+    background-size: 13px 13px;
+    color: rgba(88, 62, 50, 0.22);
+    padding: var(--space-5);
+    overflow: hidden;
+  }
+  html[data-theme="dark"] .route-map { color: rgba(255, 224, 208, 0.26); }
+</style>
+</head>
+<body>
+
+<div class="atl-wall"></div>
+
+<div class="atl-page atl-page--wide">
+
+  <div class="page-head">
+    <span class="atl-kicker">
+      <span class="lang-en">atelier-design · canonical · booking</span>
+      <span class="lang-zh">atelier-design · 范本页 · 预订流</span>
+    </span>
+    <div class="head-tools">
+      <div class="atl-langtoggle lang-toggle">
+        <button type="button" class="is-active" data-lang-toggle="en">EN</button>
+        <button type="button" data-lang-toggle="zh">中文</button>
+      </div>
+      <button type="button" class="atl-iconbtn" data-theme-toggle aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v2M12 19v2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M3 12h2M19 12h2M5.6 18.4L7 17M17 7l1.4-1.4"/><circle cx="12" cy="12" r="3.6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="atl-app atl-app--full">
+    <main class="atl-main">
+
+      <!-- ---------- Chrome ---------- -->
+      <div class="atl-topbar">
+        <div class="atl-brand">
+          <span class="atl-brand__mark">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13.5l18-7-6.5 14-2.5-5.5z"/></svg>
+          </span>
+          <span>
+            <span class="atl-brand__name">Maburo</span>
+            <span class="atl-brand__sub">
+              <span class="lang-en">Travel</span><span class="lang-zh">出行</span>
+            </span>
+          </span>
+        </div>
+
+        <div class="atl-topbar__side">
+          <div class="atl-seg">
+            <button type="button" class="atl-seg__btn is-active" data-seg-group="mode">
+              <span class="lang-en">Flights</span><span class="lang-zh">机票</span>
+            </button>
+            <button type="button" class="atl-seg__btn" data-seg-group="mode">
+              <span class="lang-en">Hotels</span><span class="lang-zh">酒店</span>
+            </button>
+            <button type="button" class="atl-seg__btn" data-seg-group="mode">
+              <span class="lang-en">Trains</span><span class="lang-zh">火车</span>
+            </button>
+            <button type="button" class="atl-seg__btn" data-seg-group="mode">
+              <span class="lang-en">Car rental</span><span class="lang-zh">租车</span>
+            </button>
+          </div>
+          <div class="atl-userchip">
+            <span class="atl-userchip__avatar">JK</span>
+            <span>Jean Kowalski</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="atl-tabs" role="tablist">
+        <button type="button" class="atl-tab" data-tab="oneway" data-tab-group="trip" role="tab" aria-selected="false">
+          <span class="lang-en">One way</span><span class="lang-zh">单程</span>
+        </button>
+        <button type="button" class="atl-tab is-active" data-tab="round" data-tab-group="trip" role="tab" aria-selected="true">
+          <span class="lang-en">Round trip</span><span class="lang-zh">往返</span>
+        </button>
+        <button type="button" class="atl-tab" data-tab="multi" data-tab-group="trip" role="tab" aria-selected="false">
+          <span class="lang-en">Multi-city</span><span class="lang-zh">多程</span>
+        </button>
+      </div>
+
+      <!-- Round-trip search bar -->
+      <div data-tabpane="round" data-tab-group="trip">
+        <div class="search-bar">
+          <div class="search-slot">
+            <span class="atl-field__label"><span class="lang-en">From</span><span class="lang-zh">出发</span></span>
+            <span class="search-slot__value">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15.5l18-6.5-5.5-4.5-3 1.5-6-2L4 5.5l4 3-3 1z"/></svg>
+              Yogyakarta <span class="atl-muted" style="font-weight:600; font-size:13px;">YIA</span>
+            </span>
+          </div>
+          <div class="search-slot">
+            <span class="atl-field__label"><span class="lang-en">To</span><span class="lang-zh">到达</span></span>
+            <span class="search-slot__value">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15.5L3 9l5.5-4.5 3 1.5 6-2L20 5.5l-4 3 3 1z"/></svg>
+              Singapore <span class="atl-muted" style="font-weight:600; font-size:13px;">SIN</span>
+            </span>
+          </div>
+          <div class="search-slot">
+            <span class="atl-field__label"><span class="lang-en">Departure</span><span class="lang-zh">去程</span></span>
+            <span class="search-slot__value">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+              <span class="lang-en">Mon, 28 Nov 2026</span><span class="lang-zh">2026-11-28 周一</span>
+            </span>
+          </div>
+          <div class="search-slot">
+            <span class="atl-field__label"><span class="lang-en">Return</span><span class="lang-zh">回程</span></span>
+            <span class="search-slot__value">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+              <span class="lang-en">Wed, 30 Nov 2026</span><span class="lang-zh">2026-11-30 周三</span>
+            </span>
+          </div>
+          <button type="button" class="atl-btn atl-btn--accent">
+            <span class="lang-en">Search flights</span><span class="lang-zh">搜索航班</span>
+          </button>
+        </div>
+      </div>
+
+      <div data-tabpane="oneway" data-tab-group="trip" hidden>
+        <div class="search-bar" style="grid-template-columns: repeat(3, minmax(0, 1fr)) auto;">
+          <div class="search-slot">
+            <span class="atl-field__label"><span class="lang-en">From</span><span class="lang-zh">出发</span></span>
+            <span class="search-slot__value">Yogyakarta <span class="atl-muted" style="font-weight:600; font-size:13px;">YIA</span></span>
+          </div>
+          <div class="search-slot">
+            <span class="atl-field__label"><span class="lang-en">To</span><span class="lang-zh">到达</span></span>
+            <span class="search-slot__value">Singapore <span class="atl-muted" style="font-weight:600; font-size:13px;">SIN</span></span>
+          </div>
+          <div class="search-slot">
+            <span class="atl-field__label"><span class="lang-en">Departure</span><span class="lang-zh">去程</span></span>
+            <span class="search-slot__value"><span class="lang-en">Mon, 28 Nov 2026</span><span class="lang-zh">2026-11-28 周一</span></span>
+          </div>
+          <button type="button" class="atl-btn atl-btn--accent">
+            <span class="lang-en">Search flights</span><span class="lang-zh">搜索航班</span>
+          </button>
+        </div>
+      </div>
+
+      <div data-tabpane="multi" data-tab-group="trip" hidden>
+        <div class="search-bar" style="grid-template-columns: minmax(0,1fr) auto;">
+          <p class="atl-muted" style="margin:0; font-size:13.5px;">
+            <span class="lang-en">Multi-city builds legs one at a time. The pane ships in the markup so this tab is real, not a stub — but a canonical page does not invent a four-leg itinerary it cannot source.</span>
+            <span class="lang-zh">多程要逐段添加。这个面板的内容写在页面里，所以标签页是真的能切——但范本页不会编造一段查不到来源的四段行程。</span>
+          </p>
+          <button type="button" class="atl-btn atl-btn--ghost">
+            <span class="lang-en">Add a leg</span><span class="lang-zh">添加航段</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ---------- Filters + results ---------- -->
+      <div class="layout">
+
+        <!-- Filter rail -->
+        <aside class="atl-card">
+          <div class="atl-card__head">
+            <h2 class="atl-card__title" style="font-size:16px;">
+              <span class="lang-en">Filters</span><span class="lang-zh">筛选</span>
+            </h2>
+            <span class="atl-chip atl-chip--accent">3</span>
+          </div>
+
+          <div class="atl-accordion">
+            <button type="button" class="atl-accordion__head" data-accordion aria-expanded="true">
+              <span><span class="lang-en">Transits</span><span class="lang-zh">中转</span></span>
+              <span class="atl-accordion__sign">−</span>
+            </button>
+            <div class="atl-accordion__body">
+              <label class="atl-check">
+                <input type="checkbox" checked>
+                <span class="lang-en">Direct</span><span class="lang-zh">直飞</span>
+                <span class="atl-check__meta">$95+</span>
+              </label>
+              <label class="atl-check">
+                <input type="checkbox">
+                <span class="lang-en">1 transit</span><span class="lang-zh">1 次中转</span>
+                <span class="atl-check__meta">$115+</span>
+              </label>
+              <label class="atl-check">
+                <input type="checkbox">
+                <span class="lang-en">2+ transits</span><span class="lang-zh">2 次以上</span>
+                <span class="atl-check__meta">$245+</span>
+              </label>
+              <p class="atl-muted" style="margin:var(--space-3) 0 0; font-size:12px;">
+                <span class="lang-en">Two-plus transits cost more here because the only such routing goes via Kuala Lumpur on a separate ticket.</span>
+                <span class="lang-zh">两次以上中转反而更贵，因为唯一这样的接续是经吉隆坡、且要分开出票。</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="atl-accordion">
+            <button type="button" class="atl-accordion__head" data-accordion aria-expanded="true">
+              <span><span class="lang-en">Flight duration</span><span class="lang-zh">飞行时长</span></span>
+              <span class="atl-accordion__sign">−</span>
+            </button>
+            <div class="atl-accordion__body">
+              <div class="atl-row atl-row--between" style="font-size:12.5px; font-weight:700;">
+                <span>2h</span><span>15h</span>
+              </div>
+              <div class="slider-track" role="img" aria-label="Duration filter set from 2 hours 20 minutes to 9 hours">
+                <span class="slider-fill"></span>
+                <span class="slider-knob" style="left:12%;"></span>
+                <span class="slider-knob" style="left:62%;"></span>
+              </div>
+              <p class="atl-muted" style="margin:0; font-size:12px;">
+                <span class="lang-en">Showing 2h 20m — 9h 00m</span><span class="lang-zh">当前 2 小时 20 分 — 9 小时 00 分</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="atl-accordion">
+            <button type="button" class="atl-accordion__head" data-accordion aria-expanded="false">
+              <span><span class="lang-en">Airline</span><span class="lang-zh">航司</span></span>
+              <span class="atl-accordion__sign">+</span>
+            </button>
+            <div class="atl-accordion__body" hidden>
+              <label class="atl-check"><input type="checkbox" checked><span>Batik Air</span><span class="atl-check__meta">4</span></label>
+              <label class="atl-check"><input type="checkbox" checked><span>Garuda Indonesia</span><span class="atl-check__meta">6</span></label>
+              <label class="atl-check"><input type="checkbox" checked><span>Citilink</span><span class="atl-check__meta">3</span></label>
+            </div>
+          </div>
+
+          <div class="atl-accordion">
+            <button type="button" class="atl-accordion__head" data-accordion aria-expanded="false">
+              <span><span class="lang-en">Facilities</span><span class="lang-zh">机上设施</span></span>
+              <span class="atl-accordion__sign">+</span>
+            </button>
+            <div class="atl-accordion__body" hidden>
+              <label class="atl-check"><input type="checkbox"><span class="lang-en">Wi-Fi on board</span><span class="lang-zh">机上 Wi-Fi</span></label>
+              <label class="atl-check"><input type="checkbox"><span class="lang-en">Power outlet</span><span class="lang-zh">电源插座</span></label>
+              <label class="atl-check"><input type="checkbox"><span class="lang-en">Checked bag included</span><span class="lang-zh">含托运行李</span></label>
+            </div>
+          </div>
+
+          <div class="atl-accordion">
+            <button type="button" class="atl-accordion__head" data-accordion aria-expanded="false">
+              <span><span class="lang-en">Refundable</span><span class="lang-zh">可退改</span></span>
+              <span class="atl-accordion__sign">+</span>
+            </button>
+            <div class="atl-accordion__body" hidden>
+              <label class="atl-check"><input type="checkbox"><span class="lang-en">Refundable only</span><span class="lang-zh">仅可退</span></label>
+              <label class="atl-check"><input type="checkbox"><span class="lang-en">Free reschedule</span><span class="lang-zh">免费改期</span></label>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Results -->
+        <div class="atl-stack">
+
+          <div class="atl-row atl-row--between atl-row--wrap">
+            <h1 style="font-size:21px; letter-spacing:-0.024em; margin:0;">
+              <span class="lang-en">Yogyakarta → Singapore</span><span class="lang-zh">日惹 → 新加坡</span>
+              <span class="atl-muted" style="font-weight:600; font-size:13.5px; display:block; margin-top:3px; letter-spacing:0;">
+                <span class="lang-en">13 flights · Mon, 28 Nov · 3 adults</span><span class="lang-zh">13 个航班 · 11 月 28 日 周一 · 3 名成人</span>
+              </span>
+            </h1>
+            <span class="atl-select">
+              <span class="lang-en">Sort: cheapest first</span><span class="lang-zh">排序：价格从低到高</span>
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>
+            </span>
+          </div>
+
+          <button type="button" class="atl-result" data-expand="leg-batik" aria-expanded="false">
+            <span class="atl-result__brand"><span class="atl-result__logo">BA</span>Batik Air</span>
+            <span><span class="atl-result__time">16:45</span><span class="atl-result__place">YIA</span></span>
+            <span class="atl-leg">
+              <span class="atl-result__place">2h 22m · <span class="lang-en">direct</span><span class="lang-zh">直飞</span></span>
+              <span class="atl-leg__line"></span>
+            </span>
+            <span><span class="atl-result__time">20:30</span><span class="atl-result__place">SIN</span></span>
+            <span class="atl-result__price">USD 233.45<small>/pax</small></span>
+          </button>
+          <div id="leg-batik" hidden class="atl-card atl-card--solid">
+            <p style="margin:0; font-size:13.5px;">
+              <span class="lang-en">Boeing 737-800 · 3-3 seat layout · 20kg checked bag · no in-seat power.</span>
+              <span class="lang-zh">波音 737-800 · 3-3 座位布局 · 20kg 托运 · 座椅无电源。</span>
+            </p>
+          </div>
+
+          <button type="button" class="atl-result" data-expand="leg-garuda" aria-expanded="false">
+            <span class="atl-result__brand"><span class="atl-result__logo">GA</span>Garuda Indonesia</span>
+            <span><span class="atl-result__time">16:45</span><span class="atl-result__place">YIA</span></span>
+            <span class="atl-leg">
+              <span class="atl-result__place">2h 22m · <span class="lang-en">direct</span><span class="lang-zh">直飞</span></span>
+              <span class="atl-leg__line"></span>
+            </span>
+            <span><span class="atl-result__time">20:30</span><span class="atl-result__place">SIN</span></span>
+            <span class="atl-result__price">USD 261.00<small>/pax</small></span>
+          </button>
+          <div id="leg-garuda" hidden class="atl-card atl-card--solid">
+            <p style="margin:0; font-size:13.5px;">
+              <span class="lang-en">Airbus A330-300 · 2-4-2 seat layout · 30kg checked bag · in-seat power and Wi-Fi.</span>
+              <span class="lang-zh">空客 A330-300 · 2-4-2 座位布局 · 30kg 托运 · 座椅电源与 Wi-Fi。</span>
+            </p>
+          </div>
+
+          <!-- The expanded row -->
+          <button type="button" class="atl-result is-open" data-expand="leg-citilink" aria-expanded="true">
+            <span class="atl-result__brand"><span class="atl-result__logo">CL</span>Citilink</span>
+            <span><span class="atl-result__time">16:45</span><span class="atl-result__place">YIA</span></span>
+            <span class="atl-leg">
+              <span class="atl-result__place">2h 22m · <span class="lang-en">direct</span><span class="lang-zh">直飞</span></span>
+              <span class="atl-leg__line"></span>
+            </span>
+            <span><span class="atl-result__time">20:30</span><span class="atl-result__place">SIN</span></span>
+            <span class="atl-result__price">USD 198.20<small>/pax</small></span>
+          </button>
+
+          <div id="leg-citilink" class="atl-card atl-card--flush atl-card--solid">
+            <div class="detail-tabs">
+              <div class="atl-tabs" role="tablist">
+                <button type="button" class="atl-tab is-active" data-tab="itinerary" data-tab-group="fare" role="tab" aria-selected="true">
+                  <span class="lang-en">Itinerary</span><span class="lang-zh">行程</span>
+                </button>
+                <button type="button" class="atl-tab" data-tab="fare" data-tab-group="fare" role="tab" aria-selected="false">
+                  <span class="lang-en">Price breakdown</span><span class="lang-zh">价格明细</span>
+                </button>
+                <button type="button" class="atl-tab" data-tab="rules" data-tab-group="fare" role="tab" aria-selected="false">
+                  <span class="lang-en">Refund &amp; reschedule</span><span class="lang-zh">退改规则</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Itinerary -->
+            <div class="detail-body" data-tabpane="itinerary" data-tab-group="fare">
+              <div class="atl-grid atl-grid--2" style="gap:var(--space-6);">
+                <div>
+                  <div class="atl-timeline">
+                    <div class="atl-timeline__row">
+                      <span>
+                        <span class="atl-timeline__time">16:45</span>
+                        <span class="atl-timeline__date">28 Nov</span>
+                      </span>
+                      <span class="atl-timeline__spine"><span class="atl-timeline__dot"></span></span>
+                      <span class="atl-timeline__body">
+                        <span class="atl-rank__name">Yogyakarta (YIA)</span>
+                        <span class="atl-rank__meta">
+                          <span class="lang-en">Yogyakarta International · terminal 1</span>
+                          <span class="lang-zh">日惹国际机场 · 1 号航站楼</span>
+                        </span>
+                      </span>
+                    </div>
+                    <div class="atl-timeline__row">
+                      <span>
+                        <span class="atl-timeline__time">2h 22m</span>
+                        <span class="atl-timeline__date"><span class="lang-en">in the air</span><span class="lang-zh">飞行中</span></span>
+                      </span>
+                      <span class="atl-timeline__spine"><span class="atl-timeline__dot"></span></span>
+                      <span class="atl-timeline__body">
+                        <span class="atl-row" style="gap:9px;">
+                          <span class="atl-result__logo">CL</span>
+                          <span>
+                            <span class="atl-rank__name">Citilink QG-242</span>
+                            <span class="atl-rank__meta">Airbus A320-200 · <span class="lang-en">economy</span><span class="lang-zh">经济舱</span></span>
+                          </span>
+                        </span>
+                        <div class="facility-grid" style="margin-top:var(--space-4);">
+                          <span class="atl-facility">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V4.5h6V7"/></svg>
+                            <span class="lang-en">20kg checked</span><span class="lang-zh">20kg 托运</span>
+                          </span>
+                          <span class="atl-facility">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M2.5 9a14 14 0 0119 0M6 12.5a9 9 0 0112 0M9.5 16a4 4 0 015 0"/><circle cx="12" cy="19.5" r="1"/></svg>
+                            <span class="lang-en">Wi-Fi available</span><span class="lang-zh">有 Wi-Fi</span>
+                          </span>
+                          <span class="atl-facility">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 3h12v8a6 6 0 01-12 0z"/><path d="M12 17v4"/></svg>
+                            <span class="lang-en">3-3 seat layout</span><span class="lang-zh">3-3 座位布局</span>
+                          </span>
+                          <span class="atl-facility">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M13 2.5L5 13.5h6l-2 8 8-11h-6z"/></svg>
+                            <span class="lang-en">No in-seat power</span><span class="lang-zh">座椅无电源</span>
+                          </span>
+                        </div>
+                      </span>
+                    </div>
+                    <div class="atl-timeline__row">
+                      <span>
+                        <span class="atl-timeline__time">20:30</span>
+                        <span class="atl-timeline__date">28 Nov</span>
+                      </span>
+                      <span class="atl-timeline__spine"><span class="atl-timeline__dot"></span></span>
+                      <span class="atl-timeline__body">
+                        <span class="atl-rank__name">Singapore (SIN)</span>
+                        <span class="atl-rank__meta">
+                          <span class="lang-en">Changi · terminal 4 · arrives GMT+8</span>
+                          <span class="lang-zh">樟宜机场 · 4 号航站楼 · 到达时区 GMT+8</span>
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <p class="atl-muted" style="margin:var(--space-3) 0 0; font-size:12.5px;">
+                    <span class="lang-en">Clock times are local. Departure is GMT+7 and arrival GMT+8, which is why 2h 22m of flying looks like 3h 45m on the clock.</span>
+                    <span class="lang-zh">时间均为当地时间。出发是 GMT+7、到达是 GMT+8，所以 2 小时 22 分的飞行在钟面上看起来是 3 小时 45 分。</span>
+                  </p>
+                </div>
+
+                <div class="atl-stack">
+                  <figure style="margin:0;">
+                    <div class="route-map">
+                    <svg viewBox="0 0 320 152" width="100%" height="176" role="img"
+                         aria-label="Great-circle route from Yogyakarta YIA north-west to Singapore SIN, 1157 kilometres, 2 hours 22 minutes">
+                      <path d="M26 128 C 96 44, 224 22, 296 56" fill="none" stroke="var(--atl-rose)" stroke-width="2.6" stroke-linecap="round"/>
+                      <circle cx="26" cy="128" r="7.5" fill="#fff" stroke="var(--atl-rose)" stroke-width="2.8"/>
+                      <circle cx="296" cy="56" r="7.5" fill="var(--atl-rose)" stroke="#fff" stroke-width="2.8"/>
+                      <text x="26" y="150" text-anchor="start" font-family="Plus Jakarta Sans, sans-serif" font-size="14" font-weight="700" fill="var(--atl-ink)">YIA</text>
+                      <text x="296" y="36" text-anchor="end" font-family="Plus Jakarta Sans, sans-serif" font-size="14" font-weight="700" fill="var(--atl-ink)">SIN</text>
+                      <text x="161" y="52" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="var(--atl-ink-2)">1 157 km</text>
+                      <text x="161" y="70" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="600" fill="var(--atl-ink-2)">2h 22m</text>
+                    </svg>
+                    </div>
+                    <figcaption class="atl-muted" style="font-size:12px; margin-top:var(--space-3);">
+                      <span class="lang-en">Great-circle track, north-west across the Java Sea and the Riau archipelago. Schematic — not a navigation chart.</span>
+                      <span class="lang-zh">大圆航线，向西北跨爪哇海与廖内群岛。示意图，不是航行图。</span>
+                    </figcaption>
+                  </figure>
+
+                  <div class="atl-row atl-row--between atl-row--wrap" style="gap:var(--space-4);">
+                    <span>
+                      <span class="atl-kpi__label"><span class="lang-en">Total for 3 adults</span><span class="lang-zh">3 名成人合计</span></span>
+                      <span class="atl-figure__value" style="font-size:34px;">USD 594.60</span>
+                    </span>
+                    <button type="button" class="atl-btn">
+                      <span class="lang-en">Select flight</span><span class="lang-zh">选择该航班</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Price breakdown -->
+            <div class="detail-body" data-tabpane="fare" data-tab-group="fare" hidden>
+              <div class="atl-grid atl-grid--2" style="gap:var(--space-6);">
+                <div>
+                  <div class="fare-line"><span><span class="lang-en">Base fare × 3</span><span class="lang-zh">票面价 × 3</span></span><b>USD 471.00</b></div>
+                  <div class="fare-line"><span><span class="lang-en">Airport tax &amp; fuel</span><span class="lang-zh">机场税与燃油</span></span><b>USD 84.60</b></div>
+                  <div class="fare-line"><span><span class="lang-en">Booking fee</span><span class="lang-zh">服务费</span></span><b>USD 39.00</b></div>
+                  <div class="fare-line"><span><span class="lang-en">Seat selection</span><span class="lang-zh">选座</span></span><b class="atl-muted"><span class="lang-en">not selected</span><span class="lang-zh">未选</span></b></div>
+                  <div class="fare-line" style="border-top:1px solid var(--atl-line-strong); padding-top:13px;">
+                    <span style="font-weight:800;"><span class="lang-en">Total</span><span class="lang-zh">合计</span></span>
+                    <b style="font-size:17px;">USD 594.60</b>
+                  </div>
+                </div>
+                <div class="atl-card atl-card--ink atl-card--tight">
+                  <h2 class="atl-card__title" style="font-size:15px;">
+                    <span class="lang-en">Why this is cheapest</span><span class="lang-zh">为什么这班最便宜</span>
+                  </h2>
+                  <p class="atl-muted" style="margin:var(--space-3) 0 0; font-size:13px;">
+                    <span class="lang-en">Citilink is USD 35 under Batik on the same aircraft type and the same slot. The gap is the checked-bag allowance: 20kg here against Batik's 20kg plus a free seat pick. If any of the three needs 30kg, Garuda lands cheaper overall.</span>
+                    <span class="lang-zh">同机型、同时段，Citilink 比 Batik 低 35 美元。差价来自行李：这里是 20kg，Batik 是 20kg 外加免费选座。如果 3 人中有人要 30kg，反而是 Garuda 总价更低。</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rules -->
+            <div class="detail-body" data-tabpane="rules" data-tab-group="fare" hidden>
+              <div class="atl-grid atl-grid--2" style="gap:var(--space-6);">
+                <div class="atl-stack">
+                  <span class="atl-chip atl-chip--warn">
+                    <span class="lang-en">Partially refundable</span><span class="lang-zh">部分可退</span>
+                  </span>
+                  <p style="margin:0; font-size:13.5px;">
+                    <span class="lang-en">Cancel more than 72 hours before departure and 60% of the base fare returns; taxes always return in full. Inside 72 hours the base fare is forfeit.</span>
+                    <span class="lang-zh">起飞前 72 小时以上取消，退还 60% 票面价；税费任何时候全额退还。72 小时以内票面价不退。</span>
+                  </p>
+                </div>
+                <div class="atl-stack">
+                  <span class="atl-chip">
+                    <span class="lang-en">Reschedule: USD 42 + fare difference</span><span class="lang-zh">改期：42 美元 + 差价</span>
+                  </span>
+                  <p style="margin:0; font-size:13.5px;">
+                    <span class="lang-en">One change allowed, up to 24 hours before departure, to any Citilink flight on the same route within 30 days.</span>
+                    <span class="lang-zh">允许改期一次，须在起飞前 24 小时以上，可改至 30 天内同航线的任意 Citilink 航班。</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <footer class="atl-foot">
+    <span>
+      <span class="lang-en">Canonical page · atelier-design · fares are illustrative</span>
+      <span class="lang-zh">范本页 · atelier-design · 票价为示意</span>
+    </span>
+    <span class="atl-mono">v1 · 2026-08-14</span>
+  </footer>
+</div>
+
+<script src="../../assets/atelier.js"></script>
+
+<!-- design-review:self-diff v1
+Skill: atelier
+Page-type: booking
+Created: 2026-08-14
+
+Decisions (7):
+1. [rail-free-shell] chose ".atl-app--full — one glass sheet with no navigation rail" over "reusing the dashboard's 244px rail". Because: a search screen's navigation IS the search bar; a rail full of destinations competes with the one control the user came for, and proving the shell works without a rail is what stops this skill from producing seven pages that are all the dashboard.
+2. [one-row-pre-expanded] chose "the third result rendered open, with two collapsed above it" over "all rows collapsed". Because: the expanded state is where all the design risk lives (tabs inside a card inside a result row), and a canonical page that hides its hardest layout behind a click is not reviewable — the screenshot gate would never see it.
+3. [filters-hold-their-reason] chose "each filter group carries a sentence explaining a counter-intuitive number" over "bare checkboxes with counts". Because: "2+ transits · $245+" looks like a data error until you know the only such routing is a separate ticket via Kuala Lumpur. A filter that surprises the user and does not explain itself gets read as a bug.
+4. [timezone-stated] chose "annotating that 2h 22m of flight shows as 3h 45m on the clock" over "printing both times and trusting the reader". Because: this is the single most common misread in every travel product, and the fix costs one line.
+5. [schematic-not-cartographic] chose "a great-circle arc over a CSS dot field, captioned as schematic" over "a dotted world map traced from real coastlines". Because: a map that is 80% accurate invites the reader to measure it; a figure that states what it is carries the same information — direction, distance, two endpoints — without the lie. It also keeps the SVG at four elements instead of four hundred circles.
+6. [dot-field-in-css] chose "radial-gradient background-size for the dot field" over "generated <circle> elements". Because: the dots are texture, not data — putting texture in CSS leaves the SVG carrying only what a screen reader should hear, which is why the aria-label is one sentence rather than a list of coordinates.
+7. [cheapest-is-argued] chose "an ink card explaining WHY this fare is cheapest, including when it is not" over "a 'best value' badge". Because: a badge is a claim; the paragraph is the reasoning, and it names the condition (30kg bags) under which the recommendation flips.
+
+Known trade-offs:
+- Filter checkboxes and the duration slider do not re-query the result list. A canonical page must not display data it cannot source, so the results are fixed and the controls demonstrate state, not filtering.
+- The duration slider is markup, not an <input type="range">. It renders identically across engines and screenshots deterministically, but it is not keyboard-operable; a production build must use a real range input with the same skin.
+- Only one of the three result rows carries a full detail card. Repeating it three times would triple the page for no additional review value.
+- The route figure has no coastlines, so a reader looking for geography gets direction and distance only. That is the deliberate trade in decision 5.
+/design-review:self-diff -->
+
+</body>
+</html>

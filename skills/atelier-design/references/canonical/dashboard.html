@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loka — people operations console</title>
+<meta name="description" content="Loka's people console: four headcount KPIs, a seven-month review ramp, the interview queue and a sortable directory, on one sheet of warm glass.">
+<meta property="og:title" content="Loka — people operations console">
+<meta property="og:description" content="Headcount KPIs, a seven-month performance ramp, the interview queue and a sortable employee directory — Loka's people console in atelier glass.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/atelier.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  /* Page-local styles use UNPREFIXED classes: verify.py only audits atl-* */
+  .page-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-5);
+  }
+  .head-tools { display: flex; align-items: center; gap: var(--space-3); }
+
+  .chart-body { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: var(--space-3); }
+  .rank-list { display: flex; flex-direction: column; gap: var(--space-4); }
+  .queue-item { display: flex; flex-direction: column; gap: 7px; }
+  .queue-item + .queue-item { margin-top: var(--space-5); }
+  .queue-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    display: inline-block;
+    margin-right: 9px;
+    vertical-align: middle;
+    opacity: 0.8;
+  }
+  .format-row { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: var(--space-4); align-items: center; }
+  .format-row + .format-row { margin-top: var(--space-3); }
+  .dir-card { display: flex; align-items: center; gap: var(--space-4); }
+</style>
+</head>
+<body>
+
+<div class="atl-wall"></div>
+
+<div class="atl-page atl-page--wide">
+
+  <div class="page-head">
+    <span class="atl-kicker">
+      <span class="lang-en">atelier-design · canonical · dashboard</span>
+      <span class="lang-zh">atelier-design · 范本页 · 控制台</span>
+    </span>
+    <div class="head-tools">
+      <div class="atl-langtoggle lang-toggle">
+        <button type="button" class="is-active" data-lang-toggle="en">EN</button>
+        <button type="button" data-lang-toggle="zh">中文</button>
+      </div>
+      <button type="button" class="atl-iconbtn" data-theme-toggle aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v2M12 19v2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M3 12h2M19 12h2M5.6 18.4L7 17M17 7l1.4-1.4"/><circle cx="12" cy="12" r="3.6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="atl-app">
+
+    <!-- ======================= RAIL ======================= -->
+    <aside class="atl-rail">
+      <div class="atl-brand">
+        <span class="atl-brand__mark">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M12 3l7.5 4.3v9L12 20.6 4.5 16.3v-9z"/><path d="M12 8.4l3.2 1.8v3.6L12 15.6l-3.2-1.8v-3.6z"/></svg>
+        </span>
+        <span>
+          <span class="atl-brand__name">Loka</span>
+          <span class="atl-brand__sub">People Ops</span>
+        </span>
+      </div>
+
+      <nav class="atl-navgroup">
+        <span class="atl-navgroup__label">
+          <span class="lang-en">Main menu</span><span class="lang-zh">主菜单</span>
+        </span>
+        <button type="button" class="atl-nav is-active" data-route="overview" data-route-title="Dashboard" aria-current="page">
+          <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7.5" height="9" rx="2"/><rect x="13.5" y="3" width="7.5" height="5.5" rx="2"/><rect x="13.5" y="12" width="7.5" height="9" rx="2"/><rect x="3" y="15.5" width="7.5" height="5.5" rx="2"/></svg>
+          <span class="lang-en">Dashboard</span><span class="lang-zh">控制台</span>
+        </button>
+        <button type="button" class="atl-nav" data-route="directory" data-route-title="Directory">
+          <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.4"/><path d="M3 20c0-3.3 2.7-5.4 6-5.4s6 2.1 6 5.4"/><path d="M16.5 11.2a3 3 0 100-6M18 20c0-2.4-.9-4.2-2.4-5.2"/></svg>
+          <span class="lang-en">Directory</span><span class="lang-zh">员工名册</span>
+          <span class="atl-nav__badge">240</span>
+        </button>
+        <button type="button" class="atl-nav" data-route="overview" data-route-title="Time off">
+          <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+          <span class="lang-en">Time off</span><span class="lang-zh">休假</span>
+        </button>
+        <button type="button" class="atl-nav" data-route="overview" data-route-title="Payroll">
+          <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.6"/><path d="M6 12h.01M18 12h.01"/></svg>
+          <span class="lang-en">Payroll</span><span class="lang-zh">薪酬</span>
+        </button>
+      </nav>
+
+      <nav class="atl-navgroup">
+        <span class="atl-navgroup__label">
+          <span class="lang-en">Team</span><span class="lang-zh">团队管理</span>
+        </span>
+        <button type="button" class="atl-nav" data-route="overview" data-route-title="Performance">
+          <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 17l5.5-5.5 3.5 3.5L21 6"/><path d="M21 11V6h-5"/></svg>
+          <span class="lang-en">Performance</span><span class="lang-zh">绩效</span>
+        </button>
+        <button type="button" class="atl-nav" data-route="overview" data-route-title="Hiring">
+          <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="7" width="19" height="13" rx="2.5"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2"/><path d="M2.5 12.5h19"/></svg>
+          <span class="lang-en">Hiring</span><span class="lang-zh">招聘</span>
+          <span class="atl-nav__badge">7</span>
+        </button>
+        <button type="button" class="atl-nav" data-route="overview" data-route-title="Reports">
+          <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+          <span class="lang-en">Reports</span><span class="lang-zh">报表</span>
+        </button>
+      </nav>
+
+      <div class="atl-rail__foot">
+        <div class="atl-userchip">
+          <span class="atl-userchip__avatar">CS</span>
+          <span>
+            Carla Sandoval
+            <span class="atl-brand__sub">
+              <span class="lang-en">HR Director</span><span class="lang-zh">人力总监</span>
+            </span>
+          </span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ======================= MAIN ======================= -->
+    <main class="atl-main">
+
+      <div class="atl-topbar">
+        <h1 class="atl-topbar__title" data-route-title-slot>Dashboard</h1>
+        <div class="atl-topbar__side">
+          <div class="atl-seg">
+            <button type="button" class="atl-seg__btn is-active" data-seg-group="range">
+              <span class="lang-en">Past 3 months</span><span class="lang-zh">近 3 个月</span>
+            </button>
+            <button type="button" class="atl-seg__btn" data-seg-group="range">
+              <span class="lang-en">Past year</span><span class="lang-zh">近一年</span>
+            </button>
+          </div>
+          <button type="button" class="atl-iconbtn" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 9a6 6 0 10-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M13.7 20a2 2 0 01-3.4 0"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ---------- PANE: overview ---------- -->
+      <section class="atl-pane" data-pane="overview">
+
+        <div class="atl-kpirow" data-reveal>
+          <div class="atl-kpi">
+            <span class="atl-orb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="17" cy="9.5" r="2.4"/><path d="M20.5 19.5c0-2.3-1.3-3.8-3.3-4.2"/></svg>
+            </span>
+            <span>
+              <span class="atl-kpi__label"><span class="lang-en">Total employees</span><span class="lang-zh">在职员工</span></span>
+              <span class="atl-kpi__value" data-count-to="240">240</span>
+            </span>
+          </div>
+          <div class="atl-kpi">
+            <span class="atl-orb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="2.5" y="7" width="19" height="13" rx="2.5"/><path d="M9 7V5.2A1.7 1.7 0 0110.7 3.5h2.6A1.7 1.7 0 0115 5.2V7"/></svg>
+            </span>
+            <span>
+              <span class="atl-kpi__label"><span class="lang-en">Open roles</span><span class="lang-zh">在招岗位</span></span>
+              <span class="atl-kpi__value" data-count-to="7">7</span>
+            </span>
+          </div>
+          <div class="atl-kpi">
+            <span class="atl-orb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="8.6"/><path d="M12 7v5.3l3.4 2"/></svg>
+            </span>
+            <span>
+              <span class="atl-kpi__label"><span class="lang-en">Median tenure</span><span class="lang-zh">司龄中位数</span></span>
+              <span class="atl-kpi__value"><span data-count-to="3.4">3.4</span> <span class="lang-en">yrs</span><span class="lang-zh">年</span></span>
+            </span>
+          </div>
+          <div class="atl-kpi">
+            <span class="atl-orb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 20V9.5M10 20V4.5M16 20v-8M22 20H2"/></svg>
+            </span>
+            <span>
+              <span class="atl-kpi__label"><span class="lang-en">Voluntary attrition</span><span class="lang-zh">主动离职率</span></span>
+              <span class="atl-kpi__value"><span data-count-to="6.1">6.1</span>%</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="atl-grid atl-grid--main-side">
+
+          <!-- Performance ramp -->
+          <div class="atl-card" data-reveal data-reveal-delay="60">
+            <div class="atl-card__head">
+              <div>
+                <h2 class="atl-card__title">
+                  <span class="lang-en">Average review score</span><span class="lang-zh">平均绩效分</span>
+                </h2>
+                <p class="atl-muted" style="margin:4px 0 0; font-size:13px;">
+                  <span class="lang-en">240 reviews, seven cycles, calibrated across five departments.</span>
+                  <span class="lang-zh">240 份评估，七个周期，跨五个部门校准。</span>
+                </p>
+              </div>
+              <div class="atl-legend">
+                <span><span class="atl-legend__dot"></span><span class="lang-en">Scored</span><span class="lang-zh">已评</span></span>
+                <span><span class="atl-legend__dot atl-legend__dot--muted"></span><span class="lang-en">Ceiling</span><span class="lang-zh">上限</span></span>
+              </div>
+            </div>
+
+            <div class="atl-row atl-row--wrap" style="align-items:flex-end; gap:var(--space-4); margin-bottom:var(--space-5);">
+              <span class="atl-figure">
+                <span class="atl-figure__value"><span data-count-to="63.89">63.89</span>%</span>
+              </span>
+              <span class="atl-delta atl-delta--down" style="padding-bottom:10px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 18L4 8h16z"/></svg>
+                2.34<span class="lang-en"> pts vs Q1</span><span class="lang-zh"> 分（对比一季度）</span>
+              </span>
+            </div>
+
+            <div class="chart-body">
+              <div class="atl-axis" aria-hidden="true">
+                <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
+              </div>
+              <div class="atl-bars" role="img"
+                   aria-label="Average review score by month: February 44, March 79, April 62, May 63, June 31, July 55, August 58 percent">
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:44%" data-grow></span></div><span class="atl-bars__tick">Feb</span></div>
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:79%" data-grow></span></div><span class="atl-bars__tick">Mar</span></div>
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:62%" data-grow></span></div><span class="atl-bars__tick">Apr</span></div>
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:63%" data-grow></span></div><span class="atl-bars__tick">May</span></div>
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:31%" data-grow></span></div><span class="atl-bars__tick">Jun</span></div>
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:55%" data-grow></span></div><span class="atl-bars__tick">Jul</span></div>
+                <div class="atl-bars__col"><div class="atl-bars__stack"><span class="atl-bars__fill" style="height:58%" data-grow></span></div><span class="atl-bars__tick">Aug</span></div>
+              </div>
+            </div>
+            <p class="atl-muted" style="margin:var(--space-4) 0 0; font-size:12.5px;">
+              <span class="lang-en">June sits at 31% because the engineering cycle slipped past the calibration window — 34 reviews landed in July instead. Read Jun+Jul as one period.</span>
+              <span class="lang-zh">6 月只有 31%，因为研发的评估周期错过了校准窗口——34 份评估落到了 7 月。6 月和 7 月应合并看。</span>
+            </p>
+          </div>
+
+          <!-- Top performers -->
+          <div class="atl-card" data-reveal data-reveal-delay="120">
+            <div class="atl-card__head">
+              <h2 class="atl-card__title">
+                <span class="lang-en">Top performance</span><span class="lang-zh">绩效榜</span>
+              </h2>
+              <span class="atl-chip atl-chip--accent">
+                <span class="lang-en">Q2</span><span class="lang-zh">二季度</span>
+              </span>
+            </div>
+            <div class="rank-list atl-rank">
+              <div class="atl-rank__row">
+                <span class="atl-rank__badge" data-allow-overlap><span class="atl-avatar">LG</span><span class="atl-rank__n">1</span></span>
+                <span>
+                  <span class="atl-rank__name">Lourdes Gutierrez</span>
+                  <span class="atl-rank__meta"><span class="lang-en">314 tasks closed</span><span class="lang-zh">完成 314 项任务</span></span>
+                </span>
+                <span class="atl-chip atl-chip--up" style="margin-left:auto;">92</span>
+              </div>
+              <div class="atl-rank__row">
+                <span class="atl-rank__badge" data-allow-overlap><span class="atl-avatar">MK</span><span class="atl-rank__n">2</span></span>
+                <span>
+                  <span class="atl-rank__name">Marlene Kuhlmann</span>
+                  <span class="atl-rank__meta"><span class="lang-en">309 tasks closed</span><span class="lang-zh">完成 309 项任务</span></span>
+                </span>
+                <span class="atl-chip atl-chip--up" style="margin-left:auto;">90</span>
+              </div>
+              <div class="atl-rank__row">
+                <span class="atl-rank__badge" data-allow-overlap><span class="atl-avatar">KL</span><span class="atl-rank__n">3</span></span>
+                <span>
+                  <span class="atl-rank__name">Kristi Lueilwitz</span>
+                  <span class="atl-rank__meta"><span class="lang-en">289 tasks closed</span><span class="lang-zh">完成 289 项任务</span></span>
+                </span>
+                <span class="atl-chip" style="margin-left:auto;">87</span>
+              </div>
+              <div class="atl-rank__row">
+                <span class="atl-rank__badge" data-allow-overlap><span class="atl-avatar">AP</span><span class="atl-rank__n">4</span></span>
+                <span>
+                  <span class="atl-rank__name">Abel Pollich</span>
+                  <span class="atl-rank__meta"><span class="lang-en">242 tasks closed</span><span class="lang-zh">完成 242 项任务</span></span>
+                </span>
+                <span class="atl-chip" style="margin-left:auto;">84</span>
+              </div>
+            </div>
+            <p class="atl-muted" style="margin:var(--space-5) 0 0; font-size:12.5px;">
+              <span class="lang-en">Ranked on closed tasks, not on review score — the two disagree for 3 of the 4. Task volume is a workload signal; the score column in the table below is the judgement.</span>
+              <span class="lang-zh">这里按完成任务数排，不是按绩效分——4 人里有 3 人两个口径不一致。任务量反映负荷，下方表格的评分才是评价。</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="atl-grid atl-grid--2">
+
+          <!-- The one ink card on this screen -->
+          <div class="atl-card atl-card--ink" data-reveal>
+            <div class="atl-card__head">
+              <h2 class="atl-card__title">
+                <span class="lang-en">Interview queue</span><span class="lang-zh">面试队列</span>
+              </h2>
+              <span class="atl-chip" style="background:rgba(255,255,255,0.12); color:inherit;">
+                <span class="lang-en">Today</span><span class="lang-zh">今天</span>
+              </span>
+            </div>
+
+            <div class="queue-item">
+              <span style="font-weight:700; font-size:14.5px;">
+                <span class="queue-dot"></span>Staff Platform Engineer — panel 3
+              </span>
+              <span class="atl-muted" style="font-size:12.5px; padding-left:16px;">06:00–08:00 · Jakarta</span>
+              <span class="atl-avatars" data-allow-overlap style="padding-left:16px;">
+                <span class="atl-avatar atl-avatar--sm">RM</span>
+                <span class="atl-avatar atl-avatar--sm">TS</span>
+                <span class="atl-avatar atl-avatar--sm">JD</span>
+              </span>
+            </div>
+            <div class="queue-item">
+              <span style="font-weight:700; font-size:14.5px;">
+                <span class="queue-dot"></span>Product Manager — hiring-manager round
+              </span>
+              <span class="atl-muted" style="font-size:12.5px; padding-left:16px;">09:30–10:15 · remote</span>
+              <span class="atl-avatars" data-allow-overlap style="padding-left:16px;">
+                <span class="atl-avatar atl-avatar--sm">CS</span>
+                <span class="atl-avatar atl-avatar--sm">NR</span>
+              </span>
+            </div>
+            <div class="queue-item">
+              <span style="font-weight:700; font-size:14.5px;">
+                <span class="queue-dot"></span>Data Analyst — take-home debrief
+              </span>
+              <span class="atl-muted" style="font-size:12.5px; padding-left:16px;">14:00–15:00 · Yogyakarta</span>
+              <span class="atl-avatars" data-allow-overlap style="padding-left:16px;">
+                <span class="atl-avatar atl-avatar--sm">AP</span>
+                <span class="atl-avatar atl-avatar--sm">LG</span>
+                <span class="atl-avatar atl-avatar--sm">MK</span>
+                <span class="atl-avatar atl-avatar--sm">+2</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Working format -->
+          <div class="atl-card" data-reveal data-reveal-delay="60">
+            <div class="atl-card__head">
+              <h2 class="atl-card__title">
+                <span class="lang-en">Working format</span><span class="lang-zh">办公形态</span>
+              </h2>
+              <span class="atl-muted" style="font-size:12.5px;">n = 240</span>
+            </div>
+
+            <div class="format-row">
+              <span>
+                <span class="atl-kpi__label"><span class="lang-en">On-site</span><span class="lang-zh">驻场</span></span>
+                <span style="font-weight:800; font-size:19px; font-variant-numeric:tabular-nums;">28</span>
+              </span>
+              <span class="atl-hbar">
+                <span class="atl-hbar__fill" style="width:11.7%" data-grow="width"></span>
+                <span class="atl-hbar__value">11.7%</span>
+              </span>
+            </div>
+            <div class="format-row">
+              <span>
+                <span class="atl-kpi__label"><span class="lang-en">Hybrid</span><span class="lang-zh">混合</span></span>
+                <span style="font-weight:800; font-size:19px; font-variant-numeric:tabular-nums;">77</span>
+              </span>
+              <span class="atl-hbar">
+                <span class="atl-hbar__fill" style="width:32.1%" data-grow="width"></span>
+                <span class="atl-hbar__value">32.1%</span>
+              </span>
+            </div>
+            <div class="format-row">
+              <span>
+                <span class="atl-kpi__label"><span class="lang-en">Remote</span><span class="lang-zh">远程</span></span>
+                <span style="font-weight:800; font-size:19px; font-variant-numeric:tabular-nums;">135</span>
+              </span>
+              <span class="atl-hbar">
+                <span class="atl-hbar__fill" style="width:56.2%" data-grow="width"></span>
+                <span class="atl-hbar__value">56.2%</span>
+              </span>
+            </div>
+
+            <p class="atl-muted" style="margin:var(--space-5) 0 0; font-size:12.5px;">
+              <span class="lang-en">Remote crossed half the company in March and has not moved since. The two on-site teams are hardware QA and the Jakarta front desk.</span>
+              <span class="lang-zh">远程比例 3 月越过半数后就没再动。仍驻场的两个团队是硬件测试和雅加达前台。</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Directory table -->
+        <div class="atl-card atl-card--flush" data-reveal>
+          <div class="atl-card__head" style="padding:var(--space-5) var(--space-5) 0; margin-bottom:var(--space-3);">
+            <h2 class="atl-card__title">
+              <span class="lang-en">Recently reviewed</span><span class="lang-zh">最近评估</span>
+            </h2>
+            <span class="atl-muted" style="font-size:12.5px;">
+              <span class="lang-en">Click a column head to sort</span><span class="lang-zh">点击表头排序</span>
+            </span>
+          </div>
+          <div class="atl-scroll">
+            <table class="atl-table">
+              <thead>
+                <tr>
+                  <th><button type="button" class="atl-table__sort" data-sort="id">ID</button></th>
+                  <th><button type="button" class="atl-table__sort" data-sort="name"><span class="lang-en">Name</span><span class="lang-zh">姓名</span></button></th>
+                  <th><span class="lang-en">Role</span><span class="lang-zh">岗位</span></th>
+                  <th><span class="lang-en">Team</span><span class="lang-zh">团队</span></th>
+                  <th style="width:170px;"><button type="button" class="atl-table__sort" data-sort="score"><span class="lang-en">Score</span><span class="lang-zh">评分</span></button></th>
+                  <th><span class="lang-en">Status</span><span class="lang-zh">状态</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-col="id" class="atl-table__id">LK-1246924</td>
+                  <td data-col="name" style="font-weight:700;">Judy Abbott</td>
+                  <td><span class="lang-en">Interaction designer</span><span class="lang-zh">交互设计师</span></td>
+                  <td class="atl-muted">Studio</td>
+                  <td data-col="score" data-value="92">
+                    <span class="atl-row"><span class="atl-meter" style="flex:1;"><span class="atl-meter__fill" style="width:92%" data-grow="width"></span></span><span class="atl-mono" style="font-size:12px;">92</span></span>
+                  </td>
+                  <td><span class="atl-chip atl-chip--up"><span class="lang-en">Promoted</span><span class="lang-zh">已晋升</span></span></td>
+                </tr>
+                <tr>
+                  <td data-col="id" class="atl-table__id">LK-1243473</td>
+                  <td data-col="name" style="font-weight:700;">Martin Feeney</td>
+                  <td><span class="lang-en">Reliability engineer</span><span class="lang-zh">稳定性工程师</span></td>
+                  <td class="atl-muted">Platform</td>
+                  <td data-col="score" data-value="78">
+                    <span class="atl-row"><span class="atl-meter" style="flex:1;"><span class="atl-meter__fill" style="width:78%" data-grow="width"></span></span><span class="atl-mono" style="font-size:12px;">78</span></span>
+                  </td>
+                  <td><span class="atl-chip"><span class="lang-en">On track</span><span class="lang-zh">正常</span></span></td>
+                </tr>
+                <tr>
+                  <td data-col="id" class="atl-table__id">LK-4637343</td>
+                  <td data-col="name" style="font-weight:700;">Ellen Streich</td>
+                  <td><span class="lang-en">Mobility supervisor</span><span class="lang-zh">外勤主管</span></td>
+                  <td class="atl-muted">Field</td>
+                  <td data-col="score" data-value="66">
+                    <span class="atl-row"><span class="atl-meter" style="flex:1;"><span class="atl-meter__fill" style="width:66%" data-grow="width"></span></span><span class="atl-mono" style="font-size:12px;">66</span></span>
+                  </td>
+                  <td><span class="atl-chip"><span class="lang-en">On track</span><span class="lang-zh">正常</span></span></td>
+                </tr>
+                <tr>
+                  <td data-col="id" class="atl-table__id">LK-1535524</td>
+                  <td data-col="name" style="font-weight:700;">Ellis Lubowitz</td>
+                  <td><span class="lang-en">Product security engineer</span><span class="lang-zh">产品安全工程师</span></td>
+                  <td class="atl-muted">Platform</td>
+                  <td data-col="score" data-value="41">
+                    <span class="atl-row"><span class="atl-meter" style="flex:1;"><span class="atl-meter__fill" style="width:41%" data-grow="width"></span></span><span class="atl-mono" style="font-size:12px;">41</span></span>
+                  </td>
+                  <td><span class="atl-chip atl-chip--warn"><span class="lang-en">Support plan</span><span class="lang-zh">改进计划</span></span></td>
+                </tr>
+                <tr>
+                  <td data-col="id" class="atl-table__id">LK-1246804</td>
+                  <td data-col="name" style="font-weight:700;">Dara Kovacek</td>
+                  <td><span class="lang-en">Human tactics assistant</span><span class="lang-zh">人力运营助理</span></td>
+                  <td class="atl-muted">People</td>
+                  <td data-col="score" data-value="85">
+                    <span class="atl-row"><span class="atl-meter" style="flex:1;"><span class="atl-meter__fill" style="width:85%" data-grow="width"></span></span><span class="atl-mono" style="font-size:12px;">85</span></span>
+                  </td>
+                  <td><span class="atl-chip atl-chip--up"><span class="lang-en">Promoted</span><span class="lang-zh">已晋升</span></span></td>
+                </tr>
+                <tr>
+                  <td data-col="id" class="atl-table__id">LK-9920184</td>
+                  <td data-col="name" style="font-weight:700;">Toni Bergstrom</td>
+                  <td><span class="lang-en">Payroll specialist</span><span class="lang-zh">薪酬专员</span></td>
+                  <td class="atl-muted">People</td>
+                  <td data-col="score" data-value="34">
+                    <span class="atl-row"><span class="atl-meter" style="flex:1;"><span class="atl-meter__fill" style="width:34%" data-grow="width"></span></span><span class="atl-mono" style="font-size:12px;">34</span></span>
+                  </td>
+                  <td><span class="atl-chip atl-chip--down"><span class="lang-en">At risk</span><span class="lang-zh">高风险</span></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- PANE: directory ---------- -->
+      <section class="atl-pane" data-pane="directory" hidden>
+        <div class="atl-card">
+          <div class="atl-card__head">
+            <h2 class="atl-card__title">
+              <span class="lang-en">Directory</span><span class="lang-zh">员工名册</span>
+            </h2>
+            <div class="atl-row">
+              <span class="atl-select">
+                <span class="lang-en">All teams</span><span class="lang-zh">全部团队</span>
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+              <span class="atl-select">
+                <span class="lang-en">All locations</span><span class="lang-zh">全部地点</span>
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </div>
+          </div>
+          <p class="atl-muted" style="font-size:13px;">
+            <span class="lang-en">240 people across five teams and three offices. This pane exists to prove the rail actually routes — the markup for every pane ships in the page, so a reader with JS off still has all of it.</span>
+            <span class="lang-zh">五个团队、三个办公地点、共 240 人。这个面板的作用是证明侧栏是真能切换的——所有面板的内容都写在页面里，JS 关掉也读得到。</span>
+          </p>
+
+          <div class="atl-grid atl-grid--3" style="margin-top:var(--space-5);">
+            <div class="atl-card atl-card--tight atl-card--solid dir-card">
+              <span class="atl-orb atl-orb--soft atl-orb--sm">PL</span>
+              <span>
+                <span class="atl-rank__name">Platform</span>
+                <span class="atl-rank__meta">68 <span class="lang-en">people · Jakarta</span><span class="lang-zh">人 · 雅加达</span></span>
+              </span>
+            </div>
+            <div class="atl-card atl-card--tight atl-card--solid dir-card">
+              <span class="atl-orb atl-orb--soft atl-orb--sm">ST</span>
+              <span>
+                <span class="atl-rank__name">Studio</span>
+                <span class="atl-rank__meta">41 <span class="lang-en">people · Yogyakarta</span><span class="lang-zh">人 · 日惹</span></span>
+              </span>
+            </div>
+            <div class="atl-card atl-card--tight atl-card--solid dir-card">
+              <span class="atl-orb atl-orb--soft atl-orb--sm">FD</span>
+              <span>
+                <span class="atl-rank__name">Field</span>
+                <span class="atl-rank__meta">94 <span class="lang-en">people · distributed</span><span class="lang-zh">人 · 分布式</span></span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="atl-foot">
+    <span>
+      <span class="lang-en">Canonical page · atelier-design · figures are illustrative</span>
+      <span class="lang-zh">范本页 · atelier-design · 数据为示意</span>
+    </span>
+    <span class="atl-mono">v1 · 2026-08-14</span>
+  </footer>
+</div>
+
+<script src="../../assets/atelier.js"></script>
+
+<!-- design-review:self-diff v1
+Skill: atelier
+Page-type: dashboard
+Created: 2026-08-14
+
+Decisions (7):
+1. [one-sheet-shell] chose "the entire application — rail, top bar, panes — inside ONE .atl-app glass sheet" over "a glass sidebar next to glass cards on the wallpaper". Because: the wallpaper is a room and the app is a window in it; letting cards float directly on the gradient turns a product into a marketing hero, and the reader loses the boundary that tells them where the tool starts.
+2. [glass-is-chrome-opacity-is-data] chose "shell at 0.52 alpha, data cards at 0.80, the table card at 0.94" over "one uniform frost everywhere". Because: numbers read against a moving gradient are numbers you re-read; the chrome may be translucent because it is furniture, but every surface carrying a figure climbs toward opaque.
+3. [gradient-orb-not-line-icon] chose "filled coral→rose orbs behind white glyphs" over "line icons in a hairline circle". Because: this is the signature the aesthetic is actually built on — the designer's own background is gradient iconography, and a hairline circle is the generic-admin-template tell that makes every dashboard look like every other dashboard.
+4. [single-ink-card] chose "exactly one near-black card (the interview queue)" over "a dark card per column". Because: on a page this light the dark card is the anchor the eye lands on first; a second one splits the landing and neither wins. In dark theme it inverts to cream — the move is "one card breaks the value run", not "one card is black".
+5. [markup-is-terminal-state] chose "KPI finals written in markup with data-count-to mirroring them, bar heights in inline style with data-grow" over "JS computing sizes and numbers". Because: the freeze contract makes static markup the canonical render, so gates, no-JS readers and deterministic screenshots all see the true values; the animation is sugar laid over a page that is already correct.
+6. [panes-ship-in-the-page] chose "every rail destination's markup present and toggled with [hidden]" over "fetching or building panes on click". Because: a canonical page must be readable without JS, and a reviewer needs to see what the second pane contains without running anything.
+7. [june-anomaly-annotated] chose "annotate the 31% June bar with the reason (cycle slipped, 34 reviews landed in July)" over "leaving the dip to speak for itself". Because: a console's job is to stop the reader from mis-reading it — an unexplained trough is the single most common source of a wrong meeting.
+
+Known trade-offs:
+- The segmented range control is decorative: switching "Past 3 months" to "Past year" does not rewrite the figures, because a canonical page must never display data it cannot source. Real implementations wire it to a query.
+- Rail destinations other than Dashboard and Directory route back to the overview pane rather than shipping five more panes of invented data.
+- backdrop-filter over a three-stop gradient is the most expensive thing on this page. Section X of atelier.css degrades the shell to an opaque panel where the property is unsupported, but on a low-end GPU the blur still costs; a production build should cut --atl-blur to 20px on scroll.
+- Names and IDs are synthetic. The employee table shows six of 240 rows, which is enough to show sorting and the meter column but not enough to show pagination.
+/design-review:self-diff -->
+
+</body>
+</html>

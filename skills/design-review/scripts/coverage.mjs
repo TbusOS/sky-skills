@@ -44,6 +44,10 @@ const TARGET = {
   glass: ['landing', 'dashboard', 'data-report', 'diagram-gallery'],
   eclat: ['launch', 'pre-order', 'spec'],
   lectern: ['agenda', 'minutes', 'review'],
+  // atelier draws applications, so its matrix is app SCREENS, not marketing
+  // page-types: the console, a search/booking flow, a record, the settings
+  // form nobody designs, and the sign-in nobody skips.
+  atelier: ['dashboard', 'booking', 'detail', 'settings', 'signin'],
 };
 
 function parseArgs(argv) {

@@ -448,7 +448,7 @@
 - **Why**：`layout-overflow`(§1.32)只看几何关系(child 右边界 > parent 右边界)，不区分「内容撑破容器」和「有意的居中突破」。它豁免了 `position: absolute/fixed/sticky` 和会滚动/裁剪的父元素，而标准 full-bleed 用的是 `position:relative` 或负边距，**一个豁免都不沾**。合起来的效果是：容器档 1200 封顶 + full-bleed 被判警告 = 密图只剩「缩小」或「拆开」两条路，而有些图型拆开就丢信息(地址布局拆了没有线性关系、位域拆了看不出位宽比例)。
 - **Defense**：`visual-audit.mjs` 给 `layout-overflow` 加 full-bleed 豁免，四条同时满足才放行：① 是 `<figure>`/`<table>`/`<pre>` ② **在视口里居中**(判几何结果，不挑 CSS 写法 —— 作者至少有四种写法，按属性匹配总会漏掉没列进去的那种) ③ 不越出视口且文档不横滚 ④ 宽 ≤1680 且左右各留 ≥16px。另加 `figure-fullbleed-uncapped`(warn)：图宽 = 视口宽即判定这条 full-bleed 没写上限 —— 审计只跑 1440 和更窄的复查，看不到宽屏，但「没有上限」这个事实在任何视口都测得出来。
 - **Fix playbook**：见 `anthropic-design/references/layout-patterns.md` 的「突破版心怎么写才合法」。注意 `position:relative` 上的 `left:50%` 是相对**自身静态位置**偏移、不是相对父容器左边缘，父容器有内边距时算出来是偏心的(实测偏 40px、右越视口 12px、页面真的在横滚)。
-- **Applies to**：全 7 个设计 skill(检查在 cross-skill 层)。
+- **Applies to**：全 8 个设计 skill(检查在 cross-skill 层)。
 
 ### 1.50 密图标签落在 9–10px：过了 9px 硬底线，却没人提醒
 
@@ -456,7 +456,7 @@
 - **Why**：760 那条是按「塞不塞得下」标的，不是按「读不读得动」标的。760–1200 之间成了真空。
 - **Defense**：`visual-audit.mjs` 新增 **dense-diagram-labels-small**(warn)：`text ≥ 20` 且最小标签渲染 <9.5px 且渲染宽 ≥760(760 以下归 cramped)。阈值是量出来的不是拍的 —— 语料 11 张密图最小标签在 9.955–11.9px 之间(即 diagram-craft 规定的 11px 源 × 0.906 缩放)，**报在那之上等于拿自己的规范判自己违规**，所以设在其下、又高于 9px 硬底线。首跑在 index.html 抓到 2 张(9.12 / 9.24px，而该页自身常规是 9.68)，已提源字号修掉。
 - **Fix playbook**：提源 font-size 到 11，或给图升一档容器(必要时到 full-bleed，见 1.49)。**别靠缩 viewBox 硬塞**。
-- **Applies to**：全 7 个设计 skill。
+- **Applies to**：全 8 个设计 skill。
 
 ### 1.51 `<b>` / `<code>` 写进 `<svg>`：图从那里断掉，后半截漏成正文
 
@@ -482,7 +482,7 @@
   [...document.body.children].filter(e => !['SECTION','NAV','HEADER','FOOTER','SCRIPT','STYLE'].includes(e.tagName))  // 应为空
   ```
 - **回归实测**：一个 14 图的长页,插入两块内容时掉出 `</section>` → 图渲染 881 / 1015px(同页中位数 340)。新规则报 `diagram-oversized`(1015px,3x median)+ 8 处 `content-outside-container`(figure 1440px / p 660px)。移回容器并压紧后为 452 / 546px,两条规则均不再触发。**参考库 50 页全扫 0 误报。**
-- **Applies to**：全 7 个设计 skill。
+- **Applies to**：全 8 个设计 skill。
 
 
 ## 2. anthropic-design
@@ -576,6 +576,45 @@
 - **Reader sees**:按钮看得见点不动。
 - **Why**:光晕层 `position:fixed; inset:0`,忘记 `pointer-events:none` 时整页点击都打在它身上。
 - **Defense**:`.glass-aurora` 在 glass.css 自带 `pointer-events:none`;visual-audit `glass-cta-obstructed`(error)对每个视口内 `.glass-button` 中心点做 `elementFromPoint` 命中检查,任何装饰层(自加的视差层/sheen 层)挡住 CTA 都会被抓。
+
+## 7. atelier-design
+
+> 全部来自 2026-08-14 建 skill 当天的实抓。§7.1–§7.3 是**闸自己的 bug**,不是页面的 bug。
+
+### 7.1 `defined_classes` 丢掉 BEM 元素名 → 每个 `__` 类都误报 undefined
+- **Reader sees**:verify.py 对一个 CSS 里明明定义了的类报 `undefined class 'atl-brand__name'`,一页 31 条假 error,闸完全不可用。
+- **Why**:`verify.py` 的 CSS 侧提取用 `\.(prefix)[a-z0-9-]+`,**字符类里没有下划线**,`.atl-brand__name` 只被学成 `atl-brand`;而 HTML 侧 `used_classes` 按空白切分,拿到的是完整 token。两边不对齐。
+- **Defense**:字符类补 `_`(`[a-z0-9_-]+`)。这条 bug 在 `anthropic.css` 的 `.anth-dialog__actions` 上**潜伏已久**,只是还没有页面用过那个类;atelier 一次用 65 个 BEM 元素类,当场引爆。回归:51 个存量 canonical 修后仍全过。
+
+### 7.2 SEO description 正则被属性里的撇号截断
+- **Reader sees**:180 字的 meta description 被报成 "4 chars",warn 完全是假的。
+- **Why**:捕获组写的是 `content=["\']([^"\']*)["\']` —— 排除了**两种**引号。双引号属性里出现 `Loka's` 时,捕获在撇号处停下,只拿到 `Loka`。任何带英文所有格的 description 都会中。
+- **Defense**:改成反向引用 `content=(["\'])(.*?)\1` + `re.DOTALL`,取 group(2)。
+
+### 7.3 分隔线格子被 hollow-card 检查当成卡片
+- **Reader sees**:每个分段 KPI 条报 3 条 hollow-card warn,报告里全是噪音 —— 这正是"教人跳过报告"的假阳形状。
+- **Why**:`hasBorder` 只要四条边**任意一条**有宽度就算卡片。KPI 行是一个圆角容器内部用 `border-right` 分隔的格子,单边分隔线被当成了卡片轮廓。已有的"≥36px 大数字算数字条"豁免够不着 —— KPI 数字只有 25px,因为一行并排四个。
+- **Defense**:`visual-audit.mjs` 新增 `dividerOnly` 判定 —— 只在行内轴(Left/Right)有边框、且无投影无独立背景时不算卡片。真卡片仍有完整轮廓 / 投影 / 独立底色,照抓不误。
+
+### 7.4 `<span>` 当块用:inline 盒子静默吞掉 width / height / 竖直 margin
+- **Reader sees**:`16:45YIA` 粘成一行;9px 的时间轴圆点渲染成一根 2px 竖条;KPI 标签和数字挤在同一行读成一句话。**三闸全绿**。
+- **Why**:`.atl-rank__name` / `.atl-timeline__dot` / `.atl-result__time` 这些槽位在 canonical 里写成 `<span>`(flex 行里塞 `<div>` 要多一层包装)。inline 盒子对 `width` / `height` / 上下 `margin` **不报错、直接忽略**。
+- **Defense**:atelier.css 里所有块行为的 BEM 元素显式 `display:block`,Section N 上方写了整段说明为什么删一个就坏。**没有机器检查** —— 这条靠看截图,记在 `atelier-design/references/dos-and-donts.md` §11。
+
+### 7.5 暗区域不带 `.atl-inksurface` → `.atl-muted` 在深色上几乎不可见
+- **Reader sees**:登录页暗面板底部那段说明字几乎看不见。**渲染对比度闸没报。**
+- **Why**:手写 `background: var(--atl-ink-card-bg)` 只改了底色,`.atl-muted` 仍解析成**亮色主题的** `--atl-ink-3`(暖炭 46% alpha),压在 `#211C1A` 上对比度极低。
+- **Defense**:atelier.css 提供 `.atl-inksurface`,带齐颜色契约(标题 / muted / 头像描边)。任何不是 `.atl-card--ink` 的暗区域必须带它。
+
+### 7.6 渐变承载文字:白字在珊瑚端只有 2.5:1
+- **Reader sees**:visual-audit 报 `.atl-btn--accent` contrast 1.11:1(取样把渐变读成透明,落到页面底色)。
+- **Why**:取样值虽然不准,**结论是对的** —— 白字压在 `#F5854F` 实测 2.5:1,连大字号 AA(3.0)都不过;压在 `#DD4F92` 是 3.8:1,只够大字号。按钮是小字。
+- **Defense**:`.atl-btn--accent` 改用实心 `--atl-accent-ink`(`#C13877`,白字 5.1:1);暗色主题下 `--atl-accent-ink` 变亮,按钮**文字**翻成 `--atl-ink-inv`。规矩写进 `dos-and-donts.md` §4:**渐变只出现在圆球 / 柱 / 进度条 / 品牌标记,永不承载文字**。
+
+### 7.7 半透明面积填充盖住先绘制的 `<text>`
+- **Reader sees**:折线图上的 "median 71" 标签被 30% alpha 的渐变面积整个盖住(重叠 100%)。
+- **Why**:SVG 按文档顺序绘制。标签写在面积 `<path>` 之前 = 后画的填充压在上面。
+- **Defense**:`svg-shape-over-text` 闸抓到了。规矩:**所有 `<text>` 放在 SVG 的最后绘制**,见 `atelier-design/references/diagram-craft.md` §5。
 
 ## 新 bug 类的处置流程（每次必做）
 

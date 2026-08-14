@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loka — workspace settings</title>
+<meta name="description" content="The settings screen nobody designs: a section rail, inputs on glass, switch rows that state their consequence, and a delete action that is hard to reach.">
+<meta property="og:title" content="Loka — workspace settings">
+<meta property="og:description" content="A section rail, inputs on glass, switch rows that state their consequence, and a destructive action that is hard to reach by design.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/atelier.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  .page-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5);
+  }
+  .head-tools { display: flex; align-items: center; gap: var(--space-3); }
+
+  .switch-row {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-5); align-items: start;
+    padding: var(--space-4) 0; border-bottom: 1px solid var(--atl-line);
+  }
+  .switch-row:last-of-type { border-bottom: 0; }
+  .switch-row__name { display: block; font-size: 14.5px; font-weight: 700; }
+  .switch-row__why { display: block; font-size: 12.5px; color: var(--atl-ink-3); margin-top: 3px; }
+
+  .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4) var(--space-5); }
+  .form-grid--full { grid-column: 1 / -1; }
+
+  .danger {
+    border: 1px solid rgba(198, 69, 63, 0.34);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    background: rgba(198, 69, 63, 0.05);
+  }
+  .save-bar {
+    position: sticky; bottom: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: var(--space-4); flex-wrap: wrap;
+    padding: var(--space-4) var(--space-5);
+    margin: var(--space-5) calc(var(--space-6) * -1) calc(var(--space-6) * -1);
+    border-top: 1px solid var(--atl-line);
+    background: var(--atl-card-2-bg);
+  }
+</style>
+</head>
+<body>
+
+<div class="atl-wall"></div>
+
+<div class="atl-page">
+
+  <div class="page-head">
+    <span class="atl-kicker">
+      <span class="lang-en">atelier-design · canonical · settings</span>
+      <span class="lang-zh">atelier-design · 范本页 · 设置</span>
+    </span>
+    <div class="head-tools">
+      <div class="atl-langtoggle lang-toggle">
+        <button type="button" class="is-active" data-lang-toggle="en">EN</button>
+        <button type="button" data-lang-toggle="zh">中文</button>
+      </div>
+      <button type="button" class="atl-iconbtn" data-theme-toggle aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v2M12 19v2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M3 12h2M19 12h2M5.6 18.4L7 17M17 7l1.4-1.4"/><circle cx="12" cy="12" r="3.6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="atl-app">
+
+    <aside class="atl-rail">
+      <div class="atl-brand">
+        <span class="atl-brand__mark">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M12 3l7.5 4.3v9L12 20.6 4.5 16.3v-9z"/><path d="M12 8.4l3.2 1.8v3.6L12 15.6l-3.2-1.8v-3.6z"/></svg>
+        </span>
+        <span>
+          <span class="atl-brand__name">Loka</span>
+          <span class="atl-brand__sub">
+            <span class="lang-en">Settings</span><span class="lang-zh">设置</span>
+          </span>
+        </span>
+      </div>
+
+      <nav class="atl-navgroup">
+        <span class="atl-navgroup__label">
+          <span class="lang-en">Workspace</span><span class="lang-zh">工作区</span>
+        </span>
+        <button type="button" class="atl-nav is-active" data-route="general" data-route-title="General" aria-current="page">
+          <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 14.5a1.7 1.7 0 00.34 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1.03 1.56V21a2 2 0 11-4 0v-.1A1.7 1.7 0 008 19.3a1.7 1.7 0 00-1.87.34l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.7 1.7 0 003.7 15 1.7 1.7 0 002.1 14H2a2 2 0 110-4h.1A1.7 1.7 0 003.7 9a1.7 1.7 0 00-.34-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06A1.7 1.7 0 008 4.7 1.7 1.7 0 009 3.1V3a2 2 0 114 0v.1a1.7 1.7 0 001.03 1.56A1.7 1.7 0 0015.9 4.4l.06-.06a2 2 0 112.83 2.83l-.06.06A1.7 1.7 0 0018.4 9v0c.2.65.79 1.1 1.5 1.1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1.4z"/></svg>
+          <span class="lang-en">General</span><span class="lang-zh">通用</span>
+        </button>
+        <button type="button" class="atl-nav" data-route="notify" data-route-title="Notifications">
+          <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 9a6 6 0 10-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M13.7 20a2 2 0 01-3.4 0"/></svg>
+          <span class="lang-en">Notifications</span><span class="lang-zh">通知</span>
+        </button>
+        <button type="button" class="atl-nav" data-route="danger" data-route-title="Data &amp; retention">
+          <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
+          <span class="lang-en">Data &amp; retention</span><span class="lang-zh">数据与留存</span>
+        </button>
+      </nav>
+
+      <div class="atl-rail__foot">
+        <div class="atl-userchip">
+          <span class="atl-userchip__avatar">CS</span>
+          <span>
+            Carla Sandoval
+            <span class="atl-brand__sub">
+              <span class="lang-en">Owner</span><span class="lang-zh">所有者</span>
+            </span>
+          </span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="atl-main">
+
+      <div class="atl-topbar">
+        <h1 class="atl-topbar__title" data-route-title-slot>General</h1>
+        <span class="atl-chip atl-chip--warn">
+          <span class="lang-en">3 unsaved changes</span><span class="lang-zh">3 项未保存</span>
+        </span>
+      </div>
+
+      <!-- ---------- General ---------- -->
+      <section class="atl-pane" data-pane="general">
+        <div class="atl-card">
+          <div class="atl-card__head">
+            <h2 class="atl-card__title">
+              <span class="lang-en">Workspace</span><span class="lang-zh">工作区</span>
+            </h2>
+          </div>
+          <div class="form-grid">
+            <label class="atl-field">
+              <span class="atl-field__label"><span class="lang-en">Workspace name</span><span class="lang-zh">工作区名称</span></span>
+              <input class="atl-input" type="text" value="Loka People Ops">
+            </label>
+            <label class="atl-field">
+              <span class="atl-field__label"><span class="lang-en">Workspace URL</span><span class="lang-zh">工作区地址</span></span>
+              <input class="atl-input" type="text" value="loka.example/people">
+            </label>
+            <label class="atl-field">
+              <span class="atl-field__label"><span class="lang-en">Primary contact</span><span class="lang-zh">主要联系人</span></span>
+              <input class="atl-input" type="email" value="carla.sandoval@example.test">
+            </label>
+            <label class="atl-field">
+              <span class="atl-field__label"><span class="lang-en">Payroll close day</span><span class="lang-zh">薪酬封账日</span></span>
+              <input class="atl-input" type="text" value="25">
+            </label>
+            <label class="atl-field form-grid--full">
+              <span class="atl-field__label"><span class="lang-en">What this workspace is for</span><span class="lang-zh">这个工作区用来做什么</span></span>
+              <input class="atl-input" type="text" placeholder="Headcount, reviews and payroll for the Yogyakarta and Jakarta entities">
+            </label>
+          </div>
+        </div>
+
+        <div class="atl-card">
+          <div class="atl-card__head">
+            <h2 class="atl-card__title">
+              <span class="lang-en">Review cycle</span><span class="lang-zh">评估周期</span>
+            </h2>
+            <div class="atl-seg">
+              <button type="button" class="atl-seg__btn" data-seg-group="cadence">
+                <span class="lang-en">Monthly</span><span class="lang-zh">每月</span>
+              </button>
+              <button type="button" class="atl-seg__btn is-active" data-seg-group="cadence">
+                <span class="lang-en">Quarterly</span><span class="lang-zh">每季度</span>
+              </button>
+              <button type="button" class="atl-seg__btn" data-seg-group="cadence">
+                <span class="lang-en">Twice a year</span><span class="lang-zh">每半年</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="switch-row">
+            <span>
+              <span class="switch-row__name">
+                <span class="lang-en">Lock scores at the calibration deadline</span><span class="lang-zh">校准截止后锁定评分</span>
+              </span>
+              <span class="switch-row__why">
+                <span class="lang-en">On: late reviews land in the NEXT cycle. This is what put 34 engineering reviews into July and dropped the June average to 31%.</span>
+                <span class="lang-zh">开启后，迟交的评估会落入下一个周期。研发那 34 份评估就是这样落到 7 月，把 6 月均分压到 31% 的。</span>
+              </span>
+            </span>
+            <button type="button" class="atl-switch is-on" data-switch role="switch" aria-checked="true" aria-label="Lock scores at the calibration deadline"></button>
+          </div>
+
+          <div class="switch-row">
+            <span>
+              <span class="switch-row__name">
+                <span class="lang-en">Let managers see peer scores</span><span class="lang-zh">允许经理查看同级评分</span>
+              </span>
+              <span class="switch-row__why">
+                <span class="lang-en">Off: each manager sees only their own reports. Turning it on makes calibration faster and cross-team comparison possible — and it cannot be reversed for a cycle already closed.</span>
+                <span class="lang-zh">关闭时，每位经理只能看到自己的下属。开启会让校准更快、可跨团队比较——但对已封存的周期不可撤销。</span>
+              </span>
+            </span>
+            <button type="button" class="atl-switch" data-switch role="switch" aria-checked="false" aria-label="Let managers see peer scores"></button>
+          </div>
+
+          <div class="switch-row">
+            <span>
+              <span class="switch-row__name">
+                <span class="lang-en">Require a written note under 60</span><span class="lang-zh">低于 60 分必须写评语</span>
+              </span>
+              <span class="switch-row__why">
+                <span class="lang-en">On: a score below 60 cannot be submitted without at least 200 characters. Two of six low scores last cycle had no note at all.</span>
+                <span class="lang-zh">开启后，低于 60 分不写满 200 字无法提交。上个周期 6 个低分里有 2 个完全没有评语。</span>
+              </span>
+            </span>
+            <button type="button" class="atl-switch is-on" data-switch role="switch" aria-checked="true" aria-label="Require a written note under 60"></button>
+          </div>
+        </div>
+
+        <div class="save-bar">
+          <span class="atl-muted" style="font-size:12.5px;">
+            <span class="lang-en">Changes apply to the cycle starting 1 Oct. The current cycle is already calibrated and will not move.</span>
+            <span class="lang-zh">改动从 10 月 1 日开始的周期生效。当前周期已校准，不会变动。</span>
+          </span>
+          <span class="atl-row">
+            <button type="button" class="atl-btn atl-btn--ghost atl-btn--sm">
+              <span class="lang-en">Discard</span><span class="lang-zh">放弃</span>
+            </button>
+            <button type="button" class="atl-btn atl-btn--sm">
+              <span class="lang-en">Save changes</span><span class="lang-zh">保存</span>
+            </button>
+          </span>
+        </div>
+      </section>
+
+      <!-- ---------- Notifications ---------- -->
+      <section class="atl-pane" data-pane="notify" hidden>
+        <div class="atl-card">
+          <div class="atl-card__head">
+            <h2 class="atl-card__title">
+              <span class="lang-en">What Loka emails you</span><span class="lang-zh">Loka 会给你发什么邮件</span>
+            </h2>
+          </div>
+          <div class="switch-row">
+            <span>
+              <span class="switch-row__name"><span class="lang-en">Review deadline, 3 days out</span><span class="lang-zh">评估截止前 3 天</span></span>
+              <span class="switch-row__why"><span class="lang-en">One digest to every manager with an open review, not one mail per review.</span><span class="lang-zh">给每位有未完成评估的经理发一封汇总，不是每份评估一封。</span></span>
+            </span>
+            <button type="button" class="atl-switch is-on" data-switch role="switch" aria-checked="true" aria-label="Review deadline reminder"></button>
+          </div>
+          <div class="switch-row">
+            <span>
+              <span class="switch-row__name"><span class="lang-en">Someone leaves</span><span class="lang-zh">有人离职</span></span>
+              <span class="switch-row__why"><span class="lang-en">Sent on the last working day, to the manager and to IT — this is the trigger that revokes access.</span><span class="lang-zh">在最后一个工作日发送，抄送经理和 IT——这封信是权限回收的触发点。</span></span>
+            </span>
+            <button type="button" class="atl-switch is-on" data-switch role="switch" aria-checked="true" aria-label="Departure notice"></button>
+          </div>
+          <div class="switch-row">
+            <span>
+              <span class="switch-row__name"><span class="lang-en">Weekly headcount summary</span><span class="lang-zh">每周人数汇总</span></span>
+              <span class="switch-row__why"><span class="lang-en">Monday 08:00 Jakarta time. Off by default because the dashboard already shows it live.</span><span class="lang-zh">雅加达时间周一 8:00。默认关闭，因为控制台已经是实时的。</span></span>
+            </span>
+            <button type="button" class="atl-switch" data-switch role="switch" aria-checked="false" aria-label="Weekly headcount summary"></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- Data & retention ---------- -->
+      <section class="atl-pane" data-pane="danger" hidden>
+        <div class="atl-card">
+          <div class="atl-card__head">
+            <h2 class="atl-card__title">
+              <span class="lang-en">Retention</span><span class="lang-zh">数据留存</span>
+            </h2>
+          </div>
+          <div class="form-grid">
+            <label class="atl-field">
+              <span class="atl-field__label"><span class="lang-en">Keep review records for</span><span class="lang-zh">评估记录保留</span></span>
+              <input class="atl-input" type="text" value="7 years">
+            </label>
+            <label class="atl-field">
+              <span class="atl-field__label"><span class="lang-en">Keep applicant records for</span><span class="lang-zh">应聘记录保留</span></span>
+              <input class="atl-input" type="text" value="18 months">
+            </label>
+          </div>
+          <p class="atl-muted" style="margin:var(--space-4) 0 0; font-size:12.5px;">
+            <span class="lang-en">Seven years is the statutory minimum for employment records in both entities. Shortening it below that is not a setting — it is a legal decision.</span>
+            <span class="lang-zh">两个法人实体的用工记录法定最短保存期都是 7 年。缩到 7 年以下不是一个设置项，是一个法律决定。</span>
+          </p>
+        </div>
+
+        <div class="danger">
+          <h2 class="atl-card__title" style="font-size:16px; color:var(--atl-down);">
+            <span class="lang-en">Delete this workspace</span><span class="lang-zh">删除该工作区</span>
+          </h2>
+          <p style="margin:var(--space-3) 0 var(--space-4); font-size:13.5px; max-width:62ch;">
+            <span class="lang-en">Removes 240 employee records, seven review cycles and all payroll history. Exports stop working immediately; the data is unrecoverable after 30 days. Type the workspace name to enable the button.</span>
+            <span class="lang-zh">将删除 240 条员工记录、七个评估周期和全部薪酬历史。导出会立刻失效；30 天后数据不可恢复。需输入工作区名称才能启用按钮。</span>
+          </p>
+          <div class="atl-row atl-row--wrap">
+            <input class="atl-input" type="text" placeholder="Loka People Ops" style="max-width:280px;">
+            <button type="button" class="atl-btn atl-btn--ghost atl-btn--sm" disabled style="opacity:0.5; cursor:not-allowed; color:var(--atl-down); border-color:rgba(198,69,63,0.4);">
+              <span class="lang-en">Delete workspace</span><span class="lang-zh">删除工作区</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="atl-foot">
+    <span>
+      <span class="lang-en">Canonical page · atelier-design · settings are illustrative</span>
+      <span class="lang-zh">范本页 · atelier-design · 设置项为示意</span>
+    </span>
+    <span class="atl-mono">v1 · 2026-08-14</span>
+  </footer>
+</div>
+
+<script src="../../assets/atelier.js"></script>
+
+<!-- design-review:self-diff v1
+Skill: atelier
+Page-type: settings
+Created: 2026-08-14
+
+Decisions (7):
+1. [every-switch-states-its-consequence] chose "a two-line switch row — name, then what actually happens when it flips" over "a label and a toggle". Because: settings are the screen people change while guessing, and the guess is where the damage happens. The lock-scores switch names the exact incident it caused (34 reviews into July, June at 31%), which no tooltip ever would.
+2. [fields-on-glass-get-an-opaque-well] chose "--atl-field-bg at 0.72 alpha with a real border" over "transparent inputs that inherit the frost". Because: an input has to read as a place where text goes. On a moving gradient a fully transparent field disappears, and the user cannot tell an empty field from a disabled one.
+3. [destructive-action-is-reachable-but-not-easy] chose "a third rail destination, a red-tinted panel, a confirmation field, and a disabled button" over "a red button in the footer of the general tab". Because: the cost of an accidental click here is 240 records; three deliberate acts is the right price. The button is styled as a ghost, not a filled red block — a filled red button is the most clicked thing on any settings page.
+4. [sticky-save-bar] chose "a save bar stuck to the bottom of the pane, stating WHEN changes take effect" over "a save button at the end of the form". Because: on a long form the button scrolls away exactly when the user has finished deciding — and "applies to the cycle starting 1 Oct" is the fact that stops someone expecting the current cycle to move.
+5. [unsaved-count-in-the-chrome] chose "a warn chip reading 3 unsaved changes next to the title" over "a dot on the tab". Because: a number tells the user whether they can leave; a dot only tells them something is different.
+6. [retention-limit-is-explained-not-enforced] chose "stating that 7 years is the statutory minimum" over "hard-coding a floor in the input". Because: the input cannot know which entity the workspace covers, and a silent floor teaches the user the product is broken. Naming the constraint moves the decision to the person who is allowed to make it.
+7. [no-avatar-upload] chose "text fields only" over "a logo dropzone". Because: a canonical page ships no images, and a dropzone with a placeholder rectangle is the single most common way this aesthetic turns into a template.
+
+Known trade-offs:
+- Nothing saves. Inputs hold values, switches flip, the save bar does not persist — the page demonstrates state, not storage.
+- The delete button is permanently disabled: wiring it to the confirmation field would mean shipping a working destructive control in a reference page.
+- The switch is a <button role="switch">, not a checkbox. It animates and screenshots deterministically, and it carries aria-checked, but it will not submit inside a form.
+- The three panes make this the longest canonical in the skill. A reader checking only the default pane sees a third of what is here.
+/design-review:self-diff -->
+
+</body>
+</html>
