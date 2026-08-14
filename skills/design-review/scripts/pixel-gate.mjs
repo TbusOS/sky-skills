@@ -36,7 +36,7 @@
 // Flags:
 //   --baseline        write/overwrite the reference PNG instead of comparing
 //   --theme=<t>       dark | light
-//   --max-diff=<f>    share of pixels allowed to differ (default 0.0002 = 0.02%)
+//   --max-diff=<f>    share of pixels allowed to differ (default 0.0005 = 0.05%)
 //   --threshold=<f>   pixelmatch per-pixel sensitivity 0-1 (default 0.03; see
 //                     the calibration note in parseArgs — 0.06+ is blind)
 //   --full-page       capture the whole scroll height (default: viewport only)
@@ -71,10 +71,14 @@ function parseArgs(argv) {
   // palette change at all, and the old 0.2% budget would have swallowed both
   // probes even if it had. A gate that cannot fail is dead code.
   //
-  // maxDiff 0.0002 (0.02% ≈ 288 px of a 1440×1000 frame) sits ~4.5× under the
-  // smaller probe while leaving room for antialiasing noise; a same-machine
-  // repeat run measures exactly 0 px, so the headroom is all cross-machine.
-  const out = { targets: [], maxDiff: 0.0002, threshold: 0.03 };
+  // maxDiff calibration, updated 2026-08-14 after the glass-v2 recolour: most
+  // pages repeat at exactly 0 px on the same machine, but a page whose 48px
+  // backdrop-filter cuts across a steep wallpaper gradient (atelier's signin,
+  // dark panel edge) shows up to 608 px = 0.042% of run-to-run render noise
+  // with NO change to the page. The real-change floor measured by the probes
+  // is 0.090%. 0.05% sits between the two: above every observed noise level,
+  // 1.8× under the smallest real change we ever measured.
+  const out = { targets: [], maxDiff: 0.0005, threshold: 0.03 };
   for (const a of argv) {
     if (a === '--baseline') out.baseline = true;
     else if (a === '--full-page') out.fullPage = true;
@@ -97,7 +101,7 @@ pixel-gate.mjs — pixel visual regression (pixelmatch)
   node skills/design-review/scripts/pixel-gate.mjs --baseline <html> [...]
   node skills/design-review/scripts/pixel-gate.mjs            <html> [...]
 
-  --theme=dark|light  --max-diff=0.0002  --threshold=0.03
+  --theme=dark|light  --max-diff=0.0005  --threshold=0.03
   --full-page  --out=<dir>  --repo=<path>  --json
 `;
 

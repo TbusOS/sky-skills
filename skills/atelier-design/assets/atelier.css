@@ -58,12 +58,21 @@
 html[data-theme="light"] {
   color-scheme: light;
 
-  /* Wallpaper: three warm stops behind everything. Never a flat color —
-   * the glass has nothing to refract over a flat fill. */
-  --atl-wall-1: #F7D9C4;          /* peach, top-left */
-  --atl-wall-2: #F3C7CE;          /* rose dust, right */
-  --atl-wall-3: #FBF3EA;          /* cream, bottom */
-  --atl-wall-base: #F6E4D6;
+  /* Wallpaper: warm stops behind everything. Never a flat color — the glass
+   * has nothing to refract over a flat fill.
+   *
+   * RECALIBRATED 2026-08-14 against the reference boards, by sampling them:
+   * the reference wallpaper runs S27-40% with a V54→V93 value SPREAD, and the
+   * colour seen THROUGH its glass is #E3C7B1 — still visibly peach. The first
+   * cut of these tokens sat at S≤19 / V96+ with a 1-point spread, so the shell
+   * had nothing to frost and read as matte cream paper. Frosted glass needs
+   * something to frost: glassiness = wallpaper saturation × value spread ×
+   * shell transparency, and all three were weak. */
+  --atl-wall-1: #E8AE86;          /* deep peach, top-left  · S42 V91 */
+  --atl-wall-2: #E39BA8;          /* rose, right           · S31 V89 */
+  --atl-wall-3: #FAEEDD;          /* cream highlight, bottom-centre — keeps the spread */
+  --atl-wall-4: #C98F72;          /* terracotta, low corner · V79 — the dark end */
+  --atl-wall-base: #E9C3A8;
 
   /* The ink ramp is SOLID, not alpha. Alpha muted text is the single most
    * common AA failure in this aesthetic: rgba(44,39,35,0.46) composites to
@@ -77,13 +86,17 @@ html[data-theme="light"] {
   --atl-ink-3: #70665F;           /* 5.4:1 on card · 4.5:1 on wallpaper */
   --atl-ink-inv: #FDF8F4;
 
-  /* The app shell: one sheet of glass */
-  --atl-shell-bg: rgba(255, 253, 251, 0.52);
-  --atl-shell-border: rgba(255, 255, 255, 0.66);
-  --atl-shell-shadow: 0 32px 70px -24px rgba(96, 52, 40, 0.34);
+  /* The app shell: one sheet of glass. 0.42 against the recalibrated
+   * wallpaper lets the peach/rose actually show through the frost — at the
+   * old 0.52 over a near-white wallpaper the shell read as solid paper. */
+  --atl-shell-bg: rgba(255, 253, 251, 0.42);
+  --atl-shell-border: rgba(255, 255, 255, 0.75);
+  --atl-shell-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --atl-shell-shadow: 0 40px 80px -28px rgba(96, 52, 40, 0.45);
 
-  /* Rail (sidebar) sits slightly lighter than the shell body */
-  --atl-rail-bg: rgba(255, 252, 249, 0.40);
+  /* Rail (sidebar): MORE transparent than the shell body — navigation is
+   * furniture and can afford the deepest frost on the page. */
+  --atl-rail-bg: rgba(255, 252, 249, 0.28);
   --atl-rail-active-bg: rgba(255, 255, 255, 0.92);
   --atl-rail-active-shadow: 0 6px 16px -6px rgba(96, 52, 40, 0.28);
 
@@ -108,6 +121,12 @@ html[data-theme="light"] {
    * but only reaches 4.29 on its OWN 12% chip, which is where it is used most.
    * #B83370 clears both (5.44 card / 4.70 chip) and still takes white at 5.61. */
   --atl-accent-ink: #B83370;
+  /* Text sitting DIRECTLY on the (recalibrated, saturated) wallpaper — the
+   * page-head kicker — needs a deeper rose: #B83370 reads 3.43 there. axe
+   * cannot police this ground (gradient backgrounds come back "incomplete",
+   * not "violation" — the footer only got flagged because the page bottom is
+   * flat base colour), so this is a manual red line, not a gate-enforced one. */
+  --atl-accent-ink-deep: #8E2756; /* 4.98 on the wallpaper base */
   --atl-accent-soft: rgba(221, 79, 146, 0.12);
 
   /* Verdict colours are TEXT on a 12% tint of themselves — the hardest ground
@@ -117,7 +136,7 @@ html[data-theme="light"] {
   --atl-down: #B5342E;            /* 5.83 card · 4.85 chip */
   --atl-warn: #8E5A0F;            /* 5.63 card · 4.78 chip */
   --atl-code-bg: rgba(88, 62, 50, 0.07);
-  --atl-blur: 40px;
+  --atl-blur: 48px;
 }
 
 /* Dark theme — the warm-night variant. Espresso, not navy: the wallpaper
@@ -125,19 +144,21 @@ html[data-theme="light"] {
 html[data-theme="dark"] {
   color-scheme: dark;
 
-  --atl-wall-1: #3A211C;
-  --atl-wall-2: #46212F;
-  --atl-wall-3: #221715;
-  --atl-wall-base: #241a17;
+  --atl-wall-1: #4A2A20;
+  --atl-wall-2: #57293A;
+  --atl-wall-3: #2A1B17;
+  --atl-wall-4: #6B3A2A;          /* ember glow, low corner — the BRIGHT end in dark */
+  --atl-wall-base: #2A1D18;
 
   --atl-ink: #F8EFE9;
   --atl-ink-2: #CFC1B8;           /* 6.4:1 on card · 8.0:1 on shell */
   --atl-ink-3: #BCACA3;           /* 5.1:1 on card · 6.4:1 on shell */
   --atl-ink-inv: #241A17;
 
-  --atl-shell-bg: rgba(58, 39, 34, 0.46);
-  --atl-shell-border: rgba(255, 224, 208, 0.16);
-  --atl-shell-shadow: 0 32px 70px -24px rgba(0, 0, 0, 0.62);
+  --atl-shell-bg: rgba(48, 32, 28, 0.40);
+  --atl-shell-border: rgba(255, 224, 208, 0.20);
+  --atl-shell-highlight: inset 0 1px 0 rgba(255, 236, 224, 0.22);
+  --atl-shell-shadow: 0 40px 80px -28px rgba(0, 0, 0, 0.66);
 
   --atl-rail-bg: rgba(42, 28, 25, 0.34);
   --atl-rail-active-bg: rgba(255, 236, 224, 0.14);
@@ -161,6 +182,7 @@ html[data-theme="dark"] {
   --atl-field-border: rgba(255, 224, 208, 0.18);
 
   --atl-accent-ink: #F58FB6;      /* rose lightens for AA on espresso */
+  --atl-accent-ink-deep: #F7A6C4; /* on the dark wallpaper the DEEP variant is the lighter one */
   --atl-accent-soft: rgba(221, 79, 146, 0.22);
 
   --atl-up: #4FD69C;
@@ -230,10 +252,15 @@ code, kbd, samp {
   position: fixed;
   inset: 0;
   z-index: -1;
+  /* Four stops. The terracotta (wall-4) is the DARK end of the value spread
+   * and lives at the lower-right edge, mostly outside the shell's footprint —
+   * it gives the frost something dark to diffuse without parking a dark
+   * ground under body text. */
   background:
-    radial-gradient(58% 52% at 8% 4%, var(--atl-wall-1) 0%, transparent 62%),
-    radial-gradient(52% 58% at 96% 26%, var(--atl-wall-2) 0%, transparent 60%),
-    radial-gradient(70% 60% at 50% 108%, var(--atl-wall-3) 0%, transparent 64%),
+    radial-gradient(58% 52% at 6% 2%, var(--atl-wall-1) 0%, transparent 64%),
+    radial-gradient(54% 60% at 98% 22%, var(--atl-wall-2) 0%, transparent 62%),
+    radial-gradient(60% 46% at 46% 104%, var(--atl-wall-3) 0%, transparent 60%),
+    radial-gradient(44% 44% at 106% 96%, var(--atl-wall-4) 0%, transparent 66%),
     var(--atl-wall-base);
 }
 
@@ -268,9 +295,9 @@ html[data-theme="dark"] .atl-wall::after { opacity: 0.16; }
   border-radius: var(--radius-lg);
   border: 1px solid var(--atl-shell-border);
   background: var(--atl-shell-bg);
-  -webkit-backdrop-filter: blur(var(--atl-blur)) saturate(168%);
-  backdrop-filter: blur(var(--atl-blur)) saturate(168%);
-  box-shadow: var(--atl-shell-shadow);
+  -webkit-backdrop-filter: blur(var(--atl-blur)) saturate(180%);
+  backdrop-filter: blur(var(--atl-blur)) saturate(180%);
+  box-shadow: var(--atl-shell-shadow), var(--atl-shell-highlight);
   overflow: hidden;
 }
 .atl-app--rail-wide { grid-template-columns: 288px minmax(0, 1fr); }
@@ -323,7 +350,9 @@ html[data-theme="dark"] .atl-wall::after { opacity: 0.16; }
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--atl-ink-3);
+  /* ink-2, not ink-3: this sits on the rail frost (0.28 over deep peach),
+   * where ink-3 reads 3.4. ink-3 is a CARD-ONLY colour — see design-tokens. */
+  color: var(--atl-ink-2);
 }
 
 .atl-navgroup { display: flex; flex-direction: column; gap: 2px; }
@@ -332,7 +361,7 @@ html[data-theme="dark"] .atl-wall::after { opacity: 0.16; }
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--atl-ink-3);
+  color: var(--atl-ink-2);   /* on the rail frost — ink-3 is card-only */
   padding: 0 var(--space-3) var(--space-2);
 }
 
@@ -686,7 +715,7 @@ html[data-theme="dark"] .atl-wall::after { opacity: 0.16; }
   position: relative;
   font-weight: 800;
   font-size: 17px;
-  color: var(--atl-accent-ink);
+  color: var(--atl-accent-ink-deep);  /* the track composites darker over the saturated wallpaper */
   font-variant-numeric: tabular-nums;
 }
 
@@ -999,7 +1028,7 @@ html[data-theme="dark"] .atl-btn--accent { color: var(--atl-ink-inv); }
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--atl-accent-ink);
+  color: var(--atl-accent-ink-deep);   /* kickers live on bare wallpaper */
 }
 .atl-muted { color: var(--atl-ink-3); }
 .atl-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
@@ -1152,7 +1181,7 @@ html[data-motion="off"] * {
   gap: var(--space-4);
   flex-wrap: wrap;
   font-size: 12.5px;
-  color: var(--atl-ink-3);
+  color: var(--atl-ink-2);   /* the footer sits on bare wallpaper — ink-3 reads 3.4 there */
 }
 
 /* ---------- Section X: Responsive ---------- */
