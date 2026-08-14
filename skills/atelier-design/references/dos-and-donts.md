@@ -34,7 +34,7 @@
 实测:白字压在珊瑚端 `#F5854F` 是 **2.5:1**,连大字号 AA(3.0)都不过;
 压在玫红端 `#DD4F92` 是 3.8:1,只够大字号。按钮是小字,所以:
 
-- 实心强调按钮 → `--atl-accent-ink`(`#C13877`,白字 **5.1:1**)
+- 实心强调按钮 → `--atl-accent-ink`(`#B83370`,白字 **5.6:1**)
 - 主按钮 → 默认 `.atl-btn`,近黑底(参考原作的 "Select Flight" 就是近黑的)
 - 渐变只出现在:圆球、柱填充、进度条填充、品牌标记、滑块填充
 
@@ -85,6 +85,14 @@
 - 冻结契约:`?freeze=1` 或 `data-motion="off"` 时,所有动画第一帧就到终态,
   而终态永远是 markup 里已经写好的东西。
 
+## §10.5 颜色一律按"最难的底"取值
+
+判断色(`--atl-up` / `--down` / `--warn`)最常出现在**自己的 12% 淡底 chip 上**,
+那比卡面更难。旧值 `#1F8A5B` 在卡上 4.20、在自己 chip 上只有 **3.61**。
+取值时永远按最难的那个底算,不是按白底算。
+
+墨色同理:页面级文字(页脚、kicker)落在**壁纸**上,比卡面难。
+
 ## §11 最容易犯的三个错
 
 1. **把 `<span>` 当块用。** `.atl-rank__name`、`.atl-timeline__dot` 这些槽位在 canonical
@@ -94,3 +102,13 @@
 2. **暗区域忘了 `.atl-inksurface`。** 手写 `background: var(--atl-ink-card-bg)`,
    `.atl-muted` 会继续用亮色主题的灰,在深色上几乎不可见。渲染对比度闸抓不到。
 3. **两张暗卡。** 见 `atelier-material.md` §6。
+
+## §12 交付前四闸
+
+```bash
+bin/design-review --skill=atelier <页面>.html          # 结构 + 渲染 + 可达性 + 截图
+bin/design-review --skill=atelier --pixel <页面>.html  # 再加像素回归(需已有基线)
+```
+
+第三闸是 **axe-core**。atelier 的 5 个 canonical + 2 个 demo 页目前 **7/7 零 violation**,
+这是这个 skill 的验收线 —— 新页面掉出这条线就是退步,不是"axe 太严"。

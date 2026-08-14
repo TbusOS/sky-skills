@@ -47,6 +47,10 @@ Checks:
   9. SEO meta on public pages (warn-only): non-empty <title>, meta
      description 50-160 chars, og:title + og:description present
      (viewport is already a hard check in 2)
+ 10. Hardcoded colour that already has a token (warn-only): a hex written in
+     an attribute or <style> block that exactly equals a value the skill's CSS
+     defines as a custom property. Text nodes are never scanned — a palette
+     page printing "#DD4F92" as copy is documenting, not styling.
 """
 from __future__ import annotations
 import os
@@ -324,18 +328,21 @@ def check_file(
     # 4. class usage — union classes from default CSS + HTML-linked CSS + --css=
     defined: set[str] = set()
     css_files_used: list[str] = []
+    css_parts: list[str] = []          # raw text, for the colour-token map (check 10)
 
     if os.path.exists(default_css):
-        defined |= defined_classes(open(default_css, encoding="utf-8").read(), prefix)
+        _t = open(default_css, encoding="utf-8").read()
+        defined |= defined_classes(_t, prefix)
+        css_parts.append(_t)
         css_files_used.append(default_css)
 
     for linked in linked_stylesheets(html, path):
         if linked in css_files_used:
             continue
         try:
-            defined |= defined_classes(
-                open(linked, encoding="utf-8").read(), prefix
-            )
+            _t = open(linked, encoding="utf-8").read()
+            defined |= defined_classes(_t, prefix)
+            css_parts.append(_t)
             css_files_used.append(linked)
         except (OSError, UnicodeDecodeError):
             pass
@@ -346,7 +353,9 @@ def check_file(
             continue
         if extra in css_files_used:
             continue
-        defined |= defined_classes(open(extra, encoding="utf-8").read(), prefix)
+        _t = open(extra, encoding="utf-8").read()
+        defined |= defined_classes(_t, prefix)
+        css_parts.append(_t)
         css_files_used.append(extra)
 
     if not css_files_used:
@@ -591,7 +600,73 @@ def check_file(
                 f"{path}: SEO — missing Open Graph tags: {', '.join(og_missing)}"
             )
 
+    # 10. Hardcoded colour that ALREADY HAS A TOKEN (warn-only).
+    #
+    # Every design skill states "pages reference semantic tokens, zero hardcoded
+    # hex". Until now that rule had no check at all, and a measurement on
+    # 2026-08-14 found 3,642 raw hex values across the 55 canonical pages — the
+    # rule had been pure prose for the life of the repo.
+    #
+    # Flagging all 3,642 would be useless. Most are one-off illustration colours
+    # that legitimately have no token, and a warning that fires 931 times on one
+    # skill is the shape that teaches people to skip the report (known-bugs
+    # §7.3, same lesson).
+    #
+    # So this only flags a hex that EXACTLY equals a value the skill's own CSS
+    # already defines as a custom property. Those are never judgement calls:
+    # the author wrote #DD4F92 where --atl-rose is defined as exactly #DD4F92,
+    # so the page silently opts out of theming — in a dual-theme skill that
+    # literal survives the theme switch and the element stops responding.
+    # Signal is high, noise is zero, and the fix is mechanical.
+    token_values = colour_tokens("\n".join(css_parts))
+    if token_values:
+        # Scan only where a colour is APPLIED — attribute values and <style>
+        # blocks — never text nodes. A palette page that prints "#DD4F92 rose ·
+        # identity" as visible copy is documenting the colour, not styling with
+        # it, and flagging that is the false positive this check exists to
+        # avoid. Comments are dropped for the same reason.
+        no_comments = re.sub(r"<!--.*?-->", "", html, flags=re.DOTALL)
+        applied = "\n".join(
+            [m.group(1) for m in re.finditer(r'="([^"]*)"', no_comments)]
+            + re.findall(r"<style[^>]*>(.*?)</style>", no_comments, re.DOTALL | re.I)
+        )
+        seen: dict[str, set[str]] = {}
+        for m in re.finditer(r"#([0-9a-fA-F]{6})\b", applied):
+            key = "#" + m.group(1).upper()
+            if key in token_values:
+                seen.setdefault(key, set()).update(token_values[key])
+        if seen:
+            parts = [
+                f"{hexv} → var({'/'.join(sorted(names))})"
+                for hexv, names in sorted(seen.items())
+            ]
+            warnings.append(
+                f"{path}: {len(seen)} hardcoded colour(s) that already have a "
+                f"token: {', '.join(parts)} — a literal does not follow the "
+                f"theme switch"
+            )
+
     return errors, warnings
+
+
+def colour_tokens(css_text: str) -> dict[str, set[str]]:
+    """Map an uppercase #RRGGBB value to the custom properties defining it.
+
+    Only 6-digit hex is collected. rgba()/hsl() token values are deliberately
+    ignored: a page writing `rgba(221,79,146,0.12)` is usually building a tint
+    the token set does not provide, which is a legitimate thing to do inline.
+    """
+    out: dict[str, set[str]] = {}
+    for m in re.finditer(
+        r"(--[a-z0-9-]+)\s*:\s*#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})\s*[;}]",
+        css_text,
+        re.I,
+    ):
+        name, raw = m.group(1), m.group(2)
+        if len(raw) == 3:
+            raw = "".join(c * 2 for c in raw)
+        out.setdefault("#" + raw.upper(), set()).add(name)
+    return out
 
 
 def parse_args(

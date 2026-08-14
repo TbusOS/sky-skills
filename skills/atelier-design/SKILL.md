@@ -53,18 +53,24 @@ atelier 风格 / 仪表盘 / dashboard / 控制台 / 后台 / admin panel / SaaS
 ## §5 发布前检查(MUST)
 
 ```bash
-bin/design-review --skill=atelier <你的页面>.html
+bin/design-review --skill=atelier <你的页面>.html            # 四闸
+bin/design-review --skill=atelier --pixel <你的页面>.html    # 再加像素回归
 ```
 
-三闸必须全绿:`verify.py`(结构)· `visual-audit.mjs`(渲染 + 品牌 + 串味)· 截图。
+四闸必须全绿:`verify.py`(结构)· `visual-audit.mjs`(渲染 + 品牌 + 串味)·
+`axe-audit.mjs`(**可达性 · axe-core**)· 截图。
+可选第五闸 `pixel-gate.mjs` 比对已提交的像素基线 —— 它是唯一能抓住"没有任何规则描述过"
+的改动的闸(卡片位移、颜色漂移、字体回落)。
 **截图必须人眼看过**——本 skill 建成当天,机器闸放过了三个只有人眼能发现的问题:
 KPI 标签和数字挤成一行、时间轴圆点被压成竖条、暗面板上的 `.atl-muted` 几乎不可见。
-三闸是必要条件,不是充分条件。
+**闸是必要条件,不是充分条件。**
+
+atelier 目前 **7/7 页 axe 零 violation**(5 canonical + 2 demo),这是验收线。
 
 ## §6 三条不可让步的规矩
 
 1. **渐变永远不承载文字。** 白字压在珊瑚端 `#F5854F` 上只有 **2.5:1**,压在玫红端只有 3.8:1。
-   实心按钮用 `--atl-accent-ink`(`#C13877`,白字 5.1:1)或默认的近黑 `.atl-btn`。
+   实心按钮用 `--atl-accent-ink`(`#B83370`,白字 5.6:1)或默认的近黑 `.atl-btn`。
    渐变只出现在:圆球、柱子、进度条、品牌标记。
 2. **玻璃是外壳,不透明度是数据。** 外壳 0.52 → 数据卡 0.80 → 表格卡 0.94。
    任何承载数字的表面都往不透明走。数字压在会动的渐变上,读者要读两遍。

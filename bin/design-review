@@ -5,7 +5,12 @@
 #   [1/4] verify.py         — structural (placeholders, DOCTYPE, BEM, …)
 #   [2/4] visual-audit.mjs  — rendered (contrast, brand-presence, italic,
 #                             cross-skill-smell, …) — Playwright + pngjs
-#   [3/4] screenshot.mjs    — full-page PNG for human review
+#   [3/5] axe-audit.mjs     — accessibility conformance (axe-core); 3 rules
+#                             blocking, color-contrast reported only
+#   [4/5] screenshot.mjs    — full-page PNG for human review
+#   [5/5] pixel-gate.mjs (opt-in, --pixel) — rendered pixels vs a committed
+#                             baseline; the only gate that fails on something
+#                             no rule describes
 #   [4/4] critic.mjs (opt)  — LLM taste judge; prepares prompt for
 #                             a Claude (or other LLM) call
 #
@@ -36,7 +41,13 @@
 #                      skip the bilingual-page rule for internal monolingual docs.
 #                      Gates 2/3/4 unchanged — glass still auto-runs both themes.
 #   --out=<dir>        Where to save screenshots (default: <repo>/shots/).
-#   --critic           Also run the LLM critic (gate 4). Writes the critic prompt
+#   --pixel            Also run the pixel-regression gate against the committed
+#                      baseline in skills/design-review/baselines/.
+#   --pixel-baseline   Record/overwrite that baseline instead of comparing.
+#                      Do this deliberately — it is how an intended visual
+#                      change gets accepted.
+#   --no-axe           Skip the accessibility gate (gate 3).
+#   --critic           Also run the LLM critic. Writes the critic prompt
 #                      to <out>/critic-<basename>-<timestamp>.md. You then feed
 #                      that to Claude / any LLM, or in Claude Code invoke the
 #                      `design-critic` subagent with the target path.
@@ -200,6 +211,9 @@ for arg in "$@"; do
     --strict)  STRICT=1 ;;
     --out=*)   OUT_DIR="${arg#--out=}" ;;
     --critic)       CRITIC=1 ;;
+    --pixel)          PIXEL_GATE=1 ;;
+    --pixel-baseline) PIXEL_GATE=1; PIXEL_BASELINE=1 ;;
+    --no-axe)         NO_AXE=1 ;;
     --multi-critic) MULTI_CRITIC=1 ;;
     --learn)        LEARN=1 ;;
     --plan)    PLAN=1 ;;
@@ -296,6 +310,8 @@ mkdir -p "$OUT_DIR"
 VERIFY="$SKY_ROOT/skills/design-review/scripts/verify.py"
 VISUAL="$SKY_ROOT/skills/design-review/scripts/visual-audit.mjs"
 SCREEN="$SKY_ROOT/skills/design-review/scripts/screenshot.mjs"
+AXE="$SKY_ROOT/skills/design-review/scripts/axe-audit.mjs"
+PIXEL="$SKY_ROOT/skills/design-review/scripts/pixel-gate.mjs"
 CRITIC_SCRIPT="$SKY_ROOT/skills/design-review/scripts/critic.mjs"
 MULTI_CRITIC_SCRIPT="$SKY_ROOT/skills/design-review/scripts/multi-critic.mjs"
 LEARN_SCRIPT="$SKY_ROOT/skills/design-review/scripts/learning-loop.mjs"
@@ -303,9 +319,14 @@ LEARN_SCRIPT="$SKY_ROOT/skills/design-review/scripts/learning-loop.mjs"
 SKILL_FLAG=()
 [ -n "$SKILL" ] && SKILL_FLAG=("--skill=$SKILL")
 
-TOTAL_GATES=3
-[ -n "$CRITIC" ] && TOTAL_GATES=4
-[ -n "$MULTI_CRITIC" ] && TOTAL_GATES=4
+PIXEL_GATE="${PIXEL_GATE:-}"
+PIXEL_BASELINE="${PIXEL_BASELINE:-}"
+NO_AXE="${NO_AXE:-}"
+
+TOTAL_GATES=4
+[ -n "$PIXEL_GATE" ] && TOTAL_GATES=$((TOTAL_GATES + 1))
+[ -n "$CRITIC" ] && TOTAL_GATES=$((TOTAL_GATES + 1))
+[ -n "$MULTI_CRITIC" ] && TOTAL_GATES=$((TOTAL_GATES + 1))
 
 CRITIC_MODE="no"
 [ -n "$CRITIC" ] && CRITIC_MODE="solo"
@@ -363,7 +384,41 @@ if [ "$exit_visual" -ne 0 ]; then
   exit 1
 fi
 
-# ---------- Gate 3 · screenshot ----------
+# ---------- Gate 3 · axe-core accessibility conformance ----------
+# Runs by default. Three rules are BLOCKING (link-name, aria-prohibited-attr,
+# svg-img-alt) — the whole corpus was measured clean on them before promotion,
+# so this gate can never fail on inherited debt. color-contrast is reported and
+# not enforced: it is one systemic palette decision across four skills, not a
+# scatter of mistakes, and blocking it would stop every commit on a migration
+# nobody has agreed to. See axe-audit.mjs for the measurement.
+exit_axe=0
+if [ -n "$NO_AXE" ]; then
+  echo ""
+  echo "━━ [3/$TOTAL_GATES] axe-audit.mjs — SKIPPED (--no-axe)"
+fi
+for theme in "${THEMES[@]}"; do
+  [ -n "$NO_AXE" ] && break
+  AXE_FLAGS=("--strict")
+  axe_label=""
+  if [ "$theme" != "default" ]; then
+    AXE_FLAGS+=("--theme=$theme")
+    axe_label="  [theme=$theme]"
+  fi
+  for html in "${HTMLS[@]}"; do
+    echo ""
+    echo "━━ [3/$TOTAL_GATES] axe-audit.mjs (accessibility · axe-core)  $html$axe_label"
+    if ! ( cd "$REPO" && node "$AXE" "${AXE_FLAGS[@]}" "$html" ); then
+      exit_axe=1
+    fi
+  done
+done
+if [ "$exit_axe" -ne 0 ]; then
+  echo ""
+  echo "✗ axe-audit found blocking violations — fix before continuing" >&2
+  exit 1
+fi
+
+# ---------- Gate 4 · screenshot ----------
 for theme in "${THEMES[@]}"; do
   SCREEN_FLAGS=()
   suffix=""
@@ -375,10 +430,41 @@ for theme in "${THEMES[@]}"; do
     base="$(basename "$html" .html)"
     out="$OUT_DIR/${base}${suffix}-$(date +%Y%m%d-%H%M%S).png"
     echo ""
-    echo "━━ [3/$TOTAL_GATES] screenshot.mjs    $html  →  $out"
+    echo "━━ [4/$TOTAL_GATES] screenshot.mjs    $html  →  $out"
     ( cd "$REPO" && node "$SCREEN" "${SCREEN_FLAGS[@]}" "$html" "$out" )
   done
 done
+
+# ---------- Gate 5 · pixel regression (opt-in) ----------
+# Opt-in because it needs a committed baseline per page+theme. It is the only
+# gate that can fail on something no rule describes — a card shifting, a colour
+# drifting, a web font falling back — because it compares rendered pixels, not
+# findings. --pixel-baseline records; --pixel compares.
+if [ -n "$PIXEL_GATE" ]; then
+  exit_pixel=0
+  for theme in "${THEMES[@]}"; do
+    PIXEL_FLAGS=()
+    pixel_label=""
+    [ -n "$PIXEL_BASELINE" ] && PIXEL_FLAGS+=("--baseline")
+    if [ "$theme" != "default" ]; then
+      PIXEL_FLAGS+=("--theme=$theme")
+      pixel_label="  [theme=$theme]"
+    fi
+    for html in "${HTMLS[@]}"; do
+      echo ""
+      echo "━━ [5/$TOTAL_GATES] pixel-gate.mjs (visual regression)  $html$pixel_label"
+      if ! ( cd "$REPO" && node "$PIXEL" "${PIXEL_FLAGS[@]}" --out="$OUT_DIR" "$html" ); then
+        exit_pixel=1
+      fi
+    done
+  done
+  if [ "$exit_pixel" -ne 0 ]; then
+    echo ""
+    echo "✗ pixel-gate found visual regressions — inspect the diff PNGs, then" >&2
+    echo "  re-baseline with --pixel-baseline only if the change is intended" >&2
+    exit 1
+  fi
+fi
 
 # ---------- Gate 4 · design-critic (solo OR 4 specialists) ----------
 if [ -n "$CRITIC" ]; then
@@ -437,7 +523,9 @@ echo ""
 echo "┌─ Summary"
 echo "│  ✓ verify.py       (structural)"
 echo "│  ✓ visual-audit    (rendered + brand + italic + smell)"
+echo "│  ✓ axe-audit       (accessibility · axe-core)"
 echo "│  ✓ screenshot      (in $OUT_DIR)"
+[ -n "$PIXEL_GATE" ] && echo "│  ✓ pixel-gate      (visual regression vs baseline)"
 [ -n "$CRITIC" ] && echo "│  ✓ critic prompt   (solo — feed to LLM)"
 [ -n "$MULTI_CRITIC" ] && echo "│  ✓ multi-critic    (4 specialists + aggregator prompts)"
 [ -n "$LEARN" ] && echo "│  ✓ learning-loop   (proposal prompt for known-bugs / check / dos-and-donts)"

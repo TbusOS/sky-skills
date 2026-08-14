@@ -65,9 +65,16 @@ html[data-theme="light"] {
   --atl-wall-3: #FBF3EA;          /* cream, bottom */
   --atl-wall-base: #F6E4D6;
 
-  --atl-ink: #2C2723;             /* warm charcoal — never pure black */
-  --atl-ink-2: rgba(44, 39, 35, 0.68);
-  --atl-ink-3: rgba(44, 39, 35, 0.46);
+  /* The ink ramp is SOLID, not alpha. Alpha muted text is the single most
+   * common AA failure in this aesthetic: rgba(44,39,35,0.46) composites to
+   * #9d9996 on a card and measures 2.74:1 — axe-core flagged 21 elements on
+   * the dashboard canonical alone, and our own contrast check never saw it
+   * because it never composited the layer. Solid values are measurable at
+   * author time; every one below clears 4.5:1 on the HARDEST ground it can
+   * land on (the wallpaper for page-level text, a 12% tint chip for chips). */
+  --atl-ink: #2C2723;             /* warm charcoal — never pure black · 14.3:1 */
+  --atl-ink-2: #5C534D;           /* 7.3:1 on card · 6.1:1 on wallpaper */
+  --atl-ink-3: #70665F;           /* 5.4:1 on card · 4.5:1 on wallpaper */
   --atl-ink-inv: #FDF8F4;
 
   /* The app shell: one sheet of glass */
@@ -97,12 +104,18 @@ html[data-theme="light"] {
   --atl-field-bg: rgba(255, 255, 255, 0.72);
   --atl-field-border: rgba(88, 62, 50, 0.16);
 
-  --atl-accent-ink: #C13877;      /* rose as TEXT — #DD4F92 on white is 3.4:1 */
+  /* Rose as TEXT. #DD4F92 on white is 3.4:1; #C13877 clears on a card (4.97)
+   * but only reaches 4.29 on its OWN 12% chip, which is where it is used most.
+   * #B83370 clears both (5.44 card / 4.70 chip) and still takes white at 5.61. */
+  --atl-accent-ink: #B83370;
   --atl-accent-soft: rgba(221, 79, 146, 0.12);
 
-  --atl-up: #1F8A5B;
-  --atl-down: #C6453F;
-  --atl-warn: #B4761A;
+  /* Verdict colours are TEXT on a 12% tint of themselves — the hardest ground
+   * they see. Each value below is chosen to clear 4.5:1 on that chip, not just
+   * on the card: the previous #1F8A5B measured 3.61 on its own chip. */
+  --atl-up: #127046;              /* 5.94 card · 4.99 chip */
+  --atl-down: #B5342E;            /* 5.83 card · 4.85 chip */
+  --atl-warn: #8E5A0F;            /* 5.63 card · 4.78 chip */
   --atl-code-bg: rgba(88, 62, 50, 0.07);
   --atl-blur: 40px;
 }
@@ -118,8 +131,8 @@ html[data-theme="dark"] {
   --atl-wall-base: #241a17;
 
   --atl-ink: #F8EFE9;
-  --atl-ink-2: rgba(248, 239, 233, 0.70);
-  --atl-ink-3: rgba(248, 239, 233, 0.48);
+  --atl-ink-2: #CFC1B8;           /* 6.4:1 on card · 8.0:1 on shell */
+  --atl-ink-3: #BCACA3;           /* 5.1:1 on card · 6.4:1 on shell */
   --atl-ink-inv: #241A17;
 
   --atl-shell-bg: rgba(58, 39, 34, 0.46);
@@ -186,12 +199,22 @@ h1, h2, h3, h4 {
 p { margin: 0 0 var(--space-4); }
 a { color: var(--atl-accent-ink); }
 
+/* Inline code is CONTENT, so it takes its own ink rather than inheriting the
+ * muted colour it happens to sit inside. A <code> in a caption inheriting
+ * --atl-ink-3 sits on the code tint, which darkens the ground just enough to
+ * land at 4.48:1 — axe caught exactly that, twice, on the demo page. */
 code, kbd, samp {
   font-family: var(--font-mono);
   font-size: 0.88em;
+  color: var(--atl-ink-2);
   background: var(--atl-code-bg);
   padding: 0.12em 0.4em;
   border-radius: var(--radius-xs);
+}
+.atl-card--ink code, .atl-card--ink kbd, .atl-card--ink samp,
+.atl-inksurface code, .atl-inksurface kbd, .atl-inksurface samp {
+  color: var(--atl-ink-card-ink);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 :focus-visible {
@@ -797,7 +820,7 @@ html[data-theme="dark"] .atl-wall::after { opacity: 0.16; }
 .atl-btn--accent {
   background: var(--atl-accent-ink);
   color: #FFF;
-  box-shadow: 0 10px 22px -10px rgba(193, 56, 119, 0.55);
+  box-shadow: 0 10px 22px -10px rgba(184, 51, 112, 0.55);
 }
 /* In dark theme --atl-accent-ink lightens for AA on espresso, so the fill
  * would strand white text. Flip the ink instead of the fill. */
@@ -967,9 +990,9 @@ html[data-theme="dark"] .atl-btn--accent { color: var(--atl-ink-inv); }
   white-space: nowrap;
 }
 .atl-chip--accent { background: var(--atl-accent-soft); color: var(--atl-accent-ink); }
-.atl-chip--up { background: rgba(31, 138, 91, 0.12); color: var(--atl-up); }
-.atl-chip--down { background: rgba(198, 69, 63, 0.12); color: var(--atl-down); }
-.atl-chip--warn { background: rgba(180, 118, 26, 0.14); color: var(--atl-warn); }
+.atl-chip--up { background: rgba(18, 112, 70, 0.12); color: var(--atl-up); }
+.atl-chip--down { background: rgba(181, 52, 46, 0.12); color: var(--atl-down); }
+.atl-chip--warn { background: rgba(142, 90, 15, 0.13); color: var(--atl-warn); }
 
 .atl-kicker {
   font-size: 11px;
