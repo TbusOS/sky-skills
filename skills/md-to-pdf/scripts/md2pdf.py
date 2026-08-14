@@ -111,7 +111,7 @@ blockquote {
 table {
     border-collapse: collapse;
     margin: 8pt 0;
-    width: 100%%%%;
+    width: 100%%;
 }
 th, td {
     border: 1px solid #ccc;
@@ -336,7 +336,17 @@ def build_pdf(md_path, pdf_path, font_path):
         doc.set_toc(toc)
 
     total = len(doc)
-    doc.save(pdf_path)
+
+    # Embedding a full CJK font costs 20-60 MB; only a few hundred glyphs are
+    # actually used. Subsetting takes a 10-page CJK doc from 23 MB to 0.3 MB.
+    # Non-fatal: an older PyMuPDF without subset_fonts still produces a valid
+    # (just larger) PDF.
+    try:
+        doc.subset_fonts(verbose=False)
+    except Exception:
+        pass
+
+    doc.save(pdf_path, garbage=4, deflate=True, clean=True)
     doc.close()
     os.remove(tmp_path)
 
