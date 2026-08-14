@@ -10,9 +10,20 @@
   --sage-bg: #f8faec;
   --sage-bg-subtle: #eef2de;
   --sage-text: #2a2c40;
-  --sage-text-secondary: #6d6f82;
+  /* 2026-08-14: was #6d6f82 — 4.33:1 on --sage-bg-subtle, i.e. under AA for
+   * normal text on the one ground it lands on most. axe-core measured it on
+   * 18 elements. #5f6172 clears every sage ground (5.35 worst). */
+  --sage-text-secondary: #5f6172;
+  /* FILL ONLY — never `color:`. #97B077 as text is 2.26:1 on cream and 2.38 on
+   * white. This file already said so in a comment further down while nine
+   * rules still used it as text; axe-core found all of them. */
   --sage-sage: #97B077;
-  --sage-sage-dark: #7a9561;
+  /* THE TEXT VARIANT of the brand green. It has to actually pass: the old
+   * #7a9561 measured 3.15:1 on --sage-bg and 2.92 on --sage-bg-subtle, so the
+   * token that existed to solve the contrast problem did not solve it.
+   * #5c7444 clears every ground (4.56 worst). --sage-sage stays exactly as it
+   * was: it is a FILL, and fills have no contrast requirement. */
+  --sage-sage-dark: #5c7444;
   --sage-ink: #393C54;
   --sage-divider: #e5e8da;
   --sage-card: #ffffff;
@@ -74,7 +85,7 @@ p  { margin: 0 0 var(--space-4); }
 
 /* ---------- Section C: Link & Button ---------- */
 .sage-link {
-  color: var(--sage-sage);
+  color: var(--sage-sage-dark);
   text-decoration: underline;
   text-underline-offset: 0.22em;
   text-decoration-thickness: 1px;
@@ -178,7 +189,7 @@ p  { margin: 0 0 var(--space-4); }
   line-height: 1;
   font-weight: 600;
   letter-spacing: -0.02em;
-  color: var(--sage-sage);
+  color: var(--sage-sage-dark);
 }
 .sage-stat-label {
   display: block;
@@ -232,7 +243,7 @@ p  { margin: 0 0 var(--space-4); }
   color: #ffffff;
   text-decoration: none;
 }
-.sage-nav a:hover { color: var(--sage-sage); }
+.sage-nav a:hover { color: var(--sage-sage-dark); }
 .sage-nav a.sage-button:hover { color: #ffffff; }
 
 /* ---------- Section G: Footer ---------- */
@@ -265,7 +276,7 @@ p  { margin: 0 0 var(--space-4); }
   margin-bottom: var(--space-2);
 }
 .sage-footer-group a:hover {
-  color: var(--sage-sage);
+  color: var(--sage-sage-dark);
   text-decoration: underline;
 }
 .sage-footer-legal {
@@ -414,7 +425,7 @@ p  { margin: 0 0 var(--space-4); }
   transition: color var(--duration-sm), border-bottom-color var(--duration-sm);
 }
 .sage-tab.is-active {
-  color: var(--sage-sage);
+  color: var(--sage-sage-dark);
   border-bottom-color: var(--sage-ink);
 }
 
@@ -458,7 +469,7 @@ code {
   background: var(--sage-bg-subtle);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
-  color: var(--sage-sage);
+  color: var(--sage-sage-dark);
 }
 kbd {
   font-family: var(--font-mono);
@@ -510,7 +521,7 @@ mark { background: rgba(196, 148, 100, 0.32); color: inherit; }
 }
 .sage-breadcrumbs li:last-child::after { content: none; }
 .sage-breadcrumbs a { color: inherit; text-decoration: none; }
-.sage-breadcrumbs a:hover { color: var(--sage-sage); }
+.sage-breadcrumbs a:hover { color: var(--sage-sage-dark); }
 
 .sage-table {
   width: 100%;

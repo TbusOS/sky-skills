@@ -83,7 +83,7 @@
   }
   .tier-card__num {
     font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.12em;
-    color:#97B077; font-weight:600;
+    color:var(--sage-sage-dark); font-weight:600;
   }
   .tier-card__name {
     font-family:'Instrument Serif', serif; font-style:normal; font-size:40px; font-weight:400;
@@ -113,7 +113,9 @@
     color:var(--sage-text);
   }
   .tier-card__features li svg { flex-shrink:0; margin-top:3px; }
-  .tier-card__features li.muted { color:var(--sage-text-secondary); opacity:0.55; }
+  /* No opacity: stacking 0.55 on an already-muted token measured 2.15:1.
+     A struck-through look needs a real strikethrough, not a fade. */
+  .tier-card__features li.muted { color:var(--sage-text-secondary); }
 
   /* Comparison table */
   .cmp-table { width:100%; border-collapse:collapse; font-size:14.5px; }
@@ -132,7 +134,9 @@
     font-family:'Inter', sans-serif;
   }
   .cmp-table td.cmp-cell { text-align:center; color:var(--sage-text); }
-  .cmp-table td.cmp-cell--off { color:var(--sage-text-secondary); opacity:0.45; }
+  /* No opacity stack: 0.45 over the muted token measured 1.97:1. The token
+     alone IS the de-emphasis. */
+  .cmp-table td.cmp-cell--off { color:var(--sage-text-secondary); }
   .cmp-table tr.cmp-group td {
     font-family:'JetBrains Mono', monospace; font-size:10.5px; letter-spacing:0.16em;
     text-transform:uppercase; color:var(--sage-text-secondary);
@@ -166,7 +170,8 @@
   .quote-dark cite {
     display:block; margin-top:var(--space-5);
     font-family:'Inter', sans-serif; font-size:14px;
-    color:#97B077; font-style:normal; letter-spacing:0.04em;
+    /* Light green on the indigo band (4.5:1) — the dark variant is for cream. */
+    color:var(--sage-sage); font-style:normal; letter-spacing:0.04em;
   }
 </style>
 </head>
@@ -293,7 +298,7 @@
           <tr>
             <th>&nbsp;</th>
             <th class="cmp-tier"><span class="lang-en">Free</span><span class="lang-zh">免费版</span></th>
-            <th class="cmp-tier" style="color:#7a9561;"><em>Pro</em></th>
+            <th class="cmp-tier" style="color:var(--sage-sage-dark);"><em>Pro</em></th>
             <th class="cmp-tier"><span class="lang-en">Team</span><span class="lang-zh">团队版</span></th>
           </tr>
         </thead>
