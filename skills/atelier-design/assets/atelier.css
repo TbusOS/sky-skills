@@ -322,7 +322,15 @@ code, kbd, samp {
   position: absolute;
   inset: -20%;
   background: linear-gradient(112deg, transparent 34%, rgba(255, 255, 255, 0.30) 50%, transparent 66%);
-  opacity: 0.55;
+  /* 0.34, not 0.55. The band is white, so it lightens the backdrop before the
+   * shell ever frosts it — dropping it is the right direction. It also does
+   * very little: measured per-pixel at a fixed viewport, 0.55 → 0.34 moves at
+   * most 6/255 on any channel and the glass samples barely move at all. The
+   * milkiness was mostly the clipped red channel, not this. Keep the honest
+   * numbers in atelier-material.md §1 before reaching for it again.
+   * Dark stays 0.16 — not scaled — see the same section. Count unchanged:
+   * one sheen only. */
+  opacity: 0.34;
   pointer-events: none;
 }
 
@@ -1237,13 +1245,20 @@ html[data-motion="off"] * {
   border-radius: var(--radius-pill);
   background: var(--atl-track);
 }
+/* Full ink, not ink-2. This control sits on the 11% --atl-track tint over the
+ * bare wallpaper — the hardest ground on the page — and at 11px mono it is
+ * small text, so it needs the full 4.5:1 with margin. ink-2 measured 4.3:1
+ * there. The selected state is already told apart by the white pill, so the
+ * unselected item does not need to be lighter to read as unselected — same
+ * rule the rail nav follows. Ink, never a lower alpha: see
+ * design-tokens.md「墨色为什么是实心值」. */
 .atl-langtoggle button {
   border: 0;
   background: transparent;
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
-  color: var(--atl-ink-2);
+  color: var(--atl-ink);
   padding: 4px 11px;
   border-radius: var(--radius-pill);
   cursor: pointer;
