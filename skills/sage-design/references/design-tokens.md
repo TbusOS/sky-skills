@@ -9,7 +9,7 @@
 | `--sage-bg` | `#f8faec` | page background (rice-paper cream) |
 | `--sage-bg-subtle` | `#eef2de` | alt section / stat band |
 | `--sage-sage` | `#97B077` | accent, CTA, illustration primary |
-| `--sage-sage-dark` | `#7a9561` | sage hover / deeper accent |
+| `--sage-sage-dark` | `#5c7444` | sage as TEXT / hover(2026-08-14 从 #7a9561 加深:旧值自身只有 2.92-3.15,不过 AA)|
 | `--sage-ink` | `#393C54` | display headings, dark sections, ink illustrations |
 | `--sage-text` | `#2a2c40` | body text (slightly lighter than ink) |
 | `--sage-text-secondary` | `#6d6f82` | captions, meta |

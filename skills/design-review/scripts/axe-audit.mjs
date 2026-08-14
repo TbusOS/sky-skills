@@ -63,17 +63,21 @@ const AXE_PATH = resolve(REPO_ROOT, 'node_modules/axe-core/axe.min.js');
 //                           alternative text. Moving the label fixed both.
 // Those three are now blocking: the corpus is clean, so the gate holds.
 //
-// color-contrast stays WARN. It is not a scatter of small mistakes, it is one
-// systemic decision — muted text tokens set too light — repeated across four
-// skills (sage 394 elements, anthropic 177, lectern 151, ember 116). Promoting
-// it today would block every commit on a palette migration nobody has agreed
-// to. atelier's share was fixed at the source: its ink ramp moved from alpha
-// compositing to solid values chosen against the hardest ground each token
-// lands on. The same fix is available to the others, one skill per commit.
+// color-contrast was WARN at rollout (1,013 elements — one systemic palette
+// decision across four skills, not a scatter of mistakes) and was promoted the
+// same day after the debt was paid down to zero, one skill per commit. The
+// four failure modes that produced all 1,013 are codified in known-bugs §7.11.
 const PROMOTED = new Set([
   'link-name',
   'aria-prohibited-attr',
   'svg-img-alt',
+  // Promoted 2026-08-14, same day, AFTER the debt was paid: the 1,013 failing
+  // elements were cleared skill-by-skill in five commits (sage 394, anthropic
+  // +site 270, lectern+ember 267, apple+eclat 49, atelier 27 at birth). The
+  // recurring failure modes and their fixes are codified in known-bugs §7.11;
+  // with the corpus at zero this rule can block without ever failing on
+  // inherited debt.
+  'color-contrast',
 ]);
 
 // Rules that do not apply to what this repo produces, each with the reason.

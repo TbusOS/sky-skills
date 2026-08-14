@@ -12,7 +12,7 @@
 | `--apple-text` | `#1D1D1F` | 主文字 |
 | `--apple-text-secondary` | `#6E6E73` | 次级文字 |
 | `--apple-text-on-dark` | `#F5F5F7` | 黑底主文字 |
-| `--apple-link` | `#0071E3` | 文字链 / Buy CTA |
+| `--apple-link` | `#0066CC` | 文字链 / Buy CTA(2026-08-14 从 #0071E3 加深:旧值在 bg-alt 上 4.31 差 0.19,即 known-bugs §3.2;新值是 apple.com 自己的链接蓝)|
 | `--apple-link-hover` | `#0077ED` | 链接 hover |
 | `--apple-divider` | `#D2D2D7` | 细分隔线 |
 | `--apple-bg-nav` | `rgba(251,251,253,0.72)` | 毛玻璃 nav 背景 |

@@ -645,14 +645,26 @@
   `pixel-gate.mjs` 的 `parseArgs` 注释里。收下之后用同一个探针验证:改动时退出码 1、
   还原后退出码 0。**新闸必须有一次"证明它能拦住东西"的探针,否则不算收下。**
 
-### 7.11 全仓可达性欠账(2026-08-14 实测,待清)
-- **现状**:74 页扫出 1023 个违规元素,**1013 个是同一条规则** `color-contrast`。
+### 7.11 全仓可达性欠账:1023 → 0(2026-08-14 当天清零,`color-contrast` 已晋升阻塞)
+- **原始现状**:74 页 1023 个违规元素,1013 个是同一条 `color-contrast`。
   分布:sage 394 · anthropic 177 · lectern 151 · ember 116 · site 93 · apple 38 · eclat 11
-  · gated-dual-clone 6 · **atelier 0**(建 skill 当天在源头改掉了)。
-- **为什么不一次性拦**:这不是一堆零散错误,是**一个系统性调色决定**在四个 skill 上重复。
-  今天把它设成阻塞,等于让每一次提交都卡在一场没人拍板的调色板迁移上。
-- **处置**:`color-contrast` 保持 warn。修法 atelier 已经验证过(alpha 墨色 → 实心值,
-  按最难的底取值),**一个 skill 一个 commit** 地清。清完一个就可以考虑晋升。
+  · gdc 6 · atelier 0(建 skill 当天在源头改掉)。
+- **清账**:一个 skill 一个 commit,五笔清完(sage `f76be04` · anthropic+site `b614e67` ·
+  lectern+ember `767a873` · apple+eclat 本笔)。清零后 `color-contrast` **晋升为阻塞级**。
+- **四个反复出现的失败模式(修任何 skill 前先对照)**:
+  1. **alpha / opacity 叠加**:`rgba` 墨色或在 muted token 上再叠 `opacity:0.4-0.65`,
+     合成后 1.85-3.04。修:去掉叠加,token 本身就是降调;整卡淡化改成只淡预览图。
+     出现在 sage / anthropic / ember / apple 的 pricing `.muted`、`.cmp-cell--off`、
+     docs-home coming-soon 卡 —— **四家共用的复制粘贴模板,一处错处处错**。
+  2. **品牌色当文字**:sage 绿 2.26 / anthropic 橙 2.66 / ember 金 2.18 / apple 蓝 4.31。
+     修:新建 `-ink` 深变体给 `color:` 用,**填充保持原值**护品牌闸;按钮底可在
+     品牌闸 TOL 55 内加深(anthropic `--anth-cta` #B85C3D,dist 50)。
+  3. **判断色按白底取值**:实际最难的底是**自己的 12% tint chip**。
+     lectern teal 3.97 / amber 2.70 于各自 chip。修:按 chip 底重取。
+  4. **明暗用反**:暗底(pre / 引用带 / footer)上用了亮色主题的深 muted(1.76-3.19),
+     或全局替换把暗底上的亮 token 一起换深(sage `.cmd` / ember `.cmd` / apple `.com` 三连踩)。
+     修:暗底用亮 token —— 亮色在暗底恰是过 AA 的那一个。**批量替换后必须重跑 axe**,
+     这个错自己不会浮出来。
 
 ## 新 bug 类的处置流程（每次必做）
 
