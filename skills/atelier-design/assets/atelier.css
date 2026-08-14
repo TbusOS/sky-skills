@@ -82,21 +82,55 @@ html[data-theme="light"] {
    * author time; every one below clears 4.5:1 on the HARDEST ground it can
    * land on (the wallpaper for page-level text, a 12% tint chip for chips). */
   --atl-ink: #2C2723;             /* warm charcoal — never pure black · 14.3:1 */
-  --atl-ink-2: #5C534D;           /* 7.3:1 on card · 6.1:1 on wallpaper */
-  --atl-ink-3: #70665F;           /* 5.4:1 on card · 4.5:1 on wallpaper */
+  /* DEEPENED one notch for material v3 (2026-08-14). Dropping the shell veil
+   * to 0.32 darkened the ground under the little text that sits on the shell
+   * rather than on a card: sampled worst case went 4.86 → 4.38, i.e. under AA.
+   * The fix is the ink, never the alpha — that is the whole point of the solid
+   * ramp. #564D47 puts the worst ground back at 4.81 and lifts the card case
+   * from 7.4 to 8.1. */
+  --atl-ink-2: #564D47;           /* 8.1:1 on card · 5.0:1 on wallpaper base · 4.8:1 worst shell pixel */
+  --atl-ink-3: #70665F;           /* 5.4:1 on card — CARD ONLY, see dos-and-donts §11.4 */
   --atl-ink-inv: #FDF8F4;
 
-  /* The app shell: one sheet of glass. 0.42 against the recalibrated
-   * wallpaper lets the peach/rose actually show through the frost — at the
-   * old 0.52 over a near-white wallpaper the shell read as solid paper. */
-  --atl-shell-bg: rgba(255, 253, 251, 0.42);
-  --atl-shell-border: rgba(255, 255, 255, 0.75);
-  --atl-shell-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  --atl-shell-shadow: 0 40px 80px -28px rgba(96, 52, 40, 0.45);
+  /* The app shell: one sheet of glass.
+   *
+   * MATERIAL v3, 2026-08-14. The v2 pane read as milk, and sampling the render
+   * said why: at 0.42 of a nearly-pure white veil over a saturate(180%)
+   * backdrop the RED CHANNEL CLIPPED to 255 across every glass region
+   * (measured: 100% of pixels in the rail and the right-hand gutters). A
+   * clipped channel cannot carry a gradient, so the value spread THROUGH the
+   * glass collapsed to 1.6 points — the pane showed one flat cream, which is
+   * exactly what "not transparent enough" looks like. Three changes together:
+   * the veil drops to 0.32 and warms (255,250,244 instead of 255,253,251),
+   * and the backdrop saturate comes DOWN to 1.45 so nothing blows out.
+   * Measured after: zero clipped pixels, mean glass saturation 24.4% → 26.1%,
+   * value spread 1.6 → 4.8 points. Lower saturate but MORE visible colour —
+   * headroom beats gain. */
+  --atl-shell-bg: rgba(255, 250, 244, 0.32);
+  --atl-shell-border: rgba(255, 252, 248, 0.55);
+  /* The optical edge of a glass pane is not one flat white line: it is bright
+   * where the light enters (top-left) and warm-dark where the pane's own
+   * thickness shows (bottom-right). Applied as a 1px masked gradient ring in
+   * Section E; --atl-shell-border is the fallback for engines without
+   * mask-composite. */
+  --atl-shell-edge: linear-gradient(146deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0.20) 38%,
+      rgba(120, 80, 60, 0.06) 64%,
+      rgba(120, 80, 60, 0.12) 100%);
+  --atl-shell-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  /* Two shadows, because glass has thickness: a tight contact shadow that
+   * seats the pane on the wallpaper, and a wide ambient one that lifts it. */
+  --atl-shell-contact: 0 2px 6px -2px rgba(96, 52, 40, 0.20);
+  --atl-shell-shadow: 0 40px 80px -28px rgba(96, 52, 40, 0.42);
 
-  /* Rail (sidebar): MORE transparent than the shell body — navigation is
-   * furniture and can afford the deepest frost on the page. */
-  --atl-rail-bg: rgba(255, 252, 249, 0.28);
+  /* Rail (sidebar). This alpha is ADDITIVE, not a replacement: the rail is a
+   * child of the shell, so its veil paints over the shell's and the composite
+   * is 0.32 + 0.20 × 0.68 = 0.456. The rail is therefore the HAZIEST glass on
+   * the page, not the clearest — the old comment here claimed the opposite,
+   * which was simply wrong about the layer stack. Hazy is right anyway:
+   * navigation is furniture and should recede. */
+  --atl-rail-bg: rgba(255, 249, 242, 0.20);
   --atl-rail-active-bg: rgba(255, 255, 255, 0.92);
   --atl-rail-active-shadow: 0 6px 16px -6px rgba(96, 52, 40, 0.28);
 
@@ -136,7 +170,16 @@ html[data-theme="light"] {
   --atl-down: #B5342E;            /* 5.83 card · 4.85 chip */
   --atl-warn: #8E5A0F;            /* 5.63 card · 4.78 chip */
   --atl-code-bg: rgba(88, 62, 50, 0.07);
-  --atl-blur: 48px;
+  --atl-blur: 42px;
+  /* Backdrop saturation. Pure blur AVERAGES the wallpaper toward grey-white,
+   * so some saturate is mandatory or the frost turns to milk. But it is a gain
+   * stage: push it past ~1.5 over this wallpaper and the peach clips (see
+   * --atl-shell-bg). 1.45 is the last stop with headroom. */
+  --atl-glass-sat: 1.45;
+  /* The "sand" in sandblasted: a 3%-alpha fractal-noise tile laid over the
+   * glass surfaces only (never over a data card). It breaks the mathematically
+   * smooth blur, which is what separates frosted glass from tinted plastic. */
+  --atl-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
 }
 
 /* Dark theme — the warm-night variant. Espresso, not navy: the wallpaper
@@ -155,12 +198,18 @@ html[data-theme="dark"] {
   --atl-ink-3: #BCACA3;           /* 5.1:1 on card · 6.4:1 on shell */
   --atl-ink-inv: #241A17;
 
-  --atl-shell-bg: rgba(48, 32, 28, 0.40);
-  --atl-shell-border: rgba(255, 224, 208, 0.20);
-  --atl-shell-highlight: inset 0 1px 0 rgba(255, 236, 224, 0.22);
+  --atl-shell-bg: rgba(40, 27, 24, 0.30);
+  --atl-shell-border: rgba(255, 224, 208, 0.16);
+  --atl-shell-edge: linear-gradient(146deg,
+      rgba(255, 236, 224, 0.34) 0%,
+      rgba(255, 236, 224, 0.09) 44%,
+      rgba(0, 0, 0, 0.06) 70%,
+      rgba(0, 0, 0, 0.14) 100%);
+  --atl-shell-highlight: inset 0 1px 0 rgba(255, 236, 224, 0.14);
+  --atl-shell-contact: 0 2px 6px -2px rgba(0, 0, 0, 0.52);
   --atl-shell-shadow: 0 40px 80px -28px rgba(0, 0, 0, 0.66);
 
-  --atl-rail-bg: rgba(42, 28, 25, 0.34);
+  --atl-rail-bg: rgba(34, 22, 20, 0.24);
   --atl-rail-active-bg: rgba(255, 236, 224, 0.14);
   --atl-rail-active-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.5);
 
@@ -189,7 +238,10 @@ html[data-theme="dark"] {
   --atl-down: #FF8A80;
   --atl-warn: #F3C063;
   --atl-code-bg: rgba(0, 0, 0, 0.28);
-  --atl-blur: 40px;
+  --atl-blur: 36px;
+  /* Lower than light: on an espresso wallpaper the same gain turns the ember
+   * corner into neon. */
+  --atl-glass-sat: 1.22;
 }
 
 /* ---------- Section B: Base ---------- */
@@ -290,22 +342,48 @@ html[data-theme="dark"] .atl-wall::after { opacity: 0.16; }
  * inside it. The rail/main split is a grid so the rail can collapse at
  * narrow widths without the main pane reflowing twice. */
 .atl-app {
+  position: relative;
   display: grid;
   grid-template-columns: 244px minmax(0, 1fr);
   border-radius: var(--radius-lg);
   border: 1px solid var(--atl-shell-border);
-  background: var(--atl-shell-bg);
-  -webkit-backdrop-filter: blur(var(--atl-blur)) saturate(180%);
-  backdrop-filter: blur(var(--atl-blur)) saturate(180%);
-  box-shadow: var(--atl-shell-shadow), var(--atl-shell-highlight);
+  /* Noise tile FIRST, veil colour last — the grain rides on the glass and, by
+   * being an ancestor background, can never land on top of a data card. */
+  background: var(--atl-noise), var(--atl-shell-bg);
+  -webkit-backdrop-filter: blur(var(--atl-blur)) saturate(var(--atl-glass-sat));
+  backdrop-filter: blur(var(--atl-blur)) saturate(var(--atl-glass-sat));
+  box-shadow: var(--atl-shell-shadow), var(--atl-shell-contact), var(--atl-shell-highlight);
   overflow: hidden;
 }
 .atl-app--rail-wide { grid-template-columns: 288px minmax(0, 1fr); }
 .atl-app--full { grid-template-columns: minmax(0, 1fr); }
 
+/* The 1px optical edge (see --atl-shell-edge). A masked ring rather than a
+ * border-image because border-image ignores border-radius, and this shell is
+ * 28px round. Guarded by @supports: without mask-composite the ring would
+ * paint as a filled sheet over the whole app, so unsupported engines keep the
+ * flat --atl-shell-border instead. */
+@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
+  .atl-app { border-color: transparent; }
+  .atl-app::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--atl-shell-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
 .atl-rail {
   padding: var(--space-6) var(--space-4);
-  background: var(--atl-rail-bg);
+  background: var(--atl-noise), var(--atl-rail-bg);
   border-right: 1px solid var(--atl-line);
   display: flex;
   flex-direction: column;
@@ -913,14 +991,17 @@ html[data-theme="dark"] .atl-btn--accent { color: var(--atl-ink-inv); }
   font-family: var(--font-display);
   font-size: 14px;
   font-weight: 700;
-  color: var(--atl-ink-3);
+  /* ink-2, not ink-3: a tab strip sits on the SHELL, not on a card, and ink-3
+   * only clears AA on a card (dos-and-donts §11.4). Material v3 made this
+   * measurable — at the thinner veil the inactive tabs fell to 3.99:1. */
+  color: var(--atl-ink-2);
   padding: 0 0 12px;
   margin-bottom: -1px;
   border-bottom: 2px solid transparent;
   cursor: pointer;
   transition: color var(--duration-xs) var(--ease-atl);
 }
-.atl-tab:hover { color: var(--atl-ink-2); }
+.atl-tab:hover { color: var(--atl-ink); }
 .atl-tab.is-active { color: var(--atl-ink); border-bottom-color: var(--atl-rose); }
 
 .atl-field { display: flex; flex-direction: column; gap: 6px; }
