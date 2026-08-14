@@ -10,9 +10,19 @@
   --anth-bg-subtle: #f0ede3;
   --anth-text: #141413;
   --anth-text-secondary: #6b6a5f;
-  --anth-orange: #d97757;
-  --anth-orange-hover: #c56544;
-  --anth-blue: #6a9bcc;
+  --anth-orange: #d97757;         /* BRAND FILL — icons, chips, diagram accents.
+                                     As TEXT it is 2.66-3.12:1 and fails AA; use
+                                     --anth-orange-ink for any `color:`. */
+  --anth-orange-ink: #A94F31;     /* orange as TEXT — 4.66:1 on the hardest ground
+                                     (bg-subtle); measured 2026-08-14 vs axe-core */
+  --anth-cta: #B85C3D;            /* filled-button ground: white text reads 4.53:1
+                                     (on #d97757 it was 3.12 — under AA for the
+                                     15px button label). Euclidean distance to the
+                                     brand orange is 50, inside the brand gate's
+                                     TOL 55, so brand-presence still matches. */
+  --anth-orange-hover: #A94F31;   /* was #c56544 — white on it is 3.95, still failing */
+  --anth-blue: #6a9bcc;           /* FILL/hairline — as text it is 2.5:1 */
+  --anth-blue-ink: #3E6E9E;       /* blue as TEXT — 4.56:1 on bg-subtle */
   --anth-green: #788c5d;
   --anth-mid-gray: #b0aea5;
   --anth-light-gray: #e8e6dc;
@@ -119,7 +129,7 @@ p {
   display: inline-block;
   padding: 12px 24px;
   border-radius: var(--radius-pill);
-  background: var(--anth-orange);
+  background: var(--anth-cta);
   color: #ffffff;
   font-family: var(--font-heading);
   font-weight: 600;
@@ -146,7 +156,7 @@ p {
 }
 
 .anth-link {
-  color: var(--anth-orange);
+  color: var(--anth-orange-ink);
   text-decoration: underline;
   text-underline-offset: 0.2em;
   transition: color var(--duration-sm);
@@ -495,11 +505,11 @@ a.anth-card {
   font-family: var(--font-heading);
   font-weight: 500;
   margin: 0 0 var(--space-2);
-  color: var(--anth-blue);
+  color: var(--anth-blue-ink);
 }
 
 .anth-admonition--warning h5 {
-  color: var(--anth-orange);
+  color: var(--anth-orange-ink);
 }
 
 .anth-admonition--success h5 {
@@ -632,7 +642,9 @@ mark {
 }
 
 .anth-table .cross {
-  color: var(--anth-mid-gray);
+  /* The cross is content — "this tier lacks the feature" — so it must be
+   * readable. mid-gray measured 2.22:1; text-secondary carries 5.45. */
+  color: var(--anth-text-secondary);
 }
 
 .anth-reveal {
