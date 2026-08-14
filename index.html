@@ -1130,59 +1130,101 @@
         <a href="demos/atelier-design/index.html" aria-label="Open the atelier-design demo" style="text-decoration:none; color:inherit; display:block;">
           <div class="scroll-x">
           <svg aria-hidden="true" viewBox="0 0 800 460" style="display:block; width:100%; height:auto;">
+            <!-- Material v3. Every fill below is SAMPLED from the rendered
+                 dashboard canonical (1440×1000), not guessed: this mock has no
+                 backdrop-filter, so painting the composited result is the only
+                 honest way to show what the frost actually produces. -->
             <defs>
-              <linearGradient id="atl-idx-wall" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#F7D9C4"/><stop offset="55%" stop-color="#F6E4D6"/><stop offset="100%" stop-color="#F3C7CE"/>
+              <radialGradient id="atl-idx-w1" gradientUnits="userSpaceOnUse" cx="48" cy="9" r="400">
+                <stop offset="0%" stop-color="#E8AE86"/><stop offset="100%" stop-color="#E8AE86" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="atl-idx-w2" gradientUnits="userSpaceOnUse" cx="784" cy="101" r="380">
+                <stop offset="0%" stop-color="#E39BA8"/><stop offset="100%" stop-color="#E39BA8" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="atl-idx-w3" gradientUnits="userSpaceOnUse" cx="368" cy="478" r="330">
+                <stop offset="0%" stop-color="#FAEEDD"/><stop offset="100%" stop-color="#FAEEDD" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="atl-idx-w4" gradientUnits="userSpaceOnUse" cx="848" cy="442" r="290">
+                <stop offset="0%" stop-color="#C98F72"/><stop offset="100%" stop-color="#C98F72" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="atl-idx-sheen" x1="0" y1="1" x2="1" y2="0.2">
+                <stop offset="34%" stop-color="#ffffff" stop-opacity="0"/>
+                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.10"/>
+                <stop offset="66%" stop-color="#ffffff" stop-opacity="0"/>
+              </linearGradient>
+              <!-- the shell reads as glass because the wallpaper survives it:
+                   peach at the rail, rose top-right, terracotta lower-right -->
+              <linearGradient id="atl-idx-glass" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#F9D9C1"/><stop offset="55%" stop-color="#F6C3B4"/><stop offset="100%" stop-color="#EAB79B"/>
+              </linearGradient>
+              <!-- 1px edge: light enters top-left, thickness shows bottom-right -->
+              <linearGradient id="atl-idx-edge" x1="0.15" y1="0" x2="0.85" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#78503C" stop-opacity="0.30"/>
               </linearGradient>
               <linearGradient id="atl-idx-ramp" x1="0" y1="1" x2="0" y2="0">
                 <stop offset="0%" stop-color="#F5854F"/><stop offset="100%" stop-color="#DD4F92"/>
               </linearGradient>
+              <!-- base wash under the four stops. Drawn as a gradient because on
+                   screen it is never flat — the mesh above it always varies it. -->
+              <linearGradient id="atl-idx-base" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#EBC7AC"/><stop offset="100%" stop-color="#E4BC9F"/>
+              </linearGradient>
             </defs>
-            <rect x="0" y="0" width="800" height="460" fill="url(#atl-idx-wall)"/>
-            <!-- the one frosted shell -->
-            <rect x="26" y="26" width="748" height="408" rx="22" fill="#ffffff" opacity="0.62" stroke="#ffffff"/>
-            <!-- rail -->
-            <rect x="26" y="26" width="152" height="408" rx="22" fill="#ffffff" opacity="0.34"/>
+            <rect x="0" y="0" width="800" height="460" fill="url(#atl-idx-base)"/>
+            <rect x="0" y="0" width="800" height="460" fill="url(#atl-idx-w1)"/>
+            <rect x="0" y="0" width="800" height="460" fill="url(#atl-idx-w2)"/>
+            <rect x="0" y="0" width="800" height="460" fill="url(#atl-idx-w3)"/>
+            <rect x="0" y="0" width="800" height="460" fill="url(#atl-idx-w4)"/>
+            <!-- one diagonal sheen, and only one -->
+            <rect x="0" y="0" width="800" height="460" fill="url(#atl-idx-sheen)"/>
+            <!-- the one frosted shell: ambient shadow lifts it, contact shadow seats it -->
+            <rect x="30" y="40" width="740" height="404" rx="22" fill="#8A5B44" opacity="0.16"/>
+            <rect x="26" y="28" width="748" height="408" rx="22" fill="#6B4433" opacity="0.10"/>
+            <rect x="26" y="26" width="748" height="408" rx="22" fill="url(#atl-idx-glass)"/>
+            <rect x="26.5" y="26.5" width="747" height="407" rx="21.5" fill="none" stroke="url(#atl-idx-edge)"/>
+            <!-- rail: its veil sits ON TOP of the shell's, so it is the mistiest glass here -->
+            <rect x="26" y="26" width="152" height="408" rx="22" fill="#F9D9C1"/>
             <rect x="42" y="46" width="26" height="26" rx="8" fill="url(#atl-idx-ramp)"/>
             <text x="78" y="64" font-family="Inter,sans-serif" font-size="13" font-weight="800" fill="#2C2723">Loka</text>
-            <rect x="40" y="94" width="124" height="30" rx="9" fill="#ffffff"/>
+            <rect x="40" y="94" width="124" height="30" rx="9" fill="#FEFAF7"/>
             <text x="56" y="114" font-family="Inter,sans-serif" font-size="11.5" font-weight="700" fill="#2C2723">Dashboard</text>
-            <text x="56" y="146" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="#7a716a">Directory</text>
-            <text x="56" y="176" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="#7a716a">Payroll</text>
-            <text x="56" y="206" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="#7a716a">Performance</text>
+            <text x="56" y="146" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="#564D47">Directory</text>
+            <text x="56" y="176" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="#564D47">Payroll</text>
+            <text x="56" y="206" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="#564D47">Performance</text>
             <!-- KPI strip: gradient orbs, one rounded container, hairline dividers -->
-            <rect x="198" y="46" width="556" height="66" rx="14" fill="#ffffff" opacity="0.84"/>
+            <rect x="198" y="46" width="556" height="66" rx="14" fill="#FEF4ED"/>
             <g>
               <circle cx="228" cy="79" r="16" fill="url(#atl-idx-ramp)"/>
-              <text x="254" y="74" font-family="Inter,sans-serif" font-size="9.5" fill="#8a817b">Total employees</text>
+              <text x="254" y="74" font-family="Inter,sans-serif" font-size="9.5" fill="#70665F">Total employees</text>
               <text x="254" y="93" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#2C2723">240</text>
-              <line x1="384" y1="56" x2="384" y2="102" stroke="#e2d5cb"/>
+              <line x1="384" y1="56" x2="384" y2="102" stroke="#E5D6CC"/>
               <circle cx="414" cy="79" r="16" fill="url(#atl-idx-ramp)"/>
-              <text x="440" y="74" font-family="Inter,sans-serif" font-size="9.5" fill="#8a817b">Open roles</text>
+              <text x="440" y="74" font-family="Inter,sans-serif" font-size="9.5" fill="#70665F">Open roles</text>
               <text x="440" y="93" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#2C2723">7</text>
-              <line x1="570" y1="56" x2="570" y2="102" stroke="#e2d5cb"/>
+              <line x1="570" y1="56" x2="570" y2="102" stroke="#E5D6CC"/>
               <circle cx="600" cy="79" r="16" fill="url(#atl-idx-ramp)"/>
-              <text x="626" y="74" font-family="Inter,sans-serif" font-size="9.5" fill="#8a817b">Attrition</text>
+              <text x="626" y="74" font-family="Inter,sans-serif" font-size="9.5" fill="#70665F">Attrition</text>
               <text x="626" y="93" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#2C2723">6.1%</text>
             </g>
             <!-- chart card: round-cap bars over neutral tracks -->
-            <rect x="198" y="128" width="348" height="182" rx="16" fill="#ffffff" opacity="0.84"/>
+            <rect x="198" y="128" width="348" height="182" rx="16" fill="#FEF4ED"/>
             <text x="220" y="154" font-family="Inter,sans-serif" font-size="12.5" font-weight="700" fill="#2C2723">Average review score</text>
             <text x="220" y="188" font-family="Inter,sans-serif" font-size="26" font-weight="800" fill="#2C2723">63.89%</text>
             <g>
-              <rect x="222" y="206" width="9" height="82" rx="4.5" fill="#e0d3c9"/>
+              <rect x="222" y="206" width="9" height="82" rx="4.5" fill="#ECE1DA"/>
               <rect x="222" y="252" width="9" height="36" rx="4.5" fill="url(#atl-idx-ramp)"/>
-              <rect x="264" y="206" width="9" height="82" rx="4.5" fill="#e0d3c9"/>
+              <rect x="264" y="206" width="9" height="82" rx="4.5" fill="#ECE1DA"/>
               <rect x="264" y="223" width="9" height="65" rx="4.5" fill="url(#atl-idx-ramp)"/>
-              <rect x="306" y="206" width="9" height="82" rx="4.5" fill="#e0d3c9"/>
+              <rect x="306" y="206" width="9" height="82" rx="4.5" fill="#ECE1DA"/>
               <rect x="306" y="237" width="9" height="51" rx="4.5" fill="url(#atl-idx-ramp)"/>
-              <rect x="348" y="206" width="9" height="82" rx="4.5" fill="#e0d3c9"/>
+              <rect x="348" y="206" width="9" height="82" rx="4.5" fill="#ECE1DA"/>
               <rect x="348" y="236" width="9" height="52" rx="4.5" fill="url(#atl-idx-ramp)"/>
-              <rect x="390" y="206" width="9" height="82" rx="4.5" fill="#e0d3c9"/>
+              <rect x="390" y="206" width="9" height="82" rx="4.5" fill="#ECE1DA"/>
               <rect x="390" y="263" width="9" height="25" rx="4.5" fill="url(#atl-idx-ramp)"/>
-              <rect x="432" y="206" width="9" height="82" rx="4.5" fill="#e0d3c9"/>
+              <rect x="432" y="206" width="9" height="82" rx="4.5" fill="#ECE1DA"/>
               <rect x="432" y="243" width="9" height="45" rx="4.5" fill="url(#atl-idx-ramp)"/>
-              <rect x="474" y="206" width="9" height="82" rx="4.5" fill="#e0d3c9"/>
+              <rect x="474" y="206" width="9" height="82" rx="4.5" fill="#ECE1DA"/>
               <rect x="474" y="240" width="9" height="48" rx="4.5" fill="url(#atl-idx-ramp)"/>
             </g>
             <!-- the ONE ink card -->
@@ -1190,27 +1232,27 @@
             <text x="584" y="156" font-family="Inter,sans-serif" font-size="12.5" font-weight="700" fill="#F7EFE9">Interview queue</text>
             <circle cx="588" cy="184" r="3" fill="#F7EFE9" opacity="0.8"/>
             <text x="600" y="188" font-family="Inter,sans-serif" font-size="10" fill="#F7EFE9">Staff Platform Engineer</text>
-            <text x="600" y="203" font-family="Inter,sans-serif" font-size="9" fill="#9e938c">06:00–08:00 · Jakarta</text>
+            <text x="600" y="203" font-family="Inter,sans-serif" font-size="9" fill="#A79C95">06:00–08:00 · Jakarta</text>
             <circle cx="588" cy="228" r="3" fill="#F7EFE9" opacity="0.8"/>
             <text x="600" y="232" font-family="Inter,sans-serif" font-size="10" fill="#F7EFE9">Product Manager</text>
-            <text x="600" y="247" font-family="Inter,sans-serif" font-size="9" fill="#9e938c">09:30–10:15 · remote</text>
+            <text x="600" y="247" font-family="Inter,sans-serif" font-size="9" fill="#A79C95">09:30–10:15 · remote</text>
             <circle cx="588" cy="272" r="3" fill="#F7EFE9" opacity="0.8"/>
             <text x="600" y="276" font-family="Inter,sans-serif" font-size="10" fill="#F7EFE9">Data Analyst</text>
-            <text x="600" y="291" font-family="Inter,sans-serif" font-size="9" fill="#9e938c">14:00–15:00 · Yogyakarta</text>
+            <text x="600" y="291" font-family="Inter,sans-serif" font-size="9" fill="#A79C95">14:00–15:00 · Yogyakarta</text>
             <!-- table with in-row meters -->
-            <rect x="198" y="326" width="556" height="88" rx="16" fill="#ffffff" opacity="0.9"/>
-            <text x="220" y="350" font-family="Inter,sans-serif" font-size="9" letter-spacing="1" fill="#8a817b">NAME</text>
-            <text x="400" y="350" font-family="Inter,sans-serif" font-size="9" letter-spacing="1" fill="#8a817b">SCORE</text>
-            <line x1="220" y1="358" x2="732" y2="358" stroke="#eee0d6"/>
+            <rect x="198" y="326" width="556" height="88" rx="16" fill="#FEF4ED"/>
+            <text x="220" y="350" font-family="Inter,sans-serif" font-size="9" letter-spacing="1" fill="#70665F">NAME</text>
+            <text x="400" y="350" font-family="Inter,sans-serif" font-size="9" letter-spacing="1" fill="#70665F">SCORE</text>
+            <line x1="220" y1="358" x2="732" y2="358" stroke="#EFE1D8"/>
             <text x="220" y="378" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#2C2723">Judy Abbott</text>
-            <rect x="400" y="371" width="150" height="6" rx="3" fill="#e0d3c9"/>
+            <rect x="400" y="371" width="150" height="6" rx="3" fill="#ECE1DA"/>
             <rect x="400" y="371" width="138" height="6" rx="3" fill="url(#atl-idx-ramp)"/>
-            <text x="562" y="378" font-family="Inter,sans-serif" font-size="10" fill="#5c534d">92</text>
-            <line x1="220" y1="388" x2="732" y2="388" stroke="#eee0d6"/>
+            <text x="562" y="378" font-family="Inter,sans-serif" font-size="10" fill="#564D47">92</text>
+            <line x1="220" y1="388" x2="732" y2="388" stroke="#EFE1D8"/>
             <text x="220" y="406" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#2C2723">Toni Bergstrom</text>
-            <rect x="400" y="399" width="150" height="6" rx="3" fill="#e0d3c9"/>
+            <rect x="400" y="399" width="150" height="6" rx="3" fill="#ECE1DA"/>
             <rect x="400" y="399" width="51" height="6" rx="3" fill="url(#atl-idx-ramp)"/>
-            <text x="562" y="406" font-family="Inter,sans-serif" font-size="10" fill="#5c534d">34</text>
+            <text x="562" y="406" font-family="Inter,sans-serif" font-size="10" fill="#564D47">34</text>
           </svg>
           </div>
         </a>
