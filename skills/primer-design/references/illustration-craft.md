@@ -30,13 +30,26 @@
 | 线端 / 接头 | `round` / `round` | 同上,继承 |
 | 描边色 | `--primer-ink` `#243244` | 同上。**别写 `stroke="#000"`** —— 纯黑是禁用色(`dos-and-donts.md` §2) |
 
-**两个改线宽的口子**(知道哪个赢很重要):
+**改线宽的口子**(知道哪个赢很重要):
 
-- 整张图加粗 → 包一层 `<g stroke-width="4.4">`。表现属性在**它自己的元素上**,
-  永远赢过从 `<svg>` 继承来的值。
-- 单个形状 → 直接写 `<path stroke-width="2.6" …>`,同理。
+- **单个形状** → 直接写 `<path stroke-width="2.6" …>`。表现属性在**它自己的元素上**,
+  赢过从 `<svg>` 继承来的值。
+- **整张图加粗 → 只能改 CSS,而且必须成对改。**`<g stroke-width="4.4">` 这种包一层的写法
+  **只抬得起主轮廓**:`primer.css:388-389` 的 `.primer-figure svg .primer-hair`
+  (以及比喻卡那条孪生规则)是**直接命中细节路径自己**的 CSS 规则,它赢过从 `<g>` 继承来的值,
+  所以 hair 仍然是 1.8 —— 主线 4.4 / 细节 1.8 = 比 0.41,而 §3 要求的比是 0.53。
+  **没有任何机械检查会报这件事**,它只是细节层次看起来塌了一层。正确写法(页内 `<style>`,
+  无前缀 class 挂在 `.primer-figure` 上,特异度天然高过 CSS Section J,不依赖代码顺序):
+
+  ```css
+  .primer-figure.fig-heavy svg              { stroke-width: 4.4px; }
+  .primer-figure.fig-heavy svg .primer-hair { stroke-width: 2.3px; }  /* 4.4 × 0.53 */
+  ```
+
+  §3 手机那段用的是同一个手法 —— **主线和细节线永远一起改**。
 - ⚠ 在 `<svg>` 自己身上写 `stroke-width="4.4"` **没用** —— CSS 规则命中的就是这个元素,
-  表现属性打不过它。真要在 svg 上改,写 `style="stroke-width:4.4px"`(内联样式)。
+  表现属性打不过它。真要在 svg 上单点改,写 `style="stroke-width:4.4px"`(内联样式);
+  但那同样抬不起 hair,所以它只适合本来就没有细节线的小图。
 
 ## §3 viewBox 尺寸律(先算,再画)
 
@@ -84,17 +97,18 @@ hero 图的 540 在 1440 下是 3.10px,到 1024 就掉到 2.92px,所以工作值
 节内全宽图在这里渲染描边只有 3.4 × 335 / 900 = **1.27px** —— 图还在,绘本感没了。
 visual-audit 的两个视口(1440 / 1024)都看不到这一格,靠人眼看截图。
 
-修法(页内局部样式,**无前缀** class,写在页面 `<style>` 里):
+修法(页内局部样式,**无前缀** class 挂在 `.primer-figure` 上,写在页面 `<style>` 里):
 
 ```css
 @media (max-width: 768px) {
-  .fig-wide svg              { stroke-width: 9px; }   /* 9 × 335/900 = 3.35px */
-  .fig-wide svg .primer-hair { stroke-width: 4.8px; } /* 主线粗了，细节线同比例跟上 */
+  .primer-figure.fig-wide svg              { stroke-width: 9px; }   /* 9 × 335/900 = 3.35px */
+  .primer-figure.fig-wide svg .primer-hair { stroke-width: 4.8px; } /* 同比例跟上：9 × 0.53 */
 }
 ```
 
-**加粗主线就要同比例加粗 `primer-hair`**,否则细节层次在手机上直接消失(桌面两者的比是
-1.8 / 3.4 ≈ 0.53)。
+**加粗主线就要同比例加粗 `primer-hair`**(§2 那条同理),否则细节层次在手机上直接消失
+(桌面两者的比是 1.8 / 3.4 ≈ 0.53)。两条选择器都带上 `.primer-figure`,特异度就一定高过
+CSS Section J,不用赌 `<style>` 和 `<link>` 的先后。
 
 ## §4 平涂与 `fill`
 

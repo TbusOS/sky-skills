@@ -16,8 +16,17 @@ canonical、出一份 LOW-CONFIDENCE 契约。这三页落地之后,契约就直
 `.html` + `.md`,LOW-CONFIDENCE 的标记自然消失(atelier 先例)。
 
 **成对读**:每个 `.html` 配一个同名 `.md`,`.md` 讲"为什么这个实例长这样" ——
-"5 个让它成立的决策" + 一张**排版规则表**(字号 / 字重 / 容器档位 / 插画尺寸)。
-sprint-contract 按名引用那张表,所以表的标题不能改。
+"5 个让它成立的决策" + 一张排版规则表(字号 / 字重 / 容器档位 / 插画尺寸)。
+
+⚠ 那张表的标题必须**原样**写成英文的:
+
+```markdown
+## Typography rules
+```
+
+`sprint-contract.mjs` 生成契约时按这个字符串引用它("Exactly match the type scale defined
+in … \"Typography rules\" table"),全部现有 canonical 的 `.md` 也都用这个标题。
+写成"排版规则"契约就指不到它了 —— 表格内容用中文没问题,标题不能翻。
 
 每个 `.html` 末尾还嵌了 `design-review:self-diff v1` 块(verify.py 强制),
 里面是同样的决策 + **已知取舍** —— 后者是 `.md` 里没有的部分,专门写给下一个作者。

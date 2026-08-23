@@ -73,8 +73,9 @@ primer 的 `forbiddenFonts`:`Fraunces` / `Instrument Serif` / `Poppins` / `Lora`
 | h1(hero 大标题) | `clamp(36px, 5.2vw, 60px)` / 行高 1.08 | display 字,600 |
 | h2(每节标题) | `clamp(26px, 3.2vw, 36px)` / 行高 1.18 | display 字,600 |
 | h3 | `clamp(19px, 2vw, 22px)` / 行高 1.3 | display 字,500 |
-| hero lede / 比喻卡正文 | `clamp(17px, 1.6vw, 20px)` | 这是"读本大正文"那一档 |
-| 正文基准 | `17px` / 行高 1.66 / `max-width: 62ch` | `.primer-body` |
+| hero lede(`.primer-hero-lede`) | `clamp(17px, 1.6vw, 20px)` | **全页只有这一处**是"读本大正文"那一档;色是 `--primer-mut`,`max-width: 40ch`(手机取消) |
+| 正文基准 | `17px` / 行高 1.66 / `max-width: 62ch` | `.primer-body`;手机(≤768px)降到 `16.5px` |
+| 比喻卡正文(`.primer-analogy-body p`) | 跟基准走:`17px`(手机 16.5px)· `max-width: 54ch` | CSS 只给它收窄了行宽,**没有加大字号** —— 比喻卡的份量来自 3.4px 的紫边框和插画,不是来自字号 |
 | 圆号数字 | `clamp(28px, 3.2vw, 40px)`,装在 `clamp(58px, 6vw, 78px)` 的圈里 | 手机上固定 26px / 54px |
 | 回顾条标题 | `clamp(20px, 2.2vw, 25px)` | |
 | `.primer-term-plain`(人话那半) | `15.5px` | |
@@ -84,8 +85,10 @@ primer 的 `forbiddenFonts`:`Fraunces` / `Instrument Serif` / `Poppins` / `Lora`
 
 **和设计书草案的两处出入**(草案先写、CSS 后定,以 CSS 为准):
 
-- 草案写"正文 18–20px"。实际:基准 17px,17→20px 那一档给了 hero lede 和比喻卡正文。
-  绘本的"大字正文"落在 lede 上,不落在通篇基准上 —— 通篇 19px 会把每节的正文块顶到插画的高度,
+- 草案写"正文 18–20px"。实际:基准 17px(手机 16.5px),而 17→20px 那一档
+  **只落在 `.primer-hero-lede` 一个位置上**(primer.css:201)。比喻卡正文没有自己的字号,
+  它跟基准走 —— primer.css:260 给 `.primer-analogy-body p` 的只有 `max-width: 54ch`。
+  绘本的"大字正文"就出现在 hero 那一句,不铺到通篇 —— 通篇 19px 会把每节的正文块顶到插画的高度,
   一屏一概念就守不住了。
 - 草案写圆号数字 `clamp(72px, 10vw, 128px)`。实际 `clamp(28px, 3.2vw, 40px)` 装在 58–78px 的圈里。
   128px 的圆号在 1080 工作档里会跟插画抢一节的主体位;数字是路标,不是主角。
