@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数据库索引是什么？· 图解读本</title>
+<meta name="description" content="Canonical primer-design concept page: what a database index is, explained for readers with zero background. 零基础图解:数据库索引是什么。">
+<meta property="og:title" content="数据库索引是什么？· 图解读本">
+<meta property="og:description" content="零基础图解:索引是一份排好序的副本。三分钟讲明白它怎么把 4 秒的查询变成 4 毫秒,代价是什么。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed classes on purpose (verify.py validates
+   * primer-* classes against primer.css; local layout stays unprefixed). */
+
+  /* Hero figure sits inside the hero grid — the component's own 40px block
+   * margin would push it off the title's vertical center. */
+  .fig-hero { margin: 0; }
+
+  /* The three steps ride one grid line under the lookup figure, each column
+   * centered under the stage it names — the circled numerals ARE the figure's
+   * caption layer, so the drawing itself stays free of labels. */
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--primer-space-5);
+    margin-top: var(--primer-space-5);
+  }
+  .steps-grid .primer-step {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--primer-space-3);
+  }
+
+  /* The recap is its own screen; the component's top margin is for pages
+   * where it trails a section. */
+  .recap-flat { margin-top: 0; }
+
+  @media (max-width: 768px) {
+    .steps-grid { grid-template-columns: minmax(0, 1fr); gap: var(--primer-space-4); }
+    /* Hero figure viewBox is 500 wide: at a 335px phone column the 3.4-unit
+     * line renders 2.28px — under the 3px picture-book floor. 5 × 335/500
+     * = 3.35px; hair follows at the 0.53 ratio (illustration-craft §2/§3). */
+    .primer-figure.fig-hero svg { stroke-width: 5px; }
+    .primer-figure.fig-hero svg .primer-hair { stroke-width: 2.65px; }
+  }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">What is a database index?</span>
+          <span class="lang-zh">数据库索引<br>是什么？</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">No database background needed. This page explains it in about three minutes.</span>
+          <span class="lang-zh">不需要任何数据库基础。这一页大约 3 分钟讲明白。</span>
+        </p>
+      </div>
+      <figure class="primer-figure fig-hero">
+        <svg viewBox="0 0 500 340" role="img"
+          aria-label="同一本厚书：没有索引页只能一页页翻，有了索引页直接翻到那一页">
+          <!-- ground -->
+          <path d="M22 306 C 150 304, 350 308, 478 305" fill="none"/>
+          <!-- divider -->
+          <path class="primer-hair" d="M250 118 L250 298" fill="none" stroke-dasharray="2 9"/>
+
+          <!-- LEFT: the thick book, flipped page by page -->
+          <path d="M56 288 Q52 288 52 293 L52 296 Q52 301 58 301 L192 302 Q198 302 198 297 L198 293 Q198 289 193 289 Z" fill="#ffffff"/>
+          <path d="M60 186 L190 187 L189 289 L61 288 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M62 197 L188 198" fill="none"/>
+          <path class="primer-hair" d="M62 208 L188 208.6" fill="none"/>
+          <path class="primer-hair" d="M62 219 L188 219.4" fill="none"/>
+          <path class="primer-hair" d="M62 230 L188 230.8" fill="none"/>
+          <path class="primer-hair" d="M62 241 L188 241.5" fill="none"/>
+          <path class="primer-hair" d="M62 252 L188 252.2" fill="none"/>
+          <path class="primer-hair" d="M62 263 L188 263.7" fill="none"/>
+          <path class="primer-hair" d="M62 274 L188 274.3" fill="none"/>
+          <path d="M54 172 Q50 172 50 177 L50 181 Q50 186 56 186 L194 187 Q200 187 200 182 L200 178 Q200 173 195 173 Z" fill="#ffffff"/>
+          <!-- pages caught mid-flip -->
+          <g transform="rotate(-14 140 108)"><path d="M114 88 Q110 88 110 93 L110 124 Q110 129 116 129 L166 128 Q172 128 172 123 L172 92 Q172 87 167 87 Z" fill="#ffffff"/><path class="primer-hair" d="M121 101 L160 100.4 M121 112 L153 111.5" fill="none"/></g>
+          <g transform="rotate(10 196 78)"><path d="M172 60 Q168 60 168 65 L168 94 Q168 99 174 99 L220 98 Q226 98 226 93 L226 64 Q226 59 221 59 Z" fill="#ffffff"/><path class="primer-hair" d="M178 72 L214 71.6 M178 83 L208 82.4" fill="none"/></g>
+          <path class="primer-hair" d="M96 150 C 108 122, 128 102, 154 92" fill="none" stroke-dasharray="2 8"/>
+
+          <!-- RIGHT: the same book with an index booklet -->
+          <path d="M296 288 Q292 288 292 293 L292 296 Q292 301 298 301 L432 302 Q438 302 438 297 L438 293 Q438 289 433 289 Z" fill="#ffffff"/>
+          <path d="M300 186 L430 187 L429 289 L301 288 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M302 198 L428 198.7" fill="none"/>
+          <path class="primer-hair" d="M302 210 L428 210.3" fill="none"/>
+          <path class="primer-hair" d="M302 222 L428 222.6" fill="none"/>
+          <path class="primer-hair" d="M302 234 L428 234.2" fill="none"/>
+          <path class="primer-hair" d="M302 246 L428 246.8" fill="none"/>
+          <path class="primer-hair" d="M302 258 L428 258.4" fill="none"/>
+          <path class="primer-hair" d="M302 270 L428 270.1" fill="none"/>
+          <path d="M294 172 Q290 172 290 177 L290 181 Q290 186 296 186 L434 187 Q440 187 440 182 L440 178 Q440 173 435 173 Z" fill="#ffffff"/>
+          <!-- the index booklet leaning against it -->
+          <g transform="rotate(-8 294 240)">
+            <path d="M262 158 Q256 158 256 165 L256 292 Q256 299 263 299 L318 299 Q325 299 325 292 L325 165 Q325 158 318 158 Z" fill="#7a5cd6"/>
+            <path d="M268 176 L313 176.6 L312.5 250 L268.4 249.5 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M274 190 L306 190.4" fill="none"/>
+            <path class="primer-hair" d="M274 204 L306 204.7" fill="none"/>
+            <path class="primer-hair" d="M274 218 L306 218.2" fill="none"/>
+            <path class="primer-hair" d="M274 232 L306 232.5" fill="none"/>
+          </g>
+          <!-- arrow: booklet → the exact page -->
+          <path d="M330 168 C 358 130, 402 128, 424 152" fill="none"/>
+          <path d="M424 152 L412 146 M424 152 L422 139" fill="none"/>
+          <circle cx="428" cy="163" r="9" fill="#ffd23f"/>
+
+          <!-- labels (text is painted last) -->
+          <text class="lang-zh" x="125" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">一页页翻</text>
+          <text class="lang-en" x="125" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">flip page by page</text>
+          <text class="lang-zh" x="370" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">直接翻到那一页</text>
+          <text class="lang-en" x="370" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">jump straight to the page</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The same thick book — the only difference is a slim, sorted booklet beside it.</span>
+          <span class="lang-zh">同一本厚书——差别只是旁边多了一本排好序的小册子。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ① 是什么 + 像什么 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What is an index?</span>
+        <span class="lang-zh">索引是什么？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">索引 index</span><span class="lang-en">index</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">a sorted list of values, each pointing at its row</span>
+          <span class="lang-zh">按顺序排好的一份目录，记着每个值在第几行</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">An index is a <span class="primer-mark">pre-sorted copy</span> stored next to the table. The database checks the copy first, then fetches the exact row.</span>
+        <span class="lang-zh">索引是一份<span class="primer-mark">排好序的副本</span>，单独存在表的旁边。查东西时，数据库先看它，再直接去取那一行。</span>
+      </p>
+
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 150" role="img"
+            aria-label="书后面的索引页：先在索引里查到页码，再直接翻到那一页">
+            <!-- open book -->
+            <path d="M14 38 C 38 26, 74 26, 88 34 L88 122 C 74 114, 38 114, 16 126 Z" fill="#ffffff"/>
+            <path d="M166 40 C 142 28, 106 28, 92 34 L92 122 C 106 114, 142 114, 164 128 Z" fill="#efe9fc"/>
+            <path class="primer-hair" d="M90 34 L90.6 122" fill="none"/>
+            <!-- left page text lines -->
+            <path class="primer-hair" d="M26 54 L76 52.8" fill="none"/>
+            <path class="primer-hair" d="M26 66 L76 64.6" fill="none"/>
+            <path class="primer-hair" d="M26 78 L76 76.9" fill="none"/>
+            <path class="primer-hair" d="M26 102 L76 100.7" fill="none"/>
+            <!-- right page: index entries with page numbers -->
+            <path class="primer-hair" d="M102 54 L130 53.2 M140 53 L152 52.6" fill="none"/>
+            <path class="primer-hair" d="M102 66 L126 65.3 M140 65 L152 64.4" fill="none"/>
+            <path class="primer-hair" d="M102 90 L128 89.4 M140 89 L152 88.5" fill="none"/>
+            <path class="primer-hair" d="M102 102 L124 101.2 M140 101 L152 100.6" fill="none"/>
+            <path d="M100 78 L154 76.8" fill="none" stroke="#7a5cd6"/>
+            <!-- arrow: entry → the spot on the left page -->
+            <path d="M118 74 C 104 56, 70 58, 52 78" fill="none"/>
+            <path d="M52 78 L56 66 M52 78 L64 80" fill="none"/>
+            <circle cx="48" cy="88" r="7" fill="#ffd23f"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p class="primer-analogy-lead"><span class="lang-en">It's like…</span><span class="lang-zh">就像……</span></p>
+          <p>
+            <span class="lang-en">The index at the back of a book: sorted entries, each with a page number. You look up the entry, then turn straight to the page.</span>
+            <span class="lang-zh">书后面的索引页：词条按拼音排好，旁边写着页码。先查到页码，再直接翻到那一页。</span>
+          </p>
+        </div>
+      </div>
+
+      <figure class="primer-figure fig-wide">
+        <svg viewBox="0 0 900 340" role="img"
+          aria-label="书的索引页和数据库的索引一一对应：词条对应值，页码对应行号">
+          <!-- LEFT: the back-of-book index -->
+          <path d="M40 82 C 92 62, 168 62, 200 76 L200 252 C 168 238, 92 238, 44 258 Z" fill="#ffffff"/>
+          <path d="M370 84 C 318 64, 242 64, 210 76 L210 252 C 242 238, 318 238, 366 260 Z" fill="#efe9fc"/>
+          <path class="primer-hair" d="M205 76 L205.8 252" fill="none"/>
+          <path class="primer-hair" d="M66 112 L180 108.9" fill="none"/>
+          <path class="primer-hair" d="M66 138 L180 135.2" fill="none"/>
+          <path class="primer-hair" d="M66 164 L180 161.6" fill="none"/>
+          <path class="primer-hair" d="M66 190 L180 187.4" fill="none"/>
+          <path class="primer-hair" d="M66 216 L180 213.8" fill="none"/>
+          <path class="primer-hair" d="M232 110 L296 107.6 M318 107 L344 106.2" fill="none"/>
+          <path class="primer-hair" d="M232 136 L288 133.9 M318 133 L344 132.4" fill="none"/>
+          <path class="primer-hair" d="M232 162 L300 159.8 M318 159 L344 158.3" fill="none"/>
+          <path class="primer-hair" d="M232 188 L292 186.1 M318 185 L344 184.5" fill="none"/>
+          <path class="primer-hair" d="M232 214 L296 212.2 M318 211 L344 210.7" fill="none"/>
+
+          <!-- MIDDLE: the one-to-one pairing -->
+          <path class="primer-hair" d="M396 118 L504 116 M396 118 L408 112 M396 118 L408 124 M504 116 L492 110 M504 116 L492 122" fill="none"/>
+          <path class="primer-hair" d="M396 186 L504 184 M396 186 L408 180 M396 186 L408 192 M504 184 L492 178 M504 184 L492 190" fill="none"/>
+
+          <!-- RIGHT: the database index + the table -->
+          <path d="M528 70 Q520 70 520 78 L520 262 Q520 270 528 270 L664 270 Q672 270 672 262 L672 78 Q672 70 664 70 Z" fill="#ffffff" stroke="#7a5cd6"/>
+          <path class="primer-hair" d="M520 110 L672 110.8" fill="none"/>
+          <path class="primer-hair" d="M520 150 L672 150.5" fill="none"/>
+          <path class="primer-hair" d="M520 190 L672 190.3" fill="none"/>
+          <path class="primer-hair" d="M520 230 L672 230.6" fill="none"/>
+          <path class="primer-hair" d="M538 90 L600 89.2 M624 89 L654 88.6" fill="none"/>
+          <path class="primer-hair" d="M538 130 L596 129.4 M624 129 L654 128.4" fill="none"/>
+          <path class="primer-hair" d="M538 170 L604 169.1 M624 169 L654 168.5" fill="none"/>
+          <path class="primer-hair" d="M538 210 L598 209.3 M624 209 L654 208.7" fill="none"/>
+          <path class="primer-hair" d="M538 250 L600 249.5 M624 249 L654 248.4" fill="none"/>
+
+          <path d="M726 52 Q718 52 718 60 L718 280 Q718 288 726 288 L852 288 Q860 288 860 280 L860 60 Q860 52 852 52 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M718 81 L860 81.6" fill="none"/>
+          <path class="primer-hair" d="M718 110 L860 110.4" fill="none"/>
+          <path class="primer-hair" d="M718 139 L860 139.7" fill="none"/>
+          <path d="M720 168 L858 168.5 L858 196 L720 195.6 Z" fill="#ffd23f" fill-opacity=".45"/>
+          <path class="primer-hair" d="M718 196 L860 196.2" fill="none"/>
+          <path class="primer-hair" d="M718 225 L860 225.5" fill="none"/>
+          <path class="primer-hair" d="M718 254 L860 254.3" fill="none"/>
+          <!-- arrow: index row → table row -->
+          <path d="M672 170 C 690 168, 700 172, 714 180" fill="none"/>
+          <path d="M714 180 L702 174 M714 180 L703 185" fill="none"/>
+
+          <!-- labels -->
+          <text class="lang-zh" x="205" y="40" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">书后面的索引页</text>
+          <text class="lang-en" x="205" y="40" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">the back-of-book index</text>
+          <text class="lang-zh" x="690" y="34" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">数据库的索引</text>
+          <text class="lang-en" x="690" y="34" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">the database's index</text>
+          <text class="lang-zh" x="450" y="102" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">词条 ↔ 值</text>
+          <text class="lang-en" x="450" y="102" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">entry ↔ value</text>
+          <text class="lang-zh" x="450" y="170" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">页码 ↔ 行号</text>
+          <text class="lang-en" x="450" y="170" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">page № ↔ row №</text>
+          <text class="lang-zh" x="596" y="310" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">索引</text>
+          <text class="lang-en" x="596" y="310" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">the index</text>
+          <text class="lang-zh" x="789" y="310" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">原表</text>
+          <text class="lang-en" x="789" y="310" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">the table</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The pairing is one-to-one: an entry is a value, a page number is a row number.</span>
+          <span class="lang-zh">对应关系是一对一的：词条就是值，页码就是行号。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ② 没有索引时 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Without an index, how does it search?</span>
+        <span class="lang-zh">没有索引，数据库怎么找？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">全表扫描 full table scan</span><span class="lang-en">full table scan</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">read every row from the first to the last, skipping none</span>
+          <span class="lang-zh">从第一行一页页翻到最后一行，一行也不跳</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">Without an index, every query is a full table scan. Twenty million rows at one per second is over seven months.</span>
+        <span class="lang-zh">没有索引，每次查询都是一次全表扫描。2000 万行的表，一行一秒地翻，要翻七个多月。</span>
+      </p>
+
+      <figure class="primer-figure fig-wide">
+        <svg viewBox="0 0 900 380" role="img"
+          aria-label="全表扫描：一行一秒地翻 2000 万行，要翻七个多月才到你要的那一行">
+          <!-- ground -->
+          <path d="M40 312 C 260 309, 640 315, 862 311" fill="none"/>
+
+          <!-- the tome being flipped -->
+          <path d="M66 298 Q60 298 60 304 Q60 310 68 310 L246 311 Q254 311 254 305 Q254 299 248 299 Z" fill="#ffffff"/>
+          <path d="M70 176 L244 177 L242 299 L72 298 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M72 189 L240 190" fill="none"/>
+          <path class="primer-hair" d="M72 202 L240 202.7" fill="none"/>
+          <path class="primer-hair" d="M72 215 L240 215.4" fill="none"/>
+          <path class="primer-hair" d="M72 228 L240 228.2" fill="none"/>
+          <path class="primer-hair" d="M72 241 L240 241.8" fill="none"/>
+          <path class="primer-hair" d="M72 254 L240 254.5" fill="none"/>
+          <path class="primer-hair" d="M72 267 L240 267.1" fill="none"/>
+          <path class="primer-hair" d="M72 280 L240 280.6" fill="none"/>
+          <path d="M64 162 Q58 162 58 168 Q58 175 66 175 L248 176 Q256 176 256 170 Q256 163 250 163 Z" fill="#ffffff"/>
+          <!-- the row you want, buried near the bottom (yellow = the found-spot
+               vocabulary; violet is reserved for the index, which this scene lacks) -->
+          <path d="M242 272 L272 271 Q278 271 278 277 Q278 284 272 284 L242 285 Z" fill="#ffd23f"/>
+          <path class="primer-hair" d="M286 278 L332 278" fill="none"/>
+
+          <!-- pages flying off, one per second -->
+          <g transform="rotate(-14 320 130)"><path d="M292 108 Q288 108 288 113 L288 148 Q288 153 294 153 L352 152 Q358 152 358 147 L358 112 Q358 107 353 107 Z" fill="#ffffff"/><path class="primer-hair" d="M300 122 L344 121.4 M300 134 L336 133.6" fill="none"/></g>
+          <g transform="rotate(-6 520 96)"><path d="M492 76 Q488 76 488 81 L488 116 Q488 121 494 121 L552 120 Q558 120 558 115 L558 80 Q558 75 553 75 Z" fill="#ffffff"/><path class="primer-hair" d="M500 90 L544 89.4 M500 102 L536 101.5" fill="none"/></g>
+          <g transform="rotate(9 668 118)"><path d="M640 98 Q636 98 636 103 L636 138 Q636 143 642 143 L700 142 Q706 142 706 137 L706 102 Q706 97 701 97 Z" fill="#ffffff"/><path class="primer-hair" d="M648 112 L692 111.3 M648 124 L684 123.6" fill="none"/></g>
+          <path class="primer-hair" d="M268 156 C 380 92, 560 84, 700 128" fill="none" stroke-dasharray="2 9"/>
+
+          <!-- the discard pile -->
+          <g transform="rotate(-3 790 282)"><path d="M726 268 Q722 268 722 273 L722 292 Q722 297 728 297 L850 296 Q856 296 856 291 L856 272 Q856 267 851 267 Z" fill="#ffffff"/></g>
+          <g transform="rotate(2 792 250)"><path d="M730 238 Q726 238 726 243 L726 260 Q726 265 732 265 L852 264 Q858 264 858 259 L858 242 Q858 237 853 237 Z" fill="#ffffff"/></g>
+          <g transform="rotate(-1 790 222)"><path d="M728 210 Q724 210 724 215 L724 230 Q724 235 730 235 L850 234 Q856 234 856 229 L856 214 Q856 209 851 209 Z" fill="#fdfaf3"/></g>
+
+          <!-- the clock -->
+          <circle cx="452" cy="220" r="38" fill="#ffffff"/>
+          <path class="primer-hair" d="M452 188 L452 196 M452 244 L452 252 M420 220 L428 220 M476 220 L484 220" fill="none"/>
+          <path d="M452 220 L452 199 M452 220 L466 228" fill="none"/>
+
+          <!-- labels -->
+          <text class="lang-zh" x="156" y="344" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">2000 万行</text>
+          <text class="lang-en" x="156" y="344" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">20,000,000 rows</text>
+          <text class="lang-zh" x="338" y="283" font-size="15" font-weight="600" fill="#243244">你要找的那一行</text>
+          <text class="lang-en" x="338" y="283" font-size="15" font-weight="600" fill="#243244">the row you want</text>
+          <text class="lang-zh" x="452" y="168" text-anchor="middle" font-size="16" font-weight="600" fill="#55617a">一行一秒</text>
+          <text class="lang-en" x="452" y="168" text-anchor="middle" font-size="16" font-weight="600" fill="#55617a">one row a second</text>
+          <text class="lang-zh" x="790" y="344" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">≈ 七个多月</text>
+          <text class="lang-en" x="790" y="344" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">≈ seven-plus months</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en"><b>One row per second:</b> 20,000,000 rows ≈ 231 days — over seven months of turning pages.</span>
+          <span class="lang-zh"><b>一行一秒：</b>2000 万行 ≈ 231 天，写成月就是七个多月。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ③ 有了索引 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">With an index, how does it find the row?</span>
+        <span class="lang-zh">有了索引，它怎么找？</span>
+      </h2>
+      <p>
+        <span class="lang-en">It never flips the table itself — it flips the sorted copy. Each check discards half; 25 checks cut 20 million rows to one.</span>
+        <span class="lang-zh">数据库不翻原表，先翻这份排好序的副本。每比一次就丢掉剩下的一半，25 次就从 2000 万行剩 1 行。</span>
+      </p>
+
+      <figure class="primer-figure fig-wide">
+        <svg viewBox="0 76 900 290" role="img"
+          aria-label="走索引的三步：翻开索引、对半排除、按行号取原行">
+          <!-- ① the index booklet -->
+          <path d="M92 122 Q84 122 84 130 L84 296 Q84 304 92 304 L204 304 Q212 304 212 296 L212 130 Q212 122 204 122 Z" fill="#7a5cd6"/>
+          <path d="M102 144 L194 144.8 L193.4 262 L102.6 261.2 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M114 164 L182 164.6" fill="none"/>
+          <path class="primer-hair" d="M114 186 L182 186.4" fill="none"/>
+          <path class="primer-hair" d="M114 208 L182 208.8" fill="none"/>
+          <path class="primer-hair" d="M114 230 L182 230.2" fill="none"/>
+          
+          <!-- arrow ① → ② -->
+          <path d="M226 214 C 268 210, 296 210, 330 212" fill="none"/>
+          <path d="M330 212 L318 205 M330 212 L318 219" fill="none"/>
+
+          <!-- ② the sorted strip, halved and halved -->
+          <path d="M368 96 Q360 96 360 104 L360 328 Q360 336 368 336 L490 336 Q498 336 498 328 L498 104 Q498 96 490 96 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M360 126 L498 126.6" fill="none"/>
+          <path class="primer-hair" d="M360 156 L498 156.3" fill="none"/>
+          <path class="primer-hair" d="M360 186 L498 186.7" fill="none"/>
+          <path class="primer-hair" d="M360 216 L498 216.4" fill="none"/>
+          <path class="primer-hair" d="M360 246 L498 246.1" fill="none"/>
+          <path class="primer-hair" d="M360 276 L498 276.5" fill="none"/>
+          <path class="primer-hair" d="M360 306 L498 306.2" fill="none"/>
+          <!-- discarded halves: tinted + struck -->
+          <path d="M361 97 L497 97.6 L497 215 L361 215.6 Z" fill="#243244" fill-opacity=".07"/>
+          <path class="primer-hair" d="M372 108 L488 206" fill="none"/>
+          <path d="M361 277 L497 277.4 L497 335 L361 335.3 Z" fill="#243244" fill-opacity=".07"/>
+          <path class="primer-hair" d="M372 284 L488 330" fill="none"/>
+          <!-- the surviving cell -->
+          <path d="M362 247 L496 247.5 L496 275 L362 275.4 Z" fill="#7a5cd6" fill-opacity=".18"/>
+          <path d="M366 274 L492 274.6" fill="none" stroke="#7a5cd6"/>
+          
+          <!-- arrow ② → ③ -->
+          <path d="M512 258 C 556 254, 586 250, 622 240" fill="none"/>
+          <path d="M622 240 L609 236 M622 240 L611 248" fill="none"/>
+
+          <!-- ③ the table, row fetched -->
+          <path d="M668 96 Q660 96 660 104 L660 286 Q660 294 668 294 L836 294 Q844 294 844 286 L844 104 Q844 96 836 96 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M660 128 L844 128.6" fill="none"/>
+          <path class="primer-hair" d="M660 160 L844 160.2" fill="none"/>
+          <path class="primer-hair" d="M660 192 L844 192.5" fill="none"/>
+          <path class="primer-hair" d="M660 224 L844 224.3" fill="none"/>
+          <path class="primer-hair" d="M660 256 L844 256.7" fill="none"/>
+          <!-- the fetched row card -->
+          <path d="M646 306 Q640 306 640 312 L640 334 Q640 340 646 340 L850 340 Q856 340 856 334 L856 312 Q856 306 850 306 Z" fill="#ffffff"/>
+          <path d="M652 332 L716 331.6 Q722 331.4 722 328 Q722 324.8 716 325 L652 325.4 Z" fill="#ffd23f"/>
+          <path class="primer-hair" d="M736 328 L830 327.5" fill="none"/>
+          <path d="M752 196 C 762 232, 748 272, 716 300" fill="none"/>
+          <path d="M716 300 L720 287 M716 300 L729 298" fill="none"/>
+          
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en"><b>The same query at machine speed:</b> full scan 4 seconds, index 4 milliseconds — a thousand times faster.</span>
+          <span class="lang-zh"><b>同一个查询，换成机器的速度：</b>全表扫描 4 秒，走索引 4 毫秒——快了一千倍。</span>
+        </figcaption>
+      </figure>
+
+      <div class="steps-grid">
+        <div class="primer-step">
+          <span class="primer-step-num">1</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">Open the index, not the table</span>
+              <span class="lang-zh">翻开索引，不翻原表</span>
+            </h3>
+          </div>
+        </div>
+        <div class="primer-step">
+          <span class="primer-step-num">2</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">Halve, halve again — one entry left</span>
+              <span class="lang-zh">一次丢一半，剩下一格</span>
+            </h3>
+          </div>
+        </div>
+        <div class="primer-step">
+          <span class="primer-step-num">3</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">Take the row number, fetch the row</span>
+              <span class="lang-zh">拿着行号，去取那一行</span>
+            </h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ 代价 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">An index takes space too</span>
+        <span class="lang-zh">索引也要占地方</span>
+      </h2>
+      <p>
+        <span class="lang-en">An index is stored for real: a 3GB table carries about 300MB — <span class="primer-mark">one tenth of the table</span>. Every insert writes twice, so writing slows down a little.</span>
+        <span class="lang-zh">索引自己也占硬盘：3GB 的表，索引约 300MB，是<span class="primer-mark">表的十分之一</span>。每存一条新数据，表和索引都要各写一次，写入会慢一点。</span>
+      </p>
+
+      <figure class="primer-figure fig-wide">
+        <svg viewBox="0 0 900 360" role="img"
+          aria-label="索引的代价：多占大约十分之一的空间，而且每次写入都要写两份">
+          <!-- shelf -->
+          <path d="M106 300 Q100 300 100 306 Q100 313 108 313 L792 314 Q800 314 800 308 Q800 301 794 301 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M150 314 L150 336 M750 315 L750 336" fill="none"/>
+
+          <!-- the table: a heavy tome -->
+          <path d="M268 132 Q260 132 260 140 L260 292 Q260 300 268 300 L492 301 Q500 301 500 293 L500 141 Q500 133 492 133 Z" fill="#ffffff"/>
+          <path d="M272 148 L488 149 L487 285 L273 284 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M274 162 L486 162.8" fill="none"/>
+          <path class="primer-hair" d="M274 178 L486 178.4" fill="none"/>
+          <path class="primer-hair" d="M274 194 L486 194.7" fill="none"/>
+          <path class="primer-hair" d="M274 210 L486 210.2" fill="none"/>
+          <path class="primer-hair" d="M274 226 L486 226.6" fill="none"/>
+          <path class="primer-hair" d="M274 242 L486 242.3" fill="none"/>
+          <path class="primer-hair" d="M274 258 L486 258.8" fill="none"/>
+          <path class="primer-hair" d="M274 274 L486 274.1" fill="none"/>
+
+          <!-- the index: a slim booklet, a tenth the girth -->
+          <path d="M544 156 Q538 156 538 162 L538 294 Q538 300 544 300 L566 300 Q572 300 572 294 L572 162 Q572 156 566 156 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M546 176 L564 176.4 M546 196 L564 196.6 M546 216 L564 216.2" fill="none"/>
+
+          <!-- a new row arrives, written twice -->
+          <path d="M604 60 Q596 60 596 68 L596 112 Q596 120 604 120 L746 120 Q754 120 754 112 L754 68 Q754 60 746 60 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M614 82 L736 82.6 M614 100 L708 100.4" fill="none"/>
+          <path d="M618 120 C 600 134, 584 142, 568 150" fill="none"/>
+          <path d="M568 150 L580 143 M568 150 L579 156" fill="none"/>
+          <path d="M596 96 C 500 82, 420 94, 384 124" fill="none"/>
+          <path d="M384 124 L397 119 M384 124 L396 131" fill="none"/>
+
+          <!-- labels -->
+          <text class="lang-zh" x="676" y="44" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">来了一条新数据</text>
+          <text class="lang-en" x="676" y="44" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">a new row arrives</text>
+          <text class="lang-zh" x="478" y="70" text-anchor="middle" font-size="16" font-weight="600" fill="#5b3fbf">写两次</text>
+          <text class="lang-en" x="478" y="70" text-anchor="middle" font-size="16" font-weight="600" fill="#5b3fbf">written twice</text>
+          <text class="lang-zh" x="380" y="342" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">表 · 3GB</text>
+          <text class="lang-en" x="380" y="342" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">the table · 3GB</text>
+          <text class="lang-zh" x="555" y="342" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">索引 · 300MB</text>
+          <text class="lang-en" x="555" y="342" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">index · 300MB</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">A heavy tome and its slim booklet: a tenth more shelf, and no more page-flipping.</span>
+          <span class="lang-zh">一本大部头配一本薄册子：多占十分之一的地方，换来不用逐页翻。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑤ 回顾 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <aside class="primer-recap recap-flat">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">An index is a sorted copy pointing each value at its row.</span>
+              <span class="lang-zh">索引是一份排好序的副本，记着每个值在原表的第几行。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">A query halves its way through the index, then fetches by row number.</span>
+              <span class="lang-zh">查询在索引里一次丢一半，最后按行号直接取那一行。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">The same query drops from 4 seconds to 4 milliseconds; the cost is space and slower writes.</span>
+              <span class="lang-zh">查询从 4 秒变 4 毫秒；代价是占空间、写入慢一点。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Canonical page · primer-design · every figure checks out on a calculator</span>
+    <span class="lang-zh">范本页 · primer-design · 页面上每个数字都能用计算器验证</span>
+    · v1 · 2026-08-24
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: primer
+Page-type: concept
+Created: 2026-08-24
+
+Decisions (5):
+1. [book-metaphor-carries-every-figure] chose "all five figures speak the book metaphor (tome, index page, flipping, booklet on a shelf)" over "database cylinders and B-tree diagrams". Because: the reader has never seen a B-tree but has used a back-of-book index; the mapping figure pins the metaphor one-to-one (entry=value, page number=row number) so it teaches instead of decorating.
+2. [numerals-twice-prose-stays-two-sentences] chose "the circled numerals drawn inside the lookup figure AND repeated as .primer-step rows carrying h3 phrases only" over "three steps each with its own paragraph". Because: one screen one idea allows two prose sentences per section; putting step detail in the figure and step names in h3 keeps the budget without hiding content.
+3. [every-number-recomputable] chose "2000万行×1秒=231天(七个多月) · log2(2000万)≈24.3→25次 · 4s→4ms=1000× · 300MB/3GB=1/10" over "impressive-sounding uncheckable stats". Because: one wrong reference costs more than a bare number — the reader who checks one and finds it wrong stops believing the page.
+4. [violet-is-the-index-itself] chose "violet always paints the index artifact (booklet, index panel, surviving cell) and yellow only the found spot" over "violet as generic decoration". Because: the brand colour then IS the concept being taught — wherever you see violet, that is the sorted copy; the eye learns the vocabulary before the words do.
+5. [two-term-bubbles-only] chose "translate exactly 索引 and 全表扫描; say 对半排除 in plain words instead of naming binary search" over "a bubble for every term the topic touches". Because: a concept page that translates three-plus terms reads like a glossary; the third term's mechanism is fully drawn in the figure, so its name would be jargon with no job.
+
+Known trade-offs:
+- On a 375px phone the .fig-wide rule keeps strokes at picture-book weight, but in-figure labels shrink to ~6px; the figcaptions repeat every number so a phone reader loses nothing factual.
+- The analogy card's drawing is the mapping figure's left half at thumbnail size — redundant on desktop, deliberate on mobile where the card leads the section alone.
+- The hero's right book and the lookup figure both draw the same violet booklet; one fewer new scene, in exchange for a consistent visual vocabulary (violet booklet = the index).
+- The cost figure approximates 1/10 girth visually (drawable at 3.4px strokes) and hands the exact ratio to the caption; drawing a true 18-unit-wide booklet would be all outline and no fill.
+- The cost figure fills 78% of its viewBox width (the loosest on the page) — kept at the uniform 900-unit working width on purpose, because that uniformity is what makes the .fig-wide mobile stroke rule land at exactly 3.35px on every full-width figure.
+/design-review:self-diff -->
+
+</body>
+</html>

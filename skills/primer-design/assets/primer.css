@@ -50,7 +50,11 @@
   --primer-card:        #ffffff;  /* card ground — ink on it = 13.01:1 */
   --primer-mut:         #55617a;  /* captions, figcaptions, meta · 5.97:1 paper,
                                    * 6.22:1 card. Solid, deliberately. */
-  --primer-violet-soft: #efe9fc;  /* analogy + term-bubble ground · ink 10.98:1 */
+  --primer-violet-soft: #efe9fc;  /* term-bubble ground (incl. the tail's inner
+                                   * triangle) · ink 10.98:1. NOT the analogy
+                                   * card's ground — that card is WHITE and
+                                   * stands on its 3.4px violet frame; a tinted
+                                   * ground would flatten it into a colour block. */
   --primer-go-soft:     #e9f5ee;  /* recap ground — a tint, never a text colour */
 
   /* --- Type --- */
@@ -214,15 +218,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: clamp(58px, 6vw, 78px);
-  height: clamp(58px, 6vw, 78px);
+  /* Render-judged on the concept canonical (2026-08-24): 40px-in-78px read as
+   * a list bullet next to a 36px h2, not as the signature oversized numeral.
+   * 56px-in-96px reads picture-book without out-shouting the figure; the
+   * spec draft's 128px stays rejected — it competes with the illustration
+   * for the section's subject slot. Mirrored in design-tokens.md §4. */
+  width: clamp(72px, 7.5vw, 96px);
+  height: clamp(72px, 7.5vw, 96px);
   border: var(--primer-stroke) solid var(--primer-violet);
   border-radius: 52% 48% 51% 49% / 49% 52% 48% 51%;
   background: var(--primer-card);
   color: var(--primer-violet-ink);
   font-family: var(--primer-font-display);
   font-weight: 600;
-  font-size: clamp(28px, 3.2vw, 40px);
+  font-size: clamp(40px, 4.4vw, 56px);
   line-height: 1;
   font-variant-numeric: lining-nums;
 }
@@ -387,6 +396,11 @@
 /* Interior detail — gear teeth, drawer seams, tick marks. Never an outline. */
 .primer-figure svg .primer-hair,
 .primer-analogy-fig svg .primer-hair { stroke-width: var(--primer-stroke-hair); }
+/* <text> must NOT inherit the 3.4px ink stroke set on the <svg> — stroked
+ * glyphs render as illegible blobs at label sizes. Labels are type, not line
+ * work: they get their weight from font-weight, never from stroke. */
+.primer-figure svg text,
+.primer-analogy-fig svg text { stroke: none; }
 .primer-figcaption {
   color: var(--primer-mut);
   font-size: 14.5px;
@@ -458,10 +472,20 @@ html:not([data-lang]) .lang-en { display: none; }
 
   /* The numeral stays big — it is the wayfinding — but stops eating the row. */
   .primer-step { gap: var(--primer-space-4); }
-  .primer-step-num { width: 54px; height: 54px; font-size: 26px; }
+  .primer-step-num { width: 64px; height: 64px; font-size: 34px; }
 
   .primer-recap { padding: var(--primer-space-4) var(--primer-space-5); }
   .primer-nav-inner { height: 58px; }
+
+  /* Full-width section figures (the ~900-unit-viewBox working size) drop under
+   * the 3px picture-book floor on a phone: 3.4 user units render at
+   * 335/900 ≈ 1.27px. `.fig-wide` on the figure restores the floor —
+   * 9 × 335/900 = 3.35px — and the hair follows at the same 0.53 ratio so the
+   * detail layer doesn't collapse (illustration-craft §3). Both selectors keep
+   * .primer-figure so they outrank Section J without depending on order.
+   * Hoisted from the per-page fix: every page-type ships full-width figures. */
+  .primer-figure.fig-wide svg              { stroke-width: 9px; }
+  .primer-figure.fig-wide svg .primer-hair { stroke-width: 4.8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

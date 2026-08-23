@@ -76,7 +76,7 @@ primer 的 `forbiddenFonts`:`Fraunces` / `Instrument Serif` / `Poppins` / `Lora`
 | hero lede(`.primer-hero-lede`) | `clamp(17px, 1.6vw, 20px)` | **全页只有这一处**是"读本大正文"那一档;色是 `--primer-mut`,`max-width: 40ch`(手机取消) |
 | 正文基准 | `17px` / 行高 1.66 / `max-width: 62ch` | `.primer-body`;手机(≤768px)降到 `16.5px` |
 | 比喻卡正文(`.primer-analogy-body p`) | 跟基准走:`17px`(手机 16.5px)· `max-width: 54ch` | CSS 只给它收窄了行宽,**没有加大字号** —— 比喻卡的份量来自 3.4px 的紫边框和插画,不是来自字号 |
-| 圆号数字 | `clamp(28px, 3.2vw, 40px)`,装在 `clamp(58px, 6vw, 78px)` 的圈里 | 手机上固定 26px / 54px |
+| 圆号数字 | `clamp(40px, 4.4vw, 56px)`,装在 `clamp(72px, 7.5vw, 96px)` 的圈里 | 手机上固定 34px / 64px |
 | 回顾条标题 | `clamp(20px, 2.2vw, 25px)` | |
 | `.primer-term-plain`(人话那半) | `15.5px` | |
 | figcaption / `.primer-term-jargon` | `14.5px` / `14px` | figcaption `max-width: 68ch` |
@@ -90,8 +90,10 @@ primer 的 `forbiddenFonts`:`Fraunces` / `Instrument Serif` / `Poppins` / `Lora`
   它跟基准走 —— primer.css:260 给 `.primer-analogy-body p` 的只有 `max-width: 54ch`。
   绘本的"大字正文"就出现在 hero 那一句,不铺到通篇 —— 通篇 19px 会把每节的正文块顶到插画的高度,
   一屏一概念就守不住了。
-- 草案写圆号数字 `clamp(72px, 10vw, 128px)`。实际 `clamp(28px, 3.2vw, 40px)` 装在 58–78px 的圈里。
-  128px 的圆号在 1080 工作档里会跟插画抢一节的主体位;数字是路标,不是主角。
+- 草案写圆号数字 `clamp(72px, 10vw, 128px)`。实际 `clamp(40px, 4.4vw, 56px)` 装在 72–96px 的圈里 ——
+  这个值是拿 concept canonical 的截图定的:最早的 40px-in-78px 挨着 36px 的 h2 看着像列表圆点,
+  不像招牌圆号,放大到 56px-in-96px 才有绘本感;草案的 128px 仍然不要 ——
+  那个尺寸在 1080 工作档里会跟插画抢一节的主体位,数字是路标,不是主角。
 
 ## §5 间距阶梯
 
