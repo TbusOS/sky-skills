@@ -31,7 +31,7 @@ import process from 'node:process';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
 const AUDIT = resolve(__dirname, 'visual-audit.mjs');
-const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage', 'glass', 'eclat', 'lectern', 'atelier'];
+const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage', 'glass', 'eclat', 'lectern', 'atelier', 'primer'];
 
 function parseArgs(argv) {
   const out = {};
@@ -45,7 +45,7 @@ function parseArgs(argv) {
 
 const HELP = `regression-gate.mjs — held-out anti-overfit gate (component 09)
 
-  --baseline --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier> [--theme=dark|light]
+  --baseline --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer> [--theme=dark|light]
        record error/warning counts for every canonical of the skill
   --check --skill=<s> [--theme=dark|light]
        re-run and FAIL (exit 1) if any canonical gained errors/warnings

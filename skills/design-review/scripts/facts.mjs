@@ -54,6 +54,7 @@ const ROSTER = {
   'eclat-design': 'design',
   'lectern-design': 'design',
   'atelier-design': 'design',
+  'primer-design': 'design',
 
   'design-review': 'harness',
   'design-planner': 'harness',
@@ -101,6 +102,8 @@ const SHOWCASE_SURFACES = [
   'demos/glass-design/index.html',
   'demos/eclat-design/index.html',
   'demos/lectern-design/index.html',
+  'demos/atelier-design/index.html',
+  'demos/primer-design/index.html',
 ];
 
 const EN_NUM = {

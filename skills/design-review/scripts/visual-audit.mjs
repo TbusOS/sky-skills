@@ -211,6 +211,23 @@ const SKILL_SIGNATURES = {
     ],
     forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
   },
+  primer: {
+    name: 'primer violet',
+    accents: [[122, 92, 214]],         // #7a5cd6 — ≥64 per-channel from all 8 sibling accents
+    threshold: 0.004,                   // provisional; recalibrate on the 3 canonicals (Task 6)
+    // ember gold, sage green and lectern navy OMITTED on purpose (spec §4.1):
+    // marker-yellow-over-ink anti-aliasing lands inside TOL 55 of #c49464;
+    // go-green white-blends land inside TOL 55 of #97B077; primer ink #243244
+    // is inside TOL 55 of lectern #1d3a6e and violet-ink #5b3fbf inside #2f5bb0.
+    forbiddenColors: [
+      { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
+      { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
+      { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
+      { rgb: [255, 91, 52], note: 'eclat flare #ff5b34' },
+      { rgb: [221, 79, 146], note: 'atelier rose #DD4F92' },
+    ],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk'],
+  },
 };
 
 function detectSkill(target, html) {

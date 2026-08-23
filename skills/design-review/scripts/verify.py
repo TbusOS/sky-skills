@@ -145,6 +145,15 @@ SKILLS: dict[str, dict] = {
         "container_modifiers": ("narrow", "wide"),
         "hero_advice": "atl-page (1280px) or atl-page--wide (1440px)",
     },
+    "primer": {
+        "prefix": "primer-",
+        "css": "primer.css",
+        "dir": "primer-design",
+        "narrow_hero": {"primer-container--narrow"},
+        "acceptable_hero": {"primer-container", "primer-container--wide"},
+        "container_modifiers": ("narrow", "wide"),
+        "hero_advice": "primer-container (default 1080px) or primer-container--wide (1280px)",
+    },
 }
 
 PLACEHOLDER_PATTERN = re.compile(

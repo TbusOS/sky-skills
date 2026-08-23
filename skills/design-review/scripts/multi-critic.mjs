@@ -54,7 +54,7 @@ multi-critic.mjs — prepare 4 specialist critic prompts in parallel
 
 Usage:
   node skills/design-review/scripts/multi-critic.mjs <target.html>
-    [--skill=anthropic|apple|ember|sage|glass|eclat|lectern|atelier]
+    [--skill=anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer]
     [--page=pricing|landing|docs-home|feature-deep]
     [--out-dir=<dir>]          default: shots/
 

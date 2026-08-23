@@ -9,7 +9,7 @@
 //
 // Usage:
 //   node skills/design-review/scripts/sprint-contract.mjs \
-//     --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier> \
+//     --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer> \
 //     --page=<pricing|landing|docs-home|feature-deep|any-other-type>
 //
 // Unknown page-types are accepted: the contract borrows structure from
@@ -25,7 +25,7 @@ import process from 'node:process';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
 
-const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage', 'glass', 'eclat', 'lectern', 'atelier'];
+const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage', 'glass', 'eclat', 'lectern', 'atelier', 'primer'];
 const VALID_PAGES = ['pricing', 'landing', 'docs-home', 'feature-deep'];
 
 // Unknown page-types are not rejected — they borrow structure from the
@@ -130,6 +130,15 @@ const BRAND = {
     // within the matcher's TOL 55 of #d97757. Mirrors visual-audit.mjs.
     forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#c49464 (ember)', '#22D3EE (glass)', '#1d3a6e (lectern)'],
   },
+  primer: {
+    accent: '#7a5cd6',
+    name: 'primer violet',
+    minCoverage: '0.4%',
+    howTo: 'violet is carried by the oversized circled step numerals, the analogy-card frame, the nav wordmark dot and the hero illustration primary — a primer page announces its violet in the first screen',
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk'],
+    // ember gold / sage green / lectern navy NOT forbidden — mirrors visual-audit.mjs, spec §4.1.
+    forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#22D3EE (glass)', '#ff5b34 (eclat)', '#DD4F92 (atelier)'],
+  },
 };
 
 // Per-skill diagram sizing + color-presence contract (mirror of each skill's
@@ -167,6 +176,10 @@ const DIAGRAM = {
     tiers: '1280 `atl-page` (the working tier — one `atl-app` glass shell sits inside it) · 1440 `atl-page--wide` (**MUST when the shell carries the 244px rail plus a 4-column KPI row**) · there is no hero tier: this skill draws applications, and an application has no hero',
     color: 'Charts are built from ONE ramp — the coral→rose `--atl-grad` — over a neutral `--atl-track`. The track is not decoration: it is what turns a column into a gauge, and it is why a 31% bar still reads as "31 out of 100" rather than "short". Second hues are reserved for verdicts (`--atl-up` / `--atl-down` / `--atl-warn`) and never for series. A rainbow series palette is the generic-admin-template tell.',
   },
+  primer: {
+    tiers: '720 `primer-container--narrow` is for TEXT only — every explainer figure rides the full 1080 `primer-container` (≤14 labels) · 1280 `primer-container--wide` (**MUST when ≥16 labels or ≥3 cols**); a primer figure IS the section, never a sidebar',
+    color: 'Thick-outline picture-book language: 3–4px rounded ink strokes + flat violet/yellow/green fills. Label budget is HALF the sibling skills — a figure that wants 20 labels must become two screens. One figure teaches exactly one idea; a decorative rainbow is the generic-infographic tell.',
+  },
 };
 
 function parseArgs(argv) {
@@ -203,7 +216,7 @@ sprint-contract.mjs — generate a contract for a new page
 
 Usage:
   node skills/design-review/scripts/sprint-contract.mjs \\
-    --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier> \\
+    --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer> \\
     --page=<pricing|landing|docs-home|feature-deep|any-other-type> \\
     [--format=md|json]
 

@@ -48,6 +48,10 @@ const TARGET = {
   // page-types: the console, a search/booking flow, a record, the settings
   // form nobody designs, and the sign-in nobody skips.
   atelier: ['dashboard', 'booking', 'detail', 'settings', 'signin'],
+  // primer explains things, so its page-types are EXPLAINER shapes rather than
+  // marketing ones: "what X is", "what happens step by step", "how A differs
+  // from B". A page-type here names a teaching order, not a sales stage.
+  primer: ['concept', 'process', 'compare'],
 };
 
 function parseArgs(argv) {

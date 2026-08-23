@@ -14,7 +14,7 @@
 //
 // Usage:
 //   node audit.mjs <path-or-url>
-//                  [--skill=anthropic|apple|ember|sage|glass|eclat|lectern|atelier]
+//                  [--skill=anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer]
 //                  [--out=<dir>]
 //                  [--repo=<path>]            // webroot for serving CSS/img
 //                  [--include='**/*.html']    // glob (NB: simple substring, not glob)
@@ -143,7 +143,7 @@ function printHelp() {
     '  https://example.com/p   fetch via Playwright into a tmp file, then audit',
     '',
     'flags:',
-    '  --skill=<name>          force skill (anthropic|apple|ember|sage|glass|eclat|lectern|atelier); auto-detect otherwise',
+    '  --skill=<name>          force skill (anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer); auto-detect otherwise',
     '  --out=<dir>             where to write reports (default <repo>/shots/)',
     '  --repo=<path>           webroot for visual-audit static server',
     '  --include=<substr>      filename filter (default ".html")',

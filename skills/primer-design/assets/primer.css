@@ -1,0 +1,457 @@
+/* === Primer Design System — Core CSS ===
+ * Last verified: 2026-08-24
+ * Docs: ../SKILL.md · ../references/design-tokens.md · ../references/illustration-craft.md
+ *
+ * Identity: a picture-explainer read-along. Paper-white ground, thick-outline
+ * illustrations, one idea per screen. The three moves that make a page primer
+ * rather than "a landing page with pictures":
+ *   1. every abstraction arrives with an analogy card (.primer-analogy) BEFORE
+ *      it arrives with a definition;
+ *   2. structure is carried by oversized circled numerals (.primer-step-num),
+ *      not by dense headings;
+ *   3. jargon is never used before .primer-term has translated it.
+ *
+ * Single theme on purpose. A primer is a daylight document: there is no dark
+ * variant, because the whole aesthetic is "printed page you can read over
+ * someone's shoulder".
+ *
+ * Every colour that carries TEXT is a SOLID value — alpha is allowed only for
+ * shadows and hairlines. Alpha-faded body text is the standard way this family
+ * of pages fails axe color-contrast (atelier paid for that lesson), so the ink
+ * ramp has real steps instead of one ink at three alphas.
+ */
+
+/* ---------- Section A: Tokens ---------- */
+:root {
+  /* --- The seven registered tokens (SKILL.md §6 · spec §3.1) --- */
+  --primer-paper:      #fdfaf3;   /* page ground — warm paper white */
+  --primer-ink:        #243244;   /* headings + body · 12.48:1 on paper */
+  --primer-violet:     #7a5cd6;   /* THE brand colour · 4.65:1 on paper, so it
+                                   * is legal as text at any size; carried by
+                                   * the circled numerals, the analogy frame,
+                                   * the wordmark dot and the hero figure */
+  --primer-violet-ink: #5b3fbf;   /* deeper violet for small emphasis text ·
+                                   * 6.93:1 on paper. If a violet reads thin,
+                                   * the fix is ALWAYS to go deeper, never to
+                                   * fade the ink. */
+  --primer-marker:     #ffd23f;   /* highlighter yellow · ink on it = 9.01:1.
+                                   * ONE STEP ONLY. A darkened derivative
+                                   * (~230,178,60) lands inside the visual-audit
+                                   * TOL-55 box of ember gold #c49464 and is a
+                                   * cross-skill smell on sight. Need heavier
+                                   * emphasis? Use --primer-violet-ink text. */
+  --primer-go:         #3aa66b;   /* "got it" green — ticks and the recap rail.
+                                   * GRAPHIC USE ONLY: 2.94:1 on paper, so it
+                                   * must never carry text. Text inside a green
+                                   * area stays --primer-ink. */
+  --primer-line:       #e8e2d4;   /* hairline rules, in the paper's own family */
+
+  /* --- Supporting neutrals + tints (derived, not registered) --- */
+  --primer-card:        #ffffff;  /* card ground — ink on it = 13.01:1 */
+  --primer-mut:         #55617a;  /* captions, figcaptions, meta · 5.97:1 paper,
+                                   * 6.22:1 card. Solid, deliberately. */
+  --primer-violet-soft: #efe9fc;  /* analogy + term-bubble ground · ink 10.98:1 */
+  --primer-go-soft:     #e9f5ee;  /* recap ground — a tint, never a text colour */
+
+  /* --- Type --- */
+  /* Fredoka has zero CJK coverage: a zh display string is really set in Noto
+   * Sans SC. That is why display sizes stay under ~64px, where the rounded /
+   * not-rounded mismatch stops being visible. See assets/fonts.css. */
+  --primer-font-display: "Fredoka", "Noto Sans SC", "PingFang SC", system-ui, sans-serif;
+  --primer-font-body:    "Nunito", "Noto Sans SC", "PingFang SC", system-ui, sans-serif;
+  --primer-font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* --- Space + shape --- */
+  --primer-space-1: 4px;   --primer-space-2: 8px;   --primer-space-3: 14px;
+  --primer-space-4: 20px;  --primer-space-5: 28px;  --primer-space-6: 40px;
+  --primer-space-7: 56px;  --primer-space-8: 80px;  --primer-space-9: 112px;
+
+  --primer-maxw:        1080px;   /* the working tier — where figures live */
+  --primer-maxw-narrow: 720px;    /* TEXT ONLY. Never wrap a figure in it. */
+  --primer-maxw-wide:   1280px;   /* ≥16 labels or ≥3 columns */
+  --primer-gutter:      32px;
+
+  --primer-radius-sm:   10px;
+  --primer-radius:      18px;
+  --primer-radius-lg:   26px;
+
+  /* The outline weight that makes an illustration a primer illustration.
+   * 3–4px, round caps, no hairlines: below 3px the drawing stops reading as
+   * picture-book and starts reading as a generic icon set. */
+  --primer-stroke:      3.4px;
+  --primer-stroke-hair: 1.8px;   /* interior detail only — teeth, seams, ticks */
+
+  --primer-shadow: 0 1px 2px rgba(36, 50, 68, .05), 0 10px 26px rgba(36, 50, 68, .06);
+  --primer-ease: cubic-bezier(.22, 1, .36, 1);
+}
+
+/* ---------- Section B: Base + typography ---------- */
+.primer-body {
+  margin: 0;
+  background: var(--primer-paper);
+  color: var(--primer-ink);
+  font-family: var(--primer-font-body);
+  font-size: 17px;
+  line-height: 1.66;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Headings are element-scoped rather than classed: a primer page has very few
+ * of them (one idea per screen), and canonicals should be writing plain <h2>. */
+.primer-body h1,
+.primer-body h2,
+.primer-body h3 {
+  font-family: var(--primer-font-display);
+  font-weight: 600;
+  color: var(--primer-ink);
+  letter-spacing: -.015em;
+  margin: 0;
+}
+.primer-body h1 { font-size: clamp(36px, 5.2vw, 60px); line-height: 1.08; }
+.primer-body h2 { font-size: clamp(26px, 3.2vw, 36px); line-height: 1.18; }
+.primer-body h3 { font-size: clamp(19px, 2vw, 22px); line-height: 1.3; font-weight: 500; }
+
+/* Wrapped in :where() so these are zero-specificity DEFAULTS. Without it,
+ * `.primer-body p` (0,1,1) outranks every single-class component override —
+ * .primer-hero-lede, .primer-analogy-lead and .primer-recap-title all set
+ * their own margins and all three would silently lose. */
+:where(.primer-body p) { margin: var(--primer-space-3) 0 0; max-width: 62ch; }
+:where(.primer-body p:first-child) { margin-top: 0; }
+.primer-body strong { font-weight: 700; color: var(--primer-ink); }
+.primer-body a { color: var(--primer-violet-ink); text-decoration-thickness: 2px;
+  text-underline-offset: 3px; }
+.primer-body a:hover { color: var(--primer-violet); }
+
+/* Keyboard visibility — stripped outlines are an audit error, not a taste call. */
+.primer-body a:focus-visible,
+.primer-body button:focus-visible {
+  outline: 3px solid var(--primer-violet-ink);
+  outline-offset: 3px;
+  border-radius: var(--primer-radius-sm);
+}
+
+/* ---------- Section C: Containers + page skeleton ---------- */
+.primer-container {
+  max-width: var(--primer-maxw);
+  margin: 0 auto;
+  padding: 0 var(--primer-gutter);
+}
+/* Modifiers never travel alone — always `primer-container primer-container--x`. */
+.primer-container--narrow { max-width: var(--primer-maxw-narrow); }
+.primer-container--wide   { max-width: var(--primer-maxw-wide); }
+
+.primer-nav {
+  border-bottom: 1px solid var(--primer-line);
+  background: var(--primer-paper);
+}
+.primer-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--primer-space-4);
+  height: 64px;
+  max-width: var(--primer-maxw);
+  margin: 0 auto;
+  padding: 0 var(--primer-gutter);
+}
+.primer-brand {
+  font-family: var(--primer-font-display);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--primer-space-2);
+}
+/* The violet's first appearance on the page, and the cheapest one. */
+.primer-brand-dot {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--primer-violet);
+  flex: 0 0 11px;
+}
+.primer-nav-tools { display: flex; align-items: center; gap: var(--primer-space-3); }
+
+/* One section = one idea. The generous padding is the rhythm, not decoration:
+ * it is what stops three concepts sharing a screen. */
+.primer-section { padding: var(--primer-space-8) 0; }
+.primer-section + .primer-section { border-top: 1px solid var(--primer-line); }
+
+.primer-footer {
+  border-top: 1px solid var(--primer-line);
+  color: var(--primer-mut);
+  font-size: 14px;
+  padding: var(--primer-space-6) 0;
+  margin-top: var(--primer-space-7);
+  text-align: center;
+}
+
+/* ---------- Section D: Hero ---------- */
+/* The hero says three things and stops: what this page explains, one sentence
+ * of "why you'd care", and the main illustration. verify.py requires the first
+ * element inside .primer-hero to be a .primer-container (or --wide). */
+.primer-hero { padding: var(--primer-space-8) 0 var(--primer-space-7); }
+.primer-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: var(--primer-space-7);
+  align-items: center;
+}
+.primer-hero-lede {
+  font-size: clamp(17px, 1.6vw, 20px);
+  color: var(--primer-mut);
+  margin-top: var(--primer-space-4);
+  max-width: 40ch;
+}
+
+/* ---------- Section E: Signature move 3 — oversized circled numerals ---------- */
+/* A hand-drawn circle, not a perfect one: the asymmetric radius is what keeps
+ * the numeral feeling drawn rather than generated. */
+.primer-step { display: flex; gap: var(--primer-space-5); align-items: flex-start; }
+.primer-step-body { flex: 1; min-width: 0; }
+.primer-step-num {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(58px, 6vw, 78px);
+  height: clamp(58px, 6vw, 78px);
+  border: var(--primer-stroke) solid var(--primer-violet);
+  border-radius: 52% 48% 51% 49% / 49% 52% 48% 51%;
+  background: var(--primer-card);
+  color: var(--primer-violet-ink);
+  font-family: var(--primer-font-display);
+  font-weight: 600;
+  font-size: clamp(28px, 3.2vw, 40px);
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+}
+
+/* ---------- Section F: Signature move 2 — the analogy card ---------- */
+/* At least one per page. This is the identity: a page with no "it's like…" is
+ * a page that skipped the only step primer adds to the other eight skills. */
+.primer-analogy {
+  display: grid;
+  grid-template-columns: 172px minmax(0, 1fr);
+  gap: var(--primer-space-5);
+  align-items: center;
+  border: var(--primer-stroke) solid var(--primer-violet);
+  border-radius: var(--primer-radius-lg);
+  background: var(--primer-card);
+  padding: var(--primer-space-5) var(--primer-space-6);
+  margin: var(--primer-space-6) 0;
+  box-shadow: var(--primer-shadow);
+}
+.primer-analogy-fig { margin: 0; }
+.primer-analogy-fig svg { display: block; width: 100%; height: auto; }
+.primer-analogy-body { min-width: 0; }
+/* The opener — "就像……" / "It's like…". Display face, violet, small: it is a
+ * label for the move, not a headline competing with the section's own. */
+.primer-analogy-lead {
+  font-family: var(--primer-font-display);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: .04em;
+  color: var(--primer-violet-ink);
+  margin: 0 0 var(--primer-space-2);
+}
+.primer-analogy-body p { max-width: 54ch; }
+
+/* ---------- Section G: Signature move 4 — the term bubble ---------- */
+/* jargon → plain language, attached to the first use. Mono marks "this is the
+ * word the experts use"; the plain half is in the reading face, because that
+ * half is the one you are meant to keep. */
+.primer-term {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--primer-space-2);
+  border: 2px solid var(--primer-violet);
+  border-radius: var(--primer-radius);
+  background: var(--primer-violet-soft);
+  padding: var(--primer-space-2) var(--primer-space-3);
+  margin: var(--primer-space-3) 0 var(--primer-space-4);
+  max-width: 52ch;
+}
+.primer-term-jargon {
+  font-family: var(--primer-font-mono);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--primer-violet-ink);
+}
+.primer-term-jargon::after { content: " →"; color: var(--primer-mut); }
+.primer-term-plain { font-size: 15.5px; color: var(--primer-ink); }
+/* Bubble tail: outer triangle continues the border, inner one the fill. */
+.primer-term::before,
+.primer-term::after {
+  content: '';
+  position: absolute;
+  left: var(--primer-space-5);
+  width: 0; height: 0;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+}
+.primer-term::before { bottom: -11px; border-top: 11px solid var(--primer-violet); }
+.primer-term::after  { bottom: -8px;  border-top: 11px solid var(--primer-violet-soft); }
+
+/* ---------- Section H: Signature move 6 — the recap rail ---------- */
+/* "Now you know" — three points, each with a tick. The green is a graphic here
+ * and nowhere else: the text inside is ink. */
+.primer-recap {
+  background: var(--primer-go-soft);
+  border-left: 6px solid var(--primer-go);
+  border-radius: var(--primer-radius);
+  padding: var(--primer-space-5) var(--primer-space-6);
+  margin: var(--primer-space-7) 0 0;
+}
+.primer-recap-title {
+  font-family: var(--primer-font-display);
+  font-weight: 600;
+  font-size: clamp(20px, 2.2vw, 25px);
+  margin: 0 0 var(--primer-space-4);
+}
+.primer-recap-list { list-style: none; margin: 0; padding: 0; }
+.primer-recap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--primer-space-3);
+  padding: var(--primer-space-2) 0;
+  color: var(--primer-ink);
+}
+.primer-recap-item + .primer-recap-item { border-top: 1px solid rgba(58, 166, 107, .18); }
+/* A CSS tick rather than a glyph: no text means no contrast liability, and the
+ * rotated-border check is the same shape a marker pen makes. */
+.primer-recap-tick {
+  flex: 0 0 24px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--primer-go);
+  position: relative;
+  margin-top: 3px;
+}
+.primer-recap-tick::after {
+  content: '';
+  position: absolute;
+  left: 7px; top: 6px;
+  width: 9px; height: 5px;
+  border-left: 2.6px solid #fff;
+  border-bottom: 2.6px solid #fff;
+  transform: rotate(-45deg);
+}
+
+/* ---------- Section I: Signature move — marker highlight ---------- */
+/* A stripe across the lower two-thirds of the line box, so ascenders stay on
+ * paper and the word still looks hand-marked rather than boxed. */
+.primer-mark {
+  background-image: linear-gradient(var(--primer-marker), var(--primer-marker));
+  background-repeat: no-repeat;
+  background-size: 100% 62%;
+  background-position: 0 88%;
+  border-radius: 4px 8px 5px 9px;
+  padding: 0 .16em;
+  color: var(--primer-ink);
+  font-weight: 700;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* ---------- Section J: Figures — the thick-outline drawing language ---------- */
+/* Stroke defaults are set on the <svg> and inherited, so a canonical draws
+ * plain <path d="…"> and gets the house line weight for free. Flat fills are
+ * set per shape (that is the language: outline + flat fill, no gradients).
+ * A presentation attribute on a child still wins, which is the escape hatch. */
+.primer-figure {
+  margin: var(--primer-space-6) 0;
+}
+.primer-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  stroke: var(--primer-ink);
+  stroke-width: var(--primer-stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Interior detail — gear teeth, drawer seams, tick marks. Never an outline. */
+.primer-figure svg .primer-hair { stroke-width: var(--primer-stroke-hair); }
+.primer-figcaption {
+  color: var(--primer-mut);
+  font-size: 14.5px;
+  line-height: 1.55;
+  margin-top: var(--primer-space-3);
+  max-width: 68ch;
+}
+.primer-figcaption b { color: var(--primer-ink); font-weight: 700; }
+
+/* ---------- Section K: Bilingual ---------- */
+/* The toggle flips html[data-lang]; CSS hides the other language. Chinese is
+ * the default so a page shows one language even before the IIFE runs — both
+ * languages visible at once is the flash this rule exists to prevent. */
+html[data-lang="en"] .lang-zh { display: none !important; }
+html[data-lang="zh"] .lang-en { display: none !important; }
+html:not([data-lang]) .lang-en { display: none; }
+
+.lang-toggle,
+.primer-langtoggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 2px solid var(--primer-line);
+  border-radius: 999px;
+  padding: 2px;
+  background: var(--primer-card);
+}
+.primer-langtoggle button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--primer-mut);
+  font-family: var(--primer-font-body);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 13px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 180ms var(--primer-ease), color 180ms var(--primer-ease);
+}
+.primer-langtoggle button:hover { color: var(--primer-ink); }
+.primer-langtoggle button.is-active {
+  background: var(--primer-violet);
+  color: #fff;   /* 4.85:1 — the only white-on-violet text on the page */
+}
+
+/* ---------- Section L: Responsive ---------- */
+@media (max-width: 768px) {
+  :root { --primer-gutter: 20px; }
+
+  .primer-body { font-size: 16.5px; }
+
+  .primer-hero { padding: var(--primer-space-7) 0 var(--primer-space-6); }
+  .primer-hero-inner { grid-template-columns: minmax(0, 1fr); gap: var(--primer-space-5); }
+  .primer-hero-lede { max-width: none; }
+
+  .primer-section { padding: var(--primer-space-7) 0; }
+
+  /* The analogy illustration goes above its text rather than beside it —
+   * a 172px figure column on a phone is a thumbnail, and a thumbnail cannot
+   * carry the analogy. */
+  .primer-analogy {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--primer-space-4);
+    padding: var(--primer-space-4) var(--primer-space-5);
+    border-radius: var(--primer-radius);
+  }
+  .primer-analogy-fig { max-width: 220px; }
+
+  /* The numeral stays big — it is the wayfinding — but stops eating the row. */
+  .primer-step { gap: var(--primer-space-4); }
+  .primer-step-num { width: 54px; height: 54px; font-size: 26px; }
+
+  .primer-recap { padding: var(--primer-space-4) var(--primer-space-5); }
+  .primer-nav-inner { height: 58px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primer-langtoggle button { transition: none; }
+}
