@@ -383,6 +383,15 @@
 .primer-figure {
   margin: var(--primer-space-6) 0;
 }
+/* Two shipped figure modifiers. They live HERE, prefixed, because verify.py
+ * validates primer-* classes against this file — an unprefixed page-local
+ * `.fig-wide` escapes that check, and every page-type needs both:
+ *   .primer-fig-wide — full-width section figure (the ~900-unit working
+ *     viewBox). Its responsive stroke stair is at the end of Section L.
+ *   .primer-fig-hero — the hero figure. Zero block margin, because it sits
+ *     inside the hero grid where the component's 40px margin would push it
+ *     off the title's vertical centre. Its phone stroke boost is in Section L. */
+.primer-figure.primer-fig-hero { margin: 0; }
 .primer-figure svg,
 .primer-analogy-fig svg {
   display: block;
@@ -476,16 +485,36 @@ html:not([data-lang]) .lang-en { display: none; }
 
   .primer-recap { padding: var(--primer-space-4) var(--primer-space-5); }
   .primer-nav-inner { height: 58px; }
+}
 
-  /* Full-width section figures (the ~900-unit-viewBox working size) drop under
-   * the 3px picture-book floor on a phone: 3.4 user units render at
-   * 335/900 ≈ 1.27px. `.fig-wide` on the figure restores the floor —
-   * 9 × 335/900 = 3.35px — and the hair follows at the same 0.53 ratio so the
-   * detail layer doesn't collapse (illustration-craft §3). Both selectors keep
-   * .primer-figure so they outrank Section J without depending on order.
-   * Hoisted from the per-page fix: every page-type ships full-width figures. */
-  .primer-figure.fig-wide svg              { stroke-width: 9px; }
-  .primer-figure.fig-wide svg .primer-hair { stroke-width: 4.8px; }
+/* --- Responsive stroke stair for full-width figures --- */
+/* 3.4 is a USER unit: on a ~900-unit viewBox it thins as the figure narrows
+ * (a 375px phone renders it at 3.4 × 335/900 ≈ 1.27px — under the 3px
+ * picture-book floor), but a single phone-size boost overshoots at tablet
+ * widths (9 units at a 768px viewport render 9 × 728/900 ≈ 7.28px — over
+ * double the design weight). Three steps keep the rendered main stroke inside
+ * ≈3.0–4.4px at every width from 340px up; the hair follows each step at the
+ * same 0.53 ratio so the detail layer never collapses (illustration-craft §3).
+ * Rendered stroke = value × content-width/900, content = viewport − gutters.
+ * Both selectors keep .primer-figure so they outrank Section J without
+ * depending on order; narrower queries come later so they win overlaps. */
+@media (max-width: 900px) {  /* content 621–836 → 4.4 renders 3.04–4.09px */
+  .primer-figure.primer-fig-wide svg              { stroke-width: 4.4px; }
+  .primer-figure.primer-fig-wide svg .primer-hair { stroke-width: 2.3px; }
+}
+@media (max-width: 660px) {  /* content 441–620 → 6.4 renders 3.14–4.41px */
+  .primer-figure.primer-fig-wide svg              { stroke-width: 6.4px; }
+  .primer-figure.primer-fig-wide svg .primer-hair { stroke-width: 3.4px; }
+}
+@media (max-width: 480px) {  /* content ≤440 → 9 renders ≤4.4px; 335 → 3.35px */
+  .primer-figure.primer-fig-wide svg              { stroke-width: 9px; }
+  .primer-figure.primer-fig-wide svg .primer-hair { stroke-width: 4.8px; }
+
+  /* The hero figure (≤500-unit viewBox) only crosses the 3px floor below
+   * ~480px: from 481–768px its single-column render is 441–728px wide, where
+   * the natural 3.4 units already land at 3.0–4.95px. One step suffices. */
+  .primer-figure.primer-fig-hero svg              { stroke-width: 5px; }
+  .primer-figure.primer-fig-hero svg .primer-hair { stroke-width: 2.65px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
