@@ -243,7 +243,9 @@
   box-shadow: var(--primer-shadow);
 }
 .primer-analogy-fig { margin: 0; }
-.primer-analogy-fig svg { display: block; width: 100%; height: auto; }
+/* Its <svg> is styled in Section J alongside .primer-figure's — the analogy
+ * illustration is drawn in the same thick-outline language as any other figure,
+ * so the two containers share one rule instead of drifting apart. */
 .primer-analogy-body { min-width: 0; }
 /* The opener — "就像……" / "It's like…". Display face, violet, small: it is a
  * label for the move, not a headline competing with the section's own. */
@@ -358,13 +360,22 @@
 
 /* ---------- Section J: Figures — the thick-outline drawing language ---------- */
 /* Stroke defaults are set on the <svg> and inherited, so a canonical draws
- * plain <path d="…"> and gets the house line weight for free. Flat fills are
- * set per shape (that is the language: outline + flat fill, no gradients).
- * A presentation attribute on a child still wins, which is the escape hatch. */
+ * plain <path d="…"> and gets the house line weight and round caps for free.
+ * The flat fill is still set per shape — that is the language (outline + flat
+ * fill, never a gradient) — and since an SVG's own default fill is black, a
+ * shape meant to be hollow says fill="none". A presentation attribute on a
+ * child always wins, which is the escape hatch.
+ *
+ * BOTH illustration containers are listed. .primer-analogy-fig is not a
+ * secondary slot: the analogy card is the component SKILL.md requires on every
+ * page, so its drawing must speak the same line weight as a section figure.
+ * Scoping this to .primer-figure alone left plain paths inside the analogy card
+ * as unstroked black silhouettes. */
 .primer-figure {
   margin: var(--primer-space-6) 0;
 }
-.primer-figure svg {
+.primer-figure svg,
+.primer-analogy-fig svg {
   display: block;
   width: 100%;
   height: auto;
@@ -374,7 +385,8 @@
   stroke-linejoin: round;
 }
 /* Interior detail — gear teeth, drawer seams, tick marks. Never an outline. */
-.primer-figure svg .primer-hair { stroke-width: var(--primer-stroke-hair); }
+.primer-figure svg .primer-hair,
+.primer-analogy-fig svg .primer-hair { stroke-width: var(--primer-stroke-hair); }
 .primer-figcaption {
   color: var(--primer-mut);
   font-size: 14.5px;
