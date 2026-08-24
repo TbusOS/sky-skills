@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Skill 是什么？· 图解读本</title>
+<meta name="description" content="primer-design flagship demo: what an Agent Skill is, explained for readers who have never used an AI tool. 零基础图解：Agent Skill 是什么。">
+<meta property="og:title" content="Agent Skill 是什么？· 图解读本">
+<meta property="og:description" content="零基础图解：Skill 是写下来的做事说明，AI 助手动手前先读。三分钟讲明白这个仓库在做什么。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../skills/primer-design/assets/fonts.css">
+<link rel="stylesheet" href="../../skills/primer-design/assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed classes on purpose (verify.py validates
+   * primer-* classes against primer.css; local layout stays unprefixed).
+   * Figure modifiers (primer-fig-wide / primer-fig-hero) ship from primer.css
+   * Sections J + L — nothing stroke-related is defined per page. */
+
+  /* The three steps ride one grid line under the checking figure, each column
+   * centered under the stage it names — the circled numerals ARE the figure's
+   * caption layer, so the drawing itself stays label-light. */
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--primer-space-5);
+    margin-top: var(--primer-space-5);
+  }
+  .steps-grid .primer-step {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--primer-space-3);
+  }
+
+  /* The recap is its own screen; the component's top margin is for pages
+   * where it trails a section. */
+  .recap-flat { margin-top: 0; }
+
+  .nav-link { font-weight: 700; font-size: 14px; text-decoration-thickness: 2px; white-space: nowrap; }
+
+  @media (max-width: 768px) {
+    .steps-grid { grid-template-columns: minmax(0, 1fr); gap: var(--primer-space-4); }
+  }
+  /* On a phone the 58px nav row cannot seat brand + two links + the toggle;
+   * the secondary link folds away (the recap CTA still reaches the repo). */
+  @media (max-width: 480px) {
+    .nav-link { font-size: 13px; }
+    .nav-link--home { display: none; }
+  }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <a class="nav-link" href="diagrams.html">
+        <span class="lang-en">Picture gallery</span><span class="lang-zh">图解集</span>
+      </a>
+      <a class="nav-link nav-link--home" href="../../index.html">
+        <span class="lang-en">All skills</span><span class="lang-zh">全部 skill</span>
+      </a>
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">You ask AI for help every day — it forgets how you work</span>
+          <span class="lang-zh">你每天让 AI 帮忙，<br>可它记不住你的做事方式</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">The thing that makes it remember is called an Agent Skill. No background needed — about three minutes.</span>
+          <span class="lang-zh">帮它记住的那样东西，叫 Agent Skill。零基础，这一页大约 3 分钟讲明白。</span>
+        </p>
+      </div>
+      <figure class="primer-figure primer-fig-hero">
+        <svg viewBox="0 0 500 340" role="img"
+          aria-label="同一台电脑：左边每天靠口头交代，废纸条越堆越多；右边手边放着一本手册，写一次就够"
+          data-label-zh="同一台电脑：左边每天靠口头交代，废纸条越堆越多；右边手边放着一本手册，写一次就够"
+          data-label-en="The same computer: told again by voice every day on the left; a handbook beside it on the right, written once">
+          <!-- ground -->
+          <path d="M22 306 C 150 304, 350 308, 478 305" fill="none"/>
+          <!-- divider -->
+          <path class="primer-hair" d="M250 88 L250 298" fill="none" stroke-dasharray="2 9"/>
+
+          <!-- LEFT: told again every day -->
+          <!-- yesterday's bubble, already fading behind today's -->
+          <path class="primer-hair" d="M92 32 Q86 32 86 38 L86 84 Q86 90 92 90 L196 90.4 Q202 90.4 202 84.4 L202 38.4 Q202 32.4 196 32.4 Z" fill="#fdfaf3"/>
+          <!-- today's bubble, said out loud again -->
+          <path d="M76 48 Q70 48 70 54 L70 112 Q70 118 76 118 L182 118.5 Q188 118.5 188 112.5 L188 54.5 Q188 48.5 182 48.5 Z" fill="#ffffff"/>
+          <path d="M104 118 L96 140 L124 120 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M84 68 C 96 63, 108 71, 120 66 S 144 70, 156 65" fill="none"/>
+          <path class="primer-hair" d="M84 86 L164 86.4 M84 102 L140 101.6" fill="none"/>
+          <!-- the laptop being told -->
+          <path d="M60 168 Q56 168 56 172 L56 252 Q56 256 60 256 L196 256.6 Q200 256.6 200 252.6 L200 172.6 Q200 168.6 196 168.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M66 176 L190 176.4 L189.6 248 L66.4 247.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M76 194 L180 194.5 M76 210 L152 209.6 M76 226 L180 226.3" fill="none"/>
+          <path d="M40 272 L216 272.8 L198 258 L58 257.4 Z" fill="#ffffff"/>
+          <!-- crumpled notes from the days before -->
+          <path d="M204 276 L222 268 L232 278 L226 292 L208 290 Z" fill="#ffffff"/>
+          <path d="M228 258 L243 254 L250 264 L242 274 L230 270 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M212 280 L222 278 M234 262 L242 263" fill="none"/>
+
+          <!-- RIGHT: written down once -->
+          <!-- the handbook, standing beside the machine -->
+          <path d="M276 122 Q268 122 268 130 L268 276 Q268 284 276 284 L344 284.6 Q352 284.6 352 276.6 L352 130.6 Q352 122.6 344 122.6 Z" fill="#7a5cd6"/>
+          <path d="M282 142 L338 142.5 L337.6 196 L282.4 195.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M290 158 L330 158.4 M290 172 L326 171.6" fill="none"/>
+          <path class="primer-hair" d="M276 216 L344 216.4 M276 232 L338 231.6 M276 248 L344 248.3" fill="none" stroke="#ffffff"/>
+          <!-- the chapter tabs -->
+          <path d="M352 150 L364 150.3 L364 166 L352 165.7 Z" fill="#ffffff"/>
+          <path d="M352 190 L364 190.4 L364 206 L352 205.6 Z" fill="#ffffff"/>
+          <path d="M352 230 L364 230.2 L364 246 L352 245.8 Z" fill="#ffffff"/>
+          <!-- the laptop reading it -->
+          <path d="M382 168 Q378 168 378 172 L378 252 Q378 256 382 256 L466 256.4 Q470 256.4 470 252.4 L470 172.4 Q470 168.4 466 168.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M388 176 L460 176.3 L459.7 248 L388.3 247.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M396 194 L452 194.3 M396 210 L436 209.6 M396 226 L452 226.2" fill="none"/>
+          <path d="M362 272 L486 272.6 L472 258 L380 257.4 Z" fill="#ffffff"/>
+
+          <!-- labels (text is painted last) -->
+          <text class="lang-zh" x="128" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">每天口头交代一遍</text>
+          <text class="lang-en" x="128" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">told again, every day</text>
+          <text class="lang-zh" x="374" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">写成一本手册</text>
+          <text class="lang-en" x="374" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">written down once</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The only difference between the two desks: whether your way of working is written down.</span>
+          <span class="lang-zh">两张桌子的差别只有一件事：你的做事方式有没有被写下来。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ① 是什么 + 像什么 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What is a skill?</span>
+        <span class="lang-zh">Skill 是什么？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">Agent Skill</span><span class="lang-en">Agent Skill</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">instructions an AI assistant reads before doing that kind of work</span>
+          <span class="lang-zh">一份写给 AI 助手的做事说明，存成文件，做那类事之前它先读</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">Your way of working, <span class="primer-mark">written down</span> — that is a skill.</span>
+        <span class="lang-zh">Skill 就是把你的做事方式<span class="primer-mark">写下来</span>，助手动手之前先读。</span>
+      </p>
+
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 150" role="img"
+            aria-label="一本入职手册和一张新员工工牌：第一天先读手册，照着做"
+            data-label-zh="一本入职手册和一张新员工工牌：第一天先读手册，照着做"
+            data-label-en="An onboarding handbook beside a new-hire badge: read it first, then follow it">
+            <!-- ground -->
+            <path d="M10 138 C 60 136.5, 130 139, 172 137.5" fill="none"/>
+            <!-- the handbook -->
+            <path d="M46 26 Q40 26 40 33 L40 124 Q40 131 47 131 L106 131 Q113 131 113 124 L113 33 Q113 26 106 26 Z" fill="#7a5cd6"/>
+            <path d="M52 40 L100 40.5 L99.6 78 L52.4 77.5 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M58 52 L94 52.3 M58 63 L88 62.6" fill="none"/>
+            <path class="primer-hair" d="M46 92 L106 92.4 M46 106 L100 105.6" fill="none" stroke="#ffffff"/>
+            <!-- the chapter tabs -->
+            <path d="M113 42 L124 42.3 L124 56 L113 55.7 Z" fill="#ffffff"/>
+            <path d="M113 68 L124 68.4 L124 82 L113 81.6 Z" fill="#ffffff"/>
+            <path d="M113 94 L124 94.2 L124 108 L113 107.8 Z" fill="#ffffff"/>
+            <!-- the new hire's badge, lanyard still on -->
+            <path class="primer-hair" d="M147 84 C 145 70, 141 60, 134 50" fill="none"/>
+            <path d="M132 84 Q129 84 129 87 L129 122 Q129 125 132 125 L162 125.3 Q165 125.3 165 122.3 L165 87.3 Q165 84.3 162 84.3 Z" fill="#ffffff"/>
+            <circle class="primer-hair" cx="147" cy="90" r="2.5" fill="none"/>
+            <path class="primer-hair" d="M135 98 L146 98.2 L145.8 110 L135.2 109.8 Z" fill="#fdfaf3"/>
+            <path class="primer-hair" d="M151 102 L160 102.2 M135 117 L160 117.4" fill="none"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p class="primer-analogy-lead"><span class="lang-en">It's like…</span><span class="lang-zh">就像……</span></p>
+          <p>
+            <span class="lang-en">The handbook a company hands a new hire: rules and examples inside. Read it first, and nobody has to walk you through.</span>
+            <span class="lang-zh">公司发给新同事的入职手册：规矩和范例都写在里面。先读它，就不用老员工天天带。</span>
+          </p>
+        </div>
+      </div>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 430" role="img"
+          aria-label="入职手册和 skill 文件夹一一对应：规矩的章节对应规则文件，范例页对应示范页"
+          data-label-zh="入职手册和 skill 文件夹一一对应：规矩的章节对应规则文件，范例页对应示范页"
+          data-label-en="The onboarding handbook pairs one-to-one with the skill folder: rules chapters become rule files, worked examples become sample pages">
+          <!-- LEFT: the onboarding handbook, open -->
+          <path d="M40 82 C 92 62, 168 62, 200 76 L200 342 C 168 328, 92 328, 44 348 Z" fill="#ffffff"/>
+          <path d="M370 84 C 318 64, 242 64, 210 76 L210 342 C 242 328, 318 328, 366 350 Z" fill="#efe9fc"/>
+          <path class="primer-hair" d="M205 76 L205.8 342" fill="none"/>
+          <!-- left page: the rules chapter -->
+          <path class="primer-hair" d="M66 116 L180 113.2" fill="none"/>
+          <path class="primer-hair" d="M66 146 L180 143.4" fill="none"/>
+          <path class="primer-hair" d="M66 176 L180 173.6" fill="none"/>
+          <path class="primer-hair" d="M66 206 L180 203.8" fill="none"/>
+          <path class="primer-hair" d="M66 236 L180 233.5" fill="none"/>
+          <path class="primer-hair" d="M66 266 L180 263.7" fill="none"/>
+          <path class="primer-hair" d="M66 296 L180 293.9" fill="none"/>
+          <!-- right page: numbered dos, one entry marked -->
+          <path class="primer-hair" d="M232 112 L246 111.6 M258 111 L340 108.9" fill="none"/>
+          <path class="primer-hair" d="M232 142 L246 141.5 M258 141 L332 139.2" fill="none"/>
+          <path d="M230 172 L340 169.4" fill="none" stroke="#7a5cd6"/>
+          <path class="primer-hair" d="M232 202 L246 201.4 M258 201 L336 199.2" fill="none"/>
+          <path class="primer-hair" d="M232 232 L246 231.6 M258 231 L328 229.5" fill="none"/>
+          <path class="primer-hair" d="M232 262 L246 261.3 M258 261 L340 259.4" fill="none"/>
+          <path class="primer-hair" d="M232 292 L246 291.6 M258 291 L330 289.7" fill="none"/>
+
+          <!-- MIDDLE: the one-to-one pairing -->
+          <path class="primer-hair" d="M396 150 L504 148 M396 150 L408 144 M396 150 L408 156 M504 148 L492 142 M504 148 L492 154" fill="none"/>
+          <path class="primer-hair" d="M396 272 L504 270 M396 272 L408 266 M396 272 L408 278 M504 270 L492 264 M504 270 L492 276" fill="none"/>
+
+          <!-- RIGHT: the skill folder -->
+          <path d="M540 88 Q534 88 534 94 L534 104 L640 104.5 L624 90 Z" fill="#ffffff"/>
+          <path d="M534 104 L534 344 Q534 352 542 352 L750 352.6 Q758 352.6 758 344.6 L758 112.6 Q758 104.6 750 104.6 L534 104 Z" fill="#ffffff"/>
+          <!-- the rules file, violet, standing tallest -->
+          <path d="M566 128 Q566 120 574 120 L666 120.6 Q674 120.6 674 128.6 L674 300 L566 299.4 Z" fill="#7a5cd6"/>
+          <path d="M578 140 L662 140.6 L661.6 176 L578.4 175.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M586 152 L652 152.4 M586 164 L640 163.6" fill="none"/>
+          <path class="primer-hair" d="M580 196 L660 196.4 M580 214 L652 213.6 M580 232 L660 232.3" fill="none" stroke="#ffffff"/>
+          <!-- the sample pages peeking beside it -->
+          <path d="M690 138 Q690 132 696 132 L744 132.4 Q750 132.4 750 138.4 L750 290 L690 289.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M698 148 L742 148.3 L741.7 176 L698.3 175.7 Z" fill="none"/>
+          <path class="primer-hair" d="M698 190 L742 190.4 M698 204 L734 203.6" fill="none"/>
+          <!-- the folder front, holding both -->
+          <path d="M534 226 Q534 218 542 218 L750 218.7 Q758 218.7 758 226.7 L758 344 Q758 352 750 352 L542 351.4 Q534 351.4 534 343.4 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M556 246 L640 246.4" fill="none"/>
+
+          <!-- labels (text is painted last) -->
+          <text class="lang-zh" x="205" y="40" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">入职手册</text>
+          <text class="lang-en" x="205" y="40" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">the onboarding handbook</text>
+          <text class="lang-zh" x="646" y="52" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">skill 文件夹</text>
+          <text class="lang-en" x="646" y="52" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">the skill folder</text>
+          <text class="lang-zh" x="450" y="132" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">章节 ↔ 规则文件</text>
+          <text class="lang-en" x="450" y="132" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">chapter ↔ rule file</text>
+          <text class="lang-zh" x="450" y="254" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">范例页 ↔ 示范页</text>
+          <text class="lang-en" x="450" y="254" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">example ↔ sample page</text>
+          <text class="lang-zh" x="205" y="396" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">给新同事</text>
+          <text class="lang-en" x="205" y="396" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">for the new hire</text>
+          <text class="lang-zh" x="646" y="396" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">给 AI 助手</text>
+          <text class="lang-en" x="646" y="396" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">for the AI assistant</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">One-to-one: chapter ↔ rule file, worked example ↔ sample page.</span>
+          <span class="lang-zh">对应是一对一的：规矩的章节就是规则文件，范例页就是示范页。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ② 没有 skill / 有 skill -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What changes with one?</span>
+        <span class="lang-zh">有没有它，差在哪？</span>
+      </h2>
+      <p>
+        <span class="lang-en">Without a skill, the method lives only in your head — you re-explain it every time. With one, the assistant reads the handbook first and works your way, every time.</span>
+        <span class="lang-zh">没有 skill，做法只在你嘴里，每次都要重新交代。有了 skill，它动手前先读手册，照同一套方式做。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 490" role="img"
+          aria-label="上下两趟一样的活：没有 skill，三次产出各不相同；有了 skill，助手先读手册，三次产出一个样子"
+          data-label-zh="上下两趟一样的活：没有 skill，三次产出各不相同；有了 skill，助手先读手册，三次产出一个样子"
+          data-label-en="The same job run twice: without a skill the three results all differ; with one the assistant reads the handbook first and the three come out alike">
+          <!-- the skill row rides a violet-tinted panel: that row is the one being taught -->
+          <path d="M46 268 Q38 268 38 276 L38 442 Q38 450 46 450 L854 450.8 Q862 450.8 862 442.8 L862 276.8 Q862 268.8 854 268.8 Z" fill="#efe9fc"/>
+
+          <!-- ROW 1: spoken instructions in, scattered results out -->
+          <path d="M78 78 Q70 78 70 86 L70 152 Q70 160 78 160 L196 160.6 Q204 160.6 204 152.6 L204 86.6 Q204 78.6 196 78.6 Z" fill="#ffffff"/>
+          <path d="M108 160 L100 184 L128 162 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M86 102 C 98 97, 110 105, 122 100 S 146 104, 158 99" fill="none"/>
+          <path class="primer-hair" d="M86 122 L186 122.4 M86 140 L142 139.6" fill="none"/>
+          <path class="primer-hair" d="M216 148 C 260 138, 290 138, 328 140" fill="none" stroke-dasharray="2 9"/>
+          <path d="M328 140 L316 134 M328 140 L316 146" fill="none"/>
+          <!-- the machine -->
+          <path d="M348 84 Q340 84 340 92 L340 168 Q340 176 348 176 L472 176.6 Q480 176.6 480 168.6 L480 92.6 Q480 84.6 472 84.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M348 94 L472 94.4 L471.6 166 L348.4 165.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M360 116 L460 116.4 M360 134 L432 133.6 M360 150 L460 150.3" fill="none"/>
+          <path d="M324 192 L496 192.8 L478 178 L342 177.4 Z" fill="#ffffff"/>
+          <path d="M492 130 C 520 124, 540 124, 566 126" fill="none"/>
+          <path d="M566 126 L554 120 M566 126 L554 132" fill="none"/>
+          <!-- three results, none alike -->
+          <path d="M588 84 Q584 84 584 88 L584 196 Q584 200 588 200 L656 200.4 Q660 200.4 660 196.4 L660 88.4 Q660 84.4 656 84.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M592 94 L652 94.3 L651.7 118 L592.3 117.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M592 134 L652 134.4 M592 150 L636 149.6 M592 166 L652 166.2 M592 182 L628 181.7" fill="none"/>
+          <g transform="rotate(4 730 141)">
+            <path d="M700 86 Q696 86 696 90 L696 192 Q696 196 700 196 L760 196.4 Q764 196.4 764 192.4 L764 90.4 Q764 86.4 760 86.4 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M704 98 L756 98.3 M704 112 L740 111.6 M704 126 L756 126.2" fill="none"/>
+            <path class="primer-hair" d="M704 144 L756 144.4 L755.6 186 L704.4 185.6 Z" fill="#fdfaf3"/>
+          </g>
+          <path d="M796 90 Q792 90 792 94 L792 198 Q792 202 796 202 L860 202.4 Q864 202.4 864 198.4 L864 94.4 Q864 90.4 860 90.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M800 102 L826 102.3 L825.7 190 L800.3 189.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M836 104 L856 104.2 M836 120 L850 119.7 M836 136 L856 136.3 M836 152 L848 151.8" fill="none"/>
+          <!-- the odd one out, ringed -->
+          <circle cx="730" cy="141" r="56" fill="none" stroke="#ffd23f"/>
+
+          <!-- ROW 2: the handbook in, matching results out -->
+          <path d="M84 300 Q78 300 78 306 L78 420 Q78 426 84 426 L146 426.5 Q152 426.5 152 420.5 L152 306.5 Q152 300.5 146 300.5 Z" fill="#7a5cd6"/>
+          <path d="M92 314 L138 314.4 L137.7 348 L92.3 347.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M98 326 L132 326.3 M98 338 L126 337.6" fill="none"/>
+          <path class="primer-hair" d="M94 366 L136 366.3 M94 382 L130 381.6 M94 398 L136 398.2" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M166 364 C 220 356, 264 356, 316 358" fill="none" stroke-dasharray="2 9"/>
+          <path d="M316 358 L304 352 M316 358 L304 364" fill="none"/>
+          <!-- the machine, reading first -->
+          <path d="M348 300 Q340 300 340 308 L340 384 Q340 392 348 392 L472 392.6 Q480 392.6 480 384.6 L480 308.6 Q480 300.6 472 300.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M348 310 L472 310.4 L471.6 382 L348.4 381.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M360 332 L460 332.4 M360 350 L432 349.6 M360 366 L460 366.3" fill="none"/>
+          <path d="M324 408 L496 408.8 L478 394 L342 393.4 Z" fill="#ffffff"/>
+          <path d="M492 346 C 520 340, 540 340, 566 342" fill="none"/>
+          <path d="M566 342 L554 336 M566 342 L554 348" fill="none"/>
+          <!-- three results, all alike -->
+          <path d="M588 300 Q584 300 584 304 L584 412 Q584 416 588 416 L656 416.4 Q660 416.4 660 412.4 L660 304.4 Q660 300.4 656 300.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M592 310 L652 310.3 L651.7 334 L592.3 333.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M592 350 L652 350.4 M592 366 L636 365.6 M592 382 L652 382.2" fill="none"/>
+          <path d="M686 300 Q682 300 682 304 L682 412 Q682 416 686 416 L754 416.5 Q758 416.5 758 412.5 L758 304.5 Q758 300.5 754 300.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M690 310 L750 310.4 L749.7 334 L690.3 333.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M690 350 L750 350.3 M690 366 L734 365.7 M690 382 L750 382.4 " fill="none"/>
+          <path d="M784 300 Q780 300 780 304 L780 412 Q780 416 784 416 L852 416.4 Q856 416.4 856 412.4 L856 304.4 Q856 300.4 852 300.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M788 310 L848 310.3 L847.6 334 L788.4 333.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M788 350 L848 350.4 M788 366 L832 365.6 M788 382 L848 382.3" fill="none"/>
+
+          <!-- labels (text is painted last) -->
+          <text class="lang-zh" x="40" y="36" font-size="17" font-weight="700" fill="#243244">没有 skill</text>
+          <text class="lang-en" x="40" y="36" font-size="17" font-weight="700" fill="#243244">without a skill</text>
+          <text class="lang-zh" x="52" y="296" font-size="17" font-weight="700" fill="#243244">有 skill</text>
+          <text class="lang-en" x="52" y="296" font-size="17" font-weight="700" fill="#243244">with a skill</text>
+          <text class="lang-zh" x="724" y="234" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">每次都不太一样</text>
+          <text class="lang-en" x="724" y="234" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">different every time</text>
+          <text class="lang-zh" x="724" y="476" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">每次同一个样子</text>
+          <text class="lang-en" x="724" y="476" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">the same every time</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The whole difference is the starting point: spoken instructions, or the written handbook.</span>
+          <span class="lang-zh">两趟的差别全在起点：口头的交代，或写下来的手册。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ③ 这个仓库有什么 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What's in this repository?</span>
+        <span class="lang-zh">这个仓库里有什么？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">仓库 repository</span><span class="lang-en">repository</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">the shared place these instruction files live — everyone pulls the same copy</span>
+          <span class="lang-zh">集中存放这些说明文件的地方，所有人取到的是同一份</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">This repository holds all 22 skills — each one a handbook. 9 design skills teach it to draw pages — under half the shelf.</span>
+        <span class="lang-zh">这个仓库放着全部 22 个 skill——每个都是一本手册。其中 9 个设计 skill 教它画页面，占不到一半。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 -16 900 522" role="img"
+          aria-label="一格文件柜：上层 22 本手册，其中 9 本教画页面；下面两个抽屉装着 58 张范本和 77 条坑的记录"
+          data-label-zh="一格文件柜：上层 22 本手册，其中 9 本教画页面；下面两个抽屉装着 58 张范本和 77 条坑的记录"
+          data-label-en="One cabinet: 22 handbooks on the shelf, 9 of them for drawing pages; two drawers below hold 58 sample pages and 77 recorded pitfalls">
+          <!-- ground -->
+          <path d="M60 456 C 260 453, 640 458, 840 455" fill="none"/>
+          <!-- the cabinet -->
+          <path d="M132 64 Q124 64 124 72 L124 424 Q124 432 132 432 L768 432.8 Q776 432.8 776 424.8 L776 72.8 Q776 64.8 768 64.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M160 432 L160 452 M740 433 L740 452" fill="none"/>
+
+          <!-- the shelf: 22 spines, 9 solid violet + 13 violet-tinted -->
+          <path class="primer-hair" d="M124 232 L776 232.5" fill="none"/>
+          <path d="M152 100 L172 100.3 L171.7 228 L152.3 227.7 Z" fill="#7a5cd6"/>
+          <path d="M179.5 104 L199.5 104.2 L199.2 228 L179.8 227.8 Z" fill="#7a5cd6"/>
+          <path d="M207 98 L227 98.4 L226.6 228 L207.4 227.6 Z" fill="#7a5cd6"/>
+          <path d="M234.5 102 L254.5 102.3 L254.2 228 L234.8 227.7 Z" fill="#7a5cd6"/>
+          <path d="M262 106 L282 106.2 L281.8 228 L262.2 227.8 Z" fill="#7a5cd6"/>
+          <path d="M289.5 99 L309.5 99.3 L309.2 228 L289.8 227.7 Z" fill="#7a5cd6"/>
+          <path d="M317 103 L337 103.4 L336.6 228 L317.4 227.6 Z" fill="#7a5cd6"/>
+          <path d="M344.5 101 L364.5 101.2 L364.2 228 L344.8 227.8 Z" fill="#7a5cd6"/>
+          <path d="M372 105 L392 105.3 L391.7 228 L372.3 227.7 Z" fill="#7a5cd6"/>
+          <path d="M406 100 L426 100.3 L425.7 228 L406.3 227.7 Z" fill="#7a5cd6" fill-opacity=".15"/>
+          <path d="M433.5 104 L453.5 104.2 L453.2 228 L433.8 227.8 Z" fill="#7a5cd6" fill-opacity=".15"/>
+          <path d="M461 98 L481 98.4 L480.6 228 L461.4 227.6 Z" fill="#7a5cd6" fill-opacity=".15"/>
+          <path d="M488.5 102 L508.5 102.3 L508.2 228 L488.8 227.7 Z" fill="#7a5cd6" fill-opacity=".15"/>
+          <path d="M516 106 L536 106.2 L535.8 228 L516.2 227.8 Z" fill="#7a5cd6" fill-opacity=".15"/>
+          <path d="M543.5 99 L563.5 99.3 L563.2 228 L543.8 227.7 Z" fill="#7a5cd6" fill-opacity=".15"/>
+          <path d="M571 103 L591 103.4 L590.6 228 L571.4 227.6 Z" fill="#7a5cd6" fill-opacity=".15"/>
+          <path d="M598.5 101 L618.5 101.2 L618.2 228 L598.8 227.8 Z" fill="#7a5cd6" fill-opacity=".15"/>
+          <path d="M626 105 L646 105.3 L645.7 228 L626.3 227.7 Z" fill="#7a5cd6" fill-opacity=".15"/>
+          <path d="M653.5 100 L673.5 100.3 L673.2 228 L653.8 227.7 Z" fill="#7a5cd6" fill-opacity=".15"/>
+          <path d="M681 104 L701 104.2 L700.8 228 L681.2 227.8 Z" fill="#7a5cd6" fill-opacity=".15"/>
+          <path d="M708.5 98 L728.5 98.4 L728.1 228 L708.9 227.6 Z" fill="#7a5cd6" fill-opacity=".15"/>
+          <path d="M736 102 L756 102.3 L755.7 228 L736.3 227.7 Z" fill="#7a5cd6" fill-opacity=".15"/>
+          <!-- spine bands -->
+          <path class="primer-hair" d="M157 122 L167 122.2 M184.5 126 L194.5 126.2 M212 120 L222 120.2 M239.5 124 L249.5 124.2 M267 128 L277 128.2 M294.5 121 L304.5 121.2 M322 125 L332 125.2 M349.5 123 L359.5 123.2 M377 127 L387 127.2" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M411 122 L421 122.2 M438.5 126 L448.5 126.2 M466 120 L476 120.2 M493.5 124 L503.5 124.2 M521 128 L531 128.2 M548.5 121 L558.5 121.2 M576 125 L586 125.2 M603.5 123 L613.5 123.2 M631 127 L641 127.2 M658.5 122 L668.5 122.2 M686 126 L696 126.2 M713.5 120 L723.5 120.2 M741 124 L751 124.2" fill="none"/>
+
+          <!-- the two group brackets -->
+          <path class="primer-hair" d="M152 246 L392 246.4 M152 246 L152 254 M392 246.4 L392 254" fill="none"/>
+          <path class="primer-hair" d="M406 246 L756 246.5 M406 246 L406 254 M756 246.5 L756 254" fill="none"/>
+
+          <!-- the two drawers -->
+          <path d="M150 294 Q144 294 144 300 L144 392 Q144 398 150 398 L434 398.6 Q440 398.6 440 392.6 L440 300.6 Q440 294.6 434 294.6 Z" fill="#fdfaf3"/>
+          <path d="M462 294 Q456 294 456 300 L456 392 Q456 398 462 398 L746 398.6 Q752 398.6 752 392.6 L752 300.6 Q752 294.6 746 294.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M272 312 Q266 312 266 316 Q266 320 272 320 L312 320.3 Q318 320.3 318 316.3 Q318 312.3 312 312.3 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M584 312 Q578 312 578 316 Q578 320 584 320 L624 320.3 Q630 320.3 630 316.3 Q630 312.3 624 312.3 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M124 414 L776 414.4" fill="none"/>
+
+          <!-- labels (text is painted last) -->
+          <text class="lang-zh" x="124" y="40" font-size="17" font-weight="700" fill="#243244">一格文件柜：全部 22 本手册</text>
+          <text class="lang-en" x="124" y="40" font-size="17" font-weight="700" fill="#243244">one cabinet: all 22 handbooks</text>
+          <text class="lang-zh" x="272" y="276" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">这 9 本教画页面</text>
+          <text class="lang-en" x="272" y="276" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">these 9 draw pages</text>
+          <text class="lang-zh" x="581" y="276" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">另外 13 本教别的</text>
+          <text class="lang-en" x="581" y="276" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">the other 13 teach the rest</text>
+          <text class="lang-zh" x="292" y="356" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">画好的范本 · 58 张</text>
+          <text class="lang-en" x="292" y="356" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">finished samples · 58</text>
+          <text class="lang-zh" x="604" y="356" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">坑的记录 · 77 条</text>
+          <text class="lang-en" x="604" y="356" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">the pitfall log · 77</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en"><b>Sample pages</b> are fully drawn exemplars — 58 of them, about 6 per design voice. The pitfall log holds 77 known-bug entries; a minute each is over an hour of reading.</span>
+          <span class="lang-zh">下面两个抽屉是配套。<b>范本</b>是整页画好的示范，共 58 张——平均每套设计 6 张多。踩过的坑已收录 77 条，一条读一分钟，要一个多小时。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ④ 机械检查怎么工作 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">How do the machine checks work?</span>
+        <span class="lang-zh">机械检查怎么工作？</span>
+      </h2>
+      <p>
+        <span class="lang-en">A machine check is a program proofreading for you: every finished page, rule by rule.</span>
+        <span class="lang-zh">机械检查就是程序替你核对：每页做完，逐条对照手册里的规矩。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 14 900 516" role="img"
+          aria-label="机械检查的一趟：做完的页对着手册变成的清单逐条核对，一条不过就打回重改，全部通过才交付"
+          data-label-zh="机械检查的一趟：做完的页对着手册变成的清单逐条核对，一条不过就打回重改，全部通过才交付"
+          data-label-en="One checking trip: a finished page is compared line by line against the handbook-turned-checklist; one miss sends it back, all clear and it ships">
+          <!-- ground -->
+          <path d="M40 468 C 250 465, 650 470, 860 467" fill="none"/>
+
+          <!-- the return route, ridden by the rejected page -->
+          <path class="primer-hair" d="M560 132 C 520 70, 300 60, 210 128" fill="none" stroke-dasharray="2 9"/>
+          <path d="M210 128 L218 116 M210 128 L223 129" fill="none"/>
+          <g transform="rotate(-4 328 80)">
+            <path d="M300 58 Q296 58 296 62 L296 100 Q296 104 300 104 L356 104.4 Q360 104.4 360 100.4 L360 62.4 Q360 58.4 356 58.4 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M306 72 L350 72.3 M306 84 L342 83.6 M306 94 L350 94.2" fill="none"/>
+          </g>
+
+          <!-- LEFT: the finished page -->
+          <path d="M88 150 Q82 150 82 156 L82 372 Q82 378 88 378 L236 378.8 Q242 378.8 242 372.8 L242 156.8 Q242 150.8 236 150.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M94 168 L200 168.4" fill="none"/>
+          <path class="primer-hair" d="M94 188 L230 188.5 L229.5 252 L94.5 251.5 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M94 272 L230 272.4 M94 292 L204 291.6 M94 312 L230 312.3 M94 332 L188 331.7 M94 352 L230 352.4" fill="none"/>
+          <path d="M256 264 C 290 258, 310 258, 340 258" fill="none"/>
+          <path d="M340 258 L328 252 M340 258 L328 264" fill="none"/>
+
+          <!-- MIDDLE: the handbook, now a checklist on a clipboard -->
+          <path d="M368 96 Q360 96 360 104 L360 420 Q360 428 368 428 L540 428.6 Q548 428.6 548 420.6 L548 104.6 Q548 96.6 540 96.6 Z" fill="#7a5cd6"/>
+          <path d="M436 84 Q430 84 430 90 L430 108 L478 108.4 L478 90.4 Q478 84.4 472 84.4 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="454" cy="96" r="4" fill="none"/>
+          <path d="M374 116 L534 116.6 L533.4 414 L374.6 413.4 Z" fill="#ffffff"/>
+          <!-- checked rows -->
+          <path class="primer-hair" d="M386 138 L400 138.2 L399.8 152 L386.2 151.8 Z" fill="none"/>
+          <path class="primer-hair" d="M388 145 L392 150 L399 139" fill="none"/>
+          <path class="primer-hair" d="M410 145 L520 145.4" fill="none"/>
+          <path class="primer-hair" d="M386 180 L400 180.3 L399.8 194 L386.2 193.7 Z" fill="none"/>
+          <path class="primer-hair" d="M388 187 L392 192 L399 181" fill="none"/>
+          <path class="primer-hair" d="M410 187 L508 187.4" fill="none"/>
+          <path class="primer-hair" d="M386 222 L400 222.2 L399.8 236 L386.2 235.8 Z" fill="none"/>
+          <path class="primer-hair" d="M388 229 L392 234 L399 223" fill="none"/>
+          <path class="primer-hair" d="M410 229 L516 229.3" fill="none"/>
+          <path class="primer-hair" d="M386 264 L400 264.3 L399.8 278 L386.2 277.7 Z" fill="none"/>
+          <path class="primer-hair" d="M388 271 L392 276 L399 265" fill="none"/>
+          <path class="primer-hair" d="M410 271 L500 271.4" fill="none"/>
+          <!-- the caught row: marked, then crossed -->
+          <path d="M408 298 L522 298.4 L522 318 L408 317.6 Z" fill="#ffd23f"/>
+          <path class="primer-hair" d="M386 306 L400 306.2 L399.8 320 L386.2 319.8 Z" fill="none"/>
+          <path class="primer-hair" d="M387 307 L399 319 M399 307 L387 319" fill="none"/>
+          <path class="primer-hair" d="M414 309 L514 309.3" fill="none"/>
+          <path class="primer-hair" d="M386 348 L400 348.2 L399.8 362 L386.2 361.8 Z" fill="none"/>
+          <path class="primer-hair" d="M410 355 L520 355.4" fill="none"/>
+          <path class="primer-hair" d="M386 386 L400 386.3 L399.8 400 L386.2 399.7 Z" fill="none"/>
+          <path class="primer-hair" d="M410 393 L504 393.2" fill="none"/>
+
+          <!-- RIGHT: all clear — into the out-tray -->
+          <path d="M556 300 C 610 300, 640 300, 690 300" fill="none"/>
+          <path d="M690 300 L678 294 M690 300 L678 306" fill="none"/>
+          <g transform="rotate(3 775 270)">
+            <path d="M744 220 Q740 220 740 224 L740 316 Q740 320 744 320 L806 320.4 Q810 320.4 810 316.4 L810 224.4 Q810 220.4 806 220.4 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M750 236 L800 236.3 M750 252 L788 251.6 M750 268 L800 268.2 M750 284 L776 283.8" fill="none"/>
+          </g>
+          <path d="M700 322 L850 322.6 L836 380 L714 379.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M712 338 L838 338.5" fill="none"/>
+
+          <!-- labels (text is painted last) -->
+          <text class="lang-zh" x="162" y="412" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">做完的一页</text>
+          <text class="lang-en" x="162" y="412" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">the finished page</text>
+          <text class="lang-zh" x="454" y="456" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">手册变成的清单</text>
+          <text class="lang-en" x="454" y="456" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">the handbook, as a checklist</text>
+          <text class="lang-zh" x="776" y="412" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">全过才交付</text>
+          <text class="lang-en" x="776" y="412" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">all clear — it ships</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en"><b>This very page took the same trip:</b> it passed the same machine checks before it shipped.</span>
+          <span class="lang-zh"><b>这一页自己也走了同一趟：</b>交付之前，先过了同一套机械检查。</span>
+        </figcaption>
+      </figure>
+
+      <div class="steps-grid">
+        <div class="primer-step">
+          <span class="primer-step-num">1</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">A finished page goes in first</span>
+              <span class="lang-zh">做完一页，先交给程序</span>
+            </h3>
+          </div>
+        </div>
+        <div class="primer-step">
+          <span class="primer-step-num">2</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">Checked line by line</span>
+              <span class="lang-zh">对着清单逐条核对</span>
+            </h3>
+          </div>
+        </div>
+        <div class="primer-step">
+          <span class="primer-step-num">3</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">One miss sends it back</span>
+              <span class="lang-zh">一条不过就打回重改</span>
+            </h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 回顾 + CTA -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <aside class="primer-recap recap-flat">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">A skill is your working method written down; the assistant reads it before starting.</span>
+              <span class="lang-zh">Skill 是写下来的做事说明，助手动手之前先读它。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Explain a job once, and it comes out the same shape every time.</span>
+              <span class="lang-zh">同一类事讲一次就够，做出来每次是同一个样子。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Every page passes the machine checks before it ships; one miss sends it back.</span>
+              <span class="lang-zh">每页交付前先过机械检查，一条不过就打回重改。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+      <p>
+        <span class="lang-en">To browse the handbooks themselves, start at the repository <a href="../../README.md">README</a>.</span>
+        <span class="lang-zh">想翻这些手册本身，从仓库的 <a href="../../README.md">README</a> 开始。</span>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Flagship demo · primer-design · every repo number on this page matches what is on disk</span>
+    <span class="lang-zh">示范页 · primer-design · 本页关于仓库的数字与仓库实况一致</span>
+    · v1 · 2026-08-24
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+    /* CSS only hides the other language's <text>; an SVG's aria-label is an
+     * attribute, so EN mode must swap it here or screen readers hear Chinese
+     * under html[lang="en"]. The static aria-label in the markup is the zh
+     * default for the no-JS case. */
+    document.querySelectorAll('svg[data-label-zh]').forEach(function (s) {
+      s.setAttribute('aria-label',
+        s.getAttribute(lang === 'zh' ? 'data-label-zh' : 'data-label-en'));
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
