@@ -27,15 +27,43 @@ agent 倾向自评过高;(2) 独立持怀疑的 evaluator 才是真正的杠杆�
 design skill 是 generator,会给自己打高分;`design-review` 脚本、规则、
 已知 bug 清单 **不属于任何一个风格**,9 种风格共用同一套工艺底线。
 
+## 检查模型 · The gate model(全仓唯一定义)
+
+**这一节是全仓"几道检查"的唯一出处。** 其它任何文件说到检查数量,以这里为准、
+引用这里,不要自己另报一个数(2026-08 之前全仓有三套互相矛盾的数法,
+计数检查追着改了四轮 —— 根因就是没有唯一定义)。EN — this section is the
+single source of truth for the repo's gate counts; every other surface cites
+it instead of asserting its own number.
+
+**四道机械检查**(`bin/design-review` 默认全跑,按序):
+
+1. `verify.py` — 结构(静态)
+2. `visual-audit.mjs` — 渲染(Playwright)
+3. `axe-audit.mjs` — 可达性(axe-core;阻断规则四条:color-contrast、
+   link-name、aria-prohibited-attr、svg-img-alt —— 全部在存量清零后才晋升)
+4. `screenshot.mjs` — 全页截图(只产物;评判它的是人眼)
+
+**四道之外**,按需叠加,不计入"四道":
+
+- `pixel-gate.mjs`(`--pixel`)— 可选的第五道机械检查,像素回归比对已提交基线
+- LLM critic(`--critic` solo / `--multi-critic` 4 专家)— 口味评审。
+  **critic 不是第四道机械检查**,它在机械检查之外
+- 人眼看截图 — 机械检查是必要条件,不是充分条件
+
+<!-- gate-model: mechanical = verify.py, visual-audit.mjs, axe-audit.mjs, screenshot.mjs ; optional = pixel-gate.mjs ; taste = critic -->
+(上面这行注释是机器可读形态,`scripts/count-check.py` 解析它做全仓计数判定。
+改模型 = 改这一节 + 让 count-check 的探针继续过。)
+
 ## What ships today · 当前交付
 
 | 组件 | 状态 | 实体 |
 |---|---|---|
 | Gate 1 · structural verify | **shipped** | `scripts/verify.py`(8 类 check + 双语强制 + `--allow-monolingual` 豁免)|
 | Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(82 条 known-bugs 里能机器化的那些)|
-| Gate 3 · full-page screenshot | **shipped** | `scripts/screenshot.mjs`(Playwright · 绝对路径 + `file://` 通用)|
-| Gate 4 · solo taste critic | **shipped** | `.claude/agents/design-critic.md` |
-| Gate 4 · multi-critic(4 专家) | **shipped** (2026-04-22) | `.claude/agents/design-{composition,copy,illustration,brand}-critic.md` 权重 25/25/20/30 |
+| Gate 3 · accessibility axe-audit | **shipped** (2026-08-14) | `scripts/axe-audit.mjs`(axe-core;四条阻断规则,存量清零后晋升)|
+| Gate 4 · full-page screenshot | **shipped** | `scripts/screenshot.mjs`(Playwright · 绝对路径 + `file://` 通用)|
+| 口味评审(四道之外)· solo critic | **shipped** | `.claude/agents/design-critic.md` |
+| 口味评审(四道之外)· multi-critic(4 专家) | **shipped** (2026-04-22) | `.claude/agents/design-{composition,copy,illustration,brand}-critic.md` 权重 25/25/20/30 |
 | Learning-loop · 回灌成规则 | **shipped** (2026-04-22) | `.claude/agents/design-learner.md` + `scripts/learning-loop.mjs` |
 | Cross-repo 入口 | **shipped** | `~/.claude/skills/design-review/dr-cli --repo=<仓> --skill=<名> <html>` |
 | 参考库 canonical | 实时计数见 `~/.claude/skills/design-review/dr-cli --coverage`(扩库中) | `~/.claude/skills/<style>-design/references/canonical/` |
@@ -50,7 +78,7 @@ design skill 是 generator,会给自己打高分;`design-review` 脚本、规则
                   <html> [...]
 ```
 
-- `--critic` / `--multi-critic` 跑 Gate 4(solo 或 4 专家并行)
+- `--critic` / `--multi-critic` 跑 LLM 口味评审(四道机械检查之外;solo 或 4 专家并行)
 - `--learn` 跑完把 verdict 喂 `learning-loop.mjs` 产出 `design-learner` prompt
 - `--allow-monolingual` 对内部单语 memo 豁免双语强制(issue #2)
 - `--audit <dir>` 整树批量检查;加 `--discover` 只列出树里所有 `.html`(分目录,不跑检查),确认没有藏在子目录里漏检的页 —— 详见下面「多页交付」
@@ -96,10 +124,13 @@ python3 skills/design-review/scripts/verify.py \
 node skills/design-review/scripts/visual-audit.mjs \
   [--ignore-intentional] <html>
 
-# 3) 肉眼检查(全页截图)
+# 3) 可达性检查(axe-core · --strict 让阻断规则真的阻断)
+node skills/design-review/scripts/axe-audit.mjs --strict <html>
+
+# 4) 肉眼检查(全页截图)
 node skills/design-review/scripts/screenshot.mjs <html> shot.png
 
-# 4) 口味评审 · solo / multi critic
+# 5) 口味评审(四道之外)· solo / multi critic
 #    在 Claude Code 里:
 Task(subagent_type="design-critic",              ...)  # 单专家
 # or 4 并行:
@@ -108,7 +139,7 @@ Task(subagent_type="design-copy-critic",         ...)
 Task(subagent_type="design-illustration-critic", ...)
 Task(subagent_type="design-brand-critic",        ...)
 
-# 5) 回灌成规则(critic 发现 → known-bugs + 机器 check)
+# 6) 回灌成规则(critic 发现 → known-bugs + 机器 check)
 node skills/design-review/scripts/learning-loop.mjs \
   --verdict=<path/to/verdict.json>  # 产出 design-learner prompt
 # 然后在 Claude Code 里 Task(subagent_type="design-learner", ...)
@@ -122,9 +153,10 @@ node skills/design-review/scripts/learning-loop.mjs \
 |---|---|---|
 | Gate 1 `verify.py` | 占位符(文档页 `<pre>`/`<code>` 块自动剥除,不误报)、BEM modifier-only、未定义 class(union: 默认 skill CSS + HTML link + `--css`)、`<svg>` 不平衡、hero 容器用错、`container --mod` 未与 base 同列(BEM base-less 错)、公开页缺双语(`lang-toggle` + `lang-en/zh`)| Python 标准库 |
 | Gate 2 `visual-audit.mjs` | WCAG contrast < 4.5、hero 框图渲染 < 900px、SVG `<text>` 实际像素 < 9px、多列网格孤儿卡、SVG `<text>` 重叠、SVG 文字 fill 和承载 shape RGB 距离 < 40、多 h1 / heading 跳级 / 无 alt img / 无文本 a、brand 色在 top region 占比 < 0.4%、cross-skill-smell(别扮成另一个 skill)、hollow-card §10b、asymmetric-first-col-hero §10c、svg-foreign-hex、figure 无 figcaption、Fraunces/Newsreader 等非本 skill 字体、italic 滥用 —— 共 26 类,每类对应 `known-bugs.md` 1 行 | playwright |
-| Gate 3 `screenshot.mjs` | 只产物不评审 —— 给人看的 | playwright |
-| Gate 4 solo `design-critic` | 整页口味(构图 + 文案 + 插画 + 品牌)一位通才评审 | `Task()` subagent |
-| Gate 4 multi-critic × 4 | 构图 / 文案 / 插画 / 品牌 四位专家独立 fresh-context · 权重 25/25/20/30 聚合 | `Task()` × 4 + 聚合 |
+| Gate 3 `axe-audit.mjs` | axe-core 可达性:color-contrast、link-name、aria-prohibited-attr、svg-img-alt 阻断,其余只报告 | playwright + axe-core |
+| Gate 4 `screenshot.mjs` | 只产物不评审 —— 给人看的 | playwright |
+| 口味评审(四道之外)solo `design-critic` | 整页口味(构图 + 文案 + 插画 + 品牌)一位通才评审 | `Task()` subagent |
+| 口味评审(四道之外)multi-critic × 4 | 构图 / 文案 / 插画 / 品牌 四位专家独立 fresh-context · 权重 25/25/20/30 聚合 | `Task()` × 4 + 聚合 |
 
 具体清单在:
 - `references/known-bugs.md`(82 条,每条写 Reader sees / Why / Defense)
@@ -174,8 +206,10 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 - `~/.claude/skills/design-review/dr-cli` — 一条命令跑完 4 道检查 + 可选 `--multi-critic` / `--learn`
 - `scripts/verify.py` — Gate 1 结构 check
 - `scripts/visual-audit.mjs` — Gate 2 渲染 check(38 项)
-- `scripts/screenshot.mjs` — Gate 3 全页截图
-- `scripts/learning-loop.mjs` — Gate 4 critic verdict → design-learner prompt
+- `scripts/axe-audit.mjs` — Gate 3 可达性 check(axe-core)
+- `scripts/screenshot.mjs` — Gate 4 全页截图
+- `scripts/count-check.py` — 全仓计数判定(承载短语 vs 磁盘真值 + 检查模型)
+- `scripts/learning-loop.mjs` — 组件 07 · critic verdict → design-learner prompt
 - `references/known-bugs.md` — 82 条 bug 大全
 - `references/cross-skill-rules.md` — 9 种风格共通规则(含 §G 双语 / §I 卡片分组)
 - `references/canonical/README.md` — canonical 参考库说明 + 扩库流程
@@ -184,4 +218,4 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 
 - [Anthropic · harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps) — "separate doing from judging"
 - 同仓 pair:`skills/gated-dual-clone-audit/`(第 2 个独立 evaluator)
-- 指南:`docs/HARNESS-ROADMAP.html`(8 组件路线图)
+- 指南:`docs/HARNESS-ROADMAP.html`(9 组件路线图)

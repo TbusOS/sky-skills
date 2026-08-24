@@ -509,7 +509,10 @@
   python3 skills/design-review/scripts/count-check.py --probe  # 只跑自检探针
   ```
   它把每个承载短语绑定到 `facts.mjs --json` 打出的磁盘真值（total / design / systems /
-  harness / canonical / known-bugs 及其派生），只打不相等的行；排除照 facts.mjs 的规矩 ——
+  harness / canonical / known-bugs 及其派生），把"几道检查"绑定到 `design-review/SKILL.md`
+  「检查模型」一节的机器可读标记（全仓唯一定义），并核"数字旁边的清单"——gate 枚举缺项、
+  critic 被记成第 N 道、大写皮肤名册数目不够又没有 `+N` 标记——只打不相等的行；
+  排除照 facts.mjs 的规矩 ——
   **序数**（`第五种` / `the fifth`）、**余数**（`其余 8 个` / `the other eight`）、
   **每套自己的数**（`Ships 3 canonical page-types`）、**路线图渲染数**（`五种美学`）、
   **记录性文件**（dated specs、本文件）—— 全部具名写在脚本的 `EXCLUSIONS` 表里，可 grep；

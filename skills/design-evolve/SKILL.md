@@ -67,7 +67,7 @@ Run from repo root. `S`=skill, `P`=page-type, `B`=a fixed test brief for `S`×`P
 3. **Apply + regenerate.** Edit the one asset, commit it on the branch, then
    regenerate `S`×`P` from the same brief `B` with the new rules.
 
-4. **Score with the frozen evaluator.** Run `~/.claude/skills/design-review/dr-cli <page>` (the 3
+4. **Score with the frozen evaluator.** Run `~/.claude/skills/design-review/dr-cli <page>` (the 4
    machine gates MUST stay green — a change that breaks a gate is an instant
    revert) then the multi-critic. To beat critic noise, **average N≥3 renders**
    and require the gain to clear the margin, not a single lucky sample.

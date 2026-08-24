@@ -45,17 +45,12 @@
 ## 📋 发布前 checklist（MUST — 四道机械检查都要 exit 0）
 
 ```bash
-# 1) 结构验证（placeholder / BEM / 未定义 class / SVG 平衡）
-python3 skills/ember-design/scripts/verify.py <path/to/your.html>
-
-# 2) 视觉渲染验证（Playwright + WCAG 对比度 + 框图尺寸 + 孤儿卡）
-node skills/ember-design/scripts/visual-audit.mjs <path/to/your.html>
-
-# 3) 全页截图，肉眼审核
-node skills/ember-design/scripts/screenshot.mjs <path/to/your.html> shot.png
+bin/design-review --skill=ember <path/to/your.html>          # 结构 + 渲染 + 可达性 + 截图
+bin/design-review --skill=ember --pixel <path/to/your.html>  # 再加像素回归（需已有基线）
 ```
 
-任何一条 exit 非 0 → **任务没完成**。
+第三道是 **axe-core**，color-contrast 是阻断项。截图必须人眼看过。
+任何一道 exit 非 0 → **任务没完成**。
 
 ## 📐 Lineup card 质量底线
 

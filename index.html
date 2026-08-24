@@ -698,7 +698,7 @@
           <h3 style="font-size:22px; margin-top:var(--space-3); font-family:'Instrument Serif',serif; font-style:italic; color:#393C54;">design-review</h3>
           <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3); max-width:640px;">
             <span class="lang-en">The evaluator keeps the nine design generators honest. Independent from the generators — inspired by GAN's discriminator and Anthropic's harness-design principle that <em>evaluators must be separate</em>. Runs the gate chain: <code>verify.py</code> → <code>visual-audit.mjs</code> → <code>axe-audit.mjs</code> (axe-core accessibility, color-contrast blocking) → <code>screenshot.mjs</code> → optional <code>pixel-gate.mjs</code> (pixel regression) → <code>critic.mjs</code> taste judgment via either a solo <code>design-critic</code> or <strong>4 parallel specialists</strong> (composition / copy / illustration / brand, weighted 25/25/20/30). Then <code>design-learner</code> (component 07) turns every critic miss into a new known-bugs row + a new mechanical check — same bug never caught twice. The <code>bin/design-review</code> CLI has three modes: <code>--plan</code> (sprint contract; unknown page-types fall back LOW-CONFIDENCE) / <code>--critic</code> / <code>--audit</code>. 82 known-bugs catalogued; 58/58 canonical page-types covered (matrix complete).</span>
-            <span class="lang-zh">这个评审员给 9 个设计生成器守关。和生成器刻意分离 —— 受 GAN 的 discriminator 和 Anthropic harness 文章里"<em>evaluator 必须独立</em>"的思想启发。跑四道检查：<code>verify.py</code> → <code>visual-audit.mjs</code> → <code>screenshot.mjs</code> → <code>critic.mjs</code> 口味评审(单 <code>design-critic</code> 或<strong>4 位专家并行</strong> —— 版式 / copy / 插画 / 品牌，权重 25/25/20/30)。再由 <code>design-learner</code>(组件 07)把每次 critic 漏掉的转成新 known-bugs 行 + 新机器 check —— 同一个 bug 不再被抓第二次。<code>bin/design-review</code> 命令行有三种模式：<code>--plan</code>(sprint contract，未知 page-type 回退 LOW-CONFIDENCE)/ <code>--critic</code> / <code>--audit</code>。已收录 82 条 known-bugs，覆盖 58/58 canonical page-type(已铺满)。</span>
+            <span class="lang-zh">这个评审员给 9 个设计生成器守关。和生成器刻意分离 —— 受 GAN 的 discriminator 和 Anthropic harness 文章里"<em>evaluator 必须独立</em>"的思想启发。跑整条检查链：<code>verify.py</code> → <code>visual-audit.mjs</code> → <code>axe-audit.mjs</code>(axe-core 可达性，color-contrast 阻断)→ <code>screenshot.mjs</code> → 可选 <code>pixel-gate.mjs</code>(像素回归)→ <code>critic.mjs</code> 口味评审(单 <code>design-critic</code> 或<strong>4 位专家并行</strong> —— 版式 / copy / 插画 / 品牌，权重 25/25/20/30)。再由 <code>design-learner</code>(组件 07)把每次 critic 漏掉的转成新 known-bugs 行 + 新机器 check —— 同一个 bug 不再被抓第二次。<code>bin/design-review</code> 命令行有三种模式：<code>--plan</code>(sprint contract，未知 page-type 回退 LOW-CONFIDENCE)/ <code>--critic</code> / <code>--audit</code>。已收录 82 条 known-bugs，覆盖 58/58 canonical page-type(已铺满)。</span>
           </p>
         </div>
         <div style="display:flex; flex-direction:column; gap:var(--space-3); min-width:120px;">
@@ -1678,7 +1678,7 @@
       </div>
       <figcaption style="margin-top:var(--space-5); font-family:var(--font-body); font-size:14px; line-height:1.55; color:var(--anth-text-secondary); text-align:center; max-width:820px; margin-left:auto; margin-right:auto;">
         <span class="lang-en">Generator-evaluator feedback loop — 9 design skills generate a page, <code>design-review</code> judges it through the gate chain (verify → visual-audit → axe → screenshot → pixel → critic), and the orange dashed arrow feeds must_fix / should_fix / known-bug matches back to the generator for the next iteration.</span>
-        <span class="lang-zh">生成器-评审员反馈环 —— 9 个 design skill 生成页面，<code>design-review</code> 用四道检查评判(verify → visual-audit → screenshot → critic)，橙色虚线箭头把 must_fix / should_fix / known-bug 匹配反馈给生成器进下一轮迭代。</span>
+        <span class="lang-zh">生成器-评审员反馈环 —— 9 个 design skill 生成页面，<code>design-review</code> 用整条检查链评判(verify → visual-audit → axe → screenshot → pixel → critic)，橙色虚线箭头把 must_fix / should_fix / known-bug 匹配反馈给生成器进下一轮迭代。</span>
       </figcaption>
     </figure>
 
@@ -1699,12 +1699,12 @@
       <article class="anth-card">
         <span class="anth-badge" style="background:var(--anth-cta); color:#ffffff; font-weight:600;"><span class="lang-en">4 Gates</span><span class="lang-zh">四道检查</span></span>
         <h3 style="font-size:19px; margin-top:var(--space-3);">
-          <span class="lang-en">Structural · Rendered · Visual · Taste</span>
-          <span class="lang-zh">结构 · 渲染 · 视觉 · 口味</span>
+          <span class="lang-en">Structural · Rendered · Accessibility · Screenshot</span>
+          <span class="lang-zh">结构 · 渲染 · 可达性 · 截图</span>
         </h3>
         <p style="font-size:15px; color:var(--anth-text-secondary); margin-top:var(--space-3);">
-          <span class="lang-en"><code>verify.py</code> catches placeholders and BEM bugs. <code>visual-audit.mjs</code> renders in Playwright and flags WCAG / hero-diagram sizing / orphan cards. <code>screenshot.mjs</code> is for the human eye. <code>critic.mjs</code> dispatches an LLM critic — solo or 4 parallel specialists — for the taste call no script can make.</span>
-          <span class="lang-zh"><code>verify.py</code> 抓占位符和 BEM 错。<code>visual-audit.mjs</code> 用 Playwright 渲染，判 WCAG 对比度 / 框图尺寸 / 孤儿卡。<code>screenshot.mjs</code> 交给人看。<code>critic.mjs</code> 派 LLM critic —— 单人或 4 位专家并行 —— 做脚本判不了的口味判断。</span>
+          <span class="lang-en"><code>verify.py</code> catches placeholders and BEM bugs. <code>visual-audit.mjs</code> renders in Playwright and flags WCAG / hero-diagram sizing / orphan cards. <code>axe-audit.mjs</code> enforces axe-core conformance, color-contrast blocking. <code>screenshot.mjs</code> is for the human eye. On top of the four, <code>critic.mjs</code> dispatches an LLM critic — solo or 4 parallel specialists — for the taste call no script can make.</span>
+          <span class="lang-zh"><code>verify.py</code> 抓占位符和 BEM 错。<code>visual-audit.mjs</code> 用 Playwright 渲染，判 WCAG 对比度 / 框图尺寸 / 孤儿卡。<code>axe-audit.mjs</code> 查 axe-core 可达性，color-contrast 阻断。<code>screenshot.mjs</code> 交给人看。四道之外，<code>critic.mjs</code> 派 LLM critic —— 单人或 4 位专家并行 —— 做脚本判不了的口味判断。</span>
         </p>
       </article>
 

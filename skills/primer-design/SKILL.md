@@ -56,9 +56,8 @@ eli5 / ELI5 / explain like I'm five / explain simply / picture explainer /
 ## §5 发布前检查(MUST)
 
 ```bash
-python3 ~/.claude/skills/design-review/scripts/verify.py --skill=primer <your-page.html>          # 结构检查
-node    ~/.claude/skills/design-review/scripts/visual-audit.mjs <your-page.html>                 # 渲染检查(自动跑第二视口)
-~/.claude/skills/design-review/dr-cli --skill=primer --critic <your-page.html>                   # 第四道 · LLM critic
+~/.claude/skills/design-review/dr-cli --skill=primer <your-page.html>          # 四道机械检查(结构/渲染/可达性/截图)
+~/.claude/skills/design-review/dr-cli --skill=primer --critic <your-page.html> # 再加 LLM critic · 口味评审(四道之外)
 ```
 
 任一 error = 任务没完成。canonical 自回归:verify + visual-audit 必须 0 error。

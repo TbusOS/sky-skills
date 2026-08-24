@@ -90,14 +90,15 @@ last-verified: 2026-04-19
 没有 self-diff = canonical 不被 `verify.py` 承认。critic 也无法做实
 质评审(没有作者意图的靶子)。HARNESS-ROADMAP Phase 03 的硬规则。
 
-### 生成**后**跑四道检查
+### 生成**后**跑四道机械检查 + critic
 
 ```bash
 ~/.claude/skills/design-review/dr-cli --critic <path/to/your.html>
 ```
 
-四道检查:`verify.py` · `visual-audit.mjs`(加 §J italic / §K brand + smell)·
-`screenshot.mjs` · `critic.mjs`(LLM taste 0-100 分)。
+四道机械检查:`verify.py` · `visual-audit.mjs`(加 §J italic / §K brand + smell)·
+`axe-audit.mjs`(可达性,color-contrast 阻断)· `screenshot.mjs`;
+四道之外,`--critic` 再跑 `critic.mjs`(LLM taste 0-100 分)。
 
 任一 error = 失败。critic 得分 < 75 必修。canonical 自回归 ≥ 90。
 

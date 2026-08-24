@@ -93,19 +93,20 @@ last-verified: 2026-04-19
 没有 self-diff = canonical 不被 `verify.py` 承认。critic 也无法做实
 质评审(没有作者意图的靶子)。HARNESS-ROADMAP Phase 03 的硬规则。
 
-### 生成**后**跑四道检查
+### 生成**后**跑四道机械检查 + critic
 
 ```bash
 ~/.claude/skills/design-review/dr-cli --critic <path/to/your.html>
 ```
 
-四道检查依次:
+四道机械检查依次(检查模型的唯一定义在 `design-review/SKILL.md`):
 1. `verify.py` — 结构(placeholders / DOCTYPE / BEM / SVG / class / §G 双语)
 2. `visual-audit.mjs` — 渲染(contrast / hero 宽 / SVG 字号 / hollow card /
    **brand-presence §K / italic-overuse §J / cross-skill-smell §K**)
-3. `screenshot.mjs` — 全页 PNG 存 `shots/`
-4. `critic.mjs` — LLM taste 评审(输出 JSON + 0-100 分,canonical 自跑 ≥ 90)
+3. `axe-audit.mjs` — 可达性(axe-core,color-contrast 阻断)
+4. `screenshot.mjs` — 全页 PNG 存 `shots/`
 
+四道之外,`--critic` 再跑 LLM taste 评审(输出 JSON + 0-100 分,canonical 自跑 ≥ 90)。
 **任一 error 整个失败**。warn 要判断是否放行。critic 得分 < 75 必修。
 
 规则与已知 bug 全在 `~/.claude/skills/design-review/references/cross-skill-rules.md`

@@ -40,9 +40,8 @@ Generates business-briefing HTML: a serif headline states the conclusion; a numb
 ## §5 发布前检查(MUST)
 
 ```bash
-python3 ~/.claude/skills/design-review/scripts/verify.py --skill=lectern <your-page.html>          # 结构门
-node    ~/.claude/skills/design-review/scripts/visual-audit.mjs <your-page.html>                   # 渲染门(自动跑第二视口)
-~/.claude/skills/design-review/dr-cli --skill=lectern --critic <your-page.html>                    # 第四道 · LLM critic
+~/.claude/skills/design-review/dr-cli --skill=lectern <your-page.html>          # 四道机械检查(结构/渲染/可达性/截图)
+~/.claude/skills/design-review/dr-cli --skill=lectern --critic <your-page.html> # 再加 LLM critic · 口味评审(四道之外)
 ```
 
 任一 error = 任务没完成。canonical 自回归:verify + visual-audit 必须 0 error。页内 `</body>` 前 embed `design-review:self-diff v1` 注释块(canonical 必须)。

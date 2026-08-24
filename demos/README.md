@@ -79,10 +79,13 @@ python3 skills/design-review/scripts/verify.py demos/<skill>/index.html
 # Gate 2 — visual (Playwright render + WCAG contrast + diagram sizing + orphan card)
 node skills/design-review/scripts/visual-audit.mjs demos/<skill>/index.html
 
-# Gate 3 — human-in-the-loop screenshot
+# Gate 3 — accessibility (axe-core; color-contrast blocking)
+node skills/design-review/scripts/axe-audit.mjs --strict demos/<skill>/index.html
+
+# Gate 4 — human-in-the-loop screenshot
 node skills/design-review/scripts/screenshot.mjs demos/<skill>/index.html demo-shot.png
 
-# Gate 4 — LLM taste review (assembles the critic prompt; run it through Claude)
+# Beyond the four — LLM taste review (assembles the critic prompt; run it through Claude)
 node skills/design-review/scripts/critic.mjs demos/<skill>/index.html
 ```
 

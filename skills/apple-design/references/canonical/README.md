@@ -45,8 +45,9 @@ about to produce that page-type. The `.md` states:
   `anthropic-design/canonical/pricing.html` as a template for an
   apple-pricing page). The whole point of per-style canonicals is to
   **preserve each style's identity**. Cross-copying flattens the voices.
-- **Don't** ship a canonical without verifying it passes all three
-  `bin/design-review` gates. Broken canonicals poison downstream output.
+- **Don't** ship a canonical without verifying it passes all four
+  `bin/design-review` mechanical gates (the gate model is defined once in
+  `design-review/SKILL.md`). Broken canonicals poison downstream output.
 
 ## Lifecycle
 

@@ -142,13 +142,13 @@ script 输出一份 sprint-contract md,必含:
 **生成器把这份 contract 读完再动手**。不读 canonical 就写 = 又一次让读者
 push back。
 
-### 生成**后**(review 阶段 —— 四道检查)
+### 生成**后**(review 阶段 —— 四道机械检查 + critic)
 
 ```bash
 bin/design-review --critic <page.html>
 ```
 
-四道检查依次跑:
+四道机械检查依次跑(检查模型的唯一定义在 `design-review/SKILL.md`):
 
 1. **verify.py** — 结构(占位符、DOCTYPE、BEM、SVG 平衡、class 定义、
    bilingual §G)
@@ -158,10 +158,14 @@ bin/design-review --critic <page.html>
      同色
    - **brand-presence** (§K) · **italic-overuse** (§J) ·
      **cross-skill-smell** (§K)
-3. **screenshot.mjs** — 全页 PNG 存 shots/
-4. **critic.mjs** — LLM 口味评审(写一份 critic prompt md,喂给 Claude;
-   Claude Code 环境下直接 Task(subagent_type='design-critic'))。输出
-   0-100 分 + 7 维度分解 + 具体 issues + narrative
+3. **axe-audit.mjs** — 可达性(axe-core;color-contrast、link-name、
+   aria-prohibited-attr、svg-img-alt 为阻断项)
+4. **screenshot.mjs** — 全页 PNG 存 shots/
+
+四道之外,`--critic` 再跑 **critic.mjs** — LLM 口味评审(写一份 critic
+prompt md,喂给 Claude;Claude Code 环境下直接
+Task(subagent_type='design-critic'))。输出 0-100 分 + 7 维度分解 +
+具体 issues + narrative。
 
 任一 error 整个失败;warn 要人判定是否放行。critic 得分 < 75 必修。
 

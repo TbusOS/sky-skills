@@ -120,7 +120,7 @@ async function init(args) {
   await writeFile(path, header, 'utf-8');
   console.log(`loop initialized → ${path}`);
   if (conf === 'low') console.log('  contract is LOW-CONFIDENCE — treat structural MUSTs as defaults.');
-  console.log(`  round 1: generate per the contract + plan, run the 3 gates, then a critic, then --record.`);
+  console.log(`  round 1: generate per the contract + plan, run the 4 gates, then a critic, then --record.`);
   return 0;
 }
 

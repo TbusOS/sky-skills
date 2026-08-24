@@ -4,12 +4,25 @@ count-check.py — repo-wide verdict on count-bearing numbers.
 
 facts.mjs guards a fixed set of carrier phrasings on a fixed set of surfaces.
 This script is the wide net behind it (known-bugs §1.53): every tracked
-*.html / *.md file, word AND digit number forms, prose AND SVG <text> AND
-attribute values (aria-label / content / alt / title / data-label-*), with
-the previous and next line joined into the match window so a number in one
-element and its label in the next are seen together. Each carrier phrase is
-bound to a truth derived from disk (facts.mjs --json); only disagreements
-are printed.
+*.html / *.md / *.mjs / *.js / *.py file plus bin/ scripts, word AND digit
+number forms, prose AND SVG <text> AND attribute values (aria-label /
+content / alt / title / data-label-*), with the previous and next line
+joined into the match window so a number in one element and its label in
+the next are seen together. Each carrier phrase is bound to a truth derived
+from disk (facts.mjs --json), and gate counts are bound to the gate model
+defined ONCE in skills/design-review/SKILL.md (the machine-readable
+`gate-model:` marker); only disagreements are printed.
+
+Beyond per-line carriers, three model-aware checks cover the
+number-vs-adjacent-list class no single-line pattern can see:
+  · gate-enum   — a gate-count claim next to an enumeration of the gate
+                  scripts must claim the model's count AND enumerate the
+                  model's full mechanical set (a 四道 heading over three
+                  commands, a "4 Gates" card listing the old three + critic)
+  · critic-as-gate — the LLM critic labelled 第 N 道 / gate N / [N/N]
+                  (the model rules the critic OUTSIDE the mechanical four)
+  · roster-subset — a design-skill count over an all-caps skin roster that
+                  names fewer skins with no "+N" marker
 
 Usage:
   python3 skills/design-review/scripts/count-check.py            # whole repo
@@ -89,6 +102,35 @@ def to_number(token: str) -> int | None:
 
 # ----------------------------------------------------------------- truths ---
 
+# The gate model is defined ONCE, in skills/design-review/SKILL.md, as a
+# machine-readable marker. This script parses it rather than hardcoding a
+# gate count — change the model there and the probe here must still pass.
+GATE_MODEL_SRC = os.path.join("skills", "design-review", "SKILL.md")
+GATE_MODEL_RE = re.compile(
+    r"<!--\s*gate-model:\s*mechanical\s*=\s*([^;]+);"
+    r"\s*optional\s*=\s*([^;]+);\s*taste\s*=\s*([^>]+?)\s*-->")
+
+
+def gate_model() -> dict:
+    try:
+        text = open(os.path.join(REPO, GATE_MODEL_SRC), encoding="utf-8").read()
+    except OSError as err:
+        print(f"count-check: cannot read {GATE_MODEL_SRC}: {err}", file=sys.stderr)
+        sys.exit(2)
+    m = GATE_MODEL_RE.search(text)
+    if not m:
+        print(f"count-check: the gate-model marker is missing from "
+              f"{GATE_MODEL_SRC} — the single source of truth for gate "
+              f"counts. Restore the '<!-- gate-model: ... -->' comment.",
+              file=sys.stderr)
+        sys.exit(2)
+    return {
+        "mechanical": [s.strip() for s in m.group(1).split(",") if s.strip()],
+        "optional": [s.strip() for s in m.group(2).split(",") if s.strip()],
+        "taste": m.group(3).strip(),
+    }
+
+
 def derive_truths() -> dict[str, int]:
     """Ground truth comes from facts.mjs, never from this file."""
     try:
@@ -110,6 +152,7 @@ def derive_truths() -> dict[str, int]:
         "nondesign": t["skills"]["total"] - t["skills"]["design"],
         "canonical": t["canonical"]["total"],
         "kb": t["knownBugs"]["total"],
+        "gates": len(gate_model()["mechanical"]),
     }
 
 
@@ -160,7 +203,8 @@ def carriers() -> list[tuple[str, str, re.Pattern]]:
         ("design-gens",    "design", rf"\bthe\s+{n}\s+generators\b", I),
         ("design-gen-sk",  "design", rf"\b{n}\s+generator\s+skills\b", I),
         ("design-zh-voice", "design", rf"{n}\s*种(?:设计)?声音", 0),
-        ("design-zh-aesth", "design", rf"{n}\s*种(?:设计|品牌)?美学", 0),
+        ("design-zh-aesth", "design", rf"{n}\s*种(?:页面设计|设计|品牌)?美学", 0),
+        ("design-zh-style", "design", rf"{n}\s*[种个]\s*风格", 0),
         ("design-zh-skill", "design",
          rf"{n}\s*个设计(?:类)?\s*(?:skill|生成器|generator|技能)", 0),
         ("design-zh-en",   "design", rf"{n}\s*个\s*design\s*skill", 0),
@@ -169,6 +213,23 @@ def carriers() -> list[tuple[str, str, re.Pattern]]:
         ("design-band",    "design",
          rf"(?:Design\s+generators|设计生成器)\s*·\s*{d}", 0),
         ("design-primer",  "design", rf"{n}\s*本教画页面", 0),
+        # -- gate counts (truth: the gate model in design-review/SKILL.md) --
+        ("gates-zh",       "gates", rf"{n}\s*道\s*(?:机械|机器)\s*(?:检查|审查)", 0),
+        # plain N 道检查 needs design-review context nearby: gated-dual-clone
+        # legitimately has its own 三道(安全)检查 with none of these tokens.
+        ("gates-zh-plain", "gates", rf"{n}\s*道\s*(?:检查|审查)", 0,
+         r"design-review|dr-cli|verify|visual-audit|axe|screenshot"),
+        ("gates-en",       "gates",
+         rf"\b{n}\s+(?:machine|mechanical|review)\s+gates\b", I),
+        ("gates-green",    "gates", rf"\b{n}\s+gates\s+green\b", I),
+        ("gates-run",      "gates", rf"\brun\s+the\s+{n}\s+gates\b", I),
+        ("gates-all",      "gates", rf"\ball\s+{n}\s+gates\b", I),
+        ("gates-dr",       "gates",
+         rf"\b{n}\s+`?bin/design-review`?\s+(?:mechanical\s+)?gates", I),
+        # own slot: the shared one's trailing lookahead blocks '-', which is
+        # exactly the joint this form hinges on ("three-gate design-review")
+        ("gates-hyphen",   "gates",
+         rf"(?<![0-9A-Za-z_.])((?:{EN_WORDS})|(?!0\d)\d{{1,2}})-gate\b", I),
         # -- systems & content family ------------------------------------
         ("systems-en",     "systems",
          rf"\b{n}\s+systems\s*(?:&|and|/)\s*content", I),
@@ -244,9 +305,36 @@ RECORD_PATHS = [
      "counts skills in the upstream anthropics/skills repo, not this one"),
     ("skills/design-review/references/known-bugs.md",
      "quotes wrong numbers as examples of the bugs it catalogues"),
+    ("skills/design-review/scripts/facts.mjs",
+     "its header records the drift history (44/44 …) that motivated the gate"),
+    ("skills/design-review/scripts/coverage.mjs",
+     "its header records the drift history (27/40, 44/44) that motivated it"),
+    ("skills/design-review/scripts/axe-audit.mjs",
+     "its PROMOTED comments record the dated 2026-08-14 measurement"),
+    ("skills/design-review/scripts/count-check.py",
+     "quotes wrong numbers as exclusion patterns and probe material — its "
+     "correctness is proven by the probe, not by scanning its source"),
     ("/references/canonical/*.md",
-     "dated per-page decision records (canonical 20 → 21 …)"),
+     "dated per-page decision records (canonical 20 → 21 …) — README.md is "
+     "live instructions and IS scanned"),
 ]
+
+# Findings in these files/lines are already handed to another task: printed
+# as pending, never silently dropped, never failing this run. An entry whose
+# pattern no longer matches is spent — delete it.
+PENDING = [
+    ("skills/design-review/scripts/sprint-contract.mjs", r"",
+     "Task 10 对齐它的 gates 数组(:296)与渲染文案,本任务禁改"),
+    ("skills/design-review/references/cross-skill-rules.md", r"三道检查的命令",
+     "sprint-contract.mjs 输出的镜像 — Task 10 一并对齐"),
+]
+
+
+def pending_reason(rel: str, raw_line: str) -> str | None:
+    for path, pat, why in PENDING:
+        if rel == path and (pat == "" or re.search(pat, raw_line)):
+            return why
+    return None
 
 IGNORE_RE = re.compile(r"facts-ignore:\s*(\S.*?)\s*(?:-->|$)")
 
@@ -256,6 +344,10 @@ TAG_RE = re.compile(r"<[^>]+>")
 
 
 def is_record_path(rel: str) -> str | None:
+    # canonical README.md files are live instructions, not dated records —
+    # they are scanned even though their sibling decision .md files are not.
+    if rel.endswith("/references/canonical/README.md"):
+        return None
     for prefix, why in RECORD_PATHS:
         if prefix.startswith("/"):
             pat = prefix.strip("/").replace(".", r"\.").replace("*", "[^/]*")
@@ -276,7 +368,113 @@ def visible(line: str) -> str:
 
 # ----------------------------------------------------------------- engine ---
 
-def scan_lines(raw: list[str], truth: dict, rules):
+def _ignore_why(raw: list[str], i: int) -> str | None:
+    for cand in (raw[i], raw[i - 1] if i else None):
+        got = IGNORE_RE.search(cand) if cand else None
+        if got:
+            return got.group(1)
+    return None
+
+
+SKIN_RE = re.compile(
+    r"\b(ANTHROPIC|APPLE|EMBER|SAGE|GLASS|ECLAT|LECTERN|ATELIER|PRIMER)\b")
+CAPS_LINE_RE = re.compile(r"^[\sA-Z0-9·&+/|-]+$")
+CRITIC_AS_GATE_RE = re.compile(
+    r"(?:第\s*[一二两三四五六七八九十\d]+\s*道|\bgate\s+\d\b|\[\d+/\d+\])"
+    r"[^\n|]{0,24}?(?:critic|口味评审|taste\s+judge)", re.I)
+
+
+# How each mechanical gate may be named inside an enumeration (zh docs write
+# screenshot.mjs as 截图 and axe as axe-core); keys are script base names.
+GATE_ALIASES = {
+    "verify": ["verify", "结构"],
+    "visual-audit": ["visual-audit", "渲染"],
+    "axe-audit": ["axe", "可达性"],
+    "screenshot": ["screenshot", "截图"],
+    "pixel-gate": ["pixel"],
+}
+
+
+def special_findings(vis, raw, truth, model):
+    """The number-vs-adjacent-list class no single-line carrier can see."""
+    mech = [g.split(".")[0].lower() for g in model["mechanical"]]
+    # 第-lookbehinds keep ordinals (第五道机械检查 = the optional 5th) out;
+    # the carrier pass gets this for free from the EXCLUSIONS span-claim.
+    n_any = (r"(?<![0-9A-Za-z_.+-])(?<![一二两三四五六七八九十])(?<!第)(?<!第 )("
+             + EN_WORDS + "|" + ZH_WORDS + r"|(?!0\d)\d{1,2})(?![0-9A-Za-z_.%+-])")
+    # For the bare-EN form only word numerals claim: digits next to "gates"
+    # are routinely something else's number ("Wave 2 gates · …" on a dated
+    # timeline). Qualified forms (machine/mechanical/review) accept digits.
+    claim_re = re.compile(
+        rf"{n_any}\s*道\s*(?:机械|机器)?\s*(?:检查|审查)"
+        rf"|{n_any}\s+(?:machine|mechanical|review)\s+gates\b"
+        rf"|(?<![0-9A-Za-z_.+-])({EN_WORDS})\s+gates\b", re.I)
+    for i, cur in enumerate(vis):
+        why = _ignore_why(raw, i)
+        m = CRITIC_AS_GATE_RE.search(cur)
+        if m:
+            ex = " ".join(cur[max(0, m.start() - 8):m.end() + 8].split())[:96]
+            yield (i + 1, "suppressed" if why else "violation",
+                   "critic-as-gate", 0, truth["gates"],
+                   f"critic labelled as a numbered gate — the model rules it "
+                   f"outside the mechanical four «{ex}»", why)
+        for m in claim_re.finditer(cur):
+            tok = m.group(1) or m.group(2) or m.group(3)
+            val = to_number(tok) if tok else None
+            if val is None:
+                continue
+            # ≥3 gate names within 14 lines = a real enumeration; two can
+            # be an incidental mention ("never edit verify.py/visual-audit").
+            window = " ".join(vis[i:i + 14]).lower()
+            found = {g for g in mech
+                     if any(a in window for a in GATE_ALIASES.get(g, [g]))}
+            if len(found) < 3:
+                continue
+            missing = [g for g in mech if g not in found]
+            if val != truth["gates"]:
+                yield (i + 1, "suppressed" if why else "violation",
+                       "gate-enum-count", val, truth["gates"],
+                       " ".join(cur.split())[:96], why)
+            if missing:
+                yield (i + 1, "suppressed" if why else "violation",
+                       "gate-enum-missing", val, truth["gates"],
+                       f"gate enumeration under the claim is missing: "
+                       + ", ".join(missing), why)
+    yield from roster_findings(vis, raw, truth)
+
+
+def roster_findings(vis, raw, truth):
+    """A design-skill count over an all-caps skin roster naming fewer skins."""
+    i = 0
+    while i < len(vis):
+        s = vis[i].strip()
+        if not (s and CAPS_LINE_RE.match(s) and SKIN_RE.search(s)):
+            i += 1
+            continue
+        names, marked, j = set(), False, i
+        while j < len(vis):
+            sj = vis[j].strip()
+            if not (sj and CAPS_LINE_RE.match(sj) and SKIN_RE.search(sj)):
+                break
+            names |= set(SKIN_RE.findall(sj))
+            if re.search(r"\+\s*\d", sj):
+                marked = True
+            j += 1
+        back = " ".join(vis[max(0, i - 5):i])
+        claimed = re.search(
+            rf"(?<![0-9A-Za-z_.+-]){truth['design']}(?![0-9A-Za-z_.%+-])", back)
+        vocab = re.search(r"aesthetic|voice|skin|美学|声音|风格", back, re.I)
+        if claimed and vocab and not marked and 2 <= len(names) < truth["design"]:
+            why = _ignore_why(raw, i)
+            yield (i + 1, "suppressed" if why else "violation",
+                   "roster-subset", len(names), truth["design"],
+                   f"claims {truth['design']} but the roster names only "
+                   f"{len(names)} skins with no '+N' marker: "
+                   + " · ".join(sorted(names)), why)
+        i = j
+
+
+def scan_lines(raw: list[str], truth: dict, rules, model):
     """Yield (line_no, kind, name, claimed, expected, excerpt, why)."""
     vis = [visible(l) for l in raw]
     excl = [(name, re.compile(pat, re.IGNORECASE)) for name, pat, _ in EXCLUSIONS]
@@ -312,25 +510,26 @@ def scan_lines(raw: list[str], truth: dict, rules):
                     seen.add((start, tok))
                     if val == truth[key]:
                         continue
-                    why = None
-                    for cand in (raw[i], raw[i - 1] if i else None):
-                        got = IGNORE_RE.search(cand) if cand else None
-                        if got:
-                            why = got.group(1)
-                            break
+                    why = _ignore_why(raw, i)
                     excerpt = " ".join(
                         joined[max(0, start - 34):end + 34].split())[:96]
                     yield (i + 1, "suppressed" if why else "violation",
                            name, val, truth[key], excerpt, why)
+    yield from special_findings(vis, raw, truth, model)
 
 
 def tracked_files() -> list[str]:
-    run = subprocess.run(["git", "-C", REPO, "ls-files", "*.html", "*.md"],
-                         capture_output=True, text=True)
+    # Code files are scanned too: design-loop.mjs's operator strings and
+    # bin/design-review's header carried stale gate counts for months in
+    # the unscanned zone (re-review round 3, finding 7).
+    run = subprocess.run(
+        ["git", "-C", REPO, "ls-files",
+         "*.html", "*.md", "*.mjs", "*.js", "*.py", "bin/*"],
+        capture_output=True, text=True)
     if run.returncode != 0:
         print("count-check: git ls-files failed", file=sys.stderr)
         sys.exit(2)
-    return [f for f in run.stdout.split("\n") if f]
+    return sorted(set(f for f in run.stdout.split("\n") if f))
 
 
 # ------------------------------------------------------------------ probe ---
@@ -342,13 +541,19 @@ def en_word(v: int) -> str:
     return str(v)
 
 
-def probe(truth: dict, rules) -> list[str]:
+ZH_SMALL = {2: "两", 3: "三", 4: "四", 5: "五", 6: "六", 7: "七"}
+
+
+def probe(truth: dict, rules, model) -> list[str]:
     """Inject a fake wrong number in every form this class has taken.
 
     Returns a list of failure messages; empty means the probe passed.
     """
     w = {k: v + 1 for k, v in truth.items()}          # guaranteed wrong
     w2 = {k: v + 2 for k, v in truth.items()}
+    g = truth["gates"]
+    g_low = 3 if g != 3 else 5                        # EN/zh low-numeral hole
+    en_low = 3 if truth["design"] != 3 else 4
     bad = f"""
 <p>Same story, {en_word(w['design'])} page-design aesthetics. All {w['total']} skills.</p>
 <p>{w['kb']} known-bugs. 覆盖 {w['canonical']}/{w['canonical']} canonical。已收录 {w2['kb']} 条。</p>
@@ -360,9 +565,20 @@ def probe(truth: dict, rules) -> list[str]:
 <text>page-types covered</text>
 <p>{w['design']} design generators, {w['systems']} systems / content utilities.</p>
 <p>另有 {w['nondesign']} 个技能。{w['harness']} harness &amp; workflow skills.</p>
+<p>{ZH_SMALL[g_low]}道机械检查都要绿。Run the {en_word(w['gates'])} machine gates.</p>
+<p>Only {en_word(en_low)} design voices remain. A {en_word(g_low)}-gate design-review.</p>
+<h3>发布前 checklist({ZH_SMALL.get(g, g)}道机械检查都要 exit 0)</h3>
+<pre>python3 scripts/verify.py page.html</pre>
+<pre>node scripts/visual-audit.mjs page.html</pre>
+<pre>node scripts/screenshot.mjs page.html</pre>
+<p>第四道检查 · LLM critic</p>
+<text>{truth['design']}</text>
+<text>aesthetics</text>
+<text>APPLE · ANTHROPIC</text>
+<text>EMBER · SAGE</text>
 """.split("\n")
     zh_probe_val = 3 if truth["design"] != 3 else 4
-    hits = [(r[2], r[3]) for r in scan_lines(bad, truth, rules)
+    hits = [(r[2], r[3]) for r in scan_lines(bad, truth, rules, model)
             if r[1] == "violation"]
     need = [
         ("design-aesth", w["design"]), ("total-all", w["total"]),
@@ -374,6 +590,11 @@ def probe(truth: dict, rules) -> list[str]:
         # line — the anti-`break` regression; plus the attribute-value form:
         ("systems-en", w["systems"]), ("nondesign-zh", w["nondesign"]),
         ("harness-en", w["harness"]),
+        # gate-model regressions: zh + EN low numerals, hyphen form,
+        # enumeration-vs-count, critic mislabelled, caps-roster subset
+        ("gates-zh", g_low), ("gates-en", w["gates"]),
+        ("gates-hyphen", g_low), ("design-en", en_low),
+        ("gate-enum-missing", g), ("critic-as-gate", 0), ("roster-subset", 4),
     ]
     fails = [f"probe: injected fake not caught: {name} claiming {val}"
              for name, val in need if (name, val) not in hits]
@@ -385,8 +606,17 @@ def probe(truth: dict, rules) -> list[str]:
         f"<p>覆盖 {truth['canonical']}/{truth['canonical']} canonical。"
         f"已收录 {truth['kb']} 条。第 13 个 skill。其余 8 个。</p>",
         "<p>rendered in all five aesthetics — atelier (5) and primer (3)</p>",
+        f"<p>{ZH_SMALL.get(g, g)}道机械检查:{'、'.join(model['mechanical'])}。"
+        f"critic 不是第{ZH_SMALL.get(g, g)}道机械检查,它在四道之外。</p>",
+        "<p>第三道是 axe-core,color-contrast 是阻断项。"
+        "可选的第五道机械检查是 pixel-gate.mjs。</p>",
+        f"<p>run the {en_word(g)} gates, then a critic.</p>",
+        f"<text>{truth['design']}</text>",
+        "<text>aesthetics</text>",
+        "<text>APPLE · ANTHROPIC</text>",
+        "<text>EMBER · SAGE · +5</text>",
     ]
-    false_alarms = [r for r in scan_lines(good, truth, rules)
+    false_alarms = [r for r in scan_lines(good, truth, rules, model)
                     if r[1] == "violation"]
     fails += [f"probe: true statement flagged: {r[2]} «{r[5]}»"
               for r in false_alarms]
@@ -401,20 +631,28 @@ def main() -> int:
     want_probe = "--probe" in args
     paths = [a for a in args if not a.startswith("--")]
     truth = derive_truths()
+    model = gate_model()
     rules = carriers()
 
     if want_list:
-        print("truths from facts.mjs --json:")
+        print("truths from facts.mjs --json + the gate model in "
+              f"{GATE_MODEL_SRC}:")
         print("  " + " · ".join(f"{k} {v}" for k, v in truth.items()))
+        print(f"  gate model: mechanical = {', '.join(model['mechanical'])}"
+              f" · optional = {', '.join(model['optional'])}"
+              f" · taste = {model['taste']} (outside the mechanical count)")
         print(f"named exclusions ({len(EXCLUSIONS)}):")
         for name, _, why in EXCLUSIONS:
             print(f"  · {name} — {why}")
         print(f"record paths, never scanned ({len(RECORD_PATHS)}):")
         for prefix, why in RECORD_PATHS:
             print(f"  · {prefix} — {why}")
+        print(f"pending, handed to another task ({len(PENDING)}):")
+        for path, pat, why in PENDING:
+            print(f"  · {path}{' «' + pat + '»' if pat else ''} — {why}")
         return 0
 
-    fails = probe(truth, rules)
+    fails = probe(truth, rules, model)
     if fails:
         for f in fails:
             print(f"  ✗ {f}")
@@ -426,7 +664,7 @@ def main() -> int:
         return 0
 
     files = paths or tracked_files()
-    skipped, suppressed, violations = [], [], []
+    skipped, suppressed, pending, violations = [], [], [], []
     for rel in files:
         why = is_record_path(rel)
         if why:
@@ -435,9 +673,13 @@ def main() -> int:
         abspath = rel if os.path.isabs(rel) else os.path.join(REPO, rel)
         with open(abspath, encoding="utf-8", errors="replace") as fh:
             raw = fh.read().split("\n")
-        for row in scan_lines(raw, truth, rules):
-            (suppressed if row[1] == "suppressed" else violations).append(
-                (rel,) + row)
+        for row in scan_lines(raw, truth, rules, model):
+            if row[1] == "suppressed":
+                suppressed.append((rel,) + row)
+                continue
+            handed = pending_reason(rel, raw[row[0] - 1])
+            (pending if handed else violations).append(
+                (rel,) + row + ((handed,) if handed else ()))
 
     print("truths: " + " · ".join(f"{k} {v}" for k, v in truth.items()))
     print(f"scanned {len(files) - len(skipped)} file(s); "
@@ -446,6 +688,12 @@ def main() -> int:
         print(f"suppressed by facts-ignore ({len(suppressed)}):")
         for rel, line, _, name, val, exp, ex, why in suppressed:
             print(f"  {rel}:{line}  «{ex}» — {why}")
+    if pending:
+        print(f"pending, handed to another task — not failing this run "
+              f"({len(pending)}):")
+        for rel, line, _, name, val, exp, ex, _w, handed in pending:
+            print(f"  {rel}:{line}  {name}  says {val}, model says {exp} — "
+                  f"{handed}")
     if violations:
         print(f"\nfalse counts ({len(violations)}):")
         for rel, line, _, name, val, exp, ex, _w in violations:

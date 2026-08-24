@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
 # design-review — one-command wrapper for the design review pipeline
 #
-# Runs up to four gates:
+# Runs the four mechanical gates, plus opt-in extras (the gate model is
+# defined once in skills/design-review/SKILL.md — this list mirrors it):
 #   [1/4] verify.py         — structural (placeholders, DOCTYPE, BEM, …)
 #   [2/4] visual-audit.mjs  — rendered (contrast, brand-presence, italic,
 #                             cross-skill-smell, …) — Playwright + pngjs
-#   [3/5] axe-audit.mjs     — accessibility conformance (axe-core); 3 rules
-#                             blocking, color-contrast reported only
-#   [4/5] screenshot.mjs    — full-page PNG for human review
-#   [5/5] pixel-gate.mjs (opt-in, --pixel) — rendered pixels vs a committed
+#   [3/4] axe-audit.mjs     — accessibility conformance (axe-core); 4 rules
+#                             blocking incl. color-contrast (promoted after
+#                             the corpus was measured clean)
+#   [4/4] screenshot.mjs    — full-page PNG for human review
+#   +1    pixel-gate.mjs (opt-in, --pixel) — rendered pixels vs a committed
 #                             baseline; the only gate that fails on something
 #                             no rule describes
-#   [4/4] critic.mjs (opt)  — LLM taste judge; prepares prompt for
-#                             a Claude (or other LLM) call
+#   +1    critic.mjs (opt-in, --critic / --multi-critic) — LLM taste judge,
+#                             outside the mechanical four; prepares prompt
+#                             for a Claude (or other LLM) call
 #
 # Usage:
 #   bin/design-review [flags] <html-path> [...]
@@ -25,7 +28,7 @@
 #                      If omitted, verify.py auto-detects from the HTML's <link>.
 #   --theme=<t>        dark | light — forwarded to visual-audit + screenshot
 #                      (flips html[data-theme] after load). With --skill=glass
-#                      and no explicit --theme, gates 2 and 3 run BOTH themes
+#                      and no explicit --theme, gates 2-4 run BOTH themes
 #                      automatically (dark is brand-canonical, light is the
 #                      iOS-frost variant; both must be clean).
 #   --css=<path>       Extra CSS file for class-definition lookup. Can repeat.
@@ -165,7 +168,7 @@ Full ratchet: skills/design-evolve/SKILL.md. One round:
   1. diagnose the weakest critic axis (composition / copy / illustration / brand)
   2. propose ONE rule/template change for that axis  (--rules --register …)
   3. apply on a branch + regenerate the page
-  4. score with the FROZEN evaluator (3 gates green + multi-critic, avg ≥3 renders)
+  4. score with the FROZEN evaluator (4 gates green + multi-critic, avg ≥3 renders)
   5. --regress --check --skill=S   (no held-out canonical may regress)
   6. keep iff Δ ≥ 2 AND step 5 clean; else git revert.  (--ledger --append …)
   7. --rules --fire=<id> [--catch]      8. repeat to --max-rounds or plateau
@@ -385,12 +388,12 @@ if [ "$exit_visual" -ne 0 ]; then
 fi
 
 # ---------- Gate 3 · axe-core accessibility conformance ----------
-# Runs by default. Three rules are BLOCKING (link-name, aria-prohibited-attr,
-# svg-img-alt) — the whole corpus was measured clean on them before promotion,
-# so this gate can never fail on inherited debt. color-contrast is reported and
-# not enforced: it is one systemic palette decision across four skills, not a
-# scatter of mistakes, and blocking it would stop every commit on a migration
-# nobody has agreed to. See axe-audit.mjs for the measurement.
+# Runs by default. Four rules are BLOCKING (color-contrast, link-name,
+# aria-prohibited-attr, svg-img-alt) — each promoted only after a measured
+# pass showed the whole corpus clean on it, so this gate can never fail on
+# inherited debt. color-contrast was WARN at rollout (1,013 elements) and was
+# promoted the same day the debt was paid down to zero (known-bugs §7.11).
+# See axe-audit.mjs PROMOTED for the list and the measurement.
 exit_axe=0
 if [ -n "$NO_AXE" ]; then
   echo ""
@@ -466,7 +469,7 @@ if [ -n "$PIXEL_GATE" ]; then
   fi
 fi
 
-# ---------- Gate 4 · design-critic (solo OR 4 specialists) ----------
+# ---------- Taste · design-critic (solo OR 4 specialists, outside the mechanical gates) ----------
 if [ -n "$CRITIC" ]; then
   for html in "${HTMLS[@]}"; do
     base="$(basename "$html" .html)"
