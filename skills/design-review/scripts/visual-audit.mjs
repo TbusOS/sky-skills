@@ -214,7 +214,12 @@ const SKILL_SIGNATURES = {
   primer: {
     name: 'primer violet',
     accents: [[122, 92, 214]],         // #7a5cd6 — ≥64 per-channel from all 8 sibling accents
-    threshold: 0.004,                   // provisional; recalibrate on the 3 canonicals (Task 6)
+    threshold: 0.00485,                 // calibrated 2026-08-24 on the 3 canonicals (measured
+                                        // top-1440×500 primer-violet coverage via visual-audit's
+                                        // own brand-presence check, forced to print by temporarily
+                                        // setting threshold high enough to always warn): concept
+                                        // 0.97%, process 1.5%, compare 1.93% — min(0.97%)/2 = 0.485%,
+                                        // above the 0.2% floor, so 0.00485 is the final value
     // ember gold, sage green and lectern navy OMITTED on purpose (spec §4.1):
     // marker-yellow-over-ink anti-aliasing lands inside TOL 55 of #c49464;
     // go-green white-blends land inside TOL 55 of #97B077; primer ink #243244
