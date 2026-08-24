@@ -69,5 +69,5 @@ light 主题下色散只用白(彩色 cast 在白底上读作脏)。
 
 - `<html data-theme="dark">` 显式声明(verify 8c 强制);dark 是品牌正典态,light 是 iOS-frost 变体。
 - 公开页必须有 `.glass-theme-toggle`(glass.js 一行切换 + localStorage)。
-- 审计:四道机械检查对 glass 自动 dark + light 双跑;brand-presence 只在 dark 检(light 下光晕覆盖率是另一个量级)。
+- 审计:渲染 / 可达性 / 截图三道(gate 2-4)对 glass 自动 dark + light 双跑(verify 静态只跑一次);brand-presence 只在 dark 检(light 下光晕覆盖率是另一个量级)。
 - 组件只引用语义 token;凡是"在两个主题下应该不同"的颜色,必须有对应 token,没有就加 token,不要写死。

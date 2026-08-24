@@ -7,8 +7,9 @@
 #   [2/4] visual-audit.mjs  — rendered (contrast, brand-presence, italic,
 #                             cross-skill-smell, …) — Playwright + pngjs
 #   [3/4] axe-audit.mjs     — accessibility conformance (axe-core); 4 rules
-#                             blocking incl. color-contrast (promoted after
-#                             the corpus was measured clean)
+#                             blocking incl. color-contrast (promotions were
+#                             measured per skill, one theme per page — glass
+#                             light still carries debt, known-bugs §6.6)
 #   [4/4] screenshot.mjs    — full-page PNG for human review
 #   +1    pixel-gate.mjs (opt-in, --pixel) — rendered pixels vs a committed
 #                             baseline; the only gate that fails on something
@@ -326,10 +327,10 @@ PIXEL_GATE="${PIXEL_GATE:-}"
 PIXEL_BASELINE="${PIXEL_BASELINE:-}"
 NO_AXE="${NO_AXE:-}"
 
+# The critic is NOT counted: it runs outside the numbered mechanical gates
+# (the gate model is defined once in skills/design-review/SKILL.md).
 TOTAL_GATES=4
 [ -n "$PIXEL_GATE" ] && TOTAL_GATES=$((TOTAL_GATES + 1))
-[ -n "$CRITIC" ] && TOTAL_GATES=$((TOTAL_GATES + 1))
-[ -n "$MULTI_CRITIC" ] && TOTAL_GATES=$((TOTAL_GATES + 1))
 
 CRITIC_MODE="no"
 [ -n "$CRITIC" ] && CRITIC_MODE="solo"
@@ -389,10 +390,12 @@ fi
 
 # ---------- Gate 3 · axe-core accessibility conformance ----------
 # Runs by default. Four rules are BLOCKING (color-contrast, link-name,
-# aria-prohibited-attr, svg-img-alt) — each promoted only after a measured
-# pass showed the whole corpus clean on it, so this gate can never fail on
-# inherited debt. color-contrast was WARN at rollout (1,013 elements) and was
-# promoted the same day the debt was paid down to zero (known-bugs §7.11).
+# aria-prohibited-attr, svg-img-alt). The promotions were measured per skill,
+# but that pass sampled ONE theme per page: glass's light theme was never
+# measured and still carries 56 color-contrast blockers (known-bugs §6.6),
+# so on glass pages this gate CAN fail on inherited debt until that is paid.
+# History: color-contrast was WARN at rollout (1,013 elements) and was
+# promoted the same day the sampled debt was paid down (known-bugs §7.11).
 # See axe-audit.mjs PROMOTED for the list and the measurement.
 exit_axe=0
 if [ -n "$NO_AXE" ]; then
@@ -475,7 +478,7 @@ if [ -n "$CRITIC" ]; then
     base="$(basename "$html" .html)"
     critic_prompt="$OUT_DIR/critic-${base}-$(date +%Y%m%d-%H%M%S).md"
     echo ""
-    echo "━━ [4/$TOTAL_GATES] critic.mjs (LLM taste — solo critic prompt)   $html"
+    echo "━━ critic.mjs · LLM taste, outside the numbered gates (solo critic prompt)   $html"
     critic_args=("$html")
     [ -n "$SKILL" ] && critic_args+=("--skill=$SKILL")
     [ -n "$PAGE" ]  && critic_args+=("--page=$PAGE")
@@ -493,7 +496,7 @@ fi
 if [ -n "$MULTI_CRITIC" ]; then
   for html in "${HTMLS[@]}"; do
     echo ""
-    echo "━━ [4/$TOTAL_GATES] multi-critic.mjs (4 specialists — composition/copy/illustration/brand)   $html"
+    echo "━━ multi-critic.mjs · LLM taste, outside the numbered gates (4 specialists — composition/copy/illustration/brand)   $html"
     mc_args=("$html")
     [ -n "$SKILL" ] && mc_args+=("--skill=$SKILL")
     [ -n "$PAGE" ]  && mc_args+=("--page=$PAGE")

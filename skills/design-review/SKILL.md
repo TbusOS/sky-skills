@@ -40,7 +40,9 @@ it instead of asserting its own number.
 1. `verify.py` — 结构(静态)
 2. `visual-audit.mjs` — 渲染(Playwright)
 3. `axe-audit.mjs` — 可达性(axe-core;阻断规则四条:color-contrast、
-   link-name、aria-prohibited-attr、svg-img-alt —— 全部在存量清零后才晋升)
+   link-name、aria-prohibited-attr、svg-img-alt。晋升按 skill 实测,但当时
+   每页只量了一个主题:glass 的 light 主题带着已知 contrast 欠账
+   (known-bugs §6.6),在 glass 页上这道检查会因存量 fail,还清前如此)
 4. `screenshot.mjs` — 全页截图(只产物;评判它的是人眼)
 
 **四道之外**,按需叠加,不计入"四道":
@@ -59,8 +61,8 @@ it instead of asserting its own number.
 | 组件 | 状态 | 实体 |
 |---|---|---|
 | Gate 1 · structural verify | **shipped** | `scripts/verify.py`(8 类 check + 双语强制 + `--allow-monolingual` 豁免)|
-| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(82 条 known-bugs 里能机器化的那些)|
-| Gate 3 · accessibility axe-audit | **shipped** (2026-08-14) | `scripts/axe-audit.mjs`(axe-core;四条阻断规则,存量清零后晋升)|
+| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(83 条 known-bugs 里能机器化的那些)|
+| Gate 3 · accessibility axe-audit | **shipped** (2026-08-14) | `scripts/axe-audit.mjs`(axe-core;四条阻断规则;当时清账每页只量一个主题,glass light 仍有欠账 —— known-bugs §6.6)|
 | Gate 4 · full-page screenshot | **shipped** | `scripts/screenshot.mjs`(Playwright · 绝对路径 + `file://` 通用)|
 | 口味评审(四道之外)· solo critic | **shipped** | `.claude/agents/design-critic.md` |
 | 口味评审(四道之外)· multi-critic(4 专家) | **shipped** (2026-04-22) | `.claude/agents/design-{composition,copy,illustration,brand}-critic.md` 权重 25/25/20/30 |
@@ -210,7 +212,7 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 - `scripts/screenshot.mjs` — Gate 4 全页截图
 - `scripts/count-check.py` — 全仓计数判定(承载短语 vs 磁盘真值 + 检查模型)
 - `scripts/learning-loop.mjs` — 组件 07 · critic verdict → design-learner prompt
-- `references/known-bugs.md` — 82 条 bug 大全
+- `references/known-bugs.md` — 83 条 bug 大全
 - `references/cross-skill-rules.md` — 9 种风格共通规则(含 §G 双语 / §I 卡片分组)
 - `references/canonical/README.md` — canonical 参考库说明 + 扩库流程
 

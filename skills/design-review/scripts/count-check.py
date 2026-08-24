@@ -319,22 +319,31 @@ RECORD_PATHS = [
      "live instructions and IS scanned"),
 ]
 
-# Findings in these files/lines are already handed to another task: printed
-# as pending, never silently dropped, never failing this run. An entry whose
-# pattern no longer matches is spent — delete it.
+# Findings on these EXACT lines are already handed to another task: printed
+# as pending, never silently dropped, never failing this run. The pattern is
+# load-bearing — a bare path would downgrade every FUTURE lie in that file
+# too (probed: three unrelated fakes injected into sprint-contract.mjs must
+# exit 1). Kinds:
+#   auto   — the scanner detects the line itself; when its pattern stops
+#            matching anything on a full scan the entry is spent and the run
+#            says so — delete it then.
+#   manual — the scanner CANNOT see the line (cross-skill-rules.md:140's
+#            「三道检查的命令」 has no gate token within the tri-line ctx
+#            window), so this is an honest hand-off note, not a detection.
 PENDING = [
-    ("skills/design-review/scripts/sprint-contract.mjs", r"",
-     "Task 10 对齐它的 gates 数组(:296)与渲染文案,本任务禁改"),
+    ("skills/design-review/scripts/sprint-contract.mjs", r"three gates",
+     "Task 10 对齐它的 gates 数组(:296)与渲染文案,本任务禁改", "auto"),
     ("skills/design-review/references/cross-skill-rules.md", r"三道检查的命令",
-     "sprint-contract.mjs 输出的镜像 — Task 10 一并对齐"),
+     "手工交接:检查器看不到这一行(上下文窗口内无 gate token)— "
+     "Task 10 改 sprint-contract 时一并对齐", "manual"),
 ]
 
 
-def pending_reason(rel: str, raw_line: str) -> str | None:
-    for path, pat, why in PENDING:
-        if rel == path and (pat == "" or re.search(pat, raw_line)):
-            return why
-    return None
+def pending_reason(rel: str, raw_line: str) -> tuple[int, str] | tuple[None, None]:
+    for idx, (path, pat, why, _kind) in enumerate(PENDING):
+        if rel == path and re.search(pat, raw_line):
+            return idx, why
+    return None, None
 
 IGNORE_RE = re.compile(r"facts-ignore:\s*(\S.*?)\s*(?:-->|$)")
 
@@ -576,6 +585,7 @@ def probe(truth: dict, rules, model) -> list[str]:
 <text>aesthetics</text>
 <text>APPLE · ANTHROPIC</text>
 <text>EMBER · SAGE</text>
+<p>共 {w2['design']} 种风格。另一页说 {w['design']} 种页面设计美学。</p>
 """.split("\n")
     zh_probe_val = 3 if truth["design"] != 3 else 4
     hits = [(r[2], r[3]) for r in scan_lines(bad, truth, rules, model)
@@ -595,6 +605,8 @@ def probe(truth: dict, rules, model) -> list[str]:
         ("gates-zh", g_low), ("gates-en", w["gates"]),
         ("gates-hyphen", g_low), ("design-en", en_low),
         ("gate-enum-missing", g), ("critic-as-gate", 0), ("roster-subset", 4),
+        # the round-4 carriers, locked per §7.10
+        ("design-zh-style", w2["design"]), ("design-zh-aesth", w["design"]),
     ]
     fails = [f"probe: injected fake not caught: {name} claiming {val}"
              for name, val in need if (name, val) not in hits]
@@ -648,8 +660,8 @@ def main() -> int:
         for prefix, why in RECORD_PATHS:
             print(f"  · {prefix} — {why}")
         print(f"pending, handed to another task ({len(PENDING)}):")
-        for path, pat, why in PENDING:
-            print(f"  · {path}{' «' + pat + '»' if pat else ''} — {why}")
+        for path, pat, why, kind in PENDING:
+            print(f"  · [{kind}] {path} «{pat}» — {why}")
         return 0
 
     fails = probe(truth, rules, model)
@@ -665,6 +677,7 @@ def main() -> int:
 
     files = paths or tracked_files()
     skipped, suppressed, pending, violations = [], [], [], []
+    fired: set[int] = set()
     for rel in files:
         why = is_record_path(rel)
         if why:
@@ -677,9 +690,12 @@ def main() -> int:
             if row[1] == "suppressed":
                 suppressed.append((rel,) + row)
                 continue
-            handed = pending_reason(rel, raw[row[0] - 1])
-            (pending if handed else violations).append(
-                (rel,) + row + ((handed,) if handed else ()))
+            idx, handed = pending_reason(rel, raw[row[0] - 1])
+            if handed is not None:
+                fired.add(idx)
+                pending.append((rel,) + row + (handed,))
+            else:
+                violations.append((rel,) + row)
 
     print("truths: " + " · ".join(f"{k} {v}" for k, v in truth.items()))
     print(f"scanned {len(files) - len(skipped)} file(s); "
@@ -694,6 +710,15 @@ def main() -> int:
         for rel, line, _, name, val, exp, ex, _w, handed in pending:
             print(f"  {rel}:{line}  {name}  says {val}, model says {exp} — "
                   f"{handed}")
+    if not paths:
+        for idx, (path, pat, _why, kind) in enumerate(PENDING):
+            if kind == "manual":
+                print(f"manual hand-off (not detected by this scanner): "
+                      f"{path} «{pat}» — 还清后手工删除本条")
+            elif idx not in fired:
+                print(f"⚠ spent PENDING entry — «{pat}» no longer matches "
+                      f"anything in {path}: the debt was paid, delete the "
+                      f"entry from PENDING")
     if violations:
         print(f"\nfalse counts ({len(violations)}):")
         for rel, line, _, name, val, exp, ex, _w in violations:
