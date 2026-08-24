@@ -22,7 +22,7 @@ Generates picture-explainer pages for readers who know nothing about the topic: 
    - `.primer-analogy` — 比喻卡("就像……"),自带小插画。**一页至少一张**,这是 primer 的身份标志。
      卡里的插画用 `<div class="primer-analogy-fig">` 裹,**别用 `<figure>`** —— 没有 `<figcaption>` 的
      `<figure>` 会被 visual-audit 警告(known-bugs 1.18),而比喻卡的说明文字本来就在 `.primer-analogy-body` 里。
-   - `.primer-step-num` — 超大圆号步骤数字,厚描边手绘感圆圈 + 大号数字。
+   - `.primer-step-num` — 超大圆号步骤数字,厚描边手绘感圆圈 + 大号数字。装在 `.primer-step` 行里;这行当节标题用(体内只有一个 h2)时加修饰符 `.primer-step--centered`,数字对 h2 垂直居中 —— 别在页内 `<style>` 里自己写居中。
    - `.primer-term` — 术语翻译气泡:mono 排术语,正文字排人话。
    - `.primer-recap` — 结尾回顾条,三点总结 + 绿勾(`.primer-recap-tick`)。
    - `.primer-mark` — 马克笔黄高亮 span,只圈一句里最要紧的那几个字。

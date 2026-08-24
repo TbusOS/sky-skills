@@ -10,12 +10,14 @@
 ## 5 个让它成立的决策
 
 ### 1. 一个比喻,而且画成一对一
-全页只有"点外卖"一个比喻,第 1 节的映射图把四步逐列配对画出来:
+全页只有"点外卖"一个比喻,第 1 节的映射图把外卖那一趟和网页那一趟逐列配对画出来:
 下单 ↔ 报网址、厨房备餐 ↔ 备好文件、骑手送 ↔ 文件上路、开门 ↔ 页面亮。
+图注只承诺这四条箭头真画出来的事(外卖的每一段都有对上的一段)—— 它**不是**第 2–5 节
+那四个编号步骤(查地址 / 送请求单 / 文件送回 / 摆出页面)的逐条重画,编号步骤拆得更细。
 **为什么**:`explain-method.md` §2 要求比喻一对一;process 页最容易犯的错是每步换一个
 比喻(DNS 配邮差、服务器配仓库),第二个比喻出现的那一刻,第一个就作废了一半。
-三个术语气泡里有两个(服务器=餐厅厨房、渲染=摆盘)本来就住在外卖世界里,
-所以这个比喻从第一屏一直付房租到最后一屏。
+三个术语气泡里有两个本来就住在外卖世界里 —— 服务器那个的人话半边直接写着
+"这一单的餐厅厨房",渲染那个是"摆盘" —— 所以这个比喻从第一屏一直付房租到最后一屏。
 
 ### 2. 圆号数字是节的脊柱
 四个步骤屏各由一个超大圆号数字(`.primer-step` + `.primer-step-num`)开场,数字紧挨
@@ -49,7 +51,7 @@
 | Element | Font | Size | Weight |
 |---|---|---|---|
 | h1 hero | Fredoka(zh 落 Noto Sans SC) | `clamp(36px, 5.2vw, 60px)` | 600, `line-height:1.08`, `letter-spacing:-.015em` |
-| h2 section / step title | Fredoka(zh 落 Noto Sans SC) | `clamp(26px, 3.2vw, 36px)` | 600, `line-height:1.18`;步骤屏的 h2 住在 `.primer-step-body` 里,和圆号数字同排(页内 `.step-head` 只加了垂直居中) |
+| h2 section / step title | Fredoka(zh 落 Noto Sans SC) | `clamp(26px, 3.2vw, 36px)` | 600, `line-height:1.18`;步骤屏的 h2 住在 `.primer-step-body` 里,和圆号数字同排(节级步骤行加 `.primer-step--centered`:数字对单行 h2 垂直居中,行下留 8px) |
 | Hero lede | Nunito / Noto Sans SC | `clamp(17px, 1.6vw, 20px)` | 400, `--primer-mut`, `max-width:40ch` |
 | Body | Nunito / Noto Sans SC | 17px(≤768px 16.5px) | 400, `line-height:1.66`, `max-width:62ch` |
 | 圆号数字 `.primer-step-num` | Fredoka | `clamp(40px, 4.4vw, 56px)`,圈 `clamp(72px, 7.5vw, 96px)`(手机 34px / 64px) | 600 |
@@ -70,7 +72,8 @@ concept 页的字栈裁决(Fredoka + Noto Sans SC 保留,两种文字不混排�
 - 紫 `#7a5cd6` 固定画在"你这一单"上(决策 3);紫字强调一律 `--primer-violet-ink #5b3fbf`。
   映射图的网页行另有 `--primer-violet-soft #efe9fc` 一块底板 —— 是"正在教的那一行"的面板
   tint(`illustration-craft.md` §9 第 3 条),不是新颜色。
-- 黄 `#ffd23f` 只有一档:两处 `.primer-mark`(下了一单 / 数字地址)+ 每图至多一处
+- 黄 `#ffd23f` 只有一档:两处 `.primer-mark`(下了一单 / 数字地址;英文侧同两处
+  places an order / numeric addresses —— 高亮笔在两种语言里都要在)+ 每图至多一处
   "找到的位置"(hero 的回车键、电话本查到的那条、第 3 步文件到站的圆点、第 4 步
   待放的空位圆点)。第 2 步那张图刻意没有黄 —— 那一步没有"找到"动作,只有"在路上"。
 - 绿 `#3aa66b` 只在回顾条,只作图形,绿区文字仍是墨色。
@@ -86,12 +89,13 @@ concept 页的字栈裁决(Fredoka + Noto Sans SC 保留,两种文字不混排�
 |---|---|---|
 | ① 这一趟像什么 | 0.587 | 0.573 |
 | ② 先把名字换成地址 | 0.551 | 0.512 |
-| ③ 把请求单送过去 | 0.525 | 0.525 |
+| ③ 把请求单送过去 | 0.511 | 0.511 |
 | ④ 文件送回来 | 0.550 | 0.534 |
 | ⑤ 把页面摆出来 | 0.551 | 0.513 |
 | ⑥ 回顾 | 豁免 | 豁免 |
 
-EN 比 zh 多折行(气泡与 figcaption 各多一行),所以 **EN 是紧的那一侧,以它为准**。
+EN 比 zh 多折行(气泡与 figcaption 各多一行),所以 **EN 是紧的那一侧,以它为准**
+(第 ③ 节的服务器气泡两种语言都折两行,两侧同为 0.511 —— 全页最紧的一格)。
 为此:四张步骤图 viewBox 高 520 / 470 / 430 / 520(宽统一 900,描边换算只依赖宽度),
 映射图 430;带 ≥3 个 `<text>` 的图渲染高都压在 640px 的 `diagram-oversized` 上限之下
 (最高 624px)。每节正文只留一句,数字全部下放到各自插画的 figcaption。
