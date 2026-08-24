@@ -1,6 +1,7 @@
 # Glass Motion — 动画体系与冻结契约
 
-> glass 是五个 skill 里唯一带富 JS 动画的。它能进三道机械检查体系的前提是
+> 九个设计 skill 里只有 glass 和 atelier 带富 JS 动画(atelier 的 JavaScript 是交付物的一半)。
+> glass 能进四道机械检查体系的前提是
 > **冻结契约**:一切动画的终态 = 静态 markup,三条独立路径都能到达终态。
 
 ## 0. 冻结契约(先读这个)

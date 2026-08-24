@@ -496,10 +496,10 @@ ln -s ~/sky-skills/skills/design-review .</code></pre>
       <span class="lang-zh">四道检查，一条命令。</span>
     </h2>
     <p class="lang-en">
-      After Claude produces HTML for you, before you ship it, run the four gates — three mechanical, plus an optional LLM taste critic. They catch the classes of bugs that both you and the generator will miss.
+      After Claude produces HTML for you, before you ship it, run the gates — four mechanical, plus an optional LLM taste critic. They catch the classes of bugs that both you and the generator will miss.
     </p>
     <p class="lang-zh">
-      Claude 给你产出 HTML 后、你发布前，跑四道检查 —— 三道机器检查 + 一道可选的 LLM 口味评审。它们抓的正是你和生成器都会漏的那类 bug。
+      Claude 给你产出 HTML 后、你发布前，跑一遍检查 —— 四道机器检查 + 一道可选的 LLM 口味评审。它们抓的正是你和生成器都会漏的那类 bug。
     </p>
 
     <h3 style="margin-top:var(--space-7); font-size:22px;">
@@ -516,19 +516,21 @@ bin/design-review --repo=/path/to/your-project \
                   docs/landing.html</code></pre>
 
     <p style="margin-top:var(--space-5);">
-      <span class="lang-en">The wrapper runs (in order) <code>verify.py</code> → <code>visual-audit.mjs</code> → <code>screenshot.mjs</code>, with <code>--ignore-intentional</code> on by default to suppress the documented 3.12-contrast brand-intentional noise. Any step failing exits non-zero. Screenshots are saved to <code>&lt;repo&gt;/shots/</code>. Those are gates 1–3; add <code>--critic</code> (solo) or <code>--multi-critic</code> (4 specialists) to also prepare gate 4 — the LLM taste judgment.</span>
-      <span class="lang-zh">壳按序跑 <code>verify.py</code> → <code>visual-audit.mjs</code> → <code>screenshot.mjs</code>，默认开 <code>--ignore-intentional</code> 消掉 3.12 brand-intentional 噪音。任一步 fail 整体 fail。截图存到 <code>&lt;repo&gt;/shots/</code>。这是第 1-3 道；加 <code>--critic</code>（solo）或 <code>--multi-critic</code>（4 专家）再准备第 4 道 —— LLM 口味评审。</span>
+      <span class="lang-en">The wrapper runs (in order) <code>verify.py</code> → <code>visual-audit.mjs</code> → <code>axe-audit.mjs</code> → <code>screenshot.mjs</code>, with <code>--ignore-intentional</code> on by default to suppress the documented 3.12-contrast brand-intentional noise. Any step failing exits non-zero. Screenshots are saved to <code>&lt;repo&gt;/shots/</code>. Those are the four mechanical gates; add <code>--critic</code> (solo) or <code>--multi-critic</code> (4 specialists) to also prepare the LLM taste judgment.</span>
+      <span class="lang-zh">壳按序跑 <code>verify.py</code> → <code>visual-audit.mjs</code> → <code>axe-audit.mjs</code> → <code>screenshot.mjs</code>，默认开 <code>--ignore-intentional</code> 消掉 3.12 brand-intentional 噪音。任一步 fail 整体 fail。截图存到 <code>&lt;repo&gt;/shots/</code>。这就是四道机器检查；加 <code>--critic</code>（solo）或 <code>--multi-critic</code>（4 专家）再准备 LLM 口味评审。</span>
     </p>
 
     <h3 style="margin-top:var(--space-7); font-size:22px;">
-      <span class="lang-en">What each of the four gates catches</span>
-      <span class="lang-zh">四道检查各抓什么</span>
+      <span class="lang-en">What each gate catches</span>
+      <span class="lang-zh">每道检查各抓什么</span>
     </h3>
     <ul style="font-size:16px; line-height:1.75;">
       <li class="lang-en"><strong><code>verify.py</code></strong> — placeholder strings (<code>[hero]</code>, <code>[svg]</code>), BEM modifier-only containers, undefined CSS classes, unbalanced <code>&lt;svg&gt;</code> tags, wrong hero container.</li>
       <li class="lang-zh"><strong><code>verify.py</code></strong> —— 占位符字符串(<code>[hero]</code>、<code>[svg]</code>)、BEM modifier-only 容器、未定义 class、<code>&lt;svg&gt;</code> 不平衡、hero 容器错。</li>
       <li class="lang-en"><strong><code>visual-audit.mjs</code></strong> — WCAG contrast &lt; 4.5 on buttons/badges, hero SVG rendered &lt; 900px, SVG text rendered &lt; 9px, orphan-figure cards next to full-row heroes.</li>
       <li class="lang-zh"><strong><code>visual-audit.mjs</code></strong> —— 按钮/徽章 WCAG 对比度 &lt; 4.5、hero SVG 渲染 &lt; 900px、SVG 文字实际像素 &lt; 9px、多列网格孤儿卡。</li>
+      <li class="lang-en"><strong><code>axe-audit.mjs</code></strong> — axe-core accessibility conformance: color-contrast and three structural rules are blocking, the rest report-only.</li>
+      <li class="lang-zh"><strong><code>axe-audit.mjs</code></strong> —— axe-core 可达性检查：color-contrast 与三条结构规则阻断，其余只报告。</li>
       <li class="lang-en"><strong><code>screenshot.mjs</code></strong> — full-page PNG for your own review. Scripts can't judge composition, rhythm, or copy quality. You have to look.</li>
       <li class="lang-zh"><strong><code>screenshot.mjs</code></strong> —— 全页截图给你肉眼审。脚本判不了版式、节奏、copy 质量。你得自己看。</li>
       <li class="lang-en"><strong><code>critic.mjs</code></strong> (opt-in · <code>--critic</code> or <code>--multi-critic</code>) — the LLM taste judgment a script can't do: a solo <code>design-critic</code>, or 4 parallel specialists (composition / copy / illustration / brand, weighted 25 / 25 / 20 / 30). Catches voice mismatch, weak composition, abstract-slop SVGs.</li>

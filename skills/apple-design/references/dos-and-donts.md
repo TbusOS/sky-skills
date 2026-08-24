@@ -50,7 +50,7 @@
 
 ---
 
-## 📋 发布前 checklist（**MUST** — 三道闸都要 exit 0）
+## 📋 发布前 checklist（**MUST** — 四道机械检查都要 exit 0）
 
 ```bash
 # 1) 结构验证（placeholder / BEM / 未定义 class / SVG 平衡 / container base-modifier）

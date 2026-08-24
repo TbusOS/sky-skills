@@ -32,7 +32,7 @@
 
 ## 输出格式
 {HTML / Markdown / 文本}
-{如果是 HTML，必须用 sky-skills/anthropic-design 风格（inline anthropic.css / fonts.css），跑 verify.py + visual-audit.mjs + screenshot.mjs 三道闸}
+{如果是 HTML，必须用 sky-skills/anthropic-design 风格（inline anthropic.css / fonts.css），跑 verify.py + visual-audit.mjs + axe-audit.mjs + screenshot.mjs 四道机械检查}
 
 ## 文件位置
 {绝对路径}

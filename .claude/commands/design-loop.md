@@ -1,5 +1,5 @@
 ---
-description: "Run the full design iteration loop (harness component 06): planner → generator → three machine gates → critic, up to --max-rounds (default 5). Verdict ≥ 88 ships; anything less feeds the critic's issues into the next round; rounds exhausted escalates to a human with the score trajectory. Accepts a brief + --skill (required), optional --page / --max-rounds."
+description: "Run the full design iteration loop (harness component 06): planner → generator → four machine gates → critic, up to --max-rounds (default 5). Verdict ≥ 88 ships; anything less feeds the critic's issues into the next round; rounds exhausted escalates to a human with the score trajectory. Accepts a brief + --skill (required), optional --page / --max-rounds."
 argument-hint: "<brief…> --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer> [--page=<type>] [--max-rounds=<n>]"
 ---
 
@@ -84,7 +84,7 @@ Round 1: generate from plan + contract using the `<skill>-design` skill
 issue list from step ⑥ — smallest-scope fixes, no wholesale rewrites of
 sections the critic did not flag.
 
-### ④ Run the three machine gates
+### ④ Run the four machine gates
 
 ```bash
 ~/.claude/skills/design-review/dr-cli <file.html>

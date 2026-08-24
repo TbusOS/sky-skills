@@ -54,7 +54,7 @@ glass 风格 / glassmorphism / 玻璃拟态 / 液态玻璃 / liquid glass / auro
 生成**后**:页内 `</body>` 前 embed `design-review:self-diff v1` 注释块(§M 契约,canonical 必须)。然后跑四道检查:
 
 ```bash
-~/.claude/skills/design-review/dr-cli --skill=glass <your-page.html>          # 三道机械检查 · 自动 dark+light 双跑
+~/.claude/skills/design-review/dr-cli --skill=glass <your-page.html>          # 四道机械检查 · 自动 dark+light 双跑
 ~/.claude/skills/design-review/dr-cli --skill=glass --critic <your-page.html> # 第四道检查 · LLM critic
 ```
 
@@ -62,7 +62,7 @@ glass 风格 / glassmorphism / 玻璃拟态 / 液态玻璃 / liquid glass / auro
 
 ## §6 glass 专属要点(机器检查会抓)
 
-- **双主题契约**:`<html data-theme="dark">` 必须显式声明(verify 8c);公开页必须有 `.glass-theme-toggle`。三道机械检查对 glass 自动跑 dark + light 两遍,**两遍都要 0 error**。
+- **双主题契约**:`<html data-theme="dark">` 必须显式声明(verify 8c);公开页必须有 `.glass-theme-toggle`。四道机械检查对 glass 自动跑 dark + light 两遍,**两遍都要 0 error**。
 - **冻结契约**:一切动画的终态 = 静态 markup。reveal 初始隐藏必须门控在 `html.js-enabled:not([data-motion="off"])` 后面(裸写 `opacity:0` 会被 `glass-reveal-stuck` 检查报);count-up 终值必须写在 markup 文本里(`glass-countup-mismatch` 检查)。
 - **R1 可读性铁律**:<28px 的文字要么落在 `.glass-panel/.glass-card/.glass-overlay` 内,要么落在无 blob 核的纯画布区;blob 核照亮的区域只允许 ≥32px 全不透明 display 文字(h1 / pull-quote)。
 - **blob 几何**:每视口 ≤3 个 blob;blob 核心区(内 40% 半径)不得压在文字面板 bbox 之下。

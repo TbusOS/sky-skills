@@ -64,7 +64,7 @@ last-verified: 2026-06-11
 
 ### ④ 交给生成流程
 
-把 `计划 + 合约(--plan 的输出)` 一起交给生成器(对应 design skill)。生成器先读 contract §0 的文件,再按计划写;写完跑 `~/.claude/skills/design-review/dr-cli <page.html>` 三道检查。计划与 contract 冲突时:审美/质量层听 contract,结构层听计划。
+把 `计划 + 合约(--plan 的输出)` 一起交给生成器(对应 design skill)。生成器先读 contract §0 的文件,再按计划写;写完跑 `~/.claude/skills/design-review/dr-cli <page.html>` 四道检查。计划与 contract 冲突时:审美/质量层听 contract,结构层听计划。
 
 ## 边界
 

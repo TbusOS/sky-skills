@@ -502,7 +502,20 @@
   **模式窄是有意的** —— 放宽就会把"× 4 skills"、"3 known-bugs rows"这类非总数报成违规，教人跳过报告。代价就是上面这一类只能人来看。
 - **Defense**：计数类改动收工前，除了跑 `facts.mjs`，必须**扫全仓**（不是只扫改过的文件 —— 改一处措辞
   会让隔壁那句变成自相矛盾），把**词形和数字形一起**扫，并且额外查两件模式做不到的事 ——
-  **数字与它旁边清单的长度是否一致**、**分项之和是否等于它自己写的总数**。下面这段可以直接跑，
+  **数字与它旁边清单的长度是否一致**、**分项之和是否等于它自己写的总数**。
+  判定形态已落成仓内脚本，收工前跑它，非零即有假数：
+  ```bash
+  python3 skills/design-review/scripts/count-check.py          # 全仓判定，exit 0 = 干净
+  python3 skills/design-review/scripts/count-check.py --probe  # 只跑自检探针
+  ```
+  它把每个承载短语绑定到 `facts.mjs --json` 打出的磁盘真值（total / design / systems /
+  harness / canonical / known-bugs 及其派生），只打不相等的行；排除照 facts.mjs 的规矩 ——
+  **序数**（`第五种` / `the fifth`）、**余数**（`其余 8 个` / `the other eight`）、
+  **每套自己的数**（`Ships 3 canonical page-types`）、**路线图渲染数**（`五种美学`）、
+  **记录性文件**（dated specs、本文件）—— 全部具名写在脚本的 `EXCLUSIONS` 表里，可 grep；
+  行级豁免复用 facts.mjs 的 `facts-ignore:` 注释。它**每次运行先给自己注入假数字探一次针**
+  （§7.10：没探针的检查等于没有），探针不过就 exit 2，根本不进入扫描。
+  下面这段是**最小人工兜底**（node 不可用，或想要一张「全部候选」的通读清单时用）。
   它按"数字 + 计数词汇在同一窗口内"取候选，剥标签之后再把 `aria-label` / `content` /
   `data-label-*` 的值和 SVG `<text>` 的正文补回来（这三处正是 ⑧ 的盲区）：
   ```bash
@@ -510,12 +523,14 @@
   import re, sys
   # stat 卡常把数字和它的标签分在两行(<text>44</text> / <text>page-types</text>),
   # 所以窗口要跨到上下各一行 —— 只看单行的话这类一个都报不出来
-  # 词形（含 twenty-two 这类连字符复合词）与数字形一起收
-  NUM = (r'(?<![\w.-])('
-         r'four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|'
-         r'sixteen|seventeen|eighteen|nineteen|twenty(?:-(?:one|two|three|four|five))?|'
-         r'[四五六七八九]|十[一二三四五六七八九]?|二十[一二三四五六七八九]?|'
-         r'\d{1,3})(?![\w.%-])')
+  # 词形（含 twenty-two 这类连字符复合词）与数字形一起收，低位到 two / 二 / 两 / 三；
+  # 前瞻/后顾只挡 ASCII 词字符 —— Python 的 \w 连 CJK 一起算，用它会把「九种」整类杀掉
+  NUM = (r'(?<![0-9A-Za-z_.-])(?<![一二两三四五六七八九十])('
+         r'two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|'
+         r'fifteen|sixteen|seventeen|eighteen|nineteen|'
+         r'twenty(?:-(?:one|two|three|four|five|six|seven|eight|nine))?|'
+         r'二十[一二两三四五六七八九]?|十[一二两三四五六七八九]?|[二两三四五六七八九]|'
+         r'\d{1,3})(?![0-9A-Za-z_.%-])')
   # 计数词汇：命中它的数字才算候选，否则 padding:8px 之类会把报告淹掉
   VOCAB = (r'skills?|design|voices?|aesthetics?|canonical|page-?types?|known-bugs?|bugs?|'
            r'generators?|evaluators?|components?|gates?|checks?|templates?|'
@@ -538,26 +553,29 @@
               near = joined[max(0, m.start()-WIN):m.end()+WIN]
               if re.search(VOCAB, near, re.I):
                   print(f'{path}:{i+1}  «{m.group(1)}»  {" ".join(near.split())[:110]}')
-                  break
   EOF
   ```
-  逐条对磁盘真值核（`node skills/design-review/scripts/facts.mjs --list` 打的就是真值）。
-  报告条数会有几百条，其中绝大多数是真话 —— **这个扫描器的产出是"要读的清单"，不是"违规清单"**，
-  它的价值在于让"数字 8 藏在 stat 卡里"这类没人会去看的地方必须被逐条读过一次。
-  想要"清零"这种可交付的结论，就再包一层：把上面每个承载短语绑定到一个真值
-  （`N design skills`→design、`All N skills`→total、`N/N canonical`→canonical、
-  `已收录 N 条`→known-bugs），只打不相等的行，并且照 facts.mjs 的规矩排除
-  **序数**（`第五种` / `the fifth`）、**余数**（`其余 8 个` / `the other eight`）、
-  **每套自己的数**（`Ships 3 canonical page-types`）和**路线图渲染数**（`五种美学`）。
-  收工前用一个假数字探一次针（往任意一页写 `All 20 skills` 看它报不报），
-  没探针的检查等于没有 —— 这正是 §7.10 那条教训。
+  兜底的产出是"要读的清单"，不是"违规清单" —— 逐条对
+  `node skills/design-review/scripts/facts.mjs --list` 的真值核；要"清零"这种可交付的结论，
+  跑上面的 `count-check.py`。这个兜底扫描器自己也栽过三个结构性的洞，上面的版本已修，
+  改它时别把洞引回来：
+  ① **每行只报第一个候选**（内层循环末尾一个 `break`）—— 39% 的候选（2296 → 3759 条）
+  根本报不出来，README:50 的真错（"8-component harness roadmap"）就藏在那里面；
+  ② **数词表从 four / 四 起**（照抄 facts.mjs）—— 写成 three / 三 的计数一个都配不上；
+  ③ **尾部前瞻写的是 `(?![\w.%-])`**，而 Python 的 `\w` 把 CJK 也算词字符，于是
+  `九种`、`四道`、`三道` 这类「中文数词 + 量词」**从来没匹配过** —— zh 词形防御名存实亡。
+  修法：前瞻/后顾只挡 ASCII 词字符（`[0-9A-Za-z_.%-]`），数词内部的误切
+  （`二十四` 切出 `十四`）由中文数词自己的 lookbehind 挡。
 - **How caught**：2026-08-24 把 primer 接进全部文档面那一轮，**同一类漏了三遍**，每一遍都是"上一遍的
   防御正好照不到的形态"：① facts.mjs 全绿（含 `--strict`）之后，人工复评在 `index.html` 找到
   "Seven aesthetics" 这类少了承载词的措辞；② 补了词形扫描器之后，它只认词形，于是
   `Design voices 8`、`SKILLS 14 / AESTHETICS 5`、`all 44 page-types`、`26 类`、
   `data-label-zh="77 条"` 这些**数字形**又整批漏过 —— 而且有几处正好落在 SVG `<text>` 和
   `data-label-*` 属性里，是扫描器当时根本没看的地方。教训：**防御要按"这一类还能以什么形态出现"
-  扩，不是按"这次漏的那一条"补**。
+  扩，不是按"这次漏的那一条"补**。③ 第四轮复查发现**扫描器自身**还有三个结构洞（见 Defense
+  末尾的 ①–③：每行只报第一个候选、低位数词配不上、zh 数词 + 量词整类匹配不了），于是判定
+  形态落成 `scripts/count-check.py` 进仓，带自检探针 —— 贴在文档里的一次性代码没有回归可言，
+  只有进了仓、每次运行都自证能拦的检查才算防御。
 - **Applies to**：任何改计数的任务，以及任何新增 design skill 的任务。
 
 

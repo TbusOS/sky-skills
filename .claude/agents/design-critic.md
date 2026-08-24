@@ -198,6 +198,6 @@ rubric is too strict; recalibrate.
 ## When to escalate
 
 If you cannot find the canonical HTML / MD, say so and stop. Don't fabricate
-a reference. If the target doesn't seem to belong to any of the 9 skills,
+a reference. If the target doesn't seem to belong to any of the 9 design skills,
 say so. If the rubric genuinely can't apply (e.g. a non-page file), tell
 the user the critic isn't the right tool.
