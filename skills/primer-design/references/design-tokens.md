@@ -113,7 +113,7 @@ primer 的 `forbiddenFonts`:`Fraunces` / `Instrument Serif` / `Poppins` / `Lora`
 | class | 宽度 | 何时 |
 |---|---|---|
 | `.primer-container--narrow` | 720px | **只给正文**。别拿它裹插画 —— 720 档里 3.4px 的描边配不上任何一张需要看细节的图 |
-| `.primer-container` | 1080px | 工作档,**插画住在这里**(减去 32×2 栏距 = 1016px 内容宽) |
+| `.primer-container` | 1080px | 工作档,**插画住在这里**(无 `box-sizing: border-box`,1080 本身就是内容宽,32×2 栏距在它之外,不是减出来的) |
 | `.primer-container--wide` | 1280px | ≥16 个标签或 ≥3 列时**必须**升上来 |
 
 - 修饰符不能单独出现:永远写 `class="primer-container primer-container--wide"`。

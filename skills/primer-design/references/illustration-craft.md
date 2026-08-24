@@ -175,7 +175,7 @@ CSS 里 `.primer-step-num` 的圆圈已经是这个做法的现成例子:
 | `aria-label` | 每个 `<svg role="img">` 必须有,写**结论**不写形状 | 跨 skill 规则 §E |
 
 渲染字号用 §3 的同一个比例换算:`渲染字号 = 源字号 × 渲染宽度 / viewBox 宽度`。
-900 viewBox 的全宽图,13px 源字号渲染到 14.6px,宽裕;190 viewBox 的比喻卡图,
+900 viewBox 的全宽图,13px 源字号渲染到 15.6px,宽裕;190 viewBox 的比喻卡图,
 13px 渲染到 11.8px,也够 —— 但:
 
 > **比喻卡的插画最好一个字都不写。** 它的说明文字本来就在 `.primer-analogy-body` 里,
