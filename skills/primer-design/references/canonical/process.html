@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>按下回车后，网页怎么来？· 图解读本</title>
+<meta name="description" content="Canonical primer-design process page: what happens after you press Enter, explained for readers with zero background. 零基础图解：按下回车后网页如何加载。">
+<meta property="og:title" content="按下回车后，网页怎么来？· 图解读本">
+<meta property="og:description" content="零基础图解：从按下回车到页面亮起的四步——查地址、送请求单、文件送回、把页面摆出来。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed classes on purpose (verify.py validates
+   * primer-* classes against primer.css; local layout stays unprefixed).
+   * Figure modifiers (primer-fig-wide / primer-fig-hero) ship from primer.css
+   * Sections J + L — nothing stroke-related is defined per page. */
+
+  /* Each step screen opens with the circled numeral beside its h2. The default
+   * .primer-step top-aligns (built for numeral + multi-line body); with a
+   * single h2 in the body the circle wants vertical centering instead. */
+  .step-head { align-items: center; margin-bottom: var(--primer-space-2); }
+
+  /* The recap is its own screen; the component's top margin is for pages
+   * where it trails a section. */
+  .recap-flat { margin-top: 0; }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">You press Enter — how does the page arrive?</span>
+          <span class="lang-zh">按下回车，<br>网页怎么来？</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">No networking background needed. This page explains it in about three minutes.</span>
+          <span class="lang-zh">不需要任何网络基础。这一页大约 3 分钟讲明白。</span>
+        </p>
+      </div>
+      <figure class="primer-figure primer-fig-hero">
+        <svg viewBox="0 0 500 340" role="img"
+          aria-label="从手指按下回车，到一个包裹沿路送达，屏幕上的页面亮起"
+          data-label-zh="从手指按下回车，到一个包裹沿路送达，屏幕上的页面亮起"
+          data-label-en="A finger presses Enter; a parcel travels the route; the page on screen lights up">
+          <!-- ground -->
+          <path d="M22 306 C 150 303, 350 308, 478 304" fill="none"/>
+
+          <!-- the keyboard corner, Enter about to go down -->
+          <path d="M40 228 Q34 228 34 234 L34 284 Q34 290 40 290 L204 291 Q210 291 210 285 L210 235 Q210 229 204 229 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M46 240 L66 240.4 L65.6 258 L46.4 257.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M74 240 L94 240.5 L93.7 258 L74.3 257.5 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M102 240 L122 240.3 L121.6 258 L102.4 257.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M158 240 L178 240.6 L177.5 258 L158.5 257.4 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M46 266 L66 266.5 L65.5 284 L46.5 283.5 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M74 266 L94 266.4 L93.6 284 L74.4 283.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M102 266 L122 266.6 L121.4 284 L102.6 283.4 Z" fill="#fdfaf3"/>
+          <!-- Enter — the one key that matters (yellow = look here) -->
+          <path d="M132 262 Q128 262 128 266 L128 282 Q128 286 132 286 L196 286.6 Q200 286.6 200 282.6 L200 266.6 Q200 262.6 196 262.6 Z" fill="#ffd23f"/>
+          <!-- the finger -->
+          <path d="M150 148 Q143 146 142 154 C 140 184, 148 224, 154 252 Q156 262 166 260 Q174 258 172 248 C 166 220, 162 186, 163 158 Q163 149 155 148 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M157 245 Q162 251 168 247" fill="none"/>
+          <path class="primer-hair" d="M122 294 L114 301 M206 294 L214 301" fill="none"/>
+
+          <!-- the route, with the order riding it -->
+          <path class="primer-hair" d="M216 250 C 250 196, 288 172, 324 178" fill="none" stroke-dasharray="2 9"/>
+          <circle class="primer-hair" cx="242" cy="218" r="4" fill="#ffffff"/>
+          <circle class="primer-hair" cx="278" cy="188" r="4" fill="#ffffff"/>
+          <g transform="rotate(-6 301 173)">
+            <path d="M282 158 Q278 158 278 162 L278 184 Q278 188 282 188 L320 188.4 Q324 188.4 324 184.4 L324 162.4 Q324 158.4 320 158.4 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M301 159 L301 187" fill="none" stroke="#ffffff"/>
+          </g>
+          <path class="primer-hair" d="M258 200 L248 205 M262 212 L253 218" fill="none"/>
+
+          <!-- the browser window, lit -->
+          <path d="M336 100 Q328 100 328 108 L328 254 Q328 262 336 262 L470 262.6 Q478 262.6 478 254.6 L478 108.6 Q478 100.6 470 100.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M328 124 L478 124.6" fill="none"/>
+          <circle class="primer-hair" cx="342" cy="112" r="3" fill="none"/>
+          <circle class="primer-hair" cx="354" cy="112" r="3" fill="none"/>
+          <path d="M342 136 Q338 136 338 140 L338 148 Q338 152 342 152 L432 152.4 Q436 152.4 436 148.4 L436 140.4 Q436 136.4 432 136.4 Z" fill="#7a5cd6"/>
+          <path d="M342 162 Q338 162 338 166 L338 216 Q338 220 342 220 L464 220.5 Q468 220.5 468 216.5 L468 166.5 Q468 162.5 464 162.5 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M352 210 L382 184 L400 200 L420 176 L452 210" fill="none" stroke="#ffffff"/>
+          <circle class="primer-hair" cx="366" cy="176" r="6" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M340 234 L458 234.5 M340 246 L426 246.4" fill="none"/>
+          <path d="M486 92 L497 81 M452 84 L458 70 M412 80 L412 64" fill="none"/>
+
+          <!-- labels (text is painted last) -->
+          <text class="lang-zh" x="122" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">按下回车</text>
+          <text class="lang-en" x="122" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">press Enter</text>
+          <text class="lang-zh" x="403" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">页面亮起</text>
+          <text class="lang-en" x="403" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">the page lights up</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">From Enter to a lit page is usually under a second — about one heartbeat.</span>
+          <span class="lang-zh">从按下回车到页面亮起，通常不到一秒——大约一次心跳的工夫。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ① 像什么:整条路线先给一个比喻 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What is this trip like?</span>
+        <span class="lang-zh">这一趟像什么？</span>
+      </h2>
+      <p>
+        <span class="lang-en">Press Enter and the browser places an order for you; four steps later it lands on your screen.</span>
+        <span class="lang-zh">按下回车，浏览器就替你<span class="primer-mark">下了一单</span>——四步之后，这份"餐"到了你屏幕上。</span>
+      </p>
+
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 150" role="img"
+            aria-label="一袋外卖已经送到门口：你没去餐厅，餐自己走完了全程"
+            data-label-zh="一袋外卖已经送到门口：你没去餐厅，餐自己走完了全程"
+            data-label-en="A takeout bag delivered to the door: you never went to the restaurant — the meal made the whole trip">
+            <!-- ground -->
+            <path d="M10 138 C 60 136.5, 130 139, 172 137.5" fill="none"/>
+            <!-- the door -->
+            <path d="M104 24 Q100 24 100 28 L100 134 L168 134.8 L168 28.8 Q168 24.8 164 24.8 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M112 36 L156 36.4 L155.6 76 L112.4 75.6 Z" fill="none"/>
+            <path class="primer-hair" d="M112 88 L156 88.4 L155.6 124 L112.4 123.6 Z" fill="none"/>
+            <circle class="primer-hair" cx="108" cy="82" r="3.5" fill="#243244"/>
+            <!-- the takeout bag = your order, arrived -->
+            <path d="M28 76 L82 76.6 L88 132 L22 131.4 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M42 76 C 44 60, 66 60, 68 76.6" fill="none"/>
+            <path d="M40 94 L70 94.4 L70 114 L40 113.6 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M46 101 L64 101.3 M46 108 L60 107.6" fill="none"/>
+            <!-- steam -->
+            <path class="primer-hair" d="M48 60 C 45 53, 51 49, 48 42" fill="none"/>
+            <path class="primer-hair" d="M62 57 C 59 51, 65 46, 62 40" fill="none"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p class="primer-analogy-lead"><span class="lang-en">It's like…</span><span class="lang-zh">就像……</span></p>
+          <p>
+            <span class="lang-en">You order, the kitchen cooks, a rider delivers, you open the door and eat. A web page reaches your screen by the same four steps.</span>
+            <span class="lang-zh">点一份外卖：下单，餐厅做，骑手送，开门就能吃。网页到你屏幕上，走的也是这四步。</span>
+          </p>
+        </div>
+      </div>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 430" role="img"
+          aria-label="外卖的四步和网页的四步一一对应：下单对报网址，厨房备餐对备好文件，骑手送对文件上路，开门对页面亮"
+          data-label-zh="外卖的四步和网页的四步一一对应：下单对报网址，厨房备餐对备好文件，骑手送对文件上路，开门对页面亮"
+          data-label-en="The four takeout steps pair one-to-one with the four web steps: ordering, cooking, riding, opening the door">
+          <!-- the web row rides a violet-tinted panel: that row is the one being taught -->
+          <path d="M46 240 Q38 240 38 248 L38 360 Q38 368 46 368 L854 368.8 Q862 368.8 862 360.8 L862 248.8 Q862 240.8 854 240.8 Z" fill="#efe9fc"/>
+
+          <!-- C1 top: ordering on a phone -->
+          <path d="M122 60 Q116 60 116 66 L116 160 Q116 166 122 166 L178 166.6 Q184 166.6 184 160.6 L184 66.6 Q184 60.6 178 60.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M142 69 L158 69.2" fill="none"/>
+          <path class="primer-hair" d="M126 78 L174 78.4 L173.6 138 L126.4 137.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M134 92 L166 92.4 M134 104 L158 104.3 M134 116 L166 116.5" fill="none"/>
+          <path class="primer-hair" d="M139 126 Q135 126 135 129.5 Q135 133 139 133 L161 133.3 Q165 133.3 165 129.8 Q165 126.3 161 126.3 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="150" cy="151" r="5" fill="none"/>
+
+          <!-- C2 top: the pot on the stove -->
+          <path d="M310 116 Q304 116 304 122 L304 152 Q304 158 310 158 L370 158.6 Q376 158.6 376 152.6 L376 122.6 Q376 116.6 370 116.6 Z" fill="#ffffff"/>
+          <path d="M300 114 L380 114.8" fill="none"/>
+          <path d="M336 106 Q340 102 344 106" fill="none"/>
+          <path d="M296 130 L304 130 M376 130 L384 130.4" fill="none"/>
+          <path class="primer-hair" d="M326 96 C 323 88, 329 84, 326 76" fill="none"/>
+          <path class="primer-hair" d="M350 94 C 347 86, 353 82, 350 74" fill="none"/>
+          <path class="primer-hair" d="M308 158 L308 170 M372 158.6 L372 170.4" fill="none"/>
+          <path class="primer-hair" d="M292 172 L388 172.6" fill="none"/>
+
+          <!-- C3 top: the scooter with its box -->
+          <circle cx="500" cy="150" r="16" fill="#ffffff"/>
+          <circle cx="580" cy="150" r="16" fill="#ffffff"/>
+          <circle class="primer-hair" cx="500" cy="150" r="5" fill="none"/>
+          <circle class="primer-hair" cx="580" cy="150" r="5" fill="none"/>
+          <path d="M508 146 C 520 126, 544 124, 556 132 L572 144" fill="none"/>
+          <path d="M556 132 L566 106 M556 104 Q564 100 572 106" fill="none"/>
+          <path d="M486 112 Q482 112 482 116 L482 140 Q482 144 486 144 L516 144.4 Q520 144.4 520 140.4 L520 116.4 Q520 112.4 516 112.4 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M482 127 L520 127.4" fill="none"/>
+          <path class="primer-hair" d="M462 132 L448 134 M464 146 L452 150" fill="none"/>
+
+          <!-- C4 top: the door, bag at the doorstep -->
+          <path d="M688 66 Q684 66 684 70 L684 164 L740 164.6 L740 70.6 Q740 66.6 736 66.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M694 78 L730 78.4 L729.6 118 L694.4 117.6 Z" fill="none"/>
+          <circle class="primer-hair" cx="690" cy="126" r="3" fill="#243244"/>
+          <path d="M652 132 L676 132.4 L679 164 L649 163.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M658 132 C 659 124, 669 124, 670 132.3" fill="none"/>
+          <path class="primer-hair" d="M640 168 L760 168.6" fill="none"/>
+
+          <!-- pairing arrows: each takeout stage points at its web twin -->
+          <path class="primer-hair" d="M150 184 L150 232 M150 184 L144 196 M150 184 L156 196 M150 232 L144 220 M150 232 L156 220" fill="none"/>
+          <path class="primer-hair" d="M340 184 L340 231 M340 184 L334 196 M340 184 L346 196 M340 231 L334 219 M340 231 L346 219" fill="none"/>
+          <path class="primer-hair" d="M530 184 L530 232 M530 184 L524 196 M530 184 L536 196 M530 232 L524 220 M530 232 L536 220" fill="none"/>
+          <path class="primer-hair" d="M712 184 L712 231 M712 184 L706 196 M712 184 L718 196 M712 231 L706 219 M712 231 L718 219" fill="none"/>
+
+          <!-- C1 bottom: typing the address -->
+          <path d="M104 288 Q98 288 98 296 L98 316 Q98 324 104 324 L196 324.6 Q202 324.6 202 316.6 L202 296.6 Q202 288.6 196 288.6 Z" fill="#ffffff"/>
+          <path d="M114 307 C 126 302, 140 310, 152 305 S 172 309, 186 305" fill="none" stroke="#7a5cd6"/>
+
+          <!-- C2 bottom: the always-on computer, files ready -->
+          <path d="M304 258 Q298 258 298 264 L298 344 Q298 350 304 350 L352 350.6 Q358 350.6 358 344.6 L358 264.6 Q358 258.6 352 258.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M298 282 L358 282.4 M298 306 L358 306.5 M298 330 L358 330.2" fill="none"/>
+          <circle class="primer-hair" cx="310" cy="270" r="2.5" fill="#243244"/>
+          <circle class="primer-hair" cx="310" cy="294" r="2.5" fill="#243244"/>
+          <path d="M368 306 Q364 306 364 310 L364 322 Q364 326 368 326 L404 326.4 Q408 326.4 408 322.4 L408 310.4 Q408 306.4 404 306.4 Z" fill="#7a5cd6"/>
+          <path d="M374 330 Q370 330 370 334 L370 346 Q370 350 374 350 L410 350.5 Q414 350.5 414 346.5 L414 334.5 Q414 330.5 410 330.5 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M372 316 L400 316.3 M378 340 L406 340.4" fill="none" stroke="#ffffff"/>
+
+          <!-- C3 bottom: the files on the wire -->
+          <path class="primer-hair" d="M448 316 L616 314.5" fill="none" stroke-dasharray="2 9"/>
+          <g transform="rotate(-4 532 300)">
+            <path d="M512 282 Q508 282 508 286 L508 314 Q508 318 512 318 L552 318.4 Q556 318.4 556 314.4 L556 286.4 Q556 282.4 552 282.4 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M532 283 L532 317" fill="none" stroke="#ffffff"/>
+          </g>
+          <path class="primer-hair" d="M486 296 L474 299 M488 308 L478 312" fill="none"/>
+
+          <!-- C4 bottom: the page, lit -->
+          <path d="M676 256 Q670 256 670 262 L670 346 Q670 352 676 352 L764 352.6 Q770 352.6 770 346.6 L770 262.6 Q770 256.6 764 256.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M670 272 L770 272.5" fill="none"/>
+          <path d="M680 282 L730 282.4 L729.6 294 L680.4 293.6 Z" fill="#7a5cd6"/>
+          <path d="M680 302 L760 302.5 L759.5 334 L680.5 333.5 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M688 328 L706 312 L718 322 L734 306 L752 328" fill="none" stroke="#ffffff"/>
+
+          <!-- labels -->
+          <text class="lang-zh" x="40" y="36" font-size="17" font-weight="700" fill="#243244">点外卖</text>
+          <text class="lang-en" x="40" y="36" font-size="17" font-weight="700" fill="#243244">ordering takeout</text>
+          <text class="lang-zh" x="52" y="266" font-size="17" font-weight="700" fill="#243244">网页送达</text>
+          <text class="lang-en" x="52" y="266" font-size="17" font-weight="700" fill="#243244">the page arriving</text>
+          <text class="lang-zh" x="150" y="400" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">下单 ↔ 报网址</text>
+          <text class="lang-en" x="150" y="400" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">order ↔ address</text>
+          <text class="lang-zh" x="340" y="400" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">厨房备餐 ↔ 备好文件</text>
+          <text class="lang-en" x="340" y="400" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">cooking ↔ files ready</text>
+          <text class="lang-zh" x="530" y="400" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">骑手送 ↔ 文件上路</text>
+          <text class="lang-en" x="530" y="400" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">riding ↔ files travel</text>
+          <text class="lang-zh" x="712" y="400" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">开门 ↔ 页面亮</text>
+          <text class="lang-en" x="712" y="400" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">door ↔ page lights</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The four steps pair one to one: wherever the takeout is, the page is at the same step.</span>
+          <span class="lang-zh">四步一一对应：外卖走到哪一步，网页就走到同一步。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ② 第 1 步:先查地址 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <div class="primer-step step-head">
+        <span class="primer-step-num">1</span>
+        <div class="primer-step-body">
+          <h2>
+            <span class="lang-en">Turn the name into an address</span>
+            <span class="lang-zh">先把名字换成地址</span>
+          </h2>
+        </div>
+      </div>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">DNS</span><span class="lang-en">DNS</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">the internet's shared phone book — a name goes in, a numeric address comes out</span>
+          <span class="lang-zh">整个互联网共用的电话本：名字进去，数字地址出来</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">Computers don't use names, only numeric addresses; the browser asks DNS for that number first.</span>
+        <span class="lang-zh">电脑记不住名字，只认<span class="primer-mark">数字地址</span>；浏览器先去 DNS 查出这串数字。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 520" role="img"
+          aria-label="浏览器拿着你输入的名字去查电话本，电话本翻到那一条，送回一张数字地址"
+          data-label-zh="浏览器拿着你输入的名字去查电话本，电话本翻到那一条，送回一张数字地址"
+          data-label-en="The browser takes the name you typed to the phone book; the book finds the entry and hands back a numeric address">
+          <!-- ground -->
+          <path d="M40 456 C 250 453, 650 458, 860 455" fill="none"/>
+
+          <!-- your browser, name typed in the bar -->
+          <path d="M68 128 Q60 128 60 136 L60 392 Q60 400 68 400 L292 400.8 Q300 400.8 300 392.8 L300 136.8 Q300 128.8 292 128.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M60 156 L300 156.6" fill="none"/>
+          <circle class="primer-hair" cx="76" cy="142" r="3.5" fill="none"/>
+          <circle class="primer-hair" cx="90" cy="142" r="3.5" fill="none"/>
+          <path class="primer-hair" d="M78 172 Q72 172 72 178 L72 192 Q72 198 78 198 L282 198.5 Q288 198.5 288 192.5 L288 178.5 Q288 172.5 282 172.5 Z" fill="#fdfaf3"/>
+          <path d="M92 186 C 104 181, 116 189, 128 184 S 150 188, 160 184" fill="none"/>
+          <path class="primer-hair" d="M78 226 L282 226.5 M78 250 L246 250.4 M78 274 L282 274.6 M78 298 L226 298.3 M78 322 L282 322.4 M78 346 L258 346.5 M78 370 L226 369.6" fill="none"/>
+
+          <!-- the phone book, one entry found -->
+          <path d="M478 142 C 540 118, 622 118, 656 132 L656 420 C 622 406, 540 406, 482 428 Z" fill="#ffffff"/>
+          <path d="M836 144 C 774 122, 692 122, 660 132 L660 420 C 692 408, 774 408, 832 430 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M658 132 L658.6 420" fill="none"/>
+          <path class="primer-hair" d="M502 170 L634 167.2" fill="none"/>
+          <path class="primer-hair" d="M502 192 L634 189.4" fill="none"/>
+          <path class="primer-hair" d="M502 214 L634 211.6" fill="none"/>
+          <path class="primer-hair" d="M502 236 L634 233.8" fill="none"/>
+          <path class="primer-hair" d="M502 258 L634 255.2" fill="none"/>
+          <path class="primer-hair" d="M502 280 L634 277.5" fill="none"/>
+          <path class="primer-hair" d="M502 302 L634 299.8" fill="none"/>
+          <path class="primer-hair" d="M502 324 L634 321.4" fill="none"/>
+          <path class="primer-hair" d="M502 346 L634 343.6" fill="none"/>
+          <path class="primer-hair" d="M502 368 L634 365.8" fill="none"/>
+          <path class="primer-hair" d="M502 390 L634 387.3" fill="none"/>
+          <!-- the found row wears the marker -->
+          <path d="M680 230 L816 227.6 L816.4 248 L680.4 250.4 Z" fill="#ffd23f"/>
+          <path class="primer-hair" d="M684 168 L756 165.6 M772 165 L810 163.8" fill="none"/>
+          <path class="primer-hair" d="M684 190 L748 187.9 M772 187 L810 185.6" fill="none"/>
+          <path class="primer-hair" d="M684 212 L758 209.7 M772 209 L810 207.9" fill="none"/>
+          <path class="primer-hair" d="M684 240 L752 237.8 M772 237 L810 235.4" fill="none"/>
+          <path class="primer-hair" d="M684 262 L750 260.1 M772 259 L810 257.8" fill="none"/>
+          <path class="primer-hair" d="M684 284 L756 282.2 M772 281 L810 279.9" fill="none"/>
+          <path class="primer-hair" d="M684 306 L746 304.3 M772 303 L810 301.7" fill="none"/>
+          <path class="primer-hair" d="M684 328 L754 326.2 M772 325 L810 323.9" fill="none"/>
+          <path class="primer-hair" d="M684 350 L748 348.4 M772 347 L810 345.8" fill="none"/>
+          <path class="primer-hair" d="M684 372 L756 370.5 M772 369 L810 368.2" fill="none"/>
+          <path class="primer-hair" d="M840 166 L852 164.8 M841 196 L853 194.9 M842 226 L854 225.2 M843 256 L855 255.4" fill="none"/>
+
+          <!-- the question goes, the address comes back -->
+          <path class="primer-hair" d="M310 176 C 380 138, 428 130, 470 140" fill="none" stroke-dasharray="2 9"/>
+          <path d="M470 140 L457 134 M470 140 L457 146" fill="none"/>
+          <path d="M478 396 C 424 428, 372 428, 316 404" fill="none"/>
+          <path d="M316 404 L329 400 M316 404 L328 410" fill="none"/>
+          <g transform="rotate(-5 396 434)">
+            <path d="M368 416 Q364 416 364 420 L364 448 Q364 452 368 452 L424 452.5 Q428 452.5 428 448.5 L428 420.5 Q428 416.5 424 416.5 Z" fill="#7a5cd6"/>
+            <path d="M374 424 L418 424.4 L417.6 444 L374.4 443.6 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M380 431 L410 431.3 M380 438 L402 437.6" fill="none"/>
+          </g>
+
+          <!-- labels -->
+          <text class="lang-zh" x="180" y="488" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">你记的名字</text>
+          <text class="lang-en" x="180" y="488" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">the name you type</text>
+          <text class="lang-zh" x="396" y="488" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">机器用的数字地址</text>
+          <text class="lang-en" x="396" y="488" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">the numeric address machines use</text>
+          <text class="lang-zh" x="658" y="74" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">公用的电话本</text>
+          <text class="lang-en" x="658" y="74" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">the shared phone book</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Names are for people — the address is what machines dial.</span>
+          <span class="lang-zh">名字给人记，数字地址给机器用——查完才知道该往哪送。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ③ 第 2 步:把请求单送过去 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <div class="primer-step step-head">
+        <span class="primer-step-num">2</span>
+        <div class="primer-step-body">
+          <h2>
+            <span class="lang-en">Carry the request slip over</span>
+            <span class="lang-zh">把请求单送过去</span>
+          </h2>
+        </div>
+      </div>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">服务器 server</span><span class="lang-en">server</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">a computer that is always on, holding the page's files</span>
+          <span class="lang-zh">一直开着的一台电脑，网页的文件都存在它那里</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">Address in hand, the browser carries a request slip to that server.</span>
+        <span class="lang-zh">拿到地址，浏览器就把一张请求单送到那台服务器。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 470" role="img"
+          aria-label="一张请求单从你的电脑沿光缆送往两千公里外的服务器，路上只要约零点零一秒"
+          data-label-zh="一张请求单从你的电脑沿光缆送往两千公里外的服务器，路上只要约零点零一秒"
+          data-label-en="A request slip travels the fibre from your computer to a server 2,000 km away in about 0.01 seconds">
+          <!-- ground -->
+          <path d="M40 402 C 250 399, 650 404, 860 401" fill="none"/>
+
+          <!-- your computer -->
+          <path d="M96 256 Q88 256 88 264 L88 360 Q88 368 96 368 L240 368.6 Q248 368.6 248 360.6 L248 264.6 Q248 256.6 240 256.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M102 270 L234 270.4 L233.6 354 L102.4 353.6 Z" fill="#fdfaf3"/>
+          <path d="M70 384 L266 384.8 L246 370 L90 369.4 Z" fill="#ffffff"/>
+
+          <!-- the server, standing in its rack -->
+          <path d="M700 120 Q692 120 692 128 L692 386 Q692 394 700 394 L804 394.6 Q812 394.6 812 386.6 L812 128.6 Q812 120.6 804 120.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M692 176 L812 176.5 M692 232 L812 232.3 M692 288 L812 288.6 M692 344 L812 344.4" fill="none"/>
+          <circle class="primer-hair" cx="708" cy="148" r="3" fill="#243244"/>
+          <circle class="primer-hair" cx="708" cy="204" r="3" fill="#243244"/>
+          <circle class="primer-hair" cx="708" cy="260" r="3" fill="#243244"/>
+          <circle class="primer-hair" cx="708" cy="316" r="3" fill="#243244"/>
+          <circle class="primer-hair" cx="708" cy="368" r="3" fill="#243244"/>
+          <path class="primer-hair" d="M760 146 L796 146.3 M760 156 L796 156.2" fill="none"/>
+          <path class="primer-hair" d="M760 202 L796 202.4 M760 212 L796 212.1" fill="none"/>
+          <path class="primer-hair" d="M760 258 L796 258.2 M760 268 L796 268.4" fill="none"/>
+          <path class="primer-hair" d="M760 314 L796 314.3 M760 324 L796 324.2" fill="none"/>
+          <path class="primer-hair" d="M760 364 L796 364.2 M760 374 L796 374.3" fill="none"/>
+
+          <!-- the route, the slip riding it -->
+          <path class="primer-hair" d="M258 330 C 380 246, 540 242, 686 288" fill="none" stroke-dasharray="2 9"/>
+          <path d="M686 288 L673 282 M686 288 L674 294" fill="none"/>
+          <g transform="rotate(-4 452 258)">
+            <path d="M424 240 Q420 240 420 244 L420 274 Q420 278 424 278 L480 278.5 Q484 278.5 484 274.5 L484 244.5 Q484 240.5 480 240.5 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M432 252 L472 252.4 M432 262 L464 261.6" fill="none" stroke="#ffffff"/>
+          </g>
+          <path class="primer-hair" d="M398 268 L384 272 M400 280 L388 285" fill="none"/>
+
+          <!-- how far that actually is -->
+          <path class="primer-hair" d="M300 352 L640 350.8 M300 352 L300 340 M640 350.8 L640 339" fill="none"/>
+
+          <!-- labels -->
+          <text class="lang-zh" x="470" y="378" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">约 2000 公里</text>
+          <text class="lang-en" x="470" y="378" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">≈ 2,000 km</text>
+          <text class="lang-zh" x="168" y="438" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">你的电脑</text>
+          <text class="lang-en" x="168" y="438" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">your computer</text>
+          <text class="lang-zh" x="752" y="438" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">服务器</text>
+          <text class="lang-en" x="752" y="438" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">the server</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Light in fibre covers about 200,000 km a second; 2,000 km one way is about 0.01 seconds.</span>
+          <span class="lang-zh">光在光缆里每秒跑约 20 万公里；就算服务器在 2000 公里外，单程也只要约 0.01 秒。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ④ 第 3 步:文件送回来 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <div class="primer-step step-head">
+        <span class="primer-step-num">3</span>
+        <div class="primer-step-body">
+          <h2>
+            <span class="lang-en">The files come back</span>
+            <span class="lang-zh">文件送回来</span>
+          </h2>
+        </div>
+      </div>
+      <p>
+        <span class="lang-en">The server packs the files — text, pictures, buttons — and sends them back to your computer.</span>
+        <span class="lang-zh">服务器把文件打包发回——文字、图片、按钮，一路送回你的电脑。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 430" role="img"
+          aria-label="服务器把文字、图片、按钮打成三个包裹，沿原路送回你的电脑"
+          data-label-zh="服务器把文字、图片、按钮打成三个包裹，沿原路送回你的电脑"
+          data-label-en="The server packs text, pictures and buttons into parcels and sends them back down the same route">
+          <!-- ground -->
+          <path d="M40 350 C 250 347, 650 352, 860 349" fill="none"/>
+
+          <!-- your computer, receiving -->
+          <path d="M96 204 Q88 204 88 212 L88 308 Q88 316 96 316 L240 316.6 Q248 316.6 248 308.6 L248 212.6 Q248 204.6 240 204.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M102 218 L234 218.4 L233.6 302 L102.4 301.6 Z" fill="#fdfaf3"/>
+          <path d="M70 332 L266 332.8 L246 318 L90 317.4 Z" fill="#ffffff"/>
+          <circle cx="290" cy="226" r="9" fill="#ffd23f"/>
+
+          <!-- the server, sending -->
+          <path d="M700 110 Q692 110 692 118 L692 334 Q692 342 700 342 L804 342.6 Q812 342.6 812 334.6 L812 118.6 Q812 110.6 804 110.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M692 166 L812 166.4 M692 222 L812 222.3 M692 278 L812 278.5" fill="none"/>
+          <circle class="primer-hair" cx="708" cy="138" r="3" fill="#243244"/>
+          <circle class="primer-hair" cx="708" cy="194" r="3" fill="#243244"/>
+          <circle class="primer-hair" cx="708" cy="250" r="3" fill="#243244"/>
+          <circle class="primer-hair" cx="708" cy="306" r="3" fill="#243244"/>
+          <path class="primer-hair" d="M760 136 L796 136.2 M760 146 L796 146.4" fill="none"/>
+          <path class="primer-hair" d="M760 192 L796 192.3 M760 202 L796 202.2" fill="none"/>
+          <path class="primer-hair" d="M760 248 L796 248.4 M760 258 L796 258.1" fill="none"/>
+
+          <!-- the route home, three parcels riding it -->
+          <path class="primer-hair" d="M686 200 C 560 140, 400 138, 272 212" fill="none" stroke-dasharray="2 9"/>
+          <path d="M272 212 L285 206 M272 212 L284 218" fill="none"/>
+          <g transform="rotate(-3 368 176)">
+            <path d="M344 154 Q340 154 340 158 L340 192 Q340 196 344 196 L392 196.4 Q396 196.4 396 192.4 L396 158.4 Q396 154.4 392 154.4 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M350 168 L386 168.3 M350 177 L378 176.6 M350 186 L382 185.7" fill="none" stroke="#ffffff"/>
+          </g>
+          <g transform="rotate(3 494 152)">
+            <path d="M470 130 Q466 130 466 134 L466 170 Q466 174 470 174 L518 174.5 Q522 174.5 522 170.5 L522 134.5 Q522 130.5 518 130.5 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M476 166 L490 150 L500 158 L514 144" fill="none" stroke="#ffffff"/>
+            <circle class="primer-hair" cx="482" cy="144" r="4" fill="none" stroke="#ffffff"/>
+          </g>
+          <g transform="rotate(-2 616 148)">
+            <path d="M592 128 Q588 128 588 132 L588 164 Q588 168 592 168 L636 168.4 Q640 168.4 640 164.4 L640 132.4 Q640 128.4 636 128.4 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M602 148 Q602 141 609 141 L623 141.3 Q630 141.3 630 148.3 Q630 155 623 155 L609 154.7 Q602 154.7 602 147.7 Z" fill="none" stroke="#ffffff"/>
+          </g>
+
+          <!-- labels -->
+          <text class="lang-zh" x="494" y="96" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">文字、图片、按钮，打包发回</text>
+          <text class="lang-en" x="494" y="96" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">text, pictures and buttons, packed and sent back</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">A page's files total about 2MB — roughly the size of one MP3.</span>
+          <span class="lang-zh">一个网页的文件通常约 2MB——大约一首 MP3 的大小。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑤ 第 4 步:把页面摆出来 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <div class="primer-step step-head">
+        <span class="primer-step-num">4</span>
+        <div class="primer-step-body">
+          <h2>
+            <span class="lang-en">Lay the page out</span>
+            <span class="lang-zh">把页面摆出来</span>
+          </h2>
+        </div>
+      </div>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">渲染 render</span><span class="lang-en">render</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">laying the delivered text and pictures onto the screen, piece by piece</span>
+          <span class="lang-zh">把送来的文字和图片，按说明一件件摆到屏幕上</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">The browser renders the page from those files: skeleton first, then text and pictures.</span>
+        <span class="lang-zh">浏览器照着文件把这一页渲染出来：先摆骨架，再放图文。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 520" role="img"
+          aria-label="浏览器像摆盘一样，把送来的标题、图片、按钮一件件放进页面的空位"
+          data-label-zh="浏览器像摆盘一样，把送来的标题、图片、按钮一件件放进页面的空位"
+          data-label-en="Like plating a dish, the browser sets each delivered piece — heading, picture, button — into its slot">
+          <!-- the tray of delivered pieces -->
+          <path d="M76 382 Q70 382 70 388 L70 452 Q70 458 76 458 L222 458.6 Q228 458.6 228 452.6 L228 388.6 Q228 382.6 222 382.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M70 412 L228 412.5" fill="none"/>
+          <g transform="rotate(-3 126 366)">
+            <path d="M92 356 L160 356.5 L159.6 376 L92.4 375.5 Z" fill="#7a5cd6"/>
+          </g>
+          <path d="M176 368 Q176 360 184 360 L204 360.3 Q212 360.3 212 368.3 Q212 376 204 376 L184 375.7 Q176 375.7 176 367.7 Z" fill="#7a5cd6"/>
+
+          <!-- the page being plated -->
+          <path d="M308 96 Q300 96 300 104 L300 468 Q300 476 308 476 L832 476.8 Q840 476.8 840 468.8 L840 104.8 Q840 96.8 832 96.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M300 126 L840 126.6" fill="none"/>
+          <circle class="primer-hair" cx="316" cy="111" r="3" fill="none"/>
+          <circle class="primer-hair" cx="330" cy="111" r="3" fill="none"/>
+          <path d="M330 148 Q326 148 326 152 L326 174 Q326 178 330 178 L604 178.5 Q608 178.5 608 174.5 L608 152.5 Q608 148.5 604 148.5 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M326 200 L560 200.5 M326 220 L604 220.4 M326 240 L520 239.6" fill="none"/>
+          <path d="M350 356 Q338 356 338 344 Q338 332 350 332 L446 332.4 Q458 332.4 458 344.4 Q458 356.4 446 356.4 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M362 344 L434 344.3" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M326 388 L604 388.4 M326 408 L560 407.6 M326 428 L604 428.3 M326 448 L520 447.6" fill="none"/>
+
+          <!-- the empty slot, marked -->
+          <path class="primer-hair" d="M626 148 L816 148.6 L815.4 300 L626.6 299.4 Z" fill="none" stroke-dasharray="3 8"/>
+          <circle cx="721" cy="240" r="9" fill="#ffd23f"/>
+
+          <!-- the picture piece, mid-air -->
+          <g transform="rotate(3 720 60)">
+            <path d="M634 28 Q630 28 630 32 L630 88 Q630 92 634 92 L806 92.6 Q810 92.6 810 88.6 L810 32.6 Q810 28.6 806 28.6 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M646 82 L678 56 L698 70 L722 48 L760 82" fill="none" stroke="#ffffff"/>
+            <circle class="primer-hair" cx="664" cy="48" r="6" fill="none" stroke="#ffffff"/>
+          </g>
+          <path d="M720 102 L720 134 M720 134 L713 122 M720 134 L727 122" fill="none"/>
+          <!-- the second slot, waiting empty -->
+          <path class="primer-hair" d="M626 330 L816 330.5 L815.5 452 L626.5 451.6 Z" fill="none" stroke-dasharray="3 8"/>
+
+          <!-- labels -->
+          <text class="lang-zh" x="149" y="502" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">送来的零件</text>
+          <text class="lang-en" x="149" y="502" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">the delivered pieces</text>
+          <text class="lang-zh" x="570" y="502" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">一件件摆上屏幕</text>
+          <text class="lang-en" x="570" y="502" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">placed piece by piece</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The page is painted onto the screen frame by frame. The screen repaints about 60 times a second, so one frame is about 16.7 milliseconds.</span>
+          <span class="lang-zh">页面是一格一格画上屏幕的。屏幕每秒重画约 60 次，一格只有约 16.7 毫秒。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑥ 回顾 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <aside class="primer-recap recap-flat">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">A page isn't simply "opened" — it is delivered to your screen from another computer.</span>
+              <span class="lang-zh">网页不是"打开"的，是从另一台电脑送到你屏幕上的。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Four steps: look up the address, send the request slip, get the files back, render the page.</span>
+              <span class="lang-zh">四步走完：先查地址，再送请求单，然后文件送回，最后渲染成页面。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Next time a page spins, you know it isn't broken — one of the four steps is waiting.</span>
+              <span class="lang-zh">下次页面转圈，你知道它不是坏了——是四步里有一步还在等。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Canonical page · primer-design · every figure checks out on a calculator</span>
+    <span class="lang-zh">范本页 · primer-design · 页面上每个数字都能用计算器验证</span>
+    · v1 · 2026-08-24
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+    /* CSS only hides the other language's <text>; an SVG's aria-label is an
+     * attribute, so EN mode must swap it here or screen readers hear Chinese
+     * under html[lang="en"]. The static aria-label in the markup is the zh
+     * default for the no-JS case. */
+    document.querySelectorAll('svg[data-label-zh]').forEach(function (s) {
+      s.setAttribute('aria-label',
+        s.getAttribute(lang === 'zh' ? 'data-label-zh' : 'data-label-en'));
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: primer
+Page-type: process
+Created: 2026-08-24
+
+Decisions (5):
+1. [one-metaphor-drawn-one-to-one] chose "a single takeout metaphor, pinned by a mapping figure that pairs each delivery stage with its web stage (下单↔报网址 · 厨房备餐↔备好文件 · 骑手送↔文件上路 · 开门↔页面亮)" over "a fresh analogy per step (postman for DNS, warehouse for the server…)". Because: explain-method §2 demands one-to-one pairing, and a second metaphor cancels half of the first; three of the four term bubbles (server=kitchen, render=plating) live INSIDE the same takeout world, so the metaphor keeps paying rent until the last screen.
+2. [numerals-are-the-section-spine] chose "each step screen opens with the oversized circled numeral beside its h2 (.primer-step at section scale — this page is the component's reference implementation)" over "numbers drawn into the figures, or a numbered flow diagram". Because: the numeral row is the wayfinding, so each figure can stay a single label-light scene; a flow diagram would compress four screens into one and lose one-idea-per-screen.
+3. [violet-is-your-order-in-transit] chose "violet always paints the delivered thing's current form — typed address line, ready files, parcels on the wire, placed page blocks; the analogy bag is violet ONCE as the bridge that equates order=page" over "violet as step decoration". Because: the page teaches a journey, so the brand colour tracks the traveller; the eye follows violet from order to lit page before reading a word. Yellow stays the found-spot vocabulary from the concept canonical (Enter key, phonebook entry, arrival dot, landing slot).
+4. [every-number-recomputable] chose "one heartbeat ≈ 1s (60/min) · 2,000 km ÷ 200,000 km/s = 0.01s · 2MB ≈ one MP3 · 1000 ÷ 60 ≈ 16.7ms" over "impressive-sounding uncheckable latency stats". Because: a reader who checks one number and finds it wrong stops believing the page (explain-method §3); every reference here survives a calculator.
+5. [three-bubbles-step-3-stays-plain] chose "translate exactly DNS, 服务器 and 渲染, each at first use; step 3 carries no bubble at all" over "a bubble per step for symmetry". Because: step 3's whole content — files packed and sent back — is sayable in plain words, so 响应 / HTTP / IP never appear; a bubble with no recurring jargon to introduce is a glossary entry, not a translation.
+
+Known trade-offs:
+- Section ratios under dos-and-donts §1's ruled yardstick (figure svg + analogy-fig column only), 1440 viewport, measured zh and en: the four step figures run 520/470/430/520 viewBox units so each step section clears ≥0.5 with one prose sentence + one bubble — EN wraps more lines than zh, so the EN measurements (0.512/0.525/0.534/0.513) are the binding ones; the exact per-section numbers live in process.md.
+- Step figures with ≥3 <text> stay ≤533 viewBox units tall (rendered ≤640px at the 1080 tier) — the diagram-oversized ceiling is why the step scenes grow sideways-sparse rather than stacking more sub-scenes.
+- The laptop and the server keep the same geography in steps 2–3 (you west, server east) at the cost of drawing the same two machines twice; the repetition is the point — only the direction of travel changes, which IS the lesson.
+- In the mapping figure the takeout row stays ink-and-white and only the web row wears violet (soft panel + artifacts), so the page-wide "violet = your order's web form" rule survives a two-row figure; the analogy card's violet bag is the one sanctioned exception (decision 3).
+- The hero window's heading + picture blocks are solid violet rather than tint because the brand-presence check counts solid-violet pixels only (TOL-55 per channel); a tinted hero would pass taste and fail the machine.
+- On a 375px phone the primer-fig-wide stair keeps strokes at picture-book weight (3.35px), but in-figure labels shrink to ~6px; every number a label carries is repeated in its figcaption, so a phone reader loses nothing factual.
+/design-review:self-diff -->
+
+</body>
+</html>
