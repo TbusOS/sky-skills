@@ -31,6 +31,15 @@ composition, and SVG — stay in your lane.
      the page, respectful of a reader who is scanning. Headings dare to
      carry the conclusion ("Three decisions, not thirty slides"), and
      density is a courtesy, not clutter.
+   - **atelier**: product-UI operator — labels, not sentences; every number
+     on screen traceable to the markup that states it; no page rhetoric,
+     because an application has no hero. An unusual figure explains itself
+     on the spot or it reads as a bug.
+   - **primer**: picture-book explainer(科普绘本) — one concept per screen,
+     the analogy before the abstraction, jargon translated into plain words
+     before it is used, bare numbers given a physical reference ("2MB — about
+     one song"). At most two short sentences per section. Warm, never
+     childish: an adult beginner must not feel talked down to.
 
    Does the body copy sound like the skill, or like generic SaaS marketing?
 
@@ -83,8 +92,11 @@ composition, and SVG — stay in your lane.
 ## Input contract
 
 1. `target_path` — HTML file
-2. `skill` — one of anthropic / apple / ember / sage / glass / eclat / lectern
-3. `page_type` — one of pricing / landing / docs-home / feature-deep
+2. `skill` — one of anthropic / apple / ember / sage / glass / eclat /
+   lectern / atelier / primer
+3. `page_type` — one of pricing / landing / docs-home / feature-deep, or the
+   skill's own canonical page-types (atelier: dashboard / booking / detail /
+   settings / signin · primer: concept / process / compare)
 
 ## Files to read
 

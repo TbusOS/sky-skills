@@ -1,6 +1,6 @@
 ---
 name: design-review
-description: "Independent evaluator for any design-skill output (anthropic-design / apple-design / ember-design / sage-design / glass-design / eclat-design / lectern-design). TRIGGER when a demo / template / landing page has just been written with one of the 7 design skills and is about to be shipped. Runs the gate chain — structural verify (placeholders, BEM, undefined classes, bilingual toggles), rendered visual-audit (contrast, hero diagram sizing, orphan cards, SVG text, known-bugs), axe-core accessibility conformance (color-contrast and three structural rules blocking), full-page screenshot, opt-in pixel regression vs a committed baseline (--pixel), and LLM taste judgment (solo design-critic or 4 parallel specialists — composition / copy / illustration / brand). Pairs with design-learner to codify every critic miss so the same bug is never caught twice. Inspired by GAN's discriminator: this skill deliberately lives outside the generator skills so the reviewer does not inherit the generator's assumptions."
+description: "Independent evaluator for any design-skill output (anthropic-design / apple-design / ember-design / sage-design / glass-design / eclat-design / lectern-design / atelier-design / primer-design). TRIGGER when a demo / template / landing page has just been written with one of the 9 design skills and is about to be shipped. Runs the gate chain — structural verify (placeholders, BEM, undefined classes, bilingual toggles), rendered visual-audit (contrast, hero diagram sizing, orphan cards, SVG text, known-bugs), axe-core accessibility conformance (color-contrast and three structural rules blocking), full-page screenshot, opt-in pixel regression vs a committed baseline (--pixel), and LLM taste judgment (solo design-critic or 4 parallel specialists — composition / copy / illustration / brand). Pairs with design-learner to codify every critic miss so the same bug is never caught twice. Inspired by GAN's discriminator: this skill deliberately lives outside the generator skills so the reviewer does not inherit the generator's assumptions."
 last-verified: 2026-04-23
 ---
 
@@ -12,19 +12,20 @@ last-verified: 2026-04-23
 long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)
 and the GAN paradigm:
 
-1. **The agent doing the work praises its own work.** The 4 design skills
-   (apple / anthropic / ember / sage) are **generators** — they know the
+1. **The agent doing the work praises its own work.** The 9 design skills
+   (apple / anthropic / ember / sage / glass / eclat / lectern / atelier / primer)
+   are **generators** — they know the
    style, they can produce HTML, and they will naturally rate their own
    output favourably.
 2. **An independent, skeptical evaluator is the real lever.** This skill
    imports **nothing** from any generator. Its rules, scripts, known-bugs
-   list, and critic agents live in one shared pool — the five styles pay
+   list, and critic agents live in one shared pool — the nine styles pay
    the same quality floor.
 
 **ZH** — 两条原则来自 Anthropic harness-design 和 GAN 范式:(1) 做事的
-agent 倾向自评过高;(2) 独立持怀疑的 evaluator 才是真正的杠杆。5 个
+agent 倾向自评过高;(2) 独立持怀疑的 evaluator 才是真正的杠杆。9 个
 design skill 是 generator,会给自己打高分;`design-review` 脚本、规则、
-已知 bug 清单 **不属于任何一个风格**,4 种风格共用同一套工艺底线。
+已知 bug 清单 **不属于任何一个风格**,9 种风格共用同一套工艺底线。
 
 ## What ships today · 当前交付
 
@@ -35,7 +36,7 @@ design skill 是 generator,会给自己打高分;`design-review` 脚本、规则
 | Gate 3 · full-page screenshot | **shipped** | `scripts/screenshot.mjs`(Playwright · 绝对路径 + `file://` 通用)|
 | Gate 4 · solo taste critic | **shipped** | `.claude/agents/design-critic.md` |
 | Gate 4 · multi-critic(4 专家) | **shipped** (2026-04-22) | `.claude/agents/design-{composition,copy,illustration,brand}-critic.md` 权重 25/25/20/30 |
-| Learning-loop · 闭环回灌 | **shipped** (2026-04-22) | `.claude/agents/design-learner.md` + `scripts/learning-loop.mjs` |
+| Learning-loop · 回灌成规则 | **shipped** (2026-04-22) | `.claude/agents/design-learner.md` + `scripts/learning-loop.mjs` |
 | Cross-repo 入口 | **shipped** | `~/.claude/skills/design-review/dr-cli --repo=<仓> --skill=<名> <html>` |
 | 参考库 canonical | 实时计数见 `~/.claude/skills/design-review/dr-cli --coverage`(扩库中) | `~/.claude/skills/<style>-design/references/canonical/` |
 
@@ -87,18 +88,18 @@ design skill 是 generator,会给自己打高分;`design-review` 脚本、规则
 ### 分别调用(调试用)
 
 ```bash
-# 1) 结构闸(静态)
+# 1) 结构检查(静态)
 python3 skills/design-review/scripts/verify.py \
   [--skill=<name>] [--css=<path>]... [--allow-monolingual] <html> [...]
 
-# 2) 视觉闸(Playwright 渲染) · 加 --ignore-intentional 消掉 brand-intentional 噪音
+# 2) 视觉检查(Playwright 渲染) · 加 --ignore-intentional 消掉 brand-intentional 噪音
 node skills/design-review/scripts/visual-audit.mjs \
   [--ignore-intentional] <html>
 
-# 3) 肉眼闸(全页截图)
+# 3) 肉眼检查(全页截图)
 node skills/design-review/scripts/screenshot.mjs <html> shot.png
 
-# 4) 口味闸 · solo / multi critic
+# 4) 口味评审 · solo / multi critic
 #    在 Claude Code 里:
 Task(subagent_type="design-critic",              ...)  # 单专家
 # or 4 并行:
@@ -107,7 +108,7 @@ Task(subagent_type="design-copy-critic",         ...)
 Task(subagent_type="design-illustration-critic", ...)
 Task(subagent_type="design-brand-critic",        ...)
 
-# 5) 闭环回灌(critic 发现 → known-bugs + 机器 check)
+# 5) 回灌成规则(critic 发现 → known-bugs + 机器 check)
 node skills/design-review/scripts/learning-loop.mjs \
   --verdict=<path/to/verdict.json>  # 产出 design-learner prompt
 # 然后在 Claude Code 里 Task(subagent_type="design-learner", ...)
@@ -115,9 +116,9 @@ node skills/design-review/scripts/learning-loop.mjs \
 
 **任一步 exit 非 0 = 没完成**。修完再跑。
 
-## 闸口覆盖的 bug 类
+## 每道检查覆盖的 bug 类
 
-| 闸口 | 抓哪些 | 依赖 |
+| 检查 | 抓哪些 | 依赖 |
 |---|---|---|
 | Gate 1 `verify.py` | 占位符(文档页 `<pre>`/`<code>` 块自动剥除,不误报)、BEM modifier-only、未定义 class(union: 默认 skill CSS + HTML link + `--css`)、`<svg>` 不平衡、hero 容器用错、`container --mod` 未与 base 同列(BEM base-less 错)、公开页缺双语(`lang-toggle` + `lang-en/zh`)| Python 标准库 |
 | Gate 2 `visual-audit.mjs` | WCAG contrast < 4.5、hero 框图渲染 < 900px、SVG `<text>` 实际像素 < 9px、多列网格孤儿卡、SVG `<text>` 重叠、SVG 文字 fill 和承载 shape RGB 距离 < 40、多 h1 / heading 跳级 / 无 alt img / 无文本 a、brand 色在 top region 占比 < 0.4%、cross-skill-smell(别扮成另一个 skill)、hollow-card §10b、asymmetric-first-col-hero §10c、svg-foreign-hex、figure 无 figcaption、Fraunces/Newsreader 等非本 skill 字体、italic 滥用 —— 共 26 类,每类对应 `known-bugs.md` 1 行 | playwright |
@@ -127,10 +128,10 @@ node skills/design-review/scripts/learning-loop.mjs \
 
 具体清单在:
 - `references/known-bugs.md`(26 条,每条写 Reader sees / Why / Defense)
-- `references/cross-skill-rules.md`(4 种风格共通工艺底线 · 有 §G 双语规则 + §I 卡片分组规则)
+- `references/cross-skill-rules.md`(9 种风格共通工艺底线 · 有 §G 双语规则 + §I 卡片分组规则)
 - `references/dos-and-donts.md`(每 skill 下的风格特定反例)
 
-## Learning-loop · 闭环回灌流程
+## Learning-loop · 回灌成规则的流程
 
 **目标**:同一类 bug 不被抓两次。
 
@@ -155,7 +156,7 @@ node skills/design-review/scripts/learning-loop.mjs \
 | 6 · `/design-loop` 编排 | planner → gen → review → critic × 3 轮 | Future(依赖 Phase 01 planner)|
 | 7 · learning-loop | `design-learner` + `learning-loop.mjs` | **done** (2026-04-22) |
 | 8 · library-grower | 5 张优秀产物 → 自动蒸馏新 canonical | Future(等 10+ 真实页数据)|
-| 10 · facts 闸 | `facts.mjs` —— 展示页宣称的数字 vs 磁盘真值,不符即非 0 退出 | **done** (2026-07-30) |
+| 10 · facts 检查 | `facts.mjs` —— 展示页宣称的数字 vs 磁盘真值,不符即非 0 退出 | **done** (2026-07-30) |
 
 ## 生命周期规则
 
@@ -170,7 +171,7 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 
 ## Files · 文件
 
-- `~/.claude/skills/design-review/dr-cli` — 一条命令跑完 4 闸 + 可选 `--multi-critic` / `--learn`
+- `~/.claude/skills/design-review/dr-cli` — 一条命令跑完 4 道检查 + 可选 `--multi-critic` / `--learn`
 - `scripts/verify.py` — Gate 1 结构 check
 - `scripts/visual-audit.mjs` — Gate 2 渲染 check(26 类)
 - `scripts/screenshot.mjs` — Gate 3 全页截图

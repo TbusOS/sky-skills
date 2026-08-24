@@ -45,6 +45,7 @@ const ROSTER = {
   'doc-to-markdown': 'systems',
   'md-to-pdf': 'systems',
   'tech-pdf-reader': 'systems',
+  'datasheet-reading': 'systems',
 
   'anthropic-design': 'design',
   'apple-design': 'design',

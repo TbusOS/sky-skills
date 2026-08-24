@@ -38,6 +38,7 @@ last-verified: 2026-04-19
 - 暖棕 / 手工 / Aesop（用 `ember-design`）
 - 苹果风极简（用 `apple-design`）
 - 橙色胶囊按钮（用 `anthropic-design`）
+- 零基础图解 / eli5 / picture explainer —— 给完全不懂的人讲一个概念（用 `primer-design`：厚描边插画 + 比喻卡 + 术语翻译；sage 是安静的阅读排版，不是图解读本）
 - dark mode / 霓虹 / 彩虹
 - 情绪化插画 / 儿童 UI
 
@@ -53,7 +54,7 @@ last-verified: 2026-04-19
 
 **尽可能用图表达**——这是默认要求，不需要用户提醒。下表任一形态出现就该配视觉化
 （图型列是**默认起点不是强制规格**——结构按实际内容定制、可混搭可自创，硬约束只有
-"该有图的地方有图" + 工艺质量闸）：
+"该有图的地方有图" + 工艺质量检查）：
 
 | 内容形态 | 必须配 | 内容形态 | 必须配 |
 |---|---|---|---|
@@ -62,7 +63,7 @@ last-verified: 2026-04-19
 | 函数控制流 / 寄存器位域 | 函数流程图 / 位域图 | SoC 结构 / 信号时序 / 编译链 | 对应内核图型（diagram-craft §6） |
 | 产品 / UI 描述 | 窗口 mock（canonical landing 的编辑器 mock 语法） | 连续纯文字 > 2 屏 | ≥ 1 个视觉元素 |
 
-节奏：每 1.5 屏（≈1300px @1440）≥ 1 个 SVG / figure / stat。机器闸 `text-desert` 在连续
+节奏：每 1.5 屏（≈1300px @1440）≥ 1 个 SVG / figure / stat。机器检查 `text-desert` 在连续
 2600px 无视觉元素时 warn（known-bugs 1.31）。动笔画图前再读 `references/diagram-craft.md`：
 §3 先定尺寸再画（**内容多就加宽加高画布，禁止把图缩小去迁就版式——看不清 = 没画**）、
 §0-1 色彩（绿 `#97B077` 单焦点 + 靛蓝 `#393C54` 做墨 + 低饱和 tint `#f0f3e2`/`#c9d1b3`/`#eef2de`
@@ -80,7 +81,7 @@ last-verified: 2026-04-19
 
 ### 生成**后**写 self-diff note(交付前 MUST)
 
-生成器在写完 HTML、跑 4 闸之前,必须在 `</body>` 前 embed 一个
+生成器在写完 HTML、跑四道检查之前,必须在 `</body>` 前 embed 一个
 `design-review:self-diff v1` HTML 注释块,列出 5-7 条本次生成的关键
 设计决策 + 2-3 条 known trade-offs。contract 见
 `~/.claude/skills/design-review/references/cross-skill-rules.md §M`,示范参考
@@ -89,13 +90,13 @@ last-verified: 2026-04-19
 没有 self-diff = canonical 不被 `verify.py` 承认。critic 也无法做实
 质评审(没有作者意图的靶子)。HARNESS-ROADMAP Phase 03 的硬规则。
 
-### 生成**后**跑四闸
+### 生成**后**跑四道检查
 
 ```bash
 ~/.claude/skills/design-review/dr-cli --critic <path/to/your.html>
 ```
 
-四闸:`verify.py` · `visual-audit.mjs`(加 §J italic / §K brand + smell)·
+四道检查:`verify.py` · `visual-audit.mjs`(加 §J italic / §K brand + smell)·
 `screenshot.mjs` · `critic.mjs`(LLM taste 0-100 分)。
 
 任一 error = 失败。critic 得分 < 75 必修。canonical 自回归 ≥ 90。

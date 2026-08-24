@@ -17,7 +17,8 @@ Usage:
   does NOT enable the bilingual or self-diff public-path rules.
 
 If --skill is omitted, the script auto-detects the skill by scanning the HTML
-for a `<link>` to one of {anthropic|apple|ember|sage|glass|eclat|lectern}.css. Pass --skill
+for a `<link>` to one of
+{anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer}.css. Pass --skill
 when detection is ambiguous.
 
 CSS class-definition lookup: unions classes from

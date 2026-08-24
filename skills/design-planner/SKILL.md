@@ -1,6 +1,6 @@
 ---
 name: design-planner
-description: "Use when the user gives a vague one-line brief for a web page ('做个 X 的页面' / 'we need a dashboard for Y') and a design skill (anthropic/apple/ember/sage/glass/eclat/lectern) will generate it. Expands the brief into a concrete plan: infer page-type + audience, pull the sprint contract via bin/design-review --plan (unknown page-types fall back to the nearest canonical, stamped LOW-CONFIDENCE), then write a section list with required content per section plus the hard numbers (diagram density, bilingual, brand presence). DO NOT TRIGGER when the user already provides a section-level spec, or for non-page work (components, refactors)."
+description: "Use when the user gives a vague one-line brief for a web page ('做个 X 的页面' / 'we need a dashboard for Y') and a design skill (anthropic/apple/ember/sage/glass/eclat/lectern/atelier/primer) will generate it. Expands the brief into a concrete plan: infer page-type + audience, pull the sprint contract via bin/design-review --plan (unknown page-types fall back to the nearest canonical, stamped LOW-CONFIDENCE), then write a section list with required content per section plus the hard numbers (diagram density, bilingual, brand presence). DO NOT TRIGGER when the user already provides a section-level spec, or for non-page work (components, refactors)."
 last-verified: 2026-06-11
 ---
 
@@ -13,7 +13,7 @@ last-verified: 2026-06-11
 规划时分清三类约束,别混在一起:
 
 1. **审美不可变** — skill 的视觉语言(字体、色板、品牌色出现方式)由 `~/.claude/skills/<skill>-design/references/` 定义,规划阶段不讨论、不修改。
-2. **质量是机器闸** — 图密度、双语、对比度等由 `verify.py` + `visual-audit.mjs` + critic 把关。计划里写明这些数字是为了第一稿就过闸,不是重新发明规则。
+2. **质量由机器检查把关** — 图密度、双语、对比度等由 `verify.py` + `visual-audit.mjs` + critic 把关。计划里写明这些数字是为了第一稿就过,不是重新发明规则。
 3. **结构自由定制** — section 的数量、顺序、形态由内容决定。contract §1 的结构 MUST 来自 canonical,对已知 page-type 是强默认;对 LOW-CONFIDENCE contract(无 canonical 的类型)只是参考。**这个 skill 输出的是计划,不是强制规格** — 生成器在审美与质量两层之内有完全的结构自由。
 
 ## 流程
@@ -28,7 +28,7 @@ last-verified: 2026-06-11
 ### ② 拿 sprint contract
 
 ```bash
-~/.claude/skills/design-review/dr-cli --plan --skill=<anthropic|apple|ember|sage|glass|eclat|lectern> --page=<type>
+~/.claude/skills/design-review/dr-cli --plan --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer> --page=<type>
 ```
 
 - 已知类型:contract 含该 canonical 的结构 MUST,照常执行。
@@ -64,10 +64,10 @@ last-verified: 2026-06-11
 
 ### ④ 交给生成流程
 
-把 `计划 + 合约(--plan 的输出)` 一起交给生成器(对应 design skill)。生成器先读 contract §0 的文件,再按计划写;写完跑 `~/.claude/skills/design-review/dr-cli <page.html>` 三闸。计划与 contract 冲突时:审美/质量层听 contract,结构层听计划。
+把 `计划 + 合约(--plan 的输出)` 一起交给生成器(对应 design skill)。生成器先读 contract §0 的文件,再按计划写;写完跑 `~/.claude/skills/design-review/dr-cli <page.html>` 三道检查。计划与 contract 冲突时:审美/质量层听 contract,结构层听计划。
 
 ## 边界
 
 - 不替用户做产品决策:brief 里没有的事实不要编造,留在"不确定点"里。
-- 不改 contract、不改 canonical、不调闸的阈值——那是 design-review / design-learner 的领地。
+- 不改 contract、不改 canonical、不调机械检查的阈值——那是 design-review / design-learner 的领地。
 - 计划超过 ~12 个 section 时先怀疑 scope:一页讲不完就拆页,不要塞。

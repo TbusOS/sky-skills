@@ -46,6 +46,23 @@ else scores composition, copy, and illustration — stay in your lane.
      Confidential)`. Ordered data must ride the single-hue navy ramp
      `#1d3a6e → #2f5bb0 → #7d9bd0`; a rainbow chart = error.
 
+   - atelier: `#DD4F92 (rose — the identity color)`, `#F5854F (coral — the
+     rose's warm partner, appears ONLY inside the gradient)`, `#F6B24C
+     (amber — third hue, category composition only, e.g. pie slices)`,
+     `#2C2723 (warm charcoal ink — not pure black)`, `#E9C3A8 (wallpaper
+     ground, stops `#E8AE86` / `#E39BA8` / `#FAEEDD` / `#C98F72`)`. Rose as
+     TEXT is `#B83370` (`--atl-accent-ink`), on bare wallpaper `#8E2756`;
+     the status trio `#127046 / #B5342E / #8E5A0F` marks judgment, never
+     series. Text sitting on a gradient = error (white on the coral stop is
+     2.5:1) — gradients carry orbs, bars, progress and the brand mark only.
+   - primer: `#7a5cd6 (violet — the signature)`, `#5b3fbf (violet-ink, for
+     small emphasis type and links)`, `#ffd23f (marker yellow — ONE stop,
+     deriving a darker gold is an error: it lands inside ember's `#c49464`)`,
+     `#3aa66b (go green — graphics only, 2.94:1, never carries text)`,
+     `#243244 (ink)` on `#fdfaf3 (paper)`. Ink values are solid, never
+     alpha-faded — an alpha-thinned body color is how the contrast checks
+     get failed.
+
    Any hex outside these + the near-whites = potential 6th hue. Flag
    each occurrence.
 
@@ -70,6 +87,13 @@ else scores composition, copy, and illustration — stay in your lane.
    - lectern navy ≥ 0.02% (carried by structural furniture — masthead
      square, section kicker, numbered agenda markers — not by a big CTA;
      a briefing deck has no full-bleed hero to lean on)
+   - atelier rose ≥ 0.06% (many small objects rather than one big one —
+     gradient orbs, the brand mark, meter fills, the active tab rule)
+   - primer violet ≥ 0.485% (calibrated 2026-08-24 against the three
+     canonicals, whose measured top-strip coverage is 0.97% / 1.5% / 1.93%;
+     the threshold is half the smallest. Violet lives on the oversized
+     circled numbers, the analogy-card border and the hero illustration —
+     if the first screen has no violet, the page is not a primer)
 
    visual-audit already runs the pixel count; your job is qualitative:
    does the first viewport SAY "this is a <skill> page" at a glance?
@@ -89,6 +113,12 @@ else scores composition, copy, and illustration — stay in your lane.
      (`--lectern-font-serif: Georgia, "Times New Roman", "Songti SC"`);
      its sans is a system stack. Flag page-level overrides that drop
      Songti SC from the serif chain
+   - atelier pairs sans↔sans: Plus Jakarta Sans for display and UI, with
+     Noto Sans SC as the zh fallback in both token chains
+   - primer also pairs sans↔sans: Fredoka (display) and Nunito (body) both
+     fall back to Noto Sans SC. Fredoka has NO CJK coverage at all, so
+     every zh display string is genuinely set in Noto Sans SC — that is the
+     intended pairing, not a fallback accident, and it is not a finding
 
    Flag any regression to `Inter, PingFang SC, ...` as an error.
 
@@ -114,6 +144,21 @@ else scores composition, copy, and illustration — stay in your lane.
      in the topbar, which also anchors the rose status color; high data
      density on purpose (one screen carrying a KPI row + two charts + a
      table) — the exact opposite of eclat's one-beat-per-screen
+   - atelier: ONE frosted `.atl-app` shell on the mesh wallpaper (two
+     glass windows = not this skill); opacity graded toward the data
+     (shell 0.32 → rail 0.46 composited → data card 0.80 → table 0.94);
+     coral→rose gradient orb icons, never line icons in rings (that is the
+     generic admin-template tell); round-cap gradient bars over neutral
+     tracks; exactly ONE near-black anchor card per screen (two anchors =
+     no anchor); no hero tier at all — an application has no hero
+   - primer: at least one `.primer-analogy` card per page (the identity
+     component — an abstraction with no analogy means the page did not do
+     primer's job); oversized circled step numbers; `.primer-term`
+     jargon→plain-words chips before the jargon is ever used; thick-outline
+     illustrations at 3.4px round-cap drawing real objects (flat icon +
+     checkmark is the slop tell); marker yellow on a few words only; a
+     closing recap strip. Label budget is half the other skills' — ≤14
+     labels at the 1080 container
 
    If 2+ signature moves are missing, the page "isn't this skill" even
    if token use is correct.

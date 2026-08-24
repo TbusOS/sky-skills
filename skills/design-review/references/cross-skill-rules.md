@@ -1,6 +1,6 @@
 # Cross-Skill Rules
 
-> 适用于 **所有 7 个 design skill**（anthropic / apple / ember / sage / glass / eclat / lectern）的共通规则。
+> 适用于 **所有 9 个 design skill**（anthropic / apple / ember / sage / glass / eclat / lectern / atelier / primer）的共通规则。
 > 每个 skill 的 `dos-and-donts.md` 负责**风格独有**的规则（调色板、字体、签名动作）；
 > 这份文件负责**跨风格的工艺底线**。evaluator 先读这份，再读对应 skill 的 dos-and-donts。
 
@@ -23,8 +23,8 @@
 5. **满宽彩色带检测（saturated-band · known-bugs §1.27）**：渲染宽度 ≥ 300px 的 SVG 里，任一 rect 同时满足"HSL 饱和（s>0.25 且 l<0.85）+ 有效不透明度 ≥ 0.5 + 宽 ≥ 60% viewBox 宽 + 高 ≥ 24 + 面积 ≥ 8% viewBox" → warn。只抓 hue 饱和的"色带"；深色中性面板（终端/深色窗口 mock）和低饱和 tint 容器是合法模式。颜色做语义不做填充——tint 容器 + 色条 + 色点，纯色满填只给 ≤ 56px 元素。画图工艺全文见各 skill `references/diagram-craft.md`（含图密度合约：≥3 步流程必须画图、数字必须 stat/图表、>2 屏纯文字必须插视觉元素、每 1.5 屏 ≥ 1 个视觉元素）。
 6. **letterbox 检测（svg-letterbox · known-bugs §1.28）**：figure 内渲染宽 ≥ 300px 的 SVG，内容元素 client-rect union 的宽向填充率 < 72% 或高向 < 50% → warn（全幅背板剔除；`data-allow-letterbox` 逃生舱）。viewBox 紧贴内容，内容 bbox 距边 ≤ 24px——画布里的空白只会偷走字号。
 7. **密图窄容器检测（dense-diagram-cramped · known-bugs §1.29）**：figure 内 SVG `<text>` ≥ 20 且渲染宽 < 760px → warn。密图必须升容器档（anthropic 1200 wide / apple 1280 hero）或拆图，不准缩字号。注意 §B.3 的 tiny-text 检查 2026-06-11 起覆盖**所有** figure 内 SVG（渲染宽 ≥ 300、text ≥ 4），不再限 hero 行。
-8. **单色图反向闸（diagram-monochrome · known-bugs §1.30 · anthropic / ember / sage 生效，apple 豁免）**：figure 内工程图（节点 rect ≥ 4 且 text ≥ 6）的 fill/stroke 中 0 个饱和 hue（s > 0.25 且 0.15 < l < 0.85）→ warn。颜色必须在场：tint 不算 hue，在场感来自实心色点 / 徽章 / 色条 / 彩色连线。归属理由——anthropic：每图 ≥ 2 语义 hue 是文档合约 + critic 评审项（机器只抓 0 hue，存量单 hue git graph / timeline 合法）；ember：暖棕灰（#312520/#6b5a4f/#8a7564）饱和度低于 s > 0.25 线，登记为 hue 的是金焦点 #c49464，0 hue 意味着金焦点缺席或冷中性灰入侵，两者都是 dos-and-donts 违例；sage：绿 #97B077 是身份色，靛蓝墨 #393C54 饱和度不够不计入，0 hue 的工程图是灰线稿不是 sage。apple 豁免（无彩灰阶 + 蓝单焦点是身份，全灰图可以合法存在）。
-9. **长文无图检测（text-desert · known-bugs §1.31）**：视觉元素（svg / figure / img / table / blockquote / pre / stat / 卡片 grid 区）之间最大纵向空隙 > 2600px → warn。豁免：页高 < 1800、md-mirror 文档页（`.md-banner`）、`<body data-allow-text-desert>`。编辑合约仍是每 1.5 屏 ≥ 1 个视觉元素——机器闸只兜最严重的。
+8. **单色图反向检查（diagram-monochrome · known-bugs §1.30 · anthropic / ember / sage 生效，apple 豁免）**：figure 内工程图（节点 rect ≥ 4 且 text ≥ 6）的 fill/stroke 中 0 个饱和 hue（s > 0.25 且 0.15 < l < 0.85）→ warn。颜色必须在场：tint 不算 hue，在场感来自实心色点 / 徽章 / 色条 / 彩色连线。归属理由——anthropic：每图 ≥ 2 语义 hue 是文档合约 + critic 评审项（机器只抓 0 hue，存量单 hue git graph / timeline 合法）；ember：暖棕灰（#312520/#6b5a4f/#8a7564）饱和度低于 s > 0.25 线，登记为 hue 的是金焦点 #c49464，0 hue 意味着金焦点缺席或冷中性灰入侵，两者都是 dos-and-donts 违例；sage：绿 #97B077 是身份色，靛蓝墨 #393C54 饱和度不够不计入，0 hue 的工程图是灰线稿不是 sage。apple 豁免（无彩灰阶 + 蓝单焦点是身份，全灰图可以合法存在）。
+9. **长文无图检测（text-desert · known-bugs §1.31）**：视觉元素（svg / figure / img / table / blockquote / pre / stat / 卡片 grid 区）之间最大纵向空隙 > 2600px → warn。豁免：页高 < 1800、md-mirror 文档页（`.md-banner`）、`<body data-allow-text-desert>`。编辑合约仍是每 1.5 屏 ≥ 1 个视觉元素——机器检查只兜最严重的。
 
 ## C. 视觉原创性（目前文档级，将来 design-critic 强制）
 
@@ -120,7 +120,7 @@
 
 **机器 check**:`visual-audit.mjs` 的 `asymmetric-first-col-hero`(3-col 触发,ratio ≥ 1.2,有 anchored-hero 豁免)。known-bugs 1.21。
 
-**历史**:2026-04-22 `demos/gated-dual-clone/index.html` 三道安全闸。作者按 composition critic 建议把 Gate A 从 `1fr 1fr 1fr` 改成 `1.4fr 1fr 1fr`,AI 评审给 91 分,用户一眼看出"还是歪的,偏左"。修法:改 `1fr 1fr` + `Gate A grid-column: 1 / -1`。composition critic subagent 只在 info-level 提了"窄视口会压缩" —— taste-level 的失衡被漏。
+**历史**:2026-04-22 `demos/gated-dual-clone/index.html` 三道安全检查。作者按 composition critic 建议把 Gate A 从 `1fr 1fr 1fr` 改成 `1.4fr 1fr 1fr`,AI 评审给 91 分,用户一眼看出"还是歪的,偏左"。修法:改 `1fr 1fr` + `Gate A grid-column: 1 / -1`。composition critic subagent 只在 info-level 提了"窄视口会压缩" —— taste-level 的失衡被漏。
 
 ## L. 完整评审流程(每次生成新页面必走)
 
@@ -137,18 +137,18 @@ script 输出一份 sprint-contract md,必含:
   dos-and-donts)
 - 本页的结构 MUST(从 canonical.md 提)
 - brand-presence / italic / cross-skill-smell 的 MUST
-- 三闸命令
+- 三道检查的命令
 
 **生成器把这份 contract 读完再动手**。不读 canonical 就写 = 又一次让读者
 push back。
 
-### 生成**后**(review 阶段 —— 4 闸)
+### 生成**后**(review 阶段 —— 四道检查)
 
 ```bash
 bin/design-review --critic <page.html>
 ```
 
-四闸依次跑:
+四道检查依次跑:
 
 1. **verify.py** — 结构(占位符、DOCTYPE、BEM、SVG 平衡、class 定义、
    bilingual §G)
@@ -185,7 +185,7 @@ bin/design-review --critic <page.html>
 | I | 布局比例 | visual-audit.mjs §10b | hollow card + 1 hero + N 替代 |
 | J | italic 纪律 | visual-audit.mjs italic-overuse | italic 仅做强调 |
 | K | 品牌可视 + 串味 | visual-audit.mjs brand-presence / smell | 本风格 vs 跨风格 |
-| L | 评审流程 | bin/design-review | plan → write → 4 闸 → self-regression |
+| L | 评审流程 | bin/design-review | plan → write → 四道检查 → self-regression |
 | M | self-diff note | verify.py | canonical 必须 embed HTML 注释块 · critic 的评审靶子 |
 
 ---
@@ -200,6 +200,12 @@ bin/design-review --critic <page.html>
    - ember 金 ≥ 0.01%(金色作 hairline,小剂量)
    - sage 绿 ≥ 1.5%(sage 必须 carry 绿色身份 —— nav band 实现)
    - glass aurora cyan ≥ 0.2%(只算实心 cyan —— eyebrow/nav CTA/hairline 三件套;blob 混进藏青底不计;只在 dark 主题检,light 是变体不是正典)
+   - eclat flare ≥ 0.002%(暗调影厅里只有 CTA 和 live 圆点是饱和前景,只抓"完全没有")
+   - lectern navy ≥ 0.02%(深蓝方块 + kicker + 议程编号在顶区扛住身份)
+   - atelier rose ≥ 0.06%(玫红活在渐变圆球 / 字标 / 计量条 / 活动标签线上 —— 件小但处处有)
+   - primer violet ≥ 0.485%(#7a5cd6 活在超大圆号数字、比喻卡边框、hero 主插画上。阈值 2026-08-24
+     实测标定:三张 canonical 的顶区 1440×500 紫覆盖率分别是 concept 0.97% / process 1.5% /
+     compare 1.93%,取最小值的一半 = 0.485%,高于 0.2% 的地板,所以就用这个值)
    - 实现:Playwright 截图 → pngjs 像素距匹配(tolerance 55,兜住 antialiasing)
 2. **cross-skill-smell**:可见元素的 computed font-family 第一项 / color / bg / fill,若匹配禁忌清单(别 skill 的 signature),warn 一次。
    - sage 禁忌:Fraunces / Poppins / Lora / Space Grotesk / 金色 #c49464 / 橙 #d97757 / glass cyan #22D3EE
@@ -207,6 +213,14 @@ bin/design-review --critic <page.html>
    - apple 禁忌:Fraunces / Instrument Serif / Poppins / Lora / Space Grotesk / 橙 / 金 / sage 绿 / glass cyan
    - anthropic 禁忌:Fraunces / Instrument Serif / Space Grotesk / apple 蓝 / sage 绿 / 金 / glass cyan
    - glass 禁忌:Fraunces / Instrument Serif / Poppins / Lora / 橙 / apple 蓝 / 金 / sage 绿(glass 的 violet/pink 不进禁忌表 —— 它们是 glass 自己的背景色,但在 glass 页面上前景即违例,见 glass dos-and-donts)
+   - eclat 禁忌:Fraunces / Instrument Serif / Lora / Poppins / Space Grotesk / apple 蓝 / sage 绿 / ember 金 / glass cyan(**anthropic 橙有意豁免** —— eclat 自己的 flare-soft #ff7a4d 落在 #d97757 的 TOL 55 内,列进去就是自己抓自己)
+   - lectern 禁忌:Fraunces / Instrument Serif / Lora / Poppins / Space Grotesk / anthropic 橙 / ember 金 / sage 绿 / glass cyan(**apple 蓝有意豁免** —— lectern 本身就是深蓝家族,图表蓝会被自己的禁忌表误伤)
+   - atelier 禁忌:Fraunces / Instrument Serif / Lora / Poppins / Space Grotesk / apple 蓝 / sage 绿 / ember 金 / glass cyan / lectern navy(**anthropic 橙有意豁免** —— atelier 珊瑚 #F5854F 在 TOL 55 内,同 eclat 的理由)
+   - primer 禁忌:Fraunces / Instrument Serif / Poppins / Lora / Space Grotesk / anthropic 橙 / apple 蓝 / glass cyan / eclat flare / atelier rose。
+     **ember 金 / sage 绿 / lectern navy 三项有意豁免**(primer spec §4.1 的推理):马克笔黄 #ffd23f
+     压在墨色上的抗锯齿像素落进 ember 金 #c49464 的 TOL 55;回顾条绿勾与白底混合落进 sage 绿
+     #97B077;primer 墨 #243244 落在 lectern navy #1d3a6e 的 TOL 55 内,紫墨 #5b3fbf 落在 #2f5bb0 内。
+     三项都是**抗锯齿与混色的必然结果,不是偷别人的色**,列进禁忌表只会制造教人跳过报告的假阳。
 
 **fix playbook**:
 - brand 不可见 → nav 给品牌 tint 背景,hero 加品牌色 kicker,CTA 用品牌色
@@ -254,6 +268,7 @@ bin/design-review --critic <page.html>
 |---|---|---|
 | Lora / Fraunces / Instrument Serif(editorial 衬线) | **Noto Serif SC** | 中英都是 serif,书卷气一致 |
 | Poppins / Inter / Space Grotesk(display / body sans) | **Noto Sans SC** | 中英都是 sans,几何一致 |
+| Fredoka / Nunito(圆体 display,primer)| **Noto Sans SC** | 圆几何 sans 在中文侧没有对应的圆体开源字重可用,退到同为 sans 的 Noto Sans SC:字形骨架一致,只是失掉圆头。Fredoka **完全没有 CJK 覆盖**,所以 zh span 里的每个大标题实际都由 Noto Sans SC 排 —— 这是预期行为,不是 fallback 事故 |
 | IBM Plex Mono / JetBrains Mono(code) | `monospace` fallback | CJK 等宽字稀有,浏览器默认即可 |
 
 **apple-design 例外**:系统原生 PingFang SC 是 Apple 自己的中文字体设计,和 SF Pro 原装配对,**不改**。只给 non-Apple 平台加 Noto Sans SC fallback。
@@ -425,8 +440,8 @@ self-diff 不是 .md 的复制 —— 它是**单实例的自述**。同一 page
 1. **muted 不叠 opacity。** token 本身就是降调;在 `--*-text-secondary` 上再叠
    `opacity:0.4-0.65`,合成后 1.85-3.04。整卡"coming soon"淡化只淡预览图,不淡文字。
 2. **品牌色不当文字。** sage 绿 2.26 / anthropic 橙 2.66 / ember 金 2.18 当 `color:` 全不过。
-   每个品牌色配一个 `-ink` 深变体给文字;**填充保持原值**(品牌闸靠它匹配)。
-   按钮底允许在品牌闸 TOL 55 内加深(实例:`--anth-cta` #B85C3D,距品牌橙 50)。
+   每个品牌色配一个 `-ink` 深变体给文字;**填充保持原值**(品牌检查靠它匹配)。
+   按钮底允许在品牌检查 TOL 55 内加深(实例:`--anth-cta` #B85C3D,距品牌橙 50)。
 3. **判断色按"自己的 12% chip"取值,不按白底。** 状态药丸 = 判断色文字压在自己的淡 chip 上,
    那是它见过的最难的底。lectern teal 白底 4.51 / 自己 chip 3.97。
 4. **暗底用亮 token。** 暗 pre / 引用带 / 页脚上,亮色主题的深 muted 只有 1.76-3.19;
@@ -434,7 +449,7 @@ self-diff 不是 .md 的复制 —— 它是**单实例的自述**。同一 page
    暗代码块在同一轮里被同一把全局替换连踩三次。
 
 机器检查:`axe-audit.mjs` 的 `color-contrast` 已是阻塞级(全仓清零后晋升)。
-本节是"写的时候别犯",闸是"犯了拦住"。
+本节是"写的时候别犯",机械检查是"犯了拦住"。
 
 ## 出坑以后
 

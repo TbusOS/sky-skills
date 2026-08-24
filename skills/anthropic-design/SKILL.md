@@ -22,6 +22,7 @@ last-verified: 2026-04-19
 
 - 通用"好看页面"（用 `frontend-design`）
 - Apple 美学（用 `apple-design`）
+- 零基础图解 / eli5 / picture explainer —— 给完全不懂的人讲一个概念（用 `primer-design`：大图少字、比喻先行；anthropic 是给读得下长文的人看的）
 - 高饱和 / 霓虹 / 赛博朋克
 
 ## 阅读顺序
@@ -43,7 +44,7 @@ last-verified: 2026-04-19
 
 **尽可能用图表达**——这是默认要求，不需要用户提醒。下表任一形态出现就该配视觉化
 （图型列是**默认起点不是强制规格**——结构按实际内容定制、可混搭可自创，硬约束只有
-"该有图的地方有图" + 工艺质量闸）：
+"该有图的地方有图" + 工艺质量检查）：
 
 | 内容形态 | 必须配 | 内容形态 | 必须配 |
 |---|---|---|---|
@@ -52,7 +53,7 @@ last-verified: 2026-04-19
 | 产品 / UI 描述 | 窗口 mock | 连续纯文字 > 2 屏 | ≥ 1 个视觉元素 |
 | 函数控制流 / 寄存器位域 | 函数流程图 / 位域图 | SoC 结构 / 信号时序 / 编译链 / 调度 | 对应内核图型(diagram-craft §15) |
 
-节奏：每 1.5 屏（≈1300px @1440）≥ 1 个 SVG / figure / stat。机器闸 `text-desert` 在连续
+节奏：每 1.5 屏（≈1300px @1440）≥ 1 个 SVG / figure / stat。机器检查 `text-desert` 在连续
 2600px 无视觉元素时 warn（known-bugs 1.31）。动笔画图前再读 `references/diagram-craft.md`：
 §8.1 先算尺寸选容器档（**密图必须 1200 wide，看不清 = 没画**）、§1 色彩（每图 ≥ 2 语义 hue，
 小元素实心主色）。现成图直接抄 `templates/diagrams/`，案例库见 `demos/anthropic-design/diagrams.html`。
@@ -83,7 +84,7 @@ last-verified: 2026-04-19
 
 ### 生成**后**写 self-diff note(交付前 MUST)
 
-生成器在写完 HTML、跑 4 闸之前,必须在 `</body>` 前 embed 一个
+生成器在写完 HTML、跑四道检查之前,必须在 `</body>` 前 embed 一个
 `design-review:self-diff v1` HTML 注释块,列出 5-7 条本次生成的关键
 设计决策 + 2-3 条 known trade-offs。contract 见
 `~/.claude/skills/design-review/references/cross-skill-rules.md §M`,示范参考
@@ -92,13 +93,13 @@ last-verified: 2026-04-19
 没有 self-diff = canonical 不被 `verify.py` 承认。critic 也无法做实
 质评审(没有作者意图的靶子)。HARNESS-ROADMAP Phase 03 的硬规则。
 
-### 生成**后**跑四闸
+### 生成**后**跑四道检查
 
 ```bash
 ~/.claude/skills/design-review/dr-cli --critic <path/to/your.html>
 ```
 
-四闸依次:
+四道检查依次:
 1. `verify.py` — 结构(placeholders / DOCTYPE / BEM / SVG / class / §G 双语)
 2. `visual-audit.mjs` — 渲染(contrast / hero 宽 / SVG 字号 / hollow card /
    **brand-presence §K / italic-overuse §J / cross-skill-smell §K**)
@@ -124,7 +125,7 @@ Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
 
 ### 审存量页（不是新生成的） — `--audit` 模式
 
-四闸只跑刚生成的 HTML。要批量扫存量页面（已有 wiki / 老 memo / 客户给的 HTML），用：
+四道检查只跑刚生成的 HTML。要批量扫存量页面（已有 wiki / 老 memo / 客户给的 HTML），用：
 
 ```bash
 # 扫整个目录（递归）
@@ -150,7 +151,7 @@ Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
 
 ### 让 .md / sibling .html 跳转也变好看 — md-mirror / md-rewrite-links / md-pack / cross-link-pack
 
-场景：anthropic 风格 HTML 文档常链到外部 .md（README / 实施步骤 / 原理详解），或链到 sibling 目录里的其他 .html。浏览器原生显示 raw markdown 难看，单独发文档目录时 sibling .html 链路又会 broken。`scripts/` 下四件套各管一段，按需用。
+场景：anthropic 风格 HTML 文档常链到外部 .md（README / 实施步骤 / 原理详解），或链到 sibling 目录里的其他 .html。浏览器原生显示 raw markdown 难看，单独发文档目录时 sibling .html 链接又会 broken。`scripts/` 下四件套各管一段，按需用。
 
 #### 1. `md-mirror.mjs` · 1→1 渲染原语
 
