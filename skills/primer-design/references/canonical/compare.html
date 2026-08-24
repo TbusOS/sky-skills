@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTTP 和 HTTPS 差在哪？· 图解读本</title>
+<meta name="description" content="Canonical primer-design compare page: HTTP vs HTTPS, explained for readers with zero background. 零基础图解:HTTP 和 HTTPS 差在哪。">
+<meta property="og:title" content="HTTP 和 HTTPS 差在哪？· 图解读本">
+<meta property="og:description" content="零基础图解:HTTP 和 HTTPS 走同一条路,差别只有内容封不封。三分钟看懂地址栏那把锁。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed classes on purpose (verify.py validates
+   * primer-* classes against primer.css; local layout stays unprefixed).
+   * Figure modifiers (primer-fig-wide / primer-fig-hero) ship from primer.css
+   * Sections J + L — nothing stroke-related is defined per page. */
+
+  /* The recap is its own screen; the component's top margin is for pages
+   * where it trails a section. */
+  .recap-flat { margin-top: 0; }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">HTTP vs HTTPS: what's the difference?</span>
+          <span class="lang-zh">HTTP 和 HTTPS，<br>差在哪？</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">No tech background needed. This page explains it in about three minutes.</span>
+          <span class="lang-zh">不需要任何网络基础。这一页大约 3 分钟讲明白。</span>
+        </p>
+      </div>
+      <figure class="primer-figure primer-fig-hero">
+        <svg viewBox="0 0 500 340" role="img"
+          aria-label="同一句话寄两次：写在明信片上，路上人人能看；封进密封信，只有收件人能拆"
+          data-label-zh="同一句话寄两次：写在明信片上，路上人人能看；封进密封信，只有收件人能拆"
+          data-label-en="The same message mailed twice: on a postcard anyone en route can read it; sealed in an envelope only the receiver can open it">
+          <!-- ground -->
+          <path d="M22 306 C 150 304, 350 308, 478 305" fill="none"/>
+          <!-- divider -->
+          <path class="primer-hair" d="M250 96 L250 298" fill="none" stroke-dasharray="2 9"/>
+
+          <!-- the one message, about to be mailed both ways -->
+          <path d="M214 40 Q210 40 210 44 L210 92 Q210 96 214 96 L286 96.5 Q290 96.5 290 92.5 L290 44.5 Q290 40.5 286 40.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M220 56 L280 56.4 M220 68 L272 67.6 M220 80 L280 80.3" fill="none"/>
+          <path d="M205 92 C 178 118, 154 142, 136 164" fill="none"/>
+          <path d="M136 164 L142 151 M136 164 L148 160" fill="none"/>
+          <path d="M295 92 C 322 118, 346 142, 364 164" fill="none"/>
+          <path d="M364 164 L358 151 M364 164 L352 160" fill="none"/>
+
+          <!-- LEFT: the postcard — message written on the outside -->
+          <g transform="rotate(-2 135 235)">
+            <path d="M66 184 Q62 184 62 188 L62 282 Q62 286 66 286 L204 286.8 Q208 286.8 208 282.8 L208 188.8 Q208 184.8 204 184.8 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M136 194 L136.4 276" fill="none"/>
+            <path class="primer-hair" d="M180 192 L200 192.4 L199.6 212 L180.4 211.6 Z" fill="#fdfaf3"/>
+            <!-- the marker sits under the writing: the words are out in the open -->
+            <path d="M74 216 L126 216.4 L126 227 L74 226.6 Z" fill="#ffd23f"/>
+            <path class="primer-hair" d="M76 210 L128 210.4 M76 222 L124 221.6 M76 234 L128 234.2 M76 246 L118 245.7 M76 258 L128 258.4" fill="none"/>
+            <path class="primer-hair" d="M148 232 L196 232.4 M148 244 L190 243.6 M148 256 L196 256.3" fill="none"/>
+          </g>
+
+          <!-- RIGHT: the sealed envelope — same message, shut inside -->
+          <path d="M296 176 Q292 176 292 180 L292 282 Q292 286 296 286 L444 286.6 Q448 286.6 448 282.6 L448 180.6 Q448 176.6 444 176.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M294 182 L370 234 M446 182 L370 234" fill="none" stroke="#ffffff"/>
+          <circle cx="370" cy="234" r="13" fill="#ffffff"/>
+          <circle class="primer-hair" cx="370" cy="234" r="6" fill="none"/>
+          <path d="M318 248 Q314 248 314 252 L314 272 Q314 276 318 276 L422 276.4 Q426 276.4 426 272.4 L426 252.4 Q426 248.4 422 248.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M324 258 L400 258.4 M324 267 L380 266.6" fill="none"/>
+
+          <!-- labels (text is painted last) -->
+          <text class="lang-zh" x="135" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">明信片 · HTTP</text>
+          <text class="lang-en" x="135" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">postcard · HTTP</text>
+          <text class="lang-zh" x="370" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">密封信 · HTTPS</text>
+          <text class="lang-en" x="370" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">sealed · HTTPS</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The same message mailed two ways — the only difference is who can read it en route.</span>
+          <span class="lang-zh">同一句话，两种寄法——差别只有路上谁能看见。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ① 是什么 + 像什么 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What are these two?</span>
+        <span class="lang-zh">这俩是什么？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">HTTP</span><span class="lang-en">HTTP</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">the mail rules of the web — sent exactly as written</span>
+          <span class="lang-zh">给网页送信的一套规矩：写什么，路上就是什么</span>
+        </span>
+      </div>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">HTTPS</span><span class="lang-en">HTTPS</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">the same rules, one extra step: sealed before it travels</span>
+          <span class="lang-zh">同一套规矩，多一道工序：内容先封起来，再上路</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">HTTP and HTTPS are the same delivery rules, with one difference: whether the content is <span class="primer-mark">sealed</span>.</span>
+        <span class="lang-zh">HTTP 和 HTTPS 是同一套送信规矩，差别只有一件事：内容<span class="primer-mark">封不封</span>。</span>
+      </p>
+
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 150" role="img"
+            aria-label="同一句话的两种寄法：明信片人人能看，密封信只有收件人拆得开"
+            data-label-zh="同一句话的两种寄法：明信片人人能看，密封信只有收件人拆得开"
+            data-label-en="Two ways to mail the same message: a postcard anyone can read, a sealed letter only the receiver opens">
+            <!-- ground -->
+            <path d="M10 138 C 60 136.5, 130 139, 172 137.5" fill="none"/>
+            <!-- the message slip -->
+            <path d="M28 16 Q25 16 25 19 L25 46 Q25 49 28 49 L72 49.4 Q75 49.4 75 46.4 L75 19.4 Q75 16.4 72 16.4 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M33 28 L67 28.3 M33 38 L60 37.6" fill="none"/>
+            <path class="primer-hair" d="M44 53 C 40 62, 38 68, 36 74" fill="none"/>
+            <path class="primer-hair" d="M36 74 L33 66 M36 74 L43 69" fill="none"/>
+            <path class="primer-hair" d="M78 46 C 92 56, 102 62, 112 68" fill="none"/>
+            <path class="primer-hair" d="M112 68 L103 66 M112 68 L107 60" fill="none"/>
+            <!-- the postcard -->
+            <g transform="rotate(-4 52 104)">
+              <path d="M20 78 Q17 78 17 81 L17 126 Q17 129 20 129 L86 129.5 Q89 129.5 89 126.5 L89 81.5 Q89 78.5 86 78.5 Z" fill="#ffffff"/>
+              <path class="primer-hair" d="M53 84 L53.3 123" fill="none"/>
+              <path class="primer-hair" d="M24 92 L46 92.3 M24 102 L42 101.6 M24 112 L46 112.2" fill="none"/>
+              <path class="primer-hair" d="M74 83 L84 83.2 L83.8 93 L74.2 92.8 Z" fill="#fdfaf3"/>
+            </g>
+            <!-- the sealed envelope -->
+            <path d="M96 74 Q93 74 93 77 L93 130 Q93 133 96 133 L166 133.5 Q169 133.5 169 130.5 L169 77.5 Q169 74.5 166 74.5 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M95 79 L131 106 M167 79 L131 106" fill="none" stroke="#ffffff"/>
+            <circle cx="131" cy="106" r="8" fill="#ffffff"/>
+            <circle class="primer-hair" cx="131" cy="106" r="3.5" fill="none"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p class="primer-analogy-lead"><span class="lang-en">It's like…</span><span class="lang-zh">就像……</span></p>
+          <p>
+            <span class="lang-en">Write on a postcard and every pair of hands can read it. Seal it in an envelope and only the receiver can open it.</span>
+            <span class="lang-zh">在明信片背面写话，经手的人都能看到。装进密封信封，就只有收件人拆得开。</span>
+          </p>
+        </div>
+      </div>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 490" role="img"
+          aria-label="明信片和密封信各对应一种网页寄法：不封的内容原样上路，封起来的只有收件人能还原"
+          data-label-zh="明信片和密封信各对应一种网页寄法：不封的内容原样上路，封起来的只有收件人能还原"
+          data-label-en="Each mailing pairs with a web trip: unsealed content travels as written; sealed content only the receiver can restore">
+          <!-- the sealed row rides a violet-tinted panel: that row is the one being taught -->
+          <path d="M46 268 Q38 268 38 276 L38 442 Q38 450 46 450 L854 450.8 Q862 450.8 862 442.8 L862 276.8 Q862 268.8 854 268.8 Z" fill="#efe9fc"/>
+
+          <!-- R1 left: the postcard, writing in the open -->
+          <g transform="rotate(-2 200 145)">
+            <path d="M92 92 Q86 92 86 98 L86 192 Q86 198 92 198 L308 198.8 Q314 198.8 314 192.8 L314 98.8 Q314 92.8 308 92.8 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M200 102 L200.5 188" fill="none"/>
+            <path class="primer-hair" d="M100 118 L188 118.5 M100 132 L180 131.6 M100 146 L188 146.3 M100 160 L172 159.6 M100 174 L188 174.4" fill="none"/>
+            <path class="primer-hair" d="M282 100 L304 100.4 L303.6 122 L282.4 121.6 Z" fill="#fdfaf3"/>
+            <path class="primer-hair" d="M214 140 L300 140.4 M214 154 L288 153.6 M214 168 L300 168.2" fill="none"/>
+          </g>
+
+          <!-- R1 right: HTTP in transit — the slip rides the wire open -->
+          <path d="M556 96 Q550 96 550 102 L550 186 Q550 192 556 192 L636 192.6 Q642 192.6 642 186.6 L642 102.6 Q642 96.6 636 96.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M550 116 L642 116.4" fill="none"/>
+          <circle class="primer-hair" cx="562" cy="106" r="2.5" fill="none"/>
+          <circle class="primer-hair" cx="572" cy="106" r="2.5" fill="none"/>
+          <path class="primer-hair" d="M560 134 L632 134.4 M560 150 L620 149.6 M560 166 L632 166.3" fill="none"/>
+          <path d="M806 82 Q800 82 800 88 L800 196 Q800 202 806 202 L854 202.4 Q860 202.4 860 196.4 L860 88.4 Q860 82.4 854 82.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M800 122 L860 122.3 M800 162 L860 162.4" fill="none"/>
+          <circle class="primer-hair" cx="812" cy="102" r="2.5" fill="#243244"/>
+          <circle class="primer-hair" cx="812" cy="142" r="2.5" fill="#243244"/>
+          <circle class="primer-hair" cx="812" cy="182" r="2.5" fill="#243244"/>
+          <path class="primer-hair" d="M652 152 C 690 128, 750 126, 794 142" fill="none" stroke-dasharray="2 9"/>
+          <g transform="rotate(-4 723 118)">
+            <path d="M696 96 Q692 96 692 100 L692 136 Q692 140 696 140 L750 140.4 Q754 140.4 754 136.4 L754 100.4 Q754 96.4 750 96.4 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M702 110 L744 110.3 M702 122 L736 121.6" fill="none"/>
+          </g>
+          <path class="primer-hair" d="M678 122 L668 126 M680 134 L671 139" fill="none"/>
+
+          <!-- pairing arrow row 1 -->
+          <path class="primer-hair" d="M368 146 L520 144 M368 146 L380 140 M368 146 L380 152 M520 144 L508 138 M520 144 L508 150" fill="none"/>
+
+          <!-- R2 left: the sealed envelope -->
+          <path d="M92 306 Q86 306 86 312 L86 424 Q86 430 92 430 L308 430.8 Q314 430.8 314 424.8 L314 312.8 Q314 306.8 308 306.8 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M89 312 L200 380 M311 312 L200 380" fill="none" stroke="#ffffff"/>
+          <circle cx="200" cy="380" r="14" fill="#ffffff"/>
+          <circle class="primer-hair" cx="200" cy="380" r="6.5" fill="none"/>
+          <path d="M124 394 Q120 394 120 398 L120 418 Q120 422 124 422 L262 422.5 Q266 422.5 266 418.5 L266 398.5 Q266 394.5 262 394.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M130 404 L236 404.3 M130 413 L210 412.6" fill="none"/>
+
+          <!-- R2 right: HTTPS in transit — the same slip, shut in a sealed packet -->
+          <path d="M556 306 Q550 306 550 312 L550 396 Q550 402 556 402 L636 402.6 Q642 402.6 642 396.6 L642 312.6 Q642 306.6 636 306.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M550 326 L642 326.4" fill="none"/>
+          <circle class="primer-hair" cx="562" cy="316" r="2.5" fill="none"/>
+          <circle class="primer-hair" cx="572" cy="316" r="2.5" fill="none"/>
+          <path class="primer-hair" d="M560 344 L632 344.4 M560 360 L620 359.6 M560 376 L632 376.3" fill="none"/>
+          <path d="M806 292 Q800 292 800 298 L800 406 Q800 412 806 412 L854 412.4 Q860 412.4 860 406.4 L860 298.4 Q860 292.4 854 292.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M800 332 L860 332.3 M800 372 L860 372.4" fill="none"/>
+          <circle class="primer-hair" cx="812" cy="312" r="2.5" fill="#243244"/>
+          <circle class="primer-hair" cx="812" cy="352" r="2.5" fill="#243244"/>
+          <circle class="primer-hair" cx="812" cy="392" r="2.5" fill="#243244"/>
+          <path class="primer-hair" d="M652 362 C 690 338, 750 336, 794 352" fill="none" stroke-dasharray="2 9"/>
+          <g transform="rotate(-4 723 328)">
+            <path d="M696 306 Q692 306 692 310 L692 346 Q692 350 696 350 L750 350.4 Q754 350.4 754 346.4 L754 310.4 Q754 306.4 750 306.4 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M723 307 L723.4 349" fill="none" stroke="#ffffff"/>
+            <circle cx="723" cy="328" r="6" fill="#ffffff"/>
+          </g>
+          <path class="primer-hair" d="M678 332 L668 336 M680 344 L671 349" fill="none"/>
+
+          <!-- pairing arrow row 2 -->
+          <path class="primer-hair" d="M368 360 L520 358 M368 360 L380 354 M368 360 L380 366 M520 358 L508 352 M520 358 L508 364" fill="none"/>
+
+          <!-- labels -->
+          <text class="lang-zh" x="200" y="40" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">寄信那边</text>
+          <text class="lang-en" x="200" y="40" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">in the mail</text>
+          <text class="lang-zh" x="705" y="40" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">网页这边</text>
+          <text class="lang-en" x="705" y="40" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">on the web</text>
+          <text class="lang-zh" x="444" y="122" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">明信片 ↔ 裸着走</text>
+          <text class="lang-en" x="444" y="122" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">postcard ↔ travels bare</text>
+          <text class="lang-zh" x="444" y="336" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">密封信 ↔ 封着走</text>
+          <text class="lang-en" x="444" y="336" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">sealed ↔ travels sealed</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The pairing is one-to-one: a postcard is a page travelling bare; a sealed letter, one travelling sealed.</span>
+          <span class="lang-zh">对应是一对一的：明信片就是裸着走的网页，密封信就是封起来的。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ② 相同处 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What's the same?</span>
+        <span class="lang-zh">它们哪里一样？</span>
+      </h2>
+      <p>
+        <span class="lang-en">Same road, same mailing steps, same delivered page — the address differs by one letter: s.</span>
+        <span class="lang-zh">路一样，寄的步骤一样，送到的页面也一样——网址只差一个字母 s。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 430" role="img"
+          aria-label="两种寄法走的是同一条路：同样的两端，同样的路线，送到同样的页面"
+          data-label-zh="两种寄法走的是同一条路：同样的两端，同样的路线，送到同样的页面"
+          data-label-en="Both mailings ride the same road: same two ends, same route, the same page delivered">
+          <!-- ground -->
+          <path d="M40 368 C 250 365, 650 370, 860 367" fill="none"/>
+
+          <!-- your computer -->
+          <path d="M96 226 Q88 226 88 234 L88 330 Q88 338 96 338 L240 338.6 Q248 338.6 248 330.6 L248 234.6 Q248 226.6 240 226.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M102 240 L234 240.4 L233.6 324 L102.4 323.6 Z" fill="#fdfaf3"/>
+          <path d="M70 354 L266 354.8 L246 340 L90 339.4 Z" fill="#ffffff"/>
+
+          <!-- the site's machine -->
+          <path d="M760 96 Q752 96 752 104 L752 350 Q752 358 760 358 L844 358.6 Q852 358.6 852 350.6 L852 104.6 Q852 96.6 844 96.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M752 148 L852 148.4 M752 200 L852 200.6 M752 252 L852 252.3 M752 304 L852 304.5" fill="none"/>
+          <circle class="primer-hair" cx="766" cy="122" r="3" fill="#243244"/>
+          <circle class="primer-hair" cx="766" cy="174" r="3" fill="#243244"/>
+          <circle class="primer-hair" cx="766" cy="226" r="3" fill="#243244"/>
+          <circle class="primer-hair" cx="766" cy="278" r="3" fill="#243244"/>
+          <circle class="primer-hair" cx="766" cy="330" r="3" fill="#243244"/>
+          <path class="primer-hair" d="M800 118 L838 118.3 M800 128 L838 128.2" fill="none"/>
+          <path class="primer-hair" d="M800 170 L838 170.4 M800 180 L838 180.1" fill="none"/>
+          <path class="primer-hair" d="M800 222 L838 222.2 M800 232 L838 232.4" fill="none"/>
+          <path class="primer-hair" d="M800 274 L838 274.3 M800 284 L838 284.2" fill="none"/>
+          <path class="primer-hair" d="M800 326 L838 326.4 M800 336 L838 336.2" fill="none"/>
+
+          <!-- the one road, both mailings riding it -->
+          <path class="primer-hair" d="M258 300 C 380 226, 560 220, 744 268" fill="none" stroke-dasharray="2 9"/>
+          <path d="M744 268 L731 262 M744 268 L732 274" fill="none"/>
+          <g transform="rotate(-4 380 240)">
+            <path d="M348 218 Q344 218 344 222 L344 262 Q344 266 348 266 L412 266.4 Q416 266.4 416 262.4 L416 222.4 Q416 218.4 412 218.4 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M380 224 L380.3 260" fill="none"/>
+            <path class="primer-hair" d="M352 232 L374 232.3 M352 244 L370 243.6" fill="none"/>
+            <path class="primer-hair" d="M388 240 L408 240.3" fill="none"/>
+          </g>
+          <g transform="rotate(3 520 230)">
+            <path d="M488 208 Q484 208 484 212 L484 252 Q484 256 488 256 L552 256.5 Q556 256.5 556 252.5 L556 212.5 Q556 208.5 552 208.5 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M486 212 L520 236 M554 212 L520 236" fill="none" stroke="#ffffff"/>
+            <circle cx="520" cy="236" r="7" fill="#ffffff"/>
+          </g>
+
+          <!-- labels -->
+          <text class="lang-zh" x="475" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">同一条路</text>
+          <text class="lang-en" x="475" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">the same road</text>
+          <text class="lang-zh" x="168" y="404" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">你这边</text>
+          <text class="lang-en" x="168" y="404" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">your side</text>
+          <text class="lang-zh" x="802" y="404" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">网站那头</text>
+          <text class="lang-en" x="802" y="404" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">the site's end</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en"><b>Speed is nearly identical too:</b> sealing costs one extra round trip on the first connection. Light in fibre covers about 200,000 km a second; a 2,000 km round trip is about 0.02s. That is under a tenth of a 0.3s blink.</span>
+          <span class="lang-zh"><b>速度也几乎一样：</b>密封只在第一次连接多一个来回。光在光缆里每秒跑约 20 万公里；2000 公里外一个来回约 0.02 秒。这不到一次眨眼 0.3 秒的十分之一。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ③ 不同处 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Where's the difference?</span>
+        <span class="lang-zh">差别在哪儿？</span>
+      </h2>
+      <p>
+        <span class="lang-en">The difference is all on the road: HTTP travels bare and readable; HTTPS travels sealed.</span>
+        <span class="lang-zh">差别全在路上：HTTP 的内容裸着走，经手的都能看；HTTPS 封着走，只能看到乱码。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 520" role="img"
+          aria-label="放大镜下的差别：明信片的字看得清、改得动；密封信只见乱码，封条动过会留痕"
+          data-label-zh="放大镜下的差别：明信片的字看得清、改得动；密封信只见乱码，封条动过会留痕"
+          data-label-en="Under the magnifier: the postcard reads clearly and can be rewritten; the sealed letter shows only gibberish and a broken seal leaves a mark">
+          <!-- centre divider, split around the row labels -->
+          <path class="primer-hair" d="M450 88 L450 262" fill="none" stroke-dasharray="2 9"/>
+          <path class="primer-hair" d="M450 306 L450 470" fill="none" stroke-dasharray="2 9"/>
+          <path class="primer-hair" d="M70 274 L830 274.6" fill="none"/>
+
+          <!-- ROW 1 left: the postcard under a magnifier — every word legible -->
+          <path d="M96 108 Q90 108 90 114 L90 232 Q90 238 96 238 L332 238.8 Q338 238.8 338 232.8 L338 114.8 Q338 108.8 332 108.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M214 118 L214.4 228" fill="none"/>
+          <path class="primer-hair" d="M306 116 L328 116.4 L327.6 138 L306.4 137.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M102 134 L200 134.5 M102 182 L184 181.7 M102 198 L200 198.4 M102 214 L192 213.6" fill="none"/>
+          <path class="primer-hair" d="M230 160 L322 160.4 M230 176 L310 175.6 M230 192 L322 192.2" fill="none"/>
+          <!-- the lens: the writing, enlarged and readable — yellow marks the read spot -->
+          <circle cx="150" cy="158" r="36" fill="#ffffff"/>
+          <path d="M126 154 L174 154.4 L174 167 L126 166.6 Z" fill="#ffd23f"/>
+          <path class="primer-hair" d="M124 146 L176 146.4 M126 162 L172 162.3 M128 176 L170 175.5" fill="none"/>
+          <path d="M177 185 L206 214" fill="none"/>
+
+          <!-- ROW 1 right: the sealed letter under the same lens — gibberish -->
+          <path d="M556 116 Q550 116 550 122 L550 234 Q550 240 556 240 L800 240.8 Q806 240.8 806 234.8 L806 122.8 Q806 116.8 800 116.8 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M553 122 L678 200 M803 122 L678 200" fill="none" stroke="#ffffff"/>
+          <circle cx="678" cy="200" r="13" fill="#ffffff"/>
+          <circle class="primer-hair" cx="678" cy="200" r="6" fill="none"/>
+          <circle cx="612" cy="162" r="36" fill="#ffffff"/>
+          <path class="primer-hair" d="M594 152 L604 146 M608 160 L600 170 M618 148 L628 156 M632 166 L624 156 M598 176 L610 178 M624 176 L634 170" fill="none"/>
+          <path d="M639 189 L668 218" fill="none"/>
+
+          <!-- ROW 2 left: a pencil rewrites the postcard mid-route -->
+          <path d="M96 312 Q90 312 90 318 L90 428 Q90 434 96 434 L332 434.8 Q338 434.8 338 428.8 L338 318.8 Q338 312.8 332 312.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M214 322 L214.4 424" fill="none"/>
+          <path class="primer-hair" d="M102 338 L200 338.4" fill="none"/>
+          <path class="primer-hair" d="M102 356 L192 355.6" fill="none"/>
+          <path class="primer-hair" d="M100 352 C 130 360, 160 352, 194 359" fill="none"/>
+          <path class="primer-hair" d="M102 376 C 114 371, 128 379, 140 374 S 164 378, 176 373" fill="none"/>
+          <path class="primer-hair" d="M102 396 L184 395.6 M102 412 L200 412.3" fill="none"/>
+          <path class="primer-hair" d="M230 356 L322 356.3 M230 372 L310 371.6" fill="none"/>
+          <path d="M188 374 L206 362 L210 380 Z" fill="#fdfaf3"/>
+          <path d="M206 362 L268 320 M210 380 L272 338" fill="none"/>
+          <path class="primer-hair" d="M268 320 L272 338" fill="none"/>
+          <path class="primer-hair" d="M191 373 L196 370" fill="none"/>
+
+          <!-- ROW 2 right: the same pencil gets nowhere — the seal stays shut -->
+          <path d="M556 332 Q550 332 550 338 L550 436 Q550 442 556 442 L800 442.8 Q806 442.8 806 436.8 L806 338.8 Q806 332.8 800 332.8 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M553 338 L678 404 M803 338 L678 404" fill="none" stroke="#ffffff"/>
+          <circle cx="678" cy="404" r="13" fill="#ffffff"/>
+          <circle class="primer-hair" cx="678" cy="404" r="6" fill="none"/>
+          <!-- the pencil can't reach the words: it hovers with a clear gap above the envelope -->
+          <path d="M590 316 L608 304 L611 318 Z" fill="#fdfaf3"/>
+          <path d="M608 304 L698 284 M611 318 L701 298" fill="none"/>
+          <path class="primer-hair" d="M698 284 L701 298" fill="none"/>
+          <path class="primer-hair" d="M593 314 L597 311" fill="none"/>
+          <!-- the only trace an attempt leaves: scratches on the sealed flap, right by the seal -->
+          <path class="primer-hair" d="M660 378 L669 386 M674 370 L682 378" fill="none"/>
+
+          <!-- labels (text is painted last) -->
+          <text x="225" y="44" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">HTTP</text>
+          <text x="675" y="44" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">HTTPS</text>
+          <text class="lang-zh" x="450" y="80" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">路上，能不能被看到？</text>
+          <text class="lang-en" x="450" y="80" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">can it be read en route?</text>
+          <text class="lang-zh" x="450" y="298" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">半路，能不能被改？</text>
+          <text class="lang-en" x="450" y="298" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">can it be changed en route?</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en"><b>No reading, no rewriting:</b> a broken seal cannot be resealed, so the receiver spots tampering at once.</span>
+          <span class="lang-zh"><b>看不成，也改不成：</b>拆了封就合不回去，收件人一眼看出动过。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ④ 怎么分辨 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">How do you tell which one you're on?</span>
+        <span class="lang-zh">怎么分辨你在用哪种？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">证书 certificate</span><span class="lang-en">certificate</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">the site's ID card — proof you reached the real site, checked by the browser for you</span>
+          <span class="lang-zh">网站的身份证：证明「你连的真是这个网站」，浏览器替你查验</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">Check the address bar: <span class="primer-mark">a padlock</span> means HTTPS, and clicking it shows the site's certificate.</span>
+        <span class="lang-zh">看地址栏：有<span class="primer-mark">锁</span>的就是 HTTPS，点开锁还能看到它的证书。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 560" role="img"
+          aria-label="地址栏里有一把锁：点开它，能看到这个网站的证书"
+          data-label-zh="地址栏里有一把锁：点开它，能看到这个网站的证书"
+          data-label-en="A padlock sits in the address bar: click it to see the site's certificate">
+          <!-- the browser window -->
+          <path d="M88 68 Q80 68 80 76 L80 492 Q80 500 88 500 L592 500.8 Q600 500.8 600 492.8 L600 76.8 Q600 68.8 592 68.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M80 132 L600 132.5" fill="none"/>
+          <!-- the address bar, lock first -->
+          <path class="primer-hair" d="M120 84 Q114 84 114 90 L114 116 Q114 122 120 122 L566 122.5 Q572 122.5 572 116.5 L572 90.5 Q572 84.5 566 84.5 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M141 100 C 141 88.5, 155 88.5, 155 100" fill="none"/>
+          <path d="M139 100 Q136 100 136 103 L136 115 Q136 118 139 118 L157 118.2 Q160 118.2 160 115.2 L160 103.2 Q160 100.2 157 100.2 Z" fill="#7a5cd6"/>
+          <circle class="primer-hair" cx="148" cy="108" r="2.6" fill="none" stroke="#ffffff"/>
+          <!-- the marker ring: this is the spot to look at -->
+          <circle cx="148" cy="104" r="25" fill="none" stroke="#ffd23f"/>
+          <path class="primer-hair" d="M186 104 C 230 100, 290 108, 350 103 S 490 108, 552 103" fill="none"/>
+          <!-- the page below the bar -->
+          <path d="M140 160 Q136 160 136 164 L136 186 Q136 190 140 190 L420 190.5 Q424 190.5 424 186.5 L424 164.5 Q424 160.5 420 160.5 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M136 214 L560 214.4 M136 236 L500 235.6 M136 258 L560 258.3 M136 280 L470 279.6" fill="none"/>
+          <path class="primer-hair" d="M140 306 Q136 306 136 310 L136 426 Q136 430 140 430 L556 430.4 Q560 430.4 560 426.4 L560 310.4 Q560 306.4 556 306.4 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M170 408 L240 340 L290 386 L350 326 L430 408" fill="none"/>
+          <circle class="primer-hair" cx="210" cy="352" r="10" fill="none"/>
+          <path class="primer-hair" d="M136 456 L560 456.3 M136 478 L430 477.6" fill="none"/>
+
+          <!-- click the lock → the certificate -->
+          <path class="primer-hair" d="M168 122 C 240 214, 420 268, 630 286" fill="none" stroke-dasharray="2 9"/>
+          <path d="M630 286 L617 280 M630 286 L618 292" fill="none"/>
+
+          <!-- the certificate: an ID card for the site -->
+          <path d="M648 168 Q640 168 640 176 L640 424 Q640 432 648 432 L852 432.6 Q860 432.6 860 424.6 L860 176.6 Q860 168.6 852 168.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M640 208 L860 208.5" fill="none"/>
+          <path class="primer-hair" d="M700 190 L800 190.3" fill="none"/>
+          <path class="primer-hair" d="M668 232 Q664 232 664 236 L664 296 Q664 300 668 300 L724 300.4 Q728 300.4 728 296.4 L728 236.4 Q728 232.4 724 232.4 Z" fill="#fdfaf3"/>
+          <circle class="primer-hair" cx="696" cy="266" r="18" fill="#ffffff"/>
+          <path class="primer-hair" d="M678 266 L714 266.3" fill="none"/>
+          <path class="primer-hair" d="M696 248 C 688 258, 688 274, 696 284" fill="none"/>
+          <path class="primer-hair" d="M696 248 C 704 258, 704 274, 696 284" fill="none"/>
+          <path class="primer-hair" d="M744 246 L840 246.4 M744 262 L816 261.6" fill="none"/>
+          <path class="primer-hair" d="M664 324 L840 324.4 M664 348 L820 347.6 M664 372 L840 372.3" fill="none"/>
+          <path d="M790 410 L781 429 L794 424 Z" fill="#7a5cd6"/>
+          <path d="M810 410 L819 429 L806 424 Z" fill="#7a5cd6"/>
+          <circle cx="800" cy="396" r="24" fill="#7a5cd6"/>
+          <circle class="primer-hair" cx="800" cy="396" r="16" fill="none" stroke="#ffffff"/>
+          <circle class="primer-hair" cx="800" cy="396" r="7" fill="none" stroke="#ffffff"/>
+
+          <!-- labels (text is painted last) -->
+          <text class="lang-zh" x="750" y="470" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">点开锁，就能看到证书</text>
+          <text class="lang-en" x="750" y="470" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">click the lock → the certificate</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The padlock in the address bar is the seal itself; click it to see the site's certificate.</span>
+          <span class="lang-zh">地址栏的锁就是那道封条：点开它，能看到这个网站的证书。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑤ 回顾 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <aside class="primer-recap recap-flat">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">HTTPS is HTTP with one extra step: the content travels sealed.</span>
+              <span class="lang-zh">HTTPS 就是 HTTP 多一道工序：内容在路上是封着的。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Both take the same road; the only difference is whether others can read what passes.</span>
+              <span class="lang-zh">两者走同一条路；差别只有路上那一段，别人看得见还是看不见。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Before typing a password or paying, look for the padlock in the address bar.</span>
+              <span class="lang-zh">输密码、付钱之前，先看地址栏有没有那把锁。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Canonical page · primer-design · every figure checks out on a calculator</span>
+    <span class="lang-zh">范本页 · primer-design · 页面上每个数字都能用计算器验证</span>
+    · v1 · 2026-08-24
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+    /* CSS only hides the other language's <text>; an SVG's aria-label is an
+     * attribute, so EN mode must swap it here or screen readers hear Chinese
+     * under html[lang="en"]. The static aria-label in the markup is the zh
+     * default for the no-JS case. */
+    document.querySelectorAll('svg[data-label-zh]').forEach(function (s) {
+      s.setAttribute('aria-label',
+        s.getAttribute(lang === 'zh' ? 'data-label-zh' : 'data-label-en'));
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: primer
+Page-type: compare
+Created: 2026-08-24
+
+Decisions (5):
+1. [one-metaphor-both-mailings] chose "a single mail metaphor — postcard vs sealed letter — spoken by every figure, with the hero feeding ONE message slip into both mailings and the mapping figure pinning it one-to-one (明信片↔裸着走 · 密封信↔封着走)" over "a metaphor per property (a spy for eavesdropping, wax for integrity, a passport for identity)". Because: explain-method §2 demands one-to-one pairing and a second metaphor cancels half of the first; the certificate bubble (证书=网站的身份证) is the page's only second image, and it names a THING, not the mechanism the mail metaphor owns.
+2. [sameness-gets-a-whole-screen] chose "a full screen of what is identical (one road, same two ends, both mailings riding the same route; the 0.02s round-trip figcaption settles speed) BEFORE any difference is shown" over "opening the comparison with a versus table". Because: a beginner shown differences first concludes the two things are unrelated; the real lesson is "everything matches except one thing", and drawn sameness is what makes the one difference visible. It also keeps the difference screen to ONE dominant two-column figure instead of an equal grid of attribute cards.
+3. [violet-is-the-seal] chose "violet paints only the sealed, protected thing (hero/analogy/mapping/road envelopes, the sealed packet, the address-bar lock, the certificate stamp) and the HTTP side never wears violet; yellow marks the exposed or look-here spot (the postcard's marked line, the lens's read spot, the ring around the lock), with the mapping and same-road figures carrying zero yellow on purpose" over "violet as column decoration". Because: the page teaches one difference, so the brand colour IS that difference — wherever violet appears, that thing is sealed; the eye learns the vocabulary before the words do.
+4. [every-number-recomputable] chose "the address differs by exactly one letter (http→https) · one extra round trip = 2×2,000km ÷ 200,000km/s = 0.02s, under a tenth of a 0.3s blink" over "impressive-sounding uncheckable security stats (percent of encrypted traffic, key lengths)". Because: a reader who checks one number and finds it wrong stops believing the page; the 2,000km and 200,000km/s constants are the process canonical's, already verified, so the two pages agree on physics.
+5. [three-bubbles-encryption-never-named] chose "translate exactly HTTP, HTTPS and 证书, each at first use — and keep the word 加密/encryption out of every reader-visible text (this note is its only occurrence in the file)" over "a bubble for 加密 too". Because: the mechanism is fully drawn (readable lines vs gibberish hatch under the same lens) and said in plain words (封起来/sealed), so the name would be jargon with no job; 服务器 / TLS / SSL / 握手 are likewise absent from reader-visible text — the far machine is "网站那头", the extra handshake is "多一个来回".
+
+Known trade-offs:
+- Section ratios under dos-and-donts §1's ruled yardstick (figure svg + analogy-fig column only), 1440 viewport, measured zh and en: the four figures run 490/430/520/560 viewBox units; EN wraps more lines than zh, so the EN measurements are the binding side; exact per-section numbers live in compare.md. The two §1 term bubbles render side by side (one row) at 1440 in both languages — stacking them would cost that section ~0.02 of ratio, which is why their plain halves stay short.
+- This is the first primer canonical with NO .primer-step numeral: compare has no sequence, and the circled numeral is sequence vocabulary — faking one would promise an order that does not exist. Structure is carried by four h2 questions instead.
+- The differences figure teaches two consequences (read / rewritten) of the ONE difference in one two-row figure; the section's single question is "路上会怎样", so the rows are evidence, not two ideas. Identity (who you're talking to) is deliberately deferred to the certificate screen so each screen keeps one question.
+- The hero, mapping, road and difference figures redraw the same two mailpieces four times; the repetition is the vocabulary — a reader who has seen the postcard once reads every later figure without labels.
+- The lock figure keeps exactly one label pair (2 <text>) so the certificate card can render 632px tall without entering the ≥3-label diagram-oversized ceiling; everything the card would need labels for is carried by the term bubble and the figcaption.
+- On a 375px phone the primer-fig-wide stair keeps strokes at picture-book weight (3.35px), but in-figure labels shrink to ~6px; every number a label carries is repeated in prose or figcaption, so a phone reader loses nothing factual.
+/design-review:self-diff -->
+
+</body>
+</html>
