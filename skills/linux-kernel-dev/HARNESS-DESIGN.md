@@ -116,7 +116,7 @@ skill 内容**对齐这些真源写，不靠记忆**（合 CLAUDE.md 文档查�
 
 | design harness | kernel harness（本设计） | 复用/新建 |
 |---|---|---|
-| 5 个生成器技能 | linux-kernel-dev 本身（被改进的技能；"生成器"= agent 用此技能答 kernel 任务） | — |
+| 9 个生成器技能 | linux-kernel-dev 本身（被改进的技能；"生成器"= agent 用此技能答 kernel 任务） | — |
 | canonical 页面测试用例集 | 测试用例集：kernel/BSP 任务 case | 新建 |
 | `verify.py`（结构检查） | **`checkpatch.pl` 包装**（kernel 树自带，可 `--no-tree` 独立跑） | 新建薄包装 |
 | `visual-audit.mjs`（启发式渲染检查） | **事实检查**：引的 API/CONFIG/符号在真树存在 + 可选**编译检查** | 新建 |

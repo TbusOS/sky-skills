@@ -448,7 +448,7 @@
 - **Why**：`layout-overflow`(§1.32)只看几何关系(child 右边界 > parent 右边界)，不区分「内容撑破容器」和「有意的居中突破」。它豁免了 `position: absolute/fixed/sticky` 和会滚动/裁剪的父元素，而标准 full-bleed 用的是 `position:relative` 或负边距，**一个豁免都不沾**。合起来的效果是：容器档 1200 封顶 + full-bleed 被判警告 = 密图只剩「缩小」或「拆开」两条路，而有些图型拆开就丢信息(地址布局拆了没有线性关系、位域拆了看不出位宽比例)。
 - **Defense**：`visual-audit.mjs` 给 `layout-overflow` 加 full-bleed 豁免，四条同时满足才放行：① 是 `<figure>`/`<table>`/`<pre>` ② **在视口里居中**(判几何结果，不挑 CSS 写法 —— 作者至少有四种写法，按属性匹配总会漏掉没列进去的那种) ③ 不越出视口且文档不横滚 ④ 宽 ≤1680 且左右各留 ≥16px。另加 `figure-fullbleed-uncapped`(warn)：图宽 = 视口宽即判定这条 full-bleed 没写上限 —— 审计只跑 1440 和更窄的复查，看不到宽屏，但「没有上限」这个事实在任何视口都测得出来。
 - **Fix playbook**：见 `anthropic-design/references/layout-patterns.md` 的「突破版心怎么写才合法」。注意 `position:relative` 上的 `left:50%` 是相对**自身静态位置**偏移、不是相对父容器左边缘，父容器有内边距时算出来是偏心的(实测偏 40px、右越视口 12px、页面真的在横滚)。
-- **Applies to**：全 8 个设计 skill(检查在 cross-skill 层)。
+- **Applies to**：全 9 个设计 skill(检查在 cross-skill 层)。
 
 ### 1.50 密图标签落在 9–10px：过了 9px 硬底线，却没人提醒
 
@@ -456,7 +456,7 @@
 - **Why**：760 那条是按「塞不塞得下」标的，不是按「读不读得动」标的。760–1200 之间成了真空。
 - **Defense**：`visual-audit.mjs` 新增 **dense-diagram-labels-small**(warn)：`text ≥ 20` 且最小标签渲染 <9.5px 且渲染宽 ≥760(760 以下归 cramped)。阈值是量出来的不是拍的 —— 语料 11 张密图最小标签在 9.955–11.9px 之间(即 diagram-craft 规定的 11px 源 × 0.906 缩放)，**报在那之上等于拿自己的规范判自己违规**，所以设在其下、又高于 9px 硬底线。首跑在 index.html 抓到 2 张(9.12 / 9.24px，而该页自身常规是 9.68)，已提源字号修掉。
 - **Fix playbook**：提源 font-size 到 11，或给图升一档容器(必要时到 full-bleed，见 1.49)。**别靠缩 viewBox 硬塞**。
-- **Applies to**：全 8 个设计 skill。
+- **Applies to**：全 9 个设计 skill。
 
 ### 1.51 `<b>` / `<code>` 写进 `<svg>`：图从那里断掉，后半截漏成正文
 
@@ -464,7 +464,7 @@
 - **Why**：SVG 里没有 `<b>`/`<i>`/`<code>`/`<br>`/`<span>`。浏览器**不报错**,它在遇到非 SVG 元素时退出 foreign-content 解析,该 `<svg>` 内**其后所有内容**都按 HTML 处理,于是漏进页面文字流。`<text>` 内合法子元素只有 `<tspan>` / `<textPath>` / `<tref>` / `<a>`;强调要写 `<tspan font-weight="600">`。既有的 `<svg>` 标签配平检查(verify #5)看不见这类问题 —— 标签是配平的,坏的是**内容**。
 - **Defense**：`verify.py` 新增 **5b**(error)：逐个 `<svg>` 块扫 14 个 HTML-only 内联标签,报 `file:line` + 替换建议。`<foreignObject>` 内 HTML 合法,已按等长空白掩码豁免(掩码保留换行,行号不偏)。反例注入实测:改一处 `tspan`→`b` 立刻报在准确行;正例 0 error。存量 150 个 html 扫出 3 处(`<title><span>` 形式,SVG `<title>` 同样只能含纯文本)。
 - **Fix playbook**：`<b>x</b>` → `<tspan font-weight="600">x</tspan>`;换字体/字号/颜色同理都走 `tspan` 属性,别用 `<code>`。
-- **Applies to**：全 7 个设计 skill(任何手工 SVG 图)。
+- **Applies to**：全 9 个设计 skill(任何手工 SVG 图)。
 
 ### 1.52 图长到一屏以上 / 内容块掉在所有容器之外 —— 两道机械检查都看不见
 
@@ -484,7 +484,7 @@
 - **回归实测**：一个 14 图的长页,插入两块内容时掉出 `</section>` → 图渲染 881 / 1015px(同页中位数 340)。新规则报 `diagram-oversized`(1015px,3x median)+ 8 处 `content-outside-container`(figure 1440px / p 660px)。移回容器并压紧后为 452 / 546px,两条规则均不再触发。**参考库 50 页全扫 0 误报。**
 - **Applies to**：全 9 个设计 skill。
 
-### 1.53 `facts.mjs` 全绿 ≠ 计数扫干净 —— "aesthetics / voices" 这类措辞它根本不看
+### 1.53 `facts.mjs` 全绿 ≠ 计数扫干净 —— 措辞、数字形态、图内文字三处盲区
 
 - **Reader sees**：首页写着 "Seven aesthetics, one repo."，正下方就排着九张 demo 卡；lectern demo 的表格说明写"另有 13 个技能"（等于宣称上面列了 9 个），而它上面的名单只有 7 行。**而 `facts.mjs` 普通模式和 `--strict` 都是绿的。**
 - **Why**：facts.mjs 是**模式表**驱动的。它认的是带承载短语的说法 —— `N design skills` / `N design aesthetics` / `N 种声音` / `All N skills` / `全部 N 个 skill`。它不认：
@@ -493,23 +493,71 @@
   ④ SVG `<text>` 里的 `19 skills · 1 page`（同样是标签属性外的图内文字，但它在 tag-strip 后才可见，模式又不带承载短语）；
   ⑤ "另有 N 个技能"与它旁边那张名单**是否同长**（跨行的一致性不在任何模式里）；
   ⑥ 分项求和：`58/58` 的旁边列 `10×4 + 4 + 3 + 3 = 50`，两个数都在同一行也不会被比较。
+  ⑦ **数字形态**：这一条最贵。facts.mjs 的英文数词表只到 twenty，中文只到二十，所以 `Twenty-two`
+  这种词形它认不了；而**纯数字**只在少数几个带承载短语的模式里才被看（`All 20 skills` 之类）。
+  裸数字 —— stat 卡上单独一行的 `8`、SVG 底栏的 `SKILLS 14 / AESTHETICS 5`、`Gate 2 渲染 check(26 类)`、
+  `all 44 page-types`、`56 bugs catalogued today` —— **一个都不报**。
+  ⑧ **图内文字与属性**：SVG `<text>`、`aria-label`、`data-label-en` / `data-label-zh`（双语图表把两种
+  语言的标签放在属性里，JS 再写进 DOM）。tag-strip 会把属性整段丢掉，`<text>` 里的数字又不带承载短语。
   **模式窄是有意的** —— 放宽就会把"× 4 skills"、"3 known-bugs rows"这类非总数报成违规，教人跳过报告。代价就是上面这一类只能人来看。
-- **Defense**：计数类改动收工前，除了跑 `facts.mjs`，必须对**每一个改过的面**做一次人工数字词扫：剥掉标签后 grep 英文 four…twenty 与中文 四…二十（后接量词 个/种/道/张/条/项），逐行对磁盘真值核，并且额外检查两件模式看不见的事 —— **数字与它旁边清单的长度是否一致**、**分项之和是否等于它自己写的总数**。可直接跑：
+- **Defense**：计数类改动收工前，除了跑 `facts.mjs`，必须**扫全仓**（不是只扫改过的文件 —— 改一处措辞
+  会让隔壁那句变成自相矛盾），把**词形和数字形一起**扫，并且额外查两件模式做不到的事 ——
+  **数字与它旁边清单的长度是否一致**、**分项之和是否等于它自己写的总数**。下面这段可以直接跑，
+  它按"数字 + 计数词汇在同一窗口内"取候选，剥标签之后再把 `aria-label` / `content` /
+  `data-label-*` 的值和 SVG `<text>` 的正文补回来（这三处正是 ⑧ 的盲区）：
   ```bash
-  python3 - "$FILE" <<'EOF'
+  python3 - $(git ls-files '*.html' '*.md') <<'EOF'
   import re, sys
-  EN = r'(?<![a-z])(four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)(?![a-z])'
-  ZH = r'(四|五|六|七|八|九|十[一二三四五六七八九]?|二十)(?=[个种道张条项])'
-  for i, l in enumerate(open(sys.argv[1], encoding='utf-8'), 1):
-      # 剥标签，否则 font-weight / height 里的 "eight" 会混进来；
-      # 但把 aria-label / content / alt / title 的值补回来，那里也写着计数
-      t = re.sub(r'<[^>]+>', ' ', l) + ' '.join(
-          re.findall(r'(?:aria-label|content|alt|title)="([^"]*)"', l))
-      if re.search(EN, t, re.I) or re.search(ZH, t):
-          print(i, t.strip()[:140])
+  # stat 卡常把数字和它的标签分在两行(<text>44</text> / <text>page-types</text>),
+  # 所以窗口要跨到上下各一行 —— 只看单行的话这类一个都报不出来
+  # 词形（含 twenty-two 这类连字符复合词）与数字形一起收
+  NUM = (r'(?<![\w.-])('
+         r'four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|'
+         r'sixteen|seventeen|eighteen|nineteen|twenty(?:-(?:one|two|three|four|five))?|'
+         r'[四五六七八九]|十[一二三四五六七八九]?|二十[一二三四五六七八九]?|'
+         r'\d{1,3})(?![\w.%-])')
+  # 计数词汇：命中它的数字才算候选，否则 padding:8px 之类会把报告淹掉
+  VOCAB = (r'skills?|design|voices?|aesthetics?|canonical|page-?types?|known-bugs?|bugs?|'
+           r'generators?|evaluators?|components?|gates?|checks?|templates?|'
+           r'技能|设计|声音|美学|范本|生成器|评审|组件|风格|条|个|种|套|张|道|项')
+  WIN = 30          # 数字与词汇之间允许的字符距离
+  def visible(s):   # ① 可见文字(含 SVG <text> 正文) ② 属性里的文字
+      return re.sub(r'<[^>]+>', ' ', s) + ' ' + ' '.join(
+          v for _, v in re.findall(
+              r'(aria-label|content|alt|title|data-label[\w-]*)="([^"]*)"', s))
+  for path in sys.argv[1:]:
+      vis = [visible(l) for l in open(path, encoding='utf-8', errors='replace')]
+      for i in range(len(vis)):
+          prev, cur = (vis[i-1] if i else ''), vis[i]
+          nxt = vis[i+1] if i+1 < len(vis) else ''
+          joined = f'{prev} | {cur} | {nxt}'
+          lo, hi = len(prev)+3, len(prev)+3+len(cur)   # 只报属于本行的数字
+          for m in re.finditer(NUM, joined, re.I):
+              if not (lo <= m.start() < hi):
+                  continue
+              near = joined[max(0, m.start()-WIN):m.end()+WIN]
+              if re.search(VOCAB, near, re.I):
+                  print(f'{path}:{i+1}  «{m.group(1)}»  {" ".join(near.split())[:110]}')
+                  break
   EOF
   ```
-- **How caught**：2026-08-24 把 primer 接进全部文档面那一轮。facts.mjs 从 92 个问题清到 0、`--strict` 同样绿、评审也确认了绿 —— 人工复评仍在 `index.html` 找到 5 处措辞类旧计数（含两处 SVG 内文字与 `<meta>`）、在 lectern demo 找到 5 处（名单没跟着标题走）、在 roadmap 找到 3 类"分项之和 ≠ 自己写的总数"。
+  逐条对磁盘真值核（`node skills/design-review/scripts/facts.mjs --list` 打的就是真值）。
+  报告条数会有几百条，其中绝大多数是真话 —— **这个扫描器的产出是"要读的清单"，不是"违规清单"**，
+  它的价值在于让"数字 8 藏在 stat 卡里"这类没人会去看的地方必须被逐条读过一次。
+  想要"清零"这种可交付的结论，就再包一层：把上面每个承载短语绑定到一个真值
+  （`N design skills`→design、`All N skills`→total、`N/N canonical`→canonical、
+  `已收录 N 条`→known-bugs），只打不相等的行，并且照 facts.mjs 的规矩排除
+  **序数**（`第五种` / `the fifth`）、**余数**（`其余 8 个` / `the other eight`）、
+  **每套自己的数**（`Ships 3 canonical page-types`）和**路线图渲染数**（`五种美学`）。
+  收工前用一个假数字探一次针（往任意一页写 `All 20 skills` 看它报不报），
+  没探针的检查等于没有 —— 这正是 §7.10 那条教训。
+- **How caught**：2026-08-24 把 primer 接进全部文档面那一轮，**同一类漏了三遍**，每一遍都是"上一遍的
+  防御正好照不到的形态"：① facts.mjs 全绿（含 `--strict`）之后，人工复评在 `index.html` 找到
+  "Seven aesthetics" 这类少了承载词的措辞；② 补了词形扫描器之后，它只认词形，于是
+  `Design voices 8`、`SKILLS 14 / AESTHETICS 5`、`all 44 page-types`、`26 类`、
+  `data-label-zh="77 条"` 这些**数字形**又整批漏过 —— 而且有几处正好落在 SVG `<text>` 和
+  `data-label-*` 属性里，是扫描器当时根本没看的地方。教训：**防御要按"这一类还能以什么形态出现"
+  扩，不是按"这次漏的那一条"补**。
 - **Applies to**：任何改计数的任务，以及任何新增 design skill 的任务。
 
 

@@ -6,9 +6,9 @@ description: >
   configuration (git config inspection), behavioural (safe --dry-run tests).
   Ships with a human-readable summary + JSON verdict, run it as a git hook,
   a cron, or manually before a risky push. gated-dual-clone 拓扑的独立评估
-  器,按需重验三道安全闸。
+  器,按需重验三道安全检查。
   TRIGGER: "audit dual clone", "verify gated dual clone", "check safety
-  gates", "dual clone drift", "审计双仓库", "验证安全闸", "检查 gated
+  gates", "dual clone drift", "审计双仓库", "验证安全检查", "检查 gated
   dual clone".
   DO NOT TRIGGER: single-repo setups, pure git worktree layouts, general
   git-config auditing unrelated to gated-dual-clone.
@@ -31,11 +31,11 @@ and the GAN paradigm:
 2. **An independent, skeptical evaluator is the real lever.** This skill
    imports **nothing** from `gated-dual-clone`. It only reads the output
    topology and checks that the safety gates still hold. Same independence
-   rule `design-review` holds against the 4 design skills.
+   rule `design-review` holds against the 9 design skills.
 
 **ZH** — 两条原则来自 Anthropic harness-design 文章和 GAN 范式:(1) 做事
 的 agent 称赞自己的作品;(2) 独立持怀疑的 evaluator 才是真正的杠杆。
-本 skill **不依赖** `gated-dual-clone`,只读拓扑成品,验三道闸。
+本 skill **不依赖** `gated-dual-clone`,只读拓扑成品,验三道检查。
 
 ## What the audit checks · 审计覆盖
 

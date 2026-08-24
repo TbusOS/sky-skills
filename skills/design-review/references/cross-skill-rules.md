@@ -313,7 +313,7 @@ html[data-lang="zh"] .<skill>-badge {
 **规则**:任何在 `docs/` 或 `skills/<style>/references/canonical/` 下的 HTML,都会被 GitHub Pages 发布到 `doc.tbusos.com/sky-skills/`(公开站的一部分)。这些页面 **必须** 支持中英切换,理由:
 
 1. 主站 `index.html` 有切换按钮 —— 用户点进 docs 或 canonical 后,切换突然消失 → UX 断裂。
-2. 4 个 design skill 的 SKILL.md TRIGGER 同时列出中英关键词(sage 风格 / sage style 等),站点自己得 match。
+2. 9 个 design skill 的 SKILL.md TRIGGER 同时列出中英关键词(sage 风格 / sage style 等),站点自己得 match。
 3. 我的中文母语用户在 sky-skills 是一等公民,不是 i18n afterthought。
 
 **实现方式**(所有 canonical / docs HTML 遵循)—— 复用 roadmap.html 的模板:

@@ -173,11 +173,11 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 
 - `~/.claude/skills/design-review/dr-cli` — 一条命令跑完 4 道检查 + 可选 `--multi-critic` / `--learn`
 - `scripts/verify.py` — Gate 1 结构 check
-- `scripts/visual-audit.mjs` — Gate 2 渲染 check(26 类)
+- `scripts/visual-audit.mjs` — Gate 2 渲染 check(38 项)
 - `scripts/screenshot.mjs` — Gate 3 全页截图
 - `scripts/learning-loop.mjs` — Gate 4 critic verdict → design-learner prompt
 - `references/known-bugs.md` — 82 条 bug 大全
-- `references/cross-skill-rules.md` — 4 style 共通规则(含 §G 双语 / §I 卡片分组)
+- `references/cross-skill-rules.md` — 9 种风格共通规则(含 §G 双语 / §I 卡片分组)
 - `references/canonical/README.md` — canonical 参考库说明 + 扩库流程
 
 ## Reference

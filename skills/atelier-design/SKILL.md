@@ -6,7 +6,7 @@ last-verified: 2026-08-14
 
 # Atelier Design — 应用界面风格
 
-生成暖色渐变壁纸上浮着一整块磨砂玻璃的**产品界面**:侧栏、KPI 行、图表、筛选面板、记录表、预订流、设置表单、登录页。这是本仓 8 个设计 skill 里**唯一画应用界面**的一个——其余 7 个画的都是页面(落地 / 定价 / 文档 / deck / 发布会)。
+生成暖色渐变壁纸上浮着一整块磨砂玻璃的**产品界面**:侧栏、KPI 行、图表、筛选面板、记录表、预订流、设置表单、登录页。这是本仓 9 个设计 skill 里**唯一画应用界面**的一个——其余 8 个画的都是页面(落地 / 定价 / 文档 / deck / 发布会)。
 
 Generates warm-gradient product UI: one frosted application shell floating on a peach-and-rose wallpaper, with gradient orb icons, round-cap bar charts over neutral tracks, and exactly one near-black anchor card per screen. The only skill in this repo that draws applications rather than documents — and the only one whose JavaScript is half the deliverable.
 
@@ -53,17 +53,17 @@ atelier 风格 / 仪表盘 / dashboard / 控制台 / 后台 / admin panel / SaaS
 ## §5 发布前检查(MUST)
 
 ```bash
-bin/design-review --skill=atelier <你的页面>.html            # 四闸
+bin/design-review --skill=atelier <你的页面>.html            # 四道检查
 bin/design-review --skill=atelier --pixel <你的页面>.html    # 再加像素回归
 ```
 
-四闸必须全绿:`verify.py`(结构)· `visual-audit.mjs`(渲染 + 品牌 + 串味)·
+四道检查必须全绿:`verify.py`(结构)· `visual-audit.mjs`(渲染 + 品牌 + 串味)·
 `axe-audit.mjs`(**可达性 · axe-core**)· 截图。
-可选第五闸 `pixel-gate.mjs` 比对已提交的像素基线 —— 它是唯一能抓住"没有任何规则描述过"
-的改动的闸(卡片位移、颜色漂移、字体回落)。
-**截图必须人眼看过**——本 skill 建成当天,机器闸放过了三个只有人眼能发现的问题:
+可选的第五道 `pixel-gate.mjs` 比对已提交的像素基线 —— 它是唯一能抓住"没有任何规则描述过"
+的改动的那一道(卡片位移、颜色漂移、字体回落)。
+**截图必须人眼看过**——本 skill 建成当天,机械检查放过了三个只有人眼能发现的问题:
 KPI 标签和数字挤成一行、时间轴圆点被压成竖条、暗面板上的 `.atl-muted` 几乎不可见。
-**闸是必要条件,不是充分条件。**
+**机械检查是必要条件,不是充分条件。**
 
 atelier 目前 **7/7 页 axe 零 violation**(5 canonical + 2 demo),这是验收线。
 

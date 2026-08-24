@@ -56,7 +56,7 @@ accent syntax highlighting. Inline `<span class="cmd">` for commands,
 
 ### 5. "In the harness" — connects to bigger picture
 
-A narrow centered section explaining: "This skill is one of 8 generators.
+A narrow centered section explaining: "This skill is one of 9 generators.
 `design-review` is the discriminator. GAN-style split." Links to roadmap
 and install pages.
 
