@@ -48,10 +48,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
 const AXE_PATH = resolve(REPO_ROOT, 'node_modules/axe-core/axe.min.js');
 
-// Rules promoted to BLOCKING. A rule goes here only after a measured pass shows
-// every page in the corpus satisfies it, so promotion can never break `main`.
+// Rules promoted to BLOCKING. A rule goes here after a measured pass shows the
+// corpus satisfies it — but "measured" is only as wide as what the pass actually
+// rendered, and the 2026-08-14 pass rendered ONE THEME PER PAGE. glass's light
+// theme was never in it, so a promotion here is not a promise that the gate
+// cannot fail on inherited debt: on glass pages it does. See known-bugs §6.6.
 //
-// Measured 2026-08-14 over 74 pages (55 canonical + 9 demos + site + docs):
+// Measured 2026-08-14 over 74 pages (55 canonical + 9 demos + site + docs),
+// each page in its default theme only:
 // 1,023 violating elements, of which 1,013 were ONE rule — color-contrast.
 // The remaining 10 were three defects, all fixed in the same commit:
 //   link-name ×8            index.html — eight demo-preview <a> wrapping an
@@ -61,22 +65,30 @@ const AXE_PATH = resolve(REPO_ROOT, 'node_modules/axe-core/axe.min.js');
 //   aria-prohibited-attr ×1 anthropic feature-deep — aria-label on a plain
 //   svg-img-alt ×1          <div>, while the role="img" SVG inside it had no
 //                           alternative text. Moving the label fixed both.
-// Those three are now blocking: the corpus is clean, so the gate holds.
+// Those three have no known debt behind them. Beyond the 2026-08-14 default-
+// theme pass, they were re-measured 2026-08-25 on everything that pass could
+// not see: the second theme of the only two dual-theme skills (seven glass
+// surfaces in light, seven atelier surfaces in dark) and the five primer pages
+// added after it. The only blocking rule that fired anywhere was color-contrast.
 //
 // color-contrast was WARN at rollout (1,013 elements — one systemic palette
 // decision across four skills, not a scatter of mistakes) and was promoted the
-// same day after the debt was paid down to zero, one skill per commit. The
-// four failure modes that produced all 1,013 are codified in known-bugs §7.11.
+// same day, after the SAMPLED debt was paid down. The sample missed glass's
+// light theme, which still fails. The four failure modes that produced all
+// 1,013 are codified in known-bugs §7.11.
 const PROMOTED = new Set([
   'link-name',
   'aria-prohibited-attr',
   'svg-img-alt',
-  // Promoted 2026-08-14, same day, AFTER the debt was paid: the 1,013 failing
-  // elements were cleared skill-by-skill in five commits (sage 394, anthropic
-  // +site 270, lectern+ember 267, apple+eclat 49, atelier 27 at birth). The
-  // recurring failure modes and their fixes are codified in known-bugs §7.11;
-  // with the corpus at zero this rule can block without ever failing on
-  // inherited debt.
+  // Promoted 2026-08-14, same day, after the SAMPLED debt was paid: the 1,013
+  // failing elements were cleared skill-by-skill in five commits (sage 394,
+  // anthropic +site 270, lectern+ember 267, apple+eclat 49, atelier 27 at
+  // birth). The recurring failure modes and their fixes are codified in
+  // known-bugs §7.11. What that pass did NOT cover is theme: it rendered one
+  // theme per page, so glass's light theme was never measured and still
+  // carries 84 blocking elements across its seven surfaces (known-bugs §6.6).
+  // This rule therefore CAN fail on inherited debt — it does, on every glass
+  // page run in the light theme — until that debt is paid in glass's CSS.
   'color-contrast',
 ]);
 

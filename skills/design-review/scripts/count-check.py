@@ -259,6 +259,13 @@ def carriers() -> list[tuple[str, str, re.Pattern]]:
         ("kb-zh-daquan",   "kb", rf"{n}\s*条\s*bug\s*大全", 0),
         ("kb-pitfall",     "kb", rf"(?:坑的记录|pitfall\s+log)\s*·\s*{n}", I),
         ("kb-zh-keng",     "kb", rf"{n}\s*条坑", 0),
+        # 「当前 N 条，…」 and 「known-bugs.md(N 条,每条写…)」 — the two forms
+        # that let a stale 82 sit next to a correct 83 in the SAME file
+        # (index.html EN said 83 / zh said 82; SKILL.md:164 vs :215). 当前 N 条
+        # is generic enough to need the known-bugs context guard.
+        ("kb-zh-dangqian", "kb", rf"当前\s*{n}\s*条", 0, r"known-bugs|bug"),
+        ("kb-zh-md-paren", "kb",
+         rf"known-bugs(?:\.md)?`?\s*[(（]\s*{n}\s*条", I),
     ]
     out = []
     for row in rows:
@@ -330,13 +337,11 @@ RECORD_PATHS = [
 #   manual — the scanner CANNOT see the line (cross-skill-rules.md:140's
 #            「三道检查的命令」 has no gate token within the tri-line ctx
 #            window), so this is an honest hand-off note, not a detection.
-PENDING = [
-    ("skills/design-review/scripts/sprint-contract.mjs", r"three gates",
-     "Task 10 对齐它的 gates 数组(:296)与渲染文案,本任务禁改", "auto"),
-    ("skills/design-review/references/cross-skill-rules.md", r"三道检查的命令",
-     "手工交接:检查器看不到这一行(上下文窗口内无 gate token)— "
-     "Task 10 改 sprint-contract 时一并对齐", "manual"),
-]
+#
+# Empty on purpose since 2026-08-25: both entries were paid. sprint-contract.mjs
+# now models the four mechanical checks in its `gates` array and in every
+# rendered sentence, and cross-skill-rules.md:140 now names all four commands.
+PENDING = []
 
 
 def pending_reason(rel: str, raw_line: str) -> tuple[int, str] | tuple[None, None]:
@@ -586,6 +591,8 @@ def probe(truth: dict, rules, model) -> list[str]:
 <text>APPLE · ANTHROPIC</text>
 <text>EMBER · SAGE</text>
 <p>共 {w2['design']} 种风格。另一页说 {w['design']} 种页面设计美学。</p>
+<p>bug 大全现在当前 {w['kb']} 条,对应 38 项检查。</p>
+<p>`references/known-bugs.md`({w2['kb']} 条,每条写 Reader sees / Why / Defense)</p>
 """.split("\n")
     zh_probe_val = 3 if truth["design"] != 3 else 4
     hits = [(r[2], r[3]) for r in scan_lines(bad, truth, rules, model)
@@ -607,6 +614,8 @@ def probe(truth: dict, rules, model) -> list[str]:
         ("gate-enum-missing", g), ("critic-as-gate", 0), ("roster-subset", 4),
         # the round-4 carriers, locked per §7.10
         ("design-zh-style", w2["design"]), ("design-zh-aesth", w["design"]),
+        # the two known-bugs forms that hid an 82 next to an 83 in one file
+        ("kb-zh-dangqian", w["kb"]), ("kb-zh-md-paren", w2["kb"]),
     ]
     fails = [f"probe: injected fake not caught: {name} claiming {val}"
              for name, val in need if (name, val) not in hits]
@@ -627,6 +636,8 @@ def probe(truth: dict, rules, model) -> list[str]:
         "<text>aesthetics</text>",
         "<text>APPLE · ANTHROPIC</text>",
         "<text>EMBER · SAGE · +5</text>",
+        f"<p>bug 大全当前 {truth['kb']} 条。"
+        f"`known-bugs.md`({truth['kb']} 条,每条写 Reader sees)</p>",
     ]
     false_alarms = [r for r in scan_lines(good, truth, rules, model)
                     if r[1] == "violation"]

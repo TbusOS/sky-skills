@@ -137,7 +137,8 @@ script 输出一份 sprint-contract md,必含:
   dos-and-donts)
 - 本页的结构 MUST(从 canonical.md 提)
 - brand-presence / italic / cross-skill-smell 的 MUST
-- 三道检查的命令
+- 四道机械检查的命令(verify.py → visual-audit.mjs → axe-audit.mjs →
+  screenshot.mjs;critic 在四道之外)
 
 **生成器把这份 contract 读完再动手**。不读 canonical 就写 = 又一次让读者
 push back。
@@ -452,8 +453,10 @@ self-diff 不是 .md 的复制 —— 它是**单实例的自述**。同一 page
    过 AA 的恰是亮色那一侧。**批量替换颜色后必须重跑 axe** —— sage / ember / apple 的
    暗代码块在同一轮里被同一把全局替换连踩三次。
 
-机器检查:`axe-audit.mjs` 的 `color-contrast` 已是阻塞级(全仓清零后晋升)。
-本节是"写的时候别犯",机械检查是"犯了拦住"。
+机器检查:`axe-audit.mjs` 的 `color-contrast` 已是阻塞级。晋升按 skill 实测,
+但 2026-08-14 那次清账**每页只量了一个主题**,glass 的 light 主题从来没被量到,
+今天仍带着 84 处 color-contrast 欠账(known-bugs §6.6)—— 所以在 glass 页上这道
+检查会因存量 fail,还清前如此。本节是"写的时候别犯",机械检查是"犯了拦住"。
 
 ## 出坑以后
 

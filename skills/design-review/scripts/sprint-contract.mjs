@@ -64,79 +64,106 @@ const BRAND = {
     name: 'anthropic orange',
     minCoverage: '0.4%',
     howTo: 'orange `.anth-badge`, orange `.anth-button` CTA in nav or banner, or orange kicker text above h1',
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Space Grotesk'],
-    forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#c49464 (ember)', '#22D3EE (glass)'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Space Grotesk', 'Fredoka'],
+    // primer violet ADDED despite spec §4.2's predicted exemption: measured
+    // 2026-08-25, nearest anthropic color is the dataviz blue #6A9BCC at 65.8,
+    // clear of the smell matcher's euclidean 22. Mirrors visual-audit.mjs.
+    forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#c49464 (ember)', '#22D3EE (glass)', '#7a5cd6 (primer)'],
   },
   apple: {
     accent: '#0071E3',
     name: 'apple blue',
     minCoverage: '0.02%',
     howTo: 'blue kicker above h1, blue `.apple-link` in nav with ›, or a filled `.apple-button` on hero CTA',
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk'],
-    forbiddenColors: ['#d97757 (anthropic)', '#c49464 (ember)', '#97B077 (sage)', '#22D3EE (glass)'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk', 'Fredoka'],
+    forbiddenColors: ['#d97757 (anthropic)', '#c49464 (ember)', '#97B077 (sage)', '#22D3EE (glass)', '#7a5cd6 (primer)'],
   },
   ember: {
     accent: '#c49464',
     name: 'ember gold',
     minCoverage: '0.01%',
     howTo: 'centered gold `.accent-strip` hairline above every section, gold SVG accent strokes, gold eyebrow text accent',
-    forbiddenFonts: ['Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk'],
-    forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#97B077 (sage)', '#22D3EE (glass)'],
+    forbiddenFonts: ['Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk', 'Fredoka'],
+    // anthropic orange is NOT forbidden here. It sat in this list alone since
+    // dcc3714 while visual-audit never enforced it — a mirror drift found and
+    // closed 2026-08-25. Enforcing it would flag `demos/ember-design/index.html`,
+    // whose SVG gallery draws each sibling skill's look in that sibling's own
+    // brand color, labelled with its name; #d97757 is an exact match there.
+    // That is a deliberate quotation, not an impersonation.
+    forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#22D3EE (glass)', '#7a5cd6 (primer)'],
   },
   sage: {
     accent: '#97B077 / #d4e1b8',
     name: 'sage green',
     minCoverage: '1.5%',
     howTo: '`.sage-nav` with `background: rgba(212,225,184,0.88)` + `border-bottom:#c9d6a8` — the nav band itself carries most of the sage-green coverage',
-    forbiddenFonts: ['Fraunces', 'Poppins', 'Lora', 'Space Grotesk'],
-    forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#c49464 (ember)', '#22D3EE (glass)'],
+    forbiddenFonts: ['Fraunces', 'Poppins', 'Lora', 'Space Grotesk', 'Fredoka'],
+    // apple blue is NOT forbidden here — same mirror drift and same reason as
+    // ember's anthropic orange above: `demos/sage-design/index.html` draws an
+    // architecture figure whose pills name each sibling skill and dot it in
+    // that skill's brand color, so #0071E3 appears there on purpose.
+    forbiddenColors: ['#d97757 (anthropic)', '#c49464 (ember)', '#22D3EE (glass)', '#7a5cd6 (primer)'],
   },
   glass: {
     accent: '#22D3EE',
     name: 'glass aurora cyan',
     minCoverage: '0.2%',
     howTo: 'three SOLID cyan moves in the hero: mono `.glass-eyebrow` kicker above the h1, filled `.glass-button` CTA in the nav, and a 2px `.glass-hairline`. Aurora blobs do NOT count — they blend toward the navy canvas and never register at the pixel matcher\'s tolerance',
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora'],
-    forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#c49464 (ember)', '#97B077 (sage)'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Fredoka'],
+    // primer violet ADDED despite spec §4.2's predicted exemption: the aurora
+    // violet blobs live in background-image gradients, which the smell matcher
+    // never reads. Measured 2026-08-25 across both themes, nearest glass color
+    // is the indigo-as-text #4F46E5 at 50.6 (aurora violet #A78BFA at 74.4).
+    // Mirrors visual-audit.mjs.
+    forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#c49464 (ember)', '#97B077 (sage)', '#7a5cd6 (primer)'],
   },
   eclat: {
     accent: '#ff5b34',
     name: 'eclat flare',
     minCoverage: '0.002%',
     howTo: 'the flare is the ONLY saturated foreground color, and it lives in just four places: the filled CTA, one live dot (flare itself — never a second red like #ff4d4d), at most ONE emphasized hero number (`.eclat-hl`), and the product\'s own accent inside a UI mock. Everything else is cool-white spotlight or warm rim light. The threshold is deliberately low — a dark cinematic hero puts the CTA mid-screen, so the gate only catches total absence',
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk', 'Fredoka'],
     // anthropic orange is NOT forbidden here: eclat's own flare-soft #ff7a4d sits
     // within the matcher's TOL 55 of #d97757, so listing it would flag eclat's
     // own warm family. Mirrors the same omission in visual-audit.mjs.
-    forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#c49464 (ember)', '#22D3EE (glass)'],
+    forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#c49464 (ember)', '#22D3EE (glass)', '#7a5cd6 (primer)'],
   },
   lectern: {
     accent: '#1d3a6e / #2f5bb0',
     name: 'lectern navy',
     minCoverage: '0.02%',
     howTo: 'the navy carries itself in the top region: a solid navy square in the masthead, the section kicker, and the numbered agenda markers. This is a briefing deck, not a launch page — there is no full-bleed hero to lean on, so keep the navy in structural furniture rather than one big CTA',
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk', 'Fredoka'],
     // apple blue is NOT forbidden here: lectern is itself a navy/blue-family skin
     // and its chart blues would false-flag. Mirrors visual-audit.mjs.
-    forbiddenColors: ['#d97757 (anthropic)', '#c49464 (ember)', '#97B077 (sage)', '#22D3EE (glass)'],
+    // primer violet IS forbidden, against spec §4.2's predicted exemption: the
+    // "nearest channel differs by only 20" reading came from a per-channel
+    // model, but the smell matcher is euclidean < 22 and lectern's nearest
+    // chart blue #5F7FC0 measures 49.4 (2026-08-25) — the thinnest of the
+    // eight, so re-measure if the chart ramp gains a violet-leaning stop.
+    forbiddenColors: ['#d97757 (anthropic)', '#c49464 (ember)', '#97B077 (sage)', '#22D3EE (glass)', '#7a5cd6 (primer)'],
   },
   atelier: {
     accent: '#DD4F92',
     name: 'atelier rose',
     minCoverage: '0.06%',
     howTo: 'the rose is carried by SMALL objects repeated often, not one big CTA: the brand mark in the rail, a filled coral→rose orb on every KPI, meter and bar fills, the active tab underline, and accent chips. The coral #F5854F never appears alone — it is the top stop of the gradient and nothing else. If a screen has no orbs it will fail this gate, and it should: orbs are the identity',
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk', 'Fredoka'],
     // anthropic orange is NOT forbidden here: atelier's coral #F5854F sits
     // within the matcher's TOL 55 of #d97757. Mirrors visual-audit.mjs.
-    forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#c49464 (ember)', '#22D3EE (glass)', '#1d3a6e (lectern)'],
+    forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#c49464 (ember)', '#22D3EE (glass)', '#1d3a6e (lectern)', '#7a5cd6 (primer)'],
   },
   primer: {
     accent: '#7a5cd6',
     name: 'primer violet',
-    minCoverage: '0.4%',
+    // 0.485% is visual-audit's calibrated threshold (0.00485), set on the three
+    // canonicals' measured coverage: concept 0.97% · process 1.5% · compare
+    // 1.93%, i.e. min/2. Keep the two numbers identical.
+    minCoverage: '0.485%',
     howTo: 'violet is carried by the oversized circled step numerals, the analogy-card frame, the nav wordmark dot and the hero illustration primary — a primer page announces its violet in the first screen',
     forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk'],
     // ember gold / sage green / lectern navy NOT forbidden — mirrors visual-audit.mjs, spec §4.1.
+    // Fredoka is primer's OWN display face, so it is absent here and present in all eight siblings.
     forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#22D3EE (glass)', '#ff5b34 (eclat)', '#DD4F92 (atelier)'],
   },
 };
@@ -293,7 +320,13 @@ async function main() {
     brand,
     bilingual: isPublic,
     selfRegressionMin: 88,
-    gates: ['verify.py', 'visual-audit.mjs', 'design-critic'],
+    // The gate model is defined ONCE, in skills/design-review/SKILL.md's
+    // 「检查模型」 section (machine-readable `gate-model:` marker). This mirrors
+    // it: four mechanical checks in run order, pixel-gate as the opt-in fifth,
+    // and the LLM critic OUTSIDE the numbered mechanical run.
+    gates: ['verify.py', 'visual-audit.mjs', 'axe-audit.mjs', 'screenshot.mjs'],
+    optionalGates: ['pixel-gate.mjs'],
+    tasteReview: 'design-critic',
   };
 
   if (args.format === 'json') {
@@ -328,9 +361,9 @@ the structure, adapt the content:`;
   return `# Sprint contract · ${skill}-design · ${page}${borrowedFrom ? ' (LOW-CONFIDENCE)' : ''}
 
 > This contract tells you what MUST be true of the page you're about to
-> generate. Read the canonical first. Then write. Then run the three gates.
-> If you skip any step, the page will fail review and have to be redone —
-> which is more work than following the contract.
+> generate. Read the canonical first. Then write. Then run the four
+> mechanical gates. If you skip any step, the page will fail review and have
+> to be redone — which is more work than following the contract.
 ${lowConfidenceBanner}
 ## 0. Files you MUST read before touching HTML
 
@@ -458,8 +491,8 @@ the palette). Never invent colors.
 
 ## 8. Before returning "done"
 
-Run all three gates from repo root (the \`bin/design-review\` wrapper
-does this):
+Run all four mechanical gates from repo root (the \`bin/design-review\`
+wrapper does this):
 
 \`\`\`bash
 bin/design-review <path-to-your-new-page.html>
@@ -468,15 +501,22 @@ bin/design-review <path-to-your-new-page.html>
 If any gate produces an \`error\`, FIX before returning. If it produces
 a \`warn\`, fix when possible — warnings are real signals.
 
-The gates are:
+The four mechanical gates, in run order:
 1. \`verify.py\` — structural (placeholders, DOCTYPE, BEM, SVG balance,
    class usage, bilingual, container rules).
 2. \`visual-audit.mjs\` — rendered (contrast, hero size, SVG tiny text on
    ALL figures, svg-letterbox, dense-diagram-cramped, diagram-monochrome,
    text-desert, overlap, h1 count, heading skip, a11y, hollow card,
    svg-same-colour, italic-overuse, cross-skill-smell, brand-presence).
-3. \`design-critic\` — LLM taste judge (Phase B; compares your page to
-   the canonical and flags taste mismatches).
+3. \`axe-audit.mjs\` — accessibility (axe-core; blocking rules are
+   color-contrast, link-name, aria-prohibited-attr, svg-img-alt).
+4. \`screenshot.mjs\` — full-page screenshot (an artefact, not a verdict;
+   what judges it is a human looking at it).
+
+Outside the mechanical four: \`pixel-gate.mjs\` (\`--pixel\`) is an opt-in
+fifth mechanical check against a committed baseline, and \`design-critic\`
+is the LLM taste review (compares your page to the canonical and flags
+taste mismatches). Neither is numbered among the four.
 
 ## 9. After returning: self-regression
 

@@ -674,29 +674,43 @@
 - **Why**:光晕层 `position:fixed; inset:0`,忘记 `pointer-events:none` 时整页点击都打在它身上。
 - **Defense**:`.glass-aurora` 在 glass.css 自带 `pointer-events:none`;visual-audit `glass-cta-obstructed`(error)对每个视口内 `.glass-button` 中心点做 `elementFromPoint` 命中检查,任何装饰层(自加的视差层/sheen 层)挡住 CTA 都会被抓。
 
-### 6.6 axe 亮色欠账:glass light 主题 56 处 color-contrast 阻断,晋升时的清账没量到
+### 6.6 axe 亮色欠账:glass light 主题 84 处 color-contrast 阻断,晋升时的清账没量到
 
 - **Reader sees**:文档曾写 color-contrast「存量清零后才晋升,这道检查不会因历史欠账而失败」;
-  但照文档跑 `bin/design-review --skill=glass <page>`(自动双主题),gate 3 在五个 glass
-  页面上**今天就 fail**。
+  但照文档跑 `bin/design-review --skill=glass <page>`(自动双主题),gate 3 在**七个**挂
+  `glass.css` 的页面上**今天就 fail**。
 - **Why**:2026-08-14 那次 74 页清账,**每页只量了一个主题**(默认主题),glass 的 light
   主题从来没有被量过。light 下弱化文字色(如 `#747882`)压在 `#f2f5fa` 浅底上大面积
-  4.04:1(线是 4.5)。复现(2026-08-25 实测):
+  4.04:1(线是 4.5);另有 `.glass-lead code` 的青字 `#0e7490` 压在 `#e7eaef` 上 4.44:1。
+  受影响面按 `grep -rl glass.css *.html` 取全,不是只取 canonical。复现(2026-08-25 逐页实测):
   ```bash
-  node skills/design-review/scripts/axe-audit.mjs --strict --theme=light \
-    skills/glass-design/references/canonical/landing.html      # 22 阻断
-  # 同命令:dashboard 4 · data-report 6 · diagram-gallery 2 · demos/glass-design/index.html 22
-  # 共 56 处,全部同一条 color-contrast;同五页 dark 主题 0 处。
+  node skills/design-review/scripts/axe-audit.mjs --strict --theme=light <page>
+  # skills/glass-design/references/canonical/landing.html         22 阻断
+  # skills/glass-design/references/canonical/data-report.html       6
+  # skills/glass-design/references/canonical/dashboard.html         4
+  # skills/glass-design/references/canonical/diagram-gallery.html   2
+  # demos/glass-design/index.html                                  22
+  # demos/glass-design/diagrams.html                                2
+  # docs/HARNESS-ROADMAP.glass.html                                26
+  # 共 84 处,全部同一条 color-contrast;同七页 dark 主题各 0 处。
   ```
+  第一次记这条时按五页记了 56 处,漏掉 `demos/glass-design/diagrams.html`(2)和
+  `docs/HARNESS-ROADMAP.glass.html`(26)—— 少记 28 处。取样按「canonical + 旗舰 demo」
+  取,而不是按「谁挂了这套 CSS」取,就会漏掉文档目录里的皮肤版页面。
 - **Defense**:欠账**未还**(还账是 glass CSS 的活,已单开任务)。还清之前:
   ① 文档不再写「存量清零 / 不会因欠账失败」—— 四处已改口(`bin/design-review` 头注与
   gate 3 注释、`design-review/SKILL.md` 检查模型与 What-ships 表、`README.md` /
   `README_zh.md` 的 design-review 行),统一说法:晋升按 skill 实测,但当时每页只量一个
   主题,glass light 带着已知 contrast 欠账,在 glass 页上 gate 3 会因存量 fail;
+  ①b 2026-08-25 又有两处加了同样的但书,还账时一并收掉:`axe-audit.mjs` 的 PROMOTED
+  注释(那里原本写「存量清零,这条规则不会因历史欠账失败」)、`cross-skill-rules.md`
+  §「颜色与对比」末尾的机器检查一行;
   ② 还账后回来删掉本条的「未还」并把上述四处的但书收掉;
   ③ 教训同 §1.53:清账证据要按「这类页面还能以什么形态渲染」取样(主题 × 视口),
-  不是按默认渲染量一遍。
+  不是按默认渲染量一遍;取样面也要按「谁挂了这套 CSS」取,不是按「哪些是 canonical」取。
 - **Applies to**:glass-design(双主题);未来任何双主题 skill 的清账都要每主题各量一遍。
+  atelier 也是双主题(light 为 canonical),2026-08-25 按 dark 逐页量过,七个页面全 0 处 ——
+  这条欠账目前只在 glass 上。
 
 ## 7. atelier-design
 

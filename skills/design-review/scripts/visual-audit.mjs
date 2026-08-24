@@ -100,18 +100,52 @@ function matchesIntentional(finding) {
 // visible presence of in its top region, and foreign signatures that must
 // NOT leak in. Added 2026-04-21 as part of Phase A evaluator completion
 // (addresses "sage nav looked yellow" — brand identity wasn't visible at top).
+//
+// Two different matchers read this object, and mixing them up is how wrong
+// exemptions get written:
+//   · `accents` feeds the brand-presence PIXEL count — euclidean < 55 over
+//     screenshot pixels (check 13).
+//   · `forbiddenColors` feeds the cross-skill smell check — euclidean < 22
+//     over COMPUTED color / background-color / fill / border-color (check 12).
+//     Gradients, box-shadows and blurred blobs are never read, so a hue that
+//     only exists inside a `background-image` cannot false-flag.
+//
+// primer violet #7a5cd6 was added to all eight siblings on 2026-08-25 after
+// measuring every canonical + demo of every skill (glass and atelier in both
+// themes) against the smell matcher. Nearest own-color distance per skill:
+// lectern 49.4 · glass 50.6 · apple 54.5 · anthropic 65.8 · eclat 83.2 ·
+// sage 87.1 · ember 93.4 · atelier 93.4 — all clear of 22, zero new findings.
+// Fredoka (primer's display face) went into all eight forbiddenFonts at the
+// same time; the font check only fires on a FIRST-position family, and no
+// sibling page names Fredoka at all.
+//
+// One shape to know before adding any forbidden color: several `demos/<skill>/
+// index.html` pages carry a gallery figure that draws each SIBLING skill's look
+// in that sibling's OWN brand color, labelled with its name. Those are
+// quotations, not impersonations. They are why anthropic orange was never
+// enforced on ember and apple blue was never enforced on sage (both measured
+// 2026-08-25 as exact matches on those two demo pages, and both dropped from
+// sprint-contract's mirror rather than added here). No such gallery quotes
+// primer violet today; if one starts to, the warn it raises is a false positive
+// to be exempted here — never a reason to repaint that page.
 const SKILL_SIGNATURES = {
   anthropic: {
     name: 'anthropic orange',
     accents: [[217, 119, 87]],        // #d97757
     threshold: 0.004,                  // canonical pages 0.5-0.9%; catch "no orange at all"
+    // primer violet is ADDED even though spec §4.2 predicted an exemption for
+    // it: the prediction assumed a per-channel ±55 model, but this check's
+    // matcher is euclidean < 22 over computed colors. Measured 2026-08-25 over
+    // all 10 anthropic canonicals + 3 demos — nearest is the dataviz blue
+    // #6A9BCC (106,155,204) at distance 65.8, so the margin is 43.8.
     forbiddenColors: [
       { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
       { rgb: [151, 176, 119], note: 'sage brand green #97B077' },
       { rgb: [196, 148, 100], note: 'ember gold #c49464' },
       { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
+      { rgb: [122, 92, 214], note: 'primer violet #7a5cd6' },
     ],
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Space Grotesk'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Space Grotesk', 'Fredoka'],
   },
   apple: {
     name: 'apple blue',
@@ -122,8 +156,12 @@ const SKILL_SIGNATURES = {
       { rgb: [196, 148, 100], note: 'ember gold #c49464' },
       { rgb: [151, 176, 119], note: 'sage green #97B077' },
       { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
+      // measured 2026-08-25: nearest apple color to primer violet is the
+      // system purple #AF52DE (175,82,222) in the demo icon set, distance
+      // 54.5 — clear of the euclidean-22 matcher by 32.5.
+      { rgb: [122, 92, 214], note: 'primer violet #7a5cd6' },
     ],
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk', 'Fredoka'],
   },
   ember: {
     name: 'ember gold',
@@ -133,8 +171,9 @@ const SKILL_SIGNATURES = {
       { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
       { rgb: [151, 176, 119], note: 'sage green #97B077' },
       { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
+      { rgb: [122, 92, 214], note: 'primer violet #7a5cd6' },
     ],
-    forbiddenFonts: ['Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk'],
+    forbiddenFonts: ['Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk', 'Fredoka'],
   },
   sage: {
     name: 'sage green',
@@ -144,8 +183,9 @@ const SKILL_SIGNATURES = {
       { rgb: [196, 148, 100], note: 'ember gold #c49464' },
       { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
       { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
+      { rgb: [122, 92, 214], note: 'primer violet #7a5cd6' },
     ],
-    forbiddenFonts: ['Fraunces', 'Poppins', 'Lora', 'Space Grotesk'],
+    forbiddenFonts: ['Fraunces', 'Poppins', 'Lora', 'Space Grotesk', 'Fredoka'],
   },
   glass: {
     name: 'glass aurora cyan',
@@ -154,13 +194,24 @@ const SKILL_SIGNATURES = {
                                        // navy canvas and never match at TOL 55.
     threshold: 0.002,                  // hero carries ≥3 solid cyan moves (kicker,
                                        // nav CTA, hairline); calibrated 2026-06-11
+    // primer violet is ADDED, against spec §4.2's predicted exemption. The
+    // prediction was that the aurora violet blobs would false-flag; measured
+    // 2026-08-25 they cannot — the blobs live in `background-image` gradients
+    // and this check only reads color / background-color / fill / border-color.
+    // Nearest glass color to primer violet across all 4 canonicals + 2 demos,
+    // BOTH themes, is the indigo-as-text #4F46E5 (79,70,229) at distance 50.6,
+    // clear of the euclidean-22 matcher by 28.6 (aurora violet #A78BFA sits at
+    // 74.4). Thinnest margin of the eight after lectern — re-measure before
+    // moving any glass token violet-ward. The entry also backs glass's own
+    // rule that violet never appears inside a glass diagram.
     forbiddenColors: [
       { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
       { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
       { rgb: [196, 148, 100], note: 'ember gold #c49464' },
       { rgb: [151, 176, 119], note: 'sage green #97B077' },
+      { rgb: [122, 92, 214], note: 'primer violet #7a5cd6' },
     ],
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Fredoka'],
   },
   eclat: {
     name: 'eclat flare',
@@ -173,8 +224,9 @@ const SKILL_SIGNATURES = {
       { rgb: [151, 176, 119], note: 'sage green #97B077' },
       { rgb: [196, 148, 100], note: 'ember gold #c49464' },
       { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
+      { rgb: [122, 92, 214], note: 'primer violet #7a5cd6' },
     ],
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk', 'Fredoka'],
   },
   lectern: {
     name: 'lectern navy',
@@ -182,13 +234,20 @@ const SKILL_SIGNATURES = {
     threshold: 0.0002,                          // navy square + kicker + agenda numbers carry it in the top region
     // apple blue OMITTED: lectern is a navy/blue-family skin; forbidding apple's
     // blue would risk flagging lectern's own chart blues.
+    // primer violet is ADDED, against spec §4.2's predicted exemption. §4.2's
+    // "nearest channel differs by only 20" was read off a per-channel model;
+    // this check's matcher is euclidean < 22. Measured 2026-08-25 over all 3
+    // lectern canonicals + 2 demos, nearest is the chart mid-blue #5F7FC0
+    // (95,127,192) at distance 49.4 — thinnest margin of the eight (27.4), so
+    // re-measure if the chart ramp ever gains a violet-leaning stop.
     forbiddenColors: [
       { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
       { rgb: [196, 148, 100], note: 'ember gold #c49464' },
       { rgb: [151, 176, 119], note: 'sage green #97B077' },
       { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
+      { rgb: [122, 92, 214], note: 'primer violet #7a5cd6' },
     ],
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk', 'Fredoka'],
   },
   atelier: {
     name: 'atelier rose',
@@ -208,8 +267,9 @@ const SKILL_SIGNATURES = {
       { rgb: [196, 148, 100], note: 'ember gold #c49464' },
       { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
       { rgb: [29, 58, 110], note: 'lectern navy #1d3a6e' },
+      { rgb: [122, 92, 214], note: 'primer violet #7a5cd6' },
     ],
-    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk'],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk', 'Fredoka'],
   },
   primer: {
     name: 'primer violet',

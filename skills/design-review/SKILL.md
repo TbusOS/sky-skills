@@ -161,7 +161,7 @@ node skills/design-review/scripts/learning-loop.mjs \
 | 口味评审(四道之外)multi-critic × 4 | 构图 / 文案 / 插画 / 品牌 四位专家独立 fresh-context · 权重 25/25/20/30 聚合 | `Task()` × 4 + 聚合 |
 
 具体清单在:
-- `references/known-bugs.md`(82 条,每条写 Reader sees / Why / Defense)
+- `references/known-bugs.md`(83 条,每条写 Reader sees / Why / Defense)
 - `references/cross-skill-rules.md`(9 种风格共通工艺底线 · 有 §G 双语规则 + §I 卡片分组规则)
 - `references/dos-and-donts.md`(每 skill 下的风格特定反例)
 
