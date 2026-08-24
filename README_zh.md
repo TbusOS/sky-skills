@@ -65,7 +65,7 @@
 
 > **两种安装作用域。** 装到某个项目的 `.claude/skills/` 只在那个仓库生效；装到 `~/.claude/skills/` 在本机所有仓库生效。下面命令都用用户级 `~/.claude/skills/`，要装到项目级把目的地换掉即可。完整双语安装指南见 [docs/INSTALL.html](docs/INSTALL.html)。
 >
-> **注意——仓库里有两种 skill。** 只有四个是光杆 `SKILL.md`：`skills-sync` / `design-planner` / `design-evolve` / `wechat-video-publisher`。**其余十五个在 `SKILL.md` 之外还带 `scripts/` / `references/` / `templates/`，必须按整目录安装**——只 copy 单 `SKILL.md` 会让 skill 起来但脚本跑不动。看着小的也在此列（`md-to-pdf` / `doc-to-markdown` / `tech-pdf-reader` 各带一个脚本），最大的 `linux-kernel-dev` 有 233 个文件。另外 `design-review` learning loop 用的 `design-learner` agent 不在 skill 目录里：要单独把 `.claude/agents/design-learner.md` 复制到你的 `~/.claude/agents/`。
+> **注意——仓库里有两种 skill。** 只有四个是光杆 `SKILL.md`：`skills-sync` / `design-planner` / `design-evolve` / `wechat-video-publisher`。**其余十八个在 `SKILL.md` 之外还带 `scripts/` / `references/` / `templates/`，必须按整目录安装**——只 copy 单 `SKILL.md` 会让 skill 起来但脚本跑不动。看着小的也在此列（`md-to-pdf` / `doc-to-markdown` / `tech-pdf-reader` 各带一个脚本），最大的 `linux-kernel-dev` 有 233 个文件。另外 `design-review` learning loop 用的 `design-learner` agent 不在 skill 目录里：要单独把 `.claude/agents/design-learner.md` 复制到你的 `~/.claude/agents/`。
 >
 > **装完之后退出 Claude Code 重进**——skill 清单是启动时扫描一次冻结的。
 

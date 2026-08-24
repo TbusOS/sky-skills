@@ -32,7 +32,7 @@ design skill 是 generator,会给自己打高分;`design-review` 脚本、规则
 | 组件 | 状态 | 实体 |
 |---|---|---|
 | Gate 1 · structural verify | **shipped** | `scripts/verify.py`(8 类 check + 双语强制 + `--allow-monolingual` 豁免)|
-| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(26 条 known-bugs 机器化)|
+| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(82 条 known-bugs 里能机器化的那些)|
 | Gate 3 · full-page screenshot | **shipped** | `scripts/screenshot.mjs`(Playwright · 绝对路径 + `file://` 通用)|
 | Gate 4 · solo taste critic | **shipped** | `.claude/agents/design-critic.md` |
 | Gate 4 · multi-critic(4 专家) | **shipped** (2026-04-22) | `.claude/agents/design-{composition,copy,illustration,brand}-critic.md` 权重 25/25/20/30 |
@@ -127,7 +127,7 @@ node skills/design-review/scripts/learning-loop.mjs \
 | Gate 4 multi-critic × 4 | 构图 / 文案 / 插画 / 品牌 四位专家独立 fresh-context · 权重 25/25/20/30 聚合 | `Task()` × 4 + 聚合 |
 
 具体清单在:
-- `references/known-bugs.md`(26 条,每条写 Reader sees / Why / Defense)
+- `references/known-bugs.md`(82 条,每条写 Reader sees / Why / Defense)
 - `references/cross-skill-rules.md`(9 种风格共通工艺底线 · 有 §G 双语规则 + §I 卡片分组规则)
 - `references/dos-and-donts.md`(每 skill 下的风格特定反例)
 
@@ -176,7 +176,7 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 - `scripts/visual-audit.mjs` — Gate 2 渲染 check(26 类)
 - `scripts/screenshot.mjs` — Gate 3 全页截图
 - `scripts/learning-loop.mjs` — Gate 4 critic verdict → design-learner prompt
-- `references/known-bugs.md` — 26 条 bug 大全
+- `references/known-bugs.md` — 82 条 bug 大全
 - `references/cross-skill-rules.md` — 4 style 共通规则(含 §G 双语 / §I 卡片分组)
 - `references/canonical/README.md` — canonical 参考库说明 + 扩库流程
 

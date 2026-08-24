@@ -373,7 +373,7 @@ self-diff 强制让作者在交付时把"选择 + 理由"落盘,给所有下游�
 
 ```html
 <!-- design-review:self-diff v1
-Skill: <anthropic | apple | ember | sage | glass | eclat | lectern>
+Skill: <anthropic | apple | ember | sage | glass | eclat | lectern | atelier | primer>
 Page-type: <landing | pricing | docs-home | comparison | feature-deep | blog | product | team | faq | changelog>
 Created: <YYYY-MM-DD>
 

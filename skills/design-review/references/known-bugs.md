@@ -482,7 +482,35 @@
   [...document.body.children].filter(e => !['SECTION','NAV','HEADER','FOOTER','SCRIPT','STYLE'].includes(e.tagName))  // 应为空
   ```
 - **回归实测**：一个 14 图的长页,插入两块内容时掉出 `</section>` → 图渲染 881 / 1015px(同页中位数 340)。新规则报 `diagram-oversized`(1015px,3x median)+ 8 处 `content-outside-container`(figure 1440px / p 660px)。移回容器并压紧后为 452 / 546px,两条规则均不再触发。**参考库 50 页全扫 0 误报。**
-- **Applies to**：全 8 个设计 skill。
+- **Applies to**：全 9 个设计 skill。
+
+### 1.53 `facts.mjs` 全绿 ≠ 计数扫干净 —— "aesthetics / voices" 这类措辞它根本不看
+
+- **Reader sees**：首页写着 "Seven aesthetics, one repo."，正下方就排着九张 demo 卡；lectern demo 的表格说明写"另有 13 个技能"（等于宣称上面列了 9 个），而它上面的名单只有 7 行。**而 `facts.mjs` 普通模式和 `--strict` 都是绿的。**
+- **Why**：facts.mjs 是**模式表**驱动的。它认的是带承载短语的说法 —— `N design skills` / `N design aesthetics` / `N 种声音` / `All N skills` / `全部 N 个 skill`。它不认：
+  ① `Seven aesthetics`（少了 design 这个词）；② `seven page-design aesthetics`（数字和 design 不相邻）；
+  ③ 写在 `<meta content="…nineteen skills…">` 里的（匹配前整个标签被剥掉）；
+  ④ SVG `<text>` 里的 `19 skills · 1 page`（同样是标签属性外的图内文字，但它在 tag-strip 后才可见，模式又不带承载短语）；
+  ⑤ "另有 N 个技能"与它旁边那张名单**是否同长**（跨行的一致性不在任何模式里）；
+  ⑥ 分项求和：`58/58` 的旁边列 `10×4 + 4 + 3 + 3 = 50`，两个数都在同一行也不会被比较。
+  **模式窄是有意的** —— 放宽就会把"× 4 skills"、"3 known-bugs rows"这类非总数报成违规，教人跳过报告。代价就是上面这一类只能人来看。
+- **Defense**：计数类改动收工前，除了跑 `facts.mjs`，必须对**每一个改过的面**做一次人工数字词扫：剥掉标签后 grep 英文 four…twenty 与中文 四…二十（后接量词 个/种/道/张/条/项），逐行对磁盘真值核，并且额外检查两件模式看不见的事 —— **数字与它旁边清单的长度是否一致**、**分项之和是否等于它自己写的总数**。可直接跑：
+  ```bash
+  python3 - "$FILE" <<'EOF'
+  import re, sys
+  EN = r'(?<![a-z])(four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)(?![a-z])'
+  ZH = r'(四|五|六|七|八|九|十[一二三四五六七八九]?|二十)(?=[个种道张条项])'
+  for i, l in enumerate(open(sys.argv[1], encoding='utf-8'), 1):
+      # 剥标签，否则 font-weight / height 里的 "eight" 会混进来；
+      # 但把 aria-label / content / alt / title 的值补回来，那里也写着计数
+      t = re.sub(r'<[^>]+>', ' ', l) + ' '.join(
+          re.findall(r'(?:aria-label|content|alt|title)="([^"]*)"', l))
+      if re.search(EN, t, re.I) or re.search(ZH, t):
+          print(i, t.strip()[:140])
+  EOF
+  ```
+- **How caught**：2026-08-24 把 primer 接进全部文档面那一轮。facts.mjs 从 92 个问题清到 0、`--strict` 同样绿、评审也确认了绿 —— 人工复评仍在 `index.html` 找到 5 处措辞类旧计数（含两处 SVG 内文字与 `<meta>`）、在 lectern demo 找到 5 处（名单没跟着标题走）、在 roadmap 找到 3 类"分项之和 ≠ 自己写的总数"。
+- **Applies to**：任何改计数的任务，以及任何新增 design skill 的任务。
 
 
 ## 2. anthropic-design
