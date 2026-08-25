@@ -266,6 +266,7 @@ def carriers() -> list[tuple[str, str, re.Pattern]]:
         ("kb-zh-dangqian", "kb", rf"当前\s*{n}\s*条", 0, r"known-bugs|bug"),
         ("kb-zh-md-paren", "kb",
          rf"known-bugs(?:\.md)?`?\s*[(（]\s*{n}\s*条", I),
+        ("kb-en-pitfall",  "kb", rf"\b{d}\s+recorded\s+pitfalls?", I),
     ]
     out = []
     for row in rows:
