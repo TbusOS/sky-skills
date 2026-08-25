@@ -334,9 +334,13 @@ RECORD_PATHS = [
 #   auto   — the scanner detects the line itself; when its pattern stops
 #            matching anything on a full scan the entry is spent and the run
 #            says so — delete it then.
-#   manual — the scanner CANNOT see the line (cross-skill-rules.md:140's
-#            「三道检查的命令」 has no gate token within the tri-line ctx
-#            window), so this is an honest hand-off note, not a detection.
+#   manual — the scanner CANNOT see the line, so the entry is an honest
+#            hand-off note rather than a detection. The worked example was
+#            cross-skill-rules.md:140's 「三道检查的命令」, whose tri-line
+#            context window held no gate token; that line was corrected on
+#            2026-08-25 and the entry retired, so the example is history, not
+#            a live case. Reach for this kind when a claim is real but sits
+#            outside every carrier's reach.
 #
 # Empty on purpose since 2026-08-25: both entries were paid. sprint-contract.mjs
 # now models the four mechanical checks in its `gates` array and in every

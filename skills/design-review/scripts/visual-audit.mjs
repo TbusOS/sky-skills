@@ -110,24 +110,32 @@ function matchesIntentional(finding) {
 //     Gradients, box-shadows and blurred blobs are never read, so a hue that
 //     only exists inside a `background-image` cannot false-flag.
 //
-// primer violet #7a5cd6 was added to all eight siblings on 2026-08-25 after
-// measuring every canonical + demo of every skill (glass and atelier in both
-// themes) against the smell matcher. Nearest own-color distance per skill:
-// lectern 49.4 · glass 50.6 · apple 54.5 · anthropic 65.8 · eclat 83.2 ·
-// sage 87.1 · ember 93.4 · atelier 93.4 — all clear of 22, zero new findings.
-// Fredoka (primer's display face) went into all eight forbiddenFonts at the
-// same time; the font check only fires on a FIRST-position family, and no
-// sibling page names Fredoka at all.
+// primer violet #7a5cd6 was added to all eight siblings on 2026-08-25, and
+// Fredoka (primer's display face) to all eight forbiddenFonts with it. The
+// measured frame is "every page that links this skin's CSS" — not "canonicals
+// + demos", which is exactly the sampling frame known-bugs §6.6 lesson ③
+// retired: 58 canonicals + 21 demos + both dual-theme skills' second theme +
+// the four skin-versioned roadmap pages + index.html. Nearest own-color
+// distance to the violet, per skill: lectern 49.4 · glass 50.6 · apple 54.5 ·
+// anthropic 65.8 · eclat 83.2 · sage 87.1 · ember 93.4 · atelier 93.4 — every
+// one clear of 22, so no skill's own palette is policed by these entries.
 //
-// One shape to know before adding any forbidden color: several `demos/<skill>/
-// index.html` pages carry a gallery figure that draws each SIBLING skill's look
-// in that sibling's OWN brand color, labelled with its name. Those are
-// quotations, not impersonations. They are why anthropic orange was never
-// enforced on ember and apple blue was never enforced on sage (both measured
-// 2026-08-25 as exact matches on those two demo pages, and both dropped from
-// sprint-contract's mirror rather than added here). No such gallery quotes
-// primer violet today; if one starts to, the warn it raises is a false positive
-// to be exempted here — never a reason to repaint that page.
+// They are NOT findings-free, and the frame is what shows it. GALLERY PAGES
+// quote other skills on purpose: `index.html` and several `demos/<skill>/
+// index.html` carry a figure that draws each SIBLING skill's look in that
+// sibling's OWN brand color and display face, labelled with its name. That is
+// quotation, not impersonation, and it has always produced smells here —
+// index.html already carried 7 (Fraunces, Instrument Serif, Space Grotesk,
+// apple blue, sage green, ember gold, glass cyan). primer's two entries add
+// exactly two more of the same class on that one page: `rgb(122,92,214)` from
+// the primer card's violet and `"Fredoka"` from its wordmark, taking index.html
+// from 7 smells / 8 warnings to 9 / 10. The per-signature dedupe caps it at one
+// warn each no matter how many times the page quotes them.
+//
+// Those two are known false positives. The fix, if they ever become noise, is
+// an exemption HERE — never repainting a gallery page to satisfy the check, and
+// never dropping the entry: anthropic's ten canonicals sit 65.8 from the violet,
+// so the entry still protects every page that is not a gallery.
 const SKILL_SIGNATURES = {
   anthropic: {
     name: 'anthropic orange',
@@ -172,6 +180,16 @@ const SKILL_SIGNATURES = {
       { rgb: [151, 176, 119], note: 'sage green #97B077' },
       { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
       { rgb: [122, 92, 214], note: 'primer violet #7a5cd6' },
+      // Added 2026-08-25 to close a mirror drift: sprint-contract's BRAND has
+      // listed anthropic orange for ember since dcc3714 while this list never
+      // enforced it. Measured over every page linking ember.css — the ten
+      // canonicals sit 38.1 from #d97757 (their own gold #c49464 is the
+      // nearest color), so enforcement is safe where it matters. The only hit
+      // is `demos/ember-design/index.html`, whose gallery figure quotes each
+      // sibling skill in that sibling's brand color; that page already carries
+      // 5 smells of exactly this origin from entries this list does enforce,
+      // so the entry is raised rather than the contract lowered.
+      { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
     ],
     forbiddenFonts: ['Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk', 'Fredoka'],
   },
@@ -184,6 +202,12 @@ const SKILL_SIGNATURES = {
       { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
       { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
       { rgb: [122, 92, 214], note: 'primer violet #7a5cd6' },
+      // Added 2026-08-25, same mirror drift as ember's anthropic orange above.
+      // Sage is nowhere near apple blue: the ten canonicals measure 145.9 from
+      // #0071E3. The only hit is `demos/sage-design/index.html`, whose
+      // architecture figure dots each sibling skill's pill in that skill's
+      // brand color — a page already carrying 3 smells of the same origin.
+      { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
     ],
     forbiddenFonts: ['Fraunces', 'Poppins', 'Lora', 'Space Grotesk', 'Fredoka'],
   },
@@ -198,8 +222,10 @@ const SKILL_SIGNATURES = {
     // prediction was that the aurora violet blobs would false-flag; measured
     // 2026-08-25 they cannot — the blobs live in `background-image` gradients
     // and this check only reads color / background-color / fill / border-color.
-    // Nearest glass color to primer violet across all 4 canonicals + 2 demos,
-    // BOTH themes, is the indigo-as-text #4F46E5 (79,70,229) at distance 50.6,
+    // Nearest glass color to primer violet across all SEVEN pages that link
+    // glass.css (canonicals, demos and the skin-versioned roadmap — the frame
+    // §6.6 lesson ③ established), BOTH themes: the indigo-as-text #4F46E5
+    // (79,70,229) at distance 50.6,
     // clear of the euclidean-22 matcher by 28.6 (aurora violet #A78BFA sits at
     // 74.4). Thinnest margin of the eight after lectern — re-measure before
     // moving any glass token violet-ward. The entry also backs glass's own
@@ -273,17 +299,30 @@ const SKILL_SIGNATURES = {
   },
   primer: {
     name: 'primer violet',
-    accents: [[122, 92, 214]],         // #7a5cd6 — ≥64 per-channel from all 8 sibling accents
+    accents: [[122, 92, 214]],         // #7a5cd6 — nearest sibling accent is lectern's
+                                       // #2f5bb0 at euclidean 84.1, well clear of the
+                                       // brand-presence matcher's 55. (Per-CHANNEL is the
+                                       // wrong reading for this field and flatters it: the
+                                       // green channel differs from #2f5bb0 by just 1.)
     threshold: 0.00485,                 // calibrated 2026-08-24 on the 3 canonicals (measured
                                         // top-1440×500 primer-violet coverage via visual-audit's
                                         // own brand-presence check, forced to print by temporarily
                                         // setting threshold high enough to always warn): concept
                                         // 0.97%, process 1.5%, compare 1.93% — min(0.97%)/2 = 0.485%,
                                         // above the 0.2% floor, so 0.00485 is the final value
-    // ember gold, sage green and lectern navy OMITTED on purpose (spec §4.1):
-    // marker-yellow-over-ink anti-aliasing lands inside TOL 55 of #c49464;
-    // go-green white-blends land inside TOL 55 of #97B077; primer ink #243244
-    // is inside TOL 55 of lectern #1d3a6e and violet-ink #5b3fbf inside #2f5bb0.
+    // ember gold, sage green and lectern navy are OMITTED, but NOT for the
+    // reason spec §4.1 gave and this file used to repeat. That reason was
+    // anti-aliased blends landing "inside TOL 55" — a PIXEL phenomenon, quoted
+    // at the other matcher's tolerance. This list feeds the smell check, which
+    // reads computed colors at euclidean 22 and never sees a blended pixel at
+    // all. Measured 2026-08-25 over every page linking primer.css, nearest
+    // computed color to each: ember gold 93.2 (primer marker #ffd23f) · sage
+    // green 94.3 (go-green #3aa66b) · lectern #1d3a6e 43.3 (primer ink #243244)
+    // · lectern #2f5bb0 54.3 (violet-ink #5b3fbf). All four clear 22 by a wide
+    // margin, so all three COULD be forbidden safely. Adding them is a
+    // behaviour change beyond the task that wrote this note — left as a
+    // follow-up, recorded here so the next reader inherits the measurement
+    // rather than the retracted mechanism.
     forbiddenColors: [
       { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
       { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },

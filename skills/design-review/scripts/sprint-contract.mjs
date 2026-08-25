@@ -84,13 +84,15 @@ const BRAND = {
     minCoverage: '0.01%',
     howTo: 'centered gold `.accent-strip` hairline above every section, gold SVG accent strokes, gold eyebrow text accent',
     forbiddenFonts: ['Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk', 'Fredoka'],
-    // anthropic orange is NOT forbidden here. It sat in this list alone since
-    // dcc3714 while visual-audit never enforced it — a mirror drift found and
-    // closed 2026-08-25. Enforcing it would flag `demos/ember-design/index.html`,
-    // whose SVG gallery draws each sibling skill's look in that sibling's own
-    // brand color, labelled with its name; #d97757 is an exact match there.
-    // That is a deliberate quotation, not an impersonation.
-    forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#22D3EE (glass)', '#7a5cd6 (primer)'],
+    // anthropic orange sat in this list alone from dcc3714 until 2026-08-25,
+    // when visual-audit was raised to enforce it too. The mirror drift is closed
+    // in that direction on purpose: ember's ten canonicals measure 38.1 from
+    // #d97757, so enforcement is safe on the page shape this contract is handed
+    // to a generator for. The one hit is `demos/ember-design/index.html`, whose
+    // gallery figure quotes each sibling skill in that sibling's brand color —
+    // a known false positive, and that page already carries 5 smells of the same
+    // origin from entries the repo does enforce.
+    forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#97B077 (sage)', '#22D3EE (glass)', '#7a5cd6 (primer)'],
   },
   sage: {
     accent: '#97B077 / #d4e1b8',
@@ -98,11 +100,13 @@ const BRAND = {
     minCoverage: '1.5%',
     howTo: '`.sage-nav` with `background: rgba(212,225,184,0.88)` + `border-bottom:#c9d6a8` — the nav band itself carries most of the sage-green coverage',
     forbiddenFonts: ['Fraunces', 'Poppins', 'Lora', 'Space Grotesk', 'Fredoka'],
-    // apple blue is NOT forbidden here — same mirror drift and same reason as
-    // ember's anthropic orange above: `demos/sage-design/index.html` draws an
-    // architecture figure whose pills name each sibling skill and dot it in
-    // that skill's brand color, so #0071E3 appears there on purpose.
-    forbiddenColors: ['#d97757 (anthropic)', '#c49464 (ember)', '#22D3EE (glass)', '#7a5cd6 (primer)'],
+    // apple blue — same mirror drift as ember's anthropic orange above, closed
+    // the same way (raised in visual-audit, kept here). Sage is nowhere near it:
+    // the ten canonicals measure 145.9 from #0071E3. The one hit is
+    // `demos/sage-design/index.html`, whose architecture figure dots each
+    // sibling skill's pill in that skill's brand color — a page already carrying
+    // 3 smells of the same origin.
+    forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#c49464 (ember)', '#22D3EE (glass)', '#7a5cd6 (primer)'],
   },
   glass: {
     accent: '#22D3EE',
@@ -162,7 +166,13 @@ const BRAND = {
     minCoverage: '0.485%',
     howTo: 'violet is carried by the oversized circled step numerals, the analogy-card frame, the nav wordmark dot and the hero illustration primary — a primer page announces its violet in the first screen',
     forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk'],
-    // ember gold / sage green / lectern navy NOT forbidden — mirrors visual-audit.mjs, spec §4.1.
+    // ember gold / sage green / lectern navy NOT forbidden — mirrors visual-audit.mjs.
+    // The reason spec §4.1 gave (anti-aliased blends "inside TOL 55") does NOT hold:
+    // that is a pixel phenomenon quoted at the brand-presence matcher's tolerance,
+    // while this list feeds the smell check at euclidean 22 over computed colors.
+    // Measured 2026-08-25 on every page linking primer.css: ember gold 93.2 ·
+    // sage green 94.3 · lectern #1d3a6e 43.3 · #2f5bb0 54.3 — all three could be
+    // forbidden safely; adding them is a follow-up, not this task's change.
     // Fredoka is primer's OWN display face, so it is absent here and present in all eight siblings.
     forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#22D3EE (glass)', '#ff5b34 (eclat)', '#DD4F92 (atelier)'],
   },
