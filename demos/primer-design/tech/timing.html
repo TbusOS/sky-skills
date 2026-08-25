@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>两块芯片怎么用四根线说话？· 图解读本</title>
+<meta name="description" content="零基础图解：一次 SPI 模式 0 传输的时序——片选拉低、8 个时钟、每个上升沿取走一位，以及数据为什么要提前稳住。One SPI mode-0 transfer, edge by edge.">
+<meta property="og:title" content="两块芯片怎么用四根线说话？· 图解读本">
+<meta property="og:description" content="零基础图解：一次 SPI 模式 0 传输——一根线打拍子，一位一位地把一个字节送过去。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed classes on purpose (verify.py validates
+   * primer-* classes against primer.css; local layout stays unprefixed).
+   * Stroke widths and figure modifiers (primer-fig-wide / primer-fig-hero)
+   * ship from primer.css Sections J + L — nothing stroke-related is
+   * defined per page. */
+
+
+  /* Three circled numerals side by side — layout only, the component itself
+   * is untouched (primer.css Section G owns its type, circle and spacing).
+   * text-wrap: balance keeps each two-line heading from orphaning one glyph. */
+  .steps-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--primer-space-6);
+    margin: var(--primer-space-6) 0 var(--primer-space-7);
+  }
+  .steps-row h3 { text-wrap: balance; }
+  @media (max-width: 768px) {
+    .steps-row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--primer-space-4);
+      margin: var(--primer-space-5) 0 var(--primer-space-6);
+    }
+  }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">Two chips, four wires — how do they talk?</span>
+          <span class="lang-zh">两块芯片，<br>怎么用四根线<br>说话？</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">No hardware background needed. This page takes one transfer, one beat at a time.</span>
+          <span class="lang-zh">不需要任何硬件基础。这一页把一次传输拆成一拍一拍来看。</span>
+        </p>
+      </div>
+      <figure class="primer-figure primer-fig-hero">
+        <svg viewBox="0 0 500 340" role="img"
+          aria-label="一块板子上两块芯片之间拉了四根线，一个字节正在其中一根线上一位一位地过去"
+          data-label-zh="一块板子上两块芯片之间拉了四根线，一个字节正在其中一根线上一位一位地过去"
+          data-label-en="Two chips on one board with four wires between them; a byte is crossing one wire a bit at a time">
+          <!-- the board they both sit on -->
+          <path d="M8 300 C 120 297.5, 380 302.5, 492 299.5" fill="none"/>
+          <path class="primer-hair" d="M40 314 L200 312.8 M244 316 L440 314.6" fill="none"/>
+          <circle class="primer-hair" cx="220" cy="314" r="4" fill="none"/>
+          <circle class="primer-hair" cx="462" cy="313" r="4" fill="none"/>
+
+          <!-- left chip: it holds the byte that is going out -->
+          <path d="M30 96 Q22 96 22 104 L22 258 Q22 266 30 266 L142 266.8 Q150 266.8 150 258.8 L150 104.8 Q150 96.8 142 96.8 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="36" cy="110" r="5" fill="#243244"/>
+          <path class="primer-hair" d="M44 122 L104 122.4 M44 130 L86 130.3" fill="none"/>
+          <path class="primer-hair" d="M44 266 L44 298 M86 266.4 L86 298 M128 266.8 L128 298" fill="none"/>
+          <!-- the byte: seven bits still queued, one already on the wire -->
+          <path d="M40 138 L128 138.5 L128 152 L40 151.5 Z" fill="#7a5cd6"/>
+          <path d="M40 156 L128 156.4 L128 170 L40 169.6 Z" fill="#7a5cd6"/>
+          <path d="M40 174 L128 174.5 L128 188 L40 187.5 Z" fill="#7a5cd6"/>
+          <path d="M40 192 L128 192.4 L128 206 L40 205.6 Z" fill="#7a5cd6"/>
+          <path d="M40 210 L128 210.5 L128 224 L40 223.5 Z" fill="#7a5cd6"/>
+          <path d="M40 228 L128 228.4 L128 242 L40 241.6 Z" fill="#7a5cd6"/>
+          <path d="M40 246 L128 246.5 L128 260 L40 259.5 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M50 145 L118 145.3 M50 163 L118 163.2 M50 181 L118 181.3 M50 199 L118 199.2 M50 217 L118 217.3 M50 235 L118 235.2 M50 253 L118 253.3" fill="none" stroke="#ffffff"/>
+
+          <!-- right chip: eight slots waiting to be filled -->
+          <path d="M358 96 Q350 96 350 104 L350 258 Q350 266 358 266 L470 266.8 Q478 266.8 478 258.8 L478 104.8 Q478 96.8 470 96.8 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="364" cy="110" r="5" fill="#243244"/>
+          <path class="primer-hair" d="M372 122 L432 122.4 M372 130 L414 130.3" fill="none"/>
+          <path class="primer-hair" d="M372 266 L372 298 M414 266.4 L414 298 M456 266.8 L456 298" fill="none"/>
+          <path class="primer-hair" d="M368 138 L456 138.4 L456 151 L368 150.6 Z" fill="none" stroke-dasharray="3 7"/>
+          <path class="primer-hair" d="M368 154 L456 154.4 L456 167 L368 166.6 Z" fill="none" stroke-dasharray="3 7"/>
+          <path class="primer-hair" d="M368 170 L456 170.4 L456 183 L368 182.6 Z" fill="none" stroke-dasharray="3 7"/>
+          <path class="primer-hair" d="M368 186 L456 186.4 L456 199 L368 198.6 Z" fill="none" stroke-dasharray="3 7"/>
+          <path class="primer-hair" d="M368 202 L456 202.4 L456 215 L368 214.6 Z" fill="none" stroke-dasharray="3 7"/>
+          <path class="primer-hair" d="M368 218 L456 218.4 L456 231 L368 230.6 Z" fill="none" stroke-dasharray="3 7"/>
+          <path class="primer-hair" d="M368 234 L456 234.4 L456 247 L368 246.6 Z" fill="none" stroke-dasharray="3 7"/>
+          <path class="primer-hair" d="M368 250 L456 250.4 L456 263 L368 262.6 Z" fill="none" stroke-dasharray="3 7"/>
+
+          <!-- the four wires, each with the direction it is driven in -->
+          <path d="M150 118 L350 118.6" fill="none"/>
+          <path d="M150 164 L350 164.5" fill="none"/>
+          <path d="M150 210.4 L350 210" fill="none"/>
+          <path d="M150 256 L350 256.6" fill="none"/>
+          <path d="M334 118.5 L324 113 M334 118.5 L324 124" fill="none"/>
+          <path d="M340 164.4 L330 159 M340 164.4 L330 170" fill="none"/>
+          <path d="M164 210.3 L174 205 M164 210.3 L174 215.6" fill="none"/>
+          <path d="M334 256.5 L324 251 M334 256.5 L324 262" fill="none"/>
+          <!-- the one bit that is on the wire right now -->
+          <path d="M286 154 L314 154.3 L314 174 L286 173.7 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M292 164 L308 164.2" fill="none" stroke="#ffffff"/>
+
+          <!-- labels (text is painted last) -->
+          <text x="190" y="110" font-size="16" font-weight="700" fill="#243244">SCLK</text>
+          <text x="190" y="156" font-size="16" font-weight="700" fill="#243244">MOSI</text>
+          <text x="190" y="202" font-size="16" font-weight="700" fill="#243244">MISO</text>
+          <text x="190" y="248" font-size="16" font-weight="700" fill="#243244">CS</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Four wires, four jobs: SCLK beats time, MOSI is the master talking. MISO is the slave answering, CS says when the exchange starts. The chip that beats time is the master, the one that follows is the slave. The master drives SCLK, MOSI and CS; the slave drives MISO. Only one bit sits on the wire at a time — a byte takes eight trips.</span>
+          <span class="lang-zh">四根线各有一份活：SCLK 打拍子，MOSI 主机说话，MISO 从机回话，CS 喊开始。打拍子的那块叫主机，跟着的那块叫从机。SCLK、MOSI、CS 由主机驱动，MISO 由从机驱动。线上一次只有一位——一个字节要走 8 趟。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ① 像什么:一个人打拍子,另一个人只在拍子上听 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What are these four wires like?</span>
+        <span class="lang-zh">这四根线像什么？</span>
+      </h2>
+
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">SPI</span><span class="lang-en">SPI</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">the most common four-wire hookup between two chips. The wire that says start also names which chip — hence chip-select.</span>
+          <span class="lang-zh">两块芯片之间最常见的四线接法。喊开始的那根还要点名是哪一块，所以叫片选。</span>
+        </span>
+      </div>
+
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 150" role="img"
+            aria-label="一台节拍器在打拍子，每一拍上递出一张写着数字的牌"
+            data-label-zh="一台节拍器在打拍子，每一拍上递出一张写着数字的牌"
+            data-label-en="A metronome keeps the beat, and on each beat one card with a number on it is handed over">
+            <!-- ground -->
+            <path d="M14 142 C 60 140.5, 130 143, 172 141.5" fill="none"/>
+            <!-- the metronome body -->
+            <path d="M50 136 L74 28 Q75 22 81 22 L104 22.3 Q110 22.3 111 28.3 L134 136.6 Q134 140 130 140 L54 139.6 Q50 139.6 50 136 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M92 36 L92 120" fill="none"/>
+            <path class="primer-hair" d="M84 50 L100 50.2 M84 64 L100 64.2 M84 78 L100 78.2 M84 92 L100 92.2 M84 106 L100 106.2" fill="none"/>
+            <path class="primer-hair" d="M62 130 L122 130.4" fill="none"/>
+            <!-- the swinging rod, mid-swing -->
+            <path d="M92 118 L120 32" fill="none"/>
+            <path class="primer-hair" d="M100 68 L114 64.5 L116.5 75 L102.5 78.5 Z" fill="#fdfaf3"/>
+            <circle class="primer-hair" cx="92" cy="118" r="4" fill="#243244"/>
+            <path class="primer-hair" d="M66 52 C 76 22, 98 12, 120 32" fill="none" stroke-dasharray="2 8"/>
+            <!-- the number said on this beat -->
+            <path d="M130 30 Q126 30 126 34 L126 48 Q126 52 130 52 L160 52.4 Q164 52.4 164 48.4 L164 34.4 Q164 30.4 160 30.4 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M134 43 C 140 39, 146 45, 152 41 S 158 43, 160 41" fill="none" stroke="#ffffff"/>
+            <path class="primer-hair" d="M168 34 L175 31 M169 42 L176 42.4 M168 50 L175 53" fill="none"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p class="primer-analogy-lead"><span class="lang-en">It's like…</span><span class="lang-zh">就像……</span></p>
+          <p>
+            <span class="lang-en">One person taps a beat; the other listens only on the beat. Nobody agrees on speed beforehand — the tapper just stays under what the listener can follow.</span>
+            <span class="lang-zh">一个人打拍子，另一个人只在拍子上听。两个人不用先商量快慢——只要别快过对方跟得上的速度。</span>
+          </p>
+        </div>
+      </div>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 500" role="img"
+          aria-label="打拍子那一头的每一样，芯片那一头都有对上的一样：摇铃对片选，拍子对时钟线，念的数字对数据线上的那一位"
+          data-label-zh="打拍子那一头的每一样，芯片那一头都有对上的一样：摇铃对片选，拍子对时钟线，念的数字对数据线上的那一位"
+          data-label-en="Every piece of the beat side has a twin on the chip side: the bell is the chip-select, the beat is the clock wire, the spoken number is the bit on the data wire">
+          <!-- the chip row rides a violet-tinted panel: that row is the one being taught -->
+          <path d="M48 270 Q40 270 40 278 L40 432 Q40 440 48 440 L852 440.8 Q860 440.8 860 432.8 L860 278.8 Q860 270.8 852 270.8 Z" fill="#efe9fc" stroke="none"/>
+          <!-- three separate things, three cells: the row is not one trace -->
+          <path class="primer-hair" d="M118 300 L302 300.4 L302 400 L118 399.6 Z" fill="none"/>
+          <path class="primer-hair" d="M362 300 L546 300.4 L546 400 L362 399.6 Z" fill="none"/>
+          <path class="primer-hair" d="M606 300 L790 300.4 L790 400 L606 399.6 Z" fill="none"/>
+
+          <!-- top · the bell that says "starting now" — first thing that happens -->
+          <g transform="rotate(-7 210 150)">
+            <path d="M188 106 C 182 128, 170 148, 158 166 L262 166.8 C 250 148, 238 128, 232 106.4 Z" fill="#ffffff"/>
+            <path d="M156 167 L264 167.8" fill="none"/>
+            <path d="M210 104 L210 82" fill="none"/>
+            <circle cx="210" cy="74" r="8" fill="#ffffff"/>
+            <path class="primer-hair" d="M194 118 C 202 114, 218 114, 226 118" fill="none"/>
+            <path class="primer-hair" d="M168 156 C 200 158.5, 222 158.5, 252 156" fill="none"/>
+            <path class="primer-hair" d="M210 168 L210 180" fill="none"/>
+            <circle class="primer-hair" cx="210" cy="185" r="6" fill="#243244"/>
+          </g>
+          <path class="primer-hair" d="M138 122 L150 127 M132 140 L145 140.4 M138 158 L150 153" fill="none"/>
+          <path class="primer-hair" d="M282 122 L270 127 M288 140 L275 140.4 M282 158 L270 153" fill="none"/>
+
+          <!-- top · the metronome -->
+          <path d="M392 198 L422 100 Q423 92 431 92 L466 92.4 Q474 92.4 475 100.4 L506 198.6 Q506 202 502 202 L396 201.6 Q392 201.6 392 198 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M448 106 L448 178" fill="none"/>
+          <path class="primer-hair" d="M439 120 L457 120.2 M439 134 L457 134.2 M439 148 L457 148.2 M439 162 L457 162.2" fill="none"/>
+          <path class="primer-hair" d="M410 188 L488 188.5" fill="none"/>
+          <path d="M448 176 L480 66" fill="none"/>
+          <path class="primer-hair" d="M456 148 L470 145 L472.5 156 L458.5 159 Z" fill="#fdfaf3"/>
+          <circle class="primer-hair" cx="448" cy="176" r="5" fill="#243244"/>
+          <path class="primer-hair" d="M410 92 C 430 62, 456 54, 480 66" fill="none" stroke-dasharray="2 8"/>
+
+          <!-- top · the number said on this beat — ink and white, the metaphor
+           * row never wears the brand colour (canonical process.md decision 3) -->
+          <path class="primer-hair" d="M666 112 Q660 112 660 118 L660 146 Q660 152 666 152 L754 152.6 Q760 152.6 760 146.6 L760 118.6 Q760 112.6 754 112.6 Z" fill="#fdfaf3"/>
+          <path d="M650 126 Q644 126 644 132 L644 172 Q644 178 650 178 L742 178.6 Q748 178.6 748 172.6 L748 132.6 Q748 126.6 742 126.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M656 142 C 668 137, 680 145, 692 140 S 714 144, 730 140" fill="none"/>
+          <path class="primer-hair" d="M762 136 L774 131 M763 152 L776 152.4 M762 168 L774 173" fill="none"/>
+
+          <!-- each piece points at its twin -->
+          <path class="primer-hair" d="M210 214 L210 262 M210 214 L204 226 M210 214 L216 226 M210 262 L204 250 M210 262 L216 250" fill="none"/>
+          <path class="primer-hair" d="M450 214 L450 262 M450 214 L444 226 M450 214 L456 226 M450 262 L444 250 M450 262 L456 250" fill="none"/>
+          <path class="primer-hair" d="M700 214 L700 262 M700 214 L694 226 M700 214 L706 226 M700 262 L694 250 M700 262 L706 250" fill="none"/>
+
+          <!-- bottom · the chip-select going low, first -->
+          <path d="M136 330 L180 330 L180 382 L284 382.6" fill="none"/>
+          <path class="primer-hair" d="M162 346 L162 366 M162 366 L158 358 M162 366 L166 358" fill="none"/>
+
+          <!-- bottom · the clock wire -->
+          <path d="M378 382 L410 382 L410 330 L436 330 L436 382 L462 382 L462 330 L488 330 L488 382 L514 382 L514 330 L538 330 L538 382 L542 382" fill="none"/>
+
+          <!-- bottom · the data wire, one bit on it — the one violet subject -->
+          <path class="primer-hair" d="M614 356 L646 356" fill="none" stroke-dasharray="2 9"/>
+          <path d="M646 356 L654 330 L722 330.4 L730 356 L722 382 L654 381.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M730 356 L782 356" fill="none" stroke-dasharray="2 9"/>
+
+          <!-- labels -->
+          <text x="696" y="170" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">7</text>
+          <text class="lang-zh" x="52" y="44" font-size="17" font-weight="700" fill="#243244">打拍子那一头</text>
+          <text class="lang-en" x="52" y="44" font-size="17" font-weight="700" fill="#243244">the beat side</text>
+          <text class="lang-zh" x="52" y="292" font-size="17" font-weight="700" fill="#243244">两块芯片那一头</text>
+          <text class="lang-en" x="52" y="292" font-size="17" font-weight="700" fill="#243244">the two-chip side</text>
+          <text class="lang-zh" x="210" y="470" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">摇铃 ↔ 片选</text>
+          <text class="lang-en" x="210" y="470" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">the bell ↔ chip-select</text>
+          <text class="lang-zh" x="450" y="470" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">拍子 ↔ 时钟线</text>
+          <text class="lang-en" x="450" y="470" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">beat ↔ clock wire</text>
+          <text class="lang-zh" x="700" y="470" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">念的数字 ↔ 那一位</text>
+          <text class="lang-en" x="700" y="470" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">the number ↔ that one bit</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Each piece above has a twin below. The bell is the chip-select, the beat is the clock wire, the number is the one bit. Left to right is the real order — the bell rings first.</span>
+          <span class="lang-zh">打拍子那一头的每一样，芯片那一头都有对上的一样。摇铃是片选，拍子是时钟线，数字是数据线上的那一位。从左往右就是真实次序——先摇铃。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ② 时钟是什么:一拍就是从低跳到高的那一下 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">The clock is that beat</span>
+        <span class="lang-zh">时钟就是那个拍子</span>
+      </h2>
+
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">模式 0（CPOL=0、CPHA=0）</span><span class="lang-en">mode 0 (CPOL=0, CPHA=0)</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">SPI's most used clock mode. The clock idles low. A bit is read on the rising edge (low to high) — a datasheet calls that moment the sample. The next bit appears on the falling edge.</span>
+          <span class="lang-zh">SPI 四种时钟模式里最常用的一种。时钟闲着是低的。上升沿（从低跳到高）读走一位，手册把这一下叫采样。下降沿（从高跳到低）换下一位。</span>
+        </span>
+      </div>
+
+      <p>
+        <span class="lang-en">The clock is one wire swinging between high and low; one swing is <span class="primer-mark">one beat</span>.</span>
+        <span class="lang-zh">时钟就是一根线在高低之间来回，来回一趟算<span class="primer-mark">一拍</span>。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 520" role="img"
+          aria-label="时钟线从芯片出来，在高低之间来回；一个来回就是一拍，1 MHz 时一拍一微秒"
+          data-label-zh="时钟线从芯片出来，在高低之间来回；一个来回就是一拍，1 MHz 时一拍一微秒"
+          data-label-en="The clock wire leaves the chip and swings between high and low; one swing is one beat, and at 1 MHz a beat is one microsecond">
+          <!-- the beat being measured sits on a violet-tinted band -->
+          <path d="M300 110 L420 110 L420 214 L300 214 Z" fill="#efe9fc" stroke="none"/>
+
+          <!-- the chip the clock comes out of -->
+          <path d="M32 136 Q24 136 24 144 L24 258 Q24 266 32 266 L152 266.8 Q160 266.8 160 258.8 L160 144.8 Q160 136.8 152 136.8 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="38" cy="150" r="5" fill="#243244"/>
+          <path class="primer-hair" d="M46 164 L118 164.4 M46 174 L98 174.3" fill="none"/>
+          <path class="primer-hair" d="M16 172 L24 172 M16 202 L24 202 M16 232 L24 232" fill="none"/>
+          <path class="primer-hair" d="M60 128 L60 136 M92 128 L92 136 M124 128 L124 136" fill="none"/>
+          <path class="primer-hair" d="M60 266 L60 274 M92 266.4 L92 274 M124 266.6 L124 274" fill="none"/>
+
+          <!-- the clock wire, then the square wave itself -->
+          <path d="M160 202 L262 202" fill="none"/>
+          <path d="M262 202 L300 202 L300 122 L360 122 L360 202 L420 202 L420 122 L480 122 L480 202 L540 202 L540 122 L600 122 L600 202 L660 202 L660 122 L720 122 L720 202 L780 202 L780 122 L840 122 L840 202 L876 202" fill="none"/>
+
+          <!-- the moment the bit is read -->
+          <circle cx="300" cy="162" r="7" fill="#ffd23f"/>
+          <path class="primer-hair" d="M300 122 L300 106" fill="none"/>
+
+          <!-- one beat, measured — same grammar as the setup/hold arrows -->
+          <path class="primer-hair" d="M300 214 L300 262 M420 214 L420 262" fill="none"/>
+          <path d="M302 247 L418 247" fill="none" stroke="#7a5cd6"/>
+          <path d="M302 247 L315 240 M302 247 L315 254 M418 247 L405 240 M418 247 L405 254" fill="none" stroke="#7a5cd6"/>
+
+          <!-- the beats keep coming: one mark per rising edge -->
+          <path class="primer-hair" d="M300 262 L300 368 M420 262 L420 368 M540 214 L540 368 M660 214 L660 368 M780 214 L780 368" fill="none" stroke-dasharray="2 9"/>
+          <path class="primer-hair" d="M180 380 L878 380.6" fill="none"/>
+          <path d="M878 380.6 L868 375 M878 380.6 L868 386" fill="none"/>
+          <circle class="primer-hair" cx="300" cy="380" r="4" fill="#ffffff"/>
+          <circle class="primer-hair" cx="420" cy="380" r="4" fill="#ffffff"/>
+          <circle class="primer-hair" cx="540" cy="380" r="4" fill="#ffffff"/>
+          <circle class="primer-hair" cx="660" cy="380" r="4" fill="#ffffff"/>
+          <circle class="primer-hair" cx="780" cy="380" r="4" fill="#ffffff"/>
+
+          <!-- labels -->
+          <text x="166" y="192" font-size="16" font-weight="700" fill="#243244">SCLK</text>
+          <text class="lang-zh" x="206" y="116" font-size="15" font-weight="600" fill="#55617a">高</text>
+          <text class="lang-en" x="206" y="116" font-size="15" font-weight="600" fill="#55617a">high</text>
+          <text class="lang-zh" x="206" y="228" font-size="15" font-weight="600" fill="#55617a">低</text>
+          <text class="lang-en" x="206" y="228" font-size="15" font-weight="600" fill="#55617a">low</text>
+          <text class="lang-zh" x="310" y="98" font-size="16" font-weight="700" fill="#243244">上升沿</text>
+          <text class="lang-en" x="310" y="98" font-size="16" font-weight="700" fill="#243244">the rising edge</text>
+          <text class="lang-zh" x="360" y="286" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">1 MHz 时，一拍 = 1 微秒</text>
+          <text class="lang-en" x="360" y="286" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">at 1 MHz, one beat = 1 µs</text>
+          <text class="lang-zh" x="866" y="408" text-anchor="end" font-size="15" font-weight="600" fill="#55617a">时间</text>
+          <text class="lang-en" x="866" y="408" text-anchor="end" font-size="15" font-weight="600" fill="#55617a">time</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The clock idles low, and in mode 0 a bit is read on the rising edge. 1 MHz means a million beats a second, so one beat is one microsecond. A blink fits 100,000 beats.</span>
+          <span class="lang-zh">时钟闲着是低的，模式 0 在上升沿读走一位。1 MHz 就是每秒一百万拍，所以一拍 1 微秒。眨一次眼，够打十万拍。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ③ 怎么运作:片选拉低,8 拍,每个上升沿取一位 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">One byte, eight beats</span>
+        <span class="lang-zh">一个字节，8 拍走完</span>
+      </h2>
+
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">一位 / 一个字节</span><span class="lang-en">one bit / one byte</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">high or low only: a beat carries one 0 or 1 — a bit. Eight bits make a byte, top bit b7 first down to b0.</span>
+          <span class="lang-zh">线上只有高低两档，一拍只送一个 0 或 1，这就是一位。8 位是一个字节，图上从最高位 b7 先走到 b0。</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- the waveform is the one figure that needs the 1280 tier (tech-figures
+     * §2): 88 units per beat only reads at 960 viewBox units wide. The prose
+     * above stays in the 1080 container so every section keeps one left edge. -->
+    <div class="primer-container primer-container--wide">
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 960 440" role="img"
+          aria-label="模式 0 的一次传输：片选拉低后打 8 拍，每个上升沿取走一位，第一位在片选拉低时就摆好了"
+          data-label-zh="模式 0 的一次传输：片选拉低后打 8 拍，每个上升沿取走一位，第一位在片选拉低时就摆好了"
+          data-label-en="One mode-0 transfer: the chip-select drops, eight beats follow, each rising edge takes one bit, and the first bit was already placed when the chip-select dropped">
+          <!-- the pair these four rows belong to -->
+          <path class="primer-hair" d="M30 2 Q24 2 24 8 L24 36 Q24 42 30 42 L68 42.4 Q74 42.4 74 36.4 L74 8.4 Q74 2.4 68 2.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M134 2 Q128 2 128 8 L128 36 Q128 42 134 42 L172 42.4 Q178 42.4 178 36.4 L178 8.4 Q178 2.4 172 2.4 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="32" cy="10" r="3" fill="#243244"/>
+          <circle class="primer-hair" cx="136" cy="10" r="3" fill="#243244"/>
+          <path class="primer-hair" d="M74 11 L128 11.3 M74 19 L128 19.2 M74 27 L128 27.3 M74 35 L128 35.2" fill="none"/>
+
+          <!-- the same instant on every row -->
+          <path class="primer-hair" d="M200 52 L200 388" fill="none" stroke-dasharray="2 9"/>
+          <path class="primer-hair" d="M332 128 L332 388 M420 128 L420 388 M508 128 L508 388 M596 128 L596 388 M684 128 L684 388 M772 128 L772 388 M860 128 L860 388" fill="none" stroke-dasharray="2 9"/>
+          <path class="primer-hair" d="M244 52 L244 388" fill="none"/>
+
+          <!-- chip-select: low means "I am talking to you" -->
+          <path d="M152 60 L200 60 L200 100 L930 100 L930 60 L936 60" fill="none"/>
+
+          <!-- the clock: eight beats, idle low at both ends -->
+          <path d="M152 176 L244 176 L244 136 L288 136 L288 176 L332 176 L332 136 L376 136 L376 176 L420 176 L420 136 L464 136 L464 176 L508 176 L508 136 L552 136 L552 176 L596 176 L596 136 L640 136 L640 176 L684 176 L684 136 L728 136 L728 176 L772 176 L772 136 L816 136 L816 176 L860 176 L860 136 L904 136 L904 176 L936 176" fill="none"/>
+
+          <!-- MOSI: eight windows, each one bit wide; the first one is the bit being taught -->
+          <path class="primer-hair" d="M152 232 L200 232" fill="none" stroke-dasharray="2 9"/>
+          <path d="M200 232 L208 212 L280 212 L288 232 L280 252 L208 252 Z" fill="#7a5cd6"/>
+          <path d="M288 232 L296 212 L368 212 L376 232 L368 252 L296 252 Z" fill="#ffffff"/>
+          <path d="M376 232 L384 212 L456 212 L464 232 L456 252 L384 252 Z" fill="#ffffff"/>
+          <path d="M464 232 L472 212 L544 212 L552 232 L544 252 L472 252 Z" fill="#ffffff"/>
+          <path d="M552 232 L560 212 L632 212 L640 232 L632 252 L560 252 Z" fill="#ffffff"/>
+          <path d="M640 232 L648 212 L720 212 L728 232 L720 252 L648 252 Z" fill="#ffffff"/>
+          <path d="M728 232 L736 212 L808 212 L816 232 L808 252 L736 252 Z" fill="#ffffff"/>
+          <path d="M816 232 L824 212 L896 212 L904 232 L896 252 L824 252 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M904 232 L936 232" fill="none" stroke-dasharray="2 9"/>
+
+          <!-- MISO: the other side answers on the same windows -->
+          <path class="primer-hair" d="M152 308 L200 308" fill="none" stroke-dasharray="2 9"/>
+          <path d="M200 308 L208 288 L280 288 L288 308 L280 328 L208 328 Z" fill="#ffffff"/>
+          <path d="M288 308 L296 288 L368 288 L376 308 L368 328 L296 328 Z" fill="#ffffff"/>
+          <path d="M376 308 L384 288 L456 288 L464 308 L456 328 L384 328 Z" fill="#ffffff"/>
+          <path d="M464 308 L472 288 L544 288 L552 308 L544 328 L472 328 Z" fill="#ffffff"/>
+          <path d="M552 308 L560 288 L632 288 L640 308 L632 328 L560 328 Z" fill="#ffffff"/>
+          <path d="M640 308 L648 288 L720 288 L728 308 L720 328 L648 328 Z" fill="#ffffff"/>
+          <path d="M728 308 L736 288 L808 288 L816 308 L808 328 L736 328 Z" fill="#ffffff"/>
+          <path d="M816 308 L824 288 L896 288 L904 308 L896 328 L824 328 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M904 308 L936 308" fill="none" stroke-dasharray="2 9"/>
+
+          <!-- the alignment line continues across both data rows: the same
+           * instant, the value each side is holding -->
+          <path class="primer-hair" d="M244 214 L244 250" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M244 290 L244 326" fill="none"/>
+
+          <!-- the sampling instant, marked once -->
+          <circle cx="244" cy="156" r="7" fill="#ffd23f"/>
+          <path class="primer-hair" d="M248 148 L253 131" fill="none"/>
+
+          <!-- who drives which row -->
+          <path class="primer-hair" d="M112 86 L136 86 M136 86 L128 81 M136 86 L128 91" fill="none"/>
+          <path class="primer-hair" d="M112 162 L136 162 M136 162 L128 157 M136 162 L128 167" fill="none"/>
+          <path class="primer-hair" d="M112 238 L136 238 M136 238 L128 233 M136 238 L128 243" fill="none"/>
+          <path class="primer-hair" d="M136 314 L112 314 M112 314 L120 309 M112 314 L120 319" fill="none"/>
+
+          <!-- eight bit-times, bracketed -->
+          <path class="primer-hair" d="M200 44 L904 44.6 M200 44 L200 54 M904 44.6 L904 54.6" fill="none"/>
+
+          <!-- time runs to the right -->
+          <path class="primer-hair" d="M152 392 L930 392.6" fill="none"/>
+          <path class="primer-hair" d="M244 388 L244 397 M332 388 L332 397 M420 388 L420 397 M508 388 L508 397 M596 388 L596 397 M684 388 L684 397 M772 388 L772 397 M860 388 L860 397" fill="none"/>
+          <path d="M930 392.6 L920 387 M930 392.6 L920 398" fill="none"/>
+
+          <!-- labels -->
+          <text x="28" y="92" font-size="16" font-weight="700" fill="#243244">CS</text>
+          <text x="28" y="168" font-size="16" font-weight="700" fill="#243244">SCLK</text>
+          <text x="28" y="244" font-size="16" font-weight="700" fill="#243244">MOSI</text>
+          <text x="28" y="320" font-size="16" font-weight="700" fill="#243244">MISO</text>
+          <text class="lang-zh" x="552" y="34" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">8 拍 = 8 微秒（1 MHz 时）</text>
+          <text class="lang-en" x="552" y="34" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">eight beats = 8 µs at 1 MHz</text>
+          <text class="lang-zh" x="258" y="124" font-size="15" font-weight="600" fill="#243244">采样点</text>
+          <text class="lang-en" x="258" y="124" font-size="15" font-weight="600" fill="#243244">sampled here</text>
+          <text x="262" y="239" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">b7</text>
+          <text x="878" y="239" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">b0</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Mode 0: the first bit is placed by the chip-select drop. Every later bit changes on a falling edge. MISO is the slave answering on the same eight windows. Only one sample point is circled; all eight sample. At 1 MHz a beat is 1 µs, so 8 bits take 8 µs. Sound moves 2.7 mm in that time.</span>
+          <span class="lang-zh">模式 0：第一位在片选拉低时就摆好，之后每一位都在下降沿换。MISO 那一行是从机在同样 8 个窗口里回话。图上只圈了第一个采样点，8 个上升沿都在采。1 MHz 时一拍 1 微秒，8 位约走 8 微秒——声音只走约 2.7 毫米。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ④ 为什么重要:提前稳住,采完再撑一会儿 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Why the data has to settle early</span>
+        <span class="lang-zh">为什么数据要提前稳住</span>
+      </h2>
+
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">建立 / 保持时间</span><span class="lang-en">setup / hold time</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">how long the data must be steady before the sampling edge (setup). How long it must stay put after it (hold).</span>
+          <span class="lang-zh">采样那一下之前，数据要先稳住多久（建立）。采完之后，还要再撑住多久（保持）。</span>
+        </span>
+      </div>
+
+      <p>
+        <span class="lang-en">The data must settle <span class="primer-mark">before</span> the sampling edge, and hold still after it.</span>
+        <span class="lang-zh">数据要在采样那一下<span class="primer-mark">之前就稳住</span>，采完还得再撑一会儿。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 520" role="img"
+          aria-label="放大看一拍：数据在下降沿换好，稳住等到上升沿被采走，采完再撑一会儿才允许变"
+          data-label-zh="放大看一拍：数据在下降沿换好，稳住等到上升沿被采走，采完再撑一会儿才允许变"
+          data-label-en="One beat, zoomed in: the data changes on the falling edge, holds steady until the rising edge samples it, and stays put a while after">
+          <!-- this whole picture is one beat -->
+          <path class="primer-hair" d="M220 80 L840 80.6 M220 80 L220 92 M840 80.6 L840 92.6" fill="none"/>
+
+          <!-- the two edges that matter, and the instant between them -->
+          <path class="primer-hair" d="M220 110 L220 392 M840 110 L840 392" fill="none" stroke-dasharray="2 9"/>
+          <path class="primer-hair" d="M530 110 L530 432" fill="none"/>
+          <path class="primer-hair" d="M432 300 L432 412 M628 300 L628 412" fill="none" stroke-dasharray="2 9"/>
+
+          <!-- the clock: falls, waits low, rises, waits high, falls again -->
+          <path d="M100 120 L220 120 L220 190 L530 190 L530 120 L840 120 L840 190 L864 190" fill="none"/>
+          <circle cx="530" cy="155" r="7" fill="#ffd23f"/>
+
+          <!-- the data line: the previous bit, this bit, the next bit -->
+          <path d="M96 300 L204 300 L220 335 L204 370 L96 370" fill="#ffffff"/>
+          <path d="M220 335 L236 300 L824 300.4 L840 335 L824 370 L236 369.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M260 335 L800 335.4" fill="none" stroke="#ffffff" stroke-dasharray="2 12"/>
+          <path class="primer-hair" d="M530 302 L530 368" fill="none" stroke="#ffffff"/>
+          <path d="M840 335 L856 300 L868 300 M840 335 L856 370 L868 370" fill="none"/>
+          <path class="primer-hair" d="M206 292 L218 318" fill="none"/>
+
+          <!-- the two margins the datasheet talks about -->
+          <path d="M432 418 L524 418 M432 418 L442 412 M432 418 L442 424 M524 418 L514 412 M524 418 L514 424" fill="none"/>
+          <path d="M536 418 L628 418 M536 418 L546 412 M536 418 L546 424 M628 418 L618 412 M628 418 L618 424" fill="none"/>
+
+          <!-- the lens: this screen is one beat under a magnifier -->
+          <circle cx="112" cy="432" r="42" fill="none"/>
+          <circle class="primer-hair" cx="112" cy="432" r="33" fill="none"/>
+          <path class="primer-hair" d="M96 414 C 104 406, 116 404, 124 408" fill="none"/>
+          <path d="M141 461 L172 492" fill="none"/>
+          <path class="primer-hair" d="M150 470 L163 483" fill="none"/>
+
+          <!-- labels -->
+          <text x="24" y="162" font-size="16" font-weight="700" fill="#243244">SCLK</text>
+          <text x="24" y="342" font-size="16" font-weight="700" fill="#243244">MOSI</text>
+          <text class="lang-zh" x="530" y="66" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">这一段就是一拍</text>
+          <text class="lang-en" x="530" y="66" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">this span is one beat</text>
+          <text class="lang-zh" x="546" y="106" font-size="16" font-weight="700" fill="#243244">采样沿</text>
+          <text class="lang-en" x="546" y="106" font-size="16" font-weight="700" fill="#243244">the sampling edge</text>
+          <text class="lang-zh" x="112" y="286" font-size="15" font-weight="600" fill="#243244">数据在这儿换</text>
+          <text class="lang-en" x="112" y="286" font-size="15" font-weight="600" fill="#243244">the data changes here</text>
+          <text class="lang-zh" x="480" y="452" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">建立</text>
+          <text class="lang-en" x="480" y="452" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">setup</text>
+          <text class="lang-zh" x="580" y="452" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">保持</text>
+          <text class="lang-en" x="580" y="452" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">hold</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Not to scale: real parts want tens of nanoseconds, a few percent of a 1 µs beat. Miss either one and the sample lands on the previous bit.</span>
+          <span class="lang-zh">箭头没有按比例画：真器件常是几十纳秒，只占 1 微秒一拍的百分之几。差一点，采到的就是上一位。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑤ 三个时刻 + 回顾 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">One transfer, three moments</span>
+        <span class="lang-zh">一次传输，三个时刻</span>
+      </h2>
+      <!-- The circled numerals belong to the three moments the waveform draws
+       * left to right, not to the four sections — so they live here, beside
+       * the recap, where no section-order promise is made. -->
+      <div class="steps-row">
+        <div class="primer-step primer-step--centered">
+          <span class="primer-step-num">1</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">CS drops, first bit ready</span>
+              <span class="lang-zh">片选拉低，摆好首位</span>
+            </h3>
+          </div>
+        </div>
+        <div class="primer-step primer-step--centered">
+          <span class="primer-step-num">2</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">Eight rising edges, a bit each</span>
+              <span class="lang-zh">8 个上升沿各取一位</span>
+            </h3>
+          </div>
+        </div>
+        <div class="primer-step primer-step--centered">
+          <span class="primer-step-num">3</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">CS released, this one is over</span>
+              <span class="lang-zh">片选放开，这次说完</span>
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      <aside class="primer-recap">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Two chips need only four wires: one beat, two for data, one to say start.</span>
+              <span class="lang-zh">两块芯片说话只要四根线：一根拍子，两根数据，一根喊开始。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Both sides trade a byte at once — you send a bit, it answers a bit.</span>
+              <span class="lang-zh">两边同时各换一个字节：你发一位，它就回一位。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Data settles early and holds after — that is what the setup and hold numbers govern.</span>
+              <span class="lang-zh">数据要提前稳住、采完再撑一会儿。手册上的建立与保持时间管的就是这个。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Technical explainer · primer-design · one SPI mode-0 transfer, edge by edge</span>
+    <span class="lang-zh">技术图解 · primer-design · 一次 SPI 模式 0 传输，一个沿一个沿地看</span>
+    · 2026-08-25
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+    /* CSS only hides the other language's <text>; an SVG's aria-label is an
+     * attribute, so EN mode must swap it here or screen readers hear Chinese
+     * under html[lang="en"]. The static aria-label in the markup is the zh
+     * default for the no-JS case. */
+    document.querySelectorAll('svg[data-label-zh]').forEach(function (s) {
+      s.setAttribute('aria-label',
+        s.getAttribute(lang === 'zh' ? 'data-label-zh' : 'data-label-en'));
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: primer
+Page-type: process (technical · timing)
+Created: 2026-08-25
+
+Decisions (6):
+1. [mode-fixed-then-obeyed] chose "declare SPI mode 0 once in a term bubble — with the CPOL/CPHA spelling a datasheet uses — and hold every edge to it" over "talk about SPI sampling in general". Because: the sampling edge is mode-dependent, so a figure that shows a rising-edge sample without naming the mode teaches a rule that is false in three of the four modes (tech-figures §2). The bubble spells out all three conventions the page then draws — idle low, read on the rising edge, change on the falling edge — and the waveform figcaption repeats them so a reader who only reads captions still gets the qualifier.
+2. [first-bit-is-not-a-falling-edge] chose "open b7's window at the chip-select's falling edge, and say so in the caption" over "the compressed line 'every bit changes on the falling edge'". Because: in mode 0 the first bit is presented when CS asserts — there is no falling edge before it. The figure is built on that geometry (b7's window runs from the CS edge to the first falling edge, sampled at its centre by the first rising edge), and the caption states the exception rather than smoothing it away.
+3. [violet-is-the-beat-and-its-bit] chose "violet marks the beat and the one bit that beat carries — the queued byte and the bit in flight in the hero, the measured beat in the clock figure, b7's window in the waveform, the sampled bit in the zoom" over "violet as section decoration". Because: 'one beat carries one bit' is the whole thesis of the page, so the signature colour is the thesis. In the mapping figure violet stays on the chip row only and the metaphor row is ink-and-white, the way the process canonical rules it (its takeout row keeps no violet); the analogy card's own number slip is the one sanctioned bridge. Yellow has a single job page-wide — the instant the bit is read — and appears exactly once per figure.
+4. [one-yellow-dot-disclosed] chose "circle only the first sampling point and say in the caption that all eight rising edges sample" over "eight yellow dots". Because: illustration-craft §9 gives yellow one spot per figure; eight marks turn a marker stroke into a fill colour. The hair grid line on every rising edge, running down to the time axis, carries the repetition; the caption carries the fact.
+5. [numerals-mark-moments-not-sections] chose "three circled numerals in the closing screen, over the recap, naming the three moments the waveform draws left to right" over both "number the four sections" and "no numeral at all". Because: the sequence on this page runs across one figure, not down the page, so numbering sections would promise an order that does not exist — but the numeral is a primer signature and the moments are real. It cannot sit inside the waveform section: that figure is capped at 587px rendered, which leaves 473px of text budget, and a numeral row (≈110px) plus the bit/byte bubble plus a caption that must carry four conventions does not fit under dos-and-donts §1's half-the-section rule. The closing screen is ratio-exempt, so the component lands there intact.
+6. [translate-the-word-used-most] chose "a bubble for 一位 / 一个字节 in the byte section, 主机 / 从机 defined in the hero figcaption where they are first used, and 采样 glossed inside the mode-0 bubble" over "bubbles only for SPI, mode 0 and setup/hold". Because: 位 is the page's most repeated noun — hero to recap — and 'one beat carries one bit' is meaningless without it. That bubble names MSB as what the figure DRAWS ("这里先走最高位"), never as a definition of the term: which bit goes first is a per-device setting, and defining MSB by transmission order is exactly the sentence an engineer would come back to correct. 帧 / frame is dropped from both languages rather than left untranslated. The byte section then runs with no prose at all: the bubble is the sentence.
+
+Known trade-offs:
+- Section ratios under dos-and-donts §1's ruled yardstick (figure svg + analogy-fig column only), 1440 viewport, measured in both languages: 0.562 / 0.545 / 0.539 / 0.545 zh and 0.562 / 0.533 / 0.528 / 0.545 en. Figures run 500 / 520 / 440 / 520 viewBox units.
+- ONE FIGURE ON THIS PAGE PADS ITS BOX AND IS NOT FIXED. The clock figure's drawing occupies y 82..413 of a 520-unit box, so 189 units — 36% — are dead margin, above illustration-craft §8's 24-unit cap. Closing the box on the drawing gives 900x379, 455px rendered, and the section falls to 0.466 zh / 0.454 en: it would fail dos-and-donts §1. The drawing cannot honestly grow into the space either. Its content is 900 wide by 331 tall, and the three levers that would change that are all worse than the margin: a square wave taller than its own 120-unit period reads as spikes, not a clock; lengthening the dashed run under the wave is whitespace with lines in it; and narrowing the viewBox to 720 to buy rendered height would put this one figure's stroke at 5.1px against the page's 3.0-4.1px and off the 900-calibrated primer-fig-wide stair. The section cannot shed text either: the mode-0 bubble is the page's only statement of CPOL/CPHA and 模式 0 is reused in the byte section and the recap, so it cannot move, and no other section can absorb it without failing the same ratio. Recorded here rather than papered over.
+- The waveform is 960x440 rather than the 960x400 tech-figures §2 quotes: the horizontal budget is §2's exactly (signal names 24-140, wave 152-936, 48 + 8x88 + 32, 76-unit row pitch), but 400 units renders 533px and leaves 473px of text for a section that needs a term bubble AND a caption carrying four conventions. 440 renders 587px, still 53px under the 640px ceiling and inside the 480-unit limit for a 960 viewBox in the wide tier.
+- That section is the page's only --wide container, and only its figure sits in it — the h2 and the bubble keep the 1080 container so all four sections share one left edge (measured: every h2 at x=180, only the waveform svg at x=80).
+- Bit order is a per-device setting, not part of the mode, so it is stated in the bit/byte bubble as "top bit (MSB) first" — what the figure draws — rather than as a rule about SPI. Same reason both period labels carry "at 1 MHz" inside the figure: those numbers are only true at a stated clock, and the caption gives MHz its plain meaning (a million beats a second).
+- One page, one grammar per operation: a measured span is always a double-headed arrow (the beat in the clock figure, setup and hold in the zoom), an instant is always the single yellow dot, and a signal that continues past the frame always runs off the edge or fades to a hair dash. The clock figure's beat was first drawn as a filled violet bar, which read as a block rather than as a measurement.
+- The three waveform figures each keep one drawn object so the lower half of the page does not read as a datasheet appendix: the clock leaves a chip with pin stubs, the transfer figure carries the two-chip pair in its corner, the zoom sits under a magnifier.
+- Setup and hold are drawn ~1/6 of a beat wide against real values of a few percent. There is no honest way to draw tens of nanoseconds on a 1 µs beat, so the figcaption says the arrows are not to scale — the one disclosure tech-figures §2 requires by name.
+- The analogy says nobody has to agree on speed beforehand, with the clause that keeps it true ("as long as the tapper stays under what the listener can follow") — a clocked bus still has an f_SCLK maximum in its datasheet.
+- The hero draws the byte moving one way only; MISO is present as a wire with its own direction arrow, and the waveform figure is where both directions are drawn on the same eight windows.
+- No real part number appears anywhere: 1 MHz, 8 bits, "tens of nanoseconds" are generic and checkable, and no register or device name is stamped on a schematic-looking figure (tech-figures §0).
+- On a 375px phone the primer-fig-wide stair keeps strokes at picture-book weight, but in-figure labels shrink to ~5px; every number and every convention a label carries is repeated in its figcaption, so a phone reader loses nothing factual.
+/design-review:self-diff -->
+
+</body>
+</html>

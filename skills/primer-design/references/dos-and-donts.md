@@ -85,7 +85,7 @@
 | 只有轮廓、没有平涂 | 纯线稿是图标集的语言。厚描边 + 平涂色块才是绘本的语言 | 每张图至少一块平涂(实色或 `fill-opacity` .12–.18 的 tint) |
 | 只有平涂、没有细节层次 | 一块紫色 + 一条线不构成插画 | 加一层 `class="primer-hair"`(1.8px)的内部细节:齿、缝、刻度、纹理 |
 | 扁平图标 + 一个对钩 | 这是 slop tell 第一名。它看着"干净",但没解释任何事 | 图要能回答这一节的那个问题;答不上就别画 |
-| 描边 `stroke-width` 自己写死 | CSS Section J 已经给两个插画容器(`.primer-figure svg` 和 `.primer-analogy-fig svg`)设了线宽和圆头,自己写会和 viewBox 换算打架 | 让它继承;要整张图加粗,包一层 `<g stroke-width="4.4">` |
+| 描边 `stroke-width` 自己写死 | CSS Section J 已经给两个插画容器(`.primer-figure svg` 和 `.primer-analogy-fig svg`)设了线宽和圆头,自己写会和 viewBox 换算打架 | 让它继承;要整张图加粗,在页内 `<style>` 里**成对**改一对选择器(`.primer-figure.fig-heavy svg` 4.4px + `.primer-figure.fig-heavy svg .primer-hair` 2.3px)。包一层 `<g stroke-width="4.4">` 只抬得起主轮廓 —— CSS 那条 `.primer-hair` 规则直接命中细节路径,hair 仍是 1.8,比掉到 0.41(要的是 0.53),而且没有机械检查会报(`illustration-craft.md` §2) |
 | 大 viewBox 装小图 | 3.4px 是**用户单位**,viewBox 越宽渲染出来越细。240 宽的 viewBox 挤在比喻卡 172px 的栏里,描边只剩 ≈2.4px —— 掉出 3px 绘本下限,当场退化成图标 | 按 `illustration-craft.md` §3 的公式定 viewBox。比喻卡插画 viewBox 宽 **≤190** |
 
 **§3 的判据**:把页面缩到 25% 看缩略图。如果分不清这是 primer 还是任意一个 Notion 模板的
