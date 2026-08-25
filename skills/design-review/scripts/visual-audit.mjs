@@ -243,8 +243,13 @@ const SKILL_SIGNATURES = {
     name: 'eclat flare',
     accents: [[255, 91, 52]],           // #ff5b34 — flare CTA + live dot (only saturated foreground)
     threshold: 0.00002,                  // dark cinematic hero puts the CTA mid-screen; catch total absence only
-    // anthropic orange OMITTED on purpose: eclat's flare-soft #ff7a4d is within
-    // TOL 55 of #d97757, so forbidding it would false-flag eclat's own warm family.
+    // anthropic orange is OMITTED here, but the stated reason was wrong. It read
+    // "eclat's flare-soft #ff7a4d is within TOL 55 of #d97757" — that quoted the
+    // brand-presence pixel matcher, not this one. Measured 2026-08-25 against the
+    // matcher that actually reads this list: #ff7a4d is euclidean 39.4 from
+    // #d97757, well clear of the 22 threshold, so the omission buys nothing.
+    // Kept as-is: removing an exemption changes what the check reports, which is
+    // a separate behaviour-change task, not a comment correction.
     forbiddenColors: [
       { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
       { rgb: [151, 176, 119], note: 'sage green #97B077' },
@@ -258,8 +263,11 @@ const SKILL_SIGNATURES = {
     name: 'lectern navy',
     accents: [[29, 58, 110], [47, 91, 176]],   // #1d3a6e + #2f5bb0
     threshold: 0.0002,                          // navy square + kicker + agenda numbers carry it in the top region
-    // apple blue OMITTED: lectern is a navy/blue-family skin; forbidding apple's
-    // blue would risk flagging lectern's own chart blues.
+    // apple blue is OMITTED on the theory that lectern's own chart blues would
+    // be flagged. Measured 2026-08-25, they are not: the nearest is #2f5bb0 at
+    // euclidean 72.8 from #0071E3, against a threshold of 22. Like eclat's and
+    // atelier's omissions above, this one is unnecessary — kept pending the
+    // separate behaviour-change task that re-audits every exemption.
     // primer violet is ADDED, against spec §4.2's predicted exemption. §4.2's
     // "nearest channel differs by only 20" was read off a per-channel model;
     // this check's matcher is euclidean < 22. Measured 2026-08-25 over all 3
@@ -284,9 +292,11 @@ const SKILL_SIGNATURES = {
     threshold: 0.0006,                  // rose lives in gradient orbs, the brand
                                         // mark, meter fills and the active tab
                                         // rule — small objects, many of them.
-    // anthropic orange OMITTED on purpose: atelier's coral #F5854F sits within
-    // the matcher's TOL 55 of #d97757, so listing it would flag atelier's own
-    // warm family. Same reasoning as eclat's omission above.
+    // anthropic orange is OMITTED here, with the same wrong reason eclat's entry
+    // carried: "coral #F5854F sits within TOL 55 of #d97757" is the pixel
+    // matcher's tolerance, not this list's. Measured 2026-08-25: #F5854F is
+    // euclidean 32.3 from #d97757, clear of the 22 threshold — the exemption is
+    // unnecessary. Kept pending the separate behaviour-change task.
     forbiddenColors: [
       { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
       { rgb: [151, 176, 119], note: 'sage green #97B077' },

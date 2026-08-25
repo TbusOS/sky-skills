@@ -66,7 +66,7 @@ eli5 / ELI5 / explain like I'm five / explain simply / picture explainer /
 
 ## §6 primer 专属要点(机械检查 + critic 会抓)
 
-- **黄单档铁律**:`--primer-marker #ffd23f` 只此一档,**禁止派生深黄 token**。压深的黄(如 hover 用 (230,178,60))落进 ember 金 `#c49464` 的容差里,直接是 cross-skill smell。要更重的强调就换 `--primer-violet-ink` 的紫字,不要压黄。
+- **黄单档铁律**(口味规则,机器不管):`--primer-marker #ffd23f` 只此一档,**禁止派生深黄 token**。压深的黄(如 hover 用 (230,178,60))不再像荧光笔划过纸,开始像 ember 的暖金 `#c49464` —— 换成了别家的声音。串味检查不会为它响(实测欧氏 60.5,阈值 22,而且 ember 金不在 primer 的禁忌清单里),所以这条只有 critic 和你自己盯着。要更重的强调就换 `--primer-violet-ink` 的紫字,不要压黄。
 - **比喻卡必有**:一页至少一张 `.primer-analogy`。抽象概念没有比喻 = 这页没做 primer 该做的事,critic 直接扣。
 - **一屏一概念**:每个 `.primer-section` 只讲一件事,插画占该节面积 ≥ 一半,正文每屏最多两短句。堆成密集 above-the-fold 落地页就丢掉了读本调性。
 - **术语先翻译后使用**:没被 `.primer-term` 用人话定义过的行话,不许出现在正文里。裸数字同理 —— "2MB" 要跟一个实物参照("约一首歌")。

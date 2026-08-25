@@ -19,8 +19,8 @@ number-vs-adjacent-list class no single-line pattern can see:
                   scripts must claim the model's count AND enumerate the
                   model's full mechanical set (a 四道 heading over three
                   commands, a "4 Gates" card listing the old three + critic)
-  · critic-as-gate — the LLM critic labelled 第 N 道 / gate N / [N/N]
-                  (the model rules the critic OUTSIDE the mechanical four)
+  · critic-as-gate — the LLM critic labelled 第 N 道 / gate N / [N/N] /
+                  "third gate" (the model rules the critic OUTSIDE the four)
   · roster-subset — a design-skill count over an all-caps skin roster that
                   names fewer skins with no "+N" marker
 
@@ -317,7 +317,11 @@ RECORD_PATHS = [
     ("skills/design-review/scripts/coverage.mjs",
      "its header records the drift history (27/40, 44/44) that motivated it"),
     ("skills/design-review/scripts/axe-audit.mjs",
-     "its PROMOTED comments record the dated 2026-08-14 measurement"),
+     "its PROMOTED comments carry the dated 2026-08-14 / 2026-08-25 element "
+     "counts — numbers about axe findings, not about this repo's rosters, so "
+     "no truth here can match them. NOTE: those comments also carry a LIVE "
+     "claim (84 blocking across seven glass surfaces, known-bugs §6.6); this "
+     "exclusion hides it, so re-verify it by hand when §6.6 changes"),
     ("skills/design-review/scripts/count-check.py",
      "quotes wrong numbers as exclusion patterns and probe material — its "
      "correctness is proven by the probe, not by scanning its source"),
@@ -397,8 +401,16 @@ def _ignore_why(raw: list[str], i: int) -> str | None:
 SKIN_RE = re.compile(
     r"\b(ANTHROPIC|APPLE|EMBER|SAGE|GLASS|ECLAT|LECTERN|ATELIER|PRIMER)\b")
 CAPS_LINE_RE = re.compile(r"^[\sA-Z0-9·&+/|-]+$")
+# The EN word-form ordinal ("the third gate is the design-critic") was invisible
+# until 2026-08-25 — the alternation only knew 第 N 道 / gate N / [N/N], so the
+# critic sat mislabelled in .claude/agents/design-critic.md through a whole
+# branch. Probe-locked below (§7.10: a caught bug becomes a check with a probe).
+# The ordinal must still come BEFORE the critic word: the reverse order is how
+# the TRUE statement is written ("critic 不是第四道机械检查"), and accepting it
+# would flag the correct phrasing — that true form is in the probe's good list.
 CRITIC_AS_GATE_RE = re.compile(
-    r"(?:第\s*[一二两三四五六七八九十\d]+\s*道|\bgate\s+\d\b|\[\d+/\d+\])"
+    r"(?:第\s*[一二两三四五六七八九十\d]+\s*道|\bgate\s+\d\b|\[\d+/\d+\]"
+    r"|\b(?:first|second|third|fourth|fifth)\s+gate\b)"
     r"[^\n|]{0,24}?(?:critic|口味评审|taste\s+judge)", re.I)
 
 
@@ -590,6 +602,7 @@ def probe(truth: dict, rules, model) -> list[str]:
 <pre>node scripts/visual-audit.mjs page.html</pre>
 <pre>node scripts/screenshot.mjs page.html</pre>
 <p>第四道检查 · LLM critic</p>
+<p>Run the machine checks, then the third gate — the design-critic — scores taste.</p>
 <text>{truth['design']}</text>
 <text>aesthetics</text>
 <text>APPLE · ANTHROPIC</text>
@@ -626,6 +639,11 @@ def probe(truth: dict, rules, model) -> list[str]:
     if hits.count(("design-en", w2["design"])) < 2:
         fails.append("probe: second candidate on a shared line not reported "
                      "(attribute value or per-line dedupe hole)")
+    # Two critic-as-gate lines above: the zh 第 N 道 form and the EN word-form
+    # ordinal. One hit means the alternation regressed to digits/zh only.
+    if hits.count(("critic-as-gate", 0)) < 2:
+        fails.append("probe: EN word-form ordinal not caught — "
+                     "'the third gate — the design-critic' must be a violation")
     good = [
         f"<p>All {truth['total']} skills. {truth['design']} design skills.</p>",
         f"<p>覆盖 {truth['canonical']}/{truth['canonical']} canonical。"

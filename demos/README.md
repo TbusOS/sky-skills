@@ -91,4 +91,4 @@ node skills/design-review/scripts/critic.mjs demos/<skill>/index.html
 
 ## Cross-link
 
-The nine flagship design demos link to each other near the footer so you can toggle between the aesthetics on the same content and compare directly. `gated-dual-clone/index.html` is the exception — it is a single-purpose page and does not carry the cross-links.
+The flagship design demos link to each other near the footer so you can toggle between the aesthetics on the same content and compare directly. Two pages do not carry the cross-links: `gated-dual-clone/index.html`, which is a single-purpose page, and `atelier-design/index.html`, which is an outstanding gap rather than a decision — it links to nobody, and adding its row is a queued follow-up.

@@ -218,14 +218,16 @@ Task(subagent_type='design-critic'))。输出 0-100 分 + 7 维度分解 +
    - apple 禁忌:Fraunces / Instrument Serif / Poppins / Lora / Space Grotesk / 橙 / 金 / sage 绿 / glass cyan
    - anthropic 禁忌:Fraunces / Instrument Serif / Space Grotesk / apple 蓝 / sage 绿 / 金 / glass cyan
    - glass 禁忌:Fraunces / Instrument Serif / Poppins / Lora / 橙 / apple 蓝 / 金 / sage 绿(glass 的 violet/pink 不进禁忌表 —— 它们是 glass 自己的背景色,但在 glass 页面上前景即违例,见 glass dos-and-donts)
-   - eclat 禁忌:Fraunces / Instrument Serif / Lora / Poppins / Space Grotesk / apple 蓝 / sage 绿 / ember 金 / glass cyan(**anthropic 橙有意豁免** —— eclat 自己的 flare-soft #ff7a4d 落在 #d97757 的 TOL 55 内,列进去就是自己抓自己)
-   - lectern 禁忌:Fraunces / Instrument Serif / Lora / Poppins / Space Grotesk / anthropic 橙 / ember 金 / sage 绿 / glass cyan(**apple 蓝有意豁免** —— lectern 本身就是深蓝家族,图表蓝会被自己的禁忌表误伤)
-   - atelier 禁忌:Fraunces / Instrument Serif / Lora / Poppins / Space Grotesk / apple 蓝 / sage 绿 / ember 金 / glass cyan / lectern navy(**anthropic 橙有意豁免** —— atelier 珊瑚 #F5854F 在 TOL 55 内,同 eclat 的理由)
+   - eclat 禁忌:Fraunces / Instrument Serif / Lora / Poppins / Space Grotesk / apple 蓝 / sage 绿 / ember 金 / glass cyan(**anthropic 橙没有列进去**。原写"eclat 自己的 flare-soft #ff7a4d 落在 #d97757 的 TOL 55 内",按的是像素匹配器;实测欧氏 **39.4**,阈值 22,并不会误伤 —— 这项豁免其实不必要,撤掉它是行为改动,另开一项处理)
+   - lectern 禁忌:Fraunces / Instrument Serif / Lora / Poppins / Space Grotesk / anthropic 橙 / ember 金 / sage 绿 / glass cyan(**apple 蓝没有列进去**。原写"图表蓝会被自己的禁忌表误伤";实测最近的图表蓝 #2f5bb0 对 apple 蓝 #0071E3 是欧氏 **72.8**,阈值 22 —— 同样不必要,同一项跟进里处理)
+   - atelier 禁忌:Fraunces / Instrument Serif / Lora / Poppins / Space Grotesk / apple 蓝 / sage 绿 / ember 金 / glass cyan / lectern navy(**anthropic 橙没有列进去**。原写"珊瑚 #F5854F 在 TOL 55 内";实测欧氏 **32.3**,阈值 22 —— 同 eclat,不必要,同一项跟进)
    - primer 禁忌:Fraunces / Instrument Serif / Poppins / Lora / Space Grotesk / anthropic 橙 / apple 蓝 / glass cyan / eclat flare / atelier rose。
-     **ember 金 / sage 绿 / lectern navy 三项有意豁免**(primer spec §4.1 的推理):马克笔黄 #ffd23f
-     压在墨色上的抗锯齿像素落进 ember 金 #c49464 的 TOL 55;回顾条绿勾与白底混合落进 sage 绿
-     #97B077;primer 墨 #243244 落在 lectern navy #1d3a6e 的 TOL 55 内,紫墨 #5b3fbf 落在 #2f5bb0 内。
-     三项都是**抗锯齿与混色的必然结果,不是偷别人的色**,列进禁忌表只会制造教人跳过报告的假阳。
+     **ember 金 / sage 绿 / lectern navy 三项没有列进去,同样不是因为会误报。** spec §4.1 原来的理由
+     (马克笔黄压墨字的抗锯齿像素、绿勾与白底的混色)说的是**像素**现象,而这张清单喂的是串味检查 ——
+     它读 computed color、按欧氏 < 22 判命中,混出来的像素它根本看不到。那段推理已撤回。
+     2026-08-25 按真匹配器实测:ember 金 93.2(对马克笔黄 #ffd23f)· sage 绿 94.3(对 #3aa66b)·
+     lectern #1d3a6e 43.3(对正文墨 #243244)· #2f5bb0 54.3(对紫墨 #5b3fbf),全部远在 22 之外。
+     四家都可以安全列进去,加进去是行为改动,和上面三条并作同一项跟进。
 
 **fix playbook**:
 - brand 不可见 → nav 给品牌 tint 背景,hero 加品牌色 kicker,CTA 用品牌色

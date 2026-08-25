@@ -61,7 +61,7 @@ it instead of asserting its own number.
 | 组件 | 状态 | 实体 |
 |---|---|---|
 | Gate 1 · structural verify | **shipped** | `scripts/verify.py`(8 类 check + 双语强制 + `--allow-monolingual` 豁免)|
-| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(83 条 known-bugs 里能机器化的那些)|
+| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(84 条 known-bugs 里能机器化的那些)|
 | Gate 3 · accessibility axe-audit | **shipped** (2026-08-14) | `scripts/axe-audit.mjs`(axe-core;四条阻断规则;当时清账每页只量一个主题,glass light 仍有欠账 —— known-bugs §6.6)|
 | Gate 4 · full-page screenshot | **shipped** | `scripts/screenshot.mjs`(Playwright · 绝对路径 + `file://` 通用)|
 | 口味评审(四道之外)· solo critic | **shipped** | `.claude/agents/design-critic.md` |
@@ -161,7 +161,7 @@ node skills/design-review/scripts/learning-loop.mjs \
 | 口味评审(四道之外)multi-critic × 4 | 构图 / 文案 / 插画 / 品牌 四位专家独立 fresh-context · 权重 25/25/20/30 聚合 | `Task()` × 4 + 聚合 |
 
 具体清单在:
-- `references/known-bugs.md`(83 条,每条写 Reader sees / Why / Defense)
+- `references/known-bugs.md`(84 条,每条写 Reader sees / Why / Defense)
 - `references/cross-skill-rules.md`(9 种风格共通工艺底线 · 有 §G 双语规则 + §I 卡片分组规则)
 - `references/dos-and-donts.md`(每 skill 下的风格特定反例)
 
@@ -212,7 +212,7 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 - `scripts/screenshot.mjs` — Gate 4 全页截图
 - `scripts/count-check.py` — 全仓计数判定(承载短语 vs 磁盘真值 + 检查模型)
 - `scripts/learning-loop.mjs` — 组件 07 · critic verdict → design-learner prompt
-- `references/known-bugs.md` — 83 条 bug 大全
+- `references/known-bugs.md` — 84 条 bug 大全
 - `references/cross-skill-rules.md` — 9 种风格共通规则(含 §G 双语 / §I 卡片分组)
 - `references/canonical/README.md` — canonical 参考库说明 + 扩库流程
 

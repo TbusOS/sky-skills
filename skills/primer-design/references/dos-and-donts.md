@@ -43,12 +43,15 @@
 
 > `--primer-marker #ffd23f` **只有一档。禁止派生深黄 token。**
 
-实算(visual-audit 的匹配规则是逐通道 |Δ| ≤ 55 三通道同时成立):
+**这条没有机器兜底,它是口味规则。** 早先这里写的是"逐通道 |Δ| ≤ 55 三通道同时成立,
+压深的黄当场是 cross-skill smell",那是把两个匹配器搞混了,已撤回:串味检查按**欧氏距离
+< 22** 比 computed color(`visual-audit.mjs:105-114`),而且 ember 金压根不在 primer 的
+`forbiddenColors` 里。压深一档的黄 (230,178,60) 对 ember 金 `#c49464` (196,148,100)
+实测欧氏 **60.5** —— 离 22 有两倍多,任何一道检查都不会为它响。
 
-- 马克笔黄 (255,210,63) 对 ember 金 `#c49464` (196,148,100) 是 Δ=(59,62,37) ——
-  靠 r/g 两个通道**险胜**,margin 只有 4 和 7。
-- 随手压深一档做 hover(230,178,60)对 ember 金 Δ=(34,30,40),**三通道全中** ——
-  当场是 cross-skill smell。
+真正的理由是读感:`#ffd23f` 亮到只可能是"荧光笔划过纸",这个亮度本身就是它的意思。
+往深里压一档,它不再像划痕,开始像 ember 的暖金 —— 那是另一套皮肤的声音。
+黄在 primer 里是"这里划重点"这个动作,动作没有深浅两档。
 
 所以:
 
@@ -68,8 +71,9 @@
 | 彩虹配色的插画 | 一张图教一件事。四个以上色相是通用信息图的味道,不是读本的 | 一张图里:墨线 + 紫(主体)+ 最多一个辅助色。分配顺序见 `illustration-craft.md` §9 |
 | 偷别家的招牌色(anthropic 橙 / apple 蓝 / glass 青 / eclat flare / atelier 玫红) | 这五个在 primer 的 `forbiddenColors` 里,机器会抓 | 用 primer 自己的七个 token |
 
-⚠ ember 金、sage 绿、lectern 蓝**刻意不进** `forbiddenColors`(原因见 `design-tokens.md` §1)。
-豁免的意思是"不报警",不是"可以用" —— 真去用,critic 会抓。
+⚠ ember 金、sage 绿、lectern 蓝**目前不在** `forbiddenColors` 里,但不是因为会误报 ——
+实测它们离 primer 最近的实色 43.3–94.3,阈值是 22(`design-tokens.md` §1 有表)。
+所以这三家现在机器抓不到,critic 会抓。
 
 ## §3 厚描边不是简笔画
 

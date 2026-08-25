@@ -127,9 +127,11 @@ const BRAND = {
     minCoverage: '0.002%',
     howTo: 'the flare is the ONLY saturated foreground color, and it lives in just four places: the filled CTA, one live dot (flare itself — never a second red like #ff4d4d), at most ONE emphasized hero number (`.eclat-hl`), and the product\'s own accent inside a UI mock. Everything else is cool-white spotlight or warm rim light. The threshold is deliberately low — a dark cinematic hero puts the CTA mid-screen, so the gate only catches total absence',
     forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk', 'Fredoka'],
-    // anthropic orange is NOT forbidden here: eclat's own flare-soft #ff7a4d sits
-    // within the matcher's TOL 55 of #d97757, so listing it would flag eclat's
-    // own warm family. Mirrors the same omission in visual-audit.mjs.
+    // anthropic orange is NOT forbidden here. The old reason — "flare-soft
+    // #ff7a4d sits within the matcher's TOL 55 of #d97757" — quoted the
+    // brand-presence pixel tolerance, not the smell check's. Measured 2026-08-25:
+    // euclidean 39.4, threshold 22, so the omission is unnecessary. Kept pending
+    // the separate behaviour-change task. Mirrors visual-audit.mjs.
     forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#c49464 (ember)', '#22D3EE (glass)', '#7a5cd6 (primer)'],
   },
   lectern: {
@@ -138,8 +140,10 @@ const BRAND = {
     minCoverage: '0.02%',
     howTo: 'the navy carries itself in the top region: a solid navy square in the masthead, the section kicker, and the numbered agenda markers. This is a briefing deck, not a launch page — there is no full-bleed hero to lean on, so keep the navy in structural furniture rather than one big CTA',
     forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk', 'Fredoka'],
-    // apple blue is NOT forbidden here: lectern is itself a navy/blue-family skin
-    // and its chart blues would false-flag. Mirrors visual-audit.mjs.
+    // apple blue is NOT forbidden here, on the theory that lectern's own chart
+    // blues would false-flag. Measured 2026-08-25 they do not: nearest is #2f5bb0
+    // at euclidean 72.8 from #0071E3, threshold 22. Unnecessary exemption, kept
+    // pending the separate behaviour-change task. Mirrors visual-audit.mjs.
     // primer violet IS forbidden, against spec §4.2's predicted exemption: the
     // "nearest channel differs by only 20" reading came from a per-channel
     // model, but the smell matcher is euclidean < 22 and lectern's nearest
@@ -153,8 +157,11 @@ const BRAND = {
     minCoverage: '0.06%',
     howTo: 'the rose is carried by SMALL objects repeated often, not one big CTA: the brand mark in the rail, a filled coral→rose orb on every KPI, meter and bar fills, the active tab underline, and accent chips. The coral #F5854F never appears alone — it is the top stop of the gradient and nothing else. If a screen has no orbs it will fail this gate, and it should: orbs are the identity',
     forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Lora', 'Poppins', 'Space Grotesk', 'Fredoka'],
-    // anthropic orange is NOT forbidden here: atelier's coral #F5854F sits
-    // within the matcher's TOL 55 of #d97757. Mirrors visual-audit.mjs.
+    // anthropic orange is NOT forbidden here. The old "coral #F5854F sits within
+    // the matcher's TOL 55 of #d97757" quoted the pixel tolerance; measured
+    // 2026-08-25 the coral is euclidean 32.3 from #d97757, threshold 22.
+    // Unnecessary exemption, kept pending the separate behaviour-change task.
+    // Mirrors visual-audit.mjs.
     forbiddenColors: ['#0071E3 (apple)', '#97B077 (sage)', '#c49464 (ember)', '#22D3EE (glass)', '#1d3a6e (lectern)', '#7a5cd6 (primer)'],
   },
   primer: {
