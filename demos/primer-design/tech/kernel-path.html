@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一个字怎么走到串口线上 · 图解读本</title>
+<meta name="description" content="Technical primer: one character's path from a write() call to a UART pin — syscall, tty layer, serial driver, transmit register. 零基础图解：你敲的一个字，怎么穿过三层内核代码走到串口线上。">
+<meta property="og:title" content="一个字怎么走到串口线上 · 图解读本">
+<meta property="og:description" content="零基础图解：一个字符从 write 进内核，经 tty 层交给串口驱动，再写进发送寄存器出到引脚。每一层都不跳过。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed classes on purpose (verify.py validates
+   * primer-* classes against primer.css; page-local layout stays unprefixed).
+   * Figure modifiers (primer-fig-wide / primer-fig-hero) and
+   * .primer-step--centered ship from primer.css Sections E + J + L. No stroke
+   * rule and no component override is defined on this page. */
+
+  /* The recap is its own screen; the component's top margin is for pages
+   * where it trails a section. */
+  .recap-flat { margin-top: 0; }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">One character,<br>all the way to a serial pin</span>
+          <span class="lang-zh">一个字，<br>怎么走到串口线上</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">No kernel background needed. About five minutes to read.</span>
+          <span class="lang-zh">不需要内核基础。这一页大约 5 分钟讲明白。</span>
+        </p>
+      </div>
+      <figure class="primer-figure primer-fig-hero">
+        <svg viewBox="0 20 500 244" role="img"
+          aria-label="屏幕上敲下的那个字，最后要变成串口线上的一串电平；两头都在这台机器上，中间那段在机器里面"
+          data-label-zh="屏幕上敲下的那个字，最后要变成串口线上的一串电平；两头都在这台机器上，中间那段在机器里面"
+          data-label-en="The character typed on the screen has to become levels on the serial wire; both ends sit on this one machine, and the stretch between them is inside it">
+          <!-- the desk both things stand on -->
+          <path class="primer-hair" d="M12 246 L488 244.6" fill="none"/>
+
+          <!-- the monitor -->
+          <path d="M24 34 L204 34.6 Q212 34.6 212 42.6 L212 158 Q212 166 204 166 L24 165.4 Q16 165.4 16 157.4 L16 42 Q16 34 24 34 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M26 44 L202 44.6 L201.4 156 L26 155.4 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M34 52 L194 52.5 L193.5 148 L34 147.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M34 68 L194 68.4" fill="none"/>
+          <circle class="primer-hair" cx="44" cy="60" r="3" fill="none"/>
+          <circle class="primer-hair" cx="56" cy="60" r="3" fill="none"/>
+          <!-- the command being typed: a prompt, some strokes, and the one
+               character this whole page follows -->
+          <path class="primer-hair" d="M44 92 L54 100 L44 108" fill="none"/>
+          <path class="primer-hair" d="M62 100 L94 100.3" fill="none"/>
+          <path d="M112 78 L140 78 Q148 78 148 86 L148 114 Q148 122 140 122 L112 122 Q104 122 104 114 L104 86 Q104 78 112 78 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M158 100 L188 100.3" fill="none"/>
+          <path class="primer-hair" d="M44 126 L170 126.4" fill="none"/>
+          <path d="M96 166 L128 166.2 L124 226 L100 226 Z" fill="#ffffff"/>
+          <path d="M74 226 L154 226.4 Q160 226.4 160 232.4 L160 236 Q160 242 154 242 L74 241.6 Q68 241.6 68 235.6 L68 232 Q68 226 74 226 Z" fill="#ffffff"/>
+
+          <!-- the machine, with a real serial connector on its right cheek -->
+          <path d="M258 150 L394 150.4 Q402 150.4 402 158.4 L402 234 Q402 242 394 242 L258 241.6 Q250 241.6 250 233.6 L250 158 Q250 150 258 150 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M264 170 L300 170.2 M264 180 L300 180.2 M264 190 L300 190.2" fill="none"/>
+          <path class="primer-hair" d="M320 168 L386 168.3 L385.7 180 L320 179.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M250 202 L402 202.4" fill="none"/>
+          <circle class="primer-hair" cx="272" cy="216" r="5" fill="none"/>
+          <path d="M402 176 L432 170 L432 206 L402 212 Z" fill="#fdfaf3"/>
+          <circle class="primer-hair" cx="405" cy="185" r="1.6" fill="#243244"/>
+          <circle class="primer-hair" cx="411" cy="185" r="1.6" fill="#243244"/>
+          <circle class="primer-hair" cx="417" cy="185" r="1.6" fill="#243244"/>
+          <circle class="primer-hair" cx="423" cy="185" r="1.6" fill="#243244"/>
+          <circle class="primer-hair" cx="429" cy="185" r="1.6" fill="#243244"/>
+          <circle class="primer-hair" cx="408" cy="198" r="1.6" fill="#243244"/>
+          <circle class="primer-hair" cx="414" cy="198" r="1.6" fill="#243244"/>
+          <circle class="primer-hair" cx="420" cy="198" r="1.6" fill="#243244"/>
+          <circle class="primer-hair" cx="426" cy="198" r="1.6" fill="#243244"/>
+
+          <!-- the cable, and the same character out on it -->
+          <path d="M432 188 C 456 188, 466 174, 468 156 C 470 138, 478 130, 500 128" fill="none"/>
+          <path d="M452 118 L480 118 Q488 118 488 126 L488 154 Q488 162 480 162 L452 162 Q444 162 444 154 L444 126 Q444 118 452 118 Z" fill="#7a5cd6"/>
+
+          <!-- labels (painted last) -->
+          <text x="126" y="111" text-anchor="middle" font-size="24" font-weight="700" fill="#ffffff">A</text>
+          <text x="466" y="151" text-anchor="middle" font-size="24" font-weight="700" fill="#ffffff">A</text>
+          <text class="lang-zh" x="404" y="112" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">串口线</text>
+          <text class="lang-en" x="404" y="112" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">the serial wire</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Both ends of the trip sit on one machine. Between them sit three layers of kernel code. This page opens them one at a time.</span>
+          <span class="lang-zh">这一趟的两头都在同一台机器上。中间那段是三层内核代码，这一页一层一层打开它。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ② 像什么:寄快递 + 五条带的全景 -->
+  <section class="primer-section">
+    <div class="primer-container primer-container--wide">
+      <h2>
+        <span class="lang-en">What is the trip like?</span>
+        <span class="lang-zh">这一趟像什么？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">串口 serial port</span><span class="lang-en">serial port</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">one wire; bits leave it in single file</span>
+          <span class="lang-zh">一根线，字符一位一位排着队出去</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">Your program only reaches the first window. <span class="primer-mark">Every layer below</span> is handed the byte by the one above.</span>
+        <span class="lang-zh">你的程序也只走到第一道窗口。<span class="primer-mark">往下每一层</span>，都由上一层交给它。</span>
+      </p>
+
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 150" role="img"
+            aria-label="快递前台：你把包裹放上柜台，柜台后面是分拣格，再后面是送货的车"
+            data-label-zh="快递前台：你把包裹放上柜台，柜台后面是分拣格，再后面是送货的车"
+            data-label-en="A parcel counter: you put the parcel on the desk, behind the desk are sorting slots, and behind those is the van">
+            <!-- floor -->
+            <path class="primer-hair" d="M8 140 L172 138.8" fill="none"/>
+            <!-- the sorting rack behind the counter -->
+            <path d="M96 24 L166 24.4 Q172 24.4 172 30.4 L172 84 Q172 90 166 90 L96 89.6 Q90 89.6 90 83.6 L90 30 Q90 24 96 24 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M96 32 L128 32.2 L127.8 58 L96 57.8 Z" fill="#fdfaf3"/>
+            <path class="primer-hair" d="M134 32 L166 32.2 L165.8 58 L134 57.8 Z" fill="#fdfaf3"/>
+            <path class="primer-hair" d="M96 62 L128 62.2 L127.8 84 L96 83.8 Z" fill="#fdfaf3"/>
+            <path class="primer-hair" d="M134 62 L166 62.2 L165.8 84 L134 83.8 Z" fill="#fdfaf3"/>
+            <!-- the counter -->
+            <path d="M14 84 L120 84.5 Q126 84.5 126 90.5 L126 96 Q126 102 120 102 L14 101.5 Q8 101.5 8 95.5 L8 90 Q8 84 14 84 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M18 102 L18 140 M116 102.4 L116 139.4" fill="none"/>
+            <path class="primer-hair" d="M8 118 L126 117.2" fill="none"/>
+            <!-- the parcel you hand over -->
+            <path d="M38 54 L74 54.3 Q80 54.3 80 60.3 L80 78 Q80 84 74 84 L38 83.7 Q32 83.7 32 77.7 L32 60 Q32 54 38 54 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M56 54 L56 84" fill="none" stroke="#ffffff"/>
+            <path class="primer-hair" d="M32 68 L80 68.2" fill="none" stroke="#ffffff"/>
+            <!-- a bell on the counter -->
+            <path class="primer-hair" d="M96 84 C 96 74, 104 70, 110 70 C 116 70, 124 74, 124 84 Z" fill="#fdfaf3"/>
+            <path class="primer-hair" d="M110 70 L110 64" fill="none"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p class="primer-analogy-lead"><span class="lang-en">It's like…</span><span class="lang-zh">就像……</span></p>
+          <p>
+            <span class="lang-en">With a parcel, you only reach the front desk. Every leg after that is one pair of hands passing to the next.</span>
+            <span class="lang-zh">寄快递，你只走到前台。剩下的每一段，都是上一段的人交给下一段。</span>
+          </p>
+        </div>
+      </div>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 2 960 434" role="img"
+          aria-label="五条水平带，从上到下是你敲的命令、系统调用、tty 子系统、串口驱动、硬件；四段实线箭头各跨一条边界，虚线从驱动带一段一段回到命令带"
+          data-label-zh="五条水平带，从上到下是你敲的命令、系统调用、tty 子系统、串口驱动、硬件；四段实线箭头各跨一条边界，虚线从驱动带一段一段回到命令带"
+          data-label-en="Five horizontal bands — your command, the syscall, the tty layer, the serial driver, the hardware; four solid arrows each cross one boundary, and a dashed return climbs from the driver band back to the command band">
+          <!-- the kernel: everything between the thick line and the last hairline -->
+          <path d="M24 98.5 L936 98.5 L936 341.5 L24 341.5 Z" fill="#7a5cd6" fill-opacity=".11" stroke="none"/>
+
+          <!-- band 1 · the terminal you type into -->
+          <path d="M223 26 L462 26.5 Q470 26.5 470 34.5 L470 82 Q470 90 462 90 L223 89.5 Q215 89.5 215 81.5 L215 34 Q215 26 223 26 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M215 44 L470 44.6" fill="none"/>
+          <circle class="primer-hair" cx="228" cy="35" r="3" fill="none"/>
+          <circle class="primer-hair" cx="240" cy="35" r="3" fill="none"/>
+          <path class="primer-hair" d="M226 58 L234 66 L226 74" fill="none"/>
+          <path class="primer-hair" d="M244 66 L286 66.3" fill="none"/>
+          <path d="M302 49 L324 49 Q330 49 330 55 L330 77 Q330 83 324 83 L302 83 Q296 83 296 77 L296 55 Q296 49 302 49 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M340 66 L456 66.4" fill="none"/>
+
+          <!-- band 2 · the service hatch: a wall with an opening and a shelf -->
+          <path d="M223 107 L462 107.5 Q470 107.5 470 115.5 L470 163 Q470 171 462 171 L223 170.5 Q215 170.5 215 162.5 L215 115 Q215 107 223 107 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M215 121 L300 121.2 M400 121 L470 121.2 M215 135 L300 135.2 M400 135 L470 135.2 M215 149 L300 149.2 M400 149 L470 149.2" fill="none"/>
+          <path class="primer-hair" d="M245 107 L245 121 M275 107 L275 121 M425 107 L425 121 M455 107 L455 121 M230 121 L230 135 M260 121 L260 135 M290 121 L290 135 M410 121 L410 135 M440 121 L440 135 M245 135 L245 149 M275 135 L275 149 M425 135 L425 149 M455 135 L455 149 M230 149 L230 171 M260 149 L260 171 M290 149 L290 171 M410 149 L410 171 M440 149 L440 171" fill="none"/>
+          <path d="M300 113 L400 113.4 L399.6 157 L300 156.6 Z" fill="#fdfaf3"/>
+          <path d="M288 157 L412 157.4 L411.6 167 L288 166.6 Z" fill="#ffffff"/>
+          <path d="M339 123 L361 123 Q367 123 367 129 L367 151 Q367 157 361 157 L339 157 Q333 157 333 151 L333 129 Q333 123 339 123 Z" fill="#7a5cd6"/>
+
+          <!-- band 3 · the sorting rack: three slots, one per kind of terminal -->
+          <path d="M223 188 L462 188.5 Q470 188.5 470 196.5 L470 244 Q470 252 462 252 L223 251.5 Q215 251.5 215 243.5 L215 196 Q215 188 223 188 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M224 196 L302 196.3 L301.7 236 L224 235.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M306 196 L384 196.3 L383.7 236 L306 235.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M388 196 L466 196.3 L465.7 236 L388 235.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M240 240 L286 240.2 M322 240 L368 240.2 M404 240 L450 240.2" fill="none"/>
+          <path d="M416 200 L438 200 Q444 200 444 206 L444 228 Q444 234 438 234 L416 234 Q410 234 410 228 L410 206 Q410 200 416 200 Z" fill="#7a5cd6"/>
+
+          <!-- band 4 · the driver's send queue: new bytes join at the right -->
+          <path d="M223 269 L512 269.5 Q520 269.5 520 277.5 L520 325 Q520 333 512 333 L223 332.5 Q215 332.5 215 324.5 L215 277 Q215 269 223 269 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M226 282 L292 282.2 L291.8 320 L226 319.8 Z" fill="none"/>
+          <path class="primer-hair" d="M300 282 L366 282.2 L365.8 320 L300 319.8 Z" fill="none"/>
+          <path class="primer-hair" d="M374 282 L440 282.2 L439.8 320 L374 319.8 Z" fill="none"/>
+          <path class="primer-hair" d="M448 282 L514 282.2 L513.8 320 L448 319.8 Z" fill="none"/>
+          <path class="primer-hair" d="M246 289 L272 289.2 L271.8 313 L246 312.8 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M320 289 L346 289.2 L345.8 313 L320 312.8 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M394 289 L420 289.2 L419.8 313 L394 312.8 Z" fill="#fdfaf3"/>
+          <path d="M470 284 L492 284 Q498 284 498 290 L498 312 Q498 318 492 318 L470 318 Q464 318 464 312 L464 290 Q464 284 470 284 Z" fill="#7a5cd6"/>
+
+          <!-- band 5 · the chip: the send register is the way out, and the leg
+               carries what was written to it -->
+          <path d="M223 348 L442 348.5 Q450 348.5 450 356.5 L450 404 Q450 412 442 412 L223 411.5 Q215 411.5 215 403.5 L215 356 Q215 348 223 348 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="228" cy="358" r="4" fill="none"/>
+          <path class="primer-hair" d="M215 362 L200 362 M215 394 L200 394" fill="none"/>
+          <path d="M240 352 L310 352.3 L309.7 390 L240 389.7 Z" fill="#ffffff"/>
+          <path d="M263 354 L285 354 Q291 354 291 360 L291 382 Q291 388 285 388 L263 388 Q257 388 257 382 L257 360 Q257 354 263 354 Z" fill="#7a5cd6"/>
+          <path d="M310 371 L600 371" fill="none" stroke="#7a5cd6"/>
+          <circle cx="600" cy="371" r="6" fill="#ffffff"/>
+
+          <!-- the four boundaries: 5 bands, 4 lines, and only the user/kernel
+               one is a main stroke -->
+          <path d="M24 98.5 L936 98.5" fill="none"/>
+          <path class="primer-hair" d="M24 179.5 L936 179.5" fill="none"/>
+          <path class="primer-hair" d="M24 260.5 L936 260.5" fill="none"/>
+          <path class="primer-hair" d="M24 341.5 L936 341.5" fill="none"/>
+
+          <!-- the way down: four arrows, each crossing exactly one boundary -->
+          <path d="M645 74 L645 122 M638 110 L645 122 L652 110" fill="none"/>
+          <path d="M645 155 L645 203 M638 191 L645 203 L652 191" fill="none"/>
+          <path d="M645 236 L645 284 M638 272 L645 284 L652 272" fill="none"/>
+          <path d="M645 317 L645 365 M638 353 L645 365 L652 353" fill="none"/>
+
+          <!-- the way back: dashed, starting in the driver band, one boundary
+               at a time, and never sharing a line with the way down -->
+          <path d="M740 320 L740 245" fill="none" stroke-dasharray="6 8"/>
+          <path d="M733 257 L740 245 L747 257" fill="none"/>
+          <path d="M740 218 L740 163" fill="none" stroke-dasharray="6 8"/>
+          <path d="M733 175 L740 163 L747 175" fill="none"/>
+          <path d="M740 136 L740 81" fill="none" stroke-dasharray="6 8"/>
+          <path d="M733 93 L740 81 L747 93" fill="none"/>
+
+          <!-- labels (painted last) -->
+          <text class="lang-zh" x="36" y="64" font-size="16" font-weight="700" fill="#243244">你敲的命令</text>
+          <text class="lang-en" x="36" y="64" font-size="16" font-weight="700" fill="#243244">your command</text>
+          <text class="lang-zh" x="36" y="145" font-size="16" font-weight="700" fill="#243244">系统调用</text>
+          <text class="lang-en" x="36" y="145" font-size="16" font-weight="700" fill="#243244">the syscall</text>
+          <text class="lang-zh" x="36" y="226" font-size="16" font-weight="700" fill="#243244">tty 子系统</text>
+          <text class="lang-en" x="36" y="226" font-size="16" font-weight="700" fill="#243244">the tty layer</text>
+          <text class="lang-zh" x="36" y="307" font-size="16" font-weight="700" fill="#243244">串口驱动</text>
+          <text class="lang-en" x="36" y="307" font-size="16" font-weight="700" fill="#243244">the serial driver</text>
+          <text class="lang-zh" x="36" y="388" font-size="16" font-weight="700" fill="#243244">硬件</text>
+          <text class="lang-en" x="36" y="388" font-size="16" font-weight="700" fill="#243244">the hardware</text>
+          <text x="668" y="86" font-size="17" font-weight="700" fill="#243244">1</text>
+          <text x="668" y="167" font-size="17" font-weight="700" fill="#243244">2</text>
+          <text x="668" y="248" font-size="17" font-weight="700" fill="#243244">3</text>
+          <text x="668" y="329" font-size="17" font-weight="700" fill="#243244">4</text>
+          <text x="330" y="406" font-size="16" font-weight="700" fill="#5b3fbf">THR</text>
+          <text x="600" y="358" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">TX</text>
+          <text class="lang-zh" x="762" y="306" font-size="15" font-weight="600" fill="#55617a">排进队列就返回</text>
+          <text class="lang-en" x="762" y="306" font-size="15" font-weight="600" fill="#55617a">returns once queued</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Five bands, four arrows — each crosses exactly one boundary, and none skips a band. The three screens below zoom legs 1, 3 and 4. Leg 2 — the kernel handing it to the tty layer — lives only here. The lavender block is the kernel. Violet is that one character, drawn at each place it passes. The landing point is THR, the transmit holding register, and the pin it drives is TX. The dashed line is the return: write comes back once the byte is queued. At that moment it has not left the pin.</span>
+          <span class="lang-zh">五条带，四段箭头，每段只跨一条边界，没有一段跳层。下面三屏放大的是第 1、3、4 段。第 2 段（内核把它交到 tty 层）只在这张图上。淡紫那块就是内核。紫色画的是同一个字符，它每经过一处就画一次。落点是 THR，也就是发送保持寄存器；它驱动的那根脚是 TX。虚线是返回：字节排进驱动的队列，write 就返回了，那时它还没出引脚。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ③ 步骤 1:write 把字节递进内核 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <div class="primer-step primer-step--centered">
+        <span class="primer-step-num">1</span>
+        <div class="primer-step-body">
+          <h2>
+            <span class="lang-en">Your program hands it in</span>
+            <span class="lang-zh">你的程序把它递进内核</span>
+          </h2>
+        </div>
+      </div>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">系统调用 syscall</span><span class="lang-en">syscall</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">knock at the window, hand the slip in</span>
+          <span class="lang-zh">敲一下窗口把条子递进去</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">A program cannot walk into the kernel; it hands the byte in at a window.</span>
+        <span class="lang-zh">程序进不了内核，只能在窗口把字节递进去。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 500" role="img"
+          aria-label="上半是你的终端窗口，字符还在里面；一段箭头穿过墙上那道开口，落到内核自己的内存上，那里是同一个字符的副本"
+          data-label-zh="上半是你的终端窗口，字符还在里面；一段箭头穿过墙上那道开口，落到内核自己的内存上，那里是同一个字符的副本"
+          data-label-en="Above is your terminal window with the character still in it; one arrow passes through the hatch in the wall and lands on the kernel's own memory, where the same character sits as a copy">
+          <!-- the terminal window: the character is still yours -->
+          <path d="M78 60 L422 60.6 Q430 60.6 430 68.6 L430 222 Q430 230 422 230 L78 229.4 Q70 229.4 70 221.4 L70 68 Q70 60 78 60 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M70 96 L430 96.6" fill="none"/>
+          <circle class="primer-hair" cx="92" cy="78" r="5" fill="none"/>
+          <circle class="primer-hair" cx="114" cy="78" r="5" fill="none"/>
+          <circle class="primer-hair" cx="136" cy="78" r="5" fill="none"/>
+          <path class="primer-hair" d="M92 146 L104 158 L92 170" fill="none"/>
+          <path class="primer-hair" d="M118 158 L196 158.4" fill="none"/>
+          <path d="M220 136 L248 136 Q256 136 256 144 L256 172 Q256 180 248 180 L220 180 Q212 180 212 172 L212 144 Q212 136 220 136 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M270 158 L400 158.5" fill="none"/>
+          <path class="primer-hair" d="M92 200 L370 200.6" fill="none"/>
+
+          <!-- the boundary: the one thick line on the page, hatched like a wall,
+               with a hatch you can hand something through -->
+          <path d="M20 250 L880 250" fill="none"/>
+          <path class="primer-hair" d="M20 262 L608 262.4 M730 262 L880 262.3 M20 274 L608 274.4 M730 274 L880 274.3" fill="none"/>
+          <path class="primer-hair" d="M80 250 L80 262 M140 250 L140 262 M200 250 L200 262 M260 250 L260 262 M320 250 L320 262 M380 250 L380 262 M440 250 L440 262 M500 250 L500 262 M560 250 L560 262 M800 250 L800 262 M860 250 L860 262 M110 262 L110 274 M170 262 L170 274 M230 262 L230 274 M290 262 L290 274 M350 262 L350 274 M410 262 L410 274 M470 262 L470 274 M530 262 L530 274 M590 262 L590 274 M770 262 L770 274 M830 262 L830 274 M80 274 L80 286 M140 274 L140 286 M200 274 L200 286 M260 274 L260 286 M320 274 L320 286 M380 274 L380 286 M440 274 L440 286 M500 274 L500 286 M560 274 L560 286 M800 274 L800 286 M860 274 L860 286" fill="none"/>
+          <path class="primer-hair" d="M20 286 L608 286.4 M730 286 L880 286.3" fill="none"/>
+          <path d="M608 250 L608 286 M730 250 L730 286" fill="none"/>
+          <path d="M478 214 L592 214.5 Q600 214.5 600 222.5 L600 238 Q600 246 592 246 L478 245.5 Q470 245.5 470 237.5 L470 222 Q470 214 478 214 Z" fill="#ffffff"/>
+
+          <!-- the kernel's own memory: the same character, as a copy -->
+          <path d="M208 350 L852 350.6 Q860 350.6 860 358.6 L860 468 Q860 476 852 476 L208 475.4 Q200 475.4 200 467.4 L200 358 Q200 350 208 350 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M200 372 L860 372.4" fill="none"/>
+          <path class="primer-hair" d="M273 372 L273 476 M346 372.1 L346 476 M419 372.2 L419 476 M492 372.3 L492 476 M565 372.4 L565 476 M638 372.4 L638 476 M711 372.5 L711 476 M784 372.6 L784 476" fill="none"/>
+          <path d="M660 391 L688 391 Q696 391 696 399 L696 427 Q696 435 688 435 L660 435 Q652 435 652 427 L652 399 Q652 391 660 391 Z" fill="#7a5cd6"/>
+
+          <!-- one hand-off, crossing one boundary, through the opening; painted
+               after the memory so nothing swallows the arrowhead -->
+          <path d="M434 158 C 548 156, 664 176, 674 224 L674 340" fill="none"/>
+          <path d="M667 328 L674 340 L681 328" fill="none"/>
+
+          <!-- labels (painted last) -->
+          <text class="lang-zh" x="30" y="36" font-size="17" font-weight="700" fill="#243244">用户态</text>
+          <text class="lang-en" x="30" y="36" font-size="17" font-weight="700" fill="#243244">user space</text>
+          <text class="lang-zh" x="30" y="318" font-size="17" font-weight="700" fill="#243244">系统调用</text>
+          <text class="lang-en" x="30" y="318" font-size="17" font-weight="700" fill="#243244">the syscall</text>
+          <text x="535" y="236" text-anchor="middle" font-size="17" font-weight="700" fill="#5b3fbf">write</text>
+          <text x="234" y="168" text-anchor="middle" font-size="22" font-weight="700" fill="#ffffff">A</text>
+          <text x="674" y="423" text-anchor="middle" font-size="22" font-weight="700" fill="#ffffff">A</text>
+          <text class="lang-zh" x="206" y="340" font-size="15" font-weight="600" fill="#55617a">内核自己的内存</text>
+          <text class="lang-en" x="206" y="340" font-size="15" font-weight="600" fill="#55617a">the kernel's own memory</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The thick line is the user–kernel boundary, the only thick one on the page. The sign says write, the name of that syscall. Your character stays put; the kernel takes a copy.</span>
+          <span class="lang-zh">那条粗线是用户态和内核的边界，全页只有它是粗的。墙上写的 write 就是这个系统调用的名字。你那个字符没动，内核抄走的是一份副本。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ④ 步骤 2:tty 层按名字找到驱动,字节排进队列 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <div class="primer-step primer-step--centered">
+        <span class="primer-step-num">2</span>
+        <div class="primer-step-body">
+          <h2>
+            <span class="lang-en">The tty layer finds the driver</span>
+            <span class="lang-zh">tty 层照名字找到驱动</span>
+          </h2>
+        </div>
+      </div>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">驱动 driver</span><span class="lang-en">driver</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">speaks this chip's own dialect</span>
+          <span class="lang-zh">会说这台机器方言的那个程序</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">The tty layer owns terminal devices and picks the driver.</span>
+        <span class="lang-zh">tty 层管的是终端这类设备，它挑出该由谁接手。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 500" role="img"
+          aria-label="上半是三个带名牌的分拣格，字符落进 ttyS0 那格；一段箭头下到驱动里，字符排进发送队列，黄圈圈着队列；虚线从队列往上回去，那就是 write 返回"
+          data-label-zh="上半是三个带名牌的分拣格，字符落进 ttyS0 那格；一段箭头下到驱动里，字符排进发送队列，黄圈圈着队列；虚线从队列往上回去，那就是 write 返回"
+          data-label-en="Above are three sorting slots with nameplates and the character drops into ttyS0; one arrow goes down into the driver where it joins the send queue, ringed in yellow; a dashed arrow climbs back out, which is write returning">
+          <!-- the sorting rack: one slot per kind of terminal device -->
+          <path d="M208 60 L612 60.6 Q620 60.6 620 68.6 L620 222 Q620 230 612 230 L208 229.4 Q200 229.4 200 221.4 L200 68 Q200 60 208 60 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M212 74 L342 74.2 L341.8 186 L212 185.8 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M350 74 L480 74.2 L479.8 186 L350 185.8 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M488 74 L618 74.2 L617.8 186 L488 185.8 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M212 88 L342 88.2 M350 88 L480 88.2 M488 88 L618 88.2" fill="none"/>
+          <path class="primer-hair" d="M232 194 L322 194.2 L321.8 220 L232 219.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M370 194 L460 194.2 L459.8 220 L370 219.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M508 194 L598 194.2 L597.8 220 L508 219.8 Z" fill="#ffffff"/>
+          <path d="M539 108 L567 108 Q575 108 575 116 L575 144 Q575 152 567 152 L539 152 Q531 152 531 144 L531 116 Q531 108 539 108 Z" fill="#7a5cd6"/>
+
+          <!-- one boundary, one crossing -->
+          <path class="primer-hair" d="M20 250 L880 250" fill="none"/>
+
+          <!-- the driver, and its send queue -->
+          <path d="M208 300 L792 300.6 Q800 300.6 800 308.6 L800 468 Q800 476 792 476 L208 475.4 Q200 475.4 200 467.4 L200 308 Q200 300 208 300 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M200 324 L800 324.5" fill="none"/>
+          <circle class="primer-hair" cx="216" cy="312" r="3" fill="none"/>
+          <circle class="primer-hair" cx="784" cy="312" r="3" fill="none"/>
+          <path d="M241 350 L595 350.5 Q603 350.5 603 358.5 L603 412 Q603 420 595 420 L241 419.5 Q233 419.5 233 411.5 L233 358 Q233 350 241 350 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M243 358 L323 358.2 L322.8 412 L243 411.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M333 358 L413 358.2 L412.8 412 L333 411.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M423 358 L503 358.2 L502.8 412 L423 411.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M513 358 L593 358.2 L592.8 412 L513 411.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M265 367 L301 367.2 L300.8 403 L265 402.8 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M355 367 L391 367.2 L390.8 403 L355 402.8 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M445 367 L481 367.2 L480.8 403 L445 402.8 Z" fill="#fdfaf3"/>
+          <path d="M539 363 L567 363 Q575 363 575 371 L575 399 Q575 407 567 407 L539 407 Q531 407 531 399 L531 371 Q531 363 539 363 Z" fill="#7a5cd6"/>
+
+          <!-- the one place to look: the queue is where write's promise ends -->
+          <g stroke-width="6"><path d="M235 336 L601 336.6 Q621 336.6 621 356.6 L621 414 Q621 434 601 434 L235 433.4 Q215 433.4 215 413.4 L215 356 Q215 336 235 336 Z" fill="none" stroke="#ffd23f"/></g>
+
+          <!-- the hand-off, painted after the driver so nothing swallows it -->
+          <path d="M553 234 L553 346" fill="none"/>
+          <path d="M546 334 L553 346 L560 334" fill="none"/>
+
+          <!-- the return: dashed, from the queue, one boundary at a time -->
+          <path d="M680 340 L680 200" fill="none" stroke-dasharray="6 8"/>
+          <path d="M673 212 L680 200 L687 212" fill="none"/>
+
+          <!-- labels (painted last) -->
+          <text class="lang-zh" x="30" y="36" font-size="17" font-weight="700" fill="#243244">tty 子系统</text>
+          <text class="lang-en" x="30" y="36" font-size="17" font-weight="700" fill="#243244">the tty layer</text>
+          <text class="lang-zh" x="30" y="282" font-size="17" font-weight="700" fill="#243244">串口驱动</text>
+          <text class="lang-en" x="30" y="282" font-size="17" font-weight="700" fill="#243244">the serial driver</text>
+          <text x="277" y="213" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">pts/3</text>
+          <text x="415" y="213" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">ttyUSB0</text>
+          <text x="553" y="213" text-anchor="middle" font-size="15" font-weight="600" fill="#5b3fbf">ttyS0</text>
+          <text class="lang-zh" x="680" y="172" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">write 就返回了</text>
+          <text class="lang-en" x="680" y="172" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">write returns</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Three pigeonholes, three kinds of terminal; ours enters ttyS0. tty is short for teletype, the old printing terminal. What the kernel matches is really the device number behind that name. The ringed row is the driver's send queue — about 4096 bytes, two pages of plain text. The dashed arrow is write returning, the moment the byte is queued.</span>
+          <span class="lang-zh">架子上三个格子是三种终端设备，字符进的是 ttyS0 那格。tty 这三个字母来自老式电报打字机 teletype。内核照的其实是这个名字背后的设备号。黄圈那排是驱动的发送队列，常见 4096 字节，大约两页纯文本。虚线是 write 的返回：字节一排进队列它就回去了。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑤ 步骤 3:驱动写进发送寄存器,字节上线 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <div class="primer-step primer-step--centered">
+        <span class="primer-step-num">3</span>
+        <div class="primer-step-body">
+          <h2>
+            <span class="lang-en">The driver writes the send register</span>
+            <span class="lang-zh">驱动写进发送寄存器</span>
+          </h2>
+        </div>
+      </div>
+      <p>
+        <span class="lang-en">The driver writes one byte to one address, and that byte is handed over. <span class="primer-mark">Ordinary programs stop short of here</span>; that takes /dev/mem, UIO or VFIO.</span>
+        <span class="lang-zh">驱动往一个地址写一个字节，这个字节就交出去了。<span class="primer-mark">普通程序走不到这里</span>，要 /dev/mem、UIO、VFIO 这类特权口子才行。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 500" role="img"
+          aria-label="队头那个字符下到芯片里，落在黄圈圈着的发送保持寄存器上；从那里进移位器，再从 TX 那根脚出去，线上是一个低起始位、八位数据、一个高停止位"
+          data-label-zh="队头那个字符下到芯片里，落在黄圈圈着的发送保持寄存器上；从那里进移位器，再从 TX 那根脚出去，线上是一个低起始位、八位数据、一个高停止位"
+          data-label-en="The byte at the head of the queue goes down into the chip and lands on the ringed transmit holding register; from there into the shift register and out of the TX leg, where the wire carries a low start bit, eight data bits and a high stop bit">
+          <!-- the same driver, one moment later: this byte is at the head -->
+          <path d="M208 66 L792 66.6 Q800 66.6 800 74.6 L800 204 Q800 212 792 212 L208 211.4 Q200 211.4 200 203.4 L200 74 Q200 66 208 66 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M200 90 L800 90.5" fill="none"/>
+          <circle class="primer-hair" cx="216" cy="78" r="3" fill="none"/>
+          <circle class="primer-hair" cx="784" cy="78" r="3" fill="none"/>
+          <path d="M241 100 L595 100.5 Q603 100.5 603 108.5 L603 162 Q603 170 595 170 L241 169.5 Q233 169.5 233 161.5 L233 108 Q233 100 241 100 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M243 108 L323 108.2 L322.8 162 L243 161.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M333 108 L413 108.2 L412.8 162 L333 161.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M423 108 L503 108.2 L502.8 162 L423 161.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M513 108 L593 108.2 L592.8 162 L513 161.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M355 117 L391 117.2 L390.8 153 L355 152.8 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M445 117 L481 117.2 L480.8 153 L445 152.8 Z" fill="#fdfaf3"/>
+          <path d="M269 113 L297 113 Q305 113 305 121 L305 149 Q305 157 297 157 L269 157 Q261 157 261 149 L261 121 Q261 113 269 113 Z" fill="#7a5cd6"/>
+
+          <!-- one boundary, one crossing -->
+          <path class="primer-hair" d="M20 250 L880 250" fill="none"/>
+
+          <!-- the chip: the send register, the shifter, the leg -->
+          <path d="M208 310 L652 310.6 Q660 310.6 660 318.6 L660 468 Q660 476 652 476 L208 475.4 Q200 475.4 200 467.4 L200 318 Q200 310 208 310 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="216" cy="326" r="5" fill="none"/>
+          <path class="primer-hair" d="M200 350 L178 350 M200 400 L178 400 M200 450 L178 450" fill="none"/>
+          <path class="primer-hair" d="M320 476 L320 488 M420 476 L420 488 M520 476 L520 488" fill="none"/>
+          <path d="M236 336 L326 336.3 L325.7 410 L236 409.7 Z" fill="#ffffff"/>
+          <path d="M267 351 L295 351 Q303 351 303 359 L303 387 Q303 395 295 395 L267 395 Q259 395 259 387 L259 359 Q259 351 267 351 Z" fill="#7a5cd6"/>
+          <path d="M326 373 L372 373" fill="none" stroke="#7a5cd6"/>
+          <path d="M372 349 L592 349.4 L591.6 397 L372 396.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M397 349 L397 397 M418 349 L418 397 M439 349 L439 397 M460 349 L460 397 M481 349 L481 397 M502 349 L502 397 M523 349 L523 397 M544 349 L544 397 M565 349 L565 397" fill="none"/>
+          <path d="M592 373 L700 373" fill="none" stroke="#7a5cd6"/>
+
+          <!-- the one place to look: writing this address IS the transmit -->
+          <g stroke-width="6"><path d="M236 324 L326 324.5 Q346 324.5 346 344.5 L346 402 Q346 422 326 422 L236 421.5 Q216 421.5 216 401.5 L216 344 Q216 324 236 324 Z" fill="none" stroke="#ffd23f"/></g>
+
+          <!-- what the wire actually carries: idle high, a low start bit, the
+               eight bits of A lowest first, then a high stop bit -->
+          <path d="M700 373 L716 373 L716 411 L732 411 L732 373 L748 373 L748 411 L828 411 L828 373 L844 373 L844 411 L860 411 L860 373 L876 373" fill="none" stroke="#7a5cd6"/>
+          <path class="primer-hair" d="M716 415 L716 427 M732 415 L732 427 M748 415 L748 427 M764 415 L764 427 M780 415 L780 427 M796 415 L796 427 M812 415 L812 427 M828 415 L828 427 M844 415 L844 427 M860 415 L860 427 M876 415 L876 427" fill="none"/>
+
+          <!-- the hand-off, painted after the chip so nothing swallows it -->
+          <path d="M283 178 L283 296" fill="none"/>
+          <path d="M276 284 L283 296 L290 284" fill="none"/>
+
+          <!-- labels (painted last) -->
+          <text class="lang-zh" x="30" y="36" font-size="17" font-weight="700" fill="#243244">串口驱动</text>
+          <text class="lang-en" x="30" y="36" font-size="17" font-weight="700" fill="#243244">the serial driver</text>
+          <text class="lang-zh" x="30" y="282" font-size="17" font-weight="700" fill="#243244">硬件</text>
+          <text class="lang-en" x="30" y="282" font-size="17" font-weight="700" fill="#243244">the hardware</text>
+          <text x="281" y="440" text-anchor="middle" font-size="17" font-weight="700" fill="#5b3fbf">THR</text>
+          <text class="lang-zh" x="482" y="336" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">移位器</text>
+          <text class="lang-en" x="482" y="336" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">shift register</text>
+          <text x="682" y="358" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">TX</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">There is no separate data port here. THR, the transmit holding register, is the way out — writing it IS the send. The shift register then pushes the bits out at the baud rate. That is the bits per second on the wire. 115200 divided by 10 bits per byte is 11,520 bytes a second. One blink, about 0.1 s, carries over a thousand bytes down this wire. The wave is the letter A (0x41), 8 data bits, no parity, one stop bit. A low start bit, then 1,0,0,0,0,0,1,0 lowest bit first, then a high stop bit. On a real 16550 there is also a 16-byte hardware queue after THR; it is not drawn. This page draws the ordinary road.</span>
+          <span class="lang-zh">这种串口没有另外的数据口。THR 是发送保持寄存器，它这个地址就是数据出口，写它就是发送。之后是移位器的活：按波特率一位一位挤出去。波特率就是每秒往线上推多少位。115200 除以每字节 10 位，是每秒 11520 个字节。眨一次眼约 0.1 秒，这根线就送得出一千多个字节。线上画的是字母 A（0x41），8 位数据、无校验、1 位停止。先一个低的起始位，再从最低位起送 1、0、0、0、0、0、1、0。最后是一个高的停止位。真芯片上 THR 后面常还有一个 16 字节的硬件队列，这里没画。这页画的是普通那条路。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑥ 回顾 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <aside class="primer-recap recap-flat">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">The character you type crosses three layers of kernel code before it touches hardware.</span>
+              <span class="lang-zh">你敲的那个字要穿过三层内核代码，才碰得到硬件。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Each layer only hands it to the next: the syscall, the tty layer, the driver.</span>
+              <span class="lang-zh">每一层只交给下一层：系统调用、tty 层、驱动。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">write returns once the byte is queued; putting it on the wire is the hardware's job.</span>
+              <span class="lang-zh">write 在字节排进队列时就返回，出线是硬件的事。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Technical primer · primer-design · the return path is drawn for a buffered tty</span>
+    <span class="lang-zh">技术图解 · primer-design · 返回路径按缓冲的 tty 画</span>
+    · v1 · 2026-08-26
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+    /* CSS only hides the other language's <text>; an SVG's aria-label is an
+     * attribute, so EN mode must swap it here or screen readers hear Chinese
+     * under html[lang="en"]. The static aria-label in the markup is the zh
+     * default for the no-JS case. */
+    document.querySelectorAll('svg[data-label-zh]').forEach(function (s) {
+      s.setAttribute('aria-label',
+        s.getAttribute(lang === 'zh' ? 'data-label-zh' : 'data-label-en'));
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: primer
+Page-type: process (technical · call path)
+Created: 2026-08-26
+
+Decisions (6):
+1. [violet-is-that-one-character] chose "violet marks the one character, at every place it passes — the block on the screen and on the cable in the hero, the block in each of the five bands, the copy in the kernel's memory, the byte at the head of the queue, the byte inside THR, and the wave it becomes on the wire" over "violet as section decoration". Because: illustration-craft §9 wants one violet subject per figure, and here the subject is one byte followed across a page; the same object drawn at successive moments is one subject, not two. The reader tracks it without a legend. Yellow appears once per figure and only twice on the page: it rings the send queue (where write's promise ends) and THR (the address whose write IS the send).
+2. [one-ladder-of-arrows, and the return is segmented too] chose "four solid arrows in their own column, each with tail in band N and head in band N+1, plus a dashed return drawn as THREE segments — driver→tty, tty→syscall, syscall→command" over "one long dashed arrow back to the top". Because: tech-figures §5 forbids an arrow that skips a band because it teaches that the middle layers are optional, and a single return arrow spanning three boundaries would be exactly that shape. The return really does unwind layer by layer, so it is drawn that way. This is the one place §5 needed interpreting: it states the no-skip rule for the outbound path and only requires the return to be dashed and to start where the page says it starts; the stricter reading is applied to both.
+3. [label budget: wide tier + neutral numerals + the gloss in the caption] the panorama carries 17 <text> elements against the wide tier's 18: five bilingual band names (10), four step numerals (neutral, 4), the register name THR (neutral, 1), and one bilingual "returns once queued" (2). §5 warns the full five-band walk-through runs 15–19 and cannot fit the 1080 tier's 14 at all. Three levers kept it inside: the step numbers are numerals rather than words, the landing point is a register name that is the same string in both languages, and every Chinese/English gloss those neutral labels do not carry — what THR stands for, what each band is called in the other language — is repeated in the figcaption, which §7's second rule requires anyway.
+4. [the return starts at the driver, and the page says so three times] chose "write returns once the byte is queued in the driver's send queue" over "returns when the wire has drained". Because: a buffered tty write is the ordinary case, and §5 forbids the figure and the prose disagreeing about it. So the dashed return's tail is in the driver band, the step-2 figure rings that queue and labels the dashed arrow "write returns", both figcaptions say it in words, and the recap's third point says it again. The hardware's own job — pushing the bits out at the baud rate — is stated as what happens after the return.
+5. [this UART is the PIO case, and it has no separate data port] chose "the data path runs THROUGH the register: THR → shift register → TX leg → the wire" over "a data port beside the register block". Because: tech-figures §4 makes this the fork that decides the drawing — an IP whose data really is a register must be drawn with the data crossing it, and inventing a data port a PIO UART does not have is a hardware path that does not exist. The figcaption says there is no separate data port in the first sentence rather than leaving it implied. What the wire carries is drawn out: the letter A (0x41) at 8N1 — idle high, a low start bit, then 1,0,0,0,0,0,1,0 lowest bit first, then a high stop bit — which is checkable against any datasheet.
+6. [privileged doors exist, so the prose names them] chose "ordinary programs stop short of a register; reaching one takes /dev/mem, UIO or VFIO" over "user space cannot touch registers". Because: the second sentence is false — those interfaces exist precisely so it can, and DPDK's whole model is built on them. §5's no-skip rule binds the FIGURE (no arrow from a user band to a hardware band) and the prose has to be accurate at the same time, so the page draws the ordinary road and says out loud that it is the ordinary one.
+
+Known trade-offs:
+- The arrow ladder sits in its own column, to the right of the objects, rather than joining object to object. It does not buy label budget — an anchored arrow costs no <text> either, and an earlier note claiming that was wrong. What it buys is legibility of the one thing the figure is about: four arrows on one vertical line make "each crosses exactly one boundary" readable at a glance, where five diagonals staircased across 912 units would each need their own inspection. Which object sits in which layer is carried by the band, not by the arrowhead.
+- Four numbered legs in the index, three numbered screens below it: legs 1, 3 and 4 each get a screen, and leg 2 — the kernel handing the byte to the tty layer — lives only in the panorama. §5's label list mandates four step numbers, and the page's brief is three step screens, so the two counts genuinely differ and the panorama's figcaption says which is which rather than leaving the reader to notice the gap. Step 2's prose covers what the tty layer does with the byte once it has it.
+- Each step figure is a two-band zoom of one adjacent pair from the panorama, drawing the same objects again: the terminal window, the brick wall with its opening, the sorting rack, the driver's queue, the chip. The repetition is deliberate (the process canonical's own decision) — the panorama is the index and the steps are the pages, so an object has to look the same in both or the reader loses the thread. Band names sit at the top-left of each band in the zooms and vertically centred in the panorama, because a 68-unit band has no room above its object.
+- Only the user/kernel boundary is a main stroke; the other three are hair. In the zooms the same rule holds, which is why step 1's boundary is thick and steps 2 and 3 are hair — and step 1's wall is the only one drawn with brick courses and a hatched section, because it is the only one you need a door for.
+- The kernel is drawn as a lavender wash spanning bands 2–4, its top edge exactly on the thick line and its bottom edge exactly on the driver/hardware line. It costs no label and answers "which of these are inside the kernel", which the band names alone do not. Its opacity is .11, inside illustration-craft §4's .12–.18 tint band's lower reach; an earlier .07 measured Euclidean 15.3 from paper — visible on a laptop, gone on a projector or in grayscale, which is not good enough for the mark a figcaption points at by name.
+- Step 1's boundary is the panorama's wall, not a hatched ground line: two brick courses through the strip below the thick line, a real opening between two jambs, and the `write` sign flush to the opening's left jamb rather than floating on blank wall. The panorama's window keeps its shelf because the byte is resting on it there; the zoom drops the shelf because the byte passes through the opening, and an arrow crossing a shelf says the byte went through solid wood.
+- The send queue is drawn with its occupied cells contiguous from the head, in all three figures where it appears — [X][X][X][A] as the new byte joins the tail, then [A][X][X][ ] one moment later with the head about to leave. A gap in the middle would be a FIFO no hardware or ring buffer produces, and it would also hide which end is the head, which is the direction the figcaption asserts.
+- Numbers are all recomputable: 8N1 spends 10 bits per byte, so 115200 ÷ 10 = 11 520 bytes a second; one blink at about 0.1 s is 1 152 bytes, hence "over a thousand"; the driver's send queue is commonly 4096 bytes, about two pages of plain text at ~2000 characters a page. Nothing on the page carries a repo count.
+- No part number is stamped on any drawing. THR is named because it is the generic name for that register in the 8250-style family the figure is drawn after, and the figcaption gives its Chinese expansion; the package outline, the pin count and the connector are generic.
+- On a 375px phone the primer-fig-wide stair holds the main stroke at picture-book weight, but the content column is 335px: a 15px in-figure label renders at about 5px in the 960-unit panorama and 5.6px in the 900-unit zooms. That is unreadable, so every band name, every device name, THR, and every number appears in the figcaption — the caption, not the drawing, is what a phone reader reads.
+- Three term bubbles, not five: 串口, 系统调用, 驱动. tty is defined in the prose sentence that first uses it and THR in the figcaption that first shows it, because each bubble costs about 80px of text height against the dos-and-donts §1 ratio, and a section with two bubbles cannot clear 0.5 with a 600px figure. Measured at 1440 — zh / en: §1 0.542 / 0.522 · §2 0.530 / 0.530 · §3 0.520 / 0.510 · §4 0.526 / 0.516; the recap section is the point-named exemption.
+- Every figure sits inside illustration-craft §8's 24-unit margin cap, measured rather than assumed (left/top/right/bottom in user units): hero 12/14/0/18 · analogy 8/24/8/10 · panorama 24/24/24/24 · steps 1–2 20/18.5/20/24 and step 3 20/18.5/20/12. The hero's right margin is 0 on purpose: the serial cable runs off the right edge, because a wire that stops in mid-air reads as a stray line rather than as a wire going somewhere.
+- The panorama's geometry, measured off the drawing rather than quoted from §5's worked example: the four boundary lines are 81 units apart, each band's object is 64 units tall, and the drawn content spans y 26–412 inside a 434-unit box. §5's own figures for a five-band walk-through are 68-unit bands on 13-unit gaps in a 440-unit box; this one is that arithmetic with the box closed onto the drawing, which is where the 24-unit margins on all four sides come from. "Equal bands" is true of the four boundary spacings and of the five objects, not of the two outer strips, which the viewBox crops.
+- Rendered heights stay under the 640px diagram-oversized line with room to spare: the panorama is 434 units on the wide tier = 579px, and each step figure is 500 units on the 1080 tier = 600px.
+- In-figure label sizes stay inside canonical process.md's 15–17px band: 15 for scene notes and device names, 16 for the panorama's band names, 17 for the step numerals and the two register names. The numerals were 19 for one revision, which put the loudest thing in any figure outside the table for no reason the table does not already serve.
+- The panorama carries 18 of the wide tier's 18 labels. The eighteenth is `TX`, so the hardware band lands on a named pin as well as a named register — §5 asks for one of the two and the figure had room for both.
+- The EN h1 says "all the way to a serial pin", not "from echo to a pin". On a tty page "echo" is the line discipline writing the character back to the terminal, which is a different path from the write() this page follows; the zh headline never claimed it, and a mechanism the page does not draw does not belong in the largest type on it.
+- Step 3's caption owns the buffer it does not draw: a real 16550 keeps a 16-byte hardware queue between THR and the shift register. The page rings a software queue in yellow and builds a decision on where write() returns, so the first buffer a measuring reader meets had to be named rather than left out.
+- Arrows are painted after the box they land in. An earlier revision drew step 2's hand-off before the driver's white body, and the driver swallowed the arrowhead — the crossing that the whole figure exists to show. The check that catches it is a rendered crop, not the source.
+/design-review:self-diff -->
+
+</body>
+</html>
