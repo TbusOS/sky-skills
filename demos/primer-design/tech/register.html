@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>寄存器是什么？一排开关 · 图解读本</title>
+<meta name="description" content="Technical primer: a register is a row of switches on the chip, taught with a 32-bit GPIO direction register. 零基础图解：寄存器就是芯片上的一排开关，以 32 位方向寄存器为例。">
+<meta property="og:title" content="寄存器是什么？一排开关 · 图解读本">
+<meta property="og:description" content="零基础图解：一个寄存器就是芯片上一排开关。位号怎么数、0 和 1 各是什么方向、改一位为什么要读-改-写。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed classes on purpose (verify.py validates
+   * primer-* classes against primer.css; local layout stays unprefixed).
+   * Figure modifiers (primer-fig-wide / primer-fig-hero) and .primer-step--centered
+   * ship from primer.css Sections E + J + L — nothing stroke-related and no
+   * component override is defined per page. */
+
+  /* Three numbered heads over the three panels of one figure: the numerals sit
+   * above the panel they name, so the figure needs no repeated captions inside
+   * it. Collapses to one column where the panels stack. */
+  .rmw-heads {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--primer-space-5);
+  }
+  @media (max-width: 900px) {
+    .rmw-heads { grid-template-columns: 1fr; gap: var(--primer-space-4); }
+  }
+
+  /* The recap is its own screen; the component's top margin is for pages
+   * where it trails a section. */
+  .recap-flat { margin-top: 0; }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">A register is<br>a row of switches</span>
+          <span class="lang-zh">一个寄存器，<br>就是一排开关</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">No hardware background needed. About four minutes to read.</span>
+          <span class="lang-zh">不需要硬件基础。这一页大约 4 分钟讲明白。</span>
+        </p>
+      </div>
+      <figure class="primer-figure primer-fig-hero">
+        <svg viewBox="0 0 500 340" role="img"
+          aria-label="芯片被打开，里面是一排小开关；拨起来的那一格通着一根脚，脚上接着一颗灯"
+          data-label-zh="芯片被打开，里面是一排小开关；拨起来的那一格通着一根脚，脚上接着一颗灯"
+          data-label-en="The chip is opened up: inside sits a row of small switches; the one flipped up runs out through a leg to a lamp">
+          <!-- board line -->
+          <path d="M20 300 C 140 297, 360 302, 480 298" fill="none"/>
+
+          <!-- the chip package, lid off -->
+          <path d="M48 96 Q40 96 40 104 L40 274 Q40 282 48 282 L292 282.8 Q300 282.8 300 274.8 L300 104.8 Q300 96.8 292 96.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M40 240 Q52 250 40 260" fill="none"/>
+          <path class="primer-hair" d="M64 112 L150 112.5 M64 122 L120 122.3" fill="none"/>
+          <path class="primer-hair" d="M40 154 L18 154 M40 186 L18 186 M40 218 L18 218 M40 250 L18 250" fill="none"/>
+          <path class="primer-hair" d="M300 154 L322 154 M300 186 L322 186 M300 218 L322 218 M300 250 L322 250" fill="none"/>
+          <path class="primer-hair" d="M56 246 L290 246.6" fill="none"/>
+
+          <!-- the row of switches: the third one is flipped up, and it is the one
+               the whole page follows — never an end slot, because the ends are
+               where bit 31 and bit 0 live -->
+          <path d="M162 116 L244 116.5 L243.5 250 L162.5 249.5 Z" fill="#7a5cd6" fill-opacity=".14"/>
+          <path d="M56 140 L110 140.3 L109.7 236 L56.3 235.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M64 188 L102 188.3" fill="none"/>
+          <path class="primer-hair" d="M69 198 L97 198.2 L96.8 228 L69.2 227.8 Z" fill="#243244"/>
+          <path d="M116 140 L170 140.4 L169.6 236 L116.4 235.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M124 188 L162 188.2" fill="none"/>
+          <path class="primer-hair" d="M129 198 L157 198.3 L156.7 228 L129.3 227.7 Z" fill="#243244"/>
+          <!-- the one we will spend the whole page on -->
+          <path d="M176 140 L230 140.3 L229.7 236 L176.3 235.7 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M184 188 L222 188.2" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M189 148 L217 148.2 L216.8 178 L189.2 177.8 Z" fill="#ffffff"/>
+          <path d="M236 140 L290 140.4 L289.6 236 L236.4 235.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M244 188 L282 188.3" fill="none"/>
+          <path class="primer-hair" d="M249 198 L277 198.2 L276.8 228 L249.2 227.8 Z" fill="#243244"/>
+
+          <!-- its leg leaves the package over the top of the row, runs down the
+               board and into the lamp's screw base — the lamp stands on the board -->
+          <path d="M203 140 L203 128 L344 128 Q352 128 352 136 L352 270 Q352 278 360 278 L392 278" fill="none" stroke="#7a5cd6"/>
+
+          <!-- the lamp -->
+          <circle cx="418" cy="222" r="36" fill="#ffffff"/>
+          <path d="M404 256 L402 264 L434 264 L432 256" fill="#ffffff"/>
+          <path d="M392 264 L444 264.4 L443.6 292 L392.4 291.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M392 272 L444 272.3 M392 281 L444 281.2" fill="none"/>
+          <path class="primer-hair" d="M400 236 L410 210 L420 236 L430 210" fill="none"/>
+          <path class="primer-hair" d="M388 192 L376 178 M418 182 L418 166 M448 192 L460 178" fill="none"/>
+          <path class="primer-hair" d="M402 292 L398 300 M434 292 L438 300" fill="none"/>
+
+          <!-- labels (painted last) -->
+          <text class="lang-zh" x="170" y="324" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">芯片里的一排开关</text>
+          <text class="lang-en" x="170" y="324" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">a row of switches inside</text>
+          <text class="lang-zh" x="412" y="324" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">这根脚接着一颗灯</text>
+          <text class="lang-en" x="412" y="324" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">this leg drives a lamp</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">A 32-bit register is 32 of these switches in one row. All of them are in your hand at once.</span>
+          <span class="lang-zh">一个 32 位的寄存器，就是这样的 32 个开关排成一行——一次全在你手里。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ② 像什么:配电箱 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What is that row like?</span>
+        <span class="lang-zh">这一排开关像什么？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">寄存器 register</span><span class="lang-en">register</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">a row of switches — flip one, the chip acts differently</span>
+          <span class="lang-zh">芯片上一排能拨的开关；拨一下，芯片就换个做法</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">A building's breaker box gives <span class="primer-mark">each room</span> its own switch. This row does the same, one slot per job.</span>
+        <span class="lang-zh">楼道里的配电箱，一格开关管<span class="primer-mark">一个房间</span>。芯片上这一排也一样，一格管一件事。</span>
+      </p>
+
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 150" role="img"
+            aria-label="墙上的配电箱：面板上一排小开关，其中一格拨了起来"
+            data-label-zh="墙上的配电箱：面板上一排小开关，其中一格拨了起来"
+            data-label-en="A breaker box on the wall: a row of small switches on the panel, one of them flipped up">
+            <!-- wall line -->
+            <path class="primer-hair" d="M8 142 L172 140.6" fill="none"/>
+            <!-- the box -->
+            <path d="M28 16 Q22 16 22 22 L22 126 Q22 132 28 132 L152 132.6 Q158 132.6 158 126.6 L158 22.6 Q158 16.6 152 16.6 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M32 30 L148 30.5 L147.6 118 L32.4 117.6 Z" fill="#fdfaf3"/>
+            <circle class="primer-hair" cx="27" cy="21" r="2.5" fill="none"/>
+            <circle class="primer-hair" cx="153" cy="21" r="2.5" fill="none"/>
+            <circle class="primer-hair" cx="27" cy="127" r="2.5" fill="none"/>
+            <circle class="primer-hair" cx="153" cy="127" r="2.5" fill="none"/>
+            <!-- the handle on the door edge -->
+            <path d="M158 66 Q166 66 166 74 Q166 82 158 82" fill="none"/>
+            <!-- four breakers, one flipped up -->
+            <path d="M38 44 L62 44.2 L61.8 106 L38.2 105.8 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M43 80 L57 80.2 L56.8 100 L43.2 99.8 Z" fill="#fdfaf3"/>
+            <path d="M66 44 L90 44.3 L89.7 106 L66.3 105.7 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M71 50 L85 50.2 L84.8 70 L71.2 69.8 Z" fill="#ffffff"/>
+            <path d="M94 44 L118 44.2 L117.8 106 L94.2 105.8 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M99 80 L113 80.3 L112.7 100 L99.3 99.7 Z" fill="#fdfaf3"/>
+            <path d="M122 44 L146 44.3 L145.7 106 L122.3 105.7 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M127 80 L141 80.2 L140.8 100 L127.2 99.8 Z" fill="#fdfaf3"/>
+            <!-- the conduit coming up the wall -->
+            <path class="primer-hair" d="M82 132 L82 142 M98 132.4 L98 142" fill="none"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p class="primer-analogy-lead"><span class="lang-en">It's like…</span><span class="lang-zh">就像……</span></p>
+          <p>
+            <span class="lang-en">A dorm's breaker box: a row of small switches, one per room. If one room is dark, you flip that room's slot.</span>
+            <span class="lang-zh">宿舍楼的配电箱：一排小开关，一格只管一个房间。谁的灯不亮，就拨谁那一格。</span>
+          </p>
+        </div>
+      </div>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 470" role="img"
+          aria-label="配电箱的一排开关和芯片里的一排开关一格对一格排在一起，位置就是它管的那件事"
+          data-label-zh="配电箱的一排开关和芯片里的一排开关一格对一格排在一起，位置就是它管的那件事"
+          data-label-en="The breaker box's row and the chip's row line up slot by slot: a slot's position is the thing it controls">
+          <!-- the breaker box: eight slots, the third one flipped up -->
+          <path d="M54 56 L876 56.6 Q886 56.6 886 66.6 L886 196.8 Q886 206.8 876 206.8 L54 206 Q44 206 44 196 L44 66 Q44 56 54 56 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M54 68 L876 68.6 L875.4 194 L54 193.4 Z" fill="#fdfaf3"/>
+          <circle class="primer-hair" cx="52" cy="64" r="4" fill="none"/>
+          <circle class="primer-hair" cx="878" cy="64" r="4" fill="none"/>
+          <circle class="primer-hair" cx="52" cy="198" r="4" fill="none"/>
+          <circle class="primer-hair" cx="878" cy="198" r="4" fill="none"/>
+          <path d="M60 86 L142 86.3 L141.7 176 L60 175.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M71 131 L131 131.3" fill="none"/>
+          <path class="primer-hair" d="M86 134 L116 134.3 L115.7 168 L86 167.7 Z" fill="#243244"/>
+          <path d="M164 86 L246 86.3 L245.7 176 L164 175.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M175 131 L235 131.3" fill="none"/>
+          <path class="primer-hair" d="M190 94 L220 94.3 L219.7 128 L190 127.7 Z" fill="#243244"/>
+          <path d="M268 86 L350 86.3 L349.7 176 L268 175.7 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M279 131 L339 131.3" fill="none"/>
+          <path class="primer-hair" d="M294 134 L324 134.3 L323.7 168 L294 167.7 Z" fill="#ffffff"/>
+          <path d="M372 86 L454 86.3 L453.7 176 L372 175.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M383 131 L443 131.3" fill="none"/>
+          <path class="primer-hair" d="M398 134 L428 134.3 L427.7 168 L398 167.7 Z" fill="#243244"/>
+          <path d="M476 86 L558 86.3 L557.7 176 L476 175.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M487 131 L547 131.3" fill="none"/>
+          <path class="primer-hair" d="M502 94 L532 94.3 L531.7 128 L502 127.7 Z" fill="#243244"/>
+          <path d="M580 86 L662 86.3 L661.7 176 L580 175.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M591 131 L651 131.3" fill="none"/>
+          <path class="primer-hair" d="M606 134 L636 134.3 L635.7 168 L606 167.7 Z" fill="#243244"/>
+          <path d="M684 86 L766 86.3 L765.7 176 L684 175.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M695 131 L755 131.3" fill="none"/>
+          <path class="primer-hair" d="M710 134 L740 134.3 L739.7 168 L710 167.7 Z" fill="#243244"/>
+          <path d="M788 86 L870 86.3 L869.7 176 L788 175.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M799 131 L859 131.3" fill="none"/>
+          <path class="primer-hair" d="M814 94 L844 94.3 L843.7 128 L814 127.7 Z" fill="#243244"/>
+          <!-- one slot up there is one slot down here — same position, same pattern -->
+          <path class="primer-hair" d="M101 210 L101 312 M205 210 L205 312 M309 210 L309 312 M413 210 L413 312 M517 210 L517 312 M621 210 L621 312 M725 210 L725 312 M829 210 L829 312" fill="none" stroke-dasharray="2 9"/>
+          <!-- the chip's row: the same eight slots, drawn small -->
+          <path d="M54 316 L876 316.6 Q886 316.6 886 326.6 L886 390.8 Q886 400.8 876 400.8 L54 400 Q44 400 44 390 L44 326 Q44 316 54 316 Z" fill="#ffffff"/>
+          <path d="M60 328 L142 328.3 L141.7 388 L60 387.7 Z" fill="none"/>
+          <path class="primer-hair" d="M71 358 L131 358.3" fill="none"/>
+          <path class="primer-hair" d="M86 363 L116 363.3 L115.7 383 L86 382.7 Z" fill="#243244"/>
+          <path d="M164 328 L246 328.3 L245.7 388 L164 387.7 Z" fill="none"/>
+          <path class="primer-hair" d="M175 358 L235 358.3" fill="none"/>
+          <path class="primer-hair" d="M190 333 L220 333.3 L219.7 353 L190 352.7 Z" fill="#243244"/>
+          <path d="M268 328 L350 328.3 L349.7 388 L268 387.7 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M279 358 L339 358.3" fill="none"/>
+          <path class="primer-hair" d="M294 363 L324 363.3 L323.7 383 L294 382.7 Z" fill="#ffffff"/>
+          <path d="M372 328 L454 328.3 L453.7 388 L372 387.7 Z" fill="none"/>
+          <path class="primer-hair" d="M383 358 L443 358.3" fill="none"/>
+          <path class="primer-hair" d="M398 363 L428 363.3 L427.7 383 L398 382.7 Z" fill="#243244"/>
+          <path d="M476 328 L558 328.3 L557.7 388 L476 387.7 Z" fill="none"/>
+          <path class="primer-hair" d="M487 358 L547 358.3" fill="none"/>
+          <path class="primer-hair" d="M502 333 L532 333.3 L531.7 353 L502 352.7 Z" fill="#243244"/>
+          <path d="M580 328 L662 328.3 L661.7 388 L580 387.7 Z" fill="none"/>
+          <path class="primer-hair" d="M591 358 L651 358.3" fill="none"/>
+          <path class="primer-hair" d="M606 363 L636 363.3 L635.7 383 L606 382.7 Z" fill="#243244"/>
+          <path d="M684 328 L766 328.3 L765.7 388 L684 387.7 Z" fill="none"/>
+          <path class="primer-hair" d="M695 358 L755 358.3" fill="none"/>
+          <path class="primer-hair" d="M710 363 L740 363.3 L739.7 383 L710 382.7 Z" fill="#243244"/>
+          <path d="M788 328 L870 328.3 L869.7 388 L788 387.7 Z" fill="none"/>
+          <path class="primer-hair" d="M799 358 L859 358.3" fill="none"/>
+          <path class="primer-hair" d="M814 333 L844 333.3 L843.7 353 L814 352.7 Z" fill="#243244"/>
+          <text class="lang-zh" x="24" y="40" font-size="17" font-weight="700" fill="#243244">配电箱</text>
+          <text class="lang-en" x="24" y="40" font-size="16" font-weight="700" fill="#243244">the breaker box</text>
+          <text class="lang-zh" x="24" y="300" font-size="17" font-weight="700" fill="#243244">芯片里的一排</text>
+          <text class="lang-en" x="24" y="300" font-size="16" font-weight="700" fill="#243244">the row inside the chip</text>
+          </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Up there one slot means one room; down here one slot means one job. The violet slot is bit 5, the one later screens change; it is still 0 here. Only 8 slots are drawn — the next screen has all 32.</span>
+          <span class="lang-zh">上面一格管一个房间，下面一格管芯片的一件事。紫色那一格就是后面几屏要改的第 5 位，现在还是 0。这里只画了 8 格，下一屏才是完整的 32 格。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ③ 位域图:哪一位管哪根引脚 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Which bit drives which pin?</span>
+        <span class="lang-zh">哪一位管哪根引脚？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">位 bit</span><span class="lang-en">bit</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">one switch: it can only sit at 0 or at 1</span>
+          <span class="lang-zh">一个开关的一格：只有 0 和 1 两个位置</span>
+        </span>
+      </div>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">引脚 pin</span><span class="lang-en">pin</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">a metal leg on the chip's edge — one wire hangs on each</span>
+          <span class="lang-zh">芯片边上伸出来的金属脚，一根挂一条线</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">Bit numbers run right to left; the rightmost slot is <span class="primer-mark">bit 0</span>, the ones place. Bit 5 drives pin 5.</span>
+        <span class="lang-zh">位号从右往左数，最右边那一格是<span class="primer-mark">第 0 位</span>，也就是个位。第 5 位管的就是 5 号引脚。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 515" role="img"
+          aria-label="32 格排成一行，左端是第 31 位、右端是第 0 位；第 5 位那一格通到芯片的 5 号引脚，脚上挂着一颗灯"
+          data-label-zh="32 格排成一行，左端是第 31 位、右端是第 0 位；第 5 位那一格通到芯片的 5 号引脚，脚上挂着一颗灯"
+          data-label-en="Thirty-two slots in one row, bit 31 at the left end and bit 0 at the right; the bit 5 slot runs to pin 5, which carries a lamp">
+          <!-- the register: one frame, 32 equal slots — bit 31 at the left end, bit 0 at the right -->
+          <path d="M30 68 L870 68.6 Q876 68.6 876 74.6 L876 146.8 Q876 152.8 870 152.8 L30 152 Q24 152 24 146 L24 74 Q24 68 30 68 Z" fill="#ffffff"/>
+          <path d="M716.25 69 L742.875 69 L742.875 151 L716.25 151 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M50.625 68 L50.625 152 M77.25 68 L77.25 152 M103.875 68 L103.875 152 M130.5 68 L130.5 152 M157.125 68 L157.125 152 M183.75 68 L183.75 152 M210.375 68 L210.375 152 M237.0 68 L237.0 152" fill="none"/>
+          <path class="primer-hair" d="M263.625 68 L263.625 152 M290.25 68 L290.25 152 M316.875 68 L316.875 152 M343.5 68 L343.5 152 M370.125 68 L370.125 152 M396.75 68 L396.75 152 M423.375 68 L423.375 152 M450.0 68 L450.0 152" fill="none"/>
+          <path class="primer-hair" d="M476.625 68 L476.625 152 M503.25 68 L503.25 152 M529.875 68 L529.875 152 M556.5 68 L556.5 152 M583.125 68 L583.125 152 M609.75 68 L609.75 152 M636.375 68 L636.375 152 M663.0 68 L663.0 152" fill="none"/>
+          <path class="primer-hair" d="M689.625 68 L689.625 152 M716.25 68 L716.25 152 M742.875 68 L742.875 152 M769.5 68 L769.5 152 M796.125 68 L796.125 152 M822.75 68 L822.75 152 M849.375 68 L849.375 152" fill="none"/>
+          <path class="primer-hair" d="M24 152 L24 168 M237 152 L237 168 M450 152 L450 168 M663 152 L663 168 M876 152 L876 168" fill="none"/>
+                    <!-- the chip, legs on the left; the violet leg is pin 5 -->
+          <path d="M610 218 L850 218.6 Q860 218.6 860 228.6 L860 388.8 Q860 398.8 850 398.8 L610 398 Q600 398 600 388 L600 228 Q600 218 610 218 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M628 238 L832 238.3 L831.7 380 L628 379.7 Z" fill="#fdfaf3"/>
+          <!-- the register itself lives in here: the leader lands on it, and the
+               violet leg leaves from its own edge — one unbroken chain -->
+          <path d="M648 264 L812 264.3 L811.7 306 L648 305.7 Z" fill="#7a5cd6" fill-opacity=".16"/>
+          <path class="primer-hair" d="M648 264 L812 264.3 L811.7 306 L648 305.7 Z" fill="none"/>
+          <path class="primer-hair" d="M652 324 L696 324.2 L695.8 362 L652 361.8 Z" fill="none"/>
+          <path class="primer-hair" d="M714 324 L758 324.2 L757.8 362 L714 361.8 Z" fill="none"/>
+          <path class="primer-hair" d="M776 324 L808 324.2 L807.8 362 L776 361.8 Z" fill="none"/>
+          <path class="primer-hair" d="M696 343 L714 343.2 M758 343 L776 343.2" fill="none"/>
+          <path class="primer-hair" d="M674 306 L674 324 M736 306 L736 324 M792 306 L792 324" fill="none"/>
+          <circle class="primer-hair" cx="614" cy="232" r="4" fill="#243244"/>
+          <!-- the slot we are talking about runs into the package and lands on the
+               register block; painted after the package so nothing swallows it -->
+          <path d="M729.6 170 L729.6 256" fill="none" stroke="#7a5cd6" stroke-dasharray="7 8"/>
+          <path d="M729.6 264 L722.6 252 M729.6 264 L736.6 252" fill="none" stroke="#7a5cd6"/>
+          <path class="primer-hair" d="M600 246 L566 246 M600 276 L566 276 M600 336 L566 336 M600 366 L566 366" fill="none"/>
+          <path d="M648 306 L556 306" fill="none" stroke="#7a5cd6"/>
+          <!-- the lamp that leg drives -->
+          <circle cx="470" cy="306" r="46" fill="#ffffff"/>
+          <path d="M510 290 L528 293 L528 319 L510 322" fill="#ffffff"/>
+          <path d="M528 290 L556 290.3 L555.7 322 L528 321.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M535.8 290 L535.8 322" fill="none"/>
+          <path class="primer-hair" d="M542.0 290 L542.0 322" fill="none"/>
+          <path class="primer-hair" d="M548.2 290 L548.2 322" fill="none"/>
+          <path class="primer-hair" d="M502 306 L480 300 L470 319 L458 297 L446 317 L438 303" fill="none"/>
+          <path class="primer-hair" d="M436 280 L424 266 M464 256 L464 240 M492 262 L502 248" fill="none"/>
+          <!-- what 0 and 1 mean on this page: signal into the chip, or out of it -->
+          <path d="M46 218 L102 218.3 L101.7 268 L46 267.7 Z" fill="#ffffff"/>
+          <path d="M224 208 L230 208.6 Q238 208.6 238 216.6 L238 266.8 Q238 274.8 230 274.8 L224 274 Q216 274 216 266 L216 216 Q216 208 224 208 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M216 220 L198 220 M216 262 L198 262" fill="none"/>
+          <path d="M196 241 L216 241" fill="none"/>
+          <path d="M124 241 L190 241 M190 241 L180 235 M190 241 L180 247" fill="none"/>
+          <path d="M46 302 L102 302.3 L101.7 352 L46 351.7 Z" fill="#ffffff"/>
+          <path d="M224 292 L230 292.6 Q238 292.6 238 300.6 L238 350.8 Q238 358.8 230 358.8 L224 358 Q216 358 216 350 L216 300 Q216 292 224 292 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M216 304 L198 304 M216 346 L198 346" fill="none"/>
+          <path d="M196 325 L216 325" fill="none"/>
+          <path d="M190 325 L124 325 M124 325 L134 319 M124 325 L134 331" fill="none"/>
+          <text x="37" y="54" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">31</text>
+          <text x="729.6" y="54" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">5</text>
+          <text x="862.7" y="54" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">0</text>
+          <text x="74" y="252" text-anchor="middle" font-size="20" font-weight="700" fill="#243244">0</text>
+          <text x="74" y="336" text-anchor="middle" font-size="20" font-weight="700" fill="#243244">1</text>
+          <text class="lang-zh" x="252" y="247" font-size="15" font-weight="600" fill="#243244">输入：只听着</text>
+          <text class="lang-en" x="252" y="247" font-size="15" font-weight="600" fill="#243244">input: it listens</text>
+          <text class="lang-zh" x="252" y="331" font-size="15" font-weight="600" fill="#243244">输出：往外送电</text>
+          <text class="lang-en" x="252" y="331" font-size="15" font-weight="600" fill="#243244">output: it drives</text>
+          <text class="lang-zh" x="470" y="428" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">5 号引脚上的灯</text>
+          <text class="lang-en" x="470" y="428" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">the lamp on pin 5</text>
+          </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Convention here: bit numbers run right to left; bit 0 is the lowest bit, the ones place. 0 = input, 1 = output — some chips have it backwards. This bit only decides listen or drive; a separate register decides whether it drives 0 or 1. Some chips spend two bits per pin, written [11:10], high bit first, so read the manual.</span>
+          <span class="lang-zh">本页约定：位号从右往左数，第 0 位是最低位，也就是个位。0 = 输入，1 = 输出；有的芯片反过来。这一位只决定这根脚是听还是送；送 0 还是送 1，另一个寄存器管。也有的一根引脚要两位来配，那一段写成 [11:10]，高位在前，动手前查手册。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ④ 怎么运作:读-改-写 -->
+  <section class="primer-section">
+    <div class="primer-container primer-container--wide">
+      <h2>
+        <span class="lang-en">Changing one bit takes three steps</span>
+        <span class="lang-zh">只改一位，要走三步</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">读-改-写</span><span class="lang-en">read-modify-write</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">read the row, change one slot, write it back</span>
+          <span class="lang-zh">读出整排，改一格，再整排写回去</span>
+        </span>
+      </div>
+
+      <div class="rmw-heads">
+        <div class="primer-step primer-step--centered">
+          <span class="primer-step-num">1</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">Read the current value</span>
+              <span class="lang-zh">读出当前值</span>
+            </h3>
+          </div>
+        </div>
+        <div class="primer-step primer-step--centered">
+          <span class="primer-step-num">2</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">Change only my bit</span>
+              <span class="lang-zh">只改我要的那一位</span>
+            </h3>
+          </div>
+        </div>
+        <div class="primer-step primer-step--centered">
+          <span class="primer-step-num">3</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">Write the whole row back</span>
+              <span class="lang-zh">整排写回去</span>
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 960 455" role="img"
+          aria-label="三张快照：整排读进手里的副本，副本上只有第 5 位被拨起来，芯片里还是老样子，最后整排写回芯片"
+          data-label-zh="三张快照：整排读进手里的副本，副本上只有第 5 位被拨起来，芯片里还是老样子，最后整排写回芯片"
+          data-label-en="Three snapshots: the whole row is read into a copy, only bit 5 is flipped on that copy while the chip still holds the old row, then the whole row is written back">
+          <!-- panel 1 · the whole row comes out -->
+          <path d="M32 70 Q26 70 26 76 L26 142 Q26 148 32 148 L290 148.8 Q296 148.8 296 142.8 L296 76.8 Q296 70.8 290 70.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M280 71 L296 87 L280 87 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M44 86 L70 86.2 L69.8 134 L44.2 133.8 Z" fill="none"/>
+          <path d="M51 114 L63 114.2 L62.8 130 L51.2 129.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M74 86 L100 86.3 L99.7 134 L74.3 133.7 Z" fill="none"/>
+          <path d="M81 90 L93 90.2 L92.8 106 L81.2 105.8 Z" fill="#243244"/>
+          <path d="M104 86 L130 86.2 L129.8 134 L104.2 133.8 Z" fill="#7a5cd6"/>
+          <path d="M111 114 L123 114.2 L122.8 130 L111.2 129.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M134 86 L160 86.3 L159.7 134 L134.3 133.7 Z" fill="none"/>
+          <path d="M141 114 L153 114.2 L152.8 130 L141.2 129.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M164 86 L190 86.2 L189.8 134 L164.2 133.8 Z" fill="none"/>
+          <path d="M171 90 L183 90.3 L182.7 106 L171.3 105.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M194 86 L220 86.3 L219.7 134 L194.3 133.7 Z" fill="none"/>
+          <path d="M201 114 L213 114.2 L212.8 130 L201.2 129.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M224 86 L250 86.2 L249.8 134 L224.2 133.8 Z" fill="none"/>
+          <path d="M231 114 L243 114.3 L242.7 130 L231.2 129.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M254 86 L280 86.3 L279.7 134 L254.3 133.7 Z" fill="none"/>
+          <path d="M261 90 L273 90.2 L272.8 106 L261.2 105.8 Z" fill="#243244"/>
+          <path d="M160 226 L160 164 M160 164 L152 176 M160 164 L168 176" fill="none"/>
+          <path d="M64 222 Q56 222 56 230 L56 342 Q56 350 64 350 L256 350.8 Q264 350.8 264 342.8 L264 230.8 Q264 222.8 256 222.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M72 254 L92 254.2 L91.8 310 L72.2 309.8 Z" fill="none"/>
+          <path class="primer-hair" d="M77 288 L87 288.2 L86.8 306 L77.2 305.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M96 254 L116 254.3 L115.7 310 L96.3 309.7 Z" fill="none"/>
+          <path class="primer-hair" d="M101 258 L111 258.2 L110.8 276 L101.2 275.8 Z" fill="#243244"/>
+          <path d="M120 254 L140 254.2 L139.8 310 L120.2 309.8 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M125 288 L135 288.2 L134.8 306 L125.2 305.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M144 254 L164 254.3 L163.7 310 L144.3 309.7 Z" fill="none"/>
+          <path class="primer-hair" d="M149 288 L159 288.2 L158.8 306 L149.2 305.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M168 254 L188 254.2 L187.8 310 L168.2 309.8 Z" fill="none"/>
+          <path class="primer-hair" d="M173 258 L183 258.3 L182.7 276 L173.3 275.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M192 254 L212 254.3 L211.7 310 L192.3 309.7 Z" fill="none"/>
+          <path class="primer-hair" d="M197 288 L207 288.2 L206.8 306 L197.2 305.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M216 254 L236 254.2 L235.8 310 L216.2 309.8 Z" fill="none"/>
+          <path class="primer-hair" d="M221 288 L231 288.3 L230.7 306 L221.3 305.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M240 254 L260 254.3 L259.7 310 L240.3 309.7 Z" fill="none"/>
+          <path class="primer-hair" d="M245 258 L255 258.2 L254.8 276 L245.2 275.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M84 350 L84 364 M124 350.3 L124 364 M164 350.5 L164 364 M204 350.6 L204 364 M244 350.8 L244 364" fill="none"/>
+
+          <!-- panel 2 · only the copy in hand changes -->
+          <path d="M352 70 Q346 70 346 76 L346 142 Q346 148 352 148 L610 148.8 Q616 148.8 616 142.8 L616 76.8 Q616 70.8 610 70.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M600 71 L616 87 L600 87 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M364 86 L390 86.2 L389.8 134 L364.2 133.8 Z" fill="none"/>
+          <path d="M371 114 L383 114.2 L382.8 130 L371.2 129.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M394 86 L420 86.3 L419.7 134 L394.3 133.7 Z" fill="none"/>
+          <path d="M401 90 L413 90.2 L412.8 106 L401.2 105.8 Z" fill="#243244"/>
+          <path d="M424 86 L450 86.2 L449.8 134 L424.2 133.8 Z" fill="#7a5cd6"/>
+          <path d="M431 90 L443 90.2 L442.8 106 L431.2 105.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M454 86 L480 86.3 L479.7 134 L454.3 133.7 Z" fill="none"/>
+          <path d="M461 114 L473 114.2 L472.8 130 L461.2 129.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M484 86 L510 86.2 L509.8 134 L484.2 133.8 Z" fill="none"/>
+          <path d="M491 90 L503 90.3 L502.7 106 L491.3 105.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M514 86 L540 86.3 L539.7 134 L514.3 133.7 Z" fill="none"/>
+          <path d="M521 114 L533 114.2 L532.8 130 L521.2 129.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M544 86 L570 86.2 L569.8 134 L544.2 133.8 Z" fill="none"/>
+          <path d="M551 114 L563 114.3 L562.7 130 L551.3 129.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M574 86 L600 86.3 L599.7 134 L574.3 133.7 Z" fill="none"/>
+          <path d="M581 90 L593 90.2 L592.8 106 L581.2 105.8 Z" fill="#243244"/>
+          <!-- panel 2 has NO connector on purpose: the edit happens on the copy in hand
+               and the chip is untouched, so the only arrow comes in from outside -->
+          <path d="M437 30 L437 62 M437 62 L430 50 M437 62 L444 50" fill="none" stroke="#7a5cd6"/>
+          <path d="M384 222 Q376 222 376 230 L376 342 Q376 350 384 350 L576 350.8 Q584 350.8 584 342.8 L584 230.8 Q584 222.8 576 222.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M392 254 L412 254.2 L411.8 310 L392.2 309.8 Z" fill="none"/>
+          <path class="primer-hair" d="M397 288 L407 288.2 L406.8 306 L397.2 305.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M416 254 L436 254.3 L435.7 310 L416.3 309.7 Z" fill="none"/>
+          <path class="primer-hair" d="M421 258 L431 258.2 L430.8 276 L421.2 275.8 Z" fill="#243244"/>
+          <path d="M440 254 L460 254.2 L459.8 310 L440.2 309.8 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M445 288 L455 288.2 L454.8 306 L445.2 305.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M464 254 L484 254.3 L483.7 310 L464.3 309.7 Z" fill="none"/>
+          <path class="primer-hair" d="M469 288 L479 288.2 L478.8 306 L469.2 305.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M488 254 L508 254.2 L507.8 310 L488.2 309.8 Z" fill="none"/>
+          <path class="primer-hair" d="M493 258 L503 258.3 L502.7 276 L493.3 275.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M512 254 L532 254.3 L531.7 310 L512.3 309.7 Z" fill="none"/>
+          <path class="primer-hair" d="M517 288 L527 288.2 L526.8 306 L517.2 305.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M536 254 L556 254.2 L555.8 310 L536.2 309.8 Z" fill="none"/>
+          <path class="primer-hair" d="M541 288 L551 288.3 L550.7 306 L541.3 305.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M560 254 L580 254.3 L579.7 310 L560.3 309.7 Z" fill="none"/>
+          <path class="primer-hair" d="M565 258 L575 258.2 L574.8 276 L565.2 275.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M404 350 L404 364 M444 350.3 L444 364 M484 350.5 L484 364 M524 350.6 L524 364 M564 350.8 L564 364" fill="none"/>
+
+          <!-- panel 3 · the whole row goes back -->
+          <path d="M672 70 Q666 70 666 76 L666 142 Q666 148 672 148 L930 148.8 Q936 148.8 936 142.8 L936 76.8 Q936 70.8 930 70.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M920 71 L936 87 L920 87 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M684 86 L710 86.2 L709.8 134 L684.2 133.8 Z" fill="none"/>
+          <path d="M691 114 L703 114.2 L702.8 130 L691.2 129.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M714 86 L740 86.3 L739.7 134 L714.3 133.7 Z" fill="none"/>
+          <path d="M721 90 L733 90.2 L732.8 106 L721.2 105.8 Z" fill="#243244"/>
+          <path d="M744 86 L770 86.2 L769.8 134 L744.2 133.8 Z" fill="#7a5cd6"/>
+          <path d="M751 90 L763 90.2 L762.8 106 L751.2 105.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M774 86 L800 86.3 L799.7 134 L774.3 133.7 Z" fill="none"/>
+          <path d="M781 114 L793 114.2 L792.8 130 L781.2 129.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M804 86 L830 86.2 L829.8 134 L804.2 133.8 Z" fill="none"/>
+          <path d="M811 90 L823 90.3 L822.7 106 L811.3 105.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M834 86 L860 86.3 L859.7 134 L834.3 133.7 Z" fill="none"/>
+          <path d="M841 114 L853 114.2 L852.8 130 L841.2 129.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M864 86 L890 86.2 L889.8 134 L864.2 133.8 Z" fill="none"/>
+          <path d="M871 114 L883 114.3 L882.7 130 L871.3 129.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M894 86 L920 86.3 L919.7 134 L894.3 133.7 Z" fill="none"/>
+          <path d="M901 90 L913 90.2 L912.8 106 L901.2 105.8 Z" fill="#243244"/>
+          <path d="M800 164 L800 226 M800 226 L792 214 M800 226 L808 214" fill="none"/>
+          <path d="M704 222 Q696 222 696 230 L696 342 Q696 350 704 350 L896 350.8 Q904 350.8 904 342.8 L904 230.8 Q904 222.8 896 222.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M712 254 L732 254.2 L731.8 310 L712.2 309.8 Z" fill="none"/>
+          <path class="primer-hair" d="M717 288 L727 288.2 L726.8 306 L717.2 305.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M736 254 L756 254.3 L755.7 310 L736.3 309.7 Z" fill="none"/>
+          <path class="primer-hair" d="M741 258 L751 258.2 L750.8 276 L741.2 275.8 Z" fill="#243244"/>
+          <path d="M760 254 L780 254.2 L779.8 310 L760.2 309.8 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M765 258 L775 258.2 L774.8 276 L765.2 275.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M784 254 L804 254.3 L803.7 310 L784.3 309.7 Z" fill="none"/>
+          <path class="primer-hair" d="M789 288 L799 288.2 L798.8 306 L789.2 305.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M808 254 L828 254.2 L827.8 310 L808.2 309.8 Z" fill="none"/>
+          <path class="primer-hair" d="M813 258 L823 258.3 L822.7 276 L813.3 275.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M832 254 L852 254.3 L851.7 310 L832.3 309.7 Z" fill="none"/>
+          <path class="primer-hair" d="M837 288 L847 288.2 L846.8 306 L837.2 305.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M856 254 L876 254.2 L875.8 310 L856.2 309.8 Z" fill="none"/>
+          <path class="primer-hair" d="M861 288 L871 288.3 L870.7 306 L861.3 305.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M880 254 L900 254.3 L899.7 310 L880.3 309.7 Z" fill="none"/>
+          <path class="primer-hair" d="M885 258 L895 258.2 L894.8 276 L885.2 275.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M724 350 L724 364 M764 350.3 L764 364 M804 350.5 L804 364 M844 350.6 L844 364 M884 350.8 L884 364" fill="none"/>
+
+          <!-- labels -->
+          <text class="lang-zh" x="480" y="420" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">芯片里还是老样子</text>
+          <text class="lang-en" x="480" y="420" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">the chip still holds the old row</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Whole rows only, so one bit costs three steps. A set/clear pair, where a chip ships one, skips them. Only the rightmost 8 of the 32 slots are drawn.</span>
+          <span class="lang-zh">芯片只认整排读写，所以改一位得走完三步。有的芯片另给一对置位、清位寄存器，写它就不用走这三步。图上只画出最右边 8 格。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑤ 为什么重要:直接写会拨到别人 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Why not just write one number?</span>
+        <span class="lang-zh">为什么不能直接写一个数？</span>
+      </h2>
+      <p>
+        <span class="lang-en">Writing one number flips <span class="primer-mark">all 32</span> switches at once. Slots other code depends on quietly go back to listening.</span>
+        <span class="lang-zh">直接写一个数，等于把 <span class="primer-mark">32 个开关</span>一起拨。别人正在用的那几格，会被你顺手关掉。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 500" role="img"
+          aria-label="写进去的数只点了第 5 位，芯片里一整排被换成这个数，原来在送电的那根脚变回听着，它上面的灯灭了"
+          data-label-zh="写进去的数只点了第 5 位，芯片里一整排被换成这个数，原来在送电的那根脚变回听着，它上面的灯灭了"
+          data-label-en="The number written names only bit 5; the chip's whole row is replaced by it, a leg that had been driving falls back to listening, and its lamp goes dark">
+          <!-- the number you write: one slot up, the other 31 left empty -->
+          <path d="M50 130 L310 130.6 Q320 130.6 320 140.6 L320 240.8 Q320 250.8 310 250.8 L50 250 Q40 250 40 240 L40 140 Q40 130 50 130 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M296 130.5 L320 154 L296 154 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M56 158 L84 158.3 L83.7 222 L56 221.7 Z" fill="none"/>
+          <path class="primer-hair" d="M60 190 L80 190.3" fill="none"/>
+          <path class="primer-hair" d="M64 194 L76 194.3 L75.7 216 L64 215.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M88 158 L116 158.3 L115.7 222 L88 221.7 Z" fill="none"/>
+          <path class="primer-hair" d="M92 190 L112 190.3" fill="none"/>
+          <path class="primer-hair" d="M96 194 L108 194.3 L107.7 216 L96 215.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M120 158 L148 158.3 L147.7 222 L120 221.7 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M124 190 L144 190.3" fill="none"/>
+          <path class="primer-hair" d="M128 164 L140 164.3 L139.7 186 L128 185.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M152 158 L180 158.3 L179.7 222 L152 221.7 Z" fill="none"/>
+          <path class="primer-hair" d="M156 190 L176 190.3" fill="none"/>
+          <path class="primer-hair" d="M160 194 L172 194.3 L171.7 216 L160 215.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M184 158 L212 158.3 L211.7 222 L184 221.7 Z" fill="none"/>
+          <path class="primer-hair" d="M188 190 L208 190.3" fill="none"/>
+          <path class="primer-hair" d="M192 194 L204 194.3 L203.7 216 L192 215.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M216 158 L244 158.3 L243.7 222 L216 221.7 Z" fill="none"/>
+          <path class="primer-hair" d="M220 190 L240 190.3" fill="none"/>
+          <path class="primer-hair" d="M224 194 L236 194.3 L235.7 216 L224 215.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M248 158 L276 158.3 L275.7 222 L248 221.7 Z" fill="none"/>
+          <path class="primer-hair" d="M252 190 L272 190.3" fill="none"/>
+          <path class="primer-hair" d="M256 194 L268 194.3 L267.7 216 L256 215.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M280 158 L308 158.3 L307.7 222 L280 221.7 Z" fill="none"/>
+          <path class="primer-hair" d="M284 190 L304 190.3" fill="none"/>
+          <path class="primer-hair" d="M288 194 L300 194.3 L299.7 216 L288 215.7 Z" fill="#243244"/>
+          <!-- it lands on the chip -->
+          <path d="M336 190 L436 190 M436 190 L424 184 M436 190 L424 196" fill="none"/>
+          <!-- the chip's whole row is replaced by that number -->
+          <path d="M462 120 L702 120.6 Q712 120.6 712 130.6 L712 330.8 Q712 340.8 702 340.8 L462 340 Q452 340 452 330 L452 130 Q452 120 462 120 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="464" cy="136" r="4" fill="#243244"/>
+          <path d="M462 152 L706 152.4 L705.6 224 L462 223.6 Z" fill="#7a5cd6" fill-opacity=".16"/>
+          <path class="primer-hair" d="M468 158 L494 158.3 L493.7 218 L468 217.7 Z" fill="none"/>
+          <path class="primer-hair" d="M472 188 L490 188.3" fill="none"/>
+          <path class="primer-hair" d="M475 193 L487 193.3 L486.7 213 L475 212.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M498 158 L524 158.3 L523.7 218 L498 217.7 Z" fill="none"/>
+          <path class="primer-hair" d="M502 188 L520 188.3" fill="none"/>
+          <path class="primer-hair" d="M505 193 L517 193.3 L516.7 213 L505 212.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M528 158 L554 158.3 L553.7 218 L528 217.7 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M532 188 L550 188.3" fill="none"/>
+          <path class="primer-hair" d="M535 163 L547 163.3 L546.7 183 L535 182.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M558 158 L584 158.3 L583.7 218 L558 217.7 Z" fill="none"/>
+          <path class="primer-hair" d="M562 188 L580 188.3" fill="none"/>
+          <path class="primer-hair" d="M565 193 L577 193.3 L576.7 213 L565 212.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M588 158 L614 158.3 L613.7 218 L588 217.7 Z" fill="none"/>
+          <path class="primer-hair" d="M592 188 L610 188.3" fill="none"/>
+          <path class="primer-hair" d="M595 193 L607 193.3 L606.7 213 L595 212.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M618 158 L644 158.3 L643.7 218 L618 217.7 Z" fill="none"/>
+          <path class="primer-hair" d="M622 188 L640 188.3" fill="none"/>
+          <path class="primer-hair" d="M625 193 L637 193.3 L636.7 213 L625 212.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M648 158 L674 158.3 L673.7 218 L648 217.7 Z" fill="none"/>
+          <path class="primer-hair" d="M652 188 L670 188.3" fill="none"/>
+          <path class="primer-hair" d="M655 193 L667 193.3 L666.7 213 L655 212.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M678 158 L704 158.3 L703.7 218 L678 217.7 Z" fill="none"/>
+          <path class="primer-hair" d="M682 188 L700 188.3" fill="none"/>
+          <path class="primer-hair" d="M685 193 L697 193.3 L696.7 213 L685 212.7 Z" fill="#243244"/>
+          <path class="primer-hair" d="M466 250 L702 250.4 L701.6 326 L466 325.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M486 266 L544 266.3 L543.7 308 L486 307.7 Z" fill="none"/>
+          <path class="primer-hair" d="M566 266 L624 266.3 L623.7 308 L566 307.7 Z" fill="none"/>
+          <path class="primer-hair" d="M646 266 L688 266.3 L687.7 308 L646 307.7 Z" fill="none"/>
+          <path class="primer-hair" d="M544 287 L566 287.2 M624 287 L646 287.2" fill="none"/>
+          <!-- the register row feeds the logic below it, same as the chip in the
+               bitfield screen: three blocks, not a grid of empty boxes -->
+          <path class="primer-hair" d="M515 222 L515 266 M655 222 L655 266" fill="none"/>
+          <path class="primer-hair" d="M712 250 L744 250 M712 320 L744 320" fill="none"/>
+          <path d="M712 170 L744 170" fill="none" stroke="#7a5cd6"/>
+          <path d="M712 200 L732 200 L732 290 L744 290" fill="none"/>
+          <!-- bits 6, 3 and 0 held a 1 before this write: the dashed outline is where
+               each lever used to sit, so the three that fell are visible -->
+          <path class="primer-hair" d="M501 164 L513 164.2 L512.8 184 L501 183.8 Z" fill="none" stroke-dasharray="3 5"/>
+          <path class="primer-hair" d="M591 164 L603 164.2 L602.8 184 L591 183.8 Z" fill="none" stroke-dasharray="3 5"/>
+          <path class="primer-hair" d="M681 164 L693 164.2 L692.8 184 L681 183.8 Z" fill="none" stroke-dasharray="3 5"/>
+          <!-- the lamp we meant to drive — still driven -->
+          <circle cx="830" cy="170" r="40" fill="#ffffff"/>
+          <path d="M796 154 L778 157 L778 183 L796 186" fill="#ffffff"/>
+          <path d="M750 154 L778 154.3 L777.7 186 L750 185.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M757.8 154 L757.8 186" fill="none"/>
+          <path class="primer-hair" d="M764.0 154 L764.0 186" fill="none"/>
+          <path class="primer-hair" d="M770.2 154 L770.2 186" fill="none"/>
+          <path class="primer-hair" d="M804 170 L820 164 L830 183 L842 161 L854 181 L862 167" fill="none"/>
+          <path class="primer-hair" d="M864 144 L876 130 M836 126 L836 110 M808 132 L798 118" fill="none"/>
+          <!-- the lamp nobody meant to switch off -->
+          <circle cx="830" cy="290" r="40" fill="#ffffff"/>
+          <path d="M796 274 L778 277 L778 303 L796 306" fill="#ffffff"/>
+          <path d="M750 274 L778 274.3 L777.7 306 L750 305.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M757.8 274 L757.8 306" fill="none"/>
+          <path class="primer-hair" d="M764.0 274 L764.0 306" fill="none"/>
+          <path class="primer-hair" d="M770.2 274 L770.2 306" fill="none"/>
+          <path class="primer-hair" d="M804 290 L820 284 L830 303 L842 281 L854 301 L862 287" fill="none"/>
+          <g stroke-width="6"><path d="M780 290 C 780 250, 806 232, 832 233 C 862 234, 888 256, 886 292 C 884 326, 858 348, 830 347 C 800 346, 781 322, 780 290 Z" fill="none" stroke="#ffd23f"/></g>
+          <path class="primer-hair" d="M828 424 L831 358" fill="none"/>
+          <text class="lang-zh" x="180" y="104" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">你写进去的那个数</text>
+          <text class="lang-en" x="180" y="104" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">the number you write</text>
+          <text class="lang-zh" x="180" y="292" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">其余 31 位全是 0</text>
+          <text class="lang-en" x="180" y="292" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">the other 31 bits are 0</text>
+          <text class="lang-zh" x="582" y="100" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">芯片里一整排被换掉</text>
+          <text class="lang-en" x="582" y="100" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">the whole row is replaced</text>
+          <text class="lang-zh" x="830" y="444" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">别人在用的灯灭了</text>
+          <text class="lang-en" x="830" y="444" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">that lamp goes dark</text>
+          </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The number you write names only bit 5, so the other 31 arrive as 0. Read-modify-write is not one step either. An interrupt — an urgent job the chip cuts in — or another core can lose your change. That set/clear pair from the last screen exists for exactly this. Again only the rightmost 8 of the 32 slots are drawn.</span>
+          <span class="lang-zh">写进去的那个数只点了第 5 位，其余 31 位就都是 0。读-改-写也不是一步。中间被中断（芯片插进来的急事）或另一个核插进来，改动会丢。上一屏那对置位、清位寄存器，就是为这件事准备的。图上同样只画最右边 8 格。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑥ 回顾 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <aside class="primer-recap recap-flat">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">A register is a row of switches on the chip: one slot, one job.</span>
+              <span class="lang-zh">寄存器就是芯片上一排开关，一格管一件事。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Bit numbers run right to left, and on this page 0 means listen, 1 means drive.</span>
+              <span class="lang-zh">位号从右往左数，本页里 0 是听着，1 是往外送电。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Changing one bit means read, modify, write — a bare number resets the other 31.</span>
+              <span class="lang-zh">改一位要读-改-写；直接写一个数，其余 31 位一起归零。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Technical primer · primer-design · every bit number follows the manual's own habit</span>
+    <span class="lang-zh">技术图解 · primer-design · 位号方向按手册的通行习惯画</span>
+    · v1 · 2026-08-25
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+    /* CSS only hides the other language's <text>; an SVG's aria-label is an
+     * attribute, so EN mode must swap it here or screen readers hear Chinese
+     * under html[lang="en"]. The static aria-label in the markup is the zh
+     * default for the no-JS case. */
+    document.querySelectorAll('svg[data-label-zh]').forEach(function (s) {
+      s.setAttribute('aria-label',
+        s.getAttribute(lang === 'zh' ? 'data-label-zh' : 'data-label-en'));
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: primer
+Page-type: concept (technical · bitfield)
+Created: 2026-08-25
+
+Decisions (5):
+1. [convention-stated-then-held] chose "one stated convention — 32 bits, MSB left / LSB right with bit 0 named as the ones place (个位, the least significant bit), one bit per pin, 0 = input, 1 = output, named generically as a direction register, multi-bit fields written [11:10] high bit first" over "a named vendor register with its real address". Because: tech-figures §0 forbids stamping a real part number on a drawing whose layout is invented, and every figure on the page has to obey the same bit order. Saying "the right end" alone does not travel to a datasheet — "bit 0 is the ones place" and the [high:low] span notation do. The figcaption also states where real chips differ (inverted polarity; two bits per pin), so a reader who opens a datasheet next has nothing to unlearn.
+2. [violet-is-bit-5-everywhere] chose "violet marks bit 5 in every place bit 5 appears — the switch in the hero, the slot in the mapping row, the cell in the 32-slot row, the copy and the chip row in all three snapshots, and the leg that carries it" over "violet as section decoration". Because: illustration-craft §9 wants one violet subject per figure, and here the subject is one bit followed across five figures; the eye tracks it without a legend. Yellow appears exactly once on the page, ringing the lamp that nobody meant to switch off.
+3. [switch-position-carries-the-value] chose "0 and 1 drawn as lever position (down / up) inside each slot" over "a 0 or 1 digit printed in each slot". Because: 8 slots x 3 snapshots would be 24 extra <text> elements — over the label budget (illustration-craft §7) and into dense-diagram territory. The lever is also the page's own metaphor, so the value and the switch are the same picture.
+4. [step-2-leaves-the-chip-alone] chose "the chip's row still shows the OLD bit 5 in snapshot 2, with a label saying so, and snapshot 2 carries NO arrow between the two rows" over "the chip and the copy changing together". Because: that gap is the whole reason read-modify-write exists. In a parallel snapshot set the arrow between the rows IS the verb "the row moves" — snapshots 1 and 3 use it for read and write-back — so reusing it in snapshot 2 would say bit 5 travelled, 24px above a label saying the chip is untouched. Snapshot 2's only arrow comes in from outside, onto the copy.
+5. [hazard-lives-in-the-caption] chose "the section answers only 'why not write a bare number', with the interrupt hazard and the set/clear-register answer in its figcaption, and 中断 glossed inline rather than given a term bubble" over "a sixth screen on atomicity, or a fifth term bubble". Because: explain-method §6 allows one question per screen, and the hazard is the engineering nuance a reader needs to not be misled. A bubble is for a word the page then reuses — 寄存器, 位, 引脚 and 读-改-写 all earn one; 中断 appears once, so it gets a parenthesis instead of a component.
+
+Known trade-offs:
+- Eight of the 32 slots are drawn in the mapping figure and in the read-modify-write snapshots. Both figcaptions say so out loud rather than implying the register is 8 bits wide; the full 32 are drawn once, in the bitfield figure, which is where the convention is stated.
+- The read-modify-write screen is the only one on the primer-container--wide tier: three snapshot panels plus three numbered heads is a 3-column layout, which the sprint contract requires the wide tier for. Its viewBox is 960x455 → 607px rendered, 33px under the 640px diagram-oversized ceiling. It got there by deleting the three in-figure panel titles: the .rmw-heads columns centre at exactly the same x as the three panels, so the circled numerals were already naming them and the in-figure copies were pure duplication (canonical decision 3). The figure now carries 2 labels.
+- Violet marks bit 5 wherever bit 5 appears, but it never marks a movement that does not happen, and it never marks two things at once: the leader into the chip in the bitfield figure lands on the violet register block inside the package, so the chain cell → leader → register → leg → lamp has no gap for the eye to jump.
+- The bitfield figure is 900x500 on the 1080 tier, not the 960x300 wide-tier figure tech-figures §1 suggests. At 300 units it renders 400px, well under half its own section and short of the dos-and-donts §1 ratio; 500 units buys the physical half of the picture — the leg, the lamp, and the 0/1 legend — that a bit row alone cannot show. Staying at 900 wide is deliberate too: the bit numbers sit above the row and only at the two ends plus bit 5, so the 26.6-unit slot pitch never has to hold a two-digit number next to another one.
+- The page draws direction only: pin multiplexing, alternate functions and pull resistors are left out. The data register is the one omission a reader could actually trip on — a direction bit chooses listen-or-drive, not the level — so the bitfield figcaption says out loud that whether the pin drives 0 or 1 belongs to a different register.
+- The violet slot sits DOWN in the mapping figure and UP in the hero, and that is the register's real state at those two moments: bit 5 is still 0 until the read-modify-write screen sets it, which is why the copy in that screen's first snapshot also starts down. The mapping figcaption says so, rather than letting the reader guess whether a lever moved for a reason.
+- On a 375px phone the primer-fig-wide stair keeps strokes at picture-book weight, but the content column is 335px: the 32-slot row is under 10px per slot and a 13px in-figure label renders at about 4.8px. That is unreadable, so every number and every convention a label carries is repeated in its figcaption — the caption, not the drawing, is what a phone reader actually reads.
+- Cell x positions in the 32-slot row are computed, not eyeballed: pitch = (900 − 24 × 2) / 32 = 26.625, and slot i's centre = 24 + 26.625 × (i + 0.5). Bit 5 is slot i = 26, so its centre is 729.56 — which is where its label and its leader line sit.
+/design-review:self-diff -->
+
+</body>
+</html>
