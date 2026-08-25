@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一颗 SoC 里面有什么？芯片像一座城 · 图解读本</title>
+<meta name="description" content="Technical primer: what sits inside one SoC — districts on a die, one shared bus, an address map, and which regions sleep. 零基础图解：芯片里面像一座城。">
+<meta property="og:title" content="一颗 SoC 里面有什么？芯片像一座城 · 图解读本">
+<meta property="og:description" content="零基础图解：芯片里面像一座城。处理器是市政府，总线是主干道，外设是各个办事处；号段分开内存和外设，用不到的区还能断电睡觉。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed classes on purpose (verify.py validates
+   * primer-* classes against primer.css; local layout stays unprefixed).
+   * Figure modifiers (primer-fig-wide / primer-fig-hero) ship from primer.css
+   * Sections E + J + L — nothing stroke-related and no component override is
+   * defined per page. */
+
+  /* The recap is its own screen; the component's top margin is meant for pages
+   * where it trails a section's prose. */
+  .recap-flat { margin-top: 0; }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">Inside one chip,<br>a whole city</span>
+          <span class="lang-zh">一颗芯片里面，<br>像一座城</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">No hardware background needed. This page covers the layout, the wiring, and which parts get to sleep.</span>
+          <span class="lang-zh">不需要硬件基础。这一页讲它们怎么排、怎么连、哪些能单独睡觉。</span>
+        </p>
+      </div>
+      <figure class="primer-figure primer-fig-hero">
+        <svg viewBox="0 0 500 340" role="img"
+          aria-label="芯片揭掉盖子的俯视图：一片硅上分成处理器、内存和两个外设四个区，中间一条街把它们连起来；旁边一粒米和这片硅差不多长"
+          data-label-zh="芯片揭掉盖子的俯视图：一片硅上分成处理器、内存和两个外设四个区，中间一条街把它们连起来；旁边一粒米和这片硅差不多长"
+          data-label-en="A chip seen from above with the lid off: one die split into four districts — processor, memory and two peripherals — joined by one street; a grain of rice beside it is about as long">
+          <!-- the table the chip is lying on -->
+          <path class="primer-hair" d="M14 300 C 140 297, 360 302, 486 299" fill="none"/>
+
+          <!-- the package, lid off -->
+          <path d="M34 24 Q26 24 26 32 L26 278 Q26 286 34 286 L322 286.8 Q330 286.8 330 278.8 L330 32.8 Q330 24.8 322 24.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M26 60 L10 60 M26 96 L10 96 M26 132 L10 132 M26 178 L10 178 M26 214 L10 214 M26 250 L10 250" fill="none"/>
+          <path class="primer-hair" d="M330 60 L346 60 M330 96 L346 96 M330 132 L346 132 M330 214 L346 214 M330 250 L346 250" fill="none"/>
+          <circle class="primer-hair" cx="38" cy="36" r="4.5" fill="#243244"/>
+
+          <!-- the die inside -->
+          <path d="M54 50 L302 50.6 L301.4 260 L54 259.4 Z" fill="#fdfaf3"/>
+
+          <!-- district: the processor -->
+          <path d="M62 62 L146 62.4 L145.6 126 L62 125.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M70 74 L138 74.3 M70 86 L138 86.3 M70 98 L124 98.2 M70 110 L138 110.3" fill="none"/>
+          <!-- district: memory, drawn as rows of cells -->
+          <path d="M158 62 L294 62.4 L293.6 126 L158 125.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M166 72 L286 72.3 M166 82 L286 82.3 M166 92 L286 92.2 M166 102 L286 102.3 M166 112 L286 112.2" fill="none"/>
+          <path class="primer-hair" d="M178 62 L178 126 M194 62 L194 126 M210 62 L210 126 M226 62 L226 126 M242 62 L242 126 M258 62 L258 126 M274 62 L274 126" fill="none"/>
+
+          <!-- the street down the middle -->
+          <path d="M60 146 L296 146.5 L295.5 178 L60 177.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M76 162 L104 162 M120 162.1 L148 162.1 M164 162.2 L192 162.2 M208 162.3 L236 162.3 M252 162.4 L280 162.4" fill="none"/>
+          <path d="M104 126 L104 146 M226 126 L226 146 M104 178 L104 192 M226 178 L226 192" fill="none"/>
+
+          <!-- district: a peripheral -->
+          <path d="M62 192 L172 192.4 L171.6 250 L62 249.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M74 206 L160 206.3 M74 220 L134 220.2" fill="none"/>
+          <path class="primer-hair" d="M74 232 L98 232.1 L97.9 244 L74 243.9 Z" fill="#243244"/>
+          <!-- district: the one being accessed right now -->
+          <path d="M184 192 L294 192.4 L293.6 250 L184 249.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M196 206 L282 206.3 M196 220 L256 220.2" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M196 232 L220 232.1 L219.9 244 L196 243.9 Z" fill="#ffffff" stroke="#ffffff"/>
+
+          <!-- a grain of rice, drawn at the same scale as the die -->
+          <path d="M392 60 C 400 43, 428 43, 436 60 C 450 96, 452 150, 450 186 C 448 232, 444 258, 434 270 C 426 285, 402 286, 393 270 C 383 258, 379 232, 377 186 C 375 150, 378 96, 392 60 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M414 72 C 420 124, 420 218, 414 264" fill="none"/>
+          <path class="primer-hair" d="M398 100 C 393 144, 393 200, 399 240" fill="none"/>
+          <path class="primer-hair" d="M404 272 C 410 278, 418 278, 424 271" fill="none"/>
+
+          <!-- labels (painted last) -->
+          <text class="lang-zh" x="178" y="322" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">一片硅，分成几个区</text>
+          <text class="lang-en" x="178" y="322" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">one die, a few districts</text>
+          <text class="lang-zh" x="412" y="322" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">一粒米</text>
+          <text class="lang-en" x="412" y="322" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">a grain of rice</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">This piece of silicon is about 5 mm across. That is close to the rice grain beside it, drawn to the same scale. Four districts, one street. Violet is the block being accessed right now, and it means that all through this page.</span>
+          <span class="lang-zh">这片硅大约 5 毫米见方，和旁边那粒米差不多长。米是按同一个比例画的。上面四个区，中间一条街。紫色是这一刻正在被访问的那一块，全页的紫都是这个意思。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ② 是什么 + 像什么:一颗芯片里面有什么 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What is inside one chip?</span>
+        <span class="lang-zh">一颗芯片里面有什么？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">SoC 片上系统</span><span class="lang-en">SoC</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">processor, memory and the small parts around them, on one piece of silicon</span>
+          <span class="lang-zh">把处理器、内存和外设（各管一件具体事的小部件）做进同一片硅里</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">In a city the hall decides, the main street carries goods, branch offices each handle one thing. <span class="primer-mark">One chip</span> holds the same three.</span>
+        <span class="lang-zh">一座城里，市政府拍板，主干道运货，各个办事处各管一摊。<span class="primer-mark">一颗芯片</span>里也是这三样。</span>
+      </p>
+
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 150" role="img"
+            aria-label="一座城的一角：市政府在主干道边上，两间办事处沿街，街上一件紫色的货正送往其中一间"
+            data-label-zh="一座城的一角：市政府在主干道边上，两间办事处沿街，街上一件紫色的货正送往其中一间"
+            data-label-en="A corner of a city: the hall stands on the main street, two branch offices line it, and one violet parcel on the street is on its way to one of them">
+            <!-- ground -->
+            <path class="primer-hair" d="M6 144 L174 142.8" fill="none"/>
+            <!-- the city hall -->
+            <path d="M60 30 L92 12 L124 30 Z" fill="#ffffff"/>
+            <path d="M64 30 L120 30.3 L119.7 76 L64 75.7 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M73 38 L73 70 M85 38 L85 70 M97 38 L97 70 M109 38 L109 70" fill="none"/>
+            <path class="primer-hair" d="M60 76 L124 76.3 M56 82 L128 82.3" fill="none"/>
+            <path d="M92 12 L92 4" fill="none"/>
+            <path d="M92 5 L107 9 L92 13 Z" fill="#ffffff"/>
+            <!-- the main street -->
+            <path d="M6 90 L174 90.6 L173.4 112 L6 111.4 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M14 101 L30 101 M42 101.1 L58 101.1 M70 101.2 L86 101.2 M154 101.5 L170 101.5" fill="none"/>
+            <!-- the parcel on its way -->
+            <path d="M116 92 L134 92.2 L133.8 104 L116 103.8 Z" fill="#7a5cd6"/>
+            <!-- two branch offices -->
+            <path d="M18 118 L64 118.3 L63.7 142 L18 141.7 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M24 126 L34 126.1 L33.9 142 L24 141.9 Z" fill="none"/>
+            <path class="primer-hair" d="M44 124 L58 124.2 L57.8 132 L44 131.8 Z" fill="none"/>
+            <path d="M110 118 L156 118.3 L155.7 142 L110 141.7 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M116 126 L126 126.1 L125.9 142 L116 141.9 Z" fill="none" stroke="#ffffff"/>
+            <path class="primer-hair" d="M136 124 L150 124.2 L149.8 132 L136 131.8 Z" fill="none" stroke="#ffffff"/>
+            <!-- short stubs onto the street -->
+            <path class="primer-hair" d="M92 82 L92 90 M40 112 L40 118 M132 104 L132 118" fill="none"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p class="primer-analogy-lead"><span class="lang-en">It's like…</span><span class="lang-zh">就像……</span></p>
+          <p>
+            <span class="lang-en">A city. The hall sits on the main street, the offices line it, and everything moves along that street.</span>
+            <span class="lang-zh">一座城。市政府在主干道边上拍板，办事处沿街办事，货都走那条街。</span>
+          </p>
+        </div>
+      </div>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 510" role="img"
+          aria-label="左边一座城，右边一颗芯片：市政府对处理器、主干道对中间那条街、办事处对外设，三条虚线一对一连起来"
+          data-label-zh="左边一座城，右边一颗芯片：市政府对处理器、主干道对中间那条街、办事处对外设，三条虚线一对一连起来"
+          data-label-en="A city on the left, a chip on the right: hall to processor, main street to the street in the middle, branch office to peripheral, paired one to one by three dashed lines">
+          <!-- ── the city ── -->
+          <path d="M276 26 L276 8" fill="none"/>
+          <path d="M276 9 L302 15 L276 21 Z" fill="#ffffff"/>
+          <path d="M186 68 L276 26 L366 68 Z" fill="#ffffff"/>
+          <path d="M192 68 L360 68.4 L359.6 150 L192 149.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M208 82 L208 142 M236 82 L236 142 M264 82 L264 142 M292 82 L292 142 M320 82 L320 142 M348 82 L348 142" fill="none"/>
+          <path class="primer-hair" d="M186 150 L366 150.4 M180 158 L372 158.4" fill="none"/>
+          <path class="primer-hair" d="M118 112 L182 112.4" fill="none"/>
+          <path d="M276 158 L276 200" fill="none"/>
+          <!-- the main street -->
+          <path d="M28 200 L396 200.6 L395.4 246 L28 245.4 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M162 223 L192 223.1 M212 223.2 L242 223.3 M262 223.3 L292 223.4 M312 223.4 L342 223.5 M362 223.5 L392 223.6" fill="none"/>
+          <path d="M100 246 L100 284 M311 246 L311 284" fill="none"/>
+          <!-- one office, and the office being visited right now -->
+          <path d="M34 284 L150 284.4 L149.6 418 L34 417.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M60 352 L84 352.2 L83.8 418 L60 417.8 Z" fill="none"/>
+          <path class="primer-hair" d="M46 302 L74 302.2 L73.8 322 L46 321.8 Z" fill="none"/>
+          <path class="primer-hair" d="M104 302 L132 302.2 L131.8 322 L104 321.8 Z" fill="none"/>
+          <path class="primer-hair" d="M96 352 L138 352.3 L137.7 370 L96 369.7 Z" fill="#fdfaf3"/>
+          <path d="M250 284 L372 284.4 L371.6 418 L250 417.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M262 334 L290 334.2 L289.8 356 L262 355.8 Z" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M320 334 L348 334.2 L347.8 356 L320 355.8 Z" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M266 374 L292 374.2 L291.8 418 L266 417.8 Z" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M306 374 L354 374.3 L353.7 396 L306 395.7 Z" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M28 426 L396 424.9" fill="none"/>
+
+          <!-- ── the chip ── -->
+          <path d="M512 26 Q504 26 504 34 L504 452 Q504 460 512 460 L868 460.8 Q876 460.8 876 452.8 L876 34.8 Q876 26.8 868 26.8 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="518" cy="38" r="4.5" fill="#243244"/>
+          <path class="primer-hair" d="M876 60 L890 60 M876 100 L890 100 M876 140 L890 140 M876 340 L890 340 M876 380 L890 380 M876 420 L890 420" fill="none"/>
+          <path d="M516 44 L864 44.6 L863.4 446 L516 445.4 Z" fill="#fdfaf3"/>
+          <!-- the processor -->
+          <path d="M524 62 L700 62.4 L699.6 150 L524 149.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M536 76 L688 76.3 M536 90 L688 90.3 M536 134 L644 134.2" fill="none"/>
+          <path class="primer-hair" d="M572 62 L572 100 M620 62 L620 100 M668 62 L668 100" fill="none"/>
+          <path d="M612 150 L612 200" fill="none"/>
+          <!-- the street in the middle -->
+          <path d="M524 200 L856 200.6 L855.4 246 L524 245.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M534 223 L564 223.1 M654 223.3 L684 223.4 M704 223.4 L734 223.5 M754 223.5 L784 223.6 M804 223.6 L834 223.7" fill="none"/>
+          <path d="M589 246 L589 284 M797 246 L797 284" fill="none"/>
+          <!-- the peripheral being accessed right now, and one more -->
+          <path d="M528 284 L650 284.4 L649.6 418 L528 417.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M544 336 L634 336.3 M544 350 L602 350.2" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M552 370 L626 370.3 L625.7 400 L552 399.7 Z" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M568 370 L568 400 M588 370 L588 400 M608 370 L608 400" fill="none" stroke="#ffffff"/>
+          <path d="M736 284 L858 284.4 L857.6 418 L736 417.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M752 312 L842 312.3 M752 328 L810 328.2" fill="none"/>
+          <circle class="primer-hair" cx="797" cy="388" r="22" fill="none"/>
+          <path class="primer-hair" d="M797 388 L797 372 M797 388 L810 395" fill="none"/>
+
+          <!-- the three pairs, drawn as one-to-one dashed links -->
+          <path class="primer-hair" d="M372 112 L520 112.4" fill="none" stroke-dasharray="3 7"/>
+          <path class="primer-hair" d="M400 223 L520 223.4" fill="none" stroke-dasharray="3 7"/>
+          <path class="primer-hair" d="M376 350 L524 350.4" fill="none" stroke-dasharray="3 7"/>
+
+          <!-- labels -->
+          <text class="lang-zh" x="30" y="118" font-size="16" font-weight="700" fill="#243244">市政府</text>
+          <text class="lang-en" x="30" y="118" font-size="16" font-weight="700" fill="#243244">city hall</text>
+          <text class="lang-zh" x="44" y="229" font-size="16" font-weight="700" fill="#243244">主干道</text>
+          <text class="lang-en" x="44" y="229" font-size="16" font-weight="700" fill="#243244">main street</text>
+          <text class="lang-zh" x="311" y="316" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">办事处</text>
+          <text class="lang-en" x="311" y="316" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">branch office</text>
+          <text x="612" y="112" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">CPU</text>
+          <text class="lang-zh" x="589" y="318" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">串口</text>
+          <text class="lang-en" x="589" y="318" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">serial port</text>
+          <text class="lang-zh" x="797" y="348" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">计时器</text>
+          <text class="lang-en" x="797" y="348" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">timer</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Three dashed pairs: hall to processor, main street to street, office to peripheral. Violet marks the same block on both sides. Two peripherals here; a real chip has a dozen, and memory joins next screen.</span>
+          <span class="lang-zh">三条虚线，三对东西。市政府对处理器、主干道对中间那条街、办事处对外设。两边的紫色标的是同一块。这里只画两个外设，真芯片里有十几个，内存下一屏才来。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ③ 怎么运作:为什么不给每对都拉一根线 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Why not wire every pair?</span>
+        <span class="lang-zh">为什么不给每对都拉一根线？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">总线 bus</span><span class="lang-en">bus</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">one shared path, taken in turns</span>
+          <span class="lang-zh">一条大家共用的通路，轮着用</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">Wiring five blocks in pairs takes <span class="primer-mark">ten runs</span>. One street, one stub each.</span>
+        <span class="lang-zh">5 个模块两两拉线，要 <span class="primer-mark">10 条</span>通路。改成一条街，每块只接一条支线。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 510" role="img"
+          aria-label="左边五个模块两两直连，十条线互相穿插；右边同样五个模块接在一条街上，两个在街上方发起搬运、三个在街下方等着被点到，街上只有一笔传输"
+          data-label-zh="左边五个模块两两直连，十条线互相穿插；右边同样五个模块接在一条街上，两个在街上方发起搬运、三个在街下方等着被点到，街上只有一笔传输"
+          data-label-en="On the left, five blocks wired in pairs — ten lines crossing each other; on the right the same five sit on one street, two above starting transfers and three below waiting to be addressed, with a single transfer on the street">
+          <!-- ── ten direct runs between five blocks ── -->
+          <path d="M82 100 L302 76 M82 100 L76 254 M82 100 L352 240 M82 100 L202 396" fill="none"/>
+          <path d="M302 76 L76 254 M302 76 L352 240 M302 76 L202 396" fill="none"/>
+          <path d="M76 254 L352 240 M76 254 L202 396 M352 240 L202 396" fill="none"/>
+          <path d="M30 72 L134 72.4 L133.6 128 L30 127.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M44 88 L120 88.3 M44 104 L100 104.2" fill="none"/>
+          <path d="M250 48 L354 48.4 L353.6 104 L250 103.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M264 64 L340 64.3 M264 80 L320 80.2" fill="none"/>
+          <path d="M24 226 L128 226.4 L127.6 282 L24 281.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M38 242 L114 242.3 M38 258 L94 258.2" fill="none"/>
+          <path d="M300 212 L404 212.4 L403.6 268 L300 267.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M314 228 L390 228.3 M314 244 L370 244.2" fill="none"/>
+          <path d="M150 368 L254 368.4 L253.6 424 L150 423.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M164 384 L240 384.3 M164 400 L220 400.2" fill="none"/>
+
+          <!-- ── the same five on one street ── -->
+          <path d="M500 48 L620 48.4 L619.6 116 L500 115.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M512 64 L608 64.3 M512 104 L580 104.2" fill="none"/>
+          <path d="M660 48 L780 48.4 L779.6 116 L660 115.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M672 64 L768 64.3 M672 104 L740 104.2" fill="none"/>
+          <!-- address and write data go down; read data comes back up -->
+          <path d="M536 116 L536 176" fill="none"/>
+          <path d="M536 182 L530 170 M536 182 L542 170" fill="none"/>
+          <path d="M578 182 L578 122" fill="none"/>
+          <path d="M578 116 L572 128 M578 116 L584 128" fill="none"/>
+          <path d="M720 116 L720 184" fill="none"/>
+          <!-- the street -->
+          <path d="M476 184 L872 184.6 L871.4 230 L476 229.4 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M490 207 L520 207.1 M540 207.1 L570 207.2 M590 207.2 L620 207.3 M730 207.5 L760 207.6 M780 207.6 L810 207.7 M830 207.7 L860 207.8" fill="none"/>
+          <!-- the only transfer on the street at this moment -->
+          <path d="M652 192 L700 192.3 L699.7 222 L652 221.7 Z" fill="#7a5cd6"/>
+          <g stroke-width="6"><path d="M632 207 C 632 191, 653 182, 676 182.6 C 701 183, 721 192, 720 208 C 719 223, 699 232, 676 231.6 C 652 231, 633 222, 632 207 Z" fill="none" stroke="#ffd23f"/></g>
+          <path d="M540 230 L540 284 M812 230 L812 284" fill="none"/>
+          <path d="M676 230 L676 284" fill="none" stroke="#7a5cd6"/>
+          <path d="M482 284 L598 284.4 L597.6 384 L482 383.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M496 306 L584 306.3 M496 320 L584 320.3 M496 334 L584 334.3 M496 348 L584 348.3 M496 362 L584 362.3" fill="none"/>
+          <path d="M618 284 L734 284.4 L733.6 384 L618 383.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M634 310 L718 310.3 M634 326 L690 326.2" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M634 344 L718 344.3 L718 368 L634 367.7 Z" fill="none" stroke="#ffffff"/>
+          <path d="M754 284 L870 284.4 L869.6 384 L754 383.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M768 310 L854 310.3 M768 326 L826 326.2" fill="none"/>
+          <path class="primer-hair" d="M768 344 L854 344.3 L854 368 L768 367.7 Z" fill="none"/>
+
+          <!-- labels -->
+          <text class="lang-zh" x="598" y="146" font-size="15" font-weight="600" fill="#243244">写下去</text>
+          <text class="lang-en" x="598" y="146" font-size="15" font-weight="600" fill="#243244">writes go down</text>
+          <text class="lang-zh" x="598" y="174" font-size="15" font-weight="600" fill="#243244">读上来</text>
+          <text class="lang-en" x="598" y="174" font-size="15" font-weight="600" fill="#243244">reads come up</text>
+          <text x="560" y="90" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">CPU</text>
+          <text x="720" y="90" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">DMA</text>
+          <text x="540" y="408" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">RAM</text>
+          <text x="676" y="408" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">UART</text>
+          <text x="812" y="408" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">SPI</text>
+          <text class="lang-zh" x="215" y="468" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">人人直连</text>
+          <text class="lang-en" x="215" y="468" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">wire every pair</text>
+          <text class="lang-zh" x="673" y="468" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">一条街</text>
+          <text class="lang-en" x="673" y="468" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">one street</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">One shared bus, the single-layer AHB kind. One transfer at a time, so two masters queue and an arbiter picks who goes. A modern SoC's fabric is usually a crossbar, a grid of streets where several pairs move at once. That limit is this drawing's, not every chip's. Top row starts transfers, bottom row answers. DMA does both. It is a master when it moves data, and a slave through its own configuration registers. RAM is memory, UART and SPI are serial ports.</span>
+          <span class="lang-zh">这条街是一条共享总线，AHB 那样的单层总线。一次只成交一笔，两个主设备得排队。谁先走由一个仲裁器决定。现代 SoC 的主干多是交叉开关，也就是几条街织成的网格。几对可以同时走。所以「一次一笔」是这张图的性质，不是每颗芯片的。上排自己发起传输（主设备），下排被点到才回话（从设备）。DMA 两头都算。搬数据时它是主设备，它自己那组配置寄存器又让它也是从设备。RAM 是内存，UART 和 SPI 是两种串口。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ④ 怎么运作:内存和外设怎么分得开 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">How are memory and peripherals told apart?</span>
+        <span class="lang-zh">内存和外设怎么分得开？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">地址 address</span><span class="lang-en">address</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">the house number of every byte on the chip</span>
+          <span class="lang-zh">芯片里每个字节的门牌号，处理器靠它找东西</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">Memory and peripherals share <span class="primer-mark">one street of numbers</span>, one range each.</span>
+        <span class="lang-zh">内存和外设住在<span class="primer-mark">同一条号码街</span>上，各占一段号段。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 510" role="img"
+          aria-label="一条竖着的号码街：最下面是 0x0000_0000 的程序段，往上是内存、串口，最上面一段没接东西；处理器发出的号码落在串口那一段上"
+          data-label-zh="一条竖着的号码街：最下面是 0x0000_0000 的程序段，往上是内存、串口，最上面一段没接东西；处理器发出的号码落在串口那一段上"
+          data-label-en="A vertical street of numbers: 0x0000_0000 holds program storage at the foot, then memory, then a serial port, and the top range has nothing behind it; the number the processor sends lands on the serial port's range">
+          <!-- addresses increase upward -->
+          <path d="M490 96 L490 60" fill="none"/>
+          <path d="M490 54 L483 67 M490 54 L497 67" fill="none"/>
+
+          <!-- the number street: four ranges of 96 units, low address at the foot.
+               Each range carries its name on the left and its texture on the
+               right, so no hairline ever runs under a label. The street is taller
+               than it is wide because that is what a memory map is — and because
+               96 units per range is what the textures need to read as textures. -->
+          <path d="M330 100 L650 100.6 L649.4 196 L330 195.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M490 195 L585 100 M538 195 L633 100 M586 195 L648 133 M490 147 L537 100" fill="none"/>
+          <path d="M330 196 L650 196.6 L649.4 292 L330 291.4 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M560 211 L636 211.3 L635.7 277 L560 276.7 Z" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M579 211 L579 277 M598 211 L598 277 M617 211 L617 277" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M490 227 L544 227.2 M490 260 L522 260.1" fill="none" stroke="#ffffff"/>
+          <path d="M330 292 L650 292.6 L649.4 388 L330 387.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M490 310 L634 310.3 M490 329 L634 329.3 M490 348 L634 348.3 M490 367 L634 367.3" fill="none"/>
+          <path class="primer-hair" d="M530 292 L530 388 M570 292 L570 388 M610 292 L610 388" fill="none"/>
+          <path d="M330 388 L650 388.6 L649.4 484 L330 483.4 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M490 406 L618 406.3 M502 425 L634 425.3 M502 444 L586 444.2 M490 463 L602 463.2" fill="none"/>
+
+          <!-- one door plate per range, centred on its range -->
+          <path d="M672 131 Q666 131 666 137 L666 160 Q666 166 672 166 L854 166.6 Q860 166.6 860 160.6 L860 137.6 Q860 131.6 854 131.6 Z" fill="#ffffff"/>
+          <path d="M672 227 Q666 227 666 233 L666 256 Q666 262 672 262 L854 262.6 Q860 262.6 860 256.6 L860 233.6 Q860 227.6 854 227.6 Z" fill="#ffffff"/>
+          <path d="M672 323 Q666 323 666 329 L666 352 Q666 358 672 358 L854 358.6 Q860 358.6 860 352.6 L860 329.6 Q860 323.6 854 323.6 Z" fill="#ffffff"/>
+          <path d="M672 419 Q666 419 666 425 L666 448 Q666 454 672 454 L854 454.6 Q860 454.6 860 448.6 L860 425.6 Q860 419.6 854 419.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M666 148 L650 148 M666 244 L650 244 M666 340 L650 340 M666 436 L650 436" fill="none"/>
+
+          <!-- the processor, and the number it is sending right now -->
+          <path d="M40 202 L250 202.6 L249.4 372 L40 371.4 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="52" cy="216" r="4.5" fill="#243244"/>
+          <path class="primer-hair" d="M64 240 L226 240.3 L225.7 282 L64 281.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M76 254 L214 254.3 M76 268 L176 268.2" fill="none"/>
+          <path class="primer-hair" d="M64 308 L112 308.2 L111.8 354 L64 353.8 Z" fill="none"/>
+          <path class="primer-hair" d="M130 308 L178 308.2 L177.8 354 L130 353.8 Z" fill="none"/>
+          <path class="primer-hair" d="M196 308 L226 308.2 L225.8 354 L196 353.8 Z" fill="none"/>
+          <path class="primer-hair" d="M112 331 L130 331.1 M178 331 L196 331.1" fill="none"/>
+          <path class="primer-hair" d="M88 372 L88 384 M120 372 L120 384 M152 372 L152 384 M184 372 L184 384" fill="none"/>
+          <path class="primer-hair" d="M226 282 L246 293 M232 295 L246 295 M226 308 L246 297" fill="none"/>
+          <path d="M250 295 L290 295 L290 244 L322 244" fill="none" stroke="#7a5cd6"/>
+          <path d="M322 244 L310 237 M322 244 L310 251" fill="none" stroke="#7a5cd6"/>
+
+          <!-- labels -->
+          <text class="lang-zh" x="490" y="38" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">地址往上递增</text>
+          <text class="lang-en" x="490" y="38" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">addresses increase upward</text>
+          <text class="lang-zh" x="346" y="154" font-size="16" font-weight="700" fill="#243244">空号段</text>
+          <text class="lang-en" x="346" y="154" font-size="16" font-weight="700" fill="#243244">nothing here</text>
+          <text x="346" y="250" font-size="17" font-weight="700" fill="#ffffff">UART</text>
+          <text x="763" y="154" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">0x5000_0000</text>
+          <text x="763" y="250" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">0x4000_0000</text>
+          <text x="763" y="346" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">0x2000_0000</text>
+          <text x="763" y="442" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">0x0000_0000</text>
+          <text class="lang-zh" x="346" y="346" font-size="16" font-weight="700" fill="#243244">读写内存</text>
+          <text class="lang-en" x="346" y="346" font-size="16" font-weight="700" fill="#243244">memory</text>
+          <text class="lang-zh" x="346" y="442" font-size="16" font-weight="700" fill="#243244">程序放这儿</text>
+          <text class="lang-en" x="346" y="442" font-size="16" font-weight="700" fill="#243244">program lives here</text>
+          <text x="145" y="226" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">CPU</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Low addresses at the foot, rising up: 0x0000_0000 at the bottom, the top range at 0x5000_0000. Not to scale — big unmapped gaps sit between ranges. UART gets 4 KB from 0x4000_0000, room for 1024 registers where a serial port needs dozens. Nothing sits behind the top range, so an access there faults. Overlaps are a configuration error, bar deliberate mirroring or a boot remap.</span>
+          <span class="lang-zh">低地址在下、往上递增：最下面 0x0000_0000，最上面那段起于 0x5000_0000。没按比例画——段与段之间还有大片空号。UART 分到 0x4000_0000 起的 4 KB，能排下 1024 个 32 位寄存器，而一个串口用不到几十个。最上面那段后面没接东西，访问它会出错。号段重叠是配置错误，例外只有刻意的镜像和启动时的重映射。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑤ 为什么重要:哪些区能单独睡觉 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Which regions can sleep on their own?</span>
+        <span class="lang-zh">哪些区能单独睡觉？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">时钟域 / 电源域</span><span class="lang-en">clock / power domain</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">a region on one clock / a region on one supply</span>
+          <span class="lang-zh">共用一个钟的区域 ／ 共用一路电的区域</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">A region can stop its own clock, or <span class="primer-mark">cut its own power</span> and forget everything.</span>
+        <span class="lang-zh">各区能自己停钟，也能<span class="primer-mark">自己断电</span>——断了电，连记住的都没了。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 510" role="img"
+          aria-label="左边一整区睡着了：钟停了，街上的线断在边界前；右边常醒的只有计时那一小块，它到点了推一下总开关，把电送回左边，跨边界的那条路上有一个同步块"
+          data-label-zh="左边一整区睡着了：钟停了，街上的线断在边界前；右边常醒的只有计时那一小块，它到点了推一下总开关，把电送回左边，跨边界的那条路上有一个同步块"
+          data-label-en="The left region is asleep: its clock has stopped and the street's line breaks before the boundary; on the right only the timekeeping corner stays awake, and when its alarm comes due it pushes the master switch and sends power back, with a synchronizer block on the crossing">
+          <!-- ── the region that is asleep ── -->
+          <path class="primer-hair" d="M40 46 L560 46.6 L559.4 466 L40 465.4 Z" fill="#ffffff" stroke-dasharray="4 8"/>
+          <path d="M64 90 L214 90.4 L213.6 186 L64 185.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M76 104 L202 104.3 M76 118 L166 118.2 M76 170 L202 170.3" fill="none"/>
+          <path class="primer-hair" d="M180 110 L202 110.2 L201.8 128 L180 127.8 Z" fill="#243244"/>
+          <path d="M252 90 L402 90.4 L401.6 186 L252 185.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M264 104 L390 104.3 M264 116 L390 116.3 M264 128 L390 128.3 M264 170 L390 170.3" fill="none"/>
+          <path class="primer-hair" d="M290 96 L290 134 M327 96 L327 134 M364 96 L364 134" fill="none"/>
+          <!-- its clock has stopped: two beats, then a flat line -->
+          <path d="M424 162 L436 162 L436 118 L454 118 L454 162 L472 162 L472 118 L490 118 L490 162 L544 162" fill="none"/>
+          <!-- the street inside this region -->
+          <path d="M48 240 L540 240.6 L539.4 288 L48 287.4 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M62 264 L92 264.1 M112 264.1 L142 264.2 M162 264.2 L192 264.3 M212 264.3 L242 264.4 M262 264.4 L292 264.5 M312 264.5 L342 264.6 M362 264.6 L392 264.7 M412 264.7 L442 264.8 M462 264.8 L492 264.9" fill="none"/>
+          <path d="M139 186 L139 240 M327 186 L327 240 M139 288 L139 336 M327 288 L327 336" fill="none"/>
+          <path d="M64 336 L214 336.4 L213.6 436 L64 435.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M78 360 L200 360.3 M78 376 L160 376.2" fill="none"/>
+          <path class="primer-hair" d="M78 396 L200 396.3 L200 420 L78 419.7 Z" fill="none"/>
+          <path d="M252 336 L402 336.4 L401.6 436 L252 435.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M266 360 L388 360.3 M266 376 L348 376.2" fill="none"/>
+          <path class="primer-hair" d="M280 392 L374 392.3 L374 418 L280 417.7 Z" fill="none"/>
+          <path class="primer-hair" d="M300 392 L300 418 M320 392 L320 418 M340 392 L340 418 M360 392 L360 418" fill="none"/>
+          <!-- the road out of this region stops short of the boundary -->
+          <path d="M540 264 L554 264" fill="none"/>
+
+          <!-- ── the region that never sleeps ── -->
+          <path class="primer-hair" d="M620 46 L876 46.6 L875.4 466 L620 465.4 Z" fill="#efe9fc" stroke-dasharray="4 8"/>
+          <!-- the timekeeping corner: still working, so it is the violet one -->
+          <path d="M664 86 L856 86.4 L855.6 216 L664 215.6 Z" fill="#7a5cd6"/>
+          <circle class="primer-hair" cx="760" cy="151" r="42" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M760 151 L760 121 M760 151 L783 164" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M760 102 L760 108 M808 151 L802 151 M760 200 L760 194 M712 151 L718 151" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M680 100 L696 100.2 M680 202 L696 202.2 M824 100 L840 100.2 M824 202 L840 202.2" fill="none" stroke="#ffffff"/>
+          <!-- its clock keeps ticking -->
+          <path d="M664 286 L678 286 L678 250 L700 250 L700 286 L722 286 L722 250 L744 250 L744 286 L766 286 L766 250 L788 250 L788 286 L800 286" fill="none"/>
+          <!-- the master switch: the alarm pushes it, and power goes back left -->
+          <path d="M680 346 L848 346.4 L847.6 436 L680 435.6 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="712" cy="396" r="6" fill="#243244"/>
+          <path class="primer-hair" d="M712 396 L800 384" fill="none"/>
+          <circle class="primer-hair" cx="812" cy="370" r="5" fill="none"/>
+          <circle class="primer-hair" cx="812" cy="412" r="5" fill="none"/>
+          <path d="M830 216 L830 338" fill="none" stroke="#7a5cd6"/>
+          <path d="M830 346 L823 334 M830 346 L837 334" fill="none" stroke="#7a5cd6"/>
+          <path d="M680 406 L566 406" fill="none"/>
+          <path d="M560 406 L572 399 M560 406 L572 413" fill="none"/>
+
+          <!-- the synchronizer, straddling the boundary -->
+          <path d="M596 240 L640 240.3 L639.7 288 L596 287.7 Z" fill="#ffffff"/>
+          <path d="M640 264 L652 264 L652 160 L664 160" fill="none"/>
+
+          <!-- labels -->
+          <text class="lang-zh" x="44" y="36" font-size="16" font-weight="700" fill="#243244">这一区睡着了</text>
+          <text class="lang-en" x="44" y="36" font-size="16" font-weight="700" fill="#243244">this region is asleep</text>
+          <text class="lang-zh" x="628" y="36" font-size="16" font-weight="700" fill="#243244">常醒的一区</text>
+          <text class="lang-en" x="628" y="36" font-size="16" font-weight="700" fill="#243244">always awake</text>
+          <text x="139" y="144" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">CPU</text>
+          <text x="327" y="144" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">RAM</text>
+          <text x="484" y="192" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">100 MHz</text>
+          <text x="732" y="316" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">32.768 kHz</text>
+          <text class="lang-zh" x="618" y="270" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">同步</text>
+          <text class="lang-en" x="618" y="270" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">sync</text>
+          <text class="lang-zh" x="520" y="392" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">叫醒</text>
+          <text class="lang-en" x="520" y="392" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">wake it up</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Two domains, dashed edges. The left one sleeps. Its clock stopped and the 100 MHz trace is flat. The street's line breaks at the boundary — no power, no signal. The right runs on a 32.768 kHz crystal — the one in a wristwatch — three thousand times slower. Its alarm pushes the switch that returns power. That crossing spans two clocks, so a synchronizer holds the signal a beat.</span>
+          <span class="lang-zh">两块极浅的底色是两个域，虚线是边界。左边睡着了：钟停了，100 MHz 那条线是平的。街上那条路断在边界前——断了电就不该还在发信号。右边那颗 32.768 kHz 晶振，就是石英手表里走秒的那一颗，慢约三千倍。它到点了推一下总开关，电就回来。这一跨跨了两个钟，所以边界上放了个同步块，让信号停一拍。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑥ 回顾 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <aside class="primer-recap recap-flat">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">One chip holds a processor, memory and peripherals, joined by one bus.</span>
+              <span class="lang-zh">一颗芯片里，处理器、内存和外设各占一块，中间一条总线连着。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">The shared bus drawn here carries one transfer at a time. A real chip's main fabric is often a crossbar, where several pairs move at once.</span>
+              <span class="lang-zh">这一页画的共享总线一次只走一笔。真芯片的主干常是交叉开关，几对能同时走。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Address ranges keep memory and peripherals apart, and a region nobody needs can power down.</span>
+              <span class="lang-zh">地址号段把内存和外设分开；用不到的区可以断电睡觉。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Technical primer · primer-design · the bus drawn here is a shared one; a crossbar is a different picture</span>
+    <span class="lang-zh">技术图解 · primer-design · 这一页画的是共享总线，交叉开关是另一张图</span>
+    · v1 · 2026-08-25
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+    /* CSS only hides the other language's <text>; an SVG's aria-label is an
+     * attribute, so EN mode must swap it here or screen readers hear Chinese
+     * under html[lang="en"]. The static aria-label in the markup is the zh
+     * default for the no-JS case. */
+    document.querySelectorAll('svg[data-label-zh]').forEach(function (s) {
+      s.setAttribute('aria-label',
+        s.getAttribute(lang === 'zh' ? 'data-label-zh' : 'data-label-en'));
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: primer
+Page-type: concept (technical · SoC block diagram)
+Created: 2026-08-25
+
+Decisions (5):
+1. [shared-bus-drawn-and-named] chose "draw one shared bus (a street), name it in the figcaption as the single-layer AHB kind, and put the crossbar correction in the same caption" over "draw a crossbar" or "draw a street and say nothing". Because: tech-figures §3 gives the street picture only for a shared bus, and its 禁止 table forbids carrying "one transfer at a time" over to a crossbar. A beginner needs the one-street picture to unlearn point-to-point wiring; an engineer needs the label to be right — APB, §3's own example, has a single master and no arbitration between masters, so a street with CPU and DMA queuing on it is AHB, not APB — and needs to be told the modern main fabric is switched, that several master-slave pairs move at once, and that the concurrency is what the extra silicon buys. Both statements sit in the caption of the figure that draws the claim, and the recap repeats the correction in plain words.
+2. [violet-is-the-block-being-accessed] chose "one page-wide meaning for violet — the block being accessed at this moment — stated once in the hero caption" over "violet as the section's subject". Because: the page has five figures of the same chip, and a colour that means one fixed thing lets the eye find the subject without a legend. It marks the die district in the hero, both halves of the analogy pair, the transfer plus its destination on the bus, the address range under the arrow, and the timer that is still working while its neighbours sleep. Yellow appears exactly once on the whole page, ringing the single transfer on the shared street.
+3. [address-map-low-at-the-foot] chose "0x0000_0000 at the bottom, rising upward, with the direction said in the caption" over "the reading order of a table, high address first". Because: tech-figures §3 pins that direction, and "increasing" is not information unless the drawing says which end it starts from. The caption also says the map is not to scale — the real hole between 0x2000_0000 and 0x4000_0000 is 512 MB wide and the drawing shows a hairline — and that overlapping ranges are a configuration error except for deliberate mirroring or a boot remap.
+4. [one-bubble-per-section, the rest glossed inline] chose "four term bubbles (SoC, 总线, 地址, 时钟域/电源域) with master/slave and synchronizer glossed inside the captions" over "a bubble for every technical word". Because: explain-method §1 only requires a bubble for jargon that enters the prose, and a word used once earns a parenthesis, not a component (the register page set that precedent with 中断). It is also what buys the illustration ratio: every bubble costs 46-77px of a section whose figure has to stay above half its height in both languages.
+5. [rice at the die's own scale] chose "draw the grain of rice 248 units long, the same length as the die's edge" over "draw a small rice icon beside a big chip". Because: explain-method §3 wants the referent to be checkable, and a referent drawn at the wrong scale teaches the wrong size. The caption gives the number (about 5 mm across) and says the grain is drawn to the same scale.
+
+Known trade-offs:
+- Every full-width figure is 900x510 -> 612px rendered, 28px under the 640px diagram-oversized line and inside the 533-unit ceiling that 900-wide-on-1080 allows (tech-figures §8). That is above §8's ≤500 working value, deliberately: those last 10 units are what let each concept section hold illustration/section above half in BOTH languages while its caption still repeats every number a phone reader cannot read off the drawing. Measured at 1440: zh 0.547 / 0.535 / 0.546 / 0.546, en 0.539 / 0.525 / 0.535 / 0.535. The bus section is the low one in both languages because its caption is the page's longest, and it has to be: it names the bus kind, refuses the crossbar generalisation, and gives DMA both identities.
+- The bus figure carries two panels. That contrast is the section's one question ("why not wire every pair") — ten runs against five stubs — and the street panel adds only what the answer needs: the master row above, the slave row below, one transfer, and the two directions drawn as separate arrows.
+- DMA sits in the master row because that is the identity that matters when it moves data. Its second identity — a slave, through its own configuration registers — is spelled out in the caption rather than drawn, because a block drawn in two rows would say there are two of them.
+- The address-map figure fills its box instead of padding it. Each of the four ranges is 96 viewBox units tall, not 75: at 75 the street was 300 units of drawing inside a 510-unit box, so 133 units — 26% — were dead margin, and the section was clearing dos-and-donts §1 on that margin rather than on its picture (tighten to illustration-craft §8's 24-unit cap and the EN ratio falls to 0.489). A memory map is taller than it is wide anyway, and 96 units per range is what the four textures need to read as code, cells, registers and hatching. Margins are now 23 top / 24 bottom.
+- Simplifications, each disclosed in the caption that makes them: two peripherals where a real chip has a dozen; five modules on the bus; four address ranges with the holes between them not to scale; no traffic at all in the correspondence figure (the caption of the bus figure is where traffic starts).
+- Numbers all live in the captions as well as the drawings: 5 mm and one grain of rice, 10 runs against 5 stubs, 4 KB and 1024 registers of 32 bits, 0x0000_0000 / 0x2000_0000 / 0x4000_0000 / 0x4000_1000 / 0x5000_0000, 100 MHz against 32.768 kHz and the three-thousand-fold ratio. At 375px the content column is 335px, where a 15-unit in-figure label renders about 5px — unreadable, so the caption is the drawing's only voice on a phone.
+- Nothing whose legibility matters rides the hero tier: primer.css renders hero strokes at 2.26-3.00px between 769 and 980px viewport (known-bugs §8.2, being fixed in the CSS, not here). The hero carries two labels and both are repeated in its caption.
+- The sleeping region draws its blocks in paper on a white ground while the always-awake region is violet-soft: the tint that means "this is the part still in use" had to stay on the side of the page where something is in use. The road out of the sleeping region stops short of the boundary rather than reaching the synchronizer, because a region with no power must not be drawing a signal, and the master switch is drawn open for the same reason.
+/design-review:self-diff -->
+
+</body>
+</html>
