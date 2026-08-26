@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>技术图解六页 · 图解读本</title>
+<meta name="description" content="Six technical primers: a register, one SPI transfer, an SoC, an IP core, the kernel path, halving. 六页技术图解，一页画一样看不见的东西。">
+<meta property="og:title" content="技术图解六页 · 图解读本">
+<meta property="og:description" content="封在芯片里的那几样，一页画一样：寄存器、时序、SoC、IP core、内核路径、对半砍。都不需要硬件基础。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed classes on purpose (verify.py validates
+   * primer-* classes against primer.css; local layout stays unprefixed).
+   * Figure modifiers (primer-fig-wide / primer-fig-hero) ship from primer.css
+   * Sections J + L — nothing stroke-related is defined per page. */
+
+  /* The six pages, one card each. Three columns only above 1000px: at that
+   * width a column is 291px and a 300-unit viewBox still renders its stroke at
+   * 3.29px, over the 3px picture-book floor (illustration-craft §3). Two
+   * columns below it, one below 660. */
+  .idx-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--primer-space-7) var(--primer-space-5);
+    margin-top: var(--primer-space-6);
+  }
+  @media (max-width: 1000px) { .idx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 660px)  { .idx-grid { grid-template-columns: minmax(0, 1fr); gap: var(--primer-space-6); } }
+
+  /* The whole card is the link: thumbnail plus the line that says what the
+   * page teaches. The underline lives on the page's name so the card reads as
+   * a link without underlining a whole sentence; the focus ring comes from
+   * primer.css and is deliberately not overridden. */
+  .idx-card { display: block; text-decoration: none; color: inherit; }
+  .idx-card .primer-figure { margin: 0; }
+  /* A two-column row hands each card up to 451px; capped at 380 the stroke
+   * stays at 4.31px instead of 5.11px, inside the 3.0–4.4px band. */
+  .idx-card svg { max-width: 380px; margin-left: auto; margin-right: auto; }
+  .idx-card .primer-figcaption { max-width: 42ch; }
+  .idx-name {
+    color: var(--primer-violet-ink);
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+  .idx-card:hover .idx-name { text-decoration-thickness: 3px; }
+
+  /* The recap is its own screen; the component's top margin is for pages
+   * where it trails a section. */
+  .recap-flat { margin-top: 0; }
+
+  .nav-link { font-weight: 700; font-size: 14px; text-decoration-thickness: 2px; white-space: nowrap; }
+  @media (max-width: 480px) { .nav-link { font-size: 13px; } }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <a class="nav-link" href="../index.html">
+        <span class="lang-en">Back to the demo</span><span class="lang-zh">回 demo</span>
+      </a>
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">Six things you<br>cannot see,<br>one page each</span>
+          <span class="lang-zh">看不见的那几样，<br>一页画一样</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">From one row of switches to a whole chip, and on to how a keystroke reaches a wire. No hardware background needed on any of the six — about four minutes a page.</span>
+          <span class="lang-zh">从一排开关，到一颗芯片，再到你敲的一个字怎么走到线上。六页都不需要硬件基础，一页大约 4 分钟。</span>
+        </p>
+      </div>
+      <figure class="primer-figure primer-fig-hero">
+        <svg viewBox="0 36 500 304" role="img"
+          aria-label="桌上一块板子，旁边摊开六张图纸；抽出来那张画的就是板子上那颗芯片"
+          data-label-zh="桌上一块板子，旁边摊开六张图纸；抽出来那张画的就是板子上那颗芯片"
+          data-label-en="A board on the desk beside a fan of six sheets; the one pulled out draws the chip on that board">
+          <!-- the desk -->
+          <path d="M14 306 C 140 303, 360 309, 486 305" fill="none"/>
+
+          <!-- the fan of six sheets, five of them showing only their edge -->
+          <g transform="rotate(-25 306 292)">
+            <path d="M306 106 Q300 106 300 112 L300 286 Q300 292 306 292 L452 292.6 Q458 292.6 458 286.6 L458 112.6 Q458 106.6 452 106.6 Z" fill="#ffffff"/>
+          </g>
+          <g transform="rotate(-20 306 292)">
+            <path d="M306 106 Q300 106 300 112 L300 286 Q300 292 306 292 L452 292.6 Q458 292.6 458 286.6 L458 112.6 Q458 106.6 452 106.6 Z" fill="#ffffff"/>
+          </g>
+          <g transform="rotate(-15 306 292)">
+            <path d="M306 106 Q300 106 300 112 L300 286 Q300 292 306 292 L452 292.6 Q458 292.6 458 286.6 L458 112.6 Q458 106.6 452 106.6 Z" fill="#ffffff"/>
+          </g>
+          <g transform="rotate(-10 306 292)">
+            <path d="M306 106 Q300 106 300 112 L300 286 Q300 292 306 292 L452 292.6 Q458 292.6 458 286.6 L458 112.6 Q458 106.6 452 106.6 Z" fill="#ffffff"/>
+          </g>
+          <g transform="rotate(-5 306 292)">
+            <path d="M306 106 Q300 106 300 112 L300 286 Q300 292 306 292 L452 292.6 Q458 292.6 458 286.6 L458 112.6 Q458 106.6 452 106.6 Z" fill="#ffffff"/>
+          </g>
+          <!-- the sheet pulled out: it draws the chip that sits on the board -->
+          <path d="M306 106 Q300 106 300 112 L300 286 Q300 292 306 292 L452 292.6 Q458 292.6 458 286.6 L458 112.6 Q458 106.6 452 106.6 Z" fill="#ffffff"/>
+          <path d="M330 136 L428 136.4 L428 196 L330 195.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M342 148 L360 148.1 L360 184 L342 183.9 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M372 148 L390 148.1 L390 184 L372 183.9 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M402 148 L420 148.1 L420 184 L402 183.9 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M330 150 L318 150 M330 168 L318 168 M330 186 L318 186" fill="none"/>
+          <path class="primer-hair" d="M428 150 L440 150 M428 168 L440 168 M428 186 L440 186" fill="none"/>
+          <path class="primer-hair" d="M320 224 L438 224.4 M320 244 L410 244.3 M320 264 L438 264.2" fill="none"/>
+
+          <!-- the board those sheets are about -->
+          <path d="M30 206 Q22 206 22 214 L22 288 Q22 296 30 296 L214 296.8 Q222 296.8 222 288.8 L222 214.8 Q222 206.8 214 206.8 Z" fill="#fdfaf3"/>
+          <path d="M92 226 L164 226.4 L164 274 L92 273.6 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="102" cy="236" r="4" fill="#243244"/>
+          <path class="primer-hair" d="M92 238 L82 238 M92 250 L82 250 M92 262 L82 262" fill="none"/>
+          <path class="primer-hair" d="M164 238 L174 238 M164 250 L174 250 M164 262 L174 262" fill="none"/>
+          <path class="primer-hair" d="M38 226 L60 226.2 L60 240 L38 239.8 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="196" cy="234" r="9" fill="none"/>
+          <path class="primer-hair" d="M38 258 L84 258.3 M38 274 L76 274.2 M180 268 L208 268.2" fill="none"/>
+
+          <!-- the marker, the one yellow on this screen -->
+          <g transform="rotate(-7 250 316)">
+            <path d="M216 308 L268 308.4 L268 322 L216 321.6 Z" fill="#ffd23f"/>
+            <path d="M268 308 L284 308.6 L284 322 L268 321.4 Z" fill="#243244"/>
+          </g>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Six sheets, one thing each. The one pulled out draws the chip on that board.</span>
+          <span class="lang-zh">六张图纸，一张画一样东西。抽出来这张画的，就是板子上那颗芯片。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ① 是什么 + 像什么:看不见的东西，画开才能指着讲 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What is this set?</span>
+        <span class="lang-zh">这六页是什么？</span>
+      </h2>
+
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">数据手册</span><span class="lang-en">datasheet</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">the manual a chip maker ships with the part — these six pages have to match it</span>
+          <span class="lang-zh">芯片厂随芯片一起给的说明书，这六页画的东西都要在它上面对得上</span>
+        </span>
+      </div>
+
+      <p>
+        <span class="lang-en">All six hide inside the chip; the lid <span class="primer-mark">shows nothing</span>. Each page opens with an analogy, then draws by the datasheet's rules.</span>
+        <span class="lang-zh">这六样都藏在芯片里，壳上<span class="primer-mark">什么也看不见</span>。每页先给一个日常比喻，再按手册的规矩画。</span>
+      </p>
+
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 190" role="img"
+            aria-label="灯箱上夹着一张片子，骨头在片子上看得清清楚楚，可以指着讲"
+            data-label-zh="灯箱上夹着一张片子，骨头在片子上看得清清楚楚，可以指着讲"
+            data-label-en="A film clipped onto a light box: the bone shows up clearly enough to point at">
+            <!-- the light box -->
+            <path d="M14 20 Q10 20 10 24 L10 168 Q10 172 14 172 L166 172.4 Q170 172.4 170 168.4 L170 24.4 Q170 20.4 166 20.4 Z" fill="#fdfaf3"/>
+            <path class="primer-hair" d="M10 158 L170 158.3" fill="none"/>
+            <!-- the two clips holding it -->
+            <path class="primer-hair" d="M58 24 L72 24.1 L72 34 L58 33.9 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M108 24 L122 24.1 L122 34 L108 33.9 Z" fill="#ffffff"/>
+            <!-- the film -->
+            <path d="M34 32 L146 32.4 L146 152 L34 151.6 Z" fill="#ffffff"/>
+            <!-- what the film shows: the thing you cannot see from outside -->
+            <path d="M84 66 L96 66.1 L96 118 L84 117.9 Z" fill="#7a5cd6"/>
+            <circle cx="82" cy="62" r="9" fill="#7a5cd6"/>
+            <circle cx="98" cy="62" r="9" fill="#7a5cd6"/>
+            <circle cx="82" cy="122" r="9" fill="#7a5cd6"/>
+            <circle cx="98" cy="122" r="9" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M90 72 L90 112" fill="none" stroke="#ffffff"/>
+            <path class="primer-hair" d="M44 44 L64 44.2 M44 140 L70 140.2" fill="none"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p class="primer-analogy-lead"><span class="lang-en">It's like…</span><span class="lang-zh">就像……</span></p>
+          <p>
+            <span class="lang-en">A hospital film. What you cannot see from outside is right there on the sheet, close enough to point at.</span>
+            <span class="lang-zh">医院拍的片子。从外面看不见的东西，在片子上摆着，可以指着一样一样讲。</span>
+          </p>
+        </div>
+      </div>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 12 900 458" role="img"
+          aria-label="左边是封好的芯片，外面只看得到型号印字；右边同一颗被画开，一排开关、一条街道和一段方波都在纸上"
+          data-label-zh="左边是封好的芯片，外面只看得到型号印字；右边同一颗被画开，一排开关、一条街道和一段方波都在纸上"
+          data-label-en="Left, the sealed part with nothing but printing on its lid; right, the same part drawn open, its switch row, its street and one square wave on paper">
+          <!-- the board the sealed part sits on -->
+          <path d="M40 372 C 130 369.5, 300 374.5, 392 371.5" fill="none"/>
+
+          <!-- LEFT: the part as it comes, lid on -->
+          <path d="M130 148 Q122 148 122 156 L122 344 Q122 352 130 352 L302 352.8 Q310 352.8 310 344.8 L310 156.8 Q310 148.8 302 148.8 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="140" cy="166" r="6" fill="#243244"/>
+          <path class="primer-hair" d="M122 190 L104 190 M122 226 L104 226 M122 262 L104 262 M122 298 L104 298 M122 334 L104 334" fill="none"/>
+          <path class="primer-hair" d="M310 190 L328 190 M310 226 L328 226 M310 262 L328 262 M310 298 L328 298 M310 334 L328 334" fill="none"/>
+          <!-- the only thing visible from outside: the printing on the lid -->
+          <path class="primer-hair" d="M152 218 L280 218.5 M152 244 L252 244.4 M152 270 L280 270.3" fill="none"/>
+          <path class="primer-hair" d="M122 310 Q136 320 122 330" fill="none"/>
+
+          <!-- the drawing takes over from here -->
+          <path d="M356 250 L436 250" fill="none"/>
+          <path d="M436 250 L424 244 M436 250 L424 256" fill="none"/>
+
+          <!-- RIGHT: the same part, drawn open on a sheet -->
+          <path d="M474 74 Q466 74 466 82 L466 404 Q466 412 474 412 L850 412.8 Q858 412.8 858 404.8 L858 82.8 Q858 74.8 850 74.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M834 74 L858 98" fill="none"/>
+          <path class="primer-hair" d="M502 118 L822 118.6 L822 380 L502 379.4 Z" fill="none"/>
+          <!-- the switch row, drawn: this is what the lid was hiding -->
+          <path d="M530 148 L794 148.6 L794 208 L530 207.4 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M544 160 L570 160.1 L570 196 L544 195.9 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M584 160 L610 160.1 L610 196 L584 195.9 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M624 160 L650 160.1 L650 196 L624 195.9 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M664 160 L690 160.1 L690 196 L664 195.9 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M704 160 L730 160.1 L730 196 L704 195.9 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M744 160 L770 160.1 L770 196 L744 195.9 Z" fill="#ffffff"/>
+          <!-- the street the row hangs off, with two blocks on it -->
+          <path class="primer-hair" d="M530 250 L794 250.5 L794 280 L530 279.5 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M548 262 L580 262.1 M600 262 L632 262.1 M652 262 L684 262.1 M704 262 L736 262.1 M756 262 L788 262.1" fill="none"/>
+          <path class="primer-hair" d="M556 208 L556 250 M700 208 L700 250" fill="none"/>
+          <path class="primer-hair" d="M544 300 L620 300.3 L620 348 L544 347.7 Z" fill="none"/>
+          <path class="primer-hair" d="M556 316 L606 316.2 M556 330 L590 330.2" fill="none"/>
+          <path class="primer-hair" d="M582 280 L582 300" fill="none"/>
+          <!-- one square wave, drawn on the same sheet -->
+          <path class="primer-hair" d="M664 340 L688 340 L688 306 L716 306 L716 340 L744 340 L744 306 L772 306 L772 340 L794 340" fill="none"/>
+          <path class="primer-hair" d="M712 280 L712 300" fill="none"/>
+
+          <!-- labels (text is painted last) -->
+          <text class="lang-zh" x="216" y="112" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">封起来的样子</text>
+          <text class="lang-en" x="216" y="112" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">as it comes, sealed</text>
+          <text class="lang-zh" x="662" y="52" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">画开的样子</text>
+          <text class="lang-en" x="662" y="52" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">the same part, drawn open</text>
+          <text class="lang-zh" x="216" y="410" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">外面只有印字</text>
+          <text class="lang-en" x="216" y="410" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">printing, and nothing else</text>
+          <text class="lang-zh" x="662" y="450" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">一排开关、一条街、一段拍子</text>
+          <text class="lang-en" x="662" y="450" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">a switch row, a street, a beat</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The lid carries printing and nothing else — every part on the right is drawn, not photographed. That is what these six pages are.</span>
+          <span class="lang-zh">壳上只有印字，别的什么都看不到——右边那一样一样都是画出来的，不是拍出来的。这六页就是这么来的。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ② 六页各答一个问题 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Six pages, one question each</span>
+        <span class="lang-zh">六页，各答一个问题</span>
+      </h2>
+      <p>
+        <span class="lang-en">The first four stay inside the chip; the fifth walks from a keystroke to a wire. The sixth is about finding things fast — no fixed order, start where you like.</span>
+        <span class="lang-zh">前四页在芯片里面，第五页从你敲的键走到线上。第六页讲一个找东西的办法，顺序不锁，挑你现在想懂的那一页。</span>
+      </p>
+
+      <div class="idx-grid">
+
+        <!-- register -->
+        <a class="idx-card" href="register.html">
+          <figure class="primer-figure">
+            <svg viewBox="0 0 300 195" role="img"
+              aria-label="芯片里一排开关，一格被拨上去了，位号从右往左数"
+              data-label-zh="芯片里一排开关，一格被拨上去了，位号从右往左数"
+              data-label-en="A row of switches inside a chip with one flipped up; bit numbers run right to left">
+              <path d="M30 44 Q22 44 22 52 L22 162 Q22 170 30 170 L270 170.8 Q278 170.8 278 162.8 L278 52.8 Q278 44.8 270 44.8 Z" fill="#ffffff"/>
+              <path class="primer-hair" d="M22 68 L12 68 M22 104 L12 104 M22 140 L12 140" fill="none"/>
+              <path class="primer-hair" d="M278 68 L288 68 M278 104 L288 104 M278 140 L288 140" fill="none"/>
+              <path class="primer-hair" d="M40 76 L65 76.1 L65 146 L40 145.9 Z" fill="none"/>
+              <path class="primer-hair" d="M69 76 L94 76.1 L94 146 L69 145.9 Z" fill="none"/>
+              <path class="primer-hair" d="M98 76 L123 76.1 L123 146 L98 145.9 Z" fill="none"/>
+              <path class="primer-hair" d="M127 76 L152 76.1 L152 146 L127 145.9 Z" fill="none"/>
+              <path d="M156 76 L181 76.1 L181 146 L156 145.9 Z" fill="#7a5cd6"/>
+              <path class="primer-hair" d="M185 76 L210 76.1 L210 146 L185 145.9 Z" fill="none"/>
+              <path class="primer-hair" d="M214 76 L239 76.1 L239 146 L214 145.9 Z" fill="none"/>
+              <path class="primer-hair" d="M243 76 L268 76.1 L268 146 L243 145.9 Z" fill="none"/>
+              <path class="primer-hair" d="M44 112 L61 112.1 M73 112 L90 112.1 M102 112 L119 112.1 M131 112 L148 112.1 M189 112 L206 112.1 M218 112 L235 112.1 M247 112 L264 112.1" fill="none"/>
+              <path class="primer-hair" d="M160 112 L177 112.1" fill="none" stroke="#ffffff"/>
+              <path class="primer-hair" d="M46 120 L59 120.1 L59 140 L46 139.9 Z" fill="#243244"/>
+              <path class="primer-hair" d="M75 120 L88 120.1 L88 140 L75 139.9 Z" fill="#243244"/>
+              <path class="primer-hair" d="M104 120 L117 120.1 L117 140 L104 139.9 Z" fill="#243244"/>
+              <path class="primer-hair" d="M133 120 L146 120.1 L146 140 L133 139.9 Z" fill="#243244"/>
+              <path class="primer-hair" d="M162 82 L175 82.1 L175 102 L162 101.9 Z" fill="#ffffff"/>
+              <path class="primer-hair" d="M191 120 L204 120.1 L204 140 L191 139.9 Z" fill="#243244"/>
+              <path class="primer-hair" d="M220 120 L233 120.1 L233 140 L220 139.9 Z" fill="#243244"/>
+              <path class="primer-hair" d="M249 120 L262 120.1 L262 140 L249 139.9 Z" fill="#243244"/>
+              <text x="52" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">7</text>
+              <text x="255" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">0</text>
+            </svg>
+            <figcaption class="primer-figcaption">
+              <span class="idx-name"><span class="lang-en">Registers</span><span class="lang-zh">寄存器</span></span><span class="lang-en"> — a row of switches on the chip: one slot, one job.</span><span class="lang-zh">——芯片上的一排开关，一格管一件事。</span>
+            </figcaption>
+          </figure>
+        </a>
+
+        <!-- timing -->
+        <a class="idx-card" href="timing.html">
+          <figure class="primer-figure">
+            <svg viewBox="0 2 300 198" role="img"
+              aria-label="一根时钟线在高低之间来回，一个来回是一拍，位在上升沿被取走"
+              data-label-zh="一根时钟线在高低之间来回，一个来回是一拍，位在上升沿被取走"
+              data-label-en="A clock wire swinging high and low: one swing is one beat, and the bit is taken on the rising edge">
+              <path d="M60 44 L144 44.2 L144 152 L60 151.8 Z" fill="#efe9fc" stroke="none"/>
+              <path d="M20 138 L60 138 L60 58 L102 58 L102 138 L144 138 L144 58 L186 58 L186 138 L228 138 L228 58 L270 58 L270 138 L282 138" fill="none"/>
+              <circle cx="60" cy="98" r="7" fill="#ffd23f"/>
+              <path class="primer-hair" d="M20 170 L286 170.4" fill="none"/>
+              <path d="M286 170.4 L277 165 M286 170.4 L277 176" fill="none"/>
+              <path class="primer-hair" d="M60 170 L60 180 M144 170 L144 180 M228 170 L228 180" fill="none"/>
+              <path class="primer-hair" d="M102 170 L102 176 M186 170 L186 176 M270 170 L270 176" fill="none"/>
+              <text x="22" y="40" font-size="15" font-weight="700" fill="#243244">SCLK</text>
+            </svg>
+            <figcaption class="primer-figcaption">
+              <span class="idx-name"><span class="lang-en">Timing</span><span class="lang-zh">时序</span></span><span class="lang-en"> — two chips on four wires, one bit per beat.</span><span class="lang-zh">——两块芯片用四根线说话，一拍送一位。</span>
+            </figcaption>
+          </figure>
+        </a>
+
+        <!-- soc -->
+        <a class="idx-card" href="soc.html">
+          <figure class="primer-figure">
+            <svg viewBox="0 0 300 200" role="img"
+              aria-label="一颗芯片的俯视布局：上排是处理器，下排是外设，中间一条主干道把它们串起来"
+              data-label-zh="一颗芯片的俯视布局：上排是处理器，下排是外设，中间一条主干道把它们串起来"
+              data-label-en="One chip from above: processors on the upper row, peripherals below, and one main road threading them together">
+              <path d="M30 24 Q22 24 22 32 L22 168 Q22 176 30 176 L270 176.8 Q278 176.8 278 168.8 L278 32.8 Q278 24.8 270 24.8 Z" fill="#ffffff"/>
+              <path class="primer-hair" d="M22 44 L12 44 M22 60 L12 60 M278 44 L288 44 M278 60 L288 60 M22 152 L12 152 M278 152 L288 152" fill="none"/>
+              <path d="M34 92 L266 92.4 L266 120 L34 119.6 Z" fill="#7a5cd6"/>
+              <path class="primer-hair" d="M46 106 L70 106.1 M86 106 L110 106.1 M126 106 L150 106.1 M166 106 L190 106.1 M206 106 L230 106.1" fill="none" stroke="#ffffff"/>
+              <path class="primer-hair" d="M44 42 L106 42.2 L106 78 L44 77.8 Z" fill="none"/>
+              <path class="primer-hair" d="M54 56 L96 56.2 M54 68 L86 68.2" fill="none"/>
+              <path class="primer-hair" d="M126 46 L172 46.2 L172 78 L126 77.8 Z" fill="none"/>
+              <path class="primer-hair" d="M136 62 L162 62.2" fill="none"/>
+              <path class="primer-hair" d="M75 78 L75 92 M149 78 L149 92" fill="none"/>
+              <path class="primer-hair" d="M44 134 L92 134.2 L92 164 L44 163.8 Z" fill="none"/>
+              <path class="primer-hair" d="M52 144 L84 144.2 M52 154 L84 154.2" fill="none"/>
+              <path class="primer-hair" d="M112 134 L160 134.2 L160 164 L112 163.8 Z" fill="none"/>
+              <path class="primer-hair" d="M180 134 L246 134.3 L246 164 L180 163.7 Z" fill="none"/>
+              <path class="primer-hair" d="M192 146 L234 146.2 M192 156 L222 156.2" fill="none"/>
+              <path class="primer-hair" d="M68 120 L68 134 M136 120 L136 134 M213 120 L213 134" fill="none"/>
+            </svg>
+            <figcaption class="primer-figcaption">
+              <span class="idx-name"><span class="lang-en">The SoC</span><span class="lang-zh">一颗芯片</span></span><span class="lang-en"> — inside, a city on one main road.</span><span class="lang-zh">——里面像一座城，一条主干道串起各家。</span>
+            </figcaption>
+          </figure>
+        </a>
+
+        <!-- ipcore -->
+        <a class="idx-card" href="ipcore.html">
+          <figure class="primer-figure">
+            <svg viewBox="0 10 300 190" role="img"
+              aria-label="一块积木的外壳：上面是寄存器面板，右边是数据口，左边接时钟和复位，下面搭在总线上"
+              data-label-zh="一块积木的外壳：上面是寄存器面板，右边是数据口，左边接时钟和复位，下面搭在总线上"
+              data-label-en="The shell of one block: a register panel on top, a data port to the right, clock and reset on the left, and the bus underneath">
+              <path d="M62 32 Q54 32 54 40 L54 156 Q54 164 62 164 L238 164.8 Q246 164.8 246 156.8 L246 40.8 Q246 32.8 238 32.8 Z" fill="#ffffff"/>
+              <path d="M68 44 L232 44.4 L232 78 L68 77.6 Z" fill="#7a5cd6"/>
+              <path class="primer-hair" d="M80 52 L102 52.1 L102 70 L80 69.9 Z" fill="none" stroke="#ffffff"/>
+              <path class="primer-hair" d="M112 52 L134 52.1 L134 70 L112 69.9 Z" fill="none" stroke="#ffffff"/>
+              <path class="primer-hair" d="M144 52 L166 52.1 L166 70 L144 69.9 Z" fill="none" stroke="#ffffff"/>
+              <path class="primer-hair" d="M176 52 L198 52.1 L198 70 L176 69.9 Z" fill="none" stroke="#ffffff"/>
+              <path class="primer-hair" d="M94 96 L206 96.3 L206 144 L94 143.7 Z" fill="#fdfaf3"/>
+              <path class="primer-hair" d="M108 112 L192 112.3 M108 128 L164 128.2" fill="none"/>
+              <path class="primer-hair" d="M150 78 L150 96" fill="none" stroke-dasharray="3 6"/>
+              <path d="M246 120 L286 120" fill="none"/>
+              <path d="M286 120 L276 114 M286 120 L276 126 M246 120 L256 114 M246 120 L256 126" fill="none"/>
+              <path class="primer-hair" d="M54 100 L18 100 M54 132 L18 132" fill="none"/>
+              <path class="primer-hair" d="M18 92 L26 100 L18 108" fill="none"/>
+              <path class="primer-hair" d="M22 178 L278 178.4" fill="none"/>
+              <path class="primer-hair" d="M104 164 L104 178 M196 164 L196 178" fill="none"/>
+            </svg>
+            <figcaption class="primer-figcaption">
+              <span class="idx-name"><span class="lang-en">IP cores</span><span class="lang-zh">IP core</span></span><span class="lang-en"> — how a block that plugs onto the road is built.</span><span class="lang-zh">——一块能接上主干道的积木，怎么设计出来。</span>
+            </figcaption>
+          </figure>
+        </a>
+
+        <!-- kernel-path -->
+        <a class="idx-card" href="kernel-path.html">
+          <figure class="primer-figure">
+            <svg viewBox="0 0 300 200" role="img"
+              aria-label="五条横带从上到下摞着，一个字一层一层往下穿，最后落在一根引脚上"
+              data-label-zh="五条横带从上到下摞着，一个字一层一层往下穿，最后落在一根引脚上"
+              data-label-en="Five stacked bands with one character crossing them one layer at a time, landing on a pin">
+              <path class="primer-hair" d="M24 24 L234 24.2 L234 52 L24 51.8 Z" fill="none"/>
+              <path class="primer-hair" d="M36 40 L106 40.2" fill="none"/>
+              <path class="primer-hair" d="M24 62 L234 62.2 L234 90 L24 89.8 Z" fill="none"/>
+              <path class="primer-hair" d="M36 78 L122 78.2" fill="none"/>
+              <path class="primer-hair" d="M24 100 L234 100.2 L234 128 L24 127.8 Z" fill="none"/>
+              <path class="primer-hair" d="M36 116 L98 116.2" fill="none"/>
+              <path class="primer-hair" d="M24 138 L234 138.2 L234 166 L24 165.8 Z" fill="none"/>
+              <path class="primer-hair" d="M36 154 L114 154.2" fill="none"/>
+              <path class="primer-hair" d="M24 176 L234 176.2 L234 196 L24 195.8 Z" fill="#fdfaf3"/>
+              <path class="primer-hair" d="M36 187 L86 187.1 M100 187 L134 187.1" fill="none"/>
+              <path d="M158 28 L182 28 Q188 28 188 34 L188 42 Q188 48 182 48 L158 48 Q152 48 152 42 L152 34 Q152 28 158 28 Z" fill="#7a5cd6"/>
+              <path class="primer-hair" d="M160 38 L180 38.1" fill="none" stroke="#ffffff"/>
+              <path d="M170 52 L170 62" fill="none"/>
+              <path d="M170 62 L165 55 M170 62 L175 55" fill="none"/>
+              <path d="M170 90 L170 100" fill="none"/>
+              <path d="M170 100 L165 93 M170 100 L175 93" fill="none"/>
+              <path d="M170 128 L170 138" fill="none"/>
+              <path d="M170 138 L165 131 M170 138 L175 131" fill="none"/>
+              <path d="M170 166 L170 176" fill="none"/>
+              <path d="M170 176 L165 169 M170 176 L175 169" fill="none"/>
+              <path class="primer-hair" d="M234 186 L272 186.2" fill="none"/>
+              <circle class="primer-hair" cx="278" cy="186" r="5" fill="none"/>
+            </svg>
+            <figcaption class="primer-figcaption">
+              <span class="idx-name"><span class="lang-en">The kernel path</span><span class="lang-zh">内核路径</span></span><span class="lang-en"> — how one keystroke reaches a serial pin.</span><span class="lang-zh">——你敲的一个字，怎么走到串口线上。</span>
+            </figcaption>
+          </figure>
+        </a>
+
+        <!-- binary-search -->
+        <a class="idx-card" href="binary-search.html">
+          <figure class="primer-figure">
+            <svg viewBox="0 2 300 193" role="img"
+              aria-label="一摞排好序的卡片被从中间砍开，上半摞不用再看，只剩下半摞"
+              data-label-zh="一摞排好序的卡片被从中间砍开，上半摞不用再看，只剩下半摞"
+              data-label-en="A sorted stack of cards cut across the middle: the upper half is out, only the lower half is left">
+              <path d="M78 26 Q70 26 70 34 L70 162 Q70 170 78 170 L222 170.8 Q230 170.8 230 162.8 L230 34.8 Q230 26.8 222 26.8 Z" fill="#fdfaf3"/>
+              <path d="M70 100 L230 100.3 L230 162 Q230 170 222 170 L78 169.6 Q70 169.6 70 161.6 Z" fill="#7a5cd6"/>
+              <path class="primer-hair" d="M70 44 L230 44.3 M70 58 L230 58.3 M70 72 L230 72.3 M70 86 L230 86.3" fill="none" opacity=".4"/>
+              <path class="primer-hair" d="M70 114 L230 114.3 M70 128 L230 128.3 M70 142 L230 142.3 M70 156 L230 156.3" fill="none" stroke="#ffffff"/>
+              <path class="primer-hair" d="M24 100 L276 100.4" fill="none" stroke-dasharray="3 8"/>
+
+            </svg>
+            <figcaption class="primer-figcaption">
+              <span class="idx-name"><span class="lang-en">Halving</span><span class="lang-zh">对半砍</span></span><span class="lang-en"> — twenty million cards, found in 25 flips.</span><span class="lang-zh">——2000 万张卡片，25 次就能翻到那一张。</span>
+            </figcaption>
+          </figure>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 回顾 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <aside class="primer-recap recap-flat">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">These six pages open up what the chip keeps sealed: switches, beats, streets, blocks.</span>
+              <span class="lang-zh">这六页把封在芯片里的东西画开：开关、拍子、街道、积木。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Each page answers one question — analogy first, then the real drawing.</span>
+              <span class="lang-zh">每页只答一个问题，先给日常比喻，再画真的那一样。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Every number and every order drawn here matches the maker's own manual.</span>
+              <span class="lang-zh">图上的每个数字、每一步次序，都对得上芯片厂的手册。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+      <p>
+        <span class="lang-en">The drawing language itself lives in the <a href="../index.html">demo</a> and the <a href="../diagrams.html">picture gallery</a>.</span>
+        <span class="lang-zh">这套画法本身在 <a href="../index.html">demo</a> 和 <a href="../diagrams.html">图解集</a> 里。</span>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Technical primer set · primer-design · six pages, one question each</span>
+    <span class="lang-zh">技术图解集 · primer-design · 六页，各答一个问题</span>
+    · v1 · 2026-08-26
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+    /* CSS only hides the other language's <text>; an SVG's aria-label is an
+     * attribute, so EN mode must swap it here or screen readers hear Chinese
+     * under html[lang="en"]. The static aria-label in the markup is the zh
+     * default for the no-JS case. */
+    document.querySelectorAll('svg[data-label-zh]').forEach(function (s) {
+      s.setAttribute('aria-label',
+        s.getAttribute(lang === 'zh' ? 'data-label-zh' : 'data-label-en'));
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: primer
+Page-type: concept (technical set cover)
+Created: 2026-08-26
+
+Decisions (6):
+1. [a-cover-is-still-a-primer] chose "hero + one framing screen + one index screen + the recap rail" over "a bare grid of six links". Because: a cover for six explainer pages is read by the same person the six pages are written for, so it has to do primer's own work before it does an index's — one analogy card (dos-and-donts §1 makes it the identity move), one question per section, at most two short sentences of prose per section, and every jargon word translated where it first lands. The index screen is one of those sections, not an exception to them.
+2. [invisible-then-drawn] chose "the framing figure pairs the sealed part with the same part drawn open" over "a figure showing the six pages as six sheets". Because: the hero already shows the sheets, and repeating them would make the section answer no question. What the six pages have in common is that their subject cannot be looked at: the lid carries printing and nothing else, so the switch row, the street and the beat only exist as drawings. That is also exactly what the analogy card says (a hospital film), so the card and the figure are one statement drawn twice — the pairing the concept canonical rules for (its decision 2).
+3. [thumbnails-are-new-drawings] chose "six small drawings, each the single most recognisable object from its page" over "shrinking each page's hero figure". Because: a page's hero is composed for a 525px hero column with its own labels and caption; at 341px it becomes a grey smudge with 5px type. Each thumbnail instead redraws one object at 300 viewBox units — a slot row with its bit numbers, one clock beat with the sampled edge, a floor plan on one street, a shell with its three ports, five layer bands, a halved stack — and carries at most two neutral labels (7 / 0 / SCLK) so nothing inside a 341px box is set below 15px source.
+4. [the-card-is-the-link] chose "the whole card is one anchor, the page's name underlined inside the caption" over "a separate 'read this page' link under each thumbnail". Because: six extra link rows is six more strings to translate and a second tab stop per card for no new information, while the caption already says what the page teaches — so the caption IS the accessible name. The name carries the underline so the card still reads as a link, and the focus ring comes from primer.css untouched.
+5. [violet-marks-what-each-page-teaches] chose "one violet subject per thumbnail, and it is that page's own subject" over "violet as a card accent". Because: the six thumbnails sit in one grid, so a violet used decoratively would repeat six times and stop meaning anything. Instead violet is the flipped switch, the measured beat, the shared street, the register panel, the character being carried, and the surviving half — each page's answer, in the colour that page uses for it. Yellow appears twice page-wide and both times as the marker it is: the pen on the desk in the hero, the sampled instant in the timing thumbnail.
+6. [no-repo-counts] chose "six — a fact about this set — and no other number about the repository" over "the counts the flagship demo carries". Because: the flagship already owns the shelf numbers and they move whenever a skill lands; a cover that repeated them would be a second surface to keep in step for no reader benefit. Six pages is durable: it is what this directory is. The one other number on the page, 2000 万张卡片 / 25 flips, belongs to the page it links to and is checkable there.
+
+Known trade-offs:
+- Section ratios under dos-and-donts §1's ruled yardstick (figure svg + analogy-fig column only), 1440 viewport, both languages: §1 0.539 zh / 0.529 en, §2 1.472 zh / 1.428 en, §3 exempt (it is the recap screen). Every figure sits inside illustration-craft §8's 24-unit margin: hero 23/14/14/14 (top/bottom/left/right), analogy 20/18/10/10, framing figure 22/15/40/42, and the six thumbnails 19..26 top with nothing over 24 except the register thumbnail's 24 bottom.
+- §2's number is over 1.0 because the yardstick SUMS every figure in a section and the six thumbnails sit in a 3x2 grid: six drawings against the height of two rows. The honest reading is per card, and it holds without the sum: each card is 0.79-0.86 illustration zh / 0.76-0.81 en, and one grid column (two cards plus the 56px row gap) is 0.736 zh / 0.703 en. Reported both ways rather than quoting the flattering one.
+- The thumbnails are the only figures on the page NOT wearing primer-fig-wide, and that is deliberate: Section L's stair is calibrated against a 900-unit design width, and these are 300 units inside a grid column. Their natural 3.4 units render 3.87px at 1440 and 3.38px at the 1024 audit viewport; the three-column band stops at 1000px because a 291px column is where a 300-unit viewBox reaches 3.29px, still over the 3px floor. Below that the grid drops to two columns, where a column can reach 451px and the stroke would hit 5.11px — so the svg is capped at 380px wide (4.31px), inside the 3.0-4.4px band at every width down to a 375px phone (3.80px).
+- The framing figure draws four things on one sheet — a switch row, a street with a block on it, and one square wave — where illustration-craft §1 asks for one subject per figure. The subject here is the sheet: what the lid hides is not one object, and a sheet with a single item on it would say the package contains one thing. The items are drawn at hair weight, unlabelled and unexplained, because the figure's claim is "these exist and are drawn", not "here is how they work" — each of the six pages is where one of them gets its own screen.
+- The analogy figure is 180x190 rather than the 180x150 illustration-craft §3 quotes. Width is what sets the stroke in that fixed 172px column (3.25px either way); the taller box is a portrait film, which is the shape a real one has, and it lifts the analogy card's illustration column from 143px to 182px — the ratio §1 needed came from that, not from cutting text.
+- On a 375px phone the framing figure's labels render around 6px, the documented cost of a 900-unit figure in a 335px column, so its figcaption states both halves of what the labels say. The thumbnails are the opposite case: one column at 335px renders them at 3.80px stroke with 17px labels, which is the widest they are ever drawn.
+- The oversized circled numeral (.primer-step-num) is the one primer signature this page does NOT use, and the copy is why: the index screen says out loud that the six have no fixed order ("顺序不锁" / "no fixed order, start where you like"), so numbering the cards would promise a sequence the set does not have — the same call the timing page made when it moved its numerals off the sections and onto three real moments. The marker yellow stays: one .primer-mark in the framing screen ("什么也看不见" / "shows nothing"), plus the pen in the hero and the sampled instant in the timing thumbnail.
+- No page-local stroke rule, no page-local component override: the six thumbnails, the framing figure and the hero all inherit primer.css Sections J + L, and the only page CSS is grid columns, the card link's underline, and the 380px svg cap.
+/design-review:self-diff -->
+
+</body>
+</html>
