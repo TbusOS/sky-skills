@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>为什么 25 次就够？对半砍的力量 · 图解读本</title>
+<meta name="description" content="Technical primer: why 25 halvings find one row among twenty million. 零基础图解：2000 万张卡片，对半砍 25 次就能翻到那一张。">
+<meta property="og:title" content="为什么 25 次就够？对半砍的力量 · 图解读本">
+<meta property="og:description" content="零基础图解：每砍一刀还剩多少、为什么 25 次就够得着 2000 万、为什么必须先排好序。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed classes on purpose (verify.py validates
+   * primer-* classes against primer.css; local layout stays unprefixed).
+   * Figure modifiers (primer-fig-wide / primer-fig-hero) and
+   * .primer-step--centered ship from primer.css Sections E + J + L — nothing
+   * stroke-related and no component override is defined per page. */
+
+  /* The three moves that make up ONE cut, as the reading key for the five
+   * rows below: circled numeral beside its phrase, three across. The figure
+   * carries no step labels of its own, so nothing is printed twice. */
+  .move-heads {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--primer-space-5);
+    margin-top: var(--primer-space-5);
+  }
+  @media (max-width: 900px) {
+    .move-heads { grid-template-columns: 1fr; gap: var(--primer-space-4); }
+  }
+
+  /* The recap is its own screen; the component's top margin is for pages
+   * where it trails a section. */
+  .recap-flat { margin-top: 0; }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">Twenty million cards,<br>found in 25 flips</span>
+          <span class="lang-zh">2000 万张卡片，<br>25 次就能翻到</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">No maths background needed. One card a second, twenty million takes over seven months; halving takes 25.</span>
+          <span class="lang-zh">不需要数学基础。一秒一张地翻，2000 万张要看七个多月；对半砍只要 25 次。</span>
+        </p>
+      </div>
+      <figure class="primer-figure primer-fig-hero">
+        <svg viewBox="6 61.1 488 312.5" role="img"
+          aria-label="一抽屉按号码排好的卡片，卡片上缘错开着索引标签；中间那一张被翻起来，左边一半变成空心：这一刀之后它们不用再看了"
+          data-label-zh="一抽屉按号码排好的卡片，卡片上缘错开着索引标签；中间那一张被翻起来，左边一半变成空心：这一刀之后它们不用再看了"
+          data-label-en="A drawer of cards kept in number order with staggered index tabs along their top edge; the middle one is pulled up and the left half has gone hollow — after this one cut nobody looks at them again">
+          <!-- the drawer, front on: cards standing on edge inside -->
+          <path d="M40 118 L460 118.8 Q470 118.8 470 128.8 L470 280 Q470 290 460 290 L40 289.2 Q30 289.2 30 279.2 L30 128 Q30 118 40 118 Z" fill="#ffffff"/>
+          <path d="M30 290 L470 290.8 L469.6 316 L30 315.2 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M52 296 L146 296.4 L145.6 310 L52 309.6 Z" fill="none"/>
+          <path class="primer-hair" d="M380 296 L438 296.3 L434 310 L384 309.7 Z" fill="none"/>
+          <path class="primer-hair" d="M44 132 L456 132.6 L455.6 276 L44 275.4 Z" fill="none"/>
+          <path class="primer-hair" d="M62.0 137.0 L62.0 271.0 M80.0 137.0 L80.0 271.0 M98.0 137.0 L98.0 271.0 M116.0 137.0 L116.0 271.0 M134.0 137.0 L134.0 271.0 M152.0 137.0 L152.0 271.0 M170.0 137.0 L170.0 271.0 M188.0 137.0 L188.0 271.0 M206.0 137.0 L206.0 271.0 M224.0 137.0 L224.0 271.0" fill="none"/>
+          <path d="M256 132 L456 132.6 L455.6 276 L256 275.4 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M274.0 137.0 L274.0 271.0 M292.0 137.0 L292.0 271.0 M310.0 137.0 L310.0 271.0 M328.0 137.0 L328.0 271.0 M346.0 137.0 L346.0 271.0 M364.0 137.0 L364.0 271.0 M382.0 137.0 L382.0 271.0 M400.0 137.0 L400.0 271.0 M418.0 137.0 L418.0 271.0 M436.0 137.0 L436.0 271.0" fill="none" stroke="#ffffff"/>
+          <path d="M244 112 L256 112.4 L255.7 276 L244 275.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M62 122 L84 122.2 L84 132 M118 126 L140 126.2 L140 132 M186 122 L208 122.2 L208 132" fill="none"/>
+          <path class="primer-hair" d="M272 122 L294 122.2 L294 132 M330 126 L352 126.2 L352 132 M396 122 L418 122.2 L418 132" fill="none" stroke="#ffffff"/>
+          <text class="lang-zh" x="30" y="344" font-size="15" font-weight="600" fill="#243244">一刀，这半边出局</text>
+          <text class="lang-en" x="30" y="344" font-size="15" font-weight="600" fill="#243244">one cut, this half is out</text>
+          <text class="lang-zh" x="250" y="100" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">2000 万张卡片</text>
+          <text class="lang-en" x="250" y="100" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">twenty million cards</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en"><b>The cards are kept in number order.</b> Pull up the middle one: wrong number, and the left half is out. One a second, 20,000,000 cards take 231 days — over seven months. Halving gets there in 25.</span>
+          <span class="lang-zh"><b>这抽屉卡片是按号码排好的。</b>把中间那一张翻起来：号码不对，左边一半就出局了。一秒一张地翻，2000 万张要 231 天多，也就是七个多月。对半砍只要 25 次。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ② 像什么:猜数字 + 翻第一张 vs 翻中间那一张 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What is halving like?</span>
+        <span class="lang-zh">对半砍像什么？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">二分查找 binary search</span><span class="lang-en">binary search</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">turn over only the middle one, then drop a whole half</span>
+          <span class="lang-zh">每次只翻中间那一张，然后扔掉一半</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">In a guessing game you don't count up from one. You say <span class="primer-mark">the middle number</span> — a wrong guess still drops half.</span>
+        <span class="lang-zh">猜数字游戏里，你不会从 1 开始一个个报。你每次报<span class="primer-mark">中间那个数</span>——报错了也砍掉一半。</span>
+      </p>
+
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 8.5 180 146" role="img"
+            aria-label="一把 1 到 100 的纸尺，一只长尾夹正咬在中间那一格上；下面一个箭头指着还要猜的那半边"
+            data-label-zh="一把 1 到 100 的纸尺，一只长尾夹正咬在中间那一格上；下面一个箭头指着还要猜的那半边"
+            data-label-en="A paper rule from 1 to 100 with a bulldog clip biting down on its middle mark; an arrow below points at the half still to guess">
+          <path d="M14 58 L166 58.8 L165.6 96 L14 95.2 Z" fill="#ffffff"/>
+          <path d="M14 96 L6 95.6 L6 76" fill="none"/>
+          <path class="primer-hair" d="M25.0 82.0 L25.0 93.0 M36.0 82.0 L36.0 93.0 M47.0 82.0 L47.0 93.0 M58.0 82.0 L58.0 93.0 M69.0 82.0 L69.0 93.0" fill="none"/>
+          <path d="M102 58 L166 58.6 L165.6 96 L102 95.4 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M113.0 82.0 L113.0 93.0 M124.0 82.0 L124.0 93.0 M135.0 82.0 L135.0 93.0 M146.0 82.0 L146.0 93.0 M157.0 82.0 L157.0 93.0" fill="none" stroke="#ffffff"/>
+          <path d="M76 54 Q88 42 100 54 L100 100 Q88 112 76 100 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M76 66 Q88 58 100 66 M76 88 Q88 96 100 88" fill="none"/>
+          <path class="primer-hair" d="M82 72 L82 82" fill="none"/>
+          <path d="M81 46 C 79 28, 97 28, 95 46" fill="none"/>
+          <path class="primer-hair" d="M104 134 L166 133" fill="none"/>
+          <path d="M134 130 L134 114" fill="none"/>
+          <path d="M134 104 L125 121 L143 121 Z" fill="#243244"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p class="primer-analogy-lead"><span class="lang-en">It's like…</span><span class="lang-zh">就像……</span></p>
+          <p>
+            <span class="lang-en">Guess a number from 1 to 100: start at 50. Too high, try 25; too low, try 75 — seven guesses always get there.</span>
+            <span class="lang-zh">猜 1 到 100 的数：先猜 50。高了猜 25，低了猜 75——七次之内一定中。</span>
+          </p>
+        </div>
+      </div>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 1 900 510" role="img"
+          aria-label="同一抽屉卡片的两种找法：上面翻出第一张，紫色几乎没动；下面翻出中间那一张，一半当场变成空心"
+          data-label-zh="同一抽屉卡片的两种找法：上面翻出第一张，紫色几乎没动；下面翻出中间那一张，一半当场变成空心"
+          data-label-en="The same drawer, two ways to search: up top the first card comes out and violet barely moves; below, the middle card comes out and half the range goes hollow at once">
+          <!-- one at a time: one card out on the lip, the range barely moved -->
+          <path d="M34 58 L866 58.8 Q876 58.8 876 68.8 L876 158 Q876 168 866 168 L34 167.2 Q24 167.2 24 157.2 L24 68 Q24 58 34 58 Z" fill="#ffffff"/>
+          <path d="M24 168 L876 168.8 L875.6 192 L24 191.2 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M50 174 L162 174.4 L161.6 186 L50 185.6 Z" fill="none"/>
+          <path class="primer-hair" d="M630 174 L690 174.3 L686 186 L634 185.7 Z" fill="none"/>
+          <path class="primer-hair" d="M38 72 L862 72.6 L861.6 154 L38 153.4 Z" fill="none"/>
+          <path class="primer-hair" d="M54.0 77.0 L54.0 149.0" fill="none"/>
+          <path d="M58 72 L862 72.4 L861.7 154 L58 153.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M74.0 77.0 L74.0 149.0 M90.0 77.0 L90.0 149.0 M106.0 77.0 L106.0 149.0 M122.0 77.0 L122.0 149.0 M138.0 77.0 L138.0 149.0 M154.0 77.0 L154.0 149.0 M170.0 77.0 L170.0 149.0 M186.0 77.0 L186.0 149.0 M202.0 77.0 L202.0 149.0 M218.0 77.0 L218.0 149.0 M234.0 77.0 L234.0 149.0 M250.0 77.0 L250.0 149.0 M266.0 77.0 L266.0 149.0 M282.0 77.0 L282.0 149.0 M298.0 77.0 L298.0 149.0 M314.0 77.0 L314.0 149.0 M330.0 77.0 L330.0 149.0 M346.0 77.0 L346.0 149.0 M362.0 77.0 L362.0 149.0 M378.0 77.0 L378.0 149.0 M394.0 77.0 L394.0 149.0 M410.0 77.0 L410.0 149.0 M426.0 77.0 L426.0 149.0 M442.0 77.0 L442.0 149.0 M458.0 77.0 L458.0 149.0 M474.0 77.0 L474.0 149.0 M490.0 77.0 L490.0 149.0 M506.0 77.0 L506.0 149.0 M522.0 77.0 L522.0 149.0 M538.0 77.0 L538.0 149.0 M554.0 77.0 L554.0 149.0 M570.0 77.0 L570.0 149.0 M586.0 77.0 L586.0 149.0 M602.0 77.0 L602.0 149.0 M618.0 77.0 L618.0 149.0 M634.0 77.0 L634.0 149.0 M650.0 77.0 L650.0 149.0 M666.0 77.0 L666.0 149.0 M682.0 77.0 L682.0 149.0 M698.0 77.0 L698.0 149.0 M714.0 77.0 L714.0 149.0 M730.0 77.0 L730.0 149.0 M746.0 77.0 L746.0 149.0 M762.0 77.0 L762.0 149.0 M778.0 77.0 L778.0 149.0 M794.0 77.0 L794.0 149.0 M810.0 77.0 L810.0 149.0 M826.0 77.0 L826.0 149.0 M842.0 77.0 L842.0 149.0 M858.0 77.0 L858.0 149.0" fill="none" stroke="#ffffff"/>
+          <path d="M200 172 L280 172.6 Q286 172.6 286 178.6 L286 206 Q286 212 280 212 L200 211.4 Q194 211.4 194 205.4 L194 178 Q194 172 200 172 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M206 185 L274 185.4 M206 196 L258 196.3" fill="none"/>
+          <path class="primer-hair" d="M270 212 L286 196" fill="none"/>
+          <!-- turn the middle one: one card out, and half the range with it -->
+          <path d="M34 300 L866 300.8 Q876 300.8 876 310.8 L876 400 Q876 410 866 410 L34 409.2 Q24 409.2 24 399.2 L24 310 Q24 300 34 300 Z" fill="#ffffff"/>
+          <path d="M24 410 L876 410.8 L875.6 434 L24 433.2 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M50 416 L162 416.4 L161.6 428 L50 427.6 Z" fill="none"/>
+          <path class="primer-hair" d="M630 416 L690 416.3 L686 428 L634 427.7 Z" fill="none"/>
+          <path class="primer-hair" d="M38 314 L862 314.6 L861.6 396 L38 395.4 Z" fill="none"/>
+          <path class="primer-hair" d="M54.0 319.0 L54.0 391.0 M70.0 319.0 L70.0 391.0 M86.0 319.0 L86.0 391.0 M102.0 319.0 L102.0 391.0 M118.0 319.0 L118.0 391.0 M134.0 319.0 L134.0 391.0 M150.0 319.0 L150.0 391.0 M166.0 319.0 L166.0 391.0 M182.0 319.0 L182.0 391.0 M198.0 319.0 L198.0 391.0 M214.0 319.0 L214.0 391.0 M230.0 319.0 L230.0 391.0 M246.0 319.0 L246.0 391.0 M262.0 319.0 L262.0 391.0 M278.0 319.0 L278.0 391.0 M294.0 319.0 L294.0 391.0 M310.0 319.0 L310.0 391.0 M326.0 319.0 L326.0 391.0 M342.0 319.0 L342.0 391.0 M358.0 319.0 L358.0 391.0 M374.0 319.0 L374.0 391.0 M390.0 319.0 L390.0 391.0 M406.0 319.0 L406.0 391.0 M422.0 319.0 L422.0 391.0 M438.0 319.0 L438.0 391.0" fill="none"/>
+          <path d="M450 314 L862 314.4 L861.7 396 L450 395.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M466.0 319.0 L466.0 391.0 M482.0 319.0 L482.0 391.0 M498.0 319.0 L498.0 391.0 M514.0 319.0 L514.0 391.0 M530.0 319.0 L530.0 391.0 M546.0 319.0 L546.0 391.0 M562.0 319.0 L562.0 391.0 M578.0 319.0 L578.0 391.0 M594.0 319.0 L594.0 391.0 M610.0 319.0 L610.0 391.0 M626.0 319.0 L626.0 391.0 M642.0 319.0 L642.0 391.0 M658.0 319.0 L658.0 391.0 M674.0 319.0 L674.0 391.0 M690.0 319.0 L690.0 391.0 M706.0 319.0 L706.0 391.0 M722.0 319.0 L722.0 391.0 M738.0 319.0 L738.0 391.0 M754.0 319.0 L754.0 391.0 M770.0 319.0 L770.0 391.0 M786.0 319.0 L786.0 391.0 M802.0 319.0 L802.0 391.0 M818.0 319.0 L818.0 391.0 M834.0 319.0 L834.0 391.0 M850.0 319.0 L850.0 391.0" fill="none" stroke="#ffffff"/>
+          <path d="M410 414 L490 414.6 Q496 414.6 496 420.6 L496 448 Q496 454 490 454 L410 453.4 Q404 453.4 404 447.4 L404 420 Q404 414 410 414 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M416 427 L484 427.4 M416 438 L468 438.3" fill="none"/>
+          <path class="primer-hair" d="M480 454 L496 438" fill="none"/>
+          <text class="lang-zh" x="24" y="42" font-size="17" font-weight="700" fill="#243244">一张一张翻</text>
+          <text class="lang-en" x="24" y="42" font-size="17" font-weight="700" fill="#243244">one at a time</text>
+          <text class="lang-zh" x="24" y="240" font-size="15" font-weight="600" fill="#243244">一秒一张，要七个多月</text>
+          <text class="lang-en" x="24" y="240" font-size="15" font-weight="600" fill="#243244">one a second: over seven months</text>
+          <text class="lang-zh" x="24" y="284" font-size="17" font-weight="700" fill="#243244">每次翻中间那一张</text>
+          <text class="lang-en" x="24" y="284" font-size="17" font-weight="700" fill="#243244">turn the middle one</text>
+          <text class="lang-zh" x="24" y="482" font-size="15" font-weight="600" fill="#243244">一刀之后还剩 1000 万</text>
+          <text class="lang-en" x="24" y="482" font-size="15" font-weight="600" fill="#243244">one cut later: ten million left</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en"><b>Violet is what you still have to look at.</b> Up top, the first card comes out and violet barely moves. One a second, 20,000,000 cards take 231 days — over seven months. Below, the middle card comes out. Half the range goes hollow at once: 20,000,000 down to 10,000,000. Both drawers gave up one card; the difference is what is left. The card on the lip is drawn far wider than one card, or it would be invisible.</span>
+          <span class="lang-zh"><b>紫色是你还得看的那些。</b>上面翻的是第一张，紫色几乎没动。一秒一张，2000 万张要 231 天多，也就是七个多月。下面翻的是中间那一张。一半当场变空心，2000 万变成 1000 万。两次都只翻出一张卡片，差别是剩下多少。抽屉沿上那张画得比一张卡片宽得多，不然看不见。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ③ 怎么运作:一刀是三步 + 五行状态快照 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">After each cut, how much is left?</span>
+        <span class="lang-zh">每砍一刀，还剩多少？</span>
+      </h2>
+
+      <div class="move-heads">
+        <div class="primer-step primer-step--centered">
+          <span class="primer-step-num">1</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">Turn the middle card</span>
+              <span class="lang-zh">翻开中间那一张</span>
+            </h3>
+          </div>
+        </div>
+        <div class="primer-step primer-step--centered">
+          <span class="primer-step-num">2</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">Compare the numbers</span>
+              <span class="lang-zh">和你要的号码比大小</span>
+            </h3>
+          </div>
+        </div>
+        <div class="primer-step primer-step--centered">
+          <span class="primer-step-num">3</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">Drop the impossible half</span>
+              <span class="lang-zh">扔掉不可能的那一半</span>
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 508" role="img"
+          aria-label="五行同一排卡片：紫色的范围每行减半，2000 万到 1000 万到 500 万到 250 万到 125 万，五行之间只有四刀；最后一行黄线下面那一小段就是答案所在"
+          data-label-zh="五行同一排卡片：紫色的范围每行减半，2000 万到 1000 万到 500 万到 250 万到 125 万，五行之间只有四刀；最后一行黄线下面那一小段就是答案所在"
+          data-label-en="Five rows of the same card row: the violet range halves each row — 20 000 000, 10 000 000, 5 000 000, 2 500 000, 1 250 000 — with only four cuts between the five, and a yellow marker under the stretch the answer is in">
+          <!-- snapshot 0: range of 20 000 000 still in play -->
+          <path class="primer-hair" d="M84 74 L752 74.6 L751.6 132 L84 131.4 Z" fill="none"/>
+          <path d="M84.0 74 L752.0 74.4 L751.7 132 L84.0 131.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M98.0 79.0 L98.0 127.0 M112.0 79.0 L112.0 127.0 M126.0 79.0 L126.0 127.0 M140.0 79.0 L140.0 127.0 M154.0 79.0 L154.0 127.0 M168.0 79.0 L168.0 127.0 M182.0 79.0 L182.0 127.0 M196.0 79.0 L196.0 127.0 M210.0 79.0 L210.0 127.0 M224.0 79.0 L224.0 127.0 M238.0 79.0 L238.0 127.0 M252.0 79.0 L252.0 127.0 M266.0 79.0 L266.0 127.0 M280.0 79.0 L280.0 127.0 M294.0 79.0 L294.0 127.0 M308.0 79.0 L308.0 127.0 M322.0 79.0 L322.0 127.0 M336.0 79.0 L336.0 127.0 M350.0 79.0 L350.0 127.0 M364.0 79.0 L364.0 127.0 M378.0 79.0 L378.0 127.0 M392.0 79.0 L392.0 127.0 M406.0 79.0 L406.0 127.0 M420.0 79.0 L420.0 127.0 M434.0 79.0 L434.0 127.0 M448.0 79.0 L448.0 127.0 M462.0 79.0 L462.0 127.0 M476.0 79.0 L476.0 127.0 M490.0 79.0 L490.0 127.0 M504.0 79.0 L504.0 127.0 M518.0 79.0 L518.0 127.0 M532.0 79.0 L532.0 127.0 M546.0 79.0 L546.0 127.0 M560.0 79.0 L560.0 127.0 M574.0 79.0 L574.0 127.0 M588.0 79.0 L588.0 127.0 M602.0 79.0 L602.0 127.0 M616.0 79.0 L616.0 127.0 M630.0 79.0 L630.0 127.0 M644.0 79.0 L644.0 127.0 M658.0 79.0 L658.0 127.0 M672.0 79.0 L672.0 127.0 M686.0 79.0 L686.0 127.0 M700.0 79.0 L700.0 127.0 M714.0 79.0 L714.0 127.0 M728.0 79.0 L728.0 127.0 M742.0 79.0 L742.0 127.0" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M418.0 66 L418.0 74" fill="none"/>
+          <path d="M411.0 46 L425.0 46.4 L424.7 66 L411.0 65.6 Z" fill="#ffffff"/>
+          <!-- snapshot 1: range of 10 000 000 still in play -->
+          <path class="primer-hair" d="M84 162 L752 162.6 L751.6 220 L84 219.4 Z" fill="none"/>
+          <path class="primer-hair" d="M98.0 167.0 L98.0 215.0 M112.0 167.0 L112.0 215.0 M126.0 167.0 L126.0 215.0 M140.0 167.0 L140.0 215.0 M154.0 167.0 L154.0 215.0 M168.0 167.0 L168.0 215.0 M182.0 167.0 L182.0 215.0 M196.0 167.0 L196.0 215.0 M210.0 167.0 L210.0 215.0 M224.0 167.0 L224.0 215.0 M238.0 167.0 L238.0 215.0 M252.0 167.0 L252.0 215.0 M266.0 167.0 L266.0 215.0 M280.0 167.0 L280.0 215.0 M294.0 167.0 L294.0 215.0 M308.0 167.0 L308.0 215.0 M322.0 167.0 L322.0 215.0 M336.0 167.0 L336.0 215.0 M350.0 167.0 L350.0 215.0 M364.0 167.0 L364.0 215.0 M378.0 167.0 L378.0 215.0 M392.0 167.0 L392.0 215.0 M406.0 167.0 L406.0 215.0" fill="none"/>
+          <path d="M418.0 162 L752.0 162.4 L751.7 220 L418.0 219.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M432.0 167.0 L432.0 215.0 M446.0 167.0 L446.0 215.0 M460.0 167.0 L460.0 215.0 M474.0 167.0 L474.0 215.0 M488.0 167.0 L488.0 215.0 M502.0 167.0 L502.0 215.0 M516.0 167.0 L516.0 215.0 M530.0 167.0 L530.0 215.0 M544.0 167.0 L544.0 215.0 M558.0 167.0 L558.0 215.0 M572.0 167.0 L572.0 215.0 M586.0 167.0 L586.0 215.0 M600.0 167.0 L600.0 215.0 M614.0 167.0 L614.0 215.0 M628.0 167.0 L628.0 215.0 M642.0 167.0 L642.0 215.0 M656.0 167.0 L656.0 215.0 M670.0 167.0 L670.0 215.0 M684.0 167.0 L684.0 215.0 M698.0 167.0 L698.0 215.0 M712.0 167.0 L712.0 215.0 M726.0 167.0 L726.0 215.0 M740.0 167.0 L740.0 215.0" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M585.0 154 L585.0 162" fill="none"/>
+          <path d="M578.0 134 L592.0 134.4 L591.7 154 L578.0 153.6 Z" fill="#ffffff"/>
+          <!-- snapshot 2: range of 5 000 000 still in play -->
+          <path class="primer-hair" d="M84 250 L752 250.6 L751.6 308 L84 307.4 Z" fill="none"/>
+          <path class="primer-hair" d="M98.0 255.0 L98.0 303.0 M112.0 255.0 L112.0 303.0 M126.0 255.0 L126.0 303.0 M140.0 255.0 L140.0 303.0 M154.0 255.0 L154.0 303.0 M168.0 255.0 L168.0 303.0 M182.0 255.0 L182.0 303.0 M196.0 255.0 L196.0 303.0 M210.0 255.0 L210.0 303.0 M224.0 255.0 L224.0 303.0 M238.0 255.0 L238.0 303.0 M252.0 255.0 L252.0 303.0 M266.0 255.0 L266.0 303.0 M280.0 255.0 L280.0 303.0 M294.0 255.0 L294.0 303.0 M308.0 255.0 L308.0 303.0 M322.0 255.0 L322.0 303.0 M336.0 255.0 L336.0 303.0 M350.0 255.0 L350.0 303.0 M364.0 255.0 L364.0 303.0 M378.0 255.0 L378.0 303.0 M392.0 255.0 L392.0 303.0 M406.0 255.0 L406.0 303.0" fill="none"/>
+          <path class="primer-hair" d="M599.0 255.0 L599.0 303.0 M613.0 255.0 L613.0 303.0 M627.0 255.0 L627.0 303.0 M641.0 255.0 L641.0 303.0 M655.0 255.0 L655.0 303.0 M669.0 255.0 L669.0 303.0 M683.0 255.0 L683.0 303.0 M697.0 255.0 L697.0 303.0 M711.0 255.0 L711.0 303.0 M725.0 255.0 L725.0 303.0 M739.0 255.0 L739.0 303.0" fill="none"/>
+          <path d="M418.0 250 L585.0 250.4 L584.7 308 L418.0 307.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M432.0 255.0 L432.0 303.0 M446.0 255.0 L446.0 303.0 M460.0 255.0 L460.0 303.0 M474.0 255.0 L474.0 303.0 M488.0 255.0 L488.0 303.0 M502.0 255.0 L502.0 303.0 M516.0 255.0 L516.0 303.0 M530.0 255.0 L530.0 303.0 M544.0 255.0 L544.0 303.0 M558.0 255.0 L558.0 303.0 M572.0 255.0 L572.0 303.0" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M501.5 242 L501.5 250" fill="none"/>
+          <path d="M494.5 222 L508.5 222.4 L508.2 242 L494.5 241.6 Z" fill="#ffffff"/>
+          <!-- snapshot 3: range of 2 500 000 still in play -->
+          <path class="primer-hair" d="M84 338 L752 338.6 L751.6 396 L84 395.4 Z" fill="none"/>
+          <path class="primer-hair" d="M98.0 343.0 L98.0 391.0 M112.0 343.0 L112.0 391.0 M126.0 343.0 L126.0 391.0 M140.0 343.0 L140.0 391.0 M154.0 343.0 L154.0 391.0 M168.0 343.0 L168.0 391.0 M182.0 343.0 L182.0 391.0 M196.0 343.0 L196.0 391.0 M210.0 343.0 L210.0 391.0 M224.0 343.0 L224.0 391.0 M238.0 343.0 L238.0 391.0 M252.0 343.0 L252.0 391.0 M266.0 343.0 L266.0 391.0 M280.0 343.0 L280.0 391.0 M294.0 343.0 L294.0 391.0 M308.0 343.0 L308.0 391.0 M322.0 343.0 L322.0 391.0 M336.0 343.0 L336.0 391.0 M350.0 343.0 L350.0 391.0 M364.0 343.0 L364.0 391.0 M378.0 343.0 L378.0 391.0 M392.0 343.0 L392.0 391.0 M406.0 343.0 L406.0 391.0 M420.0 343.0 L420.0 391.0 M434.0 343.0 L434.0 391.0 M448.0 343.0 L448.0 391.0 M462.0 343.0 L462.0 391.0 M476.0 343.0 L476.0 391.0 M490.0 343.0 L490.0 391.0" fill="none"/>
+          <path class="primer-hair" d="M599.0 343.0 L599.0 391.0 M613.0 343.0 L613.0 391.0 M627.0 343.0 L627.0 391.0 M641.0 343.0 L641.0 391.0 M655.0 343.0 L655.0 391.0 M669.0 343.0 L669.0 391.0 M683.0 343.0 L683.0 391.0 M697.0 343.0 L697.0 391.0 M711.0 343.0 L711.0 391.0 M725.0 343.0 L725.0 391.0 M739.0 343.0 L739.0 391.0" fill="none"/>
+          <path d="M501.5 338 L585.0 338.4 L584.7 396 L501.5 395.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M515.5 343.0 L515.5 391.0 M529.5 343.0 L529.5 391.0 M543.5 343.0 L543.5 391.0 M557.5 343.0 L557.5 391.0 M571.5 343.0 L571.5 391.0" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M543.2 330 L543.2 338" fill="none"/>
+          <path d="M536.2 310 L550.2 310.4 L550.0 330 L536.2 329.6 Z" fill="#ffffff"/>
+          <!-- snapshot 4: range of 1 250 000 still in play -->
+          <path class="primer-hair" d="M84 426 L752 426.6 L751.6 484 L84 483.4 Z" fill="none"/>
+          <path class="primer-hair" d="M98.0 431.0 L98.0 479.0 M112.0 431.0 L112.0 479.0 M126.0 431.0 L126.0 479.0 M140.0 431.0 L140.0 479.0 M154.0 431.0 L154.0 479.0 M168.0 431.0 L168.0 479.0 M182.0 431.0 L182.0 479.0 M196.0 431.0 L196.0 479.0 M210.0 431.0 L210.0 479.0 M224.0 431.0 L224.0 479.0 M238.0 431.0 L238.0 479.0 M252.0 431.0 L252.0 479.0 M266.0 431.0 L266.0 479.0 M280.0 431.0 L280.0 479.0 M294.0 431.0 L294.0 479.0 M308.0 431.0 L308.0 479.0 M322.0 431.0 L322.0 479.0 M336.0 431.0 L336.0 479.0 M350.0 431.0 L350.0 479.0 M364.0 431.0 L364.0 479.0 M378.0 431.0 L378.0 479.0 M392.0 431.0 L392.0 479.0 M406.0 431.0 L406.0 479.0 M420.0 431.0 L420.0 479.0 M434.0 431.0 L434.0 479.0 M448.0 431.0 L448.0 479.0 M462.0 431.0 L462.0 479.0 M476.0 431.0 L476.0 479.0 M490.0 431.0 L490.0 479.0" fill="none"/>
+          <path class="primer-hair" d="M557.2 431.0 L557.2 479.0 M571.2 431.0 L571.2 479.0 M585.2 431.0 L585.2 479.0 M599.2 431.0 L599.2 479.0 M613.2 431.0 L613.2 479.0 M627.2 431.0 L627.2 479.0 M641.2 431.0 L641.2 479.0 M655.2 431.0 L655.2 479.0 M669.2 431.0 L669.2 479.0 M683.2 431.0 L683.2 479.0 M697.2 431.0 L697.2 479.0 M711.2 431.0 L711.2 479.0 M725.2 431.0 L725.2 479.0 M739.2 431.0 L739.2 479.0" fill="none"/>
+          <path d="M501.5 426 L543.2 426.4 L543.0 484 L501.5 483.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M515.5 431.0 L515.5 479.0 M529.5 431.0 L529.5 479.0" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M522.4 418 L522.4 426" fill="none"/>
+          <path d="M515.4 398 L529.4 398.4 L529.1 418 L515.4 417.6 Z" fill="#ffffff"/>
+          <!-- the answer is somewhere in this last stretch: one marker swipe -->
+          <g stroke-width="7"><path d="M495.5 485 L549.2 483" fill="none" stroke="#ffd23f"/></g>
+          <text x="46" y="109" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">0</text>
+          <text x="876" y="109" text-anchor="end" font-size="17" font-weight="700" fill="#243244">20 000 000</text>
+          <text x="46" y="197" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">1</text>
+          <text x="876" y="197" text-anchor="end" font-size="17" font-weight="700" fill="#243244">10 000 000</text>
+          <text x="46" y="285" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">2</text>
+          <text x="876" y="285" text-anchor="end" font-size="17" font-weight="700" fill="#243244">5 000 000</text>
+          <text x="46" y="373" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">3</text>
+          <text x="876" y="373" text-anchor="end" font-size="17" font-weight="700" fill="#243244">2 500 000</text>
+          <text x="46" y="461" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">4</text>
+          <text x="876" y="461" text-anchor="end" font-size="17" font-weight="700" fill="#243244">1 250 000</text>
+          <text class="lang-zh" x="24" y="40" font-size="17" font-weight="700" fill="#243244">砍了几刀 → 范围还剩多少</text>
+          <text class="lang-en" x="24" y="40" font-size="17" font-weight="700" fill="#243244">cuts so far → range still in play</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en"><b>All five rows are the same cards on one axis.</b> Each cut halves the range still in play: 20,000,000 → 10,000,000 → 5,000,000 → 2,500,000 → 1,250,000. Row 0 is the start, so five rows hold four cuts. No ruled-out card left the row; they are drawn hollow. The answer is under the yellow line; 21 more cuts leave just it. 2 to the 20th is 1,048,576, too small; 2 to the 21st is 2,097,152, enough. 4 + 21 = 25.</span>
+          <span class="lang-zh"><b>五行是同一根横轴上的同一排卡片。</b>砍一刀，还要看的范围就少一半：2000 万 → 1000 万 → 500 万 → 250 万 → 125 万。第 0 行是起点，五行之间只有四刀。被排除的卡片没走，只是画成了空心。答案就在黄线那一小段里，再砍 21 刀就只剩它。2 的 20 次方是 1 048 576，不到 125 万；2 的 21 次方是 2 097 152，够了。4 + 21 = 25。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ④ 数学屏:2 的多少次方够得着 2000 万 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Why is 25 enough?</span>
+        <span class="lang-zh">为什么 25 次就够？</span>
+      </h2>
+      <p>
+        <span class="lang-en">Halving is doubling run backwards. Start at one card, double 25 times, and you reach 33,554,432 — past twenty million.</span>
+        <span class="lang-zh">对半砍的反面是翻倍。从 1 张开始翻 25 次，到 33 554 432 张——比 2000 万多。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 4.2 900 494.8" role="img"
+          aria-label="按一张纸 0.1 毫米算：2000 万张摞起来 2000 米，翻倍 25 次的 33 554 432 张摞起来 3355 米，越过了黄线；旁边是 828 米的高楼"
+          data-label-zh="按一张纸 0.1 毫米算：2000 万张摞起来 2000 米，翻倍 25 次的 33 554 432 张摞起来 3355 米，越过了黄线；旁边是 828 米的高楼"
+          data-label-en="At 0.1 mm a sheet: 20 000 000 cards stack 2000 m high, the 33 554 432 that 25 doublings reach stack 3355 m and clear the yellow line; beside them stands the 828 m building">
+          <!-- ground -->
+          <path d="M24 440 C 300 438, 600 442, 876 440" fill="none"/>
+          <!-- the pile you have to search: 20 000 000 sheets = 2000 m -->
+          <path d="M140 214 L228 214.6 L227.6 440 L140 439.4 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M140.0 232.0 L228.0 232.0 M140.0 250.0 L228.0 250.0 M140.0 268.0 L228.0 268.0 M140.0 286.0 L228.0 286.0 M140.0 304.0 L228.0 304.0 M140.0 322.0 L228.0 322.0 M140.0 340.0 L228.0 340.0 M140.0 358.0 L228.0 358.0 M140.0 376.0 L228.0 376.0 M140.0 394.0 L228.0 394.0 M140.0 412.0 L228.0 412.0 M140.0 430.0 L228.0 430.0" fill="none" stroke="#ffffff"/>
+          <!-- what 25 doublings reach: 33 554 432 sheets = 3355.4 m. Violet TINT, not hollow: hair-hollow means ruled out everywhere else on this page. -->
+          <path d="M300 60.8 L388 61.4 L387.6 440 L300 439.4 Z" fill="#7a5cd6" fill-opacity=".14"/>
+          <path class="primer-hair" d="M300.0 78.8 L388.0 78.8 M300.0 96.8 L388.0 96.8 M300.0 114.8 L388.0 114.8 M300.0 132.8 L388.0 132.8 M300.0 150.8 L388.0 150.8 M300.0 168.8 L388.0 168.8 M300.0 186.8 L388.0 186.8 M300.0 204.8 L388.0 204.8 M300.0 222.8 L388.0 222.8 M300.0 240.8 L388.0 240.8 M300.0 258.8 L388.0 258.8 M300.0 276.8 L388.0 276.8 M300.0 294.8 L388.0 294.8 M300.0 312.8 L388.0 312.8 M300.0 330.8 L388.0 330.8 M300.0 348.8 L388.0 348.8 M300.0 366.8 L388.0 366.8 M300.0 384.8 L388.0 384.8 M300.0 402.8 L388.0 402.8 M300.0 420.8 L388.0 420.8" fill="none"/>
+          <!-- the tallest building there is, drawn to the same height scale -->
+          <path d="M470 440 L476 406 L484 406 L484 382 L492 382 L492 364 L498 364 L500 346.4 L502 364 L508 364 L508 382 L516 382 L516 406 L524 406 L530 440 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M478.0 414.0 L522.0 414.0 M478.0 422.0 L522.0 422.0 M478.0 430.0 L522.0 430.0" fill="none"/>
+          <path class="primer-hair" d="M485.0 390.0 L515.0 390.0 M485.0 398.0 L515.0 398.0" fill="none"/>
+          <!-- 500 m ruler: every rung is 500 m -->
+          <path class="primer-hair" d="M868 440 L868 60.8" fill="none"/>
+          <path class="primer-hair" d="M860 440.0 L876 440.0 M860 383.5 L876 383.5 M860 327.0 L876 327.0 M860 270.5 L876 270.5 M860 214.0 L876 214.0 M860 157.5 L876 157.5 M860 101.0 L876 101.0" fill="none"/>
+          <path class="primer-hair" d="M396 61.2 L856 60.8" fill="none" stroke-dasharray="3 8"/>
+          <path class="primer-hair" d="M404 214.4 L856 214" fill="none" stroke-dasharray="3 8"/>
+          <path class="primer-hair" d="M538 346.8 L856 346.4" fill="none" stroke-dasharray="3 8"/>
+          <!-- the level 25 doublings has to clear: the 2000 m line -->
+          <g stroke-width="7"><path d="M132 215 L400 213" fill="none" stroke="#ffd23f"/></g>
+          <text class="lang-zh" x="344" y="44" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">翻倍 25 次 · 33 554 432 张 · 3355 米</text>
+          <text class="lang-en" x="344" y="44" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">25 doublings · 33 554 432 cards · 3355 m</text>
+          <text class="lang-zh" x="184" y="470" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">2000 万张卡片 · 2000 米</text>
+          <text class="lang-en" x="184" y="470" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">twenty million cards · 2000 m</text>
+          <text class="lang-zh" x="500" y="470" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">世界上最高的那栋楼 · 828 米</text>
+          <text class="lang-en" x="500" y="470" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">the tallest building there is · 828 m</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en"><b>At 0.1 mm a sheet — printer paper — 20,000,000 cards stack 2000 m.</b> That is 2,000,000 mm; the violet pile is it, and the yellow line is its top. Twenty-five doublings reach 33,554,432 sheets, 3,355,443 mm, 3355 m — clear of the line. 2 to the 24th is 16,777,216, short of twenty million, so 24 cuts fall short. Those 3355 m beat four of the tallest building stacked: 828 × 4 = 3312 m. Same for 1 to 100: 2 to the 6th is 64, 2 to the 7th is 128. So seven guesses. Every rung of the ruler is 500 m; heights follow that scale, widths do not.</span>
+          <span class="lang-zh"><b>按一张纸 0.1 毫米算（打印纸的厚度）：2000 万张摞起来 2000 米。</b>也就是 2 000 000 毫米。紫色那一摞就是它，黄线是它的顶。翻倍 25 次到 33 554 432 张，3 355 443 毫米，也就是 3355 米，越过了黄线。2 的 24 次方是 16 777 216，还不到 2000 万——24 次不够。3355 米比世界上最高的那栋楼叠四座还高：828 × 4 = 3312 米。猜 1 到 100 也一样：2 的 6 次方是 64，2 的 7 次方是 128，所以七次。右边刻度每一格 500 米；高度按这个刻度画，粗细没按比例。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑤ 前提:为什么必须先排好序 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Why must it already be in order?</span>
+        <span class="lang-zh">为什么必须先排好序？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">索引 index</span><span class="lang-en">index</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">a copy something keeps in order for you, all the time</span>
+          <span class="lang-zh">有人一直替你保持着顺序的那份副本</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">Out of order, the middle card tells you <span class="primer-mark">nothing</span>.</span>
+        <span class="lang-zh">没排好序，翻中间那一张<span class="primer-mark">什么也说明不了</span>。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 3 900 510" role="img"
+          aria-label="两排立在架子上的卡片，卡片的高度就是它的号码：上面没排好序，翻开中间那一张什么也砍不掉；下面按号码排好，中间那一张左边的全比它小，左半边整个出局"
+          data-label-zh="两排立在架子上的卡片，卡片的高度就是它的号码：上面没排好序，翻开中间那一张什么也砍不掉；下面按号码排好，中间那一张左边的全比它小，左半边整个出局"
+          data-label-en="Two rows of cards standing on a shelf, card height standing for the number on it: out of order, turning the middle card cuts nothing; in order, everything left of the middle is smaller, so that whole half leaves">
+          <!-- not in order: turning the middle card rules nothing out -->
+          <path d="M24 208 C 300 206, 600 210, 876 208" fill="none"/>
+          <path class="primer-hair" d="M28 217 L872 216" fill="none"/>
+          <path d="M34.0 119.0 L60.0 119.5 Q64.0 119.5 64.0 125.5 L63.7 208 L30.0 207.5 L30.0 125.0 Q30.0 119.0 34.0 119.0 Z" fill="#7a5cd6"/>
+          <path d="M84.8 182.0 L110.8 182.5 Q114.8 182.5 114.8 188.5 L114.5 208 L80.8 207.5 L80.8 188.0 Q80.8 182.0 84.8 182.0 Z" fill="#7a5cd6"/>
+          <path d="M135.5 84.0 L161.5 84.5 Q165.5 84.5 165.5 90.5 L165.2 208 L131.5 207.5 L131.5 90.0 Q131.5 84.0 135.5 84.0 Z" fill="#7a5cd6"/>
+          <path d="M186.2 196.0 L212.2 196.5 Q216.2 196.5 216.2 202.5 L215.9 208 L182.2 207.5 L182.2 202.0 Q182.2 196.0 186.2 196.0 Z" fill="#7a5cd6"/>
+          <path d="M237.0 140.0 L263.0 140.5 Q267.0 140.5 267.0 146.5 L266.7 208 L233.0 207.5 L233.0 146.0 Q233.0 140.0 237.0 140.0 Z" fill="#7a5cd6"/>
+          <path d="M287.8 105.0 L313.8 105.5 Q317.8 105.5 317.8 111.5 L317.4 208 L283.8 207.5 L283.8 111.0 Q283.8 105.0 287.8 105.0 Z" fill="#7a5cd6"/>
+          <path d="M338.5 168.0 L364.5 168.5 Q368.5 168.5 368.5 174.5 L368.2 208 L334.5 207.5 L334.5 174.0 Q334.5 168.0 338.5 168.0 Z" fill="#7a5cd6"/>
+          <path d="M389.2 91.0 L415.2 91.5 Q419.2 91.5 419.2 97.5 L418.9 208 L385.2 207.5 L385.2 97.0 Q385.2 91.0 389.2 91.0 Z" fill="#7a5cd6"/>
+          <path d="M440.0 154.0 L466.0 154.5 Q470.0 154.5 470.0 160.5 L469.7 208 L436.0 207.5 L436.0 160.0 Q436.0 154.0 440.0 154.0 Z" fill="#ffffff"/>
+          <path d="M490.8 189.0 L516.8 189.5 Q520.8 189.5 520.8 195.5 L520.5 208 L486.8 207.5 L486.8 195.0 Q486.8 189.0 490.8 189.0 Z" fill="#7a5cd6"/>
+          <path d="M541.5 98.0 L567.5 98.5 Q571.5 98.5 571.5 104.5 L571.2 208 L537.5 207.5 L537.5 104.0 Q537.5 98.0 541.5 98.0 Z" fill="#7a5cd6"/>
+          <path d="M592.2 175.0 L618.2 175.5 Q622.2 175.5 622.2 181.5 L622.0 208 L588.2 207.5 L588.2 181.0 Q588.2 175.0 592.2 175.0 Z" fill="#7a5cd6"/>
+          <path d="M643.0 112.0 L669.0 112.5 Q673.0 112.5 673.0 118.5 L672.7 208 L639.0 207.5 L639.0 118.0 Q639.0 112.0 643.0 112.0 Z" fill="#7a5cd6"/>
+          <path d="M693.8 133.0 L719.8 133.5 Q723.8 133.5 723.8 139.5 L723.5 208 L689.8 207.5 L689.8 139.0 Q689.8 133.0 693.8 133.0 Z" fill="#7a5cd6"/>
+          <path d="M744.5 161.0 L770.5 161.5 Q774.5 161.5 774.5 167.5 L774.2 208 L740.5 207.5 L740.5 167.0 Q740.5 161.0 744.5 161.0 Z" fill="#7a5cd6"/>
+          <path d="M795.2 126.0 L821.2 126.5 Q825.2 126.5 825.2 132.5 L825.0 208 L791.2 207.5 L791.2 132.0 Q791.2 126.0 795.2 126.0 Z" fill="#7a5cd6"/>
+          <path d="M846.0 147.0 L872.0 147.5 Q876.0 147.5 876.0 153.5 L875.7 208 L842.0 207.5 L842.0 153.0 Q842.0 147.0 846.0 147.0 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M35.0 131.0 L59.0 131.4 M85.8 193.7 L109.8 194.1 M136.5 96.0 L160.5 96.4 M187.2 201.4 L211.2 201.8 M238.0 152.0 L262.0 152.4 M288.8 117.0 L312.8 117.4 M339.5 180.0 L363.5 180.4 M390.2 103.0 L414.2 103.4 M491.8 197.6 L515.8 198.0 M542.5 110.0 L566.5 110.4 M593.2 187.0 L617.2 187.4 M644.0 124.0 L668.0 124.4 M694.8 145.0 L718.8 145.4 M745.5 173.0 L769.5 173.4 M796.2 138.0 L820.2 138.4 M847.0 159.0 L871.0 159.4" fill="none" stroke="#ffffff"/>
+          <path class="primer-hair" d="M441.0 166.0 L465.0 166.4" fill="none"/>
+          <!-- in order by number: everything left of the middle is smaller -->
+          <path d="M24 452 C 300 450, 600 454, 876 452" fill="none"/>
+          <path class="primer-hair" d="M28 461 L872 460" fill="none"/>
+          <path class="primer-hair" d="M34.0 440.0 L60.0 440.5 Q64.0 440.5 64.0 446.5 L63.7 452 L30.0 451.5 L30.0 446.0 Q30.0 440.0 34.0 440.0 Z" fill="none"/>
+          <path class="primer-hair" d="M84.8 433.0 L110.8 433.5 Q114.8 433.5 114.8 439.5 L114.5 452 L80.8 451.5 L80.8 439.0 Q80.8 433.0 84.8 433.0 Z" fill="none"/>
+          <path class="primer-hair" d="M135.5 426.0 L161.5 426.5 Q165.5 426.5 165.5 432.5 L165.2 452 L131.5 451.5 L131.5 432.0 Q131.5 426.0 135.5 426.0 Z" fill="none"/>
+          <path class="primer-hair" d="M186.2 419.0 L212.2 419.5 Q216.2 419.5 216.2 425.5 L215.9 452 L182.2 451.5 L182.2 425.0 Q182.2 419.0 186.2 419.0 Z" fill="none"/>
+          <path class="primer-hair" d="M237.0 412.0 L263.0 412.5 Q267.0 412.5 267.0 418.5 L266.7 452 L233.0 451.5 L233.0 418.0 Q233.0 412.0 237.0 412.0 Z" fill="none"/>
+          <path class="primer-hair" d="M287.8 405.0 L313.8 405.5 Q317.8 405.5 317.8 411.5 L317.4 452 L283.8 451.5 L283.8 411.0 Q283.8 405.0 287.8 405.0 Z" fill="none"/>
+          <path class="primer-hair" d="M338.5 398.0 L364.5 398.5 Q368.5 398.5 368.5 404.5 L368.2 452 L334.5 451.5 L334.5 404.0 Q334.5 398.0 338.5 398.0 Z" fill="none"/>
+          <path class="primer-hair" d="M389.2 391.0 L415.2 391.5 Q419.2 391.5 419.2 397.5 L418.9 452 L385.2 451.5 L385.2 397.0 Q385.2 391.0 389.2 391.0 Z" fill="none"/>
+          <path d="M440.0 384.0 L466.0 384.5 Q470.0 384.5 470.0 390.5 L469.7 452 L436.0 451.5 L436.0 390.0 Q436.0 384.0 440.0 384.0 Z" fill="#ffffff"/>
+          <path d="M490.8 377.0 L516.8 377.5 Q520.8 377.5 520.8 383.5 L520.5 452 L486.8 451.5 L486.8 383.0 Q486.8 377.0 490.8 377.0 Z" fill="#7a5cd6"/>
+          <path d="M541.5 370.0 L567.5 370.5 Q571.5 370.5 571.5 376.5 L571.2 452 L537.5 451.5 L537.5 376.0 Q537.5 370.0 541.5 370.0 Z" fill="#7a5cd6"/>
+          <path d="M592.2 363.0 L618.2 363.5 Q622.2 363.5 622.2 369.5 L622.0 452 L588.2 451.5 L588.2 369.0 Q588.2 363.0 592.2 363.0 Z" fill="#7a5cd6"/>
+          <path d="M643.0 356.0 L669.0 356.5 Q673.0 356.5 673.0 362.5 L672.7 452 L639.0 451.5 L639.0 362.0 Q639.0 356.0 643.0 356.0 Z" fill="#7a5cd6"/>
+          <path d="M693.8 349.0 L719.8 349.5 Q723.8 349.5 723.8 355.5 L723.5 452 L689.8 451.5 L689.8 355.0 Q689.8 349.0 693.8 349.0 Z" fill="#7a5cd6"/>
+          <path d="M744.5 342.0 L770.5 342.5 Q774.5 342.5 774.5 348.5 L774.2 452 L740.5 451.5 L740.5 348.0 Q740.5 342.0 744.5 342.0 Z" fill="#7a5cd6"/>
+          <path d="M795.2 335.0 L821.2 335.5 Q825.2 335.5 825.2 341.5 L825.0 452 L791.2 451.5 L791.2 341.0 Q791.2 335.0 795.2 335.0 Z" fill="#7a5cd6"/>
+          <path d="M846.0 328.0 L872.0 328.5 Q876.0 328.5 876.0 334.5 L875.7 452 L842.0 451.5 L842.0 334.0 Q842.0 328.0 846.0 328.0 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M35.0 445.4 L59.0 445.8 M85.8 441.6 L109.8 441.9 M136.5 437.7 L160.5 438.1 M187.2 431.0 L211.2 431.4 M238.0 424.0 L262.0 424.4 M288.8 417.0 L312.8 417.4 M339.5 410.0 L363.5 410.4 M390.2 403.0 L414.2 403.4" fill="none"/>
+          <path class="primer-hair" d="M441.0 396.0 L465.0 396.4" fill="none"/>
+          <path class="primer-hair" d="M491.8 389.0 L515.8 389.4 M542.5 382.0 L566.5 382.4 M593.2 375.0 L617.2 375.4 M644.0 368.0 L668.0 368.4 M694.8 361.0 L718.8 361.4 M745.5 354.0 L769.5 354.4 M796.2 347.0 L820.2 347.4 M847.0 340.0 L871.0 340.4" fill="none" stroke="#ffffff"/>
+          <text class="lang-zh" x="24" y="44" font-size="17" font-weight="700" fill="#243244">没排好序</text>
+          <text class="lang-en" x="24" y="44" font-size="17" font-weight="700" fill="#243244">not in order</text>
+          <text class="lang-zh" x="24" y="240" font-size="15" font-weight="600" fill="#243244">这一刀什么也没砍掉</text>
+          <text class="lang-en" x="24" y="240" font-size="15" font-weight="600" fill="#243244">this cut rules nothing out</text>
+          <text class="lang-zh" x="24" y="288" font-size="17" font-weight="700" fill="#243244">按号码排好序</text>
+          <text class="lang-en" x="24" y="288" font-size="17" font-weight="700" fill="#243244">in order by number</text>
+          <text class="lang-zh" x="24" y="484" font-size="15" font-weight="600" fill="#243244">左边整半边都比它小</text>
+          <text class="lang-en" x="24" y="484" font-size="15" font-weight="600" fill="#243244">everything left of it is smaller</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en"><b>A card's height is the number on it.</b> Out of order, smaller numbers sit both sides of the middle card. Nothing is ruled out; every card but the turned one stays violet. In order, everything left of the middle is shorter, so a bigger target empties that half. Both rows hold the same 17 cards. The order must be by the number you search on. Nothing sorts when you ask: a database keeps its index that way all along.</span>
+          <span class="lang-zh"><b>卡片的高度就是它上面的号码。</b>上面一排没排好序，中间那张的两边都有更小的号码。什么也砍不掉，除了翻开的那张，别的全还是紫的。下面一排排好了序，中间那张左边的全都更矮。你要的号码更大，左边整半边就变空心。两排是同样的 17 张卡片。顺序必须按你要查的那个号码排。顺序不是你来查的时候排的，是数据库让索引一直保持着的。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑥ 回顾 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <aside class="primer-recap recap-flat">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Binary search turns over the middle card and drops the half it cannot be in.</span>
+              <span class="lang-zh">二分查找就是翻开中间那一张，然后扔掉不可能的那一半。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Twenty million cards take 25 cuts; one at a time takes over seven months.</span>
+              <span class="lang-zh">2000 万张卡片 25 刀就到，一张一张翻要七个多月。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">It only works if the cards are already in order by the number you search on.</span>
+              <span class="lang-zh">前提是这排卡片一直按你要查的号码排好序。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Technical primer · primer-design · every number here checks out on a calculator</span>
+    <span class="lang-zh">技术图解 · primer-design · 页面上每个数字都能用计算器验一遍</span>
+    · v1 · 2026-08-26
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+    /* CSS only hides the other language's <text>; an SVG's aria-label is an
+     * attribute, so EN mode must swap it here or screen readers hear Chinese
+     * under html[lang="en"]. The static aria-label in the markup is the zh
+     * default for the no-JS case. */
+    document.querySelectorAll('svg[data-label-zh]').forEach(function (s) {
+      s.setAttribute('aria-label',
+        s.getAttribute(lang === 'zh' ? 'data-label-zh' : 'data-label-en'));
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: primer
+Page-type: concept (technical · algorithm / powers of two)
+Created: 2026-08-26
+
+Decisions (7):
+1. [violet-is-one-thing-page-wide] chose "violet = the cards you still have to look at, in every figure" over "violet as the section accent". Because: illustration-craft §9 wants one violet subject per figure, and this page's subject is one shrinking set followed across five drawings. Once violet means "still in play", the halving needs no legend: the violet area is the answer in the hero, in the two drawers, in all five snapshot rows, in the pile you have to search, and in what a sorted row can rule out. Ruled-out cards are never dimmed and never deleted — they stay in place as hair-hollow outline, which tech-figures §6 requires and which also keeps every number out of the low-contrast trap that axe blocks. Yellow appears once per figure and twice page-wide — the 2000 m line that 25 doublings has to clear, and one marker swipe under the last snapshot row's surviving stretch — and .primer-mark twice in prose.
+2. [hollow-on-paper-means-ruled-out-and-only-that] chose "the 33 554 432-sheet pile is violet at fill-opacity .14" over "the same hair-hollow-on-paper as everything else". Because: the hollow state is a vocabulary item this page teaches in figure 1 and repeats in figures 2, 3 and 5, so by figure 4 the tallest hollow shape would read as "already eliminated" — the opposite of "the height 25 doublings reaches". A tint adds no hue (dos-and-donts §3 allows .12-.18 explicitly), so illustration-craft §9's one-violet-subject rule still holds: solid violet is the pile you must search, the tint is the same family at a hypothetical quantity, and hollow stays reserved for eliminated.
+3. [snapshots-stacked-on-one-axis] chose "five snapshot ROWS on one shared horizontal axis" over "five small panels side by side". Because: tech-figures §6 asks for a snapshot sequence rather than one arrow-crammed diagram, and its example lays them out in a row. Five separate panels each rescale their own card row, so the reader has to compare two rescaled pictures to see a halving. On one axis the surviving band is literally half as wide as the band above it, and its edge sits exactly under the card that was turned over in the row above — the halving becomes a shape instead of a claim. No arrows anywhere in the figure. It also fixes the geometry problem the panel layout has: a wide-and-short strip cannot carry the dos-and-donts §1 ratio without dead margin, and five rows fill 90% of the box's height.
+4. [row-0-is-the-starting-state] chose "number the rows 0-4, title the column RANGE, and say in the caption that five rows hold four cuts" over "labelling the rows 1-5" or "counting cards". Because: tech-figures §6 was corrected for exactly this off-by-one, and counting pictures is how it happens. Row 0 carries the full range and no cut yet; the gutter numeral IS the number of cuts so far, so the reader can read "4" and "1 250 000" off the same line. The column says 范围 / range rather than 张 / cards on purpose: with 20 000 000 cards the probe is looked at and is not the target, so a card count would be 9 999 999 or 10 000 000 and the exactness would be a claim rather than arithmetic. On the range, half of 20 000 000 is exactly 10 000 000, and the caption then closes the sum out loud: 21 more cuts from 1 250 000, and 4 + 21 = 25.
+5. [the-referent-is-made-of-the-same-cards] chose "stack the cards themselves — 0.1 mm a sheet — so 20 000 000 is 2000 m and 33 554 432 is 3355 m" over "a paper-folding referent standing outside the page's own objects". Because: explain-method §3 wants a referent that is checkable, and this one puts both sides of the inequality into the same unit: the pile you must search is 2000 m, what 25 doublings reach is 3355 m, and the yellow line is the 2000 m level the taller pile has to clear. Folding is also the part of tech-figures §6's own referent that does not survive §0's iron rule — paper cannot be folded 25 times, the record is around 12 — so the page keeps the number and changes the verb to stacking. The building makes metres mean something, §6's four-towers comparison is kept in the caption (828 x 4 = 3312 m, still under 3355), and the sheet thickness is stated as an assumption rather than smuggled in.
+6. [order-is-drawn-as-height] chose "draw each card's number as the card's height, then show the same 17 cards jumbled and sorted, each row in an open drawer" over "printing numbers on the cards". Because: seventeen printed numbers twice over is 34 label elements against a budget of 14 (illustration-craft §7), and shrinking the type to fit is the thing dense-diagram-labels-small exists to catch. Height makes "everything left of the middle is smaller" visible with no labels at all, and the caption states the device in one sentence. This is also the only figure with violet in both rows, and that is the point being made: out of order the cut leaves every card violet, in order it empties half the row. The permutation is a real permutation of the same seventeen values, so the two rows really are the same cards.
+7. [numerals-are-the-reading-key-and-the-caption-paid-for-them] chose "three .primer-step numerals naming the three moves of one cut, above the five-row figure, with no section prose at all" over "the moves as a sentence" and over "no numerals on the page". Because: an earlier revision dropped the component after measuring that a step row costs 104-173px of text height and pushed this section to 0.485 zh / 0.457 en against dos-and-donts §1's 0.5. The measurement was right and the conclusion was wrong: what had eaten the budget was a figcaption at four times canonical scale. Cutting that caption to the numbers a phone reader actually needs, deleting the section's prose (the numerals now say what it said), and raising the figure to 508 units bought the row back with room to spare. The figure carries no step labels of its own, so nothing is printed twice — concept.md decision 3's arrangement, one tier up.
+
+Known trade-offs:
+- Every number on the page and the arithmetic behind it: 2 to the 24th = 16 777 216 < 20 000 000 <= 2 to the 25th = 33 554 432, so 25 halvings, stated as "25", never "about 25". The snapshot series is 20 000 000 / 10 000 000 / 5 000 000 / 2 500 000 / 1 250 000 — four cuts, and no rounding, because the count is on the range. 2 to the 20th = 1 048 576 < 1 250 000 <= 2 to the 21st = 2 097 152, so 21 cuts remain, and 4 + 21 = 25. The guessing game: 2 to the 6th = 64 < 100 <= 2 to the 7th = 128, so seven guesses. The linear scan: 20 000 000 s / 86 400 = 231 days, and 231 / 30.4 = over seven months. The piles: 0.1 mm x 20 000 000 = 2 000 000 mm = 2000 m; 0.1 mm x 33 554 432 = 3 355 443 mm = 3355 m; 828 x 4 = 3312 m, which 3355 clears by 43 m. Every one of these is in a figcaption as well as in the drawing, because on a 375px phone the content column is 335px and a 15px in-figure label measures 5.58px there — the caption, not the drawing, is what a phone reader reads.
+- Caption budget: five captions at 4 / 7 / 7 / 11 / 9 sentences, every sentence inside explain-method §4's caps (28 hanzi / 18 words) — checked by script over every non-figcaption and figcaption span. Large numbers are written with thousands commas in EN (20,000,000) and with spaces in zh (2 000 000), because §4 counts EN words by whitespace and a space-grouped series would blow the cap on punctuation alone.
+- The card that is turned over is drawn far wider than one card in every figure. One card out of 20 000 000 is 0.00003 units wide, so it would not exist on paper. Both the two-drawer caption and the snapshot caption say this out loud, because tech-figures §0 counts an out-of-scale mark as an omission that owes the reader a sentence.
+- The tower's height is to scale (828 m at 0.113 units per metre, the same scale as both piles and the 500 m ruler); its width is not, and the caption says so. A real 828 m tower is a few tens of metres across, which is under 6 units here — it would be a hair line, not a building. It sits immediately right of the two piles rather than at the far margin, so the three heights are read in one sweep and its label sits under its own object.
+- Section ratios under dos-and-donts §1's ruled yardstick (figure svg + analogy-fig column only, recap section exempt), measured at 1440 in both languages, as ratio (px of section height still spare above the 0.5 floor) — zh / en: ② 0.541 (+113.0) / 0.532 (+90.5) · ③ 0.537 (+84.3) / 0.527 (+61.8) · ④ 0.556 (+119.3) / 0.531 (+68.6) · ⑤ 0.546 (+102.7) / 0.535 (+80.3). EN is the binding side in all four, because its captions wrap one line further than zh. The px column is the one to spend from: a figcaption line is 22.5px, so the tightest section (EN ③, +61.8px) can afford two more caption lines and no more. Every ratio is earned against a box with legal margins rather than against padding — content bbox against viewBox, left/top/right/bottom in user units: hero 24/24/24/24 · analogy card 6/24/14/20.5 · two drawers 24/23.5/24/24 · snapshots 24/22.5/24/23 · piles 24/24/24/24 · order 24/23.5/24/24, every one inside illustration-craft §8's 24-unit cap. Fill for the five section figures is 88.9-94.7% of the width and 69.5-91.0% of the height; the 69.5% is the analogy card, which is a 139px `<div>` figure and outside §8's ≥300px check, and the five figures the check does reach fill 90.3-91.0% of their height.
+- Figure sizes are all inside the ceiling the two illustration-craft §3 formulas give: 900-wide viewBoxes on the 1080 tier render 4.08px strokes at 1440 and 3.63px at 1024, and the tallest is 510 units = 612px, 28px under the 640px diagram-oversized line. The hero is a 488-wide viewBox in the hero column: 3.65px at 1440, 3.23px at 1024. Label counts are 4 (hero) / 0 (analogy card) / 8 / 12 / 6 / 8 against 14 on this tier — the snapshot figure spends 10 of its 12 on neutral numerals, which cost one element each instead of two.
+- The two drawers in the "like what" figure each give up exactly one card, and it is drawn lying on the drawer's lip rather than standing in the row. An earlier revision drew the first drawer's card as a 12-unit sliver against the left wall, where four near-parallel strokes inside 14 rendered pixels read as border trim — so the half of the comparison that is supposed to feel futile just looked like an uncut drawer. One card out on the lip in both drawers makes the two halves equally legible and puts the whole difference where it belongs: in how much violet is left.
+- The hero figure's main stroke measures 3.43px at 375, 3.65px at 1440 and 3.23px at 1024, but it dips under the 3px floor across the middle of the range: 2.32px at 769, 2.61px at 850, 2.93px at 940, back over at 3.07px by 980. That is a set-level primer.css Section L item (known-bugs §8.2) affecting every primer page and both canonicals, being fixed there — no page-local CSS for it here, and no claim about widths this page did not sample. The five 900-unit figures were swept over the same widths and stayed at or above 3.04px throughout. The hero therefore carries nothing a reader has to read closely: one drawer, one card pulled up, one violet half, and two labels, with all four numbers in the figcaption. Its "one cut, this half is out" label sits bottom-LEFT, under the half that went hollow — on a page that argues through position and area, a label about elimination cannot sit under the surviving half.
+- The probe card is held ABOVE the row on a hair stem, not inside it. Drawn inside, a 12-unit card is 29% of what row 4 has left (a 41.5-unit band), so the two rows where "the band is half the band above it" matters most were reading as two little violet tabs. Above the row the band stays one continuous block in all five rows, and the stem still says which slot the card came out of.
+- Yellow appears twice on the page, once per figure: the 2000 m line in the doubling figure, and a marker swipe under the last snapshot row's surviving stretch. The second one exists because a page about finding one card among twenty million otherwise never shows where the card is; the stretch is where it has to be, and the caption says so. illustration-craft §9 caps yellow at one per figure, not one per page. .primer-mark is used twice in prose, matching the canonical.
+- Three declined suggestions, each with the measurement that declined it. (1) The 2000 m marker keeps its inline `<g stroke-width="7">` rather than a page-local `.fig-marker` CSS rule: this page ships under a no-page-local-stroke-rules constraint, and an element-level attribute on a shape that has no hair children is the compliant way to draw a marker bar. (2) `.move-heads .primer-step` keeps primer.css's flex row (numeral beside phrase) instead of the canonical's centred column: measured at 1440, the column layout costs +35px zh / +63px en, which takes this section to 0.500 en against dos-and-donts §1's 0.5 — the row keeps the numerals at 96px and the section at 0.527. (3) The doubling figure's right third carries only the 500 m ruler and three dashed guides: pulling the ruler in to x650 would leave a 226-unit dead margin, and narrowing the viewBox to match would push the rendered height past the 640px ceiling. It is the sky of a height comparison, and the three labels are now all centred on the objects they name.
+- Sections 2, 3 and 5 render 610-612px at 1440 (510 / 508 / 510 units on the 1080 tier). That is inside the 640px diagram-oversized line with 28px to spare but above tech-figures §8's stated working value of 500 units. Declared rather than silently spent: if any of these figures grows a row, the height comes back under 500 rather than eating the last 28px.
+- The hero and the lower drawer in the "like what" figure are the same object making a related point, which is concept.md decision 1's own habit (five figures, one metaphor) — but the hero is drawn as the closer view: its cards carry staggered index tabs along their top edge, which no other figure has, and it shows one cut where the section below it shows two ways to search.
+- The sorted precondition is stated as what it actually is: the order has to be by the number you are searching on, and a database keeps its index in that order all along. Not "you must sort your data first" — nothing sorts at query time, and a reader who came away believing that would have learned the wrong thing about indexes.
+/design-review:self-diff -->
+
+</body>
+</html>
