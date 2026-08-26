@@ -36,6 +36,9 @@
   .nav-link { font-weight: 700; font-size: 14px; text-decoration-thickness: 2px; white-space: nowrap; }
   @media (max-width: 480px) {
     .nav-link { font-size: 13px; }
+    /* The 58px nav row cannot seat brand + two links + the toggle on a phone;
+     * the secondary link folds, same call as the flagship demo makes. */
+    .nav-link--tech { display: none; }
   }
 </style>
 </head>
@@ -50,6 +53,15 @@
     <div class="primer-nav-tools">
       <a class="nav-link" href="index.html">
         <span class="lang-en">Back to the demo</span><span class="lang-zh">回 demo</span>
+      </a>
+      <!-- The nav is where this page points at the other surfaces; the
+           technical set is the second one. It folds away at ≤480 the way the
+           flagship demo folds its secondary link: measured at 375, brand + two
+           links + the toggle overflow the 335px row and the brand wraps. A
+           phone reader still gets there in one more hop — "回 demo" leads to
+           the flagship, which links the set in its closing prose. -->
+      <a class="nav-link nav-link--tech" href="tech/index.html">
+        <span class="lang-en">Technical set</span><span class="lang-zh">技术图解</span>
       </a>
       <div class="primer-langtoggle lang-toggle">
         <button type="button" data-lang-toggle="zh" class="is-active">中文</button>

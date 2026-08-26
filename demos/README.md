@@ -26,6 +26,7 @@ Extra pages beyond the nine flagship `index.html`:
 - [`lectern-design/diagrams.html`](./lectern-design/diagrams.html) — 9-visual board pack: line / bar / donut / 100%-stacked / cohort heatmap charts, KPI cards, a roadmap timeline and a RAG decisions table
 - [`atelier-design/diagrams.html`](./atelier-design/diagrams.html) — 9-figure gallery of the application parts: gradient orbs, round-cap bars, meters, the anchor card, table and rail states
 - [`primer-design/diagrams.html`](./primer-design/diagrams.html) — 25 thick-outline illustrations from the three primers plus the demo (a book's index, one takeout trip, a sealed envelope …), each answering exactly one question
+- [`primer-design/tech/`](./primer-design/tech/index.html) — the technical set behind one cover page: a register as a row of switches, one SPI mode-0 transfer, an SoC as a city, how an IP core is built, a character's path from `write()` to a UART pin, and why 25 halvings find one row in twenty million
 
 ## Local preview
 
