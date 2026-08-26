@@ -74,8 +74,40 @@ visual-audit 的 `glass-cyan-svg-text` 检查在 light 跑时按 error 抓)。
 
 ## 5. 图型模板
 
-`templates/diagrams/` 共 14 张:architecture / flow / sequence / state-machine /
+`templates/diagrams/` 共 15 张:architecture / flow / sequence / state-machine /
 timeline / bitfield / build-pipeline / hierarchy / function-flowchart /
 deployment / soc-block / hw-timing-waveform / algorithm-ringbuffer /
-sched-timeline。从模板起步改内容,不要从零画。密图(≥20 label)进
+sched-timeline / interconnect-map。从模板起步改内容,不要从零画。密图(≥20 label)进
 `.glass-container--wide` 整行 figure;tint 层按 §2 编码类别。
+
+## 6. 互连拓扑 + 地址空间映射图(interconnect-map)
+
+图型本身的工程规矩 —— 三层结构(拓扑 / 地址空间 / 缝合)、互连线的名字压在线上、
+两条地址带永不合并、窗口用斜纹、`ld/st` 线必须落到某一段而不是整条带 ——
+见 anthropic `diagram-craft.md` §15.8。那些是工程约束,跨 skill 通用。
+**这一节只写 glass 独有的四处译法**,每一处都是被玻璃材质本身逼出来的:
+
+1. **药丸不能"盖住"线,只能"坐进"线的缺口。** anthropic / apple 压在互连线上的药丸是实底,
+   直接压在线上把线切断;glass 的面板是**半透明**的(`--glass-panel-bg` 暗档 0.08 / 亮档 0.62),
+   压上去线会从底下透出来,读作"标签被划掉了"。所以互连线要**画成两段**,
+   药丸(`class="glass-svg-node"` rx = 高/2)坐在中间的缺口里。模板的
+   `<line x1="168" … x2="188">` / `<line x1="292" … x2="312">` 就是这么留的。
+2. **斜纹必须是 `fill`,不能是 `stroke`。** glass.css 只给了 fill 类(`.glass-svg-ink-3`),
+   没有对应的 stroke token —— 用 `stroke="rgba(255,255,255,…)"` 画斜线,light 主题下当场消失
+   (§1 双主题铁律)。模板把 hatch 画成 `<rect width="1.6" height="7" class="glass-svg-ink-3">`,
+   走 fill 类,两个主题各自换色。**再叠一层几何 `opacity="0.42"`** ——
+   ink-3 满值 0.55 的斜纹会把压在上面的段名吃掉(实测,2026-08-26)。
+   opacity 是几何属性不是颜色,不破坏主题切换。
+3. **tint 两格已经用完,窗口只能走纹理。** cyan = device 一侧、indigo = 内存,
+   两个 tint 色相的预算(§2)到此为止。"这块地不是本地的"是第三个类别,
+   按 §2 的类别溢出策略第 3 步走**非颜色通道** —— 也就是上面那层斜纹。
+   给窗口段再开一个色相,是这张图最容易犯的错。
+4. **cyan 预算给"谁能直接访问"这一条叙事,一共 3 个元素**:
+   发起访问的执行体胶囊(`.glass-svg-node-strong`)、那条 `ld/st` 路径(`#22D3EE` 2px)、
+   它落到的那一段(cyan 1.5px 边)。另一侧的访问路径走 `.glass-svg-line` 灰。
+   **段名和胶囊文字用 `.glass-svg-accent-ink` 不能写死 `#22D3EE`** ——
+   写死的 cyan 文字在 light 下是 1.7:1,`glass-cyan-svg-text` 检查按 error 抓(§1)。
+
+**尺寸**:天然 T ≥ 40,一律 `.glass-container--wide` 整行 figure。
+模板是 `viewBox="0 0 1240 640"`,1230 渲染宽下算得 635px —— 离 `diagram-oversized`
+的 640px 线只剩 5px,**再加一行内容就越线**。node 超过 2 个、或者要画第三条地址带,拆成两张图。

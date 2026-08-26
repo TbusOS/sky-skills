@@ -1,0 +1,63 @@
+<!-- primer-design diagram template · interconnect-map (tech-figures.md §7)
+     Paste inside <figure class="primer-figure primer-fig-wide">. primer.css supplies
+     the 3.4px round ink stroke on <svg>, so paths carry no stroke attribute of their
+     own; only fills and the hair layer are declared here. 13 <text> elements — the
+     1080 tier allows 14, so there is exactly one spare. -->
+<svg viewBox="0 0 900 470" role="img"
+  aria-label="上面两块芯片由一根线连着；下面是两条分开的门牌本，同一块显存在 CPU 的本子上写 0x8000_0000、在显卡自己的本子上写 0x0000_0000，一条紫箭头从 CPU 落在它本子上那段斜纹的号段里"
+  data-label-zh="上面两块芯片由一根线连着；下面是两条分开的门牌本，同一块显存在 CPU 的本子上写 0x8000_0000、在显卡自己的本子上写 0x0000_0000，一条紫箭头从 CPU 落在它本子上那段斜纹的号段里"
+  data-label-en="Two chips joined by one link on top; below, two separate address books — the same video memory is 0x8000_0000 in the CPU's book and 0x0000_0000 in the card's own, and a violet arrow drops from the CPU onto the hatched range in its own book">
+  <defs>
+    <!-- the "range opened for the other side" — texture, not a new colour: the
+         colour channel is already spent saying which kind of memory this is -->
+    <pattern id="pIcHatch" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="16" stroke="#243244" stroke-width="2.4" opacity="0.55"/>
+    </pattern>
+  </defs>
+
+  <!-- ── the two chips · shells wobble, nothing that carries meaning does ── -->
+  <path d="M60 56 L250 56.5 L249.5 136 L60 135.5 Z" fill="#ffffff"/>
+  <path class="primer-hair" d="M60 76 L44 76 M60 96 L44 96 M60 116 L44 116 M250 76 L266 76 M250 96 L266 96 M250 116 L266 116" fill="none"/>
+  <path class="primer-hair" d="M84 74 L226 74.4 M84 74 L84 118 M226 74.4 L226 118 M84 118 L226 118" fill="none"/>
+
+  <path d="M650 56 L840 56.5 L839.5 136 L650 135.5 Z" fill="#ffffff"/>
+  <path class="primer-hair" d="M650 76 L634 76 M650 96 L634 96 M650 116 L634 116 M840 76 L856 76 M840 96 L856 96 M840 116 L856 116" fill="none"/>
+  <path class="primer-hair" d="M674 74 L816 74.4 M674 74 L674 118 M816 74.4 L816 118 M674 118 L816 118" fill="none"/>
+
+  <!-- ── one link, its name riding the line so it cannot drift off ── -->
+  <path d="M250 96 L400 96 M500 96 L650 96" fill="none"/>
+  <rect x="400" y="80" width="100" height="32" rx="16" fill="#ffffff"/>
+
+  <!-- ── the violet arrow: the subject of this picture, and there is only one ── -->
+  <path d="M155 141 L155 166 Q155 174 163 174 L662 174 Q670 174 670 182 L670 188" fill="none" stroke="#7a5cd6"/>
+  <path d="M670 202 L661 186 L679 186 Z" fill="#7a5cd6" stroke="#7a5cd6"/>
+
+  <!-- ── book one · what the CPU sees ── -->
+  <path d="M60 208 L500 208 L500 278 L60 278 Z" fill="#efe9fc"/>
+  <path d="M500 208 L840 208 L840 278 L500 278 Z" fill="#ffffff"/>
+  <path d="M500 208 L840 208 L840 278 L500 278 Z" fill="url(#pIcHatch)"/>
+
+  <!-- ── book two · what the card sees ── -->
+  <path d="M60 368 L400 368 L400 438 L60 438 Z" fill="#ffffff"/>
+  <path d="M400 368 L840 368 L840 438 L400 438 Z" fill="none"/>
+
+  <!-- ── same block of memory, two different house numbers ── -->
+  <path class="primer-hair" d="M670 282 L670 314 L230 314 L230 364" fill="none" stroke-dasharray="9 7"/>
+
+  <text x="155" y="102" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">CPU</text>
+  <text x="745" y="102" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">GPU</text>
+  <text x="450" y="102" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">CXL</text>
+
+  <text class="lang-zh" x="280" y="250" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">本机内存</text>
+  <text class="lang-en" x="280" y="250" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">its own RAM</text>
+  <text class="lang-zh" x="670" y="243" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">给显存开的号段</text>
+  <text class="lang-en" x="670" y="243" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">a range opened for the card</text>
+  <text x="670" y="266" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">0x8000_0000</text>
+
+  <text class="lang-zh" x="230" y="403" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">显存</text>
+  <text class="lang-en" x="230" y="403" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">its video memory</text>
+  <text x="230" y="426" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">0x0000_0000</text>
+
+  <text class="lang-zh" x="60" y="344" font-size="15" font-weight="700" fill="#5b3fbf">两本，各编各的</text>
+  <text class="lang-en" x="60" y="344" font-size="15" font-weight="700" fill="#5b3fbf">two books, numbered separately</text>
+</svg>

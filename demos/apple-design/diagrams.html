@@ -871,6 +871,170 @@
     </figure>
 
     <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 640" role="img" aria-label="Two-socket accelerator system: each node holds DDR5, a host CPU die and an accelerator die joined by CXL 3.0, and the two accelerator dies meet at an eight-port fabric switch. Below, two separate physical address spaces — host and device — each carry a hatched window onto the other side, linked by the CXL.mem mapping line. The single blue path shows the one thing worth remembering: a CPU core reaches the accelerator HBM window with a plain load or store, no copy" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="icaHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#aeaeb2" stroke-width="1.6" opacity="0.5"/>
+    </pattern>
+    <filter id="icaSh" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#1d1d1f" flood-opacity="0.08"/>
+    </filter>
+    <filter id="icaShS" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1d1d1f" flood-opacity="0.08"/>
+    </filter>
+    <marker id="icaArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+    <marker id="icaArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+  </defs>
+
+  <rect width="1240" height="640" fill="#ffffff"/>
+
+  <!-- header -->
+  <text x="32" y="38" font-size="13" font-weight="500" fill="#86868b">Multi-die interconnect and address map</text>
+  <g font-size="12.5" fill="#86868b">
+    <rect x="790" y="27" width="24" height="14" rx="3" fill="#ffffff" stroke="#d2d2d7"/>
+    <rect x="790" y="27" width="24" height="14" rx="3" fill="url(#icaHatch)"/>
+    <text x="822" y="38">window onto the other space</text>
+    <line x1="1020" y1="34" x2="1048" y2="34" stroke="#0071e3" stroke-width="1.8" stroke-linecap="round"/>
+    <text x="1056" y="38">direct ld / st path</text>
+  </g>
+
+  <!-- ============ layer 1 · topology ============ -->
+  <!-- node groups: flat #f5f5f7, no border, no dashes (apple never outlines a group) -->
+  <rect x="32" y="56" width="580" height="264" rx="18" fill="#f5f5f7"/>
+  <rect x="628" y="56" width="580" height="264" rx="18" fill="#f5f5f7"/>
+  <text x="56" y="86" font-size="12.5" font-weight="500" fill="#86868b">Node 0 · socket</text>
+  <text x="588" y="86" text-anchor="end" font-size="12.5" fill="#86868b">one coherent domain</text>
+  <text x="652" y="86" font-size="12.5" font-weight="500" fill="#86868b">Node 1 · socket</text>
+  <text x="1184" y="86" text-anchor="end" font-size="12.5" fill="#86868b">one coherent domain</text>
+
+  <!-- links inside the nodes -->
+  <line x1="168" y1="136" x2="316" y2="136" stroke="#aeaeb2" stroke-width="1.2" marker-start="url(#icaArrG)" marker-end="url(#icaArrG)"/>
+  <line x1="764" y1="136" x2="912" y2="136" stroke="#aeaeb2" stroke-width="1.2" marker-start="url(#icaArrG)" marker-end="url(#icaArrG)"/>
+  <line x1="456" y1="172" x2="456" y2="228" stroke="#aeaeb2" stroke-width="1.2" marker-start="url(#icaArrG)" marker-end="url(#icaArrG)"/>
+  <line x1="1052" y1="172" x2="1052" y2="228" stroke="#aeaeb2" stroke-width="1.2" marker-start="url(#icaArrG)" marker-end="url(#icaArrG)"/>
+
+  <!-- dies: white cards, soft shadow, no stroke -->
+  <g filter="url(#icaSh)">
+    <rect x="48" y="100" width="120" height="72" rx="14" fill="#ffffff"/>
+    <rect x="316" y="100" width="280" height="72" rx="14" fill="#ffffff"/>
+    <rect x="316" y="228" width="280" height="72" rx="14" fill="#ffffff"/>
+    <rect x="644" y="100" width="120" height="72" rx="14" fill="#ffffff"/>
+    <rect x="912" y="100" width="280" height="72" rx="14" fill="#ffffff"/>
+    <rect x="912" y="228" width="280" height="72" rx="14" fill="#ffffff"/>
+  </g>
+  <g font-size="14" font-weight="600" fill="#1d1d1f">
+    <text x="68" y="132">DDR5</text>
+    <text x="340" y="132">Host CPU die</text>
+    <text x="340" y="260">Accelerator die</text>
+    <text x="664" y="132">DDR5</text>
+    <text x="936" y="132">Host CPU die</text>
+    <text x="936" y="260">Accelerator die</text>
+  </g>
+  <g font-size="12.5" fill="#86868b">
+    <text x="68" y="152">512 GB</text>
+    <text x="340" y="152">64 core · 2.4 GHz</text>
+    <text x="340" y="280">96 GB HBM3 · on-package</text>
+    <text x="664" y="152">512 GB</text>
+    <text x="936" y="152">64 core · 2.4 GHz</text>
+    <text x="936" y="280">96 GB HBM3 · on-package</text>
+  </g>
+
+  <!-- link pills: white capsules riding the line, so the name can never drift off its link -->
+  <g filter="url(#icaShS)">
+    <rect x="194" y="124" width="96" height="24" rx="12" fill="#ffffff"/>
+    <rect x="790" y="124" width="96" height="24" rx="12" fill="#ffffff"/>
+    <rect x="390" y="188" width="132" height="24" rx="12" fill="#ffffff"/>
+    <rect x="986" y="188" width="132" height="24" rx="12" fill="#ffffff"/>
+    <rect x="390" y="308" width="132" height="24" rx="12" fill="#ffffff"/>
+    <rect x="986" y="308" width="132" height="24" rx="12" fill="#ffffff"/>
+  </g>
+  <g font-size="12.5" font-weight="500" fill="#6e6e73" text-anchor="middle">
+    <text x="242" y="140">DDR5 · 8 ch</text>
+    <text x="838" y="140">DDR5 · 8 ch</text>
+    <text x="456" y="204">CXL 3.0 · 64 GB/s</text>
+    <text x="1052" y="204">CXL 3.0 · 64 GB/s</text>
+    <text x="456" y="324">fabric · 400 GB/s</text>
+    <text x="1052" y="324">fabric · 400 GB/s</text>
+  </g>
+
+  <!-- node -> fabric switch -->
+  <path d="M456,300 V308" fill="none" stroke="#aeaeb2" stroke-width="1.2"/>
+  <path d="M456,332 V340 Q456,348 464,348 H552 Q560,348 560,356 V360" fill="none" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#icaArrG)"/>
+  <path d="M1052,300 V308" fill="none" stroke="#aeaeb2" stroke-width="1.2"/>
+  <path d="M1052,332 V340 Q1052,348 1044,348 H688 Q680,348 680,356 V360" fill="none" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#icaArrG)"/>
+
+  <!-- fabric switch: a plain card, never a coloured band -->
+  <g filter="url(#icaSh)">
+    <rect x="500" y="360" width="240" height="64" rx="14" fill="#ffffff"/>
+  </g>
+  <text x="524" y="390" font-size="14" font-weight="600" fill="#1d1d1f">Fabric switch</text>
+  <text x="524" y="410" font-size="12.5" fill="#86868b">8 port · non-blocking</text>
+
+  <!-- ============ layer 3 · who reaches what with a plain instruction ============ -->
+  <g filter="url(#icaShS)">
+    <rect x="328" y="444" width="188" height="34" rx="17" fill="#ffffff"/>
+    <rect x="946" y="444" width="204" height="34" rx="17" fill="#ffffff"/>
+  </g>
+  <text x="422" y="465" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">CPU core · ld / st</text>
+  <text x="1048" y="465" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">Accel core · ld / st</text>
+  <path d="M422,478 V520" fill="none" stroke="#0071e3" stroke-width="1.8" marker-end="url(#icaArrB)"/>
+  <path d="M1048,478 V520" fill="none" stroke="#aeaeb2" stroke-width="1.2" marker-end="url(#icaArrG)"/>
+
+  <!-- ============ layer 2 · two address spaces, never merged ============ -->
+  <text x="32" y="512" font-size="12.5" font-weight="500" fill="#86868b">Host physical address space</text>
+  <text x="628" y="512" font-size="12.5" font-weight="500" fill="#86868b">Device physical address space</text>
+
+  <!-- host strip -->
+  <rect x="32" y="520" width="580" height="64" rx="10" fill="#f5f5f7"/>
+  <rect x="332" y="520" width="180" height="64" fill="#ffffff"/>
+  <rect x="332" y="520" width="180" height="64" fill="url(#icaHatch)"/>
+  <rect x="332.75" y="520.75" width="178.5" height="62.5" fill="none" stroke="#0071e3" stroke-width="1.5"/>
+  <line x1="512" y1="520" x2="512" y2="584" stroke="#d2d2d7"/>
+  <g text-anchor="middle">
+    <text x="182" y="550" font-size="12.5" font-weight="600" fill="#1d1d1f">DDR5 · 512 GB</text>
+    <text x="422" y="550" font-size="12.5" font-weight="600" fill="#0071e3">Accel HBM window</text>
+    <text x="562" y="550" font-size="12.5" font-weight="600" fill="#1d1d1f">MMIO</text>
+    <text x="182" y="568" font-size="12.5" fill="#86868b" font-family="'SF Mono', Menlo, monospace">0x0000_0000</text>
+    <text x="422" y="568" font-size="12.5" fill="#86868b" font-family="'SF Mono', Menlo, monospace">0x80_0000_0000</text>
+  </g>
+
+  <!-- device strip -->
+  <rect x="628" y="520" width="580" height="64" rx="10" fill="#f5f5f7"/>
+  <rect x="968" y="520" width="160" height="64" fill="#ffffff"/>
+  <rect x="968" y="520" width="160" height="64" fill="url(#icaHatch)"/>
+  <line x1="968" y1="520" x2="968" y2="584" stroke="#d2d2d7"/>
+  <line x1="1128" y1="520" x2="1128" y2="584" stroke="#d2d2d7"/>
+  <g text-anchor="middle">
+    <text x="798" y="550" font-size="12.5" font-weight="600" fill="#1d1d1f">HBM3 · 96 GB</text>
+    <text x="1048" y="550" font-size="12.5" font-weight="600" fill="#1d1d1f">Host DDR window</text>
+    <text x="1168" y="550" font-size="12.5" font-weight="600" fill="#86868b">reserved</text>
+    <text x="798" y="568" font-size="12.5" fill="#86868b" font-family="'SF Mono', Menlo, monospace">0x0000_0000</text>
+    <text x="1048" y="568" font-size="12.5" fill="#86868b" font-family="'SF Mono', Menlo, monospace">0x18_0000_0000</text>
+  </g>
+
+  <!-- one mapping line, two segments -->
+  <path d="M422,584 V604 Q422,612 430,612 H790 Q798,612 798,604 V584" fill="none" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="4 3" marker-start="url(#icaArrG)" marker-end="url(#icaArrG)"/>
+  <g filter="url(#icaShS)">
+    <rect x="536" y="600" width="148" height="24" rx="12" fill="#ffffff"/>
+  </g>
+  <text x="610" y="616" text-anchor="middle" font-size="12.5" font-weight="500" fill="#6e6e73">CXL.mem · HDM decoder</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">interconnect · address map</span><span class="lang-zh">互连拓扑 · 地址空间映射</span></span>
+          <span class="lang-en">Topology above, one address space per viewpoint below, and a single blue path carrying the whole point: a CPU core reaches the hatched accelerator window with a plain store, so a pointer crosses without a copy. The accelerator reaches host DDR the same way &mdash; grey, because a page has one focus. The two strips never merge: the same DRAM is <code>0x80_0000_0000</code> to the host and <code>0x18_0000_0000</code> to the device. Segment widths are not to scale. Template: <code>templates/diagrams/interconnect-map.svg</code>.</span>
+          <span class="lang-zh">上半是拓扑，下半是每个视角各一条地址空间，唯一那条蓝线就是全图的结论：CPU 核用一条普通 store 就写得到斜纹那一段，指针可以直接递过去，不用拷贝。加速器访问 host DDR 走的是同一个机制——画成灰的，因为一页只留一个焦点。两条带永不合并：同一块 DRAM 在 host 眼里是 <code>0x80_0000_0000</code>，在设备眼里是 <code>0x18_0000_0000</code>。段宽不按比例。模板：<code>templates/diagrams/interconnect-map.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+
+    <figure class="gal-fig">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 944 352" role="img" aria-label="UART_CTRL register bit-field map at offset 0x04, reset value 0x0010_0301, showing BAUD_DIV, PARITY, STOP, DATA8 and FIFO_TH fields with the TX_EN and RX_EN enable bits highlighted" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
   <!-- panel -->
   <rect x="0" y="0" width="944" height="352" fill="#ffffff"/>

@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>连上一根线，就能读到对方的内存吗？· 图解读本</title>
+<meta name="description" content="Technical primer: two chips, one wire, and two address books that never merge — why a pointer does not cross by itself. 零基础图解：两块芯片各有一本门牌本，线通了不等于号通了。">
+<meta property="og:title" content="连上一根线，就能读到对方的内存吗？· 图解读本">
+<meta property="og:description" content="零基础图解：两块芯片各管一片内存，各自从 0 号开始编门牌。修一条路不会让门牌号合并——想直接读对面，得先在自己的本子上给它开一段号。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed on purpose (verify.py validates primer-*
+   * classes against primer.css; local layout stays unprefixed). */
+  .recap-flat { margin-top: 0; }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">One wire between them<br>is not permission to read</span>
+          <span class="lang-zh">连上一根线，<br>不等于能读到</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">No hardware background needed. This page is about what that wire gives you — and the one thing it does not.</span>
+          <span class="lang-zh">不需要硬件基础。这一页讲两块芯片之间那根线，到底给了你什么、没给你什么。</span>
+        </p>
+      </div>
+      <figure class="primer-figure primer-fig-hero">
+        <svg viewBox="0 0 500 340" role="img"
+          aria-label="一块电路板上并排焊着两颗芯片，中间一根粗线连着；每颗芯片下面各摆着一本翻开的册子，两本册子都从头一页开始记"
+          data-label-zh="一块电路板上并排焊着两颗芯片，中间一根粗线连着；每颗芯片下面各摆着一本翻开的册子，两本册子都从头一页开始记"
+          data-label-en="Two chips soldered side by side on one board, joined by a thick wire; under each chip lies an open book, and both books start recording from their own first page">
+          <!-- the board they are both soldered to -->
+          <path d="M18 30 Q10 30 10 38 L10 300 Q10 308 18 308 L482 308.8 Q490 308.8 490 300.8 L490 38.8 Q490 30.8 482 30.8 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M30 46 L110 46.3 M30 60 L86 60.2 M470 46 L392 46.3 M470 60 L414 60.2" fill="none"/>
+          <circle class="primer-hair" cx="24" cy="44" r="4" fill="#243244"/>
+          <circle class="primer-hair" cx="476" cy="44" r="4" fill="#243244"/>
+
+          <!-- the wire, drawn before the chips so it tucks under them -->
+          <path d="M175 140 L325 140.4" fill="none"/>
+
+          <!-- chip on the left -->
+          <path d="M55 90 L175 90.5 L174.5 190 L55 189.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M55 110 L39 110 M55 130 L39 130 M55 150 L39 150 M55 170 L39 170" fill="none"/>
+          <path class="primer-hair" d="M175 110 L191 110 M175 170 L191 170" fill="none"/>
+          <path class="primer-hair" d="M73 106 L157 106.3 M73 106 L73 174 M157 106.3 L157 174 M73 174 L157 174" fill="none"/>
+
+          <!-- chip on the right, with a heatsink comb on top -->
+          <path d="M325 90 L445 90.5 L444.5 190 L325 189.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M445 110 L461 110 M445 130 L461 130 M445 150 L461 150 M445 170 L461 170" fill="none"/>
+          <path class="primer-hair" d="M325 110 L309 110 M325 170 L309 170" fill="none"/>
+          <path class="primer-hair" d="M343 106 L427 106.3 M343 106 L343 174 M427 106.3 L427 174 M343 174 L427 174" fill="none"/>
+          <path class="primer-hair" d="M337 90 L337 74 M355 90 L355 74 M373 90 L373 74 M391 90 L391 74 M409 90 L409 74 M427 90 L427 74" fill="none"/>
+
+          <!-- each chip's own open book, lying under it -->
+          <path d="M52 224 L178 224.5 L177.5 292 L52 291.5 Z" fill="#7a5cd6"/>
+          <path d="M115 224.2 L115 292" fill="none"/>
+          <path class="primer-hair" d="M64 242 L104 242.2 M64 256 L104 256.2 M64 270 L104 270.2 M126 242 L166 242.2 M126 256 L166 256.2 M126 270 L166 270.2" fill="none" stroke="#ffffff"/>
+
+          <path d="M322 224 L448 224.5 L447.5 292 L322 291.5 Z" fill="#ffffff"/>
+          <path d="M385 224.2 L385 292" fill="none"/>
+          <path class="primer-hair" d="M334 242 L374 242.2 M334 256 L374 256.2 M334 270 L374 270.2 M396 242 L436 242.2 M396 256 L436 256.2 M396 270 L436 270.2" fill="none"/>
+
+          <text x="115" y="146" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">CPU</text>
+          <text class="lang-zh" x="385" y="146" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">显卡</text>
+          <text class="lang-en" x="385" y="146" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">the card</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Two chips on one board, joined by one wire. Under each lies its own book: the list of house numbers for the memory it looks after. Both books start at their own first page, and neither knows what is written in the other. The wire does not change that — this whole page is about the gap between the two. Violet is the CPU's side, and it means that all through this page: we are standing where the CPU stands, holding the book it holds.</span>
+          <span class="lang-zh">一块板上两颗芯片，中间一根线连着。每颗芯片下面摆着自己的一本册子，记的是它管的那片内存的门牌号。两本都从自己的第一页开始记，谁也不知道对面那本上写了什么。那根线改变不了这件事——这一页讲的就是这中间的差。紫色是 CPU 这一侧，全页的紫都是这个意思：我们站在 CPU 的位置上，手里拿的是它那本册子。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ① 是什么:每块芯片各管一片内存,各有一本门牌本 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Each chip keeps its own book</span>
+        <span class="lang-zh">每块芯片，各有一本册子</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">地址 address</span><span class="lang-en">address</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">a house number for one byte of memory</span>
+          <span class="lang-zh">内存里一个格子的门牌号</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">Each chip looks after its own memory, and numbers it <span class="primer-mark">from its own zero</span>. Two books, two number ones.</span>
+        <span class="lang-zh">每块芯片管着自己那片内存，门牌号<span class="primer-mark">各自从 0 开始编</span>。两本册子，各有各的 0 号。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 420" role="img"
+          aria-label="左右两颗芯片由一根线连着，各自下面挂着一本门牌本，两本都从 0 号开始往下编，第四行以下还有很多行没画"
+          data-label-zh="左右两颗芯片由一根线连着，各自下面挂着一本门牌本，两本都从 0 号开始往下编，第四行以下还有很多行没画"
+          data-label-en="Two chips joined by one wire, each with its own book of house numbers hanging below it; both books start at 0 and run on past the fourth row, which is left unfinished">
+          <path d="M130 40 L330 40.5 L329.5 140 L130 139.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M130 62 L114 62 M130 90 L114 90 M130 118 L114 118 M330 62 L346 62 M330 118 L346 118" fill="none"/>
+          <path class="primer-hair" d="M154 60 L306 60.3 M154 60 L154 120 M306 60.3 L306 120 M154 120 L306 120" fill="none"/>
+
+          <path d="M570 40 L770 40.5 L769.5 140 L570 139.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M570 62 L554 62 M570 118 L554 118 M770 62 L786 62 M770 90 L786 90 M770 118 L786 118" fill="none"/>
+          <path class="primer-hair" d="M594 60 L746 60.3 M594 60 L594 120 M746 60.3 L746 120 M594 120 L746 120" fill="none"/>
+          <path class="primer-hair" d="M578 40 L578 26 M596 40 L596 26 M614 40 L614 26 M632 40 L632 26 M650 40 L650 26" fill="none"/>
+
+          <!-- the wire between them, the same one the hero drew -->
+          <path d="M330 90 L570 90.4" fill="none"/>
+
+          <!-- each chip hangs its own book below it -->
+          <path class="primer-hair" d="M230 140 L230 200 M670 140 L670 200" fill="none"/>
+
+          <path d="M120 200 L340 200.5 L339.5 360 L120 359.5 Z" fill="#efe9fc"/>
+          <path class="primer-hair" d="M120 240 L340 240.3 M120 280 L340 280.3 M120 320 L340 320.3" fill="none"/>
+          <path class="primer-hair" d="M180 200 L180 360" fill="none"/>
+          <path class="primer-hair" d="M132 348 L168 348.1 M192 348 L328 348.2" fill="none" stroke-dasharray="8 7"/>
+
+          <path d="M560 200 L780 200.5 L779.5 360 L560 359.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M560 240 L780 240.3 M560 280 L780 280.3 M560 320 L780 320.3" fill="none"/>
+          <path class="primer-hair" d="M620 200 L620 360" fill="none"/>
+          <path class="primer-hair" d="M572 348 L608 348.1 M632 348 L768 348.2" fill="none" stroke-dasharray="8 7"/>
+
+          <text x="230" y="96" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">CPU</text>
+          <text class="lang-zh" x="670" y="96" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">显卡</text>
+          <text class="lang-en" x="670" y="96" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">the card</text>
+
+          <text x="150" y="226" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">0</text>
+          <text x="150" y="266" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">1</text>
+          <text x="150" y="306" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">2</text>
+          <text x="590" y="226" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">0</text>
+          <text x="590" y="266" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">1</text>
+          <text x="590" y="306" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">2</text>
+
+          <text class="lang-zh" x="230" y="394" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">本机内存的门牌本</text>
+          <text class="lang-en" x="230" y="394" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">the book for its own RAM</text>
+          <text class="lang-zh" x="670" y="394" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">显存的门牌本</text>
+          <text class="lang-en" x="670" y="394" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">the book for its video memory</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Two chips, two books. Each book runs 0, 1, 2 and on down to its own last cell — so the number 0 appears twice on this page and means two different bytes of memory, in two different places. That is the whole difficulty, and it is already visible here. Real books hold billions of rows; four are drawn.</span>
+          <span class="lang-zh">两块芯片，两本册子。每本都从 0、1、2 一直编到自己那片内存的最后一格——所以这一页上出现了两个 0 号，它们是两个不同地方的两个格子。全部的麻烦就在这儿，这张图里已经能看见了。真的册子有几十亿行，图上画了四行。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ② 像什么:两个小区,各自编门牌 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Like two neighbourhoods</span>
+        <span class="lang-zh">就像两个小区</span>
+      </h2>
+      <p>
+        <span class="lang-en">Two neighbourhoods, each numbering its houses from one. Build a road between them and the numbers <span class="primer-mark">still do not merge</span>.</span>
+        <span class="lang-zh">两个小区，各自从 1 号开始编门牌。中间修一条路，门牌号<span class="primer-mark">照样不会合并</span>。</span>
+      </p>
+
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 150" role="img"
+            aria-label="两个小区隔着一条路，各有三栋小楼，两边的第一栋都挂着 1 号的牌子"
+            data-label-zh="两个小区隔着一条路，各有三栋小楼，两边的第一栋都挂着 1 号的牌子"
+            data-label-en="Two neighbourhoods across one road, three little houses each, and the first house on both sides carries the number one">
+            <path class="primer-hair" d="M6 142 L174 140.8" fill="none"/>
+            <!-- the road between them -->
+            <path d="M84 10 L100 10.2 L99.8 140 L84 139.8 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M92 20 L92 36 M92 48 L92 64 M92 76 L92 92 M92 104 L92 120" fill="none"/>
+            <!-- three houses on the left -->
+            <path d="M14 34 L34 22 L54 34 Z" fill="#7a5cd6"/>
+            <path d="M18 34 L50 34.2 L49.8 62 L18 61.8 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M28 44 L40 44.1 L39.9 62 L28 61.9 Z" fill="none" stroke="#ffffff"/>
+            <path d="M14 78 L34 66 L54 78 Z" fill="#ffffff"/>
+            <path d="M18 78 L50 78.2 L49.8 104 L18 103.8 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M28 88 L40 88.1 L39.9 104 L28 103.9 Z" fill="none"/>
+            <path d="M14 118 L34 106 L54 118 Z" fill="#ffffff"/>
+            <path d="M18 118 L50 118.2 L49.8 140 L18 139.8 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M28 126 L40 126.1 L39.9 140 L28 139.9 Z" fill="none"/>
+            <!-- three houses on the right -->
+            <path d="M130 34 L150 22 L170 34 Z" fill="#7a5cd6"/>
+            <path d="M134 34 L166 34.2 L165.8 62 L134 61.8 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M144 44 L156 44.1 L155.9 62 L144 61.9 Z" fill="none" stroke="#ffffff"/>
+            <path d="M130 78 L150 66 L170 78 Z" fill="#ffffff"/>
+            <path d="M134 78 L166 78.2 L165.8 104 L134 103.8 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M144 88 L156 88.1 L155.9 104 L144 103.9 Z" fill="none"/>
+            <path d="M130 118 L150 106 L170 118 Z" fill="#ffffff"/>
+            <path d="M134 118 L166 118.2 L165.8 140 L134 139.8 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M144 126 L156 126.1 L155.9 140 L144 139.9 Z" fill="none"/>
+            <!-- short stubs onto the road -->
+            <path class="primer-hair" d="M50 48 L84 48 M100 48 L134 48" fill="none"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p>
+            <span class="lang-en">Say you live at number 1 on the left. Your neighbour across the road also lives at number 1 — their own number 1. Tell a courier &ldquo;go to number 1&rdquo; and they will stop at yours, because <strong>yours is the only book they carry</strong>. The road does not fix that. Someone has to write the other side's houses into your book, under numbers of your own.</span>
+            <span class="lang-zh">你住左边 1 号。路对面那家也住 1 号——他们自己的 1 号。你跟快递说「送到 1 号」，他会停在你家，因为<strong>他手上只有你这本册子</strong>。那条路解决不了这件事。得有人把对面那几栋，用你这本册子里的号，另外写进来一次。</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 所以会怎样:线通了,号没通 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">The wire is through. The numbers are not.</span>
+        <span class="lang-zh">线是通的，号是不通的</span>
+      </h2>
+      <p>
+        <span class="lang-en">Hand the CPU a number and it looks it up <strong>in its own book</strong>. The card's numbers are simply not in there.</span>
+        <span class="lang-zh">给 CPU 一个号，它只会<strong>在自己那本册子里</strong>翻。显卡那本上的号，它这本里根本没有。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 470" role="img"
+          aria-label="上面两块芯片由一根线连着；下面是两条分开的门牌本，同一块显存在 CPU 的本子上写 0x8000_0000、在显卡自己的本子上写 0x0000_0000，一条紫箭头从 CPU 落在它本子上那段斜纹的号段里"
+          data-label-zh="上面两块芯片由一根线连着；下面是两条分开的门牌本，同一块显存在 CPU 的本子上写 0x8000_0000、在显卡自己的本子上写 0x0000_0000，一条紫箭头从 CPU 落在它本子上那段斜纹的号段里"
+          data-label-en="Two chips joined by one link on top; below, two separate address books — the same video memory is 0x8000_0000 in the CPU's book and 0x0000_0000 in the card's own, and a violet arrow drops from the CPU onto the hatched range in its own book">
+          <defs>
+            <!-- the "range opened for the other side" — texture, not a new colour: the
+                 colour channel is already spent saying which kind of memory this is -->
+            <pattern id="pIcHatch" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="16" stroke="#243244" stroke-width="2.4" opacity="0.55"/>
+            </pattern>
+          </defs>
+
+          <!-- ── the two chips · shells wobble, nothing that carries meaning does ── -->
+          <path d="M60 56 L250 56.5 L249.5 136 L60 135.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M60 76 L44 76 M60 96 L44 96 M60 116 L44 116 M250 76 L266 76 M250 96 L266 96 M250 116 L266 116" fill="none"/>
+          <path class="primer-hair" d="M84 74 L226 74.4 M84 74 L84 118 M226 74.4 L226 118 M84 118 L226 118" fill="none"/>
+
+          <path d="M650 56 L840 56.5 L839.5 136 L650 135.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M650 76 L634 76 M650 96 L634 96 M650 116 L634 116 M840 76 L856 76 M840 96 L856 96 M840 116 L856 116" fill="none"/>
+          <path class="primer-hair" d="M674 74 L816 74.4 M674 74 L674 118 M816 74.4 L816 118 M674 118 L816 118" fill="none"/>
+
+          <!-- ── one link, its name riding the line so it cannot drift off ── -->
+          <path d="M250 96 L400 96 M500 96 L650 96" fill="none"/>
+          <rect x="400" y="80" width="100" height="32" rx="16" fill="#ffffff"/>
+
+          <!-- ── the violet arrow: the subject of this picture, and there is only one ── -->
+          <path d="M155 141 L155 166 Q155 174 163 174 L662 174 Q670 174 670 182 L670 188" fill="none" stroke="#7a5cd6"/>
+          <path d="M670 202 L661 186 L679 186 Z" fill="#7a5cd6" stroke="#7a5cd6"/>
+
+          <!-- ── book one · what the CPU sees ── -->
+          <path d="M60 208 L500 208 L500 278 L60 278 Z" fill="#efe9fc"/>
+          <path d="M500 208 L840 208 L840 278 L500 278 Z" fill="#ffffff"/>
+          <path d="M500 208 L840 208 L840 278 L500 278 Z" fill="url(#pIcHatch)"/>
+
+          <!-- ── book two · what the card sees ── -->
+          <path d="M60 368 L400 368 L400 438 L60 438 Z" fill="#ffffff"/>
+          <path d="M400 368 L840 368 L840 438 L400 438 Z" fill="none"/>
+
+          <!-- ── same block of memory, two different house numbers ── -->
+          <path class="primer-hair" d="M670 282 L670 314 L230 314 L230 364" fill="none" stroke-dasharray="9 7"/>
+
+          <text x="155" y="102" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">CPU</text>
+          <text x="745" y="102" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">GPU</text>
+          <text x="450" y="102" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">CXL</text>
+
+          <text class="lang-zh" x="280" y="250" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">本机内存</text>
+          <text class="lang-en" x="280" y="250" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">its own RAM</text>
+          <text class="lang-zh" x="670" y="243" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">给显存开的号段</text>
+          <text class="lang-en" x="670" y="243" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">a range opened for the card</text>
+          <text x="670" y="266" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">0x8000_0000</text>
+
+          <text class="lang-zh" x="230" y="403" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">显存</text>
+          <text class="lang-en" x="230" y="403" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">its video memory</text>
+          <text x="230" y="426" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">0x0000_0000</text>
+
+          <text class="lang-zh" x="60" y="344" font-size="15" font-weight="700" fill="#5b3fbf">两本，各编各的</text>
+          <text class="lang-en" x="60" y="344" font-size="15" font-weight="700" fill="#5b3fbf">two books, numbered separately</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Same picture, both halves at once. Up top the wire; below it the two books. The violet arrow is the CPU reading — and it lands inside its <em>own</em> book, on the hatched stretch. That stretch and the card's video memory are one and the same silicon: <code>0x8000_0000</code> in the CPU's book, <code>0x0000_0000</code> in the card's. Two numbers, one place. Widths here are not to scale, and each book is shown with two ranges where a real one has dozens.</span>
+          <span class="lang-zh">一张图，两半一起看。上面是那根线，下面是两本册子。紫箭头是 CPU 在读——它落在<em>自己</em>那本册子里，落在那段斜纹上。那段斜纹和显卡的显存是同一块硅：在 CPU 的册子上写 <code>0x8000_0000</code>，在显卡自己的册子上写 <code>0x0000_0000</code>。两个号，一个地方。图上段宽不按比例，每本册子只画了两段，真的有几十段。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ④ 怎么办:在自己那本上给对面开一段号 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Open a stretch of your own numbers</span>
+        <span class="lang-zh">在自己那本上，开出一段号</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">窗口 window</span><span class="lang-en">window</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">a stretch of your own numbers, set aside for the other side's memory</span>
+          <span class="lang-zh">自己册子上专门留出的一段号，记的是对面的内存</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">Nothing moves house. Someone just writes the card's memory into the CPU's book, <span class="primer-mark">under numbers the CPU already understands</span>.</span>
+        <span class="lang-zh">谁也没搬家。只是有人把显卡那片内存，<span class="primer-mark">用 CPU 本来就认识的号</span>，另外记进了 CPU 这本册子。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 400" role="img"
+          aria-label="同一本册子的前后两个样子：上面那本后半截空着，下面那本后半截被划成一段斜纹，标着 0x8000_0000，中间一个紫箭头写着开一段"
+          data-label-zh="同一本册子的前后两个样子：上面那本后半截空着，下面那本后半截被划成一段斜纹，标着 0x8000_0000，中间一个紫箭头写着开一段"
+          data-label-en="The same book before and after: the upper one has an empty back half, the lower one has that half ruled off as a hatched stretch labelled 0x8000_0000, with a violet arrow between them reading open a stretch">
+          <defs>
+            <pattern id="pOpenHatch" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="16" stroke="#243244" stroke-width="2.4" opacity="0.55"/>
+            </pattern>
+          </defs>
+
+          <!-- before -->
+          <path d="M60 74 L500 74 L500 150 L60 150 Z" fill="#efe9fc"/>
+          <path d="M500 74 L840 74 L840 150 L500 150 Z" fill="#fdfaf3"/>
+
+          <!-- the act of opening it -->
+          <path d="M670 158 L670 232" fill="none" stroke="#7a5cd6"/>
+          <path d="M670 248 L661 231 L679 231 Z" fill="#7a5cd6" stroke="#7a5cd6"/>
+
+          <!-- after -->
+          <path d="M60 256 L500 256 L500 332 L60 332 Z" fill="#efe9fc"/>
+          <path d="M500 256 L840 256 L840 332 L500 332 Z" fill="#ffffff"/>
+          <path d="M500 256 L840 256 L840 332 L500 332 Z" fill="url(#pOpenHatch)"/>
+
+          <text class="lang-zh" x="60" y="56" font-size="16" font-weight="700" fill="#55617a">开之前</text>
+          <text class="lang-en" x="60" y="56" font-size="16" font-weight="700" fill="#55617a">before</text>
+          <text class="lang-zh" x="60" y="238" font-size="16" font-weight="700" fill="#55617a">开之后</text>
+          <text class="lang-en" x="60" y="238" font-size="16" font-weight="700" fill="#55617a">after</text>
+
+          <text class="lang-zh" x="280" y="120" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">本机内存</text>
+          <text class="lang-en" x="280" y="120" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">its own RAM</text>
+          <text class="lang-zh" x="670" y="120" text-anchor="middle" font-size="16" font-weight="700" fill="#55617a">这段空着</text>
+          <text class="lang-en" x="670" y="120" text-anchor="middle" font-size="16" font-weight="700" fill="#55617a">nothing here yet</text>
+
+          <text class="lang-zh" x="670" y="294" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">给显存开的号段</text>
+          <text class="lang-en" x="670" y="294" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">a stretch for the card</text>
+          <text x="670" y="318" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">0x8000_0000</text>
+
+          <text class="lang-zh" x="690" y="204" font-size="16" font-weight="700" fill="#5b3fbf">开一段</text>
+          <text class="lang-en" x="690" y="204" font-size="16" font-weight="700" fill="#5b3fbf">open a stretch</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">One book, before and after. The front half is the CPU's own RAM and does not move. The back half was empty; now it is ruled off and marked <code>0x8000_0000</code>, and every number in there points at the card's memory instead. No byte was copied to make this happen — the numbers were handed out, once, at start-up. Hatching means the same thing everywhere on this page: this stretch is not local.</span>
+          <span class="lang-zh">同一本册子，开之前和开之后。前半截是 CPU 自己的内存，一动没动。后半截原来空着，现在划出来标上 <code>0x8000_0000</code>，这一段里的每个号，指的都是显卡那边的内存。做这件事一个字节都没搬——只是开机时把号分了一次。斜纹在这一页里始终是同一个意思：这一段不是本地的。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑤ 两条路:直接读 vs 先搬一份 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Two ways to get the bytes</span>
+        <span class="lang-zh">拿到那些字节，有两条路</span>
+      </h2>
+      <p>
+        <span class="lang-en">This is what the whole page is for: with the stretch open, one ordinary read reaches across. Without it, you copy first, then read your copy.</span>
+        <span class="lang-zh">这一页就是为了这件事：号段开了，一条普通的读指令就够到对面。没开，就得先搬一份到自己这边，再读那份。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 380" role="img"
+          aria-label="同一组三块东西上画两条路：紫色那条从 CPU 一步直达显存；墨色虚线那条先把显存搬进本机内存，再让 CPU 读那一份，一共两步"
+          data-label-zh="同一组三块东西上画两条路：紫色那条从 CPU 一步直达显存；墨色虚线那条先把显存搬进本机内存，再让 CPU 读那一份，一共两步"
+          data-label-en="Two routes drawn over the same three blocks: the violet one goes from the CPU straight to the card's memory in one step; the dashed ink one copies the card's memory into local RAM first, then has the CPU read that copy — two steps">
+          <!-- the card's memory, up on the right -->
+          <path d="M660 60 L840 60.5 L839.5 170 L660 169.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M676 84 L824 84.3 M676 104 L824 104.3 M676 124 L824 124.3 M676 144 L824 144.3" fill="none"/>
+
+          <!-- local RAM, middle -->
+          <path d="M340 250 L520 250.5 L519.5 360 L340 359.5 Z" fill="#efe9fc"/>
+          <path class="primer-hair" d="M356 274 L504 274.3 M356 294 L504 294.3 M356 314 L504 314.3 M356 334 L504 334.3" fill="none"/>
+
+          <!-- the CPU, bottom left -->
+          <path d="M60 250 L220 250.5 L219.5 360 L60 359.5 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M60 278 L44 278 M60 306 L44 306 M60 334 L44 334 M220 278 L236 278 M220 334 L236 334" fill="none"/>
+          <path class="primer-hair" d="M84 274 L196 274.3 M84 274 L84 336 M196 274.3 L196 336 M84 336 L196 336" fill="none"/>
+
+          <!-- route A · one step, violet, straight across -->
+          <path d="M140 244 L140 200 Q140 192 148 192 L742 192 Q750 192 750 184 L750 176" fill="none" stroke="#7a5cd6"/>
+          <path d="M750 162 L741 179 L759 179 Z" fill="#7a5cd6" stroke="#7a5cd6"/>
+
+          <!-- route B · two steps, dashed ink, via local RAM -->
+          <path class="primer-hair" d="M660 116 L540 116 Q532 116 532 124 L532 232" fill="none" stroke-dasharray="10 8"/>
+          <path class="primer-hair" d="M532 246 L524 230 L540 230 Z" fill="#243244" stroke="#243244"/>
+          <path class="primer-hair" d="M332 306 L244 306" fill="none" stroke-dasharray="10 8"/>
+          <path class="primer-hair" d="M230 306 L246 298 L246 314 Z" fill="#243244" stroke="#243244"/>
+
+          <text x="140" y="312" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">CPU</text>
+          <text class="lang-zh" x="430" y="312" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">本机内存</text>
+          <text class="lang-en" x="430" y="312" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">local RAM</text>
+          <text class="lang-zh" x="750" y="122" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">显存</text>
+          <text class="lang-en" x="750" y="122" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">the card's memory</text>
+
+          <!-- the marker stripe rides under the sentence this page exists to make -->
+          <path d="M328 172 L472 172" fill="none" stroke="#ffd23f" stroke-width="18" stroke-linecap="butt"/>
+          <text class="lang-zh" x="336" y="178" font-size="16" font-weight="700" fill="#243244">一步：直接读</text>
+          <text class="lang-en" x="336" y="178" font-size="16" font-weight="700" fill="#243244">one step: read it</text>
+          <text class="lang-zh" x="548" y="212" font-size="16" font-weight="700" fill="#55617a">两步：先搬一份</text>
+          <text class="lang-en" x="548" y="212" font-size="16" font-weight="700" fill="#55617a">two steps: copy first</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Same three blocks, two routes. Violet is one step: the CPU issues an ordinary read against a number in the opened stretch, and the wire fetches it. Dashed ink is two: something copies the card's memory into local RAM, and only then does the CPU read — the bytes cross the wire either way, but now they occupy local RAM as well, and the copy is stale the moment the card writes again. Which route you get is decided by whether that stretch was opened at start-up, and nothing in your code can tell the difference by looking at the pointer.</span>
+          <span class="lang-zh">同样三块东西，两条路。紫色那条是一步：CPU 对开出来的那段号发一条普通的读指令，线负责把字节取回来。墨色虚线那条是两步：先有人把显卡的内存搬一份进本机内存，CPU 再读那一份——字节反正都过了那根线，但现在它同时占着一份本机内存，而且显卡一改，这份就旧了。走哪条路，取决于开机时那段号有没有开出来；光看手上那个指针，代码是分不出来的。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑥ 回顾 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <aside class="primer-recap recap-flat">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Each chip numbers its own memory from its own zero, so the same number means two different places in two different books.</span>
+              <span class="lang-zh">每块芯片给自己那片内存从 0 号开始编门牌，所以同一个号在两本册子上指的是两个地方。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">The wire moves bytes. It does not merge the two books — connected is not the same as addressable.</span>
+              <span class="lang-zh">那根线负责搬字节，不负责把两本册子合并——连上了，不等于号通了。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Open a stretch of your own numbers for the other side and one ordinary read reaches across. Skip it and you copy first, then read the copy.</span>
+              <span class="lang-zh">在自己那本上给对面开一段号，一条普通的读指令就够到对面；不开，就只能先搬一份，再读那一份。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Technical primer · primer-design · this page draws two chips side by side; one chip's insides are a different picture</span>
+    <span class="lang-zh">技术图解 · primer-design · 这一页画的是两块芯片之间，一颗芯片内部是另一张图</span>
+    · v1 · 2026-08-26
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+    /* CSS only hides the other language's <text>; an SVG's aria-label is an
+     * attribute, so EN mode must swap it here or screen readers hear Chinese
+     * under html[lang="en"]. The static aria-label in the markup is the zh
+     * default for the no-JS case. */
+    document.querySelectorAll('svg[data-label-zh]').forEach(function (s) {
+      s.setAttribute('aria-label',
+        s.getAttribute(lang === 'zh' ? 'data-label-zh' : 'data-label-en'));
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: primer
+Page-type: concept (technical · interconnect and address map)
+Created: 2026-08-26
+
+Decisions (5):
+1. [two-strips-never-merged] chose "two separate horizontal books with 90 units of blank between them" over "one long strip split by a divider". Because: tech-figures §7 forbids the merged form, and the reason is the misreading it produces — a divider inside one strip reads as two halves of the same numbering, which is the exact belief this page exists to correct. The blank between them is load-bearing: it is the only thing on the page that draws "these are two books", and the same block of memory carries two different numbers across it (0x8000_0000 in the CPU's book, 0x0000_0000 in the card's) so the claim has evidence rather than assertion.
+2. [hatching-not-a-second-colour] chose "the opened range is hatched ink on white" over "the opened range gets its own fill colour". Because: illustration-craft §9 allows one accent beside violet and ink, and that slot is already spent saying which side a thing belongs to (violet is the CPU's side, page-wide, stated in the hero caption). "This land is not local" is a second, independent fact about the same segment — texture is the channel that can sit on top of any fill without competing with it. Hatch density was measured, not guessed: at 9-unit spacing the segment label underneath was unreadable, so the page uses 16-unit spacing at 2.4 width and 0.55 opacity.
+3. [violet-means-the-CPU-side] chose "one page-wide meaning for violet, declared in the hero caption" over "violet as each section's subject". Because: five figures show the same two chips, and a colour that means one fixed thing lets the eye find the viewpoint without a legend. It marks the CPU's book in the hero, its book tint in the second figure, its own RAM range in the map, the act of opening a range, and the one-step route. Yellow appears exactly once on the whole page, under the sentence the page exists to make.
+4. [the-arrow-lands-on-a-segment] chose "the violet arrow drops onto one segment of the CPU's own book" over "an arrow from the CPU to the card". Because: an arrow that crosses to the other chip draws the belief being corrected — that the wire is what grants access. Landing inside the reader's own book is the whole mechanism: what the CPU issues is an ordinary read against a number it already understands, and the hardware behind that number is somewhere else. tech-figures §7 makes this the section's hard rule, and its 禁止 table rules out landing on a whole strip, which degrades the claim to "the CPU can read memory".
+5. [two-routes-on-one-set-of-blocks] chose "draw both routes over the same three blocks" over "a left-right before/after pair". Because: the two routes differ in step count, not in cast — the same CPU, the same local RAM, the same video memory. Drawing them twice would say there are two systems, and it would double the label budget on a page whose figures are already at 13 of the 14 the 1080 tier allows. Route labels sit on their own routes, not in a legend row: at the foot of the picture neither label said which line it belonged to.
+
+Known trade-offs:
+- Label budgets are the binding constraint here, not height. The map figure carries exactly 13 <text> elements against the tier's 14 (tech-figures §7): 2 chip names, 1 link name, one bilingual pair for the point ("two books, numbered separately"), three bilingual segment names and two neutral addresses. Same-form names are written once, not twice — "CPU" reads the same in both languages, and hanging lang classes on it costs a slot for nothing. That mistake was made and caught here: the first draft measured 14.
+- The chips sit directly above their own book, which is what buys the budget: labelling each strip with "whose book is this" would cost four elements, and position says it for free.
+- Every full-width figure clears the 640px oversized line with room: 420 / 470 / 400 / 380 viewBox units at the 900-wide 1080 tier render 504 / 564 / 480 / 456px. The map is the tall one because it carries three layers (topology, both books, the stitch between them) and tech-figures §7 forbids splitting it — the split is what leaves the reader to align the halves mentally, which is the difficulty itself.
+- Simplifications, each disclosed in the caption that makes it: four rows drawn where a real book holds billions; two ranges per book where a real one has dozens; segment widths not to scale; the fabric between the two chips drawn as one wire, with no switch, because a second chip is all this page needs.
+- Numbers live in the captions as well as the drawings: 0 / 1 / 2 and the unfinished fourth row, 0x8000_0000 and 0x0000_0000, one step against two. At 375px the content column is 335px, where a 15-unit in-figure label renders about 5px — unreadable, so the caption is the drawing's only voice on a phone.
+- The hero's violet is the CPU's book rather than a district on a die: this page is told from one side throughout, and the colour has to say which side that is before the first figure does anything else. It also carries the brand-presence check, which the all-white first draft failed at 0.18% of the top 1440x500.
+/design-review:self-diff -->
+
+</body>
+</html>

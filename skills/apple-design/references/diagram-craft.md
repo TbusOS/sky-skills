@@ -6,7 +6,7 @@
 
 > 适用：架构图 / 流程图 / 层级图 / 时间线 / 时序图等一切工程类图示。
 > 与 anthropic 的多色语义路线不同，**apple 图的美感来自"少"**：无彩色为主、蓝色一处、柔影分层、留白比信息多。
-> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence / deployment / state-machine + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline,共 **14 件**,全部按本文标准实现；另有 §8 配套的 device-mock.svg 设备线稿底版,不计入图型谱系）。案例库：`demos/apple-design/diagrams.html`（14 张图,每张带 Copy SVG）。
+> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence / deployment / state-machine + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline + 互连拓扑 interconnect-map,共 **15 件**,全部按本文标准实现；另有 §8 配套的 device-mock.svg 设备线稿底版,不计入图型谱系）。案例库：`demos/apple-design/diagrams.html`（15 张图,每张带 Copy SVG）。
 
 ## 0. 第一原则：美靠"少"
 
@@ -122,8 +122,8 @@ apple 风时序图 pattern（anthropic 有专文 `sequence-diagrams.md`，apple 
 
 ## 12. 内核 / 嵌入式工程图谱系（apple 语法）
 
-> 7 个图型与 anthropic §15 同谱系（function-flowchart / algorithm / register-bitfield / soc-block /
-> hw-timing-waveform / build-pipeline / sched-timeline），模板在 `templates/diagrams/` 同名 .svg。
+> 8 个图型与 anthropic §15 同谱系（function-flowchart / algorithm / register-bitfield / soc-block /
+> hw-timing-waveform / build-pipeline / sched-timeline / interconnect-map），模板在 `templates/diagrams/` 同名 .svg。
 > 模板是起点不是规格——结构、密度、布局按实际内容重设计,谱系之外的内容自创图型即可。
 > 结构性工艺（布局、lane、车道、交替、双箭头标注）参考 anthropic §15;本节只写 apple 的**翻译规则**。
 
@@ -138,9 +138,39 @@ apple 风时序图 pattern（anthropic 有专文 `sequence-diagrams.md`，apple 
 | 波形时序图 | CS_N / 触发信号 + 其 active 窗口 tint | 其他 lane 用灰阶值区分(#1d1d1f / #6e6e73 / #aeaeb2) |
 | 编译流程图 | 主链 + 终点交付物焦点卡 | devicetree 等分支灰实线汇入 |
 | 调度时间线 | 被追踪的那一个任务(块 tint + 蓝边 + 迁移箭头) | 其他任务 `#f5f5f7`,IRQ 标记用墨不用蓝 |
+| 互连拓扑 + 地址映射 | **能用一条普通 `ld` / `st` 抵达的那一段,加上落到它的那条路径** —— 全图就为这一句存在 | 其余互连线、另一侧的访问路径、跨空间映射线全部 `#aeaeb2`;地址段 `#f5f5f7` |
 
 三条 apple 专属注意：
 
 1. **类别信息不丢**：anthropic 靠 hue 区分的维度,apple 靠"灰阶值 + 字重 + tint 有无"补偿——波形 lane 用三档灰,寄存器字段靠 tint/白底二分。画完自问:黑白打印仍能读吗?
 2. 位格 / 单元格阵列的 hairline(0.5-1px `#d2d2d7`)是允许的"格栅"例外——无边框原则针对卡片,不针对表格性结构。
 3. 时序参数标注(tSU/tH)、wrap 注释等机制性文字一律 `#86868b` 11-12px;不准为了强调改蓝——蓝的预算已经花给焦点了。
+
+## 13. 互连拓扑 + 地址空间映射图（interconnect-map）的 apple 译法
+
+图型本身的工程规矩(三层结构、药丸标互连线、两条地址带永不合并、窗口用斜纹、
+Load/Store 线必须落到某一段)见 anthropic `diagram-craft.md` §15.8 —— 那些是工程约束,
+跨 skill 通用。**这一节只写 apple 独有的四处翻译**,每一处都是把 anthropic 的做法换掉,
+照搬过来就是串味(§11 反模式列的正是这几条)。
+
+1. **节点分组不许画虚线框。** anthropic 用 tint 底 + 虚线边圈出一个插槽;apple 的分组是
+   **`#f5f5f7` 平底 + rx 18 + 无边框**(§2)。"框内私有、框外过互连"这条界靠**底色的有无**读出来,
+   不靠边框。虚线框是 anthropic 的签名,用了就触 cross-skill-smell。
+2. **互连线上的药丸 = 白胶囊 + 柔影**,不是 tint chip。rx = 高/2、白底、`feDropShadow dy=2 stdDeviation=4`、
+   文字 11.5px 500 `#6e6e73`。药丸要压在线上把线切断,所以**必须是实底**;
+   apple 的实底只有白,层次靠影子(§2)。
+3. **斜纹用灰不用蓝。** 窗口段的 hatch 是 `#aeaeb2` `opacity 0.5` —— 蓝的预算已经全部花给
+   "谁能直接访问"那条叙事了(见 §12 表)。窗口段本身填白,靠斜纹和相邻的 `#f5f5f7` 分段区分。
+4. **蓝只走一条链,两侧不对称是对的。** 两条 `ld/st` 线里只有**一条**是蓝 1.8px 实线,
+   另一条 `#aeaeb2` 1.2px;蓝线落到的那一段加蓝 1.5px 边 + 蓝色段名。合起来是一处叙事焦点,
+   不是三处蓝。**另一侧同样能直接访问这件事,写在 figcaption 里**,不靠再点一次蓝 ——
+   "两边都能"是背景事实,"这一条是这页要讲的"才是图的焦点。
+
+**尺寸**:天然 T ≥ 30,一律 `apple-container--hero`(1280) + `grid-column: 1 / -1`。
+高度是这个图型最容易翻车的地方,而 apple 的留白配额比 anthropic 多 25%(§3),
+同样的信息量更容易顶到 `diagram-oversized` 的 640px 渲染线。
+**hero 档的渲染宽约等于 viewBox 宽,所以 viewBox 高几乎就是渲染高** ——
+`templates/diagrams/interconnect-map.svg` 是 `1240 × 640`,1240 渲染宽下正好压在线上。
+初稿按 anthropic 的行距排出来是 656 单位,在 hero 档渲染 656px、当场越线;
+压回 640 靠的是把交换机那一段的纵向 gap 从 56 收到 40,**不是**压卡高或压字号 ——
+留白一压,这张图就不再是 apple 了。**node 超过 2 个、或者要画第三条地址带,拆图。**

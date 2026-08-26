@@ -1,0 +1,169 @@
+<!-- glass-design diagram template · interconnect-map · paste into a glass page and delete the embedded <style> + background rect (glass.css provides the classes; the page provides the canvas). Craft rules: diagram-craft.md §6 -->
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two-socket accelerator system: each node holds DDR5, a host CPU die and a cyan accelerator die joined by CXL 3.0, and the two accelerator dies meet at a fabric switch. Below, two separate physical address spaces — host and device — each carry a hatched window onto the other side, linked by the CXL.mem mapping line. The cyan path carries the point: a CPU core reaches the accelerator HBM window with a plain load or store, no copy" viewBox="0 0 1240 640">
+  <style>
+    /* Standalone preview values = glass dark theme. When pasted into a glass
+       page, DELETE this style block — glass.css provides these classes with
+       theme-switching tokens (.glass-svg-* / light mode safe). */
+    .glass-svg-ink   { fill: #F4F7FF; }
+    .glass-svg-ink-2 { fill: rgba(231,238,255,0.74); }
+    .glass-svg-ink-3 { fill: rgba(231,238,255,0.55); }
+    .glass-svg-node  { fill: rgba(255,255,255,0.08); stroke: rgba(255,255,255,0.17); }
+    .glass-svg-node-strong { fill: rgba(255,255,255,0.05); stroke: #22D3EE; }
+    .glass-svg-node--cyan { fill: rgba(34,211,238,0.15); stroke: rgba(34,211,238,0.55); }
+    .glass-svg-node--indigo { fill: rgba(129,140,248,0.16); stroke: rgba(129,140,248,0.55); }
+    .glass-svg-line  { stroke: rgba(255,255,255,0.08); }
+    .glass-svg-accent-ink { fill: #22D3EE; }
+  </style>
+  <rect width="100%" height="100%" fill="#0B1020"/>
+  <defs>
+    <!-- the window hatch is a NON-COLOUR channel: both tint slots are already spent
+         (cyan = device side, indigo = memory), so "this land is not local" has to
+         ride texture instead — diagram-craft.md §2 step 3. Drawn as a FILLED bar,
+         not a stroke, so it can take .glass-svg-ink-3 and follow the theme switch. -->
+    <pattern id="icgHatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect x="0" y="0" width="1.6" height="7" class="glass-svg-ink-3"/>
+    </pattern>
+    <marker id="icgArrL" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" class="glass-svg-ink-3"/>
+    </marker>
+    <marker id="icgArrC" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#22D3EE"/>
+    </marker>
+  </defs>
+
+  <!-- header -->
+  <text x="24" y="36" font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="1.5" class="glass-svg-ink-3">MULTI-DIE INTERCONNECT · ADDRESS MAP</text>
+  <g font-family="'Inter', sans-serif" font-size="12">
+    <rect x="742" y="25" width="24" height="14" rx="3" class="glass-svg-node"/>
+    <rect x="742" y="25" width="24" height="14" rx="3" fill="url(#icgHatch)" opacity="0.42"/>
+    <text x="774" y="36" class="glass-svg-ink-3">window onto the other space</text>
+    <line x1="978" y1="32" x2="1006" y2="32" stroke="#22D3EE" stroke-width="2" stroke-linecap="round"/>
+    <text x="1014" y="36" class="glass-svg-accent-ink">direct ld / st path</text>
+  </g>
+
+  <!-- ============ layer 1 · topology ============ -->
+  <rect x="24" y="56" width="584" height="256" rx="16" class="glass-svg-node" stroke-dasharray="5 4"/>
+  <rect x="632" y="56" width="584" height="256" rx="16" class="glass-svg-node" stroke-dasharray="5 4"/>
+  <text x="48" y="84" font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="1.5" class="glass-svg-ink-2">NODE 0 · SOCKET</text>
+  <text x="584" y="84" text-anchor="end" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-3">one coherent domain</text>
+  <text x="656" y="84" font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="1.5" class="glass-svg-ink-2">NODE 1 · SOCKET</text>
+  <text x="1192" y="84" text-anchor="end" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-3">one coherent domain</text>
+
+  <!-- links inside the nodes · drawn in two pieces so the pill sits in the gap:
+       glass panels are translucent, a pill cannot paint over a line -->
+  <g class="glass-svg-line" stroke-width="1.5">
+    <line x1="168" y1="132" x2="188" y2="132" marker-start="url(#icgArrL)"/>
+    <line x1="292" y1="132" x2="312" y2="132" marker-end="url(#icgArrL)"/>
+    <line x1="776" y1="132" x2="796" y2="132" marker-start="url(#icgArrL)"/>
+    <line x1="900" y1="132" x2="920" y2="132" marker-end="url(#icgArrL)"/>
+    <line x1="452" y1="164" x2="452" y2="179" marker-start="url(#icgArrL)"/>
+    <line x1="452" y1="209" x2="452" y2="224" marker-end="url(#icgArrL)"/>
+    <line x1="1060" y1="164" x2="1060" y2="179" marker-start="url(#icgArrL)"/>
+    <line x1="1060" y1="209" x2="1060" y2="224" marker-end="url(#icgArrL)"/>
+  </g>
+
+  <!-- dies · indigo = memory, cyan = the device side, neutral = host compute -->
+  <rect x="48" y="100" width="120" height="64" rx="14" class="glass-svg-node glass-svg-node--indigo"/>
+  <rect x="312" y="100" width="272" height="64" rx="14" class="glass-svg-node"/>
+  <rect x="312" y="224" width="272" height="64" rx="14" class="glass-svg-node glass-svg-node--cyan"/>
+  <rect x="656" y="100" width="120" height="64" rx="14" class="glass-svg-node glass-svg-node--indigo"/>
+  <rect x="920" y="100" width="272" height="64" rx="14" class="glass-svg-node"/>
+  <rect x="920" y="224" width="272" height="64" rx="14" class="glass-svg-node glass-svg-node--cyan"/>
+  <g font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">
+    <text x="68" y="128">DDR5</text>
+    <text x="336" y="128">Host CPU die</text>
+    <text x="336" y="252">Accelerator die</text>
+    <text x="676" y="128">DDR5</text>
+    <text x="944" y="128">Host CPU die</text>
+    <text x="944" y="252">Accelerator die</text>
+  </g>
+  <g font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-3">
+    <text x="68" y="148">512 GB</text>
+    <text x="336" y="148">64 core · 2.4 GHz</text>
+    <text x="336" y="272">96 GB HBM3 · on-package</text>
+    <text x="676" y="148">512 GB</text>
+    <text x="944" y="148">64 core · 2.4 GHz</text>
+    <text x="944" y="272">96 GB HBM3 · on-package</text>
+  </g>
+
+  <!-- link pills: panel material sitting in the gap, so a protocol name can never
+       drift off the link it names -->
+  <g>
+    <rect x="188" y="121" width="104" height="22" rx="11" class="glass-svg-node"/>
+    <rect x="796" y="121" width="104" height="22" rx="11" class="glass-svg-node"/>
+    <rect x="384" y="179" width="136" height="30" rx="15" class="glass-svg-node"/>
+    <rect x="992" y="179" width="136" height="30" rx="15" class="glass-svg-node"/>
+    <rect x="384" y="297" width="136" height="30" rx="15" class="glass-svg-node"/>
+    <rect x="992" y="297" width="136" height="30" rx="15" class="glass-svg-node"/>
+  </g>
+  <g font-family="'JetBrains Mono', monospace" font-size="12" text-anchor="middle" class="glass-svg-ink-2">
+    <text x="240" y="136">DDR5 · 8 ch</text>
+    <text x="848" y="136">DDR5 · 8 ch</text>
+    <text x="452" y="198">CXL 3.0 · 64 GB/s</text>
+    <text x="1060" y="198">CXL 3.0 · 64 GB/s</text>
+    <text x="452" y="316">fabric · 400 GB/s</text>
+    <text x="1060" y="316">fabric · 400 GB/s</text>
+  </g>
+
+  <!-- node -> fabric switch -->
+  <g class="glass-svg-line" stroke-width="1.5" fill="none">
+    <path d="M452,288 V297"/>
+    <path d="M452,327 V344 Q452,352 460,352 H548 Q556,352 556,360 V372" marker-end="url(#icgArrL)"/>
+    <path d="M1060,288 V297"/>
+    <path d="M1060,327 V344 Q1060,352 1052,352 H692 Q684,352 684,360 V372" marker-end="url(#icgArrL)"/>
+  </g>
+
+  <!-- fabric switch: neutral panel, never a saturated band -->
+  <rect x="496" y="372" width="248" height="64" rx="14" class="glass-svg-node"/>
+  <text x="520" y="400" font-family="'Inter', sans-serif" font-size="14" font-weight="600" class="glass-svg-ink">Fabric switch</text>
+  <text x="520" y="420" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-3">8 port · non-blocking</text>
+
+  <!-- ============ layer 3 · who reaches what with a plain instruction ============ -->
+  <!-- each capsule sits directly over the segment it reaches: the line is a short
+       vertical drop, so there is no doubt which segment it lands on -->
+  <rect x="324" y="460" width="192" height="34" rx="17" class="glass-svg-node glass-svg-node-strong"/>
+  <rect x="952" y="460" width="204" height="34" rx="17" class="glass-svg-node"/>
+  <text x="420" y="482" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-accent-ink">CPU core · ld / st</text>
+  <text x="1054" y="482" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-2">Accel core · ld / st</text>
+  <path d="M420,494 V532" fill="none" stroke="#22D3EE" stroke-width="2" marker-end="url(#icgArrC)"/>
+  <path d="M1054,494 V532" class="glass-svg-line" stroke-width="1.5" fill="none" marker-end="url(#icgArrL)"/>
+
+  <!-- ============ layer 2 · two address spaces, never merged ============ -->
+  <text x="24" y="524" font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="1.2" class="glass-svg-ink-3">HOST PHYSICAL ADDRESS SPACE</text>
+  <text x="632" y="524" font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="1.2" class="glass-svg-ink-3">DEVICE PHYSICAL ADDRESS SPACE</text>
+
+  <!-- host strip -->
+  <rect x="24" y="532" width="304" height="64" class="glass-svg-node glass-svg-node--indigo"/>
+  <rect x="328" y="532" width="184" height="64" class="glass-svg-node glass-svg-node--cyan"/>
+  <rect x="328" y="532" width="184" height="64" fill="url(#icgHatch)" opacity="0.42"/>
+  <rect x="328" y="532" width="184" height="64" fill="none" stroke="#22D3EE" stroke-width="1.5"/>
+  <rect x="512" y="532" width="96" height="64" class="glass-svg-node"/>
+  <g text-anchor="middle">
+    <text x="176" y="562" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">DDR5 · 512 GB</text>
+    <text x="420" y="562" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-accent-ink">Accel HBM window</text>
+    <text x="560" y="562" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">MMIO</text>
+    <text x="176" y="582" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">0x0000_0000</text>
+    <text x="420" y="582" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">0x80_0000_0000</text>
+  </g>
+
+  <!-- device strip -->
+  <rect x="632" y="532" width="340" height="64" class="glass-svg-node glass-svg-node--cyan"/>
+  <rect x="972" y="532" width="164" height="64" class="glass-svg-node glass-svg-node--indigo"/>
+  <rect x="972" y="532" width="164" height="64" fill="url(#icgHatch)" opacity="0.42"/>
+  <rect x="1136" y="532" width="80" height="64" class="glass-svg-node"/>
+  <g text-anchor="middle">
+    <text x="802" y="562" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">HBM3 · 96 GB</text>
+    <text x="1054" y="562" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">Host DDR window</text>
+    <text x="1176" y="562" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink-3">reserved</text>
+    <text x="802" y="582" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">0x0000_0000</text>
+    <text x="1054" y="582" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">0x18_0000_0000</text>
+  </g>
+
+  <!-- one mapping line, two segments, nothing else -->
+  <g class="glass-svg-line" stroke-width="1.5" stroke-dasharray="5 4" fill="none">
+    <path d="M420,596 V606 Q420,614 428,614 H534" marker-start="url(#icgArrL)"/>
+    <path d="M688,614 H794 Q802,614 802,606 V596" marker-end="url(#icgArrL)"/>
+  </g>
+  <rect x="534" y="599" width="154" height="30" rx="15" class="glass-svg-node"/>
+  <text x="611" y="618" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-2">CXL.mem · HDM decoder</text>
+</svg>
