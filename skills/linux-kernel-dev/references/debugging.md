@@ -23,6 +23,86 @@ pr_info("subsystem initialized\n");
 /* echo 'file my_driver.c +p' > /sys/kernel/debug/dynamic_debug/control */
 ```
 
+### 原子性:一次 printk 是原子的,`pr_cont` 不是
+
+**单次 printk —— 原子。** `vprintk_emit()` 全程持 `logbuf_lock`
+(raw_spinlock + 关中断),一次 `printk("...\n")` 从格式化到写进 log buffer
+是一个临界区,别的 CPU 插不进这条记录中间。单行上限 `LOG_LINE_MAX` = 1024。
+
+⇒ 「可靠打印」不需要另找接口,**带 `\n` 的一次调用就是**。
+
+**`pr_cont` 续行 —— 不原子。** `cont` 是**一个全局缓冲区**,只认 `owner == current`:
+
+```c
+/* kernel/printk/printk.c  log_output() */
+if (cont.len) {
+        if (cont.owner == current && (lflags & LOG_CONT)) {   /* 必须同一个 task */
+                if (cont_add(...))
+                        return text_len;
+        }
+        cont_flush();          /* 否则前半行被冲成独立一条记录 */
+}
+```
+
+三种情况会把半行冲掉:
+
+| 条件 | 机制 |
+|---|---|
+| 别的 **task** 来打印 | `cont.owner == current` 不成立 → `cont_flush()` |
+| 累计超过 `cont.buf` | `cont.len + len > sizeof(cont.buf)` → `cont_flush()` |
+| 系统有 ext console(netconsole 等) | `nr_ext_console_drivers` → 直接不 cont |
+
+⚠ 第一条是 **task 不是 CPU** —— 同 CPU 上被抢占换了 task 一样断。
+
+### 循环里打一批数:攒 buffer,别 `pr_cont`
+
+不带 `\n` 的 printk **在 4.x 不会自动续行**(早期内核会,SMP 下不可靠,
+所以改成必须显式 `KERN_CONT`)。下面这种写法期望横排,实际每个数各占一行、
+各带一个时间戳:
+
+```c
+for (i = 0; i < n; i++)
+        printk("%d, ", v[i]);      /* ✗ n 个数刷 n 行 */
+```
+
+改成攒一行再打 —— `pr_cont` 也不行,它会被别的 task 劈开:
+
+```c
+char line[256];
+int len = 0;
+
+len += scnprintf(line + len, sizeof(line) - len, "prefix:");
+for (i = 0; i < n; i++)
+        len += scnprintf(line + len, sizeof(line) - len, " %d", v[i]);
+pr_info("%s\n", line);            /* ✓ 一条记录,原子 */
+```
+
+用 `scnprintf` 而非 `snprintf`:它返回**实际写入**长度,累加不会越界。
+
+### 按数据量选接口
+
+| 场景 | 用什么 | 保证 |
+|---|---|---|
+| 一条消息(哪怕长) | `pr_info`/`dev_info`,**一次调用带 `\n`** | 原子;上限 1024 字节 |
+| 一批字节 | `print_hex_dump()` | **每行**一次 printk ⇒ 行内原子;行间可能被插,但每行自带偏移前缀,插了也读得懂 |
+| 大量数据(几十上百行) | **别用 printk**,走 `seq_file`(sysfs / debugfs / procfs) | 不经 log buffer,无插队,可反复读 |
+
+**printk 是事件通知,不是数据导出。** log buffer 是环形的 ——
+往里灌几十行寄存器 dump,会把真正要查的那几行冲掉,
+而那几行往往是不可再生的现场(suspend/resume 记录、panic 前的最后打印)。
+
+### 打印要能认出来源
+
+裸 `printk("value=%d\n", v)` 在 dmesg 里看不出是谁打的。用
+`dev_*`(自带 `driver device:` 前缀)或 `pr_fmt`:
+
+```c
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt      /* 放在所有 #include 之前 */
+```
+
+同一文件里**别混用**带前缀和不带前缀的两种写法 —— 按关键词过滤日志时,
+不带前缀的那批会整类漏掉。
+
 ## Tools
 
 | 工具 | 用法 | 用途 |
