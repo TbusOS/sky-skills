@@ -395,11 +395,15 @@
 /* Two shipped figure modifiers. They live HERE, prefixed, because verify.py
  * validates primer-* classes against this file — an unprefixed page-local
  * `.fig-wide` escapes that check, and every page-type needs both:
- *   .primer-fig-wide — full-width section figure (the ~900-unit working
- *     viewBox). Its responsive stroke stair is at the end of Section L.
- *   .primer-fig-hero — the hero figure. Zero block margin, because it sits
- *     inside the hero grid where the component's 40px margin would push it
- *     off the title's vertical centre. Its phone stroke boost is in Section L. */
+ *   .primer-fig-wide — full-width section figure (900-unit design width,
+ *     960 for the technical tier). Its stroke stair is at the end of Section L.
+ *   .primer-fig-hero — the hero figure (500-unit design width). Zero block
+ *     margin, because it sits inside the hero grid where the component's 40px
+ *     margin would push it off the title's vertical centre. Its stroke stair is
+ *     in Section L too — two steps, one for phones and one for the 769–981px
+ *     band where the hero grid is two columns but the phone step has stopped.
+ * Any viewBox that is not the tier's design width (and not the self-detecting
+ * 960) declares its width once: style="--primer-vbw: 936". */
 .primer-figure.primer-fig-hero { margin: 0; }
 .primer-figure svg,
 .primer-analogy-fig svg {
@@ -496,34 +500,69 @@ html:not([data-lang]) .lang-en { display: none; }
   .primer-nav-inner { height: 58px; }
 }
 
-/* --- Responsive stroke stair for full-width figures --- */
+/* --- Responsive stroke stair for figures --- */
 /* 3.4 is a USER unit: on a ~900-unit viewBox it thins as the figure narrows
  * (a 375px phone renders it at 3.4 × 335/900 ≈ 1.27px — under the 3px
  * picture-book floor), but a single phone-size boost overshoots at tablet
  * widths (9 units at a 768px viewport render 9 × 728/900 ≈ 7.28px — over
- * double the design weight). Three steps keep the rendered main stroke inside
- * ≈3.0–4.4px at every width from 340px up; the hair follows each step at the
- * same 0.53 ratio so the detail layer never collapses (illustration-craft §3).
- * Rendered stroke = value × content-width/900, content = viewport − gutters.
+ * double the design weight). The steps below keep the rendered main stroke
+ * inside ≈3.0–4.4px at every width from 340px up; the hair follows each step at
+ * the same 0.53 ratio so the detail layer never collapses.
+ *
+ *   rendered stroke = value × content-width / viewBox-width
+ *   content-width   = viewport − two gutters (32 each, 20 at ≤768)
+ *
+ * EVERY STEP IS SCALED BY --primer-vbw, the figure's own viewBox width, against
+ * the tier's design width (900 for wide, 500 for hero). That cancels the
+ * viewBox out of the formula — rendered px = base × content-width / design-width
+ * whatever the viewBox is — so a 960-unit figure and a 900-unit one draw the
+ * same weight on the same page, and nobody re-derives a ladder per width.
+ * Without it, tech-figures.md §5's mandated 960-unit tier renders 6.7% thinner
+ * than the ladder assumes and drops under the floor at three separate bands
+ * (2.94px at 481, 2.85–3.00px across 661–695, 2.96–3.00px across 901–911).
+ *
+ * --primer-vbw is only written by hand when the viewBox width is neither the
+ * tier's design width nor the mandated 960 (which sets itself, one rule below):
+ *   <figure class="primer-figure primer-fig-wide" style="--primer-vbw: 936">
+ * See illustration-craft.md §3, which carries the same table.
+ *
  * Both selectors keep .primer-figure so they outrank Section J without
  * depending on order; narrower queries come later so they win overlaps. */
-@media (max-width: 900px) {  /* content 621–836 → 4.4 renders 3.04–4.09px */
-  .primer-figure.primer-fig-wide svg              { stroke-width: 4.4px; }
-  .primer-figure.primer-fig-wide svg .primer-hair { stroke-width: 2.3px; }
-}
-@media (max-width: 660px) {  /* content 441–620 → 6.4 renders 3.14–4.41px */
-  .primer-figure.primer-fig-wide svg              { stroke-width: 6.4px; }
-  .primer-figure.primer-fig-wide svg .primer-hair { stroke-width: 3.4px; }
-}
-@media (max-width: 480px) {  /* content ≤440 → 9 renders ≤4.4px; 335 → 3.35px */
-  .primer-figure.primer-fig-wide svg              { stroke-width: 9px; }
-  .primer-figure.primer-fig-wide svg .primer-hair { stroke-width: 4.8px; }
+.primer-figure.primer-fig-wide svg[viewBox^="0 0 960 "] { --primer-vbw: 960; }
 
-  /* The hero figure (≤500-unit viewBox) only crosses the 3px floor below
-   * ~480px: from 481–768px its single-column render is 441–728px wide, where
-   * the natural 3.4 units already land at 3.0–4.95px. One step suffices. */
-  .primer-figure.primer-fig-hero svg              { stroke-width: 5px; }
-  .primer-figure.primer-fig-hero svg .primer-hair { stroke-width: 2.65px; }
+/* Top of the wide ladder is 911, not 900: the widest sanctioned viewBox (960)
+ * only reaches 3px unaided at 3.4 × (V−64)/960 ≥ 3 ⟹ V ≥ 911.1. A viewBox
+ * wider than 960 moves that line and needs this number recomputed. */
+@media (max-width: 911px) {  /* content 621–847 → renders 3.04–4.14px */
+  .primer-figure.primer-fig-wide svg              { stroke-width: calc(4.4px * var(--primer-vbw, 900) / 900); }
+  .primer-figure.primer-fig-wide svg .primer-hair { stroke-width: calc(2.3px * var(--primer-vbw, 900) / 900); }
+}
+@media (max-width: 660px) {  /* content 441–620 → renders 3.14–4.41px */
+  .primer-figure.primer-fig-wide svg              { stroke-width: calc(6.4px * var(--primer-vbw, 900) / 900); }
+  .primer-figure.primer-fig-wide svg .primer-hair { stroke-width: calc(3.4px * var(--primer-vbw, 900) / 900); }
+}
+@media (max-width: 480px) {  /* content ≤440 → ≤4.4px; 335 → 3.35px */
+  .primer-figure.primer-fig-wide svg              { stroke-width: calc(9px   * var(--primer-vbw, 900) / 900); }
+  .primer-figure.primer-fig-wide svg .primer-hair { stroke-width: calc(4.8px * var(--primer-vbw, 900) / 900); }
+
+  /* Hero, phone step. Single column, content ≤440 → 5 renders ≤4.4px
+   * (375 → 5 × 335/500 = 3.35px). */
+  .primer-figure.primer-fig-hero svg              { stroke-width: calc(5px    * var(--primer-vbw, 500) / 500); }
+  .primer-figure.primer-fig-hero svg .primer-hair { stroke-width: calc(2.65px * var(--primer-vbw, 500) / 500); }
+}
+
+/* Hero, small-laptop / portrait-tablet step. The hero grid goes back to two
+ * columns at 769 while the block above stops at 768, so the ≤500-unit hero
+ * viewBox renders into a 332–441px column with nothing compensating: the
+ * natural 3.4 units measure 2.26px at 769 and only reach 3.0px at 981.4
+ * (right column = (V − 120) × 1.05/2.05, the 1fr / 1.05fr grid minus its
+ * 56px gap). 4.6 units render 3.06px at 769 and 4.06px at 981.
+ * Scoped to .primer-hero-inner because the narrow column IS the cause: a
+ * .primer-fig-hero reprinted outside the hero grid (the gallery caps those at
+ * 520px) keeps its render width here and would go to 4.78px with the step. */
+@media (min-width: 769px) and (max-width: 981px) {
+  .primer-hero-inner .primer-figure.primer-fig-hero svg              { stroke-width: calc(4.6px  * var(--primer-vbw, 500) / 500); }
+  .primer-hero-inner .primer-figure.primer-fig-hero svg .primer-hair { stroke-width: calc(2.45px * var(--primer-vbw, 500) / 500); }
 }
 
 @media (prefers-reduced-motion: reduce) {
