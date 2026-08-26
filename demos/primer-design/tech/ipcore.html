@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一块 IP core 是怎么设计出来的 · 图解读本</title>
+<meta name="description" content="Technical primer: how an IP core is put together — register panel, data path, control board, valid/ready handshake. 零基础图解：一块能接上总线的积木。">
+<meta property="og:title" content="一块 IP core 是怎么设计出来的 · 图解读本">
+<meta property="og:description" content="零基础图解：一块 IP core 的三类接口、寄存器面板、粗线走货细虚线发令，以及两边都举手那一拍才成交的握手。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed classes on purpose (verify.py validates
+   * primer-* classes against primer.css; page-local layout stays unprefixed).
+   * Figure modifiers (primer-fig-wide / primer-fig-hero) ship from primer.css
+   * Sections J + L: nothing stroke-related is written per page. */
+
+  /* Three numbered heads over the three beats of one figure: each numeral sits
+   * above the panel it names, so the drawing itself carries no beat captions.
+   * Collapses to one column where the panels stack. */
+  .beat-heads {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--primer-space-5);
+  }
+  /* .primer-step is a horizontal flex built for a single step used as a section
+   * header, so in a 3-column grid its numeral lands at the left of the column
+   * instead of over the beat it names. Stack it. */
+  .beat-heads .primer-step {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  /* Proximity: a numeral belongs to the panel it names, so the gap BELOW the
+   * heads has to be the smaller one. The stock 40px figure margin above and
+   * the analogy card's 40px below it read the other way round — the numerals
+   * bind upward to the card and stop being the figure's caption layer.
+   * Measured ink to ink, not box to box: the figure's own viewBox carries 24
+   * user units of clear sky above the flag tips (32px at this tier), so the
+   * stock margins read 40px up and 52px down. Zeroing the figure's top margin
+   * and widening the head's own leaves 56 up and 32 down. */
+  .beat-heads { margin-top: var(--primer-space-7); }
+  .beat-heads + .primer-figure { margin-top: 0; }
+  @media (max-width: 900px) {
+    .beat-heads { grid-template-columns: 1fr; gap: var(--primer-space-4); }
+  }
+
+  /* The recap is its own screen; the component's top margin is meant for the
+   * case where it trails a section's body. */
+  .recap-flat { margin-top: 0; }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">A block you plug<br>onto the main road</span>
+          <span class="lang-zh">一块能接上<br>主干道的积木</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">No hardware background needed. About five minutes to read.</span>
+          <span class="lang-zh">不需要硬件基础。这一页大约 5 分钟讲明白。</span>
+        </p>
+      </div>
+      <figure class="primer-figure primer-fig-hero">
+        <svg viewBox="0 0 500 340" role="img"
+          aria-label="一块模块外壳：上面一个插头接到主干道，左右一条粗带子进出，底下两根脚接时钟和复位"
+          data-label-zh="一块模块外壳：上面一个插头接到主干道，左右一条粗带子进出，底下两根脚接时钟和复位"
+          data-label-en="A module case: a plug on top reaches the main road, a thick belt runs in one side and out the other, two legs below carry clock and reset">
+          <!-- the main road across the top: a street, not a wire -->
+          <path d="M20 24 L480 24.8 L479.4 52.6 L20 52 Z" fill="#fdfaf3" stroke="none"/>
+          <path d="M20 24 L480 24.8" fill="none"/>
+          <path d="M20 52 L480 52.6" fill="none"/>
+          <path class="primer-hair" d="M30 38 L110 38.3 M148 38.5 L228 38.8 M266 39 L346 39.3 M384 39.4 L464 39.7" fill="none"/>
+
+          <!-- the module case, screws and all -->
+          <path d="M116 104 Q108 104 108 112 L108 254 Q108 262 116 262 L384 262.8 Q392 262.8 392 254.8 L392 112.8 Q392 104.8 384 104.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M124 118 L376 118.4 L375.6 248 L124 247.6 Z" fill="#fdfaf3"/>
+          <circle class="primer-hair" cx="115" cy="111" r="4" fill="none"/>
+          <circle class="primer-hair" cx="385" cy="111" r="4" fill="none"/>
+          <circle class="primer-hair" cx="115" cy="255" r="4" fill="none"/>
+          <circle class="primer-hair" cx="385" cy="255" r="4" fill="none"/>
+
+          <!-- the plug on top: three pins up into the road -->
+          <path d="M150 80 L214 80.4 L213.6 104 L150 103.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M162 80 L162 54 M182 80.2 L182 54 M202 80.3 L202 54" fill="none"/>
+
+          <!-- the belt: in on the left, straight through, out on the right -->
+          <path d="M20 154 L456 154.8 L455.2 214.6 L20 214 Z" fill="#ffffff" stroke="none"/>
+          <path d="M20 154 L456 154.8" fill="none"/>
+          <path d="M20 214 L456 214.6" fill="none"/>
+          <path d="M456 146 L484 184.4 L456 222" fill="none"/>
+          <circle class="primer-hair" cx="216" cy="184" r="17" fill="none"/>
+          <path class="primer-hair" d="M216 167 L216 201 M199 184 L233 184 M204 172 L228 196 M204 196 L228 172" fill="none"/>
+          <circle class="primer-hair" cx="306" cy="184.2" r="17" fill="none"/>
+          <path class="primer-hair" d="M306 167 L306 201 M289 184 L323 184 M294 172 L318 196 M294 196 L318 172" fill="none"/>
+          <!-- the one crate on the belt: violet is the thing being handed over -->
+          <path d="M38 160 L122 160.5 L121.5 208 L38 207.5 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M80 160 L80 208 M38 184 L122 184.3" fill="none" stroke="#ffffff"/>
+
+          <!-- two legs below: the beat comes in on one, the wake-up on the other -->
+          <path d="M168 262 L168 296" fill="none"/>
+          <path d="M300 262.4 L300 296" fill="none"/>
+          <path class="primer-hair" d="M56 296 L74 296 L74 282 L96 282.2 L96 296.2 L118 296.3 L118 282.4 L140 282.5 L140 296.5 L168 296.6" fill="none"/>
+          <path class="primer-hair" d="M300 296.6 L336 296.8" fill="none"/>
+          <circle class="primer-hair" cx="350" cy="297" r="11" fill="#fdfaf3"/>
+
+          <!-- labels (painted last) -->
+          <text class="lang-zh" x="232" y="76" font-size="15" font-weight="600" fill="#243244">寄存器接口</text>
+          <text class="lang-en" x="232" y="76" font-size="15" font-weight="600" fill="#243244">register port</text>
+          <text x="112" y="320" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">CLK</text>
+          <text x="350" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">RST</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Three kinds of port cross the case. The plug on top reaches the chip's main road — that road is called the bus. Goods go in one side and out the other. CLK is the clock, the chip's beat; RST is reset, back to a known state at power-up. The violet crate is the one being handed over.</span>
+          <span class="lang-zh">三类接口穿过外壳。上面那个插头接到芯片的主干道上（那条路叫总线）。货从一头进，另一头出。CLK 是时钟，芯片的节拍；RST 是复位，一上电先回到已知状态。紫色那件是正在被交出去的货。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ② 像什么:自动售货机 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What is this block?</span>
+        <span class="lang-zh">这块积木是什么？</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">IP core</span><span class="lang-en">IP core</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">a ready-made circuit block you drop into your own chip</span>
+          <span class="lang-zh">别人做好的一块电路，买来直接装进自己的芯片</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">A vending machine has three parts: panel, coil channels, control board. This block has <span class="primer-mark">the same three</span>.</span>
+        <span class="lang-zh">一台自动售货机分三部分：面板、货道、控制板。<span class="primer-mark">这块积木也是这三样。</span></span>
+      </p>
+
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 150" role="img"
+            aria-label="一台自动售货机：上面一排按钮，中间玻璃后是转着货道的饮料，下面是取货口"
+            data-label-zh="一台自动售货机：上面一排按钮，中间玻璃后是转着货道的饮料，下面是取货口"
+            data-label-en="A vending machine: buttons on top, bottles behind glass on turning coils in the middle, the pickup flap below">
+            <path d="M26 12 Q20 12 20 18 L20 132 Q20 138 26 138 L154 138.6 Q160 138.6 160 132.6 L160 18.6 Q160 12.6 154 12.6 Z" fill="#ffffff"/>
+            <!-- the panel: one display, nothing else — the card is a thumbnail -->
+            <path class="primer-hair" d="M28 22 L152 22.4 L151.6 48 L28 47.6 Z" fill="#fdfaf3"/>
+            <path class="primer-hair" d="M36 28 L104 28.3 L103.7 42 L36 41.7 Z" fill="#243244"/>
+            <path class="primer-hair" d="M118 28 L138 28 L138 42 L118 42 Z" fill="none"/>
+            <!-- the goods behind glass: one coil, one bottle, and it is the violet one -->
+            <path class="primer-hair" d="M28 56 L152 56.4 L151.6 104 L28 103.6 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M32 98 q8 -14 16 0 q8 -14 16 0 q8 -14 16 0 q8 -14 16 0 q8 -14 16 0 q8 -14 16 0 q8 -14 16 0" fill="none"/>
+            <path d="M48 66 L48 74 Q40 80 40 90 L40 98 L72 98 L72 90 Q72 80 64 74 L64 66 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M46 64 L66 64.2" fill="none"/>
+            <!-- the pickup flap -->
+            <path class="primer-hair" d="M32 112 L96 112.3 L95.7 130 L32 129.7 Z" fill="#fdfaf3"/>
+            <path class="primer-hair" d="M32 118 L96 118.3" fill="none"/>
+            <path class="primer-hair" d="M40 138 L40 146 M140 138.6 L140 146" fill="none"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p class="primer-analogy-lead"><span class="lang-en">It's like…</span><span class="lang-zh">就像……</span></p>
+          <p>
+            <span class="lang-en">A vending machine: you press the panel, one coil turns, a bottle drops. Whether it turns at all is the control board's call.</span>
+            <span class="lang-zh">一台自动售货机：面板上按一下，里面的货道转一格，一瓶水掉下来。转不转，由里面的控制板说。</span>
+          </p>
+        </div>
+      </div>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 454" role="img"
+          aria-label="售货机和这块积木一层对一层：面板对寄存器块，货道对数据通路，控制板对控制板"
+          data-label-zh="售货机和这块积木一层对一层：面板对寄存器块，货道对数据通路，控制板对控制板"
+          data-label-en="The vending machine and this block line up layer for layer: panel to register block, coil channels to data path, control board to control board">
+          <!-- the vending machine -->
+          <path d="M34 40 Q24 40 24 50 L24 420 Q24 430 34 430 L370 430.8 Q380 430.8 380 420.8 L380 50.8 Q380 40.8 370 40.8 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M42 58 L362 58.4 L361.6 164 L42 163.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M54 72 L150 72.3 L149.7 116 L54 115.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M172 76 L192 76 L192 96 L172 96 Z M200 76 L220 76 L220 96 L200 96 Z M228 76 L248 76 L248 96 L228 96 Z M256 76 L276 76 L276 96 L256 96 Z" fill="none"/>
+          <path class="primer-hair" d="M172 104 L192 104 L192 124 L172 124 Z M200 104 L220 104 L220 124 L200 124 Z M228 104 L248 104 L248 124 L228 124 Z M256 104 L276 104 L276 124 L256 124 Z" fill="none"/>
+          <path class="primer-hair" d="M300 76 L348 76.2 L347.8 88 L300 87.8 Z" fill="#243244"/>
+          <path class="primer-hair" d="M300 104 L348 104.2" fill="none"/>
+          <!-- the coil channels behind glass; the front bottle is the one on its way -->
+          <path class="primer-hair" d="M42 182 L362 182.4 L361.6 306 L42 305.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M52 262 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0" fill="none"/>
+          <path class="primer-hair" d="M208 262 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0" fill="none"/>
+          <path class="primer-hair" d="M42 270 L362 270.3" fill="none"/>
+          <path class="primer-hair" d="M52 296 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0" fill="none"/>
+          <path class="primer-hair" d="M208 296 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0" fill="none"/>
+          <path d="M66 208 L66 218 Q56 226 56 238 L56 262 L90 262 L90 238 Q90 226 80 218 L80 208 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M64 206 L82 206.2" fill="none"/>
+          <path class="primer-hair" d="M122 208 L122 218 Q112 226 112 238 L112 262 L146 262 L146 238 Q146 226 136 218 L136 208 Z" fill="none"/>
+          <path class="primer-hair" d="M120 206 L138 206.2" fill="none"/>
+          <path class="primer-hair" d="M210 208 L210 218 Q200 226 200 238 L200 262 L234 262 L234 238 Q234 226 224 218 L224 208 Z" fill="none"/>
+          <path class="primer-hair" d="M208 206 L226 206.2" fill="none"/>
+          <path class="primer-hair" d="M266 208 L266 218 Q256 226 256 238 L256 262 L290 262 L290 238 Q290 226 280 218 L280 208 Z" fill="none"/>
+          <path class="primer-hair" d="M264 206 L282 206.2" fill="none"/>
+          <!-- the door seam -->
+          <path class="primer-hair" d="M368 60 L368 412" fill="none"/>
+          <!-- its control board -->
+          <path class="primer-hair" d="M42 330 L362 330.4 L361.6 414 L42 413.6 Z" fill="#fdfaf3"/>
+          <!-- The machine's board is drawn as the block's board, to the unit:
+               same three states, same two arrows, same return arc bowing the
+               same way. This is the figure that claims 控制板对控制板, and two
+               boards that differ in shape make the arrow between them argue
+               with the drawing. The chip row that used to sit here read as a
+               fourth element and forced the arc up out of its own box. -->
+          <circle cx="106" cy="372" r="20" fill="#ffffff"/>
+          <circle cx="186" cy="372.2" r="20" fill="#ffffff"/>
+          <circle cx="266" cy="372.4" r="20" fill="#ffffff"/>
+          <path class="primer-hair" d="M126 372 L160 372.1 M154 366 L164 372.1 L154 378" fill="none"/>
+          <path class="primer-hair" d="M206 372.2 L240 372.3 M234 366 L244 372.3 L234 378" fill="none"/>
+          <path class="primer-hair" d="M262 392 Q186 420 110 392 M110 392 L118 386 M110 392 L120 396" fill="none"/>
+
+          <!-- the block -->
+          <path d="M530 40 Q520 40 520 50 L520 420 Q520 430 530 430 L866 430.8 Q876 430.8 876 420.8 L876 50.8 Q876 40.8 866 40.8 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="528" cy="48" r="4" fill="none"/>
+          <circle class="primer-hair" cx="868" cy="48" r="4" fill="none"/>
+          <circle class="primer-hair" cx="528" cy="422" r="4" fill="none"/>
+          <circle class="primer-hair" cx="868" cy="422" r="4" fill="none"/>
+          <!-- the register block: slots with levers, the panel's opposite number -->
+          <path class="primer-hair" d="M538 58 L858 58.4 L857.6 164 L538 163.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M552 70 L844 70.3 L843.7 92 L552 91.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M552 102 L844 102.3 L843.7 124 L552 123.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M552 134 L844 134.3 L843.7 156 L552 155.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M562 74 L590 74.2 L589.8 88 L562 87.8 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="576" cy="81" r="5" fill="#243244"/>
+          <path class="primer-hair" d="M566 106 L566 120 M576 106 L576 120 M586 106 L586 120" fill="none"/>
+          <circle class="primer-hair" cx="576" cy="145" r="8" fill="#ffffff"/>
+          <circle class="primer-hair" cx="576" cy="145" r="3.5" fill="#243244"/>
+          <!-- the data path: one unbroken belt, out through the right wall -->
+          <path d="M514 210 L868 210.6 L867.4 238.6 L514 238 Z" fill="#ffffff" stroke="none"/>
+          <path d="M514 210 L868 210.6" fill="none"/>
+          <path d="M514 238 L868 238.6" fill="none"/>
+          <path d="M868 204 L892 224.4 L868 244" fill="none"/>
+          <path d="M556 224 L534 214 L534 234 Z" fill="#243244"/>
+          <path d="M596 214 L640 214.3 L639.7 236 L596 235.7 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M618 214 L618 236" fill="none" stroke="#ffffff"/>
+          <circle class="primer-hair" cx="700" cy="224.4" r="9" fill="none"/>
+          <path class="primer-hair" d="M700 215 L700 233 M691 224 L709 224" fill="none"/>
+          <circle class="primer-hair" cx="760" cy="224.6" r="9" fill="none"/>
+          <path class="primer-hair" d="M760 215 L760 233 M751 224 L769 224" fill="none"/>
+          <!-- its control board: three states with arrows, not an empty box -->
+          <path class="primer-hair" d="M538 330 L858 330.4 L857.6 414 L538 413.6 Z" fill="#fdfaf3"/>
+          <circle cx="600" cy="372" r="20" fill="#ffffff"/>
+          <circle cx="680" cy="372.2" r="20" fill="#ffffff"/>
+          <circle cx="760" cy="372.4" r="20" fill="#ffffff"/>
+          <path class="primer-hair" d="M620 372 L654 372.1 M648 366 L658 372.1 L648 378" fill="none"/>
+          <path class="primer-hair" d="M700 372.2 L734 372.3 M728 366 L738 372.3 L728 378" fill="none"/>
+          <path class="primer-hair" d="M756 392 Q680 420 604 392 M604 392 L612 386 M604 392 L614 396" fill="none"/>
+
+          <!-- one layer to one layer: a pairing, drawn as a two-way arrow so it
+               can never be mistaken for the dashed control lines two screens on -->
+          <path class="primer-hair" d="M386 111 L514 111.3 M394 105 L386 111 L394 117 M506 105.3 L514 111.3 L506 117.3" fill="none"/>
+          <path class="primer-hair" d="M386 224 L514 224.3 M394 218 L386 224 L394 230 M506 218.3 L514 224.3 L506 230.3" fill="none"/>
+          <path class="primer-hair" d="M386 372 L514 372.3 M394 366 L386 372 L394 378 M506 366.3 L514 372.3 L506 378.3" fill="none"/>
+
+          <text class="lang-zh" x="24" y="30" font-size="17" font-weight="700" fill="#243244">自动售货机</text>
+          <text class="lang-en" x="24" y="30" font-size="16" font-weight="700" fill="#243244">a vending machine</text>
+          <text class="lang-zh" x="520" y="30" font-size="17" font-weight="700" fill="#243244">这块积木</text>
+          <text class="lang-en" x="520" y="30" font-size="16" font-weight="700" fill="#243244">this block</text>
+          <text class="lang-zh" x="450" y="97" text-anchor="middle" font-size="14" font-weight="600" fill="#243244">寄存器块</text>
+          <text class="lang-en" x="450" y="97" text-anchor="middle" font-size="13" font-weight="600" fill="#243244">register block</text>
+          <text class="lang-zh" x="450" y="210" text-anchor="middle" font-size="14" font-weight="600" fill="#243244">数据通路</text>
+          <text class="lang-en" x="450" y="210" text-anchor="middle" font-size="13" font-weight="600" fill="#243244">data path</text>
+          <text class="lang-zh" x="450" y="358" text-anchor="middle" font-size="14" font-weight="600" fill="#243244">控制板</text>
+          <text class="lang-en" x="450" y="358" text-anchor="middle" font-size="13" font-weight="600" fill="#243244">control board</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Layer for layer: panel to register block, coil channels to data path, control board to control board. The panel never touches the goods; it only tells the control board what to do. The violet bottle is the item on its way. The three circles are the control board's states. Where the goods enter and leave is drawn on the next two screens.</span>
+          <span class="lang-zh">一层对一层：面板对寄存器块，货道对数据通路，控制板对控制板。面板不碰货，它只告诉控制板要什么。紫色那瓶就是正在被交出去的那件货。三个圈是控制板的几个状态；货从哪进哪出，后面两屏画。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ③ 怎么运作:CPU 只从这块面板说话 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">The CPU only talks through this panel</span>
+        <span class="lang-zh">CPU 只能从这块面板说话</span>
+      </h2>
+      <div class="primer-term">
+        <span class="primer-term-jargon"><span class="lang-zh">寄存器 register</span><span class="lang-en">register</span></span>
+        <span class="primer-term-plain">
+          <span class="lang-en">one slot on that panel: write it, the block acts differently</span>
+          <span class="lang-zh">面板上的一格：写一下，这块积木就换个做法</span>
+        </span>
+      </div>
+      <p>
+        <span class="lang-en">The panel has three slots: one starts it, one says how much, one is read-only. Reading that one asks whether it is busy.</span>
+        <span class="lang-zh">面板上有三格：一格按下就开始，一格写一次做多少，一格只能读。读那一格，是问它忙不忙。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 500" role="img"
+          aria-label="CPU 把值放上街，值下到这块积木的面板；读回来的路单独一条；面板下面那条粗带子是数据口，不经过面板"
+          data-label-zh="CPU 把值放上街，值下到这块积木的面板；读回来的路单独一条；面板下面那条粗带子是数据口，不经过面板"
+          data-label-en="The CPU puts a value on the road and it drops into this block's panel; the read path is a separate line; the thick belt below the panel is the data port and it does not pass through the panel">
+          <!-- the core running your program -->
+          <path d="M34 24 Q24 24 24 34 L24 120 Q24 130 34 130 L180 130.6 Q190 130.6 190 120.6 L190 34.6 Q190 24.6 180 24.6 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M36 36 L178 36.4 L177.6 118 L36 117.6 Z" fill="#fdfaf3"/>
+          <circle class="primer-hair" cx="32" cy="32" r="4" fill="#243244"/>
+          <path class="primer-hair" d="M46 130 L46 144 M64 130.1 L64 144 M82 130.2 L82 144 M118 130.3 L118 144 M136 130.4 L136 144 M178 130.5 L178 144" fill="none"/>
+
+          <!-- the main road -->
+          <path d="M24 176 L876 176.8 L875.2 208.8 L24 208 Z" fill="#fdfaf3" stroke="none"/>
+          <path d="M24 176 L876 176.8" fill="none"/>
+          <path d="M24 208 L876 208.8" fill="none"/>
+          <path class="primer-hair" d="M34 192 L120 192.3 M170 192.5 L256 192.8 M306 193 L392 193.3 M442 193.5 L528 193.8 M578 194 L664 194.3 M714 194.5 L800 194.8" fill="none"/>
+
+          <!-- the value goes down onto the road, and a read comes back up -->
+          <path d="M100 130 L100 170 M100 176 L93 163 M100 176 L107 163" fill="none"/>
+          <path d="M160 176 L160 136 M160 130 L153 143 M160 130 L167 143" fill="none"/>
+          <!-- the value itself, riding the road -->
+          <path d="M340 182 L392 182.4 L391.6 202 L340 201.6 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M366 182 L366 202" fill="none" stroke="#ffffff"/>
+
+          <!-- the block, hanging under the road -->
+          <path d="M480 240 Q470 240 470 250 L470 468 Q470 478 480 478 L866 478.8 Q876 478.8 876 468.8 L876 250.8 Q876 240.8 866 240.8 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="478" cy="248" r="4" fill="none"/>
+          <circle class="primer-hair" cx="868" cy="248" r="4" fill="none"/>
+          <!-- the panel: three full-width slots — a button, a number window, a lamp -->
+          <path class="primer-hair" d="M490 258 L856 258.4 L855.6 406 L490 405.6 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M504 268 L842 268.3 L841.7 300 L504 299.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M514 270 L546 270.2 L545.8 298 L514 297.8 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="530" cy="284.2" r="9" fill="#243244"/>
+          <path class="primer-hair" d="M504 316 L842 316.3 L841.7 348 L504 347.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M521 322 L521 342 M538 322.1 L538 342 M555 322.2 L555 342" fill="none"/>
+          <path class="primer-hair" d="M504 364 L842 364.3 L841.7 396 L504 395.7 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="530" cy="380.2" r="11" fill="#ffffff"/>
+          <circle class="primer-hair" cx="530" cy="380.2" r="5" fill="#243244"/>
+          <!-- write lands on the panel; read leaves it. Two lines, one direction each -->
+          <path d="M620 208 L620 250 M620 256 L613 243 M620 256 L627 243" fill="none"/>
+          <path d="M700 256 L700 214 M700 208 L693 221 M700 208 L707 221" fill="none"/>
+          <!-- the data port: another door entirely, and it never enters the panel -->
+          <path d="M24 432 L868 432.8 L867.2 464.8 L24 464 Z" fill="#ffffff" stroke="none"/>
+          <path d="M24 432 L868 432.8" fill="none"/>
+          <path d="M24 464 L868 464.8" fill="none"/>
+          <path d="M868 426 L892 448.4 L868 470" fill="none"/>
+          <path d="M64 448 L40 438 L40 458 Z" fill="#243244"/>
+          <circle class="primer-hair" cx="180" cy="448.1" r="10" fill="none"/>
+          <path class="primer-hair" d="M180 438 L180 458 M170 448 L190 448" fill="none"/>
+          <circle class="primer-hair" cx="380" cy="448.3" r="10" fill="none"/>
+          <path class="primer-hair" d="M380 438 L380 458 M370 448 L390 448" fill="none"/>
+          <circle class="primer-hair" cx="620" cy="448.6" r="10" fill="none"/>
+          <path class="primer-hair" d="M620 438 L620 458 M610 448 L630 448" fill="none"/>
+          <circle class="primer-hair" cx="780" cy="448.8" r="10" fill="none"/>
+          <path class="primer-hair" d="M780 438 L780 458 M770 448 L790 448" fill="none"/>
+
+          <text x="107" y="86" text-anchor="middle" font-size="20" font-weight="700" fill="#243244">CPU</text>
+          <text class="lang-zh" x="604" y="232" text-anchor="end" font-size="15" font-weight="600" fill="#243244">写</text>
+          <text class="lang-en" x="604" y="232" text-anchor="end" font-size="15" font-weight="600" fill="#243244">write</text>
+          <text class="lang-zh" x="716" y="232" font-size="15" font-weight="600" fill="#243244">读</text>
+          <text class="lang-en" x="716" y="232" font-size="15" font-weight="600" fill="#243244">read</text>
+          <text class="lang-zh" x="576" y="290" font-size="15" font-weight="600" fill="#243244">开始</text>
+          <text class="lang-en" x="576" y="290" font-size="15" font-weight="600" fill="#243244">start it</text>
+          <text class="lang-zh" x="576" y="338" font-size="15" font-weight="600" fill="#243244">一次多少</text>
+          <text class="lang-en" x="576" y="338" font-size="15" font-weight="600" fill="#243244">how much</text>
+          <text class="lang-zh" x="576" y="386" font-size="15" font-weight="600" fill="#243244">忙不忙</text>
+          <text class="lang-en" x="576" y="386" font-size="15" font-weight="600" fill="#243244">busy or not</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The road across the middle is the bus, the chip's own main street. CPU is the core running your program; the violet chit is the value it just wrote. Write and read are two separate lines, one direction each. The thick belt below the panel is the data port. Goods use that door; it never enters the panel. The three slots are start it, how much, and busy or not.</span>
+          <span class="lang-zh">中间那条街就是总线，芯片自己的主干道。CPU 是跑你程序的那颗核；紫色那张条子，是它刚写下去的值。写和读是两条线，各走一个方向。面板下面那条粗带子是数据口：货走那扇门，不经过面板。三格分别是开始、一次多少、忙不忙。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ④ 怎么运作:粗线走货,细虚线发令 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Goods on the thick line, orders on the thin one</span>
+        <span class="lang-zh">粗线走货，细虚线发令</span>
+      </h2>
+      <p>
+        <span class="lang-en">Goods come in on the left, pass through both work blocks, leave on the right. The control board carries nothing; it only says <span class="primer-mark">when to move</span>.</span>
+        <span class="lang-zh">货从左边进来，穿过两个处理块，从右边出去。粗线是数据通路，细虚线是控制通路：<span class="primer-mark">只发令，不走货</span>。</span>
+      </p>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 900 500" role="img"
+          aria-label="一条粗带子从左穿到右，穿过两个处理块；寄存器块只收 CPU 那一条箭头，控制板用细虚线向两个处理块发令"
+          data-label-zh="一条粗带子从左穿到右，穿过两个处理块；寄存器块只收 CPU 那一条箭头，控制板用细虚线向两个处理块发令"
+          data-label-en="One thick belt runs left to right through two work blocks; the register block takes the single arrow from the CPU side, and the control board sends orders to both blocks on thin dashed lines">
+          <!-- the case -->
+          <path d="M130 80 Q120 80 120 90 L120 410 Q120 420 130 420 L770 420.8 Q780 420.8 780 410.8 L780 90.8 Q780 80.8 770 80.8 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="128" cy="88" r="4" fill="none"/>
+          <circle class="primer-hair" cx="772" cy="88" r="4" fill="none"/>
+          <circle class="primer-hair" cx="128" cy="412" r="4" fill="none"/>
+          <circle class="primer-hair" cx="772" cy="412" r="4" fill="none"/>
+
+          <!-- the register block: slots holding what the CPU wrote -->
+          <path class="primer-hair" d="M140 112 L430 112.3 L429.7 230 L140 229.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M154 120 L416 120.3 L415.7 150 L154 149.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M154 158 L416 158.3 L415.7 188 L154 187.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M154 196 L416 196.3 L415.7 226 L154 225.7 Z" fill="#ffffff"/>
+          <path class="primer-hair" d="M166 126 L198 126.2 L197.8 144 L166 143.8 Z" fill="#ffffff"/>
+          <circle class="primer-hair" cx="182" cy="135" r="6" fill="#243244"/>
+          <path class="primer-hair" d="M170 166 L170 182 M182 166 L182 182 M194 166 L194 182" fill="none"/>
+          <circle class="primer-hair" cx="182" cy="211" r="9" fill="#ffffff"/>
+          <circle class="primer-hair" cx="182" cy="211" r="4" fill="#243244"/>
+          <!-- the only arrow from the CPU side, and it lands on the register block.
+               Painted after the case so the case fill cannot swallow its head. -->
+          <path d="M240 24 L240 106 M240 114 L233 101 M240 114 L247 101" fill="none"/>
+          <!-- what the panel holds becomes what the board obeys -->
+          <path class="primer-hair" d="M430 171 L470 171.2" fill="none" stroke-dasharray="2 9"/>
+          <path class="primer-hair" d="M478 171.2 L465 164 M478 171.2 L465 178" fill="none"/>
+
+          <!-- the control board: three states, arrows between them -->
+          <path class="primer-hair" d="M490 112 L760 112.3 L759.7 230 L490 229.7 Z" fill="#fdfaf3"/>
+          <circle cx="552" cy="158" r="24" fill="#ffffff"/>
+          <circle cx="626" cy="158.2" r="24" fill="#ffffff"/>
+          <circle cx="700" cy="158.4" r="24" fill="#ffffff"/>
+          <path class="primer-hair" d="M576 158 L594 158.1 M589 152 L600 158.1 L589 164" fill="none"/>
+          <path class="primer-hair" d="M650 158.2 L668 158.3 M663 152 L674 158.3 L663 164" fill="none"/>
+          <path class="primer-hair" d="M696 186 Q626 212 556 186 M556 186 L565 181 M556 186 L566 191" fill="none"/>
+
+          <!-- orders: hair AND dashed, so they differ in width and in style -->
+          <path class="primer-hair" d="M552 230 L552 256 L450 256.2 L450 264" fill="none" stroke-dasharray="2 9"/>
+          <path class="primer-hair" d="M443 262 L450 274 L457 262" fill="none"/>
+          <path class="primer-hair" d="M700 230 L700 256 L630 256.2 L630 264" fill="none" stroke-dasharray="2 9"/>
+          <path class="primer-hair" d="M623 262 L630 274 L637 262" fill="none"/>
+          <!-- and the one order that runs the other way: the board lights the
+               busy lamp, which is the slot §3 said you read to ask "busy?".
+               Drawn after the board so the board's fill cannot swallow it. -->
+          <path class="primer-hair" d="M490 211 L200 211.3" fill="none" stroke-dasharray="2 9"/>
+          <path class="primer-hair" d="M192 211.3 L205 205 M192 211.3 L205 217" fill="none"/>
+
+          <!-- the data path: one belt, unbroken, in through one wall and out the other -->
+          <path d="M24 320 L868 320.8 L867.2 352.8 L24 352 Z" fill="#ffffff" stroke="none"/>
+          <path d="M24 320 L868 320.8" fill="none"/>
+          <path d="M24 352 L868 352.8" fill="none"/>
+          <path d="M868 314 L892 336.4 L868 358" fill="none"/>
+          <path d="M56 336 L32 325 L32 347 Z" fill="#243244"/>
+          <path d="M150 324 L196 324.3 L195.7 348 L150 347.7 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M173 324 L173 348" fill="none" stroke="#ffffff"/>
+
+          <!-- two work blocks straddling the belt: a pair of rollers presses the goods -->
+          <path class="primer-hair" d="M400 272 L500 272.2 L499.8 400 L400 399.8 Z" fill="none"/>
+          <path class="primer-hair" d="M580 272 L680 272.2 L679.8 400 L580 399.8 Z" fill="none"/>
+          <circle class="primer-hair" cx="450" cy="300" r="19" fill="none"/>
+          <circle class="primer-hair" cx="450" cy="373" r="19" fill="none"/>
+          <path class="primer-hair" d="M450 281 L450 319 M431 300 L469 300 M437 287 L463 313 M437 313 L463 287" fill="none"/>
+          <path class="primer-hair" d="M450 354 L450 392 M431 373 L469 373 M437 360 L463 386 M437 386 L463 360" fill="none"/>
+          <circle class="primer-hair" cx="630" cy="300.2" r="19" fill="none"/>
+          <circle class="primer-hair" cx="630" cy="373.2" r="19" fill="none"/>
+          <path class="primer-hair" d="M630 281 L630 319 M611 300 L649 300 M617 287 L643 313 M617 313 L643 287" fill="none"/>
+          <path class="primer-hair" d="M630 354 L630 392 M611 373 L649 373 M617 360 L643 386 M617 386 L643 360" fill="none"/>
+
+          <!-- the beat and the wake-up come in from below -->
+          <path d="M300 420 L300 452" fill="none"/>
+          <path d="M480 420.3 L480 452" fill="none"/>
+          <path class="primer-hair" d="M300 452 L300 464 M480 452 L480 464" fill="none"/>
+
+          <text class="lang-zh" x="252" y="44" font-size="15" font-weight="600" fill="#243244">从总线来</text>
+          <text class="lang-en" x="252" y="44" font-size="15" font-weight="600" fill="#243244">from the bus</text>
+          <text class="lang-zh" x="140" y="104" font-size="15" font-weight="600" fill="#243244">寄存器块</text>
+          <text class="lang-en" x="140" y="104" font-size="15" font-weight="600" fill="#243244">register block</text>
+          <text class="lang-zh" x="490" y="104" font-size="15" font-weight="600" fill="#243244">控制板</text>
+          <text class="lang-en" x="490" y="104" font-size="15" font-weight="600" fill="#243244">control board</text>
+          <text class="lang-zh" x="452" y="244" font-size="15" font-weight="600" fill="#243244">控制通路</text>
+          <text class="lang-en" x="452" y="244" font-size="15" font-weight="600" fill="#243244">control path</text>
+          <text class="lang-zh" x="24" y="392" font-size="15" font-weight="600" fill="#243244">数据通路</text>
+          <text class="lang-en" x="24" y="392" font-size="15" font-weight="600" fill="#243244">data path</text>
+          <text x="300" y="488" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">CLK</text>
+          <text x="480" y="488" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">RST</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The port moves 4 bytes a beat — 32 bits. Say the clock beats a hundred million times a second. With neither side waiting that is 400 MB a second — a 4 GB film in ten seconds. The far end of that belt usually goes to memory. The busy lamp is lit by the control board. This block has its own port, so goods skip the panel. Some blocks have none: a serial port sends one byte at a time. Its transmit register THR is one such slot, and its goods really do cross the panel.</span>
+          <span class="lang-zh">数据口一次搬 4 个字节，也就是 32 位。时钟比如一秒一亿拍。两边都不等的时候就是一秒 400 MB —— 一部 4 GB 的电影十秒搬完。这条带子的另一头通常接着内存。忙不忙那一格，由控制板点亮。这块积木有自己的数据口，货不穿过面板。也有的积木没有数据口。串口（一次一个字节收发的那种口）的发送寄存器 THR 就是这样一格。那种积木的货真的要穿过面板。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑤ 为什么重要:两边都举手那一拍才成交 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Why does each side raise a hand?</span>
+        <span class="lang-zh">为什么两边都要举手？</span>
+      </h2>
+      <p>
+        <span class="lang-en">The two sides run at different speeds, so the ready one waits with its hand up.</span>
+        <span class="lang-zh">两边快慢不一样，先准备好的那边举着手等，货就不会丢。</span>
+      </p>
+
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 150" role="img"
+            aria-label="还是那台售货机：货道口的瓶子正落进取货口，两根杆上的小旗都举着"
+            data-label-zh="还是那台售货机：货道口的瓶子正落进取货口，两根杆上的小旗都举着"
+            data-label-en="The same vending machine: a bottle is dropping from the coil chute into the pickup bin, and the little flag on each pole is up">
+            <path class="primer-hair" d="M24 40 q6 -12 12 0 q6 -12 12 0 q6 -12 12 0 q6 -12 12 0 q6 -12 12 0" fill="none"/>
+            <path d="M22 46 L92 46.3 L76 92 L38 91.7 Z" fill="#fdfaf3"/>
+            <path class="primer-hair" d="M38 92 L44 108 M76 92.2 L70 108" fill="none"/>
+            <path d="M110 78 L158 78.4 Q164 78.4 164 84.4 L164 128 Q164 134 158 134 L110 133.6 Q104 133.6 104 127.6 L104 84 Q104 78 110 78 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M110 104 L158 104.3 L157.7 128 L110 127.7 Z" fill="#fdfaf3"/>
+            <path class="primer-hair" d="M110 114 L158 114.3" fill="none"/>
+            <path d="M82 80 L82 86 Q76 90 76 96 L76 114 L98 114 L98 96 Q98 90 92 86 L92 80 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M80 78 L94 78.2" fill="none"/>
+            <path d="M30 46 L30 10" fill="none"/>
+            <path d="M30 12 L50 19 L30 26 Z" fill="#fdfaf3"/>
+            <path d="M150 78 L150 10" fill="none"/>
+            <path d="M150 12 L130 19 L150 26 Z" fill="#fdfaf3"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p class="primer-analogy-lead"><span class="lang-en">It's like…</span><span class="lang-zh">就像……</span></p>
+          <p>
+            <span class="lang-en">The same machine: the coil says "one is ready", the bin says "I have room". Only then does the bottle drop.</span>
+            <span class="lang-zh">还是那台售货机：货道说「这瓶好了」，取货口说「我这空着」。两句都出来，瓶子才掉。</span>
+          </p>
+        </div>
+      </div>
+
+    </div>
+    <div class="primer-container primer-container--wide">
+      <div class="beat-heads">
+        <div class="primer-step">
+          <span class="primer-step-num">1</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">Room to take, nothing to give</span>
+              <span class="lang-zh">收的有空，送的没货</span>
+            </h3>
+          </div>
+        </div>
+        <div class="primer-step">
+          <span class="primer-step-num">2</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">A hand up, but the taker is busy</span>
+              <span class="lang-zh">送的举着手，收的忙着</span>
+            </h3>
+          </div>
+        </div>
+        <div class="primer-step">
+          <span class="primer-step-num">3</span>
+          <div class="primer-step-body">
+            <h3>
+              <span class="lang-en">Both hands up — it moves</span>
+              <span class="lang-zh">两个都举着手 —— 成交</span>
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 960 464" role="img"
+          aria-label="三拍：先是收的一边举手、送的没货；再是送的举了手、收的忙着；最后两边都举着手，这一拍瓶子才过去"
+          data-label-zh="三拍：先是收的一边举手、送的没货；再是送的举了手、收的忙着；最后两边都举着手，这一拍瓶子才过去"
+          data-label-en="Three beats: first the taker's hand is up and the giver has nothing; then the giver's hand goes up while the taker is busy; then both hands are up and the bottle crosses">
+          <!-- ==== beat 1 · the taker has room, the giver has nothing yet ==== -->
+          <path d="M136 120 L34 120 Q24 120 24 130 L24 430 Q24 440 34 440 L136 440.8" fill="#ffffff"/>
+          <path d="M136 120 L136 336" fill="none"/>
+          <path d="M136 380 L136 440.8" fill="none"/>
+          <path class="primer-hair" d="M34 138 L126 138.3 L125.7 318 L34 317.7 Z" fill="none"/>
+          <path class="primer-hair" d="M40 158 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0" fill="none"/>
+          <path class="primer-hair" d="M40 172 L120 172.3 L94 296 L66 295.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M66 296 L66 336 M94 296.2 L94 336" fill="none"/>
+          <circle class="primer-hair" cx="116" cy="306" r="11" fill="none"/>
+          <path class="primer-hair" d="M116 295 L116 317 M105 306 L127 306" fill="none"/>
+          <path class="primer-hair" d="M40 412 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0" fill="none"/>
+          <path d="M200 120 L302 120 Q312 120 312 130 L312 430 Q312 440 302 440 L200 440.8" fill="#ffffff"/>
+          <path d="M200 120 L200 336" fill="none"/>
+          <path d="M200 380 L200 440.8" fill="none"/>
+          <path class="primer-hair" d="M210 138 L302 138.3 L301.7 300 L210 299.7 Z" fill="none"/>
+          <path class="primer-hair" d="M232 196 L232 208 Q222 214 222 224 L222 252 L254 252 L254 224 Q254 214 244 208 L244 196 Z" fill="none"/>
+          <path class="primer-hair" d="M274 196 L274 208 Q264 214 264 224 L264 252 L296 252 L296 224 Q296 214 286 208 L286 196 Z" fill="none"/>
+          <path class="primer-hair" d="M214 252 L298 252.3" fill="none"/>
+          <path class="primer-hair" d="M220 340 L300 340.3 L299.7 400 L220 399.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M220 352 L300 352.3" fill="none"/>
+          <path d="M78 120 L78 24" fill="none"/>
+          <path d="M78 26 L90 62 L78 78 Z" fill="#fdfaf3"/>
+          <path d="M256 120 L256 24" fill="none"/>
+          <path d="M256 26 L216 40 L256 54 Z" fill="#fdfaf3"/>
+          <path d="M136 168 L192 168.1" fill="none"/>
+          <path d="M200 168.1 L188 162 M200 168.1 L188 174" fill="none"/>
+          <path d="M200 208 L144 207.8" fill="none"/>
+          <path d="M136 207.8 L148 202 M136 207.8 L148 214" fill="none"/>
+
+          <!-- ==== beat 2 · the giver raises a hand, the taker is busy ==== -->
+          <path d="M448 120 L346 120 Q336 120 336 130 L336 430 Q336 440 346 440 L448 440.8" fill="#ffffff"/>
+          <path d="M448 120 L448 336" fill="none"/>
+          <path d="M448 380 L448 440.8" fill="none"/>
+          <path class="primer-hair" d="M346 138 L438 138.3 L437.7 318 L346 317.7 Z" fill="none"/>
+          <path class="primer-hair" d="M352 158 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0" fill="none"/>
+          <path class="primer-hair" d="M352 172 L432 172.3 L406 296 L378 295.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M378 296 L378 336 M406 296.2 L406 336" fill="none"/>
+          <circle class="primer-hair" cx="428" cy="306" r="11" fill="none"/>
+          <path class="primer-hair" d="M428 295 L428 317 M417 306 L439 306" fill="none"/>
+          <path class="primer-hair" d="M352 412 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0" fill="none"/>
+          <path d="M512 120 L614 120 Q624 120 624 130 L624 430 Q624 440 614 440 L512 440.8" fill="#ffffff"/>
+          <path d="M512 120 L512 336" fill="none"/>
+          <path d="M512 380 L512 440.8" fill="none"/>
+          <path class="primer-hair" d="M522 138 L614 138.3 L613.7 300 L522 299.7 Z" fill="none"/>
+          <path class="primer-hair" d="M544 196 L544 208 Q534 214 534 224 L534 252 L566 252 L566 224 Q566 214 556 208 L556 196 Z" fill="none"/>
+          <path class="primer-hair" d="M586 196 L586 208 Q576 214 576 224 L576 252 L608 252 L608 224 Q608 214 598 208 L598 196 Z" fill="none"/>
+          <path class="primer-hair" d="M526 252 L610 252.3" fill="none"/>
+          <path class="primer-hair" d="M532 340 L612 340.3 L611.7 400 L532 399.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M532 352 L612 352.3" fill="none"/>
+          <path d="M390 120 L390 24" fill="none"/>
+          <path d="M390 26 L430 40 L390 54 Z" fill="#fdfaf3"/>
+          <path d="M568 120 L568 24" fill="none"/>
+          <path d="M568 26 L556 62 L568 78 Z" fill="#fdfaf3"/>
+          <path d="M448 168 L504 168.1" fill="none"/>
+          <path d="M512 168.1 L500 162 M512 168.1 L500 174" fill="none"/>
+          <path d="M512 208 L456 207.8" fill="none"/>
+          <path d="M448 207.8 L460 202 M448 207.8 L460 214" fill="none"/>
+          <path d="M412 324 L412 336 Q396 344 396 356 L396 380 L442 380 L442 356 Q442 344 426 336 L426 324 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M410 322 L428 322.2" fill="none"/>
+
+          <!-- ==== beat 3 · both hands up, so the bottle crosses ==== -->
+          <path d="M760 120 L658 120 Q648 120 648 130 L648 430 Q648 440 658 440 L760 440.8" fill="#ffffff"/>
+          <path d="M760 120 L760 336" fill="none"/>
+          <path d="M760 380 L760 440.8" fill="none"/>
+          <path class="primer-hair" d="M658 138 L750 138.3 L749.7 318 L658 317.7 Z" fill="none"/>
+          <path class="primer-hair" d="M664 158 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0" fill="none"/>
+          <path class="primer-hair" d="M664 172 L744 172.3 L718 296 L690 295.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M690 296 L690 336 M718 296.2 L718 336" fill="none"/>
+          <circle class="primer-hair" cx="740" cy="306" r="11" fill="none"/>
+          <path class="primer-hair" d="M740 295 L740 317 M729 306 L751 306" fill="none"/>
+          <path class="primer-hair" d="M664 412 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0 q7 -14 14 0" fill="none"/>
+          <path d="M824 120 L926 120 Q936 120 936 130 L936 430 Q936 440 926 440 L824 440.8" fill="#ffffff"/>
+          <path d="M824 120 L824 336" fill="none"/>
+          <path d="M824 380 L824 440.8" fill="none"/>
+          <path class="primer-hair" d="M834 138 L926 138.3 L925.7 300 L834 299.7 Z" fill="none"/>
+          <path class="primer-hair" d="M856 196 L856 208 Q846 214 846 224 L846 252 L878 252 L878 224 Q878 214 868 208 L868 196 Z" fill="none"/>
+          <path class="primer-hair" d="M898 196 L898 208 Q888 214 888 224 L888 252 L920 252 L920 224 Q920 214 910 208 L910 196 Z" fill="none"/>
+          <path class="primer-hair" d="M838 252 L922 252.3" fill="none"/>
+          <path class="primer-hair" d="M844 340 L924 340.3 L923.7 400 L844 399.7 Z" fill="#fdfaf3"/>
+          <path class="primer-hair" d="M844 352 L924 352.3" fill="none"/>
+          <path d="M702 120 L702 24" fill="none"/>
+          <path d="M702 26 L742 40 L702 54 Z" fill="#fdfaf3"/>
+          <path d="M880 120 L880 24" fill="none"/>
+          <path d="M880 26 L840 40 L880 54 Z" fill="#fdfaf3"/>
+          <path d="M760 168 L816 168.1" fill="none"/>
+          <path d="M824 168.1 L812 162 M824 168.1 L812 174" fill="none"/>
+          <path d="M824 208 L768 207.8" fill="none"/>
+          <path d="M760 207.8 L772 202 M760 207.8 L772 214" fill="none"/>
+          <!-- the marker ring: a filled annulus, not a stroked circle. A stroke
+               width written here would be a fixed number of user units while
+               Section L steps the figure's own stroke by breakpoint, so the
+               highlight would end up the thinnest line in the figure on a
+               phone. Two arcs closed into one path scale with the viewBox. -->
+          <path d="M791 304 C 817 304 839 326 839 353 C 839 380 817 400 790 400 C 763 400 743 379 743 351 C 743 323 764 304 791 304 Z M791 313 C 812 313 830 331 830 353 C 830 374 812 392 791 392 C 769 392 752 374 752 352 C 752 330 770 313 791 313 Z" fill="#ffd23f" fill-rule="evenodd" stroke="none"/>
+          <path d="M784 324 L784 336 Q768 344 768 356 L768 380 L814 380 L814 356 Q814 344 798 336 L798 324 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" d="M782 322 L800 322.2" fill="none"/>
+
+          <!-- the two panel dividers -->
+          <path class="primer-hair" d="M324 30 L324 452" fill="none" stroke-dasharray="3 9"/>
+          <path class="primer-hair" d="M636 30 L636 452" fill="none" stroke-dasharray="3 9"/>
+
+          <text x="140" y="160" font-size="14" font-weight="700" fill="#243244">valid</text>
+          <text x="140" y="230" font-size="14" font-weight="700" fill="#243244">ready</text>
+          <text class="lang-zh" x="24" y="110" font-size="15" font-weight="700" fill="#243244">送</text>
+          <text class="lang-en" x="24" y="110" font-size="14" font-weight="700" fill="#243244">giver</text>
+          <text class="lang-zh" x="306" y="110" text-anchor="end" font-size="15" font-weight="700" fill="#243244">收</text>
+          <text class="lang-en" x="306" y="110" text-anchor="end" font-size="14" font-weight="700" fill="#243244">taker</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The flag on each pole is that hand: flying means up, furled means down. The upper line leaves the giver: valid, "I have one, take it." The lower one comes back from the taker: ready, "I have room." The giver never waits for the taker. The taker may wait for the giver's hand. A raised hand and its bottle stay put until the handover beat.</span>
+          <span class="lang-zh">两根杆上的小旗就是那只手：展开是举着，垂下是放下。上面那条线从送的一边出发，叫 valid：我这有一件，拿去。下面那条从收的一边回来，叫 ready：我这有空，来吧。送的从不等对方先举，收的可以等看见对方举手再举。举了手没成交，瓶子和手都不许放下。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ⑥ 回顾 -->
+  <section class="primer-section">
+    <div class="primer-container">
+      <aside class="primer-recap recap-flat">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">An IP core is a block you plug onto the bus: register block, data path, control board.</span>
+              <span class="lang-zh">一块 IP core 就是能接上总线的积木：寄存器块、数据通路、控制板。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">The CPU only talks through the register block; the goods use the data port instead.</span>
+              <span class="lang-zh">CPU 只从寄存器块说话；货走的是数据口，不经过它。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Data crosses on the beat when valid and ready are both true. That is what keeps the fast side from dropping it.</span>
+              <span class="lang-zh">valid 和 ready 同时成立的那一拍，数据才算交出去 —— 快的那边因此不会丢数据。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Technical primer · primer-design · the handshake follows the real valid and ready rule</span>
+    <span class="lang-zh">技术图解 · primer-design · 握手的先后关系按 valid 和 ready 的真实规矩画</span>
+    · v1 · 2026-08-26
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+    /* CSS only hides the other language's <text>; an SVG's aria-label is an
+     * attribute, so EN mode must swap it here or screen readers hear Chinese
+     * under html[lang="en"]. The static aria-label in the markup is the zh
+     * default for the no-JS case. */
+    document.querySelectorAll('svg[data-label-zh]').forEach(function (s) {
+      s.setAttribute('aria-label',
+        s.getAttribute(lang === 'zh' ? 'data-label-zh' : 'data-label-en'));
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: primer
+Page-type: concept (technical · IP core internals)
+Created: 2026-08-26 · revised twice (critic 83 → 81 → this), then a fix pass against
+the 83 verdict: marker ring redrawn as a filled annulus, the flag named in the caption,
+the register-slot chips deleted from the two figures that never taught them, the busy
+lamp given the return line §3 promised, the numerals rebound to the figure below them,
+the clock rate marked as an example, and the recap's last tick handed real names.
+
+Decisions (7):
+1. [pick-the-IP-kind-before-anything-else] chose "a streaming block with its own data port — goods in one side, out the other, registers only for configuration" over "a PIO-style block whose data IS a register". Because tech-figures §4 hangs every later rule on that choice: only a block with a separate data port makes data-path-versus-control-path and valid/ready natural to teach, and only for that kind is "the data never crosses the register block" true. The other kind is named out loud in the data-path figcaption — some blocks have no data port, their goods ARE one slot on the panel, and a serial port's transmit register THR is such a slot, so a drawing of THAT block must run the data through the register block. Without that clause this page would contradict any page that lands on THR.
+2. [one-metaphor-and-two-glyphs-for-its-goods] chose "the vending machine, everywhere, with bottles on the machine's side and crates on the block's side" over "one glyph for both sides". Because the mapping figure's whole job is the pairing 货道↔数据通路, and the pairing is only legible if each side keeps its own object: the machine hands bottles (the card, the machine in the mapping figure, both stations of the handshake figure, which ARE the machine's coil chute and its pickup flap), the block moves crates (the hero belt, the block half of the mapping figure, the data-path figure). Nothing else on the page is violet, so the eye learns "violet = the one being handed over" without a legend. Yellow appears exactly once: the ring around the bottle on the beat it actually moves. That ring is a filled annulus — two arcs closed into one path, outer 48 / inner 39 — not a stroked circle. A stroke width written on the shape is a fixed count of user units, while primer.css Section L steps the wide-figure stroke by breakpoint (3.4 → 4.4 → 6.4 → 9), so a 6-unit ring measured 8.0px against a 4.53px main line at 1440 and 2.09px against 3.14px at 375: on a phone the page's one highlight was its thinnest line. A filled band is geometry, so it scales with the viewBox — 9 units render 12px at 1440 and 3.14px at 375, at or above the main line at every width.
+3. [flag-shape-carries-the-signal-state] chose "both wires always drawn — one solid arrow each way — and a flag unfurled or furled says whether that side is asserting" over "the wire drawn dashed when the signal is low". Because tech-figures §4 forbids collapsing valid/ready into one double arrow, so the two one-way lines must be permanent, and dashing already means "control path, never goods" one screen earlier. The first revision encoded the state as flag HEIGHT alone and needed a legend sentence in the caption; the lowered flag is now furled down its pole, so up and down differ in shape. What was still missing was smaller and worse: the section says 举手 six times and the figure draws a flag, and the word 旗 lived only in an aria-label — the metaphor and the glyph were never tied together in anything a reader sees. One clause at the head of the figcaption ties them. That is naming the object, not legending the code.
+4. [beat-order-proves-the-dependency-direction] chose "beat 1 = the taker's hand up with nothing to give, beat 2 = the giver's hand up while the taker is busy, beat 3 = both" over "beat 1 = the giver waiting for the taker". Because §4 forbids drawing an enforced order in which the source withholds valid: beat 2 shows the giver's hand going up with the taker's hand still down, which is exactly the legal direction, and beat 1 shows the reverse case is legal too. The order also keeps the hold rule true — a raised hand and its bottle stay put until the handover beat — which the reverse order would have shown being violated.
+5. [the-numerals-are-the-caption-layer] chose "three circled numerals centred over the three beats, each phrase in an h3" over "the three phrases painted inside the SVG". Because the numbered heads are one of primer's three signature moves and this is the geometry they exist for; the figure keeps 6 labels (valid, ready, giver, taker) instead of 12, and no phrase is stated twice. The stock `.primer-step` is a horizontal flex built for a single step used as a section header, so `.beat-heads .primer-step` restacks it to a centred column — otherwise each numeral sits at the left of its column, over the giver station rather than over the beat. Restacking is only half of it. Measure the gaps ink to ink rather than box to box — the figure's viewBox carries 24 user units of clear sky above the flag tips, 32px at this tier — and the stock margins gave 40px up to the analogy card and 52px down to the first line of the drawing: the heads bound upward, to the card, and stopped being the figure's caption layer. Widening the heads' own top margin to 56 and zeroing the figure's leaves 56 up and 32 down. Two lines of page-local CSS, no numbers written into the figure.
+6. [two-doors-in-one-picture] chose "the register-panel screen draws the bus arriving on the panel AND the data belt running the full width, unbroken, through both walls" over "the panel alone, with the data port left to the next screen". Because the sentence that screen exists to teach is "the CPU side has exactly one door", and a reader can only check that against a picture where the other door is visible. Write and read are two separate one-way lines (§3), so the read-only slot has its own line leaving the panel, and the incoming arrow on the data-path screen is labelled 从总线来 / from the bus so the claim is checkable there too.
+7. [three-states-not-a-box-labelled-FSM] chose "both control boards drawn as three state circles with arrows and a return arc" over "a labelled box on the block and chips on the machine". Because §4 lists an empty FSM box as a forbidden drawing, and because the middle pairing claims 控制板对控制板 — a claim the arrow can only make good if the two shapes match. A vending machine really does have states (idle → paid → dispensing), so the machine's board is drawn as the block's board to the unit: same three circles, same two arrows, same return arc bowing the same way. It first carried a chip row as hair detail, which crowded its arc up out of its own box and left the two boards curving opposite ways — in the one figure whose whole claim is that they are the same part. The chips went; identical is the point.
+
+Vocabulary held across figures:
+- Register slots are the same three glyphs everywhere they appear — a filled button, a three-tick value window, a ringed indicator lamp — in the mapping figure, the register-panel figure and the data-path figure. The first revision drew them as arbitrary tick groups in the two figures that were not the one teaching them; a glyph that becomes vocabulary has to be grepped for in every figure that draws that object, not the ones you remember. Three glyphs is also the count: the mapping and data-path figures each stamped a fourth per-slot element — a solid ink chip at the slot's right end, in the heaviest value on the page — that the register-panel figure, the one screen that actually teaches a slot, never drew. Two supporting drawings cannot carry vocabulary the teaching drawing has not introduced, so the chips went rather than being back-filled into §3.
+- The control path is hair + `stroke-dasharray="2 9"` everywhere it appears, including the short arrow from the register block into the control board: that arrow carries an order, not goods, and drawing it at the main pen weight contradicted the h2 one line above it. It also runs in both directions. §3 teaches a read-only slot — 读那一格,是问它忙不忙 — and the data-path figure first drew the control path strictly outbound, leaving the busy lamp, which IS that slot, with no line touching it. A second dashed line now comes back from the control board and lands on the lamp, and the figcaption says in one clause who lights it. A promise made on one screen has to have a drawn way home on the screen that owes it.
+
+- Captions address the reader, never the next person to draw a diagram. The data-path caption used to end "that drawing runs data through the panel" — a note to a future illustrator, with 串口 left unglossed beside it. It now says what a serial port is (one byte at a time, sent and received) and that its goods really do cross the panel. Same for the recap's last tick: items 1 and 2 hand over IP core, 总线, 寄存器块, 数据通路, 控制板, 数据口, and the third one still said 举手 and 货. explain-method §5 calls the metaphor scaffolding; it comes off at the end. It now reads valid 和 ready 同时成立的那一拍,数据才算交出去.
+
+Known trade-offs:
+- The mapping figure's belt starts at the case wall rather than outside it: the corridor between the two objects carries the pairings, and a belt stub crossing it would read as a connection between the machine and the block. The belt's own fill interrupts the wall, so the goods still enter through a visible doorway, and the caption says where they come from is drawn on the next two screens.
+- The pairings are double-headed hair arrows, not dashes. Dashes on this page mean exactly one thing, and a pairing drawn with the same pen two screens earlier would blunt it.
+- Two violet objects share the mapping figure — the machine's bottle and the block's crate. That is the page's only departure from one violet subject per drawing, and it is deliberate: the figure is two half-figures side by side and the violet pair is what makes 货道↔数据通路 legible. It is not licence for decorative violet anywhere else.
+- Figure heights are computed, not chosen: 900-wide viewBoxes on the 1080 tier render at ×1.2, so 454 / 500 / 500 units become 545 / 600 / 600px, and the 960-wide handshake figure on the wide tier renders ×1.3333, so 464 units become 619px. All four sit under the 640px self-imposed ceiling, and the data-path figure is at the ≤500-unit working value tech-figures §8 sets for its own row.
+- Only the numbered heads and the handshake figure ride `primer-container--wide`; that section's heading, prose and card stay on `.primer-container` with the rest of the page, so the spine does not move for one section. The wide tier is earned by the figure's three columns, not by its text.
+- viewBox dead margins, measured against each figure's own content box: hero 20/16/24/12, machine card 20/20/12/4, mapping 24/8/12/23, register panel 24/8/24/21, data path 24/8/24/7, handshake card 22/16/10/16, handshake 24/24/24/12 (left/right/top/bottom, user units). illustration-craft §8 caps margins at 24, and none of the four section figures buys its ratio with dead space: width fill is 95–96%, height fill 91–94%.
+- The dos-and-donts §1 illustration share, measured per section at 1440 in both languages: analogy 0.539 zh / 0.519 en, register panel 0.538 / 0.527, data path 0.555 / 0.544, handshake 0.526 / 0.518. English runs taller per section because its figcaptions wrap longer at the same 68ch measure, so the captions were cut to the facts rather than the figures grown. The recap screen is the one section §1 exempts.
+- Two term bubbles, not six: `IP core` and `寄存器 register`. 数据通路 / 控制通路 is translated in the body prose of its own section, and valid / ready in the figcaption directly under the drawing that names them — a bubble under every h2 turns the page into a glossary, which is what canonical decision 5 warns about.
+- Label counts: hero 4 (the cap for a hero), both cards 0, mapping 10, register panel 11, data path 12, handshake 6 — under the 14 the 1080 tier allows and the 18 the wide tier allows. CLK and RST have no Chinese form and are glossed once, in the hero figcaption; THR is glossed in the data-path figcaption beside it.
+- Real numbers, with both factors on the page so the product can be recomputed: 4 bytes a beat (which is the 32 bits the port is wide), a hundred million beats a second, therefore 400 MB a second when neither side waits (a 4 GB film in ten seconds). 100 MHz × 4 bytes = 400 MB/s and 4000 MB / 400 = 10 s. The throughput is stated as the no-waiting case on purpose — the whole last screen is about the beats where one side does wait. The clock rate is prefixed 比如 / "say": real cores run from 32 kHz to several GHz, and a hundred million beats is this page's worked example, not a property of clocks. The width used to be glossed as "the four letters of data" — a letter-count pun standing where the actual anchor is 32-bit.
+- No part number is stamped on any drawing. The block is named by what it does, and the register slots are named in plain words — start it, how much, busy or not — because a screen invented for a drawing must not look like a manual page.
+- On a 375px phone the content column is 335px, so the handshake figure's three panels are about 104px each and a 14px in-figure label renders near 5px. That is unreadable by design: every number, name and convention a label carries is repeated in its figcaption, which is what a phone reader actually reads. The primer-fig-wide stroke stair keeps the line weight at picture-book thickness there.
+- The hero deliberately carries no legibility-critical detail. primer.css's hero tier renders hero strokes at 2.26-3.00px between 769 and 980px of viewport width (known-bugs 8.2, fixed elsewhere), so the hero's job here is the three ports and the crate, and the caption names all of them.
+/design-review:self-diff -->
+
+</body>
+</html>
