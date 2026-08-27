@@ -29,7 +29,7 @@ Generates picture-explainer pages for readers who know nothing about the topic: 
    - `.primer-figure` — 插画容器(`<figure>`),内含 `<svg>` + `.primer-figcaption`。
 6. 双语:每段 `<span class="lang-en">…</span><span class="lang-zh">…</span>`;nav 放 `.primer-langtoggle lang-toggle` 按钮组 + 页尾 IIFE 脚本(从 canonical 复制:脚本翻 `html[data-lang]`,CSS 靠 `html[data-lang="en"] .lang-zh { display:none }` 收起另一语)。默认中文。
 7. 先读 `references/dos-and-donts.md`(品位边界)和 `references/explain-method.md`(拆解规则),再复制 `references/canonical/<页型>.html` 起步。
-8. 技术主题(位域 / 波形 / 总线 / IP core / 调用路径 / 算法 / 互连与地址带)先读 `references/tech-figures.md`,现成 SVG 起点在 `templates/diagrams/`。
+8. 技术主题(位域 / 波形 / 总线 / IP core / 调用路径 / 算法 / 互连与地址带 / 协议分层 / 纵向地址映射)先读 `references/tech-figures.md`,现成 SVG 起点在 `templates/diagrams/`。
 
 ## §2 触发关键词
 
@@ -52,8 +52,8 @@ eli5 / ELI5 / explain like I'm five / explain simply / picture explainer /
 2. `references/explain-method.md` — 拆解规则(术语先翻译 · 抽象必配比喻 · 数字给实物参照 · 句长上限 · 讲解顺序锁定)
 3. `references/illustration-craft.md` — 厚描边插画画法(描边宽度 / 圆头 / 抖动 / 平涂色序)
 4. `references/design-tokens.md` — token 清单
-5. `references/tech-figures.md` — **技术主题才读**:七类技术图的规格(位域 / 时序波形 / 总线 SoC /
-   IP core 内部 / 调用路径 / 算法 / 互连与地址带),每一类都带"必须画 / 禁止 / 违例改写 / viewBox 与标签预算"
+5. `references/tech-figures.md` — **技术主题才读**:九类技术图的规格(位域 / 时序波形 / 总线 SoC /
+   IP core 内部 / 调用路径 / 算法 / 互连与地址带 / 协议分层 / 纵向地址映射),每一类都带"必须画 / 禁止 / 违例改写 / viewBox 与标签预算"
 6. `references/canonical/{concept,process,compare}.html` + 同名 `.md` — 对应页型的 canonical(含 self-diff 决策块)
 
 ## §5 发布前检查(MUST)

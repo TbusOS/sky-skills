@@ -62,6 +62,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 | **改既有代码五步流程**（考古找设计意图 → 读子系统规范 → 上下文·并发·**多核 SMP** → 影响面 → 方案优先级;含"原设计对不对"的三档判断） | `references/modifying-existing-code.md` | 通用工程纪律 |
 | **改动边界**（提交前看 diff:每行能否指回需求 / 四类过度设计的内核形态 / 级联改动·隐形决策·错误的抽象) | `references/change-discipline.md` + `scripts/diff_discipline.mjs` | 通用工程纪律 |
 | **答案验证契约**（引具体符号时附 `[CLAIMS]`） | `references/claims-contract.md` | 事实检查 靶子 |
+| **画调用路径**（30 层以上的调用链用 ASCII 树,别画流程图;树里一个非 ASCII 字符都不许有 —— 全部深度都编码在列里） | `references/call-path-figures.md` + `scripts/check_call_tree.py` | 通用工程纪律 |
 | 该做 / 不该做速查 | `dos-and-donts.md` | 本 skill 积累 |
 | 已知坑（gotchas） | `known-bugs.md` | 本 skill 积累 |
 
@@ -128,6 +129,7 @@ references. Load a reference only when the task needs it (progressive disclosure
 
 **已落（P1 客观检查 + P2 回归测试 + P3 打分面板/学习循环 + P4 记录表/版本适配）**：
 - `scripts/fact_gate.mjs` — 查答案 `[CLAIMS]` 里的 API / CONFIG / 符号 / compatible 是否在真内核树**实存**（树无关 `--tree`；exit 0 干净 / 1 有幻觉 / 3 检查坏不算 fail）
+- `scripts/check_call_tree.py` — 查答案里的 ASCII 调用树是否列对得上（非 ASCII / 缩进不在步长 / `<---` 落到不存在的帧 / 单行过宽；`--selftest` 四探针 + 一棵干净树校准假阳）
 - `scripts/checkpatch_gate.sh` — 用内核自带 `checkpatch.pl` 校代码风格
 - `scripts/defconfig_gate.mjs` — 查 defconfig 里**写了却没生效**的行(符号本 arch 不存在 / `depends on` 不满足 / 上游已删)。按符号比对声明值与 `.config` 实际落值,**无视顺序** —— `savedefconfig` 的 diff 会被重排序淹没,3 行真问题藏在几百行噪声里。另报 `#CONFIG_X`(`#` 后缺空格 ⇒ Kconfig 视为纯注释)。`--selftest` 做自降解校准;exit 0 全生效 / 1 有声明未生效 / 3 闸坏。规则见 `references/bsp_discipline.md §1`
 - `scripts/decompressor_limit_check.sh` — 判断一棵树会不会踩 arm32 解压器那条可执行窗口上界（两级判据：先架构后 BSP；两边都有/都没有 `configs/vendor` 时诚实报「未判定」要求 `--arch`，不猜）

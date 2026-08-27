@@ -37,6 +37,21 @@
 
 ## Don'ts
 
+### DD-010: 调用树里不许出现非 ASCII 字符 —— 一个宽字符就让它下面所有帧的深度对不上
+- since/until/range: 版本无关
+- scope/limits: 只管答案正文里的 ASCII 调用树;HTML 页面里的分层带画法不在此列(见 `references/call-path-figures.md` §5)
+- check: `scripts/check_call_tree.py <file>`（exit 1 = 有发现;`--selftest` 四类缺陷各一个探针 + 一棵干净树校准假阳）
+- linked_eval_case: —（闸自带 selftest,且上线前对全仓 skill 文档跑过 0 假阳）
+- provenance: self-distilled
+- fires/catches: 0/0
+
+  30 层以上的调用链画成流程图必然不可读,ASCII 树是对的选择 —— 但它把**全部信息编码在列里**:
+  每一帧的深度就是它的缩进。中文一个字在某些字体里占两格、在另一些里占一格,
+  于是它下面每一行的列都错了,**而整棵树看起来仍然是齐的**。这是最难发现的一种坏法。
+
+  推论三条:注释写在树**外面**(答案正文里),树里只留 ASCII · `<---` 的起始列必须对上某一帧
+  (对不上就是"返回到不存在的地方")· 单行别超过容器宽度(折下来的那半截读作列 0 的新帧)。
+
 ### DD-001: 不要凭 defconfig 的字面内容断言某选项已启用 —— 写进去 ≠ 生效
 - since/until/range: 版本无关（Kconfig 语义一直如此）
 - scope/limits: 需要一份该配置真实构建产出的 `.config` 才能判定；只有 defconfig 判不了

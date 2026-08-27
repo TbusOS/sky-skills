@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>同一块内存，为什么会有两个门牌号 · 图解读本</title>
+<meta name="description" content="The DIMM holds one continuous stretch; the system sees it split by an MMIO hole. 零基础图解：同一块内存，在内存条上和在系统眼里是两个号。">
+<meta property="og:title" content="同一块内存，为什么会有两个门牌号 · 图解读本">
+<meta property="og:description" content="零基础图解：内存条上是连续的一整条，系统眼里却被 MMIO 空洞切开，被盖住的那 1 GiB 换了个号在高处重新露面。同一块内存，两个门牌号。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed on purpose (verify.py validates primer-*
+   * classes against primer.css; local layout stays unprefixed). */
+  .recap-flat { margin-top: 0; }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">One chunk of RAM, two house numbers</span>
+          <span class="lang-zh">同一块内存，两个门牌号</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">Your machine has 16 GiB installed and reports 16 GiB. Nothing is missing &mdash; but the gigabyte you are reading is <em>not</em> at the number the module would give it. Something swapped its plate.</span>
+          <span class="lang-zh">机器插了 16 GiB，系统也报 16 GiB，一点没少。可你正在读的那 1 GiB，<strong>并不在内存条给它的那个号上</strong>——有人给它换了块门牌。</span>
+        </p>
+      </div>
+      <figure class="primer-figure primer-fig-hero">
+        <svg viewBox="0 0 500 340" role="img"
+          aria-label="一条内存条，上面焊着四颗内存颗粒，金手指在下沿；旁边另画一根竖着的尺子，刻度从下往上走"
+          data-label-zh="一条内存条，上面焊着四颗内存颗粒，金手指在下沿；旁边另画一根竖着的尺子，刻度从下往上走"
+          data-label-en="A memory module with four chips soldered on it and its gold fingers along the bottom edge, drawn beside a vertical ruler whose marks count upward">
+          <path d="M44 118 L392 116 L390 246 L46 248 Z" fill="#ffffff"/>
+          <path class="primer-hair" fill="none" d="M44 140 L392 138 M46 226 L390 224"/>
+          <path d="M60 248 L376 246 L376 262 L60 264 Z" fill="#ffd23f"/>
+          <path class="primer-hair" fill="none" d="M84 248 L84 264 M116 248 L116 264 M148 248 L148 264 M180 248 L180 264 M212 248 L212 264 M244 248 L244 264 M276 248 L276 264 M308 248 L308 264 M340 248 L340 264"/>
+          <path d="M70 156 L142 155 L141 212 L69 213 Z" fill="#7a5cd6"/>
+          <path d="M158 155 L230 154 L229 211 L157 212 Z" fill="#7a5cd6"/>
+          <path d="M246 154 L318 153 L317 210 L245 211 Z" fill="#7a5cd6"/>
+          <path d="M334 153 L378 152 L377 209 L333 210 Z" fill="#7a5cd6"/>
+          <path fill="none" d="M446 96 L446 286"/>
+          <path class="primer-hair" fill="none" d="M446 286 L426 286 M446 248 L432 248 M446 210 L426 210 M446 172 L432 172 M446 134 L426 134 M446 96 L426 96"/>
+          <path d="M446 88 L438 104 L454 104 Z" fill="#7a5cd6"/>
+          <text x="218" y="98" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">DIMM</text>
+          <text x="412" y="292" text-anchor="end" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">0x0</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The module itself is one continuous stretch: chip after chip, counted from zero at the gold fingers. Nothing on the stick knows what a hole is.</span>
+          <span class="lang-zh">内存条本身是连续的一整条：一颗接一颗，从金手指那头的 0 号开始数。<strong>条子上没有「空洞」这回事</strong>。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Who took the number away</span>
+        <span class="lang-zh">号是被谁占走的</span>
+      </h2>
+      <p>
+        <span class="lang-en">Devices need addresses too. A graphics card, a network card, the interrupt controller &mdash; each needs a stretch of numbers the CPU can write to, and those numbers come out of the same pool as memory. Firmware carves that stretch out below the 4&nbsp;GiB mark, and whatever DRAM was sitting there is now covered: the number belongs to a device, so reading it reaches the device, not the memory.</span>
+        <span class="lang-zh">设备也要门牌。显卡、网卡、中断控制器——每样都要一段 CPU 能写的号，而这些号和内存的号<strong>出自同一个池子</strong>。固件在 4&nbsp;GiB 以下切出这么一段，原本坐在那儿的 DRAM 就被盖住了：那个号已经归设备了，读它读到的是设备，不是内存。</span>
+      </p>
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 150" role="img"
+            aria-label="一栋小楼分四层，每层门口挂一块牌子，第三层挂的那块是黄色的、号码和楼层顺序对不上"
+            data-label-zh="一栋小楼分四层，每层门口挂一块牌子，第三层挂的那块是黄色的、号码和楼层顺序对不上"
+            data-label-en="A four-storey building with a plate at each door; the third-floor plate is yellow and its number does not follow the floors">
+            <path class="primer-hair" d="M6 142 L174 140.8" fill="none"/>
+            <path d="M40 22 L140 20 L138 140 L38 142 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M40 52 L139.5 50 M40 82 L139 80 M40 112 L138.5 110" fill="none"/>
+            <path d="M54 30 L74 29.6 L73.8 44 L53.8 44.4 Z" fill="#efe9fc"/>
+            <path d="M54 60 L74 59.6 L73.8 74 L53.8 74.4 Z" fill="#efe9fc"/>
+            <path d="M54 90 L74 89.6 L73.8 104 L53.8 104.4 Z" fill="#ffd23f"/>
+            <path d="M54 120 L74 119.6 L73.8 134 L53.8 134.4 Z" fill="#efe9fc"/>
+            <path d="M96 88 L128 87.4 L127.6 106 L95.6 106.6 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M104 96 L120 95.7" fill="none" stroke="#ffffff"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p>
+            <span class="lang-en">A building has four floors, one flat each. But the plates read 1, 2, <strong>5</strong>, 4 &mdash; the third plate was needed elsewhere, so this flat was given a spare number. The flat did not move; its <em>plate</em> did. Ask for &ldquo;number 5&rdquo; and you arrive at the third floor. Ask for &ldquo;the third floor&rdquo; and the postman has no idea what you mean, because plates are all he carries.</span>
+            <span class="lang-zh">一栋楼四层，一层一户。可门牌上写的是 1、2、<strong>5</strong>、4——3 号那块牌子被别处占用了，这一户只好领了个备用号。<strong>房子没动，动的是牌子。</strong>你说「找 5 号」，来的就是三楼；你说「找三楼」，邮差反而不懂——他手上只有门牌。</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Two books, side by side</span>
+        <span class="lang-zh">两本本子，并排放</span>
+      </h2>
+      <p>
+        <span class="lang-en">The memory is still on the stick and still working &mdash; it is only unreachable at its own number. So firmware hands it a second one, above the top of everything else. Put the two books side by side and the whole thing becomes one picture.</span>
+        <span class="lang-zh">那块内存还在条子上、还好好的，只是<strong>在自己的号上够不着</strong>。于是固件另给它一个号，安排在所有东西的最上头。把两本本子并排放，这件事就是一张图。</span>
+      </p>
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 960 440" role="img"
+          aria-label="两本分开的门牌本。左边是系统看到的那本：低处一段内存、中间一段被 MMIO 占住的空洞、上面又是内存，最上面那段黄色的，是被空洞盖住的那 1 GiB 换了个号重新露面。右边是内存条上真实的那本，连着一整条，其中淡紫那一小段就是被盖住的那段。一条紫线把这两段连起来，写着「重映射」。每个分界都用引线单独标出门牌号"
+          data-label-zh="两本分开的门牌本。左边是系统看到的那本：低处一段内存、中间一段被 MMIO 占住的空洞、上面又是内存，最上面那段黄色的，是被空洞盖住的那 1 GiB 换了个号重新露面。右边是内存条上真实的那本，连着一整条，其中淡紫那一小段就是被盖住的那段。一条紫线把这两段连起来，写着「重映射」。每个分界都用引线单独标出门牌号"
+          data-label-en="Two separate address books. On the left, what the system sees: a stretch of memory low down, an MMIO hole in the middle, memory again above it, and at the top the yellow band — the gigabyte the hole covered, given a second number. On the right, what the DIMM actually holds: one continuous stretch, with the pale violet slice being the covered part. A violet line joins the two, labelled remap. Every boundary gets its own leader line and number">
+          <defs>
+            <!-- the hole is not memory · texture, not a new colour -->
+            <pattern id="pAmHatch" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="16" stroke="#243244" stroke-width="2.4" opacity="0.55"/>
+            </pattern>
+          </defs>
+
+          <!-- ── left book · what the system sees (low addresses at the bottom) ── -->
+          <rect x="150" y="268" width="280" height="112" fill="#ffffff"/>
+          <rect x="150" y="200" width="280" height="68"  fill="#ffffff"/>
+          <rect x="150" y="200" width="280" height="68"  fill="url(#pAmHatch)"/>
+          <rect x="150" y="108" width="280" height="92"  fill="#ffffff"/>
+          <rect x="150" y="40"  width="280" height="68"  fill="#ffd23f"/>
+          <path fill="none" d="M150 40 L430 40 L430 380 L150 380 Z"/>
+          <path class="primer-hair" fill="none" d="M150 108 L430 108 M150 200 L430 200 M150 268 L430 268"/>
+
+          <!-- ── right book · what the DIMM actually holds ── -->
+          <rect x="620" y="268" width="280" height="112" fill="#ffffff"/>
+          <rect x="620" y="200" width="280" height="68"  fill="#efe9fc"/>
+          <rect x="620" y="120" width="280" height="80"  fill="#ffffff"/>
+          <path fill="none" d="M620 120 L900 120 L900 380 L620 380 Z"/>
+          <path class="primer-hair" fill="none" d="M620 200 L900 200 M620 268 L900 268"/>
+
+          <!-- ── segment names ── -->
+          <text x="290" y="330" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">DRAM</text>
+          <text x="290" y="240" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">MMIO</text>
+          <text x="290" y="160" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">DRAM</text>
+          <text class="lang-zh" x="290" y="80" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">搬上来的那 1 GiB</text>
+          <text class="lang-en" x="290" y="80" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">the moved gigabyte</text>
+          <text x="760" y="330" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">DRAM</text>
+          <text class="lang-zh" x="760" y="240" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">被空洞盖住的一段</text>
+          <text class="lang-en" x="760" y="240" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">the covered slice</text>
+
+          <!-- ── book titles ── -->
+          <text class="lang-zh" x="290" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="#55617a">系统看到的那本</text>
+          <text class="lang-en" x="290" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="#55617a">what the system sees</text>
+          <text class="lang-zh" x="760" y="104" text-anchor="middle" font-size="15" font-weight="700" fill="#55617a">内存条上真实的那本</text>
+          <text class="lang-en" x="760" y="104" text-anchor="middle" font-size="15" font-weight="700" fill="#55617a">what the DIMM holds</text>
+
+          <!-- ── boundary leaders · they point AT the line, never into a band ── -->
+          <path class="primer-hair" fill="none" d="M150 40 L96 40 M150 268 L96 268 M150 380 L96 380"/>
+          <text x="88" y="46"  text-anchor="end" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">TOUUD</text>
+          <text x="88" y="274" text-anchor="end" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">TOLUD</text>
+          <text x="88" y="386" text-anchor="end" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">0x0</text>
+
+          <!-- ── one plain mapping, and the remap that is the point ── -->
+          <path class="primer-hair" fill="none" stroke-dasharray="10 12" d="M612 324 L438 324"/>
+          <path fill="none" stroke="#7a5cd6" d="M612 234 L540 234 Q524 234 524 218 L524 90 Q524 74 508 74 L446 74"/>
+          <path fill="#7a5cd6" stroke="#7a5cd6" d="M430 74 L448 65 L448 83 Z"/>
+          <text class="lang-zh" x="524" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">重映射</text>
+          <text class="lang-en" x="524" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">remap</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Two books, never merged. The right one is what the DIMM holds: one continuous stretch, and shorter than the left, because a machine can number far more than it has installed. The left one is what the system sees &mdash; memory at the bottom, the hatched MMIO hole above it (hatching always means &ldquo;this is not memory&rdquo;), memory again, and at the very top the yellow band: the covered gigabyte, back under a second number. The violet line joins the two &mdash; same silicon, two plates. Every boundary gets its own leader, because a boundary is an address while a band is a range; <code>TOLUD</code> marks where the low memory ends and the hole begins. Band heights are not to scale, and low addresses are at the bottom.</span>
+          <span class="lang-zh">两本本子，永不合并。右边那本是内存条上真实的一条：连续，而且比左边<strong>短</strong>——机器能编的号远比它插的内存多。左边那本是系统看到的：底下是内存，往上是画斜纹的 MMIO 空洞（斜纹的意思始终是「这一段不是内存」），再往上又是内存，最顶上那条黄色的，就是被盖住的那 1 GiB 换了个号回来了。紫线把两段连起来——<strong>同一块硅片，两块门牌</strong>。每条分界各拉一条引线，因为<strong>分界是一个地址、段是一个范围</strong>；<code>TOLUD</code> 标的是低端内存到头、空洞开始的那一处。段高不按比例，低地址在下。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="primer-section">
+    <div class="primer-container">
+      <aside class="primer-recap recap-flat">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">The module is one continuous stretch. The split you see belongs to the address map, not to the hardware.</span>
+              <span class="lang-zh">内存条是连续的一整条。你看到的那道口子属于<strong>地址表</strong>，不属于硬件。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Device addresses and memory addresses come out of the same pool, so devices really do take numbers away from RAM.</span>
+              <span class="lang-zh">设备的号和内存的号出自<strong>同一个池子</strong>，所以设备真的会占掉内存的号。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">The covered memory is not lost &mdash; firmware re-numbers it above everything else. Same silicon, second plate.</span>
+              <span class="lang-zh">被盖住的内存没有丢——固件把它重新编到所有号的上头。同一块硅片，第二块门牌。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Technical primer · primer-design · this page draws two address books; what runs on the wire between chips is another picture</span>
+    <span class="lang-zh">技术图解 · primer-design · 这一页画的是两本门牌本，芯片之间线上跑什么是另一张图</span>
+    · v1 · 2026-08-27
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+    /* CSS only hides the other language's <text>; an SVG's aria-label is an
+     * attribute, so EN mode must swap it here or screen readers hear Chinese
+     * under html[lang="en"]. The static aria-label in the markup is the zh
+     * default for the no-JS case. */
+    document.querySelectorAll('svg[data-label-zh]').forEach(function (s) {
+      s.setAttribute('aria-label',
+        s.getAttribute(lang === 'zh' ? 'data-label-zh' : 'data-label-en'));
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: primer
+Page-type: concept (technical · interconnect and address map)
+Created: 2026-08-26
+
+Decisions (5):
+1. [two-strips-never-merged] chose "two separate horizontal books with 90 units of blank between them" over "one long strip split by a divider". Because: tech-figures §7 forbids the merged form, and the reason is the misreading it produces — a divider inside one strip reads as two halves of the same numbering, which is the exact belief this page exists to correct. The blank between them is load-bearing: it is the only thing on the page that draws "these are two books", and the same block of memory carries two different numbers across it (0x8000_0000 in the CPU's book, 0x0000_0000 in the card's) so the claim has evidence rather than assertion.
+2. [hatching-not-a-second-colour] chose "the opened range is hatched ink on white" over "the opened range gets its own fill colour". Because: illustration-craft §9 allows one accent beside violet and ink, and that slot is already spent saying which side a thing belongs to (violet is the CPU's side, page-wide, stated in the hero caption). "This land is not local" is a second, independent fact about the same segment — texture is the channel that can sit on top of any fill without competing with it. Hatch density was measured, not guessed: at 9-unit spacing the segment label underneath was unreadable, so the page uses 16-unit spacing at 2.4 width and 0.55 opacity.
+3. [violet-means-the-CPU-side] chose "one page-wide meaning for violet, declared in the hero caption" over "violet as each section's subject". Because: five figures show the same two chips, and a colour that means one fixed thing lets the eye find the viewpoint without a legend. It marks the CPU's book in the hero, its book tint in the second figure, its own RAM range in the map, the act of opening a range, and the one-step route. Yellow appears exactly once on the whole page, under the sentence the page exists to make.
+4. [the-arrow-lands-on-a-segment] chose "the violet arrow drops onto one segment of the CPU's own book" over "an arrow from the CPU to the card". Because: an arrow that crosses to the other chip draws the belief being corrected — that the wire is what grants access. Landing inside the reader's own book is the whole mechanism: what the CPU issues is an ordinary read against a number it already understands, and the hardware behind that number is somewhere else. tech-figures §7 makes this the section's hard rule, and its 禁止 table rules out landing on a whole strip, which degrades the claim to "the CPU can read memory".
+5. [two-routes-on-one-set-of-blocks] chose "draw both routes over the same three blocks" over "a left-right before/after pair". Because: the two routes differ in step count, not in cast — the same CPU, the same local RAM, the same video memory. Drawing them twice would say there are two systems, and it would double the label budget on a page whose figures are already at 13 of the 14 the 1080 tier allows. Route labels sit on their own routes, not in a legend row: at the foot of the picture neither label said which line it belonged to.
+
+Known trade-offs:
+- Label budgets are the binding constraint here, not height. The map figure carries exactly 13 <text> elements against the tier's 14 (tech-figures §7): 2 chip names, 1 link name, one bilingual pair for the point ("two books, numbered separately"), three bilingual segment names and two neutral addresses. Same-form names are written once, not twice — "CPU" reads the same in both languages, and hanging lang classes on it costs a slot for nothing. That mistake was made and caught here: the first draft measured 14.
+- The chips sit directly above their own book, which is what buys the budget: labelling each strip with "whose book is this" would cost four elements, and position says it for free.
+- Every full-width figure clears the 640px oversized line with room: 420 / 470 / 400 / 380 viewBox units at the 900-wide 1080 tier render 504 / 564 / 480 / 456px. The map is the tall one because it carries three layers (topology, both books, the stitch between them) and tech-figures §7 forbids splitting it — the split is what leaves the reader to align the halves mentally, which is the difficulty itself.
+- Simplifications, each disclosed in the caption that makes it: four rows drawn where a real book holds billions; two ranges per book where a real one has dozens; segment widths not to scale; the fabric between the two chips drawn as one wire, with no switch, because a second chip is all this page needs.
+- Numbers live in the captions as well as the drawings: 0 / 1 / 2 and the unfinished fourth row, 0x8000_0000 and 0x0000_0000, one step against two. At 375px the content column is 335px, where a 15-unit in-figure label renders about 5px — unreadable, so the caption is the drawing's only voice on a phone.
+- The hero's violet is the CPU's book rather than a district on a die: this page is told from one side throughout, and the colour has to say which side that is before the first figure does anything else. It also carries the brand-presence check, which the all-white first draft failed at 0.18% of the top 1440x500.
+/design-review:self-diff -->
+
+</body>
+</html>

@@ -61,7 +61,7 @@ it instead of asserting its own number.
 | 组件 | 状态 | 实体 |
 |---|---|---|
 | Gate 1 · structural verify | **shipped** | `scripts/verify.py`(8 类 check + 双语强制 + `--allow-monolingual` 豁免)|
-| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(84 条 known-bugs 里能机器化的那些)|
+| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(86 条 known-bugs 里能机器化的那些)|
 | Gate 3 · accessibility axe-audit | **shipped** (2026-08-14) | `scripts/axe-audit.mjs`(axe-core;四条阻断规则;当时清账每页只量一个主题,glass light 仍有欠账 —— known-bugs §6.6)|
 | Gate 4 · full-page screenshot | **shipped** | `scripts/screenshot.mjs`(Playwright · 绝对路径 + `file://` 通用)|
 | 口味评审(四道之外)· solo critic | **shipped** | `.claude/agents/design-critic.md` |
@@ -207,7 +207,7 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 
 - `~/.claude/skills/design-review/dr-cli` — 一条命令跑完 4 道检查 + 可选 `--multi-critic` / `--learn`
 - `scripts/verify.py` — Gate 1 结构 check
-- `scripts/visual-audit.mjs` — Gate 2 渲染 check(38 项)
+- `scripts/visual-audit.mjs` — Gate 2 渲染 check(51 项)
 - `scripts/axe-audit.mjs` — Gate 3 可达性 check(axe-core)
 - `scripts/screenshot.mjs` — Gate 4 全页截图
 - `scripts/count-check.py` — 全仓计数判定(承载短语 vs 磁盘真值 + 检查模型)

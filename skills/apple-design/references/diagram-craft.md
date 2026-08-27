@@ -6,7 +6,7 @@
 
 > 适用：架构图 / 流程图 / 层级图 / 时间线 / 时序图等一切工程类图示。
 > 与 anthropic 的多色语义路线不同，**apple 图的美感来自"少"**：无彩色为主、蓝色一处、柔影分层、留白比信息多。
-> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence / deployment / state-machine + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline + 互连拓扑 interconnect-map,共 **15 件**,全部按本文标准实现；另有 §8 配套的 device-mock.svg 设备线稿底版,不计入图型谱系）。案例库：`demos/apple-design/diagrams.html`（15 张图,每张带 Copy SVG）。
+> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence / deployment / state-machine + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline + 互连拓扑 interconnect-map + 协议分层 protocol-stack + 地址映射 address-map,共 **17 件**,全部按本文标准实现；另有 §8 配套的 device-mock.svg 设备线稿底版与 §15 的 glyphs.svg 构件片段集,均不计入图型谱系）。案例库：`demos/apple-design/diagrams.html`（18 张图,每张带 Copy SVG）。
 
 ## 0. 第一原则：美靠"少"
 
@@ -122,8 +122,8 @@ apple 风时序图 pattern（anthropic 有专文 `sequence-diagrams.md`，apple 
 
 ## 12. 内核 / 嵌入式工程图谱系（apple 语法）
 
-> 8 个图型与 anthropic §15 同谱系（function-flowchart / algorithm / register-bitfield / soc-block /
-> hw-timing-waveform / build-pipeline / sched-timeline / interconnect-map），模板在 `templates/diagrams/` 同名 .svg。
+> 10 个图型与 anthropic §15 同谱系（function-flowchart / algorithm / register-bitfield / soc-block /
+> hw-timing-waveform / build-pipeline / sched-timeline / interconnect-map / protocol-stack / address-map），模板在 `templates/diagrams/` 同名 .svg。
 > 模板是起点不是规格——结构、密度、布局按实际内容重设计,谱系之外的内容自创图型即可。
 > 结构性工艺（布局、lane、车道、交替、双箭头标注）参考 anthropic §15;本节只写 apple 的**翻译规则**。
 
@@ -139,6 +139,8 @@ apple 风时序图 pattern（anthropic 有专文 `sequence-diagrams.md`，apple 
 | 编译流程图 | 主链 + 终点交付物焦点卡 | devicetree 等分支灰实线汇入 |
 | 调度时间线 | 被追踪的那一个任务(块 tint + 蓝边 + 迁移箭头) | 其他任务 `#f5f5f7`,IRQ 标记用墨不用蓝 |
 | 互连拓扑 + 地址映射 | **能用一条普通 `ld` / `st` 抵达的那一段,加上落到它的那条路径** —— 全图就为这一句存在 | 其余互连线、另一侧的访问路径、跨空间映射线全部 `#aeaeb2`;地址段 `#f5f5f7` |
+| 协议分层对等图 | **本次这一笔传输走的那条路**(纵向下去 → 过线 → 纵向上来)+ 它的编号徽章 | 层区 `#f5f5f7` 无边框;对等虚线 `#aeaeb2`;最底下那根真线 `#1d1d1f` 2.4px |
+| 纵向地址映射图 | **那条重映射线,以及它两端落到的两段**(段加蓝 1.5px 边 + 蓝段名) | 直映射线 `#aeaeb2` 1.2px;地址段 `#f5f5f7`;窗口段白底 + `#aeaeb2` 斜纹 |
 
 三条 apple 专属注意：
 
@@ -174,3 +176,57 @@ Load/Store 线必须落到某一段)见 anthropic `diagram-craft.md` §15.8 —�
 初稿按 anthropic 的行距排出来是 656 单位,在 hero 档渲染 656px、当场越线;
 压回 640 靠的是把交换机那一段的纵向 gap 从 56 收到 40,**不是**压卡高或压字号 ——
 留白一压,这张图就不再是 apple 了。**node 超过 2 个、或者要画第三条地址带,拆图。**
+
+## 14. 三条通用工艺的 apple 译法（药丸 / 两类箭头 / 图族）
+
+工程约束本身见 anthropic `diagram-craft.md` §4.6、§4.7、§16 —— 那三条跨 skill 通用。
+这一节只写**换到 apple 语法后哪里必须改**,照搬 anthropic 的画法就是串味。
+
+1. **线上药丸 = 白胶囊 + 柔影,不是 tint chip。** rx = 高/2、白底、
+   `feDropShadow dy=2 stdDeviation=4 flood-opacity=0.10`、文字 12.5px 500 `#6e6e73`。
+   门槛不变:**同类线 ≥ 2 条,每条都要写清是什么**(名字 + 一个指标或位宽)。
+   药丸必须是实底 —— 它的作用之一就是把线切断,让交叉处不打架;apple 的实底只有白,层次靠影子(§2)。
+
+2. **两类箭头在 apple 靠"颜色 + 线宽"分,不靠虚实。** 这是和 anthropic 最大的一处分歧,
+   原因在 §4:**apple 少用虚线,虚线只留给回流 / 未定状态**。所以 ——
+   - **一直在那儿的结构** = `#aeaeb2` 1.2px **实线**
+   - **本节正在讲的这一次** = 蓝 `#0071e3` 1.8px **实线** + 蓝编号徽章
+   - **虚线留给一类东西:根本不存在的那条连接**(协议分层图里的对等线就是它的正主 ——
+     "同层之间看起来在对话"恰恰是一条不存在的线,用虚线画它是 apple 虚线配额最正当的用法)。
+   照 anthropic 把"本次传输"画成彩虚线,在 apple 语法里读出来是"这条路径不确定 / 是回流",
+   意思正好拧了。
+
+3. **图族的"底不许动"在 apple 更严。** apple 的分组没有边框,地形靠 `#f5f5f7` 底色的形状认;
+   底色形状一变,读者连"这是同一张图"都认不出来 —— anthropic 至少还有虚线框和 tint 色相兜底。
+   所以族内各张的 zone 矩形坐标必须逐字节相同,**viewBox 高度按最后一张定,前几张下方留白**。
+
+## 15. 协议分层 / 地址映射 / 构件字形（apple 独有的翻译点）
+
+**protocol-stack** —— 结构规矩(两侧镜像、层高相同、纵向不许跳层、最底下那根是全图唯一横向实线)
+见 anthropic §15.9。apple 改三处:
+
+- **层区不许画虚线框**,`#f5f5f7` 平底 + rx 18 + 无边框(§2)。层与层之间靠**间隙**分开,不靠边框。
+- **层名不做骑边标签**(没有边可骑),改成层区左上方 12.5px 500 `#86868b` **正常大小写**的一行小字
+  (`Transaction layer`,不是 `TRANSACTION LAYER` —— apple 不用 uppercase + letter-spacing 标签)。
+- **最底下那根真线加粗到 2.4px 墨色**,和蓝色的传输路径拉开层级:两者都是实线,靠粗细和颜色分。
+  黑白打印时粗细仍在,这正是 §12 注 1 要的补偿。
+
+**address-map** —— 结构规矩(引线指边界、符号名与常量分档、两条带永不合并、窗口用斜纹)
+见 anthropic §15.10。apple 改两处:
+
+- **符号名与字面常量的分档不靠颜色,靠字体。** anthropic 用墨 / 橙两档药丸;
+  apple 全是白药丸 + 柔影,**符号名 12.5px 600 `#1d1d1f`,字面常量 12.5px 等宽 `#6e6e73`**。
+  等宽字体本身就在说"这是一个会变的数值",和 §12 注 1 的"灰阶值 + 字重 + tint 有无"是同一套补偿。
+- **蓝只给那条重映射线和它两端落到的两段**(段加蓝 1.5px 边 —— 这是全图唯一带边框的东西,§2)。
+  直映射线全部 `#aeaeb2`;"两边都是直映射"是背景事实,写进 figcaption,不再点一次蓝。
+
+**glyphs.svg** —— 片段集,不计入图型谱系。规矩见 anthropic §17(每个字形是一个意义固定的名词、
+没有那样东西就不许画、厂商 logo 一律不进)。apple 改一处:**蓝只给"活着"的那一个状态** ——
+写入指针 `in`、已插卡的那一个槽、link 起来的 LED;读出指针 `out` 和其余形状全部墨色。
+`diagram-monochrome` 对 apple 豁免(灰阶是 apple 的身份),但**豁免不是"不许有蓝"** ——
+一个状态都不点,读者分不出这张片段集里哪些是"有东西"哪些是"空的"。
+
+**尺寸**:两张图都是 `viewBox 1240 × 560` / `1240 × 600`,走 `apple-container--wide`。
+⚠ **apple 的 gallery 图位只有 946px 宽**(known-bugs §1.50 实测),viewBox 1240 时缩放 **0.763** ——
+**最小源字号必须 ≥ 12.5**(渲染 9.54px)。anthropic 的同名模板用 11.5 源字号,
+原样搬过来渲染 8.8px,当场触 `dense-diagram-labels-small`。**跨 skill 移植图先按 apple 这一档算。**

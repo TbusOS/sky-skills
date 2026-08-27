@@ -1,0 +1,149 @@
+<!-- glass-design diagram template · address-map · paste into a glass page and delete the embedded <style> + background rect (glass.css provides the classes; the page provides the canvas). Craft rules: diagram-craft.md §8 -->
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two vertical address maps side by side with low addresses at the bottom. On the left the system physical address space: DRAM up to TOLUD at three gigabytes, a hatched MMIO hole up to four gigabytes, DRAM again from four to sixteen gigabytes, a cyan reclaimed DRAM window from REMAPBASE to TOUUD, and sixty-four bit PCIe MMIO on top. On the right the DIMM physical space, contiguous from zero to sixteen gigabytes. Every boundary has its own leader line and a label pill: symbol names in sans, literal constants in monospace. Two faint mapping lines mark direct mappings; one cyan line shows the gigabyte shadowed by the MMIO hole reappearing above TOUUD" viewBox="0 0 1240 600">
+  <style>
+    /* Standalone preview values = glass dark theme. When pasted into a glass
+       page, DELETE this style block — glass.css provides these classes. */
+    .glass-svg-ink   { fill: #F4F7FF; }
+    .glass-svg-ink-2 { fill: rgba(231,238,255,0.74); }
+    .glass-svg-ink-3 { fill: rgba(231,238,255,0.55); }
+    .glass-svg-node  { fill: rgba(255,255,255,0.08); stroke: rgba(255,255,255,0.17); }
+    .glass-svg-node--cyan { fill: rgba(34,211,238,0.15); stroke: rgba(34,211,238,0.55); }
+    .glass-svg-node--indigo { fill: rgba(129,140,248,0.16); stroke: rgba(129,140,248,0.55); }
+    .glass-svg-line  { stroke: rgba(255,255,255,0.08); }
+    .glass-svg-ink-stroke { stroke: rgba(244,247,255,0.85); fill: none; }
+    .glass-svg-accent-ink { fill: #22D3EE; }
+  </style>
+  <rect width="100%" height="100%" fill="#0B1020"/>
+  <defs>
+    <!-- window hatch = the non-colour channel: both tint slots are spent (indigo = DRAM,
+         cyan = the segment this page is about), so "not DRAM" rides texture. FILLED bar,
+         not a stroke, so it follows the theme switch — diagram-craft.md §6.2 -->
+    <pattern id="amgHatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect x="0" y="0" width="1.6" height="7" class="glass-svg-ink-3"/>
+    </pattern>
+    <clipPath id="amgClipA"><rect x="232" y="68" width="328" height="458" rx="16"/></clipPath>
+    <clipPath id="amgClipB"><rect x="800" y="214" width="328" height="312" rx="16"/></clipPath>
+    <marker id="amgArrL" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" class="glass-svg-ink-3"/>
+    </marker>
+    <marker id="amgArrC" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#22D3EE"/>
+    </marker>
+  </defs>
+
+  <text x="24" y="36" font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="1.5" class="glass-svg-ink-3">ADDRESS MAP &#183; TWO VIEWPOINTS</text>
+  <g font-family="'Inter', sans-serif" font-size="12">
+    <rect x="600" y="25" width="24" height="14" rx="3" class="glass-svg-node"/>
+    <rect x="600" y="25" width="24" height="14" rx="3" fill="url(#amgHatch)" opacity="0.42"/>
+    <text x="632" y="36" class="glass-svg-ink-3">not DRAM</text>
+    <line x1="726" y1="32" x2="754" y2="32" class="glass-svg-line" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="762" y="36" class="glass-svg-ink-3">direct mapping</text>
+    <line x1="892" y1="32" x2="920" y2="32" stroke="#22D3EE" stroke-width="2" stroke-linecap="round"/>
+    <text x="928" y="36" class="glass-svg-accent-ink">reclaim &#183; this remap</text>
+  </g>
+
+  <!-- ============ band A · system physical ============ -->
+  <g clip-path="url(#amgClipA)">
+    <rect x="232" y="68"  width="328" height="84"  class="glass-svg-node"/>
+    <rect x="232" y="68"  width="328" height="84"  fill="url(#amgHatch)" opacity="0.42"/>
+    <rect x="232" y="152" width="328" height="62"  class="glass-svg-node--cyan"/>
+    <rect x="232" y="214" width="328" height="130" class="glass-svg-node--indigo"/>
+    <rect x="232" y="344" width="328" height="62"  class="glass-svg-node"/>
+    <rect x="232" y="344" width="328" height="62"  fill="url(#amgHatch)" opacity="0.42"/>
+    <rect x="232" y="406" width="328" height="120" class="glass-svg-node--indigo"/>
+  </g>
+  <rect x="232" y="68" width="328" height="458" rx="16" fill="none" class="glass-svg-line" stroke-width="1.5"/>
+
+  <text x="252" y="104" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">PCIe MMIO &#183; 64-bit</text>
+  <text x="252" y="123" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-3">BAR windows of every device</text>
+  <text x="252" y="179" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-accent-ink">DRAM &#183; reclaimed</text>
+  <text x="252" y="198" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-3">the gigabyte that was shadowed</text>
+  <text x="252" y="274" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">DRAM &#183; direct</text>
+  <text x="252" y="293" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-3">12 GiB</text>
+  <text x="252" y="370" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">MMIO hole</text>
+  <text x="252" y="389" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-3">PCI &#183; LAPIC &#183; IOAPIC &#183; flash</text>
+  <text x="252" y="460" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">DRAM &#183; direct</text>
+  <text x="252" y="479" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-3">3 GiB, legacy region at the bottom</text>
+
+  <!-- ============ band B · DIMM physical ============ -->
+  <g clip-path="url(#amgClipB)">
+    <rect x="800" y="214" width="328" height="130" class="glass-svg-node--indigo"/>
+    <rect x="800" y="344" width="328" height="62"  class="glass-svg-node--cyan"/>
+    <rect x="800" y="406" width="328" height="120" class="glass-svg-node--indigo"/>
+  </g>
+  <rect x="800" y="214" width="328" height="312" rx="16" fill="none" class="glass-svg-line" stroke-width="1.5"/>
+
+  <text x="820" y="274" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">DRAM 4 &#8211; 16 GiB</text>
+  <text x="820" y="293" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-3">reachable at its own address</text>
+  <text x="820" y="371" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-accent-ink">DRAM 3 &#8211; 4 GiB</text>
+  <text x="820" y="390" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-3">shadowed by the hole &#8212; needs a remap</text>
+  <text x="820" y="460" font-family="'Inter', sans-serif" font-size="13" font-weight="600" class="glass-svg-ink">DRAM 0 &#8211; 3 GiB</text>
+  <text x="820" y="479" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-3">reachable at its own address</text>
+
+  <text x="232" y="56" font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="1.5" class="glass-svg-ink-2">SYSTEM PHYSICAL</text>
+  <text x="800" y="202" font-family="'JetBrains Mono', monospace" font-size="12" letter-spacing="1.5" class="glass-svg-ink-2">DIMM PHYSICAL &#183; 16 GiB</text>
+
+  <!-- ============ boundary leaders + label pills ============ -->
+  <g class="glass-svg-line" stroke-width="1.5">
+    <line x1="204" y1="68" x2="232" y2="68"/>
+    <line x1="204" y1="152" x2="232" y2="152"/>
+    <line x1="204" y1="214" x2="232" y2="214"/>
+    <line x1="204" y1="344" x2="232" y2="344"/>
+    <line x1="204" y1="406" x2="232" y2="406"/>
+    <line x1="204" y1="526" x2="232" y2="526"/>
+    <line x1="1128" y1="214" x2="1152" y2="214"/>
+    <line x1="1128" y1="344" x2="1152" y2="344"/>
+    <line x1="1128" y1="406" x2="1152" y2="406"/>
+    <line x1="1128" y1="526" x2="1152" y2="526"/>
+  </g>
+  <rect x="44" y="55" width="156" height="26" rx="13" class="glass-svg-node"/>
+  <text x="122" y="72" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">0x40_0000_0000</text>
+  <rect x="78" y="124" width="122" height="26" rx="13" class="glass-svg-node"/>
+  <text x="139" y="141" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12" font-weight="600" class="glass-svg-ink-2">TOUUD</text>
+  <rect x="44" y="154" width="156" height="26" rx="13" class="glass-svg-node"/>
+  <text x="122" y="171" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">0x4_4000_0000</text>
+  <rect x="58" y="186" width="142" height="26" rx="13" class="glass-svg-node"/>
+  <text x="129" y="203" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12" font-weight="600" class="glass-svg-ink-2">REMAPBASE</text>
+  <rect x="44" y="216" width="156" height="26" rx="13" class="glass-svg-node"/>
+  <text x="122" y="233" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">0x4_0000_0000</text>
+  <rect x="44" y="331" width="156" height="26" rx="13" class="glass-svg-node"/>
+  <text x="122" y="348" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">0x1_0000_0000</text>
+  <rect x="86" y="378" width="114" height="26" rx="13" class="glass-svg-node"/>
+  <text x="143" y="395" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12" font-weight="600" class="glass-svg-ink-2">TOLUD</text>
+  <rect x="44" y="408" width="156" height="26" rx="13" class="glass-svg-node"/>
+  <text x="122" y="425" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">0xC000_0000</text>
+  <rect x="44" y="513" width="156" height="26" rx="13" class="glass-svg-node"/>
+  <text x="122" y="530" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">0x0000_0000</text>
+  <rect x="1156" y="186" width="60" height="26" rx="13" class="glass-svg-node"/>
+  <text x="1186" y="203" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12" font-weight="600" class="glass-svg-ink-2">TOM</text>
+  <rect x="1156" y="216" width="60" height="26" rx="13" class="glass-svg-node"/>
+  <text x="1186" y="233" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">16G</text>
+  <rect x="1156" y="331" width="60" height="26" rx="13" class="glass-svg-node"/>
+  <text x="1186" y="348" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">4G</text>
+  <rect x="1156" y="393" width="60" height="26" rx="13" class="glass-svg-node"/>
+  <text x="1186" y="410" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">3G</text>
+  <rect x="1156" y="513" width="60" height="26" rx="13" class="glass-svg-node"/>
+  <text x="1186" y="530" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" class="glass-svg-ink-3">0x0</text>
+
+  <!-- ============ mapping lines · pill sits IN the gap ============ -->
+  <g class="glass-svg-line" stroke-width="1.5" stroke-dasharray="5 4">
+    <line x1="796" y1="279" x2="742" y2="279"/>
+    <line x1="618" y1="279" x2="564" y2="279" marker-end="url(#amgArrL)"/>
+  </g>
+  <rect x="622" y="265" width="116" height="28" rx="14" class="glass-svg-node"/>
+  <text x="680" y="283" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">direct</text>
+  <g class="glass-svg-line" stroke-width="1.5" stroke-dasharray="5 4">
+    <line x1="796" y1="466" x2="742" y2="466"/>
+    <line x1="618" y1="466" x2="564" y2="466" marker-end="url(#amgArrL)"/>
+  </g>
+  <rect x="622" y="452" width="116" height="28" rx="14" class="glass-svg-node"/>
+  <text x="680" y="470" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-2">direct</text>
+  <g stroke="#22D3EE" stroke-width="2" fill="none" stroke-linecap="round">
+    <path d="M796,375 H784 Q776,375 776,367 V191 Q776,183 768,183 H772"/>
+    <path d="M596,183 H564" marker-end="url(#amgArrC)"/>
+  </g>
+  <rect x="600" y="169" width="172" height="28" rx="14" class="glass-svg-node"/>
+  <text x="686" y="187" text-anchor="middle" font-family="'Inter', sans-serif" font-size="12" font-weight="600" class="glass-svg-accent-ink">reclaim &#183; same DRAM</text>
+
+  <text x="1216" y="566" text-anchor="end" font-family="'Inter', sans-serif" font-size="12" class="glass-svg-ink-3">segment heights are not to scale &#183; low addresses at the bottom</text>
+</svg>

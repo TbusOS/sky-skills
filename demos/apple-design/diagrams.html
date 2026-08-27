@@ -1035,6 +1035,430 @@
 
 
     <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 560" role="img" aria-label="PCIe protocol layering drawn as two mirrored stacks, requester on the left and completer on the right, each with a transaction layer, a data link layer and a physical layer. Between the upper two layers the horizontal lines are grey and dashed, labelled TLP end to end and DLLP hop by hop: these are protocol agreements, not wires. The only solid horizontal line runs along the bottom, the PCIe lane itself, with two AC coupling capacitors. A blue path numbered one to six shows where the bytes actually travel, down every layer on the requester, once across the lane, then up every layer on the completer" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="apsSh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#1d1d1f" flood-opacity="0.08"/>
+    </filter>
+    <filter id="apsPill" x="-40%" y="-60%" width="180%" height="220%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1d1d1f" flood-opacity="0.10"/>
+    </filter>
+    <marker id="apsArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="apsArrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+
+  <rect width="1240" height="560" fill="#ffffff"/>
+  <text x="60" y="40" font-size="12.5" font-weight="500" fill="#86868b">Protocol layering &#183; peer view</text>
+  <g font-size="12.5" font-weight="500" fill="#86868b">
+    <line x1="620" y1="36" x2="648" y2="36" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="5 4"/>
+    <text x="658" y="40">peer agreement &#183; no wire</text>
+    <line x1="852" y1="36" x2="880" y2="36" stroke="#1d1d1f" stroke-width="2.4"/>
+    <text x="890" y="40">the only real wire</text>
+    <line x1="1030" y1="36" x2="1058" y2="36" stroke="#0071e3" stroke-width="1.8"/>
+    <text x="1068" y="40">this transfer</text>
+  </g>
+
+  <rect x="60" y="76" width="440" height="116" rx="18" fill="#f5f5f7"/>
+  <rect x="740" y="76" width="440" height="116" rx="18" fill="#f5f5f7"/>
+  <rect x="60" y="224" width="440" height="116" rx="18" fill="#f5f5f7"/>
+  <rect x="740" y="224" width="440" height="116" rx="18" fill="#f5f5f7"/>
+  <rect x="60" y="372" width="440" height="116" rx="18" fill="#f5f5f7"/>
+  <rect x="740" y="372" width="440" height="116" rx="18" fill="#f5f5f7"/>
+
+  <text x="84" y="64" font-size="12.5" font-weight="500" fill="#86868b">Transaction layer</text>
+  <text x="764" y="64" font-size="12.5" font-weight="500" fill="#86868b">Transaction layer</text>
+  <text x="84" y="212" font-size="12.5" font-weight="500" fill="#86868b">Data link layer</text>
+  <text x="764" y="212" font-size="12.5" font-weight="500" fill="#86868b">Data link layer</text>
+  <text x="84" y="360" font-size="12.5" font-weight="500" fill="#86868b">Physical layer</text>
+  <text x="764" y="360" font-size="12.5" font-weight="500" fill="#86868b">Physical layer</text>
+
+  <g filter="url(#apsSh)">
+    <rect x="84" y="114" width="184" height="56" rx="14" fill="#ffffff"/>
+    <rect x="288" y="114" width="184" height="56" rx="14" fill="#ffffff"/>
+    <rect x="764" y="114" width="184" height="56" rx="14" fill="#ffffff"/>
+    <rect x="968" y="114" width="184" height="56" rx="14" fill="#ffffff"/>
+    <rect x="84" y="262" width="184" height="56" rx="14" fill="#ffffff"/>
+    <rect x="288" y="262" width="184" height="56" rx="14" fill="#ffffff"/>
+    <rect x="764" y="262" width="184" height="56" rx="14" fill="#ffffff"/>
+    <rect x="968" y="262" width="184" height="56" rx="14" fill="#ffffff"/>
+    <rect x="84" y="410" width="184" height="56" rx="14" fill="#ffffff"/>
+    <rect x="288" y="410" width="184" height="56" rx="14" fill="#ffffff"/>
+    <rect x="764" y="410" width="184" height="56" rx="14" fill="#ffffff"/>
+    <rect x="968" y="410" width="184" height="56" rx="14" fill="#ffffff"/>
+  </g>
+  <text x="98" y="138" font-size="13.5" font-weight="600" fill="#1d1d1f">TLP generator</text>
+  <text x="98" y="157" font-size="12.5" fill="#86868b">builds header + payload</text>
+  <text x="302" y="138" font-size="13.5" font-weight="600" fill="#1d1d1f">Flow control</text>
+  <text x="302" y="157" font-size="12.5" fill="#86868b">credit based</text>
+  <text x="778" y="138" font-size="13.5" font-weight="600" fill="#1d1d1f">TLP parser</text>
+  <text x="778" y="157" font-size="12.5" fill="#86868b">decodes header</text>
+  <text x="982" y="138" font-size="13.5" font-weight="600" fill="#1d1d1f">Flow control</text>
+  <text x="982" y="157" font-size="12.5" fill="#86868b">returns credits</text>
+  <text x="98" y="286" font-size="13.5" font-weight="600" fill="#1d1d1f">Seq num + LCRC</text>
+  <text x="98" y="305" font-size="12.5" fill="#86868b">one per packet</text>
+  <text x="302" y="286" font-size="13.5" font-weight="600" fill="#1d1d1f">Replay buffer</text>
+  <text x="302" y="305" font-size="12.5" fill="#86868b">holds until ACK</text>
+  <text x="778" y="286" font-size="13.5" font-weight="600" fill="#1d1d1f">LCRC check</text>
+  <text x="778" y="305" font-size="12.5" fill="#86868b">drops on mismatch</text>
+  <text x="982" y="286" font-size="13.5" font-weight="600" fill="#1d1d1f">ACK / NAK gen</text>
+  <text x="982" y="305" font-size="12.5" fill="#86868b">a DLLP, never a TLP</text>
+  <text x="98" y="434" font-size="13.5" font-weight="600" fill="#1d1d1f">128b/130b + scrambler</text>
+  <text x="98" y="453" font-size="12.5" fill="#86868b">block sync</text>
+  <text x="302" y="434" font-size="13.5" font-weight="600" fill="#1d1d1f">TX driver</text>
+  <text x="302" y="453" font-size="12.5" fill="#86868b">differential pair</text>
+  <text x="778" y="434" font-size="13.5" font-weight="600" fill="#1d1d1f">Descrambler + decode</text>
+  <text x="778" y="453" font-size="12.5" fill="#86868b">recovers symbols</text>
+  <text x="982" y="434" font-size="13.5" font-weight="600" fill="#1d1d1f">RX equalizer</text>
+  <text x="982" y="453" font-size="12.5" fill="#86868b">CDR + de-emphasis</text>
+
+  <text x="484" y="112" text-anchor="end" font-size="12.5" fill="#86868b">requester</text>
+  <text x="1164" y="112" text-anchor="end" font-size="12.5" fill="#86868b">completer</text>
+
+  <line x1="500" y1="134" x2="740" y2="134" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="5 4" marker-start="url(#apsArrN)" marker-end="url(#apsArrN)"/>
+  <g filter="url(#apsPill)"><rect x="530" y="121" width="180" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="620" y="138" text-anchor="middle" font-size="12.5" font-weight="500" fill="#6e6e73">TLP &#183; end to end</text>
+  <line x1="500" y1="282" x2="740" y2="282" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="5 4" marker-start="url(#apsArrN)" marker-end="url(#apsArrN)"/>
+  <g filter="url(#apsPill)"><rect x="530" y="269" width="180" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="620" y="286" text-anchor="middle" font-size="12.5" font-weight="500" fill="#6e6e73">DLLP &#183; hop by hop</text>
+  <text x="620" y="424" text-anchor="middle" font-size="12.5" fill="#86868b">no line here either</text>
+  <text x="620" y="444" text-anchor="middle" font-size="12.5" fill="#86868b">the real one runs below</text>
+
+  <path d="M278,524 H958" fill="none" stroke="#1d1d1f" stroke-width="2.4"/>
+  <line x1="424" y1="512" x2="424" y2="536" stroke="#1d1d1f" stroke-width="2.4"/>
+  <line x1="442" y1="512" x2="442" y2="536" stroke="#1d1d1f" stroke-width="2.4"/>
+  <line x1="796" y1="512" x2="796" y2="536" stroke="#1d1d1f" stroke-width="2.4"/>
+  <line x1="814" y1="512" x2="814" y2="536" stroke="#1d1d1f" stroke-width="2.4"/>
+  <g filter="url(#apsPill)"><rect x="524" y="511" width="192" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="620" y="528" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">PCIe lane &#215;4 &#183; 32 GT/s</text>
+
+  <g stroke="#0071e3" stroke-width="1.8" fill="none">
+    <path d="M278,192 V214" marker-end="url(#apsArrB)"/>
+    <path d="M278,340 V362" marker-end="url(#apsArrB)"/>
+    <path d="M278,488 V510" marker-end="url(#apsArrB)"/>
+    <path d="M958,510 V488" marker-end="url(#apsArrB)"/>
+    <path d="M958,362 V340" marker-end="url(#apsArrB)"/>
+    <path d="M958,214 V192" marker-end="url(#apsArrB)"/>
+  </g>
+  <g font-size="12.5" font-weight="600" fill="#ffffff">
+    <circle cx="254" cy="203" r="10" fill="#0071e3"/><text x="254" y="207" text-anchor="middle">1</text>
+    <circle cx="254" cy="351" r="10" fill="#0071e3"/><text x="254" y="355" text-anchor="middle">2</text>
+    <circle cx="254" cy="499" r="10" fill="#0071e3"/><text x="254" y="503" text-anchor="middle">3</text>
+    <circle cx="982" cy="499" r="10" fill="#0071e3"/><text x="982" y="503" text-anchor="middle">4</text>
+    <circle cx="982" cy="351" r="10" fill="#0071e3"/><text x="982" y="355" text-anchor="middle">5</text>
+    <circle cx="982" cy="203" r="10" fill="#0071e3"/><text x="982" y="207" text-anchor="middle">6</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">protocol layering · peer view</span><span class="lang-zh">协议分层 · 对等视角</span></span>
+          <span class="lang-en">The two grey dashed lines are agreements, not wires &mdash; nothing carries a TLP from one transaction layer straight to the other. Dashes are reserved here for exactly that: a connection that does not exist. The only solid horizontal line is the lane along the bottom, and the blue path numbered 1 to 6 is the one transfer this page is about: down every layer, across once, up every layer. That is why an analyser taps the lane and never the transaction layer. Template: <code>templates/diagrams/protocol-stack.svg</code>.</span>
+          <span class="lang-zh">两条灰虚线是<strong>约定</strong>，不是线 —— 没有任何东西把 TLP 从一侧的传输层直接送到另一侧。虚线在这里正是留给"根本不存在的那条连接"。全图唯一一条横向实线是最底下那根 lane；蓝色那条编号 1→6 的路径，是这一页要讲的这一笔传输：一层层下去，过一次线，再一层层上来。协议分析仪只能挂在 lane 上、挂不到传输层，原因就在这张图里。模板：<code>templates/diagrams/protocol-stack.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 600" role="img" aria-label="Two vertical address maps side by side with low addresses at the bottom. On the left the system physical address space: DRAM up to TOLUD at three gigabytes, a hatched MMIO hole up to four gigabytes, DRAM again from four to sixteen gigabytes, a reclaimed DRAM window from REMAPBASE to TOUUD outlined in blue, and sixty-four bit PCIe MMIO on top. On the right the DIMM physical space, contiguous from zero to sixteen gigabytes. Every boundary has its own leader line and label: symbol names in bold pills, literal constants in monospace pills. Two grey mapping lines mark direct mappings; one blue line shows the gigabyte shadowed by the MMIO hole reappearing above TOUUD" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="aamHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#aeaeb2" stroke-width="1.6" opacity="0.5"/>
+    </pattern>
+    <filter id="aamPill" x="-40%" y="-60%" width="180%" height="220%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1d1d1f" flood-opacity="0.10"/>
+    </filter>
+    <clipPath id="aamClipA"><rect x="232" y="68" width="328" height="458" rx="18"/></clipPath>
+    <clipPath id="aamClipB"><rect x="800" y="214" width="328" height="312" rx="18"/></clipPath>
+    <marker id="aamArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="aamArrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+
+  <rect width="1240" height="600" fill="#ffffff"/>
+  <text x="60" y="40" font-size="12.5" font-weight="500" fill="#86868b">Address map &#183; two viewpoints</text>
+  <g font-size="12.5" font-weight="500" fill="#86868b">
+    <rect x="636" y="29" width="24" height="14" rx="4" fill="#ffffff" stroke="#d2d2d7"/>
+    <rect x="636" y="29" width="24" height="14" rx="4" fill="url(#aamHatch)"/>
+    <text x="670" y="40">not DRAM</text>
+    <line x1="780" y1="36" x2="808" y2="36" stroke="#aeaeb2" stroke-width="1.2"/>
+    <text x="818" y="40">direct mapping</text>
+    <line x1="954" y1="36" x2="982" y2="36" stroke="#0071e3" stroke-width="1.8"/>
+    <text x="992" y="40">reclaim &#183; this remap</text>
+  </g>
+
+  <g clip-path="url(#aamClipA)">
+    <rect x="232" y="68" width="328" height="458" fill="#f5f5f7"/>
+    <rect x="232" y="68" width="328" height="84" fill="#ffffff"/>
+    <rect x="232" y="68" width="328" height="84" fill="url(#aamHatch)"/>
+    <rect x="232" y="344" width="328" height="62" fill="#ffffff"/>
+    <rect x="232" y="344" width="328" height="62" fill="url(#aamHatch)"/>
+    <rect x="232" y="152" width="328" height="62" fill="#ffffff"/>
+    <g stroke="#d2d2d7" stroke-width="1">
+      <line x1="232" y1="152" x2="560" y2="152"/>
+      <line x1="232" y1="214" x2="560" y2="214"/>
+      <line x1="232" y1="344" x2="560" y2="344"/>
+      <line x1="232" y1="406" x2="560" y2="406"/>
+    </g>
+  </g>
+  <rect x="232.75" y="152.75" width="326.5" height="60.5" rx="6" fill="none" stroke="#0071e3" stroke-width="1.5"/>
+
+  <text x="252" y="104" font-size="13.5" font-weight="600" fill="#1d1d1f">PCIe MMIO &#183; 64-bit</text>
+  <text x="252" y="123" font-size="12.5" fill="#86868b">BAR windows of every device</text>
+  <text x="252" y="179" font-size="13.5" font-weight="600" fill="#0071e3">DRAM &#183; reclaimed</text>
+  <text x="252" y="198" font-size="12.5" fill="#86868b">the gigabyte that was shadowed</text>
+  <text x="252" y="274" font-size="13.5" font-weight="600" fill="#1d1d1f">DRAM &#183; direct</text>
+  <text x="252" y="293" font-size="12.5" fill="#86868b">12 GiB</text>
+  <text x="252" y="370" font-size="13.5" font-weight="600" fill="#1d1d1f">MMIO hole</text>
+  <text x="252" y="389" font-size="12.5" fill="#86868b">PCI &#183; LAPIC &#183; IOAPIC &#183; flash</text>
+  <text x="252" y="460" font-size="13.5" font-weight="600" fill="#1d1d1f">DRAM &#183; direct</text>
+  <text x="252" y="479" font-size="12.5" fill="#86868b">3 GiB, legacy region at the bottom</text>
+
+  <g clip-path="url(#aamClipB)">
+    <rect x="800" y="214" width="328" height="312" fill="#f5f5f7"/>
+    <rect x="800" y="344" width="328" height="62" fill="#ffffff"/>
+    <g stroke="#d2d2d7" stroke-width="1">
+      <line x1="800" y1="344" x2="1128" y2="344"/>
+      <line x1="800" y1="406" x2="1128" y2="406"/>
+    </g>
+  </g>
+  <rect x="800.75" y="344.75" width="326.5" height="60.5" rx="6" fill="none" stroke="#0071e3" stroke-width="1.5"/>
+
+  <text x="820" y="274" font-size="13.5" font-weight="600" fill="#1d1d1f">DRAM 4 &#8211; 16 GiB</text>
+  <text x="820" y="293" font-size="12.5" fill="#86868b">reachable at its own address</text>
+  <text x="820" y="371" font-size="13.5" font-weight="600" fill="#0071e3">DRAM 3 &#8211; 4 GiB</text>
+  <text x="820" y="390" font-size="12.5" fill="#86868b">shadowed by the hole &#8212; needs a remap</text>
+  <text x="820" y="460" font-size="13.5" font-weight="600" fill="#1d1d1f">DRAM 0 &#8211; 3 GiB</text>
+  <text x="820" y="479" font-size="12.5" fill="#86868b">reachable at its own address</text>
+
+  <text x="232" y="56" font-size="12.5" font-weight="500" fill="#86868b">System physical</text>
+  <text x="800" y="202" font-size="12.5" font-weight="500" fill="#86868b">DIMM physical &#183; 16 GiB total</text>
+
+  <g stroke="#aeaeb2" stroke-width="1.2">
+    <line x1="204" y1="68" x2="232" y2="68"/>
+    <line x1="204" y1="152" x2="232" y2="152"/>
+    <line x1="204" y1="214" x2="232" y2="214"/>
+    <line x1="204" y1="344" x2="232" y2="344"/>
+    <line x1="204" y1="406" x2="232" y2="406"/>
+    <line x1="204" y1="526" x2="232" y2="526"/>
+  </g>
+  <g filter="url(#aamPill)"><rect x="48" y="55" width="152" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="124" y="72" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0x40_0000_0000</text>
+  <g filter="url(#aamPill)"><rect x="82" y="124" width="118" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="141" y="141" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">TOUUD</text>
+  <g filter="url(#aamPill)"><rect x="48" y="154" width="152" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="124" y="171" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0x4_4000_0000</text>
+  <g filter="url(#aamPill)"><rect x="64" y="186" width="136" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="132" y="203" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">REMAPBASE</text>
+  <g filter="url(#aamPill)"><rect x="48" y="216" width="152" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="124" y="233" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0x4_0000_0000</text>
+  <g filter="url(#aamPill)"><rect x="48" y="331" width="152" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="124" y="348" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0x1_0000_0000</text>
+  <g filter="url(#aamPill)"><rect x="90" y="378" width="110" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="145" y="395" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">TOLUD</text>
+  <g filter="url(#aamPill)"><rect x="48" y="408" width="152" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="124" y="425" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0xC000_0000</text>
+  <g filter="url(#aamPill)"><rect x="48" y="513" width="152" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="124" y="530" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0x0000_0000</text>
+
+  <g stroke="#aeaeb2" stroke-width="1.2">
+    <line x1="1128" y1="214" x2="1146" y2="214"/>
+    <line x1="1128" y1="344" x2="1146" y2="344"/>
+    <line x1="1128" y1="406" x2="1146" y2="406"/>
+    <line x1="1128" y1="526" x2="1146" y2="526"/>
+  </g>
+  <g filter="url(#aamPill)"><rect x="1150" y="186" width="86" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="1193" y="203" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">TOM</text>
+  <g filter="url(#aamPill)"><rect x="1150" y="216" width="86" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="1193" y="233" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">16G</text>
+  <g filter="url(#aamPill)"><rect x="1150" y="331" width="86" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="1193" y="348" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">4G</text>
+  <g filter="url(#aamPill)"><rect x="1150" y="393" width="86" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="1193" y="410" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">3G</text>
+  <g filter="url(#aamPill)"><rect x="1150" y="513" width="86" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="1193" y="530" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0x0</text>
+
+  <g stroke="#aeaeb2" stroke-width="1.2" fill="none">
+    <path d="M796,279 H564" marker-end="url(#aamArrN)"/>
+    <path d="M796,466 H564" marker-end="url(#aamArrN)"/>
+  </g>
+  <g filter="url(#aamPill)"><rect x="622" y="266" width="116" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="680" y="283" text-anchor="middle" font-size="12.5" font-weight="500" fill="#6e6e73">direct</text>
+  <g filter="url(#aamPill)"><rect x="622" y="453" width="116" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="680" y="470" text-anchor="middle" font-size="12.5" font-weight="500" fill="#6e6e73">direct</text>
+  <path d="M796,375 H784 Q776,375 776,367 V191 Q776,183 768,183 H564" fill="none" stroke="#0071e3" stroke-width="1.8" marker-end="url(#aamArrB)"/>
+  <g filter="url(#aamPill)"><rect x="588" y="170" width="180" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="678" y="187" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0071e3">reclaim &#183; same DRAM</text>
+
+  <text x="1180" y="566" text-anchor="end" font-size="12.5" fill="#86868b">segment heights are not to scale &#183; low addresses at the bottom</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">address map · two viewpoints</span><span class="lang-zh">地址映射 · 两个视角</span></span>
+          <span class="lang-en">Every boundary gets its own leader line, because a boundary is an address while a region is a range &mdash; write <code>4 GiB</code> inside a region and start, end and size all stay readable. Symbol names are set bold, literal constants monospace: <code>TOLUD</code> is a name, <code>0xC000_0000</code> is only what it equals on this board. Blue goes to one thing &mdash; the remap and the two segments it joins: the gigabyte shadowed by the MMIO hole reappears above <code>TOUUD</code>, same DRAM, a second address. Heights are not to scale; low addresses at the bottom. Template: <code>templates/diagrams/address-map.svg</code>.</span>
+          <span class="lang-zh">每条边界各拉一条引线，因为<strong>边界是一个地址、区域是一段范围</strong> —— 把 <code>4 GiB</code> 写在某段中间，起点 / 终点 / 大小三种读法都成立。符号名用粗体，字面常量用等宽：<code>TOLUD</code> 是名字，<code>0xC000_0000</code> 只是它在这块板上等于多少。蓝色只给一件事 —— 那条重映射线和它连起的两段：被 MMIO 空洞盖住的那 1 GiB，在 <code>TOUUD</code> 之上重新露面，同一块 DRAM，第二个门牌号。高度不按比例，低地址在下。模板：<code>templates/diagrams/address-map.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 470" role="img" aria-label="Glyph sheet for engineering diagrams in the apple grammar: a comb-toothed strip for a bounded in-order queue with a blue write pointer and an ink read pointer, a ruler-ticked bar for a serialized byte stream, a row of small vertical bars for pluggable slots with one populated in blue, a dark tab straddling a die boundary for an on-die port, a white card with a dark bezel strip and a blue link LED for a pluggable board, two short strokes across a line for an AC coupling capacitor, a small block where a signal crosses a clock-domain boundary for a synchroniser, and a hatched fill for a window onto another address space" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="aglHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#aeaeb2" stroke-width="1.6" opacity="0.5"/>
+    </pattern>
+    <filter id="aglSh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#1d1d1f" flood-opacity="0.08"/>
+    </filter>
+    <filter id="aglPill" x="-40%" y="-60%" width="180%" height="220%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1d1d1f" flood-opacity="0.10"/>
+    </filter>
+    <marker id="aglArrI" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#1d1d1f"/>
+    </marker>
+  </defs>
+
+  <rect width="1240" height="470" fill="#ffffff"/>
+  <text x="60" y="40" font-size="12.5" font-weight="500" fill="#86868b">Glyph sheet &#183; copy one &#60;g&#62; at a time</text>
+  <text x="60" y="88" font-size="12.5" font-weight="500" fill="#86868b">Queue</text>
+  <text x="176" y="232" text-anchor="middle" font-size="12.5" fill="#86868b">finite depth, in order</text>
+  <text x="356" y="88" font-size="12.5" font-weight="500" fill="#86868b">Byte stream</text>
+  <text x="472" y="232" text-anchor="middle" font-size="12.5" fill="#86868b">serialized bytes, not addresses</text>
+  <text x="652" y="88" font-size="12.5" font-weight="500" fill="#86868b">Slots</text>
+  <text x="768" y="232" text-anchor="middle" font-size="12.5" fill="#86868b">a place something plugs into</text>
+  <text x="948" y="88" font-size="12.5" font-weight="500" fill="#86868b">Port tab</text>
+  <text x="1064" y="232" text-anchor="middle" font-size="12.5" fill="#86868b">an interface owned by this die</text>
+  <text x="60" y="288" font-size="12.5" font-weight="500" fill="#86868b">Device card</text>
+  <text x="176" y="432" text-anchor="middle" font-size="12.5" fill="#86868b">pluggable board · model text, no logo</text>
+  <text x="356" y="288" font-size="12.5" font-weight="500" fill="#86868b">AC coupling</text>
+  <text x="472" y="432" text-anchor="middle" font-size="12.5" fill="#86868b">a capacitor, not “isolation”</text>
+  <text x="652" y="288" font-size="12.5" font-weight="500" fill="#86868b">Sync</text>
+  <text x="768" y="432" text-anchor="middle" font-size="12.5" fill="#86868b">clock-domain crossing only</text>
+  <text x="948" y="288" font-size="12.5" font-weight="500" fill="#86868b">Hatch</text>
+  <text x="1064" y="432" text-anchor="middle" font-size="12.5" fill="#86868b">a window onto another space</text>
+
+  <g id="g-queue">
+    <rect x="96" y="128" width="160" height="44" rx="8" fill="#f5f5f7"/>
+    <rect x="96" y="128" width="36" height="44" rx="8" fill="#eaf3fe"/>
+    <g stroke="#d2d2d7" stroke-width="1">
+      <line x1="108" y1="128" x2="108" y2="172"/>
+      <line x1="120" y1="128" x2="120" y2="172"/>
+      <line x1="132" y1="128" x2="132" y2="172"/>
+      <line x1="144" y1="128" x2="144" y2="172"/>
+      <line x1="156" y1="128" x2="156" y2="172"/>
+      <line x1="168" y1="128" x2="168" y2="172"/>
+      <line x1="180" y1="128" x2="180" y2="172"/>
+      <line x1="192" y1="128" x2="192" y2="172"/>
+      <line x1="204" y1="128" x2="204" y2="172"/>
+      <line x1="216" y1="128" x2="216" y2="172"/>
+      <line x1="228" y1="128" x2="228" y2="172"/>
+      <line x1="240" y1="128" x2="240" y2="172"/>
+    </g>
+    <path d="M90,182 L102,182 L96,173 Z" fill="#1d1d1f"/>
+    <text x="96" y="199" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">out</text>
+    <path d="M126,182 L138,182 L132,173 Z" fill="#0071e3"/>
+    <text x="132" y="199" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0071e3">in</text>
+  </g>
+
+  <g id="g-bytestream">
+    <rect x="372" y="132" width="200" height="30" rx="8" fill="#f5f5f7"/>
+    <g stroke="#1d1d1f" stroke-width="1.2">
+      <line x1="376" y1="162" x2="376" y2="174"/>
+      <line x1="384" y1="162" x2="384" y2="169"/>
+      <line x1="392" y1="162" x2="392" y2="169"/>
+      <line x1="400" y1="162" x2="400" y2="169"/>
+      <line x1="408" y1="162" x2="408" y2="174"/>
+      <line x1="416" y1="162" x2="416" y2="169"/>
+      <line x1="424" y1="162" x2="424" y2="169"/>
+      <line x1="432" y1="162" x2="432" y2="169"/>
+      <line x1="440" y1="162" x2="440" y2="174"/>
+      <line x1="448" y1="162" x2="448" y2="169"/>
+      <line x1="456" y1="162" x2="456" y2="169"/>
+      <line x1="464" y1="162" x2="464" y2="169"/>
+      <line x1="472" y1="162" x2="472" y2="174"/>
+      <line x1="480" y1="162" x2="480" y2="169"/>
+      <line x1="488" y1="162" x2="488" y2="169"/>
+      <line x1="496" y1="162" x2="496" y2="169"/>
+      <line x1="504" y1="162" x2="504" y2="174"/>
+      <line x1="512" y1="162" x2="512" y2="169"/>
+      <line x1="520" y1="162" x2="520" y2="169"/>
+      <line x1="528" y1="162" x2="528" y2="169"/>
+      <line x1="536" y1="162" x2="536" y2="174"/>
+      <line x1="544" y1="162" x2="544" y2="169"/>
+      <line x1="552" y1="162" x2="552" y2="169"/>
+      <line x1="560" y1="162" x2="560" y2="169"/>
+      <line x1="568" y1="162" x2="568" y2="174"/>
+    </g>
+    <text x="472" y="152" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">TLP header + payload</text>
+  </g>
+
+  <g id="g-slots">
+    <rect x="727" y="118" width="10" height="56" rx="4" fill="#f5f5f7"/>
+    <rect x="745" y="118" width="10" height="56" rx="4" fill="#f5f5f7"/>
+    <rect x="763" y="118" width="10" height="56" rx="4" fill="#0071e3"/>
+    <rect x="781" y="118" width="10" height="56" rx="4" fill="#f5f5f7"/>
+    <rect x="799" y="118" width="10" height="56" rx="4" fill="#f5f5f7"/>
+    <g filter="url(#aglPill)"><rect x="698" y="184" width="140" height="26" rx="13" fill="#ffffff"/></g>
+    <text x="768" y="201" text-anchor="middle" font-size="12.5" font-weight="500" fill="#6e6e73">PCIe &#215;16 slots</text>
+  </g>
+
+  <g id="g-porttab">
+    <g filter="url(#aglSh)"><rect x="979" y="116" width="170" height="70" rx="14" fill="#ffffff"/></g>
+    <text x="995" y="146" font-size="13.5" font-weight="600" fill="#1d1d1f">Host CPU die</text>
+    <text x="995" y="165" font-size="12.5" fill="#86868b">64 core</text>
+    <rect x="1139" y="133" width="20" height="44" rx="6" fill="#1d1d1f"/>
+    <text x="1149" y="155" text-anchor="middle" font-size="12.5" font-weight="600" fill="#ffffff" transform="rotate(-90 1149 155)">IMC</text>
+  </g>
+
+  <g id="g-devcard">
+    <g filter="url(#aglSh)"><rect x="101" y="306" width="150" height="90" rx="14" fill="#ffffff"/></g>
+    <path d="M101,320 V320 Q101,306 115,306 H237 Q251,306 251,320 Z" fill="#1d1d1f"/>
+    <circle cx="113" cy="313" r="3" fill="#0071e3"/>
+    <text x="116" y="352" font-size="13.5" font-weight="600" fill="#1d1d1f">200 GbE NIC</text>
+    <text x="116" y="371" font-size="12.5" fill="#86868b">2 &#215; QSFP56</text>
+  </g>
+
+  <g id="g-accoupling">
+    <path d="M382,351 H562" fill="none" stroke="#1d1d1f" stroke-width="2.4"/>
+    <line x1="464" y1="339" x2="464" y2="363" stroke="#1d1d1f" stroke-width="2.4"/>
+    <line x1="480" y1="339" x2="480" y2="363" stroke="#1d1d1f" stroke-width="2.4"/>
+    <text x="382" y="384" font-size="12.5" font-weight="600" fill="#6e6e73">D+</text>
+    <text x="562" y="384" text-anchor="end" font-size="12.5" font-weight="600" fill="#6e6e73">D&#8722;</text>
+  </g>
+
+  <g id="g-sync">
+    <line x1="768" y1="306" x2="768" y2="398" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="5 4"/>
+    <path d="M690,351 H842" fill="none" stroke="#1d1d1f" stroke-width="2.4" marker-end="url(#aglArrI)"/>
+    <rect x="759" y="342" width="18" height="18" rx="5" fill="#f5f5f7" stroke="#aeaeb2" stroke-width="1.2"/>
+    <text x="768" y="384" text-anchor="middle" font-size="12.5" font-weight="600" fill="#6e6e73">sync</text>
+    <text x="690" y="324" font-size="12.5" fill="#86868b">clk A</text>
+    <text x="846" y="324" text-anchor="end" font-size="12.5" fill="#86868b">clk B</text>
+  </g>
+
+  <g id="g-hatch">
+    <rect x="984" y="324" width="160" height="54" rx="10" fill="#ffffff" stroke="#d2d2d7" stroke-width="1"/>
+    <rect x="984" y="324" width="160" height="54" rx="10" fill="url(#aglHatch)"/>
+    <text x="1064" y="356" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">BAR0 window</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">glyph sheet</span><span class="lang-zh">构件字形集</span></span>
+          <span class="lang-en">A rounded rectangle can stand for anything, so on its own it says nothing. Each glyph here is a noun with one fixed meaning: comb teeth promise a bounded in-order queue, ruler ticks promise serialized bytes, a tab straddling a boundary promises the interface belongs to that die. Draw one where the thing is not actually there and the figure states something false. Blue marks the one live state per glyph &mdash; the write pointer, the populated slot, the link LED. Vendor logos stay out: model text keeps the file editable. Template: <code>templates/diagrams/glyphs.svg</code>.</span>
+          <span class="lang-zh">一个圆角矩形能代表任何东西，所以它单独出现时什么也没说。这里每个字形都是一个<strong>意义固定的名词</strong>：梳齿承诺"深度有限、按序进出"，尺状刻度承诺"这是被序列化的字节"，骑在边界上的小标签承诺"这个接口属于这块 die"。在没有那样东西的地方画上它，就是在图上写了一句假话。蓝色每个字形只点一处"活着"的状态 —— 写指针、插了卡的那个槽、link 起来的 LED。厂商 logo 一律不进：写型号文字，文件才改得动。模板：<code>templates/diagrams/glyphs.svg</code>。</span>
+        </span>
+        <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 944 352" role="img" aria-label="UART_CTRL register bit-field map at offset 0x04, reset value 0x0010_0301, showing BAUD_DIV, PARITY, STOP, DATA8 and FIFO_TH fields with the TX_EN and RX_EN enable bits highlighted" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
   <!-- panel -->
   <rect x="0" y="0" width="944" height="352" fill="#ffffff"/>
@@ -1425,8 +1849,8 @@
       <figcaption class="gal-cap">
         <span class="gal-cap-text">
           <span class="gal-tag"><span class="lang-en">Sequence · api</span><span class="lang-zh">时序 · API</span></span>
-          <span class="lang-en">Requests in blue, returns in dashed gray, activation bars floating on shadows. Template: <code>templates/diagrams/sequence.svg</code>.</span>
-          <span class="lang-zh">请求走蓝色，返回走灰虚线，激活条靠柔影浮起。模板：<code>templates/diagrams/sequence.svg</code>。</span>
+          <span class="lang-en">Requests in blue, returns in dashed gray, activation bars floating on shadows. Follow the badges: &#9315; is the one to notice &mdash; the gateway acks at 12&nbsp;ms, long before the worker has produced a token, so the client waits on a stream instead of on the whole run. Template: <code>templates/diagrams/sequence.svg</code>.</span>
+          <span class="lang-zh">请求走蓝色，返回走灰虚线，激活条靠柔影浮起。按编号读，值得注意的是 <strong>④</strong>：网关在 12&nbsp;ms 就应答了，那时 worker 一个 token 都还没产出——客户端于是等的是一条流，不是整次运行。模板：<code>templates/diagrams/sequence.svg</code>。</span>
         </span>
         <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
       </figcaption>

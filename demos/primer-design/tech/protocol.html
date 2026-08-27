@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>同层之间那条线，其实一根都没有 · 图解读本</title>
+<meta name="description" content="Technical primer: layered protocols look like peers talking sideways, but only the bottom layer has a wire. 零基础图解：分层协议里同层之间那条线，一根都不存在。">
+<meta property="og:title" content="同层之间那条线，其实一根都没有 · 图解读本">
+<meta property="og:description" content="零基础图解：教材说「传输层和对方的传输层通信」，于是你去找传输层那根线——找不到。横向那条线一根都没有，字节是一层层下去、过一次线、再一层层上来的。">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../skills/primer-design/assets/primer.css">
+<style>
+  /* Page-local styles — unprefixed on purpose (verify.py validates primer-*
+   * classes against primer.css; local layout stays unprefixed). */
+  .recap-flat { margin-top: 0; }
+</style>
+</head>
+<body class="primer-body">
+
+<nav class="primer-nav">
+  <div class="primer-nav-inner">
+    <span class="primer-brand">
+      <span class="primer-brand-dot"></span>
+      <span class="lang-en">Primer</span><span class="lang-zh">图解读本</span>
+    </span>
+    <div class="primer-nav-tools">
+      <div class="primer-langtoggle lang-toggle">
+        <button type="button" data-lang-toggle="zh" class="is-active">中文</button>
+        <button type="button" data-lang-toggle="en">EN</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="primer-hero">
+  <div class="primer-container">
+    <div class="primer-hero-inner">
+      <div>
+        <h1>
+          <span class="lang-en">The line between two peers is not a line</span>
+          <span class="lang-zh">同层之间那条线，其实一根都没有</span>
+        </h1>
+        <p class="primer-hero-lede">
+          <span class="lang-en">Every book about layered protocols says the transaction layer &ldquo;talks to&rdquo; the transaction layer on the other side. Take that literally and you go looking for its wire. There is none. Only the bottom layer has one.</span>
+          <span class="lang-zh">讲分层协议的书都会写「传输层和对方的传输层通信」。照字面理解，你就会去找传输层那根线——找不到。<strong>横向那条线一根都没有</strong>，真线只有最底下一根。</span>
+        </p>
+      </div>
+      <figure class="primer-figure primer-fig-hero">
+        <svg viewBox="0 0 500 340" role="img"
+          aria-label="一块主板上插着一张扩展卡，卡和主板之间只有插槽那一处接触，一条走线从插槽通向主板另一头的芯片"
+          data-label-zh="一块主板上插着一张扩展卡，卡和主板之间只有插槽那一处接触，一条走线从插槽通向主板另一头的芯片"
+          data-label-en="An expansion card sitting in a slot on a motherboard: the card touches the board at the slot and nowhere else, and one trace runs from the slot to the chip at the other end">
+          <path d="M28 176 L472 174 L470 316 L30 318 Z" fill="#ffffff"/>
+          <path class="primer-hair" fill="none" d="M28 200 L472 198 M28 292 L470 290"/>
+          <path d="M150 44 L430 42 L429 186 L149 188 Z" fill="#7a5cd6"/>
+          <path class="primer-hair" fill="none" stroke="#ffffff" d="M170 62 L410 60 M170 82 L410 80"/>
+          <path d="M196 106 L280 105 L279 156 L195 157 Z" fill="#ffffff"/>
+          <path class="primer-hair" fill="none" d="M186 116 L196 116 M186 132 L196 132 M186 148 L196 148 M280 115 L290 115 M280 131 L290 131 M280 147 L290 147"/>
+          <path d="M158 188 L292 188 L292 204 L158 204 Z" fill="#ffd23f"/>
+          <path fill="none" d="M210 204 L210 246 L410 246 L410 268"/>
+          <path d="M370 268 L450 267 L449 306 L369 307 Z" fill="#ffffff"/>
+          <path class="primer-hair" fill="none" d="M360 278 L370 278 M360 292 L370 292 M450 277 L460 277 M450 291 L460 291"/>
+          <text x="238" y="134" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">NIC</text>
+          <text x="410" y="292" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">CPU</text>
+          <text x="228" y="236" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">PCIe</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">The card touches the board in one place: the slot. Every byte that leaves the card leaves through those contacts &mdash; there is no second path kept aside for &ldquo;the upper layers&rdquo;.</span>
+          <span class="lang-zh">卡和主板只有一处接触：那道插槽。卡上出去的每一个字节都从那排金手指出去——<strong>没有第二条路留给「上面几层」走</strong>。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">Why the sentence misleads</span>
+        <span class="lang-zh">那句话为什么会误导人</span>
+      </h2>
+      <p>
+        <span class="lang-en">&ldquo;Talks to&rdquo; is a statement about <em>rules</em>, not about wiring. Both sides agree on what a packet looks like, what an acknowledgement means, when to resend. Agreeing is not connecting.</span>
+        <span class="lang-zh">「通信」说的是<strong>规矩</strong>，不是接线。两边说好包长什么样、确认是什么意思、什么时候重发——<strong>说好，不等于连上</strong>。</span>
+      </p>
+      <div class="primer-analogy">
+        <div class="primer-analogy-fig">
+          <svg viewBox="0 0 180 150" role="img"
+            aria-label="三个一层套一层的信封，最里面那封是紫色的；旁边一辆卡车正把它拉走"
+            data-label-zh="三个一层套一层的信封，最里面那封是紫色的；旁边一辆卡车正把它拉走"
+            data-label-en="Three envelopes nested one inside another, the innermost one violet, with a truck hauling the lot away">
+            <path class="primer-hair" d="M6 142 L174 140.8" fill="none"/>
+            <path d="M12 30 L108 28 L106 108 L10 110 Z" fill="#ffffff"/>
+            <path d="M22 44 L98 42.5 L96 96 L20 97.5 Z" fill="#efe9fc"/>
+            <path d="M32 58 L88 57 L86 84 L30 85 Z" fill="#7a5cd6"/>
+            <path class="primer-hair" d="M32 58 L59 70 L88 57" fill="none" stroke="#ffffff"/>
+            <path d="M116 74 L156 73 L155 108 L115 109 Z" fill="#ffffff"/>
+            <path d="M156 84 L172 83.5 L171 108 L155 108.5 Z" fill="#ffffff"/>
+            <path class="primer-hair" d="M158 88 L169 87.7 L168.6 96 L157.6 96.3 Z" fill="none"/>
+            <circle cx="128" cy="118" r="8" fill="#243244"/>
+            <circle cx="160" cy="118" r="8" fill="#243244"/>
+          </svg>
+        </div>
+        <div class="primer-analogy-body">
+          <p>
+            <span class="lang-en">You post a letter. Inside it you wrote to your friend &mdash; that is the layer that &ldquo;talks to&rdquo; them. But the letter goes into a courier bag, the bag goes onto a truck, and the truck is the only thing that actually moves. Your friend unloads, unwraps, then reads, in the opposite order. <strong>You and your friend never touched.</strong> Neither did the two bags.</span>
+            <span class="lang-zh">你寄一封信。信里写的是给朋友的话——那一层「和他通信」。可信要装进快递袋，袋要上卡车，<strong>真正在动的只有卡车</strong>。朋友那边按相反的顺序来：先卸车，再拆袋，最后读信。<strong>你和朋友从头到尾没碰过面</strong>，两个快递袋也没有。</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="primer-section">
+    <div class="primer-container">
+      <h2>
+        <span class="lang-en">What it looks like drawn honestly</span>
+        <span class="lang-zh">老实画出来是这样</span>
+      </h2>
+      <p>
+        <span class="lang-en">Draw the agreement as what it is &mdash; a name both sides know &mdash; and the picture stops lying. Then follow one transfer through it.</span>
+        <span class="lang-zh">把「约定」按它本来的样子画出来——一个两边都认的名字——图就不再说假话了。然后跟着<strong>一笔传输</strong>走一遍。</span>
+      </p>
+      <figure class="primer-figure primer-fig-wide">
+        <svg viewBox="0 0 960 440" role="img"
+          aria-label="上下三层，每层左右各一块。上面两层中间只有一条断开的浅虚线和一个层名气泡——那是双方说好的约定，不是一根线。只有最下面一层的两块之间有一根真线，从左边落下去、横过来、再升上去，黄色标出的就是它。紫箭头顺着左边一层层往下、过线、再顺着右边一层层往上"
+          data-label-zh="上下三层，每层左右各一块。上面两层中间只有一条断开的浅虚线和一个层名气泡——那是双方说好的约定，不是一根线。只有最下面一层的两块之间有一根真线，从左边落下去、横过来、再升上去，黄色标出的就是它。紫箭头顺着左边一层层往下、过线、再顺着右边一层层往上"
+          data-label-en="Three layers, a box on each side of every layer. Between the top two layers there is only a broken hairline and a bubble with the layer name — that is an agreement both sides keep, not a wire. Only the bottom layer has a real line between its two boxes: it drops from the left box, runs across, and climbs into the right one; the yellow highlight marks it. A violet arrow goes down the left stack, across that one line, then up the right stack">
+
+          <!-- ── the six boxes · shells wobble, nothing that carries meaning does ── -->
+          <path d="M40 40 L300 40.5 L299.5 132 L40 131.5 Z" fill="#ffffff"/>
+          <path d="M660 40.5 L920 40 L920 131.5 L660.5 132 Z" fill="#ffffff"/>
+          <path d="M40 160 L300 159.5 L299.5 252 L40 252.5 Z" fill="#ffffff"/>
+          <path d="M660 159.5 L920 160 L920 252.5 L660.5 252 Z" fill="#ffffff"/>
+          <path d="M40 280 L300 280.5 L299.5 372 L40 371.5 Z" fill="#ffffff"/>
+          <path d="M660 280.5 L920 280 L920 371.5 L660.5 372 Z" fill="#ffffff"/>
+
+          <!-- hair layer: the little seams that say these are parts, not empty frames -->
+          <path class="primer-hair" fill="none" d="M40 66 L24 66 M40 106 L24 106 M920 66 L936 66 M920 106 L936 106 M40 186 L24 186 M40 226 L24 226 M920 186 L936 186 M920 226 L936 226 M40 306 L24 306 M40 346 L24 346 M920 306 L936 306 M920 346 L936 346"/>
+
+          <!-- ── the "agreement" between the top two layers: a hairline that never closes ── -->
+          <path class="primer-hair" fill="none" stroke-dasharray="10 12" d="M300 86 L392 86 M568 86 L660 86"/>
+          <path class="primer-hair" fill="none" stroke-dasharray="10 12" d="M300 206 L392 206 M568 206 L660 206"/>
+
+          <!-- layer-name bubbles sit IN the gap, so the hairline visibly does not cross -->
+          <rect x="392" y="64" width="176" height="44" rx="22" fill="#efe9fc"/>
+          <rect x="392" y="184" width="176" height="44" rx="22" fill="#efe9fc"/>
+          <rect x="392" y="304" width="176" height="44" rx="22" fill="#efe9fc"/>
+
+          <text class="lang-zh" x="480" y="92" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">传输层</text>
+          <text class="lang-en" x="480" y="92" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">Transaction</text>
+          <text class="lang-zh" x="480" y="212" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">数据链路层</text>
+          <text class="lang-en" x="480" y="212" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">Data link</text>
+          <text class="lang-zh" x="480" y="332" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">物理层</text>
+          <text class="lang-en" x="480" y="332" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">Physical</text>
+
+          <text x="170" y="92" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">TLP</text>
+          <text x="790" y="92" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">TLP</text>
+          <text x="170" y="212" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">DLLP</text>
+          <text x="790" y="212" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">DLLP</text>
+          <text x="170" y="332" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">128b/130b</text>
+          <text x="790" y="332" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">128b/130b</text>
+
+          <!-- ── the one real line · yellow marks the thing to look at ── -->
+          <rect x="196" y="390" width="568" height="16" rx="8" fill="#ffd23f"/>
+          <path fill="none" d="M170 372 L170 398 L790 398 L790 372"/>
+          <text x="480" y="426" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">PCIe lane</text>
+
+          <!-- ── the bytes: down the left stack, across the one line, up the right ── -->
+          <path fill="none" stroke="#7a5cd6" d="M170 132 L170 152 M170 252 L170 272 M790 272 L790 252 M790 152 L790 132"/>
+          <path fill="#7a5cd6" stroke="#7a5cd6" d="M170 160 L161 152 L179 152 Z"/>
+          <path fill="#7a5cd6" stroke="#7a5cd6" d="M170 280 L161 272 L179 272 Z"/>
+          <path fill="#7a5cd6" stroke="#7a5cd6" d="M790 244 L781 252 L799 252 Z"/>
+          <path fill="#7a5cd6" stroke="#7a5cd6" d="M790 124 L781 132 L799 132 Z"/>
+
+          <!-- ── the two notes ── -->
+          <text class="lang-zh" x="480" y="146" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">说好的约定，不是线</text>
+          <text class="lang-en" x="480" y="146" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">an agreement, not a wire</text>
+          <text class="lang-zh" x="480" y="368" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">只有这一根是真的</text>
+          <text class="lang-en" x="480" y="368" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">only this one is real</text>
+        </svg>
+        <figcaption class="primer-figcaption">
+          <span class="lang-en">Three layers, a block on each side of every one. The top two are joined by nothing &mdash; a broken hairline and a bubble carrying the layer name, which is what an agreement looks like when you draw it honestly. Only the bottom pair has a real line: it drops out of the left block, runs across under the yellow band, and climbs into the right one. The violet arrow is one transfer: down every layer, across that single line, up every layer. That is why a protocol analyser clips onto the lane and never onto the transaction layer &mdash; there is nothing up there to clip to.</span>
+          <span class="lang-zh">三层，每层左右各一块。上面两层之间什么都没有——一条断开的细虚线，加一个写着层名的气泡，这就是「约定」被老实画出来的样子。只有最下面那一对之间有真线：它从左边那块底下落下来，横过黄条，再升进右边那块。紫箭头是<strong>一笔传输</strong>：一层层下去，过那唯一一根线，再一层层上来。协议分析仪之所以只能夹在 lane 上、夹不到传输层，就是因为上面根本没有东西可夹。</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="primer-section">
+    <div class="primer-container">
+      <aside class="primer-recap recap-flat">
+        <p class="primer-recap-title">
+          <span class="lang-en">Now you know</span>
+          <span class="lang-zh">现在你知道了</span>
+        </p>
+        <ul class="primer-recap-list">
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Sideways lines in a layer diagram are agreements. Only the bottom one is a wire.</span>
+              <span class="lang-zh">分层图里的横线是<strong>约定</strong>。只有最底下那根是线。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">Bytes never skip a layer: down through all of them, across once, up through all of them.</span>
+              <span class="lang-zh">字节不跳层：一层层下去，过一次线，再一层层上来。</span>
+            </span>
+          </li>
+          <li class="primer-recap-item">
+            <span class="primer-recap-tick" aria-hidden="true"></span>
+            <span>
+              <span class="lang-en">That is why you probe the physical layer &mdash; there is no other place where the bytes are actually moving.</span>
+              <span class="lang-zh">所以要抓包就抓物理层——别的地方根本没有字节在动。</span>
+            </span>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="primer-footer">
+  <div class="primer-container">
+    <span class="lang-en">Technical primer · primer-design · this page draws two peers and one wire; what happens inside a single layer is another picture</span>
+    <span class="lang-zh">技术图解 · primer-design · 这一页画的是两侧和那一根线，某一层内部是另一张图</span>
+    · v1 · 2026-08-27
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var saved;
+  var q = new URLSearchParams(location.search).get('lang');
+  if (q === 'zh' || q === 'en') {
+    saved = q;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) { saved = null; }
+  }
+  if (saved !== 'zh' && saved !== 'en') saved = 'zh';
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) { /* private mode */ }
+    document.querySelectorAll('[data-lang-toggle]').forEach(function (b) {
+      b.classList.toggle('is-active', b.getAttribute('data-lang-toggle') === lang);
+    });
+    /* CSS only hides the other language's <text>; an SVG's aria-label is an
+     * attribute, so EN mode must swap it here or screen readers hear Chinese
+     * under html[lang="en"]. The static aria-label in the markup is the zh
+     * default for the no-JS case. */
+    document.querySelectorAll('svg[data-label-zh]').forEach(function (s) {
+      s.setAttribute('aria-label',
+        s.getAttribute(lang === 'zh' ? 'data-label-zh' : 'data-label-en'));
+    });
+  }
+  apply(saved);
+  document.querySelectorAll('[data-lang-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      apply(btn.getAttribute('data-lang-toggle'));
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: primer
+Page-type: concept (technical · interconnect and address map)
+Created: 2026-08-26
+
+Decisions (5):
+1. [two-strips-never-merged] chose "two separate horizontal books with 90 units of blank between them" over "one long strip split by a divider". Because: tech-figures §7 forbids the merged form, and the reason is the misreading it produces — a divider inside one strip reads as two halves of the same numbering, which is the exact belief this page exists to correct. The blank between them is load-bearing: it is the only thing on the page that draws "these are two books", and the same block of memory carries two different numbers across it (0x8000_0000 in the CPU's book, 0x0000_0000 in the card's) so the claim has evidence rather than assertion.
+2. [hatching-not-a-second-colour] chose "the opened range is hatched ink on white" over "the opened range gets its own fill colour". Because: illustration-craft §9 allows one accent beside violet and ink, and that slot is already spent saying which side a thing belongs to (violet is the CPU's side, page-wide, stated in the hero caption). "This land is not local" is a second, independent fact about the same segment — texture is the channel that can sit on top of any fill without competing with it. Hatch density was measured, not guessed: at 9-unit spacing the segment label underneath was unreadable, so the page uses 16-unit spacing at 2.4 width and 0.55 opacity.
+3. [violet-means-the-CPU-side] chose "one page-wide meaning for violet, declared in the hero caption" over "violet as each section's subject". Because: five figures show the same two chips, and a colour that means one fixed thing lets the eye find the viewpoint without a legend. It marks the CPU's book in the hero, its book tint in the second figure, its own RAM range in the map, the act of opening a range, and the one-step route. Yellow appears exactly once on the whole page, under the sentence the page exists to make.
+4. [the-arrow-lands-on-a-segment] chose "the violet arrow drops onto one segment of the CPU's own book" over "an arrow from the CPU to the card". Because: an arrow that crosses to the other chip draws the belief being corrected — that the wire is what grants access. Landing inside the reader's own book is the whole mechanism: what the CPU issues is an ordinary read against a number it already understands, and the hardware behind that number is somewhere else. tech-figures §7 makes this the section's hard rule, and its 禁止 table rules out landing on a whole strip, which degrades the claim to "the CPU can read memory".
+5. [two-routes-on-one-set-of-blocks] chose "draw both routes over the same three blocks" over "a left-right before/after pair". Because: the two routes differ in step count, not in cast — the same CPU, the same local RAM, the same video memory. Drawing them twice would say there are two systems, and it would double the label budget on a page whose figures are already at 13 of the 14 the 1080 tier allows. Route labels sit on their own routes, not in a legend row: at the foot of the picture neither label said which line it belonged to.
+
+Known trade-offs:
+- Label budgets are the binding constraint here, not height. The map figure carries exactly 13 <text> elements against the tier's 14 (tech-figures §7): 2 chip names, 1 link name, one bilingual pair for the point ("two books, numbered separately"), three bilingual segment names and two neutral addresses. Same-form names are written once, not twice — "CPU" reads the same in both languages, and hanging lang classes on it costs a slot for nothing. That mistake was made and caught here: the first draft measured 14.
+- The chips sit directly above their own book, which is what buys the budget: labelling each strip with "whose book is this" would cost four elements, and position says it for free.
+- Every full-width figure clears the 640px oversized line with room: 420 / 470 / 400 / 380 viewBox units at the 900-wide 1080 tier render 504 / 564 / 480 / 456px. The map is the tall one because it carries three layers (topology, both books, the stitch between them) and tech-figures §7 forbids splitting it — the split is what leaves the reader to align the halves mentally, which is the difficulty itself.
+- Simplifications, each disclosed in the caption that makes it: four rows drawn where a real book holds billions; two ranges per book where a real one has dozens; segment widths not to scale; the fabric between the two chips drawn as one wire, with no switch, because a second chip is all this page needs.
+- Numbers live in the captions as well as the drawings: 0 / 1 / 2 and the unfinished fourth row, 0x8000_0000 and 0x0000_0000, one step against two. At 375px the content column is 335px, where a 15-unit in-figure label renders about 5px — unreadable, so the caption is the drawing's only voice on a phone.
+- The hero's violet is the CPU's book rather than a district on a die: this page is told from one side throughout, and the colour has to say which side that is before the first figure does anything else. It also carries the brand-presence check, which the all-white first draft failed at 0.18% of the top 1440x500.
+/design-review:self-diff -->
+
+</body>
+</html>

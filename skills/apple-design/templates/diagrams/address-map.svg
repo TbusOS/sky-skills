@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 600" role="img" aria-label="Two vertical address maps side by side with low addresses at the bottom. On the left the system physical address space: DRAM up to TOLUD at three gigabytes, a hatched MMIO hole up to four gigabytes, DRAM again from four to sixteen gigabytes, a reclaimed DRAM window from REMAPBASE to TOUUD outlined in blue, and sixty-four bit PCIe MMIO on top. On the right the DIMM physical space, contiguous from zero to sixteen gigabytes. Every boundary has its own leader line and label: symbol names in bold pills, literal constants in monospace pills. Two grey mapping lines mark direct mappings; one blue line shows the gigabyte shadowed by the MMIO hole reappearing above TOUUD" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="aamHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#aeaeb2" stroke-width="1.6" opacity="0.5"/>
+    </pattern>
+    <filter id="aamPill" x="-40%" y="-60%" width="180%" height="220%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1d1d1f" flood-opacity="0.10"/>
+    </filter>
+    <clipPath id="aamClipA"><rect x="232" y="68" width="328" height="458" rx="18"/></clipPath>
+    <clipPath id="aamClipB"><rect x="800" y="214" width="328" height="312" rx="18"/></clipPath>
+    <marker id="aamArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="aamArrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+  </defs>
+
+  <rect width="1240" height="600" fill="#ffffff"/>
+  <text x="60" y="40" font-size="12.5" font-weight="500" fill="#86868b">Address map &#183; two viewpoints</text>
+  <g font-size="12.5" font-weight="500" fill="#86868b">
+    <rect x="636" y="29" width="24" height="14" rx="4" fill="#ffffff" stroke="#d2d2d7"/>
+    <rect x="636" y="29" width="24" height="14" rx="4" fill="url(#aamHatch)"/>
+    <text x="670" y="40">not DRAM</text>
+    <line x1="780" y1="36" x2="808" y2="36" stroke="#aeaeb2" stroke-width="1.2"/>
+    <text x="818" y="40">direct mapping</text>
+    <line x1="954" y1="36" x2="982" y2="36" stroke="#0071e3" stroke-width="1.8"/>
+    <text x="992" y="40">reclaim &#183; this remap</text>
+  </g>
+
+  <g clip-path="url(#aamClipA)">
+    <rect x="232" y="68" width="328" height="458" fill="#f5f5f7"/>
+    <rect x="232" y="68" width="328" height="84" fill="#ffffff"/>
+    <rect x="232" y="68" width="328" height="84" fill="url(#aamHatch)"/>
+    <rect x="232" y="344" width="328" height="62" fill="#ffffff"/>
+    <rect x="232" y="344" width="328" height="62" fill="url(#aamHatch)"/>
+    <rect x="232" y="152" width="328" height="62" fill="#ffffff"/>
+    <g stroke="#d2d2d7" stroke-width="1">
+      <line x1="232" y1="152" x2="560" y2="152"/>
+      <line x1="232" y1="214" x2="560" y2="214"/>
+      <line x1="232" y1="344" x2="560" y2="344"/>
+      <line x1="232" y1="406" x2="560" y2="406"/>
+    </g>
+  </g>
+  <rect x="232.75" y="152.75" width="326.5" height="60.5" rx="6" fill="none" stroke="#0071e3" stroke-width="1.5"/>
+
+  <text x="252" y="104" font-size="13.5" font-weight="600" fill="#1d1d1f">PCIe MMIO &#183; 64-bit</text>
+  <text x="252" y="123" font-size="12.5" fill="#86868b">BAR windows of every device</text>
+  <text x="252" y="179" font-size="13.5" font-weight="600" fill="#0071e3">DRAM &#183; reclaimed</text>
+  <text x="252" y="198" font-size="12.5" fill="#86868b">the gigabyte that was shadowed</text>
+  <text x="252" y="274" font-size="13.5" font-weight="600" fill="#1d1d1f">DRAM &#183; direct</text>
+  <text x="252" y="293" font-size="12.5" fill="#86868b">12 GiB</text>
+  <text x="252" y="370" font-size="13.5" font-weight="600" fill="#1d1d1f">MMIO hole</text>
+  <text x="252" y="389" font-size="12.5" fill="#86868b">PCI &#183; LAPIC &#183; IOAPIC &#183; flash</text>
+  <text x="252" y="460" font-size="13.5" font-weight="600" fill="#1d1d1f">DRAM &#183; direct</text>
+  <text x="252" y="479" font-size="12.5" fill="#86868b">3 GiB, legacy region at the bottom</text>
+
+  <g clip-path="url(#aamClipB)">
+    <rect x="800" y="214" width="328" height="312" fill="#f5f5f7"/>
+    <rect x="800" y="344" width="328" height="62" fill="#ffffff"/>
+    <g stroke="#d2d2d7" stroke-width="1">
+      <line x1="800" y1="344" x2="1128" y2="344"/>
+      <line x1="800" y1="406" x2="1128" y2="406"/>
+    </g>
+  </g>
+  <rect x="800.75" y="344.75" width="326.5" height="60.5" rx="6" fill="none" stroke="#0071e3" stroke-width="1.5"/>
+
+  <text x="820" y="274" font-size="13.5" font-weight="600" fill="#1d1d1f">DRAM 4 &#8211; 16 GiB</text>
+  <text x="820" y="293" font-size="12.5" fill="#86868b">reachable at its own address</text>
+  <text x="820" y="371" font-size="13.5" font-weight="600" fill="#0071e3">DRAM 3 &#8211; 4 GiB</text>
+  <text x="820" y="390" font-size="12.5" fill="#86868b">shadowed by the hole &#8212; needs a remap</text>
+  <text x="820" y="460" font-size="13.5" font-weight="600" fill="#1d1d1f">DRAM 0 &#8211; 3 GiB</text>
+  <text x="820" y="479" font-size="12.5" fill="#86868b">reachable at its own address</text>
+
+  <text x="232" y="56" font-size="12.5" font-weight="500" fill="#86868b">System physical</text>
+  <text x="800" y="202" font-size="12.5" font-weight="500" fill="#86868b">DIMM physical &#183; 16 GiB total</text>
+
+  <g stroke="#aeaeb2" stroke-width="1.2">
+    <line x1="204" y1="68" x2="232" y2="68"/>
+    <line x1="204" y1="152" x2="232" y2="152"/>
+    <line x1="204" y1="214" x2="232" y2="214"/>
+    <line x1="204" y1="344" x2="232" y2="344"/>
+    <line x1="204" y1="406" x2="232" y2="406"/>
+    <line x1="204" y1="526" x2="232" y2="526"/>
+  </g>
+  <g filter="url(#aamPill)"><rect x="48" y="55" width="152" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="124" y="72" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0x40_0000_0000</text>
+  <g filter="url(#aamPill)"><rect x="82" y="124" width="118" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="141" y="141" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">TOUUD</text>
+  <g filter="url(#aamPill)"><rect x="48" y="154" width="152" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="124" y="171" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0x4_4000_0000</text>
+  <g filter="url(#aamPill)"><rect x="64" y="186" width="136" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="132" y="203" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">REMAPBASE</text>
+  <g filter="url(#aamPill)"><rect x="48" y="216" width="152" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="124" y="233" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0x4_0000_0000</text>
+  <g filter="url(#aamPill)"><rect x="48" y="331" width="152" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="124" y="348" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0x1_0000_0000</text>
+  <g filter="url(#aamPill)"><rect x="90" y="378" width="110" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="145" y="395" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">TOLUD</text>
+  <g filter="url(#aamPill)"><rect x="48" y="408" width="152" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="124" y="425" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0xC000_0000</text>
+  <g filter="url(#aamPill)"><rect x="48" y="513" width="152" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="124" y="530" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0x0000_0000</text>
+
+  <g stroke="#aeaeb2" stroke-width="1.2">
+    <line x1="1128" y1="214" x2="1146" y2="214"/>
+    <line x1="1128" y1="344" x2="1146" y2="344"/>
+    <line x1="1128" y1="406" x2="1146" y2="406"/>
+    <line x1="1128" y1="526" x2="1146" y2="526"/>
+  </g>
+  <g filter="url(#aamPill)"><rect x="1150" y="186" width="86" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="1193" y="203" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">TOM</text>
+  <g filter="url(#aamPill)"><rect x="1150" y="216" width="86" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="1193" y="233" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">16G</text>
+  <g filter="url(#aamPill)"><rect x="1150" y="331" width="86" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="1193" y="348" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">4G</text>
+  <g filter="url(#aamPill)"><rect x="1150" y="393" width="86" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="1193" y="410" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">3G</text>
+  <g filter="url(#aamPill)"><rect x="1150" y="513" width="86" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="1193" y="530" text-anchor="middle" font-size="12.5" font-weight="500" font-family="'SF Mono', Menlo, monospace" fill="#6e6e73">0x0</text>
+
+  <g stroke="#aeaeb2" stroke-width="1.2" fill="none">
+    <path d="M796,279 H564" marker-end="url(#aamArrN)"/>
+    <path d="M796,466 H564" marker-end="url(#aamArrN)"/>
+  </g>
+  <g filter="url(#aamPill)"><rect x="622" y="266" width="116" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="680" y="283" text-anchor="middle" font-size="12.5" font-weight="500" fill="#6e6e73">direct</text>
+  <g filter="url(#aamPill)"><rect x="622" y="453" width="116" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="680" y="470" text-anchor="middle" font-size="12.5" font-weight="500" fill="#6e6e73">direct</text>
+  <path d="M796,375 H784 Q776,375 776,367 V191 Q776,183 768,183 H564" fill="none" stroke="#0071e3" stroke-width="1.8" marker-end="url(#aamArrB)"/>
+  <g filter="url(#aamPill)"><rect x="588" y="170" width="180" height="26" rx="13" fill="#ffffff"/></g>
+  <text x="678" y="187" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0071e3">reclaim &#183; same DRAM</text>
+
+  <text x="1180" y="566" text-anchor="end" font-size="12.5" fill="#86868b">segment heights are not to scale &#183; low addresses at the bottom</text>
+</svg>

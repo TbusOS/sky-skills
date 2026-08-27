@@ -1,0 +1,61 @@
+<!-- primer-design diagram template · protocol-stack (tech-figures.md §11)
+     Paste inside <figure class="primer-figure primer-fig-wide">. primer.css supplies the
+     round ink stroke on <svg>, so shells carry no stroke attribute of their own.
+     17 <text> elements — the wide tier allows 18, so there is exactly one spare. -->
+<svg viewBox="0 0 960 440" role="img"
+  aria-label="上下三层，每层左右各一块。上面两层中间只有一条断开的浅虚线和一个层名气泡——那是双方说好的约定，不是一根线。只有最下面一层的两块之间有一根真线，从左边落下去、横过来、再升上去，黄色标出的就是它。紫箭头顺着左边一层层往下、过线、再顺着右边一层层往上"
+  data-label-zh="上下三层，每层左右各一块。上面两层中间只有一条断开的浅虚线和一个层名气泡——那是双方说好的约定，不是一根线。只有最下面一层的两块之间有一根真线，从左边落下去、横过来、再升上去，黄色标出的就是它。紫箭头顺着左边一层层往下、过线、再顺着右边一层层往上"
+  data-label-en="Three layers, a box on each side of every layer. Between the top two layers there is only a broken hairline and a bubble with the layer name — that is an agreement both sides keep, not a wire. Only the bottom layer has a real line between its two boxes: it drops from the left box, runs across, and climbs into the right one; the yellow highlight marks it. A violet arrow goes down the left stack, across that one line, then up the right stack">
+
+  <!-- ── the six boxes · shells wobble, nothing that carries meaning does ── -->
+  <path d="M40 40 L300 40.5 L299.5 132 L40 131.5 Z" fill="#ffffff"/>
+  <path d="M660 40.5 L920 40 L920 131.5 L660.5 132 Z" fill="#ffffff"/>
+  <path d="M40 160 L300 159.5 L299.5 252 L40 252.5 Z" fill="#ffffff"/>
+  <path d="M660 159.5 L920 160 L920 252.5 L660.5 252 Z" fill="#ffffff"/>
+  <path d="M40 280 L300 280.5 L299.5 372 L40 371.5 Z" fill="#ffffff"/>
+  <path d="M660 280.5 L920 280 L920 371.5 L660.5 372 Z" fill="#ffffff"/>
+
+  <!-- hair layer: the little seams that say these are parts, not empty frames -->
+  <path class="primer-hair" fill="none" d="M40 66 L24 66 M40 106 L24 106 M920 66 L936 66 M920 106 L936 106 M40 186 L24 186 M40 226 L24 226 M920 186 L936 186 M920 226 L936 226 M40 306 L24 306 M40 346 L24 346 M920 306 L936 306 M920 346 L936 346"/>
+
+  <!-- ── the "agreement" between the top two layers: a hairline that never closes ── -->
+  <path class="primer-hair" fill="none" stroke-dasharray="10 12" d="M300 86 L392 86 M568 86 L660 86"/>
+  <path class="primer-hair" fill="none" stroke-dasharray="10 12" d="M300 206 L392 206 M568 206 L660 206"/>
+
+  <!-- layer-name bubbles sit IN the gap, so the hairline visibly does not cross -->
+  <rect x="392" y="64" width="176" height="44" rx="22" fill="#efe9fc"/>
+  <rect x="392" y="184" width="176" height="44" rx="22" fill="#efe9fc"/>
+  <rect x="392" y="304" width="176" height="44" rx="22" fill="#efe9fc"/>
+
+  <text class="lang-zh" x="480" y="92" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">传输层</text>
+  <text class="lang-en" x="480" y="92" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">Transaction</text>
+  <text class="lang-zh" x="480" y="212" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">数据链路层</text>
+  <text class="lang-en" x="480" y="212" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">Data link</text>
+  <text class="lang-zh" x="480" y="332" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">物理层</text>
+  <text class="lang-en" x="480" y="332" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">Physical</text>
+
+  <text x="170" y="92" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">TLP</text>
+  <text x="790" y="92" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">TLP</text>
+  <text x="170" y="212" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">DLLP</text>
+  <text x="790" y="212" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">DLLP</text>
+  <text x="170" y="332" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">128b/130b</text>
+  <text x="790" y="332" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">128b/130b</text>
+
+  <!-- ── the one real line · yellow marks the thing to look at ── -->
+  <rect x="196" y="390" width="568" height="16" rx="8" fill="#ffd23f"/>
+  <path fill="none" d="M170 372 L170 398 L790 398 L790 372"/>
+  <text x="480" y="426" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">PCIe lane</text>
+
+  <!-- ── the bytes: down the left stack, across the one line, up the right ── -->
+  <path fill="none" stroke="#7a5cd6" d="M170 132 L170 152 M170 252 L170 272 M790 272 L790 252 M790 152 L790 132"/>
+  <path fill="#7a5cd6" stroke="#7a5cd6" d="M170 160 L161 152 L179 152 Z"/>
+  <path fill="#7a5cd6" stroke="#7a5cd6" d="M170 280 L161 272 L179 272 Z"/>
+  <path fill="#7a5cd6" stroke="#7a5cd6" d="M790 244 L781 252 L799 252 Z"/>
+  <path fill="#7a5cd6" stroke="#7a5cd6" d="M790 124 L781 132 L799 132 Z"/>
+
+  <!-- ── the two notes ── -->
+  <text class="lang-zh" x="480" y="146" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">说好的约定，不是线</text>
+  <text class="lang-en" x="480" y="146" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">an agreement, not a wire</text>
+  <text class="lang-zh" x="480" y="368" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">只有这一根是真的</text>
+  <text class="lang-en" x="480" y="368" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">only this one is real</text>
+</svg>

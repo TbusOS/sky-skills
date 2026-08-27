@@ -1,0 +1,59 @@
+<!-- primer-design diagram template · address-map (tech-figures.md §12)
+     Paste inside <figure class="primer-figure primer-fig-wide">. primer.css supplies the
+     round ink stroke on <svg>. 17 <text> elements — the wide tier allows 18. -->
+<svg viewBox="0 0 960 440" role="img"
+  aria-label="两本分开的门牌本。左边是系统看到的那本：低处一段内存、中间一段被 MMIO 占住的空洞、上面又是内存，最上面那段黄色的，是被空洞盖住的那 1 GiB 换了个号重新露面。右边是内存条上真实的那本，连着一整条，其中淡紫那一小段就是被盖住的那段。一条紫线把这两段连起来，写着「重映射」。每个分界都用引线单独标出门牌号"
+  data-label-zh="两本分开的门牌本。左边是系统看到的那本：低处一段内存、中间一段被 MMIO 占住的空洞、上面又是内存，最上面那段黄色的，是被空洞盖住的那 1 GiB 换了个号重新露面。右边是内存条上真实的那本，连着一整条，其中淡紫那一小段就是被盖住的那段。一条紫线把这两段连起来，写着「重映射」。每个分界都用引线单独标出门牌号"
+  data-label-en="Two separate address books. On the left, what the system sees: a stretch of memory low down, an MMIO hole in the middle, memory again above it, and at the top the yellow band — the gigabyte the hole covered, given a second number. On the right, what the DIMM actually holds: one continuous stretch, with the pale violet slice being the covered part. A violet line joins the two, labelled remap. Every boundary gets its own leader line and number">
+  <defs>
+    <!-- the hole is not memory · texture, not a new colour -->
+    <pattern id="pAmHatch" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="16" stroke="#243244" stroke-width="2.4" opacity="0.55"/>
+    </pattern>
+  </defs>
+
+  <!-- ── left book · what the system sees (low addresses at the bottom) ── -->
+  <rect x="150" y="268" width="280" height="112" fill="#ffffff"/>
+  <rect x="150" y="200" width="280" height="68"  fill="#ffffff"/>
+  <rect x="150" y="200" width="280" height="68"  fill="url(#pAmHatch)"/>
+  <rect x="150" y="108" width="280" height="92"  fill="#ffffff"/>
+  <rect x="150" y="40"  width="280" height="68"  fill="#ffd23f"/>
+  <path fill="none" d="M150 40 L430 40 L430 380 L150 380 Z"/>
+  <path class="primer-hair" fill="none" d="M150 108 L430 108 M150 200 L430 200 M150 268 L430 268"/>
+
+  <!-- ── right book · what the DIMM actually holds ── -->
+  <rect x="620" y="268" width="280" height="112" fill="#ffffff"/>
+  <rect x="620" y="200" width="280" height="68"  fill="#efe9fc"/>
+  <rect x="620" y="120" width="280" height="80"  fill="#ffffff"/>
+  <path fill="none" d="M620 120 L900 120 L900 380 L620 380 Z"/>
+  <path class="primer-hair" fill="none" d="M620 200 L900 200 M620 268 L900 268"/>
+
+  <!-- ── segment names ── -->
+  <text x="290" y="330" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">DRAM</text>
+  <text x="290" y="240" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">MMIO</text>
+  <text x="290" y="160" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">DRAM</text>
+  <text class="lang-zh" x="290" y="80" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">搬上来的那 1 GiB</text>
+  <text class="lang-en" x="290" y="80" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">the moved gigabyte</text>
+  <text x="760" y="330" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">DRAM</text>
+  <text class="lang-zh" x="760" y="240" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">被空洞盖住的一段</text>
+  <text class="lang-en" x="760" y="240" text-anchor="middle" font-size="16" font-weight="700" fill="#5b3fbf">the covered slice</text>
+
+  <!-- ── book titles ── -->
+  <text class="lang-zh" x="290" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="#55617a">系统看到的那本</text>
+  <text class="lang-en" x="290" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="#55617a">what the system sees</text>
+  <text class="lang-zh" x="760" y="104" text-anchor="middle" font-size="15" font-weight="700" fill="#55617a">内存条上真实的那本</text>
+  <text class="lang-en" x="760" y="104" text-anchor="middle" font-size="15" font-weight="700" fill="#55617a">what the DIMM holds</text>
+
+  <!-- ── boundary leaders · they point AT the line, never into a band ── -->
+  <path class="primer-hair" fill="none" d="M150 40 L96 40 M150 268 L96 268 M150 380 L96 380"/>
+  <text x="88" y="46"  text-anchor="end" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">TOUUD</text>
+  <text x="88" y="274" text-anchor="end" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">TOLUD</text>
+  <text x="88" y="386" text-anchor="end" font-size="15" font-weight="600" fill="#55617a" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">0x0</text>
+
+  <!-- ── one plain mapping, and the remap that is the point ── -->
+  <path class="primer-hair" fill="none" stroke-dasharray="10 12" d="M612 324 L438 324"/>
+  <path fill="none" stroke="#7a5cd6" d="M612 234 L540 234 Q524 234 524 218 L524 90 Q524 74 508 74 L446 74"/>
+  <path fill="#7a5cd6" stroke="#7a5cd6" d="M430 74 L448 65 L448 83 Z"/>
+  <text class="lang-zh" x="524" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">重映射</text>
+  <text class="lang-en" x="524" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">remap</text>
+</svg>

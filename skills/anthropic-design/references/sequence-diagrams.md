@@ -93,6 +93,11 @@ Client                 API 网关                     数据库
  │                          │ 网关内部 → 查凭证              │     ← 这一行竖线散
 ```
 
+**这条禁令的边界就是"有没有非 ASCII 字符"。** 全 ASCII 的**内核调用链**是唯一的例外:
+30 层以上纯 C 函数名画成 SVG 流程图必然不可读(高度冲破 640px 线好几倍,压到能放下则字号 6px),
+ASCII 树的缩进反而是最合适的表达。格式与红线见 `diagram-craft.md` §18 —— 
+但那也只限调用链;时序、状态机、架构一律 SVG。
+
 ### 🚫 不要用 HTML table 替代 sequence diagram
 
 table 行+列展示静态数据 OK · 但**无法表达"时间推进"和"actor 间穿梭"**的视觉感.user 看不出"流程"感.
@@ -213,7 +218,7 @@ actor 横向间距:3 actor 用 `120 / 600 / 1080`(等距) · 4 actor 用 `120 / 
 | 错法 | 后果 | 修法 |
 |---|---|---|
 | SVG `<text>` 内嵌 `<strong>` / `<code>` | 浏览器整 `<svg>` 解析中断 · 全空白 | 全 plain text · 用 font-family + tspan 切片 |
-| `<pre>` ASCII art 画时序图 + 中文 emoji | 字符宽度不一致 · 整体错位 | 改 SVG sequence diagram |
+| `<pre>` ASCII art 画时序图 + 中文 emoji | 字符宽度不一致 · 整体错位 | 改 SVG sequence diagram(纯 ASCII 的深调用链例外,见 diagram-craft §18) |
 | HTML 4 列 table 替代时序图 | 看不出"流程"感 · 静态感强 | 改 SVG sequence diagram |
 | viewBox 太小 step 数太多 | 文字重叠 / 拥挤 | 拉长 viewBox height · step 间距 ≥ 50 px |
 | step 编号写在箭头标签里 | 编号视觉权重不够 | 用左侧黑底圆圈 · r=18 · 醒目 |

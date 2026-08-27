@@ -577,6 +577,105 @@ const auditFn = (arg) => {
     }
   });
 
+  // ---------- 1d) Step badges nobody refers to (diagram-craft §5) ----------
+  // A numbered badge is a promise about reading order. If the caption never
+  // names one, the reader has no order to follow and the numbers are decoration.
+  // Deliberately loose: a bare token anywhere in the caption clears the figure,
+  // so this only fires when the caption mentions no badge at all.
+  const CIRCLED = { '①':1,'②':2,'③':3,'④':4,'⑤':5,'⑥':6,'⑦':7,'⑧':8,'⑨':9,'⑩':10,
+                    '⑪':11,'⑫':12,'⑬':13,'⑭':14,'⑮':15,'⑯':16,'⑰':17,'⑱':18,'⑲':19,'⑳':20 };
+  document.querySelectorAll('figure').forEach((f) => {
+    const svg = f.querySelector('svg');
+    const cap = f.querySelector(':scope > figcaption');
+    if (!svg || !cap) return;
+    // a badge = a short glyph sitting inside a circle
+    const circles = [...svg.querySelectorAll('circle')];
+    if (!circles.length) return;
+    const badges = [];
+    [...svg.querySelectorAll('text')].forEach((t) => {
+      const txt = (t.textContent || '').trim();
+      if (!/^[0-9]{1,2}$|^[A-Z]$/.test(txt)) return;
+      let tb;
+      try { tb = t.getBBox(); } catch (e) { return; }
+      const cx = tb.x + tb.width / 2, cy = tb.y + tb.height / 2;
+      const inCircle = circles.some((c) => {
+        const r = parseFloat(c.getAttribute('r') || '0');
+        if (!r) return false;
+        const dx = cx - parseFloat(c.getAttribute('cx') || '0');
+        const dy = cy - parseFloat(c.getAttribute('cy') || '0');
+        return Math.sqrt(dx * dx + dy * dy) <= r + 2;
+      });
+      if (inCircle) badges.push(txt);
+    });
+    // A step numbering is a CONTIGUOUS run from 1 (or A). Requiring that is what
+    // keeps avatar initials (A, W, G) and notification counts (a lone 3) out —
+    // both live in circles and both are single glyphs, but neither is a sequence.
+    const nums = badges.map((b) => (/^[A-Z]$/.test(b) ? b.charCodeAt(0) - 64 : parseInt(b, 10)));
+    const uniq = [...new Set(nums)].sort((a, b) => a - b);
+    const contiguous = uniq.length === nums.length && uniq[0] === 1
+      && uniq[uniq.length - 1] === uniq.length;
+    if (!contiguous) return;
+    // Threshold 5, and it is a judgement about information, not about noise:
+    // with 3–4 steps the arrows already carry the order and the numbers merely
+    // repeat it, so a caption that skips them costs the reader nothing. At 5+
+    // the order stops being holdable from the picture alone — that is where the
+    // prose has to anchor at least one of them. (Corpus check at ship time: 20 of
+    // the 26 figures that would have fired at 3 were 3–4-step happy paths whose
+    // arrows told the whole story.)
+    if (badges.length < 5) return;
+    let capText = cap.innerText || cap.textContent || '';
+    for (const g of Object.keys(CIRCLED)) {
+      if (capText.includes(g)) capText += ' ' + CIRCLED[g];
+    }
+    const cited = badges.some((b) => new RegExp('(?<![0-9A-Za-z])' + b + '(?![0-9A-Za-z])').test(capText));
+    if (!cited) {
+      issues.push({
+        kind: 'badge-not-referenced',
+        severity: 'warn',
+        label: String(svg.getAttribute('aria-label')
+          || (svg.querySelector('title') && svg.querySelector('title').textContent)
+          || 'figure').slice(0, 60),
+        badges: badges.length,
+        first: badges.slice(0, 4).join(', '),
+      });
+    }
+  });
+
+  // ---------- 1e) Figure-series viewBox drift (diagram-craft §16) ----------
+  // A series is N figures over ONE base drawing, each adding a layer. The moment
+  // two of them differ in viewBox the base no longer lines up and the whole point
+  // is gone. Two ways in: an explicit data-series, or two figures whose aria-label
+  // shares a long prefix (that does not happen by accident).
+  {
+    const groups = new Map();
+    const add = (key, fig, svg) => {
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push({ fig, svg });
+    };
+    document.querySelectorAll('figure').forEach((f) => {
+      const svg = f.querySelector('svg[viewBox]');
+      if (!svg) return;
+      const explicit = f.getAttribute('data-series');
+      if (explicit) { add('=' + explicit, f, svg); return; }
+      const al = (svg.getAttribute('aria-label') || '').trim();
+      if (al.length >= 40) add('~' + al.slice(0, 40), f, svg);
+    });
+    groups.forEach((members, key) => {
+      if (members.length < 2) return;
+      const boxes = [...new Set(members.map((m) => m.svg.getAttribute('viewBox').trim().replace(/\s+/g, ' ')))];
+      if (boxes.length > 1) {
+        issues.push({
+          kind: 'series-viewbox-drift',
+          severity: 'warn',
+          series: key.slice(1, 50),
+          explicit: key.startsWith('='),
+          count: members.length,
+          boxes: boxes.join('  |  '),
+        });
+      }
+    });
+  }
+
   // ---------- 2) Hero diagram sizing audit ----------
   // Hero rows: figure elements with grid-column spanning the whole row (1 / -1).
   document.querySelectorAll('figure').forEach((fig) => {
@@ -2415,6 +2514,14 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'figure-no-caption') {
     console.log(
       `  [${i.severity}] <figure> without <figcaption>: "${i.label}" — SVG aria-label + inner <text> don't satisfy the semantic figure+caption pair; add real <figcaption> after </svg> (known-bugs 1.18)`
+    );
+  } else if (i.kind === 'badge-not-referenced') {
+    console.log(
+      `  [${i.severity}] badge-not-referenced: "${i.label}" carries ${i.badges} step badges (${i.first}…) but its figcaption names none of them — a numbered badge promises a reading order, and an order nobody refers to is decoration. Cite at least one ("step ③ is where…"), or drop the numbers (diagram-craft §5)`
+    );
+  } else if (i.kind === 'series-viewbox-drift') {
+    console.log(
+      `  [${i.severity}] series-viewbox-drift: ${i.count} figures in ${i.explicit ? `series "${i.series}"` : `an apparent series ("${i.series}…")`} do not share one viewBox — ${i.boxes}. A figure series reuses ONE base drawing so the reader spends attention only on the layer that was added; a different viewBox moves the base and that saving is gone. Fix the odd one out, or make it a standalone figure (diagram-craft §16)`
     );
   } else if (i.kind === 'svg-text-overlap') {
     console.log(

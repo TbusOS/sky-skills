@@ -14,6 +14,7 @@
 | 次文字 / 数据 | `class="glass-svg-ink-2"` | `--glass-ink-2` |
 | stage label(`01 · INGEST`) | mono 12px ls 2 `class="glass-svg-ink-3"` | eyebrow |
 | 结构线 / 分隔 | `class="glass-svg-line"` | hairline |
+| **真实存在的那根线**(物理介质 / 总线) | `class="glass-svg-ink-stroke"` 2-2.4px | 墨色实线 —— 和 `glass-svg-line` 的 hairline 差一个数量级,"有没有这根线"就靠这个差别读 |
 | 点阵网格肌理 | `class="glass-svg-grid"` | 背景肌理 |
 | 流向线 / 焦点 | `stroke="#22D3EE"` 或 `class="glass-svg-accent-stroke"` | accent |
 | 流向节点 / 徽标点 | `fill="#22D3EE"` 实心圆 ≤6px | accent |
@@ -74,10 +75,11 @@ visual-audit 的 `glass-cyan-svg-text` 检查在 light 跑时按 error 抓)。
 
 ## 5. 图型模板
 
-`templates/diagrams/` 共 15 张:architecture / flow / sequence / state-machine /
+`templates/diagrams/` 共 17 张:architecture / flow / sequence / state-machine /
 timeline / bitfield / build-pipeline / hierarchy / function-flowchart /
 deployment / soc-block / hw-timing-waveform / algorithm-ringbuffer /
-sched-timeline / interconnect-map。从模板起步改内容,不要从零画。密图(≥20 label)进
+sched-timeline / interconnect-map / protocol-stack / address-map。
+另有 `glyphs.svg` 构件片段集(§8),是一张**表**不是一张图,不计入图型数。从模板起步改内容,不要从零画。密图(≥20 label)进
 `.glass-container--wide` 整行 figure;tint 层按 §2 编码类别。
 
 ## 6. 互连拓扑 + 地址空间映射图(interconnect-map)
@@ -111,3 +113,59 @@ sched-timeline / interconnect-map。从模板起步改内容,不要从零画。�
 **尺寸**:天然 T ≥ 40,一律 `.glass-container--wide` 整行 figure。
 模板是 `viewBox="0 0 1240 640"`,1230 渲染宽下算得 635px —— 离 `diagram-oversized`
 的 640px 线只剩 5px,**再加一行内容就越线**。node 超过 2 个、或者要画第三条地址带,拆成两张图。
+
+## 7. 协议分层对等图(protocol-stack)
+
+图型本身的工程规矩 —— 两侧镜像、层高相同、纵向严禁跳层、横向线两端必须落在同一层、
+最底下那根是全图唯一真实的横向连接 —— 见 anthropic `diagram-craft.md` §15.9。
+**这一节只写 glass 独有的三处译法**,每一处都是被玻璃材质逼出来的:
+
+1. **层名不做骑边标签,改用字体切换。** anthropic 让标签骑在容器上沿,用位置说"这是层的名字、
+   不是层里的第一个部件";glass 的容器边是半透明的,骑上去边会从标签底下透出来(同 §6.1 的药丸问题)。
+   glass 改用**排版**做这件事:层名走 `'JetBrains Mono'` 12px **大写 + letter-spacing 1.5** `.glass-svg-ink-2`,
+   部件卡走 Inter sans —— 字体族一换,"这一行不是部件"就读出来了。
+2. **"真的有这根线"靠 `.glass-svg-ink-stroke`,不靠 cyan。** 全图三类横线必须一眼分开:
+   对等约定 = `.glass-svg-line` 1.5px 虚线(最淡)· **真实介质 = `.glass-svg-ink-stroke` 2.4px 实线**(最亮)·
+   本次传输 = cyan 2px。cyan 的预算(§2 的 ≤3)要留给"这一次",
+   把介质也画成 cyan,读者会以为那根线和这次传输是同一件事 —— 而它是一直在那儿的硬件。
+3. **编号徽章用中性玻璃片 + cyan 数字**,不是 cyan 实心圆。6 个 cyan 实心圆会把 §2 的
+   accent 配额一次用光,而这条路径本身才是那个焦点。写法:`<circle class="glass-svg-node">` +
+   `<text class="glass-svg-accent-ink">` —— **cyan 文字必须走 accent-ink 类**,写死 `#22D3EE`
+   在 light 主题下是 1.7:1,`glass-cyan-svg-text` 按 error 抓(§1)。
+
+**尺寸**:3 层版 `viewBox="0 0 1240 560"`,1230 渲染宽下算 555px,离 640 线留 85px。
+**加到 4 层要重算**(4×112 + 3×28 = 532,加头尾 = 620 单位 → 渲染 615px,只剩 25px),
+5 层直接拆图。
+
+## 8. 纵向地址映射图(address-map)+ 构件字形集(glyphs)
+
+**address-map** 的工程规矩 —— 引线指边界不指区域、符号名与字面常量分两档、
+两个视角永不合成一条带、窗口用斜纹 —— 见 anthropic §15.10。glass 改两处:
+
+1. **符号名与常量的分档靠字体,不靠色相。** anthropic 用墨 / 橙两档药丸;
+   glass 的两格 tint 已经花给"DRAM = indigo"和"这一段 = cyan"(§2),没有第三个色相可用。
+   两种药丸都是 `.glass-svg-node`,**符号名 Inter 600 `.glass-svg-ink-2`,
+   字面常量 JetBrains Mono `.glass-svg-ink-3`** —— 等宽字本身就在说"这是一个会变的数值"。
+2. **引线也要留缺口。** 同 §6.1:药丸是半透明的,压不住线。边界引线画到药丸边缘为止,
+   药丸坐在缺口里 —— 映射线同理,拆成两段,`direct` / `reclaim` 药丸坐中间。
+
+cyan 预算在这张图正好用满 3 个:重映射线 + 它两端落到的两段(`.glass-svg-node--cyan`)。
+所以**直映射线必须走 `.glass-svg-line`** —— "两边都是直映射"是背景事实,写进 figcaption。
+
+**glyphs.svg** —— 片段集,不是图,不计入图型数。规矩见 anthropic §17。glass 改一处:
+**cyan 只点每个字形"活着"的那一处**(写指针 `in`、插了卡的那个槽、link 起来的 LED),
+读指针 `out` 和其余形状走 `.glass-svg-ink` / `.glass-svg-node`。
+端口贴边用 indigo tint(它是"属于这块 die 的一部分",是类别不是状态)。
+
+## 9. 三条通用工艺的 glass 译法(药丸 / 两类箭头 / 图族)
+
+1. **药丸**(§6.1 已立规):坐进线的缺口,不压在线上 —— 半透明材质压不住东西。
+   门槛不变:同类线 ≥ 2 条,每条写清是什么 + 一个指标。
+2. **两类箭头**:结构 = `.glass-svg-line`;本节这一次 = cyan 2px。
+   glass 不需要像 apple 那样避开虚线 —— 但**虚线在 glass 有第三种既定用法**
+   (`--danger` 自带 `stroke-dasharray` 做色盲通道,§2),所以
+   **本次传输的那条 cyan 路径一律画实线**,别用 cyan 虚线 —— 会和"错误路径"撞语义。
+3. **图族**:同一 viewBox、同一坐标、同一 tint 分配,一张只加一层。
+   glass 额外一条:**族内各张的主题相关类必须完全一致** ——
+   某一张为了好看把一段从 `.glass-svg-node` 换成写死颜色,那一张在 light 下会和其余几张长得不一样,
+   读者会以为这是"另一个状态"。
