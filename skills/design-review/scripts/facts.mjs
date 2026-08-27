@@ -240,6 +240,15 @@ function buildChecks(truth) {
         // "3 known-bugs rows" is what one round added, not what the book holds.
         new RegExp(`\\b(\\d+)\\s+known-bugs?\\b(?!\\s+rows)`, 'gi'),
         new RegExp(`已收录\\s*(\\d+)\\s*条`, 'g'),
+        // The Chinese measure word sits BETWEEN the number and the English term —
+        // "86 条 known-bugs" — so the whitespace-only pattern above walks straight
+        // past it. Every other check already carries its 量词 form ("N 个 skill");
+        // this one did not, and 14 stale counts lived behind that gap until
+        // 2026-08-27, when a human grep found them and the gate reported clean.
+        new RegExp(`${z}\\s*条\\s*known-bugs?\\b`, 'g'),
+        // and the mirror, which cannot mean anything else: the 条 has to land
+        // right after the digits, so section refs ("known-bugs 1.55", "§6") miss.
+        new RegExp(`known-bugs?\\s+(\\d+)\\s*条`, 'gi'),
       ],
     },
   ];

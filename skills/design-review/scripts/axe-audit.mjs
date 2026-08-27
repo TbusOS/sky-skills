@@ -51,8 +51,11 @@ const AXE_PATH = resolve(REPO_ROOT, 'node_modules/axe-core/axe.min.js');
 // Rules promoted to BLOCKING. A rule goes here after a measured pass shows the
 // corpus satisfies it — but "measured" is only as wide as what the pass actually
 // rendered, and the 2026-08-14 pass rendered ONE THEME PER PAGE. glass's light
-// theme was never in it, so a promotion here is not a promise that the gate
-// cannot fail on inherited debt: on glass pages it does. See known-bugs §6.6.
+// theme was never in it, and carried 84 blocking elements for eleven days as a
+// result. That debt was paid at the token level on 2026-08-27; every surface
+// that loads glass.css now measures clean in BOTH themes. See known-bugs §6.6 —
+// the lesson that outlives the debt is that a promotion is only as wide as the
+// sample, and theme is part of the sample.
 //
 // Measured 2026-08-14 over 74 pages (55 canonical + 9 demos + site + docs),
 // each page in its default theme only:
@@ -85,10 +88,10 @@ const PROMOTED = new Set([
   // anthropic +site 270, lectern+ember 267, apple+eclat 49, atelier 27 at
   // birth). The recurring failure modes and their fixes are codified in
   // known-bugs §7.11. What that pass did NOT cover is theme: it rendered one
-  // theme per page, so glass's light theme was never measured and still
-  // carries 84 blocking elements across its seven surfaces (known-bugs §6.6).
-  // This rule therefore CAN fail on inherited debt — it does, on every glass
-  // page run in the light theme — until that debt is paid in glass's CSS.
+  // theme per page, so glass's light theme went unmeasured and carried 84
+  // blocking elements until 2026-08-27, when two light-theme tokens
+  // (--glass-ink-3, --glass-accent-ink) were darkened to clear all of them.
+  // Seven glass surfaces × two themes now measure 0 (known-bugs §6.6).
   'color-contrast',
 ]);
 

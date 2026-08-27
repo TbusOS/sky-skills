@@ -457,8 +457,8 @@ self-diff 不是 .md 的复制 —— 它是**单实例的自述**。同一 page
 
 机器检查:`axe-audit.mjs` 的 `color-contrast` 已是阻塞级。晋升按 skill 实测,
 但 2026-08-14 那次清账**每页只量了一个主题**,glass 的 light 主题从来没被量到,
-今天仍带着 84 处 color-contrast 欠账(known-bugs §6.6)—— 所以在 glass 页上这道
-检查会因存量 fail,还清前如此。本节是"写的时候别犯",机械检查是"犯了拦住"。
+曾带着 84 处 color-contrast 欠账,**2026-08-27 已在 glass CSS 的 token 层还清**
+(known-bugs §6.6),现在七页 × 两主题实测 0 违规。本节是"写的时候别犯",机械检查是"犯了拦住"。
 
 ## 出坑以后
 

@@ -40,9 +40,8 @@ it instead of asserting its own number.
 1. `verify.py` — 结构(静态)
 2. `visual-audit.mjs` — 渲染(Playwright)
 3. `axe-audit.mjs` — 可达性(axe-core;阻断规则四条:color-contrast、
-   link-name、aria-prohibited-attr、svg-img-alt。晋升按 skill 实测,但当时
-   每页只量了一个主题:glass 的 light 主题带着已知 contrast 欠账
-   (known-bugs §6.6),在 glass 页上这道检查会因存量 fail,还清前如此)
+   link-name、aria-prohibited-attr、svg-img-alt。**全仓两主题实测 0 违规**
+   —— glass light 那 84 处欠账已于 2026-08-27 在 CSS token 层还清,见 known-bugs §6.6)
 4. `screenshot.mjs` — 全页截图(只产物;评判它的是人眼)
 
 **四道之外**,按需叠加,不计入"四道":

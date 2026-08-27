@@ -7,9 +7,9 @@
 #   [2/4] visual-audit.mjs  — rendered (contrast, brand-presence, italic,
 #                             cross-skill-smell, …) — Playwright + pngjs
 #   [3/4] axe-audit.mjs     — accessibility conformance (axe-core); 4 rules
-#                             blocking incl. color-contrast (promotions were
-#                             measured per skill, one theme per page — glass
-#                             light still carries debt, known-bugs §6.6)
+#                             blocking incl. color-contrast (measured per
+#                             skill; glass light's 84-element debt paid
+#                             2026-08-27 — corpus clean both themes, §6.6)
 #   [4/4] screenshot.mjs    — full-page PNG for human review
 #   +1    pixel-gate.mjs (opt-in, --pixel) — rendered pixels vs a committed
 #                             baseline; the only gate that fails on something
@@ -391,10 +391,11 @@ fi
 # ---------- Gate 3 · axe-core accessibility conformance ----------
 # Runs by default. Four rules are BLOCKING (color-contrast, link-name,
 # aria-prohibited-attr, svg-img-alt). The promotions were measured per skill,
-# but that pass sampled ONE theme per page: glass's light theme was never
-# measured and still carries 84 color-contrast blockers across the seven pages
-# that link glass.css (known-bugs §6.6), so on glass pages this gate CAN fail
-# on inherited debt until that is paid.
+# but that pass sampled ONE theme per page, and glass's light theme went
+# unmeasured — it carried 84 color-contrast blockers for eleven days. Paid
+# 2026-08-27 at the token level; all seven pages that link glass.css now
+# measure clean in BOTH themes (known-bugs §6.6). The standing lesson: a
+# promotion is only as wide as its sample, and theme is part of the sample.
 # History: color-contrast was WARN at rollout (1,013 elements) and was
 # promoted the same day the sampled debt was paid down (known-bugs §7.11).
 # See axe-audit.mjs PROMOTED for the list and the measurement.

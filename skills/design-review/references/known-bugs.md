@@ -678,6 +678,26 @@
 - **Applies to**：全 9 个设计 skill。见 `diagram-craft.md` §16。
 
 
+### 1.57 中文量词卡在数字和英文词之间 —— `86 条 known-bugs` 从 facts 闸底下走过去了
+
+- **Reader sees**：`facts.mjs` 报"documentation clean",而 5 个展示页上写着 `84 条 known-bugs`,
+  磁盘上是 86。**闸绿着,数字是错的** —— 比闸报错更坏,因为没人再去查。
+- **Why**：`known-bugs` 这条检查只有两个 pattern:`\b(\d+)\s+known-bugs?\b` 和 `已收录 N 条`。
+  第一个要求数字和英文词之间**只有空白**;而中文写法是把量词塞在中间 ——
+  `86 条 known-bugs`,`条` 一挡,`\s+` 就配不上了。
+  讽刺的是同一个文件里 `skills-total` 早就有 `${z}\s*个\s*skill` 这种量词形态,
+  **每条检查都带了自己的量词式,只有 known-bugs 这条没带**。
+  漏的不是"一种没想到的说法",是"别的检查都做了而这条忘了做"的那一格。
+- **Defense**：给 `known-bugs` 检查补两个 pattern —— `N 条 known-bugs` 与镜像
+  `known-bugs N 条`。镜像那条要求 `条` 紧跟数字,所以章节引用(`known-bugs 1.55`、`§6`)配不上。
+  上线双探针:两种写法各注入一次错数,都在准确行号报出;还原后 `✓ facts clean`。
+- **Fix playbook**：**新增一条 facts 检查时,把它的中文量词式一起写上** ——
+  `个` / `条` / `件` / `张` / `种`,以及量词在前(`已收录 N 条`)和在中间(`N 条 X`)两种位置。
+  查漏的办法:`grep -rhoE '[0-9]+\s*[个条件张种]\s*<英文词>'` 扫一遍语料,
+  凡是出现过的写法都得有 pattern。
+- **Applies to**：`skills/design-review/scripts/facts.mjs`。同族:§1.53(措辞盲区)、§1.54(读错中文数词)。
+
+
 ## 2. anthropic-design
 
 ### 2.1 cream 在橙 CTA 上 = 2.96（fail AA）
@@ -770,7 +790,7 @@
 - **Why**:光晕层 `position:fixed; inset:0`,忘记 `pointer-events:none` 时整页点击都打在它身上。
 - **Defense**:`.glass-aurora` 在 glass.css 自带 `pointer-events:none`;visual-audit `glass-cta-obstructed`(error)对每个视口内 `.glass-button` 中心点做 `elementFromPoint` 命中检查,任何装饰层(自加的视差层/sheen 层)挡住 CTA 都会被抓。
 
-### 6.6 axe 亮色欠账:glass light 主题 84 处 color-contrast 阻断,晋升时的清账没量到
+### 6.6 axe 亮色欠账:glass light 主题 84 处 color-contrast 阻断,晋升时的清账没量到 —— **2026-08-27 已还清**
 
 - **Reader sees**:文档曾写 color-contrast「存量清零后才晋升,这道检查不会因历史欠账而失败」;
   但照文档跑 `bin/design-review --skill=glass <page>`(自动双主题),gate 3 在**七个**挂
@@ -793,7 +813,21 @@
   第一次记这条时按五页记了 56 处,漏掉 `demos/glass-design/diagrams.html`(2)和
   `docs/HARNESS-ROADMAP.glass.html`(26)—— 少记 28 处。取样按「canonical + 旗舰 demo」
   取,而不是按「谁挂了这套 CSS」取,就会漏掉文档目录里的皮肤版页面。
-- **Defense**:欠账**未还**(还账是 glass CSS 的活,已单开任务)。还清之前:
+- **✅ 已还清(2026-08-27)**:根因在 **token 层,不在页面层** —— 84 处里绝大多数是同一个
+  `--glass-ink-3`。light 档它是 `rgba(13,18,32,0.55)`,压在 `--glass-bg #F2F5FA` 上混出
+  `#747882` = **4.04:1**;改成 `0.60` → `#696D77` = **4.74:1**。
+  另一处是 `--glass-accent-ink #0E7490` 在 `<code>` 底(`#E7EAEF`)上 **4.44:1**,
+  改成 `#0C6478` → code 上 5.60、页底上 6.18。**两个 token,清掉全部 84 处。**
+  取样按本条自己的教训走:`grep -rl glass.css --include=*.html` 取全 **7 页**,
+  每页 light + dark 各跑一次 = 14 次,**全部 `axe-audit: OK`**。
+  panel 比页底更亮,所以裸 `--glass-bg` 就是最坏情况,不必逐组件量。
+  上面 ①/①b 列的**六处但书已全部收掉**(`bin/design-review` 头注 + gate 3 注释、
+  `design-review/SKILL.md`、`axe-audit.mjs` 的 PROMOTED 注释、`cross-skill-rules.md`、
+  `README.md` / `README_zh.md`)。
+- **留下来的教训(欠账没了,这条不会没)**:**晋升的可信范围 = 取样的范围,而主题是取样的一维。**
+  一次"清零"如果每页只渲染了默认主题,它证明的就只是默认主题。
+  取样面也要按"谁挂了这套 CSS"取,不是按"哪些是 canonical"取 —— 第一次记本条就是这么漏掉 28 处的。
+- **当时的处置(存档)**:欠账未还期间:
   ① 文档不再写「存量清零 / 不会因欠账失败」—— 四处已改口(`bin/design-review` 头注与
   gate 3 注释、`design-review/SKILL.md` 检查模型与 What-ships 表、`README.md` /
   `README_zh.md` 的 design-review 行),统一说法:晋升按 skill 实测,但当时每页只量一个
