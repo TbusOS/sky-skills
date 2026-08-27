@@ -456,6 +456,18 @@
 - **Why**：760 那条是按「塞不塞得下」标的，不是按「读不读得动」标的。760–1200 之间成了真空。
 - **Defense**：`visual-audit.mjs` 新增 **dense-diagram-labels-small**(warn)：`text ≥ 20` 且最小标签渲染 <9.5px 且渲染宽 ≥760(760 以下归 cramped)。阈值是量出来的不是拍的 —— 语料 11 张密图最小标签在 9.955–11.9px 之间(即 diagram-craft 规定的 11px 源 × 0.906 缩放)，**报在那之上等于拿自己的规范判自己违规**，所以设在其下、又高于 9px 硬底线。首跑在 index.html 抓到 2 张(9.12 / 9.24px，而该页自身常规是 9.68)，已提源字号修掉。
 - **Fix playbook**：提源 font-size 到 11，或给图升一档容器(必要时到 full-bleed，见 1.49)。**别靠缩 viewBox 硬塞**。
+  ⚠ **同一张 SVG 换一家 gallery 就要重算源字号** —— 各家 gallery 的图位渲染宽度差得很远，
+  而渲染字号 = 源字号 × 渲染宽 / viewBox 宽。2026-08-26 实测(1440 视口)：
+
+  | gallery | 图位渲染宽 | viewBox 1240 时的缩放 | 要达到 9.96px 的源字号 |
+  |---|---|---|---|
+  | `demos/anthropic-design/diagrams.html` | 1086px | 0.876 | ≥ 11.4 |
+  | `demos/apple-design/diagrams.html` | **946px** | 0.763 | **≥ 13.1** |
+  | `demos/glass-design/diagrams.html` | 1230px | 0.992 | ≥ 10.1 |
+
+  同一张 `interconnect-map` 在 anthropic 用 11.5 源字号渲染 10.07px 过关，原样搬进 apple
+  的 gallery 就掉到 **8.8px** 当场触这条检查，源字号提到 12.5 才回到 9.5 以上。
+  **apple 那一档最窄，跨 skill 移植图先按它算。**
 - **Applies to**：全 9 个设计 skill。
 
 ### 1.51 `<b>` / `<code>` 写进 `<svg>`：图从那里断掉，后半截漏成正文
