@@ -1314,3 +1314,94 @@ html[data-motion="off"] * {
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .atl-app { background: var(--atl-card-2-bg); }
 }
+
+/* ---------- Section R: in-app diagrams ----------
+ * The panels in templates/diagrams/. Craft rules live in
+ * references/diagram-craft.md §7; this section is only the material.
+ *
+ * These are components, not page-local styles, because four shipped templates
+ * share them — a rule copy-pasted into four pages goes out of step on the first
+ * edit that only remembers three of them. */
+.atl-dia {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 252px;
+  gap: var(--space-5);
+  align-items: start;
+}
+.atl-dia__map { display: block; width: 100%; height: auto; }
+.atl-dia__side { display: grid; }
+.atl-dia__detail { margin: 0; }
+.atl-dia__detail--hot { border-color: var(--atl-accent-soft); }
+
+/* Texture in CSS, information in SVG (diagram-craft §2): a builder canvas needs
+ * a dot grid, and 400 <circle> elements would be 400 things a screen reader has
+ * to skip past. */
+.atl-dia-canvas {
+  border-radius: var(--radius-lg);
+  background-image: radial-gradient(var(--atl-line-strong) 1px, transparent 1px);
+  background-size: 22px 22px;
+  padding: var(--space-2);
+}
+
+/* links: quiet ones are plumbing; the traced one carries the signature gradient */
+/* :not() matters — this rule targets the child <path>, so it would beat the
+ * inline stroke inherited from the parent <g>, and every traced path would
+ * come out grey. Exclude the hot variant and the inherited paint gets through. */
+.atl-dia-link:not(.atl-dia-link--hot) path { stroke: var(--atl-line-strong); stroke-width: 1.6; fill: none; }
+.atl-dia-link--hot path { fill: none; }
+/* The gradient id is per-template, so the PAINT has to come from the element.
+ * It must be an inline STYLE, not a presentation attribute: presentation
+ * attributes lose to any CSS rule, so `stroke="url(#…)"` on the <g> was simply
+ * overruled by the base rule above and every traced path came out grey. */
+.atl-dia-link--hot path { stroke-width: 2.6; }
+
+/* a node is a card, so it takes the card contract — not a bare svg rect */
+.atl-dia-card { fill: var(--atl-card-2-bg); stroke: var(--atl-line-strong); stroke-width: 1; }
+.atl-dia-name { font-size: 13.5px; font-weight: 600; fill: var(--atl-ink); }
+.atl-dia-sub { font-size: 11.5px; fill: var(--atl-ink-3); }
+/* 11.5, not the 10 an eyebrow would normally take: inside .atl-dia the map
+ * column renders ~750-770px against an 880 viewBox, so the scale is ~0.87 and
+ * a 10px source lands at 8.7px — under the 9px floor. Measured, not guessed. */
+.atl-dia-kicker {
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em;
+  fill: var(--atl-ink-3);
+}
+.atl-dia-colhead text {
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em;
+  fill: var(--atl-ink-3);
+}
+.atl-dia-edge text { font-size: 11.5px; font-weight: 600; fill: var(--atl-ink-3); }
+/* base rules, so a template that uses only the base still has a defined paint —
+ * and so verify.py's undefined-class check stays meaningful instead of noisy */
+.atl-dia-static { pointer-events: none; }
+.atl-dia-stage { pointer-events: none; }
+.atl-dia-dot { fill: var(--atl-ink-3); }
+.atl-dia-fill { fill: var(--atl-rose); }   /* fallback only — see the note above about paint */
+.atl-dia-dot--ok { fill: var(--atl-ok); }
+.atl-dia-dot--warn { fill: var(--atl-warn); }
+
+.atl-dia-node { cursor: pointer; }
+.atl-dia-node:hover .atl-dia-card { stroke: var(--atl-accent-ink); }
+.atl-dia-node:focus-visible { outline: none; }
+.atl-dia-node:focus-visible .atl-dia-card { stroke: var(--atl-accent-ink); stroke-width: 2; }
+
+/* SELECTED = the screen's one near-black anchor (atelier-material.md §6).
+ * The detail pane beside it is therefore a NORMAL card: two dark surfaces on one
+ * screen split the landing point and neither wins. */
+.atl-dia-node.is-active .atl-dia-card { fill: var(--atl-ink-card-bg); stroke: none; }
+.atl-dia-node.is-active .atl-dia-name { fill: var(--atl-ink-card-ink); }
+.atl-dia-node.is-active .atl-dia-sub,
+.atl-dia-node.is-active .atl-dia-kicker { fill: var(--atl-ink-card-ink-2); }
+
+/* stage strips: the track is the unit, the fill is the value (material §5) */
+.atl-dia-track { fill: var(--atl-track); }
+.atl-dia-stage--run .atl-dia-name { fill: var(--atl-accent-ink); }
+/* a pending label uses a lighter TOKEN, never opacity — dimming muted text with
+ * alpha is the first of the four contrast laws (cross-skill-rules §N). */
+.atl-dia-stage--wait .atl-dia-name { fill: var(--atl-ink-3); }
+
+@media (max-width: 1080px) {
+  /* the detail drops UNDER the map rather than shrinking with it: a topology
+   * squeezed into half a narrow column stops being readable before the text does */
+  .atl-dia { grid-template-columns: minmax(0, 1fr); }
+}

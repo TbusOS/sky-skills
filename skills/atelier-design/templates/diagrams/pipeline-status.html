@@ -1,0 +1,87 @@
+<!-- atelier-design · in-app diagram · pipeline status
+     Paste inside .atl-main. Needs atelier.js only for [data-grow] (the running
+     stage fills to the width already written in the markup — freeze contract).
+     Craft rules: references/diagram-craft.md §7.
+
+     Anatomy is atelier's meter, not a filled block: name + meta on the card,
+     and a thin track+fill strip underneath. Two reasons, both hard-won —
+       · text never sits on the saturated gradient. A label straddling the fill
+         edge has no colour that works, and axe returns INCOMPLETE over a
+         gradient, so no gate would have told you;
+       · a full-height saturated block is the same "satiated band" smell this
+         repo bans in diagrams elsewhere. The track carries the unit
+         (atelier-material.md §5); the strip carries the value. -->
+<div class="atl-card" data-reveal>
+  <div class="atl-card__head">
+    <div>
+      <h2 class="atl-card__title">
+        <span class="lang-en">Payroll run · March</span><span class="lang-zh">薪酬运行 · 三月</span>
+      </h2>
+      <p class="atl-muted" style="margin:4px 0 0; font-size:13px;">
+        <span class="lang-en">Started 09:04. Stage four is running; the last stage has not been reached.</span>
+        <span class="lang-zh">09:04 开始。第四阶段在跑，最后一段还没走到。</span>
+      </p>
+    </div>
+    <span class="atl-chip atl-chip--accent">
+      <span class="lang-en">running</span><span class="lang-zh">运行中</span>
+    </span>
+  </div>
+
+  <svg class="atl-dia__map" viewBox="0 0 880 140" role="img"
+    aria-label="Payroll pipeline, five stages: import 41 seconds, validate 1 minute 12 and compute 3 minutes 06 are complete; disburse is running at 62 percent after 1 minute 40; notify has not started.">
+    <defs>
+      <!-- userSpaceOnUse so all five strips sit on ONE ramp. With the default
+           objectBoundingBox each strip gets its own full coral-to-rose sweep,
+           and five sweeps in a row read as five unrelated bars. -->
+      <linearGradient id="atl-pipe-hot" gradientUnits="userSpaceOnUse" x1="38" y1="0" x2="854" y2="0">
+        <stop offset="0" stop-color="#F5854F"/><stop offset="1" stop-color="#DD4F92"/>
+      </linearGradient>
+    </defs>
+
+    <g class="atl-dia-link" fill="none">
+      <path d="M172,62 H198"/><path d="M346,62 H372"/><path d="M520,62 H546"/><path d="M694,62 H720"/>
+    </g>
+
+    <g class="atl-dia-stage">
+      <rect class="atl-dia-card" x="24" y="30" width="148" height="64" rx="14"/>
+      <text class="atl-dia-name" x="38" y="55">import</text>
+      <text class="atl-dia-sub" x="38" y="72">41 s</text>
+      <rect class="atl-dia-track" x="38" y="80" width="120" height="5" rx="2.5"/>
+      <rect class="atl-dia-fill" style="fill: url(#atl-pipe-hot)" x="38" y="80" width="120" height="5" rx="2.5"/>
+    </g>
+    <g class="atl-dia-stage">
+      <rect class="atl-dia-card" x="198" y="30" width="148" height="64" rx="14"/>
+      <text class="atl-dia-name" x="212" y="55">validate</text>
+      <text class="atl-dia-sub" x="212" y="72">1 m 12 s</text>
+      <rect class="atl-dia-track" x="212" y="80" width="120" height="5" rx="2.5"/>
+      <rect class="atl-dia-fill" style="fill: url(#atl-pipe-hot)" x="212" y="80" width="120" height="5" rx="2.5"/>
+    </g>
+    <g class="atl-dia-stage">
+      <rect class="atl-dia-card" x="372" y="30" width="148" height="64" rx="14"/>
+      <text class="atl-dia-name" x="386" y="55">compute</text>
+      <text class="atl-dia-sub" x="386" y="72">3 m 06 s</text>
+      <rect class="atl-dia-track" x="386" y="80" width="120" height="5" rx="2.5"/>
+      <rect class="atl-dia-fill" style="fill: url(#atl-pipe-hot)" x="386" y="80" width="120" height="5" rx="2.5"/>
+    </g>
+
+    <!-- running: the strip is the progress, and it is the only moving thing on the screen -->
+    <g class="atl-dia-stage atl-dia-stage--run">
+      <rect class="atl-dia-card" x="546" y="30" width="148" height="64" rx="14"/>
+      <text class="atl-dia-name" x="560" y="55">disburse</text>
+      <text class="atl-dia-sub" x="560" y="72">62% · 1 m 40 s</text>
+      <rect class="atl-dia-track" x="560" y="80" width="120" height="5" rx="2.5"/>
+      <rect class="atl-dia-fill" style="fill: url(#atl-pipe-hot)" x="560" y="80" width="74" height="5" rx="2.5" data-grow="width"/>
+    </g>
+
+    <!-- pending: track only. An empty track reads as "not yet"; no box at all
+         would read as "not part of this run". The label uses a lighter TOKEN,
+         never opacity — dimming muted text with alpha is the first of the four
+         contrast laws this repo broke once already. -->
+    <g class="atl-dia-stage atl-dia-stage--wait">
+      <rect class="atl-dia-card" x="720" y="30" width="148" height="64" rx="14"/>
+      <text class="atl-dia-name" x="734" y="55">notify</text>
+      <text class="atl-dia-sub" x="734" y="72">not started</text>
+      <rect class="atl-dia-track" x="734" y="80" width="120" height="5" rx="2.5"/>
+    </g>
+  </svg>
+</div>

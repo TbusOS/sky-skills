@@ -1,0 +1,102 @@
+<!-- atelier-design · in-app diagram · flow canvas
+     Paste inside .atl-main. Needs atelier.js for [data-tab]. Craft rules: §7.
+
+     A builder canvas, not a picture of a flow. Two atelier rules do the work:
+       · the dot grid is CSS (§2) — texture belongs to the container, so the
+         SVG holds five nodes and four links instead of four hundred circles;
+       · the selected step is the screen's one dark anchor, because on a builder
+         the thing you are editing IS where the eye should land. -->
+<div class="atl-card" data-reveal>
+  <div class="atl-card__head">
+    <div>
+      <h2 class="atl-card__title">
+        <span class="lang-en">After a payroll run</span><span class="lang-zh">薪酬跑完之后</span>
+      </h2>
+      <p class="atl-muted" style="margin:4px 0 0; font-size:13px;">
+        <span class="lang-en">One trigger, one branch, two actions. Pick a step to edit it.</span>
+        <span class="lang-zh">一个触发、一次分支、两个动作。点一步来编辑它。</span>
+      </p>
+    </div>
+    <span class="atl-chip">
+      <span class="lang-en">draft</span><span class="lang-zh">草稿</span>
+    </span>
+  </div>
+
+  <div class="atl-dia">
+    <div class="atl-dia-canvas">
+      <svg class="atl-dia__map" viewBox="0 0 880 250" role="group"
+        aria-label="Flow: when a payroll run finishes, if the error count is above zero the flow pages whoever is on call, otherwise it posts a summary to the finance channel; both branches end the run. The page-on-call step is selected.">
+        <defs>
+          <linearGradient id="atl-flow-hot" gradientUnits="userSpaceOnUse" x1="200" y1="0" x2="856" y2="0">
+            <stop offset="0" stop-color="#F5854F"/><stop offset="1" stop-color="#DD4F92"/>
+          </linearGradient>
+        </defs>
+
+        <g class="atl-dia-link" fill="none">
+          <path d="M198,120 H250"/>
+          <path d="M428,120 H466 Q474,120 474,132 V190 Q474,202 482,202 H520"/>
+          <path d="M690,202 H728 Q736,202 736,190 V132 Q736,120 744,120 H772"/>
+        </g>
+        <g class="atl-dia-link atl-dia-link--hot" fill="none" style="stroke: url(#atl-flow-hot)">
+          <path d="M428,120 H466 Q474,120 474,108 V62 Q474,50 482,50 H520"/>
+          <path d="M690,50 H728 Q736,50 736,62 V108 Q736,120 744,120 H772"/>
+        </g>
+        <g class="atl-dia-edge">
+          <text x="492" y="44">yes</text>
+          <text x="492" y="224">no</text>
+        </g>
+
+        <g class="atl-dia-static">
+          <rect class="atl-dia-card" x="24" y="88" width="174" height="64" rx="14"/>
+          <text class="atl-dia-kicker" x="40" y="110">TRIGGER</text>
+          <text class="atl-dia-name" x="40" y="134">run finished</text>
+        </g>
+        <g class="atl-dia-static">
+          <rect class="atl-dia-card" x="250" y="88" width="178" height="64" rx="14"/>
+          <text class="atl-dia-kicker" x="266" y="110">IF</text>
+          <text class="atl-dia-name" x="266" y="134">errors &gt; 0</text>
+        </g>
+        <g class="atl-dia-node is-active" data-tab="f-page" data-tab-group="flow" role="button" tabindex="0" aria-label="Page on-call, selected">
+          <rect class="atl-dia-card" x="520" y="18" width="170" height="64" rx="14"/>
+          <text class="atl-dia-kicker" x="536" y="40">THEN</text>
+          <text class="atl-dia-name" x="536" y="64">page on-call</text>
+        </g>
+        <g class="atl-dia-node" data-tab="f-post" data-tab-group="flow" role="button" tabindex="0" aria-label="Post summary">
+          <rect class="atl-dia-card" x="520" y="170" width="170" height="64" rx="14"/>
+          <text class="atl-dia-kicker" x="536" y="192">ELSE</text>
+          <text class="atl-dia-name" x="536" y="216">post summary</text>
+        </g>
+        <g class="atl-dia-static">
+          <rect class="atl-dia-card" x="772" y="88" width="84" height="64" rx="14"/>
+          <text class="atl-dia-name" x="788" y="126">end</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="atl-dia__side">
+      <div class="atl-card atl-dia__detail atl-dia__detail--hot" data-tabpane="f-page" data-tab-group="flow">
+        <span class="atl-kicker" style="color:var(--atl-accent-ink);">
+          <span class="lang-en">then · page on-call</span><span class="lang-zh">then · 呼叫值班</span>
+        </span>
+        <p style="margin:10px 0 6px; font-size:12.5px;">
+          <span class="lang-en">Escalates after 5 minutes</span><span class="lang-zh">5 分钟未响应则升级</span>
+        </p>
+        <p class="atl-muted" style="margin:0; font-size:12.5px;">
+          <span class="lang-en">Ran 3 times this month, acknowledged twice.</span>
+          <span class="lang-zh">本月触发 3 次，其中 2 次被认领。</span>
+        </p>
+      </div>
+      <div class="atl-card atl-dia__detail" data-tabpane="f-post" data-tab-group="flow" hidden>
+        <span class="atl-kicker">
+          <span class="lang-en">else · post summary</span><span class="lang-zh">else · 发汇总</span>
+        </span>
+        <p style="margin:10px 0 6px; font-size:12.5px;">
+          <span class="lang-en">Posts to #finance</span><span class="lang-zh">发到 #finance</span>
+        </p>
+        <p class="atl-muted" style="margin:0; font-size:12.5px;">
+          <span class="lang-en">Ran 19 times this month.</span><span class="lang-zh">本月触发 19 次。</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

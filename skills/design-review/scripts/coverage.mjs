@@ -47,7 +47,11 @@ const TARGET = {
   // atelier draws applications, so its matrix is app SCREENS, not marketing
   // page-types: the console, a search/booking flow, a record, the settings
   // form nobody designs, and the sign-in nobody skips.
-  atelier: ['dashboard', 'booking', 'detail', 'settings', 'signin'],
+  // 'console' is the screen shape whose subject is a DIAGRAM — a topology you
+  // can click, a pipeline carrying state. It is a page-type rather than a
+  // variant of dashboard because its craft is different: selection, live
+  // values, and a11y for an interactive graphic (diagram-craft.md §7).
+  atelier: ['dashboard', 'booking', 'detail', 'settings', 'signin', 'console'],
   // primer explains things, so its page-types are EXPLAINER shapes rather than
   // marketing ones: "what X is", "what happens step by step", "how A differs
   // from B". A page-type here names a teaching order, not a sales stage.

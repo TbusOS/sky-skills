@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loka — platform console</title>
+<meta name="description" content="Two in-app diagrams in atelier glass: a clickable service topology, and a payroll pipeline that carries done, running and pending state.">
+<meta property="og:title" content="Loka — platform console">
+<meta property="og:description" content="A service topology you can click and a pipeline that carries state — technical diagrams drawn as product surfaces rather than as figures.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/atelier.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+
+  .page-head { display:flex; align-items:center; justify-content:space-between; gap:var(--space-4); flex-wrap:wrap; margin-bottom:var(--space-5); }
+  .head-tools { display:flex; align-items:center; gap:var(--space-3); }
+  .stack > * + * { margin-top: var(--space-5); }
+
+</style>
+</head>
+<body>
+
+<div class="atl-wall"></div>
+
+<div class="atl-page atl-page--wide">
+
+  <div class="page-head">
+    <span class="atl-kicker">
+      <span class="lang-en">atelier-design · canonical · console</span>
+      <span class="lang-zh">atelier-design · 范本页 · 控制台</span>
+    </span>
+    <div class="head-tools">
+      <div class="atl-langtoggle lang-toggle">
+        <button type="button" class="is-active" data-lang-toggle="en">EN</button>
+        <button type="button" data-lang-toggle="zh">中文</button>
+      </div>
+      <button type="button" class="atl-iconbtn" data-theme-toggle aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v2M12 19v2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M3 12h2M19 12h2M5.6 18.4L7 17M17 7l1.4-1.4"/><circle cx="12" cy="12" r="3.6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="atl-app">
+    <aside class="atl-rail">
+      <div class="atl-brand">
+        <span class="atl-brand__mark">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M12 3l7.5 4.3v9L12 20.6 4.5 16.3v-9z"/><path d="M12 8.4l3.2 1.8v3.6L12 15.6l-3.2-1.8v-3.6z"/></svg>
+        </span>
+        <span>
+          <span class="atl-brand__name">Loka</span>
+          <span class="atl-brand__sub">Platform</span>
+        </span>
+      </div>
+      <nav class="atl-navgroup">
+        <span class="atl-navgroup__label"><span class="lang-en">Operate</span><span class="lang-zh">运维</span></span>
+        <button type="button" class="atl-nav is-active" aria-current="page">
+          <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><circle cx="4.5" cy="6" r="2"/><circle cx="4.5" cy="18" r="2"/><circle cx="19.5" cy="6" r="2"/><circle cx="19.5" cy="18" r="2"/><path d="M6.3 7.2L9.6 10M6.3 16.8L9.6 14M17.7 7.2L14.4 10M17.7 16.8L14.4 14"/></svg>
+          <span class="lang-en">Topology</span><span class="lang-zh">拓扑</span>
+          <span class="atl-nav__badge">1</span>
+        </button>
+        <button type="button" class="atl-nav">
+          <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="9" width="5" height="6" rx="1.6"/><rect x="16" y="9" width="5" height="6" rx="1.6"/><path d="M8 12h8"/></svg>
+          <span class="lang-en">Pipelines</span><span class="lang-zh">流水线</span>
+        </button>
+        <button type="button" class="atl-nav">
+          <svg class="atl-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12h4l3 7 4-14 3 7h4"/></svg>
+          <span class="lang-en">Incidents</span><span class="lang-zh">故障</span>
+        </button>
+      </nav>
+      <div class="atl-rail__foot">
+        <div class="atl-userchip">
+          <span class="atl-userchip__avatar">DR</span>
+          <span>
+            Dita Rahayu
+            <span class="atl-brand__sub"><span class="lang-en">On call</span><span class="lang-zh">值班中</span></span>
+          </span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="atl-main">
+      <div class="atl-topbar">
+        <h1 class="atl-topbar__title"><span class="lang-en">Topology</span><span class="lang-zh">拓扑</span></h1>
+      </div>
+
+      <div class="stack">
+        <div class="atl-card" data-reveal>
+          <div class="atl-card__head">
+            <div>
+              <h2 class="atl-card__title">
+                <span class="lang-en">Service health</span><span class="lang-zh">服务健康度</span>
+              </h2>
+              <p class="atl-muted" style="margin:4px 0 0; font-size:13px;">
+                <span class="lang-en">Six services, live p95 and error rate. Pick a node to see what is on call.</span>
+                <span class="lang-zh">六个服务，实时 p95 与错误率。点一个节点看它的值班信息。</span>
+              </p>
+            </div>
+            <span class="atl-chip atl-chip--warn">
+              <span class="lang-en">1 degraded</span><span class="lang-zh">1 个降级</span>
+            </span>
+          </div>
+
+          <div class="atl-dia">
+            <!-- role="group", NOT role="img": role="img" declares an atomic graphic with
+                 no exposed children, so putting focusable nodes inside it is a contradiction
+                 (axe: nested-interactive). A group exposes its children, which is what an
+                 interactive diagram needs — and the summary still lives on aria-label for
+                 anyone who does not want to walk six nodes. -->
+            <svg class="atl-dia__map" viewBox="0 0 880 310" role="group"
+              aria-label="Service topology: web and the API gateway feed review-svc and payroll-svc, which read Postgres and Redis. payroll-svc is degraded at 812 milliseconds p95 and 4.1 percent errors, and the gradient path traces the request route that passes through it.">
+              <defs>
+                <!-- userSpaceOnUse, NOT the default objectBoundingBox: a perfectly
+                     horizontal path has a zero-height bounding box, and a gradient
+                     painted into a zero-area box degenerates — the link just vanishes.
+                     Spanning user space also puts every segment on ONE ramp, so the
+                     traced route reads as a single route instead of N little sweeps. -->
+                <linearGradient id="atl-topo-hot" gradientUnits="userSpaceOnUse" x1="228" y1="0" x2="844" y2="0">
+                  <stop offset="0" stop-color="#F5854F"/><stop offset="1" stop-color="#DD4F92"/>
+                </linearGradient>
+              </defs>
+
+              <!-- links: quiet routes first, the traced one last so it sits on top -->
+              <g class="atl-dia-link" fill="none">
+                <path d="M192,163 H228"/>
+                <path d="M396,163 H424 Q432,163 432,155 V79 Q432,71 440,71 H452"/>
+                <path d="M620,71 H676"/>
+              </g>
+              <g class="atl-dia-link atl-dia-link--hot" fill="none" style="stroke: url(#atl-topo-hot)">
+                <path d="M396,163 H424 Q432,163 432,171 V247 Q432,255 440,255 H452"/>
+                <path d="M620,255 H676"/>
+              </g>
+
+              <!-- nodes -->
+              <g class="atl-dia-node" data-tab="svc-web" data-tab-group="topo" role="button" tabindex="0" aria-label="web">
+                <rect class="atl-dia-card" x="24" y="132" width="168" height="62" rx="14"/>
+                <circle class="atl-dia-dot atl-dia-dot--ok" cx="44" cy="152" r="4"/>
+                <text class="atl-dia-name" x="56" y="157">web</text>
+                <text class="atl-dia-sub" x="44" y="179">p95 96 ms · 0.02%</text>
+              </g>
+              <g class="atl-dia-node" data-tab="svc-gw" data-tab-group="topo" role="button" tabindex="0" aria-label="API gateway">
+                <rect class="atl-dia-card" x="228" y="132" width="168" height="62" rx="14"/>
+                <circle class="atl-dia-dot atl-dia-dot--ok" cx="248" cy="152" r="4"/>
+                <text class="atl-dia-name" x="260" y="157">api-gateway</text>
+                <text class="atl-dia-sub" x="248" y="179">p95 118 ms · 0.04%</text>
+              </g>
+              <g class="atl-dia-node" data-tab="svc-review" data-tab-group="topo" role="button" tabindex="0" aria-label="review-svc">
+                <rect class="atl-dia-card" x="452" y="40" width="168" height="62" rx="14"/>
+                <circle class="atl-dia-dot atl-dia-dot--ok" cx="472" cy="60" r="4"/>
+                <text class="atl-dia-name" x="484" y="65">review-svc</text>
+                <text class="atl-dia-sub" x="472" y="87">p95 141 ms · 0.06%</text>
+              </g>
+              <g class="atl-dia-node is-active" data-tab="svc-payroll" data-tab-group="topo" role="button" tabindex="0" aria-label="payroll-svc, degraded">
+                <rect class="atl-dia-card" x="452" y="224" width="168" height="62" rx="14"/>
+                <circle class="atl-dia-dot atl-dia-dot--warn" cx="472" cy="244" r="4"/>
+                <text class="atl-dia-name" x="484" y="249">payroll-svc</text>
+                <text class="atl-dia-sub" x="472" y="271">p95 812 ms · 4.1%</text>
+              </g>
+              <g class="atl-dia-node" data-tab="svc-pg" data-tab-group="topo" role="button" tabindex="0" aria-label="Postgres">
+                <rect class="atl-dia-card" x="676" y="40" width="168" height="62" rx="14"/>
+                <circle class="atl-dia-dot atl-dia-dot--ok" cx="696" cy="60" r="4"/>
+                <text class="atl-dia-name" x="708" y="65">postgres</text>
+                <text class="atl-dia-sub" x="696" y="87">42 conns · 0.9 GB</text>
+              </g>
+              <g class="atl-dia-node" data-tab="svc-redis" data-tab-group="topo" role="button" tabindex="0" aria-label="Redis">
+                <rect class="atl-dia-card" x="676" y="224" width="168" height="62" rx="14"/>
+                <circle class="atl-dia-dot atl-dia-dot--ok" cx="696" cy="244" r="4"/>
+                <text class="atl-dia-name" x="708" y="249">redis</text>
+                <text class="atl-dia-sub" x="696" y="271">hit 91% · 240 MB</text>
+              </g>
+            </svg>
+
+            <div class="atl-dia__side">
+              <div class="atl-card atl-dia__detail atl-dia__detail--hot" data-tabpane="svc-payroll" data-tab-group="topo">
+                <span class="atl-kicker" style="color:var(--atl-accent-ink);">payroll-svc</span>
+                <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">812<span style="font-size:16px;"> ms</span></p>
+                <p class="atl-muted" style="margin:0 0 14px; font-size:12.5px;">
+                  <span class="lang-en">p95, up from 180 ms at 09:12</span>
+                  <span class="lang-zh">p95，09:12 起从 180 ms 抬上来</span>
+                </p>
+                <p style="margin:0 0 6px; font-size:12.5px;">
+                  <span class="lang-en">On call · Dita R.</span><span class="lang-zh">值班 · Dita R.</span>
+                </p>
+                <p class="atl-muted" style="margin:0; font-size:12.5px;">
+                  <span class="lang-en">Redis evictions started at the same minute.</span>
+                  <span class="lang-zh">Redis 开始逐出的时刻和它同一分钟。</span>
+                </p>
+              </div>
+              <div class="atl-card atl-dia__detail" data-tabpane="svc-web" data-tab-group="topo" hidden>
+                <span class="atl-kicker">web</span>
+                <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">96<span style="font-size:16px;"> ms</span></p>
+                <p class="atl-muted" style="margin:0; font-size:12.5px;">
+                  <span class="lang-en">p95 · 4 pods · no change today</span>
+                  <span class="lang-zh">p95 · 4 个 pod · 今天无变化</span>
+                </p>
+              </div>
+              <div class="atl-card atl-dia__detail" data-tabpane="svc-gw" data-tab-group="topo" hidden>
+                <span class="atl-kicker">api-gateway</span>
+                <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">118<span style="font-size:16px;"> ms</span></p>
+                <p class="atl-muted" style="margin:0; font-size:12.5px;">
+                  <span class="lang-en">p95 · routes 100% of traffic</span>
+                  <span class="lang-zh">p95 · 全部流量都经过它</span>
+                </p>
+              </div>
+              <div class="atl-card atl-dia__detail" data-tabpane="svc-review" data-tab-group="topo" hidden>
+                <span class="atl-kicker">review-svc</span>
+                <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">141<span style="font-size:16px;"> ms</span></p>
+                <p class="atl-muted" style="margin:0; font-size:12.5px;">
+                  <span class="lang-en">p95 · unaffected by the payroll path</span>
+                  <span class="lang-zh">p95 · 不受 payroll 那条路影响</span>
+                </p>
+              </div>
+              <div class="atl-card atl-dia__detail" data-tabpane="svc-pg" data-tab-group="topo" hidden>
+                <span class="atl-kicker">postgres</span>
+                <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">42</p>
+                <p class="atl-muted" style="margin:0; font-size:12.5px;">
+                  <span class="lang-en">connections · 0.9 GB resident</span>
+                  <span class="lang-zh">连接数 · 常驻 0.9 GB</span>
+                </p>
+              </div>
+              <div class="atl-card atl-dia__detail" data-tabpane="svc-redis" data-tab-group="topo" hidden>
+                <span class="atl-kicker">redis</span>
+                <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">91<span style="font-size:16px;"> %</span></p>
+                <p class="atl-muted" style="margin:0; font-size:12.5px;">
+                  <span class="lang-en">hit rate · evicting since 09:12</span>
+                  <span class="lang-zh">命中率 · 09:12 起开始逐出</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="atl-card" data-reveal>
+          <div class="atl-card__head">
+            <div>
+              <h2 class="atl-card__title">
+                <span class="lang-en">Payroll run · March</span><span class="lang-zh">薪酬运行 · 三月</span>
+              </h2>
+              <p class="atl-muted" style="margin:4px 0 0; font-size:13px;">
+                <span class="lang-en">Started 09:04. Stage four is running; the last stage has not been reached.</span>
+                <span class="lang-zh">09:04 开始。第四阶段在跑，最后一段还没走到。</span>
+              </p>
+            </div>
+            <span class="atl-chip atl-chip--accent">
+              <span class="lang-en">running</span><span class="lang-zh">运行中</span>
+            </span>
+          </div>
+
+          <svg class="atl-dia__map" viewBox="0 0 880 140" role="img"
+            aria-label="Payroll pipeline, five stages: import 41 seconds, validate 1 minute 12 and compute 3 minutes 06 are complete; disburse is running at 62 percent after 1 minute 40; notify has not started.">
+            <defs>
+              <!-- userSpaceOnUse so all five strips sit on ONE ramp. With the default
+                   objectBoundingBox each strip gets its own full coral-to-rose sweep,
+                   and five sweeps in a row read as five unrelated bars. -->
+              <linearGradient id="atl-pipe-hot" gradientUnits="userSpaceOnUse" x1="38" y1="0" x2="854" y2="0">
+                <stop offset="0" stop-color="#F5854F"/><stop offset="1" stop-color="#DD4F92"/>
+              </linearGradient>
+            </defs>
+
+            <g class="atl-dia-link" fill="none">
+              <path d="M172,62 H198"/><path d="M346,62 H372"/><path d="M520,62 H546"/><path d="M694,62 H720"/>
+            </g>
+
+            <g class="atl-dia-stage">
+              <rect class="atl-dia-card" x="24" y="30" width="148" height="64" rx="14"/>
+              <text class="atl-dia-name" x="38" y="55">import</text>
+              <text class="atl-dia-sub" x="38" y="72">41 s</text>
+              <rect class="atl-dia-track" x="38" y="80" width="120" height="5" rx="2.5"/>
+              <rect class="atl-dia-fill" style="fill: url(#atl-pipe-hot)" x="38" y="80" width="120" height="5" rx="2.5"/>
+            </g>
+            <g class="atl-dia-stage">
+              <rect class="atl-dia-card" x="198" y="30" width="148" height="64" rx="14"/>
+              <text class="atl-dia-name" x="212" y="55">validate</text>
+              <text class="atl-dia-sub" x="212" y="72">1 m 12 s</text>
+              <rect class="atl-dia-track" x="212" y="80" width="120" height="5" rx="2.5"/>
+              <rect class="atl-dia-fill" style="fill: url(#atl-pipe-hot)" x="212" y="80" width="120" height="5" rx="2.5"/>
+            </g>
+            <g class="atl-dia-stage">
+              <rect class="atl-dia-card" x="372" y="30" width="148" height="64" rx="14"/>
+              <text class="atl-dia-name" x="386" y="55">compute</text>
+              <text class="atl-dia-sub" x="386" y="72">3 m 06 s</text>
+              <rect class="atl-dia-track" x="386" y="80" width="120" height="5" rx="2.5"/>
+              <rect class="atl-dia-fill" style="fill: url(#atl-pipe-hot)" x="386" y="80" width="120" height="5" rx="2.5"/>
+            </g>
+
+            <!-- running: the strip is the progress, and it is the only moving thing on the screen -->
+            <g class="atl-dia-stage atl-dia-stage--run">
+              <rect class="atl-dia-card" x="546" y="30" width="148" height="64" rx="14"/>
+              <text class="atl-dia-name" x="560" y="55">disburse</text>
+              <text class="atl-dia-sub" x="560" y="72">62% · 1 m 40 s</text>
+              <rect class="atl-dia-track" x="560" y="80" width="120" height="5" rx="2.5"/>
+              <rect class="atl-dia-fill" style="fill: url(#atl-pipe-hot)" x="560" y="80" width="74" height="5" rx="2.5" data-grow="width"/>
+            </g>
+
+            <!-- pending: track only. An empty track reads as "not yet"; no box at all
+                 would read as "not part of this run". The label uses a lighter TOKEN,
+                 never opacity — dimming muted text with alpha is the first of the four
+                 contrast laws this repo broke once already. -->
+            <g class="atl-dia-stage atl-dia-stage--wait">
+              <rect class="atl-dia-card" x="720" y="30" width="148" height="64" rx="14"/>
+              <text class="atl-dia-name" x="734" y="55">notify</text>
+              <text class="atl-dia-sub" x="734" y="72">not started</text>
+              <rect class="atl-dia-track" x="734" y="80" width="120" height="5" rx="2.5"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="atl-card" data-reveal>
+          <div class="atl-card__head">
+            <div>
+              <h2 class="atl-card__title">
+                <span class="lang-en">Who can reach what</span><span class="lang-zh">谁能访问什么</span>
+              </h2>
+              <p class="atl-muted" style="margin:4px 0 0; font-size:13px;">
+                <span class="lang-en">Two people, three roles, four resources. Pick a person to trace her reach.</span>
+                <span class="lang-zh">两个人、三个角色、四项资源。点一个人，看她能够到哪儿。</span>
+              </p>
+            </div>
+            <span class="atl-chip atl-chip--warn">
+              <span class="lang-en">1 sole owner</span><span class="lang-zh">1 项单人持有</span>
+            </span>
+          </div>
+
+          <div class="atl-dia">
+            <svg class="atl-dia__map" viewBox="0 0 880 322" role="group"
+              aria-label="Permission graph. Dita Rahayu holds the payroll-admin and reviewer roles, which reach the payroll database, the audit log and review data. Arif Santoso holds read-only, which reaches review data. The payroll database is reachable by Dita alone.">
+              <defs>
+                <linearGradient id="atl-perm-hot" gradientUnits="userSpaceOnUse" x1="180" y1="0" x2="856" y2="0">
+                  <stop offset="0" stop-color="#F5854F"/><stop offset="1" stop-color="#DD4F92"/>
+                </linearGradient>
+              </defs>
+
+              <g class="atl-dia-colhead">
+                <text x="24" y="16">PEOPLE</text><text x="346" y="16">ROLES</text><text x="666" y="16">RESOURCES</text>
+              </g>
+
+              <!-- quiet edges first -->
+              <g class="atl-dia-link" fill="none">
+                <path d="M180,204 H262 Q270,204 270,212 V248 Q270,256 278,256 H346"/>
+                <path d="M496,256 H570 Q578,256 578,248 V134 Q578,126 586,126 H666"/>
+              </g>
+              <!-- the selected person's reach -->
+              <g class="atl-dia-link atl-dia-link--hot" fill="none" style="stroke: url(#atl-perm-hot)">
+                <path d="M180,94 H262 Q270,94 270,86 V72 Q270,64 278,64 H346"/>
+                <path d="M180,94 H262 Q270,94 270,102 V156 Q270,164 278,164 H346"/>
+                <path d="M496,72 H570 Q578,72 578,64 V64 H666"/>
+                <path d="M496,72 H570 Q578,72 578,80 V196 Q578,204 586,204 H666"/>
+                <path d="M496,164 H570 Q578,164 578,142 V134 Q578,126 586,126 H666"/>
+              </g>
+
+              <!-- people -->
+              <g class="atl-dia-node is-active" data-tab="p-dita" data-tab-group="perm" role="button" tabindex="0" aria-label="Dita Rahayu, selected">
+                <rect class="atl-dia-card" x="24" y="62" width="156" height="64" rx="14"/>
+                <text class="atl-dia-name" x="40" y="90">Dita Rahayu</text>
+                <text class="atl-dia-sub" x="40" y="109">2 roles</text>
+              </g>
+              <g class="atl-dia-node" data-tab="p-arif" data-tab-group="perm" role="button" tabindex="0" aria-label="Arif Santoso">
+                <rect class="atl-dia-card" x="24" y="172" width="156" height="64" rx="14"/>
+                <text class="atl-dia-name" x="40" y="200">Arif Santoso</text>
+                <text class="atl-dia-sub" x="40" y="219">1 role</text>
+              </g>
+
+              <!-- roles -->
+              <g class="atl-dia-static"><rect class="atl-dia-card" x="346" y="36" width="150" height="56" rx="14"/>
+                <text class="atl-dia-name" x="362" y="60">payroll-admin</text><text class="atl-dia-sub" x="362" y="78">write</text></g>
+              <g class="atl-dia-static"><rect class="atl-dia-card" x="346" y="136" width="150" height="56" rx="14"/>
+                <text class="atl-dia-name" x="362" y="160">reviewer</text><text class="atl-dia-sub" x="362" y="178">read</text></g>
+              <g class="atl-dia-static"><rect class="atl-dia-card" x="346" y="228" width="150" height="56" rx="14"/>
+                <text class="atl-dia-name" x="362" y="252">read-only</text><text class="atl-dia-sub" x="362" y="270">read</text></g>
+
+              <!-- resources -->
+              <g class="atl-dia-static"><rect class="atl-dia-card" x="666" y="36" width="190" height="56" rx="14"/>
+                <circle class="atl-dia-dot atl-dia-dot--warn" cx="686" cy="56" r="4"/>
+                <text class="atl-dia-name" x="698" y="61">payroll DB</text><text class="atl-dia-sub" x="686" y="80">sole owner · Dita</text></g>
+              <g class="atl-dia-static"><rect class="atl-dia-card" x="666" y="98" width="190" height="56" rx="14"/>
+                <text class="atl-dia-name" x="686" y="123">review data</text><text class="atl-dia-sub" x="686" y="142">3 readers</text></g>
+              <g class="atl-dia-static"><rect class="atl-dia-card" x="666" y="176" width="190" height="56" rx="14"/>
+                <text class="atl-dia-name" x="686" y="201">audit log</text><text class="atl-dia-sub" x="686" y="220">append only</text></g>
+              <g class="atl-dia-static"><rect class="atl-dia-card" x="666" y="238" width="190" height="56" rx="14"/>
+                <text class="atl-dia-name" x="686" y="263">billing</text><text class="atl-dia-sub" x="686" y="282">nobody here</text></g>
+            </svg>
+
+            <div class="atl-dia__side">
+              <div class="atl-card atl-dia__detail atl-dia__detail--hot" data-tabpane="p-dita" data-tab-group="perm">
+                <span class="atl-kicker" style="color:var(--atl-accent-ink);">Dita Rahayu</span>
+                <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">3<span style="font-size:16px;"> / 4</span></p>
+                <p class="atl-muted" style="margin:0 0 14px; font-size:12.5px;">
+                  <span class="lang-en">resources reachable</span><span class="lang-zh">能够到的资源</span>
+                </p>
+                <p style="margin:0 0 6px; font-size:12.5px;">
+                  <span class="lang-en">payroll-admin · reviewer</span><span class="lang-zh">payroll-admin · reviewer</span>
+                </p>
+                <p class="atl-muted" style="margin:0; font-size:12.5px;">
+                  <span class="lang-en">She is the only write path to payroll DB.</span>
+                  <span class="lang-zh">通往 payroll DB 的写权限只有她一条路。</span>
+                </p>
+              </div>
+              <div class="atl-card atl-dia__detail" data-tabpane="p-arif" data-tab-group="perm" hidden>
+                <span class="atl-kicker">Arif Santoso</span>
+                <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">1<span style="font-size:16px;"> / 4</span></p>
+                <p class="atl-muted" style="margin:0 0 14px; font-size:12.5px;">
+                  <span class="lang-en">resources reachable</span><span class="lang-zh">能够到的资源</span>
+                </p>
+                <p style="margin:0; font-size:12.5px;">
+                  <span class="lang-en">read-only · review data</span><span class="lang-zh">read-only · review data</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="atl-card" data-reveal>
+          <div class="atl-card__head">
+            <div>
+              <h2 class="atl-card__title">
+                <span class="lang-en">After a payroll run</span><span class="lang-zh">薪酬跑完之后</span>
+              </h2>
+              <p class="atl-muted" style="margin:4px 0 0; font-size:13px;">
+                <span class="lang-en">One trigger, one branch, two actions. Pick a step to edit it.</span>
+                <span class="lang-zh">一个触发、一次分支、两个动作。点一步来编辑它。</span>
+              </p>
+            </div>
+            <span class="atl-chip">
+              <span class="lang-en">draft</span><span class="lang-zh">草稿</span>
+            </span>
+          </div>
+
+          <div class="atl-dia">
+            <div class="atl-dia-canvas">
+              <svg class="atl-dia__map" viewBox="0 0 880 250" role="group"
+                aria-label="Flow: when a payroll run finishes, if the error count is above zero the flow pages whoever is on call, otherwise it posts a summary to the finance channel; both branches end the run. The page-on-call step is selected.">
+                <defs>
+                  <linearGradient id="atl-flow-hot" gradientUnits="userSpaceOnUse" x1="200" y1="0" x2="856" y2="0">
+                    <stop offset="0" stop-color="#F5854F"/><stop offset="1" stop-color="#DD4F92"/>
+                  </linearGradient>
+                </defs>
+
+                <g class="atl-dia-link" fill="none">
+                  <path d="M198,120 H250"/>
+                  <path d="M428,120 H466 Q474,120 474,132 V190 Q474,202 482,202 H520"/>
+                  <path d="M690,202 H728 Q736,202 736,190 V132 Q736,120 744,120 H772"/>
+                </g>
+                <g class="atl-dia-link atl-dia-link--hot" fill="none" style="stroke: url(#atl-flow-hot)">
+                  <path d="M428,120 H466 Q474,120 474,108 V62 Q474,50 482,50 H520"/>
+                  <path d="M690,50 H728 Q736,50 736,62 V108 Q736,120 744,120 H772"/>
+                </g>
+                <g class="atl-dia-edge">
+                  <text x="492" y="44">yes</text>
+                  <text x="492" y="224">no</text>
+                </g>
+
+                <g class="atl-dia-static">
+                  <rect class="atl-dia-card" x="24" y="88" width="174" height="64" rx="14"/>
+                  <text class="atl-dia-kicker" x="40" y="110">TRIGGER</text>
+                  <text class="atl-dia-name" x="40" y="134">run finished</text>
+                </g>
+                <g class="atl-dia-static">
+                  <rect class="atl-dia-card" x="250" y="88" width="178" height="64" rx="14"/>
+                  <text class="atl-dia-kicker" x="266" y="110">IF</text>
+                  <text class="atl-dia-name" x="266" y="134">errors &gt; 0</text>
+                </g>
+                <g class="atl-dia-node is-active" data-tab="f-page" data-tab-group="flow" role="button" tabindex="0" aria-label="Page on-call, selected">
+                  <rect class="atl-dia-card" x="520" y="18" width="170" height="64" rx="14"/>
+                  <text class="atl-dia-kicker" x="536" y="40">THEN</text>
+                  <text class="atl-dia-name" x="536" y="64">page on-call</text>
+                </g>
+                <g class="atl-dia-node" data-tab="f-post" data-tab-group="flow" role="button" tabindex="0" aria-label="Post summary">
+                  <rect class="atl-dia-card" x="520" y="170" width="170" height="64" rx="14"/>
+                  <text class="atl-dia-kicker" x="536" y="192">ELSE</text>
+                  <text class="atl-dia-name" x="536" y="216">post summary</text>
+                </g>
+                <g class="atl-dia-static">
+                  <rect class="atl-dia-card" x="772" y="88" width="84" height="64" rx="14"/>
+                  <text class="atl-dia-name" x="788" y="126">end</text>
+                </g>
+              </svg>
+            </div>
+
+            <div class="atl-dia__side">
+              <div class="atl-card atl-dia__detail atl-dia__detail--hot" data-tabpane="f-page" data-tab-group="flow">
+                <span class="atl-kicker" style="color:var(--atl-accent-ink);">
+                  <span class="lang-en">then · page on-call</span><span class="lang-zh">then · 呼叫值班</span>
+                </span>
+                <p style="margin:10px 0 6px; font-size:12.5px;">
+                  <span class="lang-en">Escalates after 5 minutes</span><span class="lang-zh">5 分钟未响应则升级</span>
+                </p>
+                <p class="atl-muted" style="margin:0; font-size:12.5px;">
+                  <span class="lang-en">Ran 3 times this month, acknowledged twice.</span>
+                  <span class="lang-zh">本月触发 3 次，其中 2 次被认领。</span>
+                </p>
+              </div>
+              <div class="atl-card atl-dia__detail" data-tabpane="f-post" data-tab-group="flow" hidden>
+                <span class="atl-kicker">
+                  <span class="lang-en">else · post summary</span><span class="lang-zh">else · 发汇总</span>
+                </span>
+                <p style="margin:10px 0 6px; font-size:12.5px;">
+                  <span class="lang-en">Posts to #finance</span><span class="lang-zh">发到 #finance</span>
+                </p>
+                <p class="atl-muted" style="margin:0; font-size:12.5px;">
+                  <span class="lang-en">Ran 19 times this month.</span><span class="lang-zh">本月触发 19 次。</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="../../assets/atelier.js"></script>
+
+<!-- design-review:self-diff v1
+Skill: atelier
+Page-type: console (in-app diagrams)
+Created: 2026-08-28
+
+Decisions (5):
+1. [in-app-not-editorial] chose "four diagrams that are product surfaces — topology, pipeline, permissions, flow" over "porting the kernel diagram family (bitfield / SoC block / timing) into an app shell". Because: atelier is the only skill here that draws applications rather than documents, and an editorial figure inside an app shell reads as neither. The test a diagram has to pass to appear on this page is not "is it technical" but "would this be a panel you can click in a real product". All four would be; a register bitfield would not.
+2. [selection-is-the-anchor] chose "the selected node renders as the screen's one near-black anchor card, and the detail pane beside it is a normal card" over "an accent ring on the node plus a dark detail card". Because: atelier-material §6 allows exactly one dark surface per screen, and on a diagram screen the story is in the map, not in the sidebar — the reader should land on the degraded service, then read about it. The first build had both dark and the landing point split in two; neither won.
+3. [no-new-javascript] chose "nodes are <g data-tab>, details are [data-tabpane]" over "a small selection controller for diagrams". Because: atelier.js already groups tabs and swaps panes, and reusing it means the freeze contract comes free — the selected node is selected in the markup, so a no-JS reader, the screenshot gate and someone who has clicked twice all see one coherent state. A bespoke controller would have had to re-earn that.
+4. [role-group-not-role-img] chose "role=group on the interactive SVGs, aria-label carrying the summary" over "role=img with alt text, the way every other diagram in this repo is marked up". Because: role=img declares an atomic graphic with no exposed children, so focusable nodes inside it are a contradiction — axe reports nested-interactive as serious, which it did on the first build. group exposes the children a keyboard user has to reach, and the one-sentence summary still lives on aria-label for anyone who does not want to walk six nodes. The static pipeline keeps role=img, because nothing in it is focusable.
+5. [meter-anatomy-for-state] chose "name and meta on the card, a thin track-and-fill strip beneath" over "a filled block whose fill width is the progress". Because: a label straddling the edge of a saturated fill has no colour that works — and axe returns INCOMPLETE over a gradient, so no gate would have said so. Moving the value into a strip also lets the track carry the unit (material §5) and drops a full-height saturated band, which this repo treats as a smell everywhere else.
+
+Known trade-offs:
+- The four panels sit on one page, which is more diagram than any real console would show at once. The page is a reference, not a screen to copy wholesale: a product screen would carry one of these and a set of ordinary panels around it.
+- Nodes are SVG <g>, not HTML elements positioned over the links. That keeps one coordinate system across the 1080 collapse, at the cost of text that cannot reflow and a focus ring that had to be written by hand. diagram-craft §7.3 records when to make the other choice.
+- The gradients are declared userSpaceOnUse with hard-coded x1/x2 per template. That is what makes a horizontal link visible at all (a zero-height bounding box degenerates an objectBoundingBox gradient) and what puts every segment on one ramp — but it means a template that is re-laid-out horizontally has to have those two numbers revisited.
+- Live values are baked into the markup. A real console would bind them; here they are the terminal state the freeze contract wants, and they are what makes the panels legible as products rather than as architecture drawings.
+/design-review:self-diff -->
+
+</body>
+</html>

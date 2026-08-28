@@ -24,7 +24,7 @@ Extra pages beyond the nine flagship `index.html`:
 - [`glass-design/diagrams.html`](./glass-design/diagrams.html) — 14-diagram gallery as frosted panels on the aurora field (theme-proof SVG ink)
 - [`eclat-design/diagrams.html`](./eclat-design/diagrams.html) — 8-composition lookbook: spotlit product, lineup, spec reveal, the moment, pricing, in-the-box, benchmarks, detail (cinematic, not code diagrams)
 - [`lectern-design/diagrams.html`](./lectern-design/diagrams.html) — 9-visual board pack: line / bar / donut / 100%-stacked / cohort heatmap charts, KPI cards, a roadmap timeline and a RAG decisions table
-- [`atelier-design/diagrams.html`](./atelier-design/diagrams.html) — 9-figure gallery of the application parts: gradient orbs, round-cap bars, meters, the anchor card, table and rail states
+- [`atelier-design/diagrams.html`](./atelier-design/diagrams.html) — 13-figure gallery of the application parts: gradient orbs, round-cap bars, meters, the anchor card, table and rail states — plus four **in-app diagrams** (a clickable service topology, a pipeline carrying state, a permission graph, a flow canvas), the technical figures that are product surfaces rather than documentation figures
 - [`primer-design/diagrams.html`](./primer-design/diagrams.html) — 25 thick-outline illustrations from the three primers plus the demo (a book's index, one takeout trip, a sealed envelope …), each answering exactly one question
 - [`primer-design/tech/`](./primer-design/tech/index.html) — the technical set behind one cover page: a register as a row of switches, one SPI mode-0 transfer, an SoC as a city, two chips whose house numbers never merge, how an IP core is built, a character's path from `write()` to a UART pin, and why 25 halvings find one row in twenty million
 

@@ -48,7 +48,11 @@ atelier 风格 / 仪表盘 / dashboard / 控制台 / 后台 / admin panel / SaaS
 7. `references/typography.md` — Plus Jakarta Sans 字号表 + 中文字体栈
 8. `references/motion.md` — 交互契约 + 冻结契约(截图检查依赖)
 9. `references/diagram-craft.md` — SVG 图示工艺
-10. `references/canonical/` — 5 个页型的 canonical html + md 成对读
+10. `references/canonical/` — 6 个页型的 canonical html + md 成对读
+    (dashboard / booking / detail / settings / signin / **console** —— console 是以图为主体的那一屏)
+11. `templates/diagrams/` — **界面内图示**片段(服务拓扑 / 流水线状态)。是 `.html` 不是 `.svg`:
+    这类图的一半是面板壳和交互接线,单独一个 svg 文件装不下。画法见 `references/diagram-craft.md` §7 ——
+    **编辑类工程图(位域 / SoC 框图 / 时序)不进 atelier**,那是文档页的活
 
 ## §5 发布前检查(MUST)
 
@@ -65,7 +69,7 @@ bin/design-review --skill=atelier --pixel <你的页面>.html    # 再加像素�
 KPI 标签和数字挤成一行、时间轴圆点被压成竖条、暗面板上的 `.atl-muted` 几乎不可见。
 **机械检查是必要条件,不是充分条件。**
 
-atelier 目前 **7/7 页 axe 零 violation**(5 canonical + 2 demo),这是验收线。
+atelier 目前 **8/8 页 axe 零 violation**(6 canonical + 2 demo),这是验收线。
 
 ## §6 三条不可让步的规矩
 

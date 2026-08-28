@@ -1,0 +1,110 @@
+<!-- atelier-design · in-app diagram · permission graph
+     Paste inside .atl-main. Needs atelier.js for [data-tab]. Craft rules: §7.
+
+     People → roles → resources. The question this screen answers is never
+     "what roles exist" but "what can THIS person reach", so selection drives
+     everything: the selected person is the screen's one dark anchor, and only
+     her reachable path is drawn on the gradient. -->
+<div class="atl-card" data-reveal>
+  <div class="atl-card__head">
+    <div>
+      <h2 class="atl-card__title">
+        <span class="lang-en">Who can reach what</span><span class="lang-zh">谁能访问什么</span>
+      </h2>
+      <p class="atl-muted" style="margin:4px 0 0; font-size:13px;">
+        <span class="lang-en">Two people, three roles, four resources. Pick a person to trace her reach.</span>
+        <span class="lang-zh">两个人、三个角色、四项资源。点一个人，看她能够到哪儿。</span>
+      </p>
+    </div>
+    <span class="atl-chip atl-chip--warn">
+      <span class="lang-en">1 sole owner</span><span class="lang-zh">1 项单人持有</span>
+    </span>
+  </div>
+
+  <div class="atl-dia">
+    <svg class="atl-dia__map" viewBox="0 0 880 322" role="group"
+      aria-label="Permission graph. Dita Rahayu holds the payroll-admin and reviewer roles, which reach the payroll database, the audit log and review data. Arif Santoso holds read-only, which reaches review data. The payroll database is reachable by Dita alone.">
+      <defs>
+        <linearGradient id="atl-perm-hot" gradientUnits="userSpaceOnUse" x1="180" y1="0" x2="856" y2="0">
+          <stop offset="0" stop-color="#F5854F"/><stop offset="1" stop-color="#DD4F92"/>
+        </linearGradient>
+      </defs>
+
+      <g class="atl-dia-colhead">
+        <text x="24" y="16">PEOPLE</text><text x="346" y="16">ROLES</text><text x="666" y="16">RESOURCES</text>
+      </g>
+
+      <!-- quiet edges first -->
+      <g class="atl-dia-link" fill="none">
+        <path d="M180,204 H262 Q270,204 270,212 V248 Q270,256 278,256 H346"/>
+        <path d="M496,256 H570 Q578,256 578,248 V134 Q578,126 586,126 H666"/>
+      </g>
+      <!-- the selected person's reach -->
+      <g class="atl-dia-link atl-dia-link--hot" fill="none" style="stroke: url(#atl-perm-hot)">
+        <path d="M180,94 H262 Q270,94 270,86 V72 Q270,64 278,64 H346"/>
+        <path d="M180,94 H262 Q270,94 270,102 V156 Q270,164 278,164 H346"/>
+        <path d="M496,72 H570 Q578,72 578,64 V64 H666"/>
+        <path d="M496,72 H570 Q578,72 578,80 V196 Q578,204 586,204 H666"/>
+        <path d="M496,164 H570 Q578,164 578,142 V134 Q578,126 586,126 H666"/>
+      </g>
+
+      <!-- people -->
+      <g class="atl-dia-node is-active" data-tab="p-dita" data-tab-group="perm" role="button" tabindex="0" aria-label="Dita Rahayu, selected">
+        <rect class="atl-dia-card" x="24" y="62" width="156" height="64" rx="14"/>
+        <text class="atl-dia-name" x="40" y="90">Dita Rahayu</text>
+        <text class="atl-dia-sub" x="40" y="109">2 roles</text>
+      </g>
+      <g class="atl-dia-node" data-tab="p-arif" data-tab-group="perm" role="button" tabindex="0" aria-label="Arif Santoso">
+        <rect class="atl-dia-card" x="24" y="172" width="156" height="64" rx="14"/>
+        <text class="atl-dia-name" x="40" y="200">Arif Santoso</text>
+        <text class="atl-dia-sub" x="40" y="219">1 role</text>
+      </g>
+
+      <!-- roles -->
+      <g class="atl-dia-static"><rect class="atl-dia-card" x="346" y="36" width="150" height="56" rx="14"/>
+        <text class="atl-dia-name" x="362" y="60">payroll-admin</text><text class="atl-dia-sub" x="362" y="78">write</text></g>
+      <g class="atl-dia-static"><rect class="atl-dia-card" x="346" y="136" width="150" height="56" rx="14"/>
+        <text class="atl-dia-name" x="362" y="160">reviewer</text><text class="atl-dia-sub" x="362" y="178">read</text></g>
+      <g class="atl-dia-static"><rect class="atl-dia-card" x="346" y="228" width="150" height="56" rx="14"/>
+        <text class="atl-dia-name" x="362" y="252">read-only</text><text class="atl-dia-sub" x="362" y="270">read</text></g>
+
+      <!-- resources -->
+      <g class="atl-dia-static"><rect class="atl-dia-card" x="666" y="36" width="190" height="56" rx="14"/>
+        <circle class="atl-dia-dot atl-dia-dot--warn" cx="686" cy="56" r="4"/>
+        <text class="atl-dia-name" x="698" y="61">payroll DB</text><text class="atl-dia-sub" x="686" y="80">sole owner · Dita</text></g>
+      <g class="atl-dia-static"><rect class="atl-dia-card" x="666" y="98" width="190" height="56" rx="14"/>
+        <text class="atl-dia-name" x="686" y="123">review data</text><text class="atl-dia-sub" x="686" y="142">3 readers</text></g>
+      <g class="atl-dia-static"><rect class="atl-dia-card" x="666" y="176" width="190" height="56" rx="14"/>
+        <text class="atl-dia-name" x="686" y="201">audit log</text><text class="atl-dia-sub" x="686" y="220">append only</text></g>
+      <g class="atl-dia-static"><rect class="atl-dia-card" x="666" y="238" width="190" height="56" rx="14"/>
+        <text class="atl-dia-name" x="686" y="263">billing</text><text class="atl-dia-sub" x="686" y="282">nobody here</text></g>
+    </svg>
+
+    <div class="atl-dia__side">
+      <div class="atl-card atl-dia__detail atl-dia__detail--hot" data-tabpane="p-dita" data-tab-group="perm">
+        <span class="atl-kicker" style="color:var(--atl-accent-ink);">Dita Rahayu</span>
+        <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">3<span style="font-size:16px;"> / 4</span></p>
+        <p class="atl-muted" style="margin:0 0 14px; font-size:12.5px;">
+          <span class="lang-en">resources reachable</span><span class="lang-zh">能够到的资源</span>
+        </p>
+        <p style="margin:0 0 6px; font-size:12.5px;">
+          <span class="lang-en">payroll-admin · reviewer</span><span class="lang-zh">payroll-admin · reviewer</span>
+        </p>
+        <p class="atl-muted" style="margin:0; font-size:12.5px;">
+          <span class="lang-en">She is the only write path to payroll DB.</span>
+          <span class="lang-zh">通往 payroll DB 的写权限只有她一条路。</span>
+        </p>
+      </div>
+      <div class="atl-card atl-dia__detail" data-tabpane="p-arif" data-tab-group="perm" hidden>
+        <span class="atl-kicker">Arif Santoso</span>
+        <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">1<span style="font-size:16px;"> / 4</span></p>
+        <p class="atl-muted" style="margin:0 0 14px; font-size:12.5px;">
+          <span class="lang-en">resources reachable</span><span class="lang-zh">能够到的资源</span>
+        </p>
+        <p style="margin:0; font-size:12.5px;">
+          <span class="lang-en">read-only · review data</span><span class="lang-zh">read-only · review data</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

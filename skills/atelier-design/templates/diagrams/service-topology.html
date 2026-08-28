@@ -1,0 +1,156 @@
+<!-- atelier-design · in-app diagram · service topology
+     Paste inside .atl-main. Needs atelier.js for [data-tab] (no new JS).
+     Craft rules: references/diagram-craft.md §7.
+
+     Two things make this an APP diagram and not a figure:
+       · the nodes are <g data-tab> — atelier.js already swaps [data-tabpane],
+         so selection costs zero new script;
+       · the selected node IS the screen's one near-black anchor card
+         (atelier-material.md §6). Do not add a second dark card beside it.
+
+     Freeze contract: the selected node is selected IN THE MARKUP, so a no-JS
+     reader and the screenshot gate both see a coherent state. -->
+<div class="atl-card" data-reveal>
+  <div class="atl-card__head">
+    <div>
+      <h2 class="atl-card__title">
+        <span class="lang-en">Service health</span><span class="lang-zh">服务健康度</span>
+      </h2>
+      <p class="atl-muted" style="margin:4px 0 0; font-size:13px;">
+        <span class="lang-en">Six services, live p95 and error rate. Pick a node to see what is on call.</span>
+        <span class="lang-zh">六个服务，实时 p95 与错误率。点一个节点看它的值班信息。</span>
+      </p>
+    </div>
+    <span class="atl-chip atl-chip--warn">
+      <span class="lang-en">1 degraded</span><span class="lang-zh">1 个降级</span>
+    </span>
+  </div>
+
+  <div class="atl-dia">
+    <!-- role="group", NOT role="img": role="img" declares an atomic graphic with
+         no exposed children, so putting focusable nodes inside it is a contradiction
+         (axe: nested-interactive). A group exposes its children, which is what an
+         interactive diagram needs — and the summary still lives on aria-label for
+         anyone who does not want to walk six nodes. -->
+    <svg class="atl-dia__map" viewBox="0 0 880 310" role="group"
+      aria-label="Service topology: web and the API gateway feed review-svc and payroll-svc, which read Postgres and Redis. payroll-svc is degraded at 812 milliseconds p95 and 4.1 percent errors, and the gradient path traces the request route that passes through it.">
+      <defs>
+        <!-- userSpaceOnUse, NOT the default objectBoundingBox: a perfectly
+             horizontal path has a zero-height bounding box, and a gradient
+             painted into a zero-area box degenerates — the link just vanishes.
+             Spanning user space also puts every segment on ONE ramp, so the
+             traced route reads as a single route instead of N little sweeps. -->
+        <linearGradient id="atl-topo-hot" gradientUnits="userSpaceOnUse" x1="228" y1="0" x2="844" y2="0">
+          <stop offset="0" stop-color="#F5854F"/><stop offset="1" stop-color="#DD4F92"/>
+        </linearGradient>
+      </defs>
+
+      <!-- links: quiet routes first, the traced one last so it sits on top -->
+      <g class="atl-dia-link" fill="none">
+        <path d="M192,163 H228"/>
+        <path d="M396,163 H424 Q432,163 432,155 V79 Q432,71 440,71 H452"/>
+        <path d="M620,71 H676"/>
+      </g>
+      <g class="atl-dia-link atl-dia-link--hot" fill="none" style="stroke: url(#atl-topo-hot)">
+        <path d="M396,163 H424 Q432,163 432,171 V247 Q432,255 440,255 H452"/>
+        <path d="M620,255 H676"/>
+      </g>
+
+      <!-- nodes -->
+      <g class="atl-dia-node" data-tab="svc-web" data-tab-group="topo" role="button" tabindex="0" aria-label="web">
+        <rect class="atl-dia-card" x="24" y="132" width="168" height="62" rx="14"/>
+        <circle class="atl-dia-dot atl-dia-dot--ok" cx="44" cy="152" r="4"/>
+        <text class="atl-dia-name" x="56" y="157">web</text>
+        <text class="atl-dia-sub" x="44" y="179">p95 96 ms · 0.02%</text>
+      </g>
+      <g class="atl-dia-node" data-tab="svc-gw" data-tab-group="topo" role="button" tabindex="0" aria-label="API gateway">
+        <rect class="atl-dia-card" x="228" y="132" width="168" height="62" rx="14"/>
+        <circle class="atl-dia-dot atl-dia-dot--ok" cx="248" cy="152" r="4"/>
+        <text class="atl-dia-name" x="260" y="157">api-gateway</text>
+        <text class="atl-dia-sub" x="248" y="179">p95 118 ms · 0.04%</text>
+      </g>
+      <g class="atl-dia-node" data-tab="svc-review" data-tab-group="topo" role="button" tabindex="0" aria-label="review-svc">
+        <rect class="atl-dia-card" x="452" y="40" width="168" height="62" rx="14"/>
+        <circle class="atl-dia-dot atl-dia-dot--ok" cx="472" cy="60" r="4"/>
+        <text class="atl-dia-name" x="484" y="65">review-svc</text>
+        <text class="atl-dia-sub" x="472" y="87">p95 141 ms · 0.06%</text>
+      </g>
+      <g class="atl-dia-node is-active" data-tab="svc-payroll" data-tab-group="topo" role="button" tabindex="0" aria-label="payroll-svc, degraded">
+        <rect class="atl-dia-card" x="452" y="224" width="168" height="62" rx="14"/>
+        <circle class="atl-dia-dot atl-dia-dot--warn" cx="472" cy="244" r="4"/>
+        <text class="atl-dia-name" x="484" y="249">payroll-svc</text>
+        <text class="atl-dia-sub" x="472" y="271">p95 812 ms · 4.1%</text>
+      </g>
+      <g class="atl-dia-node" data-tab="svc-pg" data-tab-group="topo" role="button" tabindex="0" aria-label="Postgres">
+        <rect class="atl-dia-card" x="676" y="40" width="168" height="62" rx="14"/>
+        <circle class="atl-dia-dot atl-dia-dot--ok" cx="696" cy="60" r="4"/>
+        <text class="atl-dia-name" x="708" y="65">postgres</text>
+        <text class="atl-dia-sub" x="696" y="87">42 conns · 0.9 GB</text>
+      </g>
+      <g class="atl-dia-node" data-tab="svc-redis" data-tab-group="topo" role="button" tabindex="0" aria-label="Redis">
+        <rect class="atl-dia-card" x="676" y="224" width="168" height="62" rx="14"/>
+        <circle class="atl-dia-dot atl-dia-dot--ok" cx="696" cy="244" r="4"/>
+        <text class="atl-dia-name" x="708" y="249">redis</text>
+        <text class="atl-dia-sub" x="696" y="271">hit 91% · 240 MB</text>
+      </g>
+    </svg>
+
+    <div class="atl-dia__side">
+      <div class="atl-card atl-dia__detail atl-dia__detail--hot" data-tabpane="svc-payroll" data-tab-group="topo">
+        <span class="atl-kicker" style="color:var(--atl-accent-ink);">payroll-svc</span>
+        <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">812<span style="font-size:16px;"> ms</span></p>
+        <p class="atl-muted" style="margin:0 0 14px; font-size:12.5px;">
+          <span class="lang-en">p95, up from 180 ms at 09:12</span>
+          <span class="lang-zh">p95，09:12 起从 180 ms 抬上来</span>
+        </p>
+        <p style="margin:0 0 6px; font-size:12.5px;">
+          <span class="lang-en">On call · Dita R.</span><span class="lang-zh">值班 · Dita R.</span>
+        </p>
+        <p class="atl-muted" style="margin:0; font-size:12.5px;">
+          <span class="lang-en">Redis evictions started at the same minute.</span>
+          <span class="lang-zh">Redis 开始逐出的时刻和它同一分钟。</span>
+        </p>
+      </div>
+      <div class="atl-card atl-dia__detail" data-tabpane="svc-web" data-tab-group="topo" hidden>
+        <span class="atl-kicker">web</span>
+        <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">96<span style="font-size:16px;"> ms</span></p>
+        <p class="atl-muted" style="margin:0; font-size:12.5px;">
+          <span class="lang-en">p95 · 4 pods · no change today</span>
+          <span class="lang-zh">p95 · 4 个 pod · 今天无变化</span>
+        </p>
+      </div>
+      <div class="atl-card atl-dia__detail" data-tabpane="svc-gw" data-tab-group="topo" hidden>
+        <span class="atl-kicker">api-gateway</span>
+        <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">118<span style="font-size:16px;"> ms</span></p>
+        <p class="atl-muted" style="margin:0; font-size:12.5px;">
+          <span class="lang-en">p95 · routes 100% of traffic</span>
+          <span class="lang-zh">p95 · 全部流量都经过它</span>
+        </p>
+      </div>
+      <div class="atl-card atl-dia__detail" data-tabpane="svc-review" data-tab-group="topo" hidden>
+        <span class="atl-kicker">review-svc</span>
+        <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">141<span style="font-size:16px;"> ms</span></p>
+        <p class="atl-muted" style="margin:0; font-size:12.5px;">
+          <span class="lang-en">p95 · unaffected by the payroll path</span>
+          <span class="lang-zh">p95 · 不受 payroll 那条路影响</span>
+        </p>
+      </div>
+      <div class="atl-card atl-dia__detail" data-tabpane="svc-pg" data-tab-group="topo" hidden>
+        <span class="atl-kicker">postgres</span>
+        <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">42</p>
+        <p class="atl-muted" style="margin:0; font-size:12.5px;">
+          <span class="lang-en">connections · 0.9 GB resident</span>
+          <span class="lang-zh">连接数 · 常驻 0.9 GB</span>
+        </p>
+      </div>
+      <div class="atl-card atl-dia__detail" data-tabpane="svc-redis" data-tab-group="topo" hidden>
+        <span class="atl-kicker">redis</span>
+        <p class="atl-kpi__value" style="margin:6px 0 2px; font-size:34px;">91<span style="font-size:16px;"> %</span></p>
+        <p class="atl-muted" style="margin:0; font-size:12.5px;">
+          <span class="lang-en">hit rate · evicting since 09:12</span>
+          <span class="lang-zh">命中率 · 09:12 起开始逐出</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
