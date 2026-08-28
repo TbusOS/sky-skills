@@ -75,10 +75,12 @@ visual-audit 的 `glass-cyan-svg-text` 检查在 light 跑时按 error 抓)。
 
 ## 5. 图型模板
 
-`templates/diagrams/` 共 17 张:architecture / flow / sequence / state-machine /
+`templates/diagrams/` 共 24 张:architecture / flow / sequence / state-machine /
 timeline / bitfield / build-pipeline / hierarchy / function-flowchart /
 deployment / soc-block / hw-timing-waveform / algorithm-ringbuffer /
-sched-timeline / interconnect-map / protocol-stack / address-map。
+sched-timeline / interconnect-map / protocol-stack / address-map
++ 芯片与代码七件 system-topology / die-floorplan / datapath / packet-encap /
+terminal-annotated / struct-graph / bus-fabric(译法见 §10)。
 另有 `glyphs.svg` 构件片段集(§8),是一张**表**不是一张图,不计入图型数。从模板起步改内容,不要从零画。密图(≥20 label)进
 `.glass-container--wide` 整行 figure;tint 层按 §2 编码类别。
 
@@ -169,3 +171,55 @@ cyan 预算在这张图正好用满 3 个:重映射线 + 它两端落到的两�
    glass 额外一条:**族内各张的主题相关类必须完全一致** ——
    某一张为了好看把一段从 `.glass-svg-node` 换成写死颜色,那一张在 light 下会和其余几张长得不一样,
    读者会以为这是"另一个状态"。
+
+---
+
+## 10. 芯片与代码七件的 glass 译法
+
+模板：`templates/diagrams/` 的 `system-topology` / `die-floorplan` / `datapath` /
+`packet-encap` / `terminal-annotated` / `struct-graph` / `bus-fabric`。
+**图型工艺**（每一件为什么这么画）在 anthropic-design 的 `diagram-craft.md`
+§15.11–15.17;本节只写 glass 皮下面不一样的地方。
+
+### 10.1 四种语义色 → 两个色调 + 一个状态组
+
+§2 的颜色合约给了上限：**每张图最多 2 个色调**，状态组另算一份。七件的映射固定成：
+
+| anthropic 语义 | glass 类 | 理由 |
+|---|---|---|
+| 计算 / 设备（蓝） | `glass-svg-node--indigo` | indigo 是 glass 的"次级 / 基础设施"档 |
+| 焦点 / 本次运行（橙） | `glass-svg-node--cyan` + `glass-svg-accent-stroke` | cyan 是 glass 的热路径 |
+| 内存（绿） | `glass-svg-node`（不上色） | 色调预算只有两个,内存让位 |
+| 窗口 / IO（琥珀） | `glass-svg-node--warn` | 走状态组,不占色调预算 |
+
+**关键约束**：`die-floorplan` 的互连轨在 anthropic 是橙的，
+在 glass **必须降成 `glass-svg-line`**，ring stop 降成 `glass-svg-ink-3`。
+理由：cyan 在 glass 里的含义是"这一次走的路"，轨是一直在那儿的结构。
+两者都上 cyan，图里就没有"这一次"了。
+
+### 10.2 编号徽章：实心圆会瞎掉
+
+anthropic 的徽章是实心橙圆 + 白字。直接翻译成实心 cyan 圆 + 白字，
+**暗主题下 cyan 太亮、白字糊掉，亮主题下 accent 变深、白字倒是能看** —— 两头对不上。
+落法固定为：圆用 `glass-svg-node--cyan`（15% 淡色底），字用 `glass-svg-accent-ink`。
+两个主题下都是"淡底 + 同色深字"，稳。
+
+### 10.3 斑马行删掉，别翻译
+
+`struct-graph` 的隔行浅底（`#faf9f5`）在 glass 里没有对应物：
+白色 4% 覆盖在亮主题下看不见，硬给个 token 又会跟卡面打架。
+**直接删掉**——glass 的卡本来就是半透明面，行与行之间靠字距分得开。
+
+### 10.4 marker 用类，不写死颜色
+
+箭头 marker 里的 `fill` 也要走 `.glass-svg-*` 类。
+写死 `#F4F7FF` 的白箭头在亮主题下会消失，而 marker 又不在 `verify.py`
+的"未定义 class"检查范围里，**没人会替你发现**。cyan（`#22D3EE`）是双主题常量，
+只有它可以写死。
+
+### 10.5 尺寸
+
+七件的 viewBox 是 `1120 × 560`。glass 的 gallery 图位是三家里最宽的（1230 px），
+缩放 **1.098** —— 字号最舒服（12 → 13.2），但**高度是三家里最吃紧的**：
+560 渲染成 615 px，离 `diagram-oversized` 的 640 只剩 25 px。
+**这七件的 viewBox 高度不要再加**;要加内容先砍别的。

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="An annotated boot log, kept as the real console output and marked up rather than redrawn. The dark card is fourteen lines of kernel PCI enumeration in monospace. Five numbered badges pin lines to notes on the right. Badge one, the root bus window, five hundred and twelve megabytes, is highlighted green because everything below has to fit inside it. Badge two, the downstream bridge to bus zero four got a one megabyte window at boot, highlighted amber. Badge three, the accelerator's first base address register asks for two hundred and fifty-six megabytes, highlighted orange. Badge four, probe fails with error minus twelve, minus ENOMEM, which is the consequence and not a driver bug. Badge five points at the NVMe lines four rows later that enumerated cleanly, kept in frame so the reader can see the log itself is healthy" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+  </defs>
+
+  <rect width="1120" height="560" fill="#ffffff"/>
+
+  <text x="32" y="34" font-size="12.5" font-weight="600" letter-spacing="1.2" fill="#86868b">ANNOTATED CONSOLE &#183; PCI ENUMERATION, ONE FAILING DEVICE</text>
+  <text x="1088" y="34" text-anchor="end" font-size="12.5" font-style="italic" fill="#86868b">real output, marked up &#183; never retyped</text>
+
+  <!-- terminal card -->
+  <rect x="32" y="52" width="728" height="460" rx="12" fill="#1d1d1f"/>
+  <rect x="32" y="52" width="728" height="32" rx="12" fill="#2c2c2e"/>
+  <rect x="32" y="72" width="728" height="12" fill="#2c2c2e"/>
+  <g fill="#48484a">
+    <circle cx="52" cy="68" r="4.5"/><circle cx="70" cy="68" r="4.5"/><circle cx="88" cy="68" r="4.5"/>
+  </g>
+  <text x="110" y="72" font-size="12.5" fill="#aeaeb2">ttyS0 &#183; 115200 8N1 &#183; dmesg | grep -E &#39;pci|accel|nvme&#39;</text>
+
+  <!-- highlights sit under the glyphs -->
+    <rect x="409.0" y="127" width="250.8" height="18" rx="3" fill="#aeaeb2" opacity="0.26"/>
+    <rect x="401.8" y="247" width="200.4" height="18" rx="3" fill="#6e6e73" opacity="0.26"/>
+    <rect x="358.6" y="295" width="279.6" height="18" rx="3" fill="#0071e3" opacity="0.26"/>
+    <rect x="337.0" y="319" width="92.4" height="18" rx="3" fill="#0071e3" opacity="0.26"/>
+    <rect x="430.6" y="367" width="70.8" height="18" rx="3" fill="#0071e3" opacity="0.26"/>
+
+  <g font-family="'SF Mono', SFMono-Regular, Menlo, monospace" font-size="12.5">
+    <text x="52" y="116" textLength="403.2" lengthAdjust="spacing" xml:space="preserve" fill="#86868b">[    0.412903] PCI: MMCONFIG for domain 0000 [bus 00-ff]</text>
+    <text x="52" y="140" textLength="604.8" lengthAdjust="spacing" xml:space="preserve" fill="#d2d2d7">[    0.418772] pci_bus 0000:00: root bus resource [mem 0x90000000-0xafffffff window]</text>
+    <text x="52" y="164" textLength="396.0" lengthAdjust="spacing" xml:space="preserve" fill="#86868b">[    0.431065] pci 0000:00:1c.0: PCI bridge to [bus 01]</text>
+    <text x="52" y="188" textLength="482.4" lengthAdjust="spacing" xml:space="preserve" fill="#d2d2d7">[    0.436210] pci 0000:01:00.0: [144d:a80a] type 00 class 0x010802</text>
+    <text x="52" y="212" textLength="590.4" lengthAdjust="spacing" xml:space="preserve" fill="#d2d2d7">[    0.441642] pci 0000:01:00.0: BAR 0: assigned [mem 0x90000000-0x90003fff 64bit]</text>
+    <text x="52" y="236" textLength="417.6" lengthAdjust="spacing" xml:space="preserve" fill="#86868b">[    0.447318] pci 0000:00:1c.4: PCI bridge to [bus 02-04]</text>
+    <text x="52" y="260" textLength="547.2" lengthAdjust="spacing" xml:space="preserve" fill="#d2d2d7">[    0.451900] pci 0000:02:02.0:   bridge window [mem 0xa0100000-0xa01fffff]</text>
+    <text x="52" y="284" textLength="482.4" lengthAdjust="spacing" xml:space="preserve" fill="#86868b">[    0.458233] pci 0000:04:00.0: [1de5:1001] type 00 class 0x120000</text>
+    <text x="52" y="308" textLength="583.2" lengthAdjust="spacing" xml:space="preserve" fill="#d2d2d7">[    0.462117] pci 0000:04:00.0: reg 0x10: [mem 0x00000000-0x0fffffff 64bit pref]</text>
+    <text x="52" y="332" textLength="612.0" lengthAdjust="spacing" xml:space="preserve" fill="#ffffff">[    0.476551] pci 0000:04:00.0: BAR 0: no space for [mem size 0x10000000 64bit pref]</text>
+    <text x="52" y="356" textLength="561.6" lengthAdjust="spacing" xml:space="preserve" fill="#ffffff">[    0.481990] pci 0000:04:00.0: BAR 0: failed to assign [mem size 0x10000000]</text>
+    <text x="52" y="380" textLength="446.4" lengthAdjust="spacing" xml:space="preserve" fill="#ffffff">[    0.488412] accel 0000:04:00.0: probe failed with error -12</text>
+    <text x="52" y="404" textLength="410.4" lengthAdjust="spacing" xml:space="preserve" fill="#d2d2d7">[    2.441642] nvme nvme0: 4/0/0 default/read/poll queues</text>
+    <text x="52" y="428" textLength="208.8" lengthAdjust="spacing" xml:space="preserve" fill="#d2d2d7">[    2.509377] nvme0n1: p1 p2</text>
+    <text x="52" y="460" fill="#aeaeb2">/ # </text>
+  </g>
+
+  <!-- badges pinned to their lines -->
+  <g>
+    <circle cx="722" cy="136" r="9" fill="#0071e3"/><text x="722" y="140" text-anchor="middle" fill="#ffffff" font-size="12.5" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">1</text>
+    <circle cx="722" cy="256" r="9" fill="#0071e3"/><text x="722" y="260" text-anchor="middle" fill="#ffffff" font-size="12.5" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">2</text>
+    <circle cx="722" cy="304" r="9" fill="#0071e3"/><text x="722" y="308" text-anchor="middle" fill="#ffffff" font-size="12.5" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">3</text>
+    <circle cx="722" cy="376" r="9" fill="#0071e3"/><text x="722" y="380" text-anchor="middle" fill="#ffffff" font-size="12.5" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">4</text>
+    <circle cx="722" cy="424" r="9" fill="#0071e3"/><text x="722" y="428" text-anchor="middle" fill="#ffffff" font-size="12.5" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">5</text>
+  </g>
+  <g fill="none" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="4 3">
+    <path d="M736,136 H756 Q766,136 766,126 V98 Q766,88 776,88 H790"/>
+    <path d="M736,256 H756 Q766,256 766,246 V186 Q766,176 776,176 H790"/>
+    <path d="M736,304 H756 Q766,304 766,294 V274 Q766,264 776,264 H790"/>
+    <path d="M736,376 H756 Q766,376 766,366 V362 Q766,352 776,352 H790"/>
+    <path d="M736,424 H756 Q766,424 766,434 V430 Q766,440 776,440 H790"/>
+  </g>
+
+  <!-- annotation column -->
+  <g>
+    <circle cx="800" cy="84" r="9" fill="#0071e3"/><text x="800" y="88" text-anchor="middle" font-size="12.5" font-weight="600" fill="#ffffff">1</text>
+    <text x="820" y="88" font-size="13.5" font-weight="600" fill="#1d1d1f">The only window there is</text>
+    <text x="820" y="108" font-size="12.5" fill="#86868b">Everything on this root bus has to fit in</text>
+    <text x="820" y="125" font-size="12.5" fill="#86868b">0x9000_0000–0xafff_ffff — 512 MiB. Read this</text>
+    <text x="820" y="142" font-size="12.5" fill="#86868b">line before you read any BAR line.</text>
+    <circle cx="800" cy="172" r="9" fill="#0071e3"/><text x="800" y="176" text-anchor="middle" font-size="12.5" font-weight="600" fill="#ffffff">2</text>
+    <text x="820" y="176" font-size="13.5" font-weight="600" fill="#1d1d1f">Firmware already froze the window</text>
+    <text x="820" y="196" font-size="12.5" fill="#86868b">The bridge down to bus 04 got a 1 MiB window</text>
+    <text x="820" y="213" font-size="12.5" fill="#86868b">at boot. Nothing behind that bridge can ever</text>
+    <text x="820" y="230" font-size="12.5" fill="#86868b">be larger, whatever the parent has spare.</text>
+    <circle cx="800" cy="260" r="9" fill="#0071e3"/><text x="800" y="264" text-anchor="middle" font-size="12.5" font-weight="600" fill="#ffffff">3</text>
+    <text x="820" y="264" font-size="13.5" font-weight="600" fill="#1d1d1f">What the device is asking for</text>
+    <text x="820" y="284" font-size="12.5" fill="#86868b">reg 0x10 reads back 0x0fff_ffff, so BAR0 wants</text>
+    <text x="820" y="301" font-size="12.5" fill="#86868b">256 MiB — 256× the window it must live in.</text>
+    <text x="820" y="318" font-size="12.5" fill="#86868b">This line is the request, not the result.</text>
+    <circle cx="800" cy="348" r="9" fill="#0071e3"/><text x="800" y="352" text-anchor="middle" font-size="12.5" font-weight="600" fill="#ffffff">4</text>
+    <text x="820" y="352" font-size="13.5" font-weight="600" fill="#1d1d1f">−12 is −ENOMEM, not a driver bug</text>
+    <text x="820" y="372" font-size="12.5" fill="#86868b">The resource was never assigned, so pci_iomap()</text>
+    <text x="820" y="389" font-size="12.5" fill="#86868b">in probe() had nothing to map. Fixing the driver</text>
+    <text x="820" y="406" font-size="12.5" fill="#86868b">cannot fix this; the window has to grow.</text>
+    <circle cx="800" cy="436" r="9" fill="#0071e3"/><text x="800" y="440" text-anchor="middle" font-size="12.5" font-weight="600" fill="#ffffff">5</text>
+    <text x="820" y="440" font-size="13.5" font-weight="600" fill="#1d1d1f">The healthy one, for contrast</text>
+    <text x="820" y="460" font-size="12.5" fill="#86868b">Four lines later nvme got its BAR and its queues.</text>
+    <text x="820" y="477" font-size="12.5" fill="#86868b">Keep a known-good stretch in the same figure —</text>
+    <text x="820" y="494" font-size="12.5" fill="#86868b">it is what tells you the log itself is fine.</text>
+  </g>
+</svg>

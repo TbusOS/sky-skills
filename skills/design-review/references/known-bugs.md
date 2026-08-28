@@ -1029,3 +1029,82 @@
 5. 如果能在静态扫时检测 → 加一个 check 到 `scripts/verify.py`。
 6. 如果是 style-specific → 也更新对应 skill 的 `references/dos-and-donts.md`。
 7. 至少给一个 fixture demo 或测试证据说明"改完以后这条 bug 跑脚本能被捉到"。
+
+### 1.58 `<g fill="none">` 里的连线被当成实心块 —— `svg-shape-over-text` 拿 bbox 判遮挡
+
+- **Reader sees**：一张干净的图,`visual-audit` 报出十几条
+  `svg-shape-over-text: <path fill=""> drawn after & on top of text "Core 6"`。
+  去图上看,那条 path 是一根 L 形连线,从标签**旁边**绕过去,一个像素都没压到字。
+- **Why**：两处叠加。① 检查读的是 `s.getAttribute('fill')`,
+  而连线的 `fill="none"` 写在父 `<g>` 上,子元素自己没有这个属性 —— 于是被当成"有填充"。
+  ② 判遮挡用的是 `getBoundingClientRect()`,**L 形 path 的包围盒是整个 L 的外接矩形**,
+  中间那一大片空白也算进去了。两件事凑一起,凡是"连线绕过标签"的画法都会被报。
+  2026-08-28 实测:anthropic 图示库 13 条告警里 **12 条是这个**,真阳只有 1 条(且是另一类)。
+- **Defense**：改用 `getComputedStyle(s).fill` —— 它会把父级和 CSS 的继承一起解出来,
+  `fill:none` 一律跳过;顺带跳过 alpha < 0.05 的 `rgba()`。
+  探针 `fixtures/bad-anthropic-shape-over-text.html` **一张图里放两个案例**:
+  一个实心橙圆压在标签上(必须报),一个继承 `fill:none` 的 L 形连线包围盒横跨两个标签(必须不报)。
+  改完全语料复扫:40 → 0,且探针照报。
+- **Fix playbook**：**凡是按"有没有填充"决定要不要检查的规则,一律走 `getComputedStyle`,
+  不要读属性**。SVG 的绘图属性有一半时间写在祖先节点上,读属性等于只看了一半。
+  另一半教训:**bbox 不是形状**。要判"压住没有",描边元素得看描边路径本身,
+  它的包围盒只能用来做粗筛。
+- **Applies to**：`skills/design-review/scripts/visual-audit.mjs` 的 `svg-shape-over-text`。
+  同族:§1.26(这条检查的来历)。
+
+### 1.59 SVG `<text>` 越过 viewBox —— 不报错、不换行,直接被裁掉
+
+- **Reader sees**：同一份 SVG,在 anthropic 图示库里句子是完整的,
+  搬进 glass 就成了 `…staying lo`。没有任何一道闸响。
+- **Why**：`<text>` 超出 viewBox 的行为是**静默裁剪** —— 它不会换行,也不算溢出错误。
+  而三家图示库的图位宽度不一样(1086 / 946 / 1230),
+  同一份 viewBox 被缩放成不同倍率;字体也不同(Poppins → SF Pro → Inter,依次变宽)。
+  于是"在这一家刚好放得下"的 `x` 值,换一家就出界。
+  根因是**用起点定位右侧文字**:`x="956" text-anchor="start"`,
+  右端落在哪里取决于这一行有多宽,而宽度取决于字体。
+- **Defense**：写法规矩(anthropic `diagram-craft.md` §20):
+  贴右边距的文字一律 `text-anchor="end"` 钉在右边距(模板用 `x="1088"`),
+  贴左边距的用 `x="32"` 起,居中的用 `middle` 并检查 `x ± 半宽` 在边距内。
+  锚点写在边距上是唯一不受字体宽度影响的写法。
+- **Fix playbook**：改完搜一遍 `text-anchor` 缺失且 `x > viewBox宽 - 200` 的 `<text>`,
+  逐个换成 `end`。**别靠"看着够宽"** —— 这一条只在最放大的那一家才暴露。
+- **Applies to**：所有手写 SVG 模板。同族:§1.50(同一张图换 gallery 要重算字号)。
+
+### 1.60 高度的天花板归 glass,宽度的地板归 apple —— 一份 SVG 要同时活在三家
+
+- **Reader sees**：viewBox 定 `1240 × 600` 在 anthropic 好好的,
+  进 apple 触 `dense-diagram-labels-small`(字太小),进 glass 触 `diagram-oversized`(图太高)。
+  两头都改一遍,三份文件的坐标从此对不上。
+- **Why**：§1.50 只记了宽度那一半 —— 各家图位宽 1086 / 946 / 1230,
+  **apple 最窄,所以它定字号下限**。漏掉的是另一半:
+  `渲染高 = viewBox 高 × 渲染宽 / viewBox 宽`,**glass 最宽,所以它定高度上限**。
+  一张图的两个约束来自两家不同的 skill,只盯一家必然翻车。
+- **Defense**：跨三家的图型模板统一用 **viewBox `0 0 1120 560`,最小 `font-size="12"`**。
+  实测:缩放 0.970 / 0.845 / 1.098;12 px 渲染成 11.6 / 10.1 / 13.2(下限 9.96 之上);
+  560 高渲染成 543 / 473 / 615(`diagram-oversized` 的 640 之下,glass 只剩 25 px 余量)。
+  写在 anthropic `diagram-craft.md` §19,连推导一起。
+- **Fix playbook**：**高度不够先砍内容,不要动 viewBox** —— 560 加到 620,glass 那份就是 681 px,当场超顶。
+  各家 gallery 版式一改,这三个宽度就要重量,别把它们当常数。
+- **Applies to**：anthropic / apple / glass 三家共用的图型模板。同族:§1.50、§1.52(`data-allow-tall`)。
+
+### 1.61 近黑色被算成"高饱和" —— HSL 的 saturation 在接近黑的地方不稳
+
+- **Reader sees**：一张图里放了一块近黑色的终端卡(`#0E1422`),
+  `visual-audit` 报 `1 full-width saturated band` —— 说这块"满幅高饱和色带抢走了注意力"。
+  可它就是黑的。
+- **Why**：`saturated-band` 的判据是 `s > 0.25 && l < 0.85`。
+  `#0E1422` 的 RGB 是 14/20/34,亮度只有 0.094,而 **HSL 的 S 在 L → 0 时会被放大**:
+  `S = (max-min)/(max+min) = (34-14)/(34+14) = 0.42`。
+  三个通道只差 20/255,算出来却是"高饱和"。
+  同一个文件里的 `diagram-monochrome` 一开始就带了 `l > 0.15` 这个下限,
+  **只有这条检查漏了**——又是"别的检查都做了而这条忘了做"的那一格(同 §1.57)。
+- **Defense**：判据补成 `s > 0.25 && l > 0.15 && l < 0.85`,与 `diagram-monochrome` 取平。
+  探针 `fixtures/bad-anthropic-saturated-band.html` **一张图两个案例**:
+  一条满幅品牌橙带(必报)+ 一块近黑终端卡(必不报);实测报 1 条,正是橙带。
+  全语料 90 页复扫:改前 2 处命中(glass 图示库的近黑终端卡 + ember blog-index 的暖色带),
+  改后 **1 处 —— ember 那条真阳还在,glass 那条假阳消失**。
+- **Fix playbook**：**凡是用 HSL 的 S 做判据,必须同时卡 L 的上下限**。
+  上限防的是极浅色(淡到看不见的 tint),下限防的是近黑 —— 两头 S 都会失真。
+  写新检查时先问"这个指标在极值附近还准吗",别只测中间地带的样本。
+- **Applies to**：`skills/design-review/scripts/visual-audit.mjs` 的 `saturated-band`。
+  同族:§1.30(diagram-monochrome,那条一开始就带了这个下限)。

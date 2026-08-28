@@ -55,7 +55,7 @@ last-verified: 2026-04-19
 §6 先定尺寸再画（**内容多就加宽加高画布，禁止把图缩小去迁就版式——看不清 = 没画**；
 信息密集图必须走 `--hero` 1280px 容器 + `grid-column: 1 / -1`，否则文字被压到 <9px）、
 §0 色彩身份（灰阶为本 + 蓝 `#0071e3` 全图一处——apple 的"少"靠柔影和留白做层次，不是单调）。
-现成图直接抄 `templates/diagrams/`（15 件图型 + device-mock 底版），案例库见
+现成图直接抄 `templates/diagrams/`（24 件图型 + device-mock 底版），案例库见
 `demos/apple-design/diagrams.html`（每张带 Copy SVG）。
 
 ## 发布前检查(MUST — 交给 design-review skill)

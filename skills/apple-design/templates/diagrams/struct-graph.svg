@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Pointer graph of the Linux memory-management structures, drawn so every arrow leaves the field that actually holds the pointer rather than the edge of the box. task_struct lists pid, comm, mm, active_mm and files; an orange dot marks each pointer field and the arrow starts there. The mm dot goes to mm_struct, whose mm_mt field is a maple tree keyed by start address; three slots in that tree carry the ordered virtual ranges and each slot points down at one vm_area_struct. The first VMA is drawn in full, with start, end, flags, page offset, the file it maps, its operations table, and anon_vma which stays NULL until the first copy-on-write store, while its two siblings show only start, end and flags. Two further arrows leave the first VMA: vm_file to a struct file, vm_ops to a vm_operations_struct holding filemap_fault. Field names follow include linux mm_types.h at kernel 6.6; row order is reading order, not struct offset order" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="sgArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="560" fill="#ffffff"/>
+
+  <text x="32" y="34" font-size="12.5" font-weight="600" letter-spacing="1.2" fill="#86868b">STRUCT GRAPH &#183; WHICH FIELD HOLDS WHICH POINTER</text>
+  <g font-size="12.5" fill="#86868b">
+    <circle cx="600" cy="30" r="4" fill="#0071e3"/><text x="612" y="34">pointer field &#183; every arrow starts here, not at the edge of the box</text>
+  </g>
+
+  <rect x="640" y="76" width="448" height="136" rx="10" fill="#f5f5f7" stroke="#d2d2d7" stroke-dasharray="5 4"/>
+  <text x="656" y="100" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">mm-&gt;mm_mt</text>
+  <text x="656" y="118" font-size="12.5" fill="#86868b">maple tree, keyed by vm_start &#183; replaced the VMA list and rbtree in 6.1</text>
+  <g>
+    <rect x="648" y="132" width="136" height="44" rx="6" fill="#ffffff" stroke="#d2d2d7"/>
+    <text x="716" y="150" text-anchor="middle" font-size="12.5" fill="#1d1d1f">slot 0</text>
+    <text x="716" y="167" text-anchor="middle" font-size="12.5" font-family="'SF Mono', SFMono-Regular, Menlo, monospace" fill="#86868b">0x5566_1000+</text>
+    <rect x="796" y="132" width="136" height="44" rx="6" fill="#ffffff" stroke="#d2d2d7"/>
+    <text x="864" y="150" text-anchor="middle" font-size="12.5" fill="#1d1d1f">slot 1</text>
+    <text x="864" y="167" text-anchor="middle" font-size="12.5" font-family="'SF Mono', SFMono-Regular, Menlo, monospace" fill="#86868b">0x5566_9000+</text>
+    <rect x="944" y="132" width="136" height="44" rx="6" fill="#ffffff" stroke="#d2d2d7"/>
+    <text x="1012" y="150" text-anchor="middle" font-size="12.5" fill="#1d1d1f">slot 2</text>
+    <text x="1012" y="167" text-anchor="middle" font-size="12.5" font-family="'SF Mono', SFMono-Regular, Menlo, monospace" fill="#86868b">0x7ffd_0000+</text>
+  </g>
+
+  <g>
+    <rect x="32" y="76" width="228" height="138" rx="8" fill="#ffffff" stroke="#d2d2d7"/>
+    <path d="M32,84 q0,-8 8,-8 H252 q8,0 8,8 V104 H32 Z" fill="#f5f5f7"/>
+    <line x1="32" y1="104" x2="260" y2="104" stroke="#d2d2d7"/>
+    <rect x="32" y="84" width="3" height="20" fill="#0071e3"/>
+    <text x="46" y="95" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">struct task_struct</text>
+    <text x="46" y="119" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">pid</text>
+    <text x="242" y="119" font-size="12.5" text-anchor="end" fill="#86868b">pid_t</text>
+    <rect x="33" y="126" width="226" height="22" fill="#ffffff"/>
+    <text x="46" y="141" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">comm[16]</text>
+    <text x="242" y="141" font-size="12.5" text-anchor="end" fill="#86868b">char</text>
+    <text x="46" y="163" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">mm</text>
+    <text x="242" y="163" font-size="12.5" text-anchor="end" fill="#86868b">mm_struct *</text>
+    <circle cx="260" cy="159" r="4" fill="#0071e3"/>
+    <rect x="33" y="170" width="226" height="22" fill="#ffffff"/>
+    <text x="46" y="185" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">active_mm</text>
+    <text x="242" y="185" font-size="12.5" text-anchor="end" fill="#86868b">mm_struct *</text>
+    <circle cx="260" cy="181" r="4" fill="#0071e3"/>
+    <text x="46" y="207" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">files</text>
+    <text x="242" y="207" font-size="12.5" text-anchor="end" fill="#86868b">files_struct *</text>
+    <circle cx="260" cy="203" r="4" fill="#0071e3"/>
+  </g>
+  <g>
+    <rect x="316" y="76" width="264" height="160" rx="8" fill="#ffffff" stroke="#d2d2d7"/>
+    <path d="M316,84 q0,-8 8,-8 H572 q8,0 8,8 V104 H316 Z" fill="#f5f5f7"/>
+    <line x1="316" y1="104" x2="580" y2="104" stroke="#d2d2d7"/>
+    <rect x="316" y="84" width="3" height="20" fill="#0071e3"/>
+    <text x="330" y="95" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">struct mm_struct</text>
+    <text x="330" y="119" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">mm_users</text>
+    <text x="562" y="119" font-size="12.5" text-anchor="end" fill="#86868b">atomic_t</text>
+    <rect x="317" y="126" width="262" height="22" fill="#ffffff"/>
+    <text x="330" y="141" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">mm_count</text>
+    <text x="562" y="141" font-size="12.5" text-anchor="end" fill="#86868b">atomic_t</text>
+    <text x="330" y="163" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">pgd</text>
+    <text x="562" y="163" font-size="12.5" text-anchor="end" fill="#86868b">&#8594; page tables</text>
+    <circle cx="580" cy="159" r="4" fill="#0071e3"/>
+    <rect x="317" y="170" width="262" height="22" fill="#ffffff"/>
+    <text x="330" y="185" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">mmap_base</text>
+    <text x="562" y="185" font-size="12.5" text-anchor="end" fill="#86868b">unsigned long</text>
+    <text x="330" y="207" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">mm_mt</text>
+    <text x="562" y="207" font-size="12.5" text-anchor="end" fill="#86868b">maple_tree</text>
+    <circle cx="580" cy="203" r="4" fill="#0071e3"/>
+    <rect x="317" y="214" width="262" height="22" fill="#ffffff"/>
+    <text x="330" y="229" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">map_count</text>
+    <text x="562" y="229" font-size="12.5" text-anchor="end" fill="#86868b">int &#183; 42 VMAs</text>
+  </g>
+  <g>
+    <rect x="140" y="290" width="280" height="182" rx="8" fill="#ffffff" stroke="#d2d2d7"/>
+    <path d="M140,298 q0,-8 8,-8 H412 q8,0 8,8 V318 H140 Z" fill="#f5f5f7"/>
+    <line x1="140" y1="318" x2="420" y2="318" stroke="#d2d2d7"/>
+    <rect x="140" y="298" width="3" height="20" fill="#aeaeb2"/>
+    <text x="154" y="309" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">struct vm_area_struct</text>
+    <text x="154" y="333" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">vm_start</text>
+    <text x="402" y="333" font-size="12.5" text-anchor="end" fill="#86868b">0x5566_1000</text>
+    <rect x="141" y="340" width="278" height="22" fill="#ffffff"/>
+    <text x="154" y="355" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">vm_end</text>
+    <text x="402" y="355" font-size="12.5" text-anchor="end" fill="#86868b">0x5566_9000</text>
+    <text x="154" y="377" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">vm_flags</text>
+    <text x="402" y="377" font-size="12.5" text-anchor="end" fill="#86868b">VM_READ|VM_EXEC</text>
+    <rect x="141" y="384" width="278" height="22" fill="#ffffff"/>
+    <text x="154" y="399" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">vm_pgoff</text>
+    <text x="402" y="399" font-size="12.5" text-anchor="end" fill="#86868b">0</text>
+    <text x="154" y="421" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">vm_file</text>
+    <text x="402" y="421" font-size="12.5" text-anchor="end" fill="#86868b">file *</text>
+    <circle cx="420" cy="417" r="4" fill="#0071e3"/>
+    <rect x="141" y="428" width="278" height="22" fill="#ffffff"/>
+    <text x="154" y="443" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">vm_ops</text>
+    <text x="402" y="443" font-size="12.5" text-anchor="end" fill="#86868b">vm_operations_struct *</text>
+    <circle cx="420" cy="439" r="4" fill="#0071e3"/>
+    <text x="154" y="465" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">anon_vma</text>
+    <text x="402" y="465" font-size="12.5" text-anchor="end" fill="#86868b">NULL until first COW</text>
+  </g>
+  <g>
+    <rect x="460" y="290" width="240" height="94" rx="8" fill="#ffffff" stroke="#d2d2d7"/>
+    <path d="M460,298 q0,-8 8,-8 H692 q8,0 8,8 V318 H460 Z" fill="#f5f5f7"/>
+    <line x1="460" y1="318" x2="700" y2="318" stroke="#d2d2d7"/>
+    <rect x="460" y="298" width="3" height="20" fill="#aeaeb2"/>
+    <text x="474" y="309" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">struct vm_area_struct</text>
+    <text x="474" y="333" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">vm_start</text>
+    <text x="682" y="333" font-size="12.5" text-anchor="end" fill="#86868b">0x5566_9000</text>
+    <rect x="461" y="340" width="238" height="22" fill="#ffffff"/>
+    <text x="474" y="355" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">vm_end</text>
+    <text x="682" y="355" font-size="12.5" text-anchor="end" fill="#86868b">0x5566_b000</text>
+    <text x="474" y="377" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">vm_flags</text>
+    <text x="682" y="377" font-size="12.5" text-anchor="end" fill="#86868b">VM_READ|VM_WRITE</text>
+  </g>
+  <g>
+    <rect x="740" y="290" width="240" height="94" rx="8" fill="#ffffff" stroke="#d2d2d7"/>
+    <path d="M740,298 q0,-8 8,-8 H972 q8,0 8,8 V318 H740 Z" fill="#f5f5f7"/>
+    <line x1="740" y1="318" x2="980" y2="318" stroke="#d2d2d7"/>
+    <rect x="740" y="298" width="3" height="20" fill="#aeaeb2"/>
+    <text x="754" y="309" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">struct vm_area_struct</text>
+    <text x="754" y="333" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">vm_start</text>
+    <text x="962" y="333" font-size="12.5" text-anchor="end" fill="#86868b">0x7ffd_0000</text>
+    <rect x="741" y="340" width="238" height="22" fill="#ffffff"/>
+    <text x="754" y="355" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">vm_end</text>
+    <text x="962" y="355" font-size="12.5" text-anchor="end" fill="#86868b">0x7ffd_2000</text>
+    <text x="754" y="377" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">vm_flags</text>
+    <text x="962" y="377" font-size="12.5" text-anchor="end" fill="#86868b">VM_GROWSDOWN</text>
+  </g>
+  <g>
+    <rect x="460" y="408" width="240" height="94" rx="8" fill="#ffffff" stroke="#d2d2d7"/>
+    <path d="M460,416 q0,-8 8,-8 H692 q8,0 8,8 V436 H460 Z" fill="#f5f5f7"/>
+    <line x1="460" y1="436" x2="700" y2="436" stroke="#d2d2d7"/>
+    <rect x="460" y="416" width="3" height="20" fill="#6e6e73"/>
+    <text x="474" y="427" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">struct file</text>
+    <text x="474" y="451" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">f_inode</text>
+    <text x="682" y="451" font-size="12.5" text-anchor="end" fill="#86868b">inode *</text>
+    <rect x="461" y="458" width="238" height="22" fill="#ffffff"/>
+    <text x="474" y="473" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">f_mapping</text>
+    <text x="682" y="473" font-size="12.5" text-anchor="end" fill="#86868b">address_space *</text>
+    <text x="474" y="495" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">f_op</text>
+    <text x="682" y="495" font-size="12.5" text-anchor="end" fill="#86868b">file_operations *</text>
+  </g>
+  <g>
+    <rect x="740" y="408" width="240" height="94" rx="8" fill="#ffffff" stroke="#d2d2d7"/>
+    <path d="M740,416 q0,-8 8,-8 H972 q8,0 8,8 V436 H740 Z" fill="#f5f5f7"/>
+    <line x1="740" y1="436" x2="980" y2="436" stroke="#d2d2d7"/>
+    <rect x="740" y="416" width="3" height="20" fill="#6e6e73"/>
+    <text x="754" y="427" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">struct vm_operations_struct</text>
+    <text x="754" y="451" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">.fault</text>
+    <text x="962" y="451" font-size="12.5" text-anchor="end" fill="#86868b">filemap_fault</text>
+    <rect x="741" y="458" width="238" height="22" fill="#ffffff"/>
+    <text x="754" y="473" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">.map_pages</text>
+    <text x="962" y="473" font-size="12.5" text-anchor="end" fill="#86868b">filemap_map_pages</text>
+    <text x="754" y="495" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">.open / .close</text>
+    <text x="962" y="495" font-size="12.5" text-anchor="end" fill="#86868b">NULL</text>
+  </g>
+
+  <g fill="none" stroke="#0071e3" stroke-width="1.6">
+    <path d="M260,159 H288 V90 H316" marker-end="url(#sgArrO)"/>
+    <path d="M580,203 H610 V154 H640" marker-end="url(#sgArrO)"/>
+    <path d="M716,176 V246 H280 V290" marker-end="url(#sgArrO)"/>
+    <path d="M864,176 V262 H580 V290" marker-end="url(#sgArrO)"/>
+    <path d="M1012,176 V278 H860 V290" marker-end="url(#sgArrO)"/>
+    <path d="M420,417 H440 V422 H460" marker-end="url(#sgArrO)"/>
+    <path d="M420,439 H436 V396 H720 V422 H740" marker-end="url(#sgArrO)"/>
+  </g>
+
+  <text x="32" y="528" font-size="12.5" fill="#86868b">field names from include/linux/mm_types.h and sched.h at v6.6</text>
+  <text x="1088" y="528" text-anchor="end" font-size="12.5" font-style="italic" fill="#86868b">rows are in reading order, not struct offset order</text>
+</svg>

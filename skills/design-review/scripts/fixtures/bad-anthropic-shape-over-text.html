@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BAD anthropic page — a filled shape lands on top of SVG text</title>
+<link rel="stylesheet" href="../../../anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../anthropic-design/assets/anthropic.css">
+</head>
+<body>
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="#"><strong>Fixture</strong></a>
+  <a href="#" class="anth-button">Get started</a>
+</div></nav>
+<section class="anth-section">
+  <div class="anth-container">
+    <h1>Covered label</h1>
+    <p>Two probes in one figure. The opaque orange badge is drawn after the
+    label and lands on top of it — that is the real defect this check exists
+    to catch. The L-shaped connector below inherits <code>fill:none</code>
+    from its group: its bounding box spans the second label, but a stroke with
+    no fill cannot cover anything, so it must stay silent.</p>
+    <figure>
+      <svg viewBox="0 0 900 300" width="100%" role="img" aria-label="Probe figure: one opaque badge over a label, one stroke-only connector routing past another label">
+        <text x="40" y="40" font-family="Poppins" font-size="12" fill="#8c8a7d">PROBE</text>
+
+        <!-- must fire: opaque disc drawn after the text, sitting on it -->
+        <rect x="40" y="70" width="260" height="70" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+        <text x="64" y="112" font-family="Poppins" font-size="14" fill="#141413">scheduler queue</text>
+        <circle cx="110" cy="107" r="26" fill="#d97757"/>
+
+        <!-- must NOT fire: the connector's bbox spans this label, but it has no fill -->
+        <rect x="440" y="70" width="260" height="70" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+        <text x="464" y="112" font-family="Poppins" font-size="14" fill="#141413">worker pool</text>
+        <rect x="440" y="200" width="260" height="60" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="464" y="236" font-family="Poppins" font-size="14" fill="#2f5c8a">result sink</text>
+        <g fill="none" stroke="#788c5d" stroke-width="1.8">
+          <path d="M420,105 H760 V230 H700"/>
+        </g>
+      </svg>
+    </figure>
+  </div>
+</section>
+</body>
+</html>

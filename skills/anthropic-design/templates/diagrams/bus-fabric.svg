@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Bus fabric of one SoC drawn the old way, as two horizontal rails with everything hanging off them. Three masters sit above the upper rail — a four-core CPU cluster, a sixteen-channel DMA engine and a GPU — and four slaves hang below it: SRAM, an AXI to APB bridge, high-speed USB and Ethernet, and the DDR4 controller. The rail is AXI4, one hundred and twenty-eight bits wide, and an arbiter block sits astride it. Each drop carries a slash with the width of that connection in bits, and the channel names it actually uses. The bridge drops to a second, narrower rail: APB at thirty-two bits, carrying UART, I2C, SPI, GPIO and a watchdog. One read is traced in orange over the top: badge one, the CPU drives its read-address channel onto the rail; badge two, the arbiter grants it the rail for that beat; badge three, the request reaches the DDR controller; badge four, read data returns along the same rail on the read channel, drawn dashed because it is the return leg" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="bfDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <marker id="bfArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#bfDots)"/>
+
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">BUS FABRIC &#183; TWO RAILS, ONE TRACED READ</text>
+  <g font-size="12" fill="#6b6a5f">
+    <rect x="596" y="24" width="16" height="12" rx="3" fill="#e2ecf5" stroke="#c4d5e6"/><text x="620" y="34">master</text>
+    <rect x="686" y="24" width="16" height="12" rx="3" fill="#eef1e7" stroke="#b9c4a4"/><text x="710" y="34">slave</text>
+    <rect x="768" y="24" width="16" height="12" rx="3" fill="#f0e4d8" stroke="#d9bf94"/><text x="792" y="34">APB peripheral</text>
+    <line x1="904" y1="30" x2="928" y2="30" stroke="#d97757" stroke-width="2.2"/><text x="936" y="34">this read</text>
+  </g>
+
+  <!-- masters -->
+  <g>
+    <rect x="100" y="76" width="200" height="70" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
+    <text x="200" y="109" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">CPU cluster</text>
+    <text x="200" y="127" text-anchor="middle" font-size="12" fill="#6b6a5f">4 &#215; A78 &#183; AXI master 0</text>
+    <rect x="420" y="76" width="200" height="70" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
+    <text x="520" y="109" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">DMA engine</text>
+    <text x="520" y="127" text-anchor="middle" font-size="12" fill="#6b6a5f">16 ch &#183; AXI master 1</text>
+    <rect x="740" y="76" width="200" height="70" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
+    <text x="840" y="109" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">GPU / VPU</text>
+    <text x="840" y="127" text-anchor="middle" font-size="12" fill="#6b6a5f">AXI master 2</text>
+  </g>
+
+  <!-- traced read, drawn under the rails and the arbiter -->
+  <g fill="none" stroke="#d97757" stroke-width="2.2">
+    <line x1="200" y1="146" x2="200" y2="182"/>
+    <line x1="200" y1="182" x2="980" y2="182"/>
+    <line x1="980" y1="182" x2="980" y2="254" marker-end="url(#bfArrO)"/>
+  </g>
+  <g fill="none" stroke="#d97757" stroke-width="2.2" stroke-dasharray="6 4">
+    <line x1="968" y1="254" x2="968" y2="220"/>
+    <line x1="968" y1="220" x2="212" y2="220"/>
+    <line x1="212" y1="220" x2="212" y2="146" marker-end="url(#bfArrO)"/>
+  </g>
+
+  <!-- rails -->
+  <rect x="64" y="198" width="992" height="5" rx="2.5" fill="#141413"/>
+  <rect x="180" y="398" width="720" height="6" rx="3" fill="#8c8a7d"/>
+  <text x="1056" y="172" text-anchor="end" font-size="12" font-weight="600" letter-spacing="1.2" fill="#141413">AXI4 &#183; 128-bit &#183; AW W B AR R</text>
+  <text x="916" y="406" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">APB &#183; 32-bit</text>
+
+  <!-- drops -->
+  <g stroke="#141413" stroke-width="1.6">
+    <line x1="200" y1="146" x2="200" y2="200"/>
+    <line x1="520" y1="146" x2="520" y2="200"/>
+    <line x1="840" y1="146" x2="840" y2="200"/>
+    <line x1="160" y1="200" x2="160" y2="254"/>
+    <line x1="440" y1="200" x2="440" y2="254"/>
+    <line x1="720" y1="200" x2="720" y2="254"/>
+    <line x1="980" y1="200" x2="980" y2="254"/>
+  </g>
+  <g stroke="#8c8a7d" stroke-width="1.6">
+    <line x1="240" y1="400" x2="240" y2="430"/>
+    <line x1="400" y1="400" x2="400" y2="430"/>
+    <line x1="560" y1="400" x2="560" y2="430"/>
+    <line x1="720" y1="400" x2="720" y2="430"/>
+    <line x1="880" y1="400" x2="880" y2="430"/>
+  </g>
+  <line x1="440" y1="324" x2="440" y2="398" stroke="#8c8a7d" stroke-width="1.6"/>
+
+  <!-- bus widths -->
+    <line x1="194" y1="178" x2="206" y2="166" stroke="#141413" stroke-width="1.2"/>
+    <text x="210" y="174" font-size="12" fill="#6b6a5f">128</text>
+    <line x1="434" y1="366" x2="446" y2="354" stroke="#141413" stroke-width="1.2"/>
+    <text x="450" y="362" font-size="12" fill="#6b6a5f">32</text>
+    <line x1="234" y1="421" x2="246" y2="409" stroke="#141413" stroke-width="1.2"/>
+    <text x="250" y="417" font-size="12" fill="#6b6a5f">32</text>
+
+  <!-- arbiter astride the rail -->
+  <rect x="296" y="188" width="104" height="24" rx="8" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="348" y="204" text-anchor="middle" font-size="12" font-weight="600" fill="#141413">arbiter</text>
+
+  <!-- slaves + apb -->
+  <g>
+    <rect x="70" y="254" width="180" height="70" rx="10" fill="#eef1e7" stroke="#b9c4a4"/>
+    <text x="160" y="287" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">SRAM</text>
+    <text x="160" y="305" text-anchor="middle" font-size="12" fill="#6b6a5f">256 KiB &#183; 0x0000_0000</text>
+    <rect x="350" y="254" width="180" height="70" rx="10" fill="#eef1e7" stroke="#b9c4a4"/>
+    <text x="440" y="287" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">AXI &#8594; APB bridge</text>
+    <text x="440" y="305" text-anchor="middle" font-size="12" fill="#6b6a5f">protocol converter</text>
+    <rect x="630" y="254" width="180" height="70" rx="10" fill="#eef1e7" stroke="#b9c4a4"/>
+    <text x="720" y="287" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">USB3 &#183; GbE</text>
+    <text x="720" y="305" text-anchor="middle" font-size="12" fill="#6b6a5f">high-speed IP</text>
+    <rect x="890" y="254" width="180" height="70" rx="10" fill="#eef1e7" stroke="#b9c4a4"/>
+    <text x="980" y="287" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">DDR4 controller</text>
+    <text x="980" y="305" text-anchor="middle" font-size="12" fill="#6b6a5f">0x8000_0000 &#183; 4 GiB</text>
+  </g>
+  <g>
+    <rect x="175" y="430" width="130" height="56" rx="10" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="240" y="463" text-anchor="middle" font-size="13" font-weight="600" fill="#8a6a2f">UART0</text>
+    <rect x="335" y="430" width="130" height="56" rx="10" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="400" y="463" text-anchor="middle" font-size="13" font-weight="600" fill="#8a6a2f">I2C0</text>
+    <rect x="495" y="430" width="130" height="56" rx="10" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="560" y="463" text-anchor="middle" font-size="13" font-weight="600" fill="#8a6a2f">SPI0</text>
+    <rect x="655" y="430" width="130" height="56" rx="10" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="720" y="463" text-anchor="middle" font-size="13" font-weight="600" fill="#8a6a2f">GPIO</text>
+    <rect x="815" y="430" width="130" height="56" rx="10" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="880" y="463" text-anchor="middle" font-size="13" font-weight="600" fill="#8a6a2f">WDT</text>
+  </g>
+
+  <!-- badges -->
+  <g font-size="12" font-weight="600" text-anchor="middle">
+    <circle cx="176" cy="168" r="9" fill="#d97757"/><text x="176" y="172" fill="#ffffff">1</text>
+    <circle cx="348" cy="166" r="9" fill="#d97757"/><text x="348" y="170" fill="#ffffff">2</text>
+    <circle cx="1004" cy="232" r="9" fill="#d97757"/><text x="1004" y="236" fill="#ffffff">3</text>
+    <circle cx="700" cy="234" r="9" fill="#d97757"/><text x="700" y="238" fill="#ffffff">4</text>
+  </g>
+
+  <text x="32" y="524" font-size="12" fill="#6b6a5f">every drop carries its own width; the rail carries the name of the channels riding it</text>
+  <text x="1088" y="524" text-anchor="end" font-size="12" font-style="italic" fill="#8c8a7d">rails are a drawing, not a topology claim &#183; a real AXI NoC is switched</text>
+</svg>

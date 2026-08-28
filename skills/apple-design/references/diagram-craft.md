@@ -6,7 +6,7 @@
 
 > 适用：架构图 / 流程图 / 层级图 / 时间线 / 时序图等一切工程类图示。
 > 与 anthropic 的多色语义路线不同，**apple 图的美感来自"少"**：无彩色为主、蓝色一处、柔影分层、留白比信息多。
-> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence / deployment / state-machine + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline + 互连拓扑 interconnect-map + 协议分层 protocol-stack + 地址映射 address-map,共 **17 件**,全部按本文标准实现；另有 §8 配套的 device-mock.svg 设备线稿底版与 §15 的 glyphs.svg 构件片段集,均不计入图型谱系）。案例库：`demos/apple-design/diagrams.html`（18 张图,每张带 Copy SVG）。
+> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence / deployment / state-machine + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline + 互连拓扑 interconnect-map + 协议分层 protocol-stack + 地址映射 address-map + 芯片与代码七件 system-topology / die-floorplan / datapath / packet-encap / terminal-annotated / struct-graph / bus-fabric,共 **24 件**,全部按本文标准实现；另有 §8 配套的 device-mock.svg 设备线稿底版与 §15 的 glyphs.svg 构件片段集,均不计入图型谱系）。案例库：`demos/apple-design/diagrams.html`（25 张图,每张带 Copy SVG）。
 
 ## 0. 第一原则：美靠"少"
 
@@ -122,7 +122,7 @@ apple 风时序图 pattern（anthropic 有专文 `sequence-diagrams.md`，apple 
 
 ## 12. 内核 / 嵌入式工程图谱系（apple 语法）
 
-> 10 个图型与 anthropic §15 同谱系（function-flowchart / algorithm / register-bitfield / soc-block /
+> 17 个图型与 anthropic §15 同谱系(后七件的 apple 译法见 §16)（function-flowchart / algorithm / register-bitfield / soc-block /
 > hw-timing-waveform / build-pipeline / sched-timeline / interconnect-map / protocol-stack / address-map），模板在 `templates/diagrams/` 同名 .svg。
 > 模板是起点不是规格——结构、密度、布局按实际内容重设计,谱系之外的内容自创图型即可。
 > 结构性工艺（布局、lane、车道、交替、双箭头标注）参考 anthropic §15;本节只写 apple 的**翻译规则**。
@@ -230,3 +230,48 @@ Load/Store 线必须落到某一段)见 anthropic `diagram-craft.md` §15.8 —�
 ⚠ **apple 的 gallery 图位只有 946px 宽**(known-bugs §1.50 实测),viewBox 1240 时缩放 **0.763** ——
 **最小源字号必须 ≥ 12.5**(渲染 9.54px)。anthropic 的同名模板用 11.5 源字号,
 原样搬过来渲染 8.8px,当场触 `dense-diagram-labels-small`。**跨 skill 移植图先按 apple 这一档算。**
+
+---
+
+## 16. 芯片与代码七件的 apple 译法
+
+模板：`templates/diagrams/` 的 `system-topology` / `die-floorplan` / `datapath` /
+`packet-encap` / `terminal-annotated` / `struct-graph` / `bus-fabric`。
+**图型本身的工艺**（为什么这么画、每一件的硬规矩）写在 anthropic-design 的
+`diagram-craft.md` §15.11–15.17，不在这里重复；本节只写 apple 皮下面不一样的地方。
+
+### 16.1 一个强调色的分配问题
+
+anthropic 那七张各用了四种语义色（内存绿 / 计算蓝 / 窗口琥珀 / 焦点橙）。
+apple 只有一个 `#0071e3`，其余全是灰阶 —— 所以**必须先决定这张图的蓝给谁**：
+
+| 图 | 蓝给谁 | 为什么 |
+|---|---|---|
+| system-topology | **地址条上的 MMIO 窗口** | 整张图就是为了让窗口和设备卡对上;此图没有第二条被追踪的路径来抢蓝 |
+| packet-encap | **每层加进来的那几个字段** | 图的结论就是"外面长出来的是什么" |
+| die-floorplan | **被追踪的那一次请求** | 互连轨降成 `#d2d2d7` 灰;轨和请求都用蓝,请求就不再是请求 |
+| datapath / bus-fabric / terminal-annotated / struct-graph | 被追踪的那条路 / 编号徽章 | 同上 |
+
+**没有它会怎样**：把结构线和被追踪的路都涂成品牌蓝，读者分不出「一直在那儿的」
+和「这一次走过的」—— 这正是 §14 两类箭头要解决的事，在单色系统里靠色相解决不了，
+**只能靠"谁拿到蓝"**。
+
+### 16.2 灰阶也要分层
+
+去掉色相之后，类别只剩明度可用。固定三档：
+`#ffffff` 卡面 · `#f5f5f7` 次级块 · `#d2d2d7` 边框 · `#aeaeb2` 结构线 · `#86868b` 说明文字。
+**不要在这五档之外再造灰** —— 六档以上人眼排不出顺序，图就成了噪点。
+
+### 16.3 字号台阶
+
+apple 的 gallery 图位是三家里最窄的（946 px，known-bugs §1.50）。
+七件的 viewBox 是 `1120 × 560`，缩放 0.845，所以**最小标签写 12.5，不写 12**
+（12 会渲染成 10.14，勉强过；12.5 是 10.56，留了余量，且本来就是 apple 的字号）。
+标题行 13.5。
+
+### 16.4 终端卡在 apple 里的处理
+
+`terminal-annotated` 的深色卡片**不跟随主题**：终端就是深色的，
+卡面用 `#1d1d1f`、标题条 `#2c2c2e`、正文 `#d2d2d7`、次要行 `#86868b`。
+高亮块用 `#0071e3` 加 0.26 透明度 —— 这是 apple 里唯一允许"色块盖字"的地方，
+因为它盖的是等宽 log，不是版式文字。

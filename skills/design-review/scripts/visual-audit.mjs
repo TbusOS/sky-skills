@@ -775,7 +775,13 @@ const auditFn = (arg) => {
       const op = (parseFloat(cs.opacity) || 1) * (parseFloat(cs.fillOpacity) || 1);
       if (op < 0.5) return;
       const { s, l } = toHsl(fill);
-      if (!(s > 0.25 && l < 0.85)) return; // hue-saturated only
+      // hue-saturated only. The l > 0.15 floor matters as much as the
+      // s > 0.25 bar: HSL saturation is unstable near black, so a near-black
+      // console card like #0E1422 computes s=0.42 and reads as "a saturated
+      // band" when what it actually is, is black with a hint of navy. The
+      // sibling diagram-monochrome check has carried this same floor from the
+      // start (l > 0.15 && l < 0.85); this one had only the ceiling.
+      if (!(s > 0.25 && l > 0.15 && l < 0.85)) return;
       let box;
       try { box = el.getBBox(); } catch { return; }
       if (box.width < 0.6 * vbW) return;          // not a full-width band
@@ -1338,8 +1344,17 @@ const auditFn = (arg) => {
           const s = all[i];
           if (!SHAPE_TAGS.has(s.tagName)) continue;
           if (allowsOverlap(s)) continue;
-          const fill = (s.getAttribute('fill') || '').trim();
+          // Fill can come from the attribute, from an ancestor <g fill="none">,
+          // or from CSS. A stroke-only routing path inherits fill:none and
+          // cannot cover anything — but its *bounding box* spans the whole L,
+          // so reading the attribute alone reports every connector that routes
+          // past a label. 2026-08-28: 12 of 13 warnings on the anthropic
+          // gallery were exactly that, zero of them real.
+          const cs2 = getComputedStyle(s);
+          const fill = (cs2.fill || s.getAttribute('fill') || '').trim();
           if (fill === 'none' || fill === 'transparent') continue;
+          const fa = /^rgba\([^)]*?,\s*([\d.]+)\s*\)$/.exec(fill);
+          if (fa && parseFloat(fa[1]) < 0.05) continue;
           const sr = s.getBoundingClientRect();
           const ox = Math.max(0, Math.min(tr.right, sr.right) - Math.max(tr.left, sr.left));
           const oy = Math.max(0, Math.min(tr.bottom, sr.bottom) - Math.max(tr.top, sr.top));

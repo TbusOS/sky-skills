@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="One PCIe transaction packet built layer by layer, drawn on a byte ruler at eight pixels per byte so each bar's width is literally its byte count. Row one, the transaction layer emits a sixteen byte TLP header followed by a sixty-four byte payload, eighty bytes. Row two, the data link layer prepends a two byte sequence number and appends a four byte link CRC, so the bar grows outward at both ends to eighty-six bytes while the original eighty stay put between the two dashed guidelines. Row three, the physical layer frames it with a one byte start symbol and a one byte end symbol, eighty-eight bytes. Row four, those bytes are striped round-robin across four lanes: byte zero and four and eight go to lane zero, byte one and five and nine to lane one, and so on, each lane feeding its own serialiser. The two dashed guidelines are the point of the figure: everything added by a lower layer appears outside them, never inside" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">
+  <style>
+    /* Standalone preview values = glass dark theme. When pasted into a glass
+       page, DELETE this style block and the canvas rect below — glass.css
+       provides these classes with theme-switching tokens. */
+    .glass-svg-ink   { fill: #F4F7FF; }
+    .glass-svg-ink-2 { fill: rgba(231,238,255,0.74); }
+    .glass-svg-ink-3 { fill: rgba(231,238,255,0.55); }
+    .glass-svg-node  { fill: rgba(255,255,255,0.08); stroke: rgba(255,255,255,0.17); }
+    .glass-svg-node--cyan   { fill: rgba(34,211,238,0.15); stroke: rgba(34,211,238,0.55); }
+    .glass-svg-node--indigo { fill: rgba(129,140,248,0.16); stroke: rgba(129,140,248,0.55); }
+    .glass-svg-node--warn   { fill: rgba(251,191,36,0.14); stroke: rgba(251,191,36,0.55); }
+    .glass-svg-line  { stroke: rgba(255,255,255,0.10); }
+    .glass-svg-ink-stroke { stroke: rgba(244,247,255,0.85); fill: none; }
+    .glass-svg-accent      { fill: #22D3EE; }
+    .glass-svg-accent-ink  { fill: #22D3EE; }
+    .glass-svg-accent-stroke { stroke: #22D3EE; fill: none; }
+    .glass-svg-ref-ink { fill: #A5B4FC; }
+    .glass-svg-ok   { fill: #34D399; }
+    .glass-svg-warn { fill: #FBBF24; }
+  </style>
+  <defs>
+    <marker id="peArrI" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="glass-svg-ink" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+    </marker>
+    <marker id="peArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="glass-svg-accent" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="560" rx="16" fill="#0B1020"/>
+
+  <text class="glass-svg-ink-2" x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2">PACKET ENCAPSULATION &#183; ONE BYTE RULER, THREE LAYERS</text>
+  <text class="glass-svg-ink-2" x="1088" y="34" text-anchor="end" font-size="12">8 px = 1 byte &#183; bars are to scale with each other</text>
+
+  <!-- the two guidelines: the original 80 bytes never move -->
+  <g class="glass-svg-line" stroke-width="1.2" stroke-dasharray="4 3">
+    <line x1="240" y1="82" x2="240" y2="326"/>
+    <line x1="880" y1="82" x2="880" y2="326"/>
+  </g>
+
+  <!-- ===== 1 · transaction layer ===== -->
+  <text class="glass-svg-ink" x="32" y="112" font-size="13" font-weight="600">Transaction</text>
+  <text class="glass-svg-ink-2" x="32" y="130" font-size="12">layer</text>
+  <rect class="glass-svg-node--indigo" x="240" y="96" width="128" height="34"/>
+  <rect class="glass-svg-node" x="368" y="96" width="512" height="34"/>
+  <text class="glass-svg-ref-ink" x="304" y="118" text-anchor="middle" font-size="12">TLP header 16 B</text>
+  <text class="glass-svg-ink-2" x="624" y="118" text-anchor="middle" font-size="12">data payload 64 B</text>
+  <g class="glass-svg-line" stroke-width="1">
+    <line x1="240" y1="130" x2="240" y2="123"/><line x1="304" y1="130" x2="304" y2="123"/><line x1="368" y1="130" x2="368" y2="123"/><line x1="432" y1="130" x2="432" y2="123"/><line x1="496" y1="130" x2="496" y2="123"/><line x1="560" y1="130" x2="560" y2="123"/><line x1="624" y1="130" x2="624" y2="123"/><line x1="688" y1="130" x2="688" y2="123"/><line x1="752" y1="130" x2="752" y2="123"/><line x1="816" y1="130" x2="816" y2="123"/><line x1="880" y1="130" x2="880" y2="123"/>
+  </g>
+  <text class="glass-svg-ink-3" x="1088" y="152" text-anchor="end" font-size="12" font-style="italic">80 B &#183; what the requester actually meant to send</text>
+
+  <!-- ===== 2 · data link layer ===== -->
+  <text class="glass-svg-ink" x="32" y="202" font-size="13" font-weight="600">Data link</text>
+  <text class="glass-svg-ink-2" x="32" y="220" font-size="12">layer</text>
+  <rect class="glass-svg-node--warn" x="224" y="186" width="16" height="34"/>
+  <rect class="glass-svg-node" x="240" y="186" width="640" height="34"/>
+  <rect class="glass-svg-node--warn" x="880" y="186" width="32" height="34"/>
+  <text class="glass-svg-ink-2" x="560" y="208" text-anchor="middle" font-size="12">the 80 B above, untouched</text>
+  <g class="glass-svg-line" stroke-width="1">
+    <line x1="224" y1="220" x2="224" y2="213"/><line x1="288" y1="220" x2="288" y2="213"/><line x1="352" y1="220" x2="352" y2="213"/><line x1="416" y1="220" x2="416" y2="213"/><line x1="480" y1="220" x2="480" y2="213"/><line x1="544" y1="220" x2="544" y2="213"/><line x1="608" y1="220" x2="608" y2="213"/><line x1="672" y1="220" x2="672" y2="213"/><line x1="736" y1="220" x2="736" y2="213"/><line x1="800" y1="220" x2="800" y2="213"/><line x1="864" y1="220" x2="864" y2="213"/>
+  </g>
+  <g class="glass-svg-line" fill="none"  stroke-width="1.2">
+    <path d="M232,186 V174 H180"/>
+    <path d="M896,186 V174 H948"/>
+  </g>
+  <text class="glass-svg-warn" x="176" y="178" text-anchor="end" font-size="12">+ SeqNum 2 B</text>
+  <text class="glass-svg-warn" x="952" y="178" font-size="12">+ LCRC 4 B</text>
+  <text class="glass-svg-ink-3" x="1088" y="242" text-anchor="end" font-size="12" font-style="italic">86 B &#183; replay needs the number, the receiver needs the CRC</text>
+
+  <!-- ===== 3 · physical layer ===== -->
+  <text class="glass-svg-ink" x="32" y="292" font-size="13" font-weight="600">Physical</text>
+  <text class="glass-svg-ink-2" x="32" y="310" font-size="12">layer &#183; framing</text>
+  <rect class="glass-svg-node--cyan" x="216" y="276" width="8" height="34"/>
+  <rect class="glass-svg-node" x="224" y="276" width="688" height="34"/>
+  <rect class="glass-svg-node--cyan" x="912" y="276" width="8" height="34"/>
+  <text class="glass-svg-ink-2" x="568" y="298" text-anchor="middle" font-size="12">the 86 B above, untouched</text>
+  <g class="glass-svg-line" stroke-width="1">
+    <line x1="216" y1="310" x2="216" y2="303"/><line x1="280" y1="310" x2="280" y2="303"/><line x1="344" y1="310" x2="344" y2="303"/><line x1="408" y1="310" x2="408" y2="303"/><line x1="472" y1="310" x2="472" y2="303"/><line x1="536" y1="310" x2="536" y2="303"/><line x1="600" y1="310" x2="600" y2="303"/><line x1="664" y1="310" x2="664" y2="303"/><line x1="728" y1="310" x2="728" y2="303"/><line x1="792" y1="310" x2="792" y2="303"/><line x1="856" y1="310" x2="856" y2="303"/><line x1="920" y1="310" x2="920" y2="303"/>
+  </g>
+  <g class="glass-svg-accent-stroke" fill="none"  stroke-width="1.2">
+    <path d="M220,276 V264 H172"/>
+    <path d="M916,276 V264 H964"/>
+  </g>
+  <text class="glass-svg-accent-ink" x="168" y="268" text-anchor="end" font-size="12">+ STP 1 B</text>
+  <text class="glass-svg-accent-ink" x="968" y="268" font-size="12">+ END 1 B</text>
+  <text class="glass-svg-ink-3" x="1088" y="332" text-anchor="end" font-size="12" font-style="italic">88 B &#183; now it has a beginning and an end on the wire</text>
+
+  <!-- ===== 4 · striping ===== -->
+  <path class="glass-svg-accent-stroke" d="M568,310 V352" fill="none"  stroke-width="2" marker-end="url(#peArrO)"/>
+  <text class="glass-svg-ink-2" x="216" y="356" font-size="12" font-weight="600" letter-spacing="1.2">BYTE STRIPING &#183; x4 LINK</text>
+  <text class="glass-svg-ink" x="345" y="372" text-anchor="middle" font-size="12" font-weight="600">Lane 0</text>
+  <rect class="glass-svg-node--indigo" x="300" y="380" width="90" height="26" rx="4"/>
+  <text class="glass-svg-ref-ink" x="345" y="397" text-anchor="middle" font-size="12">byte 0</text>
+  <rect class="glass-svg-node--indigo" x="300" y="412" width="90" height="26" rx="4"/>
+  <text class="glass-svg-ref-ink" x="345" y="429" text-anchor="middle" font-size="12">byte 4</text>
+  <rect class="glass-svg-node--indigo" x="300" y="444" width="90" height="26" rx="4"/>
+  <text class="glass-svg-ref-ink" x="345" y="461" text-anchor="middle" font-size="12">byte 8</text>
+  <text class="glass-svg-ink" x="455" y="372" text-anchor="middle" font-size="12" font-weight="600">Lane 1</text>
+  <rect class="glass-svg-node--indigo" x="410" y="380" width="90" height="26" rx="4"/>
+  <text class="glass-svg-ref-ink" x="455" y="397" text-anchor="middle" font-size="12">byte 1</text>
+  <rect class="glass-svg-node--indigo" x="410" y="412" width="90" height="26" rx="4"/>
+  <text class="glass-svg-ref-ink" x="455" y="429" text-anchor="middle" font-size="12">byte 5</text>
+  <rect class="glass-svg-node--indigo" x="410" y="444" width="90" height="26" rx="4"/>
+  <text class="glass-svg-ref-ink" x="455" y="461" text-anchor="middle" font-size="12">byte 9</text>
+  <text class="glass-svg-ink" x="565" y="372" text-anchor="middle" font-size="12" font-weight="600">Lane 2</text>
+  <rect class="glass-svg-node--indigo" x="520" y="380" width="90" height="26" rx="4"/>
+  <text class="glass-svg-ref-ink" x="565" y="397" text-anchor="middle" font-size="12">byte 2</text>
+  <rect class="glass-svg-node--indigo" x="520" y="412" width="90" height="26" rx="4"/>
+  <text class="glass-svg-ref-ink" x="565" y="429" text-anchor="middle" font-size="12">byte 6</text>
+  <rect class="glass-svg-node--indigo" x="520" y="444" width="90" height="26" rx="4"/>
+  <text class="glass-svg-ref-ink" x="565" y="461" text-anchor="middle" font-size="12">byte 10</text>
+  <text class="glass-svg-ink" x="675" y="372" text-anchor="middle" font-size="12" font-weight="600">Lane 3</text>
+  <rect class="glass-svg-node--indigo" x="630" y="380" width="90" height="26" rx="4"/>
+  <text class="glass-svg-ref-ink" x="675" y="397" text-anchor="middle" font-size="12">byte 3</text>
+  <rect class="glass-svg-node--indigo" x="630" y="412" width="90" height="26" rx="4"/>
+  <text class="glass-svg-ref-ink" x="675" y="429" text-anchor="middle" font-size="12">byte 7</text>
+  <rect class="glass-svg-node--indigo" x="630" y="444" width="90" height="26" rx="4"/>
+  <text class="glass-svg-ref-ink" x="675" y="461" text-anchor="middle" font-size="12">byte 11</text>
+  <g class="glass-svg-ink-stroke" fill="none"  stroke-width="1.4">
+    <line x1="345" y1="470" x2="345" y2="488" marker-end="url(#peArrI)"/>
+    <line x1="455" y1="470" x2="455" y2="488" marker-end="url(#peArrI)"/>
+    <line x1="565" y1="470" x2="565" y2="488" marker-end="url(#peArrI)"/>
+    <line x1="675" y1="470" x2="675" y2="488" marker-end="url(#peArrI)"/>
+  </g>
+  <rect class="glass-svg-node" x="300" y="492" width="420" height="30" rx="8"/>
+  <text class="glass-svg-ink" x="510" y="512" text-anchor="middle" font-size="12">SerDes &#183; 128b/130b &#183; 32 GT/s per lane</text>
+  <text class="glass-svg-ink-3" x="1088" y="440" text-anchor="end" font-size="12" font-style="italic">byte n leaves on lane n mod 4</text>
+</svg>

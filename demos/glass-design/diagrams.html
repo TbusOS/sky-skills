@@ -1675,12 +1675,1114 @@
   </div>
 </section>
 
+<!-- Silicon & code -->
+<section class="glass-section glass-section--alt">
+  <div class="glass-container glass-container--wide">
+    <div class="sect-head">
+      <span class="glass-eyebrow">05 &#183; <span class="lang-en">Silicon &amp; code</span><span class="lang-zh">芯片与代码</span></span>
+      <h2>
+        <span class="lang-en">Seven more, drawn for silicon.</span>
+        <span class="lang-zh">再添七张，画给芯片。</span>
+      </h2>
+      <p class="glass-lead glass-lead--compact" style="max-width:680px; margin-top:var(--space-5);">
+        <span class="lang-en">Board topology over its own address bar, a tile mesh, a gate-level datapath, layered encapsulation on a byte ruler, an annotated console, a pointer graph and a bus fabric. Cyan stays reserved for the one thing being traced — the mesh rails and the ring stops drop to the neutral line token so that reservation still means something.</span>
+        <span class="lang-zh">板级拓扑压在自己的地址条上、瓦片网格、器件级数据通路、字节标尺上的逐层封装、终端实录标注、指针图、总线挂载。cyan 只留给被追踪的那一样——互连轨和站点降到中性线条 token，这个约定才还算数。</span>
+      </p>
+    </div>
+
+    <figure class="glass-panel featured-panel" data-reveal>
+      <span class="tpl-kicker">templates/diagrams/system-topology.svg &#183; 1120 &#215; 560</span>
+      <div class="glass-scroll glass-scroll--wide">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Board-level system topology of one SoC package with its PCIe hierarchy, drawn above the system physical address space so the two can be read together. Two DDR4 channels enter the package on each side through an integrated memory controller; four cores and a root complex on bus 00 expose three root ports. Root port 0 reaches an NVMe SSD on bus 01, root port 1 reaches a PCIe switch whose two downstream ports carry bus 03 and bus 04 to an accelerator and a GPU, and root port 2 reaches a network controller on bus 06. Every wire carries a pill naming its link width and bus number. At the bottom a single address bar runs from zero: DRAM below two gigabytes, then the thirty-two bit PCI MMIO window holding one BAR segment per device in the same left to right order as the cards above, an unassigned gap, and DRAM again above four gigabytes. A dashed leader drops from each device card onto its own BAR segment" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">
+        <defs>
+          <pattern id="stHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line class="glass-svg-line" x1="0" y1="0" x2="0" y2="6"  stroke-width="1.6" opacity="0.45"/>
+          </pattern>
+          <filter id="stSh" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.06"/>
+          </filter>
+          <marker id="stArrI" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="glass-svg-ink" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+          </marker>
+          <marker id="stArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="glass-svg-ok" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+          </marker>
+        </defs>
+
+
+        <!-- header + legend -->
+        <text class="glass-svg-ink-2" x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2">SYSTEM TOPOLOGY &#183; PCIe HIERARCHY OVER ITS ADDRESS SPACE</text>
+        <g class="glass-svg-ink-2" font-size="12">
+          <circle class="glass-svg-ok" cx="700" cy="30" r="3.5"/><text x="712" y="34">DRAM</text>
+          <circle class="glass-svg-ref-ink" cx="778" cy="30" r="3.5"/><text x="790" y="34">device</text>
+          <circle class="glass-svg-warn" cx="862" cy="30" r="3.5"/><text x="874" y="34">MMIO window</text>
+          <line class="glass-svg-line" x1="988" y1="30" x2="1014" y2="30"  stroke-width="1.2" stroke-dasharray="4 3"/>
+          <text x="1022" y="34">owns this BAR</text>
+        </g>
+
+        <!-- ============ DIMMs ============ -->
+        <g>
+          <rect class="glass-svg-node" x="32" y="72" width="96" height="32" rx="4"/>
+          <g class="glass-svg-ok" opacity="0.55">
+            <rect x="42" y="80" width="11" height="16" rx="1.5"/><rect x="57" y="80" width="11" height="16" rx="1.5"/>
+            <rect x="72" y="80" width="11" height="16" rx="1.5"/><rect x="87" y="80" width="11" height="16" rx="1.5"/>
+            <rect x="102" y="80" width="11" height="16" rx="1.5"/>
+          </g>
+          <rect class="glass-svg-node" x="32" y="118" width="96" height="32" rx="4"/>
+          <g class="glass-svg-ok" opacity="0.55">
+            <rect x="42" y="126" width="11" height="16" rx="1.5"/><rect x="57" y="126" width="11" height="16" rx="1.5"/>
+            <rect x="72" y="126" width="11" height="16" rx="1.5"/><rect x="87" y="126" width="11" height="16" rx="1.5"/>
+            <rect x="102" y="126" width="11" height="16" rx="1.5"/>
+          </g>
+          <text class="glass-svg-ink-2" x="80" y="168" text-anchor="middle" font-size="12">DDR4 &#183; 2 DIMM</text>
+        </g>
+        <g>
+          <rect class="glass-svg-node" x="992" y="72" width="96" height="32" rx="4"/>
+          <g class="glass-svg-ok" opacity="0.55">
+            <rect x="1002" y="80" width="11" height="16" rx="1.5"/><rect x="1017" y="80" width="11" height="16" rx="1.5"/>
+            <rect x="1032" y="80" width="11" height="16" rx="1.5"/><rect x="1047" y="80" width="11" height="16" rx="1.5"/>
+            <rect x="1062" y="80" width="11" height="16" rx="1.5"/>
+          </g>
+          <rect class="glass-svg-node" x="992" y="118" width="96" height="32" rx="4"/>
+          <g class="glass-svg-ok" opacity="0.55">
+            <rect x="1002" y="126" width="11" height="16" rx="1.5"/><rect x="1017" y="126" width="11" height="16" rx="1.5"/>
+            <rect x="1032" y="126" width="11" height="16" rx="1.5"/><rect x="1047" y="126" width="11" height="16" rx="1.5"/>
+            <rect x="1062" y="126" width="11" height="16" rx="1.5"/>
+          </g>
+          <text class="glass-svg-ink-2" x="1040" y="168" text-anchor="middle" font-size="12">DDR4 &#183; 2 DIMM</text>
+        </g>
+
+        <!-- memory links + pills -->
+        <g class="glass-svg-line" fill="none"  stroke-width="1.6">
+          <line x1="128" y1="88" x2="272" y2="88" marker-end="url(#stArrG)" marker-start="url(#stArrG)"/>
+          <line x1="128" y1="134" x2="272" y2="134" marker-end="url(#stArrG)" marker-start="url(#stArrG)"/>
+          <line x1="856" y1="88" x2="992" y2="88" marker-end="url(#stArrG)" marker-start="url(#stArrG)"/>
+          <line x1="856" y1="134" x2="992" y2="134" marker-end="url(#stArrG)" marker-start="url(#stArrG)"/>
+        </g>
+        <g font-size="12" text-anchor="middle">
+          <rect class="glass-svg-node" x="140" y="78" width="120" height="20" rx="10"/>
+          <text class="glass-svg-ink-2" x="200" y="92">ch0 &#183; 3200 MT/s</text>
+          <rect class="glass-svg-node" x="140" y="124" width="120" height="20" rx="10"/>
+          <text class="glass-svg-ink-2" x="200" y="138">ch1 &#183; 3200 MT/s</text>
+          <rect class="glass-svg-node" x="864" y="78" width="120" height="20" rx="10"/>
+          <text class="glass-svg-ink-2" x="924" y="92">ch2 &#183; 3200 MT/s</text>
+          <rect class="glass-svg-node" x="864" y="124" width="120" height="20" rx="10"/>
+          <text class="glass-svg-ink-2" x="924" y="138">ch3 &#183; 3200 MT/s</text>
+        </g>
+
+        <!-- ============ SoC package ============ -->
+        <rect class="glass-svg-node" x="272" y="56" width="584" height="152" rx="12"   filter="url(#stSh)"/>
+        <circle class="glass-svg-ink" cx="292" cy="76" r="4"/>
+        <text class="glass-svg-ink" x="304" y="80" font-size="12" font-weight="600" letter-spacing="1.2">SoC PACKAGE</text>
+        <text class="glass-svg-ink-3" x="840" y="80" text-anchor="end" font-size="12" font-style="italic">one coherent domain</text>
+
+        <g font-size="12" text-anchor="middle">
+          <rect class="glass-svg-node" x="288" y="100" width="56" height="44" rx="8"/>
+          <text class="glass-svg-ink-2" x="316" y="127">IMC</text>
+          <rect class="glass-svg-node" x="784" y="100" width="56" height="44" rx="8"/>
+          <text class="glass-svg-ink-2" x="812" y="127">IMC</text>
+          <g class="glass-svg-node--indigo">
+            <rect x="360" y="100" width="84" height="44" rx="8"/><rect x="454" y="100" width="84" height="44" rx="8"/>
+            <rect x="548" y="100" width="84" height="44" rx="8"/><rect x="642" y="100" width="84" height="44" rx="8"/>
+          </g>
+          <g class="glass-svg-ref-ink">
+            <text x="402" y="127">Core 0</text><text x="496" y="127">Core 1</text>
+            <text x="590" y="127">Core 2</text><text x="684" y="127">Core 3</text>
+          </g>
+        </g>
+
+        <text class="glass-svg-ink-2" x="288" y="164" font-size="12" font-weight="600" letter-spacing="1.2">ROOT COMPLEX &#183; BUS 00</text>
+        <rect class="glass-svg-node" x="288" y="170" width="552" height="26" rx="8"/>
+        <g font-size="12" text-anchor="middle">
+          <rect class="glass-svg-node--indigo" x="340" y="174" width="110" height="18" rx="9"/>
+          <text class="glass-svg-ref-ink" x="395" y="187">RP0 &#183; 00:1c.0</text>
+          <rect class="glass-svg-node--indigo" x="520" y="174" width="110" height="18" rx="9"/>
+          <text class="glass-svg-ref-ink" x="575" y="187">RP1 &#183; 00:1c.4</text>
+          <rect class="glass-svg-node--indigo" x="700" y="174" width="110" height="18" rx="9"/>
+          <text class="glass-svg-ref-ink" x="755" y="187">RP2 &#183; 00:1d.0</text>
+        </g>
+
+        <!-- ============ links down ============ -->
+        <g class="glass-svg-ink-stroke" fill="none"  stroke-width="1.6">
+          <path d="M395,196 V332 Q395,340 387,340 H178 Q170,340 170,348 V364" marker-end="url(#stArrI)"/>
+          <path d="M575,196 V252" marker-end="url(#stArrI)"/>
+          <path d="M755,196 V332 Q755,340 763,340 H942 Q950,340 950,348 V364" marker-end="url(#stArrI)"/>
+          <path d="M520,312 V344 Q520,352 512,352 H438 Q430,352 430,360 V364" marker-end="url(#stArrI)"/>
+          <path d="M640,312 V344 Q640,352 648,352 H682 Q690,352 690,360 V364" marker-end="url(#stArrI)"/>
+        </g>
+        <g font-size="12" text-anchor="middle">
+          <rect class="glass-svg-node" x="270" y="216" width="126" height="20" rx="10"/>
+          <text class="glass-svg-ink-2" x="333" y="230">Gen4 x4 &#183; BUS 01</text>
+          <rect class="glass-svg-node" x="583" y="216" width="126" height="20" rx="10"/>
+          <text class="glass-svg-ink-2" x="646" y="230">Gen4 x8 &#183; BUS 02</text>
+          <rect class="glass-svg-node" x="763" y="216" width="126" height="20" rx="10"/>
+          <text class="glass-svg-ink-2" x="826" y="230">Gen3 x1 &#183; BUS 06</text>
+          <rect class="glass-svg-node" x="392" y="322" width="112" height="20" rx="10"/>
+          <text class="glass-svg-ink-2" x="448" y="336">x4 &#183; BUS 03</text>
+          <rect class="glass-svg-node" x="600" y="322" width="112" height="20" rx="10"/>
+          <text class="glass-svg-ink-2" x="656" y="336">x4 &#183; BUS 04</text>
+        </g>
+
+        <!-- ============ switch ============ -->
+        <rect class="glass-svg-node" x="470" y="252" width="220" height="60" rx="10"   filter="url(#stSh)"/>
+        <text class="glass-svg-ink" x="580" y="276" text-anchor="middle" font-size="13" font-weight="600">PCIe SWITCH</text>
+        <text class="glass-svg-ink-2" x="580" y="292" text-anchor="middle" font-size="12">1 upstream &#183; 2 downstream &#183; BUS 02</text>
+
+        <!-- ============ device cards ============ -->
+        <g filter="url(#stSh)">
+          <rect class="glass-svg-node" x="86" y="364" width="168" height="72" rx="10"/>
+          <rect class="glass-svg-node" x="346" y="364" width="168" height="72" rx="10"/>
+          <rect class="glass-svg-node" x="606" y="364" width="168" height="72" rx="10"/>
+          <rect class="glass-svg-node" x="866" y="364" width="168" height="72" rx="10"/>
+        </g>
+        <g class="glass-svg-line" fill="none"  stroke-width="1.6">
+          <rect x="104" y="382" width="20" height="16" rx="3"/><line x1="109" y1="398" x2="109" y2="404"/><line x1="119" y1="398" x2="119" y2="404"/>
+          <rect x="364" y="382" width="20" height="20" rx="3"/><rect x="370" y="388" width="8" height="8" rx="1"/>
+          <rect x="624" y="382" width="20" height="20" rx="3"/><line x1="629" y1="378" x2="629" y2="382"/><line x1="639" y1="378" x2="639" y2="382"/><line x1="629" y1="402" x2="629" y2="406"/><line x1="639" y1="402" x2="639" y2="406"/>
+          <circle cx="894" cy="392" r="10"/><line x1="884" y1="392" x2="904" y2="392"/><path d="M894,382 Q900,392 894,402 Q888,392 894,382"/>
+        </g>
+        <g class="glass-svg-ink" font-size="13" font-weight="600">
+          <text x="136" y="390">NVMe SSD</text><text x="396" y="390">Accelerator</text>
+          <text x="656" y="390">GPU</text><text x="916" y="390">Network</text>
+        </g>
+        <g class="glass-svg-ink-2" font-size="12">
+          <text x="104" y="418">01:00.0 &#183; BAR0 16 KiB</text>
+          <text x="364" y="418">03:00.0 &#183; BAR0 256 MiB</text>
+          <text x="624" y="418">04:00.0 &#183; BAR0 512 MiB</text>
+          <text x="884" y="418">06:00.0 &#183; BAR0 128 KiB</text>
+        </g>
+
+        <!-- ============ leaders onto the address bar ============ -->
+        <g class="glass-svg-line" fill="none"  stroke-width="1.2" stroke-dasharray="4 3">
+          <path d="M170,436 Q170,458 200,458 H420 Q450,458 450,470"/>
+          <path d="M430,436 Q430,456 460,456 H490 Q520,456 520,470"/>
+          <path d="M690,436 V470"/>
+          <path d="M950,436 Q950,456 920,456 H750 Q720,456 720,470"/>
+        </g>
+        <g class="glass-svg-ink-3">
+          <circle cx="450" cy="470" r="2.5"/><circle cx="520" cy="470" r="2.5"/>
+          <circle cx="690" cy="470" r="2.5"/><circle cx="720" cy="470" r="2.5"/>
+        </g>
+
+        <!-- ============ address bar ============ -->
+        <g>
+          <rect class="glass-svg-node" x="86" y="470" width="344" height="44"/>
+          <rect class="glass-svg-node--warn" x="430" y="470" width="40" height="44"/>
+          <rect class="glass-svg-node--warn" x="470" y="470" width="100" height="44"/>
+          <rect class="glass-svg-node--warn" x="570" y="470" width="130" height="44"/>
+          <rect class="glass-svg-node--warn" x="700" y="470" width="40" height="44"/>
+          <rect class="glass-svg-node" x="740" y="470" width="50" height="44"/>
+          <rect x="740" y="470" width="50" height="44" fill="url(#stHatch)"/>
+          <rect class="glass-svg-node" x="790" y="470" width="244" height="44"/>
+          <rect class="glass-svg-warn" x="430" y="470" width="360" height="4"/>
+        </g>
+        <g font-size="12" text-anchor="middle">
+          <text class="glass-svg-ink-2" x="258" y="497">DRAM &#183; 0 &#8211; 2 GiB</text>
+          <text class="glass-svg-warn" x="450" y="497">nvme</text>
+          <text class="glass-svg-warn" x="520" y="497">accel</text>
+          <text class="glass-svg-warn" x="635" y="497">gpu</text>
+          <text class="glass-svg-warn" x="720" y="497">nic</text>
+          <text class="glass-svg-ink-2" x="912" y="497">DRAM &#183; 4 GiB and up</text>
+        </g>
+        <g class="glass-svg-line" fill="none"  stroke-width="1.2">
+          <line x1="430" y1="524" x2="790" y2="524"/>
+          <line x1="430" y1="520" x2="430" y2="528"/><line x1="790" y1="520" x2="790" y2="528"/>
+        </g>
+        <g font-size="12">
+          <text class="glass-svg-ink-2" x="86" y="542">0x0000_0000</text>
+          <text class="glass-svg-warn" x="610" y="542" text-anchor="middle">PCI MMIO window &#183; 32-bit</text>
+          <text class="glass-svg-ink-2" x="820" y="542">0x1_0000_0000</text>
+          <text class="glass-svg-ink-3" x="1034" y="542" text-anchor="end" font-style="italic">not to scale</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>
+        <span class="lang-en">The PCIe tree and the physical address space in one frame. Every wire carries its link width and bus number, every device card its BDF and BAR size, and a dashed leader drops from each card onto its own segment of the bar. Split these into two figures and the reader has to hold the mapping in their head — which is exactly the part that goes wrong.</span>
+        <span class="lang-zh">PCIe 树和物理地址空间画在同一张图里。每根线标接口宽度和总线号，每张设备卡标 BDF 和 BAR 大小，虚线引线从卡落到地址条上属于它的那一段。拆成两张图，读者就得自己在脑子里做这个映射——而出错的恰恰是这一步。</span>
+      </figcaption>
+    </figure>
+
+    <figure class="glass-panel featured-panel" data-reveal>
+      <span class="tpl-kicker">templates/diagrams/die-floorplan.svg &#183; 1120 &#215; 560</span>
+      <div class="glass-scroll glass-scroll--wide">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Floorplan of one compute die: twenty tiles in five columns and four rows, each tile a core sitting under its own cache-home agent and last-level cache slice. Orange mesh rails run in every gap between tiles, horizontally and vertically, and a ring stop sits at each of the thirty crossings — that stop, not the tile, is where a tile joins the mesh. Four IO tiles sit along the top edge, one UPI and two PCIe and one DMI, each labelled with its width and its line rate, with an arrow leaving the die. A memory controller flanks each side with three DDR5 channels behind it. One request is traced in orange over the mesh: badge one, core eleven misses its private cache and injects at the nearest ring stop; badge two, the address hashes to the last-level cache slice on core eight's tile, two columns away; badge three, that slice misses and the request leaves eastward to the right-hand memory controller" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">
+        <defs>
+          <marker id="dfArrA" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="glass-svg-warn" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+          </marker>
+          <marker id="dfArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="glass-svg-accent" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+          </marker>
+          <marker id="dfArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="glass-svg-ok" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+          </marker>
+        </defs>
+
+
+        <text class="glass-svg-ink-2" x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2">DIE FLOORPLAN &#183; TILE MESH</text>
+        <g class="glass-svg-ink-2" font-size="12">
+          <rect class="glass-svg-node" x="500" y="24" width="16" height="12" rx="3"/><text x="524" y="34">core</text>
+          <rect class="glass-svg-node--indigo" x="572" y="24" width="16" height="12" rx="3"/><text x="596" y="34">cache slice</text>
+          <rect class="glass-svg-node--warn" x="682" y="24" width="16" height="12" rx="3"/><text x="706" y="34">IO tile</text>
+          <line class="glass-svg-line" x1="778" y1="30" x2="800" y2="30"  stroke-width="1.2" opacity="0.55"/><circle class="glass-svg-ink-3" cx="789" cy="30" r="3"/><text x="810" y="34">mesh &#183; ring stop</text>
+          <line class="glass-svg-accent-stroke" x1="936" y1="30" x2="958" y2="30"  stroke-width="2.2"/><text x="968" y="34">this request</text>
+        </g>
+
+        <!-- die outline -->
+        <rect class="glass-svg-node" x="188" y="60" width="744" height="412" rx="10"   stroke-dasharray="5 4"/>
+
+        <!-- IO tiles -->
+        <rect class="glass-svg-node--warn" x="210" y="76" width="154" height="46" rx="8"/>
+        <text class="glass-svg-ink" x="287" y="95" text-anchor="middle" font-size="13" font-weight="600">UPI &#215;20</text>
+        <text class="glass-svg-warn" x="287" y="112" text-anchor="middle" font-size="12">2 links &#183; 10.4 GT/s</text>
+        <line class="glass-svg-line" x1="287" y1="76" x2="287" y2="50"  stroke-width="1.6" marker-end="url(#dfArrA)" fill="none"/>
+        <rect class="glass-svg-node--warn" x="392" y="76" width="154" height="46" rx="8"/>
+        <text class="glass-svg-ink" x="469" y="95" text-anchor="middle" font-size="13" font-weight="600">PCIe &#215;16</text>
+        <text class="glass-svg-warn" x="469" y="112" text-anchor="middle" font-size="12">Gen5 &#183; 32 GT/s</text>
+        <line class="glass-svg-line" x1="469" y1="76" x2="469" y2="50"  stroke-width="1.6" marker-end="url(#dfArrA)" fill="none"/>
+        <rect class="glass-svg-node--warn" x="574" y="76" width="154" height="46" rx="8"/>
+        <text class="glass-svg-ink" x="651" y="95" text-anchor="middle" font-size="13" font-weight="600">DMI &#215;8</text>
+        <text class="glass-svg-warn" x="651" y="112" text-anchor="middle" font-size="12">to PCH</text>
+        <line class="glass-svg-line" x1="651" y1="76" x2="651" y2="50"  stroke-width="1.6" marker-end="url(#dfArrA)" fill="none"/>
+        <rect class="glass-svg-node--warn" x="756" y="76" width="154" height="46" rx="8"/>
+        <text class="glass-svg-ink" x="833" y="95" text-anchor="middle" font-size="13" font-weight="600">PCIe &#215;16</text>
+        <text class="glass-svg-warn" x="833" y="112" text-anchor="middle" font-size="12">Gen5 &#183; 32 GT/s</text>
+        <line class="glass-svg-line" x1="833" y1="76" x2="833" y2="50"  stroke-width="1.6" marker-end="url(#dfArrA)" fill="none"/>
+
+        <!-- mesh rails -->
+        <g class="glass-svg-line" stroke-width="1.2" opacity="0.55">
+          <line x1="200" y1="138" x2="200" y2="458"/>
+          <line x1="344" y1="138" x2="344" y2="458"/>
+          <line x1="488" y1="138" x2="488" y2="458"/>
+          <line x1="632" y1="138" x2="632" y2="458"/>
+          <line x1="776" y1="138" x2="776" y2="458"/>
+          <line x1="920" y1="138" x2="920" y2="458"/>
+          <line x1="200" y1="138" x2="920" y2="138"/>
+          <line x1="200" y1="218" x2="920" y2="218"/>
+          <line x1="200" y1="298" x2="920" y2="298"/>
+          <line x1="200" y1="378" x2="920" y2="378"/>
+          <line x1="200" y1="458" x2="920" y2="458"/>
+        </g>
+        <g class="glass-svg-ink-3">
+          <circle cx="200" cy="138" r="3"/><circle cx="344" cy="138" r="3"/><circle cx="488" cy="138" r="3"/><circle cx="632" cy="138" r="3"/><circle cx="776" cy="138" r="3"/><circle cx="920" cy="138" r="3"/>
+          <circle cx="200" cy="218" r="3"/><circle cx="344" cy="218" r="3"/><circle cx="488" cy="218" r="3"/><circle cx="632" cy="218" r="3"/><circle cx="776" cy="218" r="3"/><circle cx="920" cy="218" r="3"/>
+          <circle cx="200" cy="298" r="3"/><circle cx="344" cy="298" r="3"/><circle cx="488" cy="298" r="3"/><circle cx="632" cy="298" r="3"/><circle cx="776" cy="298" r="3"/><circle cx="920" cy="298" r="3"/>
+          <circle cx="200" cy="378" r="3"/><circle cx="344" cy="378" r="3"/><circle cx="488" cy="378" r="3"/><circle cx="632" cy="378" r="3"/><circle cx="776" cy="378" r="3"/><circle cx="920" cy="378" r="3"/>
+          <circle cx="200" cy="458" r="3"/><circle cx="344" cy="458" r="3"/><circle cx="488" cy="458" r="3"/><circle cx="632" cy="458" r="3"/><circle cx="776" cy="458" r="3"/><circle cx="920" cy="458" r="3"/>
+        </g>
+
+        <!-- tiles -->
+        <g>
+          <rect class="glass-svg-node--indigo" x="210" y="148" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="210" y="176" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="354" y="148" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="354" y="176" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="498" y="148" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="498" y="176" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="642" y="148" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="642" y="176" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="786" y="148" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="786" y="176" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="210" y="228" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="210" y="256" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="354" y="228" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="354" y="256" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="498" y="228" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="498" y="256" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="642" y="228" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="642" y="256" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="786" y="228" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="786" y="256" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="210" y="308" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="210" y="336" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="354" y="308" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="354" y="336" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="498" y="308" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="498" y="336" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="642" y="308" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="642" y="336" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="786" y="308" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="786" y="336" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="210" y="388" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="210" y="416" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="354" y="388" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="354" y="416" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="498" y="388" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="498" y="416" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="642" y="388" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="642" y="416" width="124" height="32" rx="5"/>
+          <rect class="glass-svg-node--indigo" x="786" y="388" width="124" height="26" rx="5"/>
+          <rect class="glass-svg-node" x="786" y="416" width="124" height="32" rx="5"/>
+        </g>
+        <g font-size="12" text-anchor="middle">
+          <text class="glass-svg-ref-ink" x="272" y="165">CHA &#183; LLC 3 MiB</text>
+          <text class="glass-svg-ink-2" x="272" y="197">Core 0</text>
+          <text class="glass-svg-ref-ink" x="416" y="165">CHA &#183; LLC 3 MiB</text>
+          <text class="glass-svg-ink-2" x="416" y="197">Core 1</text>
+          <text class="glass-svg-ref-ink" x="560" y="165">CHA &#183; LLC 2 MiB</text>
+          <text class="glass-svg-ink-2" x="560" y="197">Core 2</text>
+          <text class="glass-svg-ref-ink" x="704" y="165">CHA &#183; LLC 3 MiB</text>
+          <text class="glass-svg-ink-2" x="704" y="197">Core 3</text>
+          <text class="glass-svg-ref-ink" x="848" y="165">CHA &#183; LLC 2 MiB</text>
+          <text class="glass-svg-ink-2" x="848" y="197">Core 4</text>
+          <text class="glass-svg-ref-ink" x="272" y="245">CHA &#183; LLC 2 MiB</text>
+          <text class="glass-svg-ink-2" x="272" y="277">Core 5</text>
+          <text class="glass-svg-ref-ink" x="416" y="245">CHA &#183; LLC 3 MiB</text>
+          <text class="glass-svg-ink-2" x="416" y="277">Core 6</text>
+          <text class="glass-svg-ref-ink" x="560" y="245">CHA &#183; LLC 3 MiB</text>
+          <text class="glass-svg-ink-2" x="560" y="277">Core 7</text>
+          <text class="glass-svg-ref-ink" x="704" y="245">CHA &#183; LLC 2 MiB</text>
+          <text class="glass-svg-ink-2" x="704" y="277">Core 8</text>
+          <text class="glass-svg-ref-ink" x="848" y="245">CHA &#183; LLC 3 MiB</text>
+          <text class="glass-svg-ink-2" x="848" y="277">Core 9</text>
+          <text class="glass-svg-ref-ink" x="272" y="325">CHA &#183; LLC 3 MiB</text>
+          <text class="glass-svg-ink-2" x="272" y="357">Core 10</text>
+          <text class="glass-svg-ref-ink" x="416" y="325">CHA &#183; LLC 2 MiB</text>
+          <text class="glass-svg-ink-2" x="416" y="357">Core 11</text>
+          <text class="glass-svg-ref-ink" x="560" y="325">CHA &#183; LLC 3 MiB</text>
+          <text class="glass-svg-ink-2" x="560" y="357">Core 12</text>
+          <text class="glass-svg-ref-ink" x="704" y="325">CHA &#183; LLC 3 MiB</text>
+          <text class="glass-svg-ink-2" x="704" y="357">Core 13</text>
+          <text class="glass-svg-ref-ink" x="848" y="325">CHA &#183; LLC 2 MiB</text>
+          <text class="glass-svg-ink-2" x="848" y="357">Core 14</text>
+          <text class="glass-svg-ref-ink" x="272" y="405">CHA &#183; LLC 2 MiB</text>
+          <text class="glass-svg-ink-2" x="272" y="437">Core 15</text>
+          <text class="glass-svg-ref-ink" x="416" y="405">CHA &#183; LLC 3 MiB</text>
+          <text class="glass-svg-ink-2" x="416" y="437">Core 16</text>
+          <text class="glass-svg-ref-ink" x="560" y="405">CHA &#183; LLC 2 MiB</text>
+          <text class="glass-svg-ink-2" x="560" y="437">Core 17</text>
+          <text class="glass-svg-ref-ink" x="704" y="405">CHA &#183; LLC 3 MiB</text>
+          <text class="glass-svg-ink-2" x="704" y="437">Core 18</text>
+          <text class="glass-svg-ref-ink" x="848" y="405">CHA &#183; LLC 3 MiB</text>
+          <text class="glass-svg-ink-2" x="848" y="437">Core 19</text>
+        </g>
+
+        <!-- memory controllers + DDR -->
+        <rect class="glass-svg-node" x="124" y="190" width="40" height="140" rx="8"/>
+        <text class="glass-svg-ink" x="144" y="260" text-anchor="middle" font-size="12" font-weight="600"  transform="rotate(-90 144 260)">MC 0</text>
+        <rect class="glass-svg-node" x="956" y="190" width="40" height="140" rx="8"/>
+        <text class="glass-svg-ink" x="976" y="260" text-anchor="middle" font-size="12" font-weight="600"  transform="rotate(-90 976 260)">MC 1</text>
+        <rect class="glass-svg-node" x="32" y="196" width="80" height="28" rx="4"/>
+        <g class="glass-svg-ok" opacity="0.55"><rect x="41" y="203" width="10" height="14" rx="1.5"/><rect x="55" y="203" width="10" height="14" rx="1.5"/><rect x="69" y="203" width="10" height="14" rx="1.5"/><rect x="83" y="203" width="10" height="14" rx="1.5"/><rect x="97" y="203" width="10" height="14" rx="1.5"/></g>
+        <rect class="glass-svg-node" x="32" y="246" width="80" height="28" rx="4"/>
+        <g class="glass-svg-ok" opacity="0.55"><rect x="41" y="253" width="10" height="14" rx="1.5"/><rect x="55" y="253" width="10" height="14" rx="1.5"/><rect x="69" y="253" width="10" height="14" rx="1.5"/><rect x="83" y="253" width="10" height="14" rx="1.5"/><rect x="97" y="253" width="10" height="14" rx="1.5"/></g>
+        <rect class="glass-svg-node" x="32" y="296" width="80" height="28" rx="4"/>
+        <g class="glass-svg-ok" opacity="0.55"><rect x="41" y="303" width="10" height="14" rx="1.5"/><rect x="55" y="303" width="10" height="14" rx="1.5"/><rect x="69" y="303" width="10" height="14" rx="1.5"/><rect x="83" y="303" width="10" height="14" rx="1.5"/><rect x="97" y="303" width="10" height="14" rx="1.5"/></g>
+        <rect class="glass-svg-node" x="1008" y="196" width="80" height="28" rx="4"/>
+        <g class="glass-svg-ok" opacity="0.55"><rect x="1017" y="203" width="10" height="14" rx="1.5"/><rect x="1031" y="203" width="10" height="14" rx="1.5"/><rect x="1045" y="203" width="10" height="14" rx="1.5"/><rect x="1059" y="203" width="10" height="14" rx="1.5"/><rect x="1073" y="203" width="10" height="14" rx="1.5"/></g>
+        <rect class="glass-svg-node" x="1008" y="246" width="80" height="28" rx="4"/>
+        <g class="glass-svg-ok" opacity="0.55"><rect x="1017" y="253" width="10" height="14" rx="1.5"/><rect x="1031" y="253" width="10" height="14" rx="1.5"/><rect x="1045" y="253" width="10" height="14" rx="1.5"/><rect x="1059" y="253" width="10" height="14" rx="1.5"/><rect x="1073" y="253" width="10" height="14" rx="1.5"/></g>
+        <rect class="glass-svg-node" x="1008" y="296" width="80" height="28" rx="4"/>
+        <g class="glass-svg-ok" opacity="0.55"><rect x="1017" y="303" width="10" height="14" rx="1.5"/><rect x="1031" y="303" width="10" height="14" rx="1.5"/><rect x="1045" y="303" width="10" height="14" rx="1.5"/><rect x="1059" y="303" width="10" height="14" rx="1.5"/><rect x="1073" y="303" width="10" height="14" rx="1.5"/></g>
+        <g class="glass-svg-line" fill="none"  stroke-width="1.4">
+          <line x1="112" y1="210" x2="124" y2="210"/><line x1="112" y1="260" x2="124" y2="260"/><line x1="112" y1="310" x2="124" y2="310"/>
+          <line x1="996" y1="210" x2="1008" y2="210"/><line x1="996" y1="260" x2="1008" y2="260"/><line x1="996" y1="310" x2="1008" y2="310"/>
+          <line x1="164" y1="218" x2="200" y2="218" marker-end="url(#dfArrG)" marker-start="url(#dfArrG)"/>
+          <line x1="164" y1="298" x2="200" y2="298" marker-end="url(#dfArrG)" marker-start="url(#dfArrG)"/>
+          <line x1="920" y1="218" x2="956" y2="218" marker-end="url(#dfArrG)" marker-start="url(#dfArrG)"/>
+          <line x1="920" y1="298" x2="956" y2="298" marker-end="url(#dfArrG)" marker-start="url(#dfArrG)"/>
+        </g>
+        <text class="glass-svg-ink-2" x="72" y="350" text-anchor="middle" font-size="12">DDR5 &#183; 3 ch</text>
+        <text class="glass-svg-ink-2" x="1048" y="350" text-anchor="middle" font-size="12">DDR5 &#183; 3 ch</text>
+
+        <!-- traced request -->
+        <g class="glass-svg-accent-stroke" fill="none"  stroke-width="2.2">
+          <path d="M354,338 H344 V298 H632 V246 H642" marker-end="url(#dfArrO)"/>
+          <path d="M766,246 H776 V218 H920" marker-end="url(#dfArrO)"/>
+        </g>
+        <g font-size="12" font-weight="600" text-anchor="middle">
+          <circle class="glass-svg-node--cyan" cx="344" cy="318" r="9"/><text class="glass-svg-accent-ink" x="344" y="322">1</text>
+          <circle class="glass-svg-node--cyan" cx="704" cy="218" r="9"/><text class="glass-svg-accent-ink" x="704" y="222">2</text>
+          <circle class="glass-svg-node--cyan" cx="938" cy="218" r="9"/><text class="glass-svg-accent-ink" x="938" y="222">3</text>
+        </g>
+
+        <text class="glass-svg-ink-2" x="188" y="494" font-size="12">COMPUTE DIE &#183; 20 tiles &#183; 5 &#215; 4 mesh</text>
+        <text class="glass-svg-ink-3" x="932" y="494" text-anchor="end" font-size="12" font-style="italic">a tile joins the mesh at its ring stop, not at its edge</text>
+      </svg>
+      </div>
+      <figcaption>
+        <span class="lang-en">Twenty tiles, each a core under its own cache slice, joined by mesh rails whose crossings are the ring stops. A tile joins the mesh at its stop, not at its edge — that distinction is why one request's latency depends on how many stops it crosses. Badges 1 to 3 trace a single miss out to the memory controller.</span>
+        <span class="lang-zh">二十块瓦片，每块是一个核加它自己那片缓存，瓦片之间跑互连轨，交叉点就是站点。瓦片挂在自己的站点上、不是连在轨边上——一次访问的延迟取决于跳了几站，靠的就是这个区别。徽章 1–3 追一次未命中一路走到内存控制器。</span>
+      </figcaption>
+    </figure>
+
+    <figure class="glass-panel featured-panel" data-reveal>
+      <span class="tpl-kicker">templates/diagrams/datapath.svg &#183; 1120 &#215; 560</span>
+      <div class="glass-scroll glass-scroll--wide">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Read path of a four-way set-associative level-one data cache, drawn as a datapath rather than a block diagram. Badge A: the address splits into a thirty-six bit tag, a six bit set index and a six bit block offset. Badge B: the set index enters a six-to-sixty-four decoder whose wordline runs down the left edge and selects set forty-one, one entry in each of the four ways. Badge C: each way's stored tag meets the address tag at its own comparator; way one is invalid so its comparator can never assert, and way two matches. Badge D: the four match lines leave as one four-bit bundle, drive the select input of a four-to-one multiplexer that picks way two's sixty-four byte line, and the chosen word leaves to the load unit. Badge E: the same bundle enters an OR gate, whose output is the hit signal. Miss is simply that output staying low" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">
+        <defs>
+          <marker id="dpArrI" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="glass-svg-ink" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+          </marker>
+          <marker id="dpArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="glass-svg-accent" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+          </marker>
+        </defs>
+
+
+        <text class="glass-svg-ink-2" x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2">DATAPATH &#183; 4-WAY SET-ASSOCIATIVE LOOKUP</text>
+        <g class="glass-svg-ink-2" font-size="12">
+          <path class="glass-svg-node--indigo" d="M560,24 L576,28 L576,36 L560,40 Z"/><text x="584" y="34">comparator</text>
+          <path class="glass-svg-node" d="M690,24 L706,28 L706,36 L690,40 Z"   transform="rotate(180 698 32)"/><text x="714" y="34">multiplexer</text>
+          <path class="glass-svg-node" d="M800,24 Q814,24 828,32 Q814,40 800,40 Q807,32 800,24 Z"/><text x="836" y="34">OR gate</text>
+        </g>
+
+        <!-- ===== address split ===== -->
+        <g class="glass-svg-ink-2" font-size="12">
+          <text x="140" y="66">47</text><text x="556" y="66" text-anchor="end">12</text>
+          <text x="564" y="66">11</text><text x="796" y="66" text-anchor="end">6</text>
+          <text x="804" y="66">5</text><text x="1000" y="66" text-anchor="end">0</text>
+        </g>
+        <rect class="glass-svg-node--indigo" x="140" y="72" width="420" height="36"/>
+        <rect class="glass-svg-node--cyan" x="560" y="72" width="240" height="36"   stroke-width="1.5"/>
+        <rect class="glass-svg-node" x="800" y="72" width="200" height="36"/>
+        <g font-size="12" text-anchor="middle">
+          <text class="glass-svg-ref-ink" x="350" y="95">TAG &#183; 36 bits</text>
+          <text class="glass-svg-accent-ink" x="680" y="95">SET INDEX &#183; 6</text>
+          <text class="glass-svg-ink-2" x="900" y="95">BLOCK OFFSET &#183; 6</text>
+        </g>
+
+        <!-- ===== decoder ===== -->
+        <path class="glass-svg-node--cyan" d="M620,140 L740,140 L716,176 L644,176 Z"   stroke-width="1.5"/>
+        <text class="glass-svg-accent-ink" x="680" y="163" text-anchor="middle" font-size="12" font-weight="600">6 &#8594; 64</text>
+        <text class="glass-svg-ink-2" x="752" y="163" font-size="12">decoder &#183; one wordline per set</text>
+
+        <!-- ===== wires ===== -->
+        <g class="glass-svg-ink-stroke" fill="none"  stroke-width="1.4">
+          <line x1="680" y1="108" x2="680" y2="140" marker-end="url(#dpArrI)"/>
+          <path d="M680,176 V188 Q680,196 672,196 H96 Q88,196 88,204 V320 Q88,328 96,328 H104" marker-end="url(#dpArrI)"/>
+          <path d="M300,108 V124 Q300,132 308,132 H402 Q410,132 410,140 V378"/>
+          <line x1="400" y1="212" x2="424" y2="212"/>
+          <line x1="410" y1="228" x2="424" y2="228"/>
+          <line x1="400" y1="262" x2="424" y2="262"/>
+          <line x1="410" y1="278" x2="424" y2="278"/>
+          <line x1="400" y1="312" x2="424" y2="312"/>
+          <line x1="410" y1="328" x2="424" y2="328"/>
+          <line x1="400" y1="362" x2="424" y2="362"/>
+          <line x1="410" y1="378" x2="424" y2="378"/>
+          <path d="M472,220 H488 V412"/>
+          <path d="M472,270 H500 V412"/>
+          <path d="M472,320 H512 V412"/>
+          <path d="M472,370 H524 V412"/>
+          <line x1="524" y1="412" x2="836" y2="412"/>
+          <path d="M836,412 V392" marker-end="url(#dpArrI)"/>
+          <path d="M836,412 H920" marker-end="url(#dpArrI)"/>
+          <line x1="800" y1="290" x2="830" y2="290"/>
+        </g>
+        <g class="glass-svg-ink-stroke" fill="none"  stroke-width="1.4">
+          <line x1="800" y1="220" x2="830" y2="220"/>
+          <line x1="800" y1="270" x2="830" y2="270"/>
+          <line x1="800" y1="320" x2="830" y2="320"/>
+          <line x1="800" y1="370" x2="830" y2="370"/>
+        </g>
+        <!-- bus-width slashes -->
+        <g class="glass-svg-ink-stroke" stroke-width="1.2">
+          <line x1="404" y1="264" x2="416" y2="252"/>
+          <line x1="600" y1="418" x2="612" y2="406"/>
+        </g>
+        <g class="glass-svg-ink-2" font-size="12">
+          <text x="420" y="252">36</text>
+          <text x="616" y="406">4</text>
+        </g>
+
+        <!-- ===== arrays ===== -->
+        <text class="glass-svg-ink-2" x="104" y="190" font-size="12" font-weight="600" letter-spacing="1.2">V &#183; TAG ARRAY</text>
+        <text class="glass-svg-ink-2" x="520" y="190" font-size="12" font-weight="600" letter-spacing="1.2">DATA ARRAY &#183; SET 41</text>
+        <g>
+          <rect class="glass-svg-node" x="104" y="200" width="28" height="40" rx="4"/>
+          <rect class="glass-svg-node" x="140" y="200" width="260" height="40" rx="4"/>
+          <rect class="glass-svg-node glass-svg-line" x="104" y="250" width="28" height="40" rx="4"/>
+          <rect class="glass-svg-node" x="140" y="250" width="260" height="40" rx="4"/>
+          <rect class="glass-svg-node" x="104" y="300" width="28" height="40" rx="4"/>
+          <rect class="glass-svg-node" x="140" y="300" width="260" height="40" rx="4"/>
+          <rect class="glass-svg-node" x="104" y="350" width="28" height="40" rx="4"/>
+          <rect class="glass-svg-node" x="140" y="350" width="260" height="40" rx="4"/>
+        </g>
+        <g>
+          <rect class="glass-svg-node" x="520" y="200" width="280" height="40" rx="4"/>
+          <rect class="glass-svg-node" x="520" y="250" width="280" height="40" rx="4"/>
+          <rect class="glass-svg-node" x="520" y="300" width="280" height="40" rx="4"/>
+          <rect class="glass-svg-node" x="520" y="350" width="280" height="40" rx="4"/>
+        </g>
+        <g>
+          <path class="glass-svg-node--indigo" d="M424,204 L472,212 L472,228 L424,236 Z"   stroke-width="1.5"/>
+          <path class="glass-svg-node--indigo" d="M424,254 L472,262 L472,278 L424,286 Z"   stroke-width="1.5"/>
+          <path class="glass-svg-node--cyan" d="M424,304 L472,312 L472,328 L424,336 Z"   stroke-width="1.5"/>
+          <path class="glass-svg-node--indigo" d="M424,354 L472,362 L472,378 L424,386 Z"   stroke-width="1.5"/>
+        </g>
+        <g>
+          <text class="glass-svg-ink-2" x="32" y="224" font-size="12">way 0</text>
+          <text class="glass-svg-ink-2" x="118" y="224" font-size="12" text-anchor="middle">1</text>
+          <text class="glass-svg-ink" x="270" y="224" font-size="12" text-anchor="middle">0x0004_A1C</text>
+          <text class="glass-svg-ink-2" x="660" y="224" font-size="12" text-anchor="middle">64 B line &#183; way 0</text>
+          <text class="glass-svg-ref-ink" x="448" y="225" font-size="12" font-weight="600" text-anchor="middle">=</text>
+          <text class="glass-svg-ink-2" x="32" y="274" font-size="12">way 1</text>
+          <text class="glass-svg-ink-2" x="118" y="274" font-size="12" text-anchor="middle">0</text>
+          <text class="glass-svg-ink" x="270" y="274" font-size="12" text-anchor="middle">0x00F1_2B8</text>
+          <text class="glass-svg-ink-2" x="660" y="274" font-size="12" text-anchor="middle">64 B line &#183; way 1</text>
+          <text class="glass-svg-ref-ink" x="448" y="275" font-size="12" font-weight="600" text-anchor="middle">=</text>
+          <text class="glass-svg-ink-2" x="32" y="324" font-size="12">way 2</text>
+          <text class="glass-svg-ink-2" x="118" y="324" font-size="12" text-anchor="middle">1</text>
+          <text class="glass-svg-ink" x="270" y="324" font-size="12" text-anchor="middle">0x0004_A1C</text>
+          <text class="glass-svg-ink-2" x="660" y="324" font-size="12" text-anchor="middle">64 B line &#183; way 2</text>
+          <text class="glass-svg-accent-ink" x="448" y="325" font-size="12" font-weight="600" text-anchor="middle">=</text>
+          <text class="glass-svg-ink-2" x="32" y="374" font-size="12">way 3</text>
+          <text class="glass-svg-ink-2" x="118" y="374" font-size="12" text-anchor="middle">1</text>
+          <text class="glass-svg-ink" x="270" y="374" font-size="12" text-anchor="middle">0x0091_7D0</text>
+          <text class="glass-svg-ink-2" x="660" y="374" font-size="12" text-anchor="middle">64 B line &#183; way 3</text>
+          <text class="glass-svg-ref-ink" x="448" y="375" font-size="12" font-weight="600" text-anchor="middle">=</text>
+        </g>
+
+        <!-- ===== mux + or ===== -->
+        <path class="glass-svg-node" d="M830,196 L878,216 L878,364 L830,384 Z"   stroke-width="1.5"/>
+        <text class="glass-svg-ink" x="854" y="294" text-anchor="middle" font-size="12" font-weight="600">4:1</text>
+        <path class="glass-svg-node" d="M920,428 Q944,428 968,450 Q944,472 920,472 Q932,450 920,428 Z"   stroke-width="1.5"/>
+        <text class="glass-svg-ink" x="938" y="455" text-anchor="middle" font-size="12" font-weight="600">&#8805;1</text>
+
+        <g class="glass-svg-accent-stroke" fill="none"  stroke-width="2">
+          <line x1="878" y1="290" x2="948" y2="290" marker-end="url(#dpArrO)"/>
+          <line x1="968" y1="450" x2="1024" y2="450" marker-end="url(#dpArrO)"/>
+        </g>
+        <text class="glass-svg-ink" x="956" y="278" font-size="13" font-weight="600">word &#8594; load unit</text>
+        <text class="glass-svg-ink" x="956" y="440" font-size="13" font-weight="600">HIT</text>
+        <text class="glass-svg-ink-3" x="1088" y="500" text-anchor="end" font-size="12" font-style="italic">a miss is this line staying low</text>
+
+        <!-- ===== badges ===== -->
+        <g font-size="12" font-weight="600" text-anchor="middle">
+          <circle class="glass-svg-node--cyan" cx="600" cy="126" r="9"/><text class="glass-svg-accent-ink" x="600" y="130">A</text>
+          <circle class="glass-svg-node--cyan" cx="88" cy="240" r="9"/><text class="glass-svg-accent-ink" x="88" y="244">B</text>
+          <circle class="glass-svg-node--cyan" cx="448" cy="176" r="9"/><text class="glass-svg-accent-ink" x="448" y="180">C</text>
+          <circle class="glass-svg-node--cyan" cx="854" cy="176" r="9"/><text class="glass-svg-accent-ink" x="854" y="180">D</text>
+          <circle class="glass-svg-node--cyan" cx="938" cy="404" r="9"/><text class="glass-svg-accent-ink" x="938" y="408">E</text>
+        </g>
+        <text class="glass-svg-ink-2" x="32" y="524" font-size="12">way 1 is invalid, so its comparator can never assert &#8212; the valid bit is an input to the match, not a decoration</text>
+      </svg>
+      </div>
+      <figcaption>
+        <span class="lang-en">A four-way set-associative lookup drawn at gate level: the address splits, a decoder picks the set, four comparators race, and the match lines both drive the multiplexer and feed the OR gate that raises HIT. Way 1 is invalid, so its comparator can never assert — that one deliberate dead lane is what makes the valid bit legible. Badges A to E.</span>
+        <span class="lang-zh">四路组相联查找画到器件一级：地址拆分、译码器选中一组、四个比较器同时比、匹配线一边驱动多路选择器一边进或门抬起 HIT。way 1 的 valid 是 0，它的比较器永远不会成立——故意留死这一路，valid 位才讲得清。徽章 A–E。</span>
+      </figcaption>
+    </figure>
+
+    <figure class="glass-panel featured-panel" data-reveal>
+      <span class="tpl-kicker">templates/diagrams/packet-encap.svg &#183; 1120 &#215; 560</span>
+      <div class="glass-scroll glass-scroll--wide">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="One PCIe transaction packet built layer by layer, drawn on a byte ruler at eight pixels per byte so each bar's width is literally its byte count. Row one, the transaction layer emits a sixteen byte TLP header followed by a sixty-four byte payload, eighty bytes. Row two, the data link layer prepends a two byte sequence number and appends a four byte link CRC, so the bar grows outward at both ends to eighty-six bytes while the original eighty stay put between the two dashed guidelines. Row three, the physical layer frames it with a one byte start symbol and a one byte end symbol, eighty-eight bytes. Row four, those bytes are striped round-robin across four lanes: byte zero and four and eight go to lane zero, byte one and five and nine to lane one, and so on, each lane feeding its own serialiser. The two dashed guidelines are the point of the figure: everything added by a lower layer appears outside them, never inside" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">
+        <defs>
+          <marker id="peArrI" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="glass-svg-ink" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+          </marker>
+          <marker id="peArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="glass-svg-accent" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+          </marker>
+        </defs>
+
+
+        <text class="glass-svg-ink-2" x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2">PACKET ENCAPSULATION &#183; ONE BYTE RULER, THREE LAYERS</text>
+        <text class="glass-svg-ink-2" x="1088" y="34" text-anchor="end" font-size="12">8 px = 1 byte &#183; bars are to scale with each other</text>
+
+        <!-- the two guidelines: the original 80 bytes never move -->
+        <g class="glass-svg-line" stroke-width="1.2" stroke-dasharray="4 3">
+          <line x1="240" y1="82" x2="240" y2="326"/>
+          <line x1="880" y1="82" x2="880" y2="326"/>
+        </g>
+
+        <!-- ===== 1 · transaction layer ===== -->
+        <text class="glass-svg-ink" x="32" y="112" font-size="13" font-weight="600">Transaction</text>
+        <text class="glass-svg-ink-2" x="32" y="130" font-size="12">layer</text>
+        <rect class="glass-svg-node--indigo" x="240" y="96" width="128" height="34"/>
+        <rect class="glass-svg-node" x="368" y="96" width="512" height="34"/>
+        <text class="glass-svg-ref-ink" x="304" y="118" text-anchor="middle" font-size="12">TLP header 16 B</text>
+        <text class="glass-svg-ink-2" x="624" y="118" text-anchor="middle" font-size="12">data payload 64 B</text>
+        <g class="glass-svg-line" stroke-width="1">
+          <line x1="240" y1="130" x2="240" y2="123"/><line x1="304" y1="130" x2="304" y2="123"/><line x1="368" y1="130" x2="368" y2="123"/><line x1="432" y1="130" x2="432" y2="123"/><line x1="496" y1="130" x2="496" y2="123"/><line x1="560" y1="130" x2="560" y2="123"/><line x1="624" y1="130" x2="624" y2="123"/><line x1="688" y1="130" x2="688" y2="123"/><line x1="752" y1="130" x2="752" y2="123"/><line x1="816" y1="130" x2="816" y2="123"/><line x1="880" y1="130" x2="880" y2="123"/>
+        </g>
+        <text class="glass-svg-ink-3" x="1088" y="152" text-anchor="end" font-size="12" font-style="italic">80 B &#183; what the requester actually meant to send</text>
+
+        <!-- ===== 2 · data link layer ===== -->
+        <text class="glass-svg-ink" x="32" y="202" font-size="13" font-weight="600">Data link</text>
+        <text class="glass-svg-ink-2" x="32" y="220" font-size="12">layer</text>
+        <rect class="glass-svg-node--warn" x="224" y="186" width="16" height="34"/>
+        <rect class="glass-svg-node" x="240" y="186" width="640" height="34"/>
+        <rect class="glass-svg-node--warn" x="880" y="186" width="32" height="34"/>
+        <text class="glass-svg-ink-2" x="560" y="208" text-anchor="middle" font-size="12">the 80 B above, untouched</text>
+        <g class="glass-svg-line" stroke-width="1">
+          <line x1="224" y1="220" x2="224" y2="213"/><line x1="288" y1="220" x2="288" y2="213"/><line x1="352" y1="220" x2="352" y2="213"/><line x1="416" y1="220" x2="416" y2="213"/><line x1="480" y1="220" x2="480" y2="213"/><line x1="544" y1="220" x2="544" y2="213"/><line x1="608" y1="220" x2="608" y2="213"/><line x1="672" y1="220" x2="672" y2="213"/><line x1="736" y1="220" x2="736" y2="213"/><line x1="800" y1="220" x2="800" y2="213"/><line x1="864" y1="220" x2="864" y2="213"/>
+        </g>
+        <g class="glass-svg-line" fill="none"  stroke-width="1.2">
+          <path d="M232,186 V174 H180"/>
+          <path d="M896,186 V174 H948"/>
+        </g>
+        <text class="glass-svg-warn" x="176" y="178" text-anchor="end" font-size="12">+ SeqNum 2 B</text>
+        <text class="glass-svg-warn" x="952" y="178" font-size="12">+ LCRC 4 B</text>
+        <text class="glass-svg-ink-3" x="1088" y="242" text-anchor="end" font-size="12" font-style="italic">86 B &#183; replay needs the number, the receiver needs the CRC</text>
+
+        <!-- ===== 3 · physical layer ===== -->
+        <text class="glass-svg-ink" x="32" y="292" font-size="13" font-weight="600">Physical</text>
+        <text class="glass-svg-ink-2" x="32" y="310" font-size="12">layer &#183; framing</text>
+        <rect class="glass-svg-node--cyan" x="216" y="276" width="8" height="34"/>
+        <rect class="glass-svg-node" x="224" y="276" width="688" height="34"/>
+        <rect class="glass-svg-node--cyan" x="912" y="276" width="8" height="34"/>
+        <text class="glass-svg-ink-2" x="568" y="298" text-anchor="middle" font-size="12">the 86 B above, untouched</text>
+        <g class="glass-svg-line" stroke-width="1">
+          <line x1="216" y1="310" x2="216" y2="303"/><line x1="280" y1="310" x2="280" y2="303"/><line x1="344" y1="310" x2="344" y2="303"/><line x1="408" y1="310" x2="408" y2="303"/><line x1="472" y1="310" x2="472" y2="303"/><line x1="536" y1="310" x2="536" y2="303"/><line x1="600" y1="310" x2="600" y2="303"/><line x1="664" y1="310" x2="664" y2="303"/><line x1="728" y1="310" x2="728" y2="303"/><line x1="792" y1="310" x2="792" y2="303"/><line x1="856" y1="310" x2="856" y2="303"/><line x1="920" y1="310" x2="920" y2="303"/>
+        </g>
+        <g class="glass-svg-accent-stroke" fill="none"  stroke-width="1.2">
+          <path d="M220,276 V264 H172"/>
+          <path d="M916,276 V264 H964"/>
+        </g>
+        <text class="glass-svg-accent-ink" x="168" y="268" text-anchor="end" font-size="12">+ STP 1 B</text>
+        <text class="glass-svg-accent-ink" x="968" y="268" font-size="12">+ END 1 B</text>
+        <text class="glass-svg-ink-3" x="1088" y="332" text-anchor="end" font-size="12" font-style="italic">88 B &#183; now it has a beginning and an end on the wire</text>
+
+        <!-- ===== 4 · striping ===== -->
+        <path class="glass-svg-accent-stroke" d="M568,310 V352" fill="none"  stroke-width="2" marker-end="url(#peArrO)"/>
+        <text class="glass-svg-ink-2" x="216" y="356" font-size="12" font-weight="600" letter-spacing="1.2">BYTE STRIPING &#183; x4 LINK</text>
+        <text class="glass-svg-ink" x="345" y="372" text-anchor="middle" font-size="12" font-weight="600">Lane 0</text>
+        <rect class="glass-svg-node--indigo" x="300" y="380" width="90" height="26" rx="4"/>
+        <text class="glass-svg-ref-ink" x="345" y="397" text-anchor="middle" font-size="12">byte 0</text>
+        <rect class="glass-svg-node--indigo" x="300" y="412" width="90" height="26" rx="4"/>
+        <text class="glass-svg-ref-ink" x="345" y="429" text-anchor="middle" font-size="12">byte 4</text>
+        <rect class="glass-svg-node--indigo" x="300" y="444" width="90" height="26" rx="4"/>
+        <text class="glass-svg-ref-ink" x="345" y="461" text-anchor="middle" font-size="12">byte 8</text>
+        <text class="glass-svg-ink" x="455" y="372" text-anchor="middle" font-size="12" font-weight="600">Lane 1</text>
+        <rect class="glass-svg-node--indigo" x="410" y="380" width="90" height="26" rx="4"/>
+        <text class="glass-svg-ref-ink" x="455" y="397" text-anchor="middle" font-size="12">byte 1</text>
+        <rect class="glass-svg-node--indigo" x="410" y="412" width="90" height="26" rx="4"/>
+        <text class="glass-svg-ref-ink" x="455" y="429" text-anchor="middle" font-size="12">byte 5</text>
+        <rect class="glass-svg-node--indigo" x="410" y="444" width="90" height="26" rx="4"/>
+        <text class="glass-svg-ref-ink" x="455" y="461" text-anchor="middle" font-size="12">byte 9</text>
+        <text class="glass-svg-ink" x="565" y="372" text-anchor="middle" font-size="12" font-weight="600">Lane 2</text>
+        <rect class="glass-svg-node--indigo" x="520" y="380" width="90" height="26" rx="4"/>
+        <text class="glass-svg-ref-ink" x="565" y="397" text-anchor="middle" font-size="12">byte 2</text>
+        <rect class="glass-svg-node--indigo" x="520" y="412" width="90" height="26" rx="4"/>
+        <text class="glass-svg-ref-ink" x="565" y="429" text-anchor="middle" font-size="12">byte 6</text>
+        <rect class="glass-svg-node--indigo" x="520" y="444" width="90" height="26" rx="4"/>
+        <text class="glass-svg-ref-ink" x="565" y="461" text-anchor="middle" font-size="12">byte 10</text>
+        <text class="glass-svg-ink" x="675" y="372" text-anchor="middle" font-size="12" font-weight="600">Lane 3</text>
+        <rect class="glass-svg-node--indigo" x="630" y="380" width="90" height="26" rx="4"/>
+        <text class="glass-svg-ref-ink" x="675" y="397" text-anchor="middle" font-size="12">byte 3</text>
+        <rect class="glass-svg-node--indigo" x="630" y="412" width="90" height="26" rx="4"/>
+        <text class="glass-svg-ref-ink" x="675" y="429" text-anchor="middle" font-size="12">byte 7</text>
+        <rect class="glass-svg-node--indigo" x="630" y="444" width="90" height="26" rx="4"/>
+        <text class="glass-svg-ref-ink" x="675" y="461" text-anchor="middle" font-size="12">byte 11</text>
+        <g class="glass-svg-ink-stroke" fill="none"  stroke-width="1.4">
+          <line x1="345" y1="470" x2="345" y2="488" marker-end="url(#peArrI)"/>
+          <line x1="455" y1="470" x2="455" y2="488" marker-end="url(#peArrI)"/>
+          <line x1="565" y1="470" x2="565" y2="488" marker-end="url(#peArrI)"/>
+          <line x1="675" y1="470" x2="675" y2="488" marker-end="url(#peArrI)"/>
+        </g>
+        <rect class="glass-svg-node" x="300" y="492" width="420" height="30" rx="8"/>
+        <text class="glass-svg-ink" x="510" y="512" text-anchor="middle" font-size="12">SerDes &#183; 128b/130b &#183; 32 GT/s per lane</text>
+        <text class="glass-svg-ink-3" x="1088" y="440" text-anchor="end" font-size="12" font-style="italic">byte n leaves on lane n mod 4</text>
+      </svg>
+      </div>
+      <figcaption>
+        <span class="lang-en">One packet down three layers on a single byte ruler at eight pixels per byte, so each bar's width is its byte count. Two dashed guidelines pin the original eighty bytes: everything a lower layer adds appears outside them, never inside. Fields narrower than their own label get bracketed out to the margin rather than shrunk.</span>
+        <span class="lang-zh">同一个报文走过三层，画在一把 8 px/字节的标尺上，所以每根条的宽度就是它的字节数。两条竖虚线钉住最初那 80 字节：下层加的东西一律长在外面，绝不进到里面。窄到装不下标签的字段用括线引到边上写，不缩字号。</span>
+      </figcaption>
+    </figure>
+
+    <figure class="glass-panel featured-panel" data-reveal>
+      <span class="tpl-kicker">templates/diagrams/terminal-annotated.svg &#183; 1120 &#215; 560</span>
+      <div class="glass-scroll glass-scroll--wide">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="An annotated boot log, kept as the real console output and marked up rather than redrawn. The dark card is fourteen lines of kernel PCI enumeration in monospace. Five numbered badges pin lines to notes on the right. Badge one, the root bus window, five hundred and twelve megabytes, is highlighted green because everything below has to fit inside it. Badge two, the downstream bridge to bus zero four got a one megabyte window at boot, highlighted amber. Badge three, the accelerator's first base address register asks for two hundred and fifty-six megabytes, highlighted orange. Badge four, probe fails with error minus twelve, minus ENOMEM, which is the consequence and not a driver bug. Badge five points at the NVMe lines four rows later that enumerated cleanly, kept in frame so the reader can see the log itself is healthy" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">
+        <defs>
+        </defs>
+
+
+        <text class="glass-svg-ink-2" x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2">ANNOTATED CONSOLE &#183; PCI ENUMERATION, ONE FAILING DEVICE</text>
+        <text class="glass-svg-ink-3" x="1088" y="34" text-anchor="end" font-size="12" font-style="italic">real output, marked up &#183; never retyped</text>
+
+        <!-- terminal card -->
+        <rect x="32" y="52" width="728" height="460" rx="12" fill="#0E1422"/>
+        <rect x="32" y="52" width="728" height="32" rx="12" fill="#182032"/>
+        <rect x="32" y="72" width="728" height="12" fill="#182032"/>
+        <g fill="#4A5162">
+          <circle cx="52" cy="68" r="4.5"/><circle cx="70" cy="68" r="4.5"/><circle cx="88" cy="68" r="4.5"/>
+        </g>
+        <text x="110" y="72" font-size="12" fill="#8A93A6">ttyS0 &#183; 115200 8N1 &#183; dmesg | grep -E &#39;pci|accel|nvme&#39;</text>
+
+        <!-- highlights sit under the glyphs -->
+          <rect x="409.0" y="127" width="250.8" height="18" rx="3" fill="#34D399" opacity="0.26"/>
+          <rect x="401.8" y="247" width="200.4" height="18" rx="3" fill="#FBBF24" opacity="0.26"/>
+          <rect x="358.6" y="295" width="279.6" height="18" rx="3" fill="#FB7185" opacity="0.26"/>
+          <rect x="337.0" y="319" width="92.4" height="18" rx="3" fill="#FB7185" opacity="0.26"/>
+          <rect x="430.6" y="367" width="70.8" height="18" rx="3" fill="#FB7185" opacity="0.26"/>
+
+        <g font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace" font-size="12">
+          <text x="52" y="116" textLength="403.2" lengthAdjust="spacing" xml:space="preserve" fill="#7A8298">[    0.412903] PCI: MMCONFIG for domain 0000 [bus 00-ff]</text>
+          <text x="52" y="140" textLength="604.8" lengthAdjust="spacing" xml:space="preserve" fill="#D6DBE6">[    0.418772] pci_bus 0000:00: root bus resource [mem 0x90000000-0xafffffff window]</text>
+          <text x="52" y="164" textLength="396.0" lengthAdjust="spacing" xml:space="preserve" fill="#7A8298">[    0.431065] pci 0000:00:1c.0: PCI bridge to [bus 01]</text>
+          <text x="52" y="188" textLength="482.4" lengthAdjust="spacing" xml:space="preserve" fill="#D6DBE6">[    0.436210] pci 0000:01:00.0: [144d:a80a] type 00 class 0x010802</text>
+          <text x="52" y="212" textLength="590.4" lengthAdjust="spacing" xml:space="preserve" fill="#D6DBE6">[    0.441642] pci 0000:01:00.0: BAR 0: assigned [mem 0x90000000-0x90003fff 64bit]</text>
+          <text x="52" y="236" textLength="417.6" lengthAdjust="spacing" xml:space="preserve" fill="#7A8298">[    0.447318] pci 0000:00:1c.4: PCI bridge to [bus 02-04]</text>
+          <text x="52" y="260" textLength="547.2" lengthAdjust="spacing" xml:space="preserve" fill="#D6DBE6">[    0.451900] pci 0000:02:02.0:   bridge window [mem 0xa0100000-0xa01fffff]</text>
+          <text x="52" y="284" textLength="482.4" lengthAdjust="spacing" xml:space="preserve" fill="#7A8298">[    0.458233] pci 0000:04:00.0: [1de5:1001] type 00 class 0x120000</text>
+          <text x="52" y="308" textLength="583.2" lengthAdjust="spacing" xml:space="preserve" fill="#D6DBE6">[    0.462117] pci 0000:04:00.0: reg 0x10: [mem 0x00000000-0x0fffffff 64bit pref]</text>
+          <text x="52" y="332" textLength="612.0" lengthAdjust="spacing" xml:space="preserve" fill="#FDA4AF">[    0.476551] pci 0000:04:00.0: BAR 0: no space for [mem size 0x10000000 64bit pref]</text>
+          <text x="52" y="356" textLength="561.6" lengthAdjust="spacing" xml:space="preserve" fill="#FDA4AF">[    0.481990] pci 0000:04:00.0: BAR 0: failed to assign [mem size 0x10000000]</text>
+          <text x="52" y="380" textLength="446.4" lengthAdjust="spacing" xml:space="preserve" fill="#FDA4AF">[    0.488412] accel 0000:04:00.0: probe failed with error -12</text>
+          <text x="52" y="404" textLength="410.4" lengthAdjust="spacing" xml:space="preserve" fill="#D6DBE6">[    2.441642] nvme nvme0: 4/0/0 default/read/poll queues</text>
+          <text x="52" y="428" textLength="208.8" lengthAdjust="spacing" xml:space="preserve" fill="#D6DBE6">[    2.509377] nvme0n1: p1 p2</text>
+          <text x="52" y="460" fill="#34D399">/ # </text>
+        </g>
+
+        <!-- badges pinned to their lines -->
+        <g>
+          <circle class="glass-svg-node--cyan" cx="722" cy="136" r="9"/><text class="glass-svg-accent-ink" x="722" y="140" text-anchor="middle"  font-size="12" font-weight="600" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">1</text>
+          <circle class="glass-svg-node--cyan" cx="722" cy="256" r="9"/><text class="glass-svg-accent-ink" x="722" y="260" text-anchor="middle"  font-size="12" font-weight="600" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">2</text>
+          <circle class="glass-svg-node--cyan" cx="722" cy="304" r="9"/><text class="glass-svg-accent-ink" x="722" y="308" text-anchor="middle"  font-size="12" font-weight="600" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">3</text>
+          <circle class="glass-svg-node--cyan" cx="722" cy="376" r="9"/><text class="glass-svg-accent-ink" x="722" y="380" text-anchor="middle"  font-size="12" font-weight="600" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">4</text>
+          <circle class="glass-svg-node--cyan" cx="722" cy="424" r="9"/><text class="glass-svg-accent-ink" x="722" y="428" text-anchor="middle"  font-size="12" font-weight="600" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">5</text>
+        </g>
+        <g class="glass-svg-line" fill="none"  stroke-width="1.2" stroke-dasharray="4 3">
+          <path d="M736,136 H756 Q766,136 766,126 V98 Q766,88 776,88 H790"/>
+          <path d="M736,256 H756 Q766,256 766,246 V186 Q766,176 776,176 H790"/>
+          <path d="M736,304 H756 Q766,304 766,294 V274 Q766,264 776,264 H790"/>
+          <path d="M736,376 H756 Q766,376 766,366 V362 Q766,352 776,352 H790"/>
+          <path d="M736,424 H756 Q766,424 766,434 V430 Q766,440 776,440 H790"/>
+        </g>
+
+        <!-- annotation column -->
+        <g>
+          <circle class="glass-svg-node--cyan" cx="800" cy="84" r="9"/><text class="glass-svg-accent-ink" x="800" y="88" text-anchor="middle" font-size="12" font-weight="600">1</text>
+          <text class="glass-svg-ink" x="820" y="88" font-size="13" font-weight="600">The only window there is</text>
+          <text class="glass-svg-ink-2" x="820" y="108" font-size="12">Everything on this root bus has to fit in</text>
+          <text class="glass-svg-ink-2" x="820" y="125" font-size="12">0x9000_0000–0xafff_ffff — 512 MiB. Read this</text>
+          <text class="glass-svg-ink-2" x="820" y="142" font-size="12">line before you read any BAR line.</text>
+          <circle class="glass-svg-node--cyan" cx="800" cy="172" r="9"/><text class="glass-svg-accent-ink" x="800" y="176" text-anchor="middle" font-size="12" font-weight="600">2</text>
+          <text class="glass-svg-ink" x="820" y="176" font-size="13" font-weight="600">Firmware already froze the window</text>
+          <text class="glass-svg-ink-2" x="820" y="196" font-size="12">The bridge down to bus 04 got a 1 MiB window</text>
+          <text class="glass-svg-ink-2" x="820" y="213" font-size="12">at boot. Nothing behind that bridge can ever</text>
+          <text class="glass-svg-ink-2" x="820" y="230" font-size="12">be larger, whatever the parent has spare.</text>
+          <circle class="glass-svg-node--cyan" cx="800" cy="260" r="9"/><text class="glass-svg-accent-ink" x="800" y="264" text-anchor="middle" font-size="12" font-weight="600">3</text>
+          <text class="glass-svg-ink" x="820" y="264" font-size="13" font-weight="600">What the device is asking for</text>
+          <text class="glass-svg-ink-2" x="820" y="284" font-size="12">reg 0x10 reads back 0x0fff_ffff, so BAR0 wants</text>
+          <text class="glass-svg-ink-2" x="820" y="301" font-size="12">256 MiB — 256× the window it must live in.</text>
+          <text class="glass-svg-ink-2" x="820" y="318" font-size="12">This line is the request, not the result.</text>
+          <circle class="glass-svg-node--cyan" cx="800" cy="348" r="9"/><text class="glass-svg-accent-ink" x="800" y="352" text-anchor="middle" font-size="12" font-weight="600">4</text>
+          <text class="glass-svg-ink" x="820" y="352" font-size="13" font-weight="600">−12 is −ENOMEM, not a driver bug</text>
+          <text class="glass-svg-ink-2" x="820" y="372" font-size="12">The resource was never assigned, so pci_iomap()</text>
+          <text class="glass-svg-ink-2" x="820" y="389" font-size="12">in probe() had nothing to map. Fixing the driver</text>
+          <text class="glass-svg-ink-2" x="820" y="406" font-size="12">cannot fix this; the window has to grow.</text>
+          <circle class="glass-svg-node--cyan" cx="800" cy="436" r="9"/><text class="glass-svg-accent-ink" x="800" y="440" text-anchor="middle" font-size="12" font-weight="600">5</text>
+          <text class="glass-svg-ink" x="820" y="440" font-size="13" font-weight="600">The healthy one, for contrast</text>
+          <text class="glass-svg-ink-2" x="820" y="460" font-size="12">Four lines later nvme got its BAR and its queues.</text>
+          <text class="glass-svg-ink-2" x="820" y="477" font-size="12">Keep a known-good stretch in the same figure —</text>
+          <text class="glass-svg-ink-2" x="820" y="494" font-size="12">it is what tells you the log itself is fine.</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>
+        <span class="lang-en">Fourteen lines of real PCI enumeration, marked up and never retyped. Five badges pin lines to notes; the highlight blocks sit under the glyphs and are positioned from character indices, because every line is pinned to an exact textLength. The story: a 256 MiB BAR behind a bridge window firmware sized at 1 MiB, and the minus twelve that follows. The healthy NVMe lines stay in frame on purpose.</span>
+        <span class="lang-zh">十四行真实的 PCI 枚举输出，只加标注、一个字符不改。五个徽章把行钉到右栏说明；高亮块画在文字下面，位置由字符下标算出来——每行都用 textLength 锁死了字符步进。讲的事：一个 256 MiB 的 BAR 挂在 firmware 只给了 1 MiB 的桥窗口后面，接着就是 -12。正常的 nvme 那几行是故意留在画面里的。</span>
+      </figcaption>
+    </figure>
+
+    <figure class="glass-panel featured-panel" data-reveal>
+      <span class="tpl-kicker">templates/diagrams/struct-graph.svg &#183; 1120 &#215; 560</span>
+      <div class="glass-scroll glass-scroll--wide">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Pointer graph of the Linux memory-management structures, drawn so every arrow leaves the field that actually holds the pointer rather than the edge of the box. task_struct lists pid, comm, mm, active_mm and files; an orange dot marks each pointer field and the arrow starts there. The mm dot goes to mm_struct, whose mm_mt field is a maple tree keyed by start address; three slots in that tree carry the ordered virtual ranges and each slot points down at one vm_area_struct. The first VMA is drawn in full, with start, end, flags, page offset, the file it maps, its operations table, and anon_vma which stays NULL until the first copy-on-write store, while its two siblings show only start, end and flags. Two further arrows leave the first VMA: vm_file to a struct file, vm_ops to a vm_operations_struct holding filemap_fault. Field names follow include linux mm_types.h at kernel 6.6; row order is reading order, not struct offset order" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">
+        <defs>
+          <marker id="sgArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="glass-svg-accent" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+          </marker>
+        </defs>
+
+
+        <text class="glass-svg-ink-2" x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2">STRUCT GRAPH &#183; WHICH FIELD HOLDS WHICH POINTER</text>
+        <g class="glass-svg-ink-2" font-size="12">
+          <circle class="glass-svg-accent" cx="600" cy="30" r="4"/><text x="612" y="34">pointer field &#183; every arrow starts here, not at the edge of the box</text>
+        </g>
+
+        <rect class="glass-svg-node" x="640" y="76" width="448" height="136" rx="10"   stroke-dasharray="5 4"/>
+        <text class="glass-svg-ink" x="656" y="100" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">mm-&gt;mm_mt</text>
+        <text class="glass-svg-ink-2" x="656" y="118" font-size="12">maple tree, keyed by vm_start &#183; replaced the VMA list and rbtree in 6.1</text>
+        <g>
+          <rect class="glass-svg-node" x="648" y="132" width="136" height="44" rx="6"/>
+          <text class="glass-svg-ink" x="716" y="150" text-anchor="middle" font-size="12">slot 0</text>
+          <text class="glass-svg-ink-2" x="716" y="167" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">0x5566_1000+</text>
+          <rect class="glass-svg-node" x="796" y="132" width="136" height="44" rx="6"/>
+          <text class="glass-svg-ink" x="864" y="150" text-anchor="middle" font-size="12">slot 1</text>
+          <text class="glass-svg-ink-2" x="864" y="167" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">0x5566_9000+</text>
+          <rect class="glass-svg-node" x="944" y="132" width="136" height="44" rx="6"/>
+          <text class="glass-svg-ink" x="1012" y="150" text-anchor="middle" font-size="12">slot 2</text>
+          <text class="glass-svg-ink-2" x="1012" y="167" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">0x7ffd_0000+</text>
+        </g>
+
+        <g>
+          <rect class="glass-svg-node" x="32" y="76" width="228" height="138" rx="8"/>
+          <path class="glass-svg-node" d="M32,84 q0,-8 8,-8 H252 q8,0 8,8 V104 H32 Z"/>
+          <line class="glass-svg-line" x1="32" y1="104" x2="260" y2="104"/>
+          <rect class="glass-svg-ref-ink" x="32" y="84" width="3" height="20"/>
+          <text class="glass-svg-ink" x="46" y="95" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct task_struct</text>
+          <text class="glass-svg-ink" x="46" y="119" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">pid</text>
+          <text class="glass-svg-ink-2" x="242" y="119" font-size="12" text-anchor="end">pid_t</text>
+          <text class="glass-svg-ink" x="46" y="141" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">comm[16]</text>
+          <text class="glass-svg-ink-2" x="242" y="141" font-size="12" text-anchor="end">char</text>
+          <text class="glass-svg-ink" x="46" y="163" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">mm</text>
+          <text class="glass-svg-ink-2" x="242" y="163" font-size="12" text-anchor="end">mm_struct *</text>
+          <circle class="glass-svg-accent" cx="260" cy="159" r="4"/>
+          <text class="glass-svg-ink" x="46" y="185" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">active_mm</text>
+          <text class="glass-svg-ink-2" x="242" y="185" font-size="12" text-anchor="end">mm_struct *</text>
+          <circle class="glass-svg-accent" cx="260" cy="181" r="4"/>
+          <text class="glass-svg-ink" x="46" y="207" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">files</text>
+          <text class="glass-svg-ink-2" x="242" y="207" font-size="12" text-anchor="end">files_struct *</text>
+          <circle class="glass-svg-accent" cx="260" cy="203" r="4"/>
+        </g>
+        <g>
+          <rect class="glass-svg-node" x="316" y="76" width="264" height="160" rx="8"/>
+          <path class="glass-svg-node" d="M316,84 q0,-8 8,-8 H572 q8,0 8,8 V104 H316 Z"/>
+          <line class="glass-svg-line" x1="316" y1="104" x2="580" y2="104"/>
+          <rect class="glass-svg-ref-ink" x="316" y="84" width="3" height="20"/>
+          <text class="glass-svg-ink" x="330" y="95" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct mm_struct</text>
+          <text class="glass-svg-ink" x="330" y="119" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">mm_users</text>
+          <text class="glass-svg-ink-2" x="562" y="119" font-size="12" text-anchor="end">atomic_t</text>
+          <text class="glass-svg-ink" x="330" y="141" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">mm_count</text>
+          <text class="glass-svg-ink-2" x="562" y="141" font-size="12" text-anchor="end">atomic_t</text>
+          <text class="glass-svg-ink" x="330" y="163" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">pgd</text>
+          <text class="glass-svg-ink-2" x="562" y="163" font-size="12" text-anchor="end">&#8594; page tables</text>
+          <circle class="glass-svg-accent" cx="580" cy="159" r="4"/>
+          <text class="glass-svg-ink" x="330" y="185" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">mmap_base</text>
+          <text class="glass-svg-ink-2" x="562" y="185" font-size="12" text-anchor="end">unsigned long</text>
+          <text class="glass-svg-ink" x="330" y="207" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">mm_mt</text>
+          <text class="glass-svg-ink-2" x="562" y="207" font-size="12" text-anchor="end">maple_tree</text>
+          <circle class="glass-svg-accent" cx="580" cy="203" r="4"/>
+          <text class="glass-svg-ink" x="330" y="229" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">map_count</text>
+          <text class="glass-svg-ink-2" x="562" y="229" font-size="12" text-anchor="end">int &#183; 42 VMAs</text>
+        </g>
+        <g>
+          <rect class="glass-svg-node" x="140" y="290" width="280" height="182" rx="8"/>
+          <path class="glass-svg-node" d="M140,298 q0,-8 8,-8 H412 q8,0 8,8 V318 H140 Z"/>
+          <line class="glass-svg-line" x1="140" y1="318" x2="420" y2="318"/>
+          <rect class="glass-svg-ok" x="140" y="298" width="3" height="20"/>
+          <text class="glass-svg-ink" x="154" y="309" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct vm_area_struct</text>
+          <text class="glass-svg-ink" x="154" y="333" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_start</text>
+          <text class="glass-svg-ink-2" x="402" y="333" font-size="12" text-anchor="end">0x5566_1000</text>
+          <text class="glass-svg-ink" x="154" y="355" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_end</text>
+          <text class="glass-svg-ink-2" x="402" y="355" font-size="12" text-anchor="end">0x5566_9000</text>
+          <text class="glass-svg-ink" x="154" y="377" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_flags</text>
+          <text class="glass-svg-ink-2" x="402" y="377" font-size="12" text-anchor="end">VM_READ|VM_EXEC</text>
+          <text class="glass-svg-ink" x="154" y="399" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_pgoff</text>
+          <text class="glass-svg-ink-2" x="402" y="399" font-size="12" text-anchor="end">0</text>
+          <text class="glass-svg-ink" x="154" y="421" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_file</text>
+          <text class="glass-svg-ink-2" x="402" y="421" font-size="12" text-anchor="end">file *</text>
+          <circle class="glass-svg-accent" cx="420" cy="417" r="4"/>
+          <text class="glass-svg-ink" x="154" y="443" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_ops</text>
+          <text class="glass-svg-ink-2" x="402" y="443" font-size="12" text-anchor="end">vm_operations_struct *</text>
+          <circle class="glass-svg-accent" cx="420" cy="439" r="4"/>
+          <text class="glass-svg-ink" x="154" y="465" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">anon_vma</text>
+          <text class="glass-svg-ink-2" x="402" y="465" font-size="12" text-anchor="end">NULL until first COW</text>
+        </g>
+        <g>
+          <rect class="glass-svg-node" x="460" y="290" width="240" height="94" rx="8"/>
+          <path class="glass-svg-node" d="M460,298 q0,-8 8,-8 H692 q8,0 8,8 V318 H460 Z"/>
+          <line class="glass-svg-line" x1="460" y1="318" x2="700" y2="318"/>
+          <rect class="glass-svg-ok" x="460" y="298" width="3" height="20"/>
+          <text class="glass-svg-ink" x="474" y="309" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct vm_area_struct</text>
+          <text class="glass-svg-ink" x="474" y="333" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_start</text>
+          <text class="glass-svg-ink-2" x="682" y="333" font-size="12" text-anchor="end">0x5566_9000</text>
+          <text class="glass-svg-ink" x="474" y="355" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_end</text>
+          <text class="glass-svg-ink-2" x="682" y="355" font-size="12" text-anchor="end">0x5566_b000</text>
+          <text class="glass-svg-ink" x="474" y="377" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_flags</text>
+          <text class="glass-svg-ink-2" x="682" y="377" font-size="12" text-anchor="end">VM_READ|VM_WRITE</text>
+        </g>
+        <g>
+          <rect class="glass-svg-node" x="740" y="290" width="240" height="94" rx="8"/>
+          <path class="glass-svg-node" d="M740,298 q0,-8 8,-8 H972 q8,0 8,8 V318 H740 Z"/>
+          <line class="glass-svg-line" x1="740" y1="318" x2="980" y2="318"/>
+          <rect class="glass-svg-ok" x="740" y="298" width="3" height="20"/>
+          <text class="glass-svg-ink" x="754" y="309" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct vm_area_struct</text>
+          <text class="glass-svg-ink" x="754" y="333" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_start</text>
+          <text class="glass-svg-ink-2" x="962" y="333" font-size="12" text-anchor="end">0x7ffd_0000</text>
+          <text class="glass-svg-ink" x="754" y="355" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_end</text>
+          <text class="glass-svg-ink-2" x="962" y="355" font-size="12" text-anchor="end">0x7ffd_2000</text>
+          <text class="glass-svg-ink" x="754" y="377" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_flags</text>
+          <text class="glass-svg-ink-2" x="962" y="377" font-size="12" text-anchor="end">VM_GROWSDOWN</text>
+        </g>
+        <g>
+          <rect class="glass-svg-node" x="460" y="408" width="240" height="94" rx="8"/>
+          <path class="glass-svg-node" d="M460,416 q0,-8 8,-8 H692 q8,0 8,8 V436 H460 Z"/>
+          <line class="glass-svg-line" x1="460" y1="436" x2="700" y2="436"/>
+          <rect class="glass-svg-warn" x="460" y="416" width="3" height="20"/>
+          <text class="glass-svg-ink" x="474" y="427" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct file</text>
+          <text class="glass-svg-ink" x="474" y="451" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">f_inode</text>
+          <text class="glass-svg-ink-2" x="682" y="451" font-size="12" text-anchor="end">inode *</text>
+          <text class="glass-svg-ink" x="474" y="473" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">f_mapping</text>
+          <text class="glass-svg-ink-2" x="682" y="473" font-size="12" text-anchor="end">address_space *</text>
+          <text class="glass-svg-ink" x="474" y="495" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">f_op</text>
+          <text class="glass-svg-ink-2" x="682" y="495" font-size="12" text-anchor="end">file_operations *</text>
+        </g>
+        <g>
+          <rect class="glass-svg-node" x="740" y="408" width="240" height="94" rx="8"/>
+          <path class="glass-svg-node" d="M740,416 q0,-8 8,-8 H972 q8,0 8,8 V436 H740 Z"/>
+          <line class="glass-svg-line" x1="740" y1="436" x2="980" y2="436"/>
+          <rect class="glass-svg-warn" x="740" y="416" width="3" height="20"/>
+          <text class="glass-svg-ink" x="754" y="427" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct vm_operations_struct</text>
+          <text class="glass-svg-ink" x="754" y="451" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">.fault</text>
+          <text class="glass-svg-ink-2" x="962" y="451" font-size="12" text-anchor="end">filemap_fault</text>
+          <text class="glass-svg-ink" x="754" y="473" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">.map_pages</text>
+          <text class="glass-svg-ink-2" x="962" y="473" font-size="12" text-anchor="end">filemap_map_pages</text>
+          <text class="glass-svg-ink" x="754" y="495" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">.open / .close</text>
+          <text class="glass-svg-ink-2" x="962" y="495" font-size="12" text-anchor="end">NULL</text>
+        </g>
+
+        <g class="glass-svg-accent-stroke" fill="none"  stroke-width="1.6">
+          <path d="M260,159 H288 V90 H316" marker-end="url(#sgArrO)"/>
+          <path d="M580,203 H610 V154 H640" marker-end="url(#sgArrO)"/>
+          <path d="M716,176 V246 H280 V290" marker-end="url(#sgArrO)"/>
+          <path d="M864,176 V262 H580 V290" marker-end="url(#sgArrO)"/>
+          <path d="M1012,176 V278 H860 V290" marker-end="url(#sgArrO)"/>
+          <path d="M420,417 H440 V422 H460" marker-end="url(#sgArrO)"/>
+          <path d="M420,439 H436 V396 H720 V422 H740" marker-end="url(#sgArrO)"/>
+        </g>
+
+        <text class="glass-svg-ink-2" x="32" y="528" font-size="12">field names from include/linux/mm_types.h and sched.h at v6.6</text>
+        <text class="glass-svg-ink-3" x="1088" y="528" text-anchor="end" font-size="12" font-style="italic">rows are in reading order, not struct offset order</text>
+      </svg>
+      </div>
+      <figcaption>
+        <span class="lang-en">task_struct to mm_struct to the maple tree to three VMAs, with every arrow leaving the field that actually holds the pointer and landing on the target's title bar. Start precise, end whole — that asymmetry is the point. One sibling is drawn in full, the other two keep only what tells them apart. Names checked against include/linux/mm_types.h at v6.6.</span>
+        <span class="lang-zh">task_struct → mm_struct → maple tree → 三个 VMA，每根箭头从真正持有指针的那一行出发，落在目标卡片的标题栏上。起点精确到字段、终点是整个对象——这个不对称就是重点。兄弟对象只详画一个，其余只留区分它们的那几行。字段名对过 v6.6 的 include/linux/mm_types.h。</span>
+      </figcaption>
+    </figure>
+
+    <figure class="glass-panel featured-panel" data-reveal>
+      <span class="tpl-kicker">templates/diagrams/bus-fabric.svg &#183; 1120 &#215; 560</span>
+      <div class="glass-scroll glass-scroll--wide">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Bus fabric of one SoC drawn the old way, as two horizontal rails with everything hanging off them. Three masters sit above the upper rail — a four-core CPU cluster, a sixteen-channel DMA engine and a GPU — and four slaves hang below it: SRAM, an AXI to APB bridge, high-speed USB and Ethernet, and the DDR4 controller. The rail is AXI4, one hundred and twenty-eight bits wide, and an arbiter block sits astride it. Each drop carries a slash with the width of that connection in bits, and the channel names it actually uses. The bridge drops to a second, narrower rail: APB at thirty-two bits, carrying UART, I2C, SPI, GPIO and a watchdog. One read is traced in orange over the top: badge one, the CPU drives its read-address channel onto the rail; badge two, the arbiter grants it the rail for that beat; badge three, the request reaches the DDR controller; badge four, read data returns along the same rail on the read channel, drawn dashed because it is the return leg" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">
+        <defs>
+          <marker id="bfArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="glass-svg-accent" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+          </marker>
+        </defs>
+
+
+        <text class="glass-svg-ink-2" x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2">BUS FABRIC &#183; TWO RAILS, ONE TRACED READ</text>
+        <g class="glass-svg-ink-2" font-size="12">
+          <rect class="glass-svg-node--indigo" x="596" y="24" width="16" height="12" rx="3"/><text x="620" y="34">master</text>
+          <rect class="glass-svg-node" x="686" y="24" width="16" height="12" rx="3"/><text x="710" y="34">slave</text>
+          <rect class="glass-svg-node--warn" x="768" y="24" width="16" height="12" rx="3"/><text x="792" y="34">APB peripheral</text>
+          <line class="glass-svg-accent-stroke" x1="904" y1="30" x2="928" y2="30"  stroke-width="2.2"/><text x="936" y="34">this read</text>
+        </g>
+
+        <!-- masters -->
+        <g>
+          <rect class="glass-svg-node--indigo" x="100" y="76" width="200" height="70" rx="10"/>
+          <text class="glass-svg-ref-ink" x="200" y="109" text-anchor="middle" font-size="13" font-weight="600">CPU cluster</text>
+          <text class="glass-svg-ink-2" x="200" y="127" text-anchor="middle" font-size="12">4 &#215; A78 &#183; AXI master 0</text>
+          <rect class="glass-svg-node--indigo" x="420" y="76" width="200" height="70" rx="10"/>
+          <text class="glass-svg-ref-ink" x="520" y="109" text-anchor="middle" font-size="13" font-weight="600">DMA engine</text>
+          <text class="glass-svg-ink-2" x="520" y="127" text-anchor="middle" font-size="12">16 ch &#183; AXI master 1</text>
+          <rect class="glass-svg-node--indigo" x="740" y="76" width="200" height="70" rx="10"/>
+          <text class="glass-svg-ref-ink" x="840" y="109" text-anchor="middle" font-size="13" font-weight="600">GPU / VPU</text>
+          <text class="glass-svg-ink-2" x="840" y="127" text-anchor="middle" font-size="12">AXI master 2</text>
+        </g>
+
+        <!-- traced read, drawn under the rails and the arbiter -->
+        <g class="glass-svg-accent-stroke" fill="none"  stroke-width="2.2">
+          <line x1="200" y1="146" x2="200" y2="182"/>
+          <line x1="200" y1="182" x2="980" y2="182"/>
+          <line x1="980" y1="182" x2="980" y2="254" marker-end="url(#bfArrO)"/>
+        </g>
+        <g class="glass-svg-accent-stroke" fill="none"  stroke-width="2.2" stroke-dasharray="6 4">
+          <line x1="968" y1="254" x2="968" y2="220"/>
+          <line x1="968" y1="220" x2="212" y2="220"/>
+          <line x1="212" y1="220" x2="212" y2="146" marker-end="url(#bfArrO)"/>
+        </g>
+
+        <!-- rails -->
+        <rect class="glass-svg-ink" x="64" y="198" width="992" height="5" rx="2.5"/>
+        <rect class="glass-svg-ink-3" x="180" y="398" width="720" height="6" rx="3"/>
+        <text class="glass-svg-ink" x="1056" y="172" text-anchor="end" font-size="12" font-weight="600" letter-spacing="1.2">AXI4 &#183; 128-bit &#183; AW W B AR R</text>
+        <text class="glass-svg-ink-2" x="916" y="406" font-size="12" font-weight="600" letter-spacing="1.2">APB &#183; 32-bit</text>
+
+        <!-- drops -->
+        <g class="glass-svg-ink-stroke" stroke-width="1.6">
+          <line x1="200" y1="146" x2="200" y2="200"/>
+          <line x1="520" y1="146" x2="520" y2="200"/>
+          <line x1="840" y1="146" x2="840" y2="200"/>
+          <line x1="160" y1="200" x2="160" y2="254"/>
+          <line x1="440" y1="200" x2="440" y2="254"/>
+          <line x1="720" y1="200" x2="720" y2="254"/>
+          <line x1="980" y1="200" x2="980" y2="254"/>
+        </g>
+        <g class="glass-svg-line" stroke-width="1.6">
+          <line x1="240" y1="400" x2="240" y2="430"/>
+          <line x1="400" y1="400" x2="400" y2="430"/>
+          <line x1="560" y1="400" x2="560" y2="430"/>
+          <line x1="720" y1="400" x2="720" y2="430"/>
+          <line x1="880" y1="400" x2="880" y2="430"/>
+        </g>
+        <line class="glass-svg-line" x1="440" y1="324" x2="440" y2="398"  stroke-width="1.6"/>
+
+        <!-- bus widths -->
+          <line class="glass-svg-ink-stroke" x1="194" y1="178" x2="206" y2="166"  stroke-width="1.2"/>
+          <text class="glass-svg-ink-2" x="210" y="174" font-size="12">128</text>
+          <line class="glass-svg-ink-stroke" x1="434" y1="366" x2="446" y2="354"  stroke-width="1.2"/>
+          <text class="glass-svg-ink-2" x="450" y="362" font-size="12">32</text>
+          <line class="glass-svg-ink-stroke" x1="234" y1="421" x2="246" y2="409"  stroke-width="1.2"/>
+          <text class="glass-svg-ink-2" x="250" y="417" font-size="12">32</text>
+
+        <!-- arbiter astride the rail -->
+        <rect class="glass-svg-node" x="296" y="188" width="104" height="24" rx="8"/>
+        <text class="glass-svg-ink" x="348" y="204" text-anchor="middle" font-size="12" font-weight="600">arbiter</text>
+
+        <!-- slaves + apb -->
+        <g>
+          <rect class="glass-svg-node" x="70" y="254" width="180" height="70" rx="10"/>
+          <text class="glass-svg-ink-2" x="160" y="287" text-anchor="middle" font-size="13" font-weight="600">SRAM</text>
+          <text class="glass-svg-ink-2" x="160" y="305" text-anchor="middle" font-size="12">256 KiB &#183; 0x0000_0000</text>
+          <rect class="glass-svg-node" x="350" y="254" width="180" height="70" rx="10"/>
+          <text class="glass-svg-ink-2" x="440" y="287" text-anchor="middle" font-size="13" font-weight="600">AXI &#8594; APB bridge</text>
+          <text class="glass-svg-ink-2" x="440" y="305" text-anchor="middle" font-size="12">protocol converter</text>
+          <rect class="glass-svg-node" x="630" y="254" width="180" height="70" rx="10"/>
+          <text class="glass-svg-ink-2" x="720" y="287" text-anchor="middle" font-size="13" font-weight="600">USB3 &#183; GbE</text>
+          <text class="glass-svg-ink-2" x="720" y="305" text-anchor="middle" font-size="12">high-speed IP</text>
+          <rect class="glass-svg-node" x="890" y="254" width="180" height="70" rx="10"/>
+          <text class="glass-svg-ink-2" x="980" y="287" text-anchor="middle" font-size="13" font-weight="600">DDR4 controller</text>
+          <text class="glass-svg-ink-2" x="980" y="305" text-anchor="middle" font-size="12">0x8000_0000 &#183; 4 GiB</text>
+        </g>
+        <g>
+          <rect class="glass-svg-node--warn" x="175" y="430" width="130" height="56" rx="10"/>
+          <text class="glass-svg-warn" x="240" y="463" text-anchor="middle" font-size="13" font-weight="600">UART0</text>
+          <rect class="glass-svg-node--warn" x="335" y="430" width="130" height="56" rx="10"/>
+          <text class="glass-svg-warn" x="400" y="463" text-anchor="middle" font-size="13" font-weight="600">I2C0</text>
+          <rect class="glass-svg-node--warn" x="495" y="430" width="130" height="56" rx="10"/>
+          <text class="glass-svg-warn" x="560" y="463" text-anchor="middle" font-size="13" font-weight="600">SPI0</text>
+          <rect class="glass-svg-node--warn" x="655" y="430" width="130" height="56" rx="10"/>
+          <text class="glass-svg-warn" x="720" y="463" text-anchor="middle" font-size="13" font-weight="600">GPIO</text>
+          <rect class="glass-svg-node--warn" x="815" y="430" width="130" height="56" rx="10"/>
+          <text class="glass-svg-warn" x="880" y="463" text-anchor="middle" font-size="13" font-weight="600">WDT</text>
+        </g>
+
+        <!-- badges -->
+        <g font-size="12" font-weight="600" text-anchor="middle">
+          <circle class="glass-svg-node--cyan" cx="176" cy="168" r="9"/><text class="glass-svg-accent-ink" x="176" y="172">1</text>
+          <circle class="glass-svg-node--cyan" cx="348" cy="166" r="9"/><text class="glass-svg-accent-ink" x="348" y="170">2</text>
+          <circle class="glass-svg-node--cyan" cx="1004" cy="232" r="9"/><text class="glass-svg-accent-ink" x="1004" y="236">3</text>
+          <circle class="glass-svg-node--cyan" cx="700" cy="234" r="9"/><text class="glass-svg-accent-ink" x="700" y="238">4</text>
+        </g>
+
+        <text class="glass-svg-ink-2" x="32" y="524" font-size="12">every drop carries its own width; the rail carries the name of the channels riding it</text>
+        <text class="glass-svg-ink-3" x="1088" y="524" text-anchor="end" font-size="12" font-style="italic">rails are a drawing, not a topology claim &#183; a real AXI NoC is switched</text>
+      </svg>
+      </div>
+      <figcaption>
+        <span class="lang-en">Masters above the rail, slaves below, the bridge dropping to a narrower rail with its own peripherals. Each drop carries its width as a slash and a number; the rail carries the names of the channels riding it. One read is traced out solid and back dashed, twelve pixels clear of the rail — at eight it vanished into it. The footer says out loud that rails are a drawing, not a topology claim.</span>
+        <span class="lang-zh">主设备在轨上方、从设备在下方，桥再往下接一条更窄的轨和它自己的外设。每条引下线用斜杠加数字标位宽，轨上写跑在它上面的通道名。一次读事务去程实线、回程虚线，离轨 12 px——8 px 时实测糊进轨里看不见。图脚明写：轨是一种画法，不是拓扑论断。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
 <!-- Usage band -->
 <section class="glass-section glass-section--alt">
   <div class="glass-container glass-container--wide">
     <div class="craft-grid">
       <div>
-        <span class="glass-eyebrow">05 · <span class="lang-en">How to use one</span><span class="lang-zh">怎么用</span></span>
+        <span class="glass-eyebrow">06 · <span class="lang-en">How to use one</span><span class="lang-zh">怎么用</span></span>
         <h2>
           <span class="lang-en">Paste, prune,<br>let the tokens work.</span>
           <span class="lang-zh">贴入、删两样，<br>剩下交给 token。</span>
@@ -1729,7 +2831,7 @@
 <!-- CTA -->
 <section class="glass-section">
   <div class="glass-container" style="text-align:center; max-width:720px;">
-    <span class="glass-eyebrow">06 · <span class="lang-en">Go deeper</span><span class="lang-zh">更进一步</span></span>
+    <span class="glass-eyebrow">07 · <span class="lang-en">Go deeper</span><span class="lang-zh">更进一步</span></span>
     <h2>
       <span class="lang-en">See them in a real page.</span>
       <span class="lang-zh">看它们在真实页面里的样子。</span>

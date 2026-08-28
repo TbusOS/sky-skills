@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Read path of a four-way set-associative level-one data cache, drawn as a datapath rather than a block diagram. Badge A: the address splits into a thirty-six bit tag, a six bit set index and a six bit block offset. Badge B: the set index enters a six-to-sixty-four decoder whose wordline runs down the left edge and selects set forty-one, one entry in each of the four ways. Badge C: each way's stored tag meets the address tag at its own comparator; way one is invalid so its comparator can never assert, and way two matches. Badge D: the four match lines leave as one four-bit bundle, drive the select input of a four-to-one multiplexer that picks way two's sixty-four byte line, and the chosen word leaves to the load unit. Badge E: the same bundle enters an OR gate, whose output is the hit signal. Miss is simply that output staying low" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">
+  <style>
+    /* Standalone preview values = glass dark theme. When pasted into a glass
+       page, DELETE this style block and the canvas rect below — glass.css
+       provides these classes with theme-switching tokens. */
+    .glass-svg-ink   { fill: #F4F7FF; }
+    .glass-svg-ink-2 { fill: rgba(231,238,255,0.74); }
+    .glass-svg-ink-3 { fill: rgba(231,238,255,0.55); }
+    .glass-svg-node  { fill: rgba(255,255,255,0.08); stroke: rgba(255,255,255,0.17); }
+    .glass-svg-node--cyan   { fill: rgba(34,211,238,0.15); stroke: rgba(34,211,238,0.55); }
+    .glass-svg-node--indigo { fill: rgba(129,140,248,0.16); stroke: rgba(129,140,248,0.55); }
+    .glass-svg-node--warn   { fill: rgba(251,191,36,0.14); stroke: rgba(251,191,36,0.55); }
+    .glass-svg-line  { stroke: rgba(255,255,255,0.10); }
+    .glass-svg-ink-stroke { stroke: rgba(244,247,255,0.85); fill: none; }
+    .glass-svg-accent      { fill: #22D3EE; }
+    .glass-svg-accent-ink  { fill: #22D3EE; }
+    .glass-svg-accent-stroke { stroke: #22D3EE; fill: none; }
+    .glass-svg-ref-ink { fill: #A5B4FC; }
+    .glass-svg-ok   { fill: #34D399; }
+    .glass-svg-warn { fill: #FBBF24; }
+  </style>
+  <defs>
+    <marker id="dpArrI" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="glass-svg-ink" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+    </marker>
+    <marker id="dpArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="glass-svg-accent" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="560" rx="16" fill="#0B1020"/>
+
+  <text class="glass-svg-ink-2" x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2">DATAPATH &#183; 4-WAY SET-ASSOCIATIVE LOOKUP</text>
+  <g class="glass-svg-ink-2" font-size="12">
+    <path class="glass-svg-node--indigo" d="M560,24 L576,28 L576,36 L560,40 Z"/><text x="584" y="34">comparator</text>
+    <path class="glass-svg-node" d="M690,24 L706,28 L706,36 L690,40 Z"   transform="rotate(180 698 32)"/><text x="714" y="34">multiplexer</text>
+    <path class="glass-svg-node" d="M800,24 Q814,24 828,32 Q814,40 800,40 Q807,32 800,24 Z"/><text x="836" y="34">OR gate</text>
+  </g>
+
+  <!-- ===== address split ===== -->
+  <g class="glass-svg-ink-2" font-size="12">
+    <text x="140" y="66">47</text><text x="556" y="66" text-anchor="end">12</text>
+    <text x="564" y="66">11</text><text x="796" y="66" text-anchor="end">6</text>
+    <text x="804" y="66">5</text><text x="1000" y="66" text-anchor="end">0</text>
+  </g>
+  <rect class="glass-svg-node--indigo" x="140" y="72" width="420" height="36"/>
+  <rect class="glass-svg-node--cyan" x="560" y="72" width="240" height="36"   stroke-width="1.5"/>
+  <rect class="glass-svg-node" x="800" y="72" width="200" height="36"/>
+  <g font-size="12" text-anchor="middle">
+    <text class="glass-svg-ref-ink" x="350" y="95">TAG &#183; 36 bits</text>
+    <text class="glass-svg-accent-ink" x="680" y="95">SET INDEX &#183; 6</text>
+    <text class="glass-svg-ink-2" x="900" y="95">BLOCK OFFSET &#183; 6</text>
+  </g>
+
+  <!-- ===== decoder ===== -->
+  <path class="glass-svg-node--cyan" d="M620,140 L740,140 L716,176 L644,176 Z"   stroke-width="1.5"/>
+  <text class="glass-svg-accent-ink" x="680" y="163" text-anchor="middle" font-size="12" font-weight="600">6 &#8594; 64</text>
+  <text class="glass-svg-ink-2" x="752" y="163" font-size="12">decoder &#183; one wordline per set</text>
+
+  <!-- ===== wires ===== -->
+  <g class="glass-svg-ink-stroke" fill="none"  stroke-width="1.4">
+    <line x1="680" y1="108" x2="680" y2="140" marker-end="url(#dpArrI)"/>
+    <path d="M680,176 V188 Q680,196 672,196 H96 Q88,196 88,204 V320 Q88,328 96,328 H104" marker-end="url(#dpArrI)"/>
+    <path d="M300,108 V124 Q300,132 308,132 H402 Q410,132 410,140 V378"/>
+    <line x1="400" y1="212" x2="424" y2="212"/>
+    <line x1="410" y1="228" x2="424" y2="228"/>
+    <line x1="400" y1="262" x2="424" y2="262"/>
+    <line x1="410" y1="278" x2="424" y2="278"/>
+    <line x1="400" y1="312" x2="424" y2="312"/>
+    <line x1="410" y1="328" x2="424" y2="328"/>
+    <line x1="400" y1="362" x2="424" y2="362"/>
+    <line x1="410" y1="378" x2="424" y2="378"/>
+    <path d="M472,220 H488 V412"/>
+    <path d="M472,270 H500 V412"/>
+    <path d="M472,320 H512 V412"/>
+    <path d="M472,370 H524 V412"/>
+    <line x1="524" y1="412" x2="836" y2="412"/>
+    <path d="M836,412 V392" marker-end="url(#dpArrI)"/>
+    <path d="M836,412 H920" marker-end="url(#dpArrI)"/>
+    <line x1="800" y1="290" x2="830" y2="290"/>
+  </g>
+  <g class="glass-svg-ink-stroke" fill="none"  stroke-width="1.4">
+    <line x1="800" y1="220" x2="830" y2="220"/>
+    <line x1="800" y1="270" x2="830" y2="270"/>
+    <line x1="800" y1="320" x2="830" y2="320"/>
+    <line x1="800" y1="370" x2="830" y2="370"/>
+  </g>
+  <!-- bus-width slashes -->
+  <g class="glass-svg-ink-stroke" stroke-width="1.2">
+    <line x1="404" y1="264" x2="416" y2="252"/>
+    <line x1="600" y1="418" x2="612" y2="406"/>
+  </g>
+  <g class="glass-svg-ink-2" font-size="12">
+    <text x="420" y="252">36</text>
+    <text x="616" y="406">4</text>
+  </g>
+
+  <!-- ===== arrays ===== -->
+  <text class="glass-svg-ink-2" x="104" y="190" font-size="12" font-weight="600" letter-spacing="1.2">V &#183; TAG ARRAY</text>
+  <text class="glass-svg-ink-2" x="520" y="190" font-size="12" font-weight="600" letter-spacing="1.2">DATA ARRAY &#183; SET 41</text>
+  <g>
+    <rect class="glass-svg-node" x="104" y="200" width="28" height="40" rx="4"/>
+    <rect class="glass-svg-node" x="140" y="200" width="260" height="40" rx="4"/>
+    <rect class="glass-svg-node glass-svg-line" x="104" y="250" width="28" height="40" rx="4"/>
+    <rect class="glass-svg-node" x="140" y="250" width="260" height="40" rx="4"/>
+    <rect class="glass-svg-node" x="104" y="300" width="28" height="40" rx="4"/>
+    <rect class="glass-svg-node" x="140" y="300" width="260" height="40" rx="4"/>
+    <rect class="glass-svg-node" x="104" y="350" width="28" height="40" rx="4"/>
+    <rect class="glass-svg-node" x="140" y="350" width="260" height="40" rx="4"/>
+  </g>
+  <g>
+    <rect class="glass-svg-node" x="520" y="200" width="280" height="40" rx="4"/>
+    <rect class="glass-svg-node" x="520" y="250" width="280" height="40" rx="4"/>
+    <rect class="glass-svg-node" x="520" y="300" width="280" height="40" rx="4"/>
+    <rect class="glass-svg-node" x="520" y="350" width="280" height="40" rx="4"/>
+  </g>
+  <g>
+    <path class="glass-svg-node--indigo" d="M424,204 L472,212 L472,228 L424,236 Z"   stroke-width="1.5"/>
+    <path class="glass-svg-node--indigo" d="M424,254 L472,262 L472,278 L424,286 Z"   stroke-width="1.5"/>
+    <path class="glass-svg-node--cyan" d="M424,304 L472,312 L472,328 L424,336 Z"   stroke-width="1.5"/>
+    <path class="glass-svg-node--indigo" d="M424,354 L472,362 L472,378 L424,386 Z"   stroke-width="1.5"/>
+  </g>
+  <g>
+    <text class="glass-svg-ink-2" x="32" y="224" font-size="12">way 0</text>
+    <text class="glass-svg-ink-2" x="118" y="224" font-size="12" text-anchor="middle">1</text>
+    <text class="glass-svg-ink" x="270" y="224" font-size="12" text-anchor="middle">0x0004_A1C</text>
+    <text class="glass-svg-ink-2" x="660" y="224" font-size="12" text-anchor="middle">64 B line &#183; way 0</text>
+    <text class="glass-svg-ref-ink" x="448" y="225" font-size="12" font-weight="600" text-anchor="middle">=</text>
+    <text class="glass-svg-ink-2" x="32" y="274" font-size="12">way 1</text>
+    <text class="glass-svg-ink-2" x="118" y="274" font-size="12" text-anchor="middle">0</text>
+    <text class="glass-svg-ink" x="270" y="274" font-size="12" text-anchor="middle">0x00F1_2B8</text>
+    <text class="glass-svg-ink-2" x="660" y="274" font-size="12" text-anchor="middle">64 B line &#183; way 1</text>
+    <text class="glass-svg-ref-ink" x="448" y="275" font-size="12" font-weight="600" text-anchor="middle">=</text>
+    <text class="glass-svg-ink-2" x="32" y="324" font-size="12">way 2</text>
+    <text class="glass-svg-ink-2" x="118" y="324" font-size="12" text-anchor="middle">1</text>
+    <text class="glass-svg-ink" x="270" y="324" font-size="12" text-anchor="middle">0x0004_A1C</text>
+    <text class="glass-svg-ink-2" x="660" y="324" font-size="12" text-anchor="middle">64 B line &#183; way 2</text>
+    <text class="glass-svg-accent-ink" x="448" y="325" font-size="12" font-weight="600" text-anchor="middle">=</text>
+    <text class="glass-svg-ink-2" x="32" y="374" font-size="12">way 3</text>
+    <text class="glass-svg-ink-2" x="118" y="374" font-size="12" text-anchor="middle">1</text>
+    <text class="glass-svg-ink" x="270" y="374" font-size="12" text-anchor="middle">0x0091_7D0</text>
+    <text class="glass-svg-ink-2" x="660" y="374" font-size="12" text-anchor="middle">64 B line &#183; way 3</text>
+    <text class="glass-svg-ref-ink" x="448" y="375" font-size="12" font-weight="600" text-anchor="middle">=</text>
+  </g>
+
+  <!-- ===== mux + or ===== -->
+  <path class="glass-svg-node" d="M830,196 L878,216 L878,364 L830,384 Z"   stroke-width="1.5"/>
+  <text class="glass-svg-ink" x="854" y="294" text-anchor="middle" font-size="12" font-weight="600">4:1</text>
+  <path class="glass-svg-node" d="M920,428 Q944,428 968,450 Q944,472 920,472 Q932,450 920,428 Z"   stroke-width="1.5"/>
+  <text class="glass-svg-ink" x="938" y="455" text-anchor="middle" font-size="12" font-weight="600">&#8805;1</text>
+
+  <g class="glass-svg-accent-stroke" fill="none"  stroke-width="2">
+    <line x1="878" y1="290" x2="948" y2="290" marker-end="url(#dpArrO)"/>
+    <line x1="968" y1="450" x2="1024" y2="450" marker-end="url(#dpArrO)"/>
+  </g>
+  <text class="glass-svg-ink" x="956" y="278" font-size="13" font-weight="600">word &#8594; load unit</text>
+  <text class="glass-svg-ink" x="956" y="440" font-size="13" font-weight="600">HIT</text>
+  <text class="glass-svg-ink-3" x="1088" y="500" text-anchor="end" font-size="12" font-style="italic">a miss is this line staying low</text>
+
+  <!-- ===== badges ===== -->
+  <g font-size="12" font-weight="600" text-anchor="middle">
+    <circle class="glass-svg-node--cyan" cx="600" cy="126" r="9"/><text class="glass-svg-accent-ink" x="600" y="130">A</text>
+    <circle class="glass-svg-node--cyan" cx="88" cy="240" r="9"/><text class="glass-svg-accent-ink" x="88" y="244">B</text>
+    <circle class="glass-svg-node--cyan" cx="448" cy="176" r="9"/><text class="glass-svg-accent-ink" x="448" y="180">C</text>
+    <circle class="glass-svg-node--cyan" cx="854" cy="176" r="9"/><text class="glass-svg-accent-ink" x="854" y="180">D</text>
+    <circle class="glass-svg-node--cyan" cx="938" cy="404" r="9"/><text class="glass-svg-accent-ink" x="938" y="408">E</text>
+  </g>
+  <text class="glass-svg-ink-2" x="32" y="524" font-size="12">way 1 is invalid, so its comparator can never assert &#8212; the valid bit is an input to the match, not a decoration</text>
+</svg>

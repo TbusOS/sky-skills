@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="One PCIe transaction packet built layer by layer, drawn on a byte ruler at eight pixels per byte so each bar's width is literally its byte count. Row one, the transaction layer emits a sixteen byte TLP header followed by a sixty-four byte payload, eighty bytes. Row two, the data link layer prepends a two byte sequence number and appends a four byte link CRC, so the bar grows outward at both ends to eighty-six bytes while the original eighty stay put between the two dashed guidelines. Row three, the physical layer frames it with a one byte start symbol and a one byte end symbol, eighty-eight bytes. Row four, those bytes are striped round-robin across four lanes: byte zero and four and eight go to lane zero, byte one and five and nine to lane one, and so on, each lane feeding its own serialiser. The two dashed guidelines are the point of the figure: everything added by a lower layer appears outside them, never inside" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="peArrI" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#1d1d1f"/>
+    </marker>
+    <marker id="peArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="560" fill="#ffffff"/>
+
+  <text x="32" y="34" font-size="12.5" font-weight="600" letter-spacing="1.2" fill="#86868b">PACKET ENCAPSULATION &#183; ONE BYTE RULER, THREE LAYERS</text>
+  <text x="1088" y="34" text-anchor="end" font-size="12.5" fill="#86868b">8 px = 1 byte &#183; bars are to scale with each other</text>
+
+  <!-- the two guidelines: the original 80 bytes never move -->
+  <g stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="4 3">
+    <line x1="240" y1="82" x2="240" y2="326"/>
+    <line x1="880" y1="82" x2="880" y2="326"/>
+  </g>
+
+  <!-- ===== 1 · transaction layer ===== -->
+  <text x="32" y="112" font-size="13.5" font-weight="600" fill="#1d1d1f">Transaction</text>
+  <text x="32" y="130" font-size="12.5" fill="#86868b">layer</text>
+  <rect x="240" y="96" width="128" height="34" fill="#eaf3fe" stroke="#0071e3"/>
+  <rect x="368" y="96" width="512" height="34" fill="#f5f5f7" stroke="#d2d2d7"/>
+  <text x="304" y="118" text-anchor="middle" font-size="12.5" fill="#1d1d1f">TLP header 16 B</text>
+  <text x="624" y="118" text-anchor="middle" font-size="12.5" fill="#6e6e73">data payload 64 B</text>
+  <g stroke="#aeaeb2" stroke-width="1">
+    <line x1="240" y1="130" x2="240" y2="123"/><line x1="304" y1="130" x2="304" y2="123"/><line x1="368" y1="130" x2="368" y2="123"/><line x1="432" y1="130" x2="432" y2="123"/><line x1="496" y1="130" x2="496" y2="123"/><line x1="560" y1="130" x2="560" y2="123"/><line x1="624" y1="130" x2="624" y2="123"/><line x1="688" y1="130" x2="688" y2="123"/><line x1="752" y1="130" x2="752" y2="123"/><line x1="816" y1="130" x2="816" y2="123"/><line x1="880" y1="130" x2="880" y2="123"/>
+  </g>
+  <text x="1088" y="152" text-anchor="end" font-size="12.5" font-style="italic" fill="#86868b">80 B &#183; what the requester actually meant to send</text>
+
+  <!-- ===== 2 · data link layer ===== -->
+  <text x="32" y="202" font-size="13.5" font-weight="600" fill="#1d1d1f">Data link</text>
+  <text x="32" y="220" font-size="12.5" fill="#86868b">layer</text>
+  <rect x="224" y="186" width="16" height="34" fill="#eaf3fe" stroke="#0071e3"/>
+  <rect x="240" y="186" width="640" height="34" fill="#f5f5f7" stroke="#d2d2d7"/>
+  <rect x="880" y="186" width="32" height="34" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="560" y="208" text-anchor="middle" font-size="12.5" fill="#86868b">the 80 B above, untouched</text>
+  <g stroke="#aeaeb2" stroke-width="1">
+    <line x1="224" y1="220" x2="224" y2="213"/><line x1="288" y1="220" x2="288" y2="213"/><line x1="352" y1="220" x2="352" y2="213"/><line x1="416" y1="220" x2="416" y2="213"/><line x1="480" y1="220" x2="480" y2="213"/><line x1="544" y1="220" x2="544" y2="213"/><line x1="608" y1="220" x2="608" y2="213"/><line x1="672" y1="220" x2="672" y2="213"/><line x1="736" y1="220" x2="736" y2="213"/><line x1="800" y1="220" x2="800" y2="213"/><line x1="864" y1="220" x2="864" y2="213"/>
+  </g>
+  <g fill="none" stroke="#0071e3" stroke-width="1.2">
+    <path d="M232,186 V174 H180"/>
+    <path d="M896,186 V174 H948"/>
+  </g>
+  <text x="176" y="178" text-anchor="end" font-size="12.5" fill="#1d1d1f">+ SeqNum 2 B</text>
+  <text x="952" y="178" font-size="12.5" fill="#1d1d1f">+ LCRC 4 B</text>
+  <text x="1088" y="242" text-anchor="end" font-size="12.5" font-style="italic" fill="#86868b">86 B &#183; replay needs the number, the receiver needs the CRC</text>
+
+  <!-- ===== 3 · physical layer ===== -->
+  <text x="32" y="292" font-size="13.5" font-weight="600" fill="#1d1d1f">Physical</text>
+  <text x="32" y="310" font-size="12.5" fill="#86868b">layer &#183; framing</text>
+  <rect x="216" y="276" width="8" height="34" fill="#eaf3fe" stroke="#0071e3"/>
+  <rect x="224" y="276" width="688" height="34" fill="#f5f5f7" stroke="#d2d2d7"/>
+  <rect x="912" y="276" width="8" height="34" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="568" y="298" text-anchor="middle" font-size="12.5" fill="#86868b">the 86 B above, untouched</text>
+  <g stroke="#aeaeb2" stroke-width="1">
+    <line x1="216" y1="310" x2="216" y2="303"/><line x1="280" y1="310" x2="280" y2="303"/><line x1="344" y1="310" x2="344" y2="303"/><line x1="408" y1="310" x2="408" y2="303"/><line x1="472" y1="310" x2="472" y2="303"/><line x1="536" y1="310" x2="536" y2="303"/><line x1="600" y1="310" x2="600" y2="303"/><line x1="664" y1="310" x2="664" y2="303"/><line x1="728" y1="310" x2="728" y2="303"/><line x1="792" y1="310" x2="792" y2="303"/><line x1="856" y1="310" x2="856" y2="303"/><line x1="920" y1="310" x2="920" y2="303"/>
+  </g>
+  <g fill="none" stroke="#0071e3" stroke-width="1.2">
+    <path d="M220,276 V264 H172"/>
+    <path d="M916,276 V264 H964"/>
+  </g>
+  <text x="168" y="268" text-anchor="end" font-size="12.5" fill="#1d1d1f">+ STP 1 B</text>
+  <text x="968" y="268" font-size="12.5" fill="#1d1d1f">+ END 1 B</text>
+  <text x="1088" y="332" text-anchor="end" font-size="12.5" font-style="italic" fill="#86868b">88 B &#183; now it has a beginning and an end on the wire</text>
+
+  <!-- ===== 4 · striping ===== -->
+  <path d="M568,310 V352" fill="none" stroke="#0071e3" stroke-width="2" marker-end="url(#peArrO)"/>
+  <text x="216" y="356" font-size="12.5" font-weight="600" letter-spacing="1.2" fill="#86868b">BYTE STRIPING &#183; x4 LINK</text>
+  <text x="345" y="372" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">Lane 0</text>
+  <rect x="300" y="380" width="90" height="26" rx="4" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="345" y="397" text-anchor="middle" font-size="12.5" fill="#1d1d1f">byte 0</text>
+  <rect x="300" y="412" width="90" height="26" rx="4" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="345" y="429" text-anchor="middle" font-size="12.5" fill="#1d1d1f">byte 4</text>
+  <rect x="300" y="444" width="90" height="26" rx="4" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="345" y="461" text-anchor="middle" font-size="12.5" fill="#1d1d1f">byte 8</text>
+  <text x="455" y="372" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">Lane 1</text>
+  <rect x="410" y="380" width="90" height="26" rx="4" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="455" y="397" text-anchor="middle" font-size="12.5" fill="#1d1d1f">byte 1</text>
+  <rect x="410" y="412" width="90" height="26" rx="4" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="455" y="429" text-anchor="middle" font-size="12.5" fill="#1d1d1f">byte 5</text>
+  <rect x="410" y="444" width="90" height="26" rx="4" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="455" y="461" text-anchor="middle" font-size="12.5" fill="#1d1d1f">byte 9</text>
+  <text x="565" y="372" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">Lane 2</text>
+  <rect x="520" y="380" width="90" height="26" rx="4" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="565" y="397" text-anchor="middle" font-size="12.5" fill="#1d1d1f">byte 2</text>
+  <rect x="520" y="412" width="90" height="26" rx="4" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="565" y="429" text-anchor="middle" font-size="12.5" fill="#1d1d1f">byte 6</text>
+  <rect x="520" y="444" width="90" height="26" rx="4" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="565" y="461" text-anchor="middle" font-size="12.5" fill="#1d1d1f">byte 10</text>
+  <text x="675" y="372" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f">Lane 3</text>
+  <rect x="630" y="380" width="90" height="26" rx="4" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="675" y="397" text-anchor="middle" font-size="12.5" fill="#1d1d1f">byte 3</text>
+  <rect x="630" y="412" width="90" height="26" rx="4" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="675" y="429" text-anchor="middle" font-size="12.5" fill="#1d1d1f">byte 7</text>
+  <rect x="630" y="444" width="90" height="26" rx="4" fill="#eaf3fe" stroke="#0071e3"/>
+  <text x="675" y="461" text-anchor="middle" font-size="12.5" fill="#1d1d1f">byte 11</text>
+  <g fill="none" stroke="#1d1d1f" stroke-width="1.4">
+    <line x1="345" y1="470" x2="345" y2="488" marker-end="url(#peArrI)"/>
+    <line x1="455" y1="470" x2="455" y2="488" marker-end="url(#peArrI)"/>
+    <line x1="565" y1="470" x2="565" y2="488" marker-end="url(#peArrI)"/>
+    <line x1="675" y1="470" x2="675" y2="488" marker-end="url(#peArrI)"/>
+  </g>
+  <rect x="300" y="492" width="420" height="30" rx="8" fill="#ffffff" stroke="#d2d2d7"/>
+  <text x="510" y="512" text-anchor="middle" font-size="12.5" fill="#1d1d1f">SerDes &#183; 128b/130b &#183; 32 GT/s per lane</text>
+  <text x="1088" y="440" text-anchor="end" font-size="12.5" font-style="italic" fill="#86868b">byte n leaves on lane n mod 4</text>
+</svg>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Pointer graph of the Linux memory-management structures, drawn so every arrow leaves the field that actually holds the pointer rather than the edge of the box. task_struct lists pid, comm, mm, active_mm and files; an orange dot marks each pointer field and the arrow starts there. The mm dot goes to mm_struct, whose mm_mt field is a maple tree keyed by start address; three slots in that tree carry the ordered virtual ranges and each slot points down at one vm_area_struct. The first VMA is drawn in full, with start, end, flags, page offset, the file it maps, its operations table, and anon_vma which stays NULL until the first copy-on-write store, while its two siblings show only start, end and flags. Two further arrows leave the first VMA: vm_file to a struct file, vm_ops to a vm_operations_struct holding filemap_fault. Field names follow include linux mm_types.h at kernel 6.6; row order is reading order, not struct offset order" font-family="'Inter', 'Noto Sans SC', system-ui, sans-serif">
+  <style>
+    /* Standalone preview values = glass dark theme. When pasted into a glass
+       page, DELETE this style block and the canvas rect below — glass.css
+       provides these classes with theme-switching tokens. */
+    .glass-svg-ink   { fill: #F4F7FF; }
+    .glass-svg-ink-2 { fill: rgba(231,238,255,0.74); }
+    .glass-svg-ink-3 { fill: rgba(231,238,255,0.55); }
+    .glass-svg-node  { fill: rgba(255,255,255,0.08); stroke: rgba(255,255,255,0.17); }
+    .glass-svg-node--cyan   { fill: rgba(34,211,238,0.15); stroke: rgba(34,211,238,0.55); }
+    .glass-svg-node--indigo { fill: rgba(129,140,248,0.16); stroke: rgba(129,140,248,0.55); }
+    .glass-svg-node--warn   { fill: rgba(251,191,36,0.14); stroke: rgba(251,191,36,0.55); }
+    .glass-svg-line  { stroke: rgba(255,255,255,0.10); }
+    .glass-svg-ink-stroke { stroke: rgba(244,247,255,0.85); fill: none; }
+    .glass-svg-accent      { fill: #22D3EE; }
+    .glass-svg-accent-ink  { fill: #22D3EE; }
+    .glass-svg-accent-stroke { stroke: #22D3EE; fill: none; }
+    .glass-svg-ref-ink { fill: #A5B4FC; }
+    .glass-svg-ok   { fill: #34D399; }
+    .glass-svg-warn { fill: #FBBF24; }
+  </style>
+  <defs>
+    <marker id="sgArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="glass-svg-accent" d="M0,0.5 L7.5,4 L0,7.5 Z"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="560" rx="16" fill="#0B1020"/>
+
+  <text class="glass-svg-ink-2" x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2">STRUCT GRAPH &#183; WHICH FIELD HOLDS WHICH POINTER</text>
+  <g class="glass-svg-ink-2" font-size="12">
+    <circle class="glass-svg-accent" cx="600" cy="30" r="4"/><text x="612" y="34">pointer field &#183; every arrow starts here, not at the edge of the box</text>
+  </g>
+
+  <rect class="glass-svg-node" x="640" y="76" width="448" height="136" rx="10"   stroke-dasharray="5 4"/>
+  <text class="glass-svg-ink" x="656" y="100" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">mm-&gt;mm_mt</text>
+  <text class="glass-svg-ink-2" x="656" y="118" font-size="12">maple tree, keyed by vm_start &#183; replaced the VMA list and rbtree in 6.1</text>
+  <g>
+    <rect class="glass-svg-node" x="648" y="132" width="136" height="44" rx="6"/>
+    <text class="glass-svg-ink" x="716" y="150" text-anchor="middle" font-size="12">slot 0</text>
+    <text class="glass-svg-ink-2" x="716" y="167" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">0x5566_1000+</text>
+    <rect class="glass-svg-node" x="796" y="132" width="136" height="44" rx="6"/>
+    <text class="glass-svg-ink" x="864" y="150" text-anchor="middle" font-size="12">slot 1</text>
+    <text class="glass-svg-ink-2" x="864" y="167" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">0x5566_9000+</text>
+    <rect class="glass-svg-node" x="944" y="132" width="136" height="44" rx="6"/>
+    <text class="glass-svg-ink" x="1012" y="150" text-anchor="middle" font-size="12">slot 2</text>
+    <text class="glass-svg-ink-2" x="1012" y="167" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">0x7ffd_0000+</text>
+  </g>
+
+  <g>
+    <rect class="glass-svg-node" x="32" y="76" width="228" height="138" rx="8"/>
+    <path class="glass-svg-node" d="M32,84 q0,-8 8,-8 H252 q8,0 8,8 V104 H32 Z"/>
+    <line class="glass-svg-line" x1="32" y1="104" x2="260" y2="104"/>
+    <rect class="glass-svg-ref-ink" x="32" y="84" width="3" height="20"/>
+    <text class="glass-svg-ink" x="46" y="95" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct task_struct</text>
+    <text class="glass-svg-ink" x="46" y="119" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">pid</text>
+    <text class="glass-svg-ink-2" x="242" y="119" font-size="12" text-anchor="end">pid_t</text>
+    <text class="glass-svg-ink" x="46" y="141" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">comm[16]</text>
+    <text class="glass-svg-ink-2" x="242" y="141" font-size="12" text-anchor="end">char</text>
+    <text class="glass-svg-ink" x="46" y="163" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">mm</text>
+    <text class="glass-svg-ink-2" x="242" y="163" font-size="12" text-anchor="end">mm_struct *</text>
+    <circle class="glass-svg-accent" cx="260" cy="159" r="4"/>
+    <text class="glass-svg-ink" x="46" y="185" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">active_mm</text>
+    <text class="glass-svg-ink-2" x="242" y="185" font-size="12" text-anchor="end">mm_struct *</text>
+    <circle class="glass-svg-accent" cx="260" cy="181" r="4"/>
+    <text class="glass-svg-ink" x="46" y="207" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">files</text>
+    <text class="glass-svg-ink-2" x="242" y="207" font-size="12" text-anchor="end">files_struct *</text>
+    <circle class="glass-svg-accent" cx="260" cy="203" r="4"/>
+  </g>
+  <g>
+    <rect class="glass-svg-node" x="316" y="76" width="264" height="160" rx="8"/>
+    <path class="glass-svg-node" d="M316,84 q0,-8 8,-8 H572 q8,0 8,8 V104 H316 Z"/>
+    <line class="glass-svg-line" x1="316" y1="104" x2="580" y2="104"/>
+    <rect class="glass-svg-ref-ink" x="316" y="84" width="3" height="20"/>
+    <text class="glass-svg-ink" x="330" y="95" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct mm_struct</text>
+    <text class="glass-svg-ink" x="330" y="119" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">mm_users</text>
+    <text class="glass-svg-ink-2" x="562" y="119" font-size="12" text-anchor="end">atomic_t</text>
+    <text class="glass-svg-ink" x="330" y="141" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">mm_count</text>
+    <text class="glass-svg-ink-2" x="562" y="141" font-size="12" text-anchor="end">atomic_t</text>
+    <text class="glass-svg-ink" x="330" y="163" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">pgd</text>
+    <text class="glass-svg-ink-2" x="562" y="163" font-size="12" text-anchor="end">&#8594; page tables</text>
+    <circle class="glass-svg-accent" cx="580" cy="159" r="4"/>
+    <text class="glass-svg-ink" x="330" y="185" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">mmap_base</text>
+    <text class="glass-svg-ink-2" x="562" y="185" font-size="12" text-anchor="end">unsigned long</text>
+    <text class="glass-svg-ink" x="330" y="207" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">mm_mt</text>
+    <text class="glass-svg-ink-2" x="562" y="207" font-size="12" text-anchor="end">maple_tree</text>
+    <circle class="glass-svg-accent" cx="580" cy="203" r="4"/>
+    <text class="glass-svg-ink" x="330" y="229" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">map_count</text>
+    <text class="glass-svg-ink-2" x="562" y="229" font-size="12" text-anchor="end">int &#183; 42 VMAs</text>
+  </g>
+  <g>
+    <rect class="glass-svg-node" x="140" y="290" width="280" height="182" rx="8"/>
+    <path class="glass-svg-node" d="M140,298 q0,-8 8,-8 H412 q8,0 8,8 V318 H140 Z"/>
+    <line class="glass-svg-line" x1="140" y1="318" x2="420" y2="318"/>
+    <rect class="glass-svg-ok" x="140" y="298" width="3" height="20"/>
+    <text class="glass-svg-ink" x="154" y="309" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct vm_area_struct</text>
+    <text class="glass-svg-ink" x="154" y="333" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_start</text>
+    <text class="glass-svg-ink-2" x="402" y="333" font-size="12" text-anchor="end">0x5566_1000</text>
+    <text class="glass-svg-ink" x="154" y="355" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_end</text>
+    <text class="glass-svg-ink-2" x="402" y="355" font-size="12" text-anchor="end">0x5566_9000</text>
+    <text class="glass-svg-ink" x="154" y="377" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_flags</text>
+    <text class="glass-svg-ink-2" x="402" y="377" font-size="12" text-anchor="end">VM_READ|VM_EXEC</text>
+    <text class="glass-svg-ink" x="154" y="399" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_pgoff</text>
+    <text class="glass-svg-ink-2" x="402" y="399" font-size="12" text-anchor="end">0</text>
+    <text class="glass-svg-ink" x="154" y="421" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_file</text>
+    <text class="glass-svg-ink-2" x="402" y="421" font-size="12" text-anchor="end">file *</text>
+    <circle class="glass-svg-accent" cx="420" cy="417" r="4"/>
+    <text class="glass-svg-ink" x="154" y="443" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_ops</text>
+    <text class="glass-svg-ink-2" x="402" y="443" font-size="12" text-anchor="end">vm_operations_struct *</text>
+    <circle class="glass-svg-accent" cx="420" cy="439" r="4"/>
+    <text class="glass-svg-ink" x="154" y="465" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">anon_vma</text>
+    <text class="glass-svg-ink-2" x="402" y="465" font-size="12" text-anchor="end">NULL until first COW</text>
+  </g>
+  <g>
+    <rect class="glass-svg-node" x="460" y="290" width="240" height="94" rx="8"/>
+    <path class="glass-svg-node" d="M460,298 q0,-8 8,-8 H692 q8,0 8,8 V318 H460 Z"/>
+    <line class="glass-svg-line" x1="460" y1="318" x2="700" y2="318"/>
+    <rect class="glass-svg-ok" x="460" y="298" width="3" height="20"/>
+    <text class="glass-svg-ink" x="474" y="309" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct vm_area_struct</text>
+    <text class="glass-svg-ink" x="474" y="333" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_start</text>
+    <text class="glass-svg-ink-2" x="682" y="333" font-size="12" text-anchor="end">0x5566_9000</text>
+    <text class="glass-svg-ink" x="474" y="355" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_end</text>
+    <text class="glass-svg-ink-2" x="682" y="355" font-size="12" text-anchor="end">0x5566_b000</text>
+    <text class="glass-svg-ink" x="474" y="377" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_flags</text>
+    <text class="glass-svg-ink-2" x="682" y="377" font-size="12" text-anchor="end">VM_READ|VM_WRITE</text>
+  </g>
+  <g>
+    <rect class="glass-svg-node" x="740" y="290" width="240" height="94" rx="8"/>
+    <path class="glass-svg-node" d="M740,298 q0,-8 8,-8 H972 q8,0 8,8 V318 H740 Z"/>
+    <line class="glass-svg-line" x1="740" y1="318" x2="980" y2="318"/>
+    <rect class="glass-svg-ok" x="740" y="298" width="3" height="20"/>
+    <text class="glass-svg-ink" x="754" y="309" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct vm_area_struct</text>
+    <text class="glass-svg-ink" x="754" y="333" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_start</text>
+    <text class="glass-svg-ink-2" x="962" y="333" font-size="12" text-anchor="end">0x7ffd_0000</text>
+    <text class="glass-svg-ink" x="754" y="355" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_end</text>
+    <text class="glass-svg-ink-2" x="962" y="355" font-size="12" text-anchor="end">0x7ffd_2000</text>
+    <text class="glass-svg-ink" x="754" y="377" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">vm_flags</text>
+    <text class="glass-svg-ink-2" x="962" y="377" font-size="12" text-anchor="end">VM_GROWSDOWN</text>
+  </g>
+  <g>
+    <rect class="glass-svg-node" x="460" y="408" width="240" height="94" rx="8"/>
+    <path class="glass-svg-node" d="M460,416 q0,-8 8,-8 H692 q8,0 8,8 V436 H460 Z"/>
+    <line class="glass-svg-line" x1="460" y1="436" x2="700" y2="436"/>
+    <rect class="glass-svg-warn" x="460" y="416" width="3" height="20"/>
+    <text class="glass-svg-ink" x="474" y="427" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct file</text>
+    <text class="glass-svg-ink" x="474" y="451" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">f_inode</text>
+    <text class="glass-svg-ink-2" x="682" y="451" font-size="12" text-anchor="end">inode *</text>
+    <text class="glass-svg-ink" x="474" y="473" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">f_mapping</text>
+    <text class="glass-svg-ink-2" x="682" y="473" font-size="12" text-anchor="end">address_space *</text>
+    <text class="glass-svg-ink" x="474" y="495" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">f_op</text>
+    <text class="glass-svg-ink-2" x="682" y="495" font-size="12" text-anchor="end">file_operations *</text>
+  </g>
+  <g>
+    <rect class="glass-svg-node" x="740" y="408" width="240" height="94" rx="8"/>
+    <path class="glass-svg-node" d="M740,416 q0,-8 8,-8 H972 q8,0 8,8 V436 H740 Z"/>
+    <line class="glass-svg-line" x1="740" y1="436" x2="980" y2="436"/>
+    <rect class="glass-svg-warn" x="740" y="416" width="3" height="20"/>
+    <text class="glass-svg-ink" x="754" y="427" font-size="13" font-weight="600"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">struct vm_operations_struct</text>
+    <text class="glass-svg-ink" x="754" y="451" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">.fault</text>
+    <text class="glass-svg-ink-2" x="962" y="451" font-size="12" text-anchor="end">filemap_fault</text>
+    <text class="glass-svg-ink" x="754" y="473" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">.map_pages</text>
+    <text class="glass-svg-ink-2" x="962" y="473" font-size="12" text-anchor="end">filemap_map_pages</text>
+    <text class="glass-svg-ink" x="754" y="495" font-size="12"  font-family="'JetBrains Mono', SFMono-Regular, Menlo, monospace">.open / .close</text>
+    <text class="glass-svg-ink-2" x="962" y="495" font-size="12" text-anchor="end">NULL</text>
+  </g>
+
+  <g class="glass-svg-accent-stroke" fill="none"  stroke-width="1.6">
+    <path d="M260,159 H288 V90 H316" marker-end="url(#sgArrO)"/>
+    <path d="M580,203 H610 V154 H640" marker-end="url(#sgArrO)"/>
+    <path d="M716,176 V246 H280 V290" marker-end="url(#sgArrO)"/>
+    <path d="M864,176 V262 H580 V290" marker-end="url(#sgArrO)"/>
+    <path d="M1012,176 V278 H860 V290" marker-end="url(#sgArrO)"/>
+    <path d="M420,417 H440 V422 H460" marker-end="url(#sgArrO)"/>
+    <path d="M420,439 H436 V396 H720 V422 H740" marker-end="url(#sgArrO)"/>
+  </g>
+
+  <text class="glass-svg-ink-2" x="32" y="528" font-size="12">field names from include/linux/mm_types.h and sched.h at v6.6</text>
+  <text class="glass-svg-ink-3" x="1088" y="528" text-anchor="end" font-size="12" font-style="italic">rows are in reading order, not struct offset order</text>
+</svg>
