@@ -687,7 +687,7 @@
     </p>
 
     <figure class="gal-fig">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 588" role="img" aria-label="Kernel driver probe flowchart: mydev_probe happy path through devm_kzalloc, ioremap, request_irq and chardev registration, with a gold error lane collecting -ENOMEM errors and iounmap cleanup into a shared return ret exit" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 420" role="img" aria-label="Driver probe flowchart redrawn on the horizontal axis. The happy path runs left to right along the top: mydev_probe enters, badge one calls kzalloc, a diamond asks whether priv is NULL, badge two calls ioremap, a diamond asks whether base is NULL, badge three calls request_irq, a diamond asks whether ret is below zero, and the run ends at return zero. Each diamond's yes branch drops straight down into the error lane below, carrying its errno on a pill. The error lane is an unwind ladder read right to left: a request_irq failure enters at err_unmap and calls iounmap, then falls through to err_free which calls kfree, then to err_out which returns ret. An ioremap failure enters one rung later at err_free; a kzalloc failure enters at err_out and returns immediately. The ladder's own arrows point left, against the happy path, because unwinding runs backwards through everything already acquired" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
   <defs>
     <pattern id="ffc-dots" width="24" height="24" patternUnits="userSpaceOnUse">
       <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
@@ -703,146 +703,127 @@
     </marker>
   </defs>
 
-  <!-- panel -->
-  <rect x="0" y="0" width="920" height="588" rx="16" fill="#faf9f5" stroke="#eceadf"/>
-  <rect x="0" y="0" width="920" height="588" rx="16" fill="url(#ffc-dots)"/>
+  <rect x="0" y="0" width="1080" height="420" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect x="0" y="0" width="1080" height="420" rx="16" fill="url(#ffc-dots)"/>
 
-  <!-- error lane container -->
-  <rect x="624" y="56" width="252" height="496" rx="12" fill="#f0e4d8" stroke="#d9bf94" stroke-dasharray="4 3"/>
-  <rect x="624" y="68" width="4" height="472" rx="2" fill="#c9913f"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">FUNCTION FLOWCHART &#183; mydev_probe() AND ITS UNWIND LADDER</text>
+  <g font-size="11" fill="#6b6a5f">
+    <line x1="700" y1="30" x2="724" y2="30" stroke="#d97757" stroke-width="2"/><text x="732" y="34">happy path</text>
+    <line x1="820" y1="30" x2="844" y2="30" stroke="#c9913f" stroke-width="1.4" stroke-dasharray="4 3"/><text x="852" y="34">error path</text>
+    <path d="M944,22 L956,30 L944,38 L932,30 Z" fill="#f4d9cd" stroke="#d97757" stroke-width="1.2"/><text x="964" y="34">check</text>
+  </g>
 
-  <!-- happy path connectors (orange 1.8 solid) -->
+  <text x="32" y="64" font-size="11" font-weight="600" letter-spacing="1" fill="#c2613f">HAPPY PATH</text>
+
+  <!-- happy path connectors -->
   <g fill="none" stroke="#d97757" stroke-width="1.8">
-    <line x1="188" y1="60" x2="188" y2="92" marker-end="url(#ffc-arrO)"/>
-    <line x1="312" y1="124" x2="392" y2="124" marker-end="url(#ffc-arrO)"/>
-    <path d="M472,152 V168 Q472,176 464,176 H196 Q188,176 188,184 V196" marker-end="url(#ffc-arrO)"/>
-    <line x1="312" y1="228" x2="392" y2="228" marker-end="url(#ffc-arrO)"/>
-    <path d="M472,256 V272 Q472,280 464,280 H196 Q188,280 188,288 V300" marker-end="url(#ffc-arrO)"/>
-    <line x1="312" y1="332" x2="392" y2="332" marker-end="url(#ffc-arrO)"/>
-    <path d="M472,360 V376 Q472,384 464,384 H196 Q188,384 188,392 V404" marker-end="url(#ffc-arrO)"/>
-    <line x1="188" y1="464" x2="188" y2="492" marker-end="url(#ffc-arrO)"/>
+    <line x1="140" y1="112" x2="156" y2="112" marker-end="url(#ffc-arrO)"/>
+    <line x1="300" y1="112" x2="316" y2="112" marker-end="url(#ffc-arrO)"/>
+    <line x1="400" y1="112" x2="424" y2="112" marker-end="url(#ffc-arrO)"/>
+    <line x1="568" y1="112" x2="584" y2="112" marker-end="url(#ffc-arrO)"/>
+    <line x1="668" y1="112" x2="692" y2="112" marker-end="url(#ffc-arrO)"/>
+    <line x1="836" y1="112" x2="852" y2="112" marker-end="url(#ffc-arrO)"/>
+    <line x1="936" y1="112" x2="960" y2="112" marker-end="url(#ffc-arrO)"/>
+  </g>
+  <g font-size="11" font-weight="600" fill="#c2613f" text-anchor="middle">
+    <text x="412" y="100">no</text><text x="680" y="100">no</text><text x="948" y="100">no</text>
   </g>
 
-  <!-- error lane connectors (gold 1.2 dashed) -->
-  <g fill="none" stroke="#c9913f" stroke-width="1.2" stroke-dasharray="4 3">
-    <line x1="548" y1="124" x2="640" y2="124" marker-end="url(#ffc-arrG)"/>
-    <line x1="548" y1="228" x2="640" y2="228" marker-end="url(#ffc-arrG)"/>
-    <line x1="548" y1="332" x2="640" y2="332" marker-end="url(#ffc-arrG)"/>
-    <path d="M836,124 H848 Q856,124 856,132 V476 Q856,484 848,484 H748 Q740,484 740,492" marker-end="url(#ffc-arrG)"/>
-    <path d="M836,228 H848 Q856,228 856,236 V240"/>
-    <path d="M836,332 H848 Q856,332 856,340 V344"/>
+  <!-- error drops -->
+  <g fill="none" stroke="#c9913f" stroke-width="1.4" stroke-dasharray="4 3">
+    <line x1="358" y1="148" x2="358" y2="268" marker-end="url(#ffc-arrG)"/>
+    <line x1="626" y1="148" x2="626" y2="258" marker-end="url(#ffc-arrG)"/>
+    <line x1="894" y1="148" x2="894" y2="258" marker-end="url(#ffc-arrG)"/>
+  </g>
+  <g text-anchor="middle">
+    <rect x="306" y="184" width="104" height="22" rx="11" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="358" y="199" font-size="11" font-weight="600" fill="#8a5a2a">yes &#183; -ENOMEM</text>
+    <rect x="574" y="184" width="104" height="22" rx="11" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="626" y="199" font-size="11" font-weight="600" fill="#8a5a2a">yes &#183; -ENOMEM</text>
+    <rect x="852" y="184" width="84" height="22" rx="11" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="894" y="199" font-size="11" font-weight="600" fill="#8a5a2a">yes &#183; ret</text>
   </g>
 
-  <!-- entry capsule (focus) -->
-  <rect x="100" y="24" width="176" height="36" rx="18" fill="#fbeee7" stroke="#d97757" stroke-width="1.5" filter="url(#ffc-sh)"/>
-
-  <!-- main step cards -->
+  <!-- entry / step cards -->
+  <rect x="32" y="94" width="108" height="36" rx="18" fill="#fbeee7" stroke="#d97757" stroke-width="1.5" filter="url(#ffc-sh)"/>
+  <text x="86" y="117" font-size="12" font-weight="600" fill="#141413" text-anchor="middle">mydev_probe()</text>
   <g filter="url(#ffc-sh)">
-    <rect x="64" y="96" width="248" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
-    <rect x="64" y="200" width="248" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
-    <rect x="64" y="304" width="248" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
-    <rect x="64" y="408" width="248" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="156" y="76" width="144" height="72" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="424" y="76" width="144" height="72" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="692" y="76" width="144" height="72" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+  <g font-size="13" font-weight="600" fill="#141413">
+    <text x="172" y="110">kzalloc()</text>
+    <text x="440" y="110">ioremap()</text>
+    <text x="708" y="110">request_irq()</text>
+  </g>
+  <g font-size="11" fill="#6b6a5f">
+    <text x="172" y="131">GFP_KERNEL</text>
+    <text x="440" y="131">res-&gt;start &#183; SZ_4K</text>
+    <text x="708" y="131">IRQF_SHARED &#183; priv</text>
   </g>
 
   <!-- decision diamonds: the only emphasis-tint blocks -->
   <g fill="#f4d9cd" stroke="#d97757" stroke-width="1.5">
-    <path d="M472,96 L548,124 L472,152 L396,124 Z"/>
-    <path d="M472,200 L548,228 L472,256 L396,228 Z"/>
-    <path d="M472,304 L548,332 L472,360 L396,332 Z"/>
+    <path d="M358,76 L400,112 L358,148 L316,112 Z"/>
+    <path d="M626,76 L668,112 L626,148 L584,112 Z"/>
+    <path d="M894,76 L936,112 L894,148 L852,112 Z"/>
   </g>
-
-  <!-- error lane cards -->
-  <g filter="url(#ffc-sh)">
-    <rect x="644" y="96" width="192" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
-    <rect x="644" y="200" width="192" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
-    <rect x="644" y="304" width="192" height="56" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
-  </g>
-
-  <!-- exit capsules -->
-  <rect x="120" y="496" width="136" height="36" rx="18" fill="#e5e9dd" stroke="#788c5d" stroke-width="1.5" filter="url(#ffc-sh)"/>
-  <rect x="668" y="496" width="144" height="36" rx="18" fill="#ffffff" stroke="#c9913f" stroke-width="1.5" filter="url(#ffc-sh)"/>
-
-  <!-- numbered badges (happy path) -->
-  <g font-size="11" font-weight="600" text-anchor="middle">
-    <circle cx="68" cy="100" r="10" fill="#d97757"/><text x="68" y="104" fill="#ffffff">1</text>
-    <circle cx="68" cy="204" r="10" fill="#d97757"/><text x="68" y="208" fill="#ffffff">2</text>
-    <circle cx="68" cy="308" r="10" fill="#d97757"/><text x="68" y="312" fill="#ffffff">3</text>
-    <circle cx="68" cy="412" r="10" fill="#d97757"/><text x="68" y="416" fill="#ffffff">4</text>
-  </g>
-
-  <!-- category dots -->
-  <g fill="#d97757">
-    <circle cx="84" cy="116" r="3.5"/>
-    <circle cx="84" cy="220" r="3.5"/>
-    <circle cx="84" cy="324" r="3.5"/>
-    <circle cx="84" cy="428" r="3.5"/>
-  </g>
-  <g fill="#c9913f">
-    <circle cx="660" cy="116" r="3.5"/>
-    <circle cx="660" cy="220" r="3.5"/>
-    <circle cx="660" cy="324" r="3.5"/>
-    <circle cx="696" cy="514" r="4"/>
-  </g>
-  <circle cx="148" cy="514" r="4" fill="#788c5d"/>
-  <circle cx="648" cy="80" r="4" fill="#c9913f"/>
-
-  <!-- text: entry / steps -->
-  <text x="188" y="46" font-size="13" font-weight="600" fill="#141413" text-anchor="middle">mydev_probe(pdev)</text>
-  <text x="96" y="120" font-size="13" font-weight="600" fill="#141413">devm_kzalloc(ctx)</text>
-  <text x="96" y="140" font-size="11" fill="#6b6a5f">sizeof(*ctx) · GFP_KERNEL</text>
-  <text x="96" y="224" font-size="13" font-weight="600" fill="#141413">ioremap registers</text>
-  <text x="96" y="244" font-size="11" fill="#6b6a5f">MMIO window · res-&gt;start</text>
-  <text x="96" y="328" font-size="13" font-weight="600" fill="#141413">request_irq(irq, handler)</text>
-  <text x="96" y="348" font-size="11" fill="#6b6a5f">IRQF_SHARED · dev_id = ctx</text>
-  <text x="96" y="432" font-size="13" font-weight="600" fill="#141413">register chardev</text>
-  <text x="96" y="452" font-size="11" fill="#6b6a5f">misc_register(&amp;ctx-&gt;mdev)</text>
-
-  <!-- text: diamonds -->
   <g font-size="12" font-weight="600" fill="#141413" text-anchor="middle">
-    <text x="472" y="128">ctx == NULL?</text>
-    <text x="472" y="232">base == NULL?</text>
-    <text x="472" y="336">ret &lt; 0?</text>
+    <text x="358" y="116">!priv</text>
+    <text x="626" y="116">!base</text>
+    <text x="894" y="116">ret &lt; 0</text>
   </g>
 
-  <!-- text: branch labels -->
-  <g font-size="11" font-weight="600">
-    <text x="596" y="112" fill="#8a5a2a" text-anchor="middle">yes</text>
-    <text x="596" y="216" fill="#8a5a2a" text-anchor="middle">yes</text>
-    <text x="596" y="320" fill="#8a5a2a" text-anchor="middle">yes</text>
-    <text x="484" y="168" fill="#c2613f">no</text>
-    <text x="484" y="272" fill="#c2613f">no</text>
-    <text x="484" y="376" fill="#c2613f">no</text>
+  <!-- success exit -->
+  <rect x="960" y="94" width="96" height="36" rx="18" fill="#e5e9dd" stroke="#788c5d" stroke-width="1.5" filter="url(#ffc-sh)"/>
+  <text x="1008" y="117" font-size="13" font-weight="600" fill="#5d7045" text-anchor="middle">return 0</text>
+
+  <!-- numbered badges -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <circle cx="158" cy="78" r="10" fill="#d97757"/><text x="158" y="82" fill="#ffffff">1</text>
+    <circle cx="426" cy="78" r="10" fill="#d97757"/><text x="426" y="82" fill="#ffffff">2</text>
+    <circle cx="694" cy="78" r="10" fill="#d97757"/><text x="694" y="82" fill="#ffffff">3</text>
   </g>
 
-  <!-- text: error lane -->
-  <text x="658" y="84" font-size="11" font-weight="600" fill="#8a5a2a" letter-spacing="1">ERROR LANE</text>
-  <text x="672" y="120" font-size="13" font-weight="600" fill="#141413">ret = -ENOMEM</text>
-  <text x="672" y="140" font-size="11" fill="#6b6a5f">ctx alloc failed</text>
-  <text x="672" y="224" font-size="13" font-weight="600" fill="#141413">ret = -ENOMEM</text>
-  <text x="672" y="244" font-size="11" fill="#6b6a5f">mmio map failed</text>
-  <text x="672" y="328" font-size="13" font-weight="600" fill="#141413">iounmap(base)</text>
-  <text x="672" y="348" font-size="11" fill="#6b6a5f">unwind mmio mapping</text>
+  <!-- error lane -->
+  <text x="236" y="224" font-size="11" font-weight="600" letter-spacing="1" fill="#8a5a2a">ERROR LANE &#183; goto ladder, unwinds right to left</text>
+  <rect x="236" y="232" width="780" height="108" rx="12" fill="#f0e4d8" stroke="#d9bf94" stroke-dasharray="4 3"/>
+  <rect x="248" y="242" width="756" height="4" rx="2" fill="#c9913f"/>
 
-  <!-- text: exits -->
-  <text x="196" y="518" font-size="13" font-weight="600" fill="#5d7045" text-anchor="middle">return 0</text>
-  <text x="748" y="518" font-size="13" font-weight="600" fill="#8a5a2a" text-anchor="middle">return ret</text>
+  <g fill="none" stroke="#c9913f" stroke-width="1.4" stroke-dasharray="4 3">
+    <line x1="804" y1="290" x2="716" y2="290" marker-end="url(#ffc-arrG)"/>
+    <line x1="536" y1="290" x2="448" y2="290" marker-end="url(#ffc-arrG)"/>
+  </g>
+  <g font-size="11" fill="#8a5a2a" text-anchor="middle">
+    <text x="760" y="278">falls through</text>
+    <text x="492" y="278">falls through</text>
+  </g>
 
-  <!-- annotation -->
-  <text x="876" y="44" font-size="11" font-style="italic" fill="#8c8a7d" text-anchor="end">platform_driver · drivers/misc/mydev.c</text>
+  <g filter="url(#ffc-sh)">
+    <rect x="536" y="258" width="180" height="64" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="804" y="258" width="180" height="64" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+  </g>
+  <rect x="268" y="268" width="180" height="44" rx="22" fill="#ffffff" stroke="#c9913f" stroke-width="1.5" filter="url(#ffc-sh)"/>
 
-  <!-- legend -->
-  <circle cx="68" cy="564" r="4" fill="#d97757"/>
-  <text x="80" y="568" font-size="11" fill="#6b6a5f">happy path</text>
-  <circle cx="172" cy="564" r="4" fill="#c9913f"/>
-  <text x="184" y="568" font-size="11" fill="#6b6a5f">error path · dashed</text>
-  <circle cx="324" cy="564" r="4" fill="#788c5d"/>
-  <text x="336" y="568" font-size="11" fill="#6b6a5f">success exit</text>
+  <g font-size="11" font-weight="600" fill="#8a5a2a">
+    <text x="552" y="282">err_free:</text>
+    <text x="820" y="282">err_unmap:</text>
+  </g>
+  <g font-size="13" font-weight="600" fill="#141413">
+    <text x="552" y="304">kfree(priv)</text>
+    <text x="820" y="304">iounmap(base)</text>
+  </g>
+  <text x="358" y="295" font-size="13" font-weight="600" fill="#8a5a2a" text-anchor="middle">err_out: return ret</text>
+
+  <text x="32" y="376" font-size="12" font-style="italic" fill="#8c8a7d">every failure enters the ladder at its own label, then falls through every earlier one &#8212; that is why kernel error paths are written with goto and not nested ifs</text>
+  <text x="32" y="398" font-size="12" font-style="italic" fill="#8c8a7d">kzalloc, not devm_kzalloc: under devm_ the ladder disappears, and with it the only reason to draw this figure</text>
 </svg>
       <figcaption class="gal-cap">
         <span class="gal-cap-text">
           <span class="gal-tag"><span class="lang-en">function flowchart · error lanes</span><span class="lang-zh">函数流程图 · 错误车道</span></span>
-          <span class="lang-en">A driver probe() with its error handling pulled into a gold side lane — the happy path stays readable top to bottom, cleanups join a shared exit. Template: <code>templates/diagrams/function-flowchart.svg</code>.</span>
-          <span class="lang-zh">驱动 probe() 函数：错误处理抽到右侧金色车道，主路径从上到下保持可读，清理步骤汇入共享出口。模板：<code>templates/diagrams/function-flowchart.svg</code>。</span>
+          <span class="lang-en">A driver probe() laid out on the horizontal axis: badge 1 kzalloc, badge 2 ioremap, badge 3 request_irq, then <code>return 0</code>. Every diamond's yes branch drops straight down into the error lane, which is an unwind ladder read right to left — a request_irq failure enters at <code>err_unmap</code> and falls through <code>err_free</code> to <code>err_out</code>, while a kzalloc failure enters at <code>err_out</code> and returns immediately. The ladder's arrows point against the happy path because unwinding runs backwards. Vertical template: <code>templates/diagrams/function-flowchart.svg</code>.</span>
+          <span class="lang-zh">驱动 probe() 横向排布：徽章 1 kzalloc、2 ioremap、3 request_irq，然后 <code>return 0</code>。每个菱形的 yes 分支垂直落进下方错误车道；车道是一把从右往左读的解绑梯 —— request_irq 失败从 <code>err_unmap</code> 进，依次落到 <code>err_free</code>、<code>err_out</code>；kzalloc 失败直接从 <code>err_out</code> 进、立刻返回。梯子的箭头与主路径反向，因为解绑就是倒着走。纵向模板：<code>templates/diagrams/function-flowchart.svg</code>。</span>
         </span>
         <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
       </figcaption>
