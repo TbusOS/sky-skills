@@ -34,6 +34,7 @@
   html[data-lang="zh"] .alt-card__body,
   html[data-lang="zh"] .callout__body,
   html[data-lang="zh"] .detail-row__body,
+  html[data-lang="zh"] .sourcing__body,
   html[data-lang="zh"] .fig-cap {
     font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
   }
@@ -168,6 +169,28 @@
     background: #faf9f5; padding: 2px 8px; border-radius: 4px;
     border: 1px solid var(--anth-light-gray);
   }
+  /* Sourcing note - what is checked vs what is illustrative */
+  .sourcing {
+    background: #ffffff; border: 1px solid var(--anth-light-gray);
+    border-left: 3px solid var(--anth-orange);
+    border-radius: var(--radius-md); padding: var(--space-5) var(--space-6);
+  }
+  .sourcing__kicker {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink);
+    margin: 0 0 var(--space-2);
+  }
+  .sourcing__body {
+    font-family: var(--font-body); font-size: 15px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+  .sourcing__body code {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    background: #faf9f5; padding: 1px 6px; border-radius: 4px;
+    border: 1px solid var(--anth-light-gray);
+  }
+  html[data-lang="zh"] .sourcing__kicker { text-transform: none; letter-spacing: 0.05em; }
+
   .eyebrow-link {
     font-family: var(--font-heading); font-size: 12px; letter-spacing: 0.14em;
     text-transform: uppercase; color: var(--anth-text-secondary); font-weight: 600;
@@ -189,6 +212,7 @@
     <a href="#no-gpu"><span class="lang-en">Without a GPU</span><span class="lang-zh">没有 GPU</span></a>
     <a href="#why"><span class="lang-en">Why this design</span><span class="lang-zh">为什么这么设计</span></a>
     <a href="#with-gpu"><span class="lang-en">With a GPU</span><span class="lang-zh">有 GPU</span></a>
+    <a href="#discrete"><span class="lang-en">Discrete card</span><span class="lang-zh">独立显卡</span></a>
     <a href="#mechanism"><span class="lang-en">Mechanism</span><span class="lang-zh">机制细节</span></a>
     <a href="diagrams.html"><span class="lang-en">Gallery</span><span class="lang-zh">图集</span></a>
   </div>
@@ -219,11 +243,11 @@
       <span class="lang-zh">&#27809;&#26377;&#20219;&#20309;&#19996;&#35199;<br>&#34987;&#25644;&#36827;<br>GPU&#12290;</span>
     </h1>
     <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.6; max-width:700px; font-family:var(--font-body);">
-      <span class="lang-en">Two figures answering one question about a phone-class system on chip: which piece of hardware actually issues the read, and over which wire. Once you can see that the framebuffer never leaves DDR, the word <em>upload</em> turns out to have been borrowed from desktop graphics cards &#8212; and it has been misleading people ever since.</span>
-      <span class="lang-zh">&#20004;&#24352;&#22270;&#22238;&#31572;&#21516;&#19968;&#20010;&#38382;&#39064;&#65306;&#22312;&#25163;&#26426;&#36825;&#31867; SoC &#19978;&#65292;&#21040;&#24213;&#26159;&#21738;&#20010;&#30828;&#20214;&#21457;&#20986;&#20102;&#35835;&#35831;&#27714;&#65292;&#36208;&#30340;&#21448;&#26159;&#21738;&#26681;&#32447;&#12290;&#30475;&#28165;&#24086;&#32531;&#20914;&#20174;&#26469;&#27809;&#31163;&#24320;&#36807; DDR &#20043;&#21518;&#20250;&#21457;&#29616;&#65292;<em>&#19978;&#20256;</em>&#36825;&#20010;&#35789;&#26159;&#20174;&#21488;&#24335;&#26174;&#21345;&#37027;&#20799;&#20511;&#26469;&#30340;&#8212;&#8212;&#32780;&#23427;&#19968;&#30452;&#22312;&#35823;&#23548;&#20154;&#12290;</span>
+      <span class="lang-en">Three figures answering one question: which piece of hardware actually issues the read, and over which wire. Two of them cover a phone-class system on chip, where the framebuffer never leaves DDR. The third covers a desktop card, which really does have a second memory &#8212; and that is where the word <em>upload</em> came from.</span>
+      <span class="lang-zh">&#19977;&#24352;&#22270;&#22238;&#31572;&#21516;&#19968;&#20010;&#38382;&#39064;&#65306;&#21040;&#24213;&#26159;&#21738;&#20010;&#30828;&#20214;&#21457;&#20986;&#20102;&#35835;&#35831;&#27714;&#65292;&#36208;&#30340;&#21448;&#26159;&#21738;&#26681;&#32447;&#12290;&#21069;&#20004;&#24352;&#30011;&#25163;&#26426;&#36825;&#31867; SoC&#65292;&#24086;&#32531;&#20914;&#20174;&#26469;&#27809;&#31163;&#24320;&#36807; DDR&#12290;&#31532;&#19977;&#24352;&#30011;&#21488;&#24335;&#26426;&#30340;&#29420;&#31435;&#26174;&#21345;&#65292;&#37027;&#37324;&#30830;&#23454;&#26377;&#31532;&#20108;&#22359;&#20869;&#23384;&#8212;&#8212;<em>&#19978;&#20256;</em>&#36825;&#20010;&#35789;&#23601;&#26159;&#20174;&#37027;&#20799;&#26469;&#30340;&#12290;</span>
     </p>
     <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
-      <a class="anth-button" href="#no-gpu"><span class="lang-en">See the two figures</span><span class="lang-zh">&#30475;&#36825;&#20004;&#24352;&#22270;</span></a>
+      <a class="anth-button" href="#no-gpu"><span class="lang-en">See the three figures</span><span class="lang-zh">&#30475;&#36825;&#19977;&#24352;&#22270;</span></a>
       <a class="anth-button anth-button--ghost" href="#mechanism"><span class="lang-en">Jump to the mechanism</span><span class="lang-zh">&#30452;&#25509;&#30475;&#26426;&#21046;&#32454;&#33410;</span></a>
     </div>
   </div>
@@ -245,6 +269,22 @@
         <span class="num">0</span>
         <span class="lbl"><span class="lang-en">Copies into the GPU</span><span class="lang-zh">&#25320;&#36827; GPU &#30340;&#27425;&#25968;</span></span>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- What is checked vs what is illustrative -->
+<section class="anth-section" style="padding-top:0;">
+  <div class="anth-container">
+    <div class="sourcing">
+      <p class="sourcing__kicker">
+        <span class="lang-en">About the numbers on these figures</span>
+        <span class="lang-zh">&#20851;&#20110;&#22270;&#19978;&#37027;&#20123;&#25968;&#23383;</span>
+      </p>
+      <p class="sourcing__body">
+        <span class="lang-en">The structure is checked; the numbers are illustrative. Which block issues a read, and which driver owns the DMA, was read out of mainline Linux &#8212; every such claim on this page names its file and line, and the tree is <code>v7.0-9887-ga43fac2b5813</code>. The bus widths, clock rates and capacities are one representative configuration, chosen so the orders of magnitude line up; they are not the datasheet of any particular part, and nothing here was taken from a vendor manual. The argument rests only on the ratio &#8212; a frame is megabytes, on-chip memory is kilobytes &#8212; and that gap is three orders of magnitude on any chip of this class.</span>
+        <span class="lang-zh">&#32467;&#26500;&#26159;&#26597;&#36807;&#30340;&#65292;&#25968;&#23383;&#26159;&#31034;&#24847;&#30340;&#12290;&#21738;&#20010;&#27169;&#22359;&#21457;&#35835;&#35831;&#27714;&#12289;DMA &#24402;&#21738;&#20010;&#39537;&#21160;&#31649;&#65292;&#26159;&#20174;&#20027;&#32447; Linux &#28304;&#30721;&#37324;&#35835;&#20986;&#26469;&#30340;&#8212;&#8212;&#26412;&#39029;&#27599;&#26465;&#36825;&#31867;&#35770;&#26029;&#37117;&#32473;&#20102;&#25991;&#20214;&#21517;&#21644;&#34892;&#21495;&#65292;&#26641;&#26159; <code>v7.0-9887-ga43fac2b5813</code>&#12290;&#24635;&#32447;&#20301;&#23485;&#12289;&#39057;&#29575;&#12289;&#23481;&#37327;&#26159;&#19968;&#31181;&#20195;&#34920;&#24615;&#37197;&#32622;&#65292;&#20026;&#30340;&#26159;&#35753;&#37327;&#32423;&#23545;&#24471;&#19978;&#65307;&#23427;&#20204;&#19981;&#26159;&#26576;&#39063;&#20855;&#20307;&#33455;&#29255;&#30340;&#35268;&#26684;&#20070;&#65292;&#20063;&#27809;&#26377;&#20219;&#20309;&#19968;&#20010;&#25968;&#26159;&#20174;&#21378;&#21830;&#25163;&#20876;&#25220;&#30340;&#12290;&#35770;&#28857;&#21482;&#20381;&#36182;&#37027;&#20010;&#27604;&#20363;&#8212;&#8212;&#19968;&#24086;&#26159;&#20806;&#23383;&#33410;&#65292;&#29255;&#19978;&#23384;&#20648;&#26159;&#21315;&#23383;&#33410;&#8212;&#8212;&#36825;&#20010;&#24046;&#36317;&#22312;&#20219;&#20309;&#36825;&#31867;&#33455;&#29255;&#19978;&#37117;&#26377;&#19977;&#20010;&#25968;&#37327;&#32423;&#12290;</span>
+      </p>
     </div>
   </div>
 </section>
@@ -594,15 +634,126 @@
   </div>
 </section>
 
-<!-- Honest callout -->
-<section class="anth-section">
-  <div class="anth-container">
-    <div class="callout">
-      <p class="callout__kicker"><span class="lang-en">Where the word came from</span><span class="lang-zh">&#37027;&#20010;&#35789;&#30340;&#26469;&#22788;</span></p>
-      <h3 class="callout__title"><span class="lang-en">A discrete card really does copy</span><span class="lang-zh">&#29420;&#31435;&#26174;&#21345;&#30830;&#23454;&#26159;&#22312;&#25335;&#36125;</span></h3>
+<!-- Figure 3 -->
+<section class="anth-section anth-section--subtle" id="discrete">
+  <div class="anth-container anth-container--wide">
+    <span class="anth-badge"><span class="lang-en">Figure 03 &#183; discrete card</span><span class="lang-zh">&#22270; 03 &#183; &#29420;&#31435;&#26174;&#21345;</span></span>
+    <h2 style="margin-top:var(--space-3); max-width:840px;">
+      <span class="lang-en">Where there really are two memories, and the copy is real</span>
+      <span class="lang-zh">&#30495;&#30340;&#26377;&#20004;&#22359;&#20869;&#23384;&#30340;&#37027;&#31181;&#26426;&#22120;&#65292;&#25335;&#36125;&#26159;&#30495;&#30340;</span>
+    </h2>
+    <p style="font-size:16px; line-height:1.6; color:var(--anth-text-secondary); max-width:800px; margin:var(--space-3) 0 var(--space-7); font-family:var(--font-body);">
+      <span class="lang-en">The picture starts in ordinary system memory either way. On a desktop card it then has to cross to a second address space, and this figure draws that crossing &#8212; because it is the step everybody means by <em>upload</em>, and it is the one the first two figures do not have.</span>
+      <span class="lang-zh">&#19981;&#31649;&#21738;&#31181;&#26426;&#22120;&#65292;&#22270;&#19968;&#24320;&#22987;&#37117;&#22312;&#26222;&#36890;&#31995;&#32479;&#20869;&#23384;&#37324;&#12290;&#21040;&#20102;&#21488;&#24335;&#26426;&#30340;&#26174;&#21345;&#19978;&#65292;&#23427;&#24471;&#36328;&#21040;&#31532;&#20108;&#20010;&#22320;&#22336;&#31354;&#38388;&#21435;&#8212;&#8212;&#36825;&#24352;&#22270;&#30011;&#30340;&#23601;&#26159;&#36825;&#19968;&#36328;&#12290;&#22823;&#23478;&#35828;<em>&#19978;&#20256;</em>&#26102;&#25351;&#30340;&#27491;&#26159;&#23427;&#65292;&#32780;&#21069;&#20004;&#24352;&#22270;&#37324;&#26681;&#26412;&#27809;&#26377;&#36825;&#19968;&#27493;&#12290;</span>
+    </p>
+    <figure class="fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="How pixel data physically moves on a machine with a discrete graphics card, which unlike a phone system on chip has its own separate video memory. The figure is split down the middle. On the left is the host: a CPU with its memory management unit, and below it the system memory on the motherboard, drawn as two stacked rows holding the same physical pages. The upper row is labelled decoded image, ordinary pages, TTM underscore PL underscore SYSTEM, and marked as not reachable by the card at all. The lower row is the same pages after the driver has pinned them and mapped them through the graphics aperture, labelled AMDGPU underscore GEM underscore DOMAIN underscore GTT, now readable by the card across the link. A note states that this step makes a mapping entry and does not move any bytes. Between the two halves sits the PCI Express link, drawn as a narrow gold gateway, and it is the only wire connecting the two memories. On the right is the graphics card, its own board with its own memory. Its die holds, from left to right, an SDMA copy engine highlighted in orange, a shader array, a level two cache, and a display engine in blue. Below the die is a second address bar, the video memory, divided left to right into textures, the back framebuffer and the front framebuffer. Badge one, an application decodes an image into ordinary system memory where the card cannot see it. Badge two, the driver pins the pages and calls dma map sgtable, which makes them reachable. Badge three, the card's own SDMA engine reads those pages across PCI Express and writes them into video memory; this is the real copy and the card issues it, not the CPU. Badge four, the shader array reads textures and draws into the back framebuffer. Badge five, the display engine reads the front framebuffer and drives the monitor, never crossing PCI Express again. Badge six, the CPU can only see a window of video memory through the PCI Express base address register, sized by visible vram size. The conclusion is that here the word upload is literal: there really are two address spaces with one wire between them, which is exactly what a phone system on chip does not have" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="vdfDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+          <marker id="vdfArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+          <marker id="vdfArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+          <marker id="vdfArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+        </defs>
+        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="560" rx="16" fill="url(#vdfDots)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">DISCRETE CARD &#183; TWO MEMORIES, ONE WIRE &#183; HERE THE COPY IS REAL</text>
+        <g font-size="12" fill="#6b6a5f">
+          <line x1="646" y1="30" x2="670" y2="30" stroke="#d97757" stroke-width="2.4"/><text x="678" y="34">who issues the transfer</text>
+          <line x1="850" y1="30" x2="874" y2="30" stroke="#4d5a3c" stroke-width="1.8"/><text x="882" y="34">on-card traffic</text>
+          <line x1="984" y1="30" x2="1008" y2="30" stroke="#2f5c8a" stroke-width="1.8"/><text x="1016" y="34">display side</text>
+        </g>
+        <rect x="32" y="54" width="404" height="402" rx="12" fill="none" stroke="#d5d2c6" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <text x="48" y="76" font-size="13" font-weight="600" fill="#6b6a5f">HOST &#183; motherboard</text>
+        <rect x="48" y="88" width="200" height="50" rx="9" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="148" y="108" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">CPU + system MMU</text>
+        <text x="148" y="126" text-anchor="middle" font-size="12" fill="#6b6a5f">decodes, then hands over</text>
+        <text x="48" y="168" font-size="12" font-weight="600" fill="#4d5a3c">SYSTEM MEMORY &#183; DDR on the board</text>
+        <rect x="48" y="180" width="372" height="60" rx="9" fill="#f1efe8" stroke="#d5d2c6"/>
+        <text x="64" y="203" font-size="12.5" font-weight="600" fill="#6b6a5f">decoded image &#183; ordinary pages</text>
+        <text x="64" y="223" font-size="12" fill="#8c8a7d">TTM_PL_SYSTEM &#183; the card cannot reach this</text>
+        <rect x="48" y="276" width="372" height="60" rx="9" fill="#eef1e7" stroke="#b9c4a4"/>
+        <text x="64" y="299" font-size="12.5" font-weight="600" fill="#4d5a3c">the same pages, now GART-mapped</text>
+        <text x="64" y="319" font-size="12" fill="#8c8a7d">AMDGPU_GEM_DOMAIN_GTT &#183; readable over the link</text>
+        <line x1="226" y1="242" x2="226" y2="270" stroke="#4d5a3c" stroke-width="1.8" marker-end="url(#vdfArrG)"/>
+        <text x="256" y="262" font-size="12" fill="#4d5a3c">pin + dma_map_sgtable()</text>
+        <text x="48" y="364" font-size="12" font-weight="600" fill="#8f4a2f">that step writes a mapping entry.</text>
+        <text x="48" y="381" font-size="12" font-weight="600" fill="#8f4a2f">not one byte has moved yet.</text>
+        <text x="48" y="410" font-size="12" fill="#6b6a5f">the CPU could also write into the BAR window</text>
+        <text x="48" y="427" font-size="12" fill="#6b6a5f">itself, but it is small and uncached &#8212; drivers</text>
+        <text x="48" y="444" font-size="12" fill="#6b6a5f">use the engine for anything bulky.</text>
+        <rect x="446" y="270" width="66" height="72" rx="9" fill="#f0e4d8" stroke="#d9bf94"/>
+        <text x="479" y="299" text-anchor="middle" font-size="12.5" font-weight="600" fill="#8a6a2f">PCIe</text>
+        <text x="479" y="317" text-anchor="middle" font-size="11.5" fill="#8a6a2f">the only</text>
+        <text x="479" y="333" text-anchor="middle" font-size="11.5" fill="#8a6a2f">wire</text>
+        <rect x="522" y="54" width="566" height="402" rx="12" fill="none" stroke="#d97757" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <text x="538" y="76" font-size="13" font-weight="600" fill="#8f4a2f">GRAPHICS CARD &#183; its own board, its own memory</text>
+        <rect x="538" y="88" width="534" height="104" rx="10" fill="none" stroke="#d5d2c6" stroke-width="1.2"/>
+        <text x="1058" y="106" text-anchor="end" font-size="11.5" font-weight="600" letter-spacing="0.6" fill="#6b6a5f">GPU DIE</text>
+        <rect x="552" y="116" width="148" height="60" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.6"/>
+        <text x="626" y="140" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">SDMA copy engine</text>
+        <text x="626" y="158" text-anchor="middle" font-size="11.5" fill="#8f4a2f">it does the upload</text>
+        <rect x="712" y="116" width="118" height="60" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-opacity="0.45"/>
+        <text x="771" y="140" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shader array</text>
+        <text x="771" y="158" text-anchor="middle" font-size="11.5" fill="#6b6a5f">renders</text>
+        <rect x="842" y="116" width="100" height="60" rx="8" fill="#f1efe8" stroke="#d5d2c6"/>
+        <text x="892" y="140" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">L2 cache</text>
+        <text x="892" y="158" text-anchor="middle" font-size="11.5" fill="#8c8a7d">not a frame</text>
+        <rect x="954" y="116" width="104" height="60" rx="8" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="1006" y="140" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">display</text>
+        <text x="1006" y="158" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">engine</text>
+        <text x="538" y="240" font-size="12" font-weight="600" fill="#4d5a3c">VRAM &#183; a second physical address space</text>
+        <rect x="538" y="248" width="534" height="76" rx="10" fill="#ffffff" stroke="#b9c4a4"/>
+        <rect x="552" y="262" width="164" height="48" rx="7" fill="#eef1e7" stroke="#b9c4a4"/>
+        <text x="634" y="282" text-anchor="middle" font-size="12" font-weight="600" fill="#4d5a3c">textures</text>
+        <text x="634" y="300" text-anchor="middle" font-size="11.5" fill="#6b6a5f">uploaded once</text>
+        <rect x="728" y="262" width="164" height="48" rx="7" fill="#eef1e7" stroke="#b9c4a4"/>
+        <text x="810" y="282" text-anchor="middle" font-size="12" font-weight="600" fill="#4d5a3c">fb &#183; back</text>
+        <text x="810" y="300" text-anchor="middle" font-size="11.5" fill="#6b6a5f">being drawn</text>
+        <rect x="904" y="262" width="154" height="48" rx="7" fill="#eef1e7" stroke="#b9c4a4"/>
+        <text x="981" y="282" text-anchor="middle" font-size="12" font-weight="600" fill="#4d5a3c">fb &#183; front</text>
+        <text x="981" y="300" text-anchor="middle" font-size="11.5" fill="#6b6a5f">scanned out now</text>
+        <text x="538" y="342" font-size="11.5" fill="#8c8a7d">once a byte is here it stays &#8212; shaders and scanout read it without crossing PCIe</text>
+        <rect x="538" y="356" width="342" height="52" rx="8" fill="#f1efe8" stroke="#d5d2c6"/>
+        <text x="552" y="377" font-size="12" font-weight="600" fill="#6b6a5f">CPU-visible window &#183; the PCIe BAR</text>
+        <text x="552" y="396" font-size="11.5" fill="#8c8a7d">visible_vram_size &#183; usually far smaller than the VRAM</text>
+        <text x="1072" y="378" text-anchor="end" font-size="12" font-weight="600" fill="#2f5c8a">to the monitor</text>
+        <text x="1072" y="396" text-anchor="end" font-size="11.5" fill="#6b6a5f">DisplayPort &#183; off-card</text>
+        <line x1="420" y1="306" x2="444" y2="306" stroke="#d97757" stroke-width="2.4"/>
+        <path d="M479 268 L479 146 L550 146" stroke="#d97757" stroke-width="2.4" fill="none" marker-end="url(#vdfArrO)"/>
+        <path d="M626 178 L626 256" stroke="#d97757" stroke-width="2.4" fill="none" marker-end="url(#vdfArrO)"/>
+        <path d="M771 178 L771 214 L810 214 L810 256" stroke="#4d5a3c" stroke-width="1.8" fill="none" marker-end="url(#vdfArrG)"/>
+        <path d="M1006 256 L1006 180" stroke="#2f5c8a" stroke-width="1.8" fill="none" marker-end="url(#vdfArrB)"/>
+        <path d="M1060 160 L1076 160 L1076 350" stroke="#2f5c8a" stroke-width="1.8" fill="none" marker-end="url(#vdfArrB)"/>
+        <line x1="536" y1="382" x2="514" y2="382" stroke="#6b6a5f" stroke-width="1.4" stroke-dasharray="4 3"/>
+        <line x1="444" y1="382" x2="422" y2="382" stroke="#6b6a5f" stroke-width="1.4" stroke-dasharray="4 3"/>
+        <circle cx="398" cy="194" r="10.5" fill="#d97757"/>
+        <text x="398" y="198" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+        <circle cx="226" cy="256" r="10.5" fill="#d97757"/>
+        <text x="226" y="260" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+        <circle cx="479" cy="214" r="10.5" fill="#d97757"/>
+        <text x="479" y="218" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+        <circle cx="790" cy="214" r="10.5" fill="#d97757"/>
+        <text x="790" y="218" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">4</text>
+        <circle cx="1006" cy="214" r="10.5" fill="#d97757"/>
+        <text x="1006" y="218" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">5</text>
+        <circle cx="479" cy="382" r="10.5" fill="#d97757"/>
+        <text x="479" y="386" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">6</text>
+        <text x="32" y="484" font-size="11.5" fill="#8c8a7d">&#9312; an app decodes into ordinary system memory &#183; &#9313; the driver pins it and maps it through GART &#183; &#9314; the card&#8217;s SDMA engine reads it over PCIe and writes VRAM</text>
+        <text x="32" y="501" font-size="11.5" fill="#8c8a7d">&#9315; the shaders draw into the back buffer &#183; &#9316; the display engine reads the front buffer &#183; &#9317; the CPU can only peek at VRAM through the BAR window</text>
+        <text x="32" y="526" font-size="12" font-weight="600" fill="#8f4a2f">two address spaces, one wire. here &#8220;upload&#8221; is literal &#8212; and it is still the card, not the CPU, that issues the reads.</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">discrete card &#183; two memories, one wire</span><span class="lang-zh">&#29420;&#31435;&#26174;&#21345; &#183; &#20004;&#22359;&#20869;&#23384;&#65292;&#19968;&#26681;&#32447;</span></span>
+        <span class="lang-en">Compare it with Figure 02: there, every arrow ended on one address bar. Here there are two bars and a single link between them, so a byte genuinely has to be carried across. Note who carries it &#8212; badge &#9314; is the card&#8217;s own SDMA engine reading host memory, not the CPU pushing bytes out. That is the same rule as on the SoC: whoever needs the data issues the reads. Badge &#9313; is worth reading twice: pinning the pages and mapping them through GART makes them reachable without moving a single byte, which is why the two rows on the left hold the same pages.</span>
+        <span class="lang-zh">&#36319;&#22270; 02 &#23545;&#30528;&#30475;&#65306;&#37027;&#24352;&#37324;&#27599;&#26465;&#31661;&#22836;&#37117;&#33853;&#22312;&#21516;&#19968;&#26465;&#22320;&#22336;&#26465;&#19978;&#12290;&#36825;&#24352;&#26377;&#20004;&#26465;&#22320;&#22336;&#26465;&#12289;&#20013;&#38388;&#21482;&#26377;&#19968;&#26681;&#38142;&#36335;&#65292;&#25152;&#20197;&#23383;&#33410;&#30495;&#30340;&#24471;&#34987;&#25644;&#36807;&#21435;&#12290;&#30041;&#24847;&#26159;&#35841;&#22312;&#25644;&#8212;&#8212;&#24509;&#31456; &#9314; &#26159;&#26174;&#21345;&#33258;&#24049;&#30340; SDMA &#24341;&#25806;&#22312;&#35835;&#20027;&#26426;&#20869;&#23384;&#65292;&#19981;&#26159; CPU &#25226;&#23383;&#33410;&#25512;&#20986;&#21435;&#12290;&#36825;&#36319; SoC &#19978;&#26159;&#21516;&#19968;&#26465;&#35268;&#24459;&#65306;&#35841;&#35201;&#25968;&#25454;&#65292;&#35841;&#21457;&#35835;&#35831;&#27714;&#12290;&#24509;&#31456; &#9313; &#20540;&#24471;&#22810;&#30475;&#19968;&#36941;&#65306;&#25226;&#39029;&#38754;&#20882;&#20303;&#24182;&#36890;&#36807; GART &#26144;&#23556;&#65292;&#23601;&#35753;&#23427;&#20204;&#21464;&#24471;&#21487;&#35835;&#65292;&#32780;&#19968;&#20010;&#23383;&#33410;&#37117;&#27809;&#25644;&#8212;&#8212;&#36825;&#20063;&#26159;&#24038;&#36793;&#20004;&#25490;&#35013;&#30340;&#26159;&#21516;&#19968;&#25209;&#39029;&#38754;&#30340;&#21407;&#22240;&#12290;</span>
+      </figcaption>
+    </figure>
+    <div class="callout" style="margin-top:var(--space-7);">
+      <p class="callout__kicker"><span class="lang-en">So which one are you on</span><span class="lang-zh">&#37027;&#20320;&#25163;&#19978;&#26159;&#21738;&#19968;&#31181;</span></p>
+      <h3 class="callout__title"><span class="lang-en">The test is whether a second memory exists at all</span><span class="lang-zh">&#21028;&#26029;&#20381;&#25454;&#21482;&#26377;&#19968;&#26465;&#65306;&#26377;&#27809;&#26377;&#31532;&#20108;&#22359;&#20869;&#23384;</span></h3>
       <p class="callout__body">
-        <span class="lang-en">A desktop PCIe card has its own VRAM on the far side of a bus. There, uploading a texture is a genuine cross-bus copy, expensive enough to be worth optimising, and the vocabulary grew up around that fact. These two figures show a system with no VRAM at all, where <em>upload</em> means writing to a different DDR address and letting the GPU&#8217;s MMU map it. The word was borrowed; the physics was not.</span>
-        <span class="lang-zh">&#21488;&#24335;&#26426;&#37027;&#24352; PCIe &#26174;&#21345;&#26377;&#33258;&#24049;&#30340;&#26174;&#23384;&#65292;&#38548;&#30528;&#19968;&#26465;&#24635;&#32447;&#12290;&#22312;&#37027;&#36793;&#65292;&#8220;&#19978;&#20256;&#32441;&#29702;&#8221;&#30495;&#30340;&#26159;&#19968;&#27425;&#36328;&#24635;&#32447;&#25335;&#36125;&#65292;&#36149;&#21040;&#20540;&#24471;&#19987;&#38376;&#20248;&#21270;&#65292;&#25972;&#22871;&#35789;&#27719;&#20063;&#26159;&#22312;&#37027;&#20010;&#20107;&#23454;&#19978;&#38271;&#20986;&#26469;&#30340;&#12290;&#36825;&#20004;&#24352;&#22270;&#30011;&#30340;&#26159;&#26681;&#26412;&#27809;&#26377;&#26174;&#23384;&#30340;&#31995;&#32479;&#65292;<em>&#19978;&#20256;</em>&#22312;&#36825;&#37324;&#21482;&#24847;&#21619;&#30528;&#20889;&#21040; DDR &#21478;&#19968;&#27573;&#22320;&#22336;&#65292;&#20877;&#35753; GPU &#30340; MMU &#26144;&#23556;&#24471;&#21040;&#12290;&#35789;&#26159;&#20511;&#26469;&#30340;&#65292;&#29289;&#29702;&#19981;&#26159;&#12290;</span>
+        <span class="lang-en">A phone-class chip and an integrated desktop GPU both share one DDR with the CPU, so there is no second address space to cross and no copy to optimise. A discrete card has its own VRAM behind a link, so the copy is real, expensive, and worth doing once and keeping. Both cases are in these three figures; the vocabulary that confuses people came from the second and got applied to the first.</span>
+        <span class="lang-zh">&#25163;&#26426;&#33455;&#29255;&#21644;&#26700;&#38754;&#26426;&#30340;&#38598;&#25104;&#26174;&#21345;&#65292;&#37117;&#26159;&#36319; CPU &#20849;&#29992;&#19968;&#22359; DDR&#65292;&#27809;&#26377;&#31532;&#20108;&#20010;&#22320;&#22336;&#31354;&#38388;&#35201;&#36328;&#65292;&#20063;&#23601;&#27809;&#26377;&#25335;&#36125;&#21487;&#20248;&#21270;&#12290;&#29420;&#31435;&#26174;&#21345;&#38548;&#30528;&#19968;&#26681;&#38142;&#36335;&#26377;&#33258;&#24049;&#30340;&#26174;&#23384;&#65292;&#25335;&#36125;&#26159;&#30495;&#30340;&#12289;&#26159;&#36149;&#30340;&#65292;&#20540;&#24471;&#25335;&#19968;&#27425;&#28982;&#21518;&#19968;&#30452;&#25918;&#37027;&#20799;&#12290;&#36825;&#19977;&#24352;&#22270;&#25226;&#20004;&#31181;&#37117;&#30011;&#20102;&#65307;&#35753;&#20154;&#28137;&#28068;&#30340;&#37027;&#22871;&#35789;&#27719;&#26469;&#33258;&#31532;&#20108;&#31181;&#65292;&#21364;&#34987;&#29992;&#21040;&#20102;&#31532;&#19968;&#31181;&#36523;&#19978;&#12290;</span>
       </p>
     </div>
   </div>
@@ -642,8 +793,8 @@
   <div class="anth-container">
     <span class="anth-badge"><span class="lang-en">The mechanism</span><span class="lang-zh">&#26426;&#21046;&#32454;&#33410;</span></span>
     <h2 style="margin-top:var(--space-3);">
-      <span class="lang-en">Four wires, and how to check each one yourself</span>
-      <span class="lang-zh">&#22235;&#26681;&#32447;&#65292;&#20197;&#21450;&#27599;&#19968;&#26681;&#24590;&#20040;&#33258;&#24049;&#39564;</span>
+      <span class="lang-en">The wires, and the lines of source that pin each claim down</span>
+      <span class="lang-zh">&#37027;&#20960;&#26681;&#32447;&#65292;&#20197;&#21450;&#25130;&#20303;&#27599;&#26465;&#35770;&#26029;&#30340;&#28304;&#30721;&#34892;</span>
     </h2>
     <div style="margin-top:var(--space-6);">
       <div class="detail-row">
@@ -668,10 +819,17 @@
         </p>
       </div>
       <div class="detail-row">
-        <span class="detail-row__label"><span class="lang-en">Check it yourself</span><span class="lang-zh">&#33258;&#24049;&#24590;&#20040;&#39564;</span></span>
+        <span class="detail-row__label"><span class="lang-en">Evidence &#183; on a SoC</span><span class="lang-zh">&#23454;&#35777; &#183; SoC &#37027;&#20004;&#24352;</span></span>
         <p class="detail-row__body">
-          <span class="lang-en">On any mainline kernel tree, <code>grep -c dma_addr</code> in the DSI bridge driver returns <code>0</code> &#8212; it holds no buffer and issues no reads. The write that actually arms the hardware is in the display-controller driver, of the form <code>win_write(win, WIN_YRGB_MST, addr)</code>. Verified on <code>v7.0-9887-ga43fac2b5813</code>.</span>
-          <span class="lang-zh">&#22312;&#20219;&#20309;&#20027;&#32447;&#20869;&#26680;&#26641;&#19978;&#65292;&#23545; DSI &#26725;&#39537;&#21160;&#36305; <code>grep -c dma_addr</code> &#24471;&#21040;&#30340;&#26159; <code>0</code>&#8212;&#8212;&#23427;&#19981;&#25345;&#26377;&#32531;&#20914;&#65292;&#20063;&#19981;&#21457;&#35835;&#35831;&#27714;&#12290;&#30495;&#27491;&#25226;&#30828;&#20214;&#35013;&#22909;&#30340;&#37027;&#19968;&#34892;&#22312;&#26174;&#31034;&#25511;&#21046;&#22120;&#39537;&#21160;&#37324;&#65292;&#24418;&#22914; <code>win_write(win, WIN_YRGB_MST, addr)</code>&#12290;&#26680;&#39564;&#20110; <code>v7.0-9887-ga43fac2b5813</code>&#12290;</span>
+          <span class="lang-en">In <code>drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi.c</code>, <code>grep -c dma_addr</code> returns <code>0</code> &#8212; the DSI bridge holds no buffer and issues no reads. The write that arms the hardware is <code>vop2_win_write(win, VOP2_WIN_YRGB_MST, yrgb_mst)</code> at <code>drivers/gpu/drm/rockchip/rockchip_drm_vop2.c:1370</code>. That the GPU has its own MMU, and that its page tables sit in ordinary memory, is in <code>drivers/gpu/drm/panfrost/panfrost_regs.h</code> and <code>panfrost_mmu.c:820</code>.</span>
+          <span class="lang-zh">&#22312; <code>drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi.c</code> &#37324;&#36305; <code>grep -c dma_addr</code> &#24471;&#21040; <code>0</code>&#8212;&#8212;DSI &#26725;&#19981;&#25345;&#26377;&#32531;&#20914;&#65292;&#20063;&#19981;&#21457;&#35835;&#35831;&#27714;&#12290;&#30495;&#27491;&#25226;&#30828;&#20214;&#35013;&#22909;&#30340;&#37027;&#19968;&#34892;&#26159; <code>drivers/gpu/drm/rockchip/rockchip_drm_vop2.c:1370</code> &#30340; <code>vop2_win_write(win, VOP2_WIN_YRGB_MST, yrgb_mst)</code>&#12290;GPU &#26377;&#33258;&#24049;&#30340; MMU&#12289;&#19988;&#39029;&#34920;&#20303;&#22312;&#26222;&#36890;&#20869;&#23384;&#37324;&#65292;&#35265; <code>drivers/gpu/drm/panfrost/panfrost_regs.h</code> &#19982; <code>panfrost_mmu.c:820</code>&#12290;</span>
+        </p>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row__label"><span class="lang-en">Evidence &#183; discrete</span><span class="lang-zh">&#23454;&#35777; &#183; &#29420;&#31435;&#26174;&#21345;&#37027;&#24352;</span></span>
+        <p class="detail-row__body">
+          <span class="lang-en"><code>include/drm/ttm/ttm_placement.h:51</code> names the three placements &#8212; <code>TTM_PL_SYSTEM</code>, <code>TTM_PL_TT</code>, <code>TTM_PL_VRAM</code>. <code>include/uapi/drm/amdgpu_drm.h:89</code> documents <code>GTT</code> as &#8220;GPU accessible system memory, mapped into the GPU&#8217;s virtual address space via gart&#8221;. The copy runs <code>amdgpu_move_blit</code> &#8594; <code>amdgpu_copy_buffer</code> (<code>amdgpu_ttm.c:383</code>, <code>:2484</code>) on <code>mman.buffer_funcs_ring</code>, which <code>sdma_v5_2.c:2060</code> binds to the SDMA ring. Scanout is forced into VRAM at <code>amdgpu_display.c:560</code>.</span>
+          <span class="lang-zh"><code>include/drm/ttm/ttm_placement.h:51</code> &#23450;&#20041;&#20102;&#19977;&#31181;&#24402;&#23646;&#8212;&#8212;<code>TTM_PL_SYSTEM</code>&#12289;<code>TTM_PL_TT</code>&#12289;<code>TTM_PL_VRAM</code>&#12290;<code>include/uapi/drm/amdgpu_drm.h:89</code> &#25226; <code>GTT</code> &#35299;&#37322;&#20026;&#8220;GPU &#33021;&#35775;&#38382;&#30340;&#31995;&#32479;&#20869;&#23384;&#65292;&#32463;&#30001; gart &#26144;&#23556;&#36827; GPU &#30340;&#34394;&#25311;&#22320;&#22336;&#31354;&#38388;&#8221;&#12290;&#25335;&#36125;&#36208;&#30340;&#26159; <code>amdgpu_move_blit</code> &#8594; <code>amdgpu_copy_buffer</code>&#65288;<code>amdgpu_ttm.c:383</code>&#12289;<code>:2484</code>&#65289;&#65292;&#29992; <code>mman.buffer_funcs_ring</code>&#65292;&#32780; <code>sdma_v5_2.c:2060</code> &#25226;&#37027;&#20010; ring &#32465;&#21040; SDMA&#12290;&#25195;&#25551;&#36755;&#20986;&#34987;&#24378;&#21046;&#25918;&#22312; VRAM&#65292;&#35265; <code>amdgpu_display.c:560</code>&#12290;</span>
         </p>
       </div>
     </div>
@@ -685,12 +843,12 @@
       <span class="lang-en">Reuse these</span><span class="lang-zh">&#25343;&#21435;&#29992;</span>
     </span>
     <h2 style="margin-top:var(--space-3);">
-      <span class="lang-en">Both figures are templates.<br>Copy them, then change the labels.</span>
-      <span class="lang-zh">&#20004;&#24352;&#37117;&#26159;&#27169;&#26495;&#12290;<br>&#25343;&#36208;&#20877;&#25913;&#26631;&#31614;&#23601;&#34892;&#12290;</span>
+      <span class="lang-en">All three are templates.<br>Copy them, then change the labels.</span>
+      <span class="lang-zh">&#19977;&#24352;&#37117;&#26159;&#27169;&#26495;&#12290;<br>&#25343;&#36208;&#20877;&#25913;&#26631;&#31614;&#23601;&#34892;&#12290;</span>
     </h2>
     <p style="font-size:17px; line-height:1.65; color:var(--anth-text-secondary); max-width:620px; margin:var(--space-5) auto var(--space-6); font-family:var(--font-body);">
-      <span class="lang-en">Both are checked in under <code>templates/diagrams/</code> as <code>soc-dataflow.svg</code> and <code>gpu-dataflow.svg</code>, alongside thirty others in the same drawing language.</span>
-      <span class="lang-zh">&#20004;&#24352;&#37117;&#22312; <code>templates/diagrams/</code> &#19979;&#65292;&#21483; <code>soc-dataflow.svg</code> &#21644; <code>gpu-dataflow.svg</code>&#65292;&#26049;&#36793;&#36824;&#26377;&#19977;&#21313;&#24352;&#21516;&#19968;&#22871;&#30011;&#27861;&#30340;&#22270;&#12290;</span>
+      <span class="lang-en">They are checked in under <code>templates/diagrams/</code> as <code>soc-dataflow.svg</code>, <code>gpu-dataflow.svg</code> and <code>vram-dataflow.svg</code>, alongside thirty others in the same drawing language.</span>
+      <span class="lang-zh">&#19977;&#24352;&#37117;&#22312; <code>templates/diagrams/</code> &#19979;&#65292;&#21483; <code>soc-dataflow.svg</code>&#12289;<code>gpu-dataflow.svg</code> &#21644; <code>vram-dataflow.svg</code>&#65292;&#26049;&#36793;&#36824;&#26377;&#19977;&#21313;&#24352;&#21516;&#19968;&#22871;&#30011;&#27861;&#30340;&#22270;&#12290;</span>
     </p>
     <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
       <a class="anth-button" href="diagrams.html"><span class="lang-en">Open the gallery</span><span class="lang-zh">&#25171;&#24320;&#22270;&#38598;</span></a>
@@ -702,8 +860,8 @@
 <footer class="anth-section" style="border-top:1px solid var(--anth-light-gray); padding-top:var(--space-7); padding-bottom:var(--space-8);">
   <div class="anth-container anth-container--wide" style="display:flex; justify-content:space-between; gap:var(--space-5); flex-wrap:wrap; align-items:baseline;">
     <p style="font-size:14px; color:var(--anth-text-secondary); margin:0;">
-      <span class="lang-en">Both figures follow <code>skills/anthropic-design/references/diagram-craft.md</code> and pass the four design-review gates.</span>
-      <span class="lang-zh">&#20004;&#24352;&#22270;&#37117;&#36981;&#24490; <code>skills/anthropic-design/references/diagram-craft.md</code>&#65292;&#24182;&#36890;&#36807; design-review &#22235;&#36947;&#26816;&#26597;&#12290;</span>
+      <span class="lang-en">All three figures follow <code>skills/anthropic-design/references/diagram-craft.md</code> and pass the four design-review gates.</span>
+      <span class="lang-zh">&#19977;&#24352;&#22270;&#37117;&#36981;&#24490; <code>skills/anthropic-design/references/diagram-craft.md</code>&#65292;&#24182;&#36890;&#36807; design-review &#22235;&#36947;&#26816;&#26597;&#12290;</span>
     </p>
     <div style="display:flex; gap:var(--space-5);">
       <a class="anth-link" href="diagrams.html"><span class="lang-en">Diagram gallery</span><span class="lang-zh">&#22270;&#31034;&#26696;&#20363;&#24211;</span></a>
@@ -755,11 +913,14 @@ Decisions:
 - [config-vs-data-split] chose "gold dashed APB against orange solid AXI, drawn as separate wires" over "one arrow per hop". Because: the whole thesis is that 4 bytes and 8.3 MB do not travel together; one arrow style would have hidden exactly the distinction the page exists to make.
 - [same-address-bar] chose "every arrow in figure 2 landing on one shared DDR bar" over "per-master memory blocks". Because: the visual claim is that nothing moves - seven arrows terminating on the same bar says it before the caption does.
 - [rejected-designs-as-cards] chose "three alt-cards: on-chip frame / per-master memory / shared DDR (shipped)" over "prose paragraph of trade-offs". Because: the reader needs the alternatives side by side with their price tags to see why the shipped one won; a paragraph buries the comparison.
-- [vendor-neutral-evidence] chose "reproducible greps described by role (DSI bridge driver, display-controller driver)" over "named vendor source files". Because: the repository's diagram templates carry zero vendor names, and the check reproduces on any kernel tree, so naming one buys nothing.
+- [name-what-was-read] chose "the real mainline file and line for every code claim" over "roles like 'the DSI bridge driver'". Because: an anonymised citation cannot be checked, and hiding the driver name bought nothing once the figures themselves carry no product names. The figures stay generic because they teach a general principle; the evidence names what was actually opened.
+- [third-figure-for-vram] chose "draw the discrete-card case as its own figure" over "a paragraph saying a desktop card is different". Because: the question the page keeps provoking is how the bytes get across when there IS a second memory, and a text aside cannot show a crossing. Figure 03 is deliberately the visual inverse of Figure 02 - two address bars with one link, against one bar with everything landing on it.
+- [visible-sourcing-note] chose "a bordered note above the first figure" over "the same disclosure in the self-diff comment". Because: the comment is invisible to readers, so the page was silently presenting representative numbers with the same authority as checked structure.
 - [orange-badge-hero] chose "filled orange .anth-badge above h1" over "ghost kicker". Because: brand-presence (§K) needs the signature colour inside the top 1440x500, and the badge earns it without adding a second CTA.
 Known trade-offs:
 - SVG-internal text stays English in both languages; only figcaptions translate. Same precedent as diagrams.html, but a zh reader still meets English labels inside the figures.
-- The numbers (8.3 MB, 6.4 GB/s, 4 lanes x 1 Gbps) describe one representative phone-class configuration, not a specific product; a reader on a different memory width has to redo the arithmetic.
+- The numbers (8.3 MB, 6.4 GB/s, 4 lanes x 1 Gbps) describe one representative configuration, not a specific product; a reader on a different memory width has to redo the arithmetic. The sourcing note now says so on the page itself.
+- Figure 03's symbols are taken from the amdgpu and TTM drivers, so the naming is AMD-flavoured; the mechanism generalises to other discrete cards but the exact symbol names do not.
 - Figure 2 shows five DDR tenants; a real system has more (camera, codec, modem), and the page says so in prose rather than crowding the bar.
 /design-review:self-diff -->
 </body>

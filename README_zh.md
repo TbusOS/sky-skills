@@ -17,8 +17,8 @@
 - [**eclat-design demo**](./demos/eclat-design/index.html) —— 产品发布会 keynote，哑光电影舞台（近黑 #040406 + 骨白 #f6f3ec + 单一冷蓝高光）
 - [**lectern-design demo**](./demos/lectern-design/index.html) —— 会议室汇报 deck（纸白 #f5f6f8 + 深蓝墨 #16203a，KPI 卡 + 决议表）
 - [**primer-design demo**](./demos/primer-design/index.html) —— 小白图解读本（纸白 + 紫 #7a5cd6 + 马克笔黄）；厚描边插画 + 比喻卡 + 术语翻译气泡，把「Agent Skill 是什么」讲给完全没听过的人
-- [**anthropic 图表画廊**](./demos/anthropic-design/diagrams.html) —— 42 幅手工 SVG 图（寄存器、SoC 框图、时序波形、调度时间线、互连与地址空间映射、物理数据通路……）
-- [**硬件数据通路专题页**](./demos/anthropic-design/hardware.html) —— 两张图讲清「像素在物理上怎么走到屏幕」：没有 GPU 的连接、以及加了 GPU 之后数据到底去了哪
+- [**anthropic 图表画廊**](./demos/anthropic-design/diagrams.html) —— 43 幅手工 SVG 图（寄存器、SoC 框图、时序波形、调度时间线、互连与地址空间映射、物理数据通路……）
+- [**硬件数据通路专题页**](./demos/anthropic-design/hardware.html) —— 三张图讲清「像素在物理上怎么走到屏幕」：没有 GPU 的连接、加了 GPU 之后数据去了哪、以及有独立显存时字节到底怎么跨过 PCIe
 - [**apple 图表画廊**](./demos/apple-design/diagrams.html) —— 同类图型的 apple.com 干净几何风版本，共 31 幅
 - [**ember 图表画廊**](./demos/ember-design/diagrams.html) —— 同类图型的暖棕 + 金单焦点版本，共 8 幅
 - [**sage 图表画廊**](./demos/sage-design/diagrams.html) —— 同类图型的抹茶绿 + 靛蓝墨版本，共 8 幅
