@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Four CPU lanes on one microsecond axis, showing what a cross-core call actually costs. CPU zero takes a spinlock and calls flush_tlb_mm, which sends an inter-processor interrupt to the other cores and then waits for every one of them to acknowledge. CPU one wants the same lock four microseconds in and spins, drawn hatched because spinning burns cycles rather than sleeping, right through until CPU zero unlocks at thirty-four. CPU two is idle and answers its IPI immediately. CPU three had interrupts disabled for a long section of its own, so it cannot take the IPI until twenty-four, and CPU zero's wait is bounded by that slowest responder, not by the average. A bracket measures the whole thing. Below, a note contrasts this with per-CPU data, which needs none of it because no other core can name the variable, provided the thread does not migrate mid-sequence" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="mcDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <pattern id="mcHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#d97757" stroke-width="1.6" opacity="0.55"/>
+    </pattern>
+    <marker id="mcArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+    </marker>
+    <marker id="mcArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#788c5d"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#mcDots)"/>
+
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">CROSS-CORE CALLS &#183; WHO WAITS FOR WHOM</text>
+  <g font-size="12" fill="#6b6a5f">
+    <line x1="628" y1="30" x2="656" y2="30" stroke="#d97757" stroke-width="1.6" marker-end="url(#mcArrO)"/>
+    <text x="664" y="34">IPI &#183; wakes another core's hardirq</text>
+    <line x1="882" y1="30" x2="910" y2="30" stroke="#788c5d" stroke-width="1.4" stroke-dasharray="1.5 3.5" marker-end="url(#mcArrG)"/>
+    <text x="918" y="34">acknowledgement</text>
+  </g>
+
+  <g>
+    <rect x="208" y="106" width="852" height="46" rx="8" fill="#ffffff" stroke="#eceadf"/>
+    <text x="196" y="127" text-anchor="end" font-size="13" font-weight="600" fill="#141413">CPU 0</text>
+    <text x="196" y="144" text-anchor="end" font-size="12" fill="#6b6a5f">holds the lock, sends the IPI</text>
+    <rect x="208" y="166" width="852" height="46" rx="8" fill="#ffffff" stroke="#eceadf"/>
+    <text x="196" y="187" text-anchor="end" font-size="13" font-weight="600" fill="#141413">CPU 1</text>
+    <text x="196" y="204" text-anchor="end" font-size="12" fill="#6b6a5f">wants the same lock</text>
+    <rect x="208" y="226" width="852" height="46" rx="8" fill="#ffffff" stroke="#eceadf"/>
+    <text x="196" y="247" text-anchor="end" font-size="13" font-weight="600" fill="#141413">CPU 2</text>
+    <text x="196" y="264" text-anchor="end" font-size="12" fill="#6b6a5f">idle, answers at once</text>
+    <rect x="208" y="286" width="852" height="46" rx="8" fill="#ffffff" stroke="#eceadf"/>
+    <text x="196" y="307" text-anchor="end" font-size="13" font-weight="600" fill="#141413">CPU 3</text>
+    <text x="196" y="324" text-anchor="end" font-size="12" fill="#6b6a5f">irqs off in a long section</text>
+  </g>
+  <g>
+    <rect x="208.0" y="115" width="127.8" height="28" rx="5" fill="#f4d9cd" stroke="#d97757"/>
+    <text x="271.9" y="134" text-anchor="middle" font-size="12" fill="#8f4a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">spin_lock()</text>
+    <rect x="335.8" y="115" width="596.4" height="28" rx="5" fill="#e2ecf5" stroke="#c4d5e6"/>
+    <text x="634.0" y="134" text-anchor="middle" font-size="12" fill="#2f5c8a" font-family="SFMono-Regular, Menlo, Consolas, monospace">flush_tlb_mm() &#183; waits for every ack</text>
+    <rect x="932.2" y="115" width="85.2" height="28" rx="5" fill="#f4d9cd" stroke="#d97757"/>
+    <text x="974.8" y="134" text-anchor="middle" font-size="12" fill="#8f4a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">unlock</text>
+    <rect x="293.2" y="175" width="639.0" height="28" rx="5" fill="#ffffff" stroke="#d8d4c8"/>
+    <rect x="293.2" y="175" width="639.0" height="28" rx="5" fill="url(#mcHatch)"/>
+    <text x="612.7" y="194" text-anchor="middle" font-size="12" fill="#6b6a5f" font-family="SFMono-Regular, Menlo, Consolas, monospace">spinning &#183; burning cycles, not sleeping</text>
+    <rect x="932.2" y="175" width="127.8" height="28" rx="5" fill="#f4d9cd" stroke="#d97757"/>
+    <text x="996.1" y="194" text-anchor="middle" font-size="12" fill="#8f4a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">acquires</text>
+    <rect x="399.7" y="235" width="127.8" height="28" rx="5" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="463.6" y="254" text-anchor="middle" font-size="12" fill="#8a6a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">flush_tlb_func()</text>
+    <rect x="208.0" y="295" width="511.2" height="28" rx="5" fill="#eef1e7" stroke="#b9c4a4"/>
+    <text x="463.6" y="314" text-anchor="middle" font-size="12" fill="#4d5a3c" font-family="SFMono-Regular, Menlo, Consolas, monospace">irqs off &#183; a long critical section of its own</text>
+    <rect x="719.2" y="295" width="127.8" height="28" rx="5" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="783.1" y="314" text-anchor="middle" font-size="12" fill="#8a6a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">flush_tlb_func()</text>
+  </g>
+
+  <!-- IPI fan-out and acks -->
+  <g fill="none" stroke="#d97757" stroke-width="1.6">
+    <path d="M357.1,152 V160 Q357.1,166 365.1,166 H391.7 Q399.7,166 399.7,172 V226" marker-end="url(#mcArrO)"/>
+    <path d="M365.6,152 V160 Q365.6,166 373.6,166 H378.9 Q386.9,166 386.9,172 V286" marker-end="url(#mcArrO)"/>
+  </g>
+  <g fill="none" stroke="#788c5d" stroke-width="1.4" stroke-dasharray="1.5 3.5">
+    <path d="M484.9,226 V206 Q484.9,198 476.9,198 H450.3 Q442.3,198 442.3,190 V152" marker-end="url(#mcArrG)"/>
+    <path d="M847.0,286 V206 Q847.0,198 839.0,198 H812.4 Q804.4,198 804.4,190 V152" marker-end="url(#mcArrG)"/>
+  </g>
+  <text x="367.8" y="99" font-size="12" font-weight="600" fill="#8f4a2f">smp_call_function_many()</text>
+  <text x="1052" y="250" text-anchor="end" font-size="12" fill="#5d7045">the last ack &#8212; the one CPU 0 was waiting for</text>
+
+  <!-- axis -->
+  <line x1="208" y1="356" x2="1060" y2="356" stroke="#141413" stroke-width="1.4"/>
+  <g stroke="#141413" stroke-width="1.2"><line x1="208.0" y1="352" x2="208.0" y2="360"/><line x1="314.5" y1="352" x2="314.5" y2="360"/><line x1="421.0" y1="352" x2="421.0" y2="360"/><line x1="527.5" y1="352" x2="527.5" y2="360"/><line x1="634.0" y1="352" x2="634.0" y2="360"/><line x1="740.5" y1="352" x2="740.5" y2="360"/><line x1="847.0" y1="352" x2="847.0" y2="360"/><line x1="953.5" y1="352" x2="953.5" y2="360"/><line x1="1060.0" y1="352" x2="1060.0" y2="360"/></g>
+  <g>
+    <text x="208.0" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">0</text>
+    <text x="314.5" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">5</text>
+    <text x="421.0" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">10</text>
+    <text x="527.5" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">15</text>
+    <text x="634.0" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">20</text>
+    <text x="740.5" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">25</text>
+    <text x="847.0" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">30</text>
+    <text x="953.5" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">35</text>
+    <text x="1060.0" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">40</text>
+  </g>
+  <text x="196" y="360" text-anchor="end" font-size="12" fill="#6b6a5f">&#181;s</text>
+
+  <!-- the bracket that is the point -->
+  <g stroke="#c9913f" stroke-width="2">
+    <line x1="335.8" y1="404" x2="847.0" y2="404"/>
+    <line x1="335.8" y1="399" x2="335.8" y2="409"/>
+    <line x1="847.0" y1="399" x2="847.0" y2="409"/>
+  </g>
+  <text x="591.4" y="422" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">CPU 0 blocked 24 &#181;s &#8212; set by the slowest responder, not the average</text>
+  <g stroke="#a8a496" stroke-width="1.2">
+    <line x1="293.2" y1="440" x2="932.2" y2="440"/>
+    <line x1="293.2" y1="435" x2="293.2" y2="445"/>
+    <line x1="932.2" y1="435" x2="932.2" y2="445"/>
+  </g>
+  <text x="612.7" y="458" text-anchor="middle" font-size="12" fill="#6b6a5f">CPU 1 spun 30 &#181;s for a lock it could not have influenced</text>
+
+  <text x="32" y="492" font-size="12" fill="#6b6a5f">One core with interrupts disabled sets the pace for every core that needs an ack from it. That is the whole reason long irqs-off sections are a system property, not a local one.</text>
+  <text x="32" y="514" font-size="12" fill="#6b6a5f">Per-CPU data needs none of this: no other core can name the variable, so there is no lock, no IPI and no ack &#8212; provided the thread cannot migrate between get_cpu() and put_cpu().</text>
+  <text x="32" y="538" font-size="12" font-style="italic" fill="#8c8a7d">Draw the ack arrows, not just the IPI arrows. A fan-out alone reads as fire-and-forget; the acks are what turn it into a wait.</text>
+</svg>

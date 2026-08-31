@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Call graph across three drivers, drawn so the kind of every edge is visible. Three dashed containers hold the functions: DRM core on the left, the vendor display driver in the middle, the panel and backlight drivers on the right. Five edge kinds carry the meaning. A thin solid arrow is a direct call on the same stack. A solid arrow with a hollow head is an indirect call through an ops table, labelled with the member, invisible to grep at compile time. A gold dashed arrow is an asynchronous handoff that changes execution context, labelled with the primitive that does the handoff. A lightning bolt is a hardware event entering the kernel. A dotted arrow is a completion travelling back. Reading it: an ioctl in process context reaches drm_atomic_commit, which hands the work to a kworker through queue_work; the worker calls the vendor flush through the atomic_flush member and, over the top of that driver, calls the panel's prepare member directly, because DRM core talks to drm_panel without going through the display driver; the panel driver then calls into a third driver, the backlight one. Later a hardware interrupt enters the vendor handler in hardirq context, which calls back into DRM core, and the completion travels up to the worker that was waiting" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="cgDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <filter id="cgSh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/>
+    </filter>
+    <marker id="cgSolid" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/>
+    </marker>
+    <marker id="cgHollow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0.8,1 L8.2,5 L0.8,9 Z" fill="#ffffff" stroke="#2f5c8a" stroke-width="1.2"/>
+    </marker>
+    <marker id="cgGold" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c9913f"/>
+    </marker>
+    <marker id="cgGreen" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#788c5d"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#cgDots)"/>
+
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">CALL GRAPH &#183; THREE DRIVERS, FIVE KINDS OF EDGE</text>
+
+  <!-- legend: the edge kinds ARE the figure -->
+  <g font-size="12" fill="#6b6a5f">
+    <line x1="32" y1="66" x2="60" y2="66" stroke="#141413" stroke-width="1.6" marker-end="url(#cgSolid)"/>
+    <text x="68" y="70">direct call &#183; same stack</text>
+    <line x1="240" y1="66" x2="268" y2="66" stroke="#2f5c8a" stroke-width="1.6" marker-end="url(#cgHollow)"/>
+    <text x="280" y="70">through an ops table</text>
+    <line x1="456" y1="66" x2="484" y2="66" stroke="#c9913f" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#cgGold)"/>
+    <text x="492" y="70">async handoff &#183; context changes</text>
+    <path d="M756,58 L764,66 L758,66 L766,76" fill="none" stroke="#d97757" stroke-width="1.8"/>
+    <text x="776" y="70">hardware event</text>
+    <line x1="900" y1="66" x2="928" y2="66" stroke="#788c5d" stroke-width="1.6" stroke-dasharray="1.5 3.5" marker-end="url(#cgGreen)"/>
+    <text x="936" y="70">completion travels back</text>
+  </g>
+
+  <!-- module containers -->
+  <g fill="#f5f2ea" stroke="#cfccc0" stroke-dasharray="5 4">
+    <rect x="32" y="96" width="300" height="374" rx="12"/>
+    <rect x="408" y="96" width="300" height="374" rx="12"/>
+    <rect x="784" y="96" width="300" height="374" rx="12"/>
+  </g>
+  <g font-size="12" font-weight="600" letter-spacing="1.2" fill="#141413">
+    <text x="46" y="120">DRM CORE</text>
+    <text x="422" y="120">VENDOR DISPLAY DRIVER</text>
+    <text x="798" y="120">PANEL + BACKLIGHT</text>
+  </g>
+  <g font-size="12" font-style="italic" fill="#8c8a7d">
+    <text x="318" y="120" text-anchor="end">in-tree</text>
+    <text x="694" y="120" text-anchor="end">one module</text>
+    <text x="1070" y="120" text-anchor="end">two modules</text>
+  </g>
+
+  <!-- ============ edges (under the cards) ============ -->
+  <!-- 1 direct: ioctl -> commit -->
+  <line x1="182" y1="184" x2="182" y2="204" stroke="#141413" stroke-width="1.6" marker-end="url(#cgSolid)"/>
+  <!-- 2 async: commit -> worker -->
+  <line x1="182" y1="252" x2="182" y2="288" stroke="#c9913f" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#cgGold)"/>
+  <!-- 3 ops: worker -> vendor flush -->
+  <line x1="318" y1="322" x2="418" y2="322" stroke="#2f5c8a" stroke-width="1.6" marker-end="url(#cgHollow)"/>
+  <!-- 4 ops: worker -> panel prepare, flying OVER the vendor driver -->
+  <path d="M318,300 H336 Q344,300 344,292 V164 Q344,156 352,156 H1046 Q1054,156 1054,164 V288" fill="none" stroke="#2f5c8a" stroke-width="1.6" marker-end="url(#cgHollow)"/>
+  <!-- 5 direct: flush -> send frame -->
+  <line x1="558" y1="336" x2="558" y2="350" stroke="#141413" stroke-width="1.6" marker-end="url(#cgSolid)"/>
+  <!-- 6 direct across drivers: panel -> backlight -->
+  <line x1="934" y1="336" x2="934" y2="380" stroke="#141413" stroke-width="1.6" marker-end="url(#cgSolid)"/>
+  <!-- 7 hardware event -->
+  <path d="M430,502 L442,490 L434,490 L446,478" fill="none" stroke="#d97757" stroke-width="2"/>
+  <path d="M452,490 H548 Q556,490 556,482 V464" fill="none" stroke="#d97757" stroke-width="1.8" marker-end="url(#cgSolid)"/>
+  <!-- 8 direct: vendor irq -> drm core -->
+  <path d="M418,436 H322" fill="none" stroke="#141413" stroke-width="1.6" marker-end="url(#cgSolid)"/>
+  <!-- 9 completion back up to the waiting worker -->
+  <path d="M46,436 H36 Q26,436 26,426 V322 Q26,312 36,312 H46" fill="none" stroke="#788c5d" stroke-width="1.6" stroke-dasharray="1.5 3.5" marker-end="url(#cgGreen)"/>
+
+  <!-- edge labels -->
+  <g font-size="12" text-anchor="middle">
+    <rect x="126" y="260" width="112" height="20" rx="10" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="182" y="274" fill="#8a6a2f">queue_work()</text>
+    <text x="368" y="316" fill="#2f5c8a">.atomic_flush</text>
+    <text x="880" y="150" fill="#2f5c8a">.prepare &#183; core reaches the panel over that driver</text>
+    <text x="370" y="430" fill="#6b6a5f">back into core</text>
+  </g>
+  <text x="920" y="362" text-anchor="end" font-size="12" fill="#6b6a5f">plain exported symbol</text>
+  <text x="46" y="484" font-size="12" fill="#5d7045">complete(&amp;flip_done) wakes the worker</text>
+  <text x="462" y="496" font-size="12" font-weight="600" fill="#8f4a2f">DSI frame-done IRQ</text>
+
+  <!-- ============ cards ============ -->
+    <rect x="46" y="136" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+    <text x="60" y="157" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">drm_mode_atomic_ioctl()</text>
+    <text x="60" y="174" font-size="12" fill="#6b6a5f">userspace asked for a new frame</text>
+    <rect x="255" y="144" width="53" height="18" rx="9" fill="#f5f2ea" stroke="#d8d4c8"/>
+    <text x="282" y="157" text-anchor="middle" font-size="12" fill="#6b6a5f">process</text>
+    <rect x="46" y="204" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+    <text x="60" y="225" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">drm_atomic_commit()</text>
+    <text x="60" y="242" font-size="12" fill="#6b6a5f">validates, then hands the work over</text>
+    <rect x="255" y="212" width="53" height="18" rx="9" fill="#f5f2ea" stroke="#d8d4c8"/>
+    <text x="282" y="225" text-anchor="middle" font-size="12" fill="#6b6a5f">process</text>
+    <rect x="46" y="288" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+    <text x="60" y="309" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">commit_tail()</text>
+    <text x="60" y="326" font-size="12" fill="#6b6a5f">the queued work item runs here</text>
+    <rect x="255" y="296" width="53" height="18" rx="9" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="282" y="309" text-anchor="middle" font-size="12" fill="#8a6a2f">kworker</text>
+    <rect x="46" y="412" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+    <text x="60" y="433" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">drm_crtc_handle_vblank()</text>
+    <text x="60" y="450" font-size="12" fill="#6b6a5f">core bookkeeping, then wakes waiters</text>
+    <rect x="255" y="420" width="53" height="18" rx="9" fill="#f4d9cd" stroke="#d97757"/>
+    <text x="282" y="433" text-anchor="middle" font-size="12" fill="#8f4a2f">hardirq</text>
+    <rect x="422" y="288" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+    <text x="436" y="309" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">sunxi_crtc_atomic_flush()</text>
+    <text x="436" y="326" font-size="12" fill="#6b6a5f">latches the new framebuffer address</text>
+    <rect x="422" y="350" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+    <text x="436" y="371" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">sunxi_dsi_send_frame()</text>
+    <text x="436" y="388" font-size="12" fill="#6b6a5f">kicks the display DMA</text>
+    <rect x="422" y="412" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+    <text x="436" y="433" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">sunxi_dsi_irq()</text>
+    <text x="436" y="450" font-size="12" fill="#6b6a5f">acks, then calls core</text>
+    <rect x="631" y="420" width="53" height="18" rx="9" fill="#f4d9cd" stroke="#d97757"/>
+    <text x="658" y="433" text-anchor="middle" font-size="12" fill="#8f4a2f">hardirq</text>
+    <rect x="798" y="288" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+    <text x="812" y="309" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">sunxi_panel_prepare()</text>
+    <text x="812" y="326" font-size="12" fill="#6b6a5f">power rails, reset, init sequence</text>
+    <rect x="798" y="380" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+    <text x="812" y="401" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">backlight_enable()</text>
+    <text x="812" y="418" font-size="12" fill="#6b6a5f">a different module entirely</text>
+    <rect x="975" y="388" width="85" height="18" rx="9" fill="#e5e9dd" stroke="#b9c4a4"/>
+    <text x="1018" y="401" text-anchor="middle" font-size="12" fill="#5d7045">cross-driver</text>
+
+  <text x="32" y="532" font-size="12" fill="#6b6a5f">grep finds the solid black edges. It cannot find the blue ones (the target is a struct member, resolved at runtime) or the gold one (the target runs later, on another thread).</text>
+</svg>

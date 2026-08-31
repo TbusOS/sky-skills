@@ -18,8 +18,8 @@ Same story, nine aesthetics. Each demo is a single flagship HTML page showcasing
 Extra pages beyond the nine flagship `index.html`:
 
 - [`anthropic-design/index-v2.html`](./anthropic-design/index-v2.html) — v2 scenario showcase (dashboard / form / table / modal and other non-canonical layouts)
-- [`anthropic-design/diagrams.html`](./anthropic-design/diagrams.html) — 30-diagram gallery (registers, SoC blocks, waveforms, schedulers, interconnect + address maps, plus the silicon-and-code seven: board topology over its address bar, tile mesh, gate-level datapath, byte-ruler encapsulation, annotated console, struct pointer graph, bus fabric)
-- [`apple-design/diagrams.html`](./apple-design/diagrams.html) — 25-diagram gallery, same diagram types in Apple's clean geometric style (grayscale structure, the one blue spent on whatever the figure is about)
+- [`anthropic-design/diagrams.html`](./anthropic-design/diagrams.html) — 36-diagram gallery (registers, SoC blocks, waveforms, schedulers, interconnect + address maps, the silicon-and-code seven, and the calls-and-timing six: cross-driver call graph, call stack with its fault line, four-context runtime timeline, one frame through the display pipeline, cross-core IPI waits, panel power sequence)
+- [`apple-design/diagrams.html`](./apple-design/diagrams.html) — 31-diagram gallery, same diagram types in Apple's clean geometric style (grayscale structure, the one blue spent on whatever the figure is about)
 - [`apple-design/motion.html`](./apple-design/motion.html) — motion lab: 8 operable interaction demos (press feedback, interruptible springs, velocity handoff, momentum projection, rubber-band, velocity-decided sheet, one reduced-motion gate)
 - [`glass-design/diagrams.html`](./glass-design/diagrams.html) — 25-diagram gallery as frosted panels on the aurora field (theme-proof SVG ink; cyan reserved for the traced path, mesh rails dropped to the neutral line token)
 - [`eclat-design/diagrams.html`](./eclat-design/diagrams.html) — 8-composition lookbook: spotlit product, lineup, spec reveal, the moment, pricing, in-the-box, benchmarks, detail (cinematic, not code diagrams)

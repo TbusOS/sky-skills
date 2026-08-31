@@ -82,6 +82,7 @@
     <a href="#engineering"><span class="lang-en">Engineering</span><span class="lang-zh">工程图</span></a>
     <a href="#hardware"><span class="lang-en">Kernel</span><span class="lang-zh">内核硬件</span></a>
     <a href="#silicon"><span class="lang-en">Silicon</span><span class="lang-zh">芯片与代码</span></a>
+    <a href="#calls"><span class="lang-en">Calls</span><span class="lang-zh">调用与时序</span></a>
     <a href="#product"><span class="lang-en">Product</span><span class="lang-zh">产品展示</span></a>
     <a href="#reporting"><span class="lang-en">Reporting</span><span class="lang-zh">演讲汇报</span></a>
     <a href="index.html"><span class="lang-en">Demo</span><span class="lang-zh">主 demo</span></a>
@@ -3506,10 +3507,764 @@
   </div>
 </section>
 
-<!-- ===================== §3 PRODUCT ===================== -->
+<!-- ===================== §4 CALLS & TIMING ===================== -->
+<section class="anth-section" id="calls" style="background:#ffffff;">
+  <div class="anth-container anth-container--wide">
+    <span class="gal-kicker"><span class="lang-en">04 · calls &amp; timing</span><span class="lang-zh">04 · 调用与时序</span></span>
+    <h2 style="font-family:var(--font-heading); font-size:34px; font-weight:600; letter-spacing:-0.01em; margin:var(--space-2) 0 0;">
+      <span class="lang-en">Call relationships and runtime timing</span>
+      <span class="lang-zh">调用关系与运行时时序</span>
+    </h2>
+    <p class="gal-section-note">
+      <span class="lang-en">Six figures for the two questions that follow every kernel bug: who calls whom across which boundary, and when did it actually run. Three draw structure — the kind of every edge, the place a stack stops being a call chain, the core everyone else waits on. Three draw time — the gap between raising work and running it, the deadline a frame has to beat, the order a panel has to be woken in.</span>
+      <span class="lang-zh">六张图，回答内核问题后面永远跟着的两问：谁隔着什么边界调用了谁，以及它到底什么时候跑的。三张画结构——每条边是哪一种、栈从哪里起不再是调用链、大家在等哪个核。三张画时间——把活扔出去到它真跑之间的间隙、一帧要赶的 deadline、屏必须按什么顺序唤醒。</span>
+    </p>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Call graph across three drivers, drawn so the kind of every edge is visible. Three dashed containers hold the functions: DRM core on the left, the vendor display driver in the middle, the panel and backlight drivers on the right. Five edge kinds carry the meaning. A thin solid arrow is a direct call on the same stack. A solid arrow with a hollow head is an indirect call through an ops table, labelled with the member, invisible to grep at compile time. A gold dashed arrow is an asynchronous handoff that changes execution context, labelled with the primitive that does the handoff. A lightning bolt is a hardware event entering the kernel. A dotted arrow is a completion travelling back. Reading it: an ioctl in process context reaches drm_atomic_commit, which hands the work to a kworker through queue_work; the worker calls the vendor flush through the atomic_flush member and, over the top of that driver, calls the panel's prepare member directly, because DRM core talks to drm_panel without going through the display driver; the panel driver then calls into a third driver, the backlight one. Later a hardware interrupt enters the vendor handler in hardirq context, which calls back into DRM core, and the completion travels up to the worker that was waiting" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="cgDots" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+          </pattern>
+          <filter id="cgSh" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/>
+          </filter>
+          <marker id="cgSolid" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/>
+          </marker>
+          <marker id="cgHollow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+            <path d="M0.8,1 L8.2,5 L0.8,9 Z" fill="#ffffff" stroke="#2f5c8a" stroke-width="1.2"/>
+          </marker>
+          <marker id="cgGold" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c9913f"/>
+          </marker>
+          <marker id="cgGreen" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#788c5d"/>
+          </marker>
+        </defs>
+
+        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="560" rx="16" fill="url(#cgDots)"/>
+
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">CALL GRAPH &#183; THREE DRIVERS, FIVE KINDS OF EDGE</text>
+
+        <!-- legend: the edge kinds ARE the figure -->
+        <g font-size="12" fill="#6b6a5f">
+          <line x1="32" y1="66" x2="60" y2="66" stroke="#141413" stroke-width="1.6" marker-end="url(#cgSolid)"/>
+          <text x="68" y="70">direct call &#183; same stack</text>
+          <line x1="240" y1="66" x2="268" y2="66" stroke="#2f5c8a" stroke-width="1.6" marker-end="url(#cgHollow)"/>
+          <text x="280" y="70">through an ops table</text>
+          <line x1="456" y1="66" x2="484" y2="66" stroke="#c9913f" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#cgGold)"/>
+          <text x="492" y="70">async handoff &#183; context changes</text>
+          <path d="M756,58 L764,66 L758,66 L766,76" fill="none" stroke="#d97757" stroke-width="1.8"/>
+          <text x="776" y="70">hardware event</text>
+          <line x1="900" y1="66" x2="928" y2="66" stroke="#788c5d" stroke-width="1.6" stroke-dasharray="1.5 3.5" marker-end="url(#cgGreen)"/>
+          <text x="936" y="70">completion travels back</text>
+        </g>
+
+        <!-- module containers -->
+        <g fill="#f5f2ea" stroke="#cfccc0" stroke-dasharray="5 4">
+          <rect x="32" y="96" width="300" height="374" rx="12"/>
+          <rect x="408" y="96" width="300" height="374" rx="12"/>
+          <rect x="784" y="96" width="300" height="374" rx="12"/>
+        </g>
+        <g font-size="12" font-weight="600" letter-spacing="1.2" fill="#141413">
+          <text x="46" y="120">DRM CORE</text>
+          <text x="422" y="120">VENDOR DISPLAY DRIVER</text>
+          <text x="798" y="120">PANEL + BACKLIGHT</text>
+        </g>
+        <g font-size="12" font-style="italic" fill="#8c8a7d">
+          <text x="318" y="120" text-anchor="end">in-tree</text>
+          <text x="694" y="120" text-anchor="end">one module</text>
+          <text x="1070" y="120" text-anchor="end">two modules</text>
+        </g>
+
+        <!-- ============ edges (under the cards) ============ -->
+        <!-- 1 direct: ioctl -> commit -->
+        <line x1="182" y1="184" x2="182" y2="204" stroke="#141413" stroke-width="1.6" marker-end="url(#cgSolid)"/>
+        <!-- 2 async: commit -> worker -->
+        <line x1="182" y1="252" x2="182" y2="288" stroke="#c9913f" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#cgGold)"/>
+        <!-- 3 ops: worker -> vendor flush -->
+        <line x1="318" y1="322" x2="418" y2="322" stroke="#2f5c8a" stroke-width="1.6" marker-end="url(#cgHollow)"/>
+        <!-- 4 ops: worker -> panel prepare, flying OVER the vendor driver -->
+        <path d="M318,300 H336 Q344,300 344,292 V164 Q344,156 352,156 H1046 Q1054,156 1054,164 V288" fill="none" stroke="#2f5c8a" stroke-width="1.6" marker-end="url(#cgHollow)"/>
+        <!-- 5 direct: flush -> send frame -->
+        <line x1="558" y1="336" x2="558" y2="350" stroke="#141413" stroke-width="1.6" marker-end="url(#cgSolid)"/>
+        <!-- 6 direct across drivers: panel -> backlight -->
+        <line x1="934" y1="336" x2="934" y2="380" stroke="#141413" stroke-width="1.6" marker-end="url(#cgSolid)"/>
+        <!-- 7 hardware event -->
+        <path d="M430,502 L442,490 L434,490 L446,478" fill="none" stroke="#d97757" stroke-width="2"/>
+        <path d="M452,490 H548 Q556,490 556,482 V464" fill="none" stroke="#d97757" stroke-width="1.8" marker-end="url(#cgSolid)"/>
+        <!-- 8 direct: vendor irq -> drm core -->
+        <path d="M418,436 H322" fill="none" stroke="#141413" stroke-width="1.6" marker-end="url(#cgSolid)"/>
+        <!-- 9 completion back up to the waiting worker -->
+        <path d="M46,436 H36 Q26,436 26,426 V322 Q26,312 36,312 H46" fill="none" stroke="#788c5d" stroke-width="1.6" stroke-dasharray="1.5 3.5" marker-end="url(#cgGreen)"/>
+
+        <!-- edge labels -->
+        <g font-size="12" text-anchor="middle">
+          <rect x="126" y="260" width="112" height="20" rx="10" fill="#f0e4d8" stroke="#d9bf94"/>
+          <text x="182" y="274" fill="#8a6a2f">queue_work()</text>
+          <text x="368" y="316" fill="#2f5c8a">.atomic_flush</text>
+          <text x="880" y="150" fill="#2f5c8a">.prepare &#183; core reaches the panel over that driver</text>
+          <text x="370" y="430" fill="#6b6a5f">back into core</text>
+        </g>
+        <text x="920" y="362" text-anchor="end" font-size="12" fill="#6b6a5f">plain exported symbol</text>
+        <text x="46" y="484" font-size="12" fill="#5d7045">complete(&amp;flip_done) wakes the worker</text>
+        <text x="462" y="496" font-size="12" font-weight="600" fill="#8f4a2f">DSI frame-done IRQ</text>
+
+        <!-- ============ cards ============ -->
+          <rect x="46" y="136" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+          <text x="60" y="157" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">drm_mode_atomic_ioctl()</text>
+          <text x="60" y="174" font-size="12" fill="#6b6a5f">userspace asked for a new frame</text>
+          <rect x="255" y="144" width="53" height="18" rx="9" fill="#f5f2ea" stroke="#d8d4c8"/>
+          <text x="282" y="157" text-anchor="middle" font-size="12" fill="#6b6a5f">process</text>
+          <rect x="46" y="204" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+          <text x="60" y="225" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">drm_atomic_commit()</text>
+          <text x="60" y="242" font-size="12" fill="#6b6a5f">validates, then hands the work over</text>
+          <rect x="255" y="212" width="53" height="18" rx="9" fill="#f5f2ea" stroke="#d8d4c8"/>
+          <text x="282" y="225" text-anchor="middle" font-size="12" fill="#6b6a5f">process</text>
+          <rect x="46" y="288" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+          <text x="60" y="309" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">commit_tail()</text>
+          <text x="60" y="326" font-size="12" fill="#6b6a5f">the queued work item runs here</text>
+          <rect x="255" y="296" width="53" height="18" rx="9" fill="#f0e4d8" stroke="#d9bf94"/>
+          <text x="282" y="309" text-anchor="middle" font-size="12" fill="#8a6a2f">kworker</text>
+          <rect x="46" y="412" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+          <text x="60" y="433" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">drm_crtc_handle_vblank()</text>
+          <text x="60" y="450" font-size="12" fill="#6b6a5f">core bookkeeping, then wakes waiters</text>
+          <rect x="255" y="420" width="53" height="18" rx="9" fill="#f4d9cd" stroke="#d97757"/>
+          <text x="282" y="433" text-anchor="middle" font-size="12" fill="#8f4a2f">hardirq</text>
+          <rect x="422" y="288" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+          <text x="436" y="309" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">sunxi_crtc_atomic_flush()</text>
+          <text x="436" y="326" font-size="12" fill="#6b6a5f">latches the new framebuffer address</text>
+          <rect x="422" y="350" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+          <text x="436" y="371" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">sunxi_dsi_send_frame()</text>
+          <text x="436" y="388" font-size="12" fill="#6b6a5f">kicks the display DMA</text>
+          <rect x="422" y="412" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+          <text x="436" y="433" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">sunxi_dsi_irq()</text>
+          <text x="436" y="450" font-size="12" fill="#6b6a5f">acks, then calls core</text>
+          <rect x="631" y="420" width="53" height="18" rx="9" fill="#f4d9cd" stroke="#d97757"/>
+          <text x="658" y="433" text-anchor="middle" font-size="12" fill="#8f4a2f">hardirq</text>
+          <rect x="798" y="288" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+          <text x="812" y="309" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">sunxi_panel_prepare()</text>
+          <text x="812" y="326" font-size="12" fill="#6b6a5f">power rails, reset, init sequence</text>
+          <rect x="798" y="380" width="272" height="48" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#cgSh)"/>
+          <text x="812" y="401" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">backlight_enable()</text>
+          <text x="812" y="418" font-size="12" fill="#6b6a5f">a different module entirely</text>
+          <rect x="975" y="388" width="85" height="18" rx="9" fill="#e5e9dd" stroke="#b9c4a4"/>
+          <text x="1018" y="401" text-anchor="middle" font-size="12" fill="#5d7045">cross-driver</text>
+
+        <text x="32" y="532" font-size="12" fill="#6b6a5f">grep finds the solid black edges. It cannot find the blue ones (the target is a struct member, resolved at runtime) or the gold one (the target runs later, on another thread).</text>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">call graph · five kinds of edge</span><span class="lang-zh">调用关系图 · 五种边</span></span>
+          <span class="lang-en">Three drivers, and every edge drawn by kind: a thin solid arrow is a direct call on the same stack, a hollow head means the target is a struct member resolved at runtime, a gold dashed arrow is an asynchronous handoff that changes execution context, a lightning bolt is a hardware event, a dotted arrow is a completion travelling back. The point is the last line: grep only finds the solid black ones. Template: <code>templates/diagrams/call-graph.svg</code>.</span>
+          <span class="lang-zh">三个驱动，每条边按种类画：细实线是同栈直接调用，空心箭头表示目标是运行时才定的结构体成员，金色虚线是换了执行上下文的异步交接，闪电是硬件事件，点线是完成通知往回走。结论在图脚：grep 只找得到黑色实线那几条。模板：<code>templates/diagrams/call-graph.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="A kernel oops backtrace drawn as a stack rather than a list. Nine frames, newest on top: the faulting frame sunxi_dsi_write_reg in the out-of-tree drm_sunxi module, then the panel prepare path, then DRM core, then commit_tail. A horizontal fault line separates frame four from frame five. Everything below that line is the kworker skeleton — process_one_work, worker_thread, kthread and ret_from_fork — which is not the caller chain in any useful sense: process_one_work did not call commit_tail because it wanted to, it called whatever was queued. The caller you actually want, the code that ran queue_work, is not on this stack at all; a ghost card off to the side names it. A left-hand gutter brackets the two context runs, and three notes on the right explain the frames worth stopping at, including that a plus offset slash size pair tells you how far into the function the program counter was and how big the function is" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="csDots" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+          </pattern>
+          <marker id="csArrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/>
+          </marker>
+          <marker id="csArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+          </marker>
+        </defs>
+
+        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="560" rx="16" fill="url(#csDots)"/>
+
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">CALL STACK &#183; AND WHERE IT STOPS BEING A CALL CHAIN</text>
+        <text x="1088" y="34" text-anchor="end" font-size="12" font-style="italic" fill="#8c8a7d">newest frame on top &#183; the way the kernel prints it</text>
+
+        <!-- the oops line -->
+        <rect x="148" y="76" width="596" height="40" rx="8" fill="#1f1e1b"/>
+        <text x="164" y="101" font-size="12" fill="#e8a87c" font-family="SFMono-Regular, Menlo, Consolas, monospace">Unable to handle kernel NULL pointer dereference at 0x18</text>
+
+        <!-- context gutter -->
+        <g fill="none" stroke="#a8a496" stroke-width="1.4">
+          <path d="M120,128 H108 V332 H120"/>
+          <path d="M120,352 H108 V512 H120"/>
+        </g>
+        <text x="100" y="235" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f" transform="rotate(-90 100 235)">this work item</text>
+        <text x="100" y="427" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f" transform="rotate(-90 100 427)">kworker skeleton</text>
+
+        <!-- frames -->
+        <g>
+          <rect x="148" y="128" width="596" height="36" rx="6" fill="#f4d9cd" stroke="#d97757" stroke-width="1.5"/>
+          <text x="188" y="151" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">sunxi_dsi_write_reg</text>
+          <text x="730" y="151" text-anchor="end" font-size="12" fill="#6b6a5f" font-family="SFMono-Regular, Menlo, Consolas, monospace">+0x2c/0x80</text>
+          <text x="164" y="151" font-size="12" fill="#8c8a7d" font-family="SFMono-Regular, Menlo, Consolas, monospace">#0</text>
+          <rect x="488" y="136" width="78" height="20" rx="6" fill="#e5e9dd" stroke="#b9c4a4"/>
+          <text x="527" y="150" text-anchor="middle" font-size="12" fill="#5d7045" font-family="SFMono-Regular, Menlo, Consolas, monospace">[drm_sunxi]</text>
+          <rect x="148" y="168" width="596" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="188" y="191" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">sunxi_panel_prepare</text>
+          <text x="730" y="191" text-anchor="end" font-size="12" fill="#6b6a5f" font-family="SFMono-Regular, Menlo, Consolas, monospace">+0x64/0x120</text>
+          <text x="164" y="191" font-size="12" fill="#8c8a7d" font-family="SFMono-Regular, Menlo, Consolas, monospace">#1</text>
+          <rect x="488" y="176" width="91" height="20" rx="6" fill="#e5e9dd" stroke="#b9c4a4"/>
+          <text x="534" y="190" text-anchor="middle" font-size="12" fill="#5d7045" font-family="SFMono-Regular, Menlo, Consolas, monospace">[panel_sunxi]</text>
+          <rect x="148" y="208" width="596" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="188" y="231" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">drm_panel_prepare</text>
+          <text x="730" y="231" text-anchor="end" font-size="12" fill="#6b6a5f" font-family="SFMono-Regular, Menlo, Consolas, monospace">+0x28/0x50</text>
+          <text x="164" y="231" font-size="12" fill="#8c8a7d" font-family="SFMono-Regular, Menlo, Consolas, monospace">#2</text>
+          <rect x="148" y="248" width="596" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="188" y="271" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">drm_atomic_helper_commit_modeset_enables</text>
+          <text x="730" y="271" text-anchor="end" font-size="12" fill="#6b6a5f" font-family="SFMono-Regular, Menlo, Consolas, monospace">+0x2a8/0x430</text>
+          <text x="164" y="271" font-size="12" fill="#8c8a7d" font-family="SFMono-Regular, Menlo, Consolas, monospace">#3</text>
+          <rect x="148" y="288" width="596" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="188" y="311" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">commit_tail</text>
+          <text x="730" y="311" text-anchor="end" font-size="12" fill="#6b6a5f" font-family="SFMono-Regular, Menlo, Consolas, monospace">+0xa4/0x180</text>
+          <text x="164" y="311" font-size="12" fill="#8c8a7d" font-family="SFMono-Regular, Menlo, Consolas, monospace">#4</text>
+          <rect x="148" y="356" width="596" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="188" y="379" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">process_one_work</text>
+          <text x="730" y="379" text-anchor="end" font-size="12" fill="#6b6a5f" font-family="SFMono-Regular, Menlo, Consolas, monospace">+0x1d8/0x430</text>
+          <text x="164" y="379" font-size="12" fill="#8c8a7d" font-family="SFMono-Regular, Menlo, Consolas, monospace">#5</text>
+          <rect x="148" y="396" width="596" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="188" y="419" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">worker_thread</text>
+          <text x="730" y="419" text-anchor="end" font-size="12" fill="#6b6a5f" font-family="SFMono-Regular, Menlo, Consolas, monospace">+0x150/0x460</text>
+          <text x="164" y="419" font-size="12" fill="#8c8a7d" font-family="SFMono-Regular, Menlo, Consolas, monospace">#6</text>
+          <rect x="148" y="436" width="596" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="188" y="459" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">kthread</text>
+          <text x="730" y="459" text-anchor="end" font-size="12" fill="#6b6a5f" font-family="SFMono-Regular, Menlo, Consolas, monospace">+0x110/0x11c</text>
+          <text x="164" y="459" font-size="12" fill="#8c8a7d" font-family="SFMono-Regular, Menlo, Consolas, monospace">#7</text>
+          <rect x="148" y="476" width="596" height="36" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="188" y="499" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">ret_from_fork</text>
+          <text x="730" y="499" text-anchor="end" font-size="12" fill="#6b6a5f" font-family="SFMono-Regular, Menlo, Consolas, monospace">+0x10/0x20</text>
+          <text x="164" y="499" font-size="12" fill="#8c8a7d" font-family="SFMono-Regular, Menlo, Consolas, monospace">#8</text>
+        </g>
+
+        <!-- the fault line -->
+        <line x1="132" y1="342" x2="760" y2="342" stroke="#c9913f" stroke-width="1.6" stroke-dasharray="6 4"/>
+        <text x="132" y="334" font-size="12" font-weight="600" fill="#8a6a2f">the chain of &#8220;who called me&#8221; ends here</text>
+
+        <!-- the caller that is NOT on the stack -->
+        <path d="M760,342 H820" fill="none" stroke="#c9913f" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#csArrN)"/>
+        <rect x="828" y="308" width="252" height="68" rx="10" fill="#f0e4d8" stroke="#d9bf94" stroke-dasharray="4 3"/>
+        <text x="844" y="330" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, monospace">drm_atomic_commit()</text>
+        <text x="844" y="348" font-size="12" fill="#8a6a2f">ran queue_work() earlier,</text>
+        <text x="844" y="366" font-size="12" fill="#8a6a2f">in another context. Not on this stack.</text>
+
+        <!-- right-hand notes -->
+        <g>
+          <path d="M744,147 H812" fill="none" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#csArrN)"/>
+          <text x="820" y="136" font-size="13" font-weight="600" fill="#141413">Where it died</text>
+          <text x="820" y="154" font-size="12" fill="#6b6a5f">0x2c into an 0x80-byte function.</text>
+          <text x="820" y="171" font-size="12" fill="#6b6a5f">Feed that offset to addr2line, not</text>
+          <text x="820" y="188" font-size="12" fill="#6b6a5f">the raw PC &#8212; modules relocate.</text>
+          <path d="M744,227 H812" fill="none" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#csArrN)"/>
+          <text x="820" y="222" font-size="13" font-weight="600" fill="#141413">The boundary worth noticing</text>
+          <text x="820" y="240" font-size="12" fill="#6b6a5f">Frames 0-1 are out-of-tree, 2-4 are</text>
+          <text x="820" y="257" font-size="12" fill="#6b6a5f">core. The bug is almost always on</text>
+          <text x="820" y="274" font-size="12" fill="#6b6a5f">the side with the module tag.</text>
+          <path d="M744,414 H812 V420" fill="none" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#csArrN)"/>
+          <text x="820" y="424" font-size="13" font-weight="600" fill="#141413">Learn the skeletons by sight</text>
+          <text x="820" y="442" font-size="12" fill="#6b6a5f">process_one_work / worker_thread &#8212; workqueue.</text>
+          <text x="820" y="459" font-size="12" fill="#6b6a5f">call_timer_fn &#8212; timer. rcu_do_batch &#8212; RCU.</text>
+          <text x="820" y="476" font-size="12" fill="#6b6a5f">el0_svc_common &#8212; a syscall from userspace.</text>
+          <text x="820" y="493" font-size="12" fill="#6b6a5f">Each one marks a cut like this one.</text>
+        </g>
+
+        <text x="32" y="534" font-size="12" fill="#6b6a5f">A stack answers &#8220;how did I get here&#8221; only inside one context. Every async boundary &#8212; work, timer, IRQ, RCU callback &#8212; cuts it, and the cut is invisible unless you know the skeleton frames by sight.</text>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">call stack · where it stops being a chain</span><span class="lang-zh">调用栈 · 断在哪里</span></span>
+          <span class="lang-en">A nine-frame oops backtrace with a fault line across it. Below the line is the kworker skeleton, which is not a caller chain in any useful sense — process_one_work called whatever was queued, not this. The caller you actually want ran queue_work() earlier in another context, and it is drawn as a dashed ghost card off to the side because it is not on this stack at all. Template: <code>templates/diagrams/call-stack.svg</code>.</span>
+          <span class="lang-zh">九帧 oops backtrace，中间横着一条断层线。线以下是 kworker 骨架，那不是调用链——`process_one_work` 调用的是队列里排到的任何东西。你真正要找的调用者早些时候在别的上下文里跑了 `queue_work()`，它被画成旁边一张虚线幽灵卡，因为它根本不在这张栈上。模板：<code>templates/diagrams/call-stack.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="One DMA completion handed along four execution contexts, on a shared microsecond axis. The hardware raises its interrupt at time zero; the hardirq handler runs for eight microseconds, acks the device and calls tasklet_schedule. The tasklet runs at fourteen microseconds and drains descriptors until forty-six. From inside it, two handoffs leave: queue_work at forty, whose worker does not actually run until one hundred and five, and complete at forty-six, which wakes the user thread at fifty-two. Three brackets under the axis measure the gaps that matter: eight microseconds from the interrupt to the handler, six from raising the tasklet to it running, and sixty-five from queue_work to the worker. That last one is the point of the figure: a workqueue is not a slightly slower tasklet, it is an order of magnitude later, because the worker is an ordinary schedulable thread and has to wait its turn. The user thread's earlier blocked stretch is drawn hatched, so the whole wait it experienced is visible in one line" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="rtDots" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+          </pattern>
+          <pattern id="rtHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="6" stroke="#a8a496" stroke-width="1.6" opacity="0.45"/>
+          </pattern>
+          <marker id="rtArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/>
+          </marker>
+          <marker id="rtArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c9913f"/>
+          </marker>
+        </defs>
+
+        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="560" rx="16" fill="url(#rtDots)"/>
+
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">RUNTIME TIMELINE &#183; ONE COMPLETION, FOUR CONTEXTS</text>
+        <text x="1064" y="34" text-anchor="end" font-size="12" fill="#6b6a5f">time in &#181;s &#183; one CPU &#183; measured with trace_printk</text>
+
+        <!-- lanes -->
+        <g>
+          <rect x="188" y="112" width="876" height="44" rx="8" fill="#f4d9cd" stroke="#d97757" opacity="0.30"/>
+          <text x="168" y="132" text-anchor="end" font-size="13" font-weight="600" fill="#141413">hardirq</text>
+          <text x="168" y="149" text-anchor="end" font-size="12" fill="#6b6a5f">irq disabled &#183; must not sleep</text>
+          <rect x="188" y="170" width="876" height="44" rx="8" fill="#f0e4d8" stroke="#d9bf94" opacity="0.30"/>
+          <text x="168" y="190" text-anchor="end" font-size="13" font-weight="600" fill="#141413">softirq</text>
+          <text x="168" y="207" text-anchor="end" font-size="12" fill="#6b6a5f">still atomic &#183; may run on any CPU</text>
+          <rect x="188" y="228" width="876" height="44" rx="8" fill="#e2ecf5" stroke="#c4d5e6" opacity="0.30"/>
+          <text x="168" y="248" text-anchor="end" font-size="13" font-weight="600" fill="#141413">kworker</text>
+          <text x="168" y="265" text-anchor="end" font-size="12" fill="#6b6a5f">a real thread &#183; may sleep</text>
+          <rect x="188" y="286" width="876" height="44" rx="8" fill="#eef1e7" stroke="#b9c4a4" opacity="0.30"/>
+          <text x="168" y="306" text-anchor="end" font-size="13" font-weight="600" fill="#141413">user thread</text>
+          <text x="168" y="323" text-anchor="end" font-size="12" fill="#6b6a5f">the process that asked</text>
+        </g>
+
+        <!-- the user thread was already blocked -->
+        <rect x="188" y="294" width="268.0" height="28" rx="5" fill="#ffffff" stroke="#d8d4c8"/>
+        <rect x="188" y="294" width="268.0" height="28" rx="5" fill="url(#rtHatch)"/>
+        <text x="200" y="288" font-size="12" fill="#8c8a7d">blocked in read() since before this frame</text>
+
+        <!-- work blocks -->
+        <g>
+          <rect x="188.0" y="120" width="41.2" height="28" rx="5" fill="#f4d9cd" stroke="#d97757"/>
+          <text x="188.0" y="114" font-size="12" fill="#8f4a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">sunxi_dma_irq()</text>
+          <rect x="260.1" y="178" width="164.9" height="28" rx="5" fill="#f0e4d8" stroke="#d9bf94"/>
+          <text x="342.6" y="197" text-anchor="middle" font-size="12" fill="#8a6a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">dma_tasklet() &#183; drain descriptors</text>
+          <rect x="729.1" y="236" width="273.1" height="28" rx="5" fill="#e2ecf5" stroke="#c4d5e6"/>
+          <text x="865.6" y="255" text-anchor="middle" font-size="12" fill="#2f5c8a" font-family="SFMono-Regular, Menlo, Consolas, monospace">dma_refill_work() &#183; alloc + re-arm</text>
+          <rect x="456.0" y="294" width="123.7" height="28" rx="5" fill="#eef1e7" stroke="#b9c4a4"/>
+          <text x="517.8" y="313" text-anchor="middle" font-size="12" fill="#4d5a3c" font-family="SFMono-Regular, Menlo, Consolas, monospace">read() returns</text>
+        </g>
+
+        <!-- hardware event -->
+        <path d="M186,86 L198,98 L190,98 L202,110" fill="none" stroke="#d97757" stroke-width="2"/>
+        <text x="210" y="93" font-size="12" font-weight="600" fill="#8f4a2f">device raises IRQ</text>
+
+        <!-- handoffs -->
+        <g fill="none" stroke="#141413" stroke-width="1.5">
+          <path d="M229.2,156 V163 Q229.2,170 237.2,170 H252.1 Q260.1,170 260.1,177" marker-end="url(#rtArr)"/>
+          <path d="M425.0,214 V221 Q425.0,228 433.0,228 H448.0 Q456.0,228 456.0,235 V286" marker-end="url(#rtArr)"/>
+        </g>
+        <g fill="none" stroke="#c9913f" stroke-width="1.6" stroke-dasharray="5 4">
+          <path d="M394.1,214 V221 Q394.1,228 402.1,228 H721.1 Q729.1,228 729.1,235" marker-end="url(#rtArrG)"/>
+        </g>
+        <g font-size="12" text-anchor="middle">
+          <rect x="223.2" y="154" width="140" height="20" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="293.2" y="168" fill="#6b6a5f">tasklet_schedule()</text>
+          <rect x="460.0" y="252" width="104" height="20" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+          <text x="512.0" y="266" fill="#6b6a5f">complete()</text>
+          <rect x="503.6" y="218" width="116" height="20" rx="10" fill="#f0e4d8" stroke="#d9bf94"/>
+          <text x="561.6" y="232" fill="#8a6a2f">queue_work()</text>
+        </g>
+
+        <!-- axis -->
+        <line x1="188" y1="350" x2="1064" y2="350" stroke="#141413" stroke-width="1.4"/>
+        <g stroke="#141413" stroke-width="1.2">
+          <line x1="188.0" y1="346" x2="188.0" y2="354"/>
+          <line x1="316.8" y1="346" x2="316.8" y2="354"/>
+          <line x1="445.6" y1="346" x2="445.6" y2="354"/>
+          <line x1="574.5" y1="346" x2="574.5" y2="354"/>
+          <line x1="703.3" y1="346" x2="703.3" y2="354"/>
+          <line x1="832.1" y1="346" x2="832.1" y2="354"/>
+          <line x1="960.9" y1="346" x2="960.9" y2="354"/>
+        </g>
+        <g>
+          <text x="188.0" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">0</text>
+          <text x="316.8" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">25</text>
+          <text x="445.6" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">50</text>
+          <text x="574.5" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">75</text>
+          <text x="703.3" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">100</text>
+          <text x="832.1" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">125</text>
+          <text x="960.9" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">150</text>
+        </g>
+        <text x="168" y="354" text-anchor="end" font-size="12" fill="#6b6a5f">&#181;s</text>
+
+        <!-- latency brackets -->
+          <line x1="188.0" y1="400" x2="229.2" y2="400" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="188.0" y1="395" x2="188.0" y2="405" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="229.2" y1="395" x2="229.2" y2="405" stroke="#a8a496" stroke-width="1.2"/>
+          <text x="188.0" y="418" text-anchor="start" font-size="12" font-weight="400" fill="#6b6a5f">IRQ &#8594; handler &#183; 8 &#181;s</text>
+          <line x1="229.2" y1="430" x2="260.1" y2="430" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="229.2" y1="425" x2="229.2" y2="435" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="260.1" y1="425" x2="260.1" y2="435" stroke="#a8a496" stroke-width="1.2"/>
+          <text x="229.2" y="448" text-anchor="start" font-size="12" font-weight="400" fill="#6b6a5f">raise &#8594; tasklet &#183; 6 &#181;s</text>
+          <line x1="394.1" y1="400" x2="729.1" y2="400" stroke="#c9913f" stroke-width="2"/>
+          <line x1="394.1" y1="395" x2="394.1" y2="405" stroke="#c9913f" stroke-width="2"/>
+          <line x1="729.1" y1="395" x2="729.1" y2="405" stroke="#c9913f" stroke-width="2"/>
+          <text x="561.6" y="418" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">queue_work() &#8594; worker actually runs &#183; 65 &#181;s</text>
+
+        <text x="32" y="482" font-size="12" fill="#6b6a5f">Same handoff, two primitives, an order of magnitude apart: the tasklet runs on the way out of the interrupt, the worker waits for the scheduler like any other thread.</text>
+        <text x="32" y="504" font-size="12" fill="#6b6a5f">Draw the gap, not the arrow. An arrow says &#8220;then this happens&#8221;; only the gap says when &#8212; and every latency bug lives in a gap somebody drew as an arrow.</text>
+        <text x="32" y="530" font-size="12" font-style="italic" fill="#8c8a7d">If the tasklet lane ever runs longer than MAX_SOFTIRQ_TIME the rest is pushed into ksoftirqd, and this lane turns into a fifth one that competes for the CPU.</text>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">runtime timeline · four contexts</span><span class="lang-zh">运行时泳道 · 四个上下文</span></span>
+          <span class="lang-en">One DMA completion handed along hardirq, softirq, kworker and the user thread on a shared microsecond axis. Three brackets under the axis carry the numbers: 8 µs from interrupt to handler, 6 µs from raising the tasklet to running it, and 65 µs from queue_work() to the worker actually running. A workqueue is not a slightly slower tasklet — it is an order of magnitude later, because the worker waits for the scheduler like any other thread. Template: <code>templates/diagrams/runtime-timeline.svg</code>.</span>
+          <span class="lang-zh">一次 DMA 完成依次走过硬中断、软中断、kworker 和用户线程，共用一根微秒轴。轴下三条括线给数字：中断到 handler 8 µs，raise 到 tasklet 跑起来 6 µs，`queue_work()` 到 worker 真跑 65 µs。workqueue 不是「慢一点的 tasklet」，是晚一个数量级——worker 就是个普通线程，要排队等调度。模板：<code>templates/diagrams/runtime-timeline.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="One frame's journey through the display pipeline, six hardware lanes over one 60 hertz frame period, with the vertical sync and tearing-effect signals underneath on the same time axis. The compositor commits at the start. The GPU renders the next frame into the back buffer from 0.6 to 9.8 milliseconds. The DDR lane is split into two bars because it serves both at once: the GPU writing the back buffer and the display DMA reading the front buffer, and that contention is why scanout underruns when the GPU is busy. The display DMA scans the front buffer out from zero to sixteen milliseconds, the DSI serialises it line by line across four lanes, and the panel holds frame N for the whole period. Five numbered triggers run as dashed verticals through every lane: one, the vsync interrupt latches the framebuffer address; two, the GPU signals its fence; three, the page flip is queued; four, scanout finishes and raises the frame-done interrupt; five, the next vsync makes the back buffer live. The bracket between two and five is the slack, 6.9 milliseconds, and the figure's point is that if the GPU crosses trigger five the panel simply repeats frame N and the user sees a dropped frame" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="fpDots" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+          </pattern>
+          <marker id="fpArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+          </marker>
+        </defs>
+
+        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="560" rx="16" fill="url(#fpDots)"/>
+
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">FRAME PIPELINE &#183; GPU &#8594; DDR &#8594; DMA &#8594; DSI &#8594; PANEL, ONE 60 Hz PERIOD</text>
+        <g font-size="12" fill="#6b6a5f">
+          <rect x="712" y="24" width="16" height="12" rx="3" fill="#eef1e7" stroke="#b9c4a4"/><text x="736" y="34">front buffer &#183; fb A</text>
+          <rect x="866" y="24" width="16" height="12" rx="3" fill="#e2ecf5" stroke="#c4d5e6"/><text x="890" y="34">back buffer &#183; fb B</text>
+        </g>
+
+        <!-- lanes -->
+        <g>
+          <rect x="200" y="96" width="864" height="40" rx="8" fill="#ffffff" stroke="#eceadf"/>
+          <text x="188" y="114" text-anchor="end" font-size="13" font-weight="600" fill="#141413">CPU &#183; compositor</text>
+          <text x="188" y="130" text-anchor="end" font-size="12" fill="#6b6a5f">builds the atomic commit</text>
+          <rect x="200" y="142" width="864" height="40" rx="8" fill="#ffffff" stroke="#eceadf"/>
+          <text x="188" y="160" text-anchor="end" font-size="13" font-weight="600" fill="#141413">GPU</text>
+          <text x="188" y="176" text-anchor="end" font-size="12" fill="#6b6a5f">renders into the back buffer</text>
+          <rect x="200" y="188" width="864" height="40" rx="8" fill="#ffffff" stroke="#eceadf"/>
+          <text x="188" y="206" text-anchor="end" font-size="13" font-weight="600" fill="#141413">DDR</text>
+          <text x="188" y="222" text-anchor="end" font-size="12" fill="#6b6a5f">serves both at once</text>
+          <rect x="200" y="234" width="864" height="40" rx="8" fill="#ffffff" stroke="#eceadf"/>
+          <text x="188" y="252" text-anchor="end" font-size="13" font-weight="600" fill="#141413">display DMA &#183; CRTC</text>
+          <text x="188" y="268" text-anchor="end" font-size="12" fill="#6b6a5f">scans out, line by line</text>
+          <rect x="200" y="280" width="864" height="40" rx="8" fill="#ffffff" stroke="#eceadf"/>
+          <text x="188" y="298" text-anchor="end" font-size="13" font-weight="600" fill="#141413">DSI &#183; D-PHY</text>
+          <text x="188" y="314" text-anchor="end" font-size="12" fill="#6b6a5f">4 lanes &#183; 1 Gbps each</text>
+          <rect x="200" y="326" width="864" height="40" rx="8" fill="#ffffff" stroke="#eceadf"/>
+          <text x="188" y="344" text-anchor="end" font-size="13" font-weight="600" fill="#141413">LCD driver IC</text>
+          <text x="188" y="360" text-anchor="end" font-size="12" fill="#6b6a5f">holds the pixels on the glass</text>
+        </g>
+
+        <!-- trigger verticals (under the bars) -->
+        <g>
+          <line x1="200.0" y1="86" x2="200.0" y2="452" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 4"/>
+          <circle cx="200.0" cy="76" r="10" fill="#d97757"/>
+          <text x="200.0" y="80" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">1</text>
+          <line x1="670.4" y1="86" x2="670.4" y2="452" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 4"/>
+          <circle cx="670.4" cy="76" r="10" fill="#d97757"/>
+          <text x="670.4" y="80" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">2</text>
+          <line x1="723.2" y1="86" x2="723.2" y2="452" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 4"/>
+          <circle cx="723.2" cy="76" r="10" fill="#d97757"/>
+          <text x="723.2" y="80" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">3</text>
+          <line x1="968.0" y1="86" x2="968.0" y2="452" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 4"/>
+          <circle cx="968.0" cy="76" r="10" fill="#d97757"/>
+          <text x="968.0" y="80" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">4</text>
+          <line x1="1000.2" y1="86" x2="1000.2" y2="452" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 4"/>
+          <circle cx="1000.2" cy="76" r="10" fill="#d97757"/>
+          <text x="1000.2" y="80" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">5</text>
+        </g>
+
+        <!-- work bars -->
+          <rect x="204.8" y="104" width="24.0" height="24" rx="5" fill="#f4d9cd" stroke="#d97757"/>
+        <text x="233.6" y="120" font-size="12" fill="#8f4a2f">atomic commit</text>
+          <rect x="228.8" y="150" width="441.6" height="24" rx="5" fill="#e2ecf5" stroke="#c4d5e6"/>
+          <text x="449.6" y="166" text-anchor="middle" font-size="12" fill="#2f5c8a">render frame N+1 &#8594; fb B</text>
+          <rect x="228.8" y="194" width="441.6" height="15" rx="5" fill="#e2ecf5" stroke="#c4d5e6"/>
+          <text x="449.6" y="205" text-anchor="middle" font-size="12" fill="#2f5c8a">write fb B</text>
+          <rect x="200.0" y="211" width="768.0" height="15" rx="5" fill="#eef1e7" stroke="#b9c4a4"/>
+          <text x="584.0" y="222" text-anchor="middle" font-size="12" fill="#4d5a3c">read fb A &#183; every line, all frame long</text>
+          <rect x="200.0" y="242" width="768.0" height="24" rx="5" fill="#eef1e7" stroke="#b9c4a4"/>
+          <text x="584.0" y="258" text-anchor="middle" font-size="12" fill="#4d5a3c">scanout fb A &#183; 1080 lines</text>
+          <rect x="209.6" y="288" width="758.4" height="24" rx="5" fill="#f5f2ea" stroke="#d8d4c8"/>
+        <g stroke="#a8a496" stroke-width="1"><line x1="209.6" y1="290" x2="209.6" y2="310"/><line x1="239.4" y1="290" x2="239.4" y2="310"/><line x1="269.1" y1="290" x2="269.1" y2="310"/><line x1="298.9" y1="290" x2="298.9" y2="310"/><line x1="328.6" y1="290" x2="328.6" y2="310"/><line x1="358.4" y1="290" x2="358.4" y2="310"/><line x1="388.2" y1="290" x2="388.2" y2="310"/><line x1="417.9" y1="290" x2="417.9" y2="310"/><line x1="447.7" y1="290" x2="447.7" y2="310"/><line x1="477.4" y1="290" x2="477.4" y2="310"/><line x1="507.2" y1="290" x2="507.2" y2="310"/><line x1="537.0" y1="290" x2="537.0" y2="310"/><line x1="566.7" y1="290" x2="566.7" y2="310"/><line x1="596.5" y1="290" x2="596.5" y2="310"/><line x1="626.2" y1="290" x2="626.2" y2="310"/><line x1="656.0" y1="290" x2="656.0" y2="310"/><line x1="685.8" y1="290" x2="685.8" y2="310"/><line x1="715.5" y1="290" x2="715.5" y2="310"/><line x1="745.3" y1="290" x2="745.3" y2="310"/><line x1="775.0" y1="290" x2="775.0" y2="310"/><line x1="804.8" y1="290" x2="804.8" y2="310"/><line x1="834.6" y1="290" x2="834.6" y2="310"/><line x1="864.3" y1="290" x2="864.3" y2="310"/><line x1="894.1" y1="290" x2="894.1" y2="310"/><line x1="923.8" y1="290" x2="923.8" y2="310"/><line x1="953.6" y1="290" x2="953.6" y2="310"/></g>
+        <text x="584.0" y="305" text-anchor="middle" font-size="12" fill="#6b6a5f">one burst per line &#183; HS entry, payload, HS exit</text>
+          <rect x="200.0" y="334" width="800.2" height="24" rx="5" fill="#eef1e7" stroke="#b9c4a4"/>
+          <text x="600.1" y="350" text-anchor="middle" font-size="12" fill="#4d5a3c">showing frame N</text>
+          <rect x="1000.2" y="334" width="63.8" height="24" rx="5" fill="#e2ecf5" stroke="#c4d5e6"/>
+          <text x="1032.1" y="350" text-anchor="middle" font-size="12" fill="#2f5c8a">N+1</text>
+
+        <!-- signals -->
+        <text x="188" y="400" text-anchor="end" font-size="12" font-weight="600" fill="#141413">VSYNC</text>
+        <path d="M200,396 V414 H997.2 M988.2,414 V396 H1012.2 V414 H1064" fill="none" stroke="#d97757" stroke-width="1.8"/>
+        <text x="188" y="440" text-anchor="end" font-size="12" font-weight="600" fill="#141413">TE</text>
+        <path d="M200,442 H974.6 M965.6,442 V424 H989.6 V442 H1064" fill="none" stroke="#6a9bcc" stroke-width="1.8"/>
+
+        <!-- axis -->
+        <line x1="200" y1="456" x2="1064" y2="456" stroke="#141413" stroke-width="1.4"/>
+        <g stroke="#141413" stroke-width="1.2"><line x1="200.0" y1="452" x2="200.0" y2="460"/><line x1="296.0" y1="452" x2="296.0" y2="460"/><line x1="392.0" y1="452" x2="392.0" y2="460"/><line x1="488.0" y1="452" x2="488.0" y2="460"/><line x1="584.0" y1="452" x2="584.0" y2="460"/><line x1="680.0" y1="452" x2="680.0" y2="460"/><line x1="776.0" y1="452" x2="776.0" y2="460"/><line x1="872.0" y1="452" x2="872.0" y2="460"/><line x1="968.0" y1="452" x2="968.0" y2="460"/><line x1="1064.0" y1="452" x2="1064.0" y2="460"/></g>
+        <g>
+          <text x="200.0" y="478" text-anchor="middle" font-size="12" fill="#6b6a5f">0</text>
+          <text x="296.0" y="478" text-anchor="middle" font-size="12" fill="#6b6a5f">2</text>
+          <text x="392.0" y="478" text-anchor="middle" font-size="12" fill="#6b6a5f">4</text>
+          <text x="488.0" y="478" text-anchor="middle" font-size="12" fill="#6b6a5f">6</text>
+          <text x="584.0" y="478" text-anchor="middle" font-size="12" fill="#6b6a5f">8</text>
+          <text x="680.0" y="478" text-anchor="middle" font-size="12" fill="#6b6a5f">10</text>
+          <text x="776.0" y="478" text-anchor="middle" font-size="12" fill="#6b6a5f">12</text>
+          <text x="872.0" y="478" text-anchor="middle" font-size="12" fill="#6b6a5f">14</text>
+          <text x="968.0" y="478" text-anchor="middle" font-size="12" fill="#6b6a5f">16</text>
+          <text x="1064.0" y="478" text-anchor="middle" font-size="12" fill="#6b6a5f">18</text>
+        </g>
+        <text x="188" y="478" text-anchor="end" font-size="12" fill="#6b6a5f">ms</text>
+
+        <!-- the slack that decides whether the frame lands -->
+        <g stroke="#c9913f" stroke-width="2">
+          <line x1="670.4" y1="500" x2="1000.2" y2="500"/>
+          <line x1="670.4" y1="495" x2="670.4" y2="505"/>
+          <line x1="1000.2" y1="495" x2="1000.2" y2="505"/>
+        </g>
+        <text x="835.3" y="518" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">slack 6.9 ms &#183; cross &#9315; and the panel repeats frame N</text>
+
+        <text x="32" y="518" font-size="12" fill="#6b6a5f">&#9312; vsync IRQ latches the framebuffer address &#183; &#9313; GPU signals its fence &#183; &#9314; page flip queued</text>
+        <text x="32" y="536" font-size="12" fill="#6b6a5f">&#9315; scanout done, frame-done IRQ &#183; &#9316; next vsync, fb B goes live</text>
+        <text x="1064" y="536" text-anchor="end" font-size="12" font-style="italic" fill="#8c8a7d">the deadline is a vsync edge, not a config value</text>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">frame pipeline · one 60 Hz period</span><span class="lang-zh">一帧的数据通路 · 60 Hz</span></span>
+          <span class="lang-en">Six hardware lanes over one frame period with vsync and TE underneath on the same axis. The memory lane is split in two because it serves both at once — the GPU writing the back buffer and scanout reading the front buffer — and that contention is why scanout underruns when the GPU is busy. Badge 1 the vsync interrupt latches the framebuffer address, badge 2 the GPU signals its fence, badge 3 the page flip is queued, badge 4 scanout finishes, badge 5 the next vsync makes the back buffer live. Cross badge 5 and the panel simply repeats the frame. Template: <code>templates/diagrams/frame-pipeline.svg</code>.</span>
+          <span class="lang-zh">六条硬件泳道铺在一个帧周期上，下面同轴画 vsync 和 TE。内存那条拆成两根小条，因为它同时在服务两边——GPU 在写后台缓冲、扫描输出在读前台缓冲——GPU 一忙扫描输出就 underrun，原因就是这个争用。徽章 1 vsync 中断锁住帧缓冲地址，2 GPU 发出 fence，3 翻页入队，4 扫描输出结束，5 下一个 vsync 让后台缓冲上台。越过徽章 5，面板就重复上一帧。模板：<code>templates/diagrams/frame-pipeline.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Four CPU lanes on one microsecond axis, showing what a cross-core call actually costs. CPU zero takes a spinlock and calls flush_tlb_mm, which sends an inter-processor interrupt to the other cores and then waits for every one of them to acknowledge. CPU one wants the same lock four microseconds in and spins, drawn hatched because spinning burns cycles rather than sleeping, right through until CPU zero unlocks at thirty-four. CPU two is idle and answers its IPI immediately. CPU three had interrupts disabled for a long section of its own, so it cannot take the IPI until twenty-four, and CPU zero's wait is bounded by that slowest responder, not by the average. A bracket measures the whole thing. Below, a note contrasts this with per-CPU data, which needs none of it because no other core can name the variable, provided the thread does not migrate mid-sequence" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="mcDots" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+          </pattern>
+          <pattern id="mcHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="6" stroke="#d97757" stroke-width="1.6" opacity="0.55"/>
+          </pattern>
+          <marker id="mcArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+          </marker>
+          <marker id="mcArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#788c5d"/>
+          </marker>
+        </defs>
+
+        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="560" rx="16" fill="url(#mcDots)"/>
+
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">CROSS-CORE CALLS &#183; WHO WAITS FOR WHOM</text>
+        <g font-size="12" fill="#6b6a5f">
+          <line x1="628" y1="30" x2="656" y2="30" stroke="#d97757" stroke-width="1.6" marker-end="url(#mcArrO)"/>
+          <text x="664" y="34">IPI &#183; wakes another core's hardirq</text>
+          <line x1="882" y1="30" x2="910" y2="30" stroke="#788c5d" stroke-width="1.4" stroke-dasharray="1.5 3.5" marker-end="url(#mcArrG)"/>
+          <text x="918" y="34">acknowledgement</text>
+        </g>
+
+        <g>
+          <rect x="208" y="106" width="852" height="46" rx="8" fill="#ffffff" stroke="#eceadf"/>
+          <text x="196" y="127" text-anchor="end" font-size="13" font-weight="600" fill="#141413">CPU 0</text>
+          <text x="196" y="144" text-anchor="end" font-size="12" fill="#6b6a5f">holds the lock, sends the IPI</text>
+          <rect x="208" y="166" width="852" height="46" rx="8" fill="#ffffff" stroke="#eceadf"/>
+          <text x="196" y="187" text-anchor="end" font-size="13" font-weight="600" fill="#141413">CPU 1</text>
+          <text x="196" y="204" text-anchor="end" font-size="12" fill="#6b6a5f">wants the same lock</text>
+          <rect x="208" y="226" width="852" height="46" rx="8" fill="#ffffff" stroke="#eceadf"/>
+          <text x="196" y="247" text-anchor="end" font-size="13" font-weight="600" fill="#141413">CPU 2</text>
+          <text x="196" y="264" text-anchor="end" font-size="12" fill="#6b6a5f">idle, answers at once</text>
+          <rect x="208" y="286" width="852" height="46" rx="8" fill="#ffffff" stroke="#eceadf"/>
+          <text x="196" y="307" text-anchor="end" font-size="13" font-weight="600" fill="#141413">CPU 3</text>
+          <text x="196" y="324" text-anchor="end" font-size="12" fill="#6b6a5f">irqs off in a long section</text>
+        </g>
+        <g>
+          <rect x="208.0" y="115" width="127.8" height="28" rx="5" fill="#f4d9cd" stroke="#d97757"/>
+          <text x="271.9" y="134" text-anchor="middle" font-size="12" fill="#8f4a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">spin_lock()</text>
+          <rect x="335.8" y="115" width="596.4" height="28" rx="5" fill="#e2ecf5" stroke="#c4d5e6"/>
+          <text x="634.0" y="134" text-anchor="middle" font-size="12" fill="#2f5c8a" font-family="SFMono-Regular, Menlo, Consolas, monospace">flush_tlb_mm() &#183; waits for every ack</text>
+          <rect x="932.2" y="115" width="85.2" height="28" rx="5" fill="#f4d9cd" stroke="#d97757"/>
+          <text x="974.8" y="134" text-anchor="middle" font-size="12" fill="#8f4a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">unlock</text>
+          <rect x="293.2" y="175" width="639.0" height="28" rx="5" fill="#ffffff" stroke="#d8d4c8"/>
+          <rect x="293.2" y="175" width="639.0" height="28" rx="5" fill="url(#mcHatch)"/>
+          <text x="612.7" y="194" text-anchor="middle" font-size="12" fill="#6b6a5f" font-family="SFMono-Regular, Menlo, Consolas, monospace">spinning &#183; burning cycles, not sleeping</text>
+          <rect x="932.2" y="175" width="127.8" height="28" rx="5" fill="#f4d9cd" stroke="#d97757"/>
+          <text x="996.1" y="194" text-anchor="middle" font-size="12" fill="#8f4a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">acquires</text>
+          <rect x="399.7" y="235" width="127.8" height="28" rx="5" fill="#f0e4d8" stroke="#d9bf94"/>
+          <text x="463.6" y="254" text-anchor="middle" font-size="12" fill="#8a6a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">flush_tlb_func()</text>
+          <rect x="208.0" y="295" width="511.2" height="28" rx="5" fill="#eef1e7" stroke="#b9c4a4"/>
+          <text x="463.6" y="314" text-anchor="middle" font-size="12" fill="#4d5a3c" font-family="SFMono-Regular, Menlo, Consolas, monospace">irqs off &#183; a long critical section of its own</text>
+          <rect x="719.2" y="295" width="127.8" height="28" rx="5" fill="#f0e4d8" stroke="#d9bf94"/>
+          <text x="783.1" y="314" text-anchor="middle" font-size="12" fill="#8a6a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">flush_tlb_func()</text>
+        </g>
+
+        <!-- IPI fan-out and acks -->
+        <g fill="none" stroke="#d97757" stroke-width="1.6">
+          <path d="M357.1,152 V160 Q357.1,166 365.1,166 H391.7 Q399.7,166 399.7,172 V226" marker-end="url(#mcArrO)"/>
+          <path d="M365.6,152 V160 Q365.6,166 373.6,166 H378.9 Q386.9,166 386.9,172 V286" marker-end="url(#mcArrO)"/>
+        </g>
+        <g fill="none" stroke="#788c5d" stroke-width="1.4" stroke-dasharray="1.5 3.5">
+          <path d="M484.9,226 V206 Q484.9,198 476.9,198 H450.3 Q442.3,198 442.3,190 V152" marker-end="url(#mcArrG)"/>
+          <path d="M847.0,286 V206 Q847.0,198 839.0,198 H812.4 Q804.4,198 804.4,190 V152" marker-end="url(#mcArrG)"/>
+        </g>
+        <text x="367.8" y="99" font-size="12" font-weight="600" fill="#8f4a2f">smp_call_function_many()</text>
+        <text x="1052" y="250" text-anchor="end" font-size="12" fill="#5d7045">the last ack &#8212; the one CPU 0 was waiting for</text>
+
+        <!-- axis -->
+        <line x1="208" y1="356" x2="1060" y2="356" stroke="#141413" stroke-width="1.4"/>
+        <g stroke="#141413" stroke-width="1.2"><line x1="208.0" y1="352" x2="208.0" y2="360"/><line x1="314.5" y1="352" x2="314.5" y2="360"/><line x1="421.0" y1="352" x2="421.0" y2="360"/><line x1="527.5" y1="352" x2="527.5" y2="360"/><line x1="634.0" y1="352" x2="634.0" y2="360"/><line x1="740.5" y1="352" x2="740.5" y2="360"/><line x1="847.0" y1="352" x2="847.0" y2="360"/><line x1="953.5" y1="352" x2="953.5" y2="360"/><line x1="1060.0" y1="352" x2="1060.0" y2="360"/></g>
+        <g>
+          <text x="208.0" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">0</text>
+          <text x="314.5" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">5</text>
+          <text x="421.0" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">10</text>
+          <text x="527.5" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">15</text>
+          <text x="634.0" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">20</text>
+          <text x="740.5" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">25</text>
+          <text x="847.0" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">30</text>
+          <text x="953.5" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">35</text>
+          <text x="1060.0" y="378" text-anchor="middle" font-size="12" fill="#6b6a5f">40</text>
+        </g>
+        <text x="196" y="360" text-anchor="end" font-size="12" fill="#6b6a5f">&#181;s</text>
+
+        <!-- the bracket that is the point -->
+        <g stroke="#c9913f" stroke-width="2">
+          <line x1="335.8" y1="404" x2="847.0" y2="404"/>
+          <line x1="335.8" y1="399" x2="335.8" y2="409"/>
+          <line x1="847.0" y1="399" x2="847.0" y2="409"/>
+        </g>
+        <text x="591.4" y="422" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">CPU 0 blocked 24 &#181;s &#8212; set by the slowest responder, not the average</text>
+        <g stroke="#a8a496" stroke-width="1.2">
+          <line x1="293.2" y1="440" x2="932.2" y2="440"/>
+          <line x1="293.2" y1="435" x2="293.2" y2="445"/>
+          <line x1="932.2" y1="435" x2="932.2" y2="445"/>
+        </g>
+        <text x="612.7" y="458" text-anchor="middle" font-size="12" fill="#6b6a5f">CPU 1 spun 30 &#181;s for a lock it could not have influenced</text>
+
+        <text x="32" y="492" font-size="12" fill="#6b6a5f">One core with interrupts disabled sets the pace for every core that needs an ack from it. That is the whole reason long irqs-off sections are a system property, not a local one.</text>
+        <text x="32" y="514" font-size="12" fill="#6b6a5f">Per-CPU data needs none of this: no other core can name the variable, so there is no lock, no IPI and no ack &#8212; provided the thread cannot migrate between get_cpu() and put_cpu().</text>
+        <text x="32" y="538" font-size="12" font-style="italic" fill="#8c8a7d">Draw the ack arrows, not just the IPI arrows. A fan-out alone reads as fire-and-forget; the acks are what turn it into a wait.</text>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">cross-core calls · who waits for whom</span><span class="lang-zh">跨核调用 · 谁在等谁</span></span>
+          <span class="lang-en">Four CPU lanes on one microsecond axis. CPU 0 holds a spinlock and sends an IPI to the others, then waits for every acknowledgement. CPU 3 had interrupts disabled for a long stretch, so its ack arrives last and sets how long CPU 0 blocks. Draw the ack arrows, not just the fan-out: a fan-out alone reads as fire-and-forget, and the acks are what turn it into a wait. Template: <code>templates/diagrams/multicore-calls.svg</code>.</span>
+          <span class="lang-zh">四条 CPU 泳道共用一根微秒轴。CPU 0 拿着自旋锁、向其余核发 IPI，然后等每一个应答。CPU 3 有一段长时间关中断，它的应答最晚到，于是 CPU 0 阻塞多久由它说了算。**应答箭头必须画出来**：只画扇出读作发完就走，画上应答才成为一次等待。模板：<code>templates/diagrams/multicore-calls.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="A panel power-up sequence drawn as a datasheet timing figure, not to scale, with the driver callbacks that own each stretch shown above it. Four supply rails come up in order: VCC_IO, then the 3.3 volt panel supply, then the D-PHY rail, then the reference clock, which must be running before reset is released. Reset is then pulled low, held, and released. The DSI link enters LP-11, the initialisation DCS commands are sent, sleep-out completes, and only then does the backlight come on. Four constraint brackets carry the numbers that actually matter: supplies stable to reset release at least 10 milliseconds, reset low width at least 10 microseconds, reset release to the first DCS command at least 5 milliseconds, and sleep-out to backlight at least 120 milliseconds. Two bars above the waveforms show that everything up to display-on belongs to the panel driver's prepare callback and the rest to enable. A closing note states the rule that power-down must be the exact reverse of this order, and names what each violated constraint looks like on a bench: a dark panel, a white flash, or a ghost image that fades" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="psqDots" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+          </pattern>
+          <marker id="psqArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+          </marker>
+        </defs>
+
+        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="560" rx="16" fill="url(#psqDots)"/>
+
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">PANEL POWER SEQUENCE &#183; RAILS, RESET, COMMANDS, BACKLIGHT</text>
+        <text x="1064" y="34" text-anchor="end" font-size="12" font-style="italic" fill="#8c8a7d">not to scale &#183; the brackets carry the real numbers</text>
+
+        <!-- which callback owns which stretch -->
+        <rect x="216" y="56" width="676" height="22" rx="11" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="554" y="71" text-anchor="middle" font-size="12" fill="#2f5c8a" font-family="SFMono-Regular, Menlo, Consolas, monospace">panel_funcs-&gt;prepare()</text>
+        <rect x="892" y="56" width="172" height="22" rx="11" fill="#eef1e7" stroke="#b9c4a4"/>
+        <text x="978" y="71" text-anchor="middle" font-size="12" fill="#4d5a3c" font-family="SFMono-Regular, Menlo, Consolas, monospace">enable()</text>
+        <text x="204" y="71" text-anchor="end" font-size="12" font-weight="600" fill="#6b6a5f">owned by</text>
+
+        <g stroke="#a8a496" stroke-width="1" stroke-dasharray="3 4" opacity="0.7">
+          <line x1="580" y1="92" x2="580" y2="496"/>
+          <line x1="652" y1="92" x2="652" y2="466"/>
+          <line x1="800" y1="92" x2="800" y2="466"/>
+          <line x1="892" y1="92" x2="892" y2="496"/>
+          <line x1="1000" y1="92" x2="1000" y2="496"/>
+        </g>
+
+        <!-- supply rails -->
+        <g>
+          <text x="204" y="117" text-anchor="end" font-size="13" font-weight="600" fill="#141413">VCC_IO</text>
+          <text x="204" y="133" text-anchor="end" font-size="12" fill="#6b6a5f">1.8 V &#183; always first</text>
+          <path d="M216,132 H278 L288,110 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+          <text x="204" y="159" text-anchor="end" font-size="13" font-weight="600" fill="#141413">VCC_3V3</text>
+          <text x="204" y="175" text-anchor="end" font-size="12" fill="#6b6a5f">3.3 V panel supply</text>
+          <path d="M216,174 H354 L364,152 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+          <text x="204" y="201" text-anchor="end" font-size="13" font-weight="600" fill="#141413">VDD_MIPI</text>
+          <text x="204" y="217" text-anchor="end" font-size="12" fill="#6b6a5f">D-PHY rail</text>
+          <path d="M216,216 H430 L440,194 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+          <text x="204" y="243" text-anchor="end" font-size="13" font-weight="600" fill="#141413">REFCLK</text>
+          <text x="204" y="259" text-anchor="end" font-size="12" fill="#6b6a5f">24 MHz</text>
+          <path d="M216,258 H502 L512,236 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+        </g>
+
+        <!-- RESET_N -->
+        <text x="204" y="285" text-anchor="end" font-size="13" font-weight="600" fill="#141413">RESET_N</text>
+        <text x="204" y="301" text-anchor="end" font-size="12" fill="#6b6a5f">active low</text>
+        <path d="M216,278 H570 L580,300 H642 L652,278 H1064" fill="none" stroke="#d97757" stroke-width="1.8"/>
+
+        <!-- DSI link state -->
+        <text x="204" y="327" text-anchor="end" font-size="13" font-weight="600" fill="#141413">DSI link</text>
+        <text x="204" y="343" text-anchor="end" font-size="12" fill="#6b6a5f">lane state</text>
+        <rect x="216" y="318" width="508" height="26" rx="5" fill="#ffffff" stroke="#d8d4c8"/>
+        <text x="470" y="336" text-anchor="middle" font-size="12" fill="#8c8a7d">undriven</text>
+        <rect x="724" y="318" width="340" height="26" rx="5" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="894" y="336" text-anchor="middle" font-size="12" fill="#2f5c8a">LP-11 &#183; ready for commands</text>
+
+        <!-- DCS commands -->
+        <text x="204" y="369" text-anchor="end" font-size="13" font-weight="600" fill="#141413">DCS</text>
+        <text x="204" y="385" text-anchor="end" font-size="12" fill="#6b6a5f">init sequence</text>
+        <rect x="800" y="360" width="92" height="26" rx="5" fill="#f0e4d8" stroke="#d9bf94"/>
+        <text x="846" y="378" text-anchor="middle" font-size="12" fill="#8a6a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">init seq</text>
+        <rect x="892" y="360" width="60" height="26" rx="5" fill="#f4d9cd" stroke="#d97757"/>
+        <text x="922" y="378" text-anchor="middle" font-size="12" fill="#8f4a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">on</text>
+
+        <!-- backlight -->
+        <text x="204" y="411" text-anchor="end" font-size="13" font-weight="600" fill="#141413">BL_EN</text>
+        <text x="204" y="427" text-anchor="end" font-size="12" fill="#6b6a5f">PWM + enable</text>
+        <path d="M216,426 H990 L1000,404 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+
+        <!-- constraint brackets -->
+          <line x1="364" y1="456" x2="652" y2="456" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="364" y1="451" x2="364" y2="461" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="652" y1="451" x2="652" y2="461" stroke="#a8a496" stroke-width="1.2"/>
+          <text x="508" y="447" text-anchor="middle" font-size="12" font-weight="400" fill="#6b6a5f">t1 &#8805; 10 ms &#183; supplies stable &#8594; reset release</text>
+          <line x1="580" y1="486" x2="652" y2="486" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="580" y1="481" x2="580" y2="491" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="652" y1="481" x2="652" y2="491" stroke="#a8a496" stroke-width="1.2"/>
+          <text x="616" y="477" text-anchor="middle" font-size="12" font-weight="400" fill="#6b6a5f">t2 &#8805; 10 &#181;s</text>
+          <line x1="652" y1="456" x2="800" y2="456" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="652" y1="451" x2="652" y2="461" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="800" y1="451" x2="800" y2="461" stroke="#a8a496" stroke-width="1.2"/>
+          <text x="726" y="447" text-anchor="middle" font-size="12" font-weight="400" fill="#6b6a5f">t3 &#8805; 5 ms &#183; reset &#8594; first DCS</text>
+          <line x1="892" y1="486" x2="1000" y2="486" stroke="#c9913f" stroke-width="2"/>
+          <line x1="892" y1="481" x2="892" y2="491" stroke="#c9913f" stroke-width="2"/>
+          <line x1="1000" y1="481" x2="1000" y2="491" stroke="#c9913f" stroke-width="2"/>
+          <text x="946" y="477" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">t4 &#8805; 120 ms &#183; sleep-out &#8594; backlight</text>
+
+        <text x="32" y="516" font-size="12" fill="#6b6a5f">REFCLK must already be running when reset rises, or the panel latches its state from a clock that is not there. Power-down is the exact reverse of this figure, every step.</text>
+        <text x="32" y="538" font-size="12" fill="#6b6a5f">Each broken constraint has its own bench symptom: t1 short &#8594; panel never answers; t3 short &#8594; the init sequence is swallowed; <tspan font-weight="600" fill="#8a6a2f">t4 short &#8594; a white flash at every boot</tspan> &#8212; the one people ship.</text>
+      </svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">panel power sequence</span><span class="lang-zh">上电时序 · 屏</span></span>
+          <span class="lang-en">Rails, clock, reset, link state, init commands and backlight, laid out by event rather than by linear time — the constraints span four orders of magnitude, so a true-scale axis would render the 10 µs reset pulse as zero pixels. The brackets carry the real numbers with their inequality signs, and the bar along the top says which panel callback owns which stretch. Power-down is the exact reverse, every step, including the waits. Template: <code>templates/diagrams/power-sequence.svg</code>.</span>
+          <span class="lang-zh">电源轨、时钟、复位、链路状态、初始化命令、背光，按事件排而不按线性时间——约束跨了四个数量级，按真实比例画的话 10 µs 那段复位脉冲是 0 像素。括线带着不等号给真实数字，顶上那条横条说明每一段归哪个面板回调管。下电是严格逆序，每一步都要，包括那些等待。模板：<code>templates/diagrams/power-sequence.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== §5 PRODUCT ===================== -->
 <section class="anth-section" id="product" style="background:#ffffff;">
   <div class="anth-container anth-container--wide">
-    <span class="gal-kicker"><span class="lang-en">04 · for product demos</span><span class="lang-zh">04 · 产品展示</span></span>
+    <span class="gal-kicker"><span class="lang-en">05 · for product demos</span><span class="lang-zh">05 · 产品展示</span></span>
     <h2 style="font-family:var(--font-heading); font-size:34px; font-weight:600; letter-spacing:-0.01em; margin:var(--space-2) 0 0;">
       <span class="lang-en">Product mocks</span>
       <span class="lang-zh">产品 mock</span>
@@ -3832,7 +4587,7 @@
 <!-- ===================== §3 REPORTING ===================== -->
 <section class="anth-section" id="reporting">
   <div class="anth-container anth-container--wide">
-    <span class="gal-kicker"><span class="lang-en">05 · for talks &amp; reports</span><span class="lang-zh">05 · 演讲与汇报</span></span>
+    <span class="gal-kicker"><span class="lang-en">06 · for talks &amp; reports</span><span class="lang-zh">06 · 演讲与汇报</span></span>
     <h2 style="font-family:var(--font-heading); font-size:34px; font-weight:600; letter-spacing:-0.01em; margin:var(--space-2) 0 0;">
       <span class="lang-en">Slides and reporting</span>
       <span class="lang-zh">演讲汇报图</span>

@@ -6,7 +6,7 @@
 
 > 适用：架构图 / 流程图 / 层级图 / 时间线 / 时序图等一切工程类图示。
 > 与 anthropic 的多色语义路线不同，**apple 图的美感来自"少"**：无彩色为主、蓝色一处、柔影分层、留白比信息多。
-> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence / deployment / state-machine + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline + 互连拓扑 interconnect-map + 协议分层 protocol-stack + 地址映射 address-map + 芯片与代码七件 system-topology / die-floorplan / datapath / packet-encap / terminal-annotated / struct-graph / bus-fabric,共 **24 件**,全部按本文标准实现；另有 §8 配套的 device-mock.svg 设备线稿底版与 §15 的 glyphs.svg 构件片段集,均不计入图型谱系）。案例库：`demos/apple-design/diagrams.html`（25 张图,每张带 Copy SVG）。
+> 模板：`templates/diagrams/`（architecture / flow / hierarchy / timeline / sequence / deployment / state-machine + 内核七件 function-flowchart / algorithm-ringbuffer / register-bitfield / soc-block / hw-timing-waveform / build-pipeline / sched-timeline + 互连拓扑 interconnect-map + 协议分层 protocol-stack + 地址映射 address-map + 芯片与代码七件 system-topology / die-floorplan / datapath / packet-encap / terminal-annotated / struct-graph / bus-fabric + 调用与时序六件 call-graph / call-stack / runtime-timeline / frame-pipeline / multicore-calls / power-sequence,共 **30 件**,全部按本文标准实现；另有 §8 配套的 device-mock.svg 设备线稿底版与 §15 的 glyphs.svg 构件片段集,均不计入图型谱系）。案例库：`demos/apple-design/diagrams.html`（31 张图,每张带 Copy SVG）。
 
 ## 0. 第一原则：美靠"少"
 
@@ -122,7 +122,7 @@ apple 风时序图 pattern（anthropic 有专文 `sequence-diagrams.md`，apple 
 
 ## 12. 内核 / 嵌入式工程图谱系（apple 语法）
 
-> 17 个图型与 anthropic §15 同谱系(后七件的 apple 译法见 §16)（function-flowchart / algorithm / register-bitfield / soc-block /
+> 23 个图型与 anthropic §15 同谱系(芯片与代码七件的 apple 译法见 §16,调用与时序六件见 §17)（function-flowchart / algorithm / register-bitfield / soc-block /
 > hw-timing-waveform / build-pipeline / sched-timeline / interconnect-map / protocol-stack / address-map），模板在 `templates/diagrams/` 同名 .svg。
 > 模板是起点不是规格——结构、密度、布局按实际内容重设计,谱系之外的内容自创图型即可。
 > 结构性工艺（布局、lane、车道、交替、双箭头标注）参考 anthropic §15;本节只写 apple 的**翻译规则**。
@@ -275,3 +275,54 @@ apple 的 gallery 图位是三家里最窄的（946 px，known-bugs §1.50）。
 卡面用 `#1d1d1f`、标题条 `#2c2c2e`、正文 `#d2d2d7`、次要行 `#86868b`。
 高亮块用 `#0071e3` 加 0.26 透明度 —— 这是 apple 里唯一允许"色块盖字"的地方，
 因为它盖的是等宽 log，不是版式文字。
+
+---
+
+## 17. 调用与时序六件的 apple 译法
+
+模板：`templates/diagrams/` 的 `call-graph` / `call-stack` / `runtime-timeline` /
+`frame-pipeline` / `multicore-calls` / `power-sequence`。
+**图型工艺**在 anthropic-design `diagram-craft.md` §15.18–15.23;本节只写 apple 的译法。
+
+### 17.1 五种边只剩一个色，用线型顶上
+
+`call-graph` 在 anthropic 用五种颜色区分边。apple 只有一个 `#0071e3`，
+所以**颜色让位给线型和箭头形状**：
+
+| 边 | apple 画法 |
+|---|---|
+| 直接调用 | 实线 · 实心箭头 · `#1d1d1f` |
+| **经 ops 表** | 实线 · **空心箭头** · `#0071e3` ← 唯一的蓝 |
+| 异步交接 | **虚线** · 实心箭头 · `#aeaeb2` |
+| 硬件事件 | 闪电折线 · `#aeaeb2` |
+| 完成通知 | **点线** · 实心箭头 · `#aeaeb2` |
+
+蓝给"经 ops 表"那一种，理由是这张图的结论就是**它是 grep 找不到的那一条**。
+换句话说 —— **蓝给这张图真正要讲的那件事，不给最显眼的那个框**。
+
+### 17.2 每张图先回答「蓝给谁」
+
+六张各有各的答案，写死在这里免得下次又想一遍：
+
+| 图 | 蓝给谁 | 其余 |
+|---|---|---|
+| call-graph | 经 ops 表的那条边 | 四种边靠线型区分 |
+| call-stack | **出错的那一帧** | 断层线与幽灵卡走灰虚线 |
+| runtime-timeline | **queue_work 到 worker 那 65 µs 的括线** | 另两条括线灰 |
+| frame-pipeline | 后台缓冲 + 触发点徽章 + vsync + slack | 前台缓冲 / 扫描输出 / 面板全灰 |
+| multicore-calls | IPI 与它逼出来的阻塞括线 | 应答走灰点线 |
+| power-sequence | **RESET_N + t4 那条约束** | 四条电源轨全灰 |
+
+### 17.3 淡蓝底上不要放蓝字
+
+`#0071e3` 压在 `#eaf3fe` 上只有 4.4:1，差一点点过不了 AA。
+**填色用 `#eaf3fe`、线条用 `#0071e3`、压在上面的文字一律 `#1d1d1f`。**
+强调不靠字色靠形状 —— 蓝的框本身已经把眼睛拉过去了。
+
+### 17.4 右对齐的行标签会从左边掉出去
+
+这六张都是泳道图，行标签右对齐钉在泳道左边。
+**apple 的字号比 anthropic 高半点（12.5 / 13.5），同一句话就宽出去一截** ——
+`24 MHz · before reset rises` 在 anthropic 放得下，到 apple 就把左边界顶穿了，
+而 SVG 不会报错，**它就是被裁掉**（known-bugs §1.59）。
+落法:行标签写短，长条件搬到图脚;或者整列改成左对齐钉在 `x=32`。

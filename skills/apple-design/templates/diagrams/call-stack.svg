@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="A kernel oops backtrace drawn as a stack rather than a list. Nine frames, newest on top: the faulting frame sunxi_dsi_write_reg in the out-of-tree drm_sunxi module, then the panel prepare path, then DRM core, then commit_tail. A horizontal fault line separates frame four from frame five. Everything below that line is the kworker skeleton — process_one_work, worker_thread, kthread and ret_from_fork — which is not the caller chain in any useful sense: process_one_work did not call commit_tail because it wanted to, it called whatever was queued. The caller you actually want, the code that ran queue_work, is not on this stack at all; a ghost card off to the side names it. A left-hand gutter brackets the two context runs, and three notes on the right explain the frames worth stopping at, including that a plus offset slash size pair tells you how far into the function the program counter was and how big the function is" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="csArrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+    <marker id="csArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="560" fill="#ffffff"/>
+
+  <text x="32" y="34" font-size="12.5" font-weight="600" letter-spacing="1.2" fill="#86868b">CALL STACK &#183; AND WHERE IT STOPS BEING A CALL CHAIN</text>
+  <text x="1088" y="34" text-anchor="end" font-size="12.5" font-style="italic" fill="#86868b">newest frame on top &#183; the way the kernel prints it</text>
+
+  <!-- the oops line -->
+  <rect x="148" y="76" width="596" height="40" rx="8" fill="#1d1d1f"/>
+  <text x="164" y="101" font-size="12.5" fill="#ffffff" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">Unable to handle kernel NULL pointer dereference at 0x18</text>
+
+  <!-- context gutter -->
+  <g fill="none" stroke="#aeaeb2" stroke-width="1.4">
+    <path d="M120,128 H108 V332 H120"/>
+    <path d="M120,352 H108 V512 H120"/>
+  </g>
+  <text x="100" y="235" text-anchor="middle" font-size="12.5" font-weight="600" fill="#86868b" transform="rotate(-90 100 235)">this work item</text>
+  <text x="100" y="427" text-anchor="middle" font-size="12.5" font-weight="600" fill="#6e6e73" transform="rotate(-90 100 427)">kworker skeleton</text>
+
+  <!-- frames -->
+  <g>
+    <rect x="148" y="128" width="596" height="36" rx="6" fill="#eaf3fe" stroke="#0071e3" stroke-width="1.5"/>
+    <text x="188" y="151" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">sunxi_dsi_write_reg</text>
+    <text x="730" y="151" text-anchor="end" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">+0x2c/0x80</text>
+    <text x="164" y="151" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">#0</text>
+    <rect x="488" y="136" width="78" height="20" rx="6" fill="#f5f5f7" stroke="#d2d2d7"/>
+    <text x="527" y="150" text-anchor="middle" font-size="12.5" fill="#6e6e73" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">[drm_sunxi]</text>
+    <rect x="148" y="168" width="596" height="36" rx="6" fill="#ffffff" stroke="#d2d2d7"/>
+    <text x="188" y="191" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">sunxi_panel_prepare</text>
+    <text x="730" y="191" text-anchor="end" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">+0x64/0x120</text>
+    <text x="164" y="191" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">#1</text>
+    <rect x="488" y="176" width="91" height="20" rx="6" fill="#f5f5f7" stroke="#d2d2d7"/>
+    <text x="534" y="190" text-anchor="middle" font-size="12.5" fill="#6e6e73" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">[panel_sunxi]</text>
+    <rect x="148" y="208" width="596" height="36" rx="6" fill="#ffffff" stroke="#d2d2d7"/>
+    <text x="188" y="231" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">drm_panel_prepare</text>
+    <text x="730" y="231" text-anchor="end" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">+0x28/0x50</text>
+    <text x="164" y="231" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">#2</text>
+    <rect x="148" y="248" width="596" height="36" rx="6" fill="#ffffff" stroke="#d2d2d7"/>
+    <text x="188" y="271" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">drm_atomic_helper_commit_modeset_enables</text>
+    <text x="730" y="271" text-anchor="end" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">+0x2a8/0x430</text>
+    <text x="164" y="271" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">#3</text>
+    <rect x="148" y="288" width="596" height="36" rx="6" fill="#ffffff" stroke="#d2d2d7"/>
+    <text x="188" y="311" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">commit_tail</text>
+    <text x="730" y="311" text-anchor="end" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">+0xa4/0x180</text>
+    <text x="164" y="311" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">#4</text>
+    <rect x="148" y="356" width="596" height="36" rx="6" fill="#ffffff" stroke="#d2d2d7"/>
+    <text x="188" y="379" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">process_one_work</text>
+    <text x="730" y="379" text-anchor="end" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">+0x1d8/0x430</text>
+    <text x="164" y="379" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">#5</text>
+    <rect x="148" y="396" width="596" height="36" rx="6" fill="#ffffff" stroke="#d2d2d7"/>
+    <text x="188" y="419" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">worker_thread</text>
+    <text x="730" y="419" text-anchor="end" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">+0x150/0x460</text>
+    <text x="164" y="419" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">#6</text>
+    <rect x="148" y="436" width="596" height="36" rx="6" fill="#ffffff" stroke="#d2d2d7"/>
+    <text x="188" y="459" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">kthread</text>
+    <text x="730" y="459" text-anchor="end" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">+0x110/0x11c</text>
+    <text x="164" y="459" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">#7</text>
+    <rect x="148" y="476" width="596" height="36" rx="6" fill="#ffffff" stroke="#d2d2d7"/>
+    <text x="188" y="499" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">ret_from_fork</text>
+    <text x="730" y="499" text-anchor="end" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">+0x10/0x20</text>
+    <text x="164" y="499" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">#8</text>
+  </g>
+
+  <!-- the fault line -->
+  <line x1="132" y1="342" x2="760" y2="342" stroke="#6e6e73" stroke-width="1.6" stroke-dasharray="6 4"/>
+  <text x="132" y="334" font-size="12.5" font-weight="600" fill="#6e6e73">the chain of &#8220;who called me&#8221; ends here</text>
+
+  <!-- the caller that is NOT on the stack -->
+  <path d="M760,342 H820" fill="none" stroke="#6e6e73" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#csArrN)"/>
+  <rect x="828" y="308" width="252" height="68" rx="10" fill="#f5f5f7" stroke="#aeaeb2" stroke-dasharray="4 3"/>
+  <text x="844" y="330" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">drm_atomic_commit()</text>
+  <text x="844" y="348" font-size="12.5" fill="#6e6e73">ran queue_work() earlier,</text>
+  <text x="844" y="366" font-size="12.5" fill="#6e6e73">in another context. Not on this stack.</text>
+
+  <!-- right-hand notes -->
+  <g>
+    <path d="M744,147 H812" fill="none" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#csArrN)"/>
+    <text x="820" y="136" font-size="13.5" font-weight="600" fill="#1d1d1f">Where it died</text>
+    <text x="820" y="154" font-size="12.5" fill="#86868b">0x2c into an 0x80-byte function.</text>
+    <text x="820" y="171" font-size="12.5" fill="#86868b">Feed that offset to addr2line, not</text>
+    <text x="820" y="188" font-size="12.5" fill="#86868b">the raw PC &#8212; modules relocate.</text>
+    <path d="M744,227 H812" fill="none" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#csArrN)"/>
+    <text x="820" y="222" font-size="13.5" font-weight="600" fill="#1d1d1f">The boundary worth noticing</text>
+    <text x="820" y="240" font-size="12.5" fill="#86868b">Frames 0-1 are out-of-tree, 2-4 are</text>
+    <text x="820" y="257" font-size="12.5" fill="#86868b">core. The bug is almost always on</text>
+    <text x="820" y="274" font-size="12.5" fill="#86868b">the side with the module tag.</text>
+    <path d="M744,414 H812 V420" fill="none" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#csArrN)"/>
+    <text x="820" y="424" font-size="13.5" font-weight="600" fill="#1d1d1f">Learn the skeletons by sight</text>
+    <text x="820" y="442" font-size="12.5" fill="#86868b">process_one_work / worker_thread &#8212; workqueue.</text>
+    <text x="820" y="459" font-size="12.5" fill="#86868b">call_timer_fn &#8212; timer. rcu_do_batch &#8212; RCU.</text>
+    <text x="820" y="476" font-size="12.5" fill="#86868b">el0_svc_common &#8212; a syscall from userspace.</text>
+    <text x="820" y="493" font-size="12.5" fill="#86868b">Each one marks a cut like this one.</text>
+  </g>
+
+  <text x="32" y="534" font-size="12.5" fill="#86868b">A stack answers &#8220;how did I get here&#8221; only inside one context. Every async boundary &#8212; work, timer, IRQ, RCU callback &#8212; cuts it, and the cut is invisible unless you know the skeleton frames by sight.</text>
+</svg>

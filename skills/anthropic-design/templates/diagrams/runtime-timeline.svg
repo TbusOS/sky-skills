@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="One DMA completion handed along four execution contexts, on a shared microsecond axis. The hardware raises its interrupt at time zero; the hardirq handler runs for eight microseconds, acks the device and calls tasklet_schedule. The tasklet runs at fourteen microseconds and drains descriptors until forty-six. From inside it, two handoffs leave: queue_work at forty, whose worker does not actually run until one hundred and five, and complete at forty-six, which wakes the user thread at fifty-two. Three brackets under the axis measure the gaps that matter: eight microseconds from the interrupt to the handler, six from raising the tasklet to it running, and sixty-five from queue_work to the worker. That last one is the point of the figure: a workqueue is not a slightly slower tasklet, it is an order of magnitude later, because the worker is an ordinary schedulable thread and has to wait its turn. The user thread's earlier blocked stretch is drawn hatched, so the whole wait it experienced is visible in one line" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="rtDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <pattern id="rtHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#a8a496" stroke-width="1.6" opacity="0.45"/>
+    </pattern>
+    <marker id="rtArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/>
+    </marker>
+    <marker id="rtArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c9913f"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#rtDots)"/>
+
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">RUNTIME TIMELINE &#183; ONE COMPLETION, FOUR CONTEXTS</text>
+  <text x="1064" y="34" text-anchor="end" font-size="12" fill="#6b6a5f">time in &#181;s &#183; one CPU &#183; measured with trace_printk</text>
+
+  <!-- lanes -->
+  <g>
+    <rect x="188" y="112" width="876" height="44" rx="8" fill="#f4d9cd" stroke="#d97757" opacity="0.30"/>
+    <text x="168" y="132" text-anchor="end" font-size="13" font-weight="600" fill="#141413">hardirq</text>
+    <text x="168" y="149" text-anchor="end" font-size="12" fill="#6b6a5f">irq disabled &#183; must not sleep</text>
+    <rect x="188" y="170" width="876" height="44" rx="8" fill="#f0e4d8" stroke="#d9bf94" opacity="0.30"/>
+    <text x="168" y="190" text-anchor="end" font-size="13" font-weight="600" fill="#141413">softirq</text>
+    <text x="168" y="207" text-anchor="end" font-size="12" fill="#6b6a5f">still atomic &#183; may run on any CPU</text>
+    <rect x="188" y="228" width="876" height="44" rx="8" fill="#e2ecf5" stroke="#c4d5e6" opacity="0.30"/>
+    <text x="168" y="248" text-anchor="end" font-size="13" font-weight="600" fill="#141413">kworker</text>
+    <text x="168" y="265" text-anchor="end" font-size="12" fill="#6b6a5f">a real thread &#183; may sleep</text>
+    <rect x="188" y="286" width="876" height="44" rx="8" fill="#eef1e7" stroke="#b9c4a4" opacity="0.30"/>
+    <text x="168" y="306" text-anchor="end" font-size="13" font-weight="600" fill="#141413">user thread</text>
+    <text x="168" y="323" text-anchor="end" font-size="12" fill="#6b6a5f">the process that asked</text>
+  </g>
+
+  <!-- the user thread was already blocked -->
+  <rect x="188" y="294" width="268.0" height="28" rx="5" fill="#ffffff" stroke="#d8d4c8"/>
+  <rect x="188" y="294" width="268.0" height="28" rx="5" fill="url(#rtHatch)"/>
+  <text x="200" y="288" font-size="12" fill="#8c8a7d">blocked in read() since before this frame</text>
+
+  <!-- work blocks -->
+  <g>
+    <rect x="188.0" y="120" width="41.2" height="28" rx="5" fill="#f4d9cd" stroke="#d97757"/>
+    <text x="188.0" y="114" font-size="12" fill="#8f4a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">sunxi_dma_irq()</text>
+    <rect x="260.1" y="178" width="164.9" height="28" rx="5" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="342.6" y="197" text-anchor="middle" font-size="12" fill="#8a6a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">dma_tasklet() &#183; drain descriptors</text>
+    <rect x="729.1" y="236" width="273.1" height="28" rx="5" fill="#e2ecf5" stroke="#c4d5e6"/>
+    <text x="865.6" y="255" text-anchor="middle" font-size="12" fill="#2f5c8a" font-family="SFMono-Regular, Menlo, Consolas, monospace">dma_refill_work() &#183; alloc + re-arm</text>
+    <rect x="456.0" y="294" width="123.7" height="28" rx="5" fill="#eef1e7" stroke="#b9c4a4"/>
+    <text x="517.8" y="313" text-anchor="middle" font-size="12" fill="#4d5a3c" font-family="SFMono-Regular, Menlo, Consolas, monospace">read() returns</text>
+  </g>
+
+  <!-- hardware event -->
+  <path d="M186,86 L198,98 L190,98 L202,110" fill="none" stroke="#d97757" stroke-width="2"/>
+  <text x="210" y="93" font-size="12" font-weight="600" fill="#8f4a2f">device raises IRQ</text>
+
+  <!-- handoffs -->
+  <g fill="none" stroke="#141413" stroke-width="1.5">
+    <path d="M229.2,156 V163 Q229.2,170 237.2,170 H252.1 Q260.1,170 260.1,177" marker-end="url(#rtArr)"/>
+    <path d="M425.0,214 V221 Q425.0,228 433.0,228 H448.0 Q456.0,228 456.0,235 V286" marker-end="url(#rtArr)"/>
+  </g>
+  <g fill="none" stroke="#c9913f" stroke-width="1.6" stroke-dasharray="5 4">
+    <path d="M394.1,214 V221 Q394.1,228 402.1,228 H721.1 Q729.1,228 729.1,235" marker-end="url(#rtArrG)"/>
+  </g>
+  <g font-size="12" text-anchor="middle">
+    <rect x="223.2" y="154" width="140" height="20" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <text x="293.2" y="168" fill="#6b6a5f">tasklet_schedule()</text>
+    <rect x="460.0" y="252" width="104" height="20" rx="10" fill="#ffffff" stroke="#d8d4c8"/>
+    <text x="512.0" y="266" fill="#6b6a5f">complete()</text>
+    <rect x="503.6" y="218" width="116" height="20" rx="10" fill="#f0e4d8" stroke="#d9bf94"/>
+    <text x="561.6" y="232" fill="#8a6a2f">queue_work()</text>
+  </g>
+
+  <!-- axis -->
+  <line x1="188" y1="350" x2="1064" y2="350" stroke="#141413" stroke-width="1.4"/>
+  <g stroke="#141413" stroke-width="1.2">
+    <line x1="188.0" y1="346" x2="188.0" y2="354"/>
+    <line x1="316.8" y1="346" x2="316.8" y2="354"/>
+    <line x1="445.6" y1="346" x2="445.6" y2="354"/>
+    <line x1="574.5" y1="346" x2="574.5" y2="354"/>
+    <line x1="703.3" y1="346" x2="703.3" y2="354"/>
+    <line x1="832.1" y1="346" x2="832.1" y2="354"/>
+    <line x1="960.9" y1="346" x2="960.9" y2="354"/>
+  </g>
+  <g>
+    <text x="188.0" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">0</text>
+    <text x="316.8" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">25</text>
+    <text x="445.6" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">50</text>
+    <text x="574.5" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">75</text>
+    <text x="703.3" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">100</text>
+    <text x="832.1" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">125</text>
+    <text x="960.9" y="372" text-anchor="middle" font-size="12" fill="#6b6a5f">150</text>
+  </g>
+  <text x="168" y="354" text-anchor="end" font-size="12" fill="#6b6a5f">&#181;s</text>
+
+  <!-- latency brackets -->
+    <line x1="188.0" y1="400" x2="229.2" y2="400" stroke="#a8a496" stroke-width="1.2"/>
+    <line x1="188.0" y1="395" x2="188.0" y2="405" stroke="#a8a496" stroke-width="1.2"/>
+    <line x1="229.2" y1="395" x2="229.2" y2="405" stroke="#a8a496" stroke-width="1.2"/>
+    <text x="188.0" y="418" text-anchor="start" font-size="12" font-weight="400" fill="#6b6a5f">IRQ &#8594; handler &#183; 8 &#181;s</text>
+    <line x1="229.2" y1="430" x2="260.1" y2="430" stroke="#a8a496" stroke-width="1.2"/>
+    <line x1="229.2" y1="425" x2="229.2" y2="435" stroke="#a8a496" stroke-width="1.2"/>
+    <line x1="260.1" y1="425" x2="260.1" y2="435" stroke="#a8a496" stroke-width="1.2"/>
+    <text x="229.2" y="448" text-anchor="start" font-size="12" font-weight="400" fill="#6b6a5f">raise &#8594; tasklet &#183; 6 &#181;s</text>
+    <line x1="394.1" y1="400" x2="729.1" y2="400" stroke="#c9913f" stroke-width="2"/>
+    <line x1="394.1" y1="395" x2="394.1" y2="405" stroke="#c9913f" stroke-width="2"/>
+    <line x1="729.1" y1="395" x2="729.1" y2="405" stroke="#c9913f" stroke-width="2"/>
+    <text x="561.6" y="418" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">queue_work() &#8594; worker actually runs &#183; 65 &#181;s</text>
+
+  <text x="32" y="482" font-size="12" fill="#6b6a5f">Same handoff, two primitives, an order of magnitude apart: the tasklet runs on the way out of the interrupt, the worker waits for the scheduler like any other thread.</text>
+  <text x="32" y="504" font-size="12" fill="#6b6a5f">Draw the gap, not the arrow. An arrow says &#8220;then this happens&#8221;; only the gap says when &#8212; and every latency bug lives in a gap somebody drew as an arrow.</text>
+  <text x="32" y="530" font-size="12" font-style="italic" fill="#8c8a7d">If the tasklet lane ever runs longer than MAX_SOFTIRQ_TIME the rest is pushed into ksoftirqd, and this lane turns into a fifth one that competes for the CPU.</text>
+</svg>

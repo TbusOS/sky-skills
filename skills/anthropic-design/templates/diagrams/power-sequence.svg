@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="A panel power-up sequence drawn as a datasheet timing figure, not to scale, with the driver callbacks that own each stretch shown above it. Four supply rails come up in order: VCC_IO, then the 3.3 volt panel supply, then the D-PHY rail, then the reference clock, which must be running before reset is released. Reset is then pulled low, held, and released. The DSI link enters LP-11, the initialisation DCS commands are sent, sleep-out completes, and only then does the backlight come on. Four constraint brackets carry the numbers that actually matter: supplies stable to reset release at least 10 milliseconds, reset low width at least 10 microseconds, reset release to the first DCS command at least 5 milliseconds, and sleep-out to backlight at least 120 milliseconds. Two bars above the waveforms show that everything up to display-on belongs to the panel driver's prepare callback and the rest to enable. A closing note states the rule that power-down must be the exact reverse of this order, and names what each violated constraint looks like on a bench: a dark panel, a white flash, or a ghost image that fades" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="psqDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <marker id="psqArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#psqDots)"/>
+
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">PANEL POWER SEQUENCE &#183; RAILS, RESET, COMMANDS, BACKLIGHT</text>
+  <text x="1064" y="34" text-anchor="end" font-size="12" font-style="italic" fill="#8c8a7d">not to scale &#183; the brackets carry the real numbers</text>
+
+  <!-- which callback owns which stretch -->
+  <rect x="216" y="56" width="676" height="22" rx="11" fill="#e2ecf5" stroke="#c4d5e6"/>
+  <text x="554" y="71" text-anchor="middle" font-size="12" fill="#2f5c8a" font-family="SFMono-Regular, Menlo, Consolas, monospace">panel_funcs-&gt;prepare()</text>
+  <rect x="892" y="56" width="172" height="22" rx="11" fill="#eef1e7" stroke="#b9c4a4"/>
+  <text x="978" y="71" text-anchor="middle" font-size="12" fill="#4d5a3c" font-family="SFMono-Regular, Menlo, Consolas, monospace">enable()</text>
+  <text x="204" y="71" text-anchor="end" font-size="12" font-weight="600" fill="#6b6a5f">owned by</text>
+
+  <g stroke="#a8a496" stroke-width="1" stroke-dasharray="3 4" opacity="0.7">
+    <line x1="580" y1="92" x2="580" y2="496"/>
+    <line x1="652" y1="92" x2="652" y2="466"/>
+    <line x1="800" y1="92" x2="800" y2="466"/>
+    <line x1="892" y1="92" x2="892" y2="496"/>
+    <line x1="1000" y1="92" x2="1000" y2="496"/>
+  </g>
+
+  <!-- supply rails -->
+  <g>
+    <text x="204" y="117" text-anchor="end" font-size="13" font-weight="600" fill="#141413">VCC_IO</text>
+    <text x="204" y="133" text-anchor="end" font-size="12" fill="#6b6a5f">1.8 V &#183; always first</text>
+    <path d="M216,132 H278 L288,110 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+    <text x="204" y="159" text-anchor="end" font-size="13" font-weight="600" fill="#141413">VCC_3V3</text>
+    <text x="204" y="175" text-anchor="end" font-size="12" fill="#6b6a5f">3.3 V panel supply</text>
+    <path d="M216,174 H354 L364,152 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+    <text x="204" y="201" text-anchor="end" font-size="13" font-weight="600" fill="#141413">VDD_MIPI</text>
+    <text x="204" y="217" text-anchor="end" font-size="12" fill="#6b6a5f">D-PHY rail</text>
+    <path d="M216,216 H430 L440,194 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+    <text x="204" y="243" text-anchor="end" font-size="13" font-weight="600" fill="#141413">REFCLK</text>
+    <text x="204" y="259" text-anchor="end" font-size="12" fill="#6b6a5f">24 MHz</text>
+    <path d="M216,258 H502 L512,236 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+  </g>
+
+  <!-- RESET_N -->
+  <text x="204" y="285" text-anchor="end" font-size="13" font-weight="600" fill="#141413">RESET_N</text>
+  <text x="204" y="301" text-anchor="end" font-size="12" fill="#6b6a5f">active low</text>
+  <path d="M216,278 H570 L580,300 H642 L652,278 H1064" fill="none" stroke="#d97757" stroke-width="1.8"/>
+
+  <!-- DSI link state -->
+  <text x="204" y="327" text-anchor="end" font-size="13" font-weight="600" fill="#141413">DSI link</text>
+  <text x="204" y="343" text-anchor="end" font-size="12" fill="#6b6a5f">lane state</text>
+  <rect x="216" y="318" width="508" height="26" rx="5" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="470" y="336" text-anchor="middle" font-size="12" fill="#8c8a7d">undriven</text>
+  <rect x="724" y="318" width="340" height="26" rx="5" fill="#e2ecf5" stroke="#c4d5e6"/>
+  <text x="894" y="336" text-anchor="middle" font-size="12" fill="#2f5c8a">LP-11 &#183; ready for commands</text>
+
+  <!-- DCS commands -->
+  <text x="204" y="369" text-anchor="end" font-size="13" font-weight="600" fill="#141413">DCS</text>
+  <text x="204" y="385" text-anchor="end" font-size="12" fill="#6b6a5f">init sequence</text>
+  <rect x="800" y="360" width="92" height="26" rx="5" fill="#f0e4d8" stroke="#d9bf94"/>
+  <text x="846" y="378" text-anchor="middle" font-size="12" fill="#8a6a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">init seq</text>
+  <rect x="892" y="360" width="60" height="26" rx="5" fill="#f4d9cd" stroke="#d97757"/>
+  <text x="922" y="378" text-anchor="middle" font-size="12" fill="#8f4a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">on</text>
+
+  <!-- backlight -->
+  <text x="204" y="411" text-anchor="end" font-size="13" font-weight="600" fill="#141413">BL_EN</text>
+  <text x="204" y="427" text-anchor="end" font-size="12" fill="#6b6a5f">PWM + enable</text>
+  <path d="M216,426 H990 L1000,404 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+
+  <!-- constraint brackets -->
+    <line x1="364" y1="456" x2="652" y2="456" stroke="#a8a496" stroke-width="1.2"/>
+    <line x1="364" y1="451" x2="364" y2="461" stroke="#a8a496" stroke-width="1.2"/>
+    <line x1="652" y1="451" x2="652" y2="461" stroke="#a8a496" stroke-width="1.2"/>
+    <text x="508" y="447" text-anchor="middle" font-size="12" font-weight="400" fill="#6b6a5f">t1 &#8805; 10 ms &#183; supplies stable &#8594; reset release</text>
+    <line x1="580" y1="486" x2="652" y2="486" stroke="#a8a496" stroke-width="1.2"/>
+    <line x1="580" y1="481" x2="580" y2="491" stroke="#a8a496" stroke-width="1.2"/>
+    <line x1="652" y1="481" x2="652" y2="491" stroke="#a8a496" stroke-width="1.2"/>
+    <text x="616" y="477" text-anchor="middle" font-size="12" font-weight="400" fill="#6b6a5f">t2 &#8805; 10 &#181;s</text>
+    <line x1="652" y1="456" x2="800" y2="456" stroke="#a8a496" stroke-width="1.2"/>
+    <line x1="652" y1="451" x2="652" y2="461" stroke="#a8a496" stroke-width="1.2"/>
+    <line x1="800" y1="451" x2="800" y2="461" stroke="#a8a496" stroke-width="1.2"/>
+    <text x="726" y="447" text-anchor="middle" font-size="12" font-weight="400" fill="#6b6a5f">t3 &#8805; 5 ms &#183; reset &#8594; first DCS</text>
+    <line x1="892" y1="486" x2="1000" y2="486" stroke="#c9913f" stroke-width="2"/>
+    <line x1="892" y1="481" x2="892" y2="491" stroke="#c9913f" stroke-width="2"/>
+    <line x1="1000" y1="481" x2="1000" y2="491" stroke="#c9913f" stroke-width="2"/>
+    <text x="946" y="477" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">t4 &#8805; 120 ms &#183; sleep-out &#8594; backlight</text>
+
+  <text x="32" y="516" font-size="12" fill="#6b6a5f">REFCLK must already be running when reset rises, or the panel latches its state from a clock that is not there. Power-down is the exact reverse of this figure, every step.</text>
+  <text x="32" y="538" font-size="12" fill="#6b6a5f">Each broken constraint has its own bench symptom: t1 short &#8594; panel never answers; t3 short &#8594; the init sequence is swallowed; <tspan font-weight="600" fill="#8a6a2f">t4 short &#8594; a white flash at every boot</tspan> &#8212; the one people ship.</text>
+</svg>
