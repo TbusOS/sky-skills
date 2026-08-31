@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How the pixels physically get to the glass &#8212; anthropic-design</title>
+<meta name="description" content="Which hardware block actually issues the read on a phone-class SoC, over which wire, and why nothing is ever moved into the GPU.">
+<meta property="og:title" content="How the pixels physically get to the glass">
+<meta property="og:description" content="A framebuffer is an address, not a package. Two anthropic-design figures on the physical display data path, with the alternatives that were rejected and why.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/anthropic.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+
+  /* §H · Lora (editorial body) -> Noto Serif SC; Poppins (display) -> Noto Sans SC. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .alt-card__body,
+  html[data-lang="zh"] .callout__body,
+  html[data-lang="zh"] .detail-row__body,
+  html[data-lang="zh"] .fig-cap {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .alt-card__title,
+  html[data-lang="zh"] .alt-card__kicker,
+  html[data-lang="zh"] .detail-row__label,
+  html[data-lang="zh"] .fig-tag,
+  html[data-lang="zh"] .stat-trio .num,
+  html[data-lang="zh"] .stat-trio .lbl {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] .anth-quote { font-style: normal; }
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .alt-card__kicker,
+  html[data-lang="zh"] .detail-row__label,
+  html[data-lang="zh"] .fig-tag { text-transform: none; letter-spacing: 0.05em; }
+
+  /* Stat trio - the three numbers that define the whole path */
+  .stat-trio {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5);
+    padding: var(--space-7) var(--space-5);
+    background: #ffffff; border: 1px solid var(--anth-light-gray); border-radius: var(--radius-md);
+  }
+  .stat-trio > div { text-align: center; }
+  .stat-trio .num {
+    display: block; font-family: var(--font-heading); font-size: 48px; font-weight: 600;
+    color: var(--anth-text); letter-spacing: -0.02em; line-height: 1;
+  }
+  .stat-trio .lbl {
+    display: block; font-family: var(--font-heading); font-size: 12.5px; font-weight: 500;
+    color: var(--anth-text-secondary); margin-top: var(--space-3); letter-spacing: 0.02em;
+  }
+
+  /* Figure block - the two big diagrams */
+  .fig {
+    background: #ffffff; border: 1px solid var(--anth-light-gray);
+    border-radius: var(--radius-lg); padding: var(--space-6);
+    margin: 0 0 var(--space-6);
+  }
+  .fig svg { display: block; width: 100%; height: auto; }
+  .fig-cap {
+    margin: var(--space-4) 0 0;
+    font-family: var(--font-body); font-size: 14.5px; line-height: 1.6;
+    color: var(--anth-text-secondary); max-width: 900px;
+  }
+  .fig-tag {
+    display: block; font-family: var(--font-heading); font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--anth-orange-ink);
+    margin-bottom: 4px;
+  }
+
+  /* Alternative cards - designs considered and rejected */
+  .alt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .alt-card {
+    background: #ffffff; border: 1px solid var(--anth-light-gray); border-radius: var(--radius-lg);
+    padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3);
+  }
+  .alt-card--shipped { border-left: 3px solid var(--anth-orange); }
+  .alt-card__kicker {
+    font-family: var(--font-heading); font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+    color: var(--anth-orange-ink); text-transform: uppercase;
+  }
+  .alt-card__title {
+    font-family: var(--font-heading); font-size: 21px; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--anth-text); margin: 0; line-height: 1.25;
+  }
+  .alt-card__body {
+    font-family: var(--font-body); font-size: 15.5px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+  .alt-card__verdict {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    color: var(--anth-text-secondary); margin-top: auto; padding-top: var(--space-3);
+    border-top: 1px solid var(--anth-light-gray);
+  }
+
+  /* When-you-need-it list */
+  .use-list {
+    list-style: none; padding: 0; margin: var(--space-5) 0 0;
+    display: flex; flex-direction: column; gap: var(--space-4);
+  }
+  .use-list li {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+    color: var(--anth-text); padding-left: var(--space-5); position: relative;
+  }
+  .use-list li::before {
+    content: ''; position: absolute; left: 0; top: 10px;
+    width: 6px; height: 6px; border-radius: 50%; background: var(--anth-orange);
+  }
+
+  /* Honest callout */
+  .callout {
+    background: #faf9f5; border: 1px solid var(--anth-light-gray);
+    border-left: 3px solid var(--anth-orange);
+    border-radius: var(--radius-md); padding: var(--space-6);
+  }
+  .callout__kicker {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink); margin: 0;
+  }
+  .callout__title {
+    font-family: var(--font-heading); font-size: 22px; font-weight: 600;
+    color: var(--anth-text); margin: var(--space-2) 0 var(--space-3);
+  }
+  .callout__body {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+
+  /* Detail rows - the mechanism, last */
+  .detail-row {
+    display: grid; grid-template-columns: 190px 1fr;
+    gap: var(--space-5); padding: var(--space-5) 0;
+    border-bottom: 1px solid var(--anth-light-gray);
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row__label {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink);
+    padding-top: 3px;
+  }
+  .detail-row__body {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+    color: var(--anth-text); margin: 0;
+  }
+  .detail-row__body code {
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    background: #faf9f5; padding: 2px 8px; border-radius: 4px;
+    border: 1px solid var(--anth-light-gray);
+  }
+  .eyebrow-link {
+    font-family: var(--font-heading); font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--anth-text-secondary); font-weight: 600;
+  }
+  html[data-lang="zh"] .eyebrow-link { text-transform: none; letter-spacing: 0.05em; }
+
+  @media (max-width: 900px) {
+    .alt-grid, .stat-trio { grid-template-columns: 1fr; }
+    .detail-row { grid-template-columns: 1fr; gap: var(--space-2); }
+  }
+</style>
+</head>
+<body>
+
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="../../index.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">Sky Skills</a>
+  <div>
+    <a href="#premise"><span class="lang-en">Premise</span><span class="lang-zh">前提</span></a>
+    <a href="#no-gpu"><span class="lang-en">Without a GPU</span><span class="lang-zh">没有 GPU</span></a>
+    <a href="#why"><span class="lang-en">Why this design</span><span class="lang-zh">为什么这么设计</span></a>
+    <a href="#with-gpu"><span class="lang-en">With a GPU</span><span class="lang-zh">有 GPU</span></a>
+    <a href="#mechanism"><span class="lang-en">Mechanism</span><span class="lang-zh">机制细节</span></a>
+    <a href="diagrams.html"><span class="lang-en">Gallery</span><span class="lang-zh">图集</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">&#20013; / EN</button>
+    <a class="anth-button" href="../../index.html"><span class="lang-en">Browse skills</span><span class="lang-zh">&#27983;&#35272;&#20840;&#37096; skill</span></a>
+  </div>
+</div></nav>
+
+<div style="padding:var(--space-5) var(--space-5) 0;">
+  <div class="anth-container anth-container--wide">
+    <a href="diagrams.html" class="eyebrow-link" style="text-decoration:none; display:inline-block;">
+      <span class="lang-en">&#8592; Back &#183; anthropic-design diagram gallery</span>
+      <span class="lang-zh">&#8592; &#36820;&#22238; &#183; anthropic-design &#22270;&#31034;&#26696;&#20363;&#24211;</span>
+    </a>
+  </div>
+</div>
+
+<!-- Hero -->
+<section class="anth-hero" style="padding-top:var(--space-7);">
+  <div class="anth-container anth-container--wide" style="max-width:860px;">
+    <span class="anth-badge" style="background:var(--anth-cta); color:#ffffff; font-weight:600;">
+      <span class="lang-en">Figure study &#183; hardware data path</span>
+      <span class="lang-zh">&#22270;&#31034;&#19987;&#39064; &#183; &#30828;&#20214;&#25968;&#25454;&#36890;&#36335;</span>
+    </span>
+    <h1 style="margin-top:var(--space-4);">
+      <span class="lang-en">Nothing<br>moves into<br>the GPU.</span>
+      <span class="lang-zh">&#27809;&#26377;&#20219;&#20309;&#19996;&#35199;<br>&#34987;&#25644;&#36827;<br>GPU&#12290;</span>
+    </h1>
+    <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.6; max-width:700px; font-family:var(--font-body);">
+      <span class="lang-en">Two figures answering one question about a phone-class system on chip: which piece of hardware actually issues the read, and over which wire. Once you can see that the framebuffer never leaves DDR, the word <em>upload</em> turns out to have been borrowed from desktop graphics cards &#8212; and it has been misleading people ever since.</span>
+      <span class="lang-zh">&#20004;&#24352;&#22270;&#22238;&#31572;&#21516;&#19968;&#20010;&#38382;&#39064;&#65306;&#22312;&#25163;&#26426;&#36825;&#31867; SoC &#19978;&#65292;&#21040;&#24213;&#26159;&#21738;&#20010;&#30828;&#20214;&#21457;&#20986;&#20102;&#35835;&#35831;&#27714;&#65292;&#36208;&#30340;&#21448;&#26159;&#21738;&#26681;&#32447;&#12290;&#30475;&#28165;&#24086;&#32531;&#20914;&#20174;&#26469;&#27809;&#31163;&#24320;&#36807; DDR &#20043;&#21518;&#20250;&#21457;&#29616;&#65292;<em>&#19978;&#20256;</em>&#36825;&#20010;&#35789;&#26159;&#20174;&#21488;&#24335;&#26174;&#21345;&#37027;&#20799;&#20511;&#26469;&#30340;&#8212;&#8212;&#32780;&#23427;&#19968;&#30452;&#22312;&#35823;&#23548;&#20154;&#12290;</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="#no-gpu"><span class="lang-en">See the two figures</span><span class="lang-zh">&#30475;&#36825;&#20004;&#24352;&#22270;</span></a>
+      <a class="anth-button anth-button--ghost" href="#mechanism"><span class="lang-en">Jump to the mechanism</span><span class="lang-zh">&#30452;&#25509;&#30475;&#26426;&#21046;&#32454;&#33410;</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- Stat trio -->
+<section class="anth-section">
+  <div class="anth-container">
+    <div class="stat-trio">
+      <div>
+        <span class="num">8.3 MB</span>
+        <span class="lbl"><span class="lang-en">One 1080p RGBA frame</span><span class="lang-zh">&#19968;&#24086; 1080p RGBA</span></span>
+      </div>
+      <div>
+        <span class="num">4 bytes</span>
+        <span class="lbl"><span class="lang-en">What software writes per frame</span><span class="lang-zh">&#36719;&#20214;&#27599;&#24086;&#30495;&#27491;&#20889;&#30340;&#23383;&#33410;</span></span>
+      </div>
+      <div>
+        <span class="num">0</span>
+        <span class="lbl"><span class="lang-en">Copies into the GPU</span><span class="lang-zh">&#25320;&#36827; GPU &#30340;&#27425;&#25968;</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Premise: what it is + what breaks without it -->
+<section class="anth-section anth-section--subtle" id="premise">
+  <div class="anth-container">
+    <span class="anth-badge"><span class="lang-en">The premise</span><span class="lang-zh">&#21069;&#25552;</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">A framebuffer is an address, not a package.</span>
+      <span class="lang-zh">&#24086;&#32531;&#20914;&#26159;&#19968;&#20010;&#22320;&#22336;&#65292;&#19981;&#26159;&#19968;&#20010;&#21253;&#35065;&#12290;</span>
+    </h2>
+    <p class="lang-en">
+      Physically, showing an image is not a delivery. It is one hardware block reading the same region of DDR over and over on a fixed beat, and shipping what it reads out over a serial link. Software&#8217;s entire contribution is a single 32-bit register write saying where that region begins. Every read after that is issued by the display controller&#8217;s own DMA engine, without asking anyone.
+    </p>
+    <p class="lang-zh">
+      &#20174;&#29289;&#29702;&#19978;&#35762;&#65292;&#8220;&#26174;&#31034;&#19968;&#24352;&#22270;&#8221;&#19981;&#26159;&#19968;&#27425;&#25237;&#36882;&#12290;&#23427;&#26159;&#19968;&#20010;&#30828;&#20214;&#27169;&#22359;&#25353;&#22266;&#23450;&#33410;&#25293;&#21453;&#22797;&#21435;&#35835; DDR &#19978;&#21516;&#19968;&#22359;&#21306;&#22495;&#65292;&#25226;&#35835;&#21040;&#30340;&#23383;&#33410;&#20174;&#20018;&#34892;&#38142;&#36335;&#21457;&#20986;&#21435;&#12290;&#36719;&#20214;&#30340;&#20840;&#37096;&#24037;&#20316;&#65292;&#26159;&#20889;&#19968;&#20010; 32 &#20301;&#23492;&#23384;&#22120;&#21578;&#35785;&#30828;&#20214;&#37027;&#22359;&#21306;&#22495;&#20174;&#21738;&#37324;&#24320;&#22987;&#12290;&#20043;&#21518;&#27599;&#19968;&#27425;&#35835;&#21462;&#65292;&#37117;&#30001;&#26174;&#31034;&#25511;&#21046;&#22120;&#33258;&#24049;&#30340; DMA &#21457;&#36215;&#65292;&#19981;&#20877;&#32463;&#36807;&#20219;&#20309;&#20154;&#12290;
+    </p>
+    <p class="lang-en">
+      Take that DMA engine away and the CPU has to move the pixels itself. At 1080p60 that is 8.3&#160;MB sixty times a second &#8212; on the order of 62 million 64-bit load/store pairs per second, which saturates a core outright. Worse, any interrupt that delays the copy lands on the glass as a visible tear. So the DMA is not an optimisation layered on a working design; it is what makes &#8220;the screen refreshes while the CPU does something else&#8221; possible at all.
+    </p>
+    <p class="lang-zh">
+      &#25226;&#36825;&#20010; DMA &#25343;&#25481;&#65292;&#20687;&#32032;&#23601;&#24471; CPU &#33258;&#24049;&#25644;&#12290;1080p60 &#26159;&#27599;&#31186; 8.3&#160;MB &#215; 60&#65292;&#25968;&#37327;&#32423;&#19978;&#26159;&#27599;&#31186; 6200 &#19975;&#27425; 64 &#20301;&#35835;&#20889;&#37197;&#23545;&#65292;&#19968;&#20010;&#26680;&#30452;&#25509;&#34987;&#21344;&#28385;&#12290;&#26356;&#31967;&#30340;&#26159;&#65292;&#20219;&#20309;&#19968;&#27425;&#20013;&#26029;&#35753;&#25335;&#36125;&#26202;&#20102;&#65292;&#23631;&#24149;&#19978;&#23601;&#26159;&#19968;&#26465;&#30475;&#24471;&#35265;&#30340;&#25749;&#35010;&#12290;&#25152;&#20197;&#36825;&#20010; DMA &#19981;&#26159;&#22312;&#19968;&#20010;&#33021;&#29992;&#30340;&#35774;&#35745;&#19978;&#20877;&#20570;&#20248;&#21270;&#65292;&#23427;&#26159;&#8220;&#23631;&#24149;&#22312;&#21047;&#26032;&#30340;&#21516;&#26102; CPU &#36824;&#33021;&#24178;&#21035;&#30340;&#8221;&#36825;&#20214;&#20107;&#33021;&#25104;&#31435;&#30340;&#21069;&#25552;&#12290;
+    </p>
+    <blockquote class="anth-quote">
+      <span class="lang-en">Setting a framebuffer is a register write, not a copy. Four bytes go one way; 8.3 megabytes a frame come the other &#8212; and they never travel on the same wire.</span>
+      <span class="lang-zh">&#35774;&#32622;&#24086;&#32531;&#20914;&#26159;&#19968;&#27425;&#23492;&#23384;&#22120;&#20889;&#65292;&#19981;&#26159;&#19968;&#27425;&#25335;&#36125;&#12290;&#22235;&#20010;&#23383;&#33410;&#24448;&#19968;&#20010;&#26041;&#21521;&#21435;&#65292;&#27599;&#24086; 8.3 MB &#20174;&#21478;&#19968;&#20010;&#26041;&#21521;&#26469;&#8212;&#8212;&#20004;&#32773;&#20174;&#19981;&#36208;&#21516;&#19968;&#26681;&#32447;&#12290;</span>
+    </blockquote>
+  </div>
+</section>
+
+<!-- Figure 1 -->
+<section class="anth-section" id="no-gpu">
+  <div class="anth-container anth-container--wide">
+    <span class="anth-badge"><span class="lang-en">Figure 01 &#183; no GPU</span><span class="lang-zh">&#22270; 01 &#183; &#27809;&#26377; GPU</span></span>
+    <h2 style="margin-top:var(--space-3); max-width:820px;">
+      <span class="lang-en">The simplest case, drawn as a package cross-section</span>
+      <span class="lang-zh">&#26368;&#31616;&#21333;&#30340;&#37027;&#31181;&#24773;&#20917;&#65292;&#25353;&#23553;&#35013;&#21078;&#38754;&#30011;</span>
+    </h2>
+    <p style="font-size:16px; line-height:1.6; color:var(--anth-text-secondary); max-width:760px; margin:var(--space-3) 0 var(--space-7); font-family:var(--font-body);">
+      <span class="lang-en">Everything inside the dashed boundary is one die. The DDR chip on the left and the panel on the right are separate parts on the board. Follow badges &#9312;&#8211;&#9316; and you have traced one frame end to end.</span>
+      <span class="lang-zh">&#34394;&#32447;&#26694;&#20197;&#20869;&#26159;&#21516;&#19968;&#39063;&#33455;&#29255;&#12290;&#24038;&#36793;&#30340; DDR &#21644;&#21491;&#36793;&#30340;&#23631;&#65292;&#26159;&#26495;&#23376;&#19978;&#21478;&#22806;&#20004;&#20010;&#22120;&#20214;&#12290;&#36319;&#30528;&#24509;&#31456; &#9312;&#8211;&#9316; &#36208;&#19968;&#36941;&#65292;&#23601;&#26159;&#19968;&#24086;&#30340;&#20840;&#31243;&#12290;</span>
+    </p>
+    <figure class="fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Physical data path of a display pipeline with no GPU, drawn as a package cross-section. Off-package on the left is a DDR4 chip, off-package on the right is the LCD panel with its driver IC; everything between them sits inside one dashed SoC boundary. Inside, from left to right: a multi-port DDR controller and PHY with three ports carrying different quality-of-service classes, a vertical AXI NoC rail, and three bus masters hanging off it, the CPU cluster, a greyed-out GPU deferred to the next figure, and the display controller. The display controller is drawn open, showing the fetch DMA, the line buffer and the framebuffer base-address register, which is outlined because it is the only thing software sets. Its output leaves on a pixel interface, twenty-four bits of parallel RGB plus sync at the pixel clock, which is not an AXI port, into the DSI controller and then the MIPI D-PHY, which serialises onto four differential lanes to the panel. A thin gold dashed APB rail runs along the bottom from the CPU to the register blocks of the display controller and the DSI controller. Five badges trace one frame: one, the CPU writes the framebuffer base address into the display controller over APB, four bytes, once; two, the display DMA issues its own AXI read bursts with no CPU involvement; three, the DDR controller serves them on the highest-priority port; four, finished pixels cross the pixel interface into the DSI controller; five, the D-PHY serialises them off-chip. The figure's point is that the configuration path and the data path are different wires: four bytes one way, eight megabytes a frame the other" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="sdfDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+          <marker id="sdfArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+          <marker id="sdfArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
+          <marker id="sdfArrK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6b6a5f"/></marker>
+        </defs>
+        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="560" rx="16" fill="url(#sdfDots)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">PHYSICAL DATA PATH &#183; NO GPU &#183; WHO ISSUES THE TRANSACTION, AND OVER WHICH WIRE</text>
+        <g font-size="12" fill="#6b6a5f">
+          <line x1="726" y1="30" x2="750" y2="30" stroke="#d97757" stroke-width="2.4"/><text x="758" y="34">pixel data &#183; AXI</text>
+          <line x1="874" y1="30" x2="898" y2="30" stroke="#8a6a2f" stroke-width="1.6" stroke-dasharray="4 3"/><text x="906" y="34">config &#183; APB</text>
+        </g>
+        <rect x="196" y="56" width="756" height="428" rx="14" fill="none" stroke="#8c8a7d" stroke-width="1.4" stroke-dasharray="7 5"/>
+        <text x="212" y="76" font-size="12" fill="#8c8a7d">SoC package &#183; anything outside this line is a separate chip</text>
+        <rect x="40" y="176" width="140" height="128" rx="10" fill="#f5f2ea" stroke="#cfccc0"/>
+        <text x="110" y="214" text-anchor="middle" font-size="13" font-weight="600" fill="#141413">DDR4 SDRAM</text>
+        <text x="110" y="234" text-anchor="middle" font-size="12" fill="#6b6a5f">4 GiB &#183; off-package</text>
+        <text x="110" y="256" text-anchor="middle" font-size="12" fill="#6b6a5f">every framebuffer</text>
+        <text x="110" y="273" text-anchor="middle" font-size="12" fill="#6b6a5f">lives here, always</text>
+        <line x1="180" y1="240" x2="216" y2="240" stroke="#6b6a5f" stroke-width="2"/>
+        <text x="198" y="230" text-anchor="middle" font-size="12" fill="#8c8a7d">DQ</text>
+        <text x="110" y="326" text-anchor="middle" font-size="12" fill="#8c8a7d">32-bit &#183; 1600 MT/s</text>
+        <text x="110" y="343" text-anchor="middle" font-size="12" fill="#8c8a7d">= 6.4 GB/s ceiling</text>
+        <rect x="216" y="150" width="156" height="212" rx="10" fill="#eef1e7" stroke="#b9c4a4"/>
+        <text x="294" y="176" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">DDR ctrl + PHY</text>
+        <text x="294" y="194" text-anchor="middle" font-size="12" fill="#6b6a5f">multi-port &#183; QoS</text>
+        <rect x="234" y="214" width="120" height="36" rx="6" fill="#faf9f5" stroke="#b9c4a4" stroke-width="1"/>
+        <text x="246" y="236" font-size="12" fill="#4d5a3c" font-weight="600">p0</text>
+        <text x="276" y="236" font-size="12" fill="#6b6a5f">CPU</text>
+        <rect x="234" y="262" width="120" height="36" rx="6" fill="#faf9f5" stroke="#b9c4a4" stroke-width="1"/>
+        <text x="246" y="284" font-size="12" fill="#4d5a3c" font-weight="600">p1</text>
+        <text x="276" y="284" font-size="12" fill="#6b6a5f">GPU</text>
+        <rect x="234" y="310" width="120" height="36" rx="6" fill="#faf9f5" stroke="#d97757" stroke-width="1.6"/>
+        <text x="246" y="332" font-size="12" fill="#8f4a2f" font-weight="600">p2</text>
+        <text x="276" y="332" font-size="12" fill="#6b6a5f">display</text>
+        <text x="216" y="380" font-size="12" fill="#8f4a2f">p2 gets the highest QoS class</text>
+        <text x="216" y="397" font-size="12" fill="#8c8a7d">scanout cannot be made to wait</text>
+        <rect x="404" y="96" width="66" height="248" rx="10" fill="#eef1e7" stroke="#b9c4a4"/>
+        <text x="437" y="130" text-anchor="middle" font-size="12" font-weight="600" fill="#4d5a3c">AXI</text>
+        <text x="437" y="152" text-anchor="middle" font-size="12" font-weight="600" fill="#4d5a3c">NoC</text>
+        <text x="437" y="174" text-anchor="middle" font-size="12" font-weight="400" fill="#6b6a5f">128-bit</text>
+        <text x="437" y="196" text-anchor="middle" font-size="12" font-weight="400" fill="#6b6a5f">800 MHz</text>
+        <rect x="506" y="96" width="220" height="62" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="616" y="122" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">CPU cluster</text>
+        <text x="616" y="140" text-anchor="middle" font-size="12" fill="#6b6a5f">AXI master 0</text>
+        <rect x="506" y="176" width="220" height="62" rx="10" fill="#f5f2ea" stroke="#cfccc0" stroke-dasharray="6 4"/>
+        <text x="616" y="202" text-anchor="middle" font-size="13" font-weight="600" fill="#8c8a7d">GPU</text>
+        <text x="616" y="220" text-anchor="middle" font-size="12" fill="#6b6a5f">AXI master 1 &#183; next figure</text>
+        <rect x="506" y="256" width="256" height="160" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="634" y="280" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">Display controller</text>
+        <text x="634" y="298" text-anchor="middle" font-size="12" fill="#6b6a5f">AXI master 2 &#183; the DMA lives here</text>
+        <rect x="520" y="308" width="228" height="26" rx="6" fill="#faf9f5" stroke="#c4d5e6"/>
+        <text x="530" y="325" font-size="12" fill="#2f5c8a">fetch DMA &#183; issues the reads</text>
+        <rect x="520" y="340" width="228" height="40" rx="6" fill="#faf9f5" stroke="#d97757" stroke-width="1.6"/>
+        <text x="530" y="357" font-size="12" font-weight="600" fill="#8f4a2f">FB base address register</text>
+        <text x="530" y="373" font-size="12" fill="#8c8a7d">the only thing software sets</text>
+        <rect x="520" y="386" width="228" height="26" rx="6" fill="#faf9f5" stroke="#c4d5e6"/>
+        <text x="530" y="403" font-size="12" fill="#2f5c8a">line buffer &#183; a few lines only</text>
+        <line x1="470" y1="127" x2="506" y2="127" stroke="#6b6a5f" stroke-width="1.6"/>
+        <line x1="470" y1="207" x2="506" y2="207" stroke="#6b6a5f" stroke-width="1.6"/>
+        <line x1="470" y1="300" x2="506" y2="300" stroke="#6b6a5f" stroke-width="1.6"/>
+        <rect x="800" y="256" width="140" height="70" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="870" y="282" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">DSI controller</text>
+        <text x="870" y="300" text-anchor="middle" font-size="12" fill="#6b6a5f">packs RGB into</text>
+        <text x="870" y="316" text-anchor="middle" font-size="12" fill="#6b6a5f">HS packets</text>
+        <rect x="800" y="340" width="140" height="66" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="870" y="366" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">MIPI D-PHY</text>
+        <text x="870" y="384" text-anchor="middle" font-size="12" fill="#6b6a5f">4 lanes &#183; 1 Gbps</text>
+        <line x1="870" y1="326" x2="870" y2="340" stroke="#6b6a5f" stroke-width="1.6"/>
+        <rect x="976" y="256" width="112" height="150" rx="10" fill="#f5f2ea" stroke="#cfccc0"/>
+        <text x="1032" y="296" text-anchor="middle" font-size="13" font-weight="600" fill="#141413">LCD panel</text>
+        <text x="1032" y="316" text-anchor="middle" font-size="12" fill="#6b6a5f">driver IC +</text>
+        <text x="1032" y="333" text-anchor="middle" font-size="12" fill="#6b6a5f">source drivers</text>
+        <text x="1032" y="360" text-anchor="middle" font-size="12" fill="#8c8a7d">no memory</text>
+        <text x="1032" y="377" text-anchor="middle" font-size="12" fill="#8c8a7d">of a whole frame</text>
+        <path d="M726,127 H778 Q790,127 790,139 V440 Q790,452 778,452 H240" fill="none" stroke="#8a6a2f" stroke-width="1.6" stroke-dasharray="4 3"/>
+        <line x1="634" y1="416" x2="634" y2="452" stroke="#8a6a2f" stroke-width="1.4" stroke-dasharray="4 3"/>
+        <circle cx="634" cy="452" r="3" fill="#8a6a2f"/>
+        <line x1="870" y1="406" x2="870" y2="452" stroke="#8a6a2f" stroke-width="1.4" stroke-dasharray="4 3"/>
+        <circle cx="870" cy="452" r="3" fill="#8a6a2f"/>
+        <text x="240" y="472" font-size="12" font-weight="600" fill="#8a6a2f">APB &#183; 32-bit &#183; register writes only</text>
+        <text x="524" y="472" font-size="12" fill="#8c8a7d">4 bytes per frame &#183; never carries a pixel</text>
+        <g fill="none" stroke="#d97757" stroke-width="2.4">
+          <path d="M506,300 H470 V328 H392"/>
+          <line x1="392" y1="328" x2="378" y2="328" marker-end="url(#sdfArrO)"/>
+          <line x1="762" y1="291" x2="794" y2="291" marker-end="url(#sdfArrO)"/>
+          <line x1="940" y1="373" x2="970" y2="373" marker-end="url(#sdfArrO)"/>
+        </g>
+        <text x="870" y="224" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">pixel interface</text>
+        <text x="870" y="241" text-anchor="middle" font-size="12" fill="#8c8a7d">24-bit RGB &#183; not AXI</text>
+        <circle cx="742" cy="127" r="11" fill="#d97757"/>
+        <text x="742" y="131" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">1</text>
+        <circle cx="488" cy="300" r="11" fill="#d97757"/>
+        <text x="488" y="304" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">2</text>
+        <circle cx="388" cy="328" r="11" fill="#d97757"/>
+        <text x="388" y="332" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">3</text>
+        <circle cx="778" cy="291" r="11" fill="#d97757"/>
+        <text x="778" y="295" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">4</text>
+        <circle cx="956" cy="373" r="11" fill="#d97757"/>
+        <text x="956" y="377" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">5</text>
+        <text x="32" y="512" font-size="12" fill="#6b6a5f">&#9312; one 32-bit register write over APB &#183; &#9313; the DMA then reads on its own &#183; &#9314; served at the top QoS class</text>
+        <text x="32" y="530" font-size="12" fill="#6b6a5f">&#9315; pixels leave on a non-AXI wire &#183; &#9316; the D-PHY sends them off-chip</text>
+        <text x="32" y="548" font-size="12" fill="#8c8a7d">config and data are different wires: 4 bytes one way, 8.3 MB a frame the other &#8212; setting a framebuffer is a register write, not a copy</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">physical connection &#183; no GPU</span><span class="lang-zh">&#29289;&#29702;&#36830;&#25509; &#183; &#26080; GPU</span></span>
+        <span class="lang-en">The CPU writes one 32-bit base address over APB; from then on the display controller&#8217;s own DMA issues the reads. Configuration and data leave the CPU on different wires &#8212; 4 bytes one way, 8.3&#160;MB a frame the other. Note where the orange line enters memory: port p2, which the DDR controller serves at the highest QoS class, because scanout is hard real-time and cannot be made to wait.</span>
+        <span class="lang-zh">CPU &#36208; APB &#20889;&#19968;&#20010; 32 &#20301;&#22522;&#22320;&#22336;&#65307;&#20174;&#27492;&#20197;&#21518;&#65292;&#26159;&#26174;&#31034;&#25511;&#21046;&#22120;&#33258;&#24049;&#30340; DMA &#22312;&#21457;&#35835;&#35831;&#27714;&#12290;&#37197;&#32622;&#21644;&#25968;&#25454;&#36208;&#30340;&#26159;&#20004;&#26681;&#19981;&#21516;&#30340;&#32447;&#8212;&#8212;&#19968;&#36793; 4 &#20010;&#23383;&#33410;&#65292;&#21478;&#19968;&#36793;&#27599;&#24086; 8.3&#160;MB&#12290;&#30041;&#24847;&#27225;&#33394;&#37027;&#26465;&#32447;&#20174;&#21738;&#20010;&#21475;&#36827;&#20869;&#23384;&#65306;p2&#12290;DDR &#25511;&#21046;&#22120;&#32473;&#23427;&#26368;&#39640;&#20248;&#20808;&#32423;&#65292;&#22240;&#20026;&#25195;&#25551;&#36755;&#20986;&#26159;&#30828;&#23454;&#26102;&#30340;&#65292;&#31561;&#19981;&#20102;&#12290;</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Why this design -->
+<section class="anth-section anth-section--subtle" id="why">
+  <div class="anth-container anth-container--wide">
+    <div style="max-width:780px; margin:0 auto var(--space-8); text-align:center;">
+      <span class="anth-badge"><span class="lang-en">The trade-off</span><span class="lang-zh">&#21462;&#33298;</span></span>
+      <h2 style="margin-top:var(--space-3);">
+        <span class="lang-en">Three designs were on the table. Two of them cannot be built.</span>
+        <span class="lang-zh">&#26377;&#19977;&#31181;&#35774;&#35745;&#21487;&#36873;&#12290;&#20854;&#20013;&#20004;&#31181;&#36896;&#19981;&#20986;&#26469;&#12290;</span>
+      </h2>
+    </div>
+    <div class="alt-grid">
+      <div class="alt-card">
+        <span class="alt-card__kicker"><span class="lang-en">Alternative A</span><span class="lang-zh">&#26041;&#26696; A</span></span>
+        <h3 class="alt-card__title"><span class="lang-en">Keep the frame on-chip</span><span class="lang-zh">&#25226;&#24086;&#25918;&#22312;&#29255;&#20869;</span></h3>
+        <p class="alt-card__body">
+          <span class="lang-en">One frame is 8.3&#160;MB. The largest on-die memory in the second figure is the GPU&#8217;s L2 cache at 256&#160;KiB &#8212; short by a factor of 32. On-chip SRAM also costs tens of times more silicon area per bit than DRAM, so even a die that could hold a frame would not be one anybody buys.</span>
+          <span class="lang-zh">&#19968;&#24086;&#26159; 8.3&#160;MB&#12290;&#31532;&#20108;&#24352;&#22270;&#37324;&#29255;&#19978;&#26368;&#22823;&#30340;&#19968;&#22359;&#23384;&#20648;&#26159; GPU &#30340; L2&#65292;256&#160;KiB&#65292;&#24046; 32 &#20493;&#12290;&#29255;&#20869; SRAM &#27599;&#27604;&#29305;&#30340;&#30789;&#29255;&#38754;&#31215;&#36824;&#26159; DRAM &#30340;&#20960;&#21313;&#20493;&#65292;&#23601;&#31639;&#20570;&#24471;&#20986;&#26469;&#20063;&#27809;&#20154;&#20080;&#24471;&#36215;&#12290;</span>
+        </p>
+        <p class="alt-card__verdict"><span class="lang-en">verdict: not buildable</span><span class="lang-zh">&#32467;&#35770;&#65306;&#36896;&#19981;&#20986;&#26469;</span></p>
+      </div>
+      <div class="alt-card">
+        <span class="alt-card__kicker"><span class="lang-en">Alternative B</span><span class="lang-zh">&#26041;&#26696; B</span></span>
+        <h3 class="alt-card__title"><span class="lang-en">One memory per master</span><span class="lang-zh">&#27599;&#20010;&#20027;&#35774;&#22791;&#21508;&#19968;&#22359;&#20869;&#23384;</span></h3>
+        <p class="alt-card__body">
+          <span class="lang-en">Give the GPU and the display controller separate memories and a frame has to be genuinely copied between them: 8.3&#160;MB sixty times a second is 498&#160;MB/s of pure moving, repeated every time the compositor switches buffers. Sharing one DDR instead makes that number zero &#8212; the cost drops to passing an address.</span>
+          <span class="lang-zh">&#32473; GPU &#21644;&#26174;&#31034;&#25511;&#21046;&#22120;&#21508;&#19968;&#22359;&#20869;&#23384;&#65292;&#19968;&#24086;&#23601;&#24471;&#22312;&#20004;&#32773;&#20043;&#38388;&#30495;&#30340;&#25335;&#19968;&#36941;&#65306;8.3&#160;MB &#215; 60&#65292;&#27599;&#31186; 498&#160;MB &#30340;&#32431;&#25644;&#36816;&#65292;&#32780;&#19988;&#21512;&#25104;&#22120;&#27599;&#25442;&#19968;&#27425;&#32531;&#20914;&#23601;&#20877;&#26469;&#19968;&#36941;&#12290;&#25913;&#25104;&#20849;&#29992;&#19968;&#22359; DDR&#65292;&#36825;&#20010;&#25968;&#23383;&#26159; 0&#8212;&#8212;&#20195;&#20215;&#38480;&#20110;&#20256;&#19968;&#20010;&#22320;&#22336;&#12290;</span>
+        </p>
+        <p class="alt-card__verdict"><span class="lang-en">verdict: buildable, pays 498 MB/s for nothing</span><span class="lang-zh">&#32467;&#35770;&#65306;&#36896;&#24471;&#20986;&#65292;&#20294;&#30333;&#20184; 498 MB/s</span></p>
+      </div>
+      <div class="alt-card alt-card--shipped">
+        <span class="alt-card__kicker"><span class="lang-en">What shipped</span><span class="lang-zh">&#23454;&#38469;&#37319;&#29992;&#30340;</span></span>
+        <h3 class="alt-card__title"><span class="lang-en">One DDR, many masters</span><span class="lang-zh">&#19968;&#22359; DDR&#65292;&#22810;&#20010;&#20027;&#35774;&#22791;</span></h3>
+        <p class="alt-card__body">
+          <span class="lang-en">Every block issues its own addresses into the same physical memory. The price is that bandwidth becomes a shared resource: five tenants against 6.4&#160;GB/s in the second figure, more once a camera and a codec join. That is why the DDR controller carries QoS classes at all &#8212; the display port is served first, because a late GPU costs one dropped frame while late scanout is visible on the glass.</span>
+          <span class="lang-zh">&#27599;&#20010;&#27169;&#22359;&#33258;&#24049;&#21521;&#21516;&#19968;&#22359;&#29289;&#29702;&#20869;&#23384;&#21457;&#22320;&#22336;&#12290;&#20195;&#20215;&#26159;&#24102;&#23485;&#25104;&#20102;&#20844;&#20849;&#36164;&#28304;&#65306;&#31532;&#20108;&#24352;&#22270;&#37324;&#20116;&#20010;&#31199;&#25143;&#20998; 6.4&#160;GB/s&#65292;&#21152;&#19978;&#25668;&#20687;&#22836;&#21644;&#32534;&#35299;&#30721;&#36824;&#20250;&#26356;&#22810;&#12290;DDR &#25511;&#21046;&#22120;&#37027;&#22871;&#20248;&#20808;&#32423;&#23601;&#26159;&#20026;&#27492;&#23384;&#22312;&#8212;&#8212;&#26174;&#31034;&#31471;&#21475;&#20808;&#26381;&#21153;&#65292;&#22240;&#20026; GPU &#26202;&#20102;&#21482;&#26159;&#25481;&#19968;&#24086;&#65292;&#25195;&#25551;&#36755;&#20986;&#26202;&#20102;&#26159;&#30475;&#24471;&#35265;&#30340;&#12290;</span>
+        </p>
+        <p class="alt-card__verdict"><span class="lang-en">verdict: shipped &#183; bandwidth becomes the shared resource</span><span class="lang-zh">&#32467;&#35770;&#65306;&#37319;&#29992; &#183; &#24102;&#23485;&#25104;&#20026;&#20849;&#20139;&#36164;&#28304;</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Figure 2 -->
+<section class="anth-section" id="with-gpu">
+  <div class="anth-container anth-container--wide">
+    <span class="anth-badge"><span class="lang-en">Figure 02 &#183; with a GPU</span><span class="lang-zh">&#22270; 02 &#183; &#26377; GPU</span></span>
+    <h2 style="margin-top:var(--space-3); max-width:820px;">
+      <span class="lang-en">Add a GPU and you add a master, not a destination</span>
+      <span class="lang-zh">&#21152;&#19968;&#20010; GPU&#65292;&#21152;&#30340;&#26159;&#19968;&#20010;&#20027;&#35774;&#22791;&#65292;&#19981;&#26159;&#19968;&#20010;&#30446;&#30340;&#22320;</span>
+    </h2>
+    <p style="font-size:16px; line-height:1.6; color:var(--anth-text-secondary); max-width:760px; margin:var(--space-3) 0 var(--space-7); font-family:var(--font-body);">
+      <span class="lang-en">The GPU is drawn open on purpose, so you can count what is inside it and see that a frame does not fit. Then follow where the seven arrows end.</span>
+      <span class="lang-zh">GPU &#26159;&#25925;&#24847;&#30011;&#25104;&#25932;&#24320;&#30340;&#65292;&#20320;&#21487;&#20197;&#25226;&#37324;&#38754;&#30340;&#23384;&#20648;&#25968;&#19968;&#36941;&#65292;&#30475;&#20986;&#19968;&#24086;&#26681;&#26412;&#25918;&#19981;&#19979;&#12290;&#28982;&#21518;&#30475;&#37027;&#19971;&#26465;&#31661;&#22836;&#37117;&#33853;&#22312;&#20102;&#21738;&#37324;&#12290;</span>
+    </p>
+    <figure class="fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="How a GPU actually touches pixel data on a phone-class system on chip. The CPU cluster sits top left with its caches and MMU; the GPU fills the top right, drawn open so its four shader cores, its sixteen by sixteen pixel tile buffer, its two hundred and fifty six kilobyte level two cache, its own memory management unit and its single AXI master port are all visible. A note inside it states that one 1080p RGBA frame is 8.3 megabytes and nothing on that die can hold one. Across the middle runs a single DDR bar, one physical address space divided into five tenants: the command buffer, the GPU's page tables, textures and meshes, framebuffer A which is the front buffer, and framebuffer B which is the back buffer, each with its size and base address. Every arrow in the figure ends on that bar. Badge one, the CPU writes the command buffer through its cache. Badge two, the CPU rings one doorbell register over APB. Badge three, the GPU's own MMU fetches its page tables from DDR. Badge four, the GPU reads textures through its single master port. Badge five, finished tiles are written back to framebuffer B, the only pixel write the GPU performs. Badge six, a fence is signalled back to the CPU. Badge seven, at the same time the display controller's DMA is reading framebuffer A and feeding the DSI and D-PHY out to the panel. An aside notes the contrast with a discrete PCIe graphics card, where an upload really is a copy into separate video memory. The conclusion is that nothing is ever moved into the GPU: the GPU is simply a second bus master issuing addresses into the same DDR the CPU uses" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="gdfDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+          <marker id="gdfArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+          <marker id="gdfArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
+          <marker id="gdfArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+        </defs>
+        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="560" rx="16" fill="url(#gdfDots)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">GPU DATA PATH &#183; NOTHING IS EVER MOVED INTO THE GPU</text>
+        <g font-size="12" fill="#6b6a5f">
+          <line x1="558" y1="30" x2="582" y2="30" stroke="#d97757" stroke-width="2.4"/><text x="590" y="34">who issues the address</text>
+          <line x1="770" y1="30" x2="794" y2="30" stroke="#8a6a2f" stroke-width="1.6" stroke-dasharray="4 3"/><text x="802" y="34">register poke &#183; APB</text>
+          <line x1="946" y1="30" x2="970" y2="30" stroke="#2f5c8a" stroke-width="1.8"/><text x="978" y="34">display side</text>
+        </g>
+        <rect x="40" y="64" width="330" height="196" rx="12" fill="none" stroke="#c4d5e6" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <text x="56" y="88" font-size="13" font-weight="600" fill="#2f5c8a">CPU cluster &#183; AXI master 0</text>
+        <rect x="56" y="102" width="146" height="48" rx="8" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="129" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">L1 + L2 cache</text>
+        <text x="129" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">write-back</text>
+        <rect x="214" y="102" width="140" height="48" rx="8" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="284" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">CPU MMU</text>
+        <text x="284" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">virtual &#8594; physical</text>
+        <text x="56" y="174" font-size="12" fill="#6b6a5f">it fills the command buffer, then writes</text>
+        <text x="56" y="191" font-size="12" fill="#6b6a5f">one doorbell register. that is its whole</text>
+        <text x="56" y="208" font-size="12" fill="#6b6a5f">part &#8212; it never touches a pixel again.</text>
+        <text x="56" y="232" font-size="12" fill="#8f4a2f">flush the cache, or the GPU reads</text>
+        <text x="56" y="248" font-size="12" fill="#8f4a2f">bytes that are still sitting in it</text>
+        <rect x="430" y="64" width="650" height="188" rx="12" fill="none" stroke="#d97757" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <text x="446" y="88" font-size="13" font-weight="600" fill="#8f4a2f">GPU &#183; AXI master 1 &#183; drawn open</text>
+        <rect x="446" y="102" width="80" height="48" rx="8" fill="#f4d9cd" stroke="#d97757"/>
+        <text x="486" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shader</text>
+        <text x="486" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">core 0</text>
+        <rect x="534" y="102" width="80" height="48" rx="8" fill="#f4d9cd" stroke="#d97757"/>
+        <text x="574" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shader</text>
+        <text x="574" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">core 1</text>
+        <rect x="622" y="102" width="80" height="48" rx="8" fill="#f4d9cd" stroke="#d97757"/>
+        <text x="662" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shader</text>
+        <text x="662" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">core 2</text>
+        <rect x="710" y="102" width="80" height="48" rx="8" fill="#f4d9cd" stroke="#d97757"/>
+        <text x="750" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shader</text>
+        <text x="750" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">core 3</text>
+        <rect x="806" y="102" width="118" height="48" rx="8" fill="#f4d9cd" stroke="#d97757"/>
+        <text x="865" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">tile buffer</text>
+        <text x="865" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">16&#215;16 px &#183; 2 KiB</text>
+        <rect x="938" y="102" width="126" height="48" rx="8" fill="#f4d9cd" stroke="#d97757"/>
+        <text x="1001" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">L2 cache</text>
+        <text x="1001" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">256 KiB</text>
+        <rect x="446" y="168" width="190" height="46" rx="8" fill="#faf9f5" stroke="#d97757"/>
+        <text x="541" y="187" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">GPU MMU</text>
+        <text x="541" y="204" text-anchor="middle" font-size="12" fill="#6b6a5f">page tables live in DDR</text>
+        <rect x="650" y="168" width="150" height="46" rx="8" fill="#faf9f5" stroke="#d97757" stroke-width="1.8"/>
+        <text x="725" y="187" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">AXI master port</text>
+        <text x="725" y="204" text-anchor="middle" font-size="12" fill="#6b6a5f">one way in and out</text>
+        <text x="816" y="182" font-size="12" fill="#8c8a7d">one 1080p RGBA frame = 8.3 MB.</text>
+        <text x="816" y="199" font-size="12" fill="#8c8a7d">nothing on this die holds one &#8212;</text>
+        <text x="816" y="216" font-size="12" fill="#8c8a7d">so the frame has to stay in DDR.</text>
+        <line x1="370" y1="180" x2="424" y2="180" stroke="#8a6a2f" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#gdfArrG)"/>
+        <line x1="430" y1="222" x2="376" y2="222" stroke="#8a6a2f" stroke-width="1.6" stroke-dasharray="2 3" marker-end="url(#gdfArrG)"/>
+        <rect x="40" y="296" width="1030" height="76" rx="10" fill="#eef1e7" stroke="#b9c4a4"/>
+        <rect x="40" y="296" width="146" height="76" rx="10" fill="none" stroke="#b9c4a4"/>
+        <text x="113" y="323" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">command buffer</text>
+        <text x="113" y="342" text-anchor="middle" font-size="12" fill="#6b6a5f">64 KiB</text>
+        <text x="113" y="360" text-anchor="middle" font-size="12" fill="#8c8a7d">0x8000_0000</text>
+        <rect x="186" y="296" width="118" height="76" rx="10" fill="none" stroke="#b9c4a4"/>
+        <text x="245" y="323" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">page tables</text>
+        <text x="245" y="342" text-anchor="middle" font-size="12" fill="#6b6a5f">2 MiB</text>
+        <text x="245" y="360" text-anchor="middle" font-size="12" fill="#8c8a7d">0x8001_0000</text>
+        <rect x="304" y="296" width="266" height="76" rx="10" fill="none" stroke="#b9c4a4"/>
+        <text x="437" y="323" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">textures &amp; meshes</text>
+        <text x="437" y="342" text-anchor="middle" font-size="12" fill="#6b6a5f">48 MiB</text>
+        <text x="437" y="360" text-anchor="middle" font-size="12" fill="#8c8a7d">0x8021_0000</text>
+        <rect x="570" y="296" width="250" height="76" rx="10" fill="#faf9f5" stroke="#b9c4a4"/>
+        <text x="695" y="323" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">fb A &#183; front</text>
+        <text x="695" y="342" text-anchor="middle" font-size="12" fill="#6b6a5f">8.3 MiB</text>
+        <text x="695" y="360" text-anchor="middle" font-size="12" fill="#8c8a7d">0x8321_0000</text>
+        <rect x="820" y="296" width="250" height="76" rx="10" fill="#faf9f5" stroke="#b9c4a4"/>
+        <text x="945" y="323" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">fb B &#183; back</text>
+        <text x="945" y="342" text-anchor="middle" font-size="12" fill="#6b6a5f">8.3 MiB</text>
+        <text x="945" y="360" text-anchor="middle" font-size="12" fill="#8c8a7d">0x8B21_0000</text>
+        <text x="40" y="388" font-size="12" fill="#8c8a7d">DDR &#183; one physical address space, five tenants, 6.4 GB/s shared between them</text>
+        <g fill="none" stroke="#d97757" stroke-width="2.4">
+          <line x1="725" y1="214" x2="725" y2="268"/>
+          <line x1="245" y1="268" x2="945" y2="268"/>
+          <line x1="245" y1="268" x2="245" y2="292" marker-end="url(#gdfArrO)"/>
+          <line x1="437" y1="268" x2="437" y2="292" marker-end="url(#gdfArrO)"/>
+          <line x1="945" y1="268" x2="945" y2="292" marker-end="url(#gdfArrO)"/>
+        </g>
+        <line x1="113" y1="262" x2="113" y2="292" stroke="#d97757" stroke-width="2.4" marker-end="url(#gdfArrO)"/>
+        <line x1="695" y1="372" x2="695" y2="396" stroke="#2f5c8a" stroke-width="1.8" marker-end="url(#gdfArrB)"/>
+        <rect x="600" y="400" width="184" height="68" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="692" y="424" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">Display ctrl</text>
+        <text x="692" y="442" text-anchor="middle" font-size="12" fill="#6b6a5f">fetch DMA &#183; master 2</text>
+        <text x="692" y="459" text-anchor="middle" font-size="12" fill="#6b6a5f">reads fb A right now</text>
+        <rect x="800" y="400" width="130" height="68" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="865" y="424" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">DSI + D-PHY</text>
+        <text x="865" y="442" text-anchor="middle" font-size="12" fill="#6b6a5f">4 lanes</text>
+        <text x="865" y="459" text-anchor="middle" font-size="12" fill="#6b6a5f">1 Gbps each</text>
+        <rect x="946" y="400" width="124" height="68" rx="10" fill="#f5f2ea" stroke="#cfccc0"/>
+        <text x="1008" y="424" text-anchor="middle" font-size="13" font-weight="600" fill="#141413">LCD panel</text>
+        <text x="1008" y="442" text-anchor="middle" font-size="12" fill="#6b6a5f">off-package</text>
+        <text x="1008" y="459" text-anchor="middle" font-size="12" fill="#6b6a5f">glass at last</text>
+        <line x1="784" y1="434" x2="796" y2="434" stroke="#2f5c8a" stroke-width="1.8" marker-end="url(#gdfArrB)"/>
+        <line x1="930" y1="434" x2="942" y2="434" stroke="#2f5c8a" stroke-width="1.8" marker-end="url(#gdfArrB)"/>
+        <rect x="40" y="400" width="524" height="68" rx="10" fill="#faf9f5" stroke="#eceadf"/>
+        <text x="56" y="422" font-size="12" font-weight="600" fill="#141413">a desktop card is the exception</text>
+        <text x="56" y="440" font-size="12" fill="#6b6a5f">a discrete PCIe GPU has its own VRAM, so "upload the texture" really is a copy</text>
+        <text x="56" y="457" font-size="12" fill="#6b6a5f">across the bus. on this SoC there is no VRAM &#8212; upload means another DDR address.</text>
+        <circle cx="113" cy="274" r="11" fill="#d97757"/>
+        <text x="113" y="278" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">1</text>
+        <circle cx="397" cy="162" r="11" fill="#d97757"/>
+        <text x="397" y="166" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">2</text>
+        <circle cx="245" cy="286" r="11" fill="#d97757"/>
+        <text x="245" y="290" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">3</text>
+        <circle cx="437" cy="286" r="11" fill="#d97757"/>
+        <text x="437" y="290" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">4</text>
+        <circle cx="945" cy="286" r="11" fill="#d97757"/>
+        <text x="945" y="290" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">5</text>
+        <circle cx="397" cy="240" r="11" fill="#d97757"/>
+        <text x="397" y="244" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">6</text>
+        <circle cx="676" cy="386" r="11" fill="#d97757"/>
+        <text x="676" y="390" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">7</text>
+        <text x="32" y="512" font-size="12" fill="#6b6a5f">&#9312; CPU fills the command buffer &#183; &#9313; one doorbell write &#183; &#9314; the GPU MMU fetches its own page tables &#183; &#9315; textures read in</text>
+        <text x="32" y="530" font-size="12" fill="#6b6a5f">&#9316; tiles written out to fb B &#183; &#9317; fence back to the CPU &#183; &#9318; the display DMA reads fb A the whole time</text>
+        <text x="32" y="548" font-size="12" fill="#8c8a7d">every arrow ends on the same DDR bar. the GPU is not a place data goes &#8212; it is a second master issuing addresses into it.</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">data flow &#183; with a GPU</span><span class="lang-zh">&#25968;&#25454;&#27969;&#21521; &#183; &#26377; GPU</span></span>
+        <span class="lang-en">The same DDR, one more master. There is nowhere inside the GPU to put a frame: 2&#160;KiB of tile buffer and 256&#160;KiB of L2, against 8.3&#160;MB of pixels. Every arrow &#9312;&#8211;&#9318; ends on the same address bar, including the display controller&#8217;s, which is reading the front buffer while the GPU writes the back one. Even the GPU&#8217;s page tables live out there in DDR.</span>
+        <span class="lang-zh">&#21516;&#19968;&#22359; DDR&#65292;&#22810;&#20102;&#19968;&#20010;&#20027;&#35774;&#22791;&#12290;GPU &#37324;&#38754;&#26681;&#26412;&#27809;&#22320;&#26041;&#25918;&#19968;&#24086;&#65306;tile buffer 2&#160;KiB&#12289;L2 256&#160;KiB&#65292;&#32780;&#20687;&#32032;&#26159; 8.3&#160;MB&#12290;&#19971;&#26465;&#31661;&#22836; &#9312;&#8211;&#9318; &#20840;&#37096;&#33853;&#22312;&#21516;&#19968;&#26465;&#22320;&#22336;&#26465;&#19978;&#65292;&#21253;&#25324;&#26174;&#31034;&#25511;&#21046;&#22120;&#37027;&#26465;&#8212;&#8212;&#23427;&#27491;&#22312;&#35835;&#21069;&#21488;&#32531;&#20914;&#65292;&#32780; GPU &#22312;&#20889;&#21518;&#21488;&#37027;&#19968;&#20010;&#12290;&#36830; GPU &#33258;&#24049;&#30340;&#39029;&#34920;&#20063;&#22312; DDR &#37324;&#12290;</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Honest callout -->
+<section class="anth-section">
+  <div class="anth-container">
+    <div class="callout">
+      <p class="callout__kicker"><span class="lang-en">Where the word came from</span><span class="lang-zh">&#37027;&#20010;&#35789;&#30340;&#26469;&#22788;</span></p>
+      <h3 class="callout__title"><span class="lang-en">A discrete card really does copy</span><span class="lang-zh">&#29420;&#31435;&#26174;&#21345;&#30830;&#23454;&#26159;&#22312;&#25335;&#36125;</span></h3>
+      <p class="callout__body">
+        <span class="lang-en">A desktop PCIe card has its own VRAM on the far side of a bus. There, uploading a texture is a genuine cross-bus copy, expensive enough to be worth optimising, and the vocabulary grew up around that fact. These two figures show a system with no VRAM at all, where <em>upload</em> means writing to a different DDR address and letting the GPU&#8217;s MMU map it. The word was borrowed; the physics was not.</span>
+        <span class="lang-zh">&#21488;&#24335;&#26426;&#37027;&#24352; PCIe &#26174;&#21345;&#26377;&#33258;&#24049;&#30340;&#26174;&#23384;&#65292;&#38548;&#30528;&#19968;&#26465;&#24635;&#32447;&#12290;&#22312;&#37027;&#36793;&#65292;&#8220;&#19978;&#20256;&#32441;&#29702;&#8221;&#30495;&#30340;&#26159;&#19968;&#27425;&#36328;&#24635;&#32447;&#25335;&#36125;&#65292;&#36149;&#21040;&#20540;&#24471;&#19987;&#38376;&#20248;&#21270;&#65292;&#25972;&#22871;&#35789;&#27719;&#20063;&#26159;&#22312;&#37027;&#20010;&#20107;&#23454;&#19978;&#38271;&#20986;&#26469;&#30340;&#12290;&#36825;&#20004;&#24352;&#22270;&#30011;&#30340;&#26159;&#26681;&#26412;&#27809;&#26377;&#26174;&#23384;&#30340;&#31995;&#32479;&#65292;<em>&#19978;&#20256;</em>&#22312;&#36825;&#37324;&#21482;&#24847;&#21619;&#30528;&#20889;&#21040; DDR &#21478;&#19968;&#27573;&#22320;&#22336;&#65292;&#20877;&#35753; GPU &#30340; MMU &#26144;&#23556;&#24471;&#21040;&#12290;&#35789;&#26159;&#20511;&#26469;&#30340;&#65292;&#29289;&#29702;&#19981;&#26159;&#12290;</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- When you need this -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container">
+    <span class="anth-badge"><span class="lang-en">When it matters</span><span class="lang-zh">&#20160;&#20040;&#26102;&#20505;&#29992;&#24471;&#19978;</span></span>
+    <h2 style="margin-top:var(--space-3); max-width:720px;">
+      <span class="lang-en">Four moments where the wrong mental model costs you a day</span>
+      <span class="lang-zh">&#22235;&#20010;&#26102;&#21051;&#65306;&#33041;&#23376;&#37324;&#30340;&#22270;&#38169;&#20102;&#65292;&#23601;&#26159;&#19968;&#22825;</span>
+    </h2>
+    <ul class="use-list">
+      <li>
+        <span class="lang-en">The screen tears or flickers and you have to decide whether the fetch fell behind or the panel timing is wrong. Look at DDR bandwidth contention first &#8212; the DSI registers are further down the path than the problem usually is.</span>
+        <span class="lang-zh">&#23631;&#24149;&#25749;&#35010;&#25110;&#38378;&#19968;&#19979;&#65292;&#35201;&#21028;&#26029;&#26159;&#21462;&#25968;&#27809;&#36319;&#19978;&#36824;&#26159;&#38754;&#26495;&#26102;&#24207;&#19981;&#23545;&#12290;&#20808;&#30475; DDR &#24102;&#23485;&#20105;&#29992;&#8212;&#8212;DSI &#23492;&#23384;&#22120;&#22312;&#36890;&#36335;&#26356;&#38752;&#21518;&#30340;&#20301;&#32622;&#65292;&#27604;&#38382;&#39064;&#23454;&#38469;&#22312;&#30340;&#22320;&#26041;&#26356;&#36828;&#12290;</span>
+      </li>
+      <li>
+        <span class="lang-en">Display starts stuttering only after a camera preview is added. A sixth tenant just joined the same 6.4&#160;GB/s; nothing about the display path changed.</span>
+        <span class="lang-zh">&#21152;&#20102;&#19968;&#36335;&#25668;&#20687;&#22836;&#39044;&#35272;&#20043;&#21518;&#26174;&#31034;&#24320;&#22987;&#25269;&#12290;&#26159;&#31532;&#20845;&#20010;&#31199;&#25143;&#25380;&#36827;&#20102;&#21516;&#19968;&#26465; 6.4&#160;GB/s&#65292;&#26174;&#31034;&#36890;&#36335;&#26412;&#36523;&#19968;&#28857;&#27809;&#25913;&#12290;</span>
+      </li>
+      <li>
+        <span class="lang-en">Somebody proposes &#8220;upload the image to the GPU and then display it.&#8221; On this class of chip there is no upload &#8212; only a write to a different address.</span>
+        <span class="lang-zh">&#26377;&#20154;&#35828;&#8220;&#20808;&#25226;&#22270;&#19978;&#20256;&#21040; GPU &#20877;&#26174;&#31034;&#8221;&#12290;&#22312;&#36825;&#31867;&#33455;&#29255;&#19978;&#27809;&#26377;&#19978;&#20256;&#65292;&#21482;&#26377;&#20889;&#21040;&#21478;&#19968;&#20010;&#22320;&#22336;&#12290;</span>
+      </li>
+      <li>
+        <span class="lang-en">You are hunting for the DMA registers. They are in the display controller driver. The DSI bridge does not read memory at all &#8212; pixels are handed to it.</span>
+        <span class="lang-zh">&#20320;&#22312;&#25214; DMA &#30456;&#20851;&#30340;&#23492;&#23384;&#22120;&#12290;&#23427;&#20204;&#22312;&#26174;&#31034;&#25511;&#21046;&#22120;&#39537;&#21160;&#37324;&#12290;DSI &#26725;&#26681;&#26412;&#19981;&#35835;&#20869;&#23384;&#8212;&#8212;&#20687;&#32032;&#26159;&#21035;&#20154;&#21982;&#32473;&#23427;&#30340;&#12290;</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Mechanism, last -->
+<section class="anth-section" id="mechanism">
+  <div class="anth-container">
+    <span class="anth-badge"><span class="lang-en">The mechanism</span><span class="lang-zh">&#26426;&#21046;&#32454;&#33410;</span></span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">Four wires, and how to check each one yourself</span>
+      <span class="lang-zh">&#22235;&#26681;&#32447;&#65292;&#20197;&#21450;&#27599;&#19968;&#26681;&#24590;&#20040;&#33258;&#24049;&#39564;</span>
+    </h2>
+    <div style="margin-top:var(--space-6);">
+      <div class="detail-row">
+        <span class="detail-row__label"><span class="lang-en">Config path</span><span class="lang-zh">&#37197;&#32622;&#36335;</span></span>
+        <p class="detail-row__body">
+          <span class="lang-en"><code>APB &#183; 32-bit</code> Software writes the framebuffer base address register once per frame &#8212; four bytes. A pixel never travels on this wire.</span>
+          <span class="lang-zh"><code>APB &#183; 32-bit</code> &#36719;&#20214;&#27599;&#24086;&#20889;&#19968;&#27425;&#24086;&#32531;&#20914;&#22522;&#22320;&#22336;&#23492;&#23384;&#22120;&#65292;&#22235;&#20010;&#23383;&#33410;&#12290;&#36825;&#26681;&#32447;&#19978;&#27704;&#36828;&#19981;&#20250;&#36208;&#20687;&#32032;&#12290;</span>
+        </p>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row__label"><span class="lang-en">Data path</span><span class="lang-zh">&#25968;&#25454;&#36335;</span></span>
+        <p class="detail-row__body">
+          <span class="lang-en"><code>AXI &#183; 128-bit</code> The display controller&#8217;s fetch DMA issues reads on the scanout beat &#8212; 8.3&#160;MB a frame. Its line buffer holds a few lines, never a whole frame.</span>
+          <span class="lang-zh"><code>AXI &#183; 128-bit</code> &#26174;&#31034;&#25511;&#21046;&#22120;&#30340; fetch DMA &#25353;&#25195;&#25551;&#33410;&#25293;&#21457;&#35835;&#35831;&#27714;&#65292;&#27599;&#24086; 8.3&#160;MB&#12290;&#23427;&#30340;&#34892;&#32531;&#20914;&#21482;&#23384;&#20960;&#34892;&#65292;&#20174;&#26469;&#19981;&#23384;&#25972;&#24086;&#12290;</span>
+        </p>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row__label"><span class="lang-en">Pixel interface</span><span class="lang-zh">&#20687;&#32032;&#25509;&#21475;</span></span>
+        <p class="detail-row__body">
+          <span class="lang-en"><code>24-bit RGB &#8594; D-PHY</code> From display controller to DSI controller is a parallel pixel bus, not AXI. The DSI block packs it into high-speed packets and the D-PHY drives four lanes off-chip.</span>
+          <span class="lang-zh"><code>24-bit RGB &#8594; D-PHY</code> &#20174;&#26174;&#31034;&#25511;&#21046;&#22120;&#21040; DSI &#25511;&#21046;&#22120;&#36825;&#19968;&#27573;&#26159;&#24182;&#34892;&#20687;&#32032;&#24635;&#32447;&#65292;&#19981;&#26159; AXI&#12290;DSI &#25226;&#23427;&#25171;&#25104;&#39640;&#36895;&#21253;&#65292;D-PHY &#25512;&#22235;&#26465; lane &#21457;&#20986;&#33455;&#29255;&#12290;</span>
+        </p>
+      </div>
+      <div class="detail-row">
+        <span class="detail-row__label"><span class="lang-en">Check it yourself</span><span class="lang-zh">&#33258;&#24049;&#24590;&#20040;&#39564;</span></span>
+        <p class="detail-row__body">
+          <span class="lang-en">On any mainline kernel tree, <code>grep -c dma_addr</code> in the DSI bridge driver returns <code>0</code> &#8212; it holds no buffer and issues no reads. The write that actually arms the hardware is in the display-controller driver, of the form <code>win_write(win, WIN_YRGB_MST, addr)</code>. Verified on <code>v7.0-9887-ga43fac2b5813</code>.</span>
+          <span class="lang-zh">&#22312;&#20219;&#20309;&#20027;&#32447;&#20869;&#26680;&#26641;&#19978;&#65292;&#23545; DSI &#26725;&#39537;&#21160;&#36305; <code>grep -c dma_addr</code> &#24471;&#21040;&#30340;&#26159; <code>0</code>&#8212;&#8212;&#23427;&#19981;&#25345;&#26377;&#32531;&#20914;&#65292;&#20063;&#19981;&#21457;&#35835;&#35831;&#27714;&#12290;&#30495;&#27491;&#25226;&#30828;&#20214;&#35013;&#22909;&#30340;&#37027;&#19968;&#34892;&#22312;&#26174;&#31034;&#25511;&#21046;&#22120;&#39537;&#21160;&#37324;&#65292;&#24418;&#22914; <code>win_write(win, WIN_YRGB_MST, addr)</code>&#12290;&#26680;&#39564;&#20110; <code>v7.0-9887-ga43fac2b5813</code>&#12290;</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="anth-section anth-section--subtle">
+  <div class="anth-container" style="text-align:center;">
+    <span class="anth-badge" style="background:var(--anth-cta); color:#ffffff; font-weight:600;">
+      <span class="lang-en">Reuse these</span><span class="lang-zh">&#25343;&#21435;&#29992;</span>
+    </span>
+    <h2 style="margin-top:var(--space-3);">
+      <span class="lang-en">Both figures are templates.<br>Copy them, then change the labels.</span>
+      <span class="lang-zh">&#20004;&#24352;&#37117;&#26159;&#27169;&#26495;&#12290;<br>&#25343;&#36208;&#20877;&#25913;&#26631;&#31614;&#23601;&#34892;&#12290;</span>
+    </h2>
+    <p style="font-size:17px; line-height:1.65; color:var(--anth-text-secondary); max-width:620px; margin:var(--space-5) auto var(--space-6); font-family:var(--font-body);">
+      <span class="lang-en">Both are checked in under <code>templates/diagrams/</code> as <code>soc-dataflow.svg</code> and <code>gpu-dataflow.svg</code>, alongside thirty others in the same drawing language.</span>
+      <span class="lang-zh">&#20004;&#24352;&#37117;&#22312; <code>templates/diagrams/</code> &#19979;&#65292;&#21483; <code>soc-dataflow.svg</code> &#21644; <code>gpu-dataflow.svg</code>&#65292;&#26049;&#36793;&#36824;&#26377;&#19977;&#21313;&#24352;&#21516;&#19968;&#22871;&#30011;&#27861;&#30340;&#22270;&#12290;</span>
+    </p>
+    <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+      <a class="anth-button" href="diagrams.html"><span class="lang-en">Open the gallery</span><span class="lang-zh">&#25171;&#24320;&#22270;&#38598;</span></a>
+      <a class="anth-button anth-button--ghost" href="index.html"><span class="lang-en">Main demo</span><span class="lang-zh">&#20027; demo</span></a>
+    </div>
+  </div>
+</section>
+
+<footer class="anth-section" style="border-top:1px solid var(--anth-light-gray); padding-top:var(--space-7); padding-bottom:var(--space-8);">
+  <div class="anth-container anth-container--wide" style="display:flex; justify-content:space-between; gap:var(--space-5); flex-wrap:wrap; align-items:baseline;">
+    <p style="font-size:14px; color:var(--anth-text-secondary); margin:0;">
+      <span class="lang-en">Both figures follow <code>skills/anthropic-design/references/diagram-craft.md</code> and pass the four design-review gates.</span>
+      <span class="lang-zh">&#20004;&#24352;&#22270;&#37117;&#36981;&#24490; <code>skills/anthropic-design/references/diagram-craft.md</code>&#65292;&#24182;&#36890;&#36807; design-review &#22235;&#36947;&#26816;&#26597;&#12290;</span>
+    </p>
+    <div style="display:flex; gap:var(--space-5);">
+      <a class="anth-link" href="diagrams.html"><span class="lang-en">Diagram gallery</span><span class="lang-zh">&#22270;&#31034;&#26696;&#20363;&#24211;</span></a>
+      <a class="anth-link" href="index.html"><span class="lang-en">Main demo</span><span class="lang-zh">&#20027; demo</span></a>
+      <a class="anth-link" href="../../index.html"><span class="lang-en">All skills</span><span class="lang-zh">&#20840;&#37096; skill</span></a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / \u4e2d' : '\u4e2d / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: anthropic-design
+Page-type: feature-deep (demo)
+Created: 2026-08-31
+Decisions:
+- [five-question-order] chose "what it is / what breaks without it / why this design beat the alternatives / when you need it / the mechanism last" over "lead with the register map". Because: a mechanism-first explanation teaches copying, not judgement; the reader who only learns the register write cannot reason about a variant SoC.
+- [two-figures-carry-it] chose "two 1120x560 figures as the spine, prose as connective tissue" over "one combined diagram". Because: the no-GPU case and the with-GPU case answer different questions, and merging them would have pushed past 40 labels on one canvas - past the point where a wide container still reads.
+- [config-vs-data-split] chose "gold dashed APB against orange solid AXI, drawn as separate wires" over "one arrow per hop". Because: the whole thesis is that 4 bytes and 8.3 MB do not travel together; one arrow style would have hidden exactly the distinction the page exists to make.
+- [same-address-bar] chose "every arrow in figure 2 landing on one shared DDR bar" over "per-master memory blocks". Because: the visual claim is that nothing moves - seven arrows terminating on the same bar says it before the caption does.
+- [rejected-designs-as-cards] chose "three alt-cards: on-chip frame / per-master memory / shared DDR (shipped)" over "prose paragraph of trade-offs". Because: the reader needs the alternatives side by side with their price tags to see why the shipped one won; a paragraph buries the comparison.
+- [vendor-neutral-evidence] chose "reproducible greps described by role (DSI bridge driver, display-controller driver)" over "named vendor source files". Because: the repository's diagram templates carry zero vendor names, and the check reproduces on any kernel tree, so naming one buys nothing.
+- [orange-badge-hero] chose "filled orange .anth-badge above h1" over "ghost kicker". Because: brand-presence (§K) needs the signature colour inside the top 1440x500, and the badge earns it without adding a second CTA.
+Known trade-offs:
+- SVG-internal text stays English in both languages; only figcaptions translate. Same precedent as diagrams.html, but a zh reader still meets English labels inside the figures.
+- The numbers (8.3 MB, 6.4 GB/s, 4 lanes x 1 Gbps) describe one representative phone-class configuration, not a specific product; a reader on a different memory width has to redo the arithmetic.
+- Figure 2 shows five DDR tenants; a real system has more (camera, codec, modem), and the page says so in prose rather than crowding the bar.
+/design-review:self-diff -->
+</body>
+</html>
