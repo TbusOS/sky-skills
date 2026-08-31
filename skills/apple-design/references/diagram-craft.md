@@ -33,7 +33,7 @@
 - 分组容器：`#f5f5f7` + rx 18 + **无边框**；标签 12px 500 `#86868b` 正常大小写（apple 不用 uppercase letter-spacing 标签）
 - 节点卡：白底 + rx 14 + **无描边** + 柔影 `feDropShadow dx=0 dy=4 stdDeviation=8 flood-opacity=0.08`——白卡靠影子从浅灰分组里浮起来
 - 焦点卡：白底 + 蓝 1.5px 描边（全图唯一带边框的卡）
-- 圆角体系：分组 18 / 卡 14 / chip 10——比 anthropic 更圆润，对齐硬件语言
+- 圆角体系：分组 18 / 卡 14 / chip 10——比 anthropic 更圆润，贴近硬件语言
 
 ## 3. 节点卡排版
 

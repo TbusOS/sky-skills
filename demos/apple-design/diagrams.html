@@ -3000,18 +3000,18 @@
           <rect x="255" y="420" width="53" height="18" rx="9" fill="#f5f5f7" stroke="#aeaeb2"/>
           <text x="282" y="433" text-anchor="middle" font-size="12.5" fill="#6e6e73">hardirq</text>
           <rect x="422" y="288" width="272" height="48" rx="10" fill="#ffffff" stroke="#d2d2d7" filter="url(#cgSh)"/>
-          <text x="436" y="309" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">sunxi_crtc_atomic_flush()</text>
+          <text x="436" y="309" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">qz_crtc_atomic_flush()</text>
           <text x="436" y="326" font-size="12.5" fill="#86868b">latches the new framebuffer address</text>
           <rect x="422" y="350" width="272" height="48" rx="10" fill="#ffffff" stroke="#d2d2d7" filter="url(#cgSh)"/>
-          <text x="436" y="371" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">sunxi_dsi_send_frame()</text>
+          <text x="436" y="371" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">qz_dsi_send_frame()</text>
           <text x="436" y="388" font-size="12.5" fill="#86868b">kicks the display DMA</text>
           <rect x="422" y="412" width="272" height="48" rx="10" fill="#ffffff" stroke="#d2d2d7" filter="url(#cgSh)"/>
-          <text x="436" y="433" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">sunxi_dsi_irq()</text>
+          <text x="436" y="433" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">qz_dsi_irq()</text>
           <text x="436" y="450" font-size="12.5" fill="#86868b">acks, then calls core</text>
           <rect x="631" y="420" width="53" height="18" rx="9" fill="#f5f5f7" stroke="#aeaeb2"/>
           <text x="658" y="433" text-anchor="middle" font-size="12.5" fill="#6e6e73">hardirq</text>
           <rect x="798" y="288" width="272" height="48" rx="10" fill="#ffffff" stroke="#d2d2d7" filter="url(#cgSh)"/>
-          <text x="812" y="309" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">sunxi_panel_prepare()</text>
+          <text x="812" y="309" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">qz_panel_prepare()</text>
           <text x="812" y="326" font-size="12.5" fill="#86868b">power rails, reset, init sequence</text>
           <rect x="798" y="380" width="272" height="48" rx="10" fill="#ffffff" stroke="#d2d2d7" filter="url(#cgSh)"/>
           <text x="812" y="401" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">backlight_enable()</text>
@@ -3032,7 +3032,7 @@
     </figure>
 
     <figure class="gal-fig">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="A kernel oops backtrace drawn as a stack rather than a list. Nine frames, newest on top: the faulting frame sunxi_dsi_write_reg in the out-of-tree drm_sunxi module, then the panel prepare path, then DRM core, then commit_tail. A horizontal fault line separates frame four from frame five. Everything below that line is the kworker skeleton — process_one_work, worker_thread, kthread and ret_from_fork — which is not the caller chain in any useful sense: process_one_work did not call commit_tail because it wanted to, it called whatever was queued. The caller you actually want, the code that ran queue_work, is not on this stack at all; a ghost card off to the side names it. A left-hand gutter brackets the two context runs, and three notes on the right explain the frames worth stopping at, including that a plus offset slash size pair tells you how far into the function the program counter was and how big the function is" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="A kernel oops backtrace drawn as a stack rather than a list. Nine frames, newest on top: the faulting frame qz_dsi_write_reg in the out-of-tree drm_quartz module, then the panel prepare path, then DRM core, then commit_tail. A horizontal fault line separates frame four from frame five. Everything below that line is the kworker skeleton — process_one_work, worker_thread, kthread and ret_from_fork — which is not the caller chain in any useful sense: process_one_work did not call commit_tail because it wanted to, it called whatever was queued. The caller you actually want, the code that ran queue_work, is not on this stack at all; a ghost card off to the side names it. A left-hand gutter brackets the two context runs, and three notes on the right explain the frames worth stopping at, including that a plus offset slash size pair tells you how far into the function the program counter was and how big the function is" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
         <defs>
           <marker id="csArrN" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
@@ -3062,17 +3062,17 @@
         <!-- frames -->
         <g>
           <rect x="148" y="128" width="596" height="36" rx="6" fill="#eaf3fe" stroke="#0071e3" stroke-width="1.5"/>
-          <text x="188" y="151" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">sunxi_dsi_write_reg</text>
+          <text x="188" y="151" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">qz_dsi_write_reg</text>
           <text x="730" y="151" text-anchor="end" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">+0x2c/0x80</text>
           <text x="164" y="151" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">#0</text>
           <rect x="488" y="136" width="78" height="20" rx="6" fill="#f5f5f7" stroke="#d2d2d7"/>
-          <text x="527" y="150" text-anchor="middle" font-size="12.5" fill="#6e6e73" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">[drm_sunxi]</text>
+          <text x="527" y="150" text-anchor="middle" font-size="12.5" fill="#6e6e73" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">[drm_quartz]</text>
           <rect x="148" y="168" width="596" height="36" rx="6" fill="#ffffff" stroke="#d2d2d7"/>
-          <text x="188" y="191" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">sunxi_panel_prepare</text>
+          <text x="188" y="191" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">qz_panel_prepare</text>
           <text x="730" y="191" text-anchor="end" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">+0x64/0x120</text>
           <text x="164" y="191" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">#1</text>
           <rect x="488" y="176" width="91" height="20" rx="6" fill="#f5f5f7" stroke="#d2d2d7"/>
-          <text x="534" y="190" text-anchor="middle" font-size="12.5" fill="#6e6e73" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">[panel_sunxi]</text>
+          <text x="534" y="190" text-anchor="middle" font-size="12.5" fill="#6e6e73" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">[panel_quartz]</text>
           <rect x="148" y="208" width="596" height="36" rx="6" fill="#ffffff" stroke="#d2d2d7"/>
           <text x="188" y="231" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">drm_panel_prepare</text>
           <text x="730" y="231" text-anchor="end" font-size="12.5" fill="#86868b" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">+0x28/0x50</text>
@@ -3189,7 +3189,7 @@
         <!-- work blocks -->
         <g>
           <rect x="188.0" y="120" width="41.2" height="28" rx="5" fill="#f5f5f7" stroke="#aeaeb2"/>
-          <text x="188.0" y="114" font-size="12.5" fill="#6e6e73" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">sunxi_dma_irq()</text>
+          <text x="188.0" y="114" font-size="12.5" fill="#6e6e73" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">qz_dma_irq()</text>
           <rect x="260.1" y="178" width="164.9" height="28" rx="5" fill="#eaf3fe" stroke="#0071e3"/>
           <text x="342.6" y="197" text-anchor="middle" font-size="12.5" fill="#1d1d1f" font-family="'SF Mono', SFMono-Regular, Menlo, monospace">dma_tasklet() &#183; drain descriptors</text>
           <rect x="729.1" y="236" width="273.1" height="28" rx="5" fill="#f5f5f7" stroke="#d2d2d7"/>
