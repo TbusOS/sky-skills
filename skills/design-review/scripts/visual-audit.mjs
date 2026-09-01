@@ -641,6 +641,61 @@ const auditFn = (arg) => {
     }
   });
 
+  // ---------- 1d2) Interactive figure with no screenshot-stable default ----------
+  // A figure the reader can drive (buttons, a range, tab-like steps) is captured
+  // by the screenshot gate in exactly one state: whatever it looks like before
+  // anybody touches it. If that state is empty, every gate still passes and the
+  // page ships with a blank box — the failure direction is "let through", which
+  // is the expensive direction. So: at least one panel visible, and something
+  // saying which one the reader is looking at.
+  document.querySelectorAll('figure').forEach((fig) => {
+    // Scope: a figure the reader STEPS THROUGH. A lone <button> is not that —
+    // a copy-to-clipboard or download control sits on plenty of static figures
+    // and has no default state to get wrong. Requiring either a step control or
+    // step panels is what keeps this off all 76 figures in the gallery, each of
+    // which carries a Copy SVG button (false-positive fixed 2026-09-02, found by
+    // running the full suite before push rather than by the fixture).
+    const stepControls = fig.querySelectorAll(
+      'input[type=range], [role="tab"], [data-step-to]'
+    );
+    const panels = [...fig.querySelectorAll('[data-step], [role="tabpanel"]')];
+    if (!stepControls.length && panels.length < 2) return;
+    const controls = stepControls.length
+      ? stepControls
+      : fig.querySelectorAll('button, input[type=range], select, [role="tab"], [data-step-to]');
+    const label = String(
+      (fig.querySelector('svg') && fig.querySelector('svg').getAttribute('aria-label'))
+      || (fig.querySelector('figcaption') && fig.querySelector('figcaption').textContent)
+      || 'figure'
+    ).trim().slice(0, 60);
+    if (panels.length) {
+      const shown = panels.filter((p) => {
+        if (p.hasAttribute('hidden')) return false;
+        const cs = getComputedStyle(p);
+        if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return false;
+        const r = p.getBoundingClientRect();
+        return r.width > 4 && r.height > 4;
+      });
+      if (!shown.length) {
+        issues.push({ kind: 'interactive-figure-blank-default', severity: 'error', label,
+                      panels: panels.length });
+        return;
+      }
+      if (shown.length > 1) {
+        issues.push({ kind: 'interactive-figure-blank-default', severity: 'warn', label,
+                      panels: panels.length, shown: shown.length });
+        return;
+      }
+    }
+    const marked = fig.querySelector(
+      '[aria-current], [aria-selected="true"], [aria-pressed="true"], [data-active], details[open]'
+    );
+    if (!marked && !fig.hasAttribute('data-default-state')) {
+      issues.push({ kind: 'interactive-figure-no-current-marker', severity: 'warn', label,
+                    controls: controls.length });
+    }
+  });
+
   // ---------- 1e) Figure-series viewBox drift (diagram-craft §16) ----------
   // A series is N figures over ONE base drawing, each adding a layer. The moment
   // two of them differ in viewBox the base no longer lines up and the whole point
@@ -2629,6 +2684,16 @@ for (const i of visibleFindings) {
   } else if (i.kind === 'grid-track-shrink-risk') {
     console.log(
       `  [${i.severity}] grid-track-shrink-risk: <${i.selector}> declares a track minmax(0, max-content) and holds big non-wrapping text "${i.sample}" — the 0 minimum lets the track shrink below the content, so the text can overrun the next cell at narrower widths. Prefer minmax(max-content, 1fr) (or allow wrap) (§1.33b)`
+    );
+  } else if (i.kind === 'interactive-figure-blank-default') {
+    console.log(
+      i.severity === 'error'
+        ? `  [${i.severity}] interactive-figure-blank-default: "${i.label}" is drivable (buttons / steps) but all ${i.panels} of its panels are hidden before anyone clicks. The screenshot gate captures exactly that state, so this ships as an empty box with every gate green — mark one panel as the default (visible, plus aria-current / data-active on its control), or set data-default-state on the figure if the blank start is deliberate`
+        : `  [${i.severity}] interactive-figure-blank-default: "${i.label}" shows ${i.shown} of its ${i.panels} panels at once before any interaction — a step figure whose default is "all of them" is not a default, it is what you get when the script has not run. Pick one`
+    );
+  } else if (i.kind === 'interactive-figure-no-current-marker') {
+    console.log(
+      `  [${i.severity}] interactive-figure-no-current-marker: "${i.label}" has ${i.controls} control(s) but nothing marked aria-current / aria-selected / aria-pressed / data-active — the reader cannot tell which step they are on, and neither can a screenshot taken later for comparison`
     );
   } else if (i.kind === 'margin-auto-offcenter') {
     console.log(
