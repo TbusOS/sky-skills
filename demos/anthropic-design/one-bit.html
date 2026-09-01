@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How one bit is held — anthropic-design</title>
+<meta name="description" content="A ladder that opens every symbol before using it, a triptych that keeps one geometry and moves only the colour, and a rule that fits ten decades on one axis.">
+<meta property="og:title" content="How one bit is held">
+<meta property="og:description" content="Three anthropic-design figures on drawing a mechanism: an abstraction ladder, a three-state triptych on locked coordinates, and a logarithmic magnitude ruler.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/anthropic.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+
+  /* §H · Lora (editorial body) -> Noto Serif SC; Poppins (display) -> Noto Sans SC. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .alt-card__body,
+  html[data-lang="zh"] .callout__body,
+  html[data-lang="zh"] .detail-row__body,
+  html[data-lang="zh"] .sourcing__body,
+  html[data-lang="zh"] .fig-cap {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .alt-card__title,
+  html[data-lang="zh"] .alt-card__kicker,
+  html[data-lang="zh"] .detail-row__label,
+  html[data-lang="zh"] .fig-tag,
+  html[data-lang="zh"] .stat-trio .num,
+  html[data-lang="zh"] .stat-trio .lbl {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] .anth-quote { font-style: normal; }
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .alt-card__kicker,
+  html[data-lang="zh"] .detail-row__label,
+  html[data-lang="zh"] .fig-tag { text-transform: none; letter-spacing: 0.05em; }
+
+  /* Stat trio - the three numbers that define the whole path */
+  .stat-trio {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5);
+    padding: var(--space-7) var(--space-5);
+    background: #ffffff; border: 1px solid var(--anth-light-gray); border-radius: var(--radius-md);
+  }
+  .stat-trio > div { text-align: center; }
+  .stat-trio .num {
+    display: block; font-family: var(--font-heading); font-size: 48px; font-weight: 600;
+    color: var(--anth-text); letter-spacing: -0.02em; line-height: 1;
+  }
+  .stat-trio .lbl {
+    display: block; font-family: var(--font-heading); font-size: 12.5px; font-weight: 500;
+    color: var(--anth-text-secondary); margin-top: var(--space-3); letter-spacing: 0.02em;
+  }
+
+  /* Figure block - the two big diagrams */
+  .fig {
+    background: #ffffff; border: 1px solid var(--anth-light-gray);
+    border-radius: var(--radius-lg); padding: var(--space-6);
+    margin: 0 0 var(--space-6);
+  }
+  .fig svg { display: block; width: 100%; height: auto; }
+  .fig-cap {
+    margin: var(--space-4) 0 0;
+    font-family: var(--font-body); font-size: 14.5px; line-height: 1.6;
+    color: var(--anth-text-secondary); max-width: 900px;
+  }
+  .fig-tag {
+    display: block; font-family: var(--font-heading); font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--anth-orange-ink);
+    margin-bottom: 4px;
+  }
+
+  /* Alternative cards - designs considered and rejected */
+  .alt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .alt-card {
+    background: #ffffff; border: 1px solid var(--anth-light-gray); border-radius: var(--radius-lg);
+    padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3);
+  }
+  .alt-card--shipped { border-left: 3px solid var(--anth-orange); }
+  .alt-card__kicker {
+    font-family: var(--font-heading); font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+    color: var(--anth-orange-ink); text-transform: uppercase;
+  }
+  .alt-card__title {
+    font-family: var(--font-heading); font-size: 21px; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--anth-text); margin: 0; line-height: 1.25;
+  }
+  .alt-card__body {
+    font-family: var(--font-body); font-size: 15.5px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+  .alt-card__verdict {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    color: var(--anth-text-secondary); margin-top: auto; padding-top: var(--space-3);
+    border-top: 1px solid var(--anth-light-gray);
+  }
+
+  /* When-you-need-it list */
+  .use-list {
+    list-style: none; padding: 0; margin: var(--space-5) 0 0;
+    display: flex; flex-direction: column; gap: var(--space-4);
+  }
+  .use-list li {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+    color: var(--anth-text); padding-left: var(--space-5); position: relative;
+  }
+  .use-list li::before {
+    content: ''; position: absolute; left: 0; top: 10px;
+    width: 6px; height: 6px; border-radius: 50%; background: var(--anth-orange);
+  }
+
+  /* Honest callout */
+  .callout {
+    background: #faf9f5; border: 1px solid var(--anth-light-gray);
+    border-left: 3px solid var(--anth-orange);
+    border-radius: var(--radius-md); padding: var(--space-6);
+  }
+  .callout__kicker {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink); margin: 0;
+  }
+  .callout__title {
+    font-family: var(--font-heading); font-size: 22px; font-weight: 600;
+    color: var(--anth-text); margin: var(--space-2) 0 var(--space-3);
+  }
+  .callout__body {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+
+  /* Detail rows - the mechanism, last */
+  .detail-row {
+    display: grid; grid-template-columns: 190px 1fr;
+    gap: var(--space-5); padding: var(--space-5) 0;
+    border-bottom: 1px solid var(--anth-light-gray);
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row__label {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink);
+    padding-top: 3px;
+  }
+  .detail-row__body {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+    color: var(--anth-text); margin: 0;
+  }
+  .detail-row__body code {
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    background: #faf9f5; padding: 2px 8px; border-radius: 4px;
+    border: 1px solid var(--anth-light-gray);
+  }
+  /* Sourcing note - what is checked vs what is illustrative */
+  .sourcing {
+    background: #ffffff; border: 1px solid var(--anth-light-gray);
+    border-left: 3px solid var(--anth-orange);
+    border-radius: var(--radius-md); padding: var(--space-5) var(--space-6);
+  }
+  .sourcing__kicker {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink);
+    margin: 0 0 var(--space-2);
+  }
+  .sourcing__body {
+    font-family: var(--font-body); font-size: 15px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+  .sourcing__body code {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    background: #faf9f5; padding: 1px 6px; border-radius: 4px;
+    border: 1px solid var(--anth-light-gray);
+  }
+  html[data-lang="zh"] .sourcing__kicker { text-transform: none; letter-spacing: 0.05em; }
+
+  .eyebrow-link {
+    font-family: var(--font-heading); font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--anth-text-secondary); font-weight: 600;
+  }
+  html[data-lang="zh"] .eyebrow-link { text-transform: none; letter-spacing: 0.05em; }
+
+  @media (max-width: 900px) {
+    .alt-grid, .stat-trio { grid-template-columns: 1fr; }
+    .detail-row { grid-template-columns: 1fr; gap: var(--space-2); }
+  }
+
+  /* 术语表:一行一个词,左边词右边两问 */
+  .term-row { display:grid; grid-template-columns: 210px 1fr; gap: var(--space-5);
+    padding: var(--space-5) 0; border-top: 1px solid var(--anth-light-gray); }
+  .term-row:last-child { border-bottom: 1px solid var(--anth-light-gray); }
+  .term-name { font-family: var(--font-heading); font-weight: 600; font-size: 15px;
+    color: var(--anth-text); line-height: 1.4; }
+  .term-en { display:block; font-family: var(--font-mono, monospace); font-size: 12px;
+    font-weight: 400; color: var(--anth-text-secondary); margin-top: 3px; }
+  .term-what { font-size: 15px; line-height: 1.65; color: var(--anth-text); margin: 0; }
+  .term-without { font-size: 14px; line-height: 1.6; color: var(--anth-text-secondary);
+    margin: var(--space-2) 0 0; }
+  .term-without b { color: var(--anth-orange-ink); font-weight: 600; }
+  @media (max-width: 720px) { .term-row { grid-template-columns: 1fr; gap: var(--space-2); } }
+</style>
+</head>
+<body>
+
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="../../index.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">Sky Skills</a>
+  <div>
+    <a href="#ladder"><span class="lang-en">Open the symbol</span><span class="lang-zh">把符号打开</span></a>
+    <a href="#states"><span class="lang-en">Three states</span><span class="lang-zh">三个状态</span></a>
+    <a href="#scale"><span class="lang-en">Ten decades</span><span class="lang-zh">十个数量级</span></a>
+    <a href="packaging.html"><span class="lang-en">Assembly</span><span class="lang-zh">装配</span></a>
+    <a href="diagrams.html"><span class="lang-en">Gallery</span><span class="lang-zh">图集</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+  </div>
+</div></nav>
+
+<header class="anth-section" style="padding-top:var(--space-9);">
+  <div class="anth-container anth-container--wide">
+    <a class="eyebrow-link" href="diagrams.html"><span class="lang-en">← Back · anthropic-design diagram gallery</span><span class="lang-zh">← 返回 · anthropic-design 图示案例库</span></a>
+    <span class="anth-badge" style="margin-top:var(--space-5); background:var(--anth-cta); color:#ffffff; font-weight:600;"><span class="lang-en">silicon · how one bit is held</span><span class="lang-zh">芯片 · 一个比特是怎么存住的</span></span>
+    <h1 style="margin-top:var(--space-4); max-width:900px;"><span class="lang-en">Six transistors,<br>three states,<br>and ten decades of waiting.</span><span class="lang-zh">六个晶体管，<br>三个状态，<br>和十个数量级的等待。</span></h1>
+    <p style="font-size:18px; line-height:1.7; color:var(--anth-text-secondary); max-width:800px; margin-top:var(--space-5); font-family:var(--font-body);"><span class="lang-en">Three figures about the same small thing, each demonstrating a way of drawing that generalises well beyond it. A ladder that opens every symbol before it uses it. A triptych that keeps one geometry and moves only the colour. A rule that fits ten decades on one axis without lying about the gaps. If a page has to explain a mechanism, these three between them will usually carry it.</span><span class="lang-zh">三张图，讲的是同一件小东西，而每一张示范的画法都远不止用在这件小东西上。一条在使用每个符号之前先把它打开的阶梯；一组保持同一套坐标、只让颜色移动的三联图；一把把十个数量级放进一根轴、又不在间距上撒谎的尺子。一个页面要讲清一个机制，这三张通常就够了。</span></p>
+
+    <div class="stat-trio">
+      <div><span class="num">6</span><span class="lbl"><span class="lang-en">transistors in the cell the ladder arrives at</span><span class="lang-zh">阶梯最后到达的那个单元用了几个晶体管</span></span></div>
+      <div><span class="num">3</span><span class="lbl"><span class="lang-en">panels sharing one set of coordinates</span><span class="lang-zh">共用同一套坐标的格数</span></span></div>
+      <div><span class="num">10⁹</span><span class="lbl"><span class="lang-en">the span the log rule has to hold</span><span class="lang-zh">对数尺要装下的跨度</span></span></div>
+    </div>
+
+    <div class="sourcing">
+      <span class="sourcing__kicker"><span class="lang-en">what is checked and what is representative</span><span class="lang-zh">哪些是查过的，哪些是示意</span></span>
+      <p class="sourcing__body"><span class="lang-en">There are no kernel paths on this page, so there is nothing here to grep — which is worth saying plainly rather than leaving the reader to assume the numbers were verified. The circuit is the standard six-transistor cell; the transistor counts are exact for that arrangement. Every timing figure is a typical order of magnitude and the ruler says so on its face: the point is the distance between them, never the digits. Measure your own part before quoting any of it.</span><span class="lang-zh">这一页没有内核路径，也就没有什么可以 grep 的——这句话值得直说，而不是让读者默认那些数字都核过。电路是标准的六管单元，晶体管数对那个结构来说是准确的。所有时间数字都是典型数量级，尺子上也这么写了：要看的是它们之间的距离，永远不是那几位数字。要引用之前，先测自己那颗器件。</span></p>
+    </div>
+  </div>
+</header>
+
+<section class="anth-section" id="ladder">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">A symbol nobody has seen opened is a symbol nobody will question.</span><span class="lang-zh">没被打开过的符号，读者不会去质疑它。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">Every technical page runs on abstraction, and every abstraction is a box somebody decided to stop drawing the inside of. That decision is usually invisible: the reader meets the triangle already closed, learns the rule for using it, and is stuck the first time a variant does not behave. The fix costs one panel. Draw what is inside, then fold it up in front of the reader, and put the price on the outside of the fold so nobody forgets what the convenience cost.</span><span class="lang-zh">任何技术页面都靠抽象运转，而每一个抽象都是有人决定不再画里面的那个盒子。这个决定通常是隐形的：读者遇到那个三角形时它已经是关着的，学会了用法，然后在遇到第一个不按常理出牌的变体时卡住。补救只要一格图。把里面画出来，再当着读者的面折起来，并且把价钱写在折起来的外面，这样没人会忘记这份方便花了多少钱。</span></p>
+    <figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 620" role="img" aria-label="Three panels side by side showing the same idea at three levels of abstraction, each one opening the symbol used by the next. The left panel draws two transistors between a supply rail and ground with a shared gate and a shared output node, then closes them into the triangle-and-bubble symbol for an inverter, with a pill stating the cost as two transistors. The middle panel opens that symbol again: two inverters wired output to input in a ring, one wire drawn in orange for a high level and the other in blue for a low level, which is what makes the ring hold a value, then closes into a rounded box labelled one bit that holds, with a pill stating four transistors. The right panel opens that box in turn: the same ring with two access transistors on the sides controlled by a word line, then closes into a box labelled one memory cell, with a pill stating six transistors. A dashed line runs from each closed symbol down to the panel that opens it, and a closing note states that a symbol a reader has never seen opened is a symbol they will not question, and that carrying the transistor count on every symbol keeps the abstraction honest about what it costs" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs><pattern id="abDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+        <marker id="abArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/></marker></defs>
+        <rect width="1120" height="620" rx="16" fill="#faf9f5" stroke="#eceadf"/><rect width="1120" height="620" rx="16" fill="url(#abDot)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">OPEN IT FIRST, THEN CLOSE IT INTO A SYMBOL</text>
+        <text x="32" y="58" font-size="11.5" fill="#8c8a7d">each panel opens the symbol the panel before it handed over. a symbol nobody has seen opened is a symbol nobody will question.</text>
+        <rect x="36" y="76" width="336" height="452" rx="12" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <circle cx="60" cy="100" r="10.5" fill="#d97757"/><text x="60" y="104" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+        <text x="80" y="98" font-size="13" font-weight="600" fill="#141413">two transistors</text>
+        <text x="80" y="114" font-size="10.5" fill="#6b6a5f">one pulls up, one pulls down</text>
+        <text x="56" y="146" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">WHAT IS INSIDE</text>
+        <line x1="56" y1="356" x2="352" y2="356" stroke="#e3e0d4" stroke-width="1.2" stroke-dasharray="5 4"/>
+        <text x="56" y="382" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">THE SYMBOL YOU THEN USE</text>
+        <line x1="132" y1="176" x2="264" y2="176" stroke="#d97757" stroke-width="1.6"/>
+        <text x="132" y="170" font-size="10.5" font-weight="600" fill="#d97757">supply</text>
+        <line x1="196" y1="196" x2="196" y2="224" stroke="#141413" stroke-width="1.6"/>
+        <line x1="202" y1="196" x2="202" y2="224" stroke="#141413" stroke-width="1.6"/>
+        <line x1="202" y1="196" x2="220" y2="196" stroke="#141413" stroke-width="1.4"/>
+        <line x1="202" y1="224" x2="220" y2="224" stroke="#141413" stroke-width="1.4"/>
+        <line x1="178" y1="210" x2="196" y2="210" stroke="#141413" stroke-width="1.4"/>
+        <circle cx="174" cy="210" r="3.2" fill="none" stroke="#141413" stroke-width="1.4"/>
+        <line x1="211" y1="176" x2="211" y2="196" stroke="#141413" stroke-width="1.4"/>
+        <line x1="196" y1="274" x2="196" y2="302" stroke="#141413" stroke-width="1.6"/>
+        <line x1="202" y1="274" x2="202" y2="302" stroke="#141413" stroke-width="1.6"/>
+        <line x1="202" y1="274" x2="220" y2="274" stroke="#141413" stroke-width="1.4"/>
+        <line x1="202" y1="302" x2="220" y2="302" stroke="#141413" stroke-width="1.4"/>
+        <line x1="178" y1="288" x2="196" y2="288" stroke="#141413" stroke-width="1.4"/>
+        <line x1="211" y1="302" x2="211" y2="322" stroke="#141413" stroke-width="1.4"/>
+        <line x1="132" y1="322" x2="264" y2="322" stroke="#2f5c8a" stroke-width="1.6"/>
+        <text x="132" y="338" font-size="10.5" font-weight="600" fill="#2f5c8a">ground</text>
+        <line x1="211" y1="224" x2="211" y2="274" stroke="#141413" stroke-width="1.4"/>
+        <line x1="211" y1="249" x2="282" y2="249" stroke="#141413" stroke-width="1.6" marker-end="url(#abArr)"/>
+        <text x="286" y="245" font-size="10.5" fill="#6b6a5f">out</text>
+        <line x1="176" y1="210" x2="176" y2="288" stroke="#141413" stroke-width="1.4"/>
+        <line x1="132" y1="249" x2="176" y2="249" stroke="#141413" stroke-width="1.6"/>
+        <text x="108" y="245" font-size="10.5" fill="#6b6a5f">in</text>
+        <path d="M164.0 394.4 L202.5 412.0 L164.0 429.6 Z" fill="none" stroke="#141413" stroke-width="2.0" stroke-linejoin="round"/>
+        <circle cx="206.5" cy="412.0" r="4.0" fill="none" stroke="#141413" stroke-width="2.0"/>
+        <line x1="132" y1="412" x2="164" y2="412" stroke="#141413" stroke-width="1.6"/>
+        <line x1="211" y1="412" x2="246" y2="412" stroke="#141413" stroke-width="1.6"/>
+        <line x1="186" y1="330" x2="186" y2="390" stroke="#d97757" stroke-width="1.1" stroke-dasharray="4 3"/>
+        <rect x="224" y="459" width="128" height="22" rx="11" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="288" y="474" text-anchor="middle" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">2 transistors</text>
+        <text x="56" y="500" font-size="11" fill="#6b6a5f">the triangle is not new information &#8212;</text>
+        <text x="56" y="515" font-size="11" fill="#6b6a5f">it is the pair above, folded up.</text>
+        <rect x="392" y="76" width="336" height="452" rx="12" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <circle cx="416" cy="100" r="10.5" fill="#d97757"/><text x="416" y="104" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+        <text x="436" y="98" font-size="13" font-weight="600" fill="#141413">two of them, in a ring</text>
+        <text x="436" y="114" font-size="10.5" fill="#6b6a5f">each one feeds the other</text>
+        <text x="412" y="146" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">WHAT IS INSIDE</text>
+        <line x1="412" y1="356" x2="708" y2="356" stroke="#e3e0d4" stroke-width="1.2" stroke-dasharray="5 4"/>
+        <text x="412" y="382" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">THE SYMBOL YOU THEN USE</text>
+        <path d="M490.0 182.4 L528.5 200.0 L490.0 217.6 Z" fill="none" stroke="#141413" stroke-width="2.0" stroke-linejoin="round"/>
+        <circle cx="532.5" cy="200.0" r="4.0" fill="none" stroke="#141413" stroke-width="2.0"/>
+        <path d="M586.0 250.4 L624.5 268.0 L586.0 285.6 Z" fill="none" stroke="#141413" stroke-width="2.0" stroke-linejoin="round"/>
+        <circle cx="628.5" cy="268.0" r="4.0" fill="none" stroke="#141413" stroke-width="2.0"/>
+        <path d="M537 200 H 664 V 268 H 633" fill="none" stroke="#d97757" stroke-width="2"/>
+        <path d="M583 268 H 456 V 200 H 487" fill="none" stroke="#2f5c8a" stroke-width="2"/>
+        <text x="642" y="188" font-size="10.5" font-weight="600" fill="#d97757">high</text>
+        <text x="454" y="292" font-size="10.5" font-weight="600" fill="#2f5c8a">low</text>
+        <text x="412" y="330" font-size="11" fill="#6b6a5f">neither one can change without the other</text>
+        <text x="412" y="345" font-size="11" fill="#6b6a5f">disagreeing. so it stays.</text>
+        <rect x="488" y="396" width="150" height="40" rx="8" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.5"/>
+        <text x="563" y="414" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">1 bit that holds</text>
+        <text x="563" y="429" text-anchor="middle" font-size="10.5" fill="#6b6a5f">no clock, no refresh</text>
+        <line x1="563" y1="352" x2="563" y2="392" stroke="#d97757" stroke-width="1.1" stroke-dasharray="4 3"/>
+        <rect x="580" y="459" width="128" height="22" rx="11" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="644" y="474" text-anchor="middle" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">4 transistors</text>
+        <text x="412" y="500" font-size="11" fill="#6b6a5f">the box is worth 4, not 1. that number is</text>
+        <text x="412" y="515" font-size="11" fill="#6b6a5f">the price of the abstraction.</text>
+        <rect x="748" y="76" width="336" height="452" rx="12" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <circle cx="772" cy="100" r="10.5" fill="#d97757"/><text x="772" y="104" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+        <text x="792" y="98" font-size="13" font-weight="600" fill="#141413">a way in and out</text>
+        <text x="792" y="114" font-size="10.5" fill="#6b6a5f">two more, opened by a word line</text>
+        <text x="768" y="146" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">WHAT IS INSIDE</text>
+        <line x1="768" y1="356" x2="1064" y2="356" stroke="#e3e0d4" stroke-width="1.2" stroke-dasharray="5 4"/>
+        <text x="768" y="382" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">THE SYMBOL YOU THEN USE</text>
+        <path d="M859.3 193.0 L892.0 208.0 L859.3 223.0 Z" fill="none" stroke="#141413" stroke-width="1.8" stroke-linejoin="round"/>
+        <circle cx="895.4" cy="208.0" r="3.4" fill="none" stroke="#141413" stroke-width="1.8"/>
+        <path d="M937.3 247.0 L970.0 262.0 L937.3 277.0 Z" fill="none" stroke="#141413" stroke-width="1.8" stroke-linejoin="round"/>
+        <circle cx="973.4" cy="262.0" r="3.4" fill="none" stroke="#141413" stroke-width="1.8"/>
+        <path d="M900 208 H 1004 V 262 H 978" fill="none" stroke="#d97757" stroke-width="1.8"/>
+        <path d="M934 262 H 834 V 208 H 856" fill="none" stroke="#2f5c8a" stroke-width="1.8"/>
+        <line x1="816" y1="194" x2="816" y2="222" stroke="#5d7045" stroke-width="1.6"/>
+        <line x1="822" y1="194" x2="822" y2="222" stroke="#5d7045" stroke-width="1.6"/>
+        <line x1="822" y1="194" x2="840" y2="194" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="822" y1="222" x2="840" y2="222" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="798" y1="208" x2="816" y2="208" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="1010" y1="248" x2="1010" y2="276" stroke="#5d7045" stroke-width="1.6"/>
+        <line x1="1016" y1="248" x2="1016" y2="276" stroke="#5d7045" stroke-width="1.6"/>
+        <line x1="1016" y1="248" x2="1034" y2="248" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="1016" y1="276" x2="1034" y2="276" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="992" y1="262" x2="1010" y2="262" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="788" y1="176" x2="1048" y2="176" stroke="#5d7045" stroke-width="1.8"/>
+        <text x="788" y="170" font-size="10.5" font-weight="600" fill="#5d7045">word line &#183; opens both at once</text>
+        <line x1="816" y1="176" x2="816" y2="194" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="1010" y1="176" x2="1010" y2="248" stroke="#5d7045" stroke-width="1.4"/>
+        <text x="766" y="206" font-size="10" font-weight="600" fill="#8c8a7d">bit line</text>
+        <text x="1040" y="260" font-size="10" font-weight="600" fill="#8c8a7d">bit line</text>
+        <text x="768" y="330" font-size="11" fill="#6b6a5f">the ring is the same ring. the two new</text>
+        <text x="768" y="345" font-size="11" fill="#6b6a5f">transistors only decide when you may look.</text>
+        <rect x="844" y="396" width="150" height="40" rx="8" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.5"/>
+        <text x="919" y="414" text-anchor="middle" font-size="12" font-weight="600" fill="#5d7045">one memory cell</text>
+        <text x="919" y="429" text-anchor="middle" font-size="10.5" fill="#6b6a5f">addressable, at last</text>
+        <line x1="919" y1="352" x2="919" y2="392" stroke="#d97757" stroke-width="1.1" stroke-dasharray="4 3"/>
+        <rect x="936" y="459" width="128" height="22" rx="11" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="1000" y="474" text-anchor="middle" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">6 transistors</text>
+        <text x="768" y="500" font-size="11" fill="#6b6a5f">multiply by a few million and you have</text>
+        <text x="768" y="515" font-size="11" fill="#6b6a5f">the cache the die photo is mostly made of.</text>
+        <line x1="32" y1="546" x2="60" y2="546" stroke="#d97757" stroke-width="2.4"/><text x="68" y="550" font-size="11" fill="#6b6a5f">a wire held high</text>
+        <line x1="176" y1="546" x2="204" y2="546" stroke="#2f5c8a" stroke-width="2.4"/><text x="212" y="550" font-size="11" fill="#6b6a5f">a wire held low</text>
+        <line x1="316" y1="546" x2="344" y2="546" stroke="#d97757" stroke-width="1.1" stroke-dasharray="4 3"/><text x="352" y="550" font-size="11" fill="#6b6a5f">&#8220;everything above, folded into this&#8221;</text>
+        <text x="32" y="578" font-size="11.5" fill="#8c8a7d">a reader who has seen a symbol opened will question it later. a reader who met it already closed will copy it, and will be stuck the first time the variant does not behave.</text>
+        <text x="32" y="595" font-size="11.5" fill="#8c8a7d">every symbol carries its transistor count, so the ladder never hides what an abstraction costs &#8212; which is the number that decides whether it is used a million times.</text>
+        <rect x="820" y="530" width="260" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M820 537 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="833" cy="545" r="3.6" fill="#ffffff"/>
+        <text x="967" y="549" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Abstraction ladder &#183; open, then close</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">open it first, then close it</span><span class="lang-zh">先打开，再折起来</span></span>
+        <span class="lang-en">The ladder never hides what a level costs: two transistors, then four, then six, printed on the symbol itself. That number is the one that decides whether a thing gets used a million times or not at all, and it is exactly the number an abstraction is best at concealing.</span><span class="lang-zh">这条阶梯从不隐藏每一层的价钱：两个、四个、六个晶体管，直接印在符号上。这个数字决定了一样东西会被用一百万次还是根本不会被用，而它恰恰是抽象最擅长藏起来的那个数字。</span>
+      </figcaption>
+    </figure>
+
+    <div class="use-list" style="margin-top:var(--space-8);">
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">the symbol arrives already closed</span><span class="lang-zh">符号一上来就是关着的</span></div>
+        <div class="detail-row__body"><span class="lang-en">The reader will copy it correctly and will not be able to reason about it. That is fine right up to the first variant, and then it is not fine at all, because they have no model to fall back on — only a shape they were told to trust.</span><span class="lang-zh">读者会正确地照抄它，但没法对它做推理。在遇到第一个变体之前这都没问题，之后就全是问题，因为他没有可以退回去的模型——只有一个别人叫他相信的形状。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">the cost is left off the symbol</span><span class="lang-zh">符号上没写代价</span></div>
+        <div class="detail-row__body"><span class="lang-en">Then every level looks equally cheap and the reader has no way to feel the difference between a thing used once and a thing repeated a few million times across a die. Print the count on the symbol. It is one pill and it changes how the figure is read.</span><span class="lang-zh">那每一层看起来都一样便宜，读者也就感觉不到「用一次」和「在一块 die 上重复几百万次」的区别。把数目印在符号上。那只是一颗药丸，却改变了整张图的读法。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">the ladder has five or six rungs</span><span class="lang-zh">这条阶梯做了五六级</span></div>
+        <div class="detail-row__body"><span class="lang-en">Three is usually the limit before the reader loses the thread of what contains what. If the material needs more, break it into two figures with a shared bottom rung, so the second one starts from something already understood.</span><span class="lang-zh">三级通常就是极限，再多读者就跟丢了「谁装着谁」这条线。内容确实需要更多级时，拆成两张图，让第二张的第一级就是第一张的最后一级——这样它从一个已经懂了的东西开始。</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="anth-section" id="states">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">Keep the geometry still and let the colour move.</span><span class="lang-zh">让几何不动，让颜色动。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">The usual way to show three states is three drawings, and the usual result is that the reader re-finds the circuit three times and never notices which parts actually changed. Lock every coordinate instead. Now the eye has nothing to re-parse, the difference is the only thing left moving, and a legend fixed once for the whole figure does the rest. The cost of this method is discipline: the moment one panel gets nudged for a better fit, the whole effect is gone.</span><span class="lang-zh">展示三个状态的常规做法是画三张图，而常规结果是读者把电路重新找了三遍，却始终没注意到到底哪部分变了。把每一个坐标都锁死。这时眼睛没有东西需要重新解析，唯一还在动的就是那个差别，剩下的交给一个对整张图只写一次的图例。这个方法的代价是纪律：只要有一格为了排得好看被挪了一下，整个效果就没了。</span></p>
+    <figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="One memory cell drawn three times on identical coordinates, so the only thing that differs between the panels is colour, and the three together read as one story. In the first, holding, the word line is grey dashes because it is not asserted, both access transistors are shut, the bit lines are grey because nobody drives them, and inside the ring the Q node is blue for low while the QB node is orange for high, meaning the cell currently holds a zero. In the second, writing, the word line turns green, the right bit line is driven high and the left one low, and the two ring nodes swap colours, because a write is the drivers overpowering the ring rather than asking it. In the third, reading, the word line is green again, both bit lines start high, the ring still holds what the write left, and the left bit line, the one joined to the low node, is marked as dipping by about fifty millivolts. A note states that a figure redrawn for each state hides which parts moved while a figure recoloured for each state shows it, that the colour meanings are fixed once for the whole figure, and that the fifty millivolts is a typical order of magnitude rather than a measurement" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs><pattern id="stDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+        <marker id="stArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker></defs>
+        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/><rect width="1120" height="560" rx="16" fill="url(#stDot)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">THREE STATES, ONE GEOMETRY &#183; ONLY THE COLOUR MOVES</text>
+        <text x="32" y="58" font-size="11.5" fill="#8c8a7d">the three panels share every coordinate on purpose, and read left to right as one story: the cell holds a zero, a write turns it into a one, then a read gets that one back out.</text>
+        <rect x="36" y="76" width="336" height="344" rx="12" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <rect x="36" y="76" width="336" height="4" rx="2" fill="#a8a496"/>
+        <text x="56" y="106" font-size="14" font-weight="600" fill="#141413">holding</text>
+        <text x="56" y="124" font-size="11" fill="#6b6a5f">nobody is touching it</text>
+        <line x1="56" y1="164" x2="352" y2="164" stroke="#a8a496" stroke-width="2.2" stroke-dasharray="6 4"/>
+        <text x="56" y="156" font-size="10.5" font-weight="700" fill="#a8a496">word line</text>
+        <line x1="56" y1="196" x2="56" y2="330" stroke="#a8a496" stroke-width="2.2" stroke-dasharray="6 4"/>
+        <text x="56" y="346" text-anchor="start" font-size="10.5" font-weight="600" fill="#a8a496">bit line &#183; QB side</text>
+        <line x1="352" y1="196" x2="352" y2="330" stroke="#a8a496" stroke-width="2.2" stroke-dasharray="6 4"/>
+        <text x="352" y="346" text-anchor="end" font-size="10.5" font-weight="600" fill="#a8a496">bit line &#183; Q side</text>
+        <line x1="84" y1="227" x2="84" y2="253" stroke="#a8a496" stroke-width="1.6"/>
+        <line x1="90" y1="227" x2="90" y2="253" stroke="#a8a496" stroke-width="1.6"/>
+        <line x1="90" y1="227" x2="106" y2="227" stroke="#a8a496" stroke-width="1.4"/>
+        <line x1="90" y1="253" x2="106" y2="253" stroke="#a8a496" stroke-width="1.4"/>
+        <line x1="106" y1="227" x2="106" y2="253" stroke="#a8a496" stroke-width="1.4"/>
+        <line x1="68" y1="240" x2="84" y2="240" stroke="#a8a496" stroke-width="1.4"/>
+        <line x1="320" y1="227" x2="320" y2="253" stroke="#a8a496" stroke-width="1.6"/>
+        <line x1="326" y1="227" x2="326" y2="253" stroke="#a8a496" stroke-width="1.6"/>
+        <line x1="326" y1="227" x2="342" y2="227" stroke="#a8a496" stroke-width="1.4"/>
+        <line x1="326" y1="253" x2="342" y2="253" stroke="#a8a496" stroke-width="1.4"/>
+        <line x1="342" y1="227" x2="342" y2="253" stroke="#a8a496" stroke-width="1.4"/>
+        <line x1="304" y1="240" x2="320" y2="240" stroke="#a8a496" stroke-width="1.4"/>
+        <line x1="56" y1="240" x2="68" y2="240" stroke="#a8a496" stroke-width="1.6"/>
+        <line x1="106" y1="240" x2="118" y2="240" stroke="#d97757" stroke-width="1.6"/>
+        <line x1="342" y1="240" x2="352" y2="240" stroke="#a8a496" stroke-width="1.6"/>
+        <line x1="87" y1="164" x2="87" y2="227" stroke="#a8a496" stroke-width="1.4"/>
+        <line x1="323" y1="164" x2="323" y2="227" stroke="#a8a496" stroke-width="1.4"/>
+        <path d="M157.3 197.0 L190.0 212.0 L157.3 227.0 Z" fill="none" stroke="#141413" stroke-width="1.9" stroke-linejoin="round"/>
+        <circle cx="192.9" cy="212.0" r="2.9" fill="none" stroke="#141413" stroke-width="1.9"/>
+        <path d="M221.3 273.0 L254.0 288.0 L221.3 303.0 Z" fill="none" stroke="#141413" stroke-width="1.9" stroke-linejoin="round"/>
+        <circle cx="256.9" cy="288.0" r="2.9" fill="none" stroke="#141413" stroke-width="1.9"/>
+        <path d="M197 212 H 304 V 288 H 264" fill="none" stroke="#2f5c8a" stroke-width="2.2"/>
+        <path d="M261 288 H 118 V 212 H 156" fill="none" stroke="#d97757" stroke-width="2.2"/>
+        <circle cx="304" cy="240" r="3.6" fill="#2f5c8a"/>
+        <circle cx="118" cy="240" r="3.6" fill="#d97757"/>
+        <text x="310" y="204" font-size="11" font-weight="700" fill="#2f5c8a">Q</text>
+        <text x="98" y="308" font-size="11" font-weight="700" fill="#d97757">QB</text>
+        <text x="56" y="378" font-size="11.5" font-weight="600" fill="#141413">the word line is not asserted</text>
+        <text x="56" y="396" font-size="11" fill="#6b6a5f">both access transistors are shut. the ring keeps</text>
+        <text x="56" y="411" font-size="11" fill="#6b6a5f">itself, and holds a zero at Q.</text>
+        <rect x="392" y="76" width="336" height="344" rx="12" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <rect x="392" y="76" width="336" height="4" rx="2" fill="#5d7045"/>
+        <text x="412" y="106" font-size="14" font-weight="600" fill="#141413">writing</text>
+        <text x="412" y="124" font-size="11" fill="#6b6a5f">the drivers win</text>
+        <line x1="412" y1="164" x2="708" y2="164" stroke="#5d7045" stroke-width="2.2"/>
+        <text x="412" y="156" font-size="10.5" font-weight="700" fill="#5d7045">word line</text>
+        <line x1="412" y1="196" x2="412" y2="330" stroke="#2f5c8a" stroke-width="2.2"/>
+        <text x="412" y="346" text-anchor="start" font-size="10.5" font-weight="600" fill="#2f5c8a">bit line &#183; QB side</text>
+        <line x1="708" y1="196" x2="708" y2="330" stroke="#d97757" stroke-width="2.2"/>
+        <text x="708" y="346" text-anchor="end" font-size="10.5" font-weight="600" fill="#d97757">bit line &#183; Q side</text>
+        <line x1="440" y1="227" x2="440" y2="253" stroke="#5d7045" stroke-width="1.6"/>
+        <line x1="446" y1="227" x2="446" y2="253" stroke="#5d7045" stroke-width="1.6"/>
+        <line x1="446" y1="227" x2="462" y2="227" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="446" y1="253" x2="462" y2="253" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="462" y1="227" x2="462" y2="253" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="424" y1="240" x2="440" y2="240" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="676" y1="227" x2="676" y2="253" stroke="#5d7045" stroke-width="1.6"/>
+        <line x1="682" y1="227" x2="682" y2="253" stroke="#5d7045" stroke-width="1.6"/>
+        <line x1="682" y1="227" x2="698" y2="227" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="682" y1="253" x2="698" y2="253" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="698" y1="227" x2="698" y2="253" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="660" y1="240" x2="676" y2="240" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="412" y1="240" x2="424" y2="240" stroke="#2f5c8a" stroke-width="1.6"/>
+        <line x1="462" y1="240" x2="474" y2="240" stroke="#2f5c8a" stroke-width="1.6"/>
+        <line x1="698" y1="240" x2="708" y2="240" stroke="#d97757" stroke-width="1.6"/>
+        <line x1="443" y1="164" x2="443" y2="227" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="679" y1="164" x2="679" y2="227" stroke="#5d7045" stroke-width="1.4"/>
+        <path d="M513.3 197.0 L546.0 212.0 L513.3 227.0 Z" fill="none" stroke="#141413" stroke-width="1.9" stroke-linejoin="round"/>
+        <circle cx="548.9" cy="212.0" r="2.9" fill="none" stroke="#141413" stroke-width="1.9"/>
+        <path d="M577.3 273.0 L610.0 288.0 L577.3 303.0 Z" fill="none" stroke="#141413" stroke-width="1.9" stroke-linejoin="round"/>
+        <circle cx="612.9" cy="288.0" r="2.9" fill="none" stroke="#141413" stroke-width="1.9"/>
+        <path d="M553 212 H 660 V 288 H 620" fill="none" stroke="#d97757" stroke-width="2.2"/>
+        <path d="M617 288 H 474 V 212 H 512" fill="none" stroke="#2f5c8a" stroke-width="2.2"/>
+        <circle cx="660" cy="240" r="3.6" fill="#d97757"/>
+        <circle cx="474" cy="240" r="3.6" fill="#2f5c8a"/>
+        <text x="666" y="204" font-size="11" font-weight="700" fill="#d97757">Q</text>
+        <text x="454" y="308" font-size="11" font-weight="700" fill="#2f5c8a">QB</text>
+        <text x="412" y="378" font-size="11.5" font-weight="600" fill="#141413">the bit lines are driven, and Q flips</text>
+        <text x="412" y="396" font-size="11" fill="#6b6a5f">a write is not persuasion &#8212; it is overpowering</text>
+        <text x="412" y="411" font-size="11" fill="#6b6a5f">the ring from outside. Q is a one now.</text>
+        <rect x="748" y="76" width="336" height="344" rx="12" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <rect x="748" y="76" width="336" height="4" rx="2" fill="#5d7045"/>
+        <text x="768" y="106" font-size="14" font-weight="600" fill="#141413">reading</text>
+        <text x="768" y="124" font-size="11" fill="#6b6a5f">the cell barely whispers</text>
+        <line x1="768" y1="164" x2="1064" y2="164" stroke="#5d7045" stroke-width="2.2"/>
+        <text x="768" y="156" font-size="10.5" font-weight="700" fill="#5d7045">word line</text>
+        <line x1="768" y1="196" x2="768" y2="330" stroke="#d97757" stroke-width="2.2"/>
+        <text x="768" y="346" text-anchor="start" font-size="10.5" font-weight="600" fill="#d97757">bit line &#183; QB side</text>
+        <line x1="1064" y1="196" x2="1064" y2="330" stroke="#d97757" stroke-width="2.2"/>
+        <text x="1064" y="346" text-anchor="end" font-size="10.5" font-weight="600" fill="#d97757">bit line &#183; Q side</text>
+        <line x1="796" y1="227" x2="796" y2="253" stroke="#5d7045" stroke-width="1.6"/>
+        <line x1="802" y1="227" x2="802" y2="253" stroke="#5d7045" stroke-width="1.6"/>
+        <line x1="802" y1="227" x2="818" y2="227" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="802" y1="253" x2="818" y2="253" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="818" y1="227" x2="818" y2="253" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="780" y1="240" x2="796" y2="240" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="1032" y1="227" x2="1032" y2="253" stroke="#5d7045" stroke-width="1.6"/>
+        <line x1="1038" y1="227" x2="1038" y2="253" stroke="#5d7045" stroke-width="1.6"/>
+        <line x1="1038" y1="227" x2="1054" y2="227" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="1038" y1="253" x2="1054" y2="253" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="1054" y1="227" x2="1054" y2="253" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="1016" y1="240" x2="1032" y2="240" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="768" y1="240" x2="780" y2="240" stroke="#d97757" stroke-width="1.6"/>
+        <line x1="818" y1="240" x2="830" y2="240" stroke="#2f5c8a" stroke-width="1.6"/>
+        <line x1="1054" y1="240" x2="1064" y2="240" stroke="#d97757" stroke-width="1.6"/>
+        <line x1="799" y1="164" x2="799" y2="227" stroke="#5d7045" stroke-width="1.4"/>
+        <line x1="1035" y1="164" x2="1035" y2="227" stroke="#5d7045" stroke-width="1.4"/>
+        <path d="M869.3 197.0 L902.0 212.0 L869.3 227.0 Z" fill="none" stroke="#141413" stroke-width="1.9" stroke-linejoin="round"/>
+        <circle cx="904.9" cy="212.0" r="2.9" fill="none" stroke="#141413" stroke-width="1.9"/>
+        <path d="M933.3 273.0 L966.0 288.0 L933.3 303.0 Z" fill="none" stroke="#141413" stroke-width="1.9" stroke-linejoin="round"/>
+        <circle cx="968.9" cy="288.0" r="2.9" fill="none" stroke="#141413" stroke-width="1.9"/>
+        <path d="M909 212 H 1016 V 288 H 976" fill="none" stroke="#d97757" stroke-width="2.2"/>
+        <path d="M973 288 H 830 V 212 H 868" fill="none" stroke="#2f5c8a" stroke-width="2.2"/>
+        <circle cx="1016" cy="240" r="3.6" fill="#d97757"/>
+        <circle cx="830" cy="240" r="3.6" fill="#2f5c8a"/>
+        <text x="1022" y="204" font-size="11" font-weight="700" fill="#d97757">Q</text>
+        <text x="810" y="308" font-size="11" font-weight="700" fill="#2f5c8a">QB</text>
+        <rect x="780" y="262" width="86" height="20" rx="10" fill="#f7e4dc" stroke="#d97757" stroke-width="1.2"/>
+        <text x="823" y="276" text-anchor="middle" font-size="10.5" font-weight="700" fill="#c2613f">&#8722;50 mV</text>
+        <path d="M778 272 H 772" fill="none" stroke="#d97757" stroke-width="1.6" marker-end="url(#stArr)"/>
+        <text x="768" y="378" font-size="11.5" font-weight="600" fill="#141413">both bit lines start high; one dips</text>
+        <text x="768" y="396" font-size="11" fill="#6b6a5f">QB is the low node, so the QB-side bit line is the</text>
+        <text x="768" y="411" font-size="11" fill="#6b6a5f">one that sags. that sag is the entire signal.</text>
+        <line x1="32" y1="446" x2="58" y2="446" stroke="#d97757" stroke-width="2.6"/>
+        <text x="66" y="450" font-size="11" fill="#6b6a5f">high</text>
+        <line x1="120" y1="446" x2="146" y2="446" stroke="#2f5c8a" stroke-width="2.6"/>
+        <text x="154" y="450" font-size="11" fill="#6b6a5f">low</text>
+        <line x1="202" y1="446" x2="228" y2="446" stroke="#a8a496" stroke-width="2.6" stroke-dasharray="6 4"/>
+        <text x="236" y="450" font-size="11" fill="#6b6a5f">nobody is driving it</text>
+        <line x1="370" y1="446" x2="396" y2="446" stroke="#5d7045" stroke-width="2.6"/>
+        <text x="404" y="450" font-size="11" fill="#6b6a5f">the word line is asserted</text>
+        <text x="32" y="482" font-size="11.5" fill="#8c8a7d">a figure redrawn for every state hides which parts moved. a figure recoloured for every state shows it, and the reader stops re-reading the schematic three times.</text>
+        <text x="32" y="499" font-size="11.5" fill="#8c8a7d">the colour meanings are fixed once for the whole figure. a legend that changes between panels is worse than no legend at all.</text>
+        <text x="32" y="516" font-size="11.5" fill="#8c8a7d">fifty millivolts is a typical order of magnitude for a cell like this, not a measurement &#8212; the point is that it is small, not that it is fifty.</text>
+        <rect x="820" y="432" width="260" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M820 439 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="833" cy="447" r="3.6" fill="#ffffff"/>
+        <text x="967" y="451" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">State triptych &#183; recolour, do not redraw</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">three states, one geometry</span><span class="lang-zh">三个状态，一套坐标</span></span>
+        <span class="lang-en">The three panels also read left to right as one story: the cell is holding a zero, a write turns it into a one, and a read gets that one back out as a fifty-millivolt sag on a single bit line. Ordering the states as a sequence rather than a menu costs nothing and gives the figure a direction.</span><span class="lang-zh">三格从左到右也读成一个连贯的故事：单元里存着 0，一次写入把它变成 1，一次读出把这个 1 取回来——表现为某一根位线上五十毫伏的下沉。把三个状态排成一个序列而不是一份清单，不花任何代价，却给了这张图一个方向。</span>
+      </figcaption>
+    </figure>
+
+    <div class="callout" style="margin-top:var(--space-8);">
+      <span class="callout__kicker"><span class="lang-en">the discipline this method needs</span><span class="lang-zh">这个方法要求的纪律</span></span>
+      <p class="callout__title"><span class="lang-en">A legend that changes between panels is worse than no legend</span><span class="lang-zh">在几格之间会变的图例，比没有图例更糟</span></p>
+      <p class="callout__body"><span class="lang-en">Colour is carrying the entire argument here, so its meaning has to be fixed once for the whole figure and stated where the reader will look. If orange means high in one panel and “selected” in the next, the reader learns to distrust the colour and starts reading the labels instead — at which point the figure has become a slow table.</span><span class="lang-zh">这里颜色承担了全部论证，所以它的含义必须对整张图只定义一次，并且写在读者会看的地方。如果橙色在这一格是「高电平」、在下一格变成「被选中」，读者就学会了不信任颜色，转而去读标签——到那一步，这张图已经退化成一张慢吞吞的表格。</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="anth-section" id="scale">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">Ten decades do not fit on a linear axis. They barely fit on a page.</span><span class="lang-zh">十个数量级放不进线性刻度。放进一页纸都很勉强。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">The cell on this page answers in about a nanosecond. A round trip across a continent takes a hundred and fifty million times longer. Those two numbers belong in the same picture, because the whole craft of making a machine feel fast is knowing which of them you are standing next to — and a linear axis puts eleven of the twelve points on top of each other at the far left, which the small strip at the bottom of the figure shows rather than claims.</span><span class="lang-zh">这一页讲的那个单元，大约一纳秒就能答。一次跨洲往返要长一亿五千万倍。这两个数字属于同一张图，因为让一台机器「感觉快」这门手艺，全部在于你清楚自己此刻站在哪一个旁边——而线性刻度会把十二个点里的十一个叠在最左边，图底下那条小尺子把这件事show 出来，而不是说出来。</span></p>
+    <figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 748" role="img" aria-label="A logarithmic ruler placing twelve latencies on one axis that runs from one nanosecond to one second, ten decades wide. Each latency is a coloured dot on the axis with a stalk rising to a labelled pill, staggered over three rows so that closely spaced events do not collide. Colour groups them: processor work in ink, memory in blue, storage in green, network in gold, and one frame at sixty hertz in orange, drawn with a full-height line because it is the threshold a person can actually perceive. Below the axis a row of six cards restates the same numbers on a human scale, taking one nanosecond to be one second, so an L1 hit is one second, a DRAM access is a minute and a third, a syscall is eight minutes, an NVMe read is fourteen hours, one frame is a hundred and ninety-three days and a cross-continent round trip is four and three-quarter years. Underneath that sits a small strip showing the same twelve points plotted on a linear axis instead, where eleven of them collapse into a single mark at the far left, which is the reason a logarithmic axis is used at all. Closing notes state that the figures are typical orders of magnitude rather than measurements, that a log axis must always be labelled as one because equal spacing means times ten, and that the human-scale column is what makes the difference felt rather than merely read" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs><pattern id="mrDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern></defs>
+        <rect width="1120" height="748" rx="16" fill="#faf9f5" stroke="#eceadf"/><rect width="1120" height="748" rx="16" fill="url(#mrDot)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">ORDERS OF MAGNITUDE &#183; TEN DECADES ON ONE AXIS</text>
+        <text x="32" y="58" font-size="11.5" fill="#8c8a7d">every step to the right is ten times longer. that is the only way twelve numbers spanning a factor of 150 million fit in one picture.</text>
+        <line x1="120" y1="342" x2="1060" y2="342" stroke="#141413" stroke-width="1.8"/>
+        <line x1="120.0" y1="336" x2="120.0" y2="348" stroke="#141413" stroke-width="1.4"/>
+        <text x="120.0" y="366" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">1 ns</text>
+        <line x1="151.4" y1="339" x2="151.4" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="169.8" y1="339" x2="169.8" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="182.9" y1="339" x2="182.9" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="193.0" y1="339" x2="193.0" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="201.3" y1="339" x2="201.3" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="208.3" y1="339" x2="208.3" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="214.3" y1="339" x2="214.3" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="219.7" y1="339" x2="219.7" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="224.4" y1="336" x2="224.4" y2="348" stroke="#141413" stroke-width="1.4"/>
+        <text x="224.4" y="366" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">10 ns</text>
+        <line x1="255.9" y1="339" x2="255.9" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="274.3" y1="339" x2="274.3" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="287.3" y1="339" x2="287.3" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="297.4" y1="339" x2="297.4" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="305.7" y1="339" x2="305.7" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="312.7" y1="339" x2="312.7" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="318.8" y1="339" x2="318.8" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="324.1" y1="339" x2="324.1" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="328.9" y1="336" x2="328.9" y2="348" stroke="#141413" stroke-width="1.4"/>
+        <text x="328.9" y="366" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">100 ns</text>
+        <line x1="360.3" y1="339" x2="360.3" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="378.7" y1="339" x2="378.7" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="391.8" y1="339" x2="391.8" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="401.9" y1="339" x2="401.9" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="410.2" y1="339" x2="410.2" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="417.2" y1="339" x2="417.2" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="423.2" y1="339" x2="423.2" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="428.6" y1="339" x2="428.6" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="433.3" y1="336" x2="433.3" y2="348" stroke="#141413" stroke-width="1.4"/>
+        <text x="433.3" y="366" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">1 &#181;s</text>
+        <line x1="464.8" y1="339" x2="464.8" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="483.2" y1="339" x2="483.2" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="496.2" y1="339" x2="496.2" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="506.3" y1="339" x2="506.3" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="514.6" y1="339" x2="514.6" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="521.6" y1="339" x2="521.6" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="527.7" y1="339" x2="527.7" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="533.0" y1="339" x2="533.0" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="537.8" y1="336" x2="537.8" y2="348" stroke="#141413" stroke-width="1.4"/>
+        <text x="537.8" y="366" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">10 &#181;s</text>
+        <line x1="569.2" y1="339" x2="569.2" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="587.6" y1="339" x2="587.6" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="600.7" y1="339" x2="600.7" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="610.8" y1="339" x2="610.8" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="619.1" y1="339" x2="619.1" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="626.0" y1="339" x2="626.0" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="632.1" y1="339" x2="632.1" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="637.4" y1="339" x2="637.4" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="642.2" y1="336" x2="642.2" y2="348" stroke="#141413" stroke-width="1.4"/>
+        <text x="642.2" y="366" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">100 &#181;s</text>
+        <line x1="673.7" y1="339" x2="673.7" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="692.1" y1="339" x2="692.1" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="705.1" y1="339" x2="705.1" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="715.2" y1="339" x2="715.2" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="723.5" y1="339" x2="723.5" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="730.5" y1="339" x2="730.5" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="736.5" y1="339" x2="736.5" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="741.9" y1="339" x2="741.9" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="746.7" y1="336" x2="746.7" y2="348" stroke="#141413" stroke-width="1.4"/>
+        <text x="746.7" y="366" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">1 ms</text>
+        <line x1="778.1" y1="339" x2="778.1" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="796.5" y1="339" x2="796.5" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="809.5" y1="339" x2="809.5" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="819.7" y1="339" x2="819.7" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="827.9" y1="339" x2="827.9" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="834.9" y1="339" x2="834.9" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="841.0" y1="339" x2="841.0" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="846.3" y1="339" x2="846.3" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="851.1" y1="336" x2="851.1" y2="348" stroke="#141413" stroke-width="1.4"/>
+        <text x="851.1" y="366" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">10 ms</text>
+        <line x1="882.6" y1="339" x2="882.6" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="900.9" y1="339" x2="900.9" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="914.0" y1="339" x2="914.0" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="924.1" y1="339" x2="924.1" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="932.4" y1="339" x2="932.4" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="939.4" y1="339" x2="939.4" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="945.4" y1="339" x2="945.4" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="950.8" y1="339" x2="950.8" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="955.6" y1="336" x2="955.6" y2="348" stroke="#141413" stroke-width="1.4"/>
+        <text x="955.6" y="366" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">100 ms</text>
+        <line x1="987.0" y1="339" x2="987.0" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="1005.4" y1="339" x2="1005.4" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="1018.4" y1="339" x2="1018.4" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="1028.6" y1="339" x2="1028.6" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="1036.8" y1="339" x2="1036.8" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="1043.8" y1="339" x2="1043.8" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="1049.9" y1="339" x2="1049.9" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="1055.2" y1="339" x2="1055.2" y2="345" stroke="#c8c4b6" stroke-width="0.9"/>
+        <line x1="1060.0" y1="336" x2="1060.0" y2="348" stroke="#141413" stroke-width="1.4"/>
+        <text x="1060.0" y="366" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">1 s</text>
+        <line x1="120.0" y1="313" x2="120.0" y2="338" stroke="#a8a496" stroke-width="1"/>
+        <rect x="72.0" y="291" width="96" height="22" rx="11" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="120.0" y="306" text-anchor="middle" font-size="10.5" font-weight="600" fill="#141413">L1 hit</text>
+        <circle cx="120.0" cy="342" r="4.5" fill="#141413"/>
+        <line x1="169.8" y1="273" x2="169.8" y2="338" stroke="#a8a496" stroke-width="1"/>
+        <rect x="106.8" y="251" width="126" height="22" rx="11" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="169.8" y="266" text-anchor="middle" font-size="10.5" font-weight="600" fill="#141413">branch mispredict</text>
+        <circle cx="169.8" cy="342" r="4.5" fill="#141413"/>
+        <line x1="255.9" y1="313" x2="255.9" y2="338" stroke="#a8a496" stroke-width="1"/>
+        <rect x="195.9" y="291" width="120" height="22" rx="11" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="255.9" y="306" text-anchor="middle" font-size="10.5" font-weight="600" fill="#141413">uncontended lock</text>
+        <circle cx="255.9" cy="342" r="4.5" fill="#141413"/>
+        <line x1="318.8" y1="273" x2="318.8" y2="338" stroke="#a8a496" stroke-width="1"/>
+        <rect x="261.8" y="251" width="114" height="22" rx="11" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="318.8" y="266" text-anchor="middle" font-size="10.5" font-weight="600" fill="#2f5c8a">one DRAM access</text>
+        <circle cx="318.8" cy="342" r="4.5" fill="#2f5c8a"/>
+        <line x1="401.9" y1="313" x2="401.9" y2="338" stroke="#a8a496" stroke-width="1"/>
+        <rect x="353.9" y="291" width="96" height="22" rx="11" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="401.9" y="306" text-anchor="middle" font-size="10.5" font-weight="600" fill="#141413">one syscall</text>
+        <circle cx="401.9" cy="342" r="4.5" fill="#141413"/>
+        <line x1="483.2" y1="273" x2="483.2" y2="338" stroke="#a8a496" stroke-width="1"/>
+        <rect x="429.2" y="251" width="108" height="22" rx="11" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="483.2" y="266" text-anchor="middle" font-size="10.5" font-weight="600" fill="#141413">context switch</text>
+        <circle cx="483.2" cy="342" r="4.5" fill="#141413"/>
+        <line x1="610.8" y1="313" x2="610.8" y2="338" stroke="#a8a496" stroke-width="1"/>
+        <rect x="550.8" y="291" width="120" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="610.8" y="306" text-anchor="middle" font-size="10.5" font-weight="600" fill="#5d7045">NVMe random read</text>
+        <circle cx="610.8" cy="342" r="4.5" fill="#5d7045"/>
+        <line x1="683.8" y1="273" x2="683.8" y2="338" stroke="#a8a496" stroke-width="1"/>
+        <rect x="623.8" y="251" width="120" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="683.8" y="266" text-anchor="middle" font-size="10.5" font-weight="600" fill="#5d7045">eMMC random read</text>
+        <circle cx="683.8" cy="342" r="4.5" fill="#5d7045"/>
+        <line x1="715.2" y1="233" x2="715.2" y2="338" stroke="#a8a496" stroke-width="1"/>
+        <rect x="642.7" y="211" width="145" height="22" rx="11" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="715.2" y="226" text-anchor="middle" font-size="10.5" font-weight="600" fill="#8a5a2a">same-rack round trip</text>
+        <circle cx="715.2" cy="342" r="4.5" fill="#8a5a2a"/>
+        <line x1="819.7" y1="313" x2="819.7" y2="338" stroke="#a8a496" stroke-width="1"/>
+        <rect x="753.7" y="291" width="132" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="819.7" y="306" text-anchor="middle" font-size="10.5" font-weight="600" fill="#5d7045">spinning-disk seek</text>
+        <circle cx="819.7" cy="342" r="4.5" fill="#5d7045"/>
+        <line x1="874.4" y1="150" x2="874.4" y2="342" stroke="#d97757" stroke-width="1.6" stroke-dasharray="6 4"/>
+        <rect x="808.4" y="251" width="132" height="22" rx="11" fill="#f7e4dc" stroke="#d97757" stroke-width="1.2"/>
+        <text x="874.4" y="266" text-anchor="middle" font-size="10.5" font-weight="600" fill="#d97757">one frame at 60 Hz</text>
+        <circle cx="874.4" cy="342" r="4.5" fill="#d97757"/>
+        <line x1="973.9" y1="233" x2="973.9" y2="338" stroke="#a8a496" stroke-width="1"/>
+        <rect x="916.9" y="211" width="114" height="22" rx="11" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="973.9" y="226" text-anchor="middle" font-size="10.5" font-weight="600" fill="#8a5a2a">cross-continent</text>
+        <circle cx="973.9" cy="342" r="4.5" fill="#8a5a2a"/>
+        <text x="874.4" y="140" text-anchor="middle" font-size="11.5" font-weight="700" fill="#c2613f">the only one a person can perceive</text>
+        <circle cx="120" cy="392" r="4.5" fill="#141413"/><text x="134" y="396" font-size="11" fill="#6b6a5f">processor</text>
+        <circle cx="222" cy="392" r="4.5" fill="#2f5c8a"/><text x="236" y="396" font-size="11" fill="#6b6a5f">memory</text>
+        <circle cx="318" cy="392" r="4.5" fill="#5d7045"/><text x="332" y="396" font-size="11" fill="#6b6a5f">storage</text>
+        <circle cx="408" cy="392" r="4.5" fill="#8a5a2a"/><text x="422" y="396" font-size="11" fill="#6b6a5f">network</text>
+        <circle cx="502" cy="392" r="4.5" fill="#d97757"/><text x="516" y="396" font-size="11" fill="#6b6a5f">what your eye is waiting for</text>
+        <text x="32" y="440" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">THE SAME NUMBERS, IF ONE NANOSECOND WERE ONE SECOND</text>
+        <rect x="32" y="452" width="168" height="74" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <text x="46" y="474" font-size="11" font-weight="600" fill="#141413">L1 hit</text>
+        <text x="46" y="490" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">1 ns</text>
+        <text x="46" y="513" font-size="14" font-weight="700" fill="#141413">1 second</text>
+        <rect x="212" y="452" width="168" height="74" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <text x="226" y="474" font-size="11" font-weight="600" fill="#141413">one DRAM access</text>
+        <text x="226" y="490" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">80 ns</text>
+        <text x="226" y="513" font-size="14" font-weight="700" fill="#141413">1.3 minutes</text>
+        <rect x="392" y="452" width="168" height="74" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <text x="406" y="474" font-size="11" font-weight="600" fill="#141413">one syscall</text>
+        <text x="406" y="490" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">500 ns</text>
+        <text x="406" y="513" font-size="14" font-weight="700" fill="#141413">8 minutes</text>
+        <rect x="572" y="452" width="168" height="74" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <text x="586" y="474" font-size="11" font-weight="600" fill="#141413">NVMe random read</text>
+        <text x="586" y="490" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">50 &#181;s</text>
+        <text x="586" y="513" font-size="14" font-weight="700" fill="#141413">14 hours</text>
+        <rect x="752" y="452" width="168" height="74" rx="9" fill="#f7e4dc" stroke="#d97757" stroke-width="1.5"/>
+        <text x="766" y="474" font-size="11" font-weight="600" fill="#141413">one frame at 60 Hz</text>
+        <text x="766" y="490" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">16.7 ms</text>
+        <text x="766" y="513" font-size="14" font-weight="700" fill="#c2613f">193 days</text>
+        <rect x="932" y="452" width="168" height="74" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <text x="946" y="474" font-size="11" font-weight="600" fill="#141413">cross-continent</text>
+        <text x="946" y="490" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">150 ms</text>
+        <text x="946" y="513" font-size="14" font-weight="700" fill="#141413">4.7 years</text>
+        <text x="32" y="554" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">THE SAME TWELVE POINTS ON A LINEAR AXIS &#183; WHY THIS FIGURE IS NOT LINEAR</text>
+        <line x1="120" y1="590" x2="1060" y2="590" stroke="#a8a496" stroke-width="1.4"/>
+        <circle cx="120.0" cy="590" r="4" fill="#141413" opacity="0.75"/>
+        <circle cx="120.0" cy="590" r="4" fill="#141413" opacity="0.75"/>
+        <circle cx="120.0" cy="590" r="4" fill="#141413" opacity="0.75"/>
+        <circle cx="120.0" cy="590" r="4" fill="#2f5c8a" opacity="0.75"/>
+        <circle cx="120.0" cy="590" r="4" fill="#141413" opacity="0.75"/>
+        <circle cx="120.0" cy="590" r="4" fill="#141413" opacity="0.75"/>
+        <circle cx="120.3" cy="590" r="4" fill="#5d7045" opacity="0.75"/>
+        <circle cx="121.6" cy="590" r="4" fill="#5d7045" opacity="0.75"/>
+        <circle cx="123.1" cy="590" r="4" fill="#8a5a2a" opacity="0.75"/>
+        <circle cx="151.3" cy="590" r="4" fill="#5d7045" opacity="0.75"/>
+        <circle cx="224.7" cy="590" r="4" fill="#d97757" opacity="0.75"/>
+        <circle cx="1060.0" cy="590" r="4" fill="#8a5a2a" opacity="0.75"/>
+        <text x="120" y="610" font-size="11" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">0</text>
+        <text x="1060" y="610" text-anchor="end" font-size="11" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">150 ms</text>
+        <text x="136" y="584" font-size="11.5" font-weight="600" fill="#c2613f">eleven of the twelve land on this one mark</text>
+        <text x="32" y="636" font-size="11.5" fill="#8c8a7d">these are typical orders of magnitude, not measurements &#8212; the point is the distance between them, not the digits. measure your own board before quoting any figure.</text>
+        <text x="32" y="653" font-size="11.5" fill="#8c8a7d">a log axis has to say so on its face: equal spacing means times ten, and a reader who misses that reads every gap as ten times too small.</text>
+        <text x="32" y="670" font-size="11.5" fill="#8c8a7d">the human-scale row is what turns the ruler into an argument. &#8220;a hundred thousand times slower&#8221; is a phrase; &#8220;one second against a hundred and ninety-three days&#8221; is a picture.</text>
+        <rect x="820" y="700" width="260" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M820 707 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="833" cy="715" r="3.6" fill="#ffffff"/>
+        <text x="967" y="719" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Magnitude ruler &#183; log scale</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">ten decades on one axis</span><span class="lang-zh">一根轴，十个数量级</span></span>
+        <span class="lang-en">The human-scale row is what turns the ruler into an argument. “A hundred thousand times slower” is a phrase; “one second against a hundred and ninety-three days” is a picture. The one anchor that is not a machine number is the frame at sixty hertz, because it is the only interval on the axis a person can actually perceive.</span><span class="lang-zh">「换成人类尺度」那一排，才是让这把尺子变成论据的东西。「慢十万倍」是一句话，「一秒 对 一百九十三天」是一张图。轴上唯一一个不是机器数字的锚点是 60 Hz 的一帧，因为它是整根轴上人真正能感知的唯一一段间隔。</span>
+      </figcaption>
+    </figure>
+
+    <div class="use-list" style="margin-top:var(--space-8);">
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">a log axis that does not say it is one</span><span class="lang-zh">对数轴上没写它是对数轴</span></div>
+        <div class="detail-row__body"><span class="lang-en">Then the reader takes every gap at face value and reads the whole figure ten times too flat, without ever getting a signal that something is wrong. Say “each step is ten times” on the face of the figure. It is one line of text and it is not optional.</span><span class="lang-zh">那读者会按字面读每一段间隔，把整张图读平十倍，而且完全不会收到任何「哪里不对」的信号。在图上写明「每一格是十倍」。那只是一行字，而且不是可选项。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">the numbers are given to three digits</span><span class="lang-zh">数字给到了三位有效数字</span></div>
+        <div class="detail-row__body"><span class="lang-en">Precision here is a promise you cannot keep — these are orders of magnitude and they move with the part, the temperature and the queue in front of them. State that on the figure, and the reader will use it for what it is good for, which is deciding what to worry about.</span><span class="lang-zh">在这里给精度是一个你兑现不了的承诺——这些是数量级，会随器件、温度和前面排的队一起变。在图上写清楚，读者就会拿它去做它擅长的事：决定该担心什么。</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="anth-section" style="padding-top:var(--space-6);">
+  <div class="anth-container anth-container--wide">
+    <p style="color:var(--anth-text-secondary); font-size:14px;"><span class="lang-en">All three figures are templates: <code>abstraction-ladder.svg</code>, <code>state-triptych.svg</code> and <code>magnitude-ruler.svg</code> in <code>skills/anthropic-design/templates/diagrams/</code>. The other two pages in this set are <a href="bringup.html">bringing a panel up</a> and <a href="packaging.html">how a chip is assembled</a>.</span><span class="lang-zh">三张图都是模板：<code>skills/anthropic-design/templates/diagrams/</code> 下的 <code>abstraction-ladder.svg</code>、<code>state-triptych.svg</code>、<code>magnitude-ruler.svg</code>。这一组的另外两页是<a href="bringup.html">一块屏，从接上去到亮起来</a>和<a href="packaging.html">一颗芯片是怎么装出来的</a>。</span></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: anthropic-design
+Page-type: feature-deep (demo)
+Created: 2026-09-02
+Decisions:
+- [method-first] chose "three drawing methods carried by one small subject" over "a tutorial on memory cells". Because: the subject is a vehicle; a reader here is looking for how to draw a mechanism, and one small mechanism is enough to carry three methods honestly.
+- [ladder-stops-at-three] chose "three rungs" over "five". Because: past three the reader loses track of what contains what, and the fix is a second figure sharing a rung, not a taller ladder.
+- [states-as-a-sequence] chose "hold, write, read as one story" over "three independent states". Because: ordering costs nothing and gives the triptych a direction, so the reader knows why the panels are in that order.
+- [no-kernel-claims] chose "say plainly that nothing here is grep-able" over "leaving the sourcing note off". Because: the sibling pages carry file and line numbers, and a reader who has seen those will otherwise assume these numbers were checked the same way.
+Known trade-offs:
+- SVG-internal text stays English in both languages; only figcaptions and prose translate.
+- The latency figures are typical orders of magnitude, not measurements. The ruler states this on its face and the sourcing note repeats it.
+- magnitude-ruler is shared with the diagram gallery, so a change there has to be synced into both.
+/design-review:self-diff -->
+</body>
+</html>

@@ -1,0 +1,1052 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bringing a panel up — anthropic-design</title>
+<meta name="description" content="What is inside a display module, how its flex is wired, the order its supplies must come up in, and which command to run at each block when it stays dark.">
+<meta property="og:title" content="Bringing a panel up">
+<meta property="og:description" content="Four anthropic-design figures on panel bring-up: the layer stack in cross-section, the flex pinout, the power-up sequence, and a debug map that pins a command to every block.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/anthropic.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+
+  /* §H · Lora (editorial body) -> Noto Serif SC; Poppins (display) -> Noto Sans SC. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .alt-card__body,
+  html[data-lang="zh"] .callout__body,
+  html[data-lang="zh"] .detail-row__body,
+  html[data-lang="zh"] .sourcing__body,
+  html[data-lang="zh"] .fig-cap {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .alt-card__title,
+  html[data-lang="zh"] .alt-card__kicker,
+  html[data-lang="zh"] .detail-row__label,
+  html[data-lang="zh"] .fig-tag,
+  html[data-lang="zh"] .stat-trio .num,
+  html[data-lang="zh"] .stat-trio .lbl {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] .anth-quote { font-style: normal; }
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .alt-card__kicker,
+  html[data-lang="zh"] .detail-row__label,
+  html[data-lang="zh"] .fig-tag { text-transform: none; letter-spacing: 0.05em; }
+
+  /* Stat trio - the three numbers that define the whole path */
+  .stat-trio {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5);
+    padding: var(--space-7) var(--space-5);
+    background: #ffffff; border: 1px solid var(--anth-light-gray); border-radius: var(--radius-md);
+  }
+  .stat-trio > div { text-align: center; }
+  .stat-trio .num {
+    display: block; font-family: var(--font-heading); font-size: 48px; font-weight: 600;
+    color: var(--anth-text); letter-spacing: -0.02em; line-height: 1;
+  }
+  .stat-trio .lbl {
+    display: block; font-family: var(--font-heading); font-size: 12.5px; font-weight: 500;
+    color: var(--anth-text-secondary); margin-top: var(--space-3); letter-spacing: 0.02em;
+  }
+
+  /* Figure block - the two big diagrams */
+  .fig {
+    background: #ffffff; border: 1px solid var(--anth-light-gray);
+    border-radius: var(--radius-lg); padding: var(--space-6);
+    margin: 0 0 var(--space-6);
+  }
+  .fig svg { display: block; width: 100%; height: auto; }
+  .fig-cap {
+    margin: var(--space-4) 0 0;
+    font-family: var(--font-body); font-size: 14.5px; line-height: 1.6;
+    color: var(--anth-text-secondary); max-width: 900px;
+  }
+  .fig-tag {
+    display: block; font-family: var(--font-heading); font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--anth-orange-ink);
+    margin-bottom: 4px;
+  }
+
+  /* Alternative cards - designs considered and rejected */
+  .alt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .alt-card {
+    background: #ffffff; border: 1px solid var(--anth-light-gray); border-radius: var(--radius-lg);
+    padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3);
+  }
+  .alt-card--shipped { border-left: 3px solid var(--anth-orange); }
+  .alt-card__kicker {
+    font-family: var(--font-heading); font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+    color: var(--anth-orange-ink); text-transform: uppercase;
+  }
+  .alt-card__title {
+    font-family: var(--font-heading); font-size: 21px; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--anth-text); margin: 0; line-height: 1.25;
+  }
+  .alt-card__body {
+    font-family: var(--font-body); font-size: 15.5px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+  .alt-card__verdict {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    color: var(--anth-text-secondary); margin-top: auto; padding-top: var(--space-3);
+    border-top: 1px solid var(--anth-light-gray);
+  }
+
+  /* When-you-need-it list */
+  .use-list {
+    list-style: none; padding: 0; margin: var(--space-5) 0 0;
+    display: flex; flex-direction: column; gap: var(--space-4);
+  }
+  .use-list li {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+    color: var(--anth-text); padding-left: var(--space-5); position: relative;
+  }
+  .use-list li::before {
+    content: ''; position: absolute; left: 0; top: 10px;
+    width: 6px; height: 6px; border-radius: 50%; background: var(--anth-orange);
+  }
+
+  /* Honest callout */
+  .callout {
+    background: #faf9f5; border: 1px solid var(--anth-light-gray);
+    border-left: 3px solid var(--anth-orange);
+    border-radius: var(--radius-md); padding: var(--space-6);
+  }
+  .callout__kicker {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink); margin: 0;
+  }
+  .callout__title {
+    font-family: var(--font-heading); font-size: 22px; font-weight: 600;
+    color: var(--anth-text); margin: var(--space-2) 0 var(--space-3);
+  }
+  .callout__body {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+
+  /* Detail rows - the mechanism, last */
+  .detail-row {
+    display: grid; grid-template-columns: 190px 1fr;
+    gap: var(--space-5); padding: var(--space-5) 0;
+    border-bottom: 1px solid var(--anth-light-gray);
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row__label {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink);
+    padding-top: 3px;
+  }
+  .detail-row__body {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+    color: var(--anth-text); margin: 0;
+  }
+  .detail-row__body code {
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    background: #faf9f5; padding: 2px 8px; border-radius: 4px;
+    border: 1px solid var(--anth-light-gray);
+  }
+  /* Sourcing note - what is checked vs what is illustrative */
+  .sourcing {
+    background: #ffffff; border: 1px solid var(--anth-light-gray);
+    border-left: 3px solid var(--anth-orange);
+    border-radius: var(--radius-md); padding: var(--space-5) var(--space-6);
+  }
+  .sourcing__kicker {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink);
+    margin: 0 0 var(--space-2);
+  }
+  .sourcing__body {
+    font-family: var(--font-body); font-size: 15px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+  .sourcing__body code {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    background: #faf9f5; padding: 1px 6px; border-radius: 4px;
+    border: 1px solid var(--anth-light-gray);
+  }
+  html[data-lang="zh"] .sourcing__kicker { text-transform: none; letter-spacing: 0.05em; }
+
+  .eyebrow-link {
+    font-family: var(--font-heading); font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--anth-text-secondary); font-weight: 600;
+  }
+  html[data-lang="zh"] .eyebrow-link { text-transform: none; letter-spacing: 0.05em; }
+
+  @media (max-width: 900px) {
+    .alt-grid, .stat-trio { grid-template-columns: 1fr; }
+    .detail-row { grid-template-columns: 1fr; gap: var(--space-2); }
+  }
+
+  /* 术语表:一行一个词,左边词右边两问 */
+  .term-row { display:grid; grid-template-columns: 210px 1fr; gap: var(--space-5);
+    padding: var(--space-5) 0; border-top: 1px solid var(--anth-light-gray); }
+  .term-row:last-child { border-bottom: 1px solid var(--anth-light-gray); }
+  .term-name { font-family: var(--font-heading); font-weight: 600; font-size: 15px;
+    color: var(--anth-text); line-height: 1.4; }
+  .term-en { display:block; font-family: var(--font-mono, monospace); font-size: 12px;
+    font-weight: 400; color: var(--anth-text-secondary); margin-top: 3px; }
+  .term-what { font-size: 15px; line-height: 1.65; color: var(--anth-text); margin: 0; }
+  .term-without { font-size: 14px; line-height: 1.6; color: var(--anth-text-secondary);
+    margin: var(--space-2) 0 0; }
+  .term-without b { color: var(--anth-orange-ink); font-weight: 600; }
+  @media (max-width: 720px) { .term-row { grid-template-columns: 1fr; gap: var(--space-2); } }
+</style>
+</head>
+<body>
+
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="../../index.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">Sky Skills</a>
+  <div>
+    <a href="#stack"><span class="lang-en">The stack</span><span class="lang-zh">十二层</span></a>
+    <a href="#wiring"><span class="lang-en">Thirty conductors</span><span class="lang-zh">三十根线</span></a>
+    <a href="#power"><span class="lang-en">The order</span><span class="lang-zh">上电顺序</span></a>
+    <a href="#triage"><span class="lang-en">When it is dark</span><span class="lang-zh">不亮的时候</span></a>
+    <a href="hardware.html"><span class="lang-en">Data path</span><span class="lang-zh">数据通路</span></a>
+    <a href="diagrams.html"><span class="lang-en">Gallery</span><span class="lang-zh">图集</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+  </div>
+</div></nav>
+
+<header class="anth-section" style="padding-top:var(--space-9);">
+  <div class="anth-container anth-container--wide">
+    <a class="eyebrow-link" href="diagrams.html"><span class="lang-en">← Back · anthropic-design diagram gallery</span><span class="lang-zh">← 返回 · anthropic-design 图示案例库</span></a>
+    <span class="anth-badge" style="margin-top:var(--space-5); background:var(--anth-cta); color:#ffffff; font-weight:600;"><span class="lang-en">hardware · panel bring-up</span><span class="lang-zh">硬件 · 屏的点亮</span></span>
+    <h1 style="margin-top:var(--space-4); max-width:900px;"><span class="lang-en">Twelve layers.<br>Thirty conductors.<br>One order you cannot change.</span><span class="lang-zh">十二层玻璃。<br>三十根线。<br>一个不能换的顺序。</span></h1>
+    <p style="font-size:18px; line-height:1.7; color:var(--anth-text-secondary); max-width:800px; margin-top:var(--space-5); font-family:var(--font-body);"><span class="lang-en">The data-path page starts after the panel already works. This one is about everything before that: what is physically inside the module, how it is wired, the order its supplies have to come up in, and — when the screen stays dark — which command to run at which block. Four figures, one small-panel module.</span><span class="lang-zh">数据通路那一页，是从屏已经能亮之后讲起的。这一页讲之前的事：模组里面物理上有什么、怎么接线、供电必须按什么顺序上来，以及屏一直不亮的时候，在哪一块敲哪条命令。四张图，一块小尺寸屏模组。</span></p>
+
+    <div class="stat-trio">
+      <div><span class="num">12</span><span class="lbl"><span class="lang-en">layers between your finger and the backlight</span><span class="lang-zh">手指和背光之间隔着的层数</span></span></div>
+      <div><span class="num">30</span><span class="lbl"><span class="lang-en">conductors on the flex, ten of them paired</span><span class="lang-zh">FPC 上的导线，其中十根是成对的</span></span></div>
+      <div><span class="num">120 ms</span><span class="lbl"><span class="lang-en">minimum from sleep-out to backlight on</span><span class="lang-zh">从退出睡眠到点亮背光的最小间隔</span></span></div>
+    </div>
+
+    <div class="sourcing">
+      <span class="sourcing__kicker"><span class="lang-en">what is checked and what is representative</span><span class="lang-zh">哪些是查过的，哪些是示意</span></span>
+      <p class="sourcing__body"><span class="lang-en">Every kernel path named on this page was read out of a real tree — Linux 4.14.139 — and carries a file and a line number in the last section. The panel is a representative small-panel module: the layer count, the pin assignment and the timing minima are typical of that class of part rather than a specific product, and each figure says so on its face. Measure your own stack and read your own datasheet before quoting any number here.</span><span class="lang-zh">这一页提到的每一条内核路径，都是从一棵真实的树里读出来的 —— Linux 4.14.139 —— 最后一节逐条附文件和行号。屏本身是一块有代表性的小尺寸模组：层数、引脚分配、时序下限都是这一类器件的典型值，不是某个具体型号，每张图上也都写明了这一点。要引用这里任何一个数字之前，先量自己的叠层、读自己那块屏的规格书。</span></p>
+    </div>
+  </div>
+</header>
+
+<section class="anth-section" id="stack">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">A panel is not a sheet of glass. It is twelve layers, and one of them answers to two subsystems.</span><span class="lang-zh">屏不是一块玻璃，是十二层，其中一层同时归两个子系统管。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">A block diagram will tell you the display controller talks to the panel. It will not tell you that between the glass you touch and the light you see there are twelve distinct materials, that two of them are adhesive and cure once, or that the layer carrying the pixel transistors also carries the electrode the touch controller transmits on. That last one is not a curiosity. It is the reason a display-side stall can take touch down with it while every touch register still reads back normal — and no block diagram can show it, because at that level the two subsystems look completely separate.</span><span class="lang-zh">框图会告诉你显示控制器连着屏。它不会告诉你：你手指碰到的玻璃和你看到的光之间隔着十二种不同的材料，其中两层是胶、固化一次就回不去，以及承载像素晶体管的那一层，同时也承载着触摸控制器发射用的电极。最后这件事不是冷知识。它就是「显示侧一卡，触摸跟着停，而触摸寄存器读回来全是正常值」的原因 —— 而任何框图都画不出来，因为在框图那个层次上，这两个子系统看起来完全是分开的。</span></p>
+    <figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 700" role="img" aria-label="A cross-section of a display module drawn beside a magnified detail of one of its layers. Top left is a small plan view of the module seen from above, with a dashed section line A to A running across it and two arrows showing the viewing direction. In the middle of the figure the section itself: twelve horizontal bands stacked from cover glass at the top down through optical adhesive, upper polariser, colour filter glass, the liquid crystal layer, TFT glass, lower polariser, an air gap, diffuser, light guide plate, reflector and metal frame. Every band is named by a short leader running out to a right-aligned label column on the left, because the thin bands cannot hold text. A dashed box sits on the right end of the TFT glass band and two thin lines carry it across to the large detail panel on the right, which magnifies that layer forty times and shows pixel transistors below one continuous conductor strip. That strip is labelled as serving two jobs at once, the common electrode for the display and the transmit electrode for touch, which is why a stalled display side takes the touch side down with it while every touch register still reads back normal. Closing notes state that a section line is what tells the reader where the cut was made and which way they are looking, that thin layers must be labelled outside on leaders rather than stuffed with text, and that a detail panel needs two lines back to the place it magnifies" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="xsDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+          <pattern id="xsCut" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#141413" stroke-width="1.1" opacity="0.20"/></pattern>
+          <pattern id="xsCutB" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#2f5c8a" stroke-width="1.1" opacity="0.26"/></pattern>
+          <marker id="xsArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+          <marker id="xsArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+        </defs>
+
+        <rect width="1120" height="700" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="700" rx="16" fill="url(#xsDot)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">CROSS-SECTION &#183; WHAT IS TOUCHING WHAT, AND HOW THICK</text>
+
+        <!-- plan view + section line -->
+        <text x="60" y="70" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">PLAN VIEW &#183; WHERE THE CUT IS TAKEN</text>
+        <rect x="60" y="82" width="188" height="104" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.3"/>
+        <rect x="72" y="94" width="164" height="80" rx="3" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.2"/>
+        <text x="154" y="166" text-anchor="middle" font-size="10.5" fill="#6b6a5f">active area</text>
+        <line x1="44" y1="124" x2="264" y2="124" stroke="#141413" stroke-width="1.3" stroke-dasharray="10 4 3 4"/>
+        <path d="M60 142 L60 128" fill="none" stroke="#141413" stroke-width="1.5" marker-end="url(#xsArr)"/>
+        <path d="M248 142 L248 128" fill="none" stroke="#141413" stroke-width="1.5" marker-end="url(#xsArr)"/>
+        <text x="34" y="120" text-anchor="middle" font-size="11.5" font-weight="700" fill="#141413">A</text>
+        <text x="274" y="120" text-anchor="middle" font-size="11.5" font-weight="700" fill="#141413">A</text>
+        <text x="60" y="208" font-size="11.5" fill="#8c8a7d">the arrows say which way you are looking &#8212; a section line without them is ambiguous</text>
+
+        <text x="360" y="240" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">SECTION A&#8212;A &#183; 12 LAYERS, RELATIVE THICKNESS</text>
+
+        <!-- stack: cell x 360..660, backlight x 372..648 -->
+        <rect x="360" y="252" width="300" height="30" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.3"/>
+        <rect x="360" y="252" width="300" height="30" fill="url(#xsCutB)"/>
+        <rect x="360" y="282" width="300" height="16" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.2"/>
+        <rect x="360" y="298" width="300" height="18" fill="#e7e4d9" stroke="#a8a496" stroke-width="1.2"/>
+        <rect x="360" y="316" width="300" height="26" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.3"/>
+        <rect x="360" y="316" width="300" height="26" fill="url(#xsCutB)"/>
+        <rect x="360" y="342" width="300" height="18" fill="#f7e4dc" stroke="#d97757" stroke-width="1.6"/>
+        <rect x="360" y="360" width="300" height="34" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.4"/>
+        <rect x="360" y="360" width="300" height="34" fill="url(#xsCut)"/>
+        <rect x="360" y="394" width="300" height="18" fill="#e7e4d9" stroke="#a8a496" stroke-width="1.2"/>
+        <rect x="372" y="412" width="276" height="20" fill="#ffffff" stroke="#c8c4b6" stroke-width="1.1" stroke-dasharray="5 3"/>
+        <rect x="372" y="432" width="276" height="16" fill="#f1efe8" stroke="#a8a496" stroke-width="1.2"/>
+        <rect x="372" y="448" width="276" height="38" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.3"/>
+        <rect x="372" y="448" width="276" height="38" fill="url(#xsCutB)"/>
+        <rect x="372" y="486" width="276" height="14" fill="#f1efe8" stroke="#a8a496" stroke-width="1.2"/>
+        <rect x="372" y="500" width="276" height="26" fill="#e7e4d9" stroke="#141413" stroke-width="1.4"/>
+        <rect x="372" y="500" width="276" height="26" fill="url(#xsCut)"/>
+        <rect x="654" y="456" width="14" height="22" rx="2" fill="#c9913f"/>
+        <text x="661" y="450" text-anchor="middle" font-size="10.5" font-weight="600" fill="#8a5a2a">LED</text>
+
+        <!-- leaders out to the LEFT, labels right-aligned at x=330 -->
+        <g stroke="#a8a496" stroke-width="1">
+          <line x1="360" y1="267" x2="336" y2="267"/><line x1="360" y1="290" x2="336" y2="290"/>
+          <line x1="360" y1="307" x2="336" y2="307"/><line x1="360" y1="329" x2="336" y2="329"/>
+          <line x1="360" y1="403" x2="336" y2="403"/><line x1="372" y1="422" x2="336" y2="422"/>
+          <line x1="372" y1="440" x2="336" y2="440"/><line x1="372" y1="467" x2="336" y2="467"/>
+          <line x1="372" y1="493" x2="336" y2="493"/><line x1="372" y1="513" x2="336" y2="513"/>
+        </g>
+        <line x1="360" y1="351" x2="336" y2="351" stroke="#d97757" stroke-width="1.3"/>
+        <line x1="360" y1="377" x2="336" y2="377" stroke="#5d7045" stroke-width="1.3"/>
+        <g text-anchor="end" font-size="11.5">
+          <text x="330" y="271" font-weight="600" fill="#2f5c8a">cover glass<tspan font-weight="400" fill="#6b6a5f"> &#183; 0.55 mm</tspan></text>
+          <text x="330" y="294" font-weight="600" fill="#8a5a2a">optical adhesive<tspan font-weight="400" fill="#6b6a5f"> &#183; 150 &#181;m</tspan></text>
+          <text x="330" y="311" font-weight="600" fill="#6b6a5f">upper polariser</text>
+          <text x="330" y="333" font-weight="600" fill="#2f5c8a">colour-filter glass<tspan font-weight="400" fill="#6b6a5f"> &#183; 0.20 mm</tspan></text>
+          <text x="330" y="355" font-weight="700" fill="#c2613f">liquid-crystal layer<tspan font-weight="400" fill="#6b6a5f"> &#183; 3.5 &#181;m</tspan></text>
+          <text x="330" y="381" font-weight="700" fill="#5d7045">TFT glass<tspan font-weight="400" fill="#6b6a5f"> &#183; transistors + one shared conductor</tspan></text>
+          <text x="330" y="407" font-weight="600" fill="#6b6a5f">lower polariser</text>
+          <text x="330" y="426" font-weight="600" fill="#6b6a5f">air gap<tspan font-weight="400"> &#183; not a mistake, it is optical</tspan></text>
+          <text x="330" y="444" font-weight="600" fill="#6b6a5f">diffuser</text>
+          <text x="330" y="471" font-weight="600" fill="#2f5c8a">light guide plate<tspan font-weight="400" fill="#6b6a5f"> &#183; 0.40 mm</tspan></text>
+          <text x="330" y="497" font-weight="600" fill="#6b6a5f">reflector</text>
+          <text x="330" y="517" font-weight="600" fill="#141413">metal frame</text>
+        </g>
+        <text x="360" y="548" font-size="11" fill="#8c8a7d">the flex that carries signals out leaves from the TFT glass &#8212; the colour-filter glass carries nothing out</text>
+
+        <!-- detail callout box, right end of the TFT glass band -->
+        <rect x="566" y="358" width="88" height="38" fill="none" stroke="#d97757" stroke-width="1.6" stroke-dasharray="5 3"/>
+        <line x1="654" y1="358" x2="720" y2="252" stroke="#d97757" stroke-width="1.1" stroke-dasharray="4 3"/>
+        <line x1="654" y1="396" x2="720" y2="526" stroke="#d97757" stroke-width="1.1" stroke-dasharray="4 3"/>
+
+        <!-- DETAIL panel -->
+        <text x="720" y="240" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">DETAIL &#183; THAT ONE LAYER AT 40&#215;</text>
+        <rect x="720" y="252" width="360" height="274" rx="10" fill="#ffffff" stroke="#d97757" stroke-width="1.6"/>
+        <rect x="736" y="276" width="328" height="26" fill="#f7e4dc" stroke="#d97757" stroke-width="1.6"/>
+        <text x="900" y="293" text-anchor="middle" font-size="11.5" font-weight="700" fill="#c2613f">one continuous conductor strip</text>
+        <text x="736" y="324" font-size="11.5" font-weight="600" fill="#141413">display calls it</text>
+        <rect x="736" y="332" width="150" height="22" rx="11" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="811" y="347" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">Vcom &#183; common electrode</text>
+        <text x="914" y="324" font-size="11.5" font-weight="600" fill="#141413">touch calls it</text>
+        <rect x="914" y="332" width="150" height="22" rx="11" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="989" y="347" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">TX &#183; transmit electrode</text>
+        <path d="M811 354 V 372 H 900" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+        <path d="M989 354 V 372 H 900" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+        <path d="M900 372 V 386" fill="none" stroke="#d97757" stroke-width="1.8" marker-end="url(#xsArrO)"/>
+        <text x="900" y="404" text-anchor="middle" font-size="11.5" font-weight="700" fill="#c2613f">same piece of metal, time-shared</text>
+        <rect x="736" y="418" width="328" height="44" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <g stroke="#5d7045" stroke-width="1.2" fill="none">
+          <rect x="756" y="430" width="30" height="20" rx="2"/><rect x="812" y="430" width="30" height="20" rx="2"/>
+          <rect x="868" y="430" width="30" height="20" rx="2"/><rect x="924" y="430" width="30" height="20" rx="2"/>
+          <rect x="980" y="430" width="30" height="20" rx="2"/>
+        </g>
+        <text x="900" y="476" text-anchor="middle" font-size="11" fill="#6b6a5f">pixel transistors sit underneath, on the same glass</text>
+        <text x="736" y="500" font-size="11.5" font-weight="700" fill="#c2613f">consequence:</text>
+        <text x="828" y="500" font-size="11.5" fill="#6b6a5f">stall the display side and touch stops too &#8212;</text>
+        <text x="736" y="516" font-size="11.5" fill="#6b6a5f">while every touch register still reads back perfectly normal.</text>
+
+        <!-- badges -->
+        <circle cx="290" cy="124" r="10.5" fill="#d97757"/><text x="290" y="128" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+        <circle cx="348" cy="267" r="10.5" fill="#d97757"/><text x="348" y="271" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+        <circle cx="700" cy="284" r="10.5" fill="#d97757"/><text x="700" y="288" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+
+        <!-- legend -->
+        <rect x="60" y="576" width="10" height="10" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/><text x="78" y="585" font-size="11" fill="#6b6a5f">glass</text>
+        <rect x="130" y="576" width="10" height="10" fill="#e7e4d9" stroke="#a8a496" stroke-width="1.2"/><text x="148" y="585" font-size="11" fill="#6b6a5f">film</text>
+        <rect x="192" y="576" width="10" height="10" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.2"/><text x="210" y="585" font-size="11" fill="#6b6a5f">adhesive</text>
+        <rect x="276" y="576" width="10" height="10" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/><text x="294" y="585" font-size="11" fill="#6b6a5f">active silicon</text>
+        <rect x="386" y="576" width="10" height="10" fill="#f7e4dc" stroke="#d97757" stroke-width="1.4"/><text x="404" y="585" font-size="11" fill="#6b6a5f">what this figure is about</text>
+        <rect x="556" y="576" width="10" height="10" fill="#e7e4d9" stroke="#a8a496" stroke-width="1"/><rect x="556" y="576" width="10" height="10" fill="url(#xsCut)"/><text x="574" y="585" font-size="11" fill="#6b6a5f">hatched = cut through solid material</text>
+
+        <text x="32" y="620" font-size="11.5" fill="#8c8a7d">&#9312; the plan view carries the section line, so the reader knows where the cut was taken and which way they are facing &#183; &#9313; every thin band is named outside, on a leader</text>
+        <text x="32" y="637" font-size="11.5" fill="#8c8a7d">&#9314; the detail panel is joined to its origin by two lines, not one &#8212; one line reads as an arrow pointing somewhere, two read as &#8220;this region, blown up&#8221;.</text>
+        <text x="32" y="654" font-size="11.5" fill="#8c8a7d">thicknesses are typical for a small-panel module and are drawn to relative, not absolute, scale &#8212; measure your own stack before quoting any of them.</text>
+
+        <rect x="858" y="570" width="222" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M858 577 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="871" cy="585" r="3.6" fill="#ffffff"/>
+        <text x="978" y="589" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Cross-section &#183; panel stack</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">the module, cut open</span><span class="lang-zh">把模组切开</span></span>
+        <span class="lang-en">A section is only readable when the reader knows where the cut was taken, so the plan view carries the line and the two arrows that fix the viewing direction. Twelve bands cannot hold text, so every name is on a leader outside. The dashed box on the TFT glass reaches the detail panel by two lines rather than one — one line reads as an arrow pointing somewhere, two read as “this region, blown up”.</span><span class="lang-zh">剖面图只有在读者知道「从哪儿切的」时才读得懂，所以平面图上要画剖切线，还要有两个箭头把「朝哪边看」定死。十二条带子里塞不下文字，所以名字全部用引线引到外面。TFT 玻璃上那个虚线框用两条线连到放大面板，不是一条 —— 一条读起来是「指向某处的箭头」，两条才读成「这一块，放大」。</span>
+      </figcaption>
+    </figure>
+
+    <div class="callout" style="margin-top:var(--space-8);">
+      <span class="callout__kicker"><span class="lang-en">the layer that matters</span><span class="lang-zh">要盯住的那一层</span></span>
+      <p class="callout__title"><span class="lang-en">One piece of metal, two jobs, time-shared</span><span class="lang-zh">同一片金属，两个岗位，分时轮着用</span></p>
+      <p class="callout__body"><span class="lang-en">On a panel with touch integrated into the display, the common electrode the display drives and the transmit electrode the touch scan drives are the same conductor. They take turns. So the failure that catches people is not “touch is broken” — it is that touch went quiet because the display half stopped handing the line over, and every register on the touch side still reads exactly as it should. If you are chasing a touch problem and the display side has any complaint at all, settle the display side first.</span><span class="lang-zh">触摸做进显示里的屏，显示驱动的公共电极和触摸扫描的发射电极是同一根导体，两边轮流用。所以真正咬人的故障不是「触摸坏了」，而是显示那一半不再交出这根线，触摸就跟着安静了 —— 而触摸侧每一个寄存器读回来都完全正常。查触摸问题的时候，只要显示侧有任何异常，先把显示侧弄清楚。</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="anth-section" id="wiring">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">Thirty conductors — and which end is pin 1 depends on which face you are looking at.</span><span class="lang-zh">三十根线 —— 而哪一头是 1 脚，取决于你从哪一面看。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">A pinout has to be two things at once: the row of pads drawn the way the part is actually built, and the table of what each one carries. A table on its own cannot be checked against the part in your hand. A strip on its own does not tell you what any pad is. And the mistake that costs a board is neither — it is that the drawing was made from the component side and read from the pad side, which mirrors it end to end.</span><span class="lang-zh">引脚图必须同时是两样东西：按实物真实排法画出来的那一排焊盘，和「每一根是什么」的表。光有表，没法拿实物对着核；光有排布图，不知道每根是什么。而真正会烧板子的错误两者都不是 —— 是图从元件面画、人从焊盘面读，左右整个镜像了。</span></p>
+    <figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 752" role="img" aria-label="A pinout for a thirty-way flexible cable connector on a display module. Across the top the connector is drawn as it physically is, one straight row of thirty pads, each filled with the colour of its category: ink for ground, gold for power rails, blue for the ten pads that form five differential pairs, and green for control and I2C lines. Square brackets above the row join each differential pair and name it, so the two halves of a pair can never be read as unrelated pins. A triangle marks pin one at the left end, with a note that the real part carries the same triangle in silkscreen. Below the strip, a two-column table lists all thirty pins with number, colour dot, signal name and a short note. Under the table an orange warning box states the trap this figure exists to prevent: left and right depend on which face you are looking at, a drawing seen from the component side is the mirror image of the same connector seen from the pad side, so a pinout without a stated viewing side and a pin one marker is not usable. Closing notes add that differential pairs must be bracketed rather than merely listed, that the ground pins sitting between pairs are shields and not spare grounds, and that this pinout is an example rather than a part number, so the panel datasheet remains the authority" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs><pattern id="poDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern></defs>
+        <rect width="1120" height="752" rx="16" fill="#faf9f5" stroke="#eceadf"/><rect width="1120" height="752" rx="16" fill="url(#poDot)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">PINOUT &#183; 30-WAY PANEL FLEX, AS THE PART IS ACTUALLY BUILT</text>
+        <text x="32" y="58" font-size="11.5" fill="#8c8a7d">the strip is the physical row of pads; the table below is what each one carries. one without the other is not a pinout.</text>
+        <path d="M305 106 V 94 H 357 V 106" fill="none" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="331" y="88" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2f5c8a">D3</text>
+        <path d="M389 106 V 94 H 441 V 106" fill="none" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="415" y="88" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2f5c8a">D2</text>
+        <path d="M473 106 V 94 H 525 V 106" fill="none" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="499" y="88" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2f5c8a">CLK</text>
+        <path d="M557 106 V 94 H 609 V 106" fill="none" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="583" y="88" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2f5c8a">D1</text>
+        <path d="M641 106 V 94 H 693 V 106" fill="none" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="667" y="88" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2f5c8a">D0</text>
+        <path d="M126 122 L136 130 L126 138 Z" fill="#d97757"/>
+        <text x="122" y="134" text-anchor="end" font-size="10.5" font-weight="700" fill="#c2613f">pin 1</text>
+        <rect x="126" y="104" width="858" height="62" rx="6" fill="#ffffff" stroke="#8c8a7d" stroke-width="1.4"/>
+        <rect x="140" y="112" width="18" height="34" rx="2" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="149" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">1</text>
+        <rect x="168" y="112" width="18" height="34" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="177" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">2</text>
+        <rect x="196" y="112" width="18" height="34" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="205" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">3</text>
+        <rect x="224" y="112" width="18" height="34" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="233" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">4</text>
+        <rect x="252" y="112" width="18" height="34" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="261" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">5</text>
+        <rect x="280" y="112" width="18" height="34" rx="2" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="289" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">6</text>
+        <rect x="308" y="112" width="18" height="34" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="317" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">7</text>
+        <rect x="336" y="112" width="18" height="34" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="345" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">8</text>
+        <rect x="364" y="112" width="18" height="34" rx="2" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="373" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">9</text>
+        <rect x="392" y="112" width="18" height="34" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="401" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">10</text>
+        <rect x="420" y="112" width="18" height="34" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="429" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">11</text>
+        <rect x="448" y="112" width="18" height="34" rx="2" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="457" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">12</text>
+        <rect x="476" y="112" width="18" height="34" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="485" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">13</text>
+        <rect x="504" y="112" width="18" height="34" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="513" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">14</text>
+        <rect x="532" y="112" width="18" height="34" rx="2" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="541" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">15</text>
+        <rect x="560" y="112" width="18" height="34" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="569" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">16</text>
+        <rect x="588" y="112" width="18" height="34" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="597" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">17</text>
+        <rect x="616" y="112" width="18" height="34" rx="2" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="625" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">18</text>
+        <rect x="644" y="112" width="18" height="34" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="653" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">19</text>
+        <rect x="672" y="112" width="18" height="34" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="681" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">20</text>
+        <rect x="700" y="112" width="18" height="34" rx="2" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="709" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">21</text>
+        <rect x="728" y="112" width="18" height="34" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="737" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">22</text>
+        <rect x="756" y="112" width="18" height="34" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="765" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">23</text>
+        <rect x="784" y="112" width="18" height="34" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="793" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">24</text>
+        <rect x="812" y="112" width="18" height="34" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="821" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">25</text>
+        <rect x="840" y="112" width="18" height="34" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="849" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">26</text>
+        <rect x="868" y="112" width="18" height="34" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="877" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">27</text>
+        <rect x="896" y="112" width="18" height="34" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="905" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">28</text>
+        <rect x="924" y="112" width="18" height="34" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="933" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">29</text>
+        <rect x="952" y="112" width="18" height="34" rx="2" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="961" y="161" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">30</text>
+        <text x="140" y="192" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">WHAT EACH PAD CARRIES</text>
+        <rect x="132" y="207" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="156" y="220" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">1</text>
+        <circle cx="172" cy="216" r="4" fill="#141413"/>
+        <text x="186" y="220" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">GND</text>
+        <text x="156" y="240" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">2</text>
+        <circle cx="172" cy="236" r="4" fill="#8a5a2a"/>
+        <text x="186" y="240" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">VLED-</text>
+        <text x="270" y="240" font-size="10.5" fill="#6b6a5f">backlight cathode</text>
+        <rect x="132" y="247" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="156" y="260" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">3</text>
+        <circle cx="172" cy="256" r="4" fill="#8a5a2a"/>
+        <text x="186" y="260" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">VLED-</text>
+        <text x="270" y="260" font-size="10.5" fill="#6b6a5f">doubled for current</text>
+        <text x="156" y="280" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">4</text>
+        <circle cx="172" cy="276" r="4" fill="#8a5a2a"/>
+        <text x="186" y="280" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">VLED+</text>
+        <text x="270" y="280" font-size="10.5" fill="#6b6a5f">backlight anode</text>
+        <rect x="132" y="287" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="156" y="300" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">5</text>
+        <circle cx="172" cy="296" r="4" fill="#8a5a2a"/>
+        <text x="186" y="300" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">VLED+</text>
+        <text x="270" y="300" font-size="10.5" fill="#6b6a5f">doubled for current</text>
+        <text x="156" y="320" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">6</text>
+        <circle cx="172" cy="316" r="4" fill="#141413"/>
+        <text x="186" y="320" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">GND</text>
+        <rect x="132" y="327" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="156" y="340" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">7</text>
+        <circle cx="172" cy="336" r="4" fill="#2f5c8a"/>
+        <text x="186" y="340" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">D3N</text>
+        <text x="270" y="340" font-size="10.5" fill="#6b6a5f">lane 3</text>
+        <text x="156" y="360" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">8</text>
+        <circle cx="172" cy="356" r="4" fill="#2f5c8a"/>
+        <text x="186" y="360" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">D3P</text>
+        <text x="270" y="360" font-size="10.5" fill="#6b6a5f">lane 3</text>
+        <rect x="132" y="367" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="156" y="380" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">9</text>
+        <circle cx="172" cy="376" r="4" fill="#141413"/>
+        <text x="186" y="380" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">GND</text>
+        <text x="270" y="380" font-size="10.5" fill="#6b6a5f">pair shield</text>
+        <text x="156" y="400" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">10</text>
+        <circle cx="172" cy="396" r="4" fill="#2f5c8a"/>
+        <text x="186" y="400" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">D2N</text>
+        <text x="270" y="400" font-size="10.5" fill="#6b6a5f">lane 2</text>
+        <rect x="132" y="407" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="156" y="420" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">11</text>
+        <circle cx="172" cy="416" r="4" fill="#2f5c8a"/>
+        <text x="186" y="420" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">D2P</text>
+        <text x="270" y="420" font-size="10.5" fill="#6b6a5f">lane 2</text>
+        <text x="156" y="440" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">12</text>
+        <circle cx="172" cy="436" r="4" fill="#141413"/>
+        <text x="186" y="440" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">GND</text>
+        <text x="270" y="440" font-size="10.5" fill="#6b6a5f">pair shield</text>
+        <rect x="132" y="447" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="156" y="460" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">13</text>
+        <circle cx="172" cy="456" r="4" fill="#2f5c8a"/>
+        <text x="186" y="460" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">CLKN</text>
+        <text x="270" y="460" font-size="10.5" fill="#6b6a5f">clock</text>
+        <text x="156" y="480" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">14</text>
+        <circle cx="172" cy="476" r="4" fill="#2f5c8a"/>
+        <text x="186" y="480" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">CLKP</text>
+        <text x="270" y="480" font-size="10.5" fill="#6b6a5f">clock</text>
+        <rect x="132" y="487" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="156" y="500" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">15</text>
+        <circle cx="172" cy="496" r="4" fill="#141413"/>
+        <text x="186" y="500" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">GND</text>
+        <text x="270" y="500" font-size="10.5" fill="#6b6a5f">pair shield</text>
+        <rect x="556" y="207" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="580" y="220" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">16</text>
+        <circle cx="596" cy="216" r="4" fill="#2f5c8a"/>
+        <text x="610" y="220" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">D1N</text>
+        <text x="694" y="220" font-size="10.5" fill="#6b6a5f">lane 1</text>
+        <text x="580" y="240" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">17</text>
+        <circle cx="596" cy="236" r="4" fill="#2f5c8a"/>
+        <text x="610" y="240" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">D1P</text>
+        <text x="694" y="240" font-size="10.5" fill="#6b6a5f">lane 1</text>
+        <rect x="556" y="247" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="580" y="260" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">18</text>
+        <circle cx="596" cy="256" r="4" fill="#141413"/>
+        <text x="610" y="260" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">GND</text>
+        <text x="694" y="260" font-size="10.5" fill="#6b6a5f">pair shield</text>
+        <text x="580" y="280" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">19</text>
+        <circle cx="596" cy="276" r="4" fill="#2f5c8a"/>
+        <text x="610" y="280" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">D0N</text>
+        <text x="694" y="280" font-size="10.5" fill="#6b6a5f">lane 0</text>
+        <rect x="556" y="287" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="580" y="300" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">20</text>
+        <circle cx="596" cy="296" r="4" fill="#2f5c8a"/>
+        <text x="610" y="300" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">D0P</text>
+        <text x="694" y="300" font-size="10.5" fill="#6b6a5f">lane 0</text>
+        <text x="580" y="320" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">21</text>
+        <circle cx="596" cy="316" r="4" fill="#141413"/>
+        <text x="610" y="320" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">GND</text>
+        <text x="694" y="320" font-size="10.5" fill="#6b6a5f">pair shield</text>
+        <rect x="556" y="327" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="580" y="340" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">22</text>
+        <circle cx="596" cy="336" r="4" fill="#5d7045"/>
+        <text x="610" y="340" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#5d7045">TE</text>
+        <text x="694" y="340" font-size="10.5" fill="#6b6a5f">tearing effect, panel to host</text>
+        <text x="580" y="360" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">23</text>
+        <circle cx="596" cy="356" r="4" fill="#5d7045"/>
+        <text x="610" y="360" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#5d7045">RESET</text>
+        <text x="694" y="360" font-size="10.5" fill="#6b6a5f">active low</text>
+        <rect x="556" y="367" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="580" y="380" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">24</text>
+        <circle cx="596" cy="376" r="4" fill="#8a5a2a"/>
+        <text x="610" y="380" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">IOVCC</text>
+        <text x="694" y="380" font-size="10.5" fill="#6b6a5f">1.8 V logic</text>
+        <text x="580" y="400" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">25</text>
+        <circle cx="596" cy="396" r="4" fill="#8a5a2a"/>
+        <text x="610" y="400" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">IOVCC</text>
+        <text x="694" y="400" font-size="10.5" fill="#6b6a5f">doubled</text>
+        <rect x="556" y="407" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="580" y="420" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">26</text>
+        <circle cx="596" cy="416" r="4" fill="#8a5a2a"/>
+        <text x="610" y="420" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">VSP</text>
+        <text x="694" y="420" font-size="10.5" fill="#6b6a5f">+5.5 V analogue</text>
+        <text x="580" y="440" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">27</text>
+        <circle cx="596" cy="436" r="4" fill="#8a5a2a"/>
+        <text x="610" y="440" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">VSN</text>
+        <text x="694" y="440" font-size="10.5" fill="#6b6a5f">-5.5 V analogue</text>
+        <rect x="556" y="447" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="580" y="460" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">28</text>
+        <circle cx="596" cy="456" r="4" fill="#5d7045"/>
+        <text x="610" y="460" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#5d7045">SCL</text>
+        <text x="694" y="460" font-size="10.5" fill="#6b6a5f">I2C to the touch controller</text>
+        <text x="580" y="480" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">29</text>
+        <circle cx="596" cy="476" r="4" fill="#5d7045"/>
+        <text x="610" y="480" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#5d7045">SDA</text>
+        <text x="694" y="480" font-size="10.5" fill="#6b6a5f">I2C to the touch controller</text>
+        <rect x="556" y="487" width="408" height="20" rx="4" fill="#ffffff" opacity="0.72"/>
+        <text x="580" y="500" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">30</text>
+        <circle cx="596" cy="496" r="4" fill="#141413"/>
+        <text x="610" y="500" font-size="11.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">GND</text>
+        <rect x="140" y="530" width="848" height="76" rx="10" fill="#f7e4dc" stroke="#d97757" stroke-width="1.6"/>
+        <text x="164" y="556" font-size="12" font-weight="700" fill="#c2613f">the trap this figure exists to prevent</text>
+        <text x="164" y="578" font-size="11.5" fill="#141413">left and right depend on which face you are looking at. seen from the component side, this connector is the mirror of itself seen from the pad side.</text>
+        <text x="164" y="595" font-size="11.5" fill="#141413">so a pinout is only usable when it states the viewing side and marks pin 1 &#8212; and the part itself has to carry that mark too, or the drawing cannot be checked.</text>
+        <rect x="140" y="626" width="12" height="12" rx="2" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/>
+        <text x="160" y="636" font-size="11" fill="#6b6a5f">ground</text>
+        <rect x="234" y="626" width="12" height="12" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="254" y="636" font-size="11" fill="#6b6a5f">power rail</text>
+        <rect x="354" y="626" width="12" height="12" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="374" y="636" font-size="11" fill="#6b6a5f">differential pair</text>
+        <rect x="518" y="626" width="12" height="12" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="538" y="636" font-size="11" fill="#6b6a5f">control / I2C</text>
+        <path d="M657 638 V 626 H 691 V 638" fill="none" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="699" y="636" font-size="11" fill="#6b6a5f">bracket &#183; the two halves of one differential pair</text>
+        <text x="32" y="672" font-size="11.5" fill="#8c8a7d">the pairs are bracketed, not merely listed. a pair split across two table rows reads as two independent pins &#8212; and routing them that way is how a lane fails at the far end of the flex.</text>
+        <text x="32" y="689" font-size="11.5" fill="#8c8a7d">the grounds sitting between pairs are shields, not spare grounds &#8212; reassigning one of them to something else changes the impedance of the pair next to it.</text>
+        <text x="32" y="706" font-size="11.5" fill="#8c8a7d">this is an example arrangement, not a part number. the panel datasheet is the authority for any board you are actually building.</text>
+        <rect x="820" y="716" width="260" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M820 723 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="833" cy="731" r="3.6" fill="#ffffff"/>
+        <text x="967" y="735" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Pinout &#183; panel flex connector</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">the flex, pad by pad</span><span class="lang-zh">FPC，一个焊盘一个焊盘地看</span></span>
+        <span class="lang-en">Differential pairs get a bracket rather than two neighbouring table rows, because a pair read as two independent pins gets routed as two independent pins — and that fails at the far end of a long flex, not at the connector where you would look for it. The grounds sitting between pairs are shields; reassigning one changes the impedance of the pair beside it.</span><span class="lang-zh">差分对用括号括起来，而不是并排两行表格 —— 一对被读成两根独立的脚，就会被当成两根独立的脚去布线，然后在长 FPC 的远端出问题，而不是在你会去看的连接器那一头。对与对之间的地是屏蔽，不是备用地；把其中一根挪去接别的信号，旁边那一对的阻抗就变了。</span>
+      </figcaption>
+    </figure>
+
+    <div class="use-list" style="margin-top:var(--space-8);">
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">the pair is drawn as two rows in a table</span><span class="lang-zh">一对差分线在表里写成上下两行</span></div>
+        <div class="detail-row__body"><span class="lang-en">Then nothing on the page says they belong together, and the next person to touch the layout has no reason to keep them the same length. Bracket them in the figure so the pairing survives being read by someone who was not in the conversation.</span><span class="lang-zh">那么页面上就没有任何东西说它们是一对，下一个动布线的人也就没有理由让它们等长。在图上用括号把它们括起来，这样即使读图的人没参与过当时的讨论，配对关系也还在。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">the drawing does not say which face</span><span class="lang-zh">图上没写从哪一面看</span></div>
+        <div class="detail-row__body"><span class="lang-en">Then it is not a pinout, it is a coin flip. State the viewing side in words on the figure, mark pin 1, and say what carries that mark on the real part — a silkscreen triangle or a chamfered corner — so the drawing can be checked against the thing.</span><span class="lang-zh">那它就不是引脚图，是抛硬币。在图上用文字写清从哪一面看，标出 1 脚，并写明实物上靠什么认这个 1 脚 —— 丝印三角还是切角 —— 这样图才能拿去跟实物核对。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">a ground between two pairs gets reused</span><span class="lang-zh">对与对之间的地被挪去做别的用</span></div>
+        <div class="detail-row__body"><span class="lang-en">It was not spare. It was the return path keeping the pair either side of it at the impedance it was designed for. Losing it does not produce a clean failure; it produces a link that works on the bench and fails on a longer cable or a hotter day.</span><span class="lang-zh">那根地不是多出来的，它是回流路径，靠它两边那对线才维持在设计的阻抗上。丢了它不会干脆地坏掉，而是变成「实验室能跑、换根长线或者天热一点就不行」。</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="anth-section" id="power">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">Powering up is not switching on. It is a sequence with minimum gaps.</span><span class="lang-zh">上电不是「通电」，是一串带最小间隔的动作。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">Four supplies, a reference clock, a reset line and a backlight — and the only thing that makes them a panel rather than a pile of rails is the order and the waiting. Each gap in the figure has a number on it, and each number is there because something visible happens when you take it away: a panel that never lights, a white flash at boot, or an image that lingers for a second after power-down. Bring-up bugs cluster here because the sequence is split across two driver callbacks, and it is easy to move one step across that boundary without noticing.</span><span class="lang-zh">四路电源、一个参考时钟、一根复位、一路背光 —— 让它们成为一块屏而不是一堆电源轨的，只有顺序和等待。图上每一段间隔都标了数字，而每个数字之所以在那儿，是因为拿掉它就会看见后果：屏根本不亮、开机闪一下白、或者断电后画面还残留一秒。点亮阶段的问题集中在这里，因为这个顺序被拆在两个驱动回调里，很容易在没察觉的情况下把某一步挪过了边界。</span></p>
+    <figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="A panel power-up sequence drawn as a datasheet timing figure, not to scale, with the driver callbacks that own each stretch shown above it. Four supply rails come up in order: VCC_IO, then the 3.3 volt panel supply, then the D-PHY rail, then the reference clock, which must be running before reset is released. Reset is then pulled low, held, and released. The DSI link enters LP-11, the initialisation DCS commands are sent, sleep-out completes, and only then does the backlight come on. Four constraint brackets carry the numbers that actually matter: supplies stable to reset release at least 10 milliseconds, reset low width at least 10 microseconds, reset release to the first DCS command at least 5 milliseconds, and sleep-out to backlight at least 120 milliseconds. Two bars above the waveforms show that everything up to display-on belongs to the panel driver's prepare callback and the rest to enable. A closing note states the rule that power-down must be the exact reverse of this order, and names what each violated constraint looks like on a bench: a dark panel, a white flash, or a ghost image that fades" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+          <pattern id="psqDots" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+          </pattern>
+          <marker id="psqArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+          </marker>
+        </defs>
+
+        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="560" rx="16" fill="url(#psqDots)"/>
+
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">PANEL POWER SEQUENCE &#183; RAILS, RESET, COMMANDS, BACKLIGHT</text>
+        <text x="1064" y="34" text-anchor="end" font-size="12" font-style="italic" fill="#8c8a7d">not to scale &#183; the brackets carry the real numbers</text>
+
+        <!-- which callback owns which stretch -->
+        <rect x="216" y="56" width="676" height="22" rx="11" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="554" y="71" text-anchor="middle" font-size="12" fill="#2f5c8a" font-family="SFMono-Regular, Menlo, Consolas, monospace">panel_funcs-&gt;prepare()</text>
+        <rect x="892" y="56" width="172" height="22" rx="11" fill="#eef1e7" stroke="#b9c4a4"/>
+        <text x="978" y="71" text-anchor="middle" font-size="12" fill="#4d5a3c" font-family="SFMono-Regular, Menlo, Consolas, monospace">enable()</text>
+        <text x="204" y="71" text-anchor="end" font-size="12" font-weight="600" fill="#6b6a5f">owned by</text>
+
+        <g stroke="#a8a496" stroke-width="1" stroke-dasharray="3 4" opacity="0.7">
+          <line x1="580" y1="92" x2="580" y2="496"/>
+          <line x1="652" y1="92" x2="652" y2="466"/>
+          <line x1="800" y1="92" x2="800" y2="466"/>
+          <line x1="892" y1="92" x2="892" y2="496"/>
+          <line x1="1000" y1="92" x2="1000" y2="496"/>
+        </g>
+
+        <!-- supply rails -->
+        <g>
+          <text x="204" y="117" text-anchor="end" font-size="13" font-weight="600" fill="#141413">VCC_IO</text>
+          <text x="204" y="133" text-anchor="end" font-size="12" fill="#6b6a5f">1.8 V &#183; always first</text>
+          <path d="M216,132 H278 L288,110 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+          <text x="204" y="159" text-anchor="end" font-size="13" font-weight="600" fill="#141413">VCC_3V3</text>
+          <text x="204" y="175" text-anchor="end" font-size="12" fill="#6b6a5f">3.3 V panel supply</text>
+          <path d="M216,174 H354 L364,152 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+          <text x="204" y="201" text-anchor="end" font-size="13" font-weight="600" fill="#141413">VDD_MIPI</text>
+          <text x="204" y="217" text-anchor="end" font-size="12" fill="#6b6a5f">D-PHY rail</text>
+          <path d="M216,216 H430 L440,194 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+          <text x="204" y="243" text-anchor="end" font-size="13" font-weight="600" fill="#141413">REFCLK</text>
+          <text x="204" y="259" text-anchor="end" font-size="12" fill="#6b6a5f">24 MHz</text>
+          <path d="M216,258 H502 L512,236 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+        </g>
+
+        <!-- RESET_N -->
+        <text x="204" y="285" text-anchor="end" font-size="13" font-weight="600" fill="#141413">RESET_N</text>
+        <text x="204" y="301" text-anchor="end" font-size="12" fill="#6b6a5f">active low</text>
+        <path d="M216,278 H570 L580,300 H642 L652,278 H1064" fill="none" stroke="#d97757" stroke-width="1.8"/>
+
+        <!-- DSI link state -->
+        <text x="204" y="327" text-anchor="end" font-size="13" font-weight="600" fill="#141413">DSI link</text>
+        <text x="204" y="343" text-anchor="end" font-size="12" fill="#6b6a5f">lane state</text>
+        <rect x="216" y="318" width="508" height="26" rx="5" fill="#ffffff" stroke="#d8d4c8"/>
+        <text x="470" y="336" text-anchor="middle" font-size="12" fill="#8c8a7d">undriven</text>
+        <rect x="724" y="318" width="340" height="26" rx="5" fill="#e2ecf5" stroke="#c4d5e6"/>
+        <text x="894" y="336" text-anchor="middle" font-size="12" fill="#2f5c8a">LP-11 &#183; ready for commands</text>
+
+        <!-- DCS commands -->
+        <text x="204" y="369" text-anchor="end" font-size="13" font-weight="600" fill="#141413">DCS</text>
+        <text x="204" y="385" text-anchor="end" font-size="12" fill="#6b6a5f">init sequence</text>
+        <rect x="800" y="360" width="92" height="26" rx="5" fill="#f0e4d8" stroke="#d9bf94"/>
+        <text x="846" y="378" text-anchor="middle" font-size="12" fill="#8a6a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">init seq</text>
+        <rect x="892" y="360" width="60" height="26" rx="5" fill="#f4d9cd" stroke="#d97757"/>
+        <text x="922" y="378" text-anchor="middle" font-size="12" fill="#8f4a2f" font-family="SFMono-Regular, Menlo, Consolas, monospace">on</text>
+
+        <!-- backlight -->
+        <text x="204" y="411" text-anchor="end" font-size="13" font-weight="600" fill="#141413">BL_EN</text>
+        <text x="204" y="427" text-anchor="end" font-size="12" fill="#6b6a5f">PWM + enable</text>
+        <path d="M216,426 H990 L1000,404 H1064" fill="none" stroke="#788c5d" stroke-width="1.8"/>
+
+        <!-- constraint brackets -->
+          <line x1="364" y1="456" x2="652" y2="456" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="364" y1="451" x2="364" y2="461" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="652" y1="451" x2="652" y2="461" stroke="#a8a496" stroke-width="1.2"/>
+          <text x="508" y="447" text-anchor="middle" font-size="12" font-weight="400" fill="#6b6a5f">t1 &#8805; 10 ms &#183; supplies stable &#8594; reset release</text>
+          <line x1="580" y1="486" x2="652" y2="486" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="580" y1="481" x2="580" y2="491" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="652" y1="481" x2="652" y2="491" stroke="#a8a496" stroke-width="1.2"/>
+          <text x="616" y="477" text-anchor="middle" font-size="12" font-weight="400" fill="#6b6a5f">t2 &#8805; 10 &#181;s</text>
+          <line x1="652" y1="456" x2="800" y2="456" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="652" y1="451" x2="652" y2="461" stroke="#a8a496" stroke-width="1.2"/>
+          <line x1="800" y1="451" x2="800" y2="461" stroke="#a8a496" stroke-width="1.2"/>
+          <text x="726" y="447" text-anchor="middle" font-size="12" font-weight="400" fill="#6b6a5f">t3 &#8805; 5 ms &#183; reset &#8594; first DCS</text>
+          <line x1="892" y1="486" x2="1000" y2="486" stroke="#c9913f" stroke-width="2"/>
+          <line x1="892" y1="481" x2="892" y2="491" stroke="#c9913f" stroke-width="2"/>
+          <line x1="1000" y1="481" x2="1000" y2="491" stroke="#c9913f" stroke-width="2"/>
+          <text x="946" y="477" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">t4 &#8805; 120 ms &#183; sleep-out &#8594; backlight</text>
+
+        <text x="32" y="516" font-size="12" fill="#6b6a5f">REFCLK must already be running when reset rises, or the panel latches its state from a clock that is not there. Power-down is the exact reverse of this figure, every step.</text>
+        <text x="32" y="538" font-size="12" fill="#6b6a5f">Each broken constraint has its own bench symptom: t1 short &#8594; panel never answers; t3 short &#8594; the init sequence is swallowed; <tspan font-weight="600" fill="#8a6a2f">t4 short &#8594; a white flash at every boot</tspan> &#8212; the one people ship.</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">the order, and what each gap buys</span><span class="lang-zh">顺序，以及每一段间隔换来了什么</span></span>
+        <span class="lang-en">A datasheet-style timing figure, not to scale, with the driver callback that owns each stretch drawn above it. The brackets carry the four numbers that decide whether the panel comes up at all. Power-down is this figure read backwards — not “cut the rails”, but the exact reverse order.</span><span class="lang-zh">一张规格书式的时序图，不按比例，上方画出每一段归哪个驱动回调管。四个括号里是决定这块屏能不能起来的四个数字。断电就是把这张图倒着读一遍 —— 不是「把电断掉」，而是严格的反序。</span>
+      </figcaption>
+    </figure>
+
+    <div class="use-list" style="margin-top:var(--space-8);">
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">reset is released before the supplies are stable</span><span class="lang-zh">电源还没稳就放开了复位</span></div>
+        <div class="detail-row__body"><span class="lang-en">The panel controller latches configuration at the moment reset goes high. Release it early and it latches from a rail that is still moving — which afterwards does not read as a power problem at all. It reads as a panel that ignores half its initialisation commands.</span><span class="lang-zh">屏的控制器是在复位拉高的那一刻锁存配置的。放早了，它就从一条还在变的电源轨上锁，而这件事事后完全不像电源问题 —— 它表现成「这块屏有一半初始化命令不认」。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">the backlight comes on with the display</span><span class="lang-zh">背光跟显示一起开</span></div>
+        <div class="detail-row__body"><span class="lang-en">Then the first thing anybody sees is whatever was left in the panel RAM, which is where a white flash at boot comes from. The wait between sleep-out and backlight is what buys a first frame to show. It is the longest gap in the figure and the one most often shortened to make boot look faster.</span><span class="lang-zh">那么大家看到的第一样东西，就是屏内存里上次剩下的内容，这就是开机闪白的来源。退出睡眠到点亮背光之间的等待，买的就是「有一帧可显示」。它是图里最长的一段，也是最常被为了让开机看起来快一点而缩短的一段。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">power-down is not the exact reverse</span><span class="lang-zh">断电不是严格的反序</span></div>
+        <div class="detail-row__body"><span class="lang-en">Charge left on the panel is what makes an image sit on the glass after the system is off, and the reverse order is what drains it. This is the one constraint with no error message attached — the only report you will get is a user saying the screen “stays on for a moment”.</span><span class="lang-zh">屏上残留的电荷，就是系统已经关了画面还留在玻璃上的原因，而反序断电正是把它放掉的过程。这条约束完全没有任何报错 —— 你能拿到的唯一反馈，是用户说「屏幕关了还亮一下」。</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="anth-section" id="triage">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">When it stays dark, prove the previous stage produced something.</span><span class="lang-zh">屏一直不亮的时候，先证明上一站真的有输出。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">An architecture diagram leaves you knowing the shape of the system and still not knowing what to type. So this one pins the exact path under every block, and colours it by consequence rather than by category: green only reads, gold changes hardware or kernel state. Nobody arrives at a bring-up session holding a block diagram — they arrive holding a symptom, which is why the left column, not the architecture, is the entry point.</span><span class="lang-zh">架构图能让你知道系统长什么样，但还是不知道该敲什么。所以这张图把具体路径钉在每一块下面，并且按后果上色，不按类别上色：绿色只读，金色会改硬件或内核状态。没有人是捧着框图进点亮现场的，进来时手里拿的是一个现象 —— 所以入口是左边那一列，不是架构本身。</span></p>
+    <figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 812" role="img" aria-label="A block diagram of an embedded display path in which every block carries the command that inspects it. Down the left is a column of five symptom cards, each naming what the engineer actually sees, what it means, and which block to start at, so the reader enters the picture from their own problem rather than from the architecture. Below that column sits a rule box stating that you prove a stage received its input before you suspect that stage is broken. The right two thirds hold three grouped panels, display path, platform services, and interrupts and binding. Each panel holds cards naming a block with one line saying what it does, and directly under each card a monospace pill holding the exact path or command that reads it. Pills are outlined in green when the command only reads and in gold when running it changes hardware state. Closing notes record that an architecture diagram which does not say how to observe each block leaves the reader knowing the shape of the system and still not knowing what to type, that read-only and state-changing commands must be told apart on the figure itself, and that these paths only exist when debugfs is mounted and the matching kernel options are built in" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs><pattern id="tmDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+        <marker id="tmArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker></defs>
+        <rect width="1120" height="812" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="812" rx="16" fill="url(#tmDot)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">DEBUG MAP &#183; EVERY BLOCK CARRIES THE COMMAND THAT LOOKS INSIDE IT</text>
+        <text x="40" y="70" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">START FROM WHAT YOU SEE</text>
+        <rect x="40" y="82" width="276" height="62" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="40" y="82" width="4" height="62" rx="2" fill="#d97757"/>
+        <text x="58" y="102" font-size="12" font-weight="600" fill="#141413">backlight on, screen black</text>
+        <text x="58" y="118" font-size="10.5" fill="#6b6a5f">pixels are not arriving</text>
+        <text x="58" y="134" font-size="10.5" font-weight="600" fill="#c2613f">&#8594; start at the display controller</text>
+        <rect x="40" y="158" width="276" height="62" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="40" y="158" width="4" height="62" rx="2" fill="#d97757"/>
+        <text x="58" y="178" font-size="12" font-weight="600" fill="#141413">backlight off too</text>
+        <text x="58" y="194" font-size="10.5" fill="#6b6a5f">nothing is powered</text>
+        <text x="58" y="210" font-size="10.5" font-weight="600" fill="#c2613f">&#8594; start at regulators, then gpio</text>
+        <rect x="40" y="234" width="276" height="62" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="40" y="234" width="4" height="62" rx="2" fill="#d97757"/>
+        <text x="58" y="254" font-size="12" font-weight="600" fill="#141413">device node missing</text>
+        <text x="58" y="270" font-size="10.5" fill="#6b6a5f">the driver never bound</text>
+        <text x="58" y="286" font-size="10.5" font-weight="600" fill="#c2613f">&#8594; start at probe deferred</text>
+        <rect x="40" y="310" width="276" height="62" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="40" y="310" width="4" height="62" rx="2" fill="#d97757"/>
+        <text x="58" y="330" font-size="12" font-weight="600" fill="#141413">boots, then stops</text>
+        <text x="58" y="346" font-size="10.5" fill="#6b6a5f">an interrupt never came</text>
+        <text x="58" y="362" font-size="10.5" font-weight="600" fill="#c2613f">&#8594; start at interrupts</text>
+        <rect x="40" y="386" width="276" height="62" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="40" y="386" width="4" height="62" rx="2" fill="#d97757"/>
+        <text x="58" y="406" font-size="12" font-weight="600" fill="#141413">image torn or shifted</text>
+        <text x="58" y="422" font-size="10.5" fill="#6b6a5f">timing, not content</text>
+        <text x="58" y="438" font-size="10.5" font-weight="600" fill="#c2613f">&#8594; start at the clock tree</text>
+        <rect x="40" y="472" width="276" height="120" rx="9" fill="#f7e4dc" stroke="#d97757" stroke-width="1.5"/>
+        <text x="58" y="496" font-size="11.5" font-weight="700" fill="#c2613f">the rule this map exists to serve</text>
+        <text x="58" y="518" font-size="11.5" fill="#141413">prove a stage received its input</text>
+        <text x="58" y="535" font-size="11.5" fill="#141413">before you suspect that stage.</text>
+        <text x="58" y="558" font-size="10.5" fill="#6b6a5f">half of &#8220;the driver is broken&#8221; turns out to be</text>
+        <text x="58" y="572" font-size="10.5" fill="#6b6a5f">a clock that was never enabled.</text>
+        <rect x="340" y="70" width="740" height="202" rx="12" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.1" stroke-dasharray="4 3"/>
+        <rect x="340" y="82" width="4" height="178" rx="2" fill="#2f5c8a"/>
+        <circle cx="362" cy="92" r="3.5" fill="#2f5c8a"/>
+        <text x="374" y="96" font-size="11" font-weight="600" letter-spacing="1.0" fill="#2f5c8a">DISPLAY PATH</text>
+        <rect x="358" y="110" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <circle cx="374" cy="130" r="3.5" fill="#2f5c8a"/>
+        <text x="386" y="128" font-size="12" font-weight="600" fill="#141413">display controller</text>
+        <text x="386" y="143" font-size="10.5" fill="#6b6a5f">reads the framebuffer, drives timing</text>
+        <rect x="358" y="156" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="370" y="171" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/sys/kernel/debug/dri/0/state</text>
+        <text x="690" y="171" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+        <rect x="718" y="110" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <circle cx="734" cy="130" r="3.5" fill="#2f5c8a"/>
+        <text x="746" y="128" font-size="12" font-weight="600" fill="#141413">connector · DSI-1</text>
+        <text x="746" y="143" font-size="10.5" fill="#6b6a5f">is the panel even enabled</text>
+        <rect x="718" y="156" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="730" y="171" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/sys/class/drm/card0-DSI-1/enabled</text>
+        <text x="1050" y="171" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+        <rect x="358" y="190" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <circle cx="374" cy="210" r="3.5" fill="#2f5c8a"/>
+        <text x="386" y="208" font-size="12" font-weight="600" fill="#141413">buffers handed around</text>
+        <text x="386" y="223" font-size="10.5" fill="#6b6a5f">who allocated, who still holds it</text>
+        <rect x="358" y="236" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="370" y="251" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/sys/kernel/debug/dma_buf/bufinfo</text>
+        <text x="690" y="251" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+        <rect x="718" y="190" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <circle cx="734" cy="210" r="3.5" fill="#2f5c8a"/>
+        <text x="746" y="208" font-size="12" font-weight="600" fill="#141413">driver chatter, live</text>
+        <text x="746" y="223" font-size="10.5" fill="#6b6a5f">turn one file's debug prints on</text>
+        <rect x="718" y="236" width="344" height="22" rx="11" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="730" y="251" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">dynamic_debug/control &#8592; +p</text>
+        <text x="1050" y="251" text-anchor="end" font-size="10.5" font-weight="600" fill="#8a5a2a">writes</text>
+        <rect x="340" y="288" width="740" height="202" rx="12" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.1" stroke-dasharray="4 3"/>
+        <rect x="340" y="300" width="4" height="178" rx="2" fill="#5d7045"/>
+        <circle cx="362" cy="310" r="3.5" fill="#5d7045"/>
+        <text x="374" y="314" font-size="11" font-weight="600" letter-spacing="1.0" fill="#5d7045">PLATFORM SERVICES &#183; CLOCK, POWER, PINS</text>
+        <rect x="358" y="328" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <circle cx="374" cy="348" r="3.5" fill="#5d7045"/>
+        <text x="386" y="346" font-size="12" font-weight="600" fill="#141413">clock tree</text>
+        <text x="386" y="361" font-size="10.5" fill="#6b6a5f">is the pixel clock running at all</text>
+        <rect x="358" y="374" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="370" y="389" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/sys/kernel/debug/clk/clk_summary</text>
+        <text x="690" y="389" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+        <rect x="718" y="328" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <circle cx="734" cy="348" r="3.5" fill="#5d7045"/>
+        <text x="746" y="346" font-size="12" font-weight="600" fill="#141413">regulators</text>
+        <text x="746" y="361" font-size="10.5" fill="#6b6a5f">which rails are on, and who asked</text>
+        <rect x="718" y="374" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="730" y="389" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">regulator/regulator_summary</text>
+        <text x="1050" y="389" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+        <rect x="358" y="408" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <circle cx="374" cy="428" r="3.5" fill="#5d7045"/>
+        <text x="386" y="426" font-size="12" font-weight="600" fill="#141413">pin multiplexing</text>
+        <text x="386" y="441" font-size="10.5" fill="#6b6a5f">is the pin still a GPIO</text>
+        <rect x="358" y="454" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="370" y="469" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">pinctrl/*/pinmux-pins</text>
+        <text x="690" y="469" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+        <rect x="718" y="408" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <circle cx="734" cy="428" r="3.5" fill="#5d7045"/>
+        <text x="746" y="426" font-size="12" font-weight="600" fill="#141413">gpio lines</text>
+        <text x="746" y="441" font-size="10.5" fill="#6b6a5f">direction and level, per line</text>
+        <rect x="718" y="454" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="730" y="469" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/sys/kernel/debug/gpio</text>
+        <text x="1050" y="469" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+        <rect x="340" y="506" width="740" height="122" rx="12" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.1" stroke-dasharray="4 3"/>
+        <rect x="340" y="518" width="4" height="98" rx="2" fill="#c9913f"/>
+        <circle cx="362" cy="528" r="3.5" fill="#c9913f"/>
+        <text x="374" y="532" font-size="11" font-weight="600" letter-spacing="1.0" fill="#8a5a2a">INTERRUPTS AND BINDING</text>
+        <rect x="358" y="546" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <circle cx="374" cy="566" r="3.5" fill="#c9913f"/>
+        <text x="386" y="564" font-size="12" font-weight="600" fill="#141413">interrupts</text>
+        <text x="386" y="579" font-size="10.5" fill="#6b6a5f">is the count going up, on which CPU</text>
+        <rect x="358" y="592" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="370" y="607" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/proc/interrupts</text>
+        <text x="690" y="607" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+        <rect x="718" y="546" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <circle cx="734" cy="566" r="3.5" fill="#c9913f"/>
+        <text x="746" y="564" font-size="12" font-weight="600" fill="#141413">did the driver bind</text>
+        <text x="746" y="579" font-size="10.5" fill="#6b6a5f">the symlink exists only once it did</text>
+        <rect x="718" y="592" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="730" y="607" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/sys/bus/platform/devices/&lt;dev&gt;/driver</text>
+        <text x="1050" y="607" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+        <rect x="340" y="658" width="22" height="12" rx="6" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="370" y="668" font-size="11" fill="#6b6a5f">green pill &#183; only reads, safe to run on a live board</text>
+        <rect x="700" y="658" width="22" height="12" rx="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="730" y="668" font-size="11" fill="#6b6a5f">gold pill &#183; changes hardware or kernel state</text>
+        <text x="32" y="696" font-size="11.5" fill="#8c8a7d">an architecture diagram that does not say how to observe each block leaves the reader knowing the shape of the system and still not knowing what to type.</text>
+        <text x="32" y="713" font-size="11.5" fill="#8c8a7d">read-only and state-changing commands are told apart on the figure itself, because the difference matters most at 2am on someone else&#8217;s board.</text>
+        <text x="32" y="730" font-size="11.5" fill="#8c8a7d">paths under /sys/kernel/debug exist only where debugfs is mounted and the matching kernel options were built in &#8212; a missing file is not proof the block is idle.</text>
+        <rect x="796" y="748" width="284" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M796 755 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="809" cy="763" r="3.6" fill="#ffffff"/>
+        <text x="955" y="767" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Debug map &#183; commands on blocks</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">a command on every block</span><span class="lang-zh">每一块上都挂着一条命令</span></span>
+        <span class="lang-en">The rule the map exists to serve is in the box on the left: prove a stage received its input before you suspect that stage. Half of “the driver is broken” turns out to be a clock that was never enabled — and the clock has its own line in this figure precisely so that checking it costs one command instead of an afternoon.</span><span class="lang-zh">这张图存在的理由写在左下角那个框里：先证明这一段收到了输入，再怀疑这一段坏了。「驱动坏了」有一半最后查出来是某个时钟根本没使能 —— 而时钟在这张图里单独有一行，就是为了让「查一下」的代价是一条命令，不是一个下午。</span>
+      </figcaption>
+    </figure>
+
+    <div class="callout" style="margin-top:var(--space-8);">
+      <span class="callout__kicker"><span class="lang-en">before you trust an empty file</span><span class="lang-zh">把空文件当结论之前</span></span>
+      <p class="callout__title"><span class="lang-en">A missing debugfs file is not proof the block is idle</span><span class="lang-zh">debugfs 里少一个文件，不等于那一块没在工作</span></p>
+      <p class="callout__body"><span class="lang-en">Everything under <code>/sys/kernel/debug</code> exists only where debugfs is mounted and the matching kernel option was built in. On a lean product config half of these paths are simply absent, and reading that absence as “nothing is happening here” sends people down the wrong branch for hours. Check the option before you check the file.</span><span class="lang-zh"><code>/sys/kernel/debug</code> 下面的东西，只有在挂了 debugfs 且编进了对应内核选项时才存在。产品配置精简过之后，这些路径有一半根本不在，而把「不在」读成「这里什么都没发生」，能让人在错误的分支上待好几个小时。先确认选项，再去看文件。</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="anth-section" id="sourcing">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">Every kernel path on this page, with the line it came from</span><span class="lang-zh">这一页出现的每一条内核路径，附出处</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">Read out of Linux 4.14.139. Line numbers move between versions; the point of listing them is that each claim was checked against a tree rather than recalled, and that you can run the same check on yours.</span><span class="lang-zh">全部从 Linux 4.14.139 里读出来。行号会随版本变；列出来的意义是：每一条都是对着一棵树查过的，不是凭印象写的，而且你可以在自己的树上跑同一次检查。</span></p>
+
+    <div class="use-list" style="margin-top:var(--space-6);">
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">/proc/interrupts</span><span class="lang-zh">/proc/interrupts</span></div>
+        <div class="detail-row__body"><span class="lang-en"><code>fs/proc/interrupts.c:51</code> — created by <code>proc_create("interrupts", …)</code>.</span><span class="lang-zh"><code>fs/proc/interrupts.c:51</code> —— 由 <code>proc_create("interrupts", …)</code> 建立。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">clk_summary</span><span class="lang-zh">clk_summary</span></div>
+        <div class="detail-row__body"><span class="lang-en"><code>drivers/clk/clk.c:2307</code> — <code>debugfs_create_file("clk_summary", …)</code>.</span><span class="lang-zh"><code>drivers/clk/clk.c:2307</code> —— <code>debugfs_create_file("clk_summary", …)</code>。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">regulator_summary</span><span class="lang-zh">regulator_summary</span></div>
+        <div class="detail-row__body"><span class="lang-en"><code>drivers/regulator/core.c:4495</code>.</span><span class="lang-zh"><code>drivers/regulator/core.c:4495</code>。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">pinmux-pins</span><span class="lang-zh">pinmux-pins</span></div>
+        <div class="detail-row__body"><span class="lang-en"><code>drivers/pinctrl/pinmux.c:680</code>.</span><span class="lang-zh"><code>drivers/pinctrl/pinmux.c:680</code>。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">the gpio debugfs file</span><span class="lang-zh">gpio 那个 debugfs 文件</span></div>
+        <div class="detail-row__body"><span class="lang-en"><code>drivers/gpio/gpiolib.c:3794</code>.</span><span class="lang-zh"><code>drivers/gpio/gpiolib.c:3794</code>。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">dma_buf/bufinfo</span><span class="lang-zh">dma_buf/bufinfo</span></div>
+        <div class="detail-row__body"><span class="lang-en"><code>drivers/dma-buf/dma-buf.c:1169</code>.</span><span class="lang-zh"><code>drivers/dma-buf/dma-buf.c:1169</code>。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">the DRM atomic state file</span><span class="lang-zh">DRM 原子状态文件</span></div>
+        <div class="detail-row__body"><span class="lang-en"><code>drivers/gpu/drm/drm_atomic.c:1815</code> — the <code>state</code> entry in the DRM debugfs list.</span><span class="lang-zh"><code>drivers/gpu/drm/drm_atomic.c:1815</code> —— DRM debugfs 列表里的 <code>state</code> 一项。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">the connector enabled attribute</span><span class="lang-zh">连接器的 enabled 属性</span></div>
+        <div class="detail-row__body"><span class="lang-en"><code>drivers/gpu/drm/drm_sysfs.c:233</code> — <code>DEVICE_ATTR_RO(enabled)</code>.</span><span class="lang-zh"><code>drivers/gpu/drm/drm_sysfs.c:233</code> —— <code>DEVICE_ATTR_RO(enabled)</code>。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">dynamic_debug/control</span><span class="lang-zh">dynamic_debug/control</span></div>
+        <div class="detail-row__body"><span class="lang-en"><code>lib/dynamic_debug.c:967</code> — the only gold pill on the figure, because writing to it changes kernel state.</span><span class="lang-zh"><code>lib/dynamic_debug.c:967</code> —— 图上唯一一颗金色药丸，因为往里写会改内核状态。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">the driver symlink</span><span class="lang-zh">driver 这个符号链接</span></div>
+        <div class="detail-row__body"><span class="lang-en"><code>drivers/base/dd.c:303</code> — <code>sysfs_create_link(&amp;dev-&gt;kobj, …, "driver")</code>, created only when the bind succeeds, which is why its absence answers “did it bind”.</span><span class="lang-zh"><code>drivers/base/dd.c:303</code> —— <code>sysfs_create_link(&amp;dev-&gt;kobj, …, "driver")</code>，只有绑定成功才建立，所以「它在不在」正好回答「绑上了没有」。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">prepare and enable</span><span class="lang-zh">prepare 和 enable</span></div>
+        <div class="detail-row__body"><span class="lang-en"><code>include/drm/drm_panel.h:37-70</code> — the header states that <code>.prepare()</code> turns the panel on and <code>.enable()</code> typically turns on the backlight. That is the boundary the power sequence is split across.</span><span class="lang-zh"><code>include/drm/drm_panel.h:37-70</code> —— 头文件里写明 <code>.prepare()</code> 负责把屏打开、<code>.enable()</code> 通常负责点背光。上电时序正是被这条边界切成两半的。</span></div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:var(--space-8);">
+      <span class="callout__kicker"><span class="lang-en">one path deliberately not used</span><span class="lang-zh">有一条路径是特意没用的</span></span>
+      <p class="callout__title"><span class="lang-en">The deferred-probe file is not in this tree</span><span class="lang-zh">deferred-probe 那个文件不在这棵树里</span></p>
+      <p class="callout__body"><span class="lang-en">An earlier draft of the debug map carried <code>/sys/kernel/debug/devices_deferred</code>. Grepping 4.14.139 found nothing — that file arrived in a later kernel. Rather than ship a path that cannot be checked here, the figure asks the question a different way: the <code>driver</code> symlink under a device exists only after the bind succeeded, and that holds in every tree.</span><span class="lang-zh">这张图的早先一版写的是 <code>/sys/kernel/debug/devices_deferred</code>。在 4.14.139 上 grep 什么都没有 —— 那个文件是后来的内核才加的。与其发一条在这里核不了的路径，不如换个问法：设备目录下的 <code>driver</code> 符号链接只有在绑定成功之后才存在，而这一点在任何一棵树上都成立。</span></p>
+    </div>
+  </div>
+</section>
+
+<footer class="anth-section" style="padding-top:var(--space-6);">
+  <div class="anth-container anth-container--wide">
+    <p style="color:var(--anth-text-secondary); font-size:14px;"><span class="lang-en">All four figures are templates: <code>cross-section.svg</code>, <code>pinout.svg</code>, <code>power-sequence.svg</code> and <code>debug-map.svg</code> in <code>skills/anthropic-design/templates/diagrams/</code>. Copy one and swap the content.</span><span class="lang-zh">四张图都是模板：<code>skills/anthropic-design/templates/diagrams/</code> 下的 <code>cross-section.svg</code>、<code>pinout.svg</code>、<code>power-sequence.svg</code>、<code>debug-map.svg</code>。复制一张换内容即可。</span></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: anthropic-design
+Page-type: feature-deep (demo)
+Created: 2026-09-02
+Decisions:
+- [before-the-data-path] chose "a separate page about bring-up" over "extending hardware.html". Because: hardware.html starts after the panel works; wiring, supply order and triage are a different question with a different reader, and folding them in would have pushed that page past a dozen figures.
+- [symptom-first-triage] chose "symptom column as the entry point of the debug map" over "architecture as the entry point". Because: nobody arrives at a bring-up session holding a block diagram; they arrive holding a dark screen.
+- [pill-colour-by-consequence] chose "green reads / gold writes" over "colour by subsystem". Because: at 2am on somebody else's board the question is not which subsystem a command belongs to, it is whether running it changes anything.
+- [checked-against-a-tree] chose "file and line for every kernel path, from Linux 4.14.139" over "paths from memory". Because: one path in the first draft turned out not to exist in that tree, which is exactly the class of error the sourcing section exists to catch.
+- [reuse-power-sequence] chose "reuse the existing power-sequence template" over "drawing a fourth new figure". Because: that template already is a panel power-up with the constraint brackets; redrawing it would have created a second copy to keep in step.
+Known trade-offs:
+- SVG-internal text stays English in both languages; only figcaptions and prose translate.
+- The module is representative, not a part number. Layer count, pin assignment and timing minima are typical of the class; each figure says so.
+- Line numbers are from 4.14.139 and will move on other trees. The symbol names are the stable part.
+/design-review:self-diff -->
+</body>
+</html>
