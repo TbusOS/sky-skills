@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 812" role="img" aria-label="A block diagram of an embedded display path in which every block carries the command that inspects it. Down the left is a column of five symptom cards, each naming what the engineer actually sees, what it means, and which block to start at, so the reader enters the picture from their own problem rather than from the architecture. Below that column sits a rule box stating that you prove a stage received its input before you suspect that stage is broken. The right two thirds hold three grouped panels, display path, platform services, and interrupts and binding. Each panel holds cards naming a block with one line saying what it does, and directly under each card a monospace pill holding the exact path or command that reads it. Pills are outlined in green when the command only reads and in gold when running it changes hardware state. Closing notes record that an architecture diagram which does not say how to observe each block leaves the reader knowing the shape of the system and still not knowing what to type, that read-only and state-changing commands must be told apart on the figure itself, and that these paths only exist when debugfs is mounted and the matching kernel options are built in" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs><pattern id="tmDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+  <marker id="tmArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker></defs>
+  <rect width="1120" height="812" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="812" rx="16" fill="url(#tmDot)"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">DEBUG MAP &#183; EVERY BLOCK CARRIES THE COMMAND THAT LOOKS INSIDE IT</text>
+  <text x="40" y="70" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">START FROM WHAT YOU SEE</text>
+  <rect x="40" y="82" width="276" height="62" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="40" y="82" width="4" height="62" rx="2" fill="#d97757"/>
+  <text x="58" y="102" font-size="12" font-weight="600" fill="#141413">backlight on, screen black</text>
+  <text x="58" y="118" font-size="10.5" fill="#6b6a5f">pixels are not arriving</text>
+  <text x="58" y="134" font-size="10.5" font-weight="600" fill="#c2613f">&#8594; start at the display controller</text>
+  <rect x="40" y="158" width="276" height="62" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="40" y="158" width="4" height="62" rx="2" fill="#d97757"/>
+  <text x="58" y="178" font-size="12" font-weight="600" fill="#141413">backlight off too</text>
+  <text x="58" y="194" font-size="10.5" fill="#6b6a5f">nothing is powered</text>
+  <text x="58" y="210" font-size="10.5" font-weight="600" fill="#c2613f">&#8594; start at regulators, then gpio</text>
+  <rect x="40" y="234" width="276" height="62" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="40" y="234" width="4" height="62" rx="2" fill="#d97757"/>
+  <text x="58" y="254" font-size="12" font-weight="600" fill="#141413">device node missing</text>
+  <text x="58" y="270" font-size="10.5" fill="#6b6a5f">the driver never bound</text>
+  <text x="58" y="286" font-size="10.5" font-weight="600" fill="#c2613f">&#8594; start at probe deferred</text>
+  <rect x="40" y="310" width="276" height="62" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="40" y="310" width="4" height="62" rx="2" fill="#d97757"/>
+  <text x="58" y="330" font-size="12" font-weight="600" fill="#141413">boots, then stops</text>
+  <text x="58" y="346" font-size="10.5" fill="#6b6a5f">an interrupt never came</text>
+  <text x="58" y="362" font-size="10.5" font-weight="600" fill="#c2613f">&#8594; start at interrupts</text>
+  <rect x="40" y="386" width="276" height="62" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="40" y="386" width="4" height="62" rx="2" fill="#d97757"/>
+  <text x="58" y="406" font-size="12" font-weight="600" fill="#141413">image torn or shifted</text>
+  <text x="58" y="422" font-size="10.5" fill="#6b6a5f">timing, not content</text>
+  <text x="58" y="438" font-size="10.5" font-weight="600" fill="#c2613f">&#8594; start at the clock tree</text>
+  <rect x="40" y="472" width="276" height="120" rx="9" fill="#f7e4dc" stroke="#d97757" stroke-width="1.5"/>
+  <text x="58" y="496" font-size="11.5" font-weight="700" fill="#c2613f">the rule this map exists to serve</text>
+  <text x="58" y="518" font-size="11.5" fill="#141413">prove a stage received its input</text>
+  <text x="58" y="535" font-size="11.5" fill="#141413">before you suspect that stage.</text>
+  <text x="58" y="558" font-size="10.5" fill="#6b6a5f">half of &#8220;the driver is broken&#8221; turns out to be</text>
+  <text x="58" y="572" font-size="10.5" fill="#6b6a5f">a clock that was never enabled.</text>
+  <rect x="340" y="70" width="740" height="202" rx="12" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.1" stroke-dasharray="4 3"/>
+  <rect x="340" y="82" width="4" height="178" rx="2" fill="#2f5c8a"/>
+  <circle cx="362" cy="92" r="3.5" fill="#2f5c8a"/>
+  <text x="374" y="96" font-size="11" font-weight="600" letter-spacing="1.0" fill="#2f5c8a">DISPLAY PATH</text>
+  <rect x="358" y="110" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <circle cx="374" cy="130" r="3.5" fill="#2f5c8a"/>
+  <text x="386" y="128" font-size="12" font-weight="600" fill="#141413">display controller</text>
+  <text x="386" y="143" font-size="10.5" fill="#6b6a5f">reads the framebuffer, drives timing</text>
+  <rect x="358" y="156" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+  <text x="370" y="171" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/sys/kernel/debug/dri/0/state</text>
+  <text x="690" y="171" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+  <rect x="718" y="110" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <circle cx="734" cy="130" r="3.5" fill="#2f5c8a"/>
+  <text x="746" y="128" font-size="12" font-weight="600" fill="#141413">connector · DSI-1</text>
+  <text x="746" y="143" font-size="10.5" fill="#6b6a5f">is the panel even enabled</text>
+  <rect x="718" y="156" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+  <text x="730" y="171" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/sys/class/drm/card0-DSI-1/enabled</text>
+  <text x="1050" y="171" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+  <rect x="358" y="190" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <circle cx="374" cy="210" r="3.5" fill="#2f5c8a"/>
+  <text x="386" y="208" font-size="12" font-weight="600" fill="#141413">buffers handed around</text>
+  <text x="386" y="223" font-size="10.5" fill="#6b6a5f">who allocated, who still holds it</text>
+  <rect x="358" y="236" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+  <text x="370" y="251" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/sys/kernel/debug/dma_buf/bufinfo</text>
+  <text x="690" y="251" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+  <rect x="718" y="190" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <circle cx="734" cy="210" r="3.5" fill="#2f5c8a"/>
+  <text x="746" y="208" font-size="12" font-weight="600" fill="#141413">driver chatter, live</text>
+  <text x="746" y="223" font-size="10.5" fill="#6b6a5f">turn one file's debug prints on</text>
+  <rect x="718" y="236" width="344" height="22" rx="11" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+  <text x="730" y="251" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">dynamic_debug/control &#8592; +p</text>
+  <text x="1050" y="251" text-anchor="end" font-size="10.5" font-weight="600" fill="#8a5a2a">writes</text>
+  <rect x="340" y="288" width="740" height="202" rx="12" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.1" stroke-dasharray="4 3"/>
+  <rect x="340" y="300" width="4" height="178" rx="2" fill="#5d7045"/>
+  <circle cx="362" cy="310" r="3.5" fill="#5d7045"/>
+  <text x="374" y="314" font-size="11" font-weight="600" letter-spacing="1.0" fill="#5d7045">PLATFORM SERVICES &#183; CLOCK, POWER, PINS</text>
+  <rect x="358" y="328" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <circle cx="374" cy="348" r="3.5" fill="#5d7045"/>
+  <text x="386" y="346" font-size="12" font-weight="600" fill="#141413">clock tree</text>
+  <text x="386" y="361" font-size="10.5" fill="#6b6a5f">is the pixel clock running at all</text>
+  <rect x="358" y="374" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+  <text x="370" y="389" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/sys/kernel/debug/clk/clk_summary</text>
+  <text x="690" y="389" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+  <rect x="718" y="328" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <circle cx="734" cy="348" r="3.5" fill="#5d7045"/>
+  <text x="746" y="346" font-size="12" font-weight="600" fill="#141413">regulators</text>
+  <text x="746" y="361" font-size="10.5" fill="#6b6a5f">which rails are on, and who asked</text>
+  <rect x="718" y="374" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+  <text x="730" y="389" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">regulator/regulator_summary</text>
+  <text x="1050" y="389" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+  <rect x="358" y="408" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <circle cx="374" cy="428" r="3.5" fill="#5d7045"/>
+  <text x="386" y="426" font-size="12" font-weight="600" fill="#141413">pin multiplexing</text>
+  <text x="386" y="441" font-size="10.5" fill="#6b6a5f">is the pin still a GPIO</text>
+  <rect x="358" y="454" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+  <text x="370" y="469" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">pinctrl/*/pinmux-pins</text>
+  <text x="690" y="469" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+  <rect x="718" y="408" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <circle cx="734" cy="428" r="3.5" fill="#5d7045"/>
+  <text x="746" y="426" font-size="12" font-weight="600" fill="#141413">gpio lines</text>
+  <text x="746" y="441" font-size="10.5" fill="#6b6a5f">direction and level, per line</text>
+  <rect x="718" y="454" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+  <text x="730" y="469" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/sys/kernel/debug/gpio</text>
+  <text x="1050" y="469" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+  <rect x="340" y="506" width="740" height="122" rx="12" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.1" stroke-dasharray="4 3"/>
+  <rect x="340" y="518" width="4" height="98" rx="2" fill="#c9913f"/>
+  <circle cx="362" cy="528" r="3.5" fill="#c9913f"/>
+  <text x="374" y="532" font-size="11" font-weight="600" letter-spacing="1.0" fill="#8a5a2a">INTERRUPTS AND BINDING</text>
+  <rect x="358" y="546" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <circle cx="374" cy="566" r="3.5" fill="#c9913f"/>
+  <text x="386" y="564" font-size="12" font-weight="600" fill="#141413">interrupts</text>
+  <text x="386" y="579" font-size="10.5" fill="#6b6a5f">is the count going up, on which CPU</text>
+  <rect x="358" y="592" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+  <text x="370" y="607" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/proc/interrupts</text>
+  <text x="690" y="607" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+  <rect x="718" y="546" width="344" height="40" rx="8" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <circle cx="734" cy="566" r="3.5" fill="#c9913f"/>
+  <text x="746" y="564" font-size="12" font-weight="600" fill="#141413">did the driver bind</text>
+  <text x="746" y="579" font-size="10.5" fill="#6b6a5f">the symlink exists only once it did</text>
+  <rect x="718" y="592" width="344" height="22" rx="11" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+  <text x="730" y="607" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">/sys/bus/platform/devices/&lt;dev&gt;/driver</text>
+  <text x="1050" y="607" text-anchor="end" font-size="10.5" font-weight="600" fill="#5d7045">read</text>
+  <rect x="340" y="658" width="22" height="12" rx="6" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+  <text x="370" y="668" font-size="11" fill="#6b6a5f">green pill &#183; only reads, safe to run on a live board</text>
+  <rect x="700" y="658" width="22" height="12" rx="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+  <text x="730" y="668" font-size="11" fill="#6b6a5f">gold pill &#183; changes hardware or kernel state</text>
+  <text x="32" y="696" font-size="11.5" fill="#8c8a7d">an architecture diagram that does not say how to observe each block leaves the reader knowing the shape of the system and still not knowing what to type.</text>
+  <text x="32" y="713" font-size="11.5" fill="#8c8a7d">read-only and state-changing commands are told apart on the figure itself, because the difference matters most at 2am on someone else&#8217;s board.</text>
+  <text x="32" y="730" font-size="11.5" fill="#8c8a7d">paths under /sys/kernel/debug exist only where debugfs is mounted and the matching kernel options were built in &#8212; a missing file is not proof the block is idle.</text>
+  <rect x="796" y="748" width="284" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+  <path d="M796 755 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+  <circle cx="809" cy="763" r="3.6" fill="#ffffff"/>
+  <text x="955" y="767" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Debug map &#183; commands on blocks</text>
+</svg>
