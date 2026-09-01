@@ -1,0 +1,164 @@
+<!-- stepper.html — an interactive figure. Copy the whole <figure> block.
+     Contract the design-review gate enforces (visual-audit: interactive-figure-blank-default):
+       · exactly one [data-step] panel visible before any click
+       · the matching control carries aria-current
+     With scripting off the figure degrades to step 1, which is a complete figure on its own. -->
+<figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+  <div class="stepper" role="group" aria-label="transfer steps">
+    <button type="button" class="stepper__btn" data-step-to="1" aria-current="step">1 &#183; the driver fills a descriptor</button>
+    <button type="button" class="stepper__btn" data-step-to="2">2 &#183; the processor starts it</button>
+    <button type="button" class="stepper__btn" data-step-to="3">3 &#183; the engine moves the bytes</button>
+    <button type="button" class="stepper__btn" data-step-to="4">4 &#183; the engine raises an interrupt</button>
+  </div>
+  <div data-step="1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 250" role="img" aria-label="Step one of a four step transfer, drawn on one unchanging base picture. System memory runs across the middle as one bar split into a driver ring, a descriptor and a data buffer, with a DMA engine and its two registers on the right and a processor block top left. In this step the descriptor segment is the only thing coloured, in green, because the driver has just filled it in. Every other element is neutral." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+          <defs><marker id="st1A" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c2613f"/></marker>
+          <marker id="st1G" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a5a2a"/></marker></defs>
+          <circle cx="1020" cy="26" r="13" fill="#c2613f"/>
+          <text x="1020" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1</text>
+          <text x="1000" y="31" text-anchor="end" font-size="10.5" font-weight="600" letter-spacing="0.8" fill="#6b6a5f">STEP</text>
+          <rect x="36" y="30" width="128" height="40" rx="7" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="100" y="55" text-anchor="middle" font-size="12" font-weight="600" fill="#c8c4b6">CPU</text>
+          <rect x="36" y="120" width="196" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="134" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">driver ring</text>
+          <rect x="232" y="120" width="150" height="44" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.8"/>
+          <text x="307" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#5d7045">descriptor</text>
+          <rect x="382" y="120" width="404" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="584" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">data buffer</text>
+          <rect x="36" y="120" width="750" height="44" rx="6" fill="none" stroke="#141413" stroke-width="1.6"/>
+          <text x="36" y="112" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#6b6a5f">SYSTEM MEMORY</text>
+          <rect x="846" y="86" width="178" height="112" rx="8" fill="#ffffff" stroke="#c8c4b6" stroke-width="1.4"/>
+          <text x="862" y="108" font-size="11" font-weight="600" fill="#141413">DMA engine</text>
+          <rect x="862" y="124" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="141" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_DESC</text>
+          <rect x="862" y="158" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="175" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_CTRL</text>
+          <path d="M164 50 H 700 Q 720 50 720 70 V 158 Q 720 171 733 171 H 856" fill="none" stroke="#c8c4b6" stroke-width="1.2" stroke-dasharray="6 4"/>
+          <text x="420" y="42" font-size="10.5" font-weight="600" fill="#c8c4b6">write the control register</text>
+          <path d="M786 142 H 846" fill="none" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="816" y="132" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c8c4b6">data</text>
+          <path d="M935 198 V 222 H 100 V 74" fill="none" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="520" y="238" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c8c4b6">completion interrupt</text>
+        </svg>
+    <p class="stepper__note"><strong>the driver fills a descriptor</strong> &#183; still just memory writes &#8212; the engine has not been told anything yet</p>
+  </div>
+  <div data-step="2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 250" role="img" aria-label="Step two of the same picture. Nothing has moved. The dashed control line from the processor to the DMA control register is now gold and carries an arrowhead, and the control register itself is gold, because writing that register is what starts the transfer." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+          <defs><marker id="st2A" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c2613f"/></marker>
+          <marker id="st2G" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a5a2a"/></marker></defs>
+          <circle cx="1020" cy="26" r="13" fill="#c2613f"/>
+          <text x="1020" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2</text>
+          <text x="1000" y="31" text-anchor="end" font-size="10.5" font-weight="600" letter-spacing="0.8" fill="#6b6a5f">STEP</text>
+          <rect x="36" y="30" width="128" height="40" rx="7" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="100" y="55" text-anchor="middle" font-size="12" font-weight="600" fill="#c8c4b6">CPU</text>
+          <rect x="36" y="120" width="196" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="134" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">driver ring</text>
+          <rect x="232" y="120" width="150" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="307" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">descriptor</text>
+          <rect x="382" y="120" width="404" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="584" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">data buffer</text>
+          <rect x="36" y="120" width="750" height="44" rx="6" fill="none" stroke="#141413" stroke-width="1.6"/>
+          <text x="36" y="112" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#6b6a5f">SYSTEM MEMORY</text>
+          <rect x="846" y="86" width="178" height="112" rx="8" fill="#ffffff" stroke="#c8c4b6" stroke-width="1.4"/>
+          <text x="862" y="108" font-size="11" font-weight="600" fill="#141413">DMA engine</text>
+          <rect x="862" y="124" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="141" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_DESC</text>
+          <rect x="862" y="158" width="146" height="26" rx="4" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.6"/>
+          <text x="874" y="175" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">DMA_CTRL</text>
+          <path d="M164 50 H 700 Q 720 50 720 70 V 158 Q 720 171 733 171 H 856" fill="none" stroke="#8a5a2a" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#st2G)"/>
+          <text x="420" y="42" font-size="10.5" font-weight="600" fill="#8a5a2a">write the control register</text>
+          <path d="M786 142 H 846" fill="none" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="816" y="132" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c8c4b6">data</text>
+          <path d="M935 198 V 222 H 100 V 74" fill="none" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="520" y="238" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c8c4b6">completion interrupt</text>
+        </svg>
+    <p class="stepper__note"><strong>the processor starts it</strong> &#183; one register write. after this line the processor is free, which is the entire point</p>
+  </div>
+  <div data-step="3" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 250" role="img" aria-label="Step three of the same picture. The data buffer segment and the short link between it and the DMA engine are orange, because this is the only step in which bytes actually move. The processor is not involved." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+          <defs><marker id="st3A" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c2613f"/></marker>
+          <marker id="st3G" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a5a2a"/></marker></defs>
+          <circle cx="1020" cy="26" r="13" fill="#c2613f"/>
+          <text x="1020" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3</text>
+          <text x="1000" y="31" text-anchor="end" font-size="10.5" font-weight="600" letter-spacing="0.8" fill="#6b6a5f">STEP</text>
+          <rect x="36" y="30" width="128" height="40" rx="7" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="100" y="55" text-anchor="middle" font-size="12" font-weight="600" fill="#c8c4b6">CPU</text>
+          <rect x="36" y="120" width="196" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="134" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">driver ring</text>
+          <rect x="232" y="120" width="150" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="307" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">descriptor</text>
+          <rect x="382" y="120" width="404" height="44" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.8"/>
+          <text x="584" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c2613f">data buffer</text>
+          <rect x="36" y="120" width="750" height="44" rx="6" fill="none" stroke="#141413" stroke-width="1.6"/>
+          <text x="36" y="112" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#6b6a5f">SYSTEM MEMORY</text>
+          <rect x="846" y="86" width="178" height="112" rx="8" fill="#ffffff" stroke="#c8c4b6" stroke-width="1.4"/>
+          <text x="862" y="108" font-size="11" font-weight="600" fill="#141413">DMA engine</text>
+          <rect x="862" y="124" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="141" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_DESC</text>
+          <rect x="862" y="158" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="175" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_CTRL</text>
+          <path d="M164 50 H 700 Q 720 50 720 70 V 158 Q 720 171 733 171 H 856" fill="none" stroke="#c8c4b6" stroke-width="1.2" stroke-dasharray="6 4"/>
+          <text x="420" y="42" font-size="10.5" font-weight="600" fill="#c8c4b6">write the control register</text>
+          <path d="M786 142 H 846" fill="none" stroke="#c2613f" stroke-width="2.6" marker-end="url(#st3A)"/>
+          <text x="816" y="132" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c2613f">data</text>
+          <path d="M935 198 V 222 H 100 V 74" fill="none" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="520" y="238" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c8c4b6">completion interrupt</text>
+        </svg>
+    <p class="stepper__note"><strong>the engine moves the bytes</strong> &#183; the only step where data actually moves, and the only one the processor is not in</p>
+  </div>
+  <div data-step="4" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 250" role="img" aria-label="Step four of the same picture. The long return path from the engine back to the processor is orange and the processor block is highlighted, because the transfer has finished and the only thing left is the interrupt that says so." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+          <defs><marker id="st4A" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c2613f"/></marker>
+          <marker id="st4G" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a5a2a"/></marker></defs>
+          <circle cx="1020" cy="26" r="13" fill="#c2613f"/>
+          <text x="1020" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">4</text>
+          <text x="1000" y="31" text-anchor="end" font-size="10.5" font-weight="600" letter-spacing="0.8" fill="#6b6a5f">STEP</text>
+          <rect x="36" y="30" width="128" height="40" rx="7" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.8"/>
+          <text x="100" y="55" text-anchor="middle" font-size="12" font-weight="600" fill="#c2613f">CPU</text>
+          <rect x="36" y="120" width="196" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="134" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">driver ring</text>
+          <rect x="232" y="120" width="150" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="307" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">descriptor</text>
+          <rect x="382" y="120" width="404" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="584" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">data buffer</text>
+          <rect x="36" y="120" width="750" height="44" rx="6" fill="none" stroke="#141413" stroke-width="1.6"/>
+          <text x="36" y="112" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#6b6a5f">SYSTEM MEMORY</text>
+          <rect x="846" y="86" width="178" height="112" rx="8" fill="#ffffff" stroke="#c8c4b6" stroke-width="1.4"/>
+          <text x="862" y="108" font-size="11" font-weight="600" fill="#141413">DMA engine</text>
+          <rect x="862" y="124" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="141" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_DESC</text>
+          <rect x="862" y="158" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="175" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_CTRL</text>
+          <path d="M164 50 H 700 Q 720 50 720 70 V 158 Q 720 171 733 171 H 856" fill="none" stroke="#c8c4b6" stroke-width="1.2" stroke-dasharray="6 4"/>
+          <text x="420" y="42" font-size="10.5" font-weight="600" fill="#c8c4b6">write the control register</text>
+          <path d="M786 142 H 846" fill="none" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="816" y="132" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c8c4b6">data</text>
+          <path d="M935 198 V 222 H 100 V 74" fill="none" stroke="#c2613f" stroke-width="2.4" marker-end="url(#st4A)"/>
+          <text x="520" y="238" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c2613f">completion interrupt</text>
+        </svg>
+    <p class="stepper__note"><strong>the engine raises an interrupt</strong> &#183; the transfer is already over. this step is only how anybody finds out</p>
+  </div>
+  <figcaption class="fig-cap">
+    <span class="fig-tag">one base picture, four steps</span>
+    Four panels on identical coordinates; the reader drives which one is showing. Only the part the step is about is coloured, everything else stays neutral, so nothing has to be re-found between clicks. Step&nbsp;1 is the default and is a complete figure on its own &mdash; with scripting off, that is what the page shows, and it is also what any screenshot captures.
+  </figcaption>
+</figure>
+
+<script>
+(function () {
+  document.querySelectorAll("figure .stepper").forEach(function (bar) {
+    var fig = bar.closest("figure");
+    bar.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-step-to]"); if (!btn) return;
+      var want = btn.getAttribute("data-step-to");
+      fig.querySelectorAll("[data-step]").forEach(function (p) {
+        p.hidden = p.getAttribute("data-step") !== want;
+      });
+      bar.querySelectorAll("[data-step-to]").forEach(function (b) {
+        if (b === btn) { b.setAttribute("aria-current", "step"); }
+        else { b.removeAttribute("aria-current"); }
+      });
+    });
+  });
+})();
+</script>
