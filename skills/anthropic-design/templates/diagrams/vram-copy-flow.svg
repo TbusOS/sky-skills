@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 620" role="img" aria-label="A machine with a discrete graphics card, drawn so the direction of the copy is unambiguous. On the left is host system memory, shown as a bar holding an image buffer that has been pinned and mapped so the card can reach it. On the right is the card, with its own video memory bar holding textures, a front framebuffer and a back framebuffer, and above that the card's die containing a copy engine, a shader array and a display engine. Between the two memories runs the PCI Express link, drawn as two parallel flowing lines going opposite ways: the upper line carries read requests travelling from the card to host memory, and the lower line carries the data travelling back from host memory into the card. An orange copy block sits on that lower line, labelled with the amount moved, and it is the only orange element in the figure. Because the requests originate on the card, the copy is a pull and not a push, and the initiator is the card's own copy engine rather than the processor. Inside the card, single flowing lines show the shader array writing the back framebuffer and the display engine reading the front framebuffer, each one way. The closing lines state that whoever needs the data issues the reads, which is the same rule as on a system on chip, and that the difference here is only that there are two memories for the data to cross between" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+  <style>
+    .vcf-f { stroke-dasharray: 12 8; animation: vcfM 1.15s linear infinite; }
+    .vcf-f.vcf-r { animation-name: vcfMR; }
+    .vcf-f.vcf-s { animation-duration: 2.1s; }
+    @keyframes vcfM  { to { stroke-dashoffset: -40; } }
+    @keyframes vcfMR { to { stroke-dashoffset:  40; } }
+    /* 三条关闭动效的口子,跟 glass 同一套约定 */
+    @media (prefers-reduced-motion: reduce) {
+      .vcf-f { animation: none; stroke-dashoffset: 0; }
+    }
+    :root[data-motion-freeze] .vcf-f,
+    html[data-motion-freeze] .vcf-f { animation: none; stroke-dashoffset: 0; }
+  </style>
+    <pattern id="vcfD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <pattern id="vcfH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+    <marker id="vcfAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <marker id="vcfAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+    <marker id="vcfAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+    <marker id="vcfAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+    <marker id="vcfAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
+  </defs>
+  <rect width="1120" height="620" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="620" rx="16" fill="url(#vcfD)"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">DISCRETE CARD &#183; WHO PULLS FROM WHOM</text>
+  <path d="M700 30 L740 30" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="vcf-f" marker-end="url(#vcfAB)"/>
+  <text x="748" y="34" text-anchor="start" font-size="11.5" fill="#6b6a5f">requests go this way</text>
+  <path d="M918 30 L958 30" fill="none" stroke="#d97757" stroke-width="2.8" class="vcf-f" marker-end="url(#vcfAO)"/>
+  <text x="966" y="34" text-anchor="start" font-size="11.5" fill="#6b6a5f">data comes back</text>
+  <rect x="40" y="66" width="340" height="250" rx="11" fill="none" stroke="#d5d2c6" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <rect x="68.5" y="57" width="39.0" height="18" rx="9" fill="#141413"/>
+  <text x="88" y="70" text-anchor="middle" font-size="10" fill="#ffffff">host</text>
+  <rect x="64" y="96" width="172" height="56" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="150" y="121" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">CPU</text>
+  <text x="150" y="138" text-anchor="middle" font-size="11.5" fill="#6b6a5f">sets it up, then stops</text>
+  <text x="150" y="178" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">SYSTEM MEMORY</text>
+  <rect x="64" y="190" width="96" height="56" fill="#f1efe8"/>
+  <text x="112" y="223" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">other</text>
+  <line x1="160" y1="190" x2="160" y2="246" stroke="#141413" stroke-width="1.5"/>
+  <rect x="160" y="190" width="120" height="56" fill="#eef1e7"/>
+  <text x="220" y="216" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">image</text>
+  <text x="220" y="231" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">pinned</text>
+  <line x1="280" y1="190" x2="280" y2="246" stroke="#141413" stroke-width="1.5"/>
+  <rect x="280" y="190" width="76" height="56" fill="#f1efe8"/>
+  <text x="318" y="223" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">other</text>
+  <rect x="64" y="190" width="292" height="56" rx="7" fill="none" stroke="#141413" stroke-width="1.8"/>
+  <text x="210" y="272" text-anchor="middle" font-size="11" fill="#6b6a5f">pinned + mapped so the card can reach it</text>
+  <text x="210" y="290" text-anchor="middle" font-size="11" font-weight="600" fill="#4d5a3c">&#8212; the pages never move</text>
+  <path d="M596 202 L380 202" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="vcf-f" marker-end="url(#vcfAB)"/>
+  <path d="M380 234 L596 234" fill="none" stroke="#d97757" stroke-width="2.8" class="vcf-f" marker-end="url(#vcfAO)"/>
+  <rect x="419.1" y="165" width="137.9" height="18" rx="9" fill="#141413"/>
+  <text x="488" y="178" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">PCIe &#183; the only wire</text>
+  <rect x="442" y="267" width="92" height="46" rx="8" fill="#d97757" stroke="#8f4a2f" stroke-width="1.8"/>
+  <text x="488" y="287" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">COPY</text>
+  <text x="488" y="303" text-anchor="middle" font-size="10" fill="#ffffff">48 MiB once</text>
+  <text x="488" y="334" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8f4a2f">the card issues the reads &#8212; this is a pull</text>
+  <text x="488" y="352" text-anchor="middle" font-size="11" fill="#6b6a5f">not the CPU pushing bytes out</text>
+  <rect x="620" y="66" width="460" height="250" rx="11" fill="none" stroke="#d97757" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <rect x="648.6" y="57" width="182.8" height="18" rx="9" fill="#141413"/>
+  <text x="740" y="70" text-anchor="middle" font-size="10" fill="#ffffff">graphics card &#183; its own board</text>
+  <rect x="640" y="96" width="132" height="52" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="706" y="119" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">copy engine</text>
+  <text x="706" y="136" text-anchor="middle" font-size="11.5" fill="#6b6a5f">it does this</text>
+  <rect x="786" y="96" width="132" height="52" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="852" y="127" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shaders</text>
+  <rect x="932" y="96" width="130" height="52" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="997" y="119" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">display</text>
+  <text x="997" y="136" text-anchor="middle" font-size="11.5" fill="#6b6a5f">engine</text>
+  <text x="850" y="274" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">VRAM &#183; a second address space</text>
+  <rect x="640" y="190" width="150" height="56" fill="#eef1e7"/>
+  <text x="715" y="216" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">textures</text>
+  <text x="715" y="231" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">48 MiB</text>
+  <line x1="790" y1="190" x2="790" y2="246" stroke="#141413" stroke-width="1.5"/>
+  <rect x="790" y="190" width="136" height="56" fill="#eef1e7"/>
+  <text x="858" y="223" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">fb &#183; back</text>
+  <line x1="926" y1="190" x2="926" y2="246" stroke="#141413" stroke-width="1.5"/>
+  <rect x="926" y="190" width="136" height="56" fill="#e2ecf5"/>
+  <text x="994" y="223" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">fb &#183; front</text>
+  <rect x="640" y="190" width="422" height="56" rx="7" fill="none" stroke="#141413" stroke-width="1.8"/>
+  <text x="850" y="292" text-anchor="middle" font-size="11" fill="#6b6a5f">once a byte is here it never crosses PCIe again</text>
+  <path d="M700 150 L700 184" fill="none" stroke="#d97757" stroke-width="2.6" class="vcf-f" marker-end="url(#vcfAO)"/>
+  <path d="M852 150 L852 184" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="vcf-f" marker-end="url(#vcfAB)"/>
+  <path d="M996 184 L996 152" fill="none" stroke="#4d5a3c" stroke-width="2.6" class="vcf-f" marker-end="url(#vcfAG)"/>
+  <text x="1062" y="330" text-anchor="end" font-size="11.5" font-weight="600" fill="#2f5c8a">to the monitor</text>
+  <path d="M1062 246 L1062 316" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="vcf-f vcf-s" marker-end="url(#vcfAB)"/>
+  <text x="40" y="392" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">whoever needs the data issues the reads. that rule did not change &#8212; only the number of memories did.</text>
+  <circle cx="488" cy="218" r="10.5" fill="#d97757"/>
+  <text x="488" y="222" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+  <circle cx="556" cy="290" r="10.5" fill="#d97757"/>
+  <text x="556" y="294" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+  <circle cx="668" cy="167" r="10.5" fill="#d97757"/>
+  <text x="668" y="171" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+  <text x="40" y="428" text-anchor="start" font-size="11.5" fill="#8c8a7d">&#9312; the copy engine on the card sends read requests across the link &#183; &#9313; the data comes back and lands in VRAM &#183; &#9314; and stays there.</text>
+  <text x="40" y="445" text-anchor="start" font-size="11.5" fill="#8c8a7d">drawing the link as two opposite lines is what makes &#8220;pull&#8221; visible; one double-headed arrow</text>
+  <text x="40" y="462" text-anchor="start" font-size="11.5" fill="#8c8a7d">would have left it ambiguous, and ambiguous is exactly where the misunderstanding lives.</text>
+  <rect x="40" y="492" width="251" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+  <path d="M40 499 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+  <circle cx="53" cy="507" r="3.6" fill="#ffffff"/>
+  <text x="179" y="511" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Discrete card &#183; a pull, not a push</text>
+</svg>

@@ -212,6 +212,7 @@
     <a href="#no-gpu"><span class="lang-en">Without a GPU</span><span class="lang-zh">没有 GPU</span></a>
     <a href="#why"><span class="lang-en">Why this design</span><span class="lang-zh">为什么这么设计</span></a>
     <a href="#with-gpu"><span class="lang-en">With a GPU</span><span class="lang-zh">有 GPU</span></a>
+    <a href="#flip"><span class="lang-en">The flip</span><span class="lang-zh">翻页</span></a>
     <a href="#discrete"><span class="lang-en">Discrete card</span><span class="lang-zh">独立显卡</span></a>
     <a href="#mechanism"><span class="lang-en">Mechanism</span><span class="lang-zh">机制细节</span></a>
     <a href="diagrams.html"><span class="lang-en">Gallery</span><span class="lang-zh">图集</span></a>
@@ -243,11 +244,11 @@
       <span class="lang-zh">&#27809;&#26377;&#20219;&#20309;&#19996;&#35199;<br>&#34987;&#25644;&#36827;<br>GPU&#12290;</span>
     </h1>
     <p style="font-size:20px; color:var(--anth-text-secondary); margin:var(--space-5) auto var(--space-6); line-height:1.6; max-width:700px; font-family:var(--font-body);">
-      <span class="lang-en">Three figures answering one question: which piece of hardware actually issues the read, and over which wire. Two of them cover a phone-class system on chip, where the framebuffer never leaves DDR. The third covers a desktop card, which really does have a second memory &#8212; and that is where the word <em>upload</em> came from.</span>
-      <span class="lang-zh">&#19977;&#24352;&#22270;&#22238;&#31572;&#21516;&#19968;&#20010;&#38382;&#39064;&#65306;&#21040;&#24213;&#26159;&#21738;&#20010;&#30828;&#20214;&#21457;&#20986;&#20102;&#35835;&#35831;&#27714;&#65292;&#36208;&#30340;&#21448;&#26159;&#21738;&#26681;&#32447;&#12290;&#21069;&#20004;&#24352;&#30011;&#25163;&#26426;&#36825;&#31867; SoC&#65292;&#24086;&#32531;&#20914;&#20174;&#26469;&#27809;&#31163;&#24320;&#36807; DDR&#12290;&#31532;&#19977;&#24352;&#30011;&#21488;&#24335;&#26426;&#30340;&#29420;&#31435;&#26174;&#21345;&#65292;&#37027;&#37324;&#30830;&#23454;&#26377;&#31532;&#20108;&#22359;&#20869;&#23384;&#8212;&#8212;<em>&#19978;&#20256;</em>&#36825;&#20010;&#35789;&#23601;&#26159;&#20174;&#37027;&#20799;&#26469;&#30340;&#12290;</span>
+      <span class="lang-en">Four figures answering one question: which piece of hardware actually issues the read, and over which wire. Every link is drawn with a direction, and the ones the hardware walks continuously are drawn flowing, so &#8220;who reads from whom&#8221; is something you can see rather than something you have to be told. The word <em>upload</em> turns out to describe only the last figure.</span>
+      <span class="lang-zh">&#22235;&#24352;&#22270;&#22238;&#31572;&#21516;&#19968;&#20010;&#38382;&#39064;&#65306;&#21040;&#24213;&#26159;&#21738;&#20010;&#30828;&#20214;&#21457;&#20986;&#20102;&#35835;&#35831;&#27714;&#65292;&#36208;&#30340;&#21448;&#26159;&#21738;&#26681;&#32447;&#12290;&#27599;&#26465;&#38142;&#36335;&#37117;&#24102;&#26041;&#21521;&#65292;&#30828;&#20214;&#19968;&#30452;&#22312;&#36208;&#30340;&#37027;&#20960;&#26465;&#30011;&#25104;&#27969;&#21160;&#30340;&#8212;&#8212;&#20110;&#26159;&#8220;&#35841;&#22312;&#35835;&#35841;&#8221;&#26159;&#30475;&#24471;&#35265;&#30340;&#65292;&#19981;&#26159;&#38752;&#21035;&#20154;&#21578;&#35785;&#30340;&#12290;<em>&#19978;&#20256;</em>&#36825;&#20010;&#35789;&#65292;&#21482;&#37197;&#24471;&#19978;&#26368;&#21518;&#37027;&#19968;&#24352;&#22270;&#12290;</span>
     </p>
     <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
-      <a class="anth-button" href="#no-gpu"><span class="lang-en">See the three figures</span><span class="lang-zh">&#30475;&#36825;&#19977;&#24352;&#22270;</span></a>
+      <a class="anth-button" href="#no-gpu"><span class="lang-en">See the four figures</span><span class="lang-zh">&#30475;&#36825;&#22235;&#24352;&#22270;</span></a>
       <a class="anth-button anth-button--ghost" href="#mechanism"><span class="lang-en">Jump to the mechanism</span><span class="lang-zh">&#30452;&#25509;&#30475;&#26426;&#21046;&#32454;&#33410;</span></a>
     </div>
   </div>
@@ -319,121 +320,146 @@
 <!-- Figure 1 -->
 <section class="anth-section" id="no-gpu">
   <div class="anth-container anth-container--wide">
-    <span class="anth-badge"><span class="lang-en">Figure 01 &#183; no GPU</span><span class="lang-zh">&#22270; 01 &#183; &#27809;&#26377; GPU</span></span>
+    <span class="anth-badge"><span class="lang-en">Figure 01 &#183; the board</span><span class="lang-zh">&#22270; 01 &#183; &#36825;&#22359;&#26495;&#23376;</span></span>
     <h2 style="margin-top:var(--space-3); max-width:820px;">
-      <span class="lang-en">The simplest case, drawn as a package cross-section</span>
-      <span class="lang-zh">&#26368;&#31616;&#21333;&#30340;&#37027;&#31181;&#24773;&#20917;&#65292;&#25353;&#23553;&#35013;&#21078;&#38754;&#30011;</span>
+      <span class="lang-en">What the chip is wired to, and over which interface</span>
+      <span class="lang-zh">&#33455;&#29255;&#36830;&#30528;&#20160;&#20040;&#65292;&#36208;&#30340;&#26159;&#21738;&#31181;&#25509;&#21475;</span>
     </h2>
     <p style="font-size:16px; line-height:1.6; color:var(--anth-text-secondary); max-width:760px; margin:var(--space-3) 0 var(--space-7); font-family:var(--font-body);">
       <span class="lang-en">Everything inside the dashed boundary is one die. The DDR chip on the left and the panel on the right are separate parts on the board. Follow badges &#9312;&#8211;&#9316; and you have traced one frame end to end.</span>
       <span class="lang-zh">&#34394;&#32447;&#26694;&#20197;&#20869;&#26159;&#21516;&#19968;&#39063;&#33455;&#29255;&#12290;&#24038;&#36793;&#30340; DDR &#21644;&#21491;&#36793;&#30340;&#23631;&#65292;&#26159;&#26495;&#23376;&#19978;&#21478;&#22806;&#20004;&#20010;&#22120;&#20214;&#12290;&#36319;&#30528;&#24509;&#31456; &#9312;&#8211;&#9316; &#36208;&#19968;&#36941;&#65292;&#23601;&#26159;&#19968;&#24086;&#30340;&#20840;&#31243;&#12290;</span>
     </p>
     <figure class="fig">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Physical data path of a display pipeline with no GPU, drawn as a package cross-section. Off-package on the left is a DDR4 chip, off-package on the right is the LCD panel with its driver IC; everything between them sits inside one dashed SoC boundary. Inside, from left to right: a multi-port DDR controller and PHY with three ports carrying different quality-of-service classes, a vertical AXI NoC rail, and three bus masters hanging off it, the CPU cluster, a greyed-out GPU deferred to the next figure, and the display controller. The display controller is drawn open, showing the fetch DMA, the line buffer and the framebuffer base-address register, which is outlined because it is the only thing software sets. Its output leaves on a pixel interface, twenty-four bits of parallel RGB plus sync at the pixel clock, which is not an AXI port, into the DSI controller and then the MIPI D-PHY, which serialises onto four differential lanes to the panel. A thin gold dashed APB rail runs along the bottom from the CPU to the register blocks of the display controller and the DSI controller. Five badges trace one frame: one, the CPU writes the framebuffer base address into the display controller over APB, four bytes, once; two, the display DMA issues its own AXI read bursts with no CPU involvement; three, the DDR controller serves them on the highest-priority port; four, finished pixels cross the pixel interface into the DSI controller; five, the D-PHY serialises them off-chip. The figure's point is that the configuration path and the data path are different wires: four bytes one way, eight megabytes a frame the other" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 640" role="img" aria-label="Platform block diagram of a single board: one system on chip in the middle, with the parts it talks to arranged around it, and every link labelled with the interface it carries. On the left, drawn as a green circuit board with a gold edge connector and a notch, is the DRAM, joined to the chip by a link marked LPDDR4 x32; a note says every framebuffer lives here and the 6.4 gigabytes per second is shared by every master on the chip. On the right, drawn as a glass rectangle with a driver integrated circuit strip and a flexible cable, is the display panel, reached over a four lane MIPI DSI link, with a note that no frame of memory exists inside the panel so it must be fed on time every frame. Above the chip is a storage group holding eMMC over HS200 and SPI NOR flash over QSPI. Below it is a sensors and control group holding a touch controller on I2C, a backlight driver on PWM and a power management chip on I2C. Inside the chip four blocks face outward: the memory controller, the display controller which owns the fetch DMA, the DSI transmitter, and the low speed peripheral block. Badges mark the two links a pixel actually travels, the storage links which carry boot code but never pixels, and the control links which carry bytes per second rather than megabytes. The closing line states that the pill on each link is the part that carries information, and the line itself carries none" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
         <defs>
-          <pattern id="sdfDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
-          <marker id="sdfArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
-          <marker id="sdfArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
-          <marker id="sdfArrK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6b6a5f"/></marker>
+          <pattern id="pbD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+          <pattern id="pbH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+          <marker id="pbAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+          <marker id="pbAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+          <marker id="pbAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+          <marker id="pbAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+          <marker id="pbAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
         </defs>
-        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
-        <rect width="1120" height="560" rx="16" fill="url(#sdfDots)"/>
-        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">PHYSICAL DATA PATH &#183; NO GPU &#183; WHO ISSUES THE TRANSACTION, AND OVER WHICH WIRE</text>
-        <g font-size="12" fill="#6b6a5f">
-          <line x1="726" y1="30" x2="750" y2="30" stroke="#d97757" stroke-width="2.4"/><text x="758" y="34">pixel data &#183; AXI</text>
-          <line x1="874" y1="30" x2="898" y2="30" stroke="#8a6a2f" stroke-width="1.6" stroke-dasharray="4 3"/><text x="906" y="34">config &#183; APB</text>
-        </g>
-        <rect x="196" y="56" width="756" height="428" rx="14" fill="none" stroke="#8c8a7d" stroke-width="1.4" stroke-dasharray="7 5"/>
-        <text x="212" y="76" font-size="12" fill="#8c8a7d">SoC package &#183; anything outside this line is a separate chip</text>
-        <rect x="40" y="176" width="140" height="128" rx="10" fill="#f5f2ea" stroke="#cfccc0"/>
-        <text x="110" y="214" text-anchor="middle" font-size="13" font-weight="600" fill="#141413">DDR4 SDRAM</text>
-        <text x="110" y="234" text-anchor="middle" font-size="12" fill="#6b6a5f">4 GiB &#183; off-package</text>
-        <text x="110" y="256" text-anchor="middle" font-size="12" fill="#6b6a5f">every framebuffer</text>
-        <text x="110" y="273" text-anchor="middle" font-size="12" fill="#6b6a5f">lives here, always</text>
-        <line x1="180" y1="240" x2="216" y2="240" stroke="#6b6a5f" stroke-width="2"/>
-        <text x="198" y="230" text-anchor="middle" font-size="12" fill="#8c8a7d">DQ</text>
-        <text x="110" y="326" text-anchor="middle" font-size="12" fill="#8c8a7d">32-bit &#183; 1600 MT/s</text>
-        <text x="110" y="343" text-anchor="middle" font-size="12" fill="#8c8a7d">= 6.4 GB/s ceiling</text>
-        <rect x="216" y="150" width="156" height="212" rx="10" fill="#eef1e7" stroke="#b9c4a4"/>
-        <text x="294" y="176" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">DDR ctrl + PHY</text>
-        <text x="294" y="194" text-anchor="middle" font-size="12" fill="#6b6a5f">multi-port &#183; QoS</text>
-        <rect x="234" y="214" width="120" height="36" rx="6" fill="#faf9f5" stroke="#b9c4a4" stroke-width="1"/>
-        <text x="246" y="236" font-size="12" fill="#4d5a3c" font-weight="600">p0</text>
-        <text x="276" y="236" font-size="12" fill="#6b6a5f">CPU</text>
-        <rect x="234" y="262" width="120" height="36" rx="6" fill="#faf9f5" stroke="#b9c4a4" stroke-width="1"/>
-        <text x="246" y="284" font-size="12" fill="#4d5a3c" font-weight="600">p1</text>
-        <text x="276" y="284" font-size="12" fill="#6b6a5f">GPU</text>
-        <rect x="234" y="310" width="120" height="36" rx="6" fill="#faf9f5" stroke="#d97757" stroke-width="1.6"/>
-        <text x="246" y="332" font-size="12" fill="#8f4a2f" font-weight="600">p2</text>
-        <text x="276" y="332" font-size="12" fill="#6b6a5f">display</text>
-        <text x="216" y="380" font-size="12" fill="#8f4a2f">p2 gets the highest QoS class</text>
-        <text x="216" y="397" font-size="12" fill="#8c8a7d">scanout cannot be made to wait</text>
-        <rect x="404" y="96" width="66" height="248" rx="10" fill="#eef1e7" stroke="#b9c4a4"/>
-        <text x="437" y="130" text-anchor="middle" font-size="12" font-weight="600" fill="#4d5a3c">AXI</text>
-        <text x="437" y="152" text-anchor="middle" font-size="12" font-weight="600" fill="#4d5a3c">NoC</text>
-        <text x="437" y="174" text-anchor="middle" font-size="12" font-weight="400" fill="#6b6a5f">128-bit</text>
-        <text x="437" y="196" text-anchor="middle" font-size="12" font-weight="400" fill="#6b6a5f">800 MHz</text>
-        <rect x="506" y="96" width="220" height="62" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
-        <text x="616" y="122" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">CPU cluster</text>
-        <text x="616" y="140" text-anchor="middle" font-size="12" fill="#6b6a5f">AXI master 0</text>
-        <rect x="506" y="176" width="220" height="62" rx="10" fill="#f5f2ea" stroke="#cfccc0" stroke-dasharray="6 4"/>
-        <text x="616" y="202" text-anchor="middle" font-size="13" font-weight="600" fill="#8c8a7d">GPU</text>
-        <text x="616" y="220" text-anchor="middle" font-size="12" fill="#6b6a5f">AXI master 1 &#183; next figure</text>
-        <rect x="506" y="256" width="256" height="160" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
-        <text x="634" y="280" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">Display controller</text>
-        <text x="634" y="298" text-anchor="middle" font-size="12" fill="#6b6a5f">AXI master 2 &#183; the DMA lives here</text>
-        <rect x="520" y="308" width="228" height="26" rx="6" fill="#faf9f5" stroke="#c4d5e6"/>
-        <text x="530" y="325" font-size="12" fill="#2f5c8a">fetch DMA &#183; issues the reads</text>
-        <rect x="520" y="340" width="228" height="40" rx="6" fill="#faf9f5" stroke="#d97757" stroke-width="1.6"/>
-        <text x="530" y="357" font-size="12" font-weight="600" fill="#8f4a2f">FB base address register</text>
-        <text x="530" y="373" font-size="12" fill="#8c8a7d">the only thing software sets</text>
-        <rect x="520" y="386" width="228" height="26" rx="6" fill="#faf9f5" stroke="#c4d5e6"/>
-        <text x="530" y="403" font-size="12" fill="#2f5c8a">line buffer &#183; a few lines only</text>
-        <line x1="470" y1="127" x2="506" y2="127" stroke="#6b6a5f" stroke-width="1.6"/>
-        <line x1="470" y1="207" x2="506" y2="207" stroke="#6b6a5f" stroke-width="1.6"/>
-        <line x1="470" y1="300" x2="506" y2="300" stroke="#6b6a5f" stroke-width="1.6"/>
-        <rect x="800" y="256" width="140" height="70" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
-        <text x="870" y="282" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">DSI controller</text>
-        <text x="870" y="300" text-anchor="middle" font-size="12" fill="#6b6a5f">packs RGB into</text>
-        <text x="870" y="316" text-anchor="middle" font-size="12" fill="#6b6a5f">HS packets</text>
-        <rect x="800" y="340" width="140" height="66" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
-        <text x="870" y="366" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">MIPI D-PHY</text>
-        <text x="870" y="384" text-anchor="middle" font-size="12" fill="#6b6a5f">4 lanes &#183; 1 Gbps</text>
-        <line x1="870" y1="326" x2="870" y2="340" stroke="#6b6a5f" stroke-width="1.6"/>
-        <rect x="976" y="256" width="112" height="150" rx="10" fill="#f5f2ea" stroke="#cfccc0"/>
-        <text x="1032" y="296" text-anchor="middle" font-size="13" font-weight="600" fill="#141413">LCD panel</text>
-        <text x="1032" y="316" text-anchor="middle" font-size="12" fill="#6b6a5f">driver IC +</text>
-        <text x="1032" y="333" text-anchor="middle" font-size="12" fill="#6b6a5f">source drivers</text>
-        <text x="1032" y="360" text-anchor="middle" font-size="12" fill="#8c8a7d">no memory</text>
-        <text x="1032" y="377" text-anchor="middle" font-size="12" fill="#8c8a7d">of a whole frame</text>
-        <path d="M726,127 H778 Q790,127 790,139 V440 Q790,452 778,452 H240" fill="none" stroke="#8a6a2f" stroke-width="1.6" stroke-dasharray="4 3"/>
-        <line x1="634" y1="416" x2="634" y2="452" stroke="#8a6a2f" stroke-width="1.4" stroke-dasharray="4 3"/>
-        <circle cx="634" cy="452" r="3" fill="#8a6a2f"/>
-        <line x1="870" y1="406" x2="870" y2="452" stroke="#8a6a2f" stroke-width="1.4" stroke-dasharray="4 3"/>
-        <circle cx="870" cy="452" r="3" fill="#8a6a2f"/>
-        <text x="240" y="472" font-size="12" font-weight="600" fill="#8a6a2f">APB &#183; 32-bit &#183; register writes only</text>
-        <text x="524" y="472" font-size="12" fill="#8c8a7d">4 bytes per frame &#183; never carries a pixel</text>
-        <g fill="none" stroke="#d97757" stroke-width="2.4">
-          <path d="M506,300 H470 V328 H392"/>
-          <line x1="392" y1="328" x2="378" y2="328" marker-end="url(#sdfArrO)"/>
-          <line x1="762" y1="291" x2="794" y2="291" marker-end="url(#sdfArrO)"/>
-          <line x1="940" y1="373" x2="970" y2="373" marker-end="url(#sdfArrO)"/>
-        </g>
-        <text x="870" y="224" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">pixel interface</text>
-        <text x="870" y="241" text-anchor="middle" font-size="12" fill="#8c8a7d">24-bit RGB &#183; not AXI</text>
-        <circle cx="742" cy="127" r="11" fill="#d97757"/>
-        <text x="742" y="131" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">1</text>
-        <circle cx="488" cy="300" r="11" fill="#d97757"/>
-        <text x="488" y="304" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">2</text>
-        <circle cx="388" cy="328" r="11" fill="#d97757"/>
-        <text x="388" y="332" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">3</text>
-        <circle cx="778" cy="291" r="11" fill="#d97757"/>
-        <text x="778" y="295" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">4</text>
-        <circle cx="956" cy="373" r="11" fill="#d97757"/>
-        <text x="956" y="377" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">5</text>
-        <text x="32" y="512" font-size="12" fill="#6b6a5f">&#9312; one 32-bit register write over APB &#183; &#9313; the DMA then reads on its own &#183; &#9314; served at the top QoS class</text>
-        <text x="32" y="530" font-size="12" fill="#6b6a5f">&#9315; pixels leave on a non-AXI wire &#183; &#9316; the D-PHY sends them off-chip</text>
-        <text x="32" y="548" font-size="12" fill="#8c8a7d">config and data are different wires: 4 bytes one way, 8.3 MB a frame the other &#8212; setting a framebuffer is a register write, not a copy</text>
+        <rect width="1120" height="640" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="640" rx="16" fill="url(#pbD)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">PLATFORM BLOCK &#183; ONE BOARD &#183; WHAT THE CHIP TALKS TO, AND OVER WHICH INTERFACE</text>
+        <rect x="420" y="210" width="280" height="196" rx="11" fill="none" stroke="#d97757" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <rect x="456.4" y="201" width="79.2" height="18" rx="9" fill="#141413"/>
+        <text x="496" y="214" text-anchor="middle" font-size="10" fill="#ffffff">SoC package</text>
+        <text x="560" y="252" text-anchor="middle" font-size="13" font-weight="600" fill="#8f4a2f">Application processor</text>
+        <text x="560" y="270" text-anchor="middle" font-size="11" fill="#6b6a5f">these four blocks face outward</text>
+        <rect x="436" y="286" width="120" height="46" rx="8" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.4"/>
+        <text x="496" y="306" text-anchor="middle" font-size="12" font-weight="600" fill="#4d5a3c">memory ctrl</text>
+        <text x="496" y="323" text-anchor="middle" font-size="11.5" fill="#6b6a5f">multi-port</text>
+        <rect x="566" y="286" width="120" height="46" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+        <text x="626" y="306" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">display ctrl</text>
+        <text x="626" y="323" text-anchor="middle" font-size="11.5" fill="#6b6a5f">the fetch DMA</text>
+        <rect x="436" y="342" width="120" height="46" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+        <text x="496" y="362" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">low-speed IO</text>
+        <text x="496" y="379" text-anchor="middle" font-size="11.5" fill="#6b6a5f">I2C / PWM</text>
+        <rect x="566" y="342" width="120" height="46" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+        <text x="626" y="362" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">DSI TX</text>
+        <text x="626" y="379" text-anchor="middle" font-size="11.5" fill="#6b6a5f">packs + sends</text>
+        <rect x="40" y="236" width="250" height="148" rx="11" fill="none" stroke="#b9c4a4" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <rect x="84.5" y="227" width="131.0" height="18" rx="9" fill="#141413"/>
+        <text x="150" y="240" text-anchor="middle" font-size="10" fill="#ffffff">memory &#183; off-package</text>
+        <rect x="62" y="266" width="206" height="50" rx="4" fill="#6f8a58" stroke="#141413" stroke-width="1.6"/>
+        <rect x="72" y="275" width="74" height="20" rx="3" fill="#ffffff" stroke="#141413" stroke-width="1"/>
+        <text x="109" y="289" text-anchor="middle" font-size="9.5" font-family="'JetBrains Mono', monospace" fill="#141413">4 GiB LPDDR4</text>
+        <rect x="158" y="274" width="22" height="22" rx="2.5" fill="#3a3a36"/>
+        <rect x="188" y="274" width="22" height="22" rx="2.5" fill="#3a3a36"/>
+        <rect x="218" y="274" width="22" height="22" rx="2.5" fill="#3a3a36"/>
+        <rect x="69" y="306" width="192" height="8" fill="#cdb267"/>
+        <line x1="74.0" y1="306" x2="74.0" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="83.5" y1="306" x2="83.5" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="93.0" y1="306" x2="93.0" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="102.5" y1="306" x2="102.5" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="112.0" y1="306" x2="112.0" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="121.5" y1="306" x2="121.5" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="131.0" y1="306" x2="131.0" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="140.5" y1="306" x2="140.5" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="150.0" y1="306" x2="150.0" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="159.5" y1="306" x2="159.5" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="169.0" y1="306" x2="169.0" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="178.5" y1="306" x2="178.5" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="188.0" y1="306" x2="188.0" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="197.5" y1="306" x2="197.5" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="207.0" y1="306" x2="207.0" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="216.5" y1="306" x2="216.5" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="226.0" y1="306" x2="226.0" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="235.5" y1="306" x2="235.5" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="245.0" y1="306" x2="245.0" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <line x1="254.5" y1="306" x2="254.5" y2="314" stroke="#6f8a58" stroke-width="1.4"/>
+        <rect x="181" y="304" width="9" height="12" fill="#faf9f5" stroke="#141413" stroke-width="1.1"/>
+        <text x="165" y="342" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">every framebuffer lives here</text>
+        <text x="165" y="360" text-anchor="middle" font-size="11" fill="#6b6a5f">6.4 GB/s, shared by every master</text>
+        <path d="M290 300 L420 300" fill="none" stroke="#141413" stroke-width="2.0"/>
+        <rect x="316.5" y="291" width="77.0" height="18" rx="9" fill="#141413"/>
+        <text x="355" y="304" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">LPDDR4 x32</text>
+        <rect x="830" y="236" width="250" height="148" rx="11" fill="none" stroke="#c4d5e6" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <rect x="871.6" y="227" width="136.8" height="18" rx="9" fill="#141413"/>
+        <text x="940" y="240" text-anchor="middle" font-size="10" fill="#ffffff">display &#183; off-package</text>
+        <rect x="852" y="262" width="162" height="70" rx="4" fill="#e2ecf5" stroke="#141413" stroke-width="1.6"/>
+        <rect x="859" y="268" width="148" height="42" rx="2" fill="#ffffff" stroke="#c4d5e6"/>
+        <text x="933" y="295" text-anchor="middle" font-size="11" fill="#6b6a5f">1080 x 1920</text>
+        <rect x="878" y="314" width="62" height="12" rx="2" fill="#3a3a36"/>
+        <text x="909" y="323" text-anchor="middle" font-size="8" font-family="'JetBrains Mono', monospace" fill="#ffffff">driver IC</text>
+        <path d="M1014 320 L1044 320 L1044 346" fill="none" stroke="#8a6a2f" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+        <text x="955" y="350" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">no frame of memory in here</text>
+        <text x="955" y="368" text-anchor="middle" font-size="11" fill="#6b6a5f">it must be fed on time, every frame</text>
+        <path d="M700 300 L830 300" fill="none" stroke="#141413" stroke-width="2.0"/>
+        <rect x="723.5" y="291" width="83.0" height="18" rx="9" fill="#141413"/>
+        <text x="765" y="304" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">MIPI DSI x4</text>
+        <rect x="432" y="58" width="256" height="100" rx="11" fill="none" stroke="#d9bf94" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <rect x="449.9" y="49" width="56.2" height="18" rx="9" fill="#141413"/>
+        <text x="478" y="62" text-anchor="middle" font-size="10" fill="#ffffff">storage</text>
+        <rect x="448" y="86" width="108" height="52" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+        <text x="502" y="109" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">eMMC</text>
+        <text x="502" y="126" text-anchor="middle" font-size="11.5" fill="#6b6a5f">boot + rootfs</text>
+        <rect x="566" y="86" width="108" height="52" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+        <text x="620" y="109" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">SPI NOR</text>
+        <text x="620" y="126" text-anchor="middle" font-size="11.5" fill="#6b6a5f">bootloader</text>
+        <path d="M502 158 L502 210" fill="none" stroke="#141413" stroke-width="1.5"/>
+        <rect x="479.4" y="175" width="45.1" height="18" rx="9" fill="#141413"/>
+        <text x="502" y="188" text-anchor="middle" font-size="9.5" font-family="'JetBrains Mono', monospace" fill="#ffffff">HS200</text>
+        <path d="M620 158 L620 210" fill="none" stroke="#141413" stroke-width="1.5"/>
+        <rect x="600.3" y="175" width="39.3" height="18" rx="9" fill="#141413"/>
+        <text x="620" y="188" text-anchor="middle" font-size="9.5" font-family="'JetBrains Mono', monospace" fill="#ffffff">QSPI</text>
+        <rect x="424" y="468" width="340" height="100" rx="11" fill="none" stroke="#d5d2c6" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <rect x="451.6" y="559" width="136.8" height="18" rx="9" fill="#141413"/>
+        <text x="520" y="572" text-anchor="middle" font-size="10" fill="#ffffff">sensors &amp; control</text>
+        <rect x="452" y="496" width="96" height="52" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+        <text x="500" y="519" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">touch ctrl</text>
+        <text x="500" y="536" text-anchor="middle" font-size="11.5" fill="#6b6a5f">gestures</text>
+        <rect x="552" y="496" width="96" height="52" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+        <text x="600" y="519" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">backlight</text>
+        <text x="600" y="536" text-anchor="middle" font-size="11.5" fill="#6b6a5f">brightness</text>
+        <rect x="652" y="496" width="96" height="52" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+        <text x="700" y="519" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">PMIC</text>
+        <text x="700" y="536" text-anchor="middle" font-size="11.5" fill="#6b6a5f">rails</text>
+        <path d="M500 406 L500 468" fill="none" stroke="#141413" stroke-width="1.4"/>
+        <rect x="483.3" y="428" width="33.5" height="18" rx="9" fill="#141413"/>
+        <text x="500" y="441" text-anchor="middle" font-size="9.5" font-family="'JetBrains Mono', monospace" fill="#ffffff">I2C</text>
+        <path d="M600 406 L600 468" fill="none" stroke="#141413" stroke-width="1.4"/>
+        <rect x="583.3" y="428" width="33.5" height="18" rx="9" fill="#141413"/>
+        <text x="600" y="441" text-anchor="middle" font-size="9.5" font-family="'JetBrains Mono', monospace" fill="#ffffff">PWM</text>
+        <path d="M700 406 L700 468" fill="none" stroke="#141413" stroke-width="1.4"/>
+        <rect x="683.3" y="428" width="33.5" height="18" rx="9" fill="#141413"/>
+        <text x="700" y="441" text-anchor="middle" font-size="9.5" font-family="'JetBrains Mono', monospace" fill="#ffffff">I2C</text>
+        <circle cx="316" cy="276" r="10.5" fill="#d97757"/>
+        <text x="316" y="280" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+        <circle cx="804" cy="276" r="10.5" fill="#d97757"/>
+        <text x="804" y="280" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+        <circle cx="660" cy="184" r="10.5" fill="#d97757"/>
+        <text x="660" y="188" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+        <circle cx="742" cy="437" r="10.5" fill="#d97757"/>
+        <text x="742" y="441" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">4</text>
+        <text x="32" y="604" text-anchor="start" font-size="11.5" fill="#8c8a7d">&#9312; the only wire a pixel travels on the way in &#183; &#9313; the only wire it travels on the way out &#183; &#9314; boot code, never pixels</text>
+        <text x="32" y="621" text-anchor="start" font-size="11.5" fill="#8c8a7d">&#9315; control traffic &#8212; bytes per second, not megabytes. the pill on each link is the part that carries information; the line itself carries none</text>
+        <rect x="32" y="552" width="205" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M32 559 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="45" cy="567" r="3.6" fill="#ffffff"/>
+        <text x="148" y="571" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Platform block &#183; one board</text>
       </svg>
       <figcaption class="fig-cap">
         <span class="fig-tag"><span class="lang-en">physical connection &#183; no GPU</span><span class="lang-zh">&#29289;&#29702;&#36830;&#25509; &#183; &#26080; GPU</span></span>
@@ -489,7 +515,7 @@
 <!-- Figure 2 -->
 <section class="anth-section" id="with-gpu">
   <div class="anth-container anth-container--wide">
-    <span class="anth-badge"><span class="lang-en">Figure 02 &#183; with a GPU</span><span class="lang-zh">&#22270; 02 &#183; &#26377; GPU</span></span>
+    <span class="anth-badge"><span class="lang-en">Figure 02 &#183; who reads, who writes</span><span class="lang-zh">&#22270; 02 &#183; &#35841;&#22312;&#35835;&#65292;&#35841;&#22312;&#20889;</span></span>
     <h2 style="margin-top:var(--space-3); max-width:820px;">
       <span class="lang-en">Add a GPU and you add a master, not a destination</span>
       <span class="lang-zh">&#21152;&#19968;&#20010; GPU&#65292;&#21152;&#30340;&#26159;&#19968;&#20010;&#20027;&#35774;&#22791;&#65292;&#19981;&#26159;&#19968;&#20010;&#30446;&#30340;&#22320;</span>
@@ -499,131 +525,109 @@
       <span class="lang-zh">GPU &#26159;&#25925;&#24847;&#30011;&#25104;&#25932;&#24320;&#30340;&#65292;&#20320;&#21487;&#20197;&#25226;&#37324;&#38754;&#30340;&#23384;&#20648;&#25968;&#19968;&#36941;&#65292;&#30475;&#20986;&#19968;&#24086;&#26681;&#26412;&#25918;&#19981;&#19979;&#12290;&#28982;&#21518;&#30475;&#37027;&#19971;&#26465;&#31661;&#22836;&#37117;&#33853;&#22312;&#20102;&#21738;&#37324;&#12290;</span>
     </p>
     <figure class="fig">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="How a GPU actually touches pixel data on a phone-class system on chip. The CPU cluster sits top left with its caches and MMU; the GPU fills the top right, drawn open so its four shader cores, its sixteen by sixteen pixel tile buffer, its two hundred and fifty six kilobyte level two cache, its own memory management unit and its single AXI master port are all visible. A note inside it states that one 1080p RGBA frame is 8.3 megabytes and nothing on that die can hold one. Across the middle runs a single DDR bar, one physical address space divided into five tenants: the command buffer, the GPU's page tables, textures and meshes, framebuffer A which is the front buffer, and framebuffer B which is the back buffer, each with its size and base address. Every arrow in the figure ends on that bar. Badge one, the CPU writes the command buffer through its cache. Badge two, the CPU rings one doorbell register over APB. Badge three, the GPU's own MMU fetches its page tables from DDR. Badge four, the GPU reads textures through its single master port. Badge five, finished tiles are written back to framebuffer B, the only pixel write the GPU performs. Badge six, a fence is signalled back to the CPU. Badge seven, at the same time the display controller's DMA is reading framebuffer A and feeding the DSI and D-PHY out to the panel. An aside notes the contrast with a discrete PCIe graphics card, where an upload really is a copy into separate video memory. The conclusion is that nothing is ever moved into the GPU: the GPU is simply a second bus master issuing addresses into the same DDR the CPU uses" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 620" role="img" aria-label="One block of DDR memory with several bus masters around it, drawn so the direction of every link is visible. Across the middle runs a single memory bar divided into a command buffer, page tables, textures, framebuffer A marked front, and framebuffer B marked back, each with its size. Above the bar sit the CPU cluster and the GPU; below it sit the display controller and, off to the right, the panel. Every link is drawn as a flowing dashed line whose dashes travel in the direction the data moves. The CPU link and the GPU link are each drawn as two parallel lines flowing in opposite directions, because both masters read and write; a single line with two arrowheads would leave the direction ambiguous. The display controller's link is a single line flowing upward from memory into the controller, because scanout only ever reads. The GPU's tile writeback is a single line flowing downward into framebuffer B, because tiles are only written. A legend names the three cases: one way read, one way write, and two way. The closing lines state that no arrow crosses from one master to another, so nothing is ever handed between them; they only meet at the same addresses in the same memory" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
         <defs>
-          <pattern id="gdfDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
-          <marker id="gdfArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
-          <marker id="gdfArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
-          <marker id="gdfArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+        <style>
+          .gmf-f { stroke-dasharray: 12 8; animation: gmfM 1.15s linear infinite; }
+          .gmf-f.gmf-r { animation-name: gmfMR; }
+          .gmf-f.gmf-s { animation-duration: 2.1s; }
+          @keyframes gmfM  { to { stroke-dashoffset: -40; } }
+          @keyframes gmfMR { to { stroke-dashoffset:  40; } }
+          /* 三条关闭动效的口子,跟 glass 同一套约定 */
+          @media (prefers-reduced-motion: reduce) {
+            .gmf-f { animation: none; stroke-dashoffset: 0; }
+          }
+          :root[data-motion-freeze] .gmf-f,
+          html[data-motion-freeze] .gmf-f { animation: none; stroke-dashoffset: 0; }
+        </style>
+          <pattern id="gmfD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+          <pattern id="gmfH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+          <marker id="gmfAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+          <marker id="gmfAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+          <marker id="gmfAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+          <marker id="gmfAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+          <marker id="gmfAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
         </defs>
-        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
-        <rect width="1120" height="560" rx="16" fill="url(#gdfDots)"/>
-        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">GPU DATA PATH &#183; NOTHING IS EVER MOVED INTO THE GPU</text>
-        <g font-size="12" fill="#6b6a5f">
-          <line x1="558" y1="30" x2="582" y2="30" stroke="#d97757" stroke-width="2.4"/><text x="590" y="34">who issues the address</text>
-          <line x1="770" y1="30" x2="794" y2="30" stroke="#8a6a2f" stroke-width="1.6" stroke-dasharray="4 3"/><text x="802" y="34">register poke &#183; APB</text>
-          <line x1="946" y1="30" x2="970" y2="30" stroke="#2f5c8a" stroke-width="1.8"/><text x="978" y="34">display side</text>
-        </g>
-        <rect x="40" y="64" width="330" height="196" rx="12" fill="none" stroke="#c4d5e6" stroke-width="1.4" stroke-dasharray="6 4"/>
-        <text x="56" y="88" font-size="13" font-weight="600" fill="#2f5c8a">CPU cluster &#183; AXI master 0</text>
-        <rect x="56" y="102" width="146" height="48" rx="8" fill="#e2ecf5" stroke="#c4d5e6"/>
-        <text x="129" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">L1 + L2 cache</text>
-        <text x="129" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">write-back</text>
-        <rect x="214" y="102" width="140" height="48" rx="8" fill="#e2ecf5" stroke="#c4d5e6"/>
-        <text x="284" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">CPU MMU</text>
-        <text x="284" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">virtual &#8594; physical</text>
-        <text x="56" y="174" font-size="12" fill="#6b6a5f">it fills the command buffer, then writes</text>
-        <text x="56" y="191" font-size="12" fill="#6b6a5f">one doorbell register. that is its whole</text>
-        <text x="56" y="208" font-size="12" fill="#6b6a5f">part &#8212; it never touches a pixel again.</text>
-        <text x="56" y="232" font-size="12" fill="#8f4a2f">flush the cache, or the GPU reads</text>
-        <text x="56" y="248" font-size="12" fill="#8f4a2f">bytes that are still sitting in it</text>
-        <rect x="430" y="64" width="650" height="188" rx="12" fill="none" stroke="#d97757" stroke-width="1.4" stroke-dasharray="6 4"/>
-        <text x="446" y="88" font-size="13" font-weight="600" fill="#8f4a2f">GPU &#183; AXI master 1 &#183; drawn open</text>
-        <rect x="446" y="102" width="80" height="48" rx="8" fill="#f4d9cd" stroke="#d97757"/>
-        <text x="486" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shader</text>
-        <text x="486" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">core 0</text>
-        <rect x="534" y="102" width="80" height="48" rx="8" fill="#f4d9cd" stroke="#d97757"/>
-        <text x="574" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shader</text>
-        <text x="574" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">core 1</text>
-        <rect x="622" y="102" width="80" height="48" rx="8" fill="#f4d9cd" stroke="#d97757"/>
-        <text x="662" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shader</text>
-        <text x="662" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">core 2</text>
-        <rect x="710" y="102" width="80" height="48" rx="8" fill="#f4d9cd" stroke="#d97757"/>
-        <text x="750" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shader</text>
-        <text x="750" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">core 3</text>
-        <rect x="806" y="102" width="118" height="48" rx="8" fill="#f4d9cd" stroke="#d97757"/>
-        <text x="865" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">tile buffer</text>
-        <text x="865" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">16&#215;16 px &#183; 2 KiB</text>
-        <rect x="938" y="102" width="126" height="48" rx="8" fill="#f4d9cd" stroke="#d97757"/>
-        <text x="1001" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">L2 cache</text>
-        <text x="1001" y="139" text-anchor="middle" font-size="12" fill="#6b6a5f">256 KiB</text>
-        <rect x="446" y="168" width="190" height="46" rx="8" fill="#faf9f5" stroke="#d97757"/>
-        <text x="541" y="187" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">GPU MMU</text>
-        <text x="541" y="204" text-anchor="middle" font-size="12" fill="#6b6a5f">page tables live in DDR</text>
-        <rect x="650" y="168" width="150" height="46" rx="8" fill="#faf9f5" stroke="#d97757" stroke-width="1.8"/>
-        <text x="725" y="187" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">AXI master port</text>
-        <text x="725" y="204" text-anchor="middle" font-size="12" fill="#6b6a5f">one way in and out</text>
-        <text x="816" y="182" font-size="12" fill="#8c8a7d">one 1080p RGBA frame = 8.3 MB.</text>
-        <text x="816" y="199" font-size="12" fill="#8c8a7d">nothing on this die holds one &#8212;</text>
-        <text x="816" y="216" font-size="12" fill="#8c8a7d">so the frame has to stay in DDR.</text>
-        <line x1="370" y1="180" x2="424" y2="180" stroke="#8a6a2f" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#gdfArrG)"/>
-        <line x1="430" y1="222" x2="376" y2="222" stroke="#8a6a2f" stroke-width="1.6" stroke-dasharray="2 3" marker-end="url(#gdfArrG)"/>
-        <rect x="40" y="296" width="1030" height="76" rx="10" fill="#eef1e7" stroke="#b9c4a4"/>
-        <rect x="40" y="296" width="146" height="76" rx="10" fill="none" stroke="#b9c4a4"/>
-        <text x="113" y="323" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">command buffer</text>
-        <text x="113" y="342" text-anchor="middle" font-size="12" fill="#6b6a5f">64 KiB</text>
-        <text x="113" y="360" text-anchor="middle" font-size="12" fill="#8c8a7d">0x8000_0000</text>
-        <rect x="186" y="296" width="118" height="76" rx="10" fill="none" stroke="#b9c4a4"/>
-        <text x="245" y="323" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">page tables</text>
-        <text x="245" y="342" text-anchor="middle" font-size="12" fill="#6b6a5f">2 MiB</text>
-        <text x="245" y="360" text-anchor="middle" font-size="12" fill="#8c8a7d">0x8001_0000</text>
-        <rect x="304" y="296" width="266" height="76" rx="10" fill="none" stroke="#b9c4a4"/>
-        <text x="437" y="323" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">textures &amp; meshes</text>
-        <text x="437" y="342" text-anchor="middle" font-size="12" fill="#6b6a5f">48 MiB</text>
-        <text x="437" y="360" text-anchor="middle" font-size="12" fill="#8c8a7d">0x8021_0000</text>
-        <rect x="570" y="296" width="250" height="76" rx="10" fill="#faf9f5" stroke="#b9c4a4"/>
-        <text x="695" y="323" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">fb A &#183; front</text>
-        <text x="695" y="342" text-anchor="middle" font-size="12" fill="#6b6a5f">8.3 MiB</text>
-        <text x="695" y="360" text-anchor="middle" font-size="12" fill="#8c8a7d">0x8321_0000</text>
-        <rect x="820" y="296" width="250" height="76" rx="10" fill="#faf9f5" stroke="#b9c4a4"/>
-        <text x="945" y="323" text-anchor="middle" font-size="13" font-weight="600" fill="#4d5a3c">fb B &#183; back</text>
-        <text x="945" y="342" text-anchor="middle" font-size="12" fill="#6b6a5f">8.3 MiB</text>
-        <text x="945" y="360" text-anchor="middle" font-size="12" fill="#8c8a7d">0x8B21_0000</text>
-        <text x="40" y="388" font-size="12" fill="#8c8a7d">DDR &#183; one physical address space, five tenants, 6.4 GB/s shared between them</text>
-        <g fill="none" stroke="#d97757" stroke-width="2.4">
-          <line x1="725" y1="214" x2="725" y2="268"/>
-          <line x1="245" y1="268" x2="945" y2="268"/>
-          <line x1="245" y1="268" x2="245" y2="292" marker-end="url(#gdfArrO)"/>
-          <line x1="437" y1="268" x2="437" y2="292" marker-end="url(#gdfArrO)"/>
-          <line x1="945" y1="268" x2="945" y2="292" marker-end="url(#gdfArrO)"/>
-        </g>
-        <line x1="113" y1="262" x2="113" y2="292" stroke="#d97757" stroke-width="2.4" marker-end="url(#gdfArrO)"/>
-        <line x1="695" y1="372" x2="695" y2="396" stroke="#2f5c8a" stroke-width="1.8" marker-end="url(#gdfArrB)"/>
-        <rect x="600" y="400" width="184" height="68" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
-        <text x="692" y="424" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">Display ctrl</text>
-        <text x="692" y="442" text-anchor="middle" font-size="12" fill="#6b6a5f">fetch DMA &#183; master 2</text>
-        <text x="692" y="459" text-anchor="middle" font-size="12" fill="#6b6a5f">reads fb A right now</text>
-        <rect x="800" y="400" width="130" height="68" rx="10" fill="#e2ecf5" stroke="#c4d5e6"/>
-        <text x="865" y="424" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">DSI + D-PHY</text>
-        <text x="865" y="442" text-anchor="middle" font-size="12" fill="#6b6a5f">4 lanes</text>
-        <text x="865" y="459" text-anchor="middle" font-size="12" fill="#6b6a5f">1 Gbps each</text>
-        <rect x="946" y="400" width="124" height="68" rx="10" fill="#f5f2ea" stroke="#cfccc0"/>
-        <text x="1008" y="424" text-anchor="middle" font-size="13" font-weight="600" fill="#141413">LCD panel</text>
-        <text x="1008" y="442" text-anchor="middle" font-size="12" fill="#6b6a5f">off-package</text>
-        <text x="1008" y="459" text-anchor="middle" font-size="12" fill="#6b6a5f">glass at last</text>
-        <line x1="784" y1="434" x2="796" y2="434" stroke="#2f5c8a" stroke-width="1.8" marker-end="url(#gdfArrB)"/>
-        <line x1="930" y1="434" x2="942" y2="434" stroke="#2f5c8a" stroke-width="1.8" marker-end="url(#gdfArrB)"/>
-        <rect x="40" y="400" width="524" height="68" rx="10" fill="#faf9f5" stroke="#eceadf"/>
-        <text x="56" y="422" font-size="12" font-weight="600" fill="#141413">a desktop card is the exception</text>
-        <text x="56" y="440" font-size="12" fill="#6b6a5f">a discrete PCIe GPU has its own VRAM, so "upload the texture" really is a copy</text>
-        <text x="56" y="457" font-size="12" fill="#6b6a5f">across the bus. on this SoC there is no VRAM &#8212; upload means another DDR address.</text>
-        <circle cx="113" cy="274" r="11" fill="#d97757"/>
-        <text x="113" y="278" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">1</text>
-        <circle cx="397" cy="162" r="11" fill="#d97757"/>
-        <text x="397" y="166" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">2</text>
-        <circle cx="245" cy="286" r="11" fill="#d97757"/>
-        <text x="245" y="290" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">3</text>
-        <circle cx="437" cy="286" r="11" fill="#d97757"/>
-        <text x="437" y="290" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">4</text>
-        <circle cx="945" cy="286" r="11" fill="#d97757"/>
-        <text x="945" y="290" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">5</text>
-        <circle cx="397" cy="240" r="11" fill="#d97757"/>
-        <text x="397" y="244" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">6</text>
-        <circle cx="676" cy="386" r="11" fill="#d97757"/>
-        <text x="676" y="390" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">7</text>
-        <text x="32" y="512" font-size="12" fill="#6b6a5f">&#9312; CPU fills the command buffer &#183; &#9313; one doorbell write &#183; &#9314; the GPU MMU fetches its own page tables &#183; &#9315; textures read in</text>
-        <text x="32" y="530" font-size="12" fill="#6b6a5f">&#9316; tiles written out to fb B &#183; &#9317; fence back to the CPU &#183; &#9318; the display DMA reads fb A the whole time</text>
-        <text x="32" y="548" font-size="12" fill="#8c8a7d">every arrow ends on the same DDR bar. the GPU is not a place data goes &#8212; it is a second master issuing addresses into it.</text>
+        <rect width="1120" height="620" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="620" rx="16" fill="url(#gmfD)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">WHO READS, WHO WRITES &#183; EVERY LINK HAS A DIRECTION</text>
+        <path d="M560 30 L600 30" fill="none" stroke="#4d5a3c" stroke-width="2.6" class="gmf-f" marker-end="url(#gmfAG)"/>
+        <text x="608" y="34" text-anchor="start" font-size="11.5" fill="#6b6a5f">one-way read</text>
+        <path d="M712 30 L752 30" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="gmf-f" marker-end="url(#gmfAB)"/>
+        <text x="760" y="34" text-anchor="start" font-size="11.5" fill="#6b6a5f">one-way write</text>
+        <path d="M866 26 L906 26" fill="none" stroke="#d97757" stroke-width="2.4" class="gmf-f" marker-end="url(#gmfAO)"/>
+        <path d="M906 34 L866 34" fill="none" stroke="#d97757" stroke-width="2.4" class="gmf-f" marker-end="url(#gmfAO)"/>
+        <text x="914" y="34" text-anchor="start" font-size="11.5" fill="#6b6a5f">two-way</text>
+        <rect x="96" y="74" width="200" height="66" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+        <text x="196" y="104" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">CPU cluster</text>
+        <text x="196" y="121" text-anchor="middle" font-size="11.5" fill="#6b6a5f">fills commands, rings</text>
+        <text x="218" y="200" text-anchor="start" font-size="11" font-weight="600" fill="#d97757">reads and writes</text>
+        <rect x="456" y="62" width="430" height="92" rx="11" fill="none" stroke="#d97757" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <rect x="506.0" y="53" width="108.0" height="18" rx="9" fill="#141413"/>
+        <text x="560" y="66" text-anchor="middle" font-size="10" fill="#ffffff">GPU &#183; drawn open</text>
+        <rect x="472" y="90" width="118" height="50" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+        <text x="531" y="120" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shaders</text>
+        <rect x="602" y="90" width="128" height="50" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+        <text x="666" y="112" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">tile buffer</text>
+        <text x="666" y="129" text-anchor="middle" font-size="11.5" fill="#6b6a5f">2 KiB</text>
+        <rect x="742" y="90" width="128" height="50" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+        <text x="806" y="112" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">L2</text>
+        <text x="806" y="129" text-anchor="middle" font-size="11.5" fill="#6b6a5f">256 KiB</text>
+        <text x="700" y="178" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8f4a2f">a frame is 8.3 MB &#8212; neither of those can hold one</text>
+        <rect x="56" y="262" width="150" height="58" fill="#f1efe8"/>
+        <text x="131" y="289" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">commands</text>
+        <text x="131" y="304" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">64 KiB</text>
+        <line x1="206" y1="262" x2="206" y2="320" stroke="#141413" stroke-width="1.5"/>
+        <rect x="206" y="262" width="140" height="58" fill="#f1efe8"/>
+        <text x="276" y="289" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">page tables</text>
+        <text x="276" y="304" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">2 MiB</text>
+        <line x1="346" y1="262" x2="346" y2="320" stroke="#141413" stroke-width="1.5"/>
+        <rect x="346" y="262" width="280" height="58" fill="#eef1e7"/>
+        <text x="486" y="289" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">textures</text>
+        <text x="486" y="304" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">48 MiB</text>
+        <line x1="626" y1="262" x2="626" y2="320" stroke="#141413" stroke-width="1.5"/>
+        <rect x="626" y="262" width="220" height="58" fill="#e2ecf5"/>
+        <text x="736" y="289" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">fb A &#183; front</text>
+        <text x="736" y="304" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">8.3 MiB</text>
+        <line x1="846" y1="262" x2="846" y2="320" stroke="#141413" stroke-width="1.5"/>
+        <rect x="846" y="262" width="218" height="58" fill="#eef1e7"/>
+        <text x="955" y="289" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">fb B &#183; back</text>
+        <text x="955" y="304" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">8.3 MiB</text>
+        <rect x="56" y="262" width="1008" height="58" rx="7" fill="none" stroke="#141413" stroke-width="1.8"/>
+        <rect x="584.5" y="341" width="83.0" height="18" rx="9" fill="#141413"/>
+        <text x="626" y="354" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">0x8321_0000</text>
+        <line x1="626" y1="320" x2="626" y2="341" stroke="#6b6a5f" stroke-width="1.2" stroke-dasharray="3 3"/>
+        <rect x="71.0" y="333" width="258.0" height="18" rx="9" fill="#141413"/>
+        <text x="200" y="346" text-anchor="middle" font-size="9.5" fill="#ffffff">one physical address space &#183; 6.4 GB/s shared</text>
+        <rect x="300" y="424" width="200" height="62" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+        <text x="400" y="452" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">display ctrl</text>
+        <text x="400" y="469" text-anchor="middle" font-size="11.5" fill="#6b6a5f">fetch DMA</text>
+        <rect x="560" y="424" width="150" height="62" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+        <text x="635" y="460" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">DSI TX</text>
+        <rect x="770" y="418" width="156" height="74" rx="4" fill="#e2ecf5" stroke="#141413" stroke-width="1.6"/>
+        <rect x="777" y="424" width="142" height="46" rx="2" fill="#ffffff" stroke="#c4d5e6"/>
+        <text x="848" y="453" text-anchor="middle" font-size="11" fill="#6b6a5f">the glass</text>
+        <rect x="796" y="474" width="62" height="12" rx="2" fill="#3a3a36"/>
+        <text x="827" y="483" text-anchor="middle" font-size="8" font-family="'JetBrains Mono', monospace" fill="#ffffff">driver IC</text>
+        <path d="M926 480 L956 480 L956 506" fill="none" stroke="#8a6a2f" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+        <path d="M190 140 L190 258" fill="none" stroke="#d97757" stroke-width="2.6" class="gmf-f" marker-end="url(#gmfAO)"/>
+        <path d="M204 258 L204 140" fill="none" stroke="#d97757" stroke-width="2.6" class="gmf-f" marker-end="url(#gmfAO)"/>
+        <path d="M520 258 L520 154" fill="none" stroke="#4d5a3c" stroke-width="2.8" class="gmf-f" marker-end="url(#gmfAG)"/>
+        <text x="534" y="214" text-anchor="start" font-size="11" font-weight="600" fill="#4d5a3c">reads textures</text>
+        <path d="M860 154 L860 258" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="gmf-f" marker-end="url(#gmfAB)"/>
+        <text x="874" y="214" text-anchor="start" font-size="11" font-weight="600" fill="#2f5c8a">writes tiles into fb B</text>
+        <path d="M400 324 L400 424" fill="none" stroke="#4d5a3c" stroke-width="2.8" class="gmf-f" marker-end="url(#gmfAG)"/>
+        <text x="414" y="380" text-anchor="start" font-size="11" font-weight="600" fill="#4d5a3c">reads fb A &#8212; never writes</text>
+        <path d="M500 455 L556 455" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="gmf-f" marker-end="url(#gmfAB)"/>
+        <path d="M710 455 L766 455" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="gmf-f gmf-s" marker-end="url(#gmfAB)"/>
+        <text x="56" y="528" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">no arrow goes from one master to another. nothing is ever handed over &#8212; they only meet at the same addresses.</text>
+        <text x="56" y="552" text-anchor="start" font-size="11.5" fill="#8c8a7d">the two-way links are two lines on purpose: dashes on one line can only travel one way,</text>
+        <text x="56" y="569" text-anchor="start" font-size="11.5" fill="#8c8a7d">so a single double-headed arrow would say &#8220;direction unknown&#8221;.</text>
+        <text x="56" y="586" text-anchor="start" font-size="11.5" fill="#8c8a7d">read the arrowheads and you have the answer to who copies from whom &#8212; here, nobody does.</text>
+        <rect x="844" y="546" width="194" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M844 553 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="857" cy="561" r="3.6" fill="#ffffff"/>
+        <text x="954" y="565" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">One memory, many masters</text>
       </svg>
       <figcaption class="fig-cap">
         <span class="fig-tag"><span class="lang-en">data flow &#183; with a GPU</span><span class="lang-zh">&#25968;&#25454;&#27969;&#21521; &#183; &#26377; GPU</span></span>
@@ -634,10 +638,120 @@
   </div>
 </section>
 
+<!-- Figure 3 · page flip -->
+<section class="anth-section" id="flip">
+  <div class="anth-container anth-container--wide">
+    <span class="anth-badge"><span class="lang-en">Figure 03 &#183; the flip</span><span class="lang-zh">&#22270; 03 &#183; &#32763;&#39029;</span></span>
+    <h2 style="margin-top:var(--space-3); max-width:840px;">
+      <span class="lang-en">Putting the finished frame on screen costs four bytes</span>
+      <span class="lang-zh">&#25226;&#30011;&#22909;&#30340;&#19968;&#24086;&#25918;&#21040;&#23631;&#19978;&#65292;&#20195;&#20215;&#26159;&#22235;&#20010;&#23383;&#33410;</span>
+    </h2>
+    <p style="font-size:16px; line-height:1.6; color:var(--anth-text-secondary); max-width:800px; margin:var(--space-3) 0 var(--space-7); font-family:var(--font-body);">
+      <span class="lang-en">This is the step the first two figures leave out, and the one where people most often assume a copy happens. It does not. The two buffers stay exactly where they are; a register learns a different number.</span>
+      <span class="lang-zh">&#36825;&#26159;&#21069;&#20004;&#24352;&#22270;&#27809;&#35762;&#30340;&#19968;&#27493;&#65292;&#20063;&#26159;&#26368;&#22810;&#20154;&#20197;&#20026;&#21457;&#29983;&#20102;&#25335;&#36125;&#30340;&#19968;&#27493;&#12290;&#27809;&#26377;&#12290;&#20004;&#22359;&#32531;&#20914;&#21407;&#22320;&#19981;&#21160;&#65292;&#21464;&#30340;&#26159;&#19968;&#20010;&#23492;&#23384;&#22120;&#37324;&#30340;&#25968;&#12290;</span>
+    </p>
+    <figure class="fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="The same arrangement drawn twice, above and below a vsync marker, to show that a page flip changes an address rather than moving a frame. In each half, a gold box on the left is the display controller's framebuffer base address register, holding one address on a black pill. To its right is a memory bar whose two large regions are framebuffer A and framebuffer B, identical in position and width in both halves. A thick blue arrow leaves the register box, rises above the bar, travels right, and comes down onto the region that register currently names. In the upper half, before the flip, the register holds the address of framebuffer A, the arrow lands on framebuffer A which is marked front and being scanned out, and framebuffer B is marked back and being drawn. Between the halves a marker reads vsync, and a note says the register latches at that instant and not before. In the lower half, after the flip, the register holds the address of framebuffer B, the arrow turns down further right and lands on framebuffer B which is now the front buffer, while framebuffer A has become the back buffer. The bar itself is byte-identical between the two halves. The closing lines state that four bytes changed, that no pixels moved, and that latching at vsync rather than immediately is what stops a half-old and half-new frame from reaching the glass" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs>
+        <style>
+          .pf-f { stroke-dasharray: 12 8; animation: pfM 1.15s linear infinite; }
+          .pf-f.pf-r { animation-name: pfMR; }
+          .pf-f.pf-s { animation-duration: 2.1s; }
+          @keyframes pfM  { to { stroke-dashoffset: -40; } }
+          @keyframes pfMR { to { stroke-dashoffset:  40; } }
+          /* 三条关闭动效的口子,跟 glass 同一套约定 */
+          @media (prefers-reduced-motion: reduce) {
+            .pf-f { animation: none; stroke-dashoffset: 0; }
+          }
+          :root[data-motion-freeze] .pf-f,
+          html[data-motion-freeze] .pf-f { animation: none; stroke-dashoffset: 0; }
+        </style>
+          <pattern id="pfD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+          <pattern id="pfH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+          <marker id="pfAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+          <marker id="pfAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+          <marker id="pfAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+          <marker id="pfAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+          <marker id="pfAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
+        </defs>
+        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="560" rx="16" fill="url(#pfD)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">PAGE FLIP &#183; AN ADDRESS CHANGES, A FRAME DOES NOT</text>
+        <rect x="104" y="110" width="176" height="80" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+        <text x="192" y="132" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">FB base register</text>
+        <rect x="150.5" y="157" width="83.0" height="18" rx="9" fill="#141413"/>
+        <text x="192" y="170" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">0x8321_0000</text>
+        <rect x="38.0" y="141" width="52.0" height="18" rx="9" fill="#6b6a5f"/>
+        <text x="64" y="154" text-anchor="middle" font-size="10.5" fill="#ffffff">BEFORE</text>
+        <rect x="300" y="124" width="60" height="52" fill="#f1efe8"/>
+        <line x1="360" y1="124" x2="360" y2="176" stroke="#141413" stroke-width="1.5"/>
+        <rect x="360" y="124" width="250" height="52" fill="#e2ecf5"/>
+        <text x="485" y="148" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">fb A</text>
+        <text x="485" y="163" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">front &#183; scanned out</text>
+        <line x1="610" y1="124" x2="610" y2="176" stroke="#141413" stroke-width="1.5"/>
+        <rect x="610" y="124" width="250" height="52" fill="#eef1e7"/>
+        <text x="735" y="148" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">fb B</text>
+        <text x="735" y="163" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">back &#183; being drawn</text>
+        <line x1="860" y1="124" x2="860" y2="176" stroke="#141413" stroke-width="1.5"/>
+        <rect x="860" y="124" width="40" height="52" fill="#f1efe8"/>
+        <rect x="300" y="124" width="600" height="52" rx="7" fill="none" stroke="#141413" stroke-width="1.8"/>
+        <path d="M280 150 L290 150 L290 94 L485 94 L485 120" fill="none" stroke="#2f5c8a" stroke-width="3" class="pf-f" marker-end="url(#pfAB)"/>
+        <text x="499" y="82" text-anchor="start" font-size="11" font-weight="600" fill="#2f5c8a">the DMA reads from here</text>
+        <text x="735" y="196" text-anchor="middle" font-size="11" fill="#4d5a3c">the GPU is drawing into this one</text>
+        <path d="M40 232 L1080 232" fill="none" stroke="#8a6a2f" stroke-width="1.6" stroke-dasharray="7 5"/>
+        <rect x="97.0" y="223" width="46.0" height="18" rx="9" fill="#8a6a2f"/>
+        <text x="120" y="236" text-anchor="middle" font-size="10.5" fill="#ffffff">vsync</text>
+        <text x="40" y="212" text-anchor="start" font-size="11.5" font-weight="600" fill="#8a6a2f">the register latches here &#8212; not the moment software wrote it. that one rule is what keeps half an old frame off the glass.</text>
+        <rect x="104" y="276" width="176" height="80" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+        <text x="192" y="298" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">FB base register</text>
+        <rect x="150.5" y="323" width="83.0" height="18" rx="9" fill="#141413"/>
+        <text x="192" y="336" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">0x8B21_0000</text>
+        <rect x="41.0" y="307" width="46.0" height="18" rx="9" fill="#8f4a2f"/>
+        <text x="64" y="320" text-anchor="middle" font-size="10.5" fill="#ffffff">AFTER</text>
+        <rect x="300" y="290" width="60" height="52" fill="#f1efe8"/>
+        <line x1="360" y1="290" x2="360" y2="342" stroke="#141413" stroke-width="1.5"/>
+        <rect x="360" y="290" width="250" height="52" fill="#eef1e7"/>
+        <text x="485" y="314" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">fb A</text>
+        <text x="485" y="329" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">back &#183; being drawn</text>
+        <line x1="610" y1="290" x2="610" y2="342" stroke="#141413" stroke-width="1.5"/>
+        <rect x="610" y="290" width="250" height="52" fill="#e2ecf5"/>
+        <text x="735" y="314" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">fb B</text>
+        <text x="735" y="329" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">front &#183; scanned out</text>
+        <line x1="860" y1="290" x2="860" y2="342" stroke="#141413" stroke-width="1.5"/>
+        <rect x="860" y="290" width="40" height="52" fill="#f1efe8"/>
+        <rect x="300" y="290" width="600" height="52" rx="7" fill="none" stroke="#141413" stroke-width="1.8"/>
+        <path d="M280 316 L290 316 L290 260 L735 260 L735 286" fill="none" stroke="#2f5c8a" stroke-width="3" class="pf-f" marker-end="url(#pfAB)"/>
+        <text x="749" y="248" text-anchor="start" font-size="11" font-weight="600" fill="#2f5c8a">the DMA reads from here</text>
+        <text x="485" y="362" text-anchor="middle" font-size="11" fill="#4d5a3c">the GPU is drawing into this one</text>
+        <circle cx="290" cy="86" r="10.5" fill="#d97757"/>
+        <text x="290" y="90" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+        <circle cx="168" cy="232" r="10.5" fill="#d97757"/>
+        <text x="168" y="236" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+        <circle cx="290" cy="252" r="10.5" fill="#d97757"/>
+        <text x="290" y="256" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+        <text x="40" y="408" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">the bar is byte-identical in both halves. two buffers, same places, same sizes, nothing copied.</text>
+        <text x="40" y="428" text-anchor="start" font-size="11.5" font-weight="600" fill="#d97757">&#9312; the register named fb A &#183; &#9313; at vsync the hardware took the new value &#183; &#9314; now it names fb B. four bytes changed.</text>
+        <text x="40" y="470" text-anchor="start" font-size="11.5" fill="#8c8a7d">this is why &#8220;swap the buffers&#8221; costs nothing and &#8220;copy the frame&#8221; costs 8.3 MB &#8212; they are not two names for one operation.</text>
+        <text x="40" y="487" text-anchor="start" font-size="11.5" fill="#8c8a7d">and it is why the latch is tied to vsync: let the address change mid-scan and the panel receives the top of one frame with the bottom of the next.</text>
+        <text x="40" y="504" text-anchor="start" font-size="11.5" fill="#8c8a7d">the blue line flows because scanout never stops reading &#8212; what the flip changes is only where it reads from.</text>
+        <rect x="852" y="462" width="182" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M852 469 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="865" cy="477" r="3.6" fill="#ffffff"/>
+        <text x="956" y="481" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Page flip &#183; four bytes</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">page flip &#183; four bytes</span><span class="lang-zh">&#32763;&#39029; &#183; &#22235;&#20010;&#23383;&#33410;</span></span>
+        <span class="lang-en">The bar is byte-identical in both halves &#8212; look at it twice and you will not find a difference, because there is none. What moved is the turn in the blue line, and that line flows because scanout never stops reading. Note also when the register takes effect: at vsync, not when software wrote it. Let the address change mid-scan and the panel receives the top of one frame with the bottom of the next, which is exactly what tearing is.</span>
+        <span class="lang-zh">&#20004;&#21322;&#30340;&#22320;&#22336;&#26465;&#36880;&#23383;&#33410;&#30456;&#21516;&#8212;&#8212;&#30475;&#20004;&#36941;&#20063;&#25214;&#19981;&#20986;&#24046;&#21035;&#65292;&#22240;&#20026;&#26412;&#26469;&#23601;&#27809;&#26377;&#12290;&#21464;&#30340;&#26159;&#37027;&#26465;&#34013;&#32447;&#25317;&#24359;&#30340;&#20301;&#32622;&#65292;&#32780;&#23427;&#22312;&#27969;&#65292;&#26159;&#22240;&#20026;&#25195;&#25551;&#36755;&#20986;&#20174;&#26469;&#27809;&#20572;&#36807;&#35835;&#12290;&#36824;&#35201;&#30041;&#24847;&#23492;&#23384;&#22120;&#20160;&#20040;&#26102;&#20505;&#29983;&#25928;&#65306;&#22312; vsync&#65292;&#19981;&#26159;&#36719;&#20214;&#20889;&#23427;&#30340;&#37027;&#19968;&#21051;&#12290;&#35753;&#22320;&#22336;&#22312;&#25195;&#25551;&#20013;&#36884;&#25913;&#25481;&#65292;&#38754;&#26495;&#25910;&#21040;&#30340;&#23601;&#26159;&#19978;&#21322;&#24086;&#26087;&#12289;&#19979;&#21322;&#24086;&#26032;&#8212;&#8212;&#37027;&#23601;&#26159;&#25749;&#35010;&#12290;</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
 <!-- Figure 3 -->
 <section class="anth-section anth-section--subtle" id="discrete">
   <div class="anth-container anth-container--wide">
-    <span class="anth-badge"><span class="lang-en">Figure 03 &#183; discrete card</span><span class="lang-zh">&#22270; 03 &#183; &#29420;&#31435;&#26174;&#21345;</span></span>
+    <span class="anth-badge"><span class="lang-en">Figure 04 &#183; discrete card</span><span class="lang-zh">&#22270; 04 &#183; &#29420;&#31435;&#26174;&#21345;</span></span>
     <h2 style="margin-top:var(--space-3); max-width:840px;">
       <span class="lang-en">Where there really are two memories, and the copy is real</span>
       <span class="lang-zh">&#30495;&#30340;&#26377;&#20004;&#22359;&#20869;&#23384;&#30340;&#37027;&#31181;&#26426;&#22120;&#65292;&#25335;&#36125;&#26159;&#30495;&#30340;</span>
@@ -647,100 +761,106 @@
       <span class="lang-zh">&#19981;&#31649;&#21738;&#31181;&#26426;&#22120;&#65292;&#22270;&#19968;&#24320;&#22987;&#37117;&#22312;&#26222;&#36890;&#31995;&#32479;&#20869;&#23384;&#37324;&#12290;&#21040;&#20102;&#21488;&#24335;&#26426;&#30340;&#26174;&#21345;&#19978;&#65292;&#23427;&#24471;&#36328;&#21040;&#31532;&#20108;&#20010;&#22320;&#22336;&#31354;&#38388;&#21435;&#8212;&#8212;&#36825;&#24352;&#22270;&#30011;&#30340;&#23601;&#26159;&#36825;&#19968;&#36328;&#12290;&#22823;&#23478;&#35828;<em>&#19978;&#20256;</em>&#26102;&#25351;&#30340;&#27491;&#26159;&#23427;&#65292;&#32780;&#21069;&#20004;&#24352;&#22270;&#37324;&#26681;&#26412;&#27809;&#26377;&#36825;&#19968;&#27493;&#12290;</span>
     </p>
     <figure class="fig">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="How pixel data physically moves on a machine with a discrete graphics card, which unlike a phone system on chip has its own separate video memory. The figure is split down the middle. On the left is the host: a CPU with its memory management unit, and below it the system memory on the motherboard, drawn as two stacked rows holding the same physical pages. The upper row is labelled decoded image, ordinary pages, TTM underscore PL underscore SYSTEM, and marked as not reachable by the card at all. The lower row is the same pages after the driver has pinned them and mapped them through the graphics aperture, labelled AMDGPU underscore GEM underscore DOMAIN underscore GTT, now readable by the card across the link. A note states that this step makes a mapping entry and does not move any bytes. Between the two halves sits the PCI Express link, drawn as a narrow gold gateway, and it is the only wire connecting the two memories. On the right is the graphics card, its own board with its own memory. Its die holds, from left to right, an SDMA copy engine highlighted in orange, a shader array, a level two cache, and a display engine in blue. Below the die is a second address bar, the video memory, divided left to right into textures, the back framebuffer and the front framebuffer. Badge one, an application decodes an image into ordinary system memory where the card cannot see it. Badge two, the driver pins the pages and calls dma map sgtable, which makes them reachable. Badge three, the card's own SDMA engine reads those pages across PCI Express and writes them into video memory; this is the real copy and the card issues it, not the CPU. Badge four, the shader array reads textures and draws into the back framebuffer. Badge five, the display engine reads the front framebuffer and drives the monitor, never crossing PCI Express again. Badge six, the CPU can only see a window of video memory through the PCI Express base address register, sized by visible vram size. The conclusion is that here the word upload is literal: there really are two address spaces with one wire between them, which is exactly what a phone system on chip does not have" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 620" role="img" aria-label="A machine with a discrete graphics card, drawn so the direction of the copy is unambiguous. On the left is host system memory, shown as a bar holding an image buffer that has been pinned and mapped so the card can reach it. On the right is the card, with its own video memory bar holding textures, a front framebuffer and a back framebuffer, and above that the card's die containing a copy engine, a shader array and a display engine. Between the two memories runs the PCI Express link, drawn as two parallel flowing lines going opposite ways: the upper line carries read requests travelling from the card to host memory, and the lower line carries the data travelling back from host memory into the card. An orange copy block sits on that lower line, labelled with the amount moved, and it is the only orange element in the figure. Because the requests originate on the card, the copy is a pull and not a push, and the initiator is the card's own copy engine rather than the processor. Inside the card, single flowing lines show the shader array writing the back framebuffer and the display engine reading the front framebuffer, each one way. The closing lines state that whoever needs the data issues the reads, which is the same rule as on a system on chip, and that the difference here is only that there are two memories for the data to cross between" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
         <defs>
-          <pattern id="vdfDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
-          <marker id="vdfArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
-          <marker id="vdfArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
-          <marker id="vdfArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+        <style>
+          .vcf-f { stroke-dasharray: 12 8; animation: vcfM 1.15s linear infinite; }
+          .vcf-f.vcf-r { animation-name: vcfMR; }
+          .vcf-f.vcf-s { animation-duration: 2.1s; }
+          @keyframes vcfM  { to { stroke-dashoffset: -40; } }
+          @keyframes vcfMR { to { stroke-dashoffset:  40; } }
+          /* 三条关闭动效的口子,跟 glass 同一套约定 */
+          @media (prefers-reduced-motion: reduce) {
+            .vcf-f { animation: none; stroke-dashoffset: 0; }
+          }
+          :root[data-motion-freeze] .vcf-f,
+          html[data-motion-freeze] .vcf-f { animation: none; stroke-dashoffset: 0; }
+        </style>
+          <pattern id="vcfD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+          <pattern id="vcfH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+          <marker id="vcfAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+          <marker id="vcfAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+          <marker id="vcfAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+          <marker id="vcfAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+          <marker id="vcfAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
         </defs>
-        <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
-        <rect width="1120" height="560" rx="16" fill="url(#vdfDots)"/>
-        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">DISCRETE CARD &#183; TWO MEMORIES, ONE WIRE &#183; HERE THE COPY IS REAL</text>
-        <g font-size="12" fill="#6b6a5f">
-          <line x1="646" y1="30" x2="670" y2="30" stroke="#d97757" stroke-width="2.4"/><text x="678" y="34">who issues the transfer</text>
-          <line x1="850" y1="30" x2="874" y2="30" stroke="#4d5a3c" stroke-width="1.8"/><text x="882" y="34">on-card traffic</text>
-          <line x1="984" y1="30" x2="1008" y2="30" stroke="#2f5c8a" stroke-width="1.8"/><text x="1016" y="34">display side</text>
-        </g>
-        <rect x="32" y="54" width="404" height="402" rx="12" fill="none" stroke="#d5d2c6" stroke-width="1.4" stroke-dasharray="6 4"/>
-        <text x="48" y="76" font-size="13" font-weight="600" fill="#6b6a5f">HOST &#183; motherboard</text>
-        <rect x="48" y="88" width="200" height="50" rx="9" fill="#e2ecf5" stroke="#c4d5e6"/>
-        <text x="148" y="108" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">CPU + system MMU</text>
-        <text x="148" y="126" text-anchor="middle" font-size="12" fill="#6b6a5f">decodes, then hands over</text>
-        <text x="48" y="168" font-size="12" font-weight="600" fill="#4d5a3c">SYSTEM MEMORY &#183; DDR on the board</text>
-        <rect x="48" y="180" width="372" height="60" rx="9" fill="#f1efe8" stroke="#d5d2c6"/>
-        <text x="64" y="203" font-size="12.5" font-weight="600" fill="#6b6a5f">decoded image &#183; ordinary pages</text>
-        <text x="64" y="223" font-size="12" fill="#8c8a7d">TTM_PL_SYSTEM &#183; the card cannot reach this</text>
-        <rect x="48" y="276" width="372" height="60" rx="9" fill="#eef1e7" stroke="#b9c4a4"/>
-        <text x="64" y="299" font-size="12.5" font-weight="600" fill="#4d5a3c">the same pages, now GART-mapped</text>
-        <text x="64" y="319" font-size="12" fill="#8c8a7d">AMDGPU_GEM_DOMAIN_GTT &#183; readable over the link</text>
-        <line x1="226" y1="242" x2="226" y2="270" stroke="#4d5a3c" stroke-width="1.8" marker-end="url(#vdfArrG)"/>
-        <text x="256" y="262" font-size="12" fill="#4d5a3c">pin + dma_map_sgtable()</text>
-        <text x="48" y="364" font-size="12" font-weight="600" fill="#8f4a2f">that step writes a mapping entry.</text>
-        <text x="48" y="381" font-size="12" font-weight="600" fill="#8f4a2f">not one byte has moved yet.</text>
-        <text x="48" y="410" font-size="12" fill="#6b6a5f">the CPU could also write into the BAR window</text>
-        <text x="48" y="427" font-size="12" fill="#6b6a5f">itself, but it is small and uncached &#8212; drivers</text>
-        <text x="48" y="444" font-size="12" fill="#6b6a5f">use the engine for anything bulky.</text>
-        <rect x="446" y="270" width="66" height="72" rx="9" fill="#f0e4d8" stroke="#d9bf94"/>
-        <text x="479" y="299" text-anchor="middle" font-size="12.5" font-weight="600" fill="#8a6a2f">PCIe</text>
-        <text x="479" y="317" text-anchor="middle" font-size="11.5" fill="#8a6a2f">the only</text>
-        <text x="479" y="333" text-anchor="middle" font-size="11.5" fill="#8a6a2f">wire</text>
-        <rect x="522" y="54" width="566" height="402" rx="12" fill="none" stroke="#d97757" stroke-width="1.4" stroke-dasharray="6 4"/>
-        <text x="538" y="76" font-size="13" font-weight="600" fill="#8f4a2f">GRAPHICS CARD &#183; its own board, its own memory</text>
-        <rect x="538" y="88" width="534" height="104" rx="10" fill="none" stroke="#d5d2c6" stroke-width="1.2"/>
-        <text x="1058" y="106" text-anchor="end" font-size="11.5" font-weight="600" letter-spacing="0.6" fill="#6b6a5f">GPU DIE</text>
-        <rect x="552" y="116" width="148" height="60" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.6"/>
-        <text x="626" y="140" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">SDMA copy engine</text>
-        <text x="626" y="158" text-anchor="middle" font-size="11.5" fill="#8f4a2f">it does the upload</text>
-        <rect x="712" y="116" width="118" height="60" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-opacity="0.45"/>
-        <text x="771" y="140" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shader array</text>
-        <text x="771" y="158" text-anchor="middle" font-size="11.5" fill="#6b6a5f">renders</text>
-        <rect x="842" y="116" width="100" height="60" rx="8" fill="#f1efe8" stroke="#d5d2c6"/>
-        <text x="892" y="140" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">L2 cache</text>
-        <text x="892" y="158" text-anchor="middle" font-size="11.5" fill="#8c8a7d">not a frame</text>
-        <rect x="954" y="116" width="104" height="60" rx="8" fill="#e2ecf5" stroke="#c4d5e6"/>
-        <text x="1006" y="140" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">display</text>
-        <text x="1006" y="158" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">engine</text>
-        <text x="538" y="240" font-size="12" font-weight="600" fill="#4d5a3c">VRAM &#183; a second physical address space</text>
-        <rect x="538" y="248" width="534" height="76" rx="10" fill="#ffffff" stroke="#b9c4a4"/>
-        <rect x="552" y="262" width="164" height="48" rx="7" fill="#eef1e7" stroke="#b9c4a4"/>
-        <text x="634" y="282" text-anchor="middle" font-size="12" font-weight="600" fill="#4d5a3c">textures</text>
-        <text x="634" y="300" text-anchor="middle" font-size="11.5" fill="#6b6a5f">uploaded once</text>
-        <rect x="728" y="262" width="164" height="48" rx="7" fill="#eef1e7" stroke="#b9c4a4"/>
-        <text x="810" y="282" text-anchor="middle" font-size="12" font-weight="600" fill="#4d5a3c">fb &#183; back</text>
-        <text x="810" y="300" text-anchor="middle" font-size="11.5" fill="#6b6a5f">being drawn</text>
-        <rect x="904" y="262" width="154" height="48" rx="7" fill="#eef1e7" stroke="#b9c4a4"/>
-        <text x="981" y="282" text-anchor="middle" font-size="12" font-weight="600" fill="#4d5a3c">fb &#183; front</text>
-        <text x="981" y="300" text-anchor="middle" font-size="11.5" fill="#6b6a5f">scanned out now</text>
-        <text x="538" y="342" font-size="11.5" fill="#8c8a7d">once a byte is here it stays &#8212; shaders and scanout read it without crossing PCIe</text>
-        <rect x="538" y="356" width="342" height="52" rx="8" fill="#f1efe8" stroke="#d5d2c6"/>
-        <text x="552" y="377" font-size="12" font-weight="600" fill="#6b6a5f">CPU-visible window &#183; the PCIe BAR</text>
-        <text x="552" y="396" font-size="11.5" fill="#8c8a7d">visible_vram_size &#183; usually far smaller than the VRAM</text>
-        <text x="1072" y="378" text-anchor="end" font-size="12" font-weight="600" fill="#2f5c8a">to the monitor</text>
-        <text x="1072" y="396" text-anchor="end" font-size="11.5" fill="#6b6a5f">DisplayPort &#183; off-card</text>
-        <line x1="420" y1="306" x2="444" y2="306" stroke="#d97757" stroke-width="2.4"/>
-        <path d="M479 268 L479 146 L550 146" stroke="#d97757" stroke-width="2.4" fill="none" marker-end="url(#vdfArrO)"/>
-        <path d="M626 178 L626 256" stroke="#d97757" stroke-width="2.4" fill="none" marker-end="url(#vdfArrO)"/>
-        <path d="M771 178 L771 214 L810 214 L810 256" stroke="#4d5a3c" stroke-width="1.8" fill="none" marker-end="url(#vdfArrG)"/>
-        <path d="M1006 256 L1006 180" stroke="#2f5c8a" stroke-width="1.8" fill="none" marker-end="url(#vdfArrB)"/>
-        <path d="M1060 160 L1076 160 L1076 350" stroke="#2f5c8a" stroke-width="1.8" fill="none" marker-end="url(#vdfArrB)"/>
-        <line x1="536" y1="382" x2="514" y2="382" stroke="#6b6a5f" stroke-width="1.4" stroke-dasharray="4 3"/>
-        <line x1="444" y1="382" x2="422" y2="382" stroke="#6b6a5f" stroke-width="1.4" stroke-dasharray="4 3"/>
-        <circle cx="398" cy="194" r="10.5" fill="#d97757"/>
-        <text x="398" y="198" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
-        <circle cx="226" cy="256" r="10.5" fill="#d97757"/>
-        <text x="226" y="260" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
-        <circle cx="479" cy="214" r="10.5" fill="#d97757"/>
-        <text x="479" y="218" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
-        <circle cx="790" cy="214" r="10.5" fill="#d97757"/>
-        <text x="790" y="218" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">4</text>
-        <circle cx="1006" cy="214" r="10.5" fill="#d97757"/>
-        <text x="1006" y="218" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">5</text>
-        <circle cx="479" cy="382" r="10.5" fill="#d97757"/>
-        <text x="479" y="386" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">6</text>
-        <text x="32" y="484" font-size="11.5" fill="#8c8a7d">&#9312; an app decodes into ordinary system memory &#183; &#9313; the driver pins it and maps it through GART &#183; &#9314; the card&#8217;s SDMA engine reads it over PCIe and writes VRAM</text>
-        <text x="32" y="501" font-size="11.5" fill="#8c8a7d">&#9315; the shaders draw into the back buffer &#183; &#9316; the display engine reads the front buffer &#183; &#9317; the CPU can only peek at VRAM through the BAR window</text>
-        <text x="32" y="526" font-size="12" font-weight="600" fill="#8f4a2f">two address spaces, one wire. here &#8220;upload&#8221; is literal &#8212; and it is still the card, not the CPU, that issues the reads.</text>
+        <rect width="1120" height="620" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+        <rect width="1120" height="620" rx="16" fill="url(#vcfD)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">DISCRETE CARD &#183; WHO PULLS FROM WHOM</text>
+        <path d="M700 30 L740 30" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="vcf-f" marker-end="url(#vcfAB)"/>
+        <text x="748" y="34" text-anchor="start" font-size="11.5" fill="#6b6a5f">requests go this way</text>
+        <path d="M918 30 L958 30" fill="none" stroke="#d97757" stroke-width="2.8" class="vcf-f" marker-end="url(#vcfAO)"/>
+        <text x="966" y="34" text-anchor="start" font-size="11.5" fill="#6b6a5f">data comes back</text>
+        <rect x="40" y="66" width="340" height="250" rx="11" fill="none" stroke="#d5d2c6" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <rect x="68.5" y="57" width="39.0" height="18" rx="9" fill="#141413"/>
+        <text x="88" y="70" text-anchor="middle" font-size="10" fill="#ffffff">host</text>
+        <rect x="64" y="96" width="172" height="56" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+        <text x="150" y="121" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">CPU</text>
+        <text x="150" y="138" text-anchor="middle" font-size="11.5" fill="#6b6a5f">sets it up, then stops</text>
+        <text x="150" y="178" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">SYSTEM MEMORY</text>
+        <rect x="64" y="190" width="96" height="56" fill="#f1efe8"/>
+        <text x="112" y="223" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">other</text>
+        <line x1="160" y1="190" x2="160" y2="246" stroke="#141413" stroke-width="1.5"/>
+        <rect x="160" y="190" width="120" height="56" fill="#eef1e7"/>
+        <text x="220" y="216" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">image</text>
+        <text x="220" y="231" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">pinned</text>
+        <line x1="280" y1="190" x2="280" y2="246" stroke="#141413" stroke-width="1.5"/>
+        <rect x="280" y="190" width="76" height="56" fill="#f1efe8"/>
+        <text x="318" y="223" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">other</text>
+        <rect x="64" y="190" width="292" height="56" rx="7" fill="none" stroke="#141413" stroke-width="1.8"/>
+        <text x="210" y="272" text-anchor="middle" font-size="11" fill="#6b6a5f">pinned + mapped so the card can reach it</text>
+        <text x="210" y="290" text-anchor="middle" font-size="11" font-weight="600" fill="#4d5a3c">&#8212; the pages never move</text>
+        <path d="M596 202 L380 202" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="vcf-f" marker-end="url(#vcfAB)"/>
+        <path d="M380 234 L596 234" fill="none" stroke="#d97757" stroke-width="2.8" class="vcf-f" marker-end="url(#vcfAO)"/>
+        <rect x="419.1" y="165" width="137.9" height="18" rx="9" fill="#141413"/>
+        <text x="488" y="178" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">PCIe &#183; the only wire</text>
+        <rect x="442" y="267" width="92" height="46" rx="8" fill="#d97757" stroke="#8f4a2f" stroke-width="1.8"/>
+        <text x="488" y="287" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">COPY</text>
+        <text x="488" y="303" text-anchor="middle" font-size="10" fill="#ffffff">48 MiB once</text>
+        <text x="488" y="334" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8f4a2f">the card issues the reads &#8212; this is a pull</text>
+        <text x="488" y="352" text-anchor="middle" font-size="11" fill="#6b6a5f">not the CPU pushing bytes out</text>
+        <rect x="620" y="66" width="460" height="250" rx="11" fill="none" stroke="#d97757" stroke-width="1.4" stroke-dasharray="6 4"/>
+        <rect x="648.6" y="57" width="182.8" height="18" rx="9" fill="#141413"/>
+        <text x="740" y="70" text-anchor="middle" font-size="10" fill="#ffffff">graphics card &#183; its own board</text>
+        <rect x="640" y="96" width="132" height="52" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+        <text x="706" y="119" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">copy engine</text>
+        <text x="706" y="136" text-anchor="middle" font-size="11.5" fill="#6b6a5f">it does this</text>
+        <rect x="786" y="96" width="132" height="52" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+        <text x="852" y="127" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shaders</text>
+        <rect x="932" y="96" width="130" height="52" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+        <text x="997" y="119" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">display</text>
+        <text x="997" y="136" text-anchor="middle" font-size="11.5" fill="#6b6a5f">engine</text>
+        <text x="850" y="274" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">VRAM &#183; a second address space</text>
+        <rect x="640" y="190" width="150" height="56" fill="#eef1e7"/>
+        <text x="715" y="216" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">textures</text>
+        <text x="715" y="231" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">48 MiB</text>
+        <line x1="790" y1="190" x2="790" y2="246" stroke="#141413" stroke-width="1.5"/>
+        <rect x="790" y="190" width="136" height="56" fill="#eef1e7"/>
+        <text x="858" y="223" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">fb &#183; back</text>
+        <line x1="926" y1="190" x2="926" y2="246" stroke="#141413" stroke-width="1.5"/>
+        <rect x="926" y="190" width="136" height="56" fill="#e2ecf5"/>
+        <text x="994" y="223" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">fb &#183; front</text>
+        <rect x="640" y="190" width="422" height="56" rx="7" fill="none" stroke="#141413" stroke-width="1.8"/>
+        <text x="850" y="292" text-anchor="middle" font-size="11" fill="#6b6a5f">once a byte is here it never crosses PCIe again</text>
+        <path d="M700 150 L700 184" fill="none" stroke="#d97757" stroke-width="2.6" class="vcf-f" marker-end="url(#vcfAO)"/>
+        <path d="M852 150 L852 184" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="vcf-f" marker-end="url(#vcfAB)"/>
+        <path d="M996 184 L996 152" fill="none" stroke="#4d5a3c" stroke-width="2.6" class="vcf-f" marker-end="url(#vcfAG)"/>
+        <text x="1062" y="330" text-anchor="end" font-size="11.5" font-weight="600" fill="#2f5c8a">to the monitor</text>
+        <path d="M1062 246 L1062 316" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="vcf-f vcf-s" marker-end="url(#vcfAB)"/>
+        <text x="40" y="392" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">whoever needs the data issues the reads. that rule did not change &#8212; only the number of memories did.</text>
+        <circle cx="488" cy="218" r="10.5" fill="#d97757"/>
+        <text x="488" y="222" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+        <circle cx="556" cy="290" r="10.5" fill="#d97757"/>
+        <text x="556" y="294" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+        <circle cx="668" cy="167" r="10.5" fill="#d97757"/>
+        <text x="668" y="171" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+        <text x="40" y="428" text-anchor="start" font-size="11.5" fill="#8c8a7d">&#9312; the copy engine on the card sends read requests across the link &#183; &#9313; the data comes back and lands in VRAM &#183; &#9314; and stays there.</text>
+        <text x="40" y="445" text-anchor="start" font-size="11.5" fill="#8c8a7d">drawing the link as two opposite lines is what makes &#8220;pull&#8221; visible; one double-headed arrow</text>
+        <text x="40" y="462" text-anchor="start" font-size="11.5" fill="#8c8a7d">would have left it ambiguous, and ambiguous is exactly where the misunderstanding lives.</text>
+        <rect x="40" y="492" width="251" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M40 499 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="53" cy="507" r="3.6" fill="#ffffff"/>
+        <text x="179" y="511" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Discrete card &#183; a pull, not a push</text>
       </svg>
       <figcaption class="fig-cap">
         <span class="fig-tag"><span class="lang-en">discrete card &#183; two memories, one wire</span><span class="lang-zh">&#29420;&#31435;&#26174;&#21345; &#183; &#20004;&#22359;&#20869;&#23384;&#65292;&#19968;&#26681;&#32447;</span></span>
@@ -843,12 +963,12 @@
       <span class="lang-en">Reuse these</span><span class="lang-zh">&#25343;&#21435;&#29992;</span>
     </span>
     <h2 style="margin-top:var(--space-3);">
-      <span class="lang-en">All three are templates.<br>Copy them, then change the labels.</span>
-      <span class="lang-zh">&#19977;&#24352;&#37117;&#26159;&#27169;&#26495;&#12290;<br>&#25343;&#36208;&#20877;&#25913;&#26631;&#31614;&#23601;&#34892;&#12290;</span>
+      <span class="lang-en">All four are templates.<br>Copy them, then change the labels.</span>
+      <span class="lang-zh">&#22235;&#24352;&#37117;&#26159;&#27169;&#26495;&#12290;<br>&#25343;&#36208;&#20877;&#25913;&#26631;&#31614;&#23601;&#34892;&#12290;</span>
     </h2>
     <p style="font-size:17px; line-height:1.65; color:var(--anth-text-secondary); max-width:620px; margin:var(--space-5) auto var(--space-6); font-family:var(--font-body);">
-      <span class="lang-en">They are checked in under <code>templates/diagrams/</code> as <code>soc-dataflow.svg</code>, <code>gpu-dataflow.svg</code> and <code>vram-dataflow.svg</code>, alongside thirty others in the same drawing language.</span>
-      <span class="lang-zh">&#19977;&#24352;&#37117;&#22312; <code>templates/diagrams/</code> &#19979;&#65292;&#21483; <code>soc-dataflow.svg</code>&#12289;<code>gpu-dataflow.svg</code> &#21644; <code>vram-dataflow.svg</code>&#65292;&#26049;&#36793;&#36824;&#26377;&#19977;&#21313;&#24352;&#21516;&#19968;&#22871;&#30011;&#27861;&#30340;&#22270;&#12290;</span>
+      <span class="lang-en">They are checked in under <code>templates/diagrams/</code> as <code>platform-block.svg</code>, <code>gpu-memory-flow.svg</code>, <code>page-flip.svg</code> and <code>vram-copy-flow.svg</code>, alongside three dozen others in the same drawing language.</span>
+      <span class="lang-zh">&#22235;&#24352;&#37117;&#22312; <code>templates/diagrams/</code> &#19979;&#65292;&#21483; <code>platform-block.svg</code>&#12289;<code>gpu-memory-flow.svg</code>&#12289;<code>page-flip.svg</code> &#21644; <code>vram-copy-flow.svg</code>&#65292;&#26049;&#36793;&#36824;&#26377;&#19977;&#21313;&#22810;&#24352;&#21516;&#19968;&#22871;&#30011;&#27861;&#30340;&#22270;&#12290;</span>
     </p>
     <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
       <a class="anth-button" href="diagrams.html"><span class="lang-en">Open the gallery</span><span class="lang-zh">&#25171;&#24320;&#22270;&#38598;</span></a>
@@ -860,8 +980,8 @@
 <footer class="anth-section" style="border-top:1px solid var(--anth-light-gray); padding-top:var(--space-7); padding-bottom:var(--space-8);">
   <div class="anth-container anth-container--wide" style="display:flex; justify-content:space-between; gap:var(--space-5); flex-wrap:wrap; align-items:baseline;">
     <p style="font-size:14px; color:var(--anth-text-secondary); margin:0;">
-      <span class="lang-en">All three figures follow <code>skills/anthropic-design/references/diagram-craft.md</code> and pass the four design-review gates.</span>
-      <span class="lang-zh">&#19977;&#24352;&#22270;&#37117;&#36981;&#24490; <code>skills/anthropic-design/references/diagram-craft.md</code>&#65292;&#24182;&#36890;&#36807; design-review &#22235;&#36947;&#26816;&#26597;&#12290;</span>
+      <span class="lang-en">All four figures follow <code>skills/anthropic-design/references/diagram-craft.md</code> and pass the four design-review gates. Their motion halts under <code>prefers-reduced-motion</code>.</span>
+      <span class="lang-zh">&#22235;&#24352;&#22270;&#37117;&#36981;&#24490; <code>skills/anthropic-design/references/diagram-craft.md</code>&#65292;&#24182;&#36890;&#36807; design-review &#22235;&#36947;&#26816;&#26597;&#12290;&#21160;&#25928;&#22312; <code>prefers-reduced-motion</code> &#19979;&#20250;&#20572;&#12290;</span>
     </p>
     <div style="display:flex; gap:var(--space-5);">
       <a class="anth-link" href="diagrams.html"><span class="lang-en">Diagram gallery</span><span class="lang-zh">&#22270;&#31034;&#26696;&#20363;&#24211;</span></a>
@@ -917,6 +1037,8 @@ Decisions:
 - [third-figure-for-vram] chose "draw the discrete-card case as its own figure" over "a paragraph saying a desktop card is different". Because: the question the page keeps provoking is how the bytes get across when there IS a second memory, and a text aside cannot show a crossing. Figure 03 is deliberately the visual inverse of Figure 02 - two address bars with one link, against one bar with everything landing on it.
 - [visible-sourcing-note] chose "a bordered note above the first figure" over "the same disclosure in the self-diff comment". Because: the comment is invisible to readers, so the page was silently presenting representative numbers with the same authority as checked structure.
 - [orange-badge-hero] chose "filled orange .anth-badge above h1" over "ghost kicker". Because: brand-presence (§K) needs the signature colour inside the top 1440x500, and the badge earns it without adding a second CTA.
+- [direction-is-drawn] chose "every link a flowing dashed line, two-way links as two opposite lines" over "static arrows with labels". Because: the question this page keeps being asked is who copies from whom, and a static arrow answers it only in prose. Dashes on one line can travel only one way, so a double-headed arrow would say "direction unknown" at exactly the point where the misunderstanding lives.
+- [flip-gets-its-own-figure] chose "a fourth figure for the page flip" over "a sentence inside Figure 02". Because: the flip is where readers assume a copy happens, and the honest answer - four bytes, the buffers never move - only lands when the same bar is drawn twice with no difference to find.
 Known trade-offs:
 - SVG-internal text stays English in both languages; only figcaptions translate. Same precedent as diagrams.html, but a zh reader still meets English labels inside the figures.
 - The numbers (8.3 MB, 6.4 GB/s, 4 lanes x 1 Gbps) describe one representative configuration, not a specific product; a reader on a different memory width has to redo the arithmetic. The sourcing note now says so on the page itself.

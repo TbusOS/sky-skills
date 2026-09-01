@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="The same arrangement drawn twice, above and below a vsync marker, to show that a page flip changes an address rather than moving a frame. In each half, a gold box on the left is the display controller's framebuffer base address register, holding one address on a black pill. To its right is a memory bar whose two large regions are framebuffer A and framebuffer B, identical in position and width in both halves. A thick blue arrow leaves the register box, rises above the bar, travels right, and comes down onto the region that register currently names. In the upper half, before the flip, the register holds the address of framebuffer A, the arrow lands on framebuffer A which is marked front and being scanned out, and framebuffer B is marked back and being drawn. Between the halves a marker reads vsync, and a note says the register latches at that instant and not before. In the lower half, after the flip, the register holds the address of framebuffer B, the arrow turns down further right and lands on framebuffer B which is now the front buffer, while framebuffer A has become the back buffer. The bar itself is byte-identical between the two halves. The closing lines state that four bytes changed, that no pixels moved, and that latching at vsync rather than immediately is what stops a half-old and half-new frame from reaching the glass" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+  <style>
+    .pf-f { stroke-dasharray: 12 8; animation: pfM 1.15s linear infinite; }
+    .pf-f.pf-r { animation-name: pfMR; }
+    .pf-f.pf-s { animation-duration: 2.1s; }
+    @keyframes pfM  { to { stroke-dashoffset: -40; } }
+    @keyframes pfMR { to { stroke-dashoffset:  40; } }
+    /* 三条关闭动效的口子,跟 glass 同一套约定 */
+    @media (prefers-reduced-motion: reduce) {
+      .pf-f { animation: none; stroke-dashoffset: 0; }
+    }
+    :root[data-motion-freeze] .pf-f,
+    html[data-motion-freeze] .pf-f { animation: none; stroke-dashoffset: 0; }
+  </style>
+    <pattern id="pfD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <pattern id="pfH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+    <marker id="pfAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <marker id="pfAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+    <marker id="pfAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+    <marker id="pfAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+    <marker id="pfAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
+  </defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#pfD)"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">PAGE FLIP &#183; AN ADDRESS CHANGES, A FRAME DOES NOT</text>
+  <rect x="104" y="110" width="176" height="80" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="192" y="132" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">FB base register</text>
+  <rect x="150.5" y="157" width="83.0" height="18" rx="9" fill="#141413"/>
+  <text x="192" y="170" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">0x8321_0000</text>
+  <rect x="38.0" y="141" width="52.0" height="18" rx="9" fill="#6b6a5f"/>
+  <text x="64" y="154" text-anchor="middle" font-size="10.5" fill="#ffffff">BEFORE</text>
+  <rect x="300" y="124" width="60" height="52" fill="#f1efe8"/>
+  <line x1="360" y1="124" x2="360" y2="176" stroke="#141413" stroke-width="1.5"/>
+  <rect x="360" y="124" width="250" height="52" fill="#e2ecf5"/>
+  <text x="485" y="148" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">fb A</text>
+  <text x="485" y="163" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">front &#183; scanned out</text>
+  <line x1="610" y1="124" x2="610" y2="176" stroke="#141413" stroke-width="1.5"/>
+  <rect x="610" y="124" width="250" height="52" fill="#eef1e7"/>
+  <text x="735" y="148" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">fb B</text>
+  <text x="735" y="163" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">back &#183; being drawn</text>
+  <line x1="860" y1="124" x2="860" y2="176" stroke="#141413" stroke-width="1.5"/>
+  <rect x="860" y="124" width="40" height="52" fill="#f1efe8"/>
+  <rect x="300" y="124" width="600" height="52" rx="7" fill="none" stroke="#141413" stroke-width="1.8"/>
+  <path d="M280 150 L290 150 L290 94 L485 94 L485 120" fill="none" stroke="#2f5c8a" stroke-width="3" class="pf-f" marker-end="url(#pfAB)"/>
+  <text x="499" y="82" text-anchor="start" font-size="11" font-weight="600" fill="#2f5c8a">the DMA reads from here</text>
+  <text x="735" y="196" text-anchor="middle" font-size="11" fill="#4d5a3c">the GPU is drawing into this one</text>
+  <path d="M40 232 L1080 232" fill="none" stroke="#8a6a2f" stroke-width="1.6" stroke-dasharray="7 5"/>
+  <rect x="97.0" y="223" width="46.0" height="18" rx="9" fill="#8a6a2f"/>
+  <text x="120" y="236" text-anchor="middle" font-size="10.5" fill="#ffffff">vsync</text>
+  <text x="40" y="212" text-anchor="start" font-size="11.5" font-weight="600" fill="#8a6a2f">the register latches here &#8212; not the moment software wrote it. that one rule is what keeps half an old frame off the glass.</text>
+  <rect x="104" y="276" width="176" height="80" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="192" y="298" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">FB base register</text>
+  <rect x="150.5" y="323" width="83.0" height="18" rx="9" fill="#141413"/>
+  <text x="192" y="336" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">0x8B21_0000</text>
+  <rect x="41.0" y="307" width="46.0" height="18" rx="9" fill="#8f4a2f"/>
+  <text x="64" y="320" text-anchor="middle" font-size="10.5" fill="#ffffff">AFTER</text>
+  <rect x="300" y="290" width="60" height="52" fill="#f1efe8"/>
+  <line x1="360" y1="290" x2="360" y2="342" stroke="#141413" stroke-width="1.5"/>
+  <rect x="360" y="290" width="250" height="52" fill="#eef1e7"/>
+  <text x="485" y="314" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">fb A</text>
+  <text x="485" y="329" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">back &#183; being drawn</text>
+  <line x1="610" y1="290" x2="610" y2="342" stroke="#141413" stroke-width="1.5"/>
+  <rect x="610" y="290" width="250" height="52" fill="#e2ecf5"/>
+  <text x="735" y="314" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">fb B</text>
+  <text x="735" y="329" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">front &#183; scanned out</text>
+  <line x1="860" y1="290" x2="860" y2="342" stroke="#141413" stroke-width="1.5"/>
+  <rect x="860" y="290" width="40" height="52" fill="#f1efe8"/>
+  <rect x="300" y="290" width="600" height="52" rx="7" fill="none" stroke="#141413" stroke-width="1.8"/>
+  <path d="M280 316 L290 316 L290 260 L735 260 L735 286" fill="none" stroke="#2f5c8a" stroke-width="3" class="pf-f" marker-end="url(#pfAB)"/>
+  <text x="749" y="248" text-anchor="start" font-size="11" font-weight="600" fill="#2f5c8a">the DMA reads from here</text>
+  <text x="485" y="362" text-anchor="middle" font-size="11" fill="#4d5a3c">the GPU is drawing into this one</text>
+  <circle cx="290" cy="86" r="10.5" fill="#d97757"/>
+  <text x="290" y="90" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+  <circle cx="168" cy="232" r="10.5" fill="#d97757"/>
+  <text x="168" y="236" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+  <circle cx="290" cy="252" r="10.5" fill="#d97757"/>
+  <text x="290" y="256" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+  <text x="40" y="408" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">the bar is byte-identical in both halves. two buffers, same places, same sizes, nothing copied.</text>
+  <text x="40" y="428" text-anchor="start" font-size="11.5" font-weight="600" fill="#d97757">&#9312; the register named fb A &#183; &#9313; at vsync the hardware took the new value &#183; &#9314; now it names fb B. four bytes changed.</text>
+  <text x="40" y="470" text-anchor="start" font-size="11.5" fill="#8c8a7d">this is why &#8220;swap the buffers&#8221; costs nothing and &#8220;copy the frame&#8221; costs 8.3 MB &#8212; they are not two names for one operation.</text>
+  <text x="40" y="487" text-anchor="start" font-size="11.5" fill="#8c8a7d">and it is why the latch is tied to vsync: let the address change mid-scan and the panel receives the top of one frame with the bottom of the next.</text>
+  <text x="40" y="504" text-anchor="start" font-size="11.5" fill="#8c8a7d">the blue line flows because scanout never stops reading &#8212; what the flip changes is only where it reads from.</text>
+  <rect x="852" y="462" width="182" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+  <path d="M852 469 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+  <circle cx="865" cy="477" r="3.6" fill="#ffffff"/>
+  <text x="956" y="481" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Page flip &#183; four bytes</text>
+</svg>

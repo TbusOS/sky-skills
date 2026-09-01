@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 620" role="img" aria-label="One block of DDR memory with several bus masters around it, drawn so the direction of every link is visible. Across the middle runs a single memory bar divided into a command buffer, page tables, textures, framebuffer A marked front, and framebuffer B marked back, each with its size. Above the bar sit the CPU cluster and the GPU; below it sit the display controller and, off to the right, the panel. Every link is drawn as a flowing dashed line whose dashes travel in the direction the data moves. The CPU link and the GPU link are each drawn as two parallel lines flowing in opposite directions, because both masters read and write; a single line with two arrowheads would leave the direction ambiguous. The display controller's link is a single line flowing upward from memory into the controller, because scanout only ever reads. The GPU's tile writeback is a single line flowing downward into framebuffer B, because tiles are only written. A legend names the three cases: one way read, one way write, and two way. The closing lines state that no arrow crosses from one master to another, so nothing is ever handed between them; they only meet at the same addresses in the same memory" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+  <style>
+    .gmf-f { stroke-dasharray: 12 8; animation: gmfM 1.15s linear infinite; }
+    .gmf-f.gmf-r { animation-name: gmfMR; }
+    .gmf-f.gmf-s { animation-duration: 2.1s; }
+    @keyframes gmfM  { to { stroke-dashoffset: -40; } }
+    @keyframes gmfMR { to { stroke-dashoffset:  40; } }
+    /* 三条关闭动效的口子,跟 glass 同一套约定 */
+    @media (prefers-reduced-motion: reduce) {
+      .gmf-f { animation: none; stroke-dashoffset: 0; }
+    }
+    :root[data-motion-freeze] .gmf-f,
+    html[data-motion-freeze] .gmf-f { animation: none; stroke-dashoffset: 0; }
+  </style>
+    <pattern id="gmfD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <pattern id="gmfH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+    <marker id="gmfAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <marker id="gmfAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+    <marker id="gmfAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+    <marker id="gmfAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+    <marker id="gmfAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
+  </defs>
+  <rect width="1120" height="620" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="620" rx="16" fill="url(#gmfD)"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">WHO READS, WHO WRITES &#183; EVERY LINK HAS A DIRECTION</text>
+  <path d="M560 30 L600 30" fill="none" stroke="#4d5a3c" stroke-width="2.6" class="gmf-f" marker-end="url(#gmfAG)"/>
+  <text x="608" y="34" text-anchor="start" font-size="11.5" fill="#6b6a5f">one-way read</text>
+  <path d="M712 30 L752 30" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="gmf-f" marker-end="url(#gmfAB)"/>
+  <text x="760" y="34" text-anchor="start" font-size="11.5" fill="#6b6a5f">one-way write</text>
+  <path d="M866 26 L906 26" fill="none" stroke="#d97757" stroke-width="2.4" class="gmf-f" marker-end="url(#gmfAO)"/>
+  <path d="M906 34 L866 34" fill="none" stroke="#d97757" stroke-width="2.4" class="gmf-f" marker-end="url(#gmfAO)"/>
+  <text x="914" y="34" text-anchor="start" font-size="11.5" fill="#6b6a5f">two-way</text>
+  <rect x="96" y="74" width="200" height="66" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="196" y="104" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">CPU cluster</text>
+  <text x="196" y="121" text-anchor="middle" font-size="11.5" fill="#6b6a5f">fills commands, rings</text>
+  <text x="218" y="200" text-anchor="start" font-size="11" font-weight="600" fill="#d97757">reads and writes</text>
+  <rect x="456" y="62" width="430" height="92" rx="11" fill="none" stroke="#d97757" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <rect x="506.0" y="53" width="108.0" height="18" rx="9" fill="#141413"/>
+  <text x="560" y="66" text-anchor="middle" font-size="10" fill="#ffffff">GPU &#183; drawn open</text>
+  <rect x="472" y="90" width="118" height="50" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="531" y="120" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shaders</text>
+  <rect x="602" y="90" width="128" height="50" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+  <text x="666" y="112" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">tile buffer</text>
+  <text x="666" y="129" text-anchor="middle" font-size="11.5" fill="#6b6a5f">2 KiB</text>
+  <rect x="742" y="90" width="128" height="50" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+  <text x="806" y="112" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">L2</text>
+  <text x="806" y="129" text-anchor="middle" font-size="11.5" fill="#6b6a5f">256 KiB</text>
+  <text x="700" y="178" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8f4a2f">a frame is 8.3 MB &#8212; neither of those can hold one</text>
+  <rect x="56" y="262" width="150" height="58" fill="#f1efe8"/>
+  <text x="131" y="289" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">commands</text>
+  <text x="131" y="304" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">64 KiB</text>
+  <line x1="206" y1="262" x2="206" y2="320" stroke="#141413" stroke-width="1.5"/>
+  <rect x="206" y="262" width="140" height="58" fill="#f1efe8"/>
+  <text x="276" y="289" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">page tables</text>
+  <text x="276" y="304" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">2 MiB</text>
+  <line x1="346" y1="262" x2="346" y2="320" stroke="#141413" stroke-width="1.5"/>
+  <rect x="346" y="262" width="280" height="58" fill="#eef1e7"/>
+  <text x="486" y="289" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">textures</text>
+  <text x="486" y="304" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">48 MiB</text>
+  <line x1="626" y1="262" x2="626" y2="320" stroke="#141413" stroke-width="1.5"/>
+  <rect x="626" y="262" width="220" height="58" fill="#e2ecf5"/>
+  <text x="736" y="289" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">fb A &#183; front</text>
+  <text x="736" y="304" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">8.3 MiB</text>
+  <line x1="846" y1="262" x2="846" y2="320" stroke="#141413" stroke-width="1.5"/>
+  <rect x="846" y="262" width="218" height="58" fill="#eef1e7"/>
+  <text x="955" y="289" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">fb B &#183; back</text>
+  <text x="955" y="304" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">8.3 MiB</text>
+  <rect x="56" y="262" width="1008" height="58" rx="7" fill="none" stroke="#141413" stroke-width="1.8"/>
+  <rect x="584.5" y="341" width="83.0" height="18" rx="9" fill="#141413"/>
+  <text x="626" y="354" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">0x8321_0000</text>
+  <line x1="626" y1="320" x2="626" y2="341" stroke="#6b6a5f" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <rect x="71.0" y="333" width="258.0" height="18" rx="9" fill="#141413"/>
+  <text x="200" y="346" text-anchor="middle" font-size="9.5" fill="#ffffff">one physical address space &#183; 6.4 GB/s shared</text>
+  <rect x="300" y="424" width="200" height="62" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="400" y="452" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">display ctrl</text>
+  <text x="400" y="469" text-anchor="middle" font-size="11.5" fill="#6b6a5f">fetch DMA</text>
+  <rect x="560" y="424" width="150" height="62" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="635" y="460" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">DSI TX</text>
+  <rect x="770" y="418" width="156" height="74" rx="4" fill="#e2ecf5" stroke="#141413" stroke-width="1.6"/>
+  <rect x="777" y="424" width="142" height="46" rx="2" fill="#ffffff" stroke="#c4d5e6"/>
+  <text x="848" y="453" text-anchor="middle" font-size="11" fill="#6b6a5f">the glass</text>
+  <rect x="796" y="474" width="62" height="12" rx="2" fill="#3a3a36"/>
+  <text x="827" y="483" text-anchor="middle" font-size="8" font-family="'JetBrains Mono', monospace" fill="#ffffff">driver IC</text>
+  <path d="M926 480 L956 480 L956 506" fill="none" stroke="#8a6a2f" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+  <path d="M190 140 L190 258" fill="none" stroke="#d97757" stroke-width="2.6" class="gmf-f" marker-end="url(#gmfAO)"/>
+  <path d="M204 258 L204 140" fill="none" stroke="#d97757" stroke-width="2.6" class="gmf-f" marker-end="url(#gmfAO)"/>
+  <path d="M520 258 L520 154" fill="none" stroke="#4d5a3c" stroke-width="2.8" class="gmf-f" marker-end="url(#gmfAG)"/>
+  <text x="534" y="214" text-anchor="start" font-size="11" font-weight="600" fill="#4d5a3c">reads textures</text>
+  <path d="M860 154 L860 258" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="gmf-f" marker-end="url(#gmfAB)"/>
+  <text x="874" y="214" text-anchor="start" font-size="11" font-weight="600" fill="#2f5c8a">writes tiles into fb B</text>
+  <path d="M400 324 L400 424" fill="none" stroke="#4d5a3c" stroke-width="2.8" class="gmf-f" marker-end="url(#gmfAG)"/>
+  <text x="414" y="380" text-anchor="start" font-size="11" font-weight="600" fill="#4d5a3c">reads fb A &#8212; never writes</text>
+  <path d="M500 455 L556 455" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="gmf-f" marker-end="url(#gmfAB)"/>
+  <path d="M710 455 L766 455" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="gmf-f gmf-s" marker-end="url(#gmfAB)"/>
+  <text x="56" y="528" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">no arrow goes from one master to another. nothing is ever handed over &#8212; they only meet at the same addresses.</text>
+  <text x="56" y="552" text-anchor="start" font-size="11.5" fill="#8c8a7d">the two-way links are two lines on purpose: dashes on one line can only travel one way,</text>
+  <text x="56" y="569" text-anchor="start" font-size="11.5" fill="#8c8a7d">so a single double-headed arrow would say &#8220;direction unknown&#8221;.</text>
+  <text x="56" y="586" text-anchor="start" font-size="11.5" fill="#8c8a7d">read the arrowheads and you have the answer to who copies from whom &#8212; here, nobody does.</text>
+  <rect x="844" y="546" width="194" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+  <path d="M844 553 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+  <circle cx="857" cy="561" r="3.6" fill="#ffffff"/>
+  <text x="954" y="565" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">One memory, many masters</text>
+</svg>
