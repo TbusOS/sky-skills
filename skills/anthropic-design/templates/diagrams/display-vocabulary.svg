@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 520" role="img" aria-label="A map of the vocabulary onto the hardware. Across the top is the display path as five boxes: the GPU, DRAM, the display controller, the MIPI DSI controller with its physical layer, and the panel. Under each box is a column listing the terms that belong to that piece of hardware. Under the GPU: tile-based rendering and bus master. Under DRAM: frame, framebuffer, front buffer and back buffer, because all four of those words describe ranges of memory rather than pieces of silicon. Under the display controller: scanout, line buffer, fetch DMA and blending. Under the DSI and physical layer: the two bus names, APB for register writes and AXI for pixels. Under the panel: the tearing effect signal. A separate group at the bottom holds four terms that belong to no box at all, because they are moments rather than places: vsync, page flip, tearing and underflow. Separating those from the hardware terms is the point of the figure, because treating a moment as if it were a location is what makes the pipeline hard to reason about" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+  <style>
+    .vcb-f { stroke-dasharray: 12 8; animation: vcbM 1.15s linear infinite; }
+    .vcb-f.vcb-r { animation-name: vcbMR; }
+    .vcb-f.vcb-s { animation-duration: 2.1s; }
+    @keyframes vcbM  { to { stroke-dashoffset: -40; } }
+    @keyframes vcbMR { to { stroke-dashoffset:  40; } }
+    /* 三条关闭动效的口子,跟 glass 同一套约定 */
+    @media (prefers-reduced-motion: reduce) {
+      .vcb-f { animation: none; stroke-dashoffset: 0; }
+    }
+    :root[data-motion-freeze] .vcb-f,
+    html[data-motion-freeze] .vcb-f { animation: none; stroke-dashoffset: 0; }
+  </style>
+    <pattern id="vcbD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <pattern id="vcbH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+    <marker id="vcbAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <marker id="vcbAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+    <marker id="vcbAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+    <marker id="vcbAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+    <marker id="vcbAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
+  </defs>
+  <rect width="1120" height="520" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="520" rx="16" fill="url(#vcbD)"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">WHERE EACH WORD LIVES</text>
+  <text x="40" y="76" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">the words in the table above are not all the same kind of word.</text>
+  <text x="40" y="96" text-anchor="start" font-size="11.5" fill="#6b6a5f">most of them name a place. four of them name a moment, and mixing the two is what makes this hard to follow.</text>
+  <rect x="40" y="126" width="196" height="62" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="138" y="154" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">GPU</text>
+  <text x="138" y="171" text-anchor="middle" font-size="11.5" fill="#6b6a5f">draws it</text>
+  <rect x="256" y="126" width="196" height="62" rx="8" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.4"/>
+  <text x="354" y="154" text-anchor="middle" font-size="12" font-weight="600" fill="#4d5a3c">DRAM</text>
+  <text x="354" y="171" text-anchor="middle" font-size="11.5" fill="#6b6a5f">holds it</text>
+  <rect x="472" y="126" width="216" height="62" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="580" y="154" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">display controller</text>
+  <text x="580" y="171" text-anchor="middle" font-size="11.5" fill="#6b6a5f">reads it out</text>
+  <rect x="708" y="126" width="176" height="62" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="796" y="154" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">MIPI DSI + D-PHY</text>
+  <text x="796" y="171" text-anchor="middle" font-size="11.5" fill="#6b6a5f">ships it</text>
+  <rect x="904" y="126" width="176" height="62" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="992" y="154" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">panel</text>
+  <text x="992" y="171" text-anchor="middle" font-size="11.5" fill="#6b6a5f">lights it</text>
+  <path d="M236 157 L256 157" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="vcb-f" marker-end="url(#vcbAB)"/>
+  <path d="M452 157 L472 157" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="vcb-f" marker-end="url(#vcbAB)"/>
+  <path d="M688 157 L708 157" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="vcb-f" marker-end="url(#vcbAB)"/>
+  <path d="M884 157 L904 157" fill="none" stroke="#2f5c8a" stroke-width="2.6" class="vcb-f" marker-end="url(#vcbAB)"/>
+  <rect x="40" y="214" width="196" height="26" rx="6" fill="#f4d9cd" stroke="#d97757" stroke-width="1.2"/>
+  <text x="138" y="231" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8f4a2f">tile-based rendering</text>
+  <rect x="40" y="248" width="196" height="26" rx="6" fill="#f4d9cd" stroke="#d97757" stroke-width="1.2"/>
+  <text x="138" y="265" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8f4a2f">bus master</text>
+  <rect x="256" y="214" width="196" height="26" rx="6" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <text x="354" y="231" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">frame</text>
+  <rect x="256" y="248" width="196" height="26" rx="6" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <text x="354" y="265" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">framebuffer</text>
+  <rect x="256" y="282" width="196" height="26" rx="6" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <text x="354" y="299" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">front buffer</text>
+  <rect x="256" y="316" width="196" height="26" rx="6" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <text x="354" y="333" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">back buffer</text>
+  <rect x="472" y="214" width="216" height="26" rx="6" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.2"/>
+  <text x="580" y="231" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">scanout</text>
+  <rect x="472" y="248" width="216" height="26" rx="6" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.2"/>
+  <text x="580" y="265" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">line buffer</text>
+  <rect x="472" y="282" width="216" height="26" rx="6" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.2"/>
+  <text x="580" y="299" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">fetch DMA</text>
+  <rect x="472" y="316" width="216" height="26" rx="6" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.2"/>
+  <text x="580" y="333" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">blending</text>
+  <rect x="708" y="214" width="176" height="26" rx="6" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.2"/>
+  <text x="796" y="231" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">APB &#183; registers</text>
+  <rect x="708" y="248" width="176" height="26" rx="6" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.2"/>
+  <text x="796" y="265" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">AXI &#183; pixels</text>
+  <rect x="904" y="214" width="176" height="26" rx="6" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.2"/>
+  <text x="992" y="231" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8a6a2f">TE signal</text>
+  <text x="40" y="372" text-anchor="start" font-size="11.5" fill="#6b6a5f">each of these names a piece of hardware, or a range of addresses inside one. you can point at it.</text>
+  <path d="M40 396 L1080 396" fill="none" stroke="#6b6a5f" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <rect x="40" y="418" width="244" height="54" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="162" y="442" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">vsync</text>
+  <text x="162" y="459" text-anchor="middle" font-size="11.5" fill="#6b6a5f">the gap between two frames</text>
+  <line x1="52" y1="412" x2="52" y2="476" stroke="#8f4a2f" stroke-width="1.6" stroke-dasharray="3 3"/>
+  <rect x="44.0" y="394" width="16.0" height="18" rx="9" fill="#8f4a2f"/>
+  <text x="52" y="407" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff"></text>
+  <rect x="302" y="418" width="244" height="54" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="424" y="442" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">page flip</text>
+  <text x="424" y="459" text-anchor="middle" font-size="11.5" fill="#6b6a5f">one register write, at that gap</text>
+  <line x1="314" y1="412" x2="314" y2="476" stroke="#8f4a2f" stroke-width="1.6" stroke-dasharray="3 3"/>
+  <rect x="306.0" y="394" width="16.0" height="18" rx="9" fill="#8f4a2f"/>
+  <text x="314" y="407" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff"></text>
+  <rect x="564" y="418" width="244" height="54" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="686" y="442" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">tearing</text>
+  <text x="686" y="459" text-anchor="middle" font-size="11.5" fill="#6b6a5f">what you see if it lands late</text>
+  <line x1="576" y1="412" x2="576" y2="476" stroke="#8f4a2f" stroke-width="1.6" stroke-dasharray="3 3"/>
+  <rect x="568.0" y="394" width="16.0" height="18" rx="9" fill="#8f4a2f"/>
+  <text x="576" y="407" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff"></text>
+  <rect x="826" y="418" width="244" height="54" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="948" y="442" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">underflow</text>
+  <text x="948" y="459" text-anchor="middle" font-size="11.5" fill="#6b6a5f">what you see if the fetch is late</text>
+  <line x1="838" y1="412" x2="838" y2="476" stroke="#8f4a2f" stroke-width="1.6" stroke-dasharray="3 3"/>
+  <rect x="830.0" y="394" width="16.0" height="18" rx="9" fill="#8f4a2f"/>
+  <text x="838" y="407" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff"></text>
+  <text x="40" y="502" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">these four are not in any box above. they are things that happen at an instant &#8212; which is why looking for them on a block diagram never works.</text>
+</svg>

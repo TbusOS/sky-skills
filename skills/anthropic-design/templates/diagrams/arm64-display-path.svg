@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 800" role="img" aria-label="The full journey of one frame on a phone-class ARM64 system on chip, drawn as ten numbered stops in two rows with the memory between them. The upper row is the write side: the GPU shader cores render into an on-chip tile buffer, the results pass through the GPU's own memory management unit which translates virtual addresses to physical ones, then across the system interconnect on a 128-bit AXI bus, then through the memory controller which arbitrates between all requesters. A thick orange flowing line drops from the memory controller through the silicon boundary and into the back buffer. The memory bar spans the full width and is the only place in the system where a whole frame exists: it is divided into the front buffer the display is currently reading, the back buffer the GPU is currently writing, textures, the GPU's page tables, and other allocations. Below it the read side rises back into the chip: the display controller's fetch DMA issues read requests in scanline order, the blender and timing generator compose the layers and generate the horizontal and vertical sync signals, the MIPI DSI controller packetises the pixels and the D-PHY serialises them onto four lanes, and the signal leaves the chip through a port toward the panel. The CPU cluster sits to one side connected only by a narrow 32-bit APB configuration bus that carries four bytes per frame, and never touches a pixel. Every link is labelled with its bus type, its width and the number of bytes it carries per frame" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+  <style>
+    .adp-f { stroke-dasharray: 12 8; animation: adpM 1.15s linear infinite; }
+    .adp-f.adp-r { animation-name: adpMR; }
+    .adp-f.adp-s { animation-duration: 2.1s; }
+    @keyframes adpM  { to { stroke-dashoffset: -40; } }
+    @keyframes adpMR { to { stroke-dashoffset:  40; } }
+    /* 三条关闭动效的口子,跟 glass 同一套约定 */
+    @media (prefers-reduced-motion: reduce) {
+      .adp-f { animation: none; stroke-dashoffset: 0; }
+    }
+    :root[data-motion-freeze] .adp-f,
+    html[data-motion-freeze] .adp-f { animation: none; stroke-dashoffset: 0; }
+  </style>
+    <pattern id="adpD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <pattern id="adpH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+    <marker id="adpAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <marker id="adpAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+    <marker id="adpAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+    <marker id="adpAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+    <marker id="adpAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
+  </defs>
+  <rect width="1120" height="800" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="800" rx="16" fill="url(#adpD)"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">ONE FRAME &#183; TEN STOPS ON A PHONE SOC</text>
+  <path d="M686 28 L728 28" fill="none" stroke="#d97757" stroke-width="2.8" class="adp-f" marker-end="url(#adpAO)"/>
+  <text x="736" y="32" text-anchor="start" font-size="11.5" fill="#6b6a5f">pixels being written</text>
+  <path d="M898 28 L940 28" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="adp-f" marker-end="url(#adpAB)"/>
+  <text x="948" y="32" text-anchor="start" font-size="11.5" fill="#6b6a5f">pixels being read</text>
+  <text x="40" y="58" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">&#9312;&#8211;&#9316; &#183; THE WRITE SIDE &#183; the GPU renders one frame into memory</text>
+  <rect x="40" y="88" width="172" height="74" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="126" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">shader cores</text>
+  <text x="126" y="139" text-anchor="middle" font-size="11.5" fill="#6b6a5f">they compute pixels</text>
+  <rect x="238" y="88" width="172" height="74" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="324" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">tile buffer</text>
+  <text x="324" y="139" text-anchor="middle" font-size="11.5" fill="#6b6a5f">16 KiB on-chip</text>
+  <rect x="436" y="88" width="172" height="74" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="522" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">GPU MMU</text>
+  <text x="522" y="139" text-anchor="middle" font-size="11.5" fill="#6b6a5f">virtual &#8594; physical</text>
+  <rect x="634" y="88" width="172" height="74" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+  <text x="720" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">interconnect</text>
+  <text x="720" y="139" text-anchor="middle" font-size="11.5" fill="#6b6a5f">NoC &#183; arbitration</text>
+  <rect x="832" y="88" width="172" height="74" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+  <text x="918" y="122" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">memory ctrl</text>
+  <text x="918" y="139" text-anchor="middle" font-size="11.5" fill="#6b6a5f">queues + refresh</text>
+  <path d="M212 125 L238 125" fill="none" stroke="#d97757" stroke-width="2.8" class="adp-f" marker-end="url(#adpAO)"/>
+  <circle cx="56" cy="102" r="10.5" fill="#d97757"/>
+  <text x="56" y="106" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+  <path d="M410 125 L436 125" fill="none" stroke="#d97757" stroke-width="2.8" class="adp-f" marker-end="url(#adpAO)"/>
+  <circle cx="254" cy="102" r="10.5" fill="#d97757"/>
+  <text x="254" y="106" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+  <path d="M608 125 L634 125" fill="none" stroke="#d97757" stroke-width="2.8" class="adp-f" marker-end="url(#adpAO)"/>
+  <circle cx="452" cy="102" r="10.5" fill="#d97757"/>
+  <text x="452" y="106" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+  <path d="M806 125 L832 125" fill="none" stroke="#d97757" stroke-width="2.8" class="adp-f" marker-end="url(#adpAO)"/>
+  <circle cx="650" cy="102" r="10.5" fill="#d97757"/>
+  <text x="650" y="106" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">4</text>
+  <circle cx="848" cy="102" r="10.5" fill="#d97757"/>
+  <text x="848" y="106" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">5</text>
+  <rect x="28" y="74" width="592" height="102" rx="11" fill="none" stroke="#d97757" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <rect x="120.1" y="167" width="159.8" height="18" rx="9" fill="#141413"/>
+  <text x="200" y="180" text-anchor="middle" font-size="10" fill="#ffffff">GPU &#183; one IP, three parts</text>
+  <rect x="195.7" y="195" width="58.7" height="18" rx="9" fill="#141413"/>
+  <text x="225" y="208" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">on-chip</text>
+  <rect x="381.5" y="195" width="83.0" height="18" rx="9" fill="#141413"/>
+  <text x="423" y="208" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">AXI 128-bit</text>
+  <rect x="579.5" y="195" width="83.0" height="18" rx="9" fill="#141413"/>
+  <text x="621" y="208" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">AXI 128-bit</text>
+  <rect x="801.9" y="195" width="34.3" height="18" rx="9" fill="#141413"/>
+  <text x="819" y="208" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">DFI</text>
+  <rect x="40" y="232" width="214" height="56" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="147" y="257" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">CPU cluster</text>
+  <text x="147" y="274" text-anchor="middle" font-size="11.5" fill="#6b6a5f">runs the compositor</text>
+  <path d="M254 260 L356 260" fill="none" stroke="#6b6a5f" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#adpAB)"/>
+  <rect x="261.5" y="231" width="77.0" height="18" rx="9" fill="#141413"/>
+  <text x="300" y="244" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">APB 32-bit</text>
+  <text x="366" y="256" text-anchor="start" font-size="11.5" fill="#6b6a5f">4 bytes per frame, to the register at stop &#9319;.</text>
+  <text x="366" y="273" text-anchor="start" font-size="11.5" fill="#8c8a7d">this is the only thing software does. no pixel travels here.</text>
+  <path d="M918 162 L918 310 L390 310 L390 344" fill="none" stroke="#d97757" stroke-width="3.4" class="adp-f" marker-end="url(#adpAO)"/>
+  <rect x="615.2" y="301" width="113.5" height="18" rx="9" fill="#141413"/>
+  <text x="672" y="314" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">8.3 MB per frame</text>
+  <path d="M28 330 L1092 330" fill="none" stroke="#141413" stroke-width="1.6" stroke-dasharray="7 5"/>
+  <rect x="66.3" y="321" width="107.4" height="18" rx="9" fill="#6f8a58"/>
+  <text x="120" y="334" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">off-chip &#183; DRAM</text>
+  <rect x="40" y="344" width="250" height="68" fill="#e2ecf5"/>
+  <text x="165" y="376" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2f5c8a">front buffer</text>
+  <text x="165" y="391" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">the display reads this</text>
+  <line x1="290" y1="344" x2="290" y2="412" stroke="#141413" stroke-width="1.5"/>
+  <rect x="290" y="344" width="250" height="68" fill="#f4d9cd"/>
+  <text x="415" y="376" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8f4a2f">back buffer</text>
+  <text x="415" y="391" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">the GPU writes this</text>
+  <line x1="540" y1="344" x2="540" y2="412" stroke="#141413" stroke-width="1.5"/>
+  <rect x="540" y="344" width="190" height="68" fill="#eef1e7"/>
+  <text x="635" y="376" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">textures</text>
+  <text x="635" y="391" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">source art</text>
+  <line x1="730" y1="344" x2="730" y2="412" stroke="#141413" stroke-width="1.5"/>
+  <rect x="730" y="344" width="160" height="68" fill="#f0e4d8"/>
+  <text x="810" y="376" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8a6a2f">page tables</text>
+  <text x="810" y="391" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">the GPU's</text>
+  <line x1="890" y1="344" x2="890" y2="412" stroke="#141413" stroke-width="1.5"/>
+  <rect x="890" y="344" width="190" height="68" fill="#f1efe8"/>
+  <text x="985" y="383" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">other</text>
+  <rect x="40" y="344" width="1040" height="68" rx="7" fill="none" stroke="#141413" stroke-width="1.8"/>
+  <circle cx="56" cy="378" r="10.5" fill="#d97757"/>
+  <text x="56" y="382" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">6</text>
+  <text x="560" y="436" text-anchor="middle" font-size="12.5" font-weight="600" fill="#4d5a3c">LPDDR4X &#183; the only place in the system where a whole frame exists</text>
+  <path d="M28 470 L1092 470" fill="none" stroke="#141413" stroke-width="1.6" stroke-dasharray="7 5"/>
+  <rect x="857.4" y="461" width="89.1" height="18" rx="9" fill="#141413"/>
+  <text x="902" y="474" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">back on-chip</text>
+  <text x="200" y="494" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">&#9318;&#8211;&#9321; &#183; THE READ SIDE &#183; the display controller pulls it out again, and never stops</text>
+  <path d="M154 412 L154 518" fill="none" stroke="#2f5c8a" stroke-width="3.4" class="adp-f" marker-end="url(#adpAB)"/>
+  <rect x="40" y="518" width="214" height="74" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="147" y="552" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">fetch DMA</text>
+  <text x="147" y="569" text-anchor="middle" font-size="11.5" fill="#6b6a5f">reads in scanline order</text>
+  <rect x="296" y="518" width="232" height="74" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="412" y="552" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">blend + timing</text>
+  <text x="412" y="569" text-anchor="middle" font-size="11.5" fill="#6b6a5f">composes, makes vsync</text>
+  <rect x="570" y="518" width="180" height="74" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="660" y="552" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">MIPI DSI</text>
+  <text x="660" y="569" text-anchor="middle" font-size="11.5" fill="#6b6a5f">packetises</text>
+  <rect x="792" y="518" width="170" height="74" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="877" y="552" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">D-PHY</text>
+  <text x="877" y="569" text-anchor="middle" font-size="11.5" fill="#6b6a5f">4 lanes, serial</text>
+  <path d="M254 555 L296 555" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="adp-f" marker-end="url(#adpAB)"/>
+  <path d="M528 555 L570 555" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="adp-f" marker-end="url(#adpAB)"/>
+  <path d="M750 555 L792 555" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="adp-f" marker-end="url(#adpAB)"/>
+  <circle cx="56" cy="532" r="10.5" fill="#d97757"/>
+  <text x="56" y="536" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">7</text>
+  <circle cx="312" cy="532" r="10.5" fill="#d97757"/>
+  <text x="312" y="536" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">8</text>
+  <circle cx="586" cy="532" r="10.5" fill="#d97757"/>
+  <text x="586" y="536" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">9</text>
+  <rect x="28" y="504" width="512" height="102" rx="11" fill="none" stroke="#c4d5e6" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <rect x="85.8" y="597" width="188.5" height="18" rx="9" fill="#141413"/>
+  <text x="180" y="610" text-anchor="middle" font-size="10" fill="#ffffff">display controller &#183; VOP / DPU</text>
+  <rect x="558" y="504" width="414" height="102" rx="11" fill="none" stroke="#d9bf94" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <rect x="614.4" y="597" width="171.2" height="18" rx="9" fill="#141413"/>
+  <text x="700" y="610" text-anchor="middle" font-size="10" fill="#ffffff">serial link out of the chip</text>
+  <rect x="227.4" y="623" width="95.2" height="18" rx="9" fill="#141413"/>
+  <text x="275" y="636" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">16 lines only</text>
+  <rect x="510.5" y="623" width="77.0" height="18" rx="9" fill="#141413"/>
+  <text x="549" y="636" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">24-bit RGB</text>
+  <rect x="741.7" y="623" width="58.7" height="18" rx="9" fill="#141413"/>
+  <text x="771" y="636" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">packets</text>
+  <path d="M984,534 L1022,534 L1032,555.0 L1022,576 L984,576 Z" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="1008" y="559" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8a6a2f">&#8594;</text>
+  <circle cx="1064" cy="555" r="10.5" fill="#d97757"/>
+  <text x="1064" y="559" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">10</text>
+  <text x="1064" y="610" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8a6a2f">panel</text>
+  <text x="40" y="674" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">the frame never entered the GPU and never entered the display controller. both of them reached into the same DRAM.</text>
+  <text x="40" y="702" text-anchor="start" font-size="11.5" fill="#8c8a7d">every box above is a real block with a driver in mainline Linux. the two that hold no frame are the ones people assume do: the GPU,</text>
+  <text x="40" y="719" text-anchor="start" font-size="11.5" fill="#8c8a7d">whose tile buffer is 16 KiB, and the display controller, whose line buffer is 16 lines deep (rockchip_drm_vop2.c:500).</text>
+  <rect x="40" y="742" width="176" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+  <path d="M40 749 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+  <circle cx="53" cy="757" r="3.6" fill="#ffffff"/>
+  <text x="141" y="761" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">One frame &#183; ten stops</text>
+</svg>

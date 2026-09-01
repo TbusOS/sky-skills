@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 660" role="img" aria-label="An explanation that front buffer and back buffer are roles rather than addresses. Three columns show three consecutive frames, separated by vertical dashed vsync markers. In every column the same two blocks of memory are drawn at exactly the same coordinates, labelled with their fixed physical addresses, hex eight zero zero zero zero zero zero zero and hex eight zero eight zero zero zero zero zero. What changes between columns is only which block is coloured blue and which is coloured orange. Blue means the display controller is currently reading that block, which is what the word front buffer means. Orange means the GPU is currently writing that block, which is what the word back buffer means. In the first frame the lower block is the front buffer and the upper is the back buffer; after the first vsync the two swap; after the second vsync they swap back. Beneath each column is the value held in the display controller's frame buffer base address register, and that value alternates between the two addresses. Flowing lines show the display reading from whichever block is currently blue and the GPU writing to whichever is currently orange, so the lines move between blocks while the blocks themselves never move. The closing statement is that neither block of memory was ever copied, moved or renamed: a single thirty-two bit register changed value, and the two roles changed places" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+  <style>
+    .bfr-f { stroke-dasharray: 12 8; animation: bfrM 1.15s linear infinite; }
+    .bfr-f.bfr-r { animation-name: bfrMR; }
+    .bfr-f.bfr-s { animation-duration: 2.1s; }
+    @keyframes bfrM  { to { stroke-dashoffset: -40; } }
+    @keyframes bfrMR { to { stroke-dashoffset:  40; } }
+    /* 三条关闭动效的口子,跟 glass 同一套约定 */
+    @media (prefers-reduced-motion: reduce) {
+      .bfr-f { animation: none; stroke-dashoffset: 0; }
+    }
+    :root[data-motion-freeze] .bfr-f,
+    html[data-motion-freeze] .bfr-f { animation: none; stroke-dashoffset: 0; }
+  </style>
+    <pattern id="bfrD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <pattern id="bfrH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+    <marker id="bfrAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <marker id="bfrAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+    <marker id="bfrAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+    <marker id="bfrAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+    <marker id="bfrAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
+  </defs>
+  <rect width="1120" height="660" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="660" rx="16" fill="url(#bfrD)"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">FRONT AND BACK ARE ROLES, NOT ADDRESSES</text>
+  <path d="M688 28 L730 28" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="bfr-f" marker-end="url(#bfrAB)"/>
+  <text x="738" y="32" text-anchor="start" font-size="11.5" fill="#6b6a5f">display is reading it &#8594; we call it the FRONT buffer</text>
+  <path d="M688 50 L730 50" fill="none" stroke="#d97757" stroke-width="2.8" class="bfr-f" marker-end="url(#bfrAO)"/>
+  <text x="738" y="54" text-anchor="start" font-size="11.5" fill="#6b6a5f">GPU is writing it &#8594; we call it the BACK buffer</text>
+  <text x="40" y="76" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">two blocks of DRAM. their addresses never change.</text>
+  <text x="40" y="96" text-anchor="start" font-size="11.5" fill="#6b6a5f">what changes is which one each name is pointing at right now.</text>
+  <text x="158" y="182" text-anchor="end" font-size="12" font-weight="600" fill="#141413">block A</text>
+  <text x="158" y="200" text-anchor="end" font-size="11" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">0x8000_0000</text>
+  <text x="158" y="268" text-anchor="end" font-size="12" font-weight="600" fill="#141413">block B</text>
+  <text x="158" y="286" text-anchor="end" font-size="11" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">0x8080_0000</text>
+  <text x="304" y="130" text-anchor="middle" font-size="12.5" font-weight="600" fill="#141413">frame N</text>
+  <rect x="178" y="156" width="252" height="62" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="304" y="184" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">BACK buffer</text>
+  <text x="304" y="201" text-anchor="middle" font-size="11.5" fill="#6b6a5f">being drawn into</text>
+  <rect x="178" y="242" width="252" height="62" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="304" y="270" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">FRONT buffer</text>
+  <text x="304" y="287" text-anchor="middle" font-size="11.5" fill="#6b6a5f">being read out</text>
+  <path d="M430 273 L458 273" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="bfr-f" marker-end="url(#bfrAB)"/>
+  <path d="M458 187 L430 187" fill="none" stroke="#d97757" stroke-width="2.8" class="bfr-f" marker-end="url(#bfrAO)"/>
+  <rect x="178" y="350" width="252" height="52" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="304" y="373" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">0x8000_0000</text>
+  <text x="304" y="390" text-anchor="middle" font-size="11.5" fill="#6b6a5f">frame buffer base address register</text>
+  <text x="614" y="130" text-anchor="middle" font-size="12.5" font-weight="600" fill="#141413">frame N+1</text>
+  <rect x="488" y="156" width="252" height="62" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="614" y="184" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">FRONT buffer</text>
+  <text x="614" y="201" text-anchor="middle" font-size="11.5" fill="#6b6a5f">being read out</text>
+  <rect x="488" y="242" width="252" height="62" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="614" y="270" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">BACK buffer</text>
+  <text x="614" y="287" text-anchor="middle" font-size="11.5" fill="#6b6a5f">being drawn into</text>
+  <path d="M740 187 L768 187" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="bfr-f" marker-end="url(#bfrAB)"/>
+  <path d="M768 273 L740 273" fill="none" stroke="#d97757" stroke-width="2.8" class="bfr-f" marker-end="url(#bfrAO)"/>
+  <rect x="488" y="350" width="252" height="52" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="614" y="373" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">0x8080_0000</text>
+  <text x="614" y="390" text-anchor="middle" font-size="11.5" fill="#6b6a5f">frame buffer base address register</text>
+  <text x="924" y="130" text-anchor="middle" font-size="12.5" font-weight="600" fill="#141413">frame N+2</text>
+  <rect x="798" y="156" width="252" height="62" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="924" y="184" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">BACK buffer</text>
+  <text x="924" y="201" text-anchor="middle" font-size="11.5" fill="#6b6a5f">being drawn into</text>
+  <rect x="798" y="242" width="252" height="62" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="924" y="270" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">FRONT buffer</text>
+  <text x="924" y="287" text-anchor="middle" font-size="11.5" fill="#6b6a5f">being read out</text>
+  <path d="M1050 273 L1078 273" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="bfr-f" marker-end="url(#bfrAB)"/>
+  <path d="M1078 187 L1050 187" fill="none" stroke="#d97757" stroke-width="2.8" class="bfr-f" marker-end="url(#bfrAO)"/>
+  <rect x="798" y="350" width="252" height="52" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="924" y="373" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">0x8000_0000</text>
+  <text x="924" y="390" text-anchor="middle" font-size="11.5" fill="#6b6a5f">frame buffer base address register</text>
+  <line x1="476" y1="122" x2="476" y2="414" stroke="#8f4a2f" stroke-width="1.6" stroke-dasharray="4 4"/>
+  <rect x="452.8" y="104" width="46.5" height="18" rx="9" fill="#8f4a2f"/>
+  <text x="476" y="117" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">vsync</text>
+  <line x1="786" y1="122" x2="786" y2="414" stroke="#8f4a2f" stroke-width="1.6" stroke-dasharray="4 4"/>
+  <rect x="762.8" y="104" width="46.5" height="18" rx="9" fill="#8f4a2f"/>
+  <text x="786" y="117" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">vsync</text>
+  <text x="40" y="428" text-anchor="start" font-size="11.5" font-weight="600" fill="#8a6a2f">&#8593; one 32-bit register write. that is the entire page flip.</text>
+  <path d="M40 452 L1080 452" fill="none" stroke="#6b6a5f" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <text x="40" y="484" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">nothing was copied, moved or renamed. one register took a different value, and the two roles changed places.</text>
+  <text x="40" y="514" text-anchor="start" font-size="11.5" fill="#8c8a7d">read the three columns across and the two rectangles never move: same x, same y, same address, same size. only their colour alternates.</text>
+  <text x="40" y="531" text-anchor="start" font-size="11.5" fill="#8c8a7d">that is what makes the words confusing &#8212; &#8220;front&#8221; and &#8220;back&#8221; sound like places, and they are not. they are two jobs that two</text>
+  <text x="40" y="548" text-anchor="start" font-size="11.5" fill="#8c8a7d">blocks of memory take turns doing. on this hardware the register is VOP2_WIN_YRGB_MST (rockchip_drm_vop2.c:1370), and it takes</text>
+  <text x="40" y="565" text-anchor="start" font-size="11.5" fill="#8c8a7d">effect at the next vsync rather than when software writes it &#8212; let the address change mid-scan and the panel gets the top of one frame with</text>
+  <text x="40" y="582" text-anchor="start" font-size="11.5" fill="#8c8a7d">the bottom of another, which is exactly what tearing is.</text>
+  <rect x="40" y="612" width="280" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+  <path d="M40 619 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+  <circle cx="53" cy="627" r="3.6" fill="#ffffff"/>
+  <text x="193" y="631" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Front and back &#183; two jobs, taking turns</text>
+</svg>

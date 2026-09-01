@@ -542,6 +542,72 @@ def check_file(
             f"Han glyphs. See known-bugs.md §1.22."
         )
 
+    # 8a. Hand-computed CJK numeric entities (known-bugs 1.62).
+    # 2026-09-01, hardware.html: the generator wrote Chinese as decimal HTML
+    # entities and got seven code points wrong. Every wrong one decoded to a
+    # REAL but different character - 帧 (frame) became 帖 (a post) in 21 places,
+    # 敞 became 敌, 拐弯 became 拥弧, 锁住 became 冒住. Wrong-but-valid characters
+    # render perfectly and pass every other check, so nothing caught it until a
+    # human read the page and asked what the word meant.
+    #
+    # There is no output-only check for "this is the wrong Chinese word" - 一帖
+    # is a grammatical phrase. A character-frequency check was tried and
+    # rejected: it missed the worst instance (帖 is a common character in other
+    # corpora) while flagging four legitimate words. The only sound defence is
+    # to close the channel: write CJK as literal UTF-8, never as a code point
+    # a human or a model computed by hand.
+    cjk_entities = {}
+    for m in re.finditer(r"&#(\d{4,6});", html):
+        cp = int(m.group(1))
+        if 0x3400 <= cp <= 0x9FFF:            # CJK Unified Ideographs (+ Ext A)
+            cjk_entities.setdefault(chr(cp), 0)
+            cjk_entities[chr(cp)] += 1
+    if cjk_entities:
+        shown = ", ".join(f"{c}(&#{ord(c)};)&#215;{n}" for c, n in
+                          sorted(cjk_entities.items(), key=lambda kv: -kv[1])[:4])
+        errors.append(
+            f"{path}: {sum(cjk_entities.values())} CJK character(s) written as "
+            f"numeric HTML entities ({shown}). Write literal UTF-8 instead - a "
+            f"hand-computed code point that is off by a few decodes to a real "
+            f"but wrong character, which renders fine and passes every check. "
+            f"See known-bugs.md 1.62."
+        )
+
+    # 8b. Jargon used but never defined (known-bugs 1.63).
+    # A page can pass every structural and visual check and still be unreadable
+    # because it uses domain vocabulary as if the reader already shared it.
+    # Fires only when several listed terms appear with no definition anywhere on
+    # the page, so a page written for specialists that defines nothing on
+    # purpose gets one warning rather than a wall of them.
+    _jf = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                       "references", "zh-jargon-terms.txt")
+    if os.path.exists(_jf):
+        with open(_jf, encoding="utf-8") as _fh:
+            terms = [t.strip() for t in _fh if t.strip() and not t.startswith("#")]
+        zh_text = " ".join(zh_span_pattern.findall(html))
+        zh_plain = re.sub(r"<[^>]+>", "", zh_text)
+        # 有定义的迹象:词后 40 字内出现「是 / 指 / 就是 / 即 / 意思是 / 叫」,
+        # 或者页面上有术语表结构(class 含 term/glossary,或 <dt>)。
+        has_glossary = bool(re.search(r'class="[^"]*(?:term|glossary|def)[^"]*"|<dt\b', html, re.I))
+        undefined = []
+        for t in terms:
+            if t not in zh_plain:
+                continue
+            if has_glossary:
+                continue
+            near = re.search(re.escape(t) + r".{0,40}?(?:是|指|就是|即|意思是|叫做|叫)", zh_plain, re.S)
+            if not near:
+                undefined.append(t)
+        if len(undefined) >= 4:
+            warnings.append(
+                f"{path}: {len(undefined)} domain terms used in Chinese prose with no "
+                f"definition anywhere on the page ({', '.join(undefined[:6])}"
+                f"{'...' if len(undefined) > 6 else ''}). A reader who does not already "
+                f"know these cannot follow the argument. Define each on first use, or add "
+                f"a glossary block (any element with a term/glossary class, or a <dt>). "
+                f"See known-bugs.md 1.63."
+            )
+
     # 8c. Glass dual-theme contract — glass pages declare an initial theme on
     # <html>, and public glass pages must ship the theme toggle. The light
     # theme is part of the skill's identity (iOS-frost variant), and the

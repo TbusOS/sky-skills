@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 640" role="img" aria-label="How a mobile GPU renders a frame it cannot hold. On the left the screen is drawn as a grid of small tiles, ten thousand one hundred and twenty-five of them at sixteen by sixteen pixels each, with one tile highlighted as the one currently being worked on. In the middle that tile is magnified to show what happens inside the chip: the triangles that touch this tile are rasterised, depth tested and blended entirely within the sixteen kibibyte on-chip tile buffer, and none of that intermediate work ever reaches memory. On the right, only when the tile is finished is it written out to DRAM, exactly once, four kibibytes of it. Below is the comparison with immediate mode rendering as used on desktop cards, where every layer of overdraw costs a read and a write of external memory, so three layers of overdraw cost six memory accesses per pixel instead of one write. The closing point is that tiling exists because of bandwidth rather than compute: on a phone the memory bus is shared by every block on the chip, so avoiding a memory access is worth more than avoiding a multiply" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+  <style>
+    .tlr-f { stroke-dasharray: 12 8; animation: tlrM 1.15s linear infinite; }
+    .tlr-f.tlr-r { animation-name: tlrMR; }
+    .tlr-f.tlr-s { animation-duration: 2.1s; }
+    @keyframes tlrM  { to { stroke-dashoffset: -40; } }
+    @keyframes tlrMR { to { stroke-dashoffset:  40; } }
+    /* 三条关闭动效的口子,跟 glass 同一套约定 */
+    @media (prefers-reduced-motion: reduce) {
+      .tlr-f { animation: none; stroke-dashoffset: 0; }
+    }
+    :root[data-motion-freeze] .tlr-f,
+    html[data-motion-freeze] .tlr-f { animation: none; stroke-dashoffset: 0; }
+  </style>
+    <pattern id="tlrD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <pattern id="tlrH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+    <marker id="tlrAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <marker id="tlrAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+    <marker id="tlrAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+    <marker id="tlrAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+    <marker id="tlrAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
+  </defs>
+  <rect width="1120" height="640" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="640" rx="16" fill="url(#tlrD)"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">TILING &#183; HOW A GPU DRAWS A FRAME IT CANNOT HOLD</text>
+  <text x="40" y="76" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">the tile buffer holds 16 KiB and a frame is 9.89 MiB. so the GPU never works on a frame.</text>
+  <text x="40" y="96" text-anchor="start" font-size="11.5" fill="#6b6a5f">it works on one 16&#215;16 tile at a time, and there are 10 125 of them.</text>
+  <rect x="32" y="118" width="300" height="328" rx="11" fill="none" stroke="#b9c4a4" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <rect x="87.8" y="109" width="188.5" height="18" rx="9" fill="#141413"/>
+  <text x="182" y="122" text-anchor="middle" font-size="10" fill="#ffffff">the screen, as the GPU sees it</text>
+  <rect x="96" y="148" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="116" y="148" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="136" y="148" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="156" y="148" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="176" y="148" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="196" y="148" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="216" y="148" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="236" y="148" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="256" y="148" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="276" y="148" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="96" y="168" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="116" y="168" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="136" y="168" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="156" y="168" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="176" y="168" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="196" y="168" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="216" y="168" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="236" y="168" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="256" y="168" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="276" y="168" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="96" y="188" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="116" y="188" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="136" y="188" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="156" y="188" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="176" y="188" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="196" y="188" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="216" y="188" width="17" height="17" rx="3" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <rect x="236" y="188" width="17" height="17" rx="3" fill="#f4d9cd" stroke="#d97757" stroke-width="1.2"/>
+  <rect x="256" y="188" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="276" y="188" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="96" y="208" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="116" y="208" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="136" y="208" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="156" y="208" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="176" y="208" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="196" y="208" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="216" y="208" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="236" y="208" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="256" y="208" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="276" y="208" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="96" y="228" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="116" y="228" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="136" y="228" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="156" y="228" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="176" y="228" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="196" y="228" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="216" y="228" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="236" y="228" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="256" y="228" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="276" y="228" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="96" y="248" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="116" y="248" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="136" y="248" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="156" y="248" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="176" y="248" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="196" y="248" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="216" y="248" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="236" y="248" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="256" y="248" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="276" y="248" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="96" y="268" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="116" y="268" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="136" y="268" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="156" y="268" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="176" y="268" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="196" y="268" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="216" y="268" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="236" y="268" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="256" y="268" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="276" y="268" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="96" y="288" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="116" y="288" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="136" y="288" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="156" y="288" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="176" y="288" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="196" y="288" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="216" y="288" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="236" y="288" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="256" y="288" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="276" y="288" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="96" y="308" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="116" y="308" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="136" y="308" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="156" y="308" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="176" y="308" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="196" y="308" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="216" y="308" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="236" y="308" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="256" y="308" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="276" y="308" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="96" y="328" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="116" y="328" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="136" y="328" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="156" y="328" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="176" y="328" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="196" y="328" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="216" y="328" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="236" y="328" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="256" y="328" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="276" y="328" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="96" y="348" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="116" y="348" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="136" y="348" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="156" y="348" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="176" y="348" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="196" y="348" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="216" y="348" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="236" y="348" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="256" y="348" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="276" y="348" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="96" y="368" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="116" y="368" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="136" y="368" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="156" y="368" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="176" y="368" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="196" y="368" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="216" y="368" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="236" y="368" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="256" y="368" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="276" y="368" width="17" height="17" rx="3" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <rect x="96" y="398" width="11" height="11" rx="2.5" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.2"/>
+  <text x="112" y="407" font-size="11" fill="#6b6a5f">done</text>
+  <rect x="150.0" y="398" width="11" height="11" rx="2.5" fill="#f4d9cd" stroke="#d97757" stroke-width="1.2"/>
+  <text x="166.0" y="407" font-size="11" fill="#6b6a5f">now</text>
+  <rect x="198.5" y="398" width="11" height="11" rx="2.5" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.2"/>
+  <text x="214.5" y="407" font-size="11" fill="#6b6a5f">waiting</text>
+  <text x="182" y="432" text-anchor="middle" font-size="11.5" fill="#6b6a5f">10 125 tiles &#183; 16&#215;16 pixels each</text>
+  <circle cx="76" cy="158" r="10.5" fill="#d97757"/>
+  <text x="76" y="162" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+  <path d="M316 200 L476 172" fill="none" stroke="#6b6a5f" stroke-width="1.3" stroke-dasharray="4 3"/>
+  <path d="M316 216 L476 344" fill="none" stroke="#6b6a5f" stroke-width="1.3" stroke-dasharray="4 3"/>
+  <rect x="476" y="118" width="322" height="300" rx="11" fill="none" stroke="#d97757" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <rect x="516.9" y="109" width="240.2" height="18" rx="9" fill="#141413"/>
+  <text x="637" y="122" text-anchor="middle" font-size="10" fill="#ffffff">inside the chip &#183; 16 KiB of tile buffer</text>
+  <rect x="496" y="150" width="282" height="58" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="637" y="176" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">rasterise</text>
+  <text x="637" y="193" text-anchor="middle" font-size="11.5" fill="#6b6a5f">which pixels does this triangle touch</text>
+  <circle cx="520" cy="164" r="10.5" fill="#d97757"/>
+  <text x="520" y="168" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+  <path d="M637 208 L637 224" fill="none" stroke="#d97757" stroke-width="2.6" class="tlr-f" marker-end="url(#tlrAO)"/>
+  <rect x="496" y="224" width="282" height="58" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="637" y="250" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">depth test</text>
+  <text x="637" y="267" text-anchor="middle" font-size="11.5" fill="#6b6a5f">is it behind something already here</text>
+  <circle cx="520" cy="238" r="10.5" fill="#d97757"/>
+  <text x="520" y="242" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+  <path d="M637 282 L637 298" fill="none" stroke="#d97757" stroke-width="2.6" class="tlr-f" marker-end="url(#tlrAO)"/>
+  <rect x="496" y="298" width="282" height="58" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="637" y="324" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">blend</text>
+  <text x="637" y="341" text-anchor="middle" font-size="11.5" fill="#6b6a5f">mix it with what is here</text>
+  <circle cx="520" cy="312" r="10.5" fill="#d97757"/>
+  <text x="520" y="316" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">4</text>
+  <text x="637" y="396" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8f4a2f">all of it on-chip. zero memory traffic so far.</text>
+  <path d="M798 268 L872 268" fill="none" stroke="#d97757" stroke-width="3.2" class="tlr-f" marker-end="url(#tlrAO)"/>
+  <rect x="814.8" y="237" width="40.4" height="18" rx="9" fill="#141413"/>
+  <text x="835" y="250" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">once</text>
+  <rect x="872" y="240" width="208" height="56" rx="8" fill="#eef1e7" stroke="#b9c4a4" stroke-width="1.4"/>
+  <text x="976" y="265" text-anchor="middle" font-size="12" font-weight="600" fill="#4d5a3c">write to DRAM</text>
+  <text x="976" y="282" text-anchor="middle" font-size="11.5" fill="#6b6a5f">4 KiB, one burst</text>
+  <circle cx="896" cy="254" r="10.5" fill="#d97757"/>
+  <text x="896" y="258" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">5</text>
+  <text x="976" y="320" text-anchor="middle" font-size="11" fill="#6b6a5f">and only now does this tile</text>
+  <text x="976" y="336" text-anchor="middle" font-size="11" fill="#6b6a5f">exist outside the chip</text>
+  <path d="M40 442 L1080 442" fill="none" stroke="#6b6a5f" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <text x="40" y="470" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">THE ALTERNATIVE &#183; immediate mode, which is what a desktop card does</text>
+  <text x="40" y="494" text-anchor="start" font-size="11.5" fill="#6b6a5f">every layer of overdraw is a read-modify-write of external memory. three layers deep, that is six memory accesses per pixel</text>
+  <text x="40" y="512" text-anchor="start" font-size="11.5" fill="#6b6a5f">instead of one write. it is the right trade when memory bandwidth is yours alone; on a phone it is shared with five other blocks.</text>
+  <text x="40" y="546" text-anchor="start" font-size="11.5" fill="#8c8a7d">tiling is a bandwidth decision, not a compute decision. that is why it shows up on phones first and why the tile buffer is small on purpose:</text>
+  <text x="40" y="563" text-anchor="start" font-size="11.5" fill="#8c8a7d">it has to fit in the power and area budget of something in your pocket. the depth and blend work above happens at full rate inside</text>
+  <text x="40" y="580" text-anchor="start" font-size="11.5" fill="#8c8a7d">the chip, and DRAM never sees any of it &#8212; which is the same shape of answer as the display controller blending layers on the way past.</text>
+  <rect x="40" y="604" width="199" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+  <path d="M40 611 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+  <circle cx="53" cy="619" r="3.6" fill="#ffffff"/>
+  <text x="153" y="623" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Tiling &#183; 16 KiB at a time</text>
+</svg>

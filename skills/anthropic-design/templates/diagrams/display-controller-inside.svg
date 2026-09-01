@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 740" role="img" aria-label="The inside of a display controller, drawn from the block diagram in the Rockchip VOP2 driver. Across the top is a bar of DRAM divided into four layer buffers that are on screen at the same time: the status bar, the application, a video layer and the cursor, followed by other allocations. Four flowing blue lines drop straight down from those four buffers into four of the six hardware windows below. Each window has its own fetch DMA and its own line buffer sixteen lines deep, so each one pulls its own layer out of memory independently. Two further windows are drawn greyed out because this screen does not need them. All six windows feed a layer selector, then a single overlay block that blends any number of the six layers together. The overlay is highlighted because it is the point of the figure: the blending happens here, inside the chip, and the blended result is never written back to memory. Below the overlay a video port generates the horizontal sync, vertical sync and data enable timing, and below that an output selector routes the pixels to one of MIPI DSI, HDMI, embedded DisplayPort or LVDS, with the MIPI DSI port highlighted as the one a phone uses. A callout compares this with the alternative of having the GPU composite the layers into a new buffer, which would cost one extra full-frame write plus one extra full-frame read, about one point two gigabytes per second of pure memory traffic that this design avoids entirely" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+  <style>
+    .dci-f { stroke-dasharray: 12 8; animation: dciM 1.15s linear infinite; }
+    .dci-f.dci-r { animation-name: dciMR; }
+    .dci-f.dci-s { animation-duration: 2.1s; }
+    @keyframes dciM  { to { stroke-dashoffset: -40; } }
+    @keyframes dciMR { to { stroke-dashoffset:  40; } }
+    /* 三条关闭动效的口子,跟 glass 同一套约定 */
+    @media (prefers-reduced-motion: reduce) {
+      .dci-f { animation: none; stroke-dashoffset: 0; }
+    }
+    :root[data-motion-freeze] .dci-f,
+    html[data-motion-freeze] .dci-f { animation: none; stroke-dashoffset: 0; }
+  </style>
+    <pattern id="dciD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <pattern id="dciH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+    <marker id="dciAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <marker id="dciAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+    <marker id="dciAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+    <marker id="dciAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+    <marker id="dciAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
+  </defs>
+  <rect width="1120" height="740" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="740" rx="16" fill="url(#dciD)"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">INSIDE THE DISPLAY CONTROLLER &#183; WHERE COMPOSITING ACTUALLY HAPPENS</text>
+  <text x="40" y="76" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">a phone screen is never one image. it is four, and something has to add them up.</text>
+  <text x="40" y="96" text-anchor="start" font-size="11.5" fill="#6b6a5f">the surprise is where that happens: not in the GPU, and not in memory.</text>
+  <rect x="48" y="122" width="150" height="60" fill="#eef1e7"/>
+  <text x="123" y="150" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">status bar</text>
+  <text x="123" y="165" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">1080&#215;90</text>
+  <line x1="198" y1="122" x2="198" y2="182" stroke="#141413" stroke-width="1.5"/>
+  <rect x="198" y="122" width="198" height="60" fill="#eef1e7"/>
+  <text x="297" y="150" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">app window</text>
+  <text x="297" y="165" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">1080&#215;2100</text>
+  <line x1="396" y1="122" x2="396" y2="182" stroke="#141413" stroke-width="1.5"/>
+  <rect x="396" y="122" width="150" height="60" fill="#eef1e7"/>
+  <text x="471" y="150" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">video</text>
+  <text x="471" y="165" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">decoder output</text>
+  <line x1="546" y1="122" x2="546" y2="182" stroke="#141413" stroke-width="1.5"/>
+  <rect x="546" y="122" width="198" height="60" fill="#eef1e7"/>
+  <text x="645" y="150" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">cursor</text>
+  <text x="645" y="165" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">96&#215;96</text>
+  <line x1="744" y1="122" x2="744" y2="182" stroke="#141413" stroke-width="1.5"/>
+  <rect x="744" y="122" width="328" height="60" fill="#f1efe8"/>
+  <text x="908" y="157" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">other</text>
+  <rect x="48" y="122" width="1024" height="60" rx="7" fill="none" stroke="#141413" stroke-width="1.8"/>
+  <rect x="146.5" y="101" width="339.0" height="18" rx="9" fill="#6f8a58"/>
+  <text x="316" y="114" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">DRAM &#183; four separate buffers, four separate addresses</text>
+  <rect x="48" y="236" width="150" height="78" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="123" y="272" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">Cluster 0</text>
+  <text x="123" y="289" text-anchor="middle" font-size="11.5" fill="#6b6a5f">fetch DMA</text>
+  <text x="123" y="309" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">+ 16-line buffer</text>
+  <path d="M123 182 L123 236" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="dci-f" marker-end="url(#dciAB)"/>
+  <circle cx="63" cy="250" r="10.5" fill="#d97757"/>
+  <text x="63" y="254" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+  <rect x="222" y="236" width="150" height="78" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="297" y="272" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">Cluster 1</text>
+  <text x="297" y="289" text-anchor="middle" font-size="11.5" fill="#6b6a5f">fetch DMA</text>
+  <text x="297" y="309" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">+ 16-line buffer</text>
+  <path d="M297 182 L297 236" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="dci-f" marker-end="url(#dciAB)"/>
+  <circle cx="237" cy="250" r="10.5" fill="#d97757"/>
+  <text x="237" y="254" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+  <rect x="396" y="236" width="150" height="78" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="471" y="272" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">Esmart 0</text>
+  <text x="471" y="289" text-anchor="middle" font-size="11.5" fill="#6b6a5f">fetch DMA</text>
+  <text x="471" y="309" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">+ 16-line buffer</text>
+  <path d="M471 182 L471 236" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="dci-f" marker-end="url(#dciAB)"/>
+  <circle cx="411" cy="250" r="10.5" fill="#d97757"/>
+  <text x="411" y="254" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+  <rect x="570" y="236" width="150" height="78" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="645" y="272" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">Esmart 1</text>
+  <text x="645" y="289" text-anchor="middle" font-size="11.5" fill="#6b6a5f">fetch DMA</text>
+  <text x="645" y="309" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">+ 16-line buffer</text>
+  <path d="M645 182 L645 236" fill="none" stroke="#2f5c8a" stroke-width="2.8" class="dci-f" marker-end="url(#dciAB)"/>
+  <circle cx="585" cy="250" r="10.5" fill="#d97757"/>
+  <text x="585" y="254" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">4</text>
+  <rect x="744" y="236" width="150" height="78" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+  <text x="819" y="272" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">Smart 0</text>
+  <text x="819" y="289" text-anchor="middle" font-size="11.5" fill="#6b6a5f">idle</text>
+  <text x="819" y="309" text-anchor="middle" font-size="10.5" fill="#6b6a5f">not needed here</text>
+  <rect x="918" y="236" width="150" height="78" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+  <text x="993" y="272" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a5f">Smart 1</text>
+  <text x="993" y="289" text-anchor="middle" font-size="11.5" fill="#6b6a5f">idle</text>
+  <text x="993" y="309" text-anchor="middle" font-size="10.5" fill="#6b6a5f">not needed here</text>
+  <rect x="36" y="220" width="1048" height="108" rx="11" fill="none" stroke="#c4d5e6" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <rect x="736.8" y="211" width="326.5" height="18" rx="9" fill="#141413"/>
+  <text x="900" y="224" text-anchor="middle" font-size="10" fill="#ffffff">six hardware windows &#183; each one reads memory by itself</text>
+  <path d="M123 314 L123 350 L560 350 L560 384" fill="none" stroke="#2f5c8a" stroke-width="1.6"/>
+  <path d="M297 314 L297 350 L560 350 L560 384" fill="none" stroke="#2f5c8a" stroke-width="1.6"/>
+  <path d="M471 314 L471 350 L560 350 L560 384" fill="none" stroke="#2f5c8a" stroke-width="1.6"/>
+  <path d="M645 314 L645 350 L560 350 L560 384" fill="none" stroke="#2f5c8a" stroke-width="1.6"/>
+  <path d="M819 314 L819 350 L560 350 L560 384" fill="none" stroke="#2f5c8a" stroke-width="1.6"/>
+  <path d="M993 314 L993 350 L560 350 L560 384" fill="none" stroke="#2f5c8a" stroke-width="1.6"/>
+  <path d="M993 350 L1076 350" fill="none" stroke="#2f5c8a" stroke-width="1.6"/>
+  <text x="1076" y="368" text-anchor="end" font-size="11" fill="#6b6a5f">layer select &#183; 1 from 6</text>
+  <rect x="248" y="384" width="624" height="70" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="560" y="416" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">OVERLAY &#183; blends N of the 6 layers</text>
+  <text x="560" y="433" text-anchor="middle" font-size="11.5" fill="#6b6a5f">alpha, z-order, colour keys</text>
+  <text x="540" y="478" text-anchor="end" font-size="12" font-weight="600" fill="#8f4a2f">this is the compositor, and it is a piece of silicon</text>
+  <circle cx="276" cy="400" r="10.5" fill="#d97757"/>
+  <text x="276" y="404" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">7</text>
+  <rect x="884" y="386" width="200" height="96" rx="11" fill="none" stroke="#d5d2c6" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <rect x="932.9" y="377" width="102.2" height="18" rx="9" fill="#141413"/>
+  <text x="984" y="390" text-anchor="middle" font-size="10" fill="#ffffff">the alternative</text>
+  <text x="984" y="414" text-anchor="middle" font-size="11" fill="#6b6a5f">GPU composites into</text>
+  <text x="984" y="429" text-anchor="middle" font-size="11" fill="#6b6a5f">a fifth buffer instead</text>
+  <text x="984" y="451" text-anchor="middle" font-size="13" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8f4a2f">+1.2 GB/s</text>
+  <text x="984" y="468" text-anchor="middle" font-size="10.5" fill="#8c8a7d">of pure memory traffic</text>
+  <path d="M560 454 L560 496" fill="none" stroke="#2f5c8a" stroke-width="3.0" class="dci-f" marker-end="url(#dciAB)"/>
+  <rect x="380" y="496" width="360" height="62" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="560" y="524" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">VIDEO PORT &#183; timing generator</text>
+  <text x="560" y="541" text-anchor="middle" font-size="11.5" fill="#6b6a5f">makes hsync, vsync and data enable</text>
+  <circle cx="408" cy="512" r="10.5" fill="#d97757"/>
+  <text x="408" y="516" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">8</text>
+  <path d="M560 558 L560 592" fill="none" stroke="#2f5c8a" stroke-width="2.4" marker-end="url(#dciAB)"/>
+  <path d="M348,592 L442,592 L452,612.0 L442,632 L348,632 Z" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="400" y="616" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8a6a2f">MIPI DSI</text>
+  <path d="M464,592 L558,592 L568,612.0 L558,632 L464,632 Z" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+  <text x="516" y="616" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">HDMI</text>
+  <path d="M580,592 L674,592 L684,612.0 L674,632 L580,632 Z" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+  <text x="632" y="616" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">eDP</text>
+  <path d="M696,592 L790,592 L800,612.0 L790,632 L696,632 Z" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+  <text x="748" y="616" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">LVDS</text>
+  <text x="1000" y="618" text-anchor="end" font-size="11" fill="#6b6a5f">one gets picked</text>
+  <text x="40" y="664" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">the blended result is never written back to memory. it goes straight out of the chip as a pixel stream.</text>
+  <text x="40" y="692" text-anchor="start" font-size="11.5" fill="#8c8a7d">structure follows the block diagram the vendor put in the driver itself (rockchip_drm_vop2.c:41&#8211;68). the sixteen-line</text>
+  <text x="40" y="709" text-anchor="start" font-size="11.5" fill="#8c8a7d">buffer is from line 500 of the same file. this is why a phone can show video under a translucent status bar at 60 Hz without</text>
+  <text x="40" y="726" text-anchor="start" font-size="11.5" fill="#8c8a7d">the GPU waking up at all: the layers were never merged into one image, they were added together on the way past.</text>
+</svg>

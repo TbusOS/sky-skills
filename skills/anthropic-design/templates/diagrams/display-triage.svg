@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 500" role="img" aria-label="A triage table turning the eight figures into a debugging order. Four rows, each with the same shape: a symptom, the mechanism that symptom is actually reporting, the stop on the path to look at first, and the place not to start. Tearing is the page flip landing mid-scan, so look at when the base address register takes effect, and do not start by suspecting the panel. A band or a flash across the screen is underflow, so look at who else is using memory bandwidth, and do not start at the DSI registers because DSI sits further down the path than the problem does. A frozen image with no crash means the framebuffer base address stopped being updated, so look at the flip path in the display controller driver, not at the GPU. Wrong layer order or wrong transparency is the overlay's layer selection, so look at the display controller's window and layer configuration rather than at what the application drew. The closing line is that the last column is worth more than the first three: the most common waste in display debugging is starting at the last stop on the path when the fault is almost always earlier" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+  <style>
+    .trg-f { stroke-dasharray: 12 8; animation: trgM 1.15s linear infinite; }
+    .trg-f.trg-r { animation-name: trgMR; }
+    .trg-f.trg-s { animation-duration: 2.1s; }
+    @keyframes trgM  { to { stroke-dashoffset: -40; } }
+    @keyframes trgMR { to { stroke-dashoffset:  40; } }
+    /* 三条关闭动效的口子,跟 glass 同一套约定 */
+    @media (prefers-reduced-motion: reduce) {
+      .trg-f { animation: none; stroke-dashoffset: 0; }
+    }
+    :root[data-motion-freeze] .trg-f,
+    html[data-motion-freeze] .trg-f { animation: none; stroke-dashoffset: 0; }
+  </style>
+    <pattern id="trgD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <pattern id="trgH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+    <marker id="trgAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <marker id="trgAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+    <marker id="trgAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+    <marker id="trgAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+    <marker id="trgAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
+  </defs>
+  <rect width="1120" height="500" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="500" rx="16" fill="url(#trgD)"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">WHEN IT BREAKS &#183; WHICH STOP TO START AT</text>
+  <text x="40" y="76" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">the same eight figures, read backwards: a symptom, and where on the path it comes from.</text>
+  <text x="40" y="112" text-anchor="start" font-size="11" font-weight="600" fill="#6b6a5f">THE SYMPTOM</text>
+  <text x="292" y="112" text-anchor="start" font-size="11" font-weight="600" fill="#6b6a5f">WHAT IT ACTUALLY IS</text>
+  <text x="576" y="112" text-anchor="start" font-size="11" font-weight="600" fill="#6b6a5f">START HERE</text>
+  <text x="836" y="112" text-anchor="start" font-size="11" font-weight="600" fill="#6b6a5f">DO NOT START HERE</text>
+  <rect x="40" y="128" width="236" height="64" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="158" y="165" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">tearing</text>
+  <rect x="292" y="128" width="268" height="64" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+  <text x="426" y="157" text-anchor="middle" font-size="12" fill="#6b6a5f">the flip landed mid-scan</text>
+  <text x="426" y="174" text-anchor="middle" font-size="11.5" fill="#6b6a5f">figure 05</text>
+  <rect x="576" y="128" width="244" height="64" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="698" y="165" text-anchor="middle" font-size="12" fill="#2f5c8a">when the base register takes effect</text>
+  <rect x="836" y="128" width="244" height="64" rx="8" fill="none" stroke="#d5d2c6" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="958" y="155" text-anchor="middle" font-size="11.5" fill="#6b6a5f">the panel</text>
+  <text x="958" y="173" text-anchor="middle" font-size="10.5" fill="#8c8a7d">it received exactly what it was sent</text>
+  <path d="M276 160 L292 160" fill="none" stroke="#d97757" stroke-width="2.4" class="trg-f" marker-end="url(#trgAO)"/>
+  <path d="M560 160 L576 160" fill="none" stroke="#2f5c8a" stroke-width="2.4" class="trg-f" marker-end="url(#trgAB)"/>
+  <rect x="40" y="206" width="236" height="64" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="158" y="243" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">a band, or a flash</text>
+  <rect x="292" y="206" width="268" height="64" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+  <text x="426" y="235" text-anchor="middle" font-size="12" fill="#6b6a5f">underflow &#8212; the line buffer ran dry</text>
+  <text x="426" y="252" text-anchor="middle" font-size="11.5" fill="#6b6a5f">figure 07</text>
+  <rect x="576" y="206" width="244" height="64" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="698" y="243" text-anchor="middle" font-size="12" fill="#2f5c8a">who else is using bandwidth</text>
+  <rect x="836" y="206" width="244" height="64" rx="8" fill="none" stroke="#d5d2c6" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="958" y="233" text-anchor="middle" font-size="11.5" fill="#6b6a5f">the DSI registers</text>
+  <text x="958" y="251" text-anchor="middle" font-size="10.5" fill="#8c8a7d">DSI is further down than the fault</text>
+  <path d="M276 238 L292 238" fill="none" stroke="#d97757" stroke-width="2.4" class="trg-f" marker-end="url(#trgAO)"/>
+  <path d="M560 238 L576 238" fill="none" stroke="#2f5c8a" stroke-width="2.4" class="trg-f" marker-end="url(#trgAB)"/>
+  <rect x="40" y="284" width="236" height="64" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="158" y="321" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">frozen image, no crash</text>
+  <rect x="292" y="284" width="268" height="64" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+  <text x="426" y="313" text-anchor="middle" font-size="12" fill="#6b6a5f">the base address stopped being updated</text>
+  <text x="426" y="330" text-anchor="middle" font-size="11.5" fill="#6b6a5f">figure 01</text>
+  <rect x="576" y="284" width="244" height="64" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="698" y="321" text-anchor="middle" font-size="12" fill="#2f5c8a">the flip path in the display driver</text>
+  <rect x="836" y="284" width="244" height="64" rx="8" fill="none" stroke="#d5d2c6" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="958" y="311" text-anchor="middle" font-size="11.5" fill="#6b6a5f">the GPU</text>
+  <text x="958" y="329" text-anchor="middle" font-size="10.5" fill="#8c8a7d">it may be drawing perfectly</text>
+  <path d="M276 316 L292 316" fill="none" stroke="#d97757" stroke-width="2.4" class="trg-f" marker-end="url(#trgAO)"/>
+  <path d="M560 316 L576 316" fill="none" stroke="#2f5c8a" stroke-width="2.4" class="trg-f" marker-end="url(#trgAB)"/>
+  <rect x="40" y="362" width="236" height="64" rx="8" fill="#f4d9cd" stroke="#d97757" stroke-width="1.4"/>
+  <text x="158" y="399" text-anchor="middle" font-size="12" font-weight="600" fill="#8f4a2f">wrong layer order</text>
+  <rect x="292" y="362" width="268" height="64" rx="8" fill="#f1efe8" stroke="#d5d2c6" stroke-width="1.4"/>
+  <text x="426" y="391" text-anchor="middle" font-size="12" fill="#6b6a5f">the overlay's layer selection</text>
+  <text x="426" y="408" text-anchor="middle" font-size="11.5" fill="#6b6a5f">figure 04</text>
+  <rect x="576" y="362" width="244" height="64" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="698" y="399" text-anchor="middle" font-size="12" fill="#2f5c8a">window and layer config</text>
+  <rect x="836" y="362" width="244" height="64" rx="8" fill="none" stroke="#d5d2c6" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="958" y="389" text-anchor="middle" font-size="11.5" fill="#6b6a5f">what the application drew</text>
+  <path d="M276 394 L292 394" fill="none" stroke="#d97757" stroke-width="2.4" class="trg-f" marker-end="url(#trgAO)"/>
+  <path d="M560 394 L576 394" fill="none" stroke="#2f5c8a" stroke-width="2.4" class="trg-f" marker-end="url(#trgAB)"/>
+  <text x="40" y="462" text-anchor="start" font-size="12.5" font-weight="600" fill="#141413">the last column is worth more than the first three. the usual waste is starting at the end of the path, and the fault is almost never there.</text>
+</svg>
