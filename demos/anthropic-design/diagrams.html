@@ -3341,7 +3341,7 @@
         <span class="gal-cap-text">
           <span class="gal-tag"><span class="lang-en">hardware · the only figure here that moves</span><span class="lang-zh">硬件 · 这里唯一一张会动的图</span></span>
           <span class="lang-en">The motion carries a fact, which is the only reason it is allowed. A line that flows is a path the hardware walks continuously &mdash; every frame, every line, for as long as the screen is on. A line that stays still fires once and then nothing: badge &#9313; is the single register write software performs per frame, and it is deliberately the one arrow that does not move. A static figure cannot make that distinction; both would be an arrow with a head on it. The animation is CSS rather than SMIL on purpose, because only CSS honours <code>prefers-reduced-motion</code> &mdash; so it halts for readers who ask for less motion, halts under <code>html[data-motion-freeze]</code>, and halts in every screenshot, which keeps captures byte-identical between runs. All three were tested, not assumed. Template: <code>templates/diagrams/dataflow-animated.svg</code>.</span>
-          <span class="lang-zh">这张图动，是因为动作本身带着一条信息——只有这种情况才允许动。流动的线是硬件**一直在走**的通路：每一帧、每一行，只要屏亮着就没停过。静止的线则是发生一次就完了：徽章 ② 是软件每帧唯一的那次寄存器写，它被刻意画成全图唯一不动的箭头。静态图说不出这个区别——两者都只是一根带箭头的线。动画用 CSS 写而不用 SMIL 也是刻意的，因为只有 CSS 认 <code>prefers-reduced-motion</code>：读者要求减少动效时它会停，页面加 <code>html[data-motion-freeze]</code> 时会停，截图时也会停，于是每次截出来的图逐字节相同。这三条都实测过，不是想当然。模板：<code>templates/diagrams/dataflow-animated.svg</code>。</span>
+          <span class="lang-zh">这张图动，是因为动作本身带着一条信息——只有这种情况才允许动。流动的线是硬件<strong>一直在走</strong>的通路：每一帧、每一行，只要屏亮着就没停过。静止的线则是发生一次就完了：徽章 ② 是软件每帧唯一的那次寄存器写，它被刻意画成全图唯一不动的箭头。静态图说不出这个区别——两者都只是一根带箭头的线。动画用 CSS 写而不用 SMIL 也是刻意的，因为只有 CSS 认 <code>prefers-reduced-motion</code>：读者要求减少动效时它会停，页面加 <code>html[data-motion-freeze]</code> 时会停，截图时也会停，于是每次截出来的图逐字节相同。这三条都实测过，不是想当然。模板：<code>templates/diagrams/dataflow-animated.svg</code>。</span>
         </span>
         <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
       </figcaption>
@@ -3439,7 +3439,7 @@
         <span class="gal-cap-text">
           <span class="gal-tag"><span class="lang-en">hardware · a flip is four bytes</span><span class="lang-zh">硬件 · 翻页只是四个字节</span></span>
           <span class="lang-en">The same arrangement twice, above and below a vsync marker. The memory bar is byte-identical in both halves &mdash; two buffers, same places, same sizes. What changes is the value in one register and, because of that, where the flowing blue line turns down. That turn moving right is the entire page flip. The line flows because scanout never stops reading; the flip changes only where it reads from. Drawing the two halves on identical coordinates is deliberate: it leaves your eye exactly one difference to find, which is the honest size of what happened. Template: <code>templates/diagrams/page-flip.svg</code>.</span>
-          <span class="lang-zh">同一张底图画两遍，中间隔着 vsync。两半的地址条**逐字节相同**——两块缓冲，位置一样、大小一样。变的只有寄存器里的值，以及那条蓝色流动线拐弯的位置。拐点右移，就是整个「翻页」。线在流，是因为扫描输出从来没停过读；翻页改的只是它从哪儿读。两半用完全相同的坐标是刻意的：只留一处差别给眼睛找，而那一处差别的大小，就是这件事真实的大小。模板：<code>templates/diagrams/page-flip.svg</code>。</span>
+          <span class="lang-zh">同一张底图画两遍，中间隔着 vsync。两半的地址条<strong>逐字节相同</strong>——两块缓冲，位置一样、大小一样。变的只有寄存器里的值，以及那条蓝色流动线拐弯的位置。拐点右移，就是整个「翻页」。线在流，是因为扫描输出从来没停过读；翻页改的只是它从哪儿读。两半用完全相同的坐标是刻意的：只留一处差别给眼睛找，而那一处差别的大小，就是这件事真实的大小。模板：<code>templates/diagrams/page-flip.svg</code>。</span>
         </span>
         <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
       </figcaption>
@@ -3664,7 +3664,7 @@
         <span class="gal-cap-text">
           <span class="gal-tag"><span class="lang-en">hardware · a pull, not a push</span><span class="lang-zh">硬件 · 是拉，不是推</span></span>
           <span class="lang-en">The discrete-card case, drawn so the direction of the copy cannot be misread. The link is two opposite flowing lines: requests travelling from the card to host memory, data travelling back. Because the requests start on the card, the copy is a pull &mdash; the initiator is the card's own copy engine, not the processor. That is the same rule as on a system on chip: whoever needs the data issues the reads. Only the number of memories changed. One double-headed arrow would have left this ambiguous, and ambiguous is exactly where the misunderstanding lives. Template: <code>templates/diagrams/vram-copy-flow.svg</code>.</span>
-          <span class="lang-zh">独立显卡那种情况，画成方向不会读错的样子。那根线画成两条反向流动的：请求从显卡去主机内存，数据反向回来。请求发起在显卡这边，所以这次拷贝是**拉**不是推——发起方是显卡自己的搬运引擎，不是处理器。这跟片上系统是同一条规则：谁要数据谁发读请求，变的只是内存的块数。画成一条双箭头线就会含糊，而含糊正是误解住的地方。模板：<code>templates/diagrams/vram-copy-flow.svg</code>。</span>
+          <span class="lang-zh">独立显卡那种情况，画成方向不会读错的样子。那根线画成两条反向流动的：请求从显卡去主机内存，数据反向回来。请求发起在显卡这边，所以这次拷贝是<strong>拉</strong>不是推——发起方是显卡自己的搬运引擎，不是处理器。这跟片上系统是同一条规则：谁要数据谁发读请求，变的只是内存的块数。画成一条双箭头线就会含糊，而含糊正是误解住的地方。模板：<code>templates/diagrams/vram-copy-flow.svg</code>。</span>
         </span>
         <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
       </figcaption>
@@ -6827,7 +6827,7 @@
         <span class="gal-cap-text">
           <span class="gal-tag"><span class="lang-en">cross-core calls · who waits for whom</span><span class="lang-zh">跨核调用 · 谁在等谁</span></span>
           <span class="lang-en">Four CPU lanes on one microsecond axis. CPU 0 holds a spinlock and sends an IPI to the others, then waits for every acknowledgement. CPU 3 had interrupts disabled for a long stretch, so its ack arrives last and sets how long CPU 0 blocks. Draw the ack arrows, not just the fan-out: a fan-out alone reads as fire-and-forget, and the acks are what turn it into a wait. Template: <code>templates/diagrams/multicore-calls.svg</code>.</span>
-          <span class="lang-zh">四条 CPU 泳道共用一根微秒轴。CPU 0 拿着自旋锁、向其余核发 IPI，然后等每一个应答。CPU 3 有一段长时间关中断，它的应答最晚到，于是 CPU 0 阻塞多久由它说了算。**应答箭头必须画出来**：只画扇出读作发完就走，画上应答才成为一次等待。模板：<code>templates/diagrams/multicore-calls.svg</code>。</span>
+          <span class="lang-zh">四条 CPU 泳道共用一根微秒轴。CPU 0 拿着自旋锁、向其余核发 IPI，然后等每一个应答。CPU 3 有一段长时间关中断，它的应答最晚到，于是 CPU 0 阻塞多久由它说了算。<strong>应答箭头必须画出来</strong>：只画扇出读作发完就走，画上应答才成为一次等待。模板：<code>templates/diagrams/multicore-calls.svg</code>。</span>
         </span>
         <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
       </figcaption>
