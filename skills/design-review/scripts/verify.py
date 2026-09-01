@@ -529,6 +529,11 @@ def check_file(
         # Ignore code spans inside the lang-zh body — identifiers legitimately
         # keep half-width punctuation.
         body_sansCode = re.sub(r"<code\b[^>]*>.*?</code>", "", body, flags=re.DOTALL | re.I)
+        # Character references end in ";" — "&#183; 把" is a middot, not a
+        # half-width semicolon glued to a Han glyph. Drop them before matching
+        # or every entity-written separator reads as a violation (known-bugs
+        # 1.22, false-positive guard added 2026-09-02).
+        body_sansCode = re.sub(r"&(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);", " ", body_sansCode)
         hits = halfwidth_near_cjk.findall(body_sansCode)
         if hits:
             zh_hits.extend(hits[:3])
