@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where the time goes — anthropic-design</title>
+<meta name="description" content="Two figures that argue rather than report: width with a unit on a sampled profile, and the wait against utilisation with its knee drawn in.">
+<meta property="og:title" content="Where the time goes">
+<meta property="og:description" content="Two anthropic-design performance figures: a flame graph where width is share of samples, and a queue curve showing that the last twenty per cent of load is not twenty per cent of the trouble.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/anthropic.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+
+  /* §H · Lora (editorial body) -> Noto Serif SC; Poppins (display) -> Noto Sans SC. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .alt-card__body,
+  html[data-lang="zh"] .callout__body,
+  html[data-lang="zh"] .detail-row__body,
+  html[data-lang="zh"] .sourcing__body,
+  html[data-lang="zh"] .fig-cap {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .alt-card__title,
+  html[data-lang="zh"] .alt-card__kicker,
+  html[data-lang="zh"] .detail-row__label,
+  html[data-lang="zh"] .fig-tag,
+  html[data-lang="zh"] .stat-trio .num,
+  html[data-lang="zh"] .stat-trio .lbl {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] .anth-quote { font-style: normal; }
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .alt-card__kicker,
+  html[data-lang="zh"] .detail-row__label,
+  html[data-lang="zh"] .fig-tag { text-transform: none; letter-spacing: 0.05em; }
+
+  /* Stat trio - the three numbers that define the whole path */
+  .stat-trio {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5);
+    padding: var(--space-7) var(--space-5);
+    background: #ffffff; border: 1px solid var(--anth-light-gray); border-radius: var(--radius-md);
+  }
+  .stat-trio > div { text-align: center; }
+  .stat-trio .num {
+    display: block; font-family: var(--font-heading); font-size: 48px; font-weight: 600;
+    color: var(--anth-text); letter-spacing: -0.02em; line-height: 1;
+  }
+  .stat-trio .lbl {
+    display: block; font-family: var(--font-heading); font-size: 12.5px; font-weight: 500;
+    color: var(--anth-text-secondary); margin-top: var(--space-3); letter-spacing: 0.02em;
+  }
+
+  /* Figure block - the two big diagrams */
+  .fig {
+    background: #ffffff; border: 1px solid var(--anth-light-gray);
+    border-radius: var(--radius-lg); padding: var(--space-6);
+    margin: 0 0 var(--space-6);
+  }
+  .fig svg { display: block; width: 100%; height: auto; }
+  .fig-cap {
+    margin: var(--space-4) 0 0;
+    font-family: var(--font-body); font-size: 14.5px; line-height: 1.6;
+    color: var(--anth-text-secondary); max-width: 900px;
+  }
+  .fig-tag {
+    display: block; font-family: var(--font-heading); font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--anth-orange-ink);
+    margin-bottom: 4px;
+  }
+
+  /* Alternative cards - designs considered and rejected */
+  .alt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .alt-card {
+    background: #ffffff; border: 1px solid var(--anth-light-gray); border-radius: var(--radius-lg);
+    padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3);
+  }
+  .alt-card--shipped { border-left: 3px solid var(--anth-orange); }
+  .alt-card__kicker {
+    font-family: var(--font-heading); font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+    color: var(--anth-orange-ink); text-transform: uppercase;
+  }
+  .alt-card__title {
+    font-family: var(--font-heading); font-size: 21px; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--anth-text); margin: 0; line-height: 1.25;
+  }
+  .alt-card__body {
+    font-family: var(--font-body); font-size: 15.5px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+  .alt-card__verdict {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    color: var(--anth-text-secondary); margin-top: auto; padding-top: var(--space-3);
+    border-top: 1px solid var(--anth-light-gray);
+  }
+
+  /* When-you-need-it list */
+  .use-list {
+    list-style: none; padding: 0; margin: var(--space-5) 0 0;
+    display: flex; flex-direction: column; gap: var(--space-4);
+  }
+  .use-list li {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+    color: var(--anth-text); padding-left: var(--space-5); position: relative;
+  }
+  .use-list li::before {
+    content: ''; position: absolute; left: 0; top: 10px;
+    width: 6px; height: 6px; border-radius: 50%; background: var(--anth-orange);
+  }
+
+  /* Honest callout */
+  .callout {
+    background: #faf9f5; border: 1px solid var(--anth-light-gray);
+    border-left: 3px solid var(--anth-orange);
+    border-radius: var(--radius-md); padding: var(--space-6);
+  }
+  .callout__kicker {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink); margin: 0;
+  }
+  .callout__title {
+    font-family: var(--font-heading); font-size: 22px; font-weight: 600;
+    color: var(--anth-text); margin: var(--space-2) 0 var(--space-3);
+  }
+  .callout__body {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+
+  /* Detail rows - the mechanism, last */
+  .detail-row {
+    display: grid; grid-template-columns: 190px 1fr;
+    gap: var(--space-5); padding: var(--space-5) 0;
+    border-bottom: 1px solid var(--anth-light-gray);
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row__label {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink);
+    padding-top: 3px;
+  }
+  .detail-row__body {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+    color: var(--anth-text); margin: 0;
+  }
+  .detail-row__body code {
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    background: #faf9f5; padding: 2px 8px; border-radius: 4px;
+    border: 1px solid var(--anth-light-gray);
+  }
+  /* Sourcing note - what is checked vs what is illustrative */
+  .sourcing {
+    background: #ffffff; border: 1px solid var(--anth-light-gray);
+    border-left: 3px solid var(--anth-orange);
+    border-radius: var(--radius-md); padding: var(--space-5) var(--space-6);
+  }
+  .sourcing__kicker {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink);
+    margin: 0 0 var(--space-2);
+  }
+  .sourcing__body {
+    font-family: var(--font-body); font-size: 15px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+  .sourcing__body code {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    background: #faf9f5; padding: 1px 6px; border-radius: 4px;
+    border: 1px solid var(--anth-light-gray);
+  }
+  html[data-lang="zh"] .sourcing__kicker { text-transform: none; letter-spacing: 0.05em; }
+
+  .eyebrow-link {
+    font-family: var(--font-heading); font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--anth-text-secondary); font-weight: 600;
+  }
+  html[data-lang="zh"] .eyebrow-link { text-transform: none; letter-spacing: 0.05em; }
+
+  @media (max-width: 900px) {
+    .alt-grid, .stat-trio { grid-template-columns: 1fr; }
+    .detail-row { grid-template-columns: 1fr; gap: var(--space-2); }
+  }
+
+  /* 术语表:一行一个词,左边词右边两问 */
+  .term-row { display:grid; grid-template-columns: 210px 1fr; gap: var(--space-5);
+    padding: var(--space-5) 0; border-top: 1px solid var(--anth-light-gray); }
+  .term-row:last-child { border-bottom: 1px solid var(--anth-light-gray); }
+  .term-name { font-family: var(--font-heading); font-weight: 600; font-size: 15px;
+    color: var(--anth-text); line-height: 1.4; }
+  .term-en { display:block; font-family: var(--font-mono, monospace); font-size: 12px;
+    font-weight: 400; color: var(--anth-text-secondary); margin-top: 3px; }
+  .term-what { font-size: 15px; line-height: 1.65; color: var(--anth-text); margin: 0; }
+  .term-without { font-size: 14px; line-height: 1.6; color: var(--anth-text-secondary);
+    margin: var(--space-2) 0 0; }
+  .term-without b { color: var(--anth-orange-ink); font-weight: 600; }
+  @media (max-width: 720px) { .term-row { grid-template-columns: 1fr; gap: var(--space-2); } }
+</style>
+</head>
+<body>
+
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="../../index.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">Sky Skills</a>
+  <div>
+    <a href="#flame"><span class="lang-en">Where the time went</span><span class="lang-zh">时间去哪儿了</span></a>
+    <a href="#queue"><span class="lang-en">What busy costs</span><span class="lang-zh">越忙的代价</span></a>
+    <a href="reading.html"><span class="lang-en">How a figure reads</span><span class="lang-zh">图怎么被读</span></a>
+    <a href="diagrams.html"><span class="lang-en">Gallery</span><span class="lang-zh">图集</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+  </div>
+</div></nav>
+
+<header class="anth-section" style="padding-top:var(--space-9);">
+  <div class="anth-container anth-container--wide">
+    <a class="eyebrow-link" href="diagrams.html"><span class="lang-en">← Back · anthropic-design diagram gallery</span><span class="lang-zh">← 返回 · anthropic-design 图示案例库</span></a>
+    <span class="anth-badge" style="margin-top:var(--space-5); background:var(--anth-cta); color:#ffffff; font-weight:600;"><span class="lang-en">performance · two figures that argue</span><span class="lang-zh">性能 · 两张会讲道理的图</span></span>
+    <h1 style="margin-top:var(--space-4); max-width:900px;"><span class="lang-en">Two figures<br>that change what<br>you go and fix.</span><span class="lang-zh">两张图，<br>会改变你接下来<br>去修哪儿。</span></h1>
+    <p style="font-size:18px; line-height:1.7; color:var(--anth-text-secondary); max-width:800px; margin-top:var(--space-5); font-family:var(--font-body);"><span class="lang-en">Most performance figures report. These two argue. One puts a unit on the horizontal axis so a box stops being a name and starts being a share of the cost. The other puts the wait against utilisation, which is the one relationship people reliably get wrong, because the axis is linear and the experience is not.</span><span class="lang-zh">大多数性能图是在汇报。这两张在讲道理。一张给横轴加上单位，于是一个方块不再只是个名字，而是一份开销占比。另一张把等待画在利用率上——这是人们最容易搞错的一条关系，因为轴是线性的，体验不是。</span></p>
+
+    <div class="stat-trio">
+      <div><span class="num">28%</span><span class="lbl"><span class="lang-en">the widest plateau, and the thing to fix</span><span class="lang-zh">最宽的那个平顶，也就是该修的那个</span></span></div>
+      <div><span class="num">4×</span><span class="lbl"><span class="lang-en">the wait at 80% busy, against 50%</span><span class="lang-zh">80% 忙时的等待，相对 50%</span></span></div>
+      <div><span class="num">19×</span><span class="lbl"><span class="lang-en">the wait at 95% busy</span><span class="lang-zh">95% 忙时的等待</span></span></div>
+    </div>
+
+    <div class="sourcing">
+      <span class="sourcing__kicker"><span class="lang-en">what is measured and what is illustrative</span><span class="lang-zh">哪些是实测，哪些是示意</span></span>
+      <p class="sourcing__body"><span class="lang-en">Nothing on this page is a measurement. The profile percentages were chosen so the arithmetic adds up, and the queue curve is the textbook shape for one server with random arrivals. Both figures say so on their own faces, because a figure that looks like data and is not is worse than one that never pretended. What is real is the shape of both relationships, and the shape is what these two figures exist to argue about.</span><span class="lang-zh">这一页上没有一个数字是实测的。采样占比是挑出来让算术对得上的，队列曲线是单服务台、随机到达那个教科书形状。两张图自己都写明了这一点——因为一张长得像数据、其实不是的图，比一张从不假装的图更糟。真实的是两条关系的形状，而这两张图存在的理由就是为那个形状讲道理。</span></p>
+    </div>
+  </div>
+</header>
+
+<section class="anth-section" id="flame">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">A box has two dimensions and most diagrams spend one.</span><span class="lang-zh">一个方块有两个维度，大多数图只花掉一个。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">In an ordinary call graph, a box is as wide as its name happens to be. That is a whole dimension carrying nothing, and filling it costs nothing: let width be share of samples and the same six functions stop being a structure and become a budget. The figure shows both drawings side by side because the difference is easier to accept than to describe &mdash; the left one is not wrong, it simply answers &ldquo;who calls whom&rdquo; and was never going to answer &ldquo;where did the time go&rdquo;.</span><span class="lang-zh">在普通的调用关系图里，一个方块的宽度由它名字的长度决定。那是一整个维度什么都没承载，而把它填上不花任何代价：让宽度等于采样占比，同样这六个函数就从一个结构变成了一本账。这张图把两种画法并排放，是因为这个差别更容易被接受而不是被描述——左边那张并没有错，它答的是「谁调用谁」，本来就不打算答「时间去哪儿了」。</span></p>
+    <figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 690" role="img" aria-label="The same sampled profile drawn twice, so the only difference is whether width means anything. On the left the six functions are drawn as an ordinary call graph, where each box is as wide as its name happens to be and a note points out that this dimension carries no information at all. On the right the same six are drawn as a flame graph: the root spans the full width, each caller sits directly above the callees it spent its samples in, and every box is exactly as wide as its share of the profile. A percentage axis runs underneath. The widest leaf, a kernel receive at twenty-eight per cent, is highlighted in orange and labelled as the thing to act on, with a note that the target is the widest plateau rather than the tallest tower. Colour groups the frames by where the code lives, application in blue, library in gold and kernel in green, rather than being random. Closing notes state that the horizontal axis is share of samples and not elapsed time so neighbouring boxes are not sequential, that the vertical axis is stack depth and not duration, and that a profile with no wide plateau is telling you the cost is spread thin and there is nothing single to fix" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs><pattern id="fgDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+        <marker id="fgArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/></marker>
+        <marker id="fgArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c2613f"/></marker></defs>
+        <rect width="1120" height="690" rx="16" fill="#faf9f5" stroke="#eceadf"/><rect width="1120" height="690" rx="16" fill="url(#fgDot)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">WIDTH WITH A UNIT &#183; THE SAME PROFILE, DRAWN TWICE</text>
+        <text x="32" y="58" font-size="11.5" fill="#8c8a7d">a box has two dimensions and most diagrams spend only one of them. here the horizontal one is doing work: it is the share of the profile that frame accounted for.</text>
+        <text x="36" y="98" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">AS A CALL GRAPH &#183; WIDTH MEANS NOTHING</text>
+        <rect x="36" y="112" width="384" height="316" rx="10" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <rect x="184" y="150" width="86" height="26" rx="6" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="227" y="167" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">main</text>
+        <rect x="144" y="198" width="132" height="26" rx="6" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="210" y="215" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">handle_request</text>
+        <rect x="268" y="198" width="150" height="26" rx="6" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="343" y="215" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">background_flush</text>
+        <rect x="92" y="248" width="96" height="26" rx="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="140" y="265" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">parse_json</text>
+        <rect x="202" y="248" width="88" height="26" rx="6" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="246" y="265" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">db_query</text>
+        <rect x="304" y="248" width="72" height="26" rx="6" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="340" y="265" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">render</text>
+        <rect x="92" y="298" width="84" height="26" rx="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="134" y="315" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">memcpy</text>
+        <rect x="202" y="298" width="90" height="26" rx="6" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="247" y="315" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#5d7045">net_recv</text>
+        <rect x="324" y="298" width="72" height="26" rx="6" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="360" y="315" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#5d7045">write</text>
+        <path d="M227 176 V 188 H 210 V 196" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#fgArr)"/>
+        <path d="M227 176 V 188 H 343 V 196" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#fgArr)"/>
+        <path d="M210 224 V 236 H 140 V 246" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#fgArr)"/>
+        <path d="M210 224 V 236 H 246 V 246" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#fgArr)"/>
+        <path d="M210 224 V 236 H 340 V 246" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#fgArr)"/>
+        <path d="M140 274 V 286 H 134 V 296" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#fgArr)"/>
+        <path d="M246 274 V 286 H 247 V 296" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#fgArr)"/>
+        <path d="M343 224 V 236 H 360 V 296" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#fgArr)"/>
+        <text x="52" y="356" font-size="11" fill="#6b6a5f">every box is as wide as its name happens to be.</text>
+        <text x="52" y="372" font-size="11" font-weight="700" fill="#c2613f">that dimension is empty. it costs nothing to fill.</text>
+        <text x="52" y="396" font-size="11" fill="#6b6a5f">the graph is not wrong &#8212; it answers &#8220;who calls whom&#8221;.</text>
+        <text x="52" y="412" font-size="11" fill="#6b6a5f">it just cannot answer &#8220;where did the time go&#8221;.</text>
+        <text x="452" y="98" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">AS A FLAME GRAPH &#183; WIDTH IS SHARE OF SAMPLES</text>
+        <rect x="452.0" y="372" width="620.0" height="34" rx="3" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="762.0" y="386" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">main</text>
+        <text x="762.0" y="401" text-anchor="middle" font-size="10.5" fill="#2f5c8a">100%</text>
+        <rect x="452.0" y="332" width="483.6" height="34" rx="3" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="693.8" y="346" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">handle_request</text>
+        <text x="693.8" y="361" text-anchor="middle" font-size="10.5" fill="#2f5c8a">78%</text>
+        <rect x="935.6" y="332" width="136.4" height="34" rx="3" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="1003.8" y="346" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">background_flush</text>
+        <text x="1003.8" y="361" text-anchor="middle" font-size="10.5" fill="#2f5c8a">22%</text>
+        <rect x="452.0" y="292" width="192.2" height="34" rx="3" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="548.1" y="306" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">parse_json</text>
+        <text x="548.1" y="321" text-anchor="middle" font-size="10.5" fill="#8a5a2a">31%</text>
+        <rect x="644.2" y="292" width="210.8" height="34" rx="3" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="749.6" y="306" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">db_query</text>
+        <text x="749.6" y="321" text-anchor="middle" font-size="10.5" fill="#2f5c8a">34%</text>
+        <rect x="855.0" y="292" width="80.6" height="34" rx="3" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/>
+        <text x="895.3" y="306" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">render</text>
+        <text x="895.3" y="321" text-anchor="middle" font-size="10.5" fill="#2f5c8a">13%</text>
+        <rect x="935.6" y="292" width="117.8" height="34" rx="3" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/>
+        <text x="994.5" y="306" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#5d7045">write</text>
+        <text x="994.5" y="321" text-anchor="middle" font-size="10.5" fill="#5d7045">19%</text>
+        <rect x="452.0" y="252" width="74.4" height="34" rx="3" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/>
+        <text x="489.2" y="266" text-anchor="middle" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">memcpy</text>
+        <text x="489.2" y="281" text-anchor="middle" font-size="10.5" fill="#8a5a2a">12%</text>
+        <rect x="644.2" y="252" width="173.6" height="34" rx="3" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.8"/>
+        <text x="731.0" y="266" text-anchor="middle" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#c2613f">net_recv</text>
+        <text x="731.0" y="281" text-anchor="middle" font-size="10.5" fill="#c2613f">28%</text>
+        <path d="M731.0 226 V 246" fill="none" stroke="#c2613f" stroke-width="1.8" marker-end="url(#fgArrO)"/>
+        <rect x="605.0" y="196" width="252" height="26" rx="13" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.4"/>
+        <text x="731.0" y="213" text-anchor="middle" font-size="11" font-weight="700" fill="#c2613f">the widest plateau, not the tallest tower</text>
+        <line x1="452" y1="420" x2="1072" y2="420" stroke="#141413" stroke-width="1.4"/>
+        <line x1="452.0" y1="416" x2="452.0" y2="424" stroke="#141413" stroke-width="1"/>
+        <text x="452.0" y="439" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">0%</text>
+        <line x1="514.0" y1="416" x2="514.0" y2="424" stroke="#a8a496" stroke-width="1"/>
+        <line x1="576.0" y1="416" x2="576.0" y2="424" stroke="#a8a496" stroke-width="1"/>
+        <line x1="638.0" y1="416" x2="638.0" y2="424" stroke="#a8a496" stroke-width="1"/>
+        <line x1="700.0" y1="416" x2="700.0" y2="424" stroke="#a8a496" stroke-width="1"/>
+        <line x1="762.0" y1="416" x2="762.0" y2="424" stroke="#141413" stroke-width="1"/>
+        <text x="762.0" y="439" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">50%</text>
+        <line x1="824.0" y1="416" x2="824.0" y2="424" stroke="#a8a496" stroke-width="1"/>
+        <line x1="886.0" y1="416" x2="886.0" y2="424" stroke="#a8a496" stroke-width="1"/>
+        <line x1="948.0" y1="416" x2="948.0" y2="424" stroke="#a8a496" stroke-width="1"/>
+        <line x1="1010.0" y1="416" x2="1010.0" y2="424" stroke="#a8a496" stroke-width="1"/>
+        <line x1="1072.0" y1="416" x2="1072.0" y2="424" stroke="#141413" stroke-width="1"/>
+        <text x="1072.0" y="439" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">100%</text>
+        <text x="452" y="460" font-size="11" font-weight="600" fill="#141413">share of samples &#8212; not elapsed time</text>
+        <rect x="36" y="490" width="12" height="12" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.2"/><text x="56" y="500" font-size="11" fill="#6b6a5f">application code</text>
+        <rect x="176" y="490" width="12" height="12" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.2"/><text x="196" y="500" font-size="11" fill="#6b6a5f">library</text>
+        <rect x="266" y="490" width="12" height="12" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.2"/><text x="286" y="500" font-size="11" fill="#6b6a5f">kernel</text>
+        <rect x="352" y="490" width="12" height="12" rx="2" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.4"/><text x="372" y="500" font-size="11" fill="#6b6a5f">the one worth acting on</text>
+        <text x="32" y="534" font-size="11.5" fill="#8c8a7d">the horizontal axis is share of samples, so neighbouring boxes are not sequential. two boxes side by side did not run one after the other &#8212; they are sorted by name, which keeps the shape stable between runs.</text>
+        <text x="32" y="551" font-size="11.5" fill="#8c8a7d">reading a flame graph left to right as a timeline is the single most common way to misread one. the vertical axis is stack depth, not duration.</text>
+        <text x="32" y="568" font-size="11.5" fill="#8c8a7d">a tall thin tower is a deep call chain that cost almost nothing, and it is exactly what the eye is drawn to first. a profile with no wide plateau is telling you the cost is spread thin.</text>
+        <text x="32" y="585" font-size="11.5" fill="#8c8a7d">colour here groups frames by where the code lives. random colour is the usual convention for this figure type, and it spends a whole dimension on nothing.</text>
+        <text x="32" y="602" font-size="11.5" fill="#8c8a7d">the percentages are an illustrative profile, chosen so the arithmetic adds up. the shape is the lesson, not the numbers.</text>
+        <rect x="820" y="632" width="260" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M820 639 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="833" cy="647" r="3.6" fill="#ffffff"/>
+        <text x="967" y="651" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Flame graph &#183; width has a unit</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">width with a unit</span><span class="lang-zh">宽度带上单位</span></span>
+        <span class="lang-en">Colour here groups frames by where the code lives rather than being random. Random colour is the usual convention for this figure type and it spends an entire dimension on nothing &mdash; which is the same mistake the call graph makes with width, one axis over.</span><span class="lang-zh">这里的颜色按代码归属分组，而不是随机的。随机配色是这类图的常见做法，它把一整个维度花在了零信息上——跟左边那张调用图对宽度犯的错，是同一个错，只是换了一个轴。</span>
+      </figcaption>
+    </figure>
+
+    <div class="use-list" style="margin-top:var(--space-8);">
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">reading it left to right as a timeline</span><span class="lang-zh">把它从左往右当时间线读</span></div>
+        <div class="detail-row__body"><span class="lang-en">The most common way to misread one. The horizontal axis is share of samples; neighbouring boxes are sorted by name, not by when they ran, and that sorting is what keeps the shape stable between runs so two profiles can be compared at all.</span><span class="lang-zh">这是第一号误读。横轴是采样占比；相邻的方块按名字排序，不是按运行先后——而正是这个排序让形状在多次采集之间保持稳定，两份采样才有得比。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">chasing the tallest tower</span><span class="lang-zh">去追最高的那座塔</span></div>
+        <div class="detail-row__body"><span class="lang-en">The vertical axis is stack depth, not duration. A tall thin tower is a deep call chain that cost almost nothing, and it is exactly what the eye goes to first. The target is the widest plateau.</span><span class="lang-zh">纵轴是栈深，不是时长。又高又细的塔是一条几乎不花时间的深调用链，而它恰恰是眼睛最先去的地方。要找的是最宽的那个平顶。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">a profile with no wide plateau</span><span class="lang-zh">一份没有宽平顶的采样</span></div>
+        <div class="detail-row__body"><span class="lang-en">Not a broken profile. It is telling you the cost is spread thin and there is no single thing to fix &mdash; which is a real answer, and a much more useful one than an hour spent looking for the bar that is not there.</span><span class="lang-zh">这不是采样坏了。它在说开销摊得很平，没有单独一件事可修——这是一个真的答案，而且比花一小时去找一根根本不存在的柱子有用得多。</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="anth-section" id="queue">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">The last twenty per cent of load is not twenty per cent of the trouble.</span><span class="lang-zh">最后那 20% 的负载，不是 20% 的麻烦。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">Show somebody three queues at three loads and they will read a proportion: busier means proportionally slower. The real relationship bends. Going from half busy to eighty per cent busy costs four times the wait; going from eighty to ninety-five costs another five times on top of that. This is the single most reliable gap between what a utilisation number feels like and what it does, and a picture of queues cannot close it on its own &mdash; only the curve underneath can.</span><span class="lang-zh">给人看三个负载下的三条队列，他读到的是一个比例：忙一点就按比例慢一点。真实的关系是弯的。从半忙到八成忙，等待变四倍；从八成到九成五，在此之上再乘五倍。这是「一个利用率数字给人的感觉」和「它实际造成的后果」之间最稳定的一道落差，而光画队列关不上这道落差——只有底下那条曲线能。</span></p>
+    <figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 680" role="img" aria-label="Three panels above a curve, all about the same thing: how long a queue gets as the server approaches saturation. Each panel shows one server box with work waiting in front of it, drawn as small squares, at three levels of utilisation. At fifty per cent one item waits and the panel is calm. At eighty per cent four items wait. At ninety-five per cent nineteen items wait and the row runs off the edge of the panel. Below them a single chart plots average wait against utilisation from zero to nearly one hundred per cent. The line is flat and unremarkable until about seventy per cent, then bends sharply upward, and a dashed vertical marker at eighty per cent is labelled as the knee. Four points on the curve are called out with their values: one at fifty per cent, four at eighty, nine at ninety, nineteen at ninety-five. Closing notes state that the last twenty per cent of utilisation is not the last twenty per cent of the trouble, that this shape comes from one server and random arrivals so a real system with bursts bends earlier and harder, and that a queue drawing without this curve underneath lets a reader believe a busy system is merely a proportionally slower one" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs><pattern id="quDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+        <marker id="quA" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6b6a5f"/></marker></defs>
+        <rect width="1120" height="680" rx="16" fill="#faf9f5" stroke="#eceadf"/><rect width="1120" height="680" rx="16" fill="url(#quDot)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">A QUEUE IS NOT A PROPORTION &#183; THE LAST 20% OF LOAD IS NOT 20% OF THE TROUBLE</text>
+        <text x="32" y="58" font-size="11.5" fill="#8c8a7d">the three panels are the same server at three loads. the curve underneath is why the third one looks the way it does, and it is the part a queue drawing usually leaves out.</text>
+        <rect x="36" y="76" width="336" height="196" rx="10" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <text x="56" y="102" font-size="14" font-weight="600" fill="#141413">50% busy</text>
+        <text x="56" y="120" font-size="10.5" fill="#6b6a5f">half the time it is idle</text>
+        <rect x="286" y="148" width="62" height="44" rx="7" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.5"/>
+        <text x="317" y="166" text-anchor="middle" font-size="10.5" font-weight="600" fill="#2f5c8a">server</text>
+        <text x="317" y="180" text-anchor="middle" font-size="10.5" fill="#6b6a5f">one at a time</text>
+        <rect x="250" y="158" width="13" height="24" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.1"/>
+        <path d="M54 170 H 70" fill="none" stroke="#6b6a5f" stroke-width="1.2" marker-end="url(#quA)"/>
+        <text x="54" y="146" font-size="10" fill="#6b6a5f">arrivals</text>
+        <text x="56" y="216" font-size="11.5" font-weight="700" fill="#5d7045">1 waiting</text>
+        <text x="56" y="234" font-size="11" fill="#6b6a5f">the queue empties between arrivals</text>
+        <rect x="392" y="76" width="336" height="196" rx="10" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <text x="412" y="102" font-size="14" font-weight="600" fill="#141413">80% busy</text>
+        <text x="412" y="120" font-size="10.5" fill="#6b6a5f">the usual production target</text>
+        <rect x="642" y="148" width="62" height="44" rx="7" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.5"/>
+        <text x="673" y="166" text-anchor="middle" font-size="10.5" font-weight="600" fill="#2f5c8a">server</text>
+        <text x="673" y="180" text-anchor="middle" font-size="10.5" fill="#6b6a5f">one at a time</text>
+        <rect x="606" y="158" width="13" height="24" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.1"/>
+        <rect x="588" y="158" width="13" height="24" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.1"/>
+        <rect x="570" y="158" width="13" height="24" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.1"/>
+        <rect x="552" y="158" width="13" height="24" rx="2" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.1"/>
+        <path d="M410 170 H 426" fill="none" stroke="#6b6a5f" stroke-width="1.2" marker-end="url(#quA)"/>
+        <text x="410" y="146" font-size="10" fill="#6b6a5f">arrivals</text>
+        <text x="412" y="216" font-size="11.5" font-weight="700" fill="#8a5a2a">4 waiting</text>
+        <text x="412" y="234" font-size="11" fill="#6b6a5f">four waiting, and it feels fine on a graph</text>
+        <rect x="748" y="76" width="336" height="196" rx="10" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <text x="768" y="102" font-size="14" font-weight="600" fill="#141413">95% busy</text>
+        <text x="768" y="120" font-size="10.5" fill="#6b6a5f">&#8220;we still have headroom&#8221;</text>
+        <rect x="998" y="148" width="62" height="44" rx="7" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.5"/>
+        <text x="1029" y="166" text-anchor="middle" font-size="10.5" font-weight="600" fill="#2f5c8a">server</text>
+        <text x="1029" y="180" text-anchor="middle" font-size="10.5" fill="#6b6a5f">one at a time</text>
+        <rect x="962" y="158" width="13" height="24" rx="2" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.1"/>
+        <rect x="944" y="158" width="13" height="24" rx="2" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.1"/>
+        <rect x="926" y="158" width="13" height="24" rx="2" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.1"/>
+        <rect x="908" y="158" width="13" height="24" rx="2" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.1"/>
+        <rect x="890" y="158" width="13" height="24" rx="2" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.1"/>
+        <rect x="872" y="158" width="13" height="24" rx="2" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.1"/>
+        <rect x="854" y="158" width="13" height="24" rx="2" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.1"/>
+        <rect x="836" y="158" width="13" height="24" rx="2" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.1"/>
+        <rect x="818" y="158" width="13" height="24" rx="2" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.1"/>
+        <text x="812" y="176" text-anchor="end" font-size="11" font-weight="700" fill="#c2613f">+10</text>
+        <path d="M766 170 H 782" fill="none" stroke="#6b6a5f" stroke-width="1.2" marker-end="url(#quA)"/>
+        <text x="766" y="146" font-size="10" fill="#6b6a5f">arrivals</text>
+        <text x="768" y="216" font-size="11.5" font-weight="700" fill="#c2613f">19 waiting</text>
+        <text x="768" y="234" font-size="11" fill="#6b6a5f">nineteen waiting. nothing broke &#8212; it just queued</text>
+        <text x="32" y="308" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">AVERAGE WAIT AGAINST UTILISATION &#183; ONE SERVER, RANDOM ARRIVALS</text>
+        <line x1="140" y1="520" x2="1060" y2="520" stroke="#141413" stroke-width="1.6"/>
+        <line x1="140" y1="520" x2="140" y2="334" stroke="#141413" stroke-width="1.6"/>
+        <line x1="140.0" y1="520" x2="140.0" y2="525" stroke="#c8c4b6" stroke-width="1"/>
+        <text x="140.0" y="540" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">0%</text>
+        <line x1="232.0" y1="520" x2="232.0" y2="525" stroke="#c8c4b6" stroke-width="1"/>
+        <line x1="324.0" y1="520" x2="324.0" y2="525" stroke="#c8c4b6" stroke-width="1"/>
+        <text x="324.0" y="540" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">20%</text>
+        <line x1="416.0" y1="520" x2="416.0" y2="525" stroke="#c8c4b6" stroke-width="1"/>
+        <line x1="508.0" y1="520" x2="508.0" y2="525" stroke="#c8c4b6" stroke-width="1"/>
+        <text x="508.0" y="540" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">40%</text>
+        <line x1="600.0" y1="520" x2="600.0" y2="525" stroke="#c8c4b6" stroke-width="1"/>
+        <line x1="692.0" y1="520" x2="692.0" y2="525" stroke="#c8c4b6" stroke-width="1"/>
+        <text x="692.0" y="540" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">60%</text>
+        <line x1="784.0" y1="520" x2="784.0" y2="525" stroke="#c8c4b6" stroke-width="1"/>
+        <line x1="876.0" y1="520" x2="876.0" y2="525" stroke="#c8c4b6" stroke-width="1"/>
+        <text x="876.0" y="540" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">80%</text>
+        <line x1="968.0" y1="520" x2="968.0" y2="525" stroke="#c8c4b6" stroke-width="1"/>
+        <line x1="1060.0" y1="520" x2="1060.0" y2="525" stroke="#c8c4b6" stroke-width="1"/>
+        <text x="1060.0" y="540" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">100%</text>
+        <line x1="140" y1="511.1" x2="1060" y2="511.1" stroke="#c8c4b6" stroke-width="0.9" stroke-dasharray="3 4"/>
+        <text x="132" y="515.1" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">1&#215;</text>
+        <line x1="140" y1="475.5" x2="1060" y2="475.5" stroke="#c8c4b6" stroke-width="0.9" stroke-dasharray="3 4"/>
+        <text x="132" y="479.5" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">5&#215;</text>
+        <line x1="140" y1="431.0" x2="1060" y2="431.0" stroke="#c8c4b6" stroke-width="0.9" stroke-dasharray="3 4"/>
+        <text x="132" y="435.0" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">10&#215;</text>
+        <line x1="140" y1="386.5" x2="1060" y2="386.5" stroke="#c8c4b6" stroke-width="0.9" stroke-dasharray="3 4"/>
+        <text x="132" y="390.5" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">15&#215;</text>
+        <line x1="140" y1="342.0" x2="1060" y2="342.0" stroke="#c8c4b6" stroke-width="0.9" stroke-dasharray="3 4"/>
+        <text x="132" y="346.0" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">20&#215;</text>
+        <text x="132" y="328" text-anchor="end" font-size="10.5" fill="#6b6a5f">wait</text>
+        <polyline points="140.0,520.0 149.2,519.9 158.4,519.8 167.6,519.7 176.8,519.6 186.0,519.5 195.2,519.4 204.4,519.3 213.6,519.2 222.8,519.1 232.0,519.0 241.2,518.9 250.4,518.8 259.6,518.7 268.8,518.6 278.0,518.4 287.2,518.3 296.4,518.2 305.6,518.0 314.8,517.9 324.0,517.8 333.2,517.6 342.4,517.5 351.6,517.3 360.8,517.2 370.0,517.0 379.2,516.9 388.4,516.7 397.6,516.5 406.8,516.4 416.0,516.2 425.2,516.0 434.4,515.8 443.6,515.6 452.8,515.4 462.0,515.2 471.2,515.0 480.4,514.8 489.6,514.5 498.8,514.3 508.0,514.1 517.2,513.8 526.4,513.6 535.6,513.3 544.8,513.0 554.0,512.7 563.2,512.4 572.4,512.1 581.6,511.8 590.8,511.4 600.0,511.1 609.2,510.7 618.4,510.4 627.6,510.0 636.8,509.6 646.0,509.1 655.2,508.7 664.4,508.2 673.6,507.7 682.8,507.2 692.0,506.6 701.2,506.1 710.4,505.5 719.6,504.8 728.8,504.2 738.0,503.5 747.2,502.7 756.4,501.9 765.6,501.1 774.8,500.2 784.0,499.2 793.2,498.2 802.4,497.1 811.6,495.9 820.8,494.7 830.0,493.3 839.2,491.8 848.4,490.2 857.6,488.4 866.8,486.5 876.0,484.4 885.2,482.1 894.4,479.5 903.6,476.5 912.8,473.3 922.0,469.6 931.2,465.3 940.4,460.4 949.6,454.7 958.8,448.0 968.0,439.9 977.2,430.0 986.4,417.6 995.6,401.8 1004.8,380.6 1014.0,350.9 1023.2,342.0" fill="none" stroke="#c2613f" stroke-width="2.6" stroke-linejoin="round"/>
+        <line x1="876.0" y1="520" x2="876.0" y2="334" stroke="#8a5a2a" stroke-width="1.6" stroke-dasharray="6 4"/>
+        <text x="876.0" y="328" text-anchor="middle" font-size="11" font-weight="700" fill="#8a5a2a">the knee</text>
+        <circle cx="600.0" cy="511.1" r="4.5" fill="#c2613f"/>
+        <text x="610.0" y="505.1" font-size="10.5" font-weight="700" fill="#c2613f">1&#215; at 50%</text>
+        <circle cx="876.0" cy="484.4" r="4.5" fill="#c2613f"/>
+        <text x="886.0" y="478.4" font-size="10.5" font-weight="700" fill="#c2613f">4&#215; at 80%</text>
+        <circle cx="968.0" cy="439.9" r="4.5" fill="#c2613f"/>
+        <text x="978.0" y="433.9" font-size="10.5" font-weight="700" fill="#c2613f">9&#215; at 90%</text>
+        <circle cx="1014.0" cy="350.9" r="4.5" fill="#c2613f"/>
+        <text x="1024.0" y="344.9" font-size="10.5" font-weight="700" fill="#c2613f">19&#215; at 95%</text>
+        <text x="32" y="562" font-size="11.5" fill="#8c8a7d">going from 50% to 80% busy costs four times the wait. going from 80% to 95% costs another five times on top of that. the axis is linear; the experience is not.</text>
+        <text x="32" y="579" font-size="11.5" fill="#8c8a7d">this shape is one server with random arrivals. a real system with bursty arrivals bends earlier and harder, so treat the curve as the floor of the bad news rather than the estimate.</text>
+        <text x="32" y="596" font-size="11.5" fill="#8c8a7d">the three panels above cannot make this point on their own &#8212; a reader who sees only queues believes a busy system is a proportionally slower one. the curve is what says otherwise.</text>
+        <text x="32" y="613" font-size="11.5" fill="#8c8a7d">the same shape governs an interrupt handler, a ring buffer and a thread pool. what changes between them is what happens after the queue is full, not the shape of the approach.</text>
+        <rect x="820" y="636" width="260" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M820 643 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="833" cy="651" r="3.6" fill="#ffffff"/>
+        <text x="967" y="655" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Queue pressure &#183; the knee</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">the knee, drawn</span><span class="lang-zh">把那个膝点画出来</span></span>
+        <span class="lang-en">The three panels above the curve are the entry point, not the argument. Nineteen items waiting at ninety-five per cent is the same fact as nineteen times the wait, drawn as something you can count. Below eighty per cent the curve is unremarkable, which is exactly why the number feels safe right up until it does not.</span><span class="lang-zh">曲线上面那三格是入口，不是论证。95% 时有十九个在排队，跟等待变十九倍是同一个事实，只是画成了能数得出来的东西。80% 以下这条曲线平平无奇——而这正是为什么那个数字一直让人觉得安全，直到它不再安全。</span>
+      </figcaption>
+    </figure>
+
+    <div class="callout" style="margin-top:var(--space-8);">
+      <span class="callout__kicker"><span class="lang-en">what this shape assumes</span><span class="lang-zh">这条形状的前提</span></span>
+      <p class="callout__title"><span class="lang-en">One server, random arrivals &mdash; so treat it as the floor</span><span class="lang-zh">单服务台、随机到达 —— 所以把它当下限</span></p>
+      <p class="callout__body"><span class="lang-en">A real system has bursts, and bursts bend the curve earlier and harder. So the honest way to use this figure is as the best case: whatever it says the wait will be at a given load, the machine in front of you will be worse. That is also why a target of eighty per cent utilisation is a decision about how much bad news you are willing to buy, not a safety margin.</span><span class="lang-zh">真实系统有突发，而突发让这条曲线弯得更早、更狠。所以老实的用法是把它当最好情况：它说某个负载下等待是多少，你面前那台机器只会更差。这也是为什么「利用率目标 80%」是一个「你愿意买多少坏消息」的决定，而不是一条安全余量。</span></p>
+    </div>
+  </div>
+</section>
+
+<footer class="anth-section" style="padding-top:var(--space-6);">
+  <div class="anth-container anth-container--wide">
+    <p style="color:var(--anth-text-secondary); font-size:14px;"><span class="lang-en">Templates: <code>flame-graph.svg</code> and <code>queue-pressure.svg</code> in <code>skills/anthropic-design/templates/diagrams/</code>. Companion pages: <a href="reading.html">how a figure gets read</a>, <a href="one-bit.html">how one bit is held</a>, <a href="bringup.html">bringing a panel up</a>, <a href="packaging.html">how a chip is assembled</a>.</span><span class="lang-zh">模板：<code>skills/anthropic-design/templates/diagrams/</code> 下的 <code>flame-graph.svg</code>、<code>queue-pressure.svg</code>。姊妹页：<a href="reading.html">一张图怎么被读</a>、<a href="one-bit.html">一个比特是怎么存住的</a>、<a href="bringup.html">一块屏，从接上去到亮起来</a>、<a href="packaging.html">一颗芯片是怎么装出来的</a>。</span></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: anthropic-design
+Page-type: feature-deep (demo)
+Created: 2026-09-02
+Decisions:
+- [two-figures-only] chose "two figures with room to argue" over "a survey of performance visualisations". Because: both of these exist to correct a specific wrong intuition, and a survey would have flattened them into a catalogue.
+- [same-mistake-twice] chose "point out that random flame-graph colour is the call graph's width mistake one axis over" over "treating them as unrelated conventions". Because: it is the same waste, and naming it once makes both figures easier to remember.
+- [curve-not-queues] chose "the curve as the argument and the queues as the entry" over "the queues alone". Because: a reader who sees only queues comes away believing utilisation is proportional, which is the belief the page exists to break.
+- [floor-not-estimate] chose "state that the curve is the best case" over "presenting it as the model". Because: real arrivals are bursty, and a figure that quietly reads as an estimate would be used as one.
+Known trade-offs:
+- SVG-internal text stays English in both languages; only figcaptions and prose translate.
+- No number here is measured. Both figures say so on their faces and the sourcing note repeats it.
+- Both figures are shared with the diagram gallery, so a change has to be synced into both.
+/design-review:self-diff -->
+</body>
+</html>

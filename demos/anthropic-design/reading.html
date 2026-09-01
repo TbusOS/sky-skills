@@ -1,0 +1,1077 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How a figure gets read — anthropic-design</title>
+<meta name="description" content="Which of the three ways of showing an inside you need, how to step through a dense picture, when to hand over the control, and what a figure must carry to travel alone.">
+<meta property="og:title" content="How a figure gets read">
+<meta property="og:description" content="Five anthropic-design figures about the reader rather than the subject: three ways to show an inside, moving the highlight, an interactive stepper, a railroad diagram, and a card that travels alone.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../../skills/anthropic-design/assets/anthropic.css">
+<style>
+  html[data-lang="en"] .lang-zh { display: none !important; }
+  html[data-lang="zh"] .lang-en { display: none !important; }
+  .lang-toggle {
+    background: transparent;
+    border: 1px solid var(--anth-light-gray);
+    color: var(--anth-text);
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .lang-toggle:hover { background: var(--anth-light-gray); }
+
+  /* §H · Lora (editorial body) -> Noto Serif SC; Poppins (display) -> Noto Sans SC. */
+  html[data-lang="zh"] body,
+  html[data-lang="zh"] p,
+  html[data-lang="zh"] li,
+  html[data-lang="zh"] .alt-card__body,
+  html[data-lang="zh"] .callout__body,
+  html[data-lang="zh"] .detail-row__body,
+  html[data-lang="zh"] .sourcing__body,
+  html[data-lang="zh"] .fig-cap {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "PingFang SC", serif;
+  }
+  html[data-lang="zh"] h1,
+  html[data-lang="zh"] h2,
+  html[data-lang="zh"] h3,
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .alt-card__title,
+  html[data-lang="zh"] .alt-card__kicker,
+  html[data-lang="zh"] .detail-row__label,
+  html[data-lang="zh"] .fig-tag,
+  html[data-lang="zh"] .stat-trio .num,
+  html[data-lang="zh"] .stat-trio .lbl {
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+  }
+  html[data-lang="zh"] .anth-quote { font-style: normal; }
+  html[data-lang="zh"] .anth-badge,
+  html[data-lang="zh"] .alt-card__kicker,
+  html[data-lang="zh"] .detail-row__label,
+  html[data-lang="zh"] .fig-tag { text-transform: none; letter-spacing: 0.05em; }
+
+  /* Stat trio - the three numbers that define the whole path */
+  .stat-trio {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5);
+    padding: var(--space-7) var(--space-5);
+    background: #ffffff; border: 1px solid var(--anth-light-gray); border-radius: var(--radius-md);
+  }
+  .stat-trio > div { text-align: center; }
+  .stat-trio .num {
+    display: block; font-family: var(--font-heading); font-size: 48px; font-weight: 600;
+    color: var(--anth-text); letter-spacing: -0.02em; line-height: 1;
+  }
+  .stat-trio .lbl {
+    display: block; font-family: var(--font-heading); font-size: 12.5px; font-weight: 500;
+    color: var(--anth-text-secondary); margin-top: var(--space-3); letter-spacing: 0.02em;
+  }
+
+  /* Figure block - the two big diagrams */
+  .fig {
+    background: #ffffff; border: 1px solid var(--anth-light-gray);
+    border-radius: var(--radius-lg); padding: var(--space-6);
+    margin: 0 0 var(--space-6);
+  }
+  .fig svg { display: block; width: 100%; height: auto; }
+  .fig-cap {
+    margin: var(--space-4) 0 0;
+    font-family: var(--font-body); font-size: 14.5px; line-height: 1.6;
+    color: var(--anth-text-secondary); max-width: 900px;
+  }
+  .fig-tag {
+    display: block; font-family: var(--font-heading); font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--anth-orange-ink);
+    margin-bottom: 4px;
+  }
+
+  /* Alternative cards - designs considered and rejected */
+  .alt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .alt-card {
+    background: #ffffff; border: 1px solid var(--anth-light-gray); border-radius: var(--radius-lg);
+    padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3);
+  }
+  .alt-card--shipped { border-left: 3px solid var(--anth-orange); }
+  .alt-card__kicker {
+    font-family: var(--font-heading); font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+    color: var(--anth-orange-ink); text-transform: uppercase;
+  }
+  .alt-card__title {
+    font-family: var(--font-heading); font-size: 21px; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--anth-text); margin: 0; line-height: 1.25;
+  }
+  .alt-card__body {
+    font-family: var(--font-body); font-size: 15.5px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+  .alt-card__verdict {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    color: var(--anth-text-secondary); margin-top: auto; padding-top: var(--space-3);
+    border-top: 1px solid var(--anth-light-gray);
+  }
+
+  /* When-you-need-it list */
+  .use-list {
+    list-style: none; padding: 0; margin: var(--space-5) 0 0;
+    display: flex; flex-direction: column; gap: var(--space-4);
+  }
+  .use-list li {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+    color: var(--anth-text); padding-left: var(--space-5); position: relative;
+  }
+  .use-list li::before {
+    content: ''; position: absolute; left: 0; top: 10px;
+    width: 6px; height: 6px; border-radius: 50%; background: var(--anth-orange);
+  }
+
+  /* Honest callout */
+  .callout {
+    background: #faf9f5; border: 1px solid var(--anth-light-gray);
+    border-left: 3px solid var(--anth-orange);
+    border-radius: var(--radius-md); padding: var(--space-6);
+  }
+  .callout__kicker {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink); margin: 0;
+  }
+  .callout__title {
+    font-family: var(--font-heading); font-size: 22px; font-weight: 600;
+    color: var(--anth-text); margin: var(--space-2) 0 var(--space-3);
+  }
+  .callout__body {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+
+  /* Detail rows - the mechanism, last */
+  .detail-row {
+    display: grid; grid-template-columns: 190px 1fr;
+    gap: var(--space-5); padding: var(--space-5) 0;
+    border-bottom: 1px solid var(--anth-light-gray);
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row__label {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink);
+    padding-top: 3px;
+  }
+  .detail-row__body {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+    color: var(--anth-text); margin: 0;
+  }
+  .detail-row__body code {
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    background: #faf9f5; padding: 2px 8px; border-radius: 4px;
+    border: 1px solid var(--anth-light-gray);
+  }
+  /* Sourcing note - what is checked vs what is illustrative */
+  .sourcing {
+    background: #ffffff; border: 1px solid var(--anth-light-gray);
+    border-left: 3px solid var(--anth-orange);
+    border-radius: var(--radius-md); padding: var(--space-5) var(--space-6);
+  }
+  .sourcing__kicker {
+    font-family: var(--font-heading); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--anth-orange-ink);
+    margin: 0 0 var(--space-2);
+  }
+  .sourcing__body {
+    font-family: var(--font-body); font-size: 15px; line-height: 1.65;
+    color: var(--anth-text); margin: 0;
+  }
+  .sourcing__body code {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    background: #faf9f5; padding: 1px 6px; border-radius: 4px;
+    border: 1px solid var(--anth-light-gray);
+  }
+  html[data-lang="zh"] .sourcing__kicker { text-transform: none; letter-spacing: 0.05em; }
+
+  .eyebrow-link {
+    font-family: var(--font-heading); font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--anth-text-secondary); font-weight: 600;
+  }
+  html[data-lang="zh"] .eyebrow-link { text-transform: none; letter-spacing: 0.05em; }
+
+  @media (max-width: 900px) {
+    .alt-grid, .stat-trio { grid-template-columns: 1fr; }
+    .detail-row { grid-template-columns: 1fr; gap: var(--space-2); }
+  }
+
+  /* 术语表:一行一个词,左边词右边两问 */
+  .term-row { display:grid; grid-template-columns: 210px 1fr; gap: var(--space-5);
+    padding: var(--space-5) 0; border-top: 1px solid var(--anth-light-gray); }
+  .term-row:last-child { border-bottom: 1px solid var(--anth-light-gray); }
+  .term-name { font-family: var(--font-heading); font-weight: 600; font-size: 15px;
+    color: var(--anth-text); line-height: 1.4; }
+  .term-en { display:block; font-family: var(--font-mono, monospace); font-size: 12px;
+    font-weight: 400; color: var(--anth-text-secondary); margin-top: 3px; }
+  .term-what { font-size: 15px; line-height: 1.65; color: var(--anth-text); margin: 0; }
+  .term-without { font-size: 14px; line-height: 1.6; color: var(--anth-text-secondary);
+    margin: var(--space-2) 0 0; }
+  .term-without b { color: var(--anth-orange-ink); font-weight: 600; }
+  @media (max-width: 720px) { .term-row { grid-template-columns: 1fr; gap: var(--space-2); } }
+</style><style>
+  .stepper { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:var(--space-4); }
+  .stepper__btn {
+    font-family: var(--font-heading); font-size:12.5px; font-weight:500;
+    padding:7px 14px; border-radius:var(--radius-pill); cursor:pointer;
+    border:1px solid var(--anth-light-gray); background:#ffffff; color:var(--anth-text-secondary);
+  }
+  .stepper__btn:hover { background:var(--anth-bg-subtle); }
+  .stepper__btn[aria-current] {
+    background:var(--anth-cta); border-color:var(--anth-cta); color:#ffffff; font-weight:600;
+  }
+  .stepper__note { font-size:14px; color:var(--anth-text-secondary); margin:var(--space-3) 0 0; }
+  html[data-lang="zh"] .stepper__btn { font-family:"Noto Sans SC","PingFang SC",sans-serif; }
+</style>
+</head>
+<body>
+
+<nav class="anth-nav"><div class="anth-nav-inner">
+  <a href="../../index.html" style="font-family:var(--font-heading); font-weight:600; font-size:18px; text-decoration:none; color:var(--anth-text);">Sky Skills</a>
+  <div>
+    <a href="#inside"><span class="lang-en">Three ways in</span><span class="lang-zh">三种看内部</span></a>
+    <a href="#highlight"><span class="lang-en">Move the highlight</span><span class="lang-zh">只动高亮</span></a>
+    <a href="#step"><span class="lang-en">Let them drive</span><span class="lang-zh">让读者自己拨</span></a>
+    <a href="#notation"><span class="lang-en">Notation or picture</span><span class="lang-zh">记号还是图</span></a>
+    <a href="#alone"><span class="lang-en">Travelling alone</span><span class="lang-zh">自己出门</span></a>
+    <a href="diagrams.html"><span class="lang-en">Gallery</span><span class="lang-zh">图集</span></a>
+  </div>
+  <div style="display:flex; gap:var(--space-3); align-items:center;">
+    <button type="button" class="lang-toggle" aria-label="Switch language">中 / EN</button>
+  </div>
+</div></nav>
+
+<header class="anth-section" style="padding-top:var(--space-9);">
+  <div class="anth-container anth-container--wide">
+    <a class="eyebrow-link" href="diagrams.html"><span class="lang-en">← Back · anthropic-design diagram gallery</span><span class="lang-zh">← 返回 · anthropic-design 图示案例库</span></a>
+    <span class="anth-badge" style="margin-top:var(--space-5); background:var(--anth-cta); color:#ffffff; font-weight:600;"><span class="lang-en">method · how a figure gets read</span><span class="lang-zh">方法 · 一张图是怎么被读的</span></span>
+    <h1 style="margin-top:var(--space-4); max-width:900px;"><span class="lang-en">A careful figure<br>that nobody can read<br>is a careful figure.</span><span class="lang-zh">一张画得很仔细<br>但没人读得懂的图，<br>仍然只是画得很仔细。</span></h1>
+    <p style="font-size:18px; line-height:1.7; color:var(--anth-text-secondary); max-width:800px; margin-top:var(--space-5); font-family:var(--font-body);"><span class="lang-en">Five figures, and each one is about the reader rather than the subject. Which of the three ways of showing an inside you actually need. How to break a dense picture into steps without making the reader find it again each time. When to hand them the control. When a notation beats a picture. And what a figure has to carry if somebody screenshots it and sends it on.</span><span class="lang-zh">五张图，每一张讲的都是读者，不是被画的那个东西。三种「把里面画出来」的方法你到底需要哪一种；一张很密的图怎么分步，而不让读者每一步都重新找一遍；什么时候该把控制权交出去；什么时候文字记号反而赢过图；以及一张图被人截屏发走之后，它身上必须带着什么。</span></p>
+
+    <div class="stat-trio">
+      <div><span class="num">3</span><span class="lbl"><span class="lang-en">ways to show an inside, with different costs</span><span class="lang-zh">三种看内部的画法，代价各不相同</span></span></div>
+      <div><span class="num">2</span><span class="lbl"><span class="lang-en">layers of highlight before nothing is highlighted</span><span class="lang-zh">高亮到第几层就等于没高亮</span></span></div>
+      <div><span class="num">4</span><span class="lbl"><span class="lang-en">things a figure must carry to travel alone</span><span class="lang-zh">图要自己出门，得自带几样东西</span></span></div>
+    </div>
+
+    <div class="sourcing">
+      <span class="sourcing__kicker"><span class="lang-en">what is method and what is example</span><span class="lang-zh">哪些是方法，哪些只是例子</span></span>
+      <p class="sourcing__body"><span class="lang-en">The subjects here — a chip package, a memory array, a transfer, a configuration grammar — are vehicles. Every dimension and every timing is illustrative and each figure says so on its face. What is not illustrative is the drawing method: the rules in the strips and callouts are meant to be applied literally, and one of them is enforced by a machine check rather than by good intentions.</span><span class="lang-zh">这里的题材——一颗封装、一片存储阵列、一次传输、一份配置文法——都是载体。所有尺寸和时间都是示意，每张图自己也这么写了。不是示意的是画法：那些规矩带和提示框里的条目是照着用的，其中有一条已经由机器检查强制，而不是靠自觉。</span></p>
+    </div>
+  </div>
+</header>
+
+<section class="anth-section" id="inside">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">&ldquo;Show the inside&rdquo; is three different drawings.</span><span class="lang-zh">「把里面画出来」是三种不同的图。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">Cut it open and you get adjacency and thickness, at the cost of seeing only the plane you cut. Make the shell see-through and you get how many parts there are and how they sit, at the cost of everywhere they overlap. Pull it apart and you get order and reversibility, at the cost of the real adjacency the first one showed. Picking without noticing you were picking is how a figure ends up careful and unhelpful at the same time.</span><span class="lang-zh">切开，得到的是相邻和厚度，代价是只看得见你切的那个平面。把外壳变透明，得到的是里面有几个、怎么摆，代价是所有重叠的地方。拆开，得到的是顺序和可逆性，代价是第一种画法展示的那些真实相邻关系。在没意识到自己在选的情况下选了一种——图就是这样变成既仔细又帮不上忙的。</span></p>
+    <figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 620" role="img" aria-label="The same chip package drawn three ways, so the reader can see that looking inside something is not one technique but three, each answering a different question and each paying a different price. The first panel cuts it open: a section with hatched cut faces showing lid, two dies, substrate and solder balls, which answers what touches what and how thick, and pays by showing only the one plane the knife went through. The second panel makes the shell see-through: the outline of the package is drawn at low opacity with the two dies and the wiring visible inside it, which answers how many parts there are and how they are arranged, and pays by blurring wherever parts overlap. The third panel pulls it apart along an axis, which answers what order it was built in and what can still be separated, and pays by destroying the real adjacency the first panel showed. A closing rule states that the question decides the drawing: what is next to what and how thick means cut it, how many and where means make it see-through, what order and can it come apart means pull it apart, and that a figure trying to answer all three at once answers none of them well" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs><pattern id="siDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+        <pattern id="siCut" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#141413" stroke-width="1.1" opacity="0.22"/></pattern>
+        <marker id="siArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/></marker></defs>
+        <rect width="1120" height="620" rx="16" fill="#faf9f5" stroke="#eceadf"/><rect width="1120" height="620" rx="16" fill="url(#siDot)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">THREE WAYS TO LOOK INSIDE ONE THING &#183; AND WHAT EACH ONE COSTS</text>
+        <text x="32" y="58" font-size="11.5" fill="#8c8a7d">&#8220;show the inside&#8221; is not one drawing. it is three, they answer different questions, and picking the wrong one is why a figure can be careful and still not help.</text>
+        <rect x="36" y="76" width="336" height="342" rx="10" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <circle cx="60" cy="102" r="10" fill="#c2613f"/><text x="60" y="106" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+        <text x="78" y="100" font-size="13" font-weight="600" fill="#141413">cut it open</text>
+        <text x="78" y="116" font-size="10.5" fill="#6b6a5f">a plane through the part</text>
+        <rect x="96" y="160" width="216" height="18" fill="#e7e4d9" stroke="#141413" stroke-width="1.3"/><rect x="96" y="160" width="216" height="18" fill="url(#siCut)"/>
+        <rect x="114" y="184" width="88" height="34" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/><rect x="114" y="184" width="88" height="34" fill="url(#siCut)"/>
+        <rect x="222" y="184" width="66" height="34" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/><rect x="222" y="184" width="66" height="34" fill="url(#siCut)"/>
+        <rect x="96" y="224" width="216" height="26" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.3"/><rect x="96" y="224" width="216" height="26" fill="url(#siCut)"/>
+        <circle cx="118" cy="262" r="7" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <circle cx="148" cy="262" r="7" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <circle cx="178" cy="262" r="7" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <circle cx="208" cy="262" r="7" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <circle cx="238" cy="262" r="7" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <circle cx="268" cy="262" r="7" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <circle cx="298" cy="262" r="7" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <line x1="312" y1="169" x2="336" y2="169" stroke="#a8a496" stroke-width="1"/><text x="340" y="172" font-size="10" fill="#6b6a5f">lid</text>
+        <line x1="288" y1="201" x2="336" y2="201" stroke="#a8a496" stroke-width="1"/><text x="340" y="204" font-size="10" fill="#6b6a5f">dies</text>
+        <line x1="312" y1="237" x2="336" y2="237" stroke="#a8a496" stroke-width="1"/><text x="340" y="240" font-size="10" fill="#6b6a5f">substrate</text>
+        <text x="56" y="292" font-size="10.5" fill="#6b6a5f">hatching says &#8220;the knife went through here&#8221;</text>
+        <text x="56" y="330" font-size="10" font-weight="600" letter-spacing="0.8" fill="#8c8a7d">ANSWERS</text>
+        <text x="56" y="350" font-size="11.5" font-weight="600" fill="#141413">what touches what, and how thick</text>
+        <text x="56" y="374" font-size="10" font-weight="600" letter-spacing="0.8" fill="#8c8a7d">PAYS WITH</text>
+        <text x="56" y="394" font-size="11.5" fill="#c2613f">you only see the one plane you cut</text>
+        <rect x="392" y="76" width="336" height="342" rx="10" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <circle cx="416" cy="102" r="10" fill="#c2613f"/><text x="416" y="106" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+        <text x="434" y="100" font-size="13" font-weight="600" fill="#141413">make it see-through</text>
+        <text x="434" y="116" font-size="10.5" fill="#6b6a5f">the shell drops to a whisper</text>
+        <rect x="452" y="160" width="216" height="102" rx="4" fill="#e7e4d9" fill-opacity="0.35" stroke="#141413" stroke-width="1.4" stroke-opacity="0.55"/>
+        <rect x="470" y="184" width="88" height="52" rx="3" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.5"/>
+        <text x="514" y="214" text-anchor="middle" font-size="10.5" font-weight="600" fill="#5d7045">logic</text>
+        <rect x="578" y="184" width="66" height="52" rx="3" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.5"/>
+        <text x="611" y="214" text-anchor="middle" font-size="10.5" font-weight="600" fill="#2f5c8a">memory</text>
+        <line x1="558" y1="192" x2="578" y2="192" stroke="#8a5a2a" stroke-width="1.2" opacity="0.75"/>
+        <line x1="558" y1="201" x2="578" y2="201" stroke="#8a5a2a" stroke-width="1.2" opacity="0.75"/>
+        <line x1="558" y1="210" x2="578" y2="210" stroke="#8a5a2a" stroke-width="1.2" opacity="0.75"/>
+        <line x1="558" y1="219" x2="578" y2="219" stroke="#8a5a2a" stroke-width="1.2" opacity="0.75"/>
+        <line x1="558" y1="228" x2="578" y2="228" stroke="#8a5a2a" stroke-width="1.2" opacity="0.75"/>
+        <line x1="558" y1="237" x2="578" y2="237" stroke="#8a5a2a" stroke-width="1.2" opacity="0.75"/>
+        <rect x="452" y="244" width="216" height="0" fill="none"/>
+        <text x="560" y="256" text-anchor="middle" font-size="10" fill="#6b6a5f">the shell is still there &#8212; it is just quiet</text>
+        <rect x="412" y="272" width="60" height="22" rx="4" fill="#e7e4d9" fill-opacity="0.35" stroke="#141413" stroke-width="1.2" stroke-opacity="0.55"/>
+        <rect x="442" y="278" width="60" height="22" rx="4" fill="#e7e4d9" fill-opacity="0.35" stroke="#141413" stroke-width="1.2" stroke-opacity="0.55"/>
+        <text x="512" y="296" font-size="10.5" fill="#6b6a5f">two overlapping parts read as a third</text>
+        <text x="412" y="330" font-size="10" font-weight="600" letter-spacing="0.8" fill="#8c8a7d">ANSWERS</text>
+        <text x="412" y="350" font-size="11.5" font-weight="600" fill="#141413">how many parts, and how they sit</text>
+        <text x="412" y="374" font-size="10" font-weight="600" letter-spacing="0.8" fill="#8c8a7d">PAYS WITH</text>
+        <text x="412" y="394" font-size="11.5" fill="#c2613f">wherever things overlap, it goes muddy</text>
+        <rect x="748" y="76" width="336" height="342" rx="10" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <circle cx="772" cy="102" r="10" fill="#c2613f"/><text x="772" y="106" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+        <text x="790" y="100" font-size="13" font-weight="600" fill="#141413">pull it apart</text>
+        <text x="790" y="116" font-size="10.5" fill="#6b6a5f">along one straight axis</text>
+        <line x1="916" y1="152" x2="916" y2="278" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="10 4 3 4"/>
+        <rect x="808" y="158" width="216" height="16" rx="2" fill="#e7e4d9" stroke="#141413" stroke-width="1.3"/>
+        <rect x="826" y="192" width="88" height="26" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="934" y="192" width="66" height="26" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.3"/>
+        <rect x="808" y="236" width="216" height="22" rx="2" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.3"/>
+        <circle cx="830" cy="274" r="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <circle cx="860" cy="274" r="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <circle cx="890" cy="274" r="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <circle cx="920" cy="274" r="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <circle cx="950" cy="274" r="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <circle cx="980" cy="274" r="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <circle cx="1010" cy="274" r="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1"/>
+        <path d="M1040 168 V 182" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#siArr)"/>
+        <path d="M1040 212 V 226" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#siArr)"/>
+        <text x="768" y="292" font-size="10.5" fill="#6b6a5f">equal gaps, one axis, everything centred on it</text>
+        <text x="768" y="330" font-size="10" font-weight="600" letter-spacing="0.8" fill="#8c8a7d">ANSWERS</text>
+        <text x="768" y="350" font-size="11.5" font-weight="600" fill="#141413">what order, and what still separates</text>
+        <text x="768" y="374" font-size="10" font-weight="600" letter-spacing="0.8" fill="#8c8a7d">PAYS WITH</text>
+        <text x="768" y="394" font-size="11.5" fill="#c2613f">the real adjacency is gone</text>
+        <rect x="36" y="440" width="1048" height="62" rx="10" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.5"/>
+        <text x="60" y="466" font-size="12" font-weight="700" fill="#c2613f">the question picks the drawing, not your taste</text>
+        <text x="60" y="488" font-size="11.5" fill="#141413">&#8220;what is next to what, and how thick&#8221; &#8594; cut it &#183; &#8220;how many, and where&#8221; &#8594; make it see-through &#183; &#8220;what order, and can it come apart&#8221; &#8594; pull it apart</text>
+        <text x="32" y="528" font-size="11.5" fill="#8c8a7d">a figure that tries to answer all three at once answers none of them well: the section grows ghost outlines, the see-through view grows an axis, and the reader stops trusting any of it.</text>
+        <text x="32" y="545" font-size="11.5" fill="#8c8a7d">see-through is the one to reach for least. it is the only one of the three whose failure is quiet &#8212; overlapping parts merge into shapes that were never there, and nothing on the page says so.</text>
+        <text x="32" y="562" font-size="11.5" fill="#8c8a7d">all three are flat drawings. none of them needs perspective, and adding it costs accuracy in exchange for looking like a render.</text>
+        <rect x="820" y="576" width="260" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M820 583 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="833" cy="591" r="3.6" fill="#ffffff"/>
+        <text x="967" y="595" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">See inside &#183; three ways, three costs</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">three ways, three costs</span><span class="lang-zh">三种画法，三种代价</span></span>
+        <span class="lang-en">See-through is the one to reach for least, and the reason is on the figure: it is the only one of the three whose failure is quiet. A section that is wrong looks wrong. An exploded view that is wrong looks wrong. Two overlapping parts merging into a shape that was never there looks like a shape.</span><span class="lang-zh">三种里最该少用的是透视，理由就在图上：它是唯一一种失败得很安静的。剖面画错了看得出来，爆炸图画错了也看得出来；而两个重叠的件合成一个本来不存在的形状，看起来就只是一个形状。</span>
+      </figcaption>
+    </figure>
+
+    <div class="callout" style="margin-top:var(--space-8);">
+      <span class="callout__kicker"><span class="lang-en">the question comes first</span><span class="lang-zh">先有问题，才有画法</span></span>
+      <p class="callout__title"><span class="lang-en">You do not pick a drawing, you pick a question</span><span class="lang-zh">你挑的不是画法，是问题</span></p>
+      <p class="callout__body"><span class="lang-en">What is next to what and how thick &rarr; cut it. How many and where &rarr; make it see-through. What order and can it come apart &rarr; pull it apart. A figure that tries to answer all three grows ghost outlines and stray axes, and the reader stops trusting the parts that were right.</span><span class="lang-zh">谁挨着谁、多厚 → 切开。有几个、在哪 → 透视。什么顺序、拆不拆得开 → 拆开。想一张图答完三个问题，它就会长出幽灵轮廓和多余的装配轴，而读者会连原本对的那部分也一起不再相信。</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="anth-section" id="highlight">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">Keep the picture still. Move the highlight.</span><span class="lang-zh">让图不动，让高亮动。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">The instinct with a dense figure is to redraw it for each step, showing only what matters this time. It backfires: the reader has to locate the structure again in every panel, and by the third one they have stopped reading carefully and started skimming. Lock every coordinate instead, paint everything neutral, and let one row come forward. Now nothing has to be re-parsed and the difference is the only thing moving.</span><span class="lang-zh">面对一张很密的图，本能是每一步重画一次，只画这次要紧的部分。结果适得其反：读者在每一格里都要重新定位这个结构，到第三格就已经从「读」切换成「扫」了。改成把每一个坐标都锁死、其余全部画成中性，只让一行站出来。这时没有东西需要重新解析，唯一还在动的就是那个差别。</span></p>
+    <figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 580" role="img" aria-label="The same memory array drawn three times at identical coordinates, with the highlight moving instead of the drawing. In the first panel every word line, bit line and cell is neutral grey, and a dashed orange rectangle is laid over one whole row and labelled as a page, which is how an abstract name gets pinned to a physical structure. In the second panel one word line and the cells along it turn green, and the caption says that selecting a row is a physical act performed on that one wire. In the third panel that green row stays and one bit line turns blue, with the single cell where they cross filled orange, which is the one cell being addressed. Closing notes state that the array is drawn once and only the highlight moves, because redrawing a dense figure for every step makes the reader find it again each time, that abstract names like page or row or block should be pinned onto the physical picture with a dashed box rather than only described in prose, and that two layers of highlight is the limit before a second figure is needed" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs><pattern id="hiDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern></defs>
+        <rect width="1120" height="580" rx="16" fill="#faf9f5" stroke="#eceadf"/><rect width="1120" height="580" rx="16" fill="url(#hiDot)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">DRAW THE ARRAY ONCE &#183; MOVE THE HIGHLIGHT, NOT THE DRAWING</text>
+        <text x="32" y="58" font-size="11.5" fill="#8c8a7d">a dense figure redrawn for every step costs the reader a fresh search each time. keep it still, keep it neutral, and let one row or one cell come forward.</text>
+        <rect x="36" y="76" width="336" height="300" rx="10" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <circle cx="60" cy="102" r="10" fill="#c2613f"/><text x="60" y="106" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+        <text x="78" y="100" font-size="13" font-weight="600" fill="#141413">nothing selected</text>
+        <text x="78" y="116" font-size="10.5" fill="#6b6a5f">the structure, and nothing else</text>
+        <line x1="58" y1="156" x2="324" y2="156" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="58" y1="182" x2="324" y2="182" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="58" y1="208" x2="324" y2="208" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="58" y1="234" x2="324" y2="234" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="58" y1="260" x2="324" y2="260" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="76" y1="140" x2="76" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="108" y1="140" x2="108" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="140" y1="140" x2="140" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="172" y1="140" x2="172" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="204" y1="140" x2="204" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="236" y1="140" x2="236" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="268" y1="140" x2="268" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="300" y1="140" x2="300" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <rect x="69" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="101" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="133" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="165" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="197" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="229" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="261" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="293" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="69" y="177" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="101" y="177" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="133" y="177" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="165" y="177" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="197" y="177" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="229" y="177" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="261" y="177" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="293" y="177" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="69" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="101" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="133" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="165" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="197" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="229" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="261" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="293" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="69" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="101" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="133" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="165" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="197" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="229" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="261" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="293" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="69" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="101" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="133" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="165" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="197" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="229" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="261" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="293" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <text x="54" y="160" text-anchor="end" font-size="10.5" fill="#6b6a5f">word</text>
+        <text x="76" y="132" text-anchor="middle" font-size="10.5" fill="#6b6a5f">bit</text>
+        <rect x="54" y="169" width="264" height="26" rx="4" fill="none" stroke="#c2613f" stroke-width="1.8" stroke-dasharray="5 3"/>
+        <text x="318" y="162" text-anchor="end" font-size="10.5" font-weight="700" fill="#c2613f">one page</text>
+        <text x="56" y="330" font-size="11" fill="#6b6a5f">the dashed box is the whole point of this panel:</text>
+        <text x="56" y="346" font-size="11" fill="#6b6a5f">&#8220;page&#8221; is a word, and this is where it lives.</text>
+        <rect x="392" y="76" width="336" height="300" rx="10" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <circle cx="416" cy="102" r="10" fill="#c2613f"/><text x="416" y="106" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+        <text x="434" y="100" font-size="13" font-weight="600" fill="#141413">one word line up</text>
+        <text x="434" y="116" font-size="10.5" fill="#6b6a5f">selecting a row is a physical act</text>
+        <line x1="414" y1="156" x2="680" y2="156" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="414" y1="182" x2="680" y2="182" stroke="#5d7045" stroke-width="2.2"/>
+        <line x1="414" y1="208" x2="680" y2="208" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="414" y1="234" x2="680" y2="234" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="414" y1="260" x2="680" y2="260" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="432" y1="140" x2="432" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="464" y1="140" x2="464" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="496" y1="140" x2="496" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="528" y1="140" x2="528" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="560" y1="140" x2="560" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="592" y1="140" x2="592" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="624" y1="140" x2="624" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="656" y1="140" x2="656" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <rect x="425" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="457" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="489" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="521" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="553" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="585" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="617" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="649" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="425" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="457" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="489" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="521" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="553" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="585" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="617" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="649" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="425" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="457" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="489" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="521" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="553" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="585" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="617" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="649" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="425" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="457" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="489" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="521" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="553" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="585" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="617" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="649" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="425" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="457" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="489" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="521" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="553" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="585" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="617" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="649" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <text x="410" y="160" text-anchor="end" font-size="10.5" fill="#6b6a5f">word</text>
+        <text x="432" y="132" text-anchor="middle" font-size="10.5" fill="#6b6a5f">bit</text>
+        <text x="412" y="330" font-size="11" fill="#6b6a5f">the array did not move. one wire came forward,</text>
+        <text x="412" y="346" font-size="11" fill="#6b6a5f">and the cells it opens came with it.</text>
+        <rect x="748" y="76" width="336" height="300" rx="10" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <circle cx="772" cy="102" r="10" fill="#c2613f"/><text x="772" y="106" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+        <text x="790" y="100" font-size="13" font-weight="600" fill="#141413">one cell addressed</text>
+        <text x="790" y="116" font-size="10.5" fill="#6b6a5f">a row and a column, and their crossing</text>
+        <line x1="770" y1="156" x2="1036" y2="156" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="770" y1="182" x2="1036" y2="182" stroke="#5d7045" stroke-width="2.2"/>
+        <line x1="770" y1="208" x2="1036" y2="208" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="770" y1="234" x2="1036" y2="234" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="770" y1="260" x2="1036" y2="260" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="788" y1="140" x2="788" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="820" y1="140" x2="820" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="852" y1="140" x2="852" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="884" y1="140" x2="884" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="916" y1="140" x2="916" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="948" y1="140" x2="948" y2="278" stroke="#2f5c8a" stroke-width="2.2"/>
+        <line x1="980" y1="140" x2="980" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <line x1="1012" y1="140" x2="1012" y2="278" stroke="#c8c4b6" stroke-width="1.2"/>
+        <rect x="781" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="813" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="845" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="877" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="909" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="941" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="973" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="1005" y="151" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="781" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="813" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="845" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="877" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="909" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="941" y="177" width="14" height="11" rx="2" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.8"/>
+        <rect x="973" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="1005" y="177" width="14" height="11" rx="2" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.3"/>
+        <rect x="781" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="813" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="845" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="877" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="909" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="941" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="973" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="1005" y="203" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="781" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="813" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="845" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="877" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="909" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="941" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="973" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="1005" y="229" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="781" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="813" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="845" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="877" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="909" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="941" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="973" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <rect x="1005" y="255" width="14" height="11" rx="2" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.0"/>
+        <text x="766" y="160" text-anchor="end" font-size="10.5" fill="#6b6a5f">word</text>
+        <text x="788" y="132" text-anchor="middle" font-size="10.5" fill="#6b6a5f">bit</text>
+        <text x="768" y="330" font-size="11" fill="#6b6a5f">two layers of highlight is the limit. a third</text>
+        <text x="768" y="346" font-size="11" fill="#6b6a5f">colour on the same picture and nothing is highlighted.</text>
+        <line x1="36" y1="410" x2="62" y2="410" stroke="#c8c4b6" stroke-width="1.2"/>
+        <text x="70" y="414" font-size="11" fill="#6b6a5f">not part of this step</text>
+        <line x1="216" y1="410" x2="242" y2="410" stroke="#5d7045" stroke-width="2.2"/>
+        <text x="250" y="414" font-size="11" fill="#6b6a5f">the word line that is up</text>
+        <line x1="430" y1="410" x2="456" y2="410" stroke="#2f5c8a" stroke-width="2.2"/>
+        <text x="464" y="414" font-size="11" fill="#6b6a5f">the bit line being read</text>
+        <rect x="628" y="404" width="26" height="12" rx="3" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.6"/>
+        <text x="662" y="414" font-size="11" fill="#6b6a5f">the one cell in question</text>
+        <rect x="812" y="404" width="26" height="12" rx="3" fill="none" stroke="#c2613f" stroke-width="1.8" stroke-dasharray="5 3"/><text x="846" y="414" font-size="11" fill="#6b6a5f">a name, pinned to the structure</text>
+        <text x="32" y="452" font-size="11.5" fill="#8c8a7d">the array is drawn once. a dense picture redrawn for every step makes the reader locate it again in each panel, and by the third panel they have stopped looking carefully.</text>
+        <text x="32" y="469" font-size="11.5" fill="#8c8a7d">neutral is a choice, not a leftover. everything not part of this step is deliberately quiet, which is what gives the one thing that is coloured somewhere to stand out from.</text>
+        <text x="32" y="486" font-size="11.5" fill="#8c8a7d">a word like page, row, block or bank should be pinned onto the physical picture with a dashed box the first time it appears. described only in prose, it stays a word the reader nods at.</text>
+        <text x="32" y="503" font-size="11.5" fill="#8c8a7d">two layers of highlight is the working limit. a third colour on the same picture means nothing is highlighted, and it is the point at which the material wants a second figure.</text>
+        <rect x="820" y="524" width="260" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M820 531 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="833" cy="539" r="3.6" fill="#ffffff"/>
+        <text x="967" y="543" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Highlight in place &#183; one array</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">one array, three steps</span><span class="lang-zh">一片阵列，三步</span></span>
+        <span class="lang-en">The dashed box in the first panel is doing the other half of the job. &ldquo;Page&rdquo; is a word the reader will nod at and not locate; pinning it onto the physical structure the first time it appears is what turns it into something they can point at later.</span><span class="lang-zh">第一格那个虚线框干的是另一半活。「页」是一个读者会点头、但不会去定位的词；在它第一次出现时就把它钉在物理结构上，才让它变成之后能被指出来的东西。</span>
+      </figcaption>
+    </figure>
+
+    <div class="use-list" style="margin-top:var(--space-8);">
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">every panel is redrawn from scratch</span><span class="lang-zh">每一格都重画一遍</span></div>
+        <div class="detail-row__body"><span class="lang-en">Then the reader spends their attention on re-finding the structure instead of on the change, which is the one thing you brought them here for. Identical coordinates cost nothing and buy all of that attention back.</span><span class="lang-zh">那读者的注意力就花在重新找结构上，而不是花在那个变化上——而变化才是你把他带到这里的唯一理由。坐标一致不花任何代价，却把这份注意力全买回来了。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">everything is coloured</span><span class="lang-zh">什么都上了色</span></div>
+        <div class="detail-row__body"><span class="lang-en">Then nothing is. Neutral is a deliberate choice: it is the ground the highlighted thing stands out from. A figure where every element carries a colour has spent its whole budget before the first step.</span><span class="lang-zh">那就等于什么都没上色。中性是刻意的选择：它是被高亮的东西赖以站出来的那个背景。每个元素都带颜色的图，在第一步之前就已经把预算花光了。</span></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-row__label"><span class="lang-en">a third highlight colour appears</span><span class="lang-zh">出现了第三种高亮色</span></div>
+        <div class="detail-row__body"><span class="lang-en">Two layers — a row and a column — is the working limit. A third means the material wants a second figure, and adding the colour instead is how a figure quietly stops working while still looking busy.</span><span class="lang-zh">两层——一行加一列——是实际的上限。出现第三层，说明内容想要第二张图；这时选择加颜色而不是拆图，图就在看起来很充实的同时悄悄失效了。</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="anth-section" id="step">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">Hand over the control &mdash; but leave a complete figure behind if nobody takes it.</span><span class="lang-zh">把控制权交出去 —— 但没人接手时，留下的也得是一张完整的图。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">An interactive figure is the strongest form here and the only one that can fail invisibly. The screenshot gate captures exactly one state: whatever the figure looks like before anybody clicks. If that state is empty, every mechanical check still passes and the page ships a blank box. The failure direction is &ldquo;let through&rdquo;, which is the expensive direction, so this one is not left to good intentions — it is a machine check.</span><span class="lang-zh">交互图是这里最强的一种形式，也是唯一一种能悄无声息失败的。截图检查只会拍到一个状态：这张图在任何人点击之前长什么样。如果那个状态是空的，所有机器检查照样全绿，页面就带着一个空盒子发出去了。坏的方向是「放过」，而这是最贵的方向——所以这一条不交给自觉，它是一道机器检查。</span></p>
+<!-- stepper.html — an interactive figure. Copy the whole <figure> block.
+     Contract the design-review gate enforces (visual-audit: interactive-figure-blank-default):
+       · exactly one [data-step] panel visible before any click
+       · the matching control carries aria-current
+     With scripting off the figure degrades to step 1, which is a complete figure on its own. -->
+<figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+  <div class="stepper" role="group" aria-label="transfer steps">
+    <button type="button" class="stepper__btn" data-step-to="1" aria-current="step">1 &#183; the driver fills a descriptor</button>
+    <button type="button" class="stepper__btn" data-step-to="2">2 &#183; the processor starts it</button>
+    <button type="button" class="stepper__btn" data-step-to="3">3 &#183; the engine moves the bytes</button>
+    <button type="button" class="stepper__btn" data-step-to="4">4 &#183; the engine raises an interrupt</button>
+  </div>
+  <div data-step="1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 250" role="img" aria-label="Step one of a four step transfer, drawn on one unchanging base picture. System memory runs across the middle as one bar split into a driver ring, a descriptor and a data buffer, with a DMA engine and its two registers on the right and a processor block top left. In this step the descriptor segment is the only thing coloured, in green, because the driver has just filled it in. Every other element is neutral." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+          <defs><marker id="st1A" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c2613f"/></marker>
+          <marker id="st1G" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a5a2a"/></marker></defs>
+          <circle cx="1020" cy="26" r="13" fill="#c2613f"/>
+          <text x="1020" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1</text>
+          <text x="1000" y="31" text-anchor="end" font-size="10.5" font-weight="600" letter-spacing="0.8" fill="#6b6a5f">STEP</text>
+          <rect x="36" y="30" width="128" height="40" rx="7" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="100" y="55" text-anchor="middle" font-size="12" font-weight="600" fill="#c8c4b6">CPU</text>
+          <rect x="36" y="120" width="196" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="134" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">driver ring</text>
+          <rect x="232" y="120" width="150" height="44" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.8"/>
+          <text x="307" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#5d7045">descriptor</text>
+          <rect x="382" y="120" width="404" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="584" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">data buffer</text>
+          <rect x="36" y="120" width="750" height="44" rx="6" fill="none" stroke="#141413" stroke-width="1.6"/>
+          <text x="36" y="112" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#6b6a5f">SYSTEM MEMORY</text>
+          <rect x="846" y="86" width="178" height="112" rx="8" fill="#ffffff" stroke="#c8c4b6" stroke-width="1.4"/>
+          <text x="862" y="108" font-size="11" font-weight="600" fill="#141413">DMA engine</text>
+          <rect x="862" y="124" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="141" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_DESC</text>
+          <rect x="862" y="158" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="175" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_CTRL</text>
+          <path d="M164 50 H 700 Q 720 50 720 70 V 158 Q 720 171 733 171 H 856" fill="none" stroke="#c8c4b6" stroke-width="1.2" stroke-dasharray="6 4"/>
+          <text x="420" y="42" font-size="10.5" font-weight="600" fill="#c8c4b6">write the control register</text>
+          <path d="M786 142 H 846" fill="none" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="816" y="132" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c8c4b6">data</text>
+          <path d="M935 198 V 222 H 100 V 74" fill="none" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="520" y="238" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c8c4b6">completion interrupt</text>
+        </svg>
+    <p class="stepper__note"><strong>the driver fills a descriptor</strong> &#183; still just memory writes &#8212; the engine has not been told anything yet</p>
+  </div>
+  <div data-step="2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 250" role="img" aria-label="Step two of the same picture. Nothing has moved. The dashed control line from the processor to the DMA control register is now gold and carries an arrowhead, and the control register itself is gold, because writing that register is what starts the transfer." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+          <defs><marker id="st2A" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c2613f"/></marker>
+          <marker id="st2G" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a5a2a"/></marker></defs>
+          <circle cx="1020" cy="26" r="13" fill="#c2613f"/>
+          <text x="1020" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2</text>
+          <text x="1000" y="31" text-anchor="end" font-size="10.5" font-weight="600" letter-spacing="0.8" fill="#6b6a5f">STEP</text>
+          <rect x="36" y="30" width="128" height="40" rx="7" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="100" y="55" text-anchor="middle" font-size="12" font-weight="600" fill="#c8c4b6">CPU</text>
+          <rect x="36" y="120" width="196" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="134" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">driver ring</text>
+          <rect x="232" y="120" width="150" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="307" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">descriptor</text>
+          <rect x="382" y="120" width="404" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="584" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">data buffer</text>
+          <rect x="36" y="120" width="750" height="44" rx="6" fill="none" stroke="#141413" stroke-width="1.6"/>
+          <text x="36" y="112" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#6b6a5f">SYSTEM MEMORY</text>
+          <rect x="846" y="86" width="178" height="112" rx="8" fill="#ffffff" stroke="#c8c4b6" stroke-width="1.4"/>
+          <text x="862" y="108" font-size="11" font-weight="600" fill="#141413">DMA engine</text>
+          <rect x="862" y="124" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="141" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_DESC</text>
+          <rect x="862" y="158" width="146" height="26" rx="4" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.6"/>
+          <text x="874" y="175" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">DMA_CTRL</text>
+          <path d="M164 50 H 700 Q 720 50 720 70 V 158 Q 720 171 733 171 H 856" fill="none" stroke="#8a5a2a" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#st2G)"/>
+          <text x="420" y="42" font-size="10.5" font-weight="600" fill="#8a5a2a">write the control register</text>
+          <path d="M786 142 H 846" fill="none" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="816" y="132" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c8c4b6">data</text>
+          <path d="M935 198 V 222 H 100 V 74" fill="none" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="520" y="238" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c8c4b6">completion interrupt</text>
+        </svg>
+    <p class="stepper__note"><strong>the processor starts it</strong> &#183; one register write. after this line the processor is free, which is the entire point</p>
+  </div>
+  <div data-step="3" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 250" role="img" aria-label="Step three of the same picture. The data buffer segment and the short link between it and the DMA engine are orange, because this is the only step in which bytes actually move. The processor is not involved." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+          <defs><marker id="st3A" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c2613f"/></marker>
+          <marker id="st3G" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a5a2a"/></marker></defs>
+          <circle cx="1020" cy="26" r="13" fill="#c2613f"/>
+          <text x="1020" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3</text>
+          <text x="1000" y="31" text-anchor="end" font-size="10.5" font-weight="600" letter-spacing="0.8" fill="#6b6a5f">STEP</text>
+          <rect x="36" y="30" width="128" height="40" rx="7" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="100" y="55" text-anchor="middle" font-size="12" font-weight="600" fill="#c8c4b6">CPU</text>
+          <rect x="36" y="120" width="196" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="134" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">driver ring</text>
+          <rect x="232" y="120" width="150" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="307" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">descriptor</text>
+          <rect x="382" y="120" width="404" height="44" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.8"/>
+          <text x="584" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c2613f">data buffer</text>
+          <rect x="36" y="120" width="750" height="44" rx="6" fill="none" stroke="#141413" stroke-width="1.6"/>
+          <text x="36" y="112" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#6b6a5f">SYSTEM MEMORY</text>
+          <rect x="846" y="86" width="178" height="112" rx="8" fill="#ffffff" stroke="#c8c4b6" stroke-width="1.4"/>
+          <text x="862" y="108" font-size="11" font-weight="600" fill="#141413">DMA engine</text>
+          <rect x="862" y="124" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="141" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_DESC</text>
+          <rect x="862" y="158" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="175" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_CTRL</text>
+          <path d="M164 50 H 700 Q 720 50 720 70 V 158 Q 720 171 733 171 H 856" fill="none" stroke="#c8c4b6" stroke-width="1.2" stroke-dasharray="6 4"/>
+          <text x="420" y="42" font-size="10.5" font-weight="600" fill="#c8c4b6">write the control register</text>
+          <path d="M786 142 H 846" fill="none" stroke="#c2613f" stroke-width="2.6" marker-end="url(#st3A)"/>
+          <text x="816" y="132" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c2613f">data</text>
+          <path d="M935 198 V 222 H 100 V 74" fill="none" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="520" y="238" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c8c4b6">completion interrupt</text>
+        </svg>
+    <p class="stepper__note"><strong>the engine moves the bytes</strong> &#183; the only step where data actually moves, and the only one the processor is not in</p>
+  </div>
+  <div data-step="4" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 250" role="img" aria-label="Step four of the same picture. The long return path from the engine back to the processor is orange and the processor block is highlighted, because the transfer has finished and the only thing left is the interrupt that says so." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+          <defs><marker id="st4A" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#c2613f"/></marker>
+          <marker id="st4G" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a5a2a"/></marker></defs>
+          <circle cx="1020" cy="26" r="13" fill="#c2613f"/>
+          <text x="1020" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">4</text>
+          <text x="1000" y="31" text-anchor="end" font-size="10.5" font-weight="600" letter-spacing="0.8" fill="#6b6a5f">STEP</text>
+          <rect x="36" y="30" width="128" height="40" rx="7" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.8"/>
+          <text x="100" y="55" text-anchor="middle" font-size="12" font-weight="600" fill="#c2613f">CPU</text>
+          <rect x="36" y="120" width="196" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="134" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">driver ring</text>
+          <rect x="232" y="120" width="150" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="307" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">descriptor</text>
+          <rect x="382" y="120" width="404" height="44" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="584" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#c8c4b6">data buffer</text>
+          <rect x="36" y="120" width="750" height="44" rx="6" fill="none" stroke="#141413" stroke-width="1.6"/>
+          <text x="36" y="112" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#6b6a5f">SYSTEM MEMORY</text>
+          <rect x="846" y="86" width="178" height="112" rx="8" fill="#ffffff" stroke="#c8c4b6" stroke-width="1.4"/>
+          <text x="862" y="108" font-size="11" font-weight="600" fill="#141413">DMA engine</text>
+          <rect x="862" y="124" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="141" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_DESC</text>
+          <rect x="862" y="158" width="146" height="26" rx="4" fill="#f1efe8" stroke="#c8c4b6" stroke-width="1.1"/>
+          <text x="874" y="175" font-size="10.5" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">DMA_CTRL</text>
+          <path d="M164 50 H 700 Q 720 50 720 70 V 158 Q 720 171 733 171 H 856" fill="none" stroke="#c8c4b6" stroke-width="1.2" stroke-dasharray="6 4"/>
+          <text x="420" y="42" font-size="10.5" font-weight="600" fill="#c8c4b6">write the control register</text>
+          <path d="M786 142 H 846" fill="none" stroke="#c8c4b6" stroke-width="1.2"/>
+          <text x="816" y="132" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c8c4b6">data</text>
+          <path d="M935 198 V 222 H 100 V 74" fill="none" stroke="#c2613f" stroke-width="2.4" marker-end="url(#st4A)"/>
+          <text x="520" y="238" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c2613f">completion interrupt</text>
+        </svg>
+    <p class="stepper__note"><strong>the engine raises an interrupt</strong> &#183; the transfer is already over. this step is only how anybody finds out</p>
+  </div>
+  <figcaption class="fig-cap">
+    <span class="fig-tag">one base picture, four steps</span>
+    Four panels on identical coordinates; the reader drives which one is showing. Only the part the step is about is coloured, everything else stays neutral, so nothing has to be re-found between clicks. Step&nbsp;1 is the default and is a complete figure on its own &mdash; with scripting off, that is what the page shows, and it is also what any screenshot captures.
+  </figcaption>
+</figure>
+
+<script>
+(function () {
+  document.querySelectorAll("figure .stepper").forEach(function (bar) {
+    var fig = bar.closest("figure");
+    bar.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-step-to]"); if (!btn) return;
+      var want = btn.getAttribute("data-step-to");
+      fig.querySelectorAll("[data-step]").forEach(function (p) {
+        p.hidden = p.getAttribute("data-step") !== want;
+      });
+      bar.querySelectorAll("[data-step-to]").forEach(function (b) {
+        if (b === btn) { b.setAttribute("aria-current", "step"); }
+        else { b.removeAttribute("aria-current"); }
+      });
+    });
+  });
+})();
+</script>
+
+    <div class="callout" style="margin-top:var(--space-8);">
+      <span class="callout__kicker"><span class="lang-en">the check behind this figure</span><span class="lang-zh">这张图背后的那道检查</span></span>
+      <p class="callout__title"><span class="lang-en">interactive-figure-blank-default</span><span class="lang-zh">interactive-figure-blank-default</span></p>
+      <p class="callout__body"><span class="lang-en">It fires as an error when a figure has controls and every panel is hidden before interaction, and as a warning when all of them are showing at once, which is what you get when the script has not run. It was written before this figure was drawn, and it was mutation-tested: a fixture with every panel hidden goes red, a compliant one stays green, and removing the fix turns the compliant one red again. A check nobody has watched fail is not yet a check.</span><span class="lang-zh">一张图带控件、而交互之前所有面板都隐藏时，它报 error；所有面板同时显示时报 warn——后者正是脚本没跑起来时的样子。这道检查是在画这张图之前先写的，而且做过变异测试：全隐藏的夹具会变红、合规的保持绿、把补丁撤掉合规的那个立刻变红。一道没人看着它红过的检查，还算不上检查。</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="anth-section" id="notation">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">Sometimes the notation wins, and the honest thing is to say which times.</span><span class="lang-zh">有时候文字记号赢，诚实的做法是说清哪些时候。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">A railroad diagram beats grammar notation on exactly three questions — may I leave this out, may I repeat it, which of these do I pick — because each answer becomes a different shape rather than a different bracket. It loses badly on recursion: notation states that a term contains an expression in one line, while the picture can only point back at an earlier track and hope. A page that only ever argues for pictures is selling something.</span><span class="lang-zh">铁路图在恰好三个问题上赢过文法记号——能不能省、能不能重复、要在几个里挑哪个——因为每个答案变成了一种不同的形状，而不是一种不同的括号。它在递归上输得很惨：记号一行就能说清 term 里含 expr，图只能指回上面那条轨，然后指望读者跟得上。一个页面如果永远只替图说话，那它在推销东西。</span></p>
+    <figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 664" role="img" aria-label="The same small grammar written twice, as notation and as a railroad diagram. On the left, five lines of grammar notation in a monospace block, with a note that its brackets and braces are doing three different jobs while all looking alike. On the right, two tracks. The upper one is an expression: a start ring, an optional negation the line can bypass over the top, a term, then a loop that leaves the main line, runs leftwards through a box reading and-and or or-or, and rejoins in front of the term, which is how the picture says the term may repeat. The lower track is a term: the line splits three ways into a bare symbol, a symbol compared with another symbol, and a parenthesised expression, and the three merge into one end ring. Below both tracks, three small glyphs name the only shapes the notation uses: a bypass over the top means optional, a loop back underneath means repeatable, parallel rows mean choose one. Closing notes state that the single rule is that any path walked from start ring to end ring is legal, that a railroad diagram contains no decisions and so must never be given diamonds or condition labels, and that recursion is the one thing notation states plainly while the picture can only point back at an earlier track" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs><pattern id="rrDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern></defs>
+        <rect width="1120" height="664" rx="16" fill="#faf9f5" stroke="#eceadf"/><rect width="1120" height="664" rx="16" fill="url(#rrDot)"/>
+        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">RAILROAD &#183; WHAT IS OPTIONAL, WHAT REPEATS, WHAT YOU CHOOSE BETWEEN</text>
+        <text x="32" y="58" font-size="11.5" fill="#8c8a7d">one rule: any path you can walk from the start ring to the end ring is legal. that is the whole notation, and it is why nothing here needs a condition label.</text>
+        <text x="36" y="98" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">AS NOTATION</text>
+        <rect x="36" y="110" width="360" height="150" rx="10" fill="#ffffff" stroke="#e3e0d4" stroke-width="1.2"/>
+        <text x="56" y="142" font-size="11.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">expr</text>
+        <text x="100" y="142" font-size="11.5" font-family="'JetBrains Mono', monospace" fill="#141413">  :=  [ '!' ] term { ( '&amp;&amp;' | '||' ) term }</text>
+        <text x="56" y="170" font-size="11.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">term</text>
+        <text x="100" y="170" font-size="11.5" font-family="'JetBrains Mono', monospace" fill="#141413">  :=  symbol</text>
+        <text x="56" y="198" font-size="11.5" font-family="'JetBrains Mono', monospace" fill="#141413">  |   symbol '=' symbol</text>
+        <text x="56" y="226" font-size="11.5" font-family="'JetBrains Mono', monospace" fill="#141413">  |   '(' expr ')'</text>
+        <text x="36" y="284" font-size="11" fill="#6b6a5f">correct, complete &#8212; and you hold all of it in your head.</text>
+        <text x="36" y="312" font-size="11" fill="#6b6a5f">the square brackets, the braces and the bar are doing</text>
+        <text x="36" y="328" font-size="11" fill="#6b6a5f">three different jobs, and all three look alike.</text>
+        <text x="36" y="354" font-size="11" font-weight="700" fill="#c2613f">on the right those three jobs become three shapes.</text>
+        <text x="430" y="98" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">AS A RAILROAD &#183; expr</text>
+        <circle cx="444" cy="158" r="7" fill="#141413" stroke="#141413" stroke-width="1.6"/>
+        <path d="M451 158 H 486" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="486" y="144" width="54" height="28" rx="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.4"/>
+        <text x="513" y="162" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">'!'</text>
+        <path d="M540 158 H 596" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M470 158 Q 470 130 486 130 H 578 Q 596 130 596 158" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="596" y="144" width="88" height="28" rx="6" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="640" y="162" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">term</text>
+        <path d="M684 158 H 1046" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="1054" cy="158" r="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M812 158 V 192 Q 812 206 796 206 H 756" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="656" y="192" width="100" height="28" rx="6" fill="#e5e9dd" stroke="#5d7045" stroke-width="1.4"/>
+        <text x="706" y="210" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#5d7045">'&amp;&amp;' or '||'</text>
+        <path d="M656 206 H 620 Q 604 206 604 192 V 158" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="812" cy="158" r="3.4" fill="#141413"/>
+        <circle cx="604" cy="158" r="3.4" fill="#141413"/>
+        <text x="706" y="232" text-anchor="middle" font-size="10.5" font-weight="600" fill="#5d7045">round again for another term</text>
+        <text x="470" y="124" font-size="10.5" font-weight="600" fill="#8a5a2a">skip it</text>
+        <text x="430" y="290" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">AS A RAILROAD &#183; term</text>
+        <circle cx="444" cy="352" r="7" fill="#141413" stroke="#141413" stroke-width="1.6"/>
+        <path d="M451 352 H 476" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M476 352 Q 476 310 492 310 H 512" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M608 310 H 800 Q 816 310 816 352" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M512 310 H 520" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="520" y="296" width="88" height="28" rx="6" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="564" y="314" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">symbol</text>
+        <path d="M476 352 H 512" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M772 352 H 816" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M512 352 H 520" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="520" y="338" width="84" height="28" rx="6" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="562" y="356" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">symbol</text>
+        <path d="M604 352 H 624" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="624" y="338" width="44" height="28" rx="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.4"/>
+        <text x="646" y="356" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">'='</text>
+        <path d="M668 352 H 688" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="688" y="338" width="84" height="28" rx="6" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="730" y="356" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">symbol</text>
+        <path d="M476 352 Q 476 394 492 394 H 512" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M716 394 H 800 Q 816 394 816 352" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M512 394 H 520" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="520" y="380" width="40" height="28" rx="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.4"/>
+        <text x="540" y="398" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">'('</text>
+        <path d="M560 394 H 584" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="584" y="380" width="72" height="28" rx="6" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.4"/>
+        <text x="620" y="398" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c2613f">expr</text>
+        <path d="M656 394 H 676" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="676" y="380" width="40" height="28" rx="6" fill="#f0e4d8" stroke="#8a5a2a" stroke-width="1.4"/>
+        <text x="696" y="398" text-anchor="middle" font-size="11" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">')'</text>
+        <path d="M816 352 H 968" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="976" cy="352" r="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <text x="430" y="426" font-size="10.5" font-weight="600" fill="#6b6a5f">three ways in, one way out</text>
+        <text x="618" y="426" font-size="10.5" font-weight="700" fill="#c2613f">this box points back at the track above &#8212; that is the recursion</text>
+        <text x="32" y="456" font-size="10.5" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">THE ONLY THREE SHAPES IT USES</text>
+        <path d="M36 492 H 66" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="66" y="481" width="44" height="22" rx="5" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="88" y="496" text-anchor="middle" font-size="10" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">A</text>
+        <path d="M110 492 H 140" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M52 492 Q 52 474 66 474 H 110 Q 124 474 124 492" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <text x="152" y="496" font-size="11" font-weight="600" fill="#141413">over the top = you may skip it</text>
+        <path d="M420 492 H 450" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="450" y="481" width="44" height="22" rx="5" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="472" y="496" text-anchor="middle" font-size="10" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">A</text>
+        <path d="M494 492 H 524" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M508 492 Q 508 510 494 510 H 450 Q 436 510 436 492" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <text x="536" y="496" font-size="11" font-weight="600" fill="#141413">back underneath = you may repeat it</text>
+        <path d="M792 492 H 806" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="812" y="467" width="44" height="22" rx="5" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="834" y="482" text-anchor="middle" font-size="10" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">A</text>
+        <rect x="812" y="495" width="44" height="22" rx="5" fill="#e2ecf5" stroke="#2f5c8a" stroke-width="1.4"/>
+        <text x="834" y="510" text-anchor="middle" font-size="10" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">B</text>
+        <path d="M806 478 V 506" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M806 478 H 812" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M806 506 H 812" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M856 478 H 862" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M856 506 H 862" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M862 478 V 506" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M862 492 H 896" fill="none" stroke="#141413" stroke-width="1.8" stroke-linecap="round"/>
+        <text x="908" y="496" font-size="11" font-weight="600" fill="#141413">parallel rows = choose one</text>
+        <text x="32" y="540" font-size="11.5" fill="#8c8a7d">a railroad diagram contains no decisions, so it must never be given diamonds, arrowheads on every segment, or condition labels &#8212; that turns it into a flowchart that is wrong.</text>
+        <text x="32" y="557" font-size="11.5" fill="#8c8a7d">it beats notation on the three questions readers actually ask: may I leave this out, may I repeat it, which do I pick. each answer is a different shape, not a different bracket.</text>
+        <text x="32" y="574" font-size="11.5" fill="#8c8a7d">it loses on recursion: notation says term contains expr in one line, while the picture can only point back at the track above. when a grammar is mostly recursive, keep the notation.</text>
+        <text x="32" y="591" font-size="11.5" fill="#8c8a7d">this grammar is a cut-down form of the boolean expressions a kernel configuration language accepts, trimmed so each of the three shapes appears exactly once.</text>
+        <rect x="820" y="616" width="260" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M820 623 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="833" cy="631" r="3.6" fill="#ffffff"/>
+        <text x="967" y="635" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Railroad &#183; grammar as a path</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">grammar as a path</span><span class="lang-zh">把文法走成一条路</span></span>
+        <span class="lang-en">One rule carries the whole notation: any path you can walk from the start ring to the end ring is legal. That is also why it must never be given diamonds or condition labels — there are no decisions in it, and adding the furniture of a flowchart turns it into a flowchart that happens to be wrong.</span><span class="lang-zh">一条规则撑起整套记号：从起点环走到终点环，走得通的路径就是合法的。这也是为什么绝不能给它加菱形或者条件标签——它里面根本没有决策，把流程图那套家具搬进来，它就变成一张碰巧画错的流程图。</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="anth-section" id="alone">
+  <div class="anth-container anth-container--wide">
+    <h2><span class="lang-en">Your figure will be screenshotted and sent to somebody who has not read the page.</span><span class="lang-zh">你的图会被截屏，发给一个没读过这个页面的人。</span></h2>
+    <p style="max-width:860px; margin-top:var(--space-4);"><span class="lang-en">That is the normal fate of a good figure, and almost none of ours survive it. The page had been quietly supplying four things: a title saying what the figure is, one line saying what it answers, a source with a date, and the limits. Strip the page away and all four go with it, leaving a picture that looks authoritative and cannot be acted on. A figure meant to travel has to carry its own four.</span><span class="lang-zh">这是一张好图的正常命运，而我们的图几乎没有一张扛得住。页面一直在悄悄替它提供四样东西：一个说清它是什么的标题、一句说清它答什么的话、带日期的出处、以及边界。把页面拿走，这四样一起没了，剩下一张看起来很权威、但没法据以行动的图。要出门的图，这四样得自己带。</span></p>
+    <figure class="fig" data-allow-tall style="margin-top:var(--space-8);">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 756" role="img" aria-label="A single reference card that is complete on its own. A heading names it as a chooser for figure types and a line underneath says what it answers. Twelve cards follow in a three by four grid, each pairing a question a reader might arrive with against the kind of figure that answers it: what touches what and how thick goes to a cross-section, what order and what comes apart goes to an exploded view, are these the same thing at different sizes goes to a zoom chain, how was it built goes to a process series, what does it look like in each state goes to a same-coordinate triptych, what is inside this symbol goes to an abstraction ladder, which command do I run goes to a debug map, how far apart are these numbers goes to a logarithmic rule, where did the time go goes to a flame graph, what is optional and what repeats goes to a railroad diagram, what is each conductor goes to a pinout, and what happens as it gets busier goes to a queue curve. A footer strip carries the source, the date and the boundary of the card: it says which figure to draw and not how to draw it. Closing notes state that a card meant to travel has to carry its own title, its own one-line purpose, its own source and date, and its own limits, because the page it came from will not travel with it" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+        <defs><pattern id="csDot2" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern></defs>
+        <rect width="1120" height="756" rx="16" fill="#faf9f5" stroke="#eceadf"/><rect width="1120" height="756" rx="16" fill="url(#csDot2)"/>
+        <rect x="16" y="16" width="1088" height="724" rx="12" fill="none" stroke="#141413" stroke-width="2"/>
+        <text x="40" y="62" font-size="26" font-weight="600" letter-spacing="-0.01em" fill="#141413">Which figure answers this?</text>
+        <text x="40" y="88" font-size="12.5" fill="#6b6a5f">start from the question the reader arrives with, not from the thing you want to describe. twelve questions, twelve figures.</text>
+        <text x="40" y="110" font-size="11" font-weight="600" letter-spacing="0.9" fill="#8c8a7d">A CARD MEANT TO BE SENT ON ITS OWN &#183; NOTHING HERE NEEDS THE PAGE IT CAME FROM</text>
+        <line x1="36" y1="124" x2="1084" y2="124" stroke="#e3e0d4" stroke-width="1.2"/>
+        <rect x="36" y="142" width="340" height="92" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="36" y="156" width="4" height="64" rx="2" fill="#c2613f"/>
+        <text x="54" y="168" font-size="12.5" font-weight="600" fill="#141413">what touches what, and how thick</text>
+        <rect x="54" y="178" width="102" height="20" rx="10" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="63" y="192" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">cross-section</text>
+        <text x="54" y="212" font-size="10.5" fill="#6b6a5f">a section, with the cut line shown on a plan</text>
+        <text x="54" y="227" font-size="10.5" fill="#6b6a5f">view</text>
+        <rect x="392" y="142" width="340" height="92" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="392" y="156" width="4" height="64" rx="2" fill="#c2613f"/>
+        <text x="410" y="168" font-size="12.5" font-weight="600" fill="#141413">what order, and what comes apart</text>
+        <rect x="410" y="178" width="102" height="20" rx="10" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="419" y="192" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">exploded-view</text>
+        <text x="410" y="212" font-size="10.5" fill="#6b6a5f">one axis, equal gaps, numbered by assembly</text>
+        <rect x="748" y="142" width="340" height="92" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="748" y="156" width="4" height="64" rx="2" fill="#c2613f"/>
+        <text x="766" y="168" font-size="12.5" font-weight="600" fill="#141413">are these the same thing, bigger?</text>
+        <rect x="766" y="178" width="96" height="20" rx="10" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="775" y="192" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">scale-ladder</text>
+        <text x="766" y="212" font-size="10.5" fill="#6b6a5f">two lines per hop and a real dimension on</text>
+        <text x="766" y="227" font-size="10.5" fill="#6b6a5f">each</text>
+        <rect x="36" y="248" width="340" height="92" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="36" y="262" width="4" height="64" rx="2" fill="#c2613f"/>
+        <text x="54" y="274" font-size="12.5" font-weight="600" fill="#141413">how was it built, step by step</text>
+        <rect x="54" y="284" width="102" height="20" rx="10" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="63" y="298" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">process-steps</text>
+        <text x="54" y="318" font-size="10.5" fill="#6b6a5f">one part drawn N times, only the new bit</text>
+        <text x="54" y="333" font-size="10.5" fill="#6b6a5f">coloured</text>
+        <rect x="392" y="248" width="340" height="92" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="392" y="262" width="4" height="64" rx="2" fill="#c2613f"/>
+        <text x="410" y="274" font-size="12.5" font-weight="600" fill="#141413">what does it look like in each state</text>
+        <rect x="410" y="284" width="109" height="20" rx="10" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="419" y="298" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">state-triptych</text>
+        <text x="410" y="318" font-size="10.5" fill="#6b6a5f">identical coordinates, only the colour moves</text>
+        <rect x="748" y="248" width="340" height="92" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="748" y="262" width="4" height="64" rx="2" fill="#c2613f"/>
+        <text x="766" y="274" font-size="12.5" font-weight="600" fill="#141413">what is inside this symbol</text>
+        <rect x="766" y="284" width="135" height="20" rx="10" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="775" y="298" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">abstraction-ladder</text>
+        <text x="766" y="318" font-size="10.5" fill="#6b6a5f">open it, then fold it, with the cost on the</text>
+        <text x="766" y="333" font-size="10.5" fill="#6b6a5f">fold</text>
+        <rect x="36" y="354" width="340" height="92" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="36" y="368" width="4" height="64" rx="2" fill="#c2613f"/>
+        <text x="54" y="380" font-size="12.5" font-weight="600" fill="#141413">which command do I actually run</text>
+        <rect x="54" y="390" width="76" height="20" rx="10" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="63" y="404" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">debug-map</text>
+        <text x="54" y="424" font-size="10.5" fill="#6b6a5f">the path pinned under every block, green</text>
+        <text x="54" y="439" font-size="10.5" fill="#6b6a5f">reads gold writes</text>
+        <rect x="392" y="354" width="340" height="92" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="392" y="368" width="4" height="64" rx="2" fill="#c2613f"/>
+        <text x="410" y="380" font-size="12.5" font-weight="600" fill="#141413">how far apart are these numbers</text>
+        <rect x="410" y="390" width="115" height="20" rx="10" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="419" y="404" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">magnitude-ruler</text>
+        <text x="410" y="424" font-size="10.5" fill="#6b6a5f">a log axis, and a linear strip showing why</text>
+        <rect x="748" y="354" width="340" height="92" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="748" y="368" width="4" height="64" rx="2" fill="#c2613f"/>
+        <text x="766" y="380" font-size="12.5" font-weight="600" fill="#141413">where did the time go</text>
+        <rect x="766" y="390" width="89" height="20" rx="10" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="775" y="404" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">flame-graph</text>
+        <text x="766" y="424" font-size="10.5" fill="#6b6a5f">width is share of samples, not a timeline</text>
+        <rect x="36" y="460" width="340" height="92" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="36" y="474" width="4" height="64" rx="2" fill="#c2613f"/>
+        <text x="54" y="486" font-size="12.5" font-weight="600" fill="#141413">what is optional, what repeats</text>
+        <rect x="54" y="496" width="70" height="20" rx="10" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="63" y="510" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">railroad</text>
+        <text x="54" y="530" font-size="10.5" fill="#6b6a5f">bypass over, loop under, parallel rows</text>
+        <rect x="392" y="460" width="340" height="92" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="392" y="474" width="4" height="64" rx="2" fill="#c2613f"/>
+        <text x="410" y="486" font-size="12.5" font-weight="600" fill="#141413">what is each conductor</text>
+        <rect x="410" y="496" width="57" height="20" rx="10" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="419" y="510" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">pinout</text>
+        <text x="410" y="530" font-size="10.5" fill="#6b6a5f">physical row plus the table, and which face</text>
+        <text x="410" y="545" font-size="10.5" fill="#6b6a5f">you are on</text>
+        <rect x="748" y="460" width="340" height="92" rx="9" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+        <rect x="748" y="474" width="4" height="64" rx="2" fill="#c2613f"/>
+        <text x="766" y="486" font-size="12.5" font-weight="600" fill="#141413">what happens as it gets busier</text>
+        <rect x="766" y="496" width="109" height="20" rx="10" fill="#e7e4d9" stroke="#cfccc0" stroke-width="1"/>
+        <text x="775" y="510" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace" fill="#141413">queue-pressure</text>
+        <text x="766" y="530" font-size="10.5" fill="#6b6a5f">the knee, not a proportion</text>
+        <rect x="36" y="572" width="1048" height="56" rx="9" fill="#f7e4dc" stroke="#c2613f" stroke-width="1.4"/>
+        <text x="58" y="594" font-size="11.5" font-weight="700" fill="#c2613f">what this card does not do</text>
+        <text x="58" y="614" font-size="11.5" fill="#141413">it says which figure to draw. it says nothing about how to draw one &#8212; that is the template library, and each name above is a file in it.</text>
+        <text x="1062" y="594" text-anchor="end" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#c2613f">anthropic-design &#183; diagram-craft &#167;15 &#183; 2026-09</text>
+        <text x="36" y="654" font-size="11.5" fill="#8c8a7d">a figure that travels needs four things the page normally supplies for it: a title saying what it is, one line saying what it answers, a source with a date, and its own limits. all four are on this card.</text>
+        <text x="36" y="671" font-size="11.5" fill="#8c8a7d">the test is simple and worth applying to any figure: screenshot it, send it to somebody who has not read the page, and see whether they can act on it. most of our figures fail that test, and this one is the shape that passes.</text>
+        <rect x="820" y="700" width="248" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+        <path d="M820 707 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+        <circle cx="833" cy="715" r="3.6" fill="#ffffff"/>
+        <text x="960" y="719" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Cheat sheet &#183; travels alone</text>
+      </svg>
+      <figcaption class="fig-cap">
+        <span class="fig-tag"><span class="lang-en">a card that travels alone</span><span class="lang-zh">一张能自己出门的卡</span></span>
+        <span class="lang-en">The test is worth running on any figure you are about to ship: screenshot it, send it to somebody who was not in the conversation, and see whether they can act on it. This card is built to pass — including the line about what it does not do, which is the part that gets left off most often and the part that stops a reader treating it as a complete answer.</span><span class="lang-zh">这道检验值得对任何一张准备发出去的图跑一遍：截图，发给一个没参与过讨论的人，看他能不能据此做事。这张卡是照着通过它做的——包括那行「它不管什么」，那是最常被省掉的一部分，也是让读者不会把它当成完整答案的那一部分。</span>
+      </figcaption>
+    </figure>
+
+    <div class="callout" style="margin-top:var(--space-8);">
+      <span class="callout__kicker"><span class="lang-en">why this is the last section</span><span class="lang-zh">为什么把这一节放在最后</span></span>
+      <p class="callout__title"><span class="lang-en">Everything above only matters if the figure is still readable when it leaves</span><span class="lang-zh">上面那些，只有在图离开页面之后仍然读得懂时才算数</span></p>
+      <p class="callout__body"><span class="lang-en">The other four sections improve a figure in place, on a page you control, next to prose you wrote. This one is about the version of it that ends up in a chat window at 2am with none of that. If a figure only works in its original setting, most of the work put into it never reaches anybody.</span><span class="lang-zh">前面四节改善的是图在原地的样子——在你能控制的页面上，紧挨着你自己写的正文。这一节讲的是它最后出现在凌晨两点某个聊天窗口里、上述一样都不在的那个版本。一张只在原生环境里成立的图，投进去的功夫大部分没有到达任何人。</span></p>
+    </div>
+  </div>
+</section>
+
+<footer class="anth-section" style="padding-top:var(--space-6);">
+  <div class="anth-container anth-container--wide">
+    <p style="color:var(--anth-text-secondary); font-size:14px;"><span class="lang-en">Templates: <code>see-inside.svg</code>, <code>highlight-in-place.svg</code>, <code>stepper.html</code>, <code>railroad.svg</code> and <code>cheatsheet.svg</code> in <code>skills/anthropic-design/templates/diagrams/</code>. Companion pages: <a href="bringup.html">bringing a panel up</a>, <a href="packaging.html">how a chip is assembled</a>, <a href="one-bit.html">how one bit is held</a>, <a href="pressure.html">where the time goes</a>.</span><span class="lang-zh">模板：<code>skills/anthropic-design/templates/diagrams/</code> 下的 <code>see-inside.svg</code>、<code>highlight-in-place.svg</code>、<code>stepper.html</code>、<code>railroad.svg</code>、<code>cheatsheet.svg</code>。姊妹页：<a href="bringup.html">一块屏，从接上去到亮起来</a>、<a href="packaging.html">一颗芯片是怎么装出来的</a>、<a href="one-bit.html">一个比特是怎么存住的</a>、<a href="pressure.html">时间去哪儿了</a>。</span></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var queryLang = new URLSearchParams(location.search).get('lang');
+  var saved;
+  if (queryLang === 'zh' || queryLang === 'en') {
+    saved = queryLang;
+  } else {
+    try { saved = localStorage.getItem('sky-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+  }
+  function apply(lang) {
+    html.setAttribute('data-lang', lang);
+    html.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('sky-lang', lang); } catch (e) {}
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.textContent = lang === 'zh' ? 'EN / 中' : '中 / EN';
+    });
+  }
+  apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.lang-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        apply(html.getAttribute('data-lang') === 'zh' ? 'en' : 'zh');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- design-review:self-diff v1
+Skill: anthropic-design
+Page-type: feature-deep (demo)
+Created: 2026-09-02
+Decisions:
+- [reader-not-subject] chose "five figures about how a figure is read" over "five more figures about hardware". Because: the repository already has seventy figures of subject matter and nothing that says which of them to reach for or what each costs.
+- [interactive-last-and-guarded] chose "ship the stepper only behind a machine check" over "ship it and rely on review". Because: an interactive figure whose default state is empty passes every existing gate silently, and a failure that leaves no trace is the one worth spending a check on.
+- [argue-against-pictures-once] chose "a section where notation beats the diagram" over "an unbroken case for figures". Because: a page that only ever argues one way stops being usable as guidance.
+- [travel-test-last] chose "closing on the screenshot test" over "opening with it". Because: it reframes the four sections before it, and as an opener it would read as a rule rather than as a consequence.
+Known trade-offs:
+- SVG-internal text stays English in both languages; only figcaptions and prose translate.
+- The stepper needs scripting to change steps. Without it the page shows step one, which is a complete figure, but the other three are unreachable.
+- see-inside, highlight-in-place, railroad and cheatsheet are shared with the diagram gallery, so a change has to be synced into both.
+/design-review:self-diff -->
+</body>
+</html>
