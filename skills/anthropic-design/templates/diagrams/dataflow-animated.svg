@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 500" role="img" aria-label="An animated display data path, in which the moving lines carry meaning rather than decoration. Along the middle of the figure runs the path a pixel takes: a memory bar on the left whose middle region is the framebuffer, then the display controller holding a framebuffer base address register and a fetch DMA engine, then the DSI transmitter, then the panel drawn as glass with a driver integrated circuit and a flexible cable. The three links along that path are drawn as flowing dashed lines, animated so the dashes travel in the direction the data moves: from memory into the fetch DMA over AXI, from the display controller to the DSI transmitter as parallel RGB, and from the transmitter to the panel over four MIPI lanes. Above them, from the CPU box down to the base address register, runs a gold dashed line that does not move at all. A legend states the rule: a line that flows is one the hardware walks continuously, every frame and every line; a line that stays still fires once and then nothing. The closing note records that the motion is CSS rather than SMIL so it stops under prefers-reduced-motion, under a data motion freeze attribute on the document, and whenever a screenshot is taken, which keeps captures identical from run to run" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+  <style>
+    .dfa-flow {
+      stroke-dasharray: 13 9;
+      animation: dfaMarch 1.05s linear infinite;
+    }
+    .dfa-flow--slow { animation-duration: 1.9s; }
+    @keyframes dfaMarch { to { stroke-dashoffset: -44; } }
+
+    /* 三条关闭动效的口子 —— 跟 glass 同一套约定。
+       截图检查以 reducedMotion:'reduce' 跑,所以截出来永远是同一帧。 */
+    @media (prefers-reduced-motion: reduce) {
+      .dfa-flow { animation: none; stroke-dashoffset: 0; }
+    }
+    :root[data-motion-freeze] .dfa-flow,
+    html[data-motion-freeze] .dfa-flow {
+      animation: none; stroke-dashoffset: 0;
+    }
+  </style>
+    <pattern id="dfaD" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <pattern id="dfaH" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2f5c8a" stroke-width="1.6" opacity="0.35"/></pattern>
+    <marker id="dfaAO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <marker id="dfaAB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#2f5c8a"/></marker>
+    <marker id="dfaAG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#4d5a3c"/></marker>
+    <marker id="dfaAK" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#141413"/></marker>
+    <marker id="dfaAD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#8a6a2f"/></marker>
+  </defs>
+  <rect width="1120" height="500" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="500" rx="16" fill="url(#dfaD)"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">ANIMATED DATA PATH &#183; A LINE THAT FLOWS IS ONE THAT NEVER STOPS</text>
+  <line x1="612" y1="30" x2="648" y2="30" stroke="#d97757" stroke-width="3" class="dfa-flow"/>
+  <text x="656" y="34" text-anchor="start" font-size="12" fill="#6b6a5f">flows &#8212; walked every frame</text>
+  <line x1="884" y1="30" x2="920" y2="30" stroke="#8a6a2f" stroke-width="2" stroke-dasharray="5 4"/>
+  <text x="928" y="34" text-anchor="start" font-size="12" fill="#6b6a5f">still &#8212; fires once</text>
+  <rect x="40" y="70" width="196" height="52" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="138" y="93" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">CPU</text>
+  <text x="138" y="110" text-anchor="middle" font-size="11.5" fill="#6b6a5f">writes one register</text>
+  <path d="M236 96 L470 96 L470 168" fill="none" stroke="#8a6a2f" stroke-width="2.0" stroke-dasharray="5 4" marker-end="url(#dfaAD)"/>
+  <rect x="281.0" y="87" width="144.0" height="18" rx="9" fill="#141413"/>
+  <text x="353" y="100" text-anchor="middle" font-size="10" font-family="'JetBrains Mono', monospace" fill="#ffffff">APB &#183; 4 bytes / frame</text>
+  <rect x="40" y="206" width="70" height="56" fill="#f1efe8"/>
+  <text x="75" y="239" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">other</text>
+  <line x1="110" y1="206" x2="110" y2="262" stroke="#141413" stroke-width="1.5"/>
+  <rect x="110" y="206" width="110" height="56" fill="#eef1e7"/>
+  <text x="165" y="232" text-anchor="middle" font-size="11.5" font-weight="600" fill="#4d5a3c">framebuffer</text>
+  <text x="165" y="247" text-anchor="middle" font-size="10.5" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">8.3 MB</text>
+  <line x1="220" y1="206" x2="220" y2="262" stroke="#141413" stroke-width="1.5"/>
+  <rect x="220" y="206" width="60" height="56" fill="#f1efe8"/>
+  <text x="250" y="239" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6b6a5f">other</text>
+  <rect x="40" y="206" width="240" height="56" rx="7" fill="none" stroke="#141413" stroke-width="1.8"/>
+  <rect x="141.0" y="271" width="38.0" height="18" rx="9" fill="#141413"/>
+  <text x="160" y="284" text-anchor="middle" font-size="9.5" fill="#ffffff">DRAM</text>
+  <rect x="390" y="168" width="190" height="132" rx="11" fill="none" stroke="#c4d5e6" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <rect x="410.2" y="159" width="119.5" height="18" rx="9" fill="#141413"/>
+  <text x="470" y="172" text-anchor="middle" font-size="10" fill="#ffffff">display controller</text>
+  <rect x="404" y="196" width="162" height="42" rx="8" fill="#f0e4d8" stroke="#d9bf94" stroke-width="1.4"/>
+  <text x="485" y="222" text-anchor="middle" font-size="12" font-weight="600" fill="#8a6a2f">FB base reg</text>
+  <rect x="404" y="246" width="162" height="42" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="485" y="272" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">fetch DMA</text>
+  <rect x="690" y="202" width="110" height="64" rx="8" fill="#e2ecf5" stroke="#c4d5e6" stroke-width="1.4"/>
+  <text x="745" y="231" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">DSI TX</text>
+  <text x="745" y="248" text-anchor="middle" font-size="11.5" fill="#6b6a5f">packs</text>
+  <rect x="900" y="192" width="160" height="84" rx="4" fill="#e2ecf5" stroke="#141413" stroke-width="1.6"/>
+  <rect x="907" y="198" width="146" height="56" rx="2" fill="#ffffff" stroke="#c4d5e6"/>
+  <text x="980" y="232" text-anchor="middle" font-size="11" fill="#6b6a5f">the glass</text>
+  <rect x="926" y="258" width="62" height="12" rx="2" fill="#3a3a36"/>
+  <text x="957" y="267" text-anchor="middle" font-size="8" font-family="'JetBrains Mono', monospace" fill="#ffffff">driver IC</text>
+  <path d="M1060 264 L1090 264 L1090 290" fill="none" stroke="#8a6a2f" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+  <line x1="280" y1="234" x2="388" y2="234" stroke="#d97757" stroke-width="3" class="dfa-flow"/>
+  <path d="M379 228 L389 234 L379 240 Z" fill="#d97757"/>
+  <rect x="317.3" y="199" width="33.5" height="18" rx="9" fill="#141413"/>
+  <text x="334" y="212" text-anchor="middle" font-size="9.5" font-family="'JetBrains Mono', monospace" fill="#ffffff">AXI</text>
+  <line x1="580" y1="234" x2="688" y2="234" stroke="#2f5c8a" stroke-width="3" class="dfa-flow"/>
+  <path d="M679 228 L689 234 L679 240 Z" fill="#2f5c8a"/>
+  <rect x="596.9" y="199" width="74.3" height="18" rx="9" fill="#141413"/>
+  <text x="634" y="212" text-anchor="middle" font-size="9.5" font-family="'JetBrains Mono', monospace" fill="#ffffff">24-bit RGB</text>
+  <line x1="800" y1="234" x2="898" y2="234" stroke="#2f5c8a" stroke-width="3" class="dfa-flow dfa-flow--slow"/>
+  <path d="M889 228 L899 234 L889 240 Z" fill="#2f5c8a"/>
+  <rect x="820.6" y="199" width="56.8" height="18" rx="9" fill="#141413"/>
+  <text x="849" y="212" text-anchor="middle" font-size="9.5" font-family="'JetBrains Mono', monospace" fill="#ffffff">MIPI x4</text>
+  <circle cx="334" cy="260" r="10.5" fill="#d97757"/>
+  <text x="334" y="264" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">1</text>
+  <circle cx="470" cy="140" r="10.5" fill="#d97757"/>
+  <text x="470" y="144" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">2</text>
+  <circle cx="634" cy="260" r="10.5" fill="#d97757"/>
+  <text x="634" y="264" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">3</text>
+  <circle cx="849" cy="260" r="10.5" fill="#d97757"/>
+  <text x="849" y="264" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ffffff">4</text>
+  <text x="40" y="332" text-anchor="start" font-size="11.5" font-weight="600" fill="#8a6a2f">&#9313; is the only step software takes, and it happens once per frame.</text>
+  <text x="40" y="350" text-anchor="start" font-size="11.5" font-weight="600" fill="#d97757">&#9312; &#9314; &#9315; never stop while the screen is on &#8212; that is what the motion is saying.</text>
+  <text x="40" y="434" text-anchor="start" font-size="11.5" fill="#8c8a7d">the motion is not decoration: a flowing line means the hardware walks that path continuously, a still line means one transaction and then nothing.</text>
+  <text x="40" y="451" text-anchor="start" font-size="11.5" fill="#8c8a7d">it is CSS, not SMIL, so it halts under prefers-reduced-motion, under html[data-motion-freeze], and in every screenshot &#8212; captures stay identical run to run.</text>
+  <rect x="40" y="374" width="159" height="30" rx="7" fill="#ffffff" stroke="#141413" stroke-width="1.6"/>
+  <path d="M40 381 a7 7 0 0 1 7-7 h20 v30 h-20 a7 7 0 0 1 -7 -7 Z" fill="#141413"/>
+  <circle cx="53" cy="389" r="3.6" fill="#ffffff"/>
+  <text x="133" y="393" text-anchor="middle" font-size="11.5" font-weight="600" fill="#141413">Animated data path</text>
+</svg>
