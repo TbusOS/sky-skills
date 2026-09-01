@@ -52,5 +52,19 @@ open(sys.argv[2], "w", encoding="utf-8").write(s)
 PY
 chk "注入术语全不定义"        hit   "$T/nodef.html" "no definition anywhere"
 
+# ── 注入 3:把双语页压成**单语页**(拆掉 lang-zh span、删掉 lang-en),再去掉定义。
+#    2026-09-01 发现的漏洞:检查只扫 lang-zh span,纯中文页待检文本恒为空,
+#    整道闸空转 —— 一批纯中文报告 err=0 warn=0 全绿,而正文里 5 个术语没定义。
+#    这条用例就是那个漏洞的回归测试:修好之前它必然 FAIL。
+python3 - "$T/nodef.html" "$T/mono.html" <<'PY2'
+import re, sys
+s = open(sys.argv[1], encoding="utf-8").read()
+s = re.sub(r'<span class=["\']lang-en["\']\s*>.*?</span>', '', s, flags=re.S)
+s = re.sub(r'<span class=["\']lang-zh["\']\s*>(.*?)</span>', r'\1', s, flags=re.S)
+open(sys.argv[2], "w", encoding="utf-8").write(s)
+PY2
+echo "  (单语页 lang-zh span 残留: $(grep -o 'lang-zh' "$T/mono.html" | wc -l | tr -d ' '))"
+chk "单语页术语全不定义"      hit   "$T/mono.html" "no definition anywhere"
+
 echo "探针结果: $pass 通过, $fail 失败"
 [ "$fail" -eq 0 ]

@@ -584,8 +584,20 @@ def check_file(
     if os.path.exists(_jf):
         with open(_jf, encoding="utf-8") as _fh:
             terms = [t.strip() for t in _fh if t.strip() and not t.startswith("#")]
-        zh_text = " ".join(zh_span_pattern.findall(html))
-        zh_plain = re.sub(r"<[^>]+>", "", zh_text)
+        # 取待检正文。双语页只看 lang-zh span;**单语页(整页一个 lang-zh 都没有)
+        # 退回整页**,否则待检文本恒为空、这道检查在纯中文页上完全空转。
+        # 2026-09-01 实测:一批纯中文投资报告 err=0 warn=0 全绿,而人工按同样
+        # 逻辑跑正文,5 个术语确实没定义 —— 闸一个都没看见,绿灯是假的。
+        # 空转的检查比没有检查更糟:它让人以为查过了。见 known-bugs.md 1.63。
+        zh_bodies = zh_span_pattern.findall(html)
+        zh_src = " ".join(zh_bodies) if zh_bodies else html
+        # script / style / HTML 注释 / 代码块都不是正文 —— 标识符、self-diff
+        # 自评块里出现的词不算「在正文里用了这个术语」。整页退回时尤其要紧。
+        for _drop in (r"<script\b.*?</script>", r"<style\b.*?</style>",
+                      r"<!--.*?-->", r"<pre\b.*?</pre>", r"<code\b.*?</code>"):
+            zh_src = re.sub(_drop, " ", zh_src, flags=re.DOTALL | re.I)
+        # 标签去掉不留空格:`<strong>帧</strong>缓冲` 视觉上是一个词,要能拼回来。
+        zh_plain = re.sub(r"<[^>]+>", "", zh_src)
         # 有定义的迹象:词后 40 字内出现「是 / 指 / 就是 / 即 / 意思是 / 叫」,
         # 或者页面上有术语表结构(class 含 term/glossary,或 <dt>)。
         has_glossary = bool(re.search(r'class="[^"]*(?:term|glossary|def)[^"]*"|<dt\b', html, re.I))
