@@ -55,7 +55,7 @@ executing. `--force` is only valid for empty target dirs (non-empty is always
 rejected; clean up by hand first). See `scripts/bootstrap.sh --help` for
 detail.
 
-## Post-setup · 搭建完成后(3 道闸)
+## Post-setup · 搭建完成后(3 道检查)
 
 `bootstrap.sh` verifies three safety layers before exiting 0:
 
@@ -71,7 +71,7 @@ detail.
 Gate failures halt bootstrap with a clear reason — nothing is left in a
 partial state that the user has to hand-clean.
 
-**三道闸都过才算 bootstrap 成功**。任一失败会明确说明原因,不留一半成品。
+**三道检查都过才算 bootstrap 成功**。任一失败会明确说明原因,不留一半成品。
 
 ## Daily operations · 日常操作
 
@@ -224,6 +224,7 @@ B4) to re-verify the topology on demand.
   syncing satellite from gateway
 - `scripts/clean-verify-run.sh` — sync + clean + full-build + stamp · the pre-push reproducibility gate for 3-clone mode
 - `scripts/install-hooks.sh` — writes the `pre-push` hook on the gateway · `--enforce-clean-verify` adds the stamp-match gate
+- `scripts/check_before_mr.sh` — 5 checks to run **right before opening the MR** (clean tree · clean-verify repo exists · stamp present · stamp sha == branch head · remote == local). For push-early / MR-late projects — see below
 - `references/decision-checklist.md` — when to use / when not to use
 - `references/daily-workflow.md` — 4-step cheatsheet
 - `references/patterns.md` — N-satellite / worktree fallback / GitHub-GitLab-Gerrit shapes
@@ -231,6 +232,42 @@ B4) to re-verify the topology on demand.
 - `references/server-side-enforcement.md` — GitLab / GitHub / Gerrit / pre-receive / Actions templates (real enforcement beyond advisory client-side hook)
 - `references/troubleshooting.md` — 10 common failures, symptom → diagnose → fix → prevent
 - `references/comparison.md` — dual-clone vs worktree vs single-repo, 11-dimension table
+
+## Push-early / MR-late · 先推分支,最后才开 MR
+
+有些项目这样走:**个人分支随时 push 到远端当备份,一整个主题做完才开 MR**。
+这时 `install-hooks.sh --enforce-clean-verify` 那道会碍事 —— 它**不看分支名,
+任何 push 都拦**,于是每次备份性质的 push 都要 `--push-option=allow-unverified`。
+
+**绕过一旦变成肌肉记忆,哪天真该拦的那次也会顺手绕过** —— 比关掉更糟,
+因为还以为有人看着。
+
+而真正该卡的是**开 MR 那一刻**,那是托管平台上的动作,不是 git 事件,pre-push hook
+根本接不到。所以这类项目应该:
+
+```bash
+# 1. 建仓时【不加】 --enforce-clean-verify(或事后把 hook 里 enforce_cv 改 0)
+#    Gate 1(保护分支)照旧生效,个人分支随便推
+
+# 2. 开 MR 之前跑这个,五项全过才去点开 MR
+scripts/check_before_mr.sh \
+  --gateway-dir=<gateway> \
+  --clean-verify-dir=<clean-verify> \
+  --branch=<待 MR 的分支>
+```
+
+五项:
+
+| | 查什么 | 漏了会怎样 |
+|---|---|---|
+| M1 | gateway 工作区干净 | 要 MR 的不是手上这份 |
+| M2 | clean-verify 仓在位且是 git 仓 | 空目录 = 那道关卡从来没建起来过 |
+| M3 | 盖章文件存在 | 压根没跑过 `clean-verify-run.sh` |
+| M4 | 盖章 sha == 待 MR 分支 HEAD | **跑过,但之后又提交了几笔** —— 最容易漏的一种 |
+| M5 | 远端分支 == 本地 HEAD | 本地验过没推,MR 提的是远端那份旧的 |
+
+**怎么选**:每次 push 都该验 → 用 `--enforce-clean-verify`;
+先推后 MR → 关掉它,改用 `check_before_mr.sh`。**两个都不用 = 那道关卡不存在。**
 
 ## Reference · 参考
 
