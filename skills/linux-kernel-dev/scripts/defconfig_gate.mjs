@@ -24,9 +24,21 @@
  *   missing-space `#CONFIG_X is not set` -- no space after `#`, so Kconfig sees
  *                a bare comment and the symbol is NOT forced off    -> WARN
  *                (`# CONFIG_X is not set` WITH the space is the real form)
- *   commented-out `#CONFIG_X=v` -- an assignment parked behind a `#`. That is
- *                the ordinary way to disable a line, not a defect -> counted,
- *                never reported
+ *   commented-out `#CONFIG_X=v` -- an assignment parked behind a `#`. Whether
+ *                that actually disables anything depends on the symbol's
+ *                Kconfig default, so the verdict is split:
+ *                  · .config has no value for X  -> the comment did disable it,
+ *                    the ordinary way to park a line   -> counted, not reported
+ *                  · .config still has X=v       -> commenting out only dropped
+ *                    the explicit assignment; the Kconfig `default` then decided,
+ *                    and it decided ON. The line reads "off" and the build is
+ *                    "on".                            -> WARN (parked-but-on)
+ *                Same failure as missing-space: the author believed they turned
+ *                something off and did not. Real case 2026-09-03:
+ *                `#CONFIG_VENDOR_SIGNATURE_SUPPORT=y` in a vendor defconfig, while
+ *                the symbol carried `default y if VENDOR` and VENDOR was on -- a whole
+ *                signature-verify directory compiled in behind a line that reads
+ *                as disabled.
  *
  *   A symbol present in .config but absent from the defconfig is NOT reported:
  *   that is the normal savedefconfig minimisation (bsp_discipline.md §1 case B).
@@ -58,9 +70,10 @@ const NOT_SET = /^# (CONFIG_[A-Za-z0-9_]+) is not set$/
 // without the space it is a bare comment -- almost always someone meaning to
 // force the symbol off and silently not doing so.
 const PSEUDO_NOTSET = /^#(CONFIG_[A-Za-z0-9_]+) is not set$/
-// `#CONFIG_X=v` is just an assignment commented out, which is the ordinary way
-// to park a line. Not a defect -- do not report it.
-const COMMENTED_OUT = /^#(CONFIG_[A-Za-z0-9_]+)=/
+// `#CONFIG_X=v` is an assignment commented out. Whether that disables anything
+// depends on the symbol's Kconfig default, so audit() checks .config before
+// deciding: still set there -> parked-but-on (WARN); absent -> genuinely parked.
+const COMMENTED_OUT = /^#(CONFIG_[A-Za-z0-9_]+)=(.*)$/
 
 function die(msg) { console.error(msg); process.exit(3) }
 
@@ -127,7 +140,7 @@ function collectDefinedSymbols(tree) {
 function audit(defconfigPath, configPath, tree) {
   const { values, off } = readConfig(configPath)
   const defined = tree ? collectDefinedSymbols(tree) : null
-  const out = { honored: 0, notSetHonored: 0, commentedOut: 0, findings: [], pseudo: [] }
+  const out = { honored: 0, notSetHonored: 0, commentedOut: 0, findings: [], pseudo: [], parkedOn: [] }
 
   const lines = readFileSync(defconfigPath, 'utf8').split('\n')
   for (const raw of lines) {
@@ -153,7 +166,15 @@ function audit(defconfigPath, configPath, tree) {
       else out.notSetHonored++
       continue
     }
-    if (COMMENTED_OUT.test(line)) { out.commentedOut++; continue }
+    m = COMMENTED_OUT.exec(line)
+    if (m) {
+      const [, sym, want] = m
+      // The comment removed the explicit assignment. If .config still carries a
+      // value, the Kconfig default supplied it -- the line lies about the build.
+      if (values.has(sym)) out.parkedOn.push({ line: line.trim(), sym, got: values.get(sym) })
+      else out.commentedOut++
+      continue
+    }
     m = PSEUDO_NOTSET.exec(line)
     if (m) out.pseudo.push(line.trim())
   }
@@ -175,6 +196,7 @@ function report(r, a) {
     console.log(`    "is not set" kept  : ${r.notSetHonored}`)
     console.log(`    NOT in effect      : ${r.findings.length}`)
     console.log(`    missing-space      : ${r.pseudo.length}`)
+    console.log(`    parked-but-on      : ${r.parkedOn.length}`)
     console.log(`    commented-out (ok) : ${r.commentedOut}`)
   }
   for (const f of r.findings) {
@@ -187,6 +209,12 @@ function report(r, a) {
     console.log(`  MISSING-SPACE (Kconfig reads these as bare comments, so they do nothing):`)
     for (const p of r.pseudo) console.log(`      ${p}`)
     console.log(`      the form Kconfig honours is:  # CONFIG_X is not set`)
+  }
+  if (r.parkedOn.length && !a.quiet) {
+    console.log(`  PARKED-BUT-ON (commented out, yet the build still has them on --`)
+    console.log(`                 the Kconfig default decided once the explicit line went away):`)
+    for (const p of r.parkedOn) console.log(`      ${p.line}   ->  .config has ${p.sym}=${p.got}`)
+    console.log(`      to really force it off:  # ${r.parkedOn[0].sym} is not set`)
   }
 }
 
@@ -222,7 +250,8 @@ function selftest() {
     'CONFIG_VALUE_SYM=0x1000',       // changed
     '# CONFIG_OFF_SYM is not set',   // contradicted
     '#CONFIG_PSEUDO_SYM is not set', // missing-space -- flagged
-    '#CONFIG_PARKED_SYM=y',          // commented-out assignment -- NOT a defect
+    '#CONFIG_PARKED_SYM=y',          // parked and .config agrees it is off -- NOT a defect
+    '#CONFIG_STILL_ON_SYM=y',        // parked, but .config still has it on -- flagged
     '',
   ].join('\n'))
 
@@ -232,6 +261,7 @@ function selftest() {
     'CONFIG_MENU_SYM=y',
     'CONFIG_VALUE_SYM=0x2000',
     'CONFIG_OFF_SYM=y',
+    'CONFIG_STILL_ON_SYM=y',
     '',
   ].join('\n'))
 
@@ -259,7 +289,10 @@ function selftest() {
   console.log(`  ${pseudoOk ? 'PASS' : 'FAIL'}  missing-space count: expected 1, got ${r.pseudo.length}`)
   const comOk = r.commentedOut === 1
   if (!comOk) bad++
-  console.log(`  ${comOk ? 'PASS' : 'FAIL'}  commented-out not flagged as a defect: expected 1, got ${r.commentedOut}`)
+  console.log(`  ${comOk ? 'PASS' : 'FAIL'}  commented-out (genuinely off) not flagged: expected 1, got ${r.commentedOut}`)
+  const parkedOk = r.parkedOn.length === 1 && r.parkedOn[0].sym === 'CONFIG_STILL_ON_SYM'
+  if (!parkedOk) bad++
+  console.log(`  ${parkedOk ? 'PASS' : 'FAIL'}  parked-but-on caught: expected CONFIG_STILL_ON_SYM, got ${r.parkedOn.map(x => x.sym).join(',') || '(none)'}`)
 
   rmSync(dir, { recursive: true, force: true })
   console.log(bad === 0 ? '\nselftest: all checks caught their planted defect' : `\nselftest: ${bad} check(s) did not fire`)
@@ -281,11 +314,14 @@ if (a.tree) { try { statSync(join(a.tree, 'Kconfig')) } catch { die(`--tree does
 const res = audit(a.defconfig, a.config, a.tree)
 report(res, a)
 
-const fail = res.findings.length > 0 || (a.strict && res.pseudo.length > 0)
+const fail = res.findings.length > 0 || (a.strict && (res.pseudo.length > 0 || res.parkedOn.length > 0))
+const warnCount = res.pseudo.length + res.parkedOn.length
 if (!a.quiet) {
   console.log(fail
     ? `\nRESULT: FAIL -- ${res.findings.length} declared option(s) not in effect`
-    : `\nRESULT: clean -- every declared option is in effect`)
+    : warnCount
+      ? `\nRESULT: nothing was dropped, but ${warnCount} line(s) read as "off" while the build has them on -- see above (--strict turns this into a failure)`
+      : `\nRESULT: clean -- every declared option is in effect`)
   if (!a.tree) console.log('(bind a tree with --tree to separate dead lines from unsatisfied dependencies)')
 }
 process.exit(fail ? 1 : 0)

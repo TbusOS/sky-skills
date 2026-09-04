@@ -5,7 +5,7 @@
 
 ## 1. defconfig 必须走框架原生流程
 
-**绝不手改 `defconfig`。** 依赖链（`select`/`depends on`/`imply`）由 Kconfig 引擎算；手改漏连锁依赖 → 编过但 runtime 静默缺功能。
+**绝不手改 `defconfig`。** 依赖链（`select`/`depends on`/`imply`）由 Kconfig 引擎算；手改漏连锁依赖 → 编过，但跑起来少了功能，而且不报错。
 
 正规流程：
 ```bash
@@ -23,7 +23,7 @@ diff configs/<board>_defconfig defconfig                 # 理解差异再 cp
 - B（正常）：符号值 = Kconfig `default`，savedefconfig 最小化时自然省略，`.config` 里仍取 default，功能照编入。
 - 切忌看到省略就惊呼"污染/失效"——先分清 A/B。
 
-### 反向的坑更危险：写进 defconfig ≠ 生效（**跑闸，别肉眼看**）
+### 反向的坑更危险：写进 defconfig ≠ 生效（**跑检查脚本，别肉眼看**）
 
 上面讲的是"defconfig 里没有但生效了"。反过来那种更难发现：**defconfig 里明写着
 `=y`，Kconfig 却把它悄悄丢了** —— 符号在本 arch 不存在、`depends on` 不满足、
@@ -48,7 +48,8 @@ scripts/defconfig_gate.mjs --selftest  # 自降解校准：每类缺陷种一个
 
 判定分类：`honored` / `changed`（值被覆盖）/ `dropped`（声明了但没落地，再细分
 `undefined-symbol` = 上面的 A 类死行、`unreachable` = 依赖或 arch 不满足）/
-`contradicted`（写了 `# X is not set`，`.config` 里却是 `y`）/ `missing-space`。
+`contradicted`（写了 `# X is not set`，`.config` 里却是 `y`）/ `missing-space` /
+`parked-but-on`。
 
 **`missing-space` 这类值得单说**：`#CONFIG_X is not set` —— `#` 后**少一个空格**。
 Kconfig 认的"未设置"形式必须是 `# CONFIG_X is not set`（带空格）；少了空格就是
@@ -56,9 +57,27 @@ Kconfig 认的"未设置"形式必须是 `# CONFIG_X is not set`（带空格）�
 想关掉一组选项），结果**一条都没生效**；而取值碰巧等于默认值时不会有任何症状
 —— 直到哪天上游把默认值改了。
 
-**别把它和"正常注释掉一行"搞混**：`#CONFIG_X=v` 是把一条赋值语句停用，这是
-常规做法、不是缺陷，闸只计数不报警。两者的区别在于作者的意图：前者想让 Kconfig
-读到并执行"关掉"，后者想让 Kconfig 什么都别读到。
+**`#CONFIG_X=v`（注释掉一条赋值）要看 `.config` 才知道算不算缺陷。**
+注释掉只是把这条显式赋值拿走，**不等于关掉** —— 拿走之后由 Kconfig 里的
+`default` 说了算：
+
+| `.config` 里 X 是什么 | 结论 |
+|---|---|
+| 查不到 / `is not set` | 注释确实让它关了，常规做法，只计数不报警 |
+| 仍然有值（如 `X=y`） | `default` 接管并给了 `y`。**这一行读起来是关的，构建里是开的** → 报 `parked-but-on` |
+
+这跟 `missing-space` 是同一类错误：作者以为关掉了，实际没关。
+`--strict` 下两者都会让检查失败。
+
+**真实案例（2026-09-03，某 ARM64 SoC 的厂商 u-boot）**：某产品 defconfig 里有一行
+`#CONFIG_VENDOR_SIGNATURE_SUPPORT=y`，而该符号的 Kconfig 写着 `default y if VENDOR`、
+`CONFIG_VENDOR=y`。于是 `.config` 里它是 `y`，`obj-$(CONFIG_VENDOR_SIGNATURE_SUPPORT) += security/`
+把整个验签目录编了进去 —— 藏在一行"看着已经关掉"的注释后面。
+按文本读会得出完全相反的结论。
+
+⚠ **这一条是从"不报警"改过来的**：检查脚本原先把 `#CONFIG_X=v` 一律当常规做法放过，
+理由写的是"作者想让 Kconfig 什么都别读到"。那个理由只在**符号默认为 n** 时成立，
+默认为 y 时正好相反。现在按 `.config` 分两种情况判。
 
 ## 2. 硬件状态调试必须直接读字节
 
