@@ -248,7 +248,14 @@ function overlaps(boxes) {
       if (a.t === b.t && a.tag === b.tag) continue;   // two lines of one element
       const ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
       const oy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
-      if (ox <= 1 || oy <= 1) continue;
+      // A line box is taller than the glyphs inside it, and how much taller
+      // depends on the font's ascent and descent. Noto Sans SC runs tall enough
+      // that a 40px heading with 46px line-height reports a 56px box, so a
+      // heading and the paragraph under it touch by three pixels with nothing
+      // overlapping on screen. Two lines of text that genuinely collide do so
+      // by much more than a third of a line, so a floor in pixels removes the
+      // whole class without hiding a real one.
+      if (ox < 6 || oy < 6) continue;
       const area = ox * oy;
       const smaller = Math.min(a.w * a.h, b.w * b.h);
       if (area / smaller < 0.12) continue;           // brushing counts as clear
