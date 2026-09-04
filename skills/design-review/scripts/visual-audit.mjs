@@ -38,6 +38,25 @@ import { PNG } from 'pngjs';
 
 const args = process.argv.slice(2);
 const ignoreIntentional = args.includes('--ignore-intentional');
+// --waive=<kind>[|reason] — a project's DESIGN.md has looked at this finding and
+// decided to live with it. It is demoted from error to warning and labelled
+// with the reason; it is never hidden. Something you chose to accept is still
+// something the next reader should see, and a mute button is how a check stops
+// meaning anything.
+const waivers = new Map();
+for (const a of args) {
+  if (!a.startsWith('--waive=')) continue;
+  const [kindRaw, ...rest] = a.slice(8).split('|');
+  // Ids are <gate>:<kind>. A waiver addressed to another gate is not this
+  // gate's business — reporting it as stale here would be wrong twice over.
+  const m = /^([a-z-]+):(.+)$/.exec(kindRaw.trim());
+  if (!m || m[1] !== 'visual-audit') continue;
+  waivers.set(m[2], rest.join('|') || '(no reason given)');
+}
+const waiversUsed = new Set();
+// One page not tripping a waiver says nothing when a whole directory is being
+// checked, so the caller silences the stale report for multi-page runs.
+const waiveQuiet = args.includes('--waive-quiet');
 // --theme=dark|light — flips html[data-theme] after load. Glass pages are
 // dual-theme; the harness audits dark (canonical) and light separately.
 const themeArg = (args.find((a) => a.startsWith('--theme=')) || '').split('=')[1] || null;
@@ -2505,17 +2524,38 @@ const visibleFindings = ignoreIntentional
     })
   : findings;
 
+for (const f of visibleFindings) {
+  if (!waivers.has(f.kind)) continue;
+  waiversUsed.add(f.kind);
+  f.waived = waivers.get(f.kind);
+  if (f.severity === 'error') f.severity = 'warn';
+}
 const errors = visibleFindings.filter((i) => i.severity === 'error');
 const warns = visibleFindings.filter((i) => i.severity === 'warn');
+// A waiver that matched nothing is either a finding someone already fixed or a
+// check that has been renamed. Either way the line in DESIGN.md is now telling
+// the next reader something that is not true.
+const waiversUnused = [...waivers.keys()].filter((k) => !waiversUsed.has(k));
+
+function reportWaivers() {
+  for (const k of waiversUsed) console.log(`  [waived] visual-audit:${k} — ${waivers.get(k)}`);
+  if (!waiveQuiet) {
+    for (const k of waiversUnused) {
+      console.log(`  [stale waiver] visual-audit:${k} did not fire on this page — remove it from DESIGN.md or check the id`);
+    }
+  }
+}
 
 if (visibleFindings.length === 0) {
   const noise = suppressed > 0 ? ` (${suppressed} brand-intentional suppressed)` : '';
   console.log(`visual-audit: OK  (${target})${noise}`);
+  reportWaivers();
   process.exit(0);
 }
 
 const noise = suppressed > 0 ? ` · ${suppressed} brand-intentional suppressed` : '';
 console.log(`visual-audit: ${errors.length} error(s), ${warns.length} warning(s)  (${target})${noise}`);
+reportWaivers();
 for (const i of visibleFindings) {
   if (i.kind === 'contrast') {
     console.log(

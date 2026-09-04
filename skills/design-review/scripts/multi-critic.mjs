@@ -84,7 +84,7 @@ async function safeMkdir(path) {
 
 function fence(lang, body) { return '```' + lang + '\n' + (body || '') + '\n```'; }
 
-function buildSpecialistPrompt({ specialist, agentSpec, skill, page, target, targetHtml, canonicalHtml, canonicalMd, crossRules, knownBugs, dosDonts, languageRules }) {
+function buildSpecialistPrompt({ specialist, agentSpec, skill, page, target, targetHtml, canonicalHtml, canonicalMd, designMd, crossRules, knownBugs, dosDonts, languageRules }) {
   return `<!-- multi-critic · specialist=${specialist.name} · skill=${skill} · page=${page} · target=${target} -->
 
 # System prompt · design-${specialist.name}-critic
@@ -111,6 +111,16 @@ ${fence('html', canonicalHtml.slice(0, 80000))}
 ## Canonical MD (7 decisions · acceptance rubric)
 
 ${fence('markdown', canonicalMd)}
+${designMd ? `
+## What this project says it is trying to do (its DESIGN.md)
+
+The canonical page above is the yardstick for voice. This is the yardstick for
+purpose — the project's own statement of who it is for and what it will not do.
+Where the two disagree about content, this wins; where they disagree about
+craft, the canonical wins.
+
+${fence('markdown', designMd)}
+` : ''}
 
 ## Cross-skill rules
 
@@ -217,10 +227,24 @@ async function main() {
   const canonicalMdPath = `skills/${skill}-design/references/canonical/${page}.md`;
   const canonicalHtml = await safeRead(resolve(REPO_ROOT, canonicalHtmlPath));
   const canonicalMd = await safeRead(resolve(REPO_ROOT, canonicalMdPath));
+  // The project's own stated intent, if it wrote one down. Without it the
+  // critic judges the page against a canonical demo for a fictional product,
+  // which is the right yardstick for voice and the wrong one for purpose.
+  const designMd = await (async () => {
+    const { find, load } = await import('./design-md.mjs');
+    const f = find(resolve(REPO_ROOT, target), REPO_ROOT);
+    if (!f) return null;
+    const r = load(f);
+    return r.body || null;
+  })().catch(() => null);
   const crossRules = await safeRead(resolve(REPO_ROOT, 'skills/design-review/references/cross-skill-rules.md'));
   const knownBugs = await safeRead(resolve(REPO_ROOT, 'skills/design-review/references/known-bugs.md'));
   const dosDonts = await safeRead(resolve(REPO_ROOT, `skills/${skill}-design/references/dos-and-donts.md`));
-  const languageRules = await safeRead('/Users/sky/.claude/rules/language.md');
+  // Optional. A local prose-style file, if the operator keeps one. Absent on
+  // most machines, and safeRead returns null rather than failing.
+  const languageRules = process.env.DESIGN_LANGUAGE_RULES
+    ? await safeRead(process.env.DESIGN_LANGUAGE_RULES)
+    : await safeRead(resolve(process.env.HOME || '', '.claude/rules/language.md'));
 
   if (!canonicalHtml) { console.error(`canonical HTML missing: ${canonicalHtmlPath}`); return 1; }
   if (!canonicalMd) { console.error(`canonical MD missing: ${canonicalMdPath}`); return 1; }
@@ -233,7 +257,7 @@ async function main() {
     const agentSpec = await safeRead(resolve(REPO_ROOT, specialist.agent)) || `(agent spec ${specialist.agent} not found)`;
     const prompt = buildSpecialistPrompt({
       specialist, agentSpec, skill, page, target, targetHtml,
-      canonicalHtml, canonicalMd, crossRules, knownBugs, dosDonts, languageRules,
+      canonicalHtml, canonicalMd, designMd, crossRules, knownBugs, dosDonts, languageRules,
     });
     const outPath = join(outDir, `multi-critic-${specialist.name}-${base}-${ts}.md`);
     await writeFile(resolve(REPO_ROOT, outPath), prompt, 'utf-8');

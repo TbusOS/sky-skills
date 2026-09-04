@@ -72,7 +72,7 @@ const PROMOTED = new Set([
 ]);
 
 function parseArgs(argv) {
-  const out = { targets: [], perShape: 2, max: 60 };
+  const out = { targets: [], perShape: 2, max: 60, waive: [] };
   for (const a of argv) {
     if (a.startsWith('--repo=')) out.repo = a.slice(7);
     else if (a.startsWith('--theme=')) out.theme = a.slice(8);
@@ -81,6 +81,8 @@ function parseArgs(argv) {
     else if (a === '--strict') out.strict = true;
     else if (a === '--json') out.json = true;
     else if (a === '--no-axe') out.noAxe = true;
+    else if (a.startsWith('--waive=')) out.waive.push(a.slice(8));
+    else if (a === '--waive-quiet') out.waiveQuiet = true;
     else if (a === '-h' || a === '--help') out.help = true;
     else if (a.startsWith('--')) out.bad = a;
     else out.targets.push(a);
@@ -103,6 +105,7 @@ Flags:
   --per-shape=<n>    controls to exercise per identical shape (default 2)
   --max=<n>          hard cap on controls per page (default 60)
   --no-axe           skip the post-click accessibility re-run (faster)
+  --waive=<k>[|why]  demote a finding kind to a warning, labelled with why
   --strict           exit 1 on any error (default: report only)
   --json             machine-readable output
 
@@ -122,6 +125,21 @@ if (!Number.isFinite(args.perShape) || args.perShape < 1) {
 if (!Number.isFinite(args.max) || args.max < 1) {
   console.error('interaction-audit: --max must be a positive integer'); process.exit(2);
 }
+// --waive=<kind>[|reason] — a project's DESIGN.md looked at this finding and
+// decided to live with it. Demoted from error to warning and labelled with the
+// reason, never hidden: a finding you accepted is still one the next reader
+// should see.
+const WAIVERS = new Map();
+for (const w of args.waive) {
+  const [k, ...rest] = w.split('|');
+  // Ids are <gate>:<kind>. Anything addressed elsewhere belongs to another gate.
+  const m = /^([a-z-]+):(.+)$/.exec(k.trim());
+  if (!m || m[1] !== 'interaction') continue;
+  WAIVERS.set(m[2], rest.join('|') || '(no reason given)');
+}
+const waiversUsed = new Set();
+const waived = (kind) => { if (WAIVERS.has(kind)) { waiversUsed.add(kind); return WAIVERS.get(kind); } return null; };
+
 const useAxe = !args.noAxe && existsSync(AXE_PATH);
 if (!args.noAxe && !useAxe) {
   console.error(`interaction-audit: axe-core not found at ${AXE_PATH} — run \`npm install\` in ${REPO_ROOT}, or pass --no-axe`);
@@ -431,8 +449,13 @@ for (const target of args.targets) {
         res.errors.push(...errors);
         await p.close();
       }
-      if (res.errors.length) blocking += res.errors.length;
-      blocking += res.newViolations.length;
+      res.waivedErrors = res.errors.length ? waived('console-error') : null;
+      res.waivedViolations = res.newViolations.length ? waived('new-violation') : null;
+      if (res.errors.length && !res.waivedErrors) blocking += res.errors.length;
+      if (res.newViolations.length && !res.waivedViolations) blocking += res.newViolations.length;
+      if (res.brokenAnchor) waived('broken-anchor');
+      if (!res.changed && !res.active && !res.declaredInert) waived('dead-control');
+      if (res.newOverlaps.length) waived('revealed-overlap');
       entry.controls.push(res);
     }
   } catch (err) {
@@ -470,9 +493,9 @@ if (args.json) {
     console.log(`  ${r.controls.length} control(s) exercised of ${r.total} found` +
                 (r.skipped ? `, ${r.skipped} skipped as repeats of a shape already covered` : ''));
     for (const c of r.controls) {
-      for (const e of c.errors) console.log(`  [error] "${c.label}" — ${e}`);
+      for (const e of c.errors) console.log(`  [${c.waivedErrors ? 'waived' : 'error'}] "${c.label}" — ${e}${c.waivedErrors ? `  · ${c.waivedErrors}` : ''}`);
       for (const v of c.newViolations) {
-        console.log(`  [error] "${c.label}" introduced ${v.rule} (${v.impact}) on ${v.target}`);
+        console.log(`  [${c.waivedViolations ? 'waived' : 'error'}] "${c.label}" introduced ${v.rule} (${v.impact}) on ${v.target}${c.waivedViolations ? `  · ${c.waivedViolations}` : ''}`);
         if (v.summary) console.log(`          ${v.summary}`);
       }
       for (const o of c.newOverlaps) {
@@ -492,6 +515,13 @@ if (args.json) {
     for (const c of declared) {
       console.log(`  [declared] "${c.label}" is inert on purpose — ${c.declaredInert}`);
     }
+  }
+}
+
+for (const k of waiversUsed) console.log(`  [waived] interaction:${k} — ${WAIVERS.get(k)}`);
+if (!args.waiveQuiet) {
+  for (const k of WAIVERS.keys()) {
+    if (!waiversUsed.has(k)) console.log(`  [stale waiver] interaction:${k} did not fire on this page — remove it from DESIGN.md or check the id`);
   }
 }
 

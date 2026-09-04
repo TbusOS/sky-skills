@@ -88,6 +88,16 @@ async function main() {
   const canonicalMdPath = `skills/${skill}-design/references/canonical/${page}.md`;
   const canonicalHtml = await safeRead(resolve(REPO_ROOT, canonicalHtmlPath));
   const canonicalMd = await safeRead(resolve(REPO_ROOT, canonicalMdPath));
+  // The project's own stated intent, if it wrote one down. Without it the
+  // critic judges the page against a canonical demo for a fictional product,
+  // which is the right yardstick for voice and the wrong one for purpose.
+  const designMd = await (async () => {
+    const { find, load } = await import('./design-md.mjs');
+    const f = find(resolve(REPO_ROOT, target), REPO_ROOT);
+    if (!f) return null;
+    const r = load(f);
+    return r.body || null;
+  })().catch(() => null);
   const crossRules = await safeRead(resolve(REPO_ROOT, 'skills/design-review/references/cross-skill-rules.md'));
   const knownBugs = await safeRead(resolve(REPO_ROOT, 'skills/design-review/references/known-bugs.md'));
   const dosDonts = await safeRead(resolve(REPO_ROOT, `skills/${skill}-design/references/dos-and-donts.md`));
@@ -102,7 +112,7 @@ async function main() {
   }
 
   const prompt = buildPrompt({
-    skill, page, target, targetHtml, canonicalHtml, canonicalMd,
+    skill, page, target, targetHtml, canonicalHtml, canonicalMd, designMd,
     crossRules, knownBugs, dosDonts, agentSpec,
   });
 
@@ -117,7 +127,7 @@ async function main() {
 
 function fence(lang, body) { return '```' + lang + '\n' + (body || '') + '\n```'; }
 
-function buildPrompt({ skill, page, target, targetHtml, canonicalHtml, canonicalMd, crossRules, knownBugs, dosDonts, agentSpec }) {
+function buildPrompt({ skill, page, target, targetHtml, canonicalHtml, canonicalMd, designMd, crossRules, knownBugs, dosDonts, agentSpec }) {
   return `<!-- design-critic prompt · skill=${skill} · page=${page} · target=${target} -->
 
 # System prompt · design-critic
@@ -143,6 +153,16 @@ ${fence('html', canonicalHtml.slice(0, 100000))}
 ## Canonical.md (7 decisions · acceptance rubric)
 
 ${fence('markdown', canonicalMd)}
+${designMd ? `
+## What this project says it is trying to do (its DESIGN.md)
+
+The canonical page above is the yardstick for voice. This is the yardstick for
+purpose — the project's own statement of who it is for and what it will not do.
+Where the two disagree about content, this wins; where they disagree about
+craft, the canonical wins.
+
+${fence('markdown', designMd)}
+` : ''}
 
 ## Cross-skill rules A–K
 
