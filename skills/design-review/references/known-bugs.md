@@ -1203,3 +1203,22 @@
 - **教训(通用)**：任何"从子集里取待检文本"的检查,都要问一句
   **「这个子集为空时会怎样」** —— 若答案是"静默通过",那它就有一整类页面查不到。
   加检查的同时就要加一条"子集为空"的探针用例。
+
+### 1.64 只在悬停时才存在的低对比 —— 四道静态检查一道都看不见
+
+- **Reader sees**：`anth-button--ghost`(透明底 + 深色字 + 深色描边)鼠标一放上去,
+  底色变成 `--anth-orange-hover` `#A94F31`,而文字仍是 `--anth-text` `#141413`。
+  实测 **3.38:1**,低于 4.5 的门槛。26 个页面在用这个按钮。
+- **Why**：`.anth-button:hover { background: var(--anth-orange-hover) }` 特异性是 (0,2,0),
+  `.anth-button--ghost { background: transparent }` 是 (0,1,0) —— **修饰符被基类的 hover 盖掉了**。
+  实心按钮上这条规则是对的(白字压橙底),ghost 变体上就成了深字压橙底。
+- **为什么活到 2026-09-05 才被发现**：verify.py 读源码,visual-audit 量首帧,
+  axe-audit 跑的是加载后的 DOM,screenshot 存的还是那一帧 —— **四道判的都是同一个静止画面**,
+  而这个状态只在指针移上去之后才存在。第一次跑 `interaction-audit.mjs` 就抓到了它,
+  因为 Playwright 的 `click()` 会先把指针移过去,悬停态随之出现。
+- **Defense**：`anthropic.css` 加 `.anth-button--ghost:hover, .anth-button--ghost:focus-visible`
+  反色(深底浅字,17.50:1),2026-09-05 ship。可执行检查 = 第四道
+  `interaction-audit.mjs`,它对每个控件点击前后各跑一次 axe,只报点击之后新出现的违规。
+  夹具 `fixtures/bad-interaction-contrast-after-click.html` + `interaction_selftest.sh` 锁住这条。
+- **同类要一起查的**：任何"基类定义了 hover / focus,修饰符只改了静止态"的组合。
+  九套 skill 各自的 `--ghost` / `--outline` / `--text` 变体都属于这个形态。

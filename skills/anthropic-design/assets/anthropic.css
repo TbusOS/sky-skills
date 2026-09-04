@@ -144,6 +144,18 @@ p {
   background: var(--anth-orange-hover);
 }
 
+/* The ghost variant is transparent with dark text, so the rule above filled it
+   with orange-hover and left the text at --anth-text: 3.37:1, on hover only.
+   No static check can see that state, which is why it survived until
+   interaction-audit clicked the button. Inverting keeps the affordance and
+   measures 15.8:1. */
+.anth-button--ghost:hover,
+.anth-button--ghost:focus-visible {
+  background: var(--anth-text);
+  color: var(--anth-bg);
+  border-color: var(--anth-text);
+}
+
 .anth-button--dark {
   background: var(--anth-text);
   color: var(--anth-bg);

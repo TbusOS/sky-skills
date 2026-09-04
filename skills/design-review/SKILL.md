@@ -35,20 +35,55 @@ design skill 是 generator,会给自己打高分;`design-review` 脚本、规则
 single source of truth for the repo's gate counts; every other surface cites
 it instead of asserting its own number.
 
-**四道机械检查**(`bin/design-review` 默认全跑,按序):
+**五道机械检查**(`bin/design-review` 默认全跑,按序):
 
 1. `verify.py` — 结构(静态)
 2. `visual-audit.mjs` — 渲染(Playwright)
 3. `axe-audit.mjs` — 可达性(axe-core;阻断规则四条:color-contrast、
    link-name、aria-prohibited-attr、svg-img-alt。**全仓两主题实测 0 违规**
    —— glass light 那 84 处欠账已于 2026-08-27 在 CSS token 层还清,见 known-bugs §6.6)
-4. `screenshot.mjs` — 全页截图(只产物;评判它的是人眼)
+4. `interaction-audit.mjs` — **点开之后才存在的那些状态**(2026-09-05 加)
+5. `screenshot.mjs` — 全页截图(只产物;评判它的是人眼)
 
-**四道之外**,按需叠加,不计入"四道":
+### 第四道在补什么(为什么前三道漏得掉)
 
-- `pixel-gate.mjs`(`--pixel`)— 可选的第五道机械检查,像素回归比对已提交基线
+前三道判的是**同一个静止画面**:verify 读源码,visual-audit 量首帧,
+axe 跑加载后的 DOM。于是标签页点了没反应、手风琴展开后文字读不清、
+按钮一点就抛异常 —— 三道全绿照样发布。
+
+第四道逐个操作可交互元素(`button` / `summary` / `[role=tab]` / `[aria-expanded]` /
+`th[aria-sort]` / `input` / `select` / 页内锚点),每点一次判五件事:
+
+| 判定 | 级别 |
+|---|---|
+| 这一下点出了控制台报错或未捕获异常 | error |
+| 这一下点出了**新的** axe 违规(点前没有、点后才有,四条阻断规则内) | error |
+| 声明了 `data-inert-by-design` 却真的改了页面(声明过期) | error |
+| 点完页面没有任何可测变化 —— 死控件,或长得像能点的装饰 | warn |
+| 页内锚点指向的 id 在本页不存在 | warn |
+| 点开后新露出的内容压在别的内容上 | warn |
+
+**已经激活的控件不算死**:带 `aria-current` / `aria-selected="true"` /
+`aria-pressed="true"`,或 class 里有 `active` / `selected` / `current` 的,
+点它本来就不该有反应。**故意不接线的控件写
+`data-inert-by-design="理由"`** —— 跟 `data-allow-overlap` 同一个约定,
+必须写理由,声明才是可复核的而不是一个静音开关;而且一旦它真的动了,这一条会报 error。
+
+**判「这个元素读者看得见吗」用浏览器自带的 `checkVisibility()`,不是手写那套判断。**
+收起的 `<details>` **不会**给内容设 `display:none` —— 它保留一个真实的
+640×122 盒子且 `visibility:visible`,这正是 known-bugs §1.40 那批幻觉重叠的根因。
+
+代价:每个控件一次页面加载,一页 17-21 秒(前三道合计约 9 秒)。
+同形状的控件只测前两个(`--per-shape`),八条一模一样的 FAQ 手风琴不必测八遍。
+要跳过用 `--no-interact`,但**默认是开的** —— 选配的检查等于没有检查。
+自检:`skills/design-review/scripts/interaction_selftest.sh` —— 7 个故意做坏的测试页,
+10 项检查,每一类判定的正反两面都测。
+
+**五道之外**,按需叠加,不计入"五道":
+
+- `pixel-gate.mjs`(`--pixel`)— 可选的第六道机械检查,像素回归比对已提交基线
 - LLM critic(`--critic` solo / `--multi-critic` 4 专家)— 口味评审。
-  **critic 不是第四道机械检查**,它在机械检查之外
+  **critic 不是第五道机械检查**,它在机械检查之外
 - 人眼看截图 — 机械检查是必要条件,不是充分条件
 
 <!-- gate-model: mechanical = verify.py, visual-audit.mjs, axe-audit.mjs, screenshot.mjs ; optional = pixel-gate.mjs ; taste = critic -->
@@ -63,8 +98,8 @@ it instead of asserting its own number.
 | Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(86 条 known-bugs 里能机器化的那些)|
 | Gate 3 · accessibility axe-audit | **shipped** (2026-08-14) | `scripts/axe-audit.mjs`(axe-core;四条阻断规则;当时清账每页只量一个主题,glass light 仍有欠账 —— known-bugs §6.6)|
 | Gate 4 · full-page screenshot | **shipped** | `scripts/screenshot.mjs`(Playwright · 绝对路径 + `file://` 通用)|
-| 口味评审(四道之外)· solo critic | **shipped** | `.claude/agents/design-critic.md` |
-| 口味评审(四道之外)· multi-critic(4 专家) | **shipped** (2026-04-22) | `.claude/agents/design-{composition,copy,illustration,brand}-critic.md` 权重 25/25/20/30 |
+| 口味评审(五道之外)· solo critic | **shipped** | `.claude/agents/design-critic.md` |
+| 口味评审(五道之外)· multi-critic(4 专家) | **shipped** (2026-04-22) | `.claude/agents/design-{composition,copy,illustration,brand}-critic.md` 权重 25/25/20/30 |
 | Learning-loop · 回灌成规则 | **shipped** (2026-04-22) | `.claude/agents/design-learner.md` + `scripts/learning-loop.mjs` |
 | Cross-repo 入口 | **shipped** | `~/.claude/skills/design-review/dr-cli --repo=<仓> --skill=<名> <html>` |
 | 参考库 canonical | 实时计数见 `~/.claude/skills/design-review/dr-cli --coverage`(扩库中) | `~/.claude/skills/<style>-design/references/canonical/` |
@@ -79,7 +114,7 @@ it instead of asserting its own number.
                   <html> [...]
 ```
 
-- `--critic` / `--multi-critic` 跑 LLM 口味评审(四道机械检查之外;solo 或 4 专家并行)
+- `--critic` / `--multi-critic` 跑 LLM 口味评审(五道机械检查之外;solo 或 4 专家并行)
 - `--learn` 跑完把 verdict 喂 `learning-loop.mjs` 产出 `design-learner` prompt
 - `--allow-monolingual` 对内部单语 memo 豁免双语强制(issue #2)
 - `--audit <dir>` 整树批量检查;加 `--discover` 只列出树里所有 `.html`(分目录,不跑检查),确认没有藏在子目录里漏检的页 —— 详见下面「多页交付」
@@ -131,7 +166,7 @@ node skills/design-review/scripts/axe-audit.mjs --strict <html>
 # 4) 肉眼检查(全页截图)
 node skills/design-review/scripts/screenshot.mjs <html> shot.png
 
-# 5) 口味评审(四道之外)· solo / multi critic
+# 5) 口味评审(五道之外)· solo / multi critic
 #    在 Claude Code 里:
 Task(subagent_type="design-critic",              ...)  # 单专家
 # or 4 并行:
@@ -156,8 +191,8 @@ node skills/design-review/scripts/learning-loop.mjs \
 | Gate 2 `visual-audit.mjs` | WCAG contrast < 4.5、hero 框图渲染 < 900px、SVG `<text>` 实际像素 < 9px、多列网格孤儿卡、SVG `<text>` 重叠、SVG 文字 fill 和承载 shape RGB 距离 < 40、多 h1 / heading 跳级 / 无 alt img / 无文本 a、brand 色在 top region 占比 < 0.4%、cross-skill-smell(别扮成另一个 skill)、hollow-card §10b、asymmetric-first-col-hero §10c、svg-foreign-hex、figure 无 figcaption、Fraunces/Newsreader 等非本 skill 字体、italic 滥用 —— 共 26 类,每类对应 `known-bugs.md` 1 行 | playwright |
 | Gate 3 `axe-audit.mjs` | axe-core 可达性:color-contrast、link-name、aria-prohibited-attr、svg-img-alt 阻断,其余只报告 | playwright + axe-core |
 | Gate 4 `screenshot.mjs` | 只产物不评审 —— 给人看的 | playwright |
-| 口味评审(四道之外)solo `design-critic` | 整页口味(构图 + 文案 + 插画 + 品牌)一位通才评审 | `Task()` subagent |
-| 口味评审(四道之外)multi-critic × 4 | 构图 / 文案 / 插画 / 品牌 四位专家独立 fresh-context · 权重 25/25/20/30 聚合 | `Task()` × 4 + 聚合 |
+| 口味评审(五道之外)solo `design-critic` | 整页口味(构图 + 文案 + 插画 + 品牌)一位通才评审 | `Task()` subagent |
+| 口味评审(五道之外)multi-critic × 4 | 构图 / 文案 / 插画 / 品牌 四位专家独立 fresh-context · 权重 25/25/20/30 聚合 | `Task()` × 4 + 聚合 |
 
 具体清单在:
 - `references/known-bugs.md`(84 条,每条写 Reader sees / Why / Defense)
@@ -204,7 +239,7 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 
 ## Files · 文件
 
-- `~/.claude/skills/design-review/dr-cli` — 一条命令跑完 4 道检查 + 可选 `--multi-critic` / `--learn`
+- `~/.claude/skills/design-review/dr-cli` — 一条命令跑完 5 道检查 + 可选 `--multi-critic` / `--learn`
 - `scripts/verify.py` — Gate 1 结构 check
 - `scripts/visual-audit.mjs` — Gate 2 渲染 check(51 项)
 - `scripts/axe-audit.mjs` — Gate 3 可达性 check(axe-core)

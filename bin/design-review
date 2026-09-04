@@ -3,14 +3,17 @@
 #
 # Runs the four mechanical gates, plus opt-in extras (the gate model is
 # defined once in skills/design-review/SKILL.md — this list mirrors it):
-#   [1/4] verify.py         — structural (placeholders, DOCTYPE, BEM, …)
-#   [2/4] visual-audit.mjs  — rendered (contrast, brand-presence, italic,
+#   [1/5] verify.py         — structural (placeholders, DOCTYPE, BEM, …)
+#   [2/5] visual-audit.mjs  — rendered (contrast, brand-presence, italic,
 #                             cross-skill-smell, …) — Playwright + pngjs
-#   [3/4] axe-audit.mjs     — accessibility conformance (axe-core); 4 rules
+#   [3/5] axe-audit.mjs     — accessibility conformance (axe-core); 4 rules
 #                             blocking incl. color-contrast (measured per
 #                             skill; glass light's 84-element debt paid
 #                             2026-08-27 — corpus clean both themes, §6.6)
-#   [4/4] screenshot.mjs    — full-page PNG for human review
+#   [4/5] interaction-audit.mjs — the states a reader reaches by clicking:
+#                             console errors, dead controls, broken in-page
+#                             anchors, and axe re-run on each new state
+#   [5/5] screenshot.mjs    — full-page PNG for human review
 #   +1    pixel-gate.mjs (opt-in, --pixel) — rendered pixels vs a committed
 #                             baseline; the only gate that fails on something
 #                             no rule describes
@@ -45,6 +48,9 @@
 #                      skip the bilingual-page rule for internal monolingual docs.
 #                      Gates 2/3/4 unchanged — glass still auto-runs both themes.
 #   --out=<dir>        Where to save screenshots (default: <repo>/shots/).
+#   --no-interact      Skip the interaction gate. It is on by default because a
+#                      gate nobody runs is a gate that does not exist; it costs
+#                      roughly one page load per control exercised.
 #   --pixel            Also run the pixel-regression gate against the committed
 #                      baseline in skills/design-review/baselines/.
 #   --pixel-baseline   Record/overwrite that baseline instead of comparing.
@@ -215,6 +221,7 @@ for arg in "$@"; do
     --strict)  STRICT=1 ;;
     --out=*)   OUT_DIR="${arg#--out=}" ;;
     --critic)       CRITIC=1 ;;
+    --no-interact)    NO_INTERACT=1 ;;
     --pixel)          PIXEL_GATE=1 ;;
     --pixel-baseline) PIXEL_GATE=1; PIXEL_BASELINE=1 ;;
     --no-axe)         NO_AXE=1 ;;
@@ -315,6 +322,7 @@ VERIFY="$SKY_ROOT/skills/design-review/scripts/verify.py"
 VISUAL="$SKY_ROOT/skills/design-review/scripts/visual-audit.mjs"
 SCREEN="$SKY_ROOT/skills/design-review/scripts/screenshot.mjs"
 AXE="$SKY_ROOT/skills/design-review/scripts/axe-audit.mjs"
+INTERACT="$SKY_ROOT/skills/design-review/scripts/interaction-audit.mjs"
 PIXEL="$SKY_ROOT/skills/design-review/scripts/pixel-gate.mjs"
 CRITIC_SCRIPT="$SKY_ROOT/skills/design-review/scripts/critic.mjs"
 MULTI_CRITIC_SCRIPT="$SKY_ROOT/skills/design-review/scripts/multi-critic.mjs"
@@ -329,7 +337,9 @@ NO_AXE="${NO_AXE:-}"
 
 # The critic is NOT counted: it runs outside the numbered mechanical gates
 # (the gate model is defined once in skills/design-review/SKILL.md).
-TOTAL_GATES=4
+NO_INTERACT="${NO_INTERACT:-}"
+TOTAL_GATES=5
+[ -n "$NO_INTERACT" ] && TOTAL_GATES=$((TOTAL_GATES - 1))
 [ -n "$PIXEL_GATE" ] && TOTAL_GATES=$((TOTAL_GATES + 1))
 
 CRITIC_MODE="no"
@@ -426,7 +436,38 @@ if [ "$exit_axe" -ne 0 ]; then
   exit 1
 fi
 
-# ---------- Gate 4 · screenshot ----------
+# ---------- Gate 4 · interaction ----------
+# The four checks before this one all judge the first painted frame. A page
+# whose tabs do nothing, whose accordion opens onto unreadable text, or whose
+# button throws on click passes every one of them. This gate operates the page.
+exit_interact=0
+if [ -n "$NO_INTERACT" ]; then
+  echo ""
+  echo "━━ interaction-audit.mjs — SKIPPED (--no-interact)"
+fi
+for theme in "${THEMES[@]}"; do
+  [ -n "$NO_INTERACT" ] && break
+  IA_FLAGS=("--strict")
+  ia_label=""
+  if [ "$theme" != "default" ]; then
+    IA_FLAGS+=("--theme=$theme")
+    ia_label="  [theme=$theme]"
+  fi
+  for html in "${HTMLS[@]}"; do
+    echo ""
+    echo "━━ [4/$TOTAL_GATES] interaction-audit.mjs (the states a click reaches)  $html$ia_label"
+    if ! ( cd "$REPO" && node "$INTERACT" "${IA_FLAGS[@]}" "$html" ); then
+      exit_interact=1
+    fi
+  done
+done
+if [ "$exit_interact" -ne 0 ]; then
+  echo ""
+  echo "✗ interaction-audit found blocking findings — fix before continuing" >&2
+  exit 1
+fi
+
+# ---------- Gate 5 · screenshot ----------
 for theme in "${THEMES[@]}"; do
   SCREEN_FLAGS=()
   suffix=""
@@ -438,7 +479,7 @@ for theme in "${THEMES[@]}"; do
     base="$(basename "$html" .html)"
     out="$OUT_DIR/${base}${suffix}-$(date +%Y%m%d-%H%M%S).png"
     echo ""
-    echo "━━ [4/$TOTAL_GATES] screenshot.mjs    $html  →  $out"
+    echo "━━ [5/$TOTAL_GATES] screenshot.mjs    $html  →  $out"
     ( cd "$REPO" && node "$SCREEN" "${SCREEN_FLAGS[@]}" "$html" "$out" )
   done
 done
@@ -532,6 +573,11 @@ echo "┌─ Summary"
 echo "│  ✓ verify.py       (structural)"
 echo "│  ✓ visual-audit    (rendered + brand + italic + smell)"
 echo "│  ✓ axe-audit       (accessibility · axe-core)"
+if [ -n "$NO_INTERACT" ]; then
+  echo "│  – interaction     (skipped by --no-interact)"
+else
+  echo "│  ✓ interaction     (clicked states: errors, dead controls, anchors, axe)"
+fi
 echo "│  ✓ screenshot      (in $OUT_DIR)"
 [ -n "$PIXEL_GATE" ] && echo "│  ✓ pixel-gate      (visual regression vs baseline)"
 [ -n "$CRITIC" ] && echo "│  ✓ critic prompt   (solo — feed to LLM)"
