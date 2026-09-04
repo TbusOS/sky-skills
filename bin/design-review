@@ -353,6 +353,28 @@ echo "│  targets: ${HTMLS[*]}"
 echo "└───────────────────────────────────────────────────────"
 echo ""
 
+# ---------- receipt ----------
+# The hook in hooks/design-gate/ records a content hash on every HTML write and
+# reports, at the end of a turn, the files whose current hash has no passing
+# run. Writing the hash here is what closes that loop. Skipping a gate makes the
+# receipt a lie, so a run with --no-interact or --no-axe does not write one.
+if [ -z "$NO_INTERACT" ] && [ -z "$NO_AXE" ] && command -v python3 >/dev/null 2>&1; then
+  gate_state="$REPO/.design-gate"
+  if mkdir -p "$gate_state" 2>/dev/null; then
+    for html in "${HTMLS[@]}"; do
+      [ -f "$REPO/$html" ] || continue
+      gate_sha="$(python3 - "$REPO/$html" <<'PYSHA' 2>/dev/null
+import hashlib, sys
+print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest()[:16])
+PYSHA
+)"
+      [ -n "$gate_sha" ] || continue
+      grep -qs "^$gate_sha	" "$gate_state/passed.tsv" 2>/dev/null && continue
+      printf '%s\t%s\n' "$gate_sha" "$html" >> "$gate_state/passed.tsv"
+    done
+  fi
+fi
+
 # ---------- Gate 1 · structural ----------
 # --internal forwards to verify.py only (skips the bilingual-page rule for
 # internal monolingual docs); gates 2/3/4 behave identically either way, so

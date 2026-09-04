@@ -79,6 +79,32 @@ axe 跑加载后的 DOM。于是标签页点了没反应、手风琴展开后文
 自检:`skills/design-review/scripts/interaction_selftest.sh` —— 7 个故意做坏的测试页,
 10 项检查,每一类判定的正反两面都测。
 
+### 让它不靠记性:编辑触发的 hook
+
+五道跑一页要 17-25 秒,因为其中三道要开浏览器。**没人会在每次改动后都付这个代价**,
+于是实际情况是发布前才想起来跑一次 —— 而那正是结构问题最难改、可访问性问题最可能
+带着上线的时刻。
+
+`verify.py` 是唯一不需要浏览器的一道,**0.05 秒**,所以它可以每次写 HTML 都跑。
+
+`hooks/design-gate/` 两个 hook:
+
+- **`post-edit.sh`**(PostToolUse)—— 每次写 HTML 跑一遍 `verify.py`,不过就把结果
+  送回给模型;同时把这一版的内容哈希记进 `.design-gate/pending.tsv`。
+  路径不是 `.html`、或者不在带 `verify.py` 的仓里,立刻退出不作声。
+- **`stop.sh`**(Stop)—— 回合结束时,报出哈希在 `pending.tsv` 里、
+  却不在 `passed.tsv` 里的文件。`bin/design-review` 五道全过才写这条回执,
+  带 `--no-interact` 或 `--no-axe` 的部分运行不写(部分运行的回执是假的)。
+  **改文件会改哈希,回执自动失效**,不用谁记得作废它。
+
+**它只拦一次,然后清账。** 一个"条件不满足就一直不放行"的 Stop hook,
+在条件根本达不到的时候会一直不放行,记录里就是 hook 和模型互相重复八轮
+直到被强制放行。所以这个只拦一次,把待办清空,然后闭嘴 ——
+**目的是让漏掉这件事被看见,不是强制执行。**
+
+装:`hooks/design-gate/install.sh`(先 `--dry-run` 看它要改什么)。
+单次关掉:`DESIGN_GATE_HOOK=off`。自检 `hooks/design-gate/selftest.sh`,15 项。
+
 **五道之外**,按需叠加,不计入"五道":
 
 - `pixel-gate.mjs`(`--pixel`)— 可选的第六道机械检查,像素回归比对已提交基线
