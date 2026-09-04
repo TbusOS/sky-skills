@@ -224,11 +224,18 @@ function TEXT_BOXES() {
     const t = el.textContent.trim();
     if (!t) continue;
     if (!window.__iaVis(el)) continue;
-    const r = el.getBoundingClientRect();
-    if (r.width < 4 || r.height < 4) continue;
     if (el.closest('[data-allow-overlap]')) continue;
-    out.push({ x: r.x, y: r.y, w: r.width, h: r.height, t: t.slice(0, 40),
-               tag: el.tagName.toLowerCase() });
+    // One box per line, not one per element. getBoundingClientRect on an inline
+    // element that wraps returns the union of its lines, which starts at the
+    // left edge of the first line and ends at the right edge of the last — a
+    // rectangle covering text that belongs to its neighbours. Two adjacent
+    // wrapped links then report a 100% overlap while nothing overlaps on
+    // screen. getClientRects returns the real per-line boxes.
+    for (const r of el.getClientRects()) {
+      if (r.width < 4 || r.height < 4) continue;
+      out.push({ x: r.x, y: r.y, w: r.width, h: r.height, t: t.slice(0, 40),
+                 tag: el.tagName.toLowerCase() });
+    }
   }
   return out;
 }
@@ -238,6 +245,7 @@ function overlaps(boxes) {
   for (let i = 0; i < boxes.length; i++) {
     for (let j = i + 1; j < boxes.length; j++) {
       const a = boxes[i], b = boxes[j];
+      if (a.t === b.t && a.tag === b.tag) continue;   // two lines of one element
       const ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
       const oy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
       if (ox <= 1 || oy <= 1) continue;
