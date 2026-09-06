@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>hw3d 站点页模板</title>
+<title>一条数据从内存颗粒到 CPU 寄存器 · hardware-3d 示范页</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
@@ -113,15 +113,15 @@
 <div id="labels"></div>
 
 <header class="title">
-  <h1>换成你的标题</h1>
-  <p>一行副标题：这页到底讲什么 · 写实 3D 讲解</p>
+  <h1>一条数据从内存颗粒到 CPU 寄存器</h1>
+  <p>缓存没命中的那几百个周期，到底花在哪儿 · hardware-3d 示范页</p>
 </header>
 
 <nav class="acts panel" id="acts"></nav>
 <nav class="stations panel" id="stations"></nav>
 
 <aside class="caption panel" id="caption">
-  <div class="k" id="cK">第一幕 · 01 / 14</div>
+  <div class="k" id="cK">第一幕 · 01 / 05</div>
   <h2 id="cT">—</h2>
   <div class="body" id="cB"></div>
   <div class="clk" id="clk">
@@ -1262,7 +1262,7 @@ const MAT = {
   // die 内部"城"
   siliconCity:{c:[0.0550,0.0600,0.0700], me:0.0, ro:0.300},
   blockSM  : {c:[0.1050,0.1250,0.1650], me:0.0,  ro:0.450},
-  blockL2  : {c:[0.2800,0.3000,0.3400], me:0.0,  ro:0.400},
+  blockL2  : {c:[0.2050,0.2250,0.2600], me:0.0,  ro:0.400},
   blockMC  : {c:[0.2200,0.1600,0.1000], me:0.0,  ro:0.450},
   blockIO  : {c:[0.0900,0.1000,0.1100], me:0.0,  ro:0.420},
   blockDisp: {c:[0.0800,0.1400,0.1100], me:0.0,  ro:0.420},
@@ -1275,64 +1275,217 @@ const jit=(v)=>1+(rnd()-0.5)*v;
 
 
 //==============================================================
-// S9 · 场景 —— 最小示例:一块板 + 两颗芯片。照这个格式换成你的题目
+// S9 · 场景 —— 三个"世界":主板 · 一颗 DRAM 里面 · CPU die 的城
+//   放大模型离主板很远(z=±460),靠视锥剔除保证每站只画看得见的那一个
 //==============================================================
 const G={STATIC:0};
 const PROTO={}, SCENE=[], POS={};
+const WA=[0,0,0], WB=[0,0,-460], WC=[0,0,460];
+const at=(w,x,y,z)=>[w[0]+x, w[1]+y, w[2]+z];
 function buildScene(){
   const P=(k,geo,max)=>{ PROTO[k]=makeMesh(geo,max); return PROTO[k]; };
-  P('board', roundedBox(120, 2.4, 90, 0.9, 3), 1);
-  P('chip',  roundedBox(16, 1.4, 16, 0.25, 3), 4);
-  P('pad',   roundedBox(1.35, 0.13, 1.35, 0.05, 2), 400);
+  P('board', roundedBox(168,2.4,118,1.1,3), 1);
+  P('slot',  roundedBox(74,4.4,9.2,0.5,2), 1);
+  P('dimm',  roundedBox(69,1.2,30,0.6,3), 1);
+  P('dram',  roundedBox(11.5,1.15,8.6,0.22,3), 6);
+  P('subs',  roundedBox(42,1.8,42,0.6,3), 1);
+  P('ihs',   roundedBox(33,2.8,33,1.0,3), 1);
+  P('chip',  roundedBox(14,1.35,14,0.25,3), 3);
+  P('mlcc',  roundedBox(1.7,0.85,0.95,0.12,2), 210);
+  P('pad',   roundedBox(1.25,0.13,1.25,0.05,2), 320);
+  P('ind',   roundedBox(7.4,5.2,7.0,0.5,2), 6);
+  P('mos',   roundedBox(5.2,1.7,5.0,0.2,2), 14);
+  P('ecap',  cylinder(3.1,7.4,18), 4);
+  P('pcie',  roundedBox(62,5.2,6.4,0.5,2), 1);
+  P('clip',  roundedBox(3.0,3.2,10.0,0.4,2), 2);
+  P('blk',   roundedBox(1,1,1,0.03,2), 260);
+  P('rail',  roundedBox(8.0,0.85,1.7,0.22,2), 620);
+  P('via',   cylinder(0.5,4.4,8), 240);
+
   const L={}; for(const k in PROTO) L[k]=[];
   const m=(mat,extra)=>Object.assign({c:mat.c, me:mat.me, ro:mat.ro, tx:0, g:0}, extra||{});
-  L.board.push(m(MAT.pcbBlack,{p:[0,-1.2,0], tx:2}));           // tx:2 = 走线 + 阻焊 + 位号框
-  [[-40,0],[0,0],[40,0]].forEach(([x,z],i)=>{
-    L.chip.push(m(MAT.epoxy,{p:[x,0.72,z], tx:1, atl:ATLAS_RECT[i%ATLAS_RECT.length]}));
-    for(let s=-1;s<=1;s+=2) for(let n=0;n<10;n++)
-      L.pad.push(m(MAT.goldENIG,{p:[x+(n-4.5)*1.5, 0.08, z+s*8.8]}));
-  });
-  POS.left=[-40,1.6,0]; POS.mid=[0,1.6,0]; POS.right=[40,1.6,0];
+  const A=ATLAS_RECT;
+  const blk=(mat,p,s,extra)=>L.blk.push(m(mat,Object.assign({p:p,s:s},extra||{})));
+  // 架空铜轨:柱子撑起横轨。芯片里晶体管在硅的最底层,十几层铜金属层在上面走线
+  const railLine=(p0,p1,y,lanes,gap)=>{
+    const dx=p1[0]-p0[0], dz=p1[2]-p0[2], len=Math.hypot(dx,dz);
+    if(len<1e-3) return;
+    const yaw=Math.atan2(dz,dx), nx=-dz/len, nz=dx/len;
+    const segs=Math.max(1,Math.round(len/8.2));
+    for(let l=0;l<lanes;l++){
+      const o=(l-(lanes-1)/2)*(gap||2.6);
+      for(let s=0;s<segs;s++){
+        const u=(s+0.5)/segs;
+        L.rail.push(m(MAT.copperRail,{p:[p0[0]+dx*u+nx*o, y, p0[2]+dz*u+nz*o],
+          s:[len/segs/8.0*0.93, 1, 1], yaw:yaw}));
+      }
+    }
+    const posts=Math.max(2,Math.round(len/24));
+    for(let s=0;s<=posts;s++){ const u=s/posts;
+      L.via.push(m(MAT.copper,{p:[p0[0]+dx*u, y-2.7, p0[2]+dz*u]})); }
+  };
+
+  // ============ 世界 A · 主板 ============
+  L.board.push(m(MAT.pcbBlack,{p:at(WA,0,-1.2,0), tx:2}));
+  // 笔记本那种平躺的 SO-DIMM:插槽 + 内存条 + 4 颗颗粒 + 一颗 SPD
+  L.slot.push(m(MAT.plasticDark,{p:at(WA,-52,1.3,0)}));
+  L.dimm.push(m(MAT.pcbGreen,{p:at(WA,-52,3.5,0), tx:2}));
+  for(let i=0;i<4;i++)
+    L.dram.push(m(MAT.epoxy,{p:at(WA,-52+(i-1.5)*16.4,4.68,0), tx:1, atl:A[i%2]}));
+  L.dram.push(m(MAT.epoxy,{p:at(WA,-30,4.68,10.6), tx:1, atl:A[6]}));
+  for(const s of [-1,1]) L.clip.push(m(MAT.alu,{p:at(WA,-52+s*37,2.9,0)}));
+  for(let i=0;i<24;i++){ const x=-52+(rnd()-0.5)*60, z=(rnd()>0.5?1:-1)*(10+rnd()*4);
+    L.mlcc.push(m(MAT.mlcc,{p:at(WA,x,4.55,z), yaw:rnd()>0.5?0:1.5708})); }
+  // CPU:插座框 + 封装基板 + 金属顶盖 + 一圈去耦电容
+  for(const [dx,dz,sx,sz] of [[0,-25,54,3.4],[0,25,54,3.4],[-25,0,3.4,54],[25,0,3.4,54]])
+    blk(MAT.plasticDark, at(WA,40+dx,0.85,dz), [sx,3.1,sz]);
+  L.subs.push(m(MAT.substrate,{p:at(WA,40,0.9,0), g:2, kind:1}));
+  L.ihs.push(m(MAT.nickelIHS,{p:at(WA,40,3.2,0)}));
+  for(let i=0;i<40;i++){ const a=i/40*6.2831853;
+    L.mlcc.push(m(MAT.mlcc,{p:at(WA,40+Math.cos(a)*19.6, 2.15, Math.sin(a)*19.6), yaw:a})); }
+  // 供电级 + 外围芯片,让板面有真实密度
+  for(let i=0;i<6;i++) L.ind.push(m(MAT.ferrite,{p:at(WA,40+(i-2.5)*10.5, 2.6, -40)}));
+  for(let i=0;i<12;i++) L.mos.push(m(MAT.epoxy,
+    {p:at(WA,40+(i%6-2.5)*10.5, 0.85, (i<6?-49:-55.5)), tx:1, atl:A[5]}));
+  for(let i=0;i<4;i++) L.ecap.push(m(MAT.connDark,{p:at(WA,-14+i*7.5, 3.7, -45)}));
+  L.pcie.push(m(MAT.plasticDark,{p:at(WA,8,2.6,45)}));
+  for(const [cx,cz,ai] of [[75,30,7],[75,-22,2]]){
+    L.chip.push(m(MAT.epoxy,{p:at(WA,cx,0.68,cz), tx:1, atl:A[ai]}));
+    for(let s=-1;s<=1;s+=2) for(let n=0;n<9;n++)
+      L.pad.push(m(MAT.goldENIG,{p:at(WA,cx+(n-4)*1.5, 0.08, cz+s*7.9)}));
+  }
+  for(let i=0;i<80;i++){ const x=(rnd()-0.5)*152, z=(rnd()-0.5)*106;
+    if(Math.abs(x-40)<30 && Math.abs(z)<30) continue;
+    if(Math.abs(x+52)<40 && Math.abs(z)<18) continue;
+    if(Math.abs(x-75)<12 && (Math.abs(z-30)<12||Math.abs(z+22)<12)) continue;
+    L.mlcc.push(m(MAT.mlcc,{p:at(WA,x,0.42,z), yaw:rnd()>0.5?0:1.5708})); }
+  POS.dimm =at(WA,-27,6.6,0);
+  POS.dram1=at(WA,-76.6,5.8,0);
+  POS.cpu  =at(WA,40,5.6,0);
+  POS.busA =at(WA,-1,2.2,0);
+
+  // ============ 世界 B · 一颗 DRAM 里面 ============
+  // 8 个 bank(2 排 × 4 列)。每个 bank:存储阵列 + 左侧行译码器 + 靠内侧的行缓冲
+  blk(MAT.siliconCity, at(WB,0,0,0), [126,2.6,120], {tx:5});
+  const BX=[-42,-14,14,42], BZ=[-30,30];
+  for(let bi=0;bi<4;bi++) for(let bj=0;bj<2;bj++){
+    const x=BX[bi], z=BZ[bj], sgn=bj?-1:1;
+    blk(MAT.blockSM, at(WB,x,2.9,z),            [23,3.4,30], {tx:5});
+    blk(MAT.blockMC, at(WB,x-13.6,2.7,z),       [3.2,3.0,30]);
+    blk(MAT.blockL2, at(WB,x,2.75,z+sgn*17.6),  [23,2.9,3.4]);
+    railLine(at(WB,x,0,z+sgn*19.6), at(WB,x,0,sgn*4.6), 7.6, 2, 2.4);
+  }
+  blk(MAT.blockIO,  at(WB,0,2.7,0), [118,3.0,7.6]);
+  for(let bi=0;bi<4;bi++) blk(MAT.blockROP, at(WB,BX[bi],3.05,0), [23,3.4,4.8]);
+  railLine(at(WB,-58,0,0), at(WB,58,0,0), 9.6, 3, 2.6);
+  POS.bank  =at(WB,14,6.6,-30);
+  POS.rowdec=at(WB,0.4,6.0,-30);
+  POS.rowbuf=at(WB,14,5.6,-12.4);
+  POS.dio   =at(WB,46,6.2,0);
+
+  // ============ 世界 C · CPU die 的城 ============
+  blk(MAT.siliconCity, at(WC,0,0,0), [140,2.6,112], {tx:5});
+  blk(MAT.blockMC, at(WC,-58,3.0,0), [15,3.6,86], {tx:5});         // 内存控制器 + PHY
+  for(let i=0;i<8;i++) blk(MAT.blockIO, at(WC,-58,4.95,(i-3.5)*10.6), [11,0.6,7.4]);
+  for(let i=0;i<2;i++) for(let j=0;j<2;j++)                        // L3 四片
+    blk(MAT.blockL2, at(WC,-24+i*26, 2.9, (j?1:-1)*24), [22,3.4,30], {tx:5});
+  for(const cz of [-24,24]){                                       // 两个核
+    blk(MAT.blockSM,   at(WC,44,3.1,cz),      [42,3.8,42], {tx:5});
+    blk(MAT.blockL2,   at(WC,32,5.15,cz),     [11,0.9,34]);        // L2
+    for(let i=0;i<6;i++)                                           // 执行单元
+      blk(MAT.blockIO, at(WC,41+(i%2)*8, 5.15, cz-12+Math.floor(i/2)*12), [7,0.9,10]);
+    blk(MAT.blockDisp, at(WC,58,5.15,cz+11),  [10,0.9,16]);        // L1 数据缓存
+    blk(MAT.blockROP,  at(WC,58,5.15,cz-11),  [10,0.9,16]);        // 寄存器堆
+  }
+  for(const cz of [-24,24]){
+    railLine(at(WC,-50,0,cz), at(WC,20,0,cz), 9.4, 3, 2.8);
+    railLine(at(WC, 24,0,cz), at(WC,62,0,cz), 11.2, 2, 2.4);
+  }
+  railLine(at(WC,-11,0,-42), at(WC,-11,0,42), 9.4, 3, 2.8);        // 环形互连
+  railLine(at(WC, 15,0,-42), at(WC, 15,0,42), 9.4, 3, 2.8);
+  POS.mc  =at(WC,-58,7.2,26);
+  POS.l3  =at(WC,-11,6.6,24);
+  POS.l1  =at(WC,58,6.4,35);
+  POS.reg =at(WC,58,6.4,13);
+
   for(const k in PROTO){ uploadInst(PROTO[k], L[k]); SCENE.push(PROTO[k]); }
 }
 
 //==============================================================
 // S10 · 站点 —— 每站:相机 + 状态 + 标签 + 三问文案 + 数据流
 //==============================================================
-const cam={ tgt:[0,1.2,0], az:-0.55, el:0.45, dist:150, fov:26, ap:0.30, ex:1.55, focus:'plane', fy:1.2 };
+const cam={ tgt:[-6,2.5,0], az:-0.42, el:0.55, dist:190, fov:26, ap:0.30, ex:1.55, focus:'plane', fy:2.5 };
 const STATE={ lift:0, cutX:60 };
 function camEye(){ const ce=Math.cos(cam.el), se=Math.sin(cam.el);
   return [cam.tgt[0]+cam.dist*ce*Math.sin(cam.az), cam.tgt[1]+cam.dist*se, cam.tgt[2]+cam.dist*ce*Math.cos(cam.az)]; }
 // 三问文案模板 —— 顺序不能换,篇幅不够砍机制不砍这三问
 const Q=(a,b,c,en)=>`<span class="q"><em>是什么</em>${a}</span><span class="q"><em>没有它</em>${b}</span><span class="q"><em>为什么这样</em>${c}</span>${en?`<span class="q en">${en}</span>`:''}`;
 const STATIONS=[
- { act:0, title:'整板俯视', cam:{tgt:[0,1.2,0], az:-0.55, el:0.85, dist:170, fov:26, ap:0.35, focus:'plane', fy:1.2, ex:1.55},
+ { act:0, title:'整板俯视：这条路有多长',
+   cam:{tgt:[4,2.5,-11], az:-1.02, el:0.78, dist:176, fov:28, ap:0.38, focus:'plane', fy:2.5, ex:1.55},
    state:{},
-   labels:[{p:'mid',t:'主芯片',s:'这一页的主角'},{p:'left',t:'旁边那颗',s:'数据从这儿来',dy:-40}],
-   body:Q('把整块板放在棚拍光下看清布局。移轴对焦让整板从角到角都清晰。',
-          '没有这一站,读者不知道后面放大的是哪一块。',
-          '为什么整板俯视必须开移轴?焦平面垂直视线时,斜俯视只有中间一条带清晰。',
-          'PCB · solder mask · ENIG pad') },
- { act:0, title:'芯片微距', cam:{tgt:[0,1.4,0], az:0.9, el:0.22, dist:44, fov:26, ap:0.12, focus:'point', fy:1.4, ex:1.6},
+   labels:[{p:'dimm',t:'内存条 SO-DIMM',s:'板上 4 颗 DRAM 颗粒',dy:-48},
+           {p:'busA',t:'内存总线',s:'64 根数据线走在板里'},
+           {p:'cpu', t:'CPU 封装',s:'金属盖底下是一片硅',dy:-48}],
+   body:Q('一条 <code>mov eax,[rbx]</code> 指令,如果三级缓存都没命中,数据要从左边内存条上的颗粒出发,穿过插槽、板上 64 根数据线、封装引脚,最后才进到右边 CPU 的寄存器。这一页把这段路按拍走一遍。',
+          '不知道这条路有多长,就理解不了「一次内存访问要几百个时钟周期」这句话 —— 延迟不是玄学,就是路程加上每一站的排队。',
+          '为什么内存不直接做进 CPU?做进去延迟能降一个数量级,但容量会被硅片面积卡死在几十 MB。分开放才能既有几十 GB 又能换条升级,代价就是这段路。',
+          'DRAM · memory bus · cache miss') },
+ { act:0, title:'一颗 DRAM 颗粒',
+   cam:{tgt:[-68,4.5,1], az:0.72, el:0.30, dist:66, fov:26, ap:0.16, focus:'point', fy:4.6, ex:1.60},
    state:{},
-   labels:[{p:'mid',t:'塑封体',s:'哑光,粗糙度 0.655'}],
-   body:Q('凑近看单颗芯片的材质、丝印和焊盘。',
-          '没有微距,读者感受不到"这是真实器件"。',
-          '为什么微距用经典对焦而不是移轴?浅景深是有意的 —— 它把注意力钉在焦点上。',
-          'epoxy package · silkscreen') },
- { act:1, title:'数据走一遍', cam:{tgt:[0,2.6,0], az:-0.35, el:0.55, dist:130, fov:26, ap:0.22, focus:'plane', fy:2.6, ex:1.55},
-   state:{}, flow:'demo',
-   labels:[{p:[0,3.6,0],t:'16 位总线',s:'…',live:'bus',dy:-46}],
-   body:Q('16 根并行导线,每拍送一行 16 位。到达后拼成一块写入。',
-          '没有并行总线,一次只能送一位,带宽上不去。',
-          '为什么画成 16 根线而不是一条?一条线看不出"并行"这件事 —— 数据要有形状。',
-          'parallel bus · bit lane') },
+   labels:[{p:'dram1',t:'DRAM 颗粒',s:'塑封底下是一片硅'},
+           {p:[-60.2,5.8,0], t:'旁边这几颗',s:'4 颗一起凑出 64 位',dy:56}],
+   body:Q('一颗 FBGA 封装的 DRAM。一条内存条上有 4 到 16 颗这样的颗粒并排,它们同时被选中、同时输出 —— 每颗只负责 64 位总线里的 8 位或 16 位。',
+          '只有一颗的话,数据引脚只有 8 到 16 根,一拍最多取 2 个字节,总线上另外 48 根线是空的。',
+          '为什么不做一颗宽 64 位的大颗粒?引脚数、封装功耗和良率都会变差。用几颗窄颗粒并联,同样凑出 64 位,每颗的走线还更短、更好等长。',
+          'FBGA · x16 device · rank') },
+ { act:1, title:'颗粒内部：先开一整行，再选一列',
+   cam:{tgt:[-2,4.0,-458], az:-0.34, el:0.74, dist:298, fov:26, ap:0.34, focus:'plane', fy:4.0, ex:1.55},
+   state:{}, flow:'array',
+   labels:[{p:'bank',  t:'一个 bank',s:'行 × 列 的电容阵列',dy:-78},
+           {p:'rowdec',t:'行译码器',s:'把行地址变成一根字线',dy:-34},
+           {p:'rowbuf',t:'行缓冲',s:'…',live:'arr',dy:62},
+           {p:'dio',   t:'列选 + 数据 IO',s:'从这一行里挑出要的字节',dy:44}],
+   body:Q('颗粒里面是 8 个 bank,每个 bank 是一片行乘列的电容阵列。读一个字节要分两步:先「激活」一整行,把这一行上万个电容的微弱电荷抬进行缓冲;再按列地址,从行缓冲里挑出要的那几个字节。',
+          '不分行列、每个存储位单独引一根线的话,一颗 8Gb 的芯片要接出 80 亿根线 —— 做不出来。行列寻址把 N 根线降到 2×√N 根。',
+          '为什么非得先整行搬出来?因为读电容是破坏性的,电荷读走了就没了,读完必须原样写回。既然这一行反正都要动,不如一次全抬进行缓冲 —— 这也正是「同一行内连续访问」比「换一行」快好几倍的原因。',
+          'bank · word line · sense amplifier · tRCD') },
+ { act:1, title:'总线上的 64 位',
+   cam:{tgt:[2,2.6,-15], az:-0.66, el:0.60, dist:94, fov:26, ap:0.13, focus:'plane', fy:2.6, ex:1.58},
+   state:{}, flow:'bus',
+   labels:[{p:'busA',t:'64 根数据线',s:'…',live:'bus',dy:-52},
+           {p:[29,7.4,-7], t:'CPU 这边收',s:'凑够 64 字节才算一条缓存行',dy:-44}],
+   body:Q('64 根数据线并排走在板里,一拍送 64 位,也就是 8 个字节。DDR 在时钟的上升沿和下降沿各送一次,所以一个时钟周期送 16 字节;连送 4 个周期、8 次,刚好 64 字节 —— 一条缓存行。',
+          '没有并行总线,一次只能送 1 位,同一条缓存行要送 512 拍。带宽是「宽度 × 频率」,宽度这一项直接乘在上面。',
+          '为什么固定搬 64 字节,哪怕程序只要 1 个字节?因为程序访问有局部性,取了一个字节,马上多半会用到它旁边的。一次搬一整条,后面几次就直接在缓存里命中了。代价是只要 1 字节时也照搬 64 字节。',
+          'DDR · dual edge · cache line · burst length 8') },
+ { act:1, title:'进 die 的城：一路排队到寄存器',
+   cam:{tgt:[6,6.0,468], az:-1.36, el:0.68, dist:230, fov:28, ap:0.30, focus:'plane', fy:6.0, ex:1.55},
+   state:{}, flow:'city',
+   labels:[{p:'mc', t:'内存控制器',s:'数据从这儿进 die',dy:-44},
+           {p:'l3', t:'L3 · 环形互连',s:'…',live:'city',dy:-42},
+           {p:'l1', t:'L1 数据缓存',s:'一拍就能访问',dy:36},
+           {p:'reg',t:'寄存器堆',s:'终点:指令能算了',dy:-36}],
+   body:Q('数据进了硅片不是一步到位。内存控制器收下 → 上环形互连 → L3 → L2 → L1 → 最后才进寄存器。每过一级都要重新排一次队,架空的铜轨就是真实的金属互连层:晶体管在硅的最底层,十几层铜在上面走线。',
+          '没有这三级缓存,每一次访问都得走完整条路。CPU 会有大半时间停在那儿等数据,再多核心也没用。',
+          '为什么要分三级,不做一个大的?缓存越大越慢 —— 线更长、查找更慢。分级是拿容量换速度:L1 小到能一拍访问,L3 大到装得下整个工作集,L2 在中间接着。每一级都是这条曲线上的一个取舍点。',
+          'memory controller · ring interconnect · L3/L2/L1 · register file') },
 ];
 const ACTS=['第一幕 · 看清结构','第二幕 · 数据走一遍'];
 const GLOSSARY=[
+ ['DRAM','动态随机存取存储器','用一个电容存一位。电容会漏电,所以要定期刷新 —— 「动态」就是这个意思。'],
+ ['bank','存储体','一颗颗粒里相互独立的几片阵列。不同 bank 可以同时在忙,这样等待能重叠起来。'],
+ ['word line','字线','行译码器拉高的那一根线。它一拉高,整行的电容就都接到了位线上。'],
+ ['sense amp','读出放大器 / 行缓冲','把电容上微弱的电荷放大成稳定的 0 或 1,并暂存整行数据。'],
+ ['tRCD','行到列的延迟','从「激活一行」到「可以读这一行的列」之间必须等的拍数。'],
+ ['cache line','缓存行','缓存和内存之间搬运的最小单位,现在通常是 64 字节。'],
+ ['SO-DIMM','小型双列直插内存条','笔记本用的那种短内存条,平躺插在插槽里。'],
+ ['MC','内存控制器','die 上负责跟内存条对话的那块电路,管地址、时序和刷新。'],
  ['PBR','基于物理的渲染','用金属度和粗糙度描述材质,金属和塑料反光才会不一样。'],
  ['IBL','基于图像的光照','用一张环境图给所有材质打光,本页的棚拍光就是这么来的。'],
 ];
+
 //==============================================================
 // S11 · 帧缓冲
 //==============================================================
@@ -1771,24 +1924,101 @@ function tokenAlong(P,u,col){
 // 逻辑块表面的"在忙"高亮
 function blockGlow(p,sx,sz,col,inten){ glow([p[0],p[1]+0.05,p[2]],[sx,0.02,sz],col,inten); }
 
-// ---------- 示例数据流 ----------
-// 照 references/flow-craft.md 写:数据有形状、按拍走、live 显示实时数字
+// ---------- 数据流:三站各一套 ----------
+// 三条规矩:数据要有形状 · 画芯片内部不是板级 · 按拍走可暂停单步
 function buildFlow(kind,T){
   FLOW.list.length=0; FLOW.live={};
-  if(kind==='demo'){
-    const tk=tick(), ph=phase(), step=tk%4, u=ph;
-    const A=[-40,3.2,0], B=[0,3.2,0], C=[40,3.2,0];
-    wires(A,C,16,0.9,[0.85,0.55,0.25],0.06,0.10);        // 16 根并行导线
-    if(step<2){                                           // 一行 16 位沿线走
-      wordOnWires(A,C,(step+u)/2,16,0.9,(b)=>h1(tk,b)>0.5,FC.data,1.9);
-    } else {                                              // 到达后拼成一块
-      tileAlong([B,C],(step-2+u)/2,4,2,FC.data,tk,1.5);
+
+  // ===== 站 3 · 一颗 DRAM 里面:先开一整行,再选一列(12 拍一轮)=====
+  if(kind==='array'){
+    const tk=tick(), u=phase(), st=tk%12;
+    const bx=14, bz=-30, y=5.05, gy=4.80;
+    const ADR=at(WB,-18,y,bz), DEC=at(WB,0.4,y,bz);
+    const RB =at(WB,bx,y,bz+17.6);            // 行缓冲(读出放大器)
+    const CS =at(WB,bx,y,0);                  // 列选 + 数据 IO
+    const OUT=at(WB,56,y+4.4,0);              // 出颗粒
+    // 行地址 15 根地址线 → 行译码器
+    wires(ADR,DEC,15,1.05,[0.85,0.55,0.25],0.05,0.09);
+    if(st<2) wordOnWires(ADR,DEC,(st+u)/2,15,1.05,(b)=>h1(tk,b,3)>0.45,FC.cmd,2.0);
+    else     blockGlow(at(WB,0.4,gy,bz),3.2,30,FC.cmd,0.30);
+    // 字线:译码器拉高的那一根,横穿整个阵列
+    if(st>=2&&st<5){
+      const w=(st===2)?ease(u):1;
+      pad(at(WB,bx-11.5+11.5*w,y,bz), 23*w, 0.55, FC.cmd, 2.2);
+      blockGlow(at(WB,bx,gy,bz),23,30,FC.cmd,0.08+0.10*pulse(T,0.7));
     }
-    blockGlow(A,14,14,FC.cmd,0.2+0.6*pulse(T,1.0));
-    blockGlow(C,14,14,FC.data,step>=2?0.9:0.1);
-    FLOW.live.bus = `第 ${step+1}/4 拍 · <b>${['①发出请求','①16 位沿线走','②到达,拼成一块','②写入'][step]}</b>`;
+    // 整行电荷抬进行缓冲 —— tRCD 等的就是这几拍
+    const fill = st<2 ? 0 : st===2 ? ease(u)*0.45
+               : st<5 ? 0.45+0.55*Math.min(1,(st-3+u)/2) : 1;
+    if(fill>0) wordRow(RB, 0, 32, 0.70,
+      (i)=>(h1(bz,i,7)>0.42 && i/32 < fill+0.04), FC.data, 1.4+0.7*fill, 0.50);
+    if(st>=5) blockGlow(at(WB,bx,gy,bz+17.6),23,3.4,FC.data,0.20);
+    // 列地址 → 列选
+    if(st>=5&&st<7){
+      wires(RB,CS,8,1.7,[0.85,0.55,0.25],0.05,0.10);
+      blockGlow(at(WB,bx,gy,0),23,4.8,FC.cmd,0.22+0.40*pulse(T,0.55));
+    }
+    // 按列取出 8 个字节,沿铜轨走到中央 IO,再出颗粒
+    if(st>=7&&st<10){
+      tileAlong([RB,CS],(st-7+u)/3,8,2,FC.data,tk,1.5,1.05);
+      blockGlow(at(WB,bx,gy,0),23,4.8,FC.data,0.40);
+    }
+    if(st>=10) tileAlong([CS,OUT],(st-10+u)/2,8,2,FC.data,tk,1.5,1.05);
+    const NAME=['①行地址进译码器','①行地址进译码器',
+      '②拉高字线,整行接到位线','③整行电荷抬进行缓冲','③整行电荷抬进行缓冲',
+      '④列地址进列选','④列地址进列选',
+      '⑤按列取出 8 个字节','⑤按列取出 8 个字节','⑤按列取出 8 个字节',
+      '⑥出颗粒,上内存总线','⑥出颗粒,上内存总线'];
+    const WAIT=['—','—','等 tRCD','等 tRCD','等 tRCD','—','—','等 CL','等 CL','等 CL','—','—'];
+    FLOW.live.arr=`第 ${st+1} / 12 拍 · <b>${NAME[st]}</b>` +
+      (WAIT[st]!=='—' ? ` · <i>${WAIT[st]}</i>` : '');
+  }
+
+  // ===== 站 4 · 总线上的 64 位(8 拍凑一条缓存行)=====
+  if(kind==='bus'){
+    const tk=tick(), u=phase(), st=tk%8;
+    const A=at(WA,-14.5,0.30,0), B=at(WA,12.0,0.30,0);
+    wires(A,B,64,0.34,[0.85,0.55,0.25],0.20,0.085);           // 64 根并行线,不是一条线
+    wordOnWires(A,B,ease(u),64,0.34,(b)=>h1(tk,b,1)>0.5,FC.data,2.0);
+    const C=at(WA,29,5.7,-7);                                  // CPU 这边收
+    gridObj(C,0,8,8,1.25,(i,j)=>({col:FC.data,
+      inten:(j<st || (j===st && u>0.82))?1.45:0.09}),1);
+    glow([C[0],C[1]-0.32,C[2]],[11.4,0.02,11.4],FC.data,0.16);
+    blockGlow(at(WA,-52,4.9,0),69,30,FC.cmd,0.06+0.10*pulse(T,0.9));
+    FLOW.live.bus=`第 ${st+1} / 8 拍 · 已收 <b>${st*8} / 64 字节</b> · 一拍 64 位`;
+  }
+
+  // ===== 站 5 · die 的城:一路排队到寄存器(16 拍)=====
+  if(kind==='city'){
+    const tk=tick(), u=phase(), st=tk%16;
+    const cz=24, y=10.3, y2=12.1, gy=5.75;
+    const MC =at(WC,-50,y,cz),  L3a=at(WC,-24,y,cz), L3b=at(WC,2,y,cz),
+          TN =at(WC,24,y,cz),   TN2=at(WC,24,y2,cz), L2=at(WC,32,y2,cz),
+          L1 =at(WC,58,y2,cz+11), RG=at(WC,58,y2,cz-11);
+    ribbon([MC,L3a,L3b,TN],[0.85,0.55,0.25],0.05,2.4);
+    ribbon([TN2,L2,at(WC,58,y2,cz)],[0.85,0.55,0.25],0.05,2.0);
+    ribbon([at(WC,58,y2,cz),L1],[0.85,0.55,0.25],0.05,1.6);
+    ribbon([at(WC,58,y2,cz),RG],[0.85,0.55,0.25],0.05,1.6);
+    blockGlow(at(WC,-58,4.95,0),15,86,FC.cmd,0.10);
+    const line=(P,uu)=>tileAlong(P,uu,8,8,FC.data,7,1.35,1.15);
+    let where='';
+    if(st<4){       line([MC,L3a],(st+u)/4);                 where='在环形互连上,去 L3'; }
+    else if(st<7){  line([MC,L3a],1);
+                    blockGlow(at(WC,-24,gy,cz),22,30,FC.cmd,0.18+0.40*pulse(T,0.5));
+                    where='L3 里查一遍 —— 没命中,继续往下'; }
+    else if(st<10){ line([L3a,L3b,TN,TN2,L2],(st-7+u)/3);    where='L3 → L2'; }
+    else if(st<12){ line([L2,at(WC,58,y2,cz),L1],(st-10+u)/2); where='L2 → L1 数据缓存'; }
+    else if(st<14){ line([L2,at(WC,58,y2,cz),L1],1);
+                    blockGlow(at(WC,58,gy,cz+11),10,16,FC.data,0.30+0.35*pulse(T,0.45));
+                    where='L1 里按地址挑出这 8 个字节'; }
+    else {          const uu=(st-14+u)/2;
+                    wordOnWires(L1,RG,uu,16,0.62,(b)=>h1(tk,b,9)>0.45,FC.data,2.1);
+                    blockGlow(at(WC,58,gy,cz-11),10,16,FC.data,0.25+0.45*uu);
+                    where='进寄存器 —— 这条指令终于能算了'; }
+    FLOW.live.city=`已走 <b>${st+1}</b> 拍 · ${where}`;
   }
 }
+
 function renderFlow(){
   if(!FLOW.box||!lastVP) return;
   uploadInst(FLOW.box,  FLOW.list.filter(o=>!o.orb && !o.flat));
@@ -2044,7 +2274,6 @@ window.__rec={
   },
   stations(){ return STATIONS.map((s,i)=>({i, act:s.act, title:s.title, flow:s.flow||null})); }
 };
-// 调机位用:外部直接覆盖 cam,不用改文件重开。配 scripts/try_cameras.mjs 一次试几组
 window.__setCam=(c)=>{ Object.assign(cam,c); tween=null; reset(); updateLabels(); };
 window.__setProgress=(p)=>{ goTo(Math.min(STATIONS.length-1, Math.floor(p*STATIONS.length)), true); };
 try{ boot(); }

@@ -14,6 +14,7 @@ Same story, nine aesthetics. Each demo is a single flagship HTML page showcasing
 | [`primer-design/`](./primer-design/index.html) | `skills/primer-design/` | Paper white + violet + marker yellow, Fredoka display over Nunito body, thick-outline illustrations at 3.4px round-cap, analogy cards, jargon→plain-words chips and a closing recap — "what is an Agent Skill" for a complete beginner |
 | [`sage-design/`](./sage-design/index.html) | `skills/sage-design/` | Rice-paper cream + sage green + deep indigo, Instrument Serif display + Inter body + JetBrains Mono section numbers, quiet Nordic minimalism |
 | [`gated-dual-clone/`](./gated-dual-clone/index.html) | `skills/gated-dual-clone/` | Anthropic voice, single-purpose page explaining the 2/3-clone git topology and its safety gates |
+| [`hardware-3d/`](./hardware-3d/index.html) | `skills/hardware-3d/` | Photoreal, not a design voice — hand-written WebGL2 in one file. Studio-lit board, DRAM die and CPU die; 200 accumulated samples give real soft shadows and real depth of field, tilt-shift keeps the board sharp corner to corner, and the flow layer draws the data path inside the die on elevated copper rails, advancing by clock ticks you can pause and single-step |
 
 Extra pages beyond the nine flagship `index.html`:
 
@@ -27,6 +28,8 @@ Extra pages beyond the nine flagship `index.html`:
 - [`atelier-design/diagrams.html`](./atelier-design/diagrams.html) — 13-figure gallery of the application parts: gradient orbs, round-cap bars, meters, the anchor card, table and rail states — plus four **in-app diagrams** (a clickable service topology, a pipeline carrying state, a permission graph, a flow canvas), the technical figures that are product surfaces rather than documentation figures
 - [`primer-design/diagrams.html`](./primer-design/diagrams.html) — 25 thick-outline illustrations from the three primers plus the demo (a book's index, one takeout trip, a sealed envelope …), each answering exactly one question
 - [`primer-design/tech/`](./primer-design/tech/index.html) — the technical set behind one cover page: a register as a row of switches, one SPI mode-0 transfer, an SoC as a city, two chips whose house numbers never merge, how an IP core is built, a character's path from `write()` to a UART pin, and why 25 halvings find one row in twenty million
+
+**`hardware-3d/` is not one of the nine aesthetics.** The other demos are the same story told in different visual voices; this one is a rendered page — five stations following one data word from a DRAM cell to a CPU register. It exists to show what the skill's three layers (render / visual language / flow craft) produce together, which a static screenshot cannot: park the camera and the image keeps converging, and the data flow only makes sense in motion.
 
 ## Local preview
 

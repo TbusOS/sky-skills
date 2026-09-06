@@ -6,7 +6,9 @@
 
 ## 在线 Demo
 
-九个设计类 skill 各自配备了一份单页 flagship demo，位于 [`demos/`](./demos/) 目录 —— 同一份内容，九种美学呈现：
+九个设计类 skill 各自配备了一份单页 flagship demo，位于 [`demos/`](./demos/) 目录 —— 同一份内容，九种美学呈现。`hardware-3d` 是里面的另类：它做的是渲染，不是排版。
+
+- [**hardware-3d demo**](./demos/hardware-3d/index.html) —— 一条数据从内存颗粒走到 CPU 寄存器，分五站。单文件手写 WebGL2：PBR + 现烘棚拍柔光箱 + SSAO，累积 200 次采样换来真软阴影和真景深。数据流那一层画在 **die 内部** —— 逻辑块躺在硅上、架空铜轨在上方 —— 并且按时钟拍走，可以暂停和单步
 
 - [**apple-design demo**](./demos/apple-design/index.html) —— apple.com 的冷感克制
 - [**anthropic-design demo**](./demos/anthropic-design/index.html) —— anthropic.com 的暖编辑感
@@ -45,6 +47,7 @@
 | [md-to-pdf](skills/md-to-pdf/) | EN/ZH | Markdown 转 PDF —— 基于 PyMuPDF Story HTML 渲染，完整中文支持、自动书签、页码 |
 | [tech-pdf-reader](skills/tech-pdf-reader/) | ZH | **技术 PDF 阅读** —— datasheet、原理图、协议文档，答案常在时序图和引脚表里而不在文字层。按关键词定位章节、把整页渲染出来让图真的看得见、渲染失败时兜底抠内嵌图。核心纪律是把**「工具不行」**和**「文件坏了」**分开 —— 二者现象相同（都是空白），处理方式完全相反。`scripts/pdf_probe.py` 逐页报文字层 / 内嵌图数 / 有无 `/Contents`，遍历对象图区分「引用断了还能修」和「内容真的不在文件里」，再读 `Page N of M` 页脚揪出截断副本。技术参数错一位就是硬件问题，所以读不到就写读不到，绝不按「应该是这样」补全 |
 | [datasheet-reading](skills/datasheet-reading/) | EN/ZH | **在工程 PDF 里查事实** —— 寄存器某一位的定义、时序最小值、引脚从哪路供电、某个元件到底贴没贴（NC）、这份文档有没有提到 X。先定位到页，再读表或读图，答案连着页号 + 表号一起给，方便复查。硬规则：**「我没提取出来」永远不写成「文档里没有」** |
+| [hardware-3d](skills/hardware-3d/) | ZH | **写实硬件 / 芯片原理讲解页** —— 单个 HTML、手写 WebGL2、零外部依赖。PBR + 开机现烘的棚拍柔光箱环境 + SSAO + 真圆角几何；照片感来自**累积采样** —— 相机一停，每帧重新抖动亚像素偏移（高斯 σ≈0.32px）、光圈盘、柔光箱面积和 AO 核，200 帧后的软阴影和景深是真算出来的，不是糊出来的。移轴让整块板从这个角到那个角都清楚。第二层更难：**看得懂的数据流** —— 一个 64 位字是一行亮暗格子，一条总线是 64 根并行导线而不是一条线，路径画在 *die 内部*（逻辑块躺在硅上，架空铜轨在上方，那正是金属互连层的真实样子）。全部按时钟拍走，可暂停 / 单步 / 调速，读者自己数延迟有多少拍。四道可执行检查把关（自包含 / 管线 / 防霓虹回潮 / 帧时间）—— 见 [demo](demos/hardware-3d/index.html) |
 | [apple-design](skills/apple-design/) | EN/ZH | 以 **apple.com** 网页美学渲染 HTML/CSS —— SF Pro 字体、白/浅灰/黑交替段落、克制的文字链、巨字号统计、产品摄影主导、手工 SVG 流程图。**diagram-craft v3 (2026-06) 新增：** 内核级 SVG 制图规范（先定尺寸、tint 填充、每图 ≥2 个色相）+ 模板库扩到 30 件 —— 见[图表画廊](demos/apple-design/diagrams.html) |
 | [anthropic-design](skills/anthropic-design/) | EN/ZH | 以 **anthropic.com** 网页美学渲染 HTML/CSS —— 暖米白 + 橙色强调、Poppins 标题 + Lora 衬线正文、实心胶囊按钮、编辑式卡片、抽象 SVG 插画、低饱和图表。**v2 (2026-04) 新增：** 给 canonical 没覆盖的版式 / 控件 / 动效 / 文案各加一层 scenario recipes（dashboard / form / table / tab / accordion / modal / sidebar / changelog / video / empty-state · input / select / check / switch / toast / dialog / banner / tooltip / skeleton · hero / stagger / hover / route），加一份 `references/ux-writing.md`（CTA / empty / error / placeholder / 禁用词清单），所有 recipe class 已落到 `assets/anthropic.css`。配 `bin/design-review --audit <dir-or-url>` 批量审存量页面。**v3 (2026-05) 新增：** `scripts/` 下 4 件套 md 渲染管线 —— `md-mirror`（1 个 `.md` → 1 个 anthropic 风格 `.html`，内联 CSS）/ `md-rewrite-links`（原地 `.md`→`.html` href 替换）/ `md-pack`（把链到的 `.md` 折叠到扁平 `_md/` 子目录 + 重写 href + basename 救援源文档 `../` typo）/ `cross-link-pack`（跨目录 sibling `.html` 也折叠进同款 `_md/`）。在文档目录跑 pack + cross-link-pack 一次，`cp -r` 到任何地方所有链接全活。**diagram-craft v3 (2026-06) 新增：** 内核级 SVG 制图规范 + 模板库扩到 66 件（register-bitfield / soc-block / hw-timing-waveform / sched-timeline / interconnect-map / protocol-stack / address-map……）—— 见 [76 图画廊](demos/anthropic-design/diagrams.html) |
 | [ember-design](skills/ember-design/) | EN/ZH | 以 **手作编辑** 美学渲染 HTML/CSS —— 暖米 (#fff2df) + 深巧克力 (#312520) + 棕色 CTA (#492d22) + 金色 (#c49464)，Fraunces 展示衬线 + Inter 正文。适合咖啡工坊 / 精品酒店 / 文学期刊 / 独立品牌。**diagram-craft (2026-06) 新增：** 暖棕灰阶结构 + 金单焦点制图规范 + 8 件 SVG 图示模板 —— 见 [8 图画廊](demos/ember-design/diagrams.html) |
