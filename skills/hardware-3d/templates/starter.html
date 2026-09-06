@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hw3d 最小可跑页</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#141416;
+    font-family:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;color:#e6e6ea}
+  #gl{display:block;width:100%;height:100%;cursor:grab}
+  #gl:active{cursor:grabbing}
+  .hud{position:fixed;left:18px;top:16px;z-index:10;font-size:12px;line-height:1.7;color:#a9a9b1;
+    background:rgba(18,18,21,.74);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.09);
+    border-radius:11px;padding:12px 15px;min-width:200px;user-select:none;pointer-events:none}
+  .hud .row{display:flex;justify-content:space-between;gap:16px;font-variant-numeric:tabular-nums}
+  .hud .row span:last-child{color:#e6e6ea}
+  #err{position:fixed;inset:0;display:none;place-items:center;z-index:99;background:#141416;
+    color:#ff8a8a;font-size:14px;padding:40px;text-align:center;line-height:1.9;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div class="hud">
+  <div class="row"><span>累积采样</span><span id="hSpp">0 / 0</span></div>
+  <div class="row"><span>帧时间</span><span id="hMs">—</span></div>
+  <div class="row"><span>三角形</span><span id="hTri">—</span></div>
+</div>
+<div id="err"></div>
+<script>
+'use strict';
+/* ===== 这里内联 assets/hw3d.js 的全部内容 ===== */
+/* <<<  PASTE hw3d.js HERE  >>> */
+
+//====== 场景:一块板 + 几颗芯片 ======
+const PROTO={}, SCENE=[], POS={};
+function buildScene(){
+  const P=(k,geo,max)=>{ PROTO[k]=makeMesh(geo,max); return PROTO[k]; };
+  P('board', roundedBox(120, 2.4, 90, 0.9, 3), 1);
+  P('chip',  roundedBox(11.5, 1.15, 14.5, 0.20, 3), 8);
+  P('pad',   roundedBox(1.35, 0.13, 1.35, 0.05, 2), 300);
+  const L={}; for(const k in PROTO) L[k]=[];
+  const m=(mat,extra)=>Object.assign({c:mat.c, me:mat.me, ro:mat.ro, tx:0, g:0}, extra||{});
+  L.board.push(m(MAT.pcbBlack,{p:[0,-1.2,0], tx:2}));
+  for(let i=0;i<8;i++){
+    const x=-42+ (i%4)*28, z=(i<4?-22:22);
+    L.chip.push(m(MAT.epoxy,{p:[x,0.62,z], tx:1, atl:ATLAS_RECT[i%ATLAS_RECT.length]}));
+    for(let s=-1;s<=1;s+=2) for(let n=0;n<9;n++)
+      L.pad.push(m(MAT.goldENIG,{p:[x+(n-4)*1.5, 0.08, z+s*7.25]}));
+  }
+  for(const k in PROTO){ uploadInst(PROTO[k], L[k]); SCENE.push(PROTO[k]); }
+}
+//====== 相机 / 状态 ======
+const cam={ tgt:[0,1.2,0], az:-0.55, el:0.42, dist:110, fov:26, ap:0.30, ex:1.55, focus:'plane', fy:1.2 };
+const STATE={ lift:200, cutX:60 };
+function camEye(){ const ce=Math.cos(cam.el), se=Math.sin(cam.el);
+  return [cam.tgt[0]+cam.dist*ce*Math.sin(cam.az), cam.tgt[1]+cam.dist*se, cam.tgt[2]+cam.dist*ce*Math.cos(cam.az)]; }
+//====== 交互 ======
+let drag=null;
+cv.addEventListener('mousedown',e=>{ drag={x:e.clientX,y:e.clientY}; e.preventDefault(); });
+window.addEventListener('mouseup',()=>drag=null);
+window.addEventListener('mousemove',e=>{ if(!drag) return;
+  cam.az-=(e.clientX-drag.x)*0.0052;
+  cam.el=Math.max(0.02,Math.min(1.52,cam.el+(e.clientY-drag.y)*0.0042));
+  drag.x=e.clientX; drag.y=e.clientY; reset(); });
+cv.addEventListener('wheel',e=>{ e.preventDefault();
+  cam.dist=Math.max(6,Math.min(500,cam.dist*Math.exp(e.deltaY*0.0011))); reset(); },{passive:false});
+window.addEventListener('resize',resize);
+//====== 启动 ======
+let ATLAS_TEX=null;
+const $=id=>document.getElementById(id);
+function boot(){
+  PR.gb=prog(GB_VS,GB_FS,'gbuffer'); PR.shadow=prog(SHADOW_VS,SHADOW_FS,'shadow');
+  PR.ssao=prog(FS_VS,SSAO_FS,'ssao'); PR.blur=prog(FS_VS,BLUR_FS,'aoblur');
+  PR.light=prog(FS_VS,LIGHT_FS,'lighting'); PR.copy=prog(FS_VS,COPY_FS,'copy');
+  PR.bright=prog(FS_VS,BRIGHT_FS,'bright'); PR.gauss=prog(FS_VS,GAUSS_FS,'gauss');
+  PR.post=prog(FS_VS,POST_FS,'post');
+  ATLAS_TEX=buildAtlas(); bakeEnvironment(); buildScene();
+  totalTris=SCENE.reduce((a,m)=>a+m.tris*m.count,0);
+  shadow=mkShadow(); resize(); requestAnimationFrame(loop);
+}
+let fpsAcc=0,fpsN=0;
+function loop(){
+  const t0=performance.now();
+  if(spp<QUAL.maxSPP){ renderSample(spp); spp++; dirty=true; }
+  if(dirty){ composite(); dirty=(spp<QUAL.maxSPP); }
+  const dt=performance.now()-t0; fpsAcc+=dt; fpsN++;
+  if(fpsN>=20){ lastMs=fpsAcc/fpsN; fpsAcc=0; fpsN=0; }
+  $('hSpp').textContent=spp+' / '+QUAL.maxSPP;
+  $('hMs').textContent=lastMs?lastMs.toFixed(1)+' ms':'—';
+  $('hTri').textContent=(totalTris/1000).toFixed(0)+' K';
+  requestAnimationFrame(loop);
+}
+window.__hw3d={ caps:()=>({webgl2:true,colorFloat:CAPS.colorFloat,floatLinear:CAPS.floatLinear,aniso:MAXANISO,
+    passes:['shadow','gbuffer','ssao','ibl-lighting','accum','bloom','post'],
+    envSize:ENV_SIZE,envMips:ENV_MIPS,tris:totalTris,stations:1}),
+  spp:()=>spp, maxSpp:()=>QUAL.maxSPP, converged:()=>spp>=QUAL.maxSPP,
+  go:()=>{}, setSpp:(n)=>{QUAL.maxSPP=n; reset();},
+  errs:()=>GLERR.slice(), glError:()=>{const e=[];for(let k=0;k<8;k++){const x=gl.getError();if(!x)break;e.push('0x'+x.toString(16));}return e;} };
+try{ boot(); }catch(err){ console.error(err);
+  if(!document.getElementById('err').style.display) fatal('初始化失败：'+(err&&err.message?err.message:err)); }
+</script>
+</body>
+</html>

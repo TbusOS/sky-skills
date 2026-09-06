@@ -1,0 +1,51 @@
+<!-- hw3d 页面外壳 DOM。配 assets/hw3d-ui.css + hw3d-ui.js 使用。
+     标题/副标题按题目改;其余结构别动 —— JS 靠这些 id 挂载。 -->
+<canvas id="gl"></canvas>
+<svg id="leaders"></svg>
+<div id="labels"></div>
+
+<header class="title">
+  <h1>GPU：从硅片到屏幕</h1>
+  <p>一块显卡里，一帧画面是怎么被算出来、又怎么被点亮的 · 写实 3D 讲解</p>
+</header>
+
+<nav class="acts panel" id="acts"></nav>
+<nav class="stations panel" id="stations"></nav>
+
+<aside class="caption panel" id="caption">
+  <div class="k" id="cK">第一幕 · 01 / 14</div>
+  <h2 id="cT">—</h2>
+  <div class="body" id="cB"></div>
+  <div class="clk" id="clk">
+    <button id="cPlay" title="暂停 / 继续">⏸</button>
+    <button id="cStep" title="单步:走一拍">⏭ 一拍</button>
+    <label>速度 <input id="cSpd" type="range" min="25" max="300" value="100"></label>
+    <span id="cTick" class="mono">拍 0</span>
+  </div>
+  <div class="nav">
+    <button id="bPrev">← 上一站</button>
+    <button id="bNext" class="pri">下一站 →</button>
+  </div>
+</aside>
+
+<aside class="hud panel">
+  <b>渲染状态</b>
+  <div class="row"><span>累积采样</span><span id="hSpp" class="mono">0 / 0</span></div>
+  <div class="row"><span>帧时间</span><span id="hMs" class="mono">—</span></div>
+  <div class="row"><span>三角形</span><span id="hTri" class="mono">—</span></div>
+  <div class="row"><span>光圈(景深)</span><span id="hFst" class="mono">—</span></div>
+  <input id="hAp" type="range" min="0" max="100" value="50" title="0 = 全清晰,50 = 镜头默认,100 = 两倍">
+  <label class="row"><span>焦平面贴板面(移轴)</span><input id="hTs" type="checkbox"></label>
+  <div class="bar"><i id="hBar"></i></div>
+</aside>
+
+<div class="tip"><kbd>←</kbd> <kbd>→</kbd> 切站 &nbsp; <kbd>拖动</kbd> 转视角 &nbsp; <kbd>滚轮</kbd> 推拉<br>松手后画面会持续累积采样，越等越干净</div>
+
+<button class="gloss-btn" id="gBtn" title="术语表">❓</button>
+<aside class="gloss" id="gPanel">
+  <button class="x" id="gClose">×</button>
+  <h3>术语表</h3>
+  <div class="sub">英文缩写 · 中文名 · 一句话解释</div>
+  <dl id="gList"></dl>
+</aside>
+<div id="err"></div>
