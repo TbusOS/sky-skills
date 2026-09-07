@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>hw3d 站点页模板</title>
+<title>hw3d station-page template</title>
+<meta name="description" content="Template for a photoreal hardware 3D explainer page: WebGL2 in one file, stations, and a readable data-flow layer.">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
@@ -16,7 +17,8 @@
   .panel{background:rgba(18,18,21,.74);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     border:1px solid rgba(255,255,255,.09);border-radius:12px}
   /* —— 标题 —— */
-  .title{position:fixed;left:22px;top:18px;z-index:20;pointer-events:none;user-select:none}
+  .title{position:fixed;left:22px;top:18px;z-index:20;pointer-events:none;user-select:none;
+    max-width:min(430px,27vw)}
   .title h1{font-size:clamp(18px,1.6vw,26px);font-weight:700;letter-spacing:.02em;
     background:linear-gradient(90deg,#f1f1f3 0%,#b9c7d6 55%,#8fb3d9 100%);
     -webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.25}
@@ -36,7 +38,7 @@
   .stations button.done{color:#c0c0c8}
   /* —— 说明卡 —— */
   .caption{position:fixed;left:22px;bottom:22px;z-index:20;width:min(430px,calc(100vw - 44px));
-    padding:18px 20px 16px;transition:opacity .35s}
+    padding:18px 56px 16px 20px;transition:opacity .35s}
   .caption .k{font:600 11px/1 "JetBrains Mono",monospace;color:#5aa0eb;letter-spacing:.12em;text-transform:uppercase}
   .caption h2{font-size:19px;font-weight:700;margin:9px 0 10px;letter-spacing:.01em;color:#f3f3f5}
   .caption .body{font-size:13px;line-height:1.72;color:#c6c6cd}
@@ -58,6 +60,26 @@
   .caption .nav button.pri{background:#5aa0eb;color:#0b1b2c;border-color:transparent;font-weight:600}
   .caption .nav button.pri:hover{background:#74b1f3}
   .caption .nav button:disabled{opacity:.35;cursor:default}
+  /* —— 说明卡收起 —— 它固定占左下一大块,挡视线时收成一条 —— */
+  .cap-x{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.10);color:#b9b9c1;border-radius:7px;padding:4px 9px;
+    font:500 11px/1.25 "Noto Sans SC",sans-serif;cursor:pointer;transition:.16s;white-space:nowrap}
+  .cap-x:hover{background:rgba(255,255,255,.14);color:#fff}
+  /* —— 中英切换 —— 公开页面必须能切,检查链会查这条 —— */
+  html[data-lang="en"] .lang-zh{display:none !important}
+  html[data-lang="zh"] .lang-en{display:none !important}
+  .lang-toggle{position:fixed;right:80px;bottom:26px;z-index:9999;letter-spacing:.04em;
+    background:rgba(24,24,28,.86);border:1px solid rgba(255,255,255,.14);color:#dcdce2;
+    border-radius:999px;padding:7px 14px;font:500 12px/1 "Noto Sans SC",sans-serif;cursor:pointer;
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    box-shadow:0 6px 24px rgba(0,0,0,.4);transition:.18s}
+  .lang-toggle:hover{background:#5aa0eb;color:#0b1b2c}
+  .caption.mini{width:auto;max-width:min(430px,calc(100vw - 44px));padding:12px 62px 12px 16px}
+  .caption.mini h2{font-size:14.5px;margin:7px 0 0}
+  .caption.mini .body,.caption.mini .nav{display:none}
+  /* 收起后保留时钟控件:收起卡片多半就是为了看动画,暂停/单步正是这时候要用的 */
+  .caption.mini .clk{margin-top:10px;padding-top:9px}
+  .caption.mini .clk.on{display:flex}
   /* —— 3D 标签层 —— */
   #labels{position:fixed;inset:0;z-index:15;pointer-events:none;overflow:hidden}
   #leaders{position:fixed;inset:0;z-index:14;pointer-events:none;width:100%;height:100%}
@@ -70,7 +92,7 @@
   .lb::after{content:"";position:absolute;left:50%;bottom:-5px;width:8px;height:8px;
     background:#5aa0eb;border-radius:50%;transform:translate(-50%,50%);box-shadow:0 0 0 3px rgba(90,160,235,.25)}
   /* —— 渲染状态 —— */
-  .hud{position:fixed;right:22px;top:112px;z-index:20;padding:12px 15px;min-width:220px;
+  .hud{position:fixed;right:22px;top:112px;z-index:20;padding:12px 52px 12px 15px;min-width:220px;
     font-size:11.5px;line-height:1.7;color:#a9a9b1;user-select:none;pointer-events:none}
   .hud b{display:block;color:#e6e6ea;font-weight:600;font-size:12px;margin-bottom:5px}
   .hud .row{display:flex;justify-content:space-between;gap:16px;font-variant-numeric:tabular-nums}
@@ -80,8 +102,18 @@
   .hud label.row{cursor:pointer;pointer-events:auto;margin-top:6px}
   .bar{height:3px;background:rgba(255,255,255,.12);border-radius:2px;margin-top:8px;overflow:hidden}
   .bar i{display:block;height:100%;width:0%;background:#5aa0eb;transition:width .12s linear}
-  .tip{position:fixed;right:84px;bottom:26px;z-index:20;color:#7c7c84;font-size:11px;line-height:1.8;
-    text-align:right;user-select:none;pointer-events:none}
+  /* —— 渲染状态收起 —— 收起后只留标题和那条累积进度 —— */
+  .hud-x{position:absolute;top:10px;right:12px;z-index:2;pointer-events:auto;
+    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);color:#b9b9c1;
+    border-radius:7px;padding:3px 8px;font:500 10.5px/1.25 "Noto Sans SC",sans-serif;
+    cursor:pointer;transition:.16s;white-space:nowrap}
+  .hud-x:hover{background:rgba(255,255,255,.14);color:#fff}
+  .hud.mini{min-width:0;padding:11px 52px 11px 15px}
+  .hud.mini .row,.hud.mini input[type=range],.hud.mini label.row{display:none}
+  .hud.mini b{margin-bottom:0}
+  .hud.mini .bar{margin-top:9px;width:96px}
+  .tip{position:fixed;right:24px;bottom:82px;z-index:20;color:#7c7c84;font-size:11px;line-height:1.8;
+    text-align:right;user-select:none;pointer-events:none;max-width:min(460px,46vw)}
   .tip kbd{background:rgba(255,255,255,.09);border-radius:4px;padding:1px 6px;font-family:inherit;color:#bdbdc5}
   /* —— 术语表 —— */
   .gloss-btn{position:fixed;bottom:24px;right:24px;z-index:9999;width:46px;height:46px;border-radius:50%;
@@ -90,8 +122,10 @@
   .gloss-btn:hover{background:#5aa0eb;color:#0b1b2c;transform:translateY(-2px)}
   .gloss{position:fixed;top:0;right:0;bottom:0;width:min(400px,92vw);z-index:9998;
     background:rgba(16,16,19,.94);backdrop-filter:blur(20px);border-left:1px solid rgba(255,255,255,.1);
-    transform:translateX(102%);transition:transform .38s cubic-bezier(.2,.8,.2,1);overflow-y:auto;padding:26px 24px 90px}
-  .gloss.open{transform:none}
+    transform:translateX(102%);visibility:hidden;
+    transition:transform .38s cubic-bezier(.2,.8,.2,1),visibility 0s linear .38s;
+    overflow-y:auto;padding:26px 24px 90px}
+  .gloss.open{transform:none;visibility:visible;transition-delay:0s,0s}
   .gloss h3{font-size:17px;font-weight:700;margin-bottom:6px}
   .gloss .sub{font-size:12px;color:#8a8a92;margin-bottom:18px}
   .gloss dl{display:grid;gap:12px}
@@ -99,6 +133,8 @@
   .gloss dt span{font-family:"Noto Sans SC",sans-serif;color:#e6e6ea;font-weight:600;margin-left:8px}
   .gloss dd{font-size:12.5px;line-height:1.65;color:#bdbdc5;margin-top:3px}
   .gloss .x{position:absolute;top:16px;right:18px;background:transparent;border:0;color:#9a9aa2;font-size:22px;cursor:pointer}
+  /* 键盘焦点必须看得见 —— 这一页有 19 个可聚焦元素 */
+  :focus-visible{outline:2px solid #5aa0eb;outline-offset:2px;border-radius:6px}
   #err{position:fixed;inset:0;display:none;place-items:center;z-index:99999;background:#141416;color:#ff8a8a;
     font-size:14px;padding:40px;text-align:center;line-height:1.9;white-space:pre-wrap}
   @media (max-width:900px){
@@ -113,47 +149,50 @@
 <div id="labels"></div>
 
 <header class="title">
-  <h1>换成你的标题</h1>
-  <p>一行副标题：这页到底讲什么 · 写实 3D 讲解</p>
+  <h1><span class="lang-en">Your title here</span><span class="lang-zh">换成你的标题</span></h1>
+  <p><span class="lang-en">One line: what this page is actually about · photoreal 3D walkthrough</span><span class="lang-zh">一行副标题：这页到底讲什么 · 写实 3D 讲解</span></p>
 </header>
 
 <nav class="acts panel" id="acts"></nav>
 <nav class="stations panel" id="stations"></nav>
 
 <aside class="caption panel" id="caption">
+  <button class="cap-x" id="cHide" title="Collapse (H) · 收起说明卡（H）" aria-expanded="true"><span class="lang-en">Hide ⌄</span><span class="lang-zh">收起 ⌄</span></button>
   <div class="k" id="cK">第一幕 · 01 / 14</div>
   <h2 id="cT">—</h2>
   <div class="body" id="cB"></div>
   <div class="clk" id="clk">
-    <button id="cPlay" title="暂停 / 继续">⏸</button>
-    <button id="cStep" title="单步:走一拍">⏭ 一拍</button>
-    <label>速度 <input id="cSpd" type="range" min="25" max="300" value="100"></label>
-    <span id="cTick" class="mono">拍 0</span>
+    <button id="cPlay" title="Pause / resume · 暂停 / 继续">⏸</button>
+    <button id="cStep" title="Step one tick · 单步:走一拍">⏭ <span class="lang-en">one tick</span><span class="lang-zh">一拍</span></button>
+    <label><span class="lang-en">Speed</span><span class="lang-zh">速度</span> <input id="cSpd" type="range" min="25" max="300" value="100"></label>
+    <span id="cTick" class="mono"><span class="lang-en">tick </span><span class="lang-zh">拍 </span><span id="cTickN">0</span></span>
   </div>
   <div class="nav">
-    <button id="bPrev">← 上一站</button>
+    <button id="bPrev">← <span class="lang-en">Back</span><span class="lang-zh">上一站</span></button>
     <button id="bNext" class="pri">下一站 →</button>
   </div>
 </aside>
 
-<aside class="hud panel">
-  <b>渲染状态</b>
-  <div class="row"><span>累积采样</span><span id="hSpp" class="mono">0 / 0</span></div>
-  <div class="row"><span>帧时间</span><span id="hMs" class="mono">—</span></div>
-  <div class="row"><span>三角形</span><span id="hTri" class="mono">—</span></div>
-  <div class="row"><span>光圈(景深)</span><span id="hFst" class="mono">—</span></div>
-  <input id="hAp" type="range" min="0" max="100" value="50" title="0 = 全清晰,50 = 镜头默认,100 = 两倍">
-  <label class="row"><span>焦平面贴板面(移轴)</span><input id="hTs" type="checkbox"></label>
+<aside class="hud panel" id="hud">
+  <button class="hud-x" id="hHide" title="Collapse (R) · 收起渲染状态（R）" aria-expanded="true"><span class="lang-en">Hide ⌄</span><span class="lang-zh">收起 ⌄</span></button>
+  <b><span class="lang-en">Render state</span><span class="lang-zh">渲染状态</span></b>
+  <div class="row"><span><span class="lang-en">Samples</span><span class="lang-zh">累积采样</span></span><span id="hSpp" class="mono">0 / 0</span></div>
+  <div class="row"><span><span class="lang-en">Frame time</span><span class="lang-zh">帧时间</span></span><span id="hMs" class="mono">—</span></div>
+  <div class="row"><span><span class="lang-en">Triangles</span><span class="lang-zh">三角形</span></span><span id="hTri" class="mono">—</span></div>
+  <div class="row"><span><span class="lang-en">Aperture (DOF)</span><span class="lang-zh">光圈(景深)</span></span><span id="hFst" class="mono">—</span></div>
+  <input id="hAp" type="range" min="0" max="100" value="50" title="0 = everything sharp, 50 = as shot, 100 = twice · 0 = 全清晰,50 = 镜头默认,100 = 两倍">
+  <label class="row"><span><span class="lang-en">Focal plane along the board (tilt-shift)</span><span class="lang-zh">焦平面贴板面(移轴)</span></span><input id="hTs" type="checkbox"></label>
   <div class="bar"><i id="hBar"></i></div>
 </aside>
 
-<div class="tip"><kbd>←</kbd> <kbd>→</kbd> 切站 &nbsp; <kbd>拖动</kbd> 转视角 &nbsp; <kbd>滚轮</kbd> 推拉<br>松手后画面会持续累积采样，越等越干净</div>
+<div class="tip"><span class="lang-en"><kbd>←</kbd> <kbd>→</kbd> station &nbsp; <kbd>drag</kbd> orbit &nbsp; <kbd>wheel</kbd> zoom &nbsp; <kbd>H</kbd>/<kbd>R</kbd> hide panels<br>Let go and the image keeps accumulating — the longer you wait, the cleaner it gets</span><span class="lang-zh"><kbd>←</kbd> <kbd>→</kbd> 切站 &nbsp; <kbd>拖动</kbd> 转视角 &nbsp; <kbd>滚轮</kbd> 推拉 &nbsp; <kbd>H</kbd>/<kbd>R</kbd> 收起面板<br>松手后画面会持续累积采样，越等越干净</span></div>
 
-<button class="gloss-btn" id="gBtn" title="术语表">❓</button>
+<button class="lang-toggle" id="langBtn" type="button">中文</button>
+<button class="gloss-btn" id="gBtn" title="Glossary · 术语表">❓</button>
 <aside class="gloss" id="gPanel">
   <button class="x" id="gClose">×</button>
-  <h3>术语表</h3>
-  <div class="sub">英文缩写 · 中文名 · 一句话解释</div>
+  <h3><span class="lang-en">Glossary</span><span class="lang-zh">术语表</span></h3>
+  <div class="sub"><span class="lang-en">Abbreviation · full name · one sentence</span><span class="lang-zh">英文缩写 · 中文名 · 一句话解释</span></div>
   <dl id="gList"></dl>
 </aside>
 <div id="err"></div>
@@ -1303,35 +1342,54 @@ const cam={ tgt:[0,1.2,0], az:-0.55, el:0.45, dist:150, fov:26, ap:0.30, ex:1.55
 const STATE={ lift:0, cutX:60 };
 function camEye(){ const ce=Math.cos(cam.el), se=Math.sin(cam.el);
   return [cam.tgt[0]+cam.dist*ce*Math.sin(cam.az), cam.tgt[1]+cam.dist*se, cam.tgt[2]+cam.dist*ce*Math.cos(cam.az)]; }
+// BI(en,zh):中英一对,整页的双语都走它,html[data-lang] 决定显示哪半边。
+// **别改名叫 T** —— buildFlow(kind,T) 的第二个参数就叫 T(秒数),同名会在函数里
+// 把这个助手整个挡住,而且只在有数据流的站才炸。
+const BI=(en,zh)=>`<span class="lang-en">${en}</span><span class="lang-zh">${zh}</span>`;
 // 三问文案模板 —— 顺序不能换,篇幅不够砍机制不砍这三问
 const Q=(a,b,c,en)=>`<span class="q"><em>是什么</em>${a}</span><span class="q"><em>没有它</em>${b}</span><span class="q"><em>为什么这样</em>${c}</span>${en?`<span class="q en">${en}</span>`:''}`;
 const STATIONS=[
- { act:0, title:'整板俯视', cam:{tgt:[0,1.2,0], az:-0.55, el:0.85, dist:170, fov:26, ap:0.35, focus:'plane', fy:1.2, ex:1.55},
+ { act:0, title:BI('The whole board','整板俯视'), cam:{tgt:[0,1.2,0], az:-0.55, el:0.85, dist:170, fov:26, ap:0.35, focus:'plane', fy:1.2, ex:1.55},
    state:{},
-   labels:[{p:'mid',t:'主芯片',s:'这一页的主角'},{p:'left',t:'旁边那颗',s:'数据从这儿来',dy:-40}],
-   body:Q('把整块板放在棚拍光下看清布局。移轴对焦让整板从角到角都清晰。',
-          '没有这一站,读者不知道后面放大的是哪一块。',
-          '为什么整板俯视必须开移轴?焦平面垂直视线时,斜俯视只有中间一条带清晰。',
+   labels:[{p:'mid',t:BI('Main chip','主芯片'),s:BI('the subject of this page','这一页的主角')},
+           {p:'left',t:BI('The one beside it','旁边那颗'),s:BI('the data comes from here','数据从这儿来'),dy:-40}],
+   body:Q(BI('The whole board under studio light, so the layout reads. Tilt-shift keeps it sharp corner to corner.',
+            '把整块板放在棚拍光下看清布局。移轴对焦让整板从角到角都清晰。'),
+          BI('Without this station the reader does not know which part the close-ups belong to.',
+            '没有这一站,读者不知道后面放大的是哪一块。'),
+          BI('Why must a board overview use tilt-shift? With the focal plane perpendicular to the view, only a band across the middle is sharp.',
+            '为什么整板俯视必须开移轴?焦平面垂直视线时,斜俯视只有中间一条带清晰。'),
           'PCB · solder mask · ENIG pad') },
- { act:0, title:'芯片微距', cam:{tgt:[0,1.4,0], az:0.9, el:0.22, dist:44, fov:26, ap:0.12, focus:'point', fy:1.4, ex:1.6},
+ { act:0, title:BI('Chip macro','芯片微距'), cam:{tgt:[0,1.4,0], az:0.9, el:0.22, dist:44, fov:26, ap:0.12, focus:'point', fy:1.4, ex:1.6},
    state:{},
-   labels:[{p:'mid',t:'塑封体',s:'哑光,粗糙度 0.655'}],
-   body:Q('凑近看单颗芯片的材质、丝印和焊盘。',
-          '没有微距,读者感受不到"这是真实器件"。',
-          '为什么微距用经典对焦而不是移轴?浅景深是有意的 —— 它把注意力钉在焦点上。',
+   labels:[{p:'mid',t:BI('Moulded package','塑封体'),s:BI('matte, roughness 0.655','哑光,粗糙度 0.655')}],
+   body:Q(BI('Up close on one package: material, silkscreen and pads.',
+            '凑近看单颗芯片的材质、丝印和焊盘。'),
+          BI('Without a macro shot the reader never feels this is a real part.',
+            '没有微距,读者感受不到"这是真实器件"。'),
+          BI('Why classic focus here rather than tilt-shift? The shallow depth of field is deliberate — it pins attention on the focal point.',
+            '为什么微距用经典对焦而不是移轴?浅景深是有意的 —— 它把注意力钉在焦点上。'),
           'epoxy package · silkscreen') },
- { act:1, title:'数据走一遍', cam:{tgt:[0,2.6,0], az:-0.35, el:0.55, dist:130, fov:26, ap:0.22, focus:'plane', fy:2.6, ex:1.55},
+ { act:1, title:BI('Walk the data through','数据走一遍'), cam:{tgt:[0,2.6,0], az:-0.35, el:0.55, dist:130, fov:26, ap:0.22, focus:'plane', fy:2.6, ex:1.55},
    state:{}, flow:'demo',
-   labels:[{p:[0,3.6,0],t:'16 位总线',s:'…',live:'bus',dy:-46}],
-   body:Q('16 根并行导线,每拍送一行 16 位。到达后拼成一块写入。',
-          '没有并行总线,一次只能送一位,带宽上不去。',
-          '为什么画成 16 根线而不是一条?一条线看不出"并行"这件事 —— 数据要有形状。',
+   labels:[{p:[0,3.6,0],t:BI('16-bit bus','16 位总线'),s:'…',live:'bus',dy:-46}],
+   body:Q(BI('16 parallel wires carry one 16-bit row per tick. On arrival the rows assemble into a block and are written.',
+            '16 根并行导线,每拍送一行 16 位。到达后拼成一块写入。'),
+          BI('Without a parallel bus only one bit moves at a time and bandwidth stays flat.',
+            '没有并行总线,一次只能送一位,带宽上不去。'),
+          BI('Why draw 16 wires rather than one line? One line cannot show that anything is parallel — data needs a shape.',
+            '为什么画成 16 根线而不是一条?一条线看不出"并行"这件事 —— 数据要有形状。'),
           'parallel bus · bit lane') },
 ];
-const ACTS=['第一幕 · 看清结构','第二幕 · 数据走一遍'];
+const ACTS=[BI('Act one · See the structure','第一幕 · 看清结构'),
+            BI('Act two · Walk the data through','第二幕 · 数据走一遍')];
 const GLOSSARY=[
- ['PBR','基于物理的渲染','用金属度和粗糙度描述材质,金属和塑料反光才会不一样。'],
- ['IBL','基于图像的光照','用一张环境图给所有材质打光,本页的棚拍光就是这么来的。'],
+ ['PBR',BI('Physically based rendering','基于物理的渲染'),
+  BI('Materials described by metallic and roughness, which is why metal and plastic reflect differently.',
+     '用金属度和粗糙度描述材质,金属和塑料反光才会不一样。')],
+ ['IBL',BI('Image-based lighting','基于图像的光照'),
+  BI('One environment image lights everything; the studio softboxes on this page come from it.',
+     '用一张环境图给所有材质打光,本页的棚拍光就是这么来的。')],
 ];
 //==============================================================
 // S11 · 帧缓冲
@@ -1786,7 +1844,9 @@ function buildFlow(kind,T){
     }
     blockGlow(A,14,14,FC.cmd,0.2+0.6*pulse(T,1.0));
     blockGlow(C,14,14,FC.data,step>=2?0.9:0.1);
-    FLOW.live.bus = `第 ${step+1}/4 拍 · <b>${['①发出请求','①16 位沿线走','②到达,拼成一块','②写入'][step]}</b>`;
+    const NM=[BI('① request issued','①发出请求'), BI('① 16 bits along the wires','①16 位沿线走'),
+              BI('② arrived, assembled into a block','②到达,拼成一块'), BI('② written','②写入')];
+    FLOW.live.bus = BI(`tick ${step+1}/4 · `,`第 ${step+1}/4 拍 · `) + `<b>${NM[step]}</b>`;
   }
 }
 function renderFlow(){
@@ -1900,32 +1960,58 @@ function renderUI(){
   document.querySelectorAll('#acts button').forEach((b,k)=>b.classList.toggle('on',k===st.act));
   document.querySelectorAll('#stations button').forEach((b,k)=>{
     b.classList.toggle('on',k===cur); b.classList.toggle('done',k<cur); });
-  $('cK').textContent=ACTS[st.act]+' · '+String(cur+1).padStart(2,'0')+' / '+STATIONS.length;
-  $('cT').textContent=st.title;
+  $('cK').innerHTML=ACTS[st.act]+' · '+String(cur+1).padStart(2,'0')+' / '+STATIONS.length;
+  $('cT').innerHTML=st.title;
   $('cB').innerHTML=st.body;
   $('bPrev').disabled=(cur===0);
   $('clk').classList.toggle('on', !!st.flow);
-  $('bNext').textContent=(cur===STATIONS.length-1)?'回到开头 ↺':'下一站 →';
+  $('bNext').innerHTML=(cur===STATIONS.length-1)
+    ? BI('Start over ↺','回到开头 ↺') : BI('Next','下一站')+' →';
   const sl=$('hAp'); if(sl) sl.value=50;
   const ts=$('hTs'); if(ts) ts.checked=(cam.focus==='plane');
 }
 function buildUI(){
   const acts=$('acts');
-  ACTS.forEach((n,i)=>{ const b=document.createElement('button'); b.textContent=n;
+  ACTS.forEach((n,i)=>{ const b=document.createElement('button'); b.innerHTML=n;
     b.onclick=()=>goTo(STATIONS.findIndex(s=>s.act===i)); acts.appendChild(b); });
   const sts=$('stations');
-  STATIONS.forEach((s,i)=>{ const b=document.createElement('button'); b.textContent=i+1; b.title=s.title;
+  STATIONS.forEach((s,i)=>{ const b=document.createElement('button'); b.textContent=i+1;
+    b.title=s.title.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
     b.onclick=()=>goTo(i); sts.appendChild(b); });
   $('bPrev').onclick=()=>goTo(cur-1);
   $('bNext').onclick=()=>goTo((cur+1)%STATIONS.length);
   const gl_=$('gList');
   GLOSSARY.forEach(([en,zh,ex])=>{ const dt=document.createElement('dt'); dt.innerHTML=en+'<span>'+zh+'</span>';
-    const dd=document.createElement('dd'); dd.textContent=ex; gl_.appendChild(dt); gl_.appendChild(dd); });
+    const dd=document.createElement('dd'); dd.innerHTML=ex; gl_.appendChild(dt); gl_.appendChild(dd); });
+  // 说明卡收起:它占着左下一大块,挡住主体时收成一条。收起状态跨站保留
+  const cap=$('caption'), capBtn=$('cHide');
+  const setMini=(on)=>{ cap.classList.toggle('mini',on);
+    capBtn.innerHTML = on ? BI('Caption ⌃','说明 ⌃') : BI('Hide ⌄','收起 ⌄');
+    capBtn.title = on ? '展开说明卡（H）' : '收起说明卡（H）';
+    capBtn.setAttribute('aria-expanded', String(!on)); };
+  const toggleMini=()=>setMini(!cap.classList.contains('mini'));
+  // 渲染状态同理:收起后只留标题和累积进度条
+  const hud=$('hud'), hudBtn=$('hHide');
+  const setHud=(on)=>{ hud.classList.toggle('mini',on);
+    hudBtn.innerHTML = on ? BI('Show ⌃','展开 ⌃') : BI('Hide ⌄','收起 ⌄');
+    hudBtn.title = on ? '展开渲染状态（R）' : '收起渲染状态（R）';
+    hudBtn.setAttribute('aria-expanded', String(!on)); };
+  const toggleHud=()=>setHud(!hud.classList.contains('mini'));
+  hudBtn.onclick=toggleHud;
+  capBtn.onclick=toggleMini;
+  // 中英切换:整页靠 html[data-lang] 一个属性驱动,不用重建 DOM
+  const langBtn=$('langBtn'), docEl=document.documentElement;
+  langBtn.onclick=()=>{ const zh = docEl.getAttribute('data-lang')==='zh';
+    docEl.setAttribute('data-lang', zh?'en':'zh');
+    docEl.setAttribute('lang', zh?'en':'zh');
+    langBtn.textContent = zh ? '中文' : 'English'; };
   $('gBtn').onclick=()=>$('gPanel').classList.toggle('open');
   $('gClose').onclick=()=>$('gPanel').classList.remove('open');
   window.addEventListener('keydown',e=>{
     if(e.key==='ArrowRight'||e.key==='PageDown'){ goTo(Math.min(cur+1,STATIONS.length-1)); }
     else if(e.key==='ArrowLeft'||e.key==='PageUp'){ goTo(Math.max(cur-1,0)); }
+    else if(e.key==='h'||e.key==='H'){ toggleMini(); }
+    else if(e.key==='r'||e.key==='R'){ toggleHud(); }
     else if(e.key==='Escape'){ $('gPanel').classList.remove('open'); }
   });
   $('cPlay').onclick=()=>{ CLK.playing=!CLK.playing; $('cPlay').textContent=CLK.playing?'⏸':'▶'; };
@@ -2008,7 +2094,7 @@ function loop(now){
   $('hTri').textContent=(drawnTris/2/1000).toFixed(0)+' / '+(totalTris/1000).toFixed(0)+' K';
   $('hFst').textContent=cam.ap<0.001?'关(全清晰)':cam.ap.toFixed(2);
   $('hBar').style.width=(100*spp/QUAL.maxSPP).toFixed(1)+'%';
-  $('cTick').textContent='拍 '+tick();
+  $('cTickN').textContent=tick();
   requestAnimationFrame(loop);
 }
 // 自动化检查 / 录制钩子

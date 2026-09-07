@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>一条数据从内存颗粒到 CPU 寄存器 · hardware-3d 示范页</title>
+<title>One data word from a DRAM cell to a CPU register · hardware-3d</title>
+<meta name="description" content="One data word from a DRAM cell to a CPU register: five stations, drawn inside the die, advancing by clock ticks you can pause.">
+<meta property="og:title" content="One data word from a DRAM cell to a CPU register">
+<meta property="og:description" content="Hand-written WebGL2 in a single file. 200 accumulated samples give real soft shadows and real depth of field; the data path is drawn inside the die on elevated copper rails.">
+<meta property="og:type" content="article">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
@@ -16,7 +20,8 @@
   .panel{background:rgba(18,18,21,.74);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     border:1px solid rgba(255,255,255,.09);border-radius:12px}
   /* —— 标题 —— */
-  .title{position:fixed;left:22px;top:18px;z-index:20;pointer-events:none;user-select:none}
+  .title{position:fixed;left:22px;top:18px;z-index:20;pointer-events:none;user-select:none;
+    max-width:min(430px,27vw)}
   .title h1{font-size:clamp(18px,1.6vw,26px);font-weight:700;letter-spacing:.02em;
     background:linear-gradient(90deg,#f1f1f3 0%,#b9c7d6 55%,#8fb3d9 100%);
     -webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.25}
@@ -36,7 +41,7 @@
   .stations button.done{color:#c0c0c8}
   /* —— 说明卡 —— */
   .caption{position:fixed;left:22px;bottom:22px;z-index:20;width:min(430px,calc(100vw - 44px));
-    padding:18px 20px 16px;transition:opacity .35s}
+    padding:18px 56px 16px 20px;transition:opacity .35s}
   .caption .k{font:600 11px/1 "JetBrains Mono",monospace;color:#5aa0eb;letter-spacing:.12em;text-transform:uppercase}
   .caption h2{font-size:19px;font-weight:700;margin:9px 0 10px;letter-spacing:.01em;color:#f3f3f5}
   .caption .body{font-size:13px;line-height:1.72;color:#c6c6cd}
@@ -58,6 +63,26 @@
   .caption .nav button.pri{background:#5aa0eb;color:#0b1b2c;border-color:transparent;font-weight:600}
   .caption .nav button.pri:hover{background:#74b1f3}
   .caption .nav button:disabled{opacity:.35;cursor:default}
+  /* —— 说明卡收起 —— 它固定占左下一大块,挡视线时收成一条 —— */
+  .cap-x{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.10);color:#b9b9c1;border-radius:7px;padding:4px 9px;
+    font:500 11px/1.25 "Noto Sans SC",sans-serif;cursor:pointer;transition:.16s;white-space:nowrap}
+  .cap-x:hover{background:rgba(255,255,255,.14);color:#fff}
+  /* —— 中英切换 —— 公开页面必须能切,检查链会查这条 —— */
+  html[data-lang="en"] .lang-zh{display:none !important}
+  html[data-lang="zh"] .lang-en{display:none !important}
+  .lang-toggle{position:fixed;right:80px;bottom:26px;z-index:9999;letter-spacing:.04em;
+    background:rgba(24,24,28,.86);border:1px solid rgba(255,255,255,.14);color:#dcdce2;
+    border-radius:999px;padding:7px 14px;font:500 12px/1 "Noto Sans SC",sans-serif;cursor:pointer;
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    box-shadow:0 6px 24px rgba(0,0,0,.4);transition:.18s}
+  .lang-toggle:hover{background:#5aa0eb;color:#0b1b2c}
+  .caption.mini{width:auto;max-width:min(430px,calc(100vw - 44px));padding:12px 62px 12px 16px}
+  .caption.mini h2{font-size:14.5px;margin:7px 0 0}
+  .caption.mini .body,.caption.mini .nav{display:none}
+  /* 收起后保留时钟控件:收起卡片多半就是为了看动画,暂停/单步正是这时候要用的 */
+  .caption.mini .clk{margin-top:10px;padding-top:9px}
+  .caption.mini .clk.on{display:flex}
   /* —— 3D 标签层 —— */
   #labels{position:fixed;inset:0;z-index:15;pointer-events:none;overflow:hidden}
   #leaders{position:fixed;inset:0;z-index:14;pointer-events:none;width:100%;height:100%}
@@ -70,7 +95,7 @@
   .lb::after{content:"";position:absolute;left:50%;bottom:-5px;width:8px;height:8px;
     background:#5aa0eb;border-radius:50%;transform:translate(-50%,50%);box-shadow:0 0 0 3px rgba(90,160,235,.25)}
   /* —— 渲染状态 —— */
-  .hud{position:fixed;right:22px;top:112px;z-index:20;padding:12px 15px;min-width:220px;
+  .hud{position:fixed;right:22px;top:112px;z-index:20;padding:12px 52px 12px 15px;min-width:220px;
     font-size:11.5px;line-height:1.7;color:#a9a9b1;user-select:none;pointer-events:none}
   .hud b{display:block;color:#e6e6ea;font-weight:600;font-size:12px;margin-bottom:5px}
   .hud .row{display:flex;justify-content:space-between;gap:16px;font-variant-numeric:tabular-nums}
@@ -80,8 +105,18 @@
   .hud label.row{cursor:pointer;pointer-events:auto;margin-top:6px}
   .bar{height:3px;background:rgba(255,255,255,.12);border-radius:2px;margin-top:8px;overflow:hidden}
   .bar i{display:block;height:100%;width:0%;background:#5aa0eb;transition:width .12s linear}
-  .tip{position:fixed;right:84px;bottom:26px;z-index:20;color:#7c7c84;font-size:11px;line-height:1.8;
-    text-align:right;user-select:none;pointer-events:none}
+  /* —— 渲染状态收起 —— 收起后只留标题和那条累积进度 —— */
+  .hud-x{position:absolute;top:10px;right:12px;z-index:2;pointer-events:auto;
+    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);color:#b9b9c1;
+    border-radius:7px;padding:3px 8px;font:500 10.5px/1.25 "Noto Sans SC",sans-serif;
+    cursor:pointer;transition:.16s;white-space:nowrap}
+  .hud-x:hover{background:rgba(255,255,255,.14);color:#fff}
+  .hud.mini{min-width:0;padding:11px 52px 11px 15px}
+  .hud.mini .row,.hud.mini input[type=range],.hud.mini label.row{display:none}
+  .hud.mini b{margin-bottom:0}
+  .hud.mini .bar{margin-top:9px;width:96px}
+  .tip{position:fixed;right:24px;bottom:82px;z-index:20;color:#7c7c84;font-size:11px;line-height:1.8;
+    text-align:right;user-select:none;pointer-events:none;max-width:min(460px,46vw)}
   .tip kbd{background:rgba(255,255,255,.09);border-radius:4px;padding:1px 6px;font-family:inherit;color:#bdbdc5}
   /* —— 术语表 —— */
   .gloss-btn{position:fixed;bottom:24px;right:24px;z-index:9999;width:46px;height:46px;border-radius:50%;
@@ -90,8 +125,10 @@
   .gloss-btn:hover{background:#5aa0eb;color:#0b1b2c;transform:translateY(-2px)}
   .gloss{position:fixed;top:0;right:0;bottom:0;width:min(400px,92vw);z-index:9998;
     background:rgba(16,16,19,.94);backdrop-filter:blur(20px);border-left:1px solid rgba(255,255,255,.1);
-    transform:translateX(102%);transition:transform .38s cubic-bezier(.2,.8,.2,1);overflow-y:auto;padding:26px 24px 90px}
-  .gloss.open{transform:none}
+    transform:translateX(102%);visibility:hidden;
+    transition:transform .38s cubic-bezier(.2,.8,.2,1),visibility 0s linear .38s;
+    overflow-y:auto;padding:26px 24px 90px}
+  .gloss.open{transform:none;visibility:visible;transition-delay:0s,0s}
   .gloss h3{font-size:17px;font-weight:700;margin-bottom:6px}
   .gloss .sub{font-size:12px;color:#8a8a92;margin-bottom:18px}
   .gloss dl{display:grid;gap:12px}
@@ -99,6 +136,8 @@
   .gloss dt span{font-family:"Noto Sans SC",sans-serif;color:#e6e6ea;font-weight:600;margin-left:8px}
   .gloss dd{font-size:12.5px;line-height:1.65;color:#bdbdc5;margin-top:3px}
   .gloss .x{position:absolute;top:16px;right:18px;background:transparent;border:0;color:#9a9aa2;font-size:22px;cursor:pointer}
+  /* 键盘焦点必须看得见 —— 这一页有 19 个可聚焦元素 */
+  :focus-visible{outline:2px solid #5aa0eb;outline-offset:2px;border-radius:6px}
   #err{position:fixed;inset:0;display:none;place-items:center;z-index:99999;background:#141416;color:#ff8a8a;
     font-size:14px;padding:40px;text-align:center;line-height:1.9;white-space:pre-wrap}
   @media (max-width:900px){
@@ -113,47 +152,50 @@
 <div id="labels"></div>
 
 <header class="title">
-  <h1>一条数据从内存颗粒到 CPU 寄存器</h1>
-  <p>缓存没命中的那几百个周期，到底花在哪儿 · hardware-3d 示范页</p>
+  <h1><span class="lang-en">One data word, from a DRAM cell to a CPU register</span><span class="lang-zh">一条数据从内存颗粒到 CPU 寄存器</span></h1>
+  <p><span class="lang-en">Where the few hundred cycles of a cache miss actually go · a hardware-3d worked page</span><span class="lang-zh">缓存没命中的那几百个周期，到底花在哪儿 · hardware-3d 示范页</span></p>
 </header>
 
 <nav class="acts panel" id="acts"></nav>
 <nav class="stations panel" id="stations"></nav>
 
 <aside class="caption panel" id="caption">
+  <button class="cap-x" id="cHide" title="Collapse (H) · 收起说明卡（H）" aria-expanded="true"><span class="lang-en">Hide ⌄</span><span class="lang-zh">收起 ⌄</span></button>
   <div class="k" id="cK">第一幕 · 01 / 05</div>
   <h2 id="cT">—</h2>
   <div class="body" id="cB"></div>
   <div class="clk" id="clk">
-    <button id="cPlay" title="暂停 / 继续">⏸</button>
-    <button id="cStep" title="单步:走一拍">⏭ 一拍</button>
-    <label>速度 <input id="cSpd" type="range" min="25" max="300" value="100"></label>
-    <span id="cTick" class="mono">拍 0</span>
+    <button id="cPlay" title="Pause / resume · 暂停 / 继续">⏸</button>
+    <button id="cStep" title="Step one tick · 单步:走一拍">⏭ <span class="lang-en">one tick</span><span class="lang-zh">一拍</span></button>
+    <label><span class="lang-en">Speed</span><span class="lang-zh">速度</span> <input id="cSpd" type="range" min="25" max="300" value="100"></label>
+    <span id="cTick" class="mono"><span class="lang-en">tick </span><span class="lang-zh">拍 </span><span id="cTickN">0</span></span>
   </div>
   <div class="nav">
-    <button id="bPrev">← 上一站</button>
+    <button id="bPrev">← <span class="lang-en">Back</span><span class="lang-zh">上一站</span></button>
     <button id="bNext" class="pri">下一站 →</button>
   </div>
 </aside>
 
-<aside class="hud panel">
-  <b>渲染状态</b>
-  <div class="row"><span>累积采样</span><span id="hSpp" class="mono">0 / 0</span></div>
-  <div class="row"><span>帧时间</span><span id="hMs" class="mono">—</span></div>
-  <div class="row"><span>三角形</span><span id="hTri" class="mono">—</span></div>
-  <div class="row"><span>光圈(景深)</span><span id="hFst" class="mono">—</span></div>
-  <input id="hAp" type="range" min="0" max="100" value="50" title="0 = 全清晰,50 = 镜头默认,100 = 两倍">
-  <label class="row"><span>焦平面贴板面(移轴)</span><input id="hTs" type="checkbox"></label>
+<aside class="hud panel" id="hud">
+  <button class="hud-x" id="hHide" title="Collapse (R) · 收起渲染状态（R）" aria-expanded="true"><span class="lang-en">Hide ⌄</span><span class="lang-zh">收起 ⌄</span></button>
+  <b><span class="lang-en">Render state</span><span class="lang-zh">渲染状态</span></b>
+  <div class="row"><span><span class="lang-en">Samples</span><span class="lang-zh">累积采样</span></span><span id="hSpp" class="mono">0 / 0</span></div>
+  <div class="row"><span><span class="lang-en">Frame time</span><span class="lang-zh">帧时间</span></span><span id="hMs" class="mono">—</span></div>
+  <div class="row"><span><span class="lang-en">Triangles</span><span class="lang-zh">三角形</span></span><span id="hTri" class="mono">—</span></div>
+  <div class="row"><span><span class="lang-en">Aperture (DOF)</span><span class="lang-zh">光圈(景深)</span></span><span id="hFst" class="mono">—</span></div>
+  <input id="hAp" type="range" min="0" max="100" value="50" title="0 = everything sharp, 50 = as shot, 100 = twice · 0 = 全清晰,50 = 镜头默认,100 = 两倍">
+  <label class="row"><span><span class="lang-en">Focal plane along the board (tilt-shift)</span><span class="lang-zh">焦平面贴板面(移轴)</span></span><input id="hTs" type="checkbox"></label>
   <div class="bar"><i id="hBar"></i></div>
 </aside>
 
-<div class="tip"><kbd>←</kbd> <kbd>→</kbd> 切站 &nbsp; <kbd>拖动</kbd> 转视角 &nbsp; <kbd>滚轮</kbd> 推拉<br>松手后画面会持续累积采样，越等越干净</div>
+<div class="tip"><span class="lang-en"><kbd>←</kbd> <kbd>→</kbd> station &nbsp; <kbd>drag</kbd> orbit &nbsp; <kbd>wheel</kbd> zoom &nbsp; <kbd>H</kbd>/<kbd>R</kbd> panels<br>Let go and it keeps accumulating — the longer you wait, the cleaner</span><span class="lang-zh"><kbd>←</kbd> <kbd>→</kbd> 切站 &nbsp; <kbd>拖动</kbd> 转视角 &nbsp; <kbd>滚轮</kbd> 推拉 &nbsp; <kbd>H</kbd>/<kbd>R</kbd> 收起面板<br>松手后画面会持续累积采样，越等越干净</span></div>
 
-<button class="gloss-btn" id="gBtn" title="术语表">❓</button>
+<button class="lang-toggle" id="langBtn" type="button">中文</button>
+<button class="gloss-btn" id="gBtn" title="Glossary · 术语表">❓</button>
 <aside class="gloss" id="gPanel">
   <button class="x" id="gClose">×</button>
-  <h3>术语表</h3>
-  <div class="sub">英文缩写 · 中文名 · 一句话解释</div>
+  <h3><span class="lang-en">Glossary</span><span class="lang-zh">术语表</span></h3>
+  <div class="sub"><span class="lang-en">Abbreviation · full name · one sentence</span><span class="lang-zh">英文缩写 · 中文名 · 一句话解释</span></div>
   <dl id="gList"></dl>
 </aside>
 <div id="err"></div>
@@ -1418,74 +1460,116 @@ const cam={ tgt:[-6,2.5,0], az:-0.42, el:0.55, dist:190, fov:26, ap:0.30, ex:1.5
 const STATE={ lift:0, cutX:60 };
 function camEye(){ const ce=Math.cos(cam.el), se=Math.sin(cam.el);
   return [cam.tgt[0]+cam.dist*ce*Math.sin(cam.az), cam.tgt[1]+cam.dist*se, cam.tgt[2]+cam.dist*ce*Math.cos(cam.az)]; }
+// 中英一对:整页的双语都走这一个助手,html[data-lang] 决定显示哪半边
+// BI(en,zh):中英一对。**别改回 T** —— buildFlow(kind,T) 的第二个参数就叫 BI(秒数),
+// 同名会在函数里把这个助手整个挡住,而且只在有数据流的站才炸。
+const BI=(en,zh)=>`<span class="lang-en">${en}</span><span class="lang-zh">${zh}</span>`;
 // 三问文案模板 —— 顺序不能换,篇幅不够砍机制不砍这三问
-const Q=(a,b,c,en)=>`<span class="q"><em>是什么</em>${a}</span><span class="q"><em>没有它</em>${b}</span><span class="q"><em>为什么这样</em>${c}</span>${en?`<span class="q en">${en}</span>`:''}`;
+const Q=(a,b,c,en)=>`<span class="q"><em>${BI('What it is','是什么')}</em>${a}</span>`+
+  `<span class="q"><em>${BI('Without it','没有它')}</em>${b}</span>`+
+  `<span class="q"><em>${BI('Why this way','为什么这样')}</em>${c}</span>`+
+  (en?`<span class="q en">${en}</span>`:'');
 const STATIONS=[
- { act:0, title:'整板俯视：这条路有多长',
+ { act:0, title:BI('The whole board: how far the data has to go','整板俯视：这条路有多长'),
    cam:{tgt:[4,2.5,-11], az:-1.02, el:0.78, dist:176, fov:28, ap:0.38, focus:'plane', fy:2.5, ex:1.55},
    state:{},
-   labels:[{p:'dimm',t:'内存条 SO-DIMM',s:'板上 4 颗 DRAM 颗粒',dy:-48},
-           {p:'busA',t:'内存总线',s:'64 根数据线走在板里'},
-           {p:'cpu', t:'CPU 封装',s:'金属盖底下是一片硅',dy:-48}],
-   body:Q('一条 <code>mov eax,[rbx]</code> 指令,如果三级缓存都没命中,数据要从左边内存条上的颗粒出发,穿过插槽、板上 64 根数据线、封装引脚,最后才进到右边 CPU 的寄存器。这一页把这段路按拍走一遍。',
-          '不知道这条路有多长,就理解不了「一次内存访问要几百个时钟周期」这句话 —— 延迟不是玄学,就是路程加上每一站的排队。',
-          '为什么内存不直接做进 CPU?做进去延迟能降一个数量级,但容量会被硅片面积卡死在几十 MB。分开放才能既有几十 GB 又能换条升级,代价就是这段路。',
+   labels:[{p:'dimm',t:BI('SO-DIMM module','内存条 SO-DIMM'),s:BI('4 DRAM packages on it','板上 4 颗 DRAM 颗粒'),dy:-48},
+           {p:'busA',t:BI('Memory bus','内存总线'),s:BI('64 data lines, buried in the board','64 根数据线走在板里')},
+           {p:'cpu', t:BI('CPU package','CPU 封装'),s:BI('a slab of silicon under the lid','金属盖底下是一片硅'),dy:-48}],
+   body:Q(BI('One <code>mov eax,[rbx]</code>. If all three cache levels miss, the data starts in a package on the memory module at the left, crosses the socket, the 64 data lines buried in the board and the package pins, and only then reaches a register in the CPU at the right. This page walks that road one clock tick at a time.',
+           '一条 <code>mov eax,[rbx]</code> 指令,如果三级缓存都没命中,数据要从左边内存条上的颗粒出发,穿过插槽、板上 64 根数据线、封装引脚,最后才进到右边 CPU 的寄存器。这一页把这段路按拍走一遍。'),
+          BI('Without knowing how long the road is, "a memory access costs hundreds of cycles" stays a magic number. Latency is not mysterious — it is distance plus the queue at every stop.',
+            '不知道这条路有多长,就理解不了「一次内存访问要几百个时钟周期」这句话 —— 延迟不是玄学,就是路程加上每一站的排队。'),
+          BI('Why not put the memory inside the CPU? Latency would drop by an order of magnitude, but capacity would be capped by die area at tens of megabytes. Keeping them apart is what buys tens of gigabytes and a module you can swap. This road is the price.',
+            '为什么内存不直接做进 CPU?做进去延迟能降一个数量级,但容量会被硅片面积卡死在几十 MB。分开放才能既有几十 GB 又能换条升级,代价就是这段路。'),
           'DRAM · memory bus · cache miss') },
- { act:0, title:'一颗 DRAM 颗粒',
+ { act:0, title:BI('One DRAM package','一颗 DRAM 颗粒'),
    cam:{tgt:[-68,4.5,1], az:0.72, el:0.30, dist:66, fov:26, ap:0.16, focus:'point', fy:4.6, ex:1.60},
    state:{},
-   labels:[{p:'dram1',t:'DRAM 颗粒',s:'塑封底下是一片硅'},
-           {p:[-60.2,5.8,0], t:'旁边这几颗',s:'4 颗一起凑出 64 位',dy:56}],
-   body:Q('一颗 FBGA 封装的 DRAM。一条内存条上有 4 到 16 颗这样的颗粒并排,它们同时被选中、同时输出 —— 每颗只负责 64 位总线里的 8 位或 16 位。',
-          '只有一颗的话,数据引脚只有 8 到 16 根,一拍最多取 2 个字节,总线上另外 48 根线是空的。',
-          '为什么不做一颗宽 64 位的大颗粒?引脚数、封装功耗和良率都会变差。用几颗窄颗粒并联,同样凑出 64 位,每颗的走线还更短、更好等长。',
+   labels:[{p:'dram1',t:BI('DRAM package','DRAM 颗粒'),s:BI('a slab of silicon under the moulding','塑封底下是一片硅')},
+           {p:[-60.2,5.8,0], t:BI('The ones beside it','旁边这几颗'),s:BI('four together make up the 64 bits','4 颗一起凑出 64 位'),dy:56}],
+   body:Q(BI('One DRAM in an FBGA package. A module carries 4 to 16 of them side by side; they are selected together and drive their outputs together — each one owns only 8 or 16 of the 64 bus bits.',
+           '一颗 FBGA 封装的 DRAM。一条内存条上有 4 到 16 颗这样的颗粒并排,它们同时被选中、同时输出 —— 每颗只负责 64 位总线里的 8 位或 16 位。'),
+          BI('With one package alone there are only 8 to 16 data pins, so a tick fetches 2 bytes at most and the other 48 lines sit idle.',
+            '只有一颗的话,数据引脚只有 8 到 16 根,一拍最多取 2 个字节,总线上另外 48 根线是空的。'),
+          BI('Why not one wide 64-bit package? Pin count, package power and yield all get worse. Several narrow packages in parallel add up to the same 64 bits, and each one&rsquo;s traces stay shorter and easier to length-match.',
+            '为什么不做一颗宽 64 位的大颗粒?引脚数、封装功耗和良率都会变差。用几颗窄颗粒并联,同样凑出 64 位,每颗的走线还更短、更好等长。'),
           'FBGA · x16 device · rank') },
- { act:1, title:'颗粒内部：先开一整行，再选一列',
+ { act:1, title:BI('Inside the package: open a whole row, then pick a column','颗粒内部：先开一整行，再选一列'),
    cam:{tgt:[-2,4.0,-458], az:-0.34, el:0.74, dist:298, fov:26, ap:0.34, focus:'plane', fy:4.0, ex:1.55},
    state:{}, flow:'array',
-   labels:[{p:'bank',  t:'一个 bank',s:'行 × 列 的电容阵列',dy:-78},
-           {p:'rowdec',t:'行译码器',s:'把行地址变成一根字线',dy:-34},
-           {p:'rowbuf',t:'行缓冲',s:'…',live:'arr',dy:62},
-           {p:'dio',   t:'列选 + 数据 IO',s:'从这一行里挑出要的字节',dy:44}],
-   body:Q('颗粒里面是 8 个 bank,每个 bank 是一片行乘列的电容阵列。读一个字节要分两步:先「激活」一整行,把这一行上万个电容的微弱电荷抬进行缓冲;再按列地址,从行缓冲里挑出要的那几个字节。',
-          '不分行列、每个存储位单独引一根线的话,一颗 8Gb 的芯片要接出 80 亿根线 —— 做不出来。行列寻址把 N 根线降到 2×√N 根。',
-          '为什么非得先整行搬出来?因为读电容是破坏性的,电荷读走了就没了,读完必须原样写回。既然这一行反正都要动,不如一次全抬进行缓冲 —— 这也正是「同一行内连续访问」比「换一行」快好几倍的原因。',
+   labels:[{p:'bank',  t:BI('One bank','一个 bank'),s:BI('a row × column array of capacitors','行 × 列 的电容阵列'),dy:-78},
+           {p:'rowdec',t:BI('Row decoder','行译码器'),s:BI('turns a row address into one word line','把行地址变成一根字线'),dy:-34},
+           {p:'rowbuf',t:BI('Row buffer','行缓冲'),s:'…',live:'arr',dy:62},
+           {p:'dio',   t:BI('Column select + data IO','列选 + 数据 IO'),s:BI('picks the wanted bytes out of that row','从这一行里挑出要的字节'),dy:44}],
+   body:Q(BI('A package holds 8 banks, and each bank is an array of capacitors addressed by row and column. Reading one byte takes two steps: first &ldquo;activate&rdquo; a whole row, lifting the faint charge of tens of thousands of capacitors into the row buffer; then, given a column address, pick the wanted bytes out of that buffer.',
+           '颗粒里面是 8 个 bank,每个 bank 是一片行乘列的电容阵列。读一个字节要分两步:先「激活」一整行,把这一行上万个电容的微弱电荷抬进行缓冲;再按列地址,从行缓冲里挑出要的那几个字节。'),
+          BI('Without row and column addressing — one wire per storage cell — an 8Gb chip would need eight billion wires. It cannot be built. Row and column addressing turns N wires into 2×√N.',
+            '不分行列、每个存储位单独引一根线的话,一颗 8Gb 的芯片要接出 80 亿根线 —— 做不出来。行列寻址把 N 根线降到 2×√N 根。'),
+          BI('Why must a whole row come out first? Reading a capacitor destroys its charge, so whatever was read has to be written back. Since the row gets disturbed anyway, it is lifted into the buffer in one go — which is also exactly why consecutive accesses inside one row run several times faster than switching rows.',
+            '为什么非得先整行搬出来?因为读电容是破坏性的,电荷读走了就没了,读完必须原样写回。既然这一行反正都要动,不如一次全抬进行缓冲 —— 这也正是「同一行内连续访问」比「换一行」快好几倍的原因。'),
           'bank · word line · sense amplifier · tRCD') },
- { act:1, title:'总线上的 64 位',
+ { act:1, title:BI('64 bits on the bus','总线上的 64 位'),
    cam:{tgt:[2,2.6,-15], az:-0.66, el:0.60, dist:94, fov:26, ap:0.13, focus:'plane', fy:2.6, ex:1.58},
    state:{}, flow:'bus',
-   labels:[{p:'busA',t:'64 根数据线',s:'…',live:'bus',dy:-52},
-           {p:[29,7.4,-7], t:'CPU 这边收',s:'凑够 64 字节才算一条缓存行',dy:-44}],
-   body:Q('64 根数据线并排走在板里,一拍送 64 位,也就是 8 个字节。DDR 在时钟的上升沿和下降沿各送一次,所以一个时钟周期送 16 字节;连送 4 个周期、8 次,刚好 64 字节 —— 一条缓存行。',
-          '没有并行总线,一次只能送 1 位,同一条缓存行要送 512 拍。带宽是「宽度 × 频率」,宽度这一项直接乘在上面。',
-          '为什么固定搬 64 字节,哪怕程序只要 1 个字节?因为程序访问有局部性,取了一个字节,马上多半会用到它旁边的。一次搬一整条,后面几次就直接在缓存里命中了。代价是只要 1 字节时也照搬 64 字节。',
+   labels:[{p:'busA',t:BI('64 data lines','64 根数据线'),s:'…',live:'bus',dy:-52},
+           {p:[29,7.4,-7], t:BI('The CPU side receives','CPU 这边收'),s:BI('64 bytes make one cache line','凑够 64 字节才算一条缓存行'),dy:-44}],
+   body:Q(BI('64 data lines run side by side inside the board. One tick carries 64 bits — 8 bytes. DDR sends on both the rising and the falling edge of the clock, so one clock period carries 16 bytes; four periods, eight sends, come to exactly 64 bytes — one cache line.',
+           '64 根数据线并排走在板里,一拍送 64 位,也就是 8 个字节。DDR 在时钟的上升沿和下降沿各送一次,所以一个时钟周期送 16 字节;连送 4 个周期、8 次,刚好 64 字节 —— 一条缓存行。'),
+          BI('Without a parallel bus only one bit moves at a time and the same cache line takes 512 ticks. Bandwidth is width × frequency, and width multiplies straight into it.',
+            '没有并行总线,一次只能送 1 位,同一条缓存行要送 512 拍。带宽是「宽度 × 频率」,宽度这一项直接乘在上面。'),
+          BI('Why always move 64 bytes, even when the program asked for one? Because accesses are local: having touched one byte, the next ones are very likely right beside it. Move the whole line once and the following accesses hit in cache. The price is moving 64 bytes when 1 was wanted.',
+            '为什么固定搬 64 字节,哪怕程序只要 1 个字节?因为程序访问有局部性,取了一个字节,马上多半会用到它旁边的。一次搬一整条,后面几次就直接在缓存里命中了。代价是只要 1 字节时也照搬 64 字节。'),
           'DDR · dual edge · cache line · burst length 8') },
- { act:1, title:'进 die 的城：一路排队到寄存器',
+ { act:1, title:BI('Into the die: queueing all the way to a register','进 die 的城：一路排队到寄存器'),
    cam:{tgt:[6,6.0,468], az:-1.36, el:0.68, dist:230, fov:28, ap:0.30, focus:'plane', fy:6.0, ex:1.55},
    state:{}, flow:'city',
-   labels:[{p:'mc', t:'内存控制器',s:'数据从这儿进 die',dy:-44},
-           {p:'l3', t:'L3 · 环形互连',s:'…',live:'city',dy:-42},
-           {p:'l1', t:'L1 数据缓存',s:'一拍就能访问',dy:36},
-           {p:'reg',t:'寄存器堆',s:'终点:指令能算了',dy:-36}],
-   body:Q('数据进了硅片不是一步到位。内存控制器收下 → 上环形互连 → L3 → L2 → L1 → 最后才进寄存器。每过一级都要重新排一次队,架空的铜轨就是真实的金属互连层:晶体管在硅的最底层,十几层铜在上面走线。',
-          '没有这三级缓存,每一次访问都得走完整条路。CPU 会有大半时间停在那儿等数据,再多核心也没用。',
-          '为什么要分三级,不做一个大的?缓存越大越慢 —— 线更长、查找更慢。分级是拿容量换速度:L1 小到能一拍访问,L3 大到装得下整个工作集,L2 在中间接着。每一级都是这条曲线上的一个取舍点。',
+   labels:[{p:'mc', t:BI('Memory controller','内存控制器'),s:BI('where the data enters the die','数据从这儿进 die'),dy:-44},
+           {p:'l3', t:BI('L3 · ring interconnect','L3 · 环形互连'),s:'…',live:'city',dy:-42},
+           {p:'l1', t:BI('L1 data cache','L1 数据缓存'),s:BI('reachable in one tick','一拍就能访问'),dy:36},
+           {p:'reg',t:BI('Register file','寄存器堆'),s:BI('the end — the instruction can compute','终点:指令能算了'),dy:-36}],
+   body:Q(BI('Once inside the silicon the data does not arrive in one step. The memory controller takes it, then the ring interconnect, then L3, L2, L1, and only then a register. Every level means queueing again. The elevated copper rails are the real metal interconnect layers: transistors sit at the bottom of the silicon, a dozen-odd copper layers route above them.',
+           '数据进了硅片不是一步到位。内存控制器收下 → 上环形互连 → L3 → L2 → L1 → 最后才进寄存器。每过一级都要重新排一次队,架空的铜轨就是真实的金属互连层:晶体管在硅的最底层,十几层铜在上面走线。'),
+          BI('Without these three cache levels every access would walk the whole road. The CPU would spend most of its time parked and waiting, and more cores would not help.',
+            '没有这三级缓存,每一次访问都得走完整条路。CPU 会有大半时间停在那儿等数据,再多核心也没用。'),
+          BI('Why three levels rather than one big one? A bigger cache is necessarily slower — longer wires, slower lookup. Levels trade capacity for speed: L1 small enough to answer in one tick, L3 large enough to hold the working set, L2 bridging them. Each level is one point on that curve.',
+            '为什么要分三级,不做一个大的?缓存越大越慢 —— 线更长、查找更慢。分级是拿容量换速度:L1 小到能一拍访问,L3 大到装得下整个工作集,L2 在中间接着。每一级都是这条曲线上的一个取舍点。'),
           'memory controller · ring interconnect · L3/L2/L1 · register file') },
 ];
-const ACTS=['第一幕 · 看清结构','第二幕 · 数据走一遍'];
+const ACTS=[BI('Act one · See the structure','第一幕 · 看清结构'),
+            BI('Act two · Walk the data through','第二幕 · 数据走一遍')];
 const GLOSSARY=[
- ['DRAM','动态随机存取存储器','用一个电容存一位。电容会漏电,所以要定期刷新 —— 「动态」就是这个意思。'],
- ['bank','存储体','一颗颗粒里相互独立的几片阵列。不同 bank 可以同时在忙,这样等待能重叠起来。'],
- ['word line','字线','行译码器拉高的那一根线。它一拉高,整行的电容就都接到了位线上。'],
- ['sense amp','读出放大器 / 行缓冲','把电容上微弱的电荷放大成稳定的 0 或 1,并暂存整行数据。'],
- ['tRCD','行到列的延迟','从「激活一行」到「可以读这一行的列」之间必须等的拍数。'],
- ['cache line','缓存行','缓存和内存之间搬运的最小单位,现在通常是 64 字节。'],
- ['SO-DIMM','小型双列直插内存条','笔记本用的那种短内存条,平躺插在插槽里。'],
- ['MC','内存控制器','die 上负责跟内存条对话的那块电路,管地址、时序和刷新。'],
- ['PBR','基于物理的渲染','用金属度和粗糙度描述材质,金属和塑料反光才会不一样。'],
- ['IBL','基于图像的光照','用一张环境图给所有材质打光,本页的棚拍光就是这么来的。'],
+ ['DRAM', BI('Dynamic random-access memory','动态随机存取存储器'),
+  BI('One capacitor holds one bit. Capacitors leak, so they must be refreshed periodically — that is what &ldquo;dynamic&rdquo; means.',
+    '用一个电容存一位。电容会漏电,所以要定期刷新 —— 「动态」就是这个意思。')],
+ ['bank', BI('Bank','存储体'),
+  BI('Independent arrays inside one package. Different banks can be busy at once, so their waits overlap.',
+    '一颗颗粒里相互独立的几片阵列。不同 bank 可以同时在忙,这样等待能重叠起来。')],
+ ['word line', BI('Word line','字线'),
+  BI('The line the row decoder pulls high. Raising it connects a whole row of capacitors to the bit lines.',
+    '行译码器拉高的那一根线。它一拉高,整行的电容就都接到了位线上。')],
+ ['sense amp', BI('Sense amplifier / row buffer','读出放大器 / 行缓冲'),
+  BI('Amplifies the faint charge on a capacitor into a solid 0 or 1, and holds the whole row.',
+    '把电容上微弱的电荷放大成稳定的 0 或 1,并暂存整行数据。')],
+ ['tRCD', BI('Row-to-column delay','行到列的延迟'),
+  BI('The ticks that must pass between activating a row and being allowed to read a column of it.',
+    '从「激活一行」到「可以读这一行的列」之间必须等的拍数。')],
+ ['cache line', BI('Cache line','缓存行'),
+  BI('The smallest unit moved between cache and memory, these days usually 64 bytes.',
+    '缓存和内存之间搬运的最小单位,现在通常是 64 字节。')],
+ ['SO-DIMM', BI('Small outline dual in-line memory module','小型双列直插内存条'),
+  BI('The short module a laptop uses, lying flat in its socket.',
+    '笔记本用的那种短内存条,平躺插在插槽里。')],
+ ['MC', BI('Memory controller','内存控制器'),
+  BI('The block on the die that talks to the memory module: addresses, timing and refresh.',
+    'die 上负责跟内存条对话的那块电路,管地址、时序和刷新。')],
+ ['PBR', BI('Physically based rendering','基于物理的渲染'),
+  BI('Materials described by metallic and roughness, which is why metal and plastic reflect differently.',
+    '用金属度和粗糙度描述材质,金属和塑料反光才会不一样。')],
+ ['IBL', BI('Image-based lighting','基于图像的光照'),
+  BI('One environment image lights everything; the studio softboxes on this page come from it.',
+    '用一张环境图给所有材质打光,本页的棚拍光就是这么来的。')],
 ];
-
 //==============================================================
 // S11 · 帧缓冲
 //==============================================================
@@ -1964,14 +2048,17 @@ function buildFlow(kind,T){
       blockGlow(at(WB,bx,gy,0),23,4.8,FC.data,0.40);
     }
     if(st>=10) tileAlong([CS,OUT],(st-10+u)/2,8,2,FC.data,tk,1.5,1.05);
-    const NAME=['①行地址进译码器','①行地址进译码器',
-      '②拉高字线,整行接到位线','③整行电荷抬进行缓冲','③整行电荷抬进行缓冲',
-      '④列地址进列选','④列地址进列选',
-      '⑤按列取出 8 个字节','⑤按列取出 8 个字节','⑤按列取出 8 个字节',
-      '⑥出颗粒,上内存总线','⑥出颗粒,上内存总线'];
-    const WAIT=['—','—','等 tRCD','等 tRCD','等 tRCD','—','—','等 CL','等 CL','等 CL','—','—'];
-    FLOW.live.arr=`第 ${st+1} / 12 拍 · <b>${NAME[st]}</b>` +
-      (WAIT[st]!=='—' ? ` · <i>${WAIT[st]}</i>` : '');
+    const A1=BI('① row address into the decoder','①行地址进译码器'),
+          A2=BI('② word line high, the row meets the bit lines','②拉高字线,整行接到位线'),
+          A3=BI('③ the whole row lifts into the row buffer','③整行电荷抬进行缓冲'),
+          A4=BI('④ column address into column select','④列地址进列选'),
+          A5=BI('⑤ 8 bytes picked out by column','⑤按列取出 8 个字节'),
+          A6=BI('⑥ out of the package, onto the memory bus','⑥出颗粒,上内存总线');
+    const NAME=[A1,A1,A2,A3,A3,A4,A4,A5,A5,A5,A6,A6];
+    const W1=BI('waiting tRCD','等 tRCD'), W2=BI('waiting CL','等 CL'), W0='';
+    const WAIT=[W0,W0,W1,W1,W1,W0,W0,W2,W2,W2,W0,W0];
+    FLOW.live.arr=BI(`tick ${st+1} / 12 · `,`第 ${st+1} / 12 拍 · `) + `<b>${NAME[st]}</b>` +
+      (WAIT[st] ? ` · <i>${WAIT[st]}</i>` : '');
   }
 
   // ===== 站 4 · 总线上的 64 位(8 拍凑一条缓存行)=====
@@ -1985,7 +2072,8 @@ function buildFlow(kind,T){
       inten:(j<st || (j===st && u>0.82))?1.45:0.09}),1);
     glow([C[0],C[1]-0.32,C[2]],[11.4,0.02,11.4],FC.data,0.16);
     blockGlow(at(WA,-52,4.9,0),69,30,FC.cmd,0.06+0.10*pulse(T,0.9));
-    FLOW.live.bus=`第 ${st+1} / 8 拍 · 已收 <b>${st*8} / 64 字节</b> · 一拍 64 位`;
+    FLOW.live.bus=BI(`tick ${st+1} / 8 · received `,`第 ${st+1} / 8 拍 · 已收 `) +
+      `<b>${st*8}</b>` + BI(' / 64 bytes · 64 bits a tick',' / 64 字节 · 一拍 64 位');
   }
 
   // ===== 站 5 · die 的城:一路排队到寄存器(16 拍)=====
@@ -2002,20 +2090,22 @@ function buildFlow(kind,T){
     blockGlow(at(WC,-58,4.95,0),15,86,FC.cmd,0.10);
     const line=(P,uu)=>tileAlong(P,uu,8,8,FC.data,7,1.35,1.15);
     let where='';
-    if(st<4){       line([MC,L3a],(st+u)/4);                 where='在环形互连上,去 L3'; }
+    if(st<4){       line([MC,L3a],(st+u)/4);
+                    where=BI('on the ring interconnect, heading for L3','在环形互连上,去 L3'); }
     else if(st<7){  line([MC,L3a],1);
                     blockGlow(at(WC,-24,gy,cz),22,30,FC.cmd,0.18+0.40*pulse(T,0.5));
-                    where='L3 里查一遍 —— 没命中,继续往下'; }
-    else if(st<10){ line([L3a,L3b,TN,TN2,L2],(st-7+u)/3);    where='L3 → L2'; }
-    else if(st<12){ line([L2,at(WC,58,y2,cz),L1],(st-10+u)/2); where='L2 → L1 数据缓存'; }
+                    where=BI('checked in L3 — a miss, keep going down','L3 里查一遍 —— 没命中,继续往下'); }
+    else if(st<10){ line([L3a,L3b,TN,TN2,L2],(st-7+u)/3);    where=BI('L3 → L2','L3 → L2'); }
+    else if(st<12){ line([L2,at(WC,58,y2,cz),L1],(st-10+u)/2);
+                    where=BI('L2 → L1 data cache','L2 → L1 数据缓存'); }
     else if(st<14){ line([L2,at(WC,58,y2,cz),L1],1);
                     blockGlow(at(WC,58,gy,cz+11),10,16,FC.data,0.30+0.35*pulse(T,0.45));
-                    where='L1 里按地址挑出这 8 个字节'; }
+                    where=BI('L1 picks these 8 bytes by address','L1 里按地址挑出这 8 个字节'); }
     else {          const uu=(st-14+u)/2;
                     wordOnWires(L1,RG,uu,16,0.62,(b)=>h1(tk,b,9)>0.45,FC.data,2.1);
                     blockGlow(at(WC,58,gy,cz-11),10,16,FC.data,0.25+0.45*uu);
-                    where='进寄存器 —— 这条指令终于能算了'; }
-    FLOW.live.city=`已走 <b>${st+1}</b> 拍 · ${where}`;
+                    where=BI('into a register — the instruction can finally compute','进寄存器 —— 这条指令终于能算了'); }
+    FLOW.live.city=BI('travelled ','已走 ') + `<b>${st+1}</b>` + BI(' ticks · ',' 拍 · ') + where;
   }
 }
 
@@ -2130,32 +2220,58 @@ function renderUI(){
   document.querySelectorAll('#acts button').forEach((b,k)=>b.classList.toggle('on',k===st.act));
   document.querySelectorAll('#stations button').forEach((b,k)=>{
     b.classList.toggle('on',k===cur); b.classList.toggle('done',k<cur); });
-  $('cK').textContent=ACTS[st.act]+' · '+String(cur+1).padStart(2,'0')+' / '+STATIONS.length;
-  $('cT').textContent=st.title;
+  $('cK').innerHTML=ACTS[st.act]+' · '+String(cur+1).padStart(2,'0')+' / '+STATIONS.length;
+  $('cT').innerHTML=st.title;
   $('cB').innerHTML=st.body;
   $('bPrev').disabled=(cur===0);
   $('clk').classList.toggle('on', !!st.flow);
-  $('bNext').textContent=(cur===STATIONS.length-1)?'回到开头 ↺':'下一站 →';
+  $('bNext').innerHTML=(cur===STATIONS.length-1)
+    ? BI('Start over ↺','回到开头 ↺') : BI('Next','下一站')+' →';
   const sl=$('hAp'); if(sl) sl.value=50;
   const ts=$('hTs'); if(ts) ts.checked=(cam.focus==='plane');
 }
 function buildUI(){
   const acts=$('acts');
-  ACTS.forEach((n,i)=>{ const b=document.createElement('button'); b.textContent=n;
+  ACTS.forEach((n,i)=>{ const b=document.createElement('button'); b.innerHTML=n;
     b.onclick=()=>goTo(STATIONS.findIndex(s=>s.act===i)); acts.appendChild(b); });
   const sts=$('stations');
-  STATIONS.forEach((s,i)=>{ const b=document.createElement('button'); b.textContent=i+1; b.title=s.title;
+  STATIONS.forEach((s,i)=>{ const b=document.createElement('button'); b.textContent=i+1;
+    b.title=s.title.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
     b.onclick=()=>goTo(i); sts.appendChild(b); });
   $('bPrev').onclick=()=>goTo(cur-1);
   $('bNext').onclick=()=>goTo((cur+1)%STATIONS.length);
   const gl_=$('gList');
   GLOSSARY.forEach(([en,zh,ex])=>{ const dt=document.createElement('dt'); dt.innerHTML=en+'<span>'+zh+'</span>';
-    const dd=document.createElement('dd'); dd.textContent=ex; gl_.appendChild(dt); gl_.appendChild(dd); });
+    const dd=document.createElement('dd'); dd.innerHTML=ex; gl_.appendChild(dt); gl_.appendChild(dd); });
+  // 说明卡收起:它占着左下一大块,挡住主体时收成一条。收起状态跨站保留
+  const cap=$('caption'), capBtn=$('cHide');
+  const setMini=(on)=>{ cap.classList.toggle('mini',on);
+    capBtn.innerHTML = on ? BI('Caption ⌃','说明 ⌃') : BI('Hide ⌄','收起 ⌄');
+    capBtn.title = on ? '展开说明卡（H）' : '收起说明卡（H）';
+    capBtn.setAttribute('aria-expanded', String(!on)); };
+  const toggleMini=()=>setMini(!cap.classList.contains('mini'));
+  // 渲染状态同理:收起后只留标题和累积进度条
+  const hud=$('hud'), hudBtn=$('hHide');
+  const setHud=(on)=>{ hud.classList.toggle('mini',on);
+    hudBtn.innerHTML = on ? BI('Show ⌃','展开 ⌃') : BI('Hide ⌄','收起 ⌄');
+    hudBtn.title = on ? '展开渲染状态（R）' : '收起渲染状态（R）';
+    hudBtn.setAttribute('aria-expanded', String(!on)); };
+  const toggleHud=()=>setHud(!hud.classList.contains('mini'));
+  hudBtn.onclick=toggleHud;
+  capBtn.onclick=toggleMini;
+  // 中英切换:整页靠 html[data-lang] 一个属性驱动,不用重建 DOM
+  const langBtn=$('langBtn'), docEl=document.documentElement;
+  langBtn.onclick=()=>{ const zh = docEl.getAttribute('data-lang')==='zh';
+    docEl.setAttribute('data-lang', zh?'en':'zh');
+    docEl.setAttribute('lang', zh?'en':'zh');
+    langBtn.textContent = zh ? '中文' : 'English'; };
   $('gBtn').onclick=()=>$('gPanel').classList.toggle('open');
   $('gClose').onclick=()=>$('gPanel').classList.remove('open');
   window.addEventListener('keydown',e=>{
     if(e.key==='ArrowRight'||e.key==='PageDown'){ goTo(Math.min(cur+1,STATIONS.length-1)); }
     else if(e.key==='ArrowLeft'||e.key==='PageUp'){ goTo(Math.max(cur-1,0)); }
+    else if(e.key==='h'||e.key==='H'){ toggleMini(); }
+    else if(e.key==='r'||e.key==='R'){ toggleHud(); }
     else if(e.key==='Escape'){ $('gPanel').classList.remove('open'); }
   });
   $('cPlay').onclick=()=>{ CLK.playing=!CLK.playing; $('cPlay').textContent=CLK.playing?'⏸':'▶'; };
@@ -2238,7 +2354,7 @@ function loop(now){
   $('hTri').textContent=(drawnTris/2/1000).toFixed(0)+' / '+(totalTris/1000).toFixed(0)+' K';
   $('hFst').textContent=cam.ap<0.001?'关(全清晰)':cam.ap.toFixed(2);
   $('hBar').style.width=(100*spp/QUAL.maxSPP).toFixed(1)+'%';
-  $('cTick').textContent='拍 '+tick();
+  $('cTickN').textContent=tick();
   requestAnimationFrame(loop);
 }
 // 自动化检查 / 录制钩子

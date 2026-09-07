@@ -4,6 +4,11 @@
 //   STATIONS[]  每站 {act,title,cam,state,labels,body,flow}
 //   ACTS[]      幕名        GLOSSARY[]  术语表 [英文,中文,一句话]
 //   cam / STATE / reset() / camMats() / resize() / FLOW / buildFlow() / renderFlow()
+//   BI(en,zh)   中英一对的助手,必须在 STATIONS 之前定义(见 templates/station-page.html)。
+//               **别叫 T** —— buildFlow(kind,T) 的第二个参数就叫 T(秒数),同名会把它挡住,
+//               而且只在有数据流的站才炸。
+// 主循环里那行拍号也要改:$('cTick').textContent='拍 '+tick() → $('cTickN').textContent=tick()
+//               (外壳 DOM 里 #cTick 已经拆成 中/英 前缀 + #cTickN 数字两段)
 //
 // 三个要点:
 //   1 站点切换用 1.7s 三次缓动;dist 走**指数插值**(线性会先冲远再拉回);
@@ -100,32 +105,58 @@ function renderUI(){
   document.querySelectorAll('#acts button').forEach((b,k)=>b.classList.toggle('on',k===st.act));
   document.querySelectorAll('#stations button').forEach((b,k)=>{
     b.classList.toggle('on',k===cur); b.classList.toggle('done',k<cur); });
-  $('cK').textContent=ACTS[st.act]+' · '+String(cur+1).padStart(2,'0')+' / '+STATIONS.length;
-  $('cT').textContent=st.title;
+  $('cK').innerHTML=ACTS[st.act]+' · '+String(cur+1).padStart(2,'0')+' / '+STATIONS.length;
+  $('cT').innerHTML=st.title;
   $('cB').innerHTML=st.body;
   $('bPrev').disabled=(cur===0);
   $('clk').classList.toggle('on', !!st.flow);
-  $('bNext').textContent=(cur===STATIONS.length-1)?'回到开头 ↺':'下一站 →';
+  $('bNext').innerHTML=(cur===STATIONS.length-1)
+    ? BI('Start over ↺','回到开头 ↺') : BI('Next','下一站')+' →';
   const sl=$('hAp'); if(sl) sl.value=50;
   const ts=$('hTs'); if(ts) ts.checked=(cam.focus==='plane');
 }
 function buildUI(){
   const acts=$('acts');
-  ACTS.forEach((n,i)=>{ const b=document.createElement('button'); b.textContent=n;
+  ACTS.forEach((n,i)=>{ const b=document.createElement('button'); b.innerHTML=n;
     b.onclick=()=>goTo(STATIONS.findIndex(s=>s.act===i)); acts.appendChild(b); });
   const sts=$('stations');
-  STATIONS.forEach((s,i)=>{ const b=document.createElement('button'); b.textContent=i+1; b.title=s.title;
+  STATIONS.forEach((s,i)=>{ const b=document.createElement('button'); b.textContent=i+1;
+    b.title=s.title.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
     b.onclick=()=>goTo(i); sts.appendChild(b); });
   $('bPrev').onclick=()=>goTo(cur-1);
   $('bNext').onclick=()=>goTo((cur+1)%STATIONS.length);
   const gl_=$('gList');
   GLOSSARY.forEach(([en,zh,ex])=>{ const dt=document.createElement('dt'); dt.innerHTML=en+'<span>'+zh+'</span>';
-    const dd=document.createElement('dd'); dd.textContent=ex; gl_.appendChild(dt); gl_.appendChild(dd); });
+    const dd=document.createElement('dd'); dd.innerHTML=ex; gl_.appendChild(dt); gl_.appendChild(dd); });
+  // 说明卡收起:它占着左下一大块,挡住主体时收成一条。收起状态跨站保留
+  const cap=$('caption'), capBtn=$('cHide');
+  const setMini=(on)=>{ cap.classList.toggle('mini',on);
+    capBtn.innerHTML = on ? BI('Caption ⌃','说明 ⌃') : BI('Hide ⌄','收起 ⌄');
+    capBtn.title = on ? '展开说明卡（H）' : '收起说明卡（H）';
+    capBtn.setAttribute('aria-expanded', String(!on)); };
+  const toggleMini=()=>setMini(!cap.classList.contains('mini'));
+  // 渲染状态同理:收起后只留标题和累积进度条
+  const hud=$('hud'), hudBtn=$('hHide');
+  const setHud=(on)=>{ hud.classList.toggle('mini',on);
+    hudBtn.innerHTML = on ? BI('Show ⌃','展开 ⌃') : BI('Hide ⌄','收起 ⌄');
+    hudBtn.title = on ? '展开渲染状态（R）' : '收起渲染状态（R）';
+    hudBtn.setAttribute('aria-expanded', String(!on)); };
+  const toggleHud=()=>setHud(!hud.classList.contains('mini'));
+  hudBtn.onclick=toggleHud;
+  capBtn.onclick=toggleMini;
+  // 中英切换:整页靠 html[data-lang] 一个属性驱动,不用重建 DOM
+  const langBtn=$('langBtn'), docEl=document.documentElement;
+  langBtn.onclick=()=>{ const zh = docEl.getAttribute('data-lang')==='zh';
+    docEl.setAttribute('data-lang', zh?'en':'zh');
+    docEl.setAttribute('lang', zh?'en':'zh');
+    langBtn.textContent = zh ? '中文' : 'English'; };
   $('gBtn').onclick=()=>$('gPanel').classList.toggle('open');
   $('gClose').onclick=()=>$('gPanel').classList.remove('open');
   window.addEventListener('keydown',e=>{
     if(e.key==='ArrowRight'||e.key==='PageDown'){ goTo(Math.min(cur+1,STATIONS.length-1)); }
     else if(e.key==='ArrowLeft'||e.key==='PageUp'){ goTo(Math.max(cur-1,0)); }
+    else if(e.key==='h'||e.key==='H'){ toggleMini(); }
+    else if(e.key==='r'||e.key==='R'){ toggleHud(); }
     else if(e.key==='Escape'){ $('gPanel').classList.remove('open'); }
   });
   $('cPlay').onclick=()=>{ CLK.playing=!CLK.playing; $('cPlay').textContent=CLK.playing?'⏸':'▶'; };

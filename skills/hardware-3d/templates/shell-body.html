@@ -1,51 +1,56 @@
 <!-- hw3d 页面外壳 DOM。配 assets/hw3d-ui.css + hw3d-ui.js 使用。
-     标题/副标题按题目改;其余结构别动 —— JS 靠这些 id 挂载。 -->
+     标题/副标题按题目改;其余结构别动 —— JS 靠这些 id 挂载。
+     公开站点的页面必须双语:文字用 <span class="lang-en">/<span class="lang-zh"> 成对写,
+     <html> 上带 lang="en" data-lang="en",切换靠 #langBtn。 -->
 <canvas id="gl"></canvas>
 <svg id="leaders"></svg>
 <div id="labels"></div>
 
 <header class="title">
-  <h1>GPU：从硅片到屏幕</h1>
-  <p>一块显卡里，一帧画面是怎么被算出来、又怎么被点亮的 · 写实 3D 讲解</p>
+  <h1><span class="lang-en">GPU: from silicon to screen</span><span class="lang-zh">GPU：从硅片到屏幕</span></h1>
+  <p><span class="lang-en">How one frame is computed inside a graphics card, and how it is lit up · photoreal 3D</span><span class="lang-zh">一块显卡里，一帧画面是怎么被算出来、又怎么被点亮的 · 写实 3D 讲解</span></p>
 </header>
 
 <nav class="acts panel" id="acts"></nav>
 <nav class="stations panel" id="stations"></nav>
 
 <aside class="caption panel" id="caption">
+  <button class="cap-x" id="cHide" title="Collapse (H) · 收起说明卡（H）" aria-expanded="true"><span class="lang-en">Hide ⌄</span><span class="lang-zh">收起 ⌄</span></button>
   <div class="k" id="cK">第一幕 · 01 / 14</div>
   <h2 id="cT">—</h2>
   <div class="body" id="cB"></div>
   <div class="clk" id="clk">
-    <button id="cPlay" title="暂停 / 继续">⏸</button>
-    <button id="cStep" title="单步:走一拍">⏭ 一拍</button>
-    <label>速度 <input id="cSpd" type="range" min="25" max="300" value="100"></label>
-    <span id="cTick" class="mono">拍 0</span>
+    <button id="cPlay" title="Pause / resume · 暂停 / 继续">⏸</button>
+    <button id="cStep" title="Step one tick · 单步:走一拍">⏭ <span class="lang-en">one tick</span><span class="lang-zh">一拍</span></button>
+    <label><span class="lang-en">Speed</span><span class="lang-zh">速度</span> <input id="cSpd" type="range" min="25" max="300" value="100"></label>
+    <span id="cTick" class="mono"><span class="lang-en">tick </span><span class="lang-zh">拍 </span><span id="cTickN">0</span></span>
   </div>
   <div class="nav">
-    <button id="bPrev">← 上一站</button>
+    <button id="bPrev">← <span class="lang-en">Back</span><span class="lang-zh">上一站</span></button>
     <button id="bNext" class="pri">下一站 →</button>
   </div>
 </aside>
 
-<aside class="hud panel">
-  <b>渲染状态</b>
-  <div class="row"><span>累积采样</span><span id="hSpp" class="mono">0 / 0</span></div>
-  <div class="row"><span>帧时间</span><span id="hMs" class="mono">—</span></div>
-  <div class="row"><span>三角形</span><span id="hTri" class="mono">—</span></div>
-  <div class="row"><span>光圈(景深)</span><span id="hFst" class="mono">—</span></div>
-  <input id="hAp" type="range" min="0" max="100" value="50" title="0 = 全清晰,50 = 镜头默认,100 = 两倍">
-  <label class="row"><span>焦平面贴板面(移轴)</span><input id="hTs" type="checkbox"></label>
+<aside class="hud panel" id="hud">
+  <button class="hud-x" id="hHide" title="Collapse (R) · 收起渲染状态（R）" aria-expanded="true"><span class="lang-en">Hide ⌄</span><span class="lang-zh">收起 ⌄</span></button>
+  <b><span class="lang-en">Render state</span><span class="lang-zh">渲染状态</span></b>
+  <div class="row"><span><span class="lang-en">Samples</span><span class="lang-zh">累积采样</span></span><span id="hSpp" class="mono">0 / 0</span></div>
+  <div class="row"><span><span class="lang-en">Frame time</span><span class="lang-zh">帧时间</span></span><span id="hMs" class="mono">—</span></div>
+  <div class="row"><span><span class="lang-en">Triangles</span><span class="lang-zh">三角形</span></span><span id="hTri" class="mono">—</span></div>
+  <div class="row"><span><span class="lang-en">Aperture (DOF)</span><span class="lang-zh">光圈(景深)</span></span><span id="hFst" class="mono">—</span></div>
+  <input id="hAp" type="range" min="0" max="100" value="50" title="0 = everything sharp, 50 = as shot, 100 = twice · 0 = 全清晰,50 = 镜头默认,100 = 两倍">
+  <label class="row"><span><span class="lang-en">Focal plane along the board (tilt-shift)</span><span class="lang-zh">焦平面贴板面(移轴)</span></span><input id="hTs" type="checkbox"></label>
   <div class="bar"><i id="hBar"></i></div>
 </aside>
 
-<div class="tip"><kbd>←</kbd> <kbd>→</kbd> 切站 &nbsp; <kbd>拖动</kbd> 转视角 &nbsp; <kbd>滚轮</kbd> 推拉<br>松手后画面会持续累积采样，越等越干净</div>
+<div class="tip"><span class="lang-en"><kbd>←</kbd> <kbd>→</kbd> station &nbsp; <kbd>drag</kbd> orbit &nbsp; <kbd>wheel</kbd> zoom &nbsp; <kbd>H</kbd>/<kbd>R</kbd> hide panels<br>Let go and the image keeps accumulating — the longer you wait, the cleaner it gets</span><span class="lang-zh"><kbd>←</kbd> <kbd>→</kbd> 切站 &nbsp; <kbd>拖动</kbd> 转视角 &nbsp; <kbd>滚轮</kbd> 推拉 &nbsp; <kbd>H</kbd>/<kbd>R</kbd> 收起面板<br>松手后画面会持续累积采样，越等越干净</span></div>
 
-<button class="gloss-btn" id="gBtn" title="术语表">❓</button>
+<button class="lang-toggle" id="langBtn" type="button">中文</button>
+<button class="gloss-btn" id="gBtn" title="Glossary · 术语表">❓</button>
 <aside class="gloss" id="gPanel">
   <button class="x" id="gClose">×</button>
-  <h3>术语表</h3>
-  <div class="sub">英文缩写 · 中文名 · 一句话解释</div>
+  <h3><span class="lang-en">Glossary</span><span class="lang-zh">术语表</span></h3>
+  <div class="sub"><span class="lang-en">Abbreviation · full name · one sentence</span><span class="lang-zh">英文缩写 · 中文名 · 一句话解释</span></div>
   <dl id="gList"></dl>
 </aside>
 <div id="err"></div>
