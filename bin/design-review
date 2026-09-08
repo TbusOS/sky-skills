@@ -288,47 +288,13 @@ if [ -n "$DISTILL" ]; then
   exec node "$SKY_ROOT/skills/design-review/scripts/library-grower.mjs" "${distill_args[@]}"
 fi
 
-# ---------- Audit mode (batch verify + visual-audit, aggregate report) ----------
-if [ -n "$AUDIT" ]; then
-  if [ "${#HTMLS[@]}" -eq 0 ]; then
-    echo "--audit requires a path argument (file or directory)" >&2
-    exit 2
-  fi
-  AUDIT_TARGET="${HTMLS[0]}"
-  if [ "${#HTMLS[@]}" -gt 1 ]; then
-    echo "--audit takes exactly one path; got: ${HTMLS[*]}" >&2
-    echo "(use --include / --exclude to scope what audit.mjs walks under that path)" >&2
-    exit 2
-  fi
-  audit_args=("$AUDIT_TARGET")
-  [ -n "$SKILL" ] && audit_args+=("--skill=$SKILL")
-  [ -n "$REPO" ] && audit_args+=("--repo=$REPO")
-  [ -n "$OUT_DIR" ] && audit_args+=("--out=$OUT_DIR")
-  [ -n "$STRICT" ] && audit_args+=("--strict")
-  for f in "${AUDIT_FORWARD[@]}"; do audit_args+=("$f"); done
-  exec node "$SKY_ROOT/skills/design-review/scripts/audit.mjs" "${audit_args[@]}"
-fi
-
-if [ "${#HTMLS[@]}" -eq 0 ]; then
-  echo "usage: bin/design-review [--critic] [--repo=<path>] [--skill=<name>] [--css=<path>]... <html> [...]" >&2
-  echo "       bin/design-review --plan --skill=<name> --page=<type>" >&2
-  echo "       bin/design-review --distill --skill=<name> --page=<type> [--corpus=<dir>]" >&2
-  exit 2
-fi
-
 REPO="$(cd "$REPO" && pwd)"
-[ -z "$OUT_DIR" ] && OUT_DIR="$REPO/shots"
-mkdir -p "$OUT_DIR"
 
-VERIFY="$SKY_ROOT/skills/design-review/scripts/verify.py"
-VISUAL="$SKY_ROOT/skills/design-review/scripts/visual-audit.mjs"
-SCREEN="$SKY_ROOT/skills/design-review/scripts/screenshot.mjs"
-AXE="$SKY_ROOT/skills/design-review/scripts/axe-audit.mjs"
-INTERACT="$SKY_ROOT/skills/design-review/scripts/interaction-audit.mjs"
-PIXEL="$SKY_ROOT/skills/design-review/scripts/pixel-gate.mjs"
-CRITIC_SCRIPT="$SKY_ROOT/skills/design-review/scripts/critic.mjs"
-MULTI_CRITIC_SCRIPT="$SKY_ROOT/skills/design-review/scripts/multi-critic.mjs"
-LEARN_SCRIPT="$SKY_ROOT/skills/design-review/scripts/learning-loop.mjs"
+# Read BEFORE the audit branch, not after. The audit branch ends in `exec`, so
+# anything below it does not run in that mode — and everything DESIGN.md decides
+# (which language the project writes in, which skill, which findings it has
+# waived) was below it. The failure was silent in the worst way: the file was
+# there, it validated, and the run simply ignored it without a line saying so.
 
 DESIGN_MD_SCRIPT="$SKY_ROOT/skills/design-review/scripts/design-md.mjs"
 
@@ -374,6 +340,52 @@ if [ -z "${NO_DESIGN_MD:-}" ] && [ ${#HTMLS[@]} -gt 0 ] && command -v node >/dev
     fi
   fi
 fi
+
+# ---------- Audit mode (batch verify + visual-audit, aggregate report) ----------
+if [ -n "$AUDIT" ]; then
+  if [ "${#HTMLS[@]}" -eq 0 ]; then
+    echo "--audit requires a path argument (file or directory)" >&2
+    exit 2
+  fi
+  AUDIT_TARGET="${HTMLS[0]}"
+  if [ "${#HTMLS[@]}" -gt 1 ]; then
+    echo "--audit takes exactly one path; got: ${HTMLS[*]}" >&2
+    echo "(use --include / --exclude to scope what audit.mjs walks under that path)" >&2
+    exit 2
+  fi
+  audit_args=("$AUDIT_TARGET")
+  [ -n "$SKILL" ] && audit_args+=("--skill=$SKILL")
+  [ -n "$REPO" ] && audit_args+=("--repo=$REPO")
+  [ -n "$OUT_DIR" ] && audit_args+=("--out=$OUT_DIR")
+  [ -n "$STRICT" ] && audit_args+=("--strict")
+  # Not a flag audit.mjs acts on — bin/design-review has already turned the file
+  # into --skill / --internal above. It is there so the banner can say which
+  # file was honoured, because "it silently did not read it" is exactly the
+  # failure this ordering used to have.
+  [ -n "$DESIGN_MD" ] && audit_args+=("--design-md=${DESIGN_MD#"$REPO"/}")
+  for f in "${AUDIT_FORWARD[@]}"; do audit_args+=("$f"); done
+  exec node "$SKY_ROOT/skills/design-review/scripts/audit.mjs" "${audit_args[@]}"
+fi
+
+if [ "${#HTMLS[@]}" -eq 0 ]; then
+  echo "usage: bin/design-review [--critic] [--repo=<path>] [--skill=<name>] [--css=<path>]... <html> [...]" >&2
+  echo "       bin/design-review --plan --skill=<name> --page=<type>" >&2
+  echo "       bin/design-review --distill --skill=<name> --page=<type> [--corpus=<dir>]" >&2
+  exit 2
+fi
+
+[ -z "$OUT_DIR" ] && OUT_DIR="$REPO/shots"
+mkdir -p "$OUT_DIR"
+
+VERIFY="$SKY_ROOT/skills/design-review/scripts/verify.py"
+VISUAL="$SKY_ROOT/skills/design-review/scripts/visual-audit.mjs"
+SCREEN="$SKY_ROOT/skills/design-review/scripts/screenshot.mjs"
+AXE="$SKY_ROOT/skills/design-review/scripts/axe-audit.mjs"
+INTERACT="$SKY_ROOT/skills/design-review/scripts/interaction-audit.mjs"
+PIXEL="$SKY_ROOT/skills/design-review/scripts/pixel-gate.mjs"
+CRITIC_SCRIPT="$SKY_ROOT/skills/design-review/scripts/critic.mjs"
+MULTI_CRITIC_SCRIPT="$SKY_ROOT/skills/design-review/scripts/multi-critic.mjs"
+LEARN_SCRIPT="$SKY_ROOT/skills/design-review/scripts/learning-loop.mjs"
 
 SKILL_FLAG=()
 [ -n "$SKILL" ] && SKILL_FLAG=("--skill=$SKILL")

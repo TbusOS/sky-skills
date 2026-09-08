@@ -36,7 +36,7 @@
 //   node design-md.mjs --explain [path]   what it changes about a run
 //   node design-md.mjs --flags   [path]   tab-separated, for bin/design-review
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -182,8 +182,13 @@ export function load(file) {
 
 // Look for DESIGN.md next to the page, then upward to the repo root: a project
 // with several sites keeps one file per site rather than one for all of them.
+//
+// A directory is its own starting point. --audit takes a directory, and
+// dirname() of it starts one level too high — a project that keeps
+// docs/DESIGN.md and audits docs/ would have its own file stepped over.
 export function find(fromPath, root = REPO_ROOT) {
-  let dir = resolve(dirname(fromPath));
+  const abs = resolve(fromPath);
+  let dir = existsSync(abs) && statSync(abs).isDirectory() ? abs : dirname(abs);
   const stop = resolve(root);
   for (;;) {
     const p = join(dir, 'DESIGN.md');

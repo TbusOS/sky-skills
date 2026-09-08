@@ -60,6 +60,7 @@ let excludeList = ['shots', 'node_modules', '.git', '.cache', 'dist', 'build', '
 let maxFiles = 0;
 let strict = false;
 let allowMonolingual = false;
+let designMd = '';
 let runVisual = true;
 let discoverOnly = false;
 
@@ -73,6 +74,11 @@ for (const a of argv) {
   else if (a.startsWith('--max=')) maxFiles = parseInt(a.slice(6), 10) || 0;
   else if (a === '--strict') strict = true;
   else if (a === '--allow-monolingual' || a === '--internal') allowMonolingual = true;
+  // Display only. bin/design-review has already turned this file into flags;
+  // what the banner is missing is any way for the reader to tell whether it
+  // was read at all. That silence is what let the audit branch ignore
+  // DESIGN.md for a whole release without anyone noticing.
+  else if (a.startsWith('--design-md=')) designMd = a.slice(12);
   else if (a === '--no-visual') runVisual = false;
   else if (a === '--discover') discoverOnly = true;
   else if (a.startsWith('--')) { console.error(`unknown flag: ${a}`); process.exit(2); }
@@ -248,6 +254,9 @@ console.log('');
 console.log('┌─ design-review --audit · ' + new Date().toISOString().slice(0, 19).replace('T', ' '));
 console.log(`│  repo=${repoAbs}  skill=${skill || 'auto'}  visual=${runVisual ? 'on' : 'off'}  strict=${strict}`);
 console.log(`│  files: ${finalTargets.length}${maxFiles && targets.length > maxFiles ? ` (capped from ${targets.length})` : ''}`);
+if (designMd) {
+  console.log(`│  DESIGN.md: ${designMd}${allowMonolingual ? '  (monolingual)' : ''}`);
+}
 console.log('└──────────────────────────────────────────────────');
 console.log('');
 

@@ -146,6 +146,44 @@ has "$out" "stale waiver" "a waiver of its own that did not fire IS reported"
 out="$($VA --skill=anthropic --waive-quiet '--waive=visual-audit:figure-no-caption|a reason long enough to be one' "$LAP" 2>&1)"
 hasnt "$out" "stale waiver" "--waive-quiet silences that, for multi-page runs"
 
+# The audit branch ends in `exec`, so anything below it does not run in that
+# mode. Everything DESIGN.md decides used to sit below it: the file was there,
+# it validated, and the run ignored it without a line saying so. Moving the read
+# above the branch fixed it once; this is what stops the next person putting
+# something below the exec again. `--plan` and `--distill` end in exec too.
+echo "--audit honours DESIGN.md, which lives above an exec that used to skip it"
+# Its own temp root, not a subdirectory of $T. The lookup walks upward, and $T
+# already holds a DESIGN.md that earlier blocks in this file wrote — an "it
+# found nothing" assertion under $T would find that one instead and fail for a
+# reason that has nothing to do with what it is testing.
+A="$(mktemp -d)"; trap 'rm -rf "$T" "$A"' EXIT
+mkdir -p "$A/docs"
+printf -- '---\nskill: anthropic\nmonolingual: true\n---\n\n# prose\n' > "$A/DESIGN.md"
+cat > "$A/docs/page.html" <<'EOF'
+<!doctype html><html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>t</title></head>
+<body><section class="anth-hero"><div class="anth-container"><h1>x</h1></div></section></body></html>
+EOF
+out="$(cd "$A" && bash "$REPO/bin/design-review" --audit --no-visual docs/ 2>&1)"; rc=$?
+t "$rc" "0" "a monolingual page passes because DESIGN.md said so"
+has "$out" "DESIGN.md: DESIGN.md" "and the banner names the file it honoured"
+has "$out" "(monolingual)" "and says what that changed"
+has "$out" "skill=anthropic" "skill: reaches audit mode too, not just the flag"
+
+# Without the file the same page must fail. A test that passes both with and
+# without the thing under test is measuring nothing.
+mv "$A/DESIGN.md" "$A/DESIGN.md.off"
+out="$(cd "$A" && bash "$REPO/bin/design-review" --audit --no-visual docs/ 2>&1)"; rc=$?
+t "$rc" "1" "the same page fails once DESIGN.md is taken away"
+hasnt "$out" "DESIGN.md:" "and the banner does not claim to have read one"
+mv "$A/DESIGN.md.off" "$A/DESIGN.md"
+
+# --audit takes a directory. dirname() of a directory starts one level too high,
+# so a project keeping docs/DESIGN.md and auditing docs/ used to step over it.
+mv "$A/DESIGN.md" "$A/docs/DESIGN.md"
+out="$(cd "$A" && bash "$REPO/bin/design-review" --audit --no-visual docs/ 2>&1)"; rc=$?
+t "$rc" "0" "a DESIGN.md inside the audited directory is found, not stepped over"
+
 echo "the run refuses to start on a malformed file"
 # A page that passes on its own, so an exit of 1 can only have come from the
 # DESIGN.md. Using the overlap fixture here would have proved nothing: it exits
