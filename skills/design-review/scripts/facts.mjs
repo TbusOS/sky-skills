@@ -434,6 +434,149 @@ async function scanSurfaces(checks, surfaces) {
   return violations;
 }
 
+// ---------------------------------------------------------------------------
+// Bilingual pairing: the two halves of one claim must agree with each other.
+//
+// Everything above works off a hand-written list of phrasings. That list can
+// only catch a sentence someone already thought to write a pattern for, and on
+// 2026-09-08 that turned out to be a real gap rather than a theoretical one:
+// the roster reported 18 stale counts, all of them fixed, and it then said
+// clean while 17 more sat on the same pages. The shape it missed:
+//
+//   <span class="lang-en">23 skills. One pattern.</span>
+//   <span class="lang-zh">22 个 skill,同一套结构。</span>
+//
+// One half updated, the other not. The English pattern matched; the Chinese one
+// wanted the number followed by 。 or 一张表 or 分三族, and "，同一套结构" is
+// none of those. On another page it was the other way round — Chinese caught,
+// English missed. The direction is not even consistent, which is what makes it
+// hard to notice by eye.
+//
+// So this asks a different question. Not "does this look like a phrasing I
+// know" but "do the two halves of this one claim say the same number". No
+// phrase list, no truth lookup: a page can be internally consistent and still
+// wrong about disk, and that is what the checks above are for. These two catch
+// different things and neither replaces the other.
+//
+// Why the rules are this narrow — measured over 2,667 pairs in this repo:
+//
+//   compare the two number multisets           50 differ, 47 of them fine
+//   ...only when both sides have as many       6 differ, 3 of them fine
+//   ...and at most 4 numbers per side          3 differ, 0 of them fine
+//
+// The two survivors of the first cut are what makes it usable:
+//
+//   equal count — English routinely spells a number out where Chinese uses a
+//   digit ("Four scripts" / "4 个脚本", "1 · Norm source" / "一 · 规范源头").
+//   That is a difference in writing, not in claim, and it accounts for 44 of
+//   the 50. A missing number on one side is never evidence of disagreement.
+//
+//   at most four — a claim about a count lives in a heading, a caption or a
+//   stat label and carries one or two numbers. The only pairs above four in
+//   this repo are three 45-number changelog paragraphs, where two languages
+//   narrating the same history legitimately name different specifics. Nothing
+//   in the corpus sits between 2 and 45, so the threshold is not a guess about
+//   where to draw a line — there is a gap to draw it in.
+//
+// The cost of the threshold, stated plainly: a stale number inside a long
+// paragraph is invisible to this check. The phrase list above is what covers
+// that case, when it knows the phrasing.
+const PAIR_MAX_NUMBERS = 4;
+
+// Collect lang-en / lang-zh elements in document order, then pair adjacent ones
+// of opposite language.
+//
+// The first version scanned twice — once for "English first", once for
+// "Chinese first" — because both orders occur (primer's SVG labels put Chinese
+// first). Two passes let one label's English pair with the NEXT label's
+// Chinese, and every pair built that way looks exactly like a real
+// disagreement. One ordered pass, each element used at most once.
+function langPairs(html) {
+  const open = /<(\w+)[^>]*\bclass="([^"]*)"[^>]*>/g;
+  const nodes = [];
+  let m;
+  while ((m = open.exec(html))) {
+    const lang = /\blang-en\b/.test(m[2]) ? 'en'
+               : /\blang-zh\b/.test(m[2]) ? 'zh' : null;
+    if (!lang) continue;
+    const body = balanced(html, m.index + m[0].length, m[1]);
+    if (!body) continue;
+    nodes.push({ lang, text: body.text, start: m.index, end: body.end });
+    open.lastIndex = body.end;      // a nested lang-* belongs to its parent
+  }
+
+  const out = [];
+  for (let i = 0; i + 1 < nodes.length; i++) {
+    if (nodes[i].lang === nodes[i + 1].lang) continue;
+    // A block element between them means these are two separate claims that
+    // happen to sit next to each other, not one claim in two languages.
+    if (/<(p|div|section|li|tr|h[1-6])\b/i.test(html.slice(nodes[i].end, nodes[i + 1].start))) continue;
+    const [en, zh] = nodes[i].lang === 'en' ? [nodes[i], nodes[i + 1]] : [nodes[i + 1], nodes[i]];
+    out.push({ en: en.text, zh: zh.text, index: nodes[i].start });
+    i++;
+  }
+  return out;
+}
+
+// Walk forward from `from` to the tag's own closing tag, counting depth.
+// A non-greedy regex stops at the first </span>, which is wrong the moment the
+// text contains a nested <span> — and half the copy in this repo does.
+function balanced(html, from, tag) {
+  const re = new RegExp(`<${tag}\\b[^>]*>|</${tag}>`, 'g');
+  re.lastIndex = from;
+  let depth = 1, m;
+  while ((m = re.exec(html))) {
+    depth += m[0][1] === '/' ? -1 : 1;
+    if (depth === 0) return { text: html.slice(from, m.index), end: re.lastIndex };
+  }
+  return null;
+}
+
+// Entities are dropped before digits are read: &#9315; is a circled numeral,
+// and left in place it reads as the number 9315.
+const pairNumbers = (s) => s
+  .replace(/<[^>]*>/g, ' ')
+  .replace(/&#\d+;|&[a-z]+;/gi, ' ')
+  .match(/\d+/g) || [];
+
+// The rule, in one place, so the self-test exercises what the scan runs and not
+// a second copy of it that can drift.
+// Returns the two number lists when the pair disagrees, null when it does not.
+function pairMismatch(enHtml, zhHtml) {
+  const a = pairNumbers(enHtml), b = pairNumbers(zhHtml);
+  if (!a.length || a.length !== b.length) return null;
+  if (a.length > PAIR_MAX_NUMBERS) return null;
+  if ([...a].sort().join() === [...b].sort().join()) return null;
+  return { a, b };
+}
+
+async function scanLangPairs(surfaces) {
+  const violations = [];
+  const suppressed = [];
+  for (const rel of surfaces) {
+    const abs = resolve(REPO_ROOT, rel);
+    if (!(await exists(abs))) continue;   // scanSurfaces already reports this
+    const html = await readFile(abs, 'utf-8');
+    const raw = html.split('\n');
+    for (const p of langPairs(html)) {
+      const { a, b } = pairMismatch(p.en, p.zh) || {};
+      if (!a) continue;
+      const line = html.slice(0, p.index).split('\n').length;
+      const hit = {
+        file: rel, line, id: 'lang-pair-mismatch',
+        claimed: a.join(','), truth: b.join(','),
+        what: 'the two halves of one bilingual claim state different numbers',
+        text: p.en.replace(/<[^>]*>/g, '').trim().slice(0, 60),
+        zh: p.zh.replace(/<[^>]*>/g, '').trim().slice(0, 40),
+      };
+      const why = suppression(raw, line - 1);
+      if (why) suppressed.push({ ...hit, why }); else violations.push(hit);
+    }
+  }
+  violations.suppressed = suppressed;
+  return violations;
+}
+
 function printTruth(truth) {
   const f = truth.skills.families;
   console.log('ground truth, derived from disk:');
@@ -486,10 +629,17 @@ async function main() {
   const checks = buildChecks(truth);
   const core = await scanSurfaces(checks, CORE_SURFACES);
   const showcase = await scanSurfaces(checks, SHOWCASE_SURFACES);
+  // Gated on documentation, reported on demos — the same split the count
+  // checks use, for the same reason: a demo's numbers are woven through hero
+  // copy, so correcting one is a rewrite rather than a substitution.
+  const corePairs = await scanLangPairs(CORE_SURFACES);
+  const showcasePairs = await scanLangPairs(SHOWCASE_SURFACES);
 
   if (wantJson) {
-    console.log(JSON.stringify({ truth, structural, core, showcase }, null, 2));
-    return structural.length + core.length + (strict ? showcase.length : 0) ? 1 : 0;
+    console.log(JSON.stringify(
+      { truth, structural, core, showcase, corePairs, showcasePairs }, null, 2));
+    return structural.length + core.length + corePairs.length
+      + (strict ? showcase.length + showcasePairs.length : 0) ? 1 : 0;
   }
 
   printTruth(truth);
@@ -501,7 +651,8 @@ async function main() {
     console.log('');
   }
 
-  const muted = [...core.suppressed, ...showcase.suppressed];
+  const muted = [...core.suppressed, ...showcase.suppressed,
+                 ...corePairs.suppressed, ...showcasePairs.suppressed];
   if (muted.length) {
     console.log(`suppressed by facts-ignore (${muted.length}):`);
     for (const s of muted) console.log(`  ${s.file}:${s.line}  «${s.text}» — ${s.why}`);
@@ -517,17 +668,58 @@ async function main() {
            showcase);
   }
 
-  const failing = structural.length + core.length + (strict ? showcase.length : 0);
+  // Its own section: these are not "the page disagrees with disk" but "the page
+  // disagrees with itself", and one of the two numbers is right. Printing them
+  // as a stale count would name a truth this check does not have.
+  if (corePairs.length) reportPairs('bilingual halves disagree · documentation', corePairs);
+  if (showcasePairs.length) {
+    reportPairs(strict ? 'bilingual halves disagree · showcase demos'
+                       : 'bilingual halves disagree · showcase demos (reported, not gating)',
+                showcasePairs);
+  }
+  if (!corePairs.length && !showcasePairs.length) {
+    console.log('✓ bilingual pairs agree with each other\n');
+  }
+
+  const failing = structural.length + core.length + corePairs.length
+    + (strict ? showcase.length + showcasePairs.length : 0);
+  const alsoDemos = showcase.length + showcasePairs.length;
   if (!failing) {
     console.log('✓ facts clean');
     return 0;
   }
   console.log(`✗ ${failing} problem(s) must be fixed` +
-    (!strict && showcase.length ? `  ·  ${showcase.length} more in showcase demos` : ''));
+    (!strict && alsoDemos ? `  ·  ${alsoDemos} more in showcase demos` : ''));
   return 1;
 }
 
-main().then((c) => process.exit(c)).catch((e) => {
-  console.error(e?.stack || String(e));
-  process.exit(2);
-});
+function reportPairs(label, violations) {
+  const byFile = new Map();
+  for (const v of violations) {
+    if (!byFile.has(v.file)) byFile.set(v.file, []);
+    byFile.get(v.file).push(v);
+  }
+  console.log(`${label} (${violations.length} across ${byFile.size} file(s)):`);
+  for (const [file, vs] of byFile) {
+    console.log(`  ${file}`);
+    for (const v of vs) {
+      console.log(`    :${String(v.line).padEnd(5)} en [${v.claimed}]  «${v.text}»`);
+      console.log(`    ${' '.repeat(6)} zh [${v.truth}]  «${v.zh}»`);
+    }
+  }
+  console.log('');
+}
+
+// Exported so the self-test can drive the pairing rule directly. A check whose
+// only entry point is "scan these thirteen files" can be tested for what it
+// finds today but not for what it would say about a case that is not in the
+// repo — and the cases worth testing are exactly the ones nobody has written
+// yet. (design-md.mjs guards the same way.)
+export { langPairs, pairNumbers, pairMismatch, PAIR_MAX_NUMBERS };
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().then((c) => process.exit(c)).catch((e) => {
+    console.error(e?.stack || String(e));
+    process.exit(2);
+  });
+}

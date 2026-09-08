@@ -286,7 +286,7 @@ node skills/design-review/scripts/learning-loop.mjs \
 
 首次实战(2026-04-22):13 条原始 issue → 5 类新 bug → 3 新 known-bugs(1.17/1.18/1.19)+ 1 新机器 check(figure-no-caption)+ 8 条 dos-and-donts。
 
-## Roadmap · 对齐 [HARNESS-ROADMAP](../../docs/HARNESS-ROADMAP.html)
+## Roadmap · 对应 [HARNESS-ROADMAP](../../docs/HARNESS-ROADMAP.html)
 
 | Phase | 组件 | 状态 |
 |---|---|---|
@@ -298,7 +298,23 @@ node skills/design-review/scripts/learning-loop.mjs \
 | 6 · `/design-loop` 编排 | planner → gen → review → critic × 3 轮 | Future(依赖 Phase 01 planner)|
 | 7 · learning-loop | `design-learner` + `learning-loop.mjs` | **done** (2026-04-22) |
 | 8 · library-grower | 5 张优秀产物 → 自动蒸馏新 canonical | Future(等 10+ 真实页数据)|
-| 10 · facts 检查 | `facts.mjs` —— 展示页宣称的数字 vs 磁盘真值,不符即非 0 退出 | **done** (2026-07-30) |
+| 10 · facts 检查 | `facts.mjs` —— 展示页宣称的数字 vs 磁盘真值,不符即非 0 退出;**外加中英配对**:同一处声明的两半必须说同一个数 | **done** (2026-07-30 · 配对 2026-09-08) |
+
+**facts 是两问,不是一问。** 前一问「页面说的跟磁盘对不对得上」靠一份手写措辞清单
+(`facts.mjs` 里那批正则),它只认有人想到过要写的写法。2026-09-08 实测这不是理论
+缺口:它报了 18 处过期数字,全改完之后说 clean,**同一批页面上还剩 17 处** ——
+漏掉的那些长一个样:同一行里英文那半改了,中文那半没改,而且**方向不固定**(另一页反过来)。
+
+所以加了第二问:**同一处声明的中英两半必须说同一个数。** 不认措辞,只问两边一不一致。
+它跟前一问抓的是两类东西 —— 页面可以自己跟自己一致但整体是旧的 —— 谁也替代不了谁。
+
+规则窄得有理由,是量出来的(本仓 2667 处配对):只比数字集合 → 50 处不同、47 处是好的;
+再要求**两边数字个数相同** → 6 处、3 处是好的;再要求**每侧不超过 4 个数字** → 3 处、
+0 处是好的。个数相同这条挡掉的是「英文写单词中文写数字」(`Four scripts` / `4 个脚本`),
+占原始差异的 44/50;上限 4 这条的理由是**一句计数声明活在标题、图注或数据标签里,
+带一两个数字**,而本仓唯一超过 4 的是三段 45 个数字的变更记录 —— 2 和 45 之间没有
+任何东西,阈值是画在空隙里的,不是拍的。代价说清楚:**长段落里的过期数字这一问看不见**,
+那是前一问的活。自检 `scripts/facts_selftest.sh`,20 项。
 
 ## 生命周期规则
 
