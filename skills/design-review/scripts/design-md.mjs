@@ -16,6 +16,7 @@
 //
 //   ---
 //   skill: anthropic
+//   monolingual: true
 //   waivers:
 //     - check: visual-audit:figure-no-caption
 //       reason: the figures here are section headers; a caption repeats the h2
@@ -112,7 +113,7 @@ function parseFrontMatter(text) {
 
 const stripQuotes = (s) => s.replace(/^(['"])([\s\S]*)\1$/, '$2').trim();
 
-const TOP_KEYS = new Set(['skill', 'waivers']);
+const TOP_KEYS = new Set(['skill', 'monolingual', 'waivers']);
 const WAIVER_KEYS = new Set(['check', 'reason', 'until']);
 
 export function load(file) {
@@ -131,6 +132,21 @@ export function load(file) {
     if (typeof data.skill !== 'string' || !SKILLS.includes(data.skill)) {
       problems.push(`skill: "${data.skill}" is not one of ${SKILLS.join(' / ')}`);
     } else skill = data.skill;
+  }
+
+  // Whether this project's pages are single-language. The bilingual rule (§G)
+  // exists because THIS repo publishes a bilingual site; a project writing
+  // internal docs in one language never agreed to it, and its every page fails
+  // on every run until someone remembers to type --allow-monolingual. A standing
+  // decision belongs in the file that holds standing decisions, not in muscle
+  // memory. Unlike a waiver this does not downgrade a finding — it says the rule
+  // does not apply here, which is a different claim and is why it is a separate
+  // field rather than a waiver id.
+  let monolingual = false;
+  if (data.monolingual !== undefined) {
+    if (data.monolingual !== 'true' && data.monolingual !== 'false') {
+      problems.push(`monolingual: ${JSON.stringify(data.monolingual)} is not true or false`);
+    } else monolingual = data.monolingual === 'true';
   }
 
   const known = knownChecks();
@@ -161,7 +177,7 @@ export function load(file) {
     waivers.push({ check: w.check, reason: w.reason || '', until: w.until || null });
   });
 
-  return { found: true, file, skill, waivers, body: body.trim(), problems };
+  return { found: true, file, skill, monolingual, waivers, body: body.trim(), problems };
 }
 
 // Look for DESIGN.md next to the page, then upward to the repo root: a project
@@ -197,6 +213,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (mode === '--flags') {
     console.log(`file\t${file}`);
     if (r.skill) console.log(`skill\t${r.skill}`);
+    if (r.monolingual) console.log('monolingual\ttrue');
     for (const w of r.waivers) console.log(`waive\t${w.check}|${w.reason.replace(/[\t\n]/g, ' ')}`);
     for (const p of r.problems) console.log(`problem\t${p}`);
     process.exit(r.problems.length ? 1 : 0);
@@ -204,6 +221,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   console.log(`DESIGN.md · ${file.replace(process.cwd() + '/', '')}`);
   console.log(`  skill    ${r.skill ?? '(not set — the checks auto-detect from the stylesheet link)'}`);
+  console.log(`  lang     ${r.monolingual ? 'monolingual — the bilingual rule (§G) does not apply' : 'bilingual (default)'}`);
   console.log(`  waivers  ${r.waivers.length}`);
   for (const w of r.waivers) {
     console.log(`    · ${w.check}${w.until ? `  until ${w.until}` : ''}`);

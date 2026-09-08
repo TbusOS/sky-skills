@@ -35,13 +35,13 @@ except Exception: pass
 ' 2>/dev/null)"
 [ -n "$cwd" ] || cwd="$PWD"
 
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)" || exit 0
+# shellcheck source=owner.sh
+. "$HERE/owner.sh" 2>/dev/null || exit 0
+SKY_ROOT="$(cd "$HERE/../.." 2>/dev/null && pwd)" || exit 0
+
 dir="$(cd "$cwd" 2>/dev/null && pwd)" || exit 0
-repo=""
-while [ -n "$dir" ] && [ "$dir" != "/" ]; do
-  if [ -f "$dir/skills/design-review/scripts/verify.py" ]; then repo="$dir"; break; fi
-  dir="$(dirname "$dir")"
-done
-[ -n "$repo" ] || exit 0
+repo="$(dg_state_root "$dir")" || exit 0
 
 state="$repo/.design-gate"
 pending="$state/pending.tsv"
@@ -76,15 +76,19 @@ PY
 n="$(printf '%s\n' "$owed" | grep -c .)"
 list="$(printf '%s\n' "$owed" | sed 's/^/  · /' | head -12)"
 cmd="$(printf '%s\n' "$owed" | head -6 | tr '\n' ' ' | sed 's/ $//')"
+# A downstream project has no bin/design-review of its own; name the one in the
+# checkout the hook came from, so the command in the message can be pasted.
+review="bin/design-review"
+[ -x "$repo/bin/design-review" ] || review="$SKY_ROOT/bin/design-review"
 
-python3 - "$n" "$list" "$repo" "$cmd" <<'PY'
+python3 - "$n" "$list" "$repo" "$cmd" "$review" <<'PY'
 import json, sys
-n, listing, repo, cmd = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+n, listing, repo, cmd, review = sys.argv[1:6]
 reason = (
     f"{n} HTML file(s) were edited this session and have not passed the full "
     f"design gate. verify.py ran on each write, but the rendered, accessibility "
     f"and interaction checks did not:\n{listing}\n\n"
-    f"  cd {repo} && bin/design-review {cmd}\n\n"
+    f"  cd {repo} && {review} {cmd}\n\n"
     "Run it, or say why this page does not need it. This notice is not repeated."
 )
 print(json.dumps({"decision": "block", "reason": reason}, ensure_ascii=False))

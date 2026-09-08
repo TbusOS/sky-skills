@@ -51,6 +51,27 @@ out="$($DM --flags "$T/DESIGN.md" 2>&1)"
 has "$out" "skill	anthropic" "--flags emits the skill"
 has "$out" "waive	visual-audit:text-overlap|" "--flags emits the waiver with its reason"
 
+# monolingual is not a waiver, and the difference is the point. A waiver says
+# "we saw this finding and chose to live with it" and downgrades it; this says
+# "that rule is not about us". Without it, a project writing in one language
+# fails §G on every page on every run, and a check nobody can satisfy is a check
+# nobody reads.
+echo "monolingual — a standing --allow-monolingual"
+mkdir -p "$T/mono"
+printf -- '---\nskill: anthropic\nmonolingual: true\n---\n\n# prose\n' > "$T/mono/DESIGN.md"
+out="$($DM --check "$T/mono/DESIGN.md" 2>&1)"; rc=$?
+t "$rc" "0" "monolingual: true validates"
+has "$out" "the bilingual rule (§G) does not apply" "--explain says what it turns off"
+out="$($DM --flags "$T/mono/DESIGN.md" 2>&1)"
+has "$out" "monolingual	true" "--flags emits it for bin/design-review"
+printf -- '---\nskill: anthropic\nmonolingual: false\n---\n\n# prose\n' > "$T/mono/DESIGN.md"
+out="$($DM --flags "$T/mono/DESIGN.md" 2>&1)"
+hasnt "$out" "monolingual" "false emits nothing — the default is the bilingual rule"
+printf -- '---\nskill: anthropic\nmonolingual: yes\n---\n\n# prose\n' > "$T/mono/DESIGN.md"
+out="$($DM --check "$T/mono/DESIGN.md" 2>&1)"; rc=$?
+t "$rc" "1" "a value that is not true/false is rejected, not guessed at"
+has "$out" 'is not true or false' "and the reason names what was wrong"
+
 echo "a file with no front matter at all"
 mkdir -p "$T/plain"
 printf '# just prose\n' > "$T/plain/DESIGN.md"

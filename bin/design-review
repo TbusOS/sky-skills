@@ -357,6 +357,11 @@ if [ -z "${NO_DESIGN_MD:-}" ] && [ ${#HTMLS[@]} -gt 0 ] && command -v node >/dev
       case "$kind" in
         file)  DESIGN_MD="$val" ;;
         skill) [ -z "$SKILL" ] && SKILL="$val" ;;
+        # A standing --internal. The bilingual rule exists because this repo
+        # publishes a bilingual site; a project that writes in one language
+        # never agreed to it, and without this every one of its pages fails
+        # every run until someone remembers to type the flag.
+        monolingual) INTERNAL=1; AUDIT_FORWARD+=("--internal") ;;
         waive) DESIGN_WAIVERS+=("--waive=$val") ;;
         problem) echo "  ✗ DESIGN.md: $val" >&2 ;;
       esac

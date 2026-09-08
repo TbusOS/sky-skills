@@ -91,7 +91,11 @@ axe 跑加载后的 DOM。于是标签页点了没反应、手风琴展开后文
 
 - **`post-edit.sh`**(PostToolUse)—— 每次写 HTML 跑一遍 `verify.py`,不过就把结果
   送回给模型;同时把这一版的内容哈希记进 `.design-gate/pending.tsv`。
-  路径不是 `.html`、或者不在带 `verify.py` 的仓里,立刻退出不作声。
+  路径不是 `.html`、或者这个项目没声明过它在意设计,立刻退出不作声。
+  **「这一页归谁管」看的是项目自己放的 `DESIGN.md`,不是「检查器源码在哪」** ——
+  第一版按后者找,于是只有 sky-skills 自己能命中,而**用这套东西的下游项目一个都收不到**,
+  偏偏最容易忘记跑检查的正是它们。`verify.py` 的位置从钩子脚本自身路径反推,
+  跟被编辑的文件在哪毫无关系(见 `hooks/design-gate/owner.sh`)。
 - **`stop.sh`**(Stop)—— 回合结束时,报出哈希在 `pending.tsv` 里、
   却不在 `passed.tsv` 里的文件。`bin/design-review` 五道全过才写这条回执,
   带 `--no-interact` 或 `--no-axe` 的部分运行不写(部分运行的回执是假的)。
@@ -103,7 +107,7 @@ axe 跑加载后的 DOM。于是标签页点了没反应、手风琴展开后文
 **目的是让漏掉这件事被看见,不是强制执行。**
 
 装:`hooks/design-gate/install.sh`(先 `--dry-run` 看它要改什么)。
-单次关掉:`DESIGN_GATE_HOOK=off`。自检 `hooks/design-gate/selftest.sh`,15 项。
+单次关掉:`DESIGN_GATE_HOOK=off`。自检 `hooks/design-gate/selftest.sh`,21 项。
 
 ### 项目自己的决定:DESIGN.md
 
@@ -116,6 +120,7 @@ axe 跑加载后的 DOM。于是标签页点了没反应、手风琴展开后文
 ```markdown
 ---
 skill: anthropic
+monolingual: false
 waivers:
   - check: visual-audit:figure-no-caption
     reason: 这里的图就是章节头,配图注等于把上面的 h2 再说一遍
@@ -129,6 +134,7 @@ waivers:
 | 字段 | 作用 |
 |---|---|
 | `skill:` | 写哪一套语言。不写就靠样式表链接自动探测,而**还没写完的页面探测不出来** |
+| `monolingual:` | 这个项目的页面只写一种自然语言。双语规则(§G)是**本仓**发布双语站点才有的义务,别人没答应过 —— 不写这行,它 `docs/` 下每一页每次都失败,直到有人想起来手打 `--allow-monolingual` |
 | `waivers:` | **降级,不隐藏** —— error 变 warn,那条发现照样打出来,理由跟在旁边 |
 | 散文部分 | 原样喂给 `critic` / `multi-critic`。样张是**声音**的标尺,它是**目的**的标尺 |
 
@@ -140,9 +146,12 @@ waivers:
 3. **`until` 过期就校验失败**,逼你重新决定一次。
    另外**豁免了一条这一页根本没触发的检查也会被报出来** —— 那行字在骗下一个读者。
 
+`monolingual:` **不是豁免**。豁免说的是「这条发现我们看过了,决定就这样」,它降级不隐藏;
+`monolingual:` 说的是「那条规则不是冲我们来的」—— 两句话不是一个意思,所以是两个字段。
+
 `DESIGN.md` 写坏了**整轮不跑**,在第一道之前就停 —— 它决定检查怎么做,
 半读半猜比直接拒绝更坏。模板见 `references/DESIGN.md.template`,
-自检 `scripts/design_md_selftest.sh`,30 项。`--no-design-md` 可以忽略它。
+自检 `scripts/design_md_selftest.sh`,36 项。`--no-design-md` 可以忽略它。
 
 **五道之外**,按需叠加,不计入"五道":
 

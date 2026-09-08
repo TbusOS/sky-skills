@@ -6,10 +6,18 @@
 #   hooks/design-gate/install.sh uninstall  remove them again
 #
 # Entries carry an absolute path to this checkout, so a second checkout replaces
-# the first rather than stacking. The matcher is intentionally left off: both
-# hooks read the payload and exit 0 in a microsecond when it is not theirs, and
-# a matcher expression that silently stops matching after a schema change is
-# harder to notice than a hook that runs and says nothing.
+# the first rather than stacking.
+#
+# The matcher is intentionally left off. A matcher expression that silently
+# stops matching after a schema change is harder to notice than a hook that runs
+# and says nothing — the first leaves no trace at all. The cost of that choice is
+# real and was long mis-stated here as "a microsecond": PostToolUse fires on
+# every tool call, and a full bash + python3 round trip measures 19 ms, so a few
+# hundred tool calls is several seconds of a session spent proving the payload
+# was never ours. post-edit.sh now rejects a payload with no ".html" in it with a
+# shell case statement, before starting an interpreter, which is 0.05 ms. The
+# matcher stays off; the price of leaving it off is now what the comment claimed
+# it always was.
 
 set -uo pipefail
 PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
@@ -20,7 +28,7 @@ for a in "$@"; do
   case "$a" in
     uninstall) CMD=uninstall ;;
     --dry-run) DRY=1 ;;
-    -h|--help) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown argument: $a" >&2; exit 2 ;;
   esac
 done

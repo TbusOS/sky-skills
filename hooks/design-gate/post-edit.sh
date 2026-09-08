@@ -27,6 +27,20 @@ PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
 payload="$(cat 2>/dev/null || true)"
 [ -n "$payload" ] || exit 0
 
+# PostToolUse fires on every tool call, and this hook is deliberately installed
+# without a matcher (see install.sh). That makes the not-mine path the hot one:
+# it runs a few hundred times a session and the session waits for each. Parsing
+# the JSON there costs a python3 cold start — 19 ms measured end to end, so
+# ~6 seconds over a busy session spent proving the payload was never ours.
+#
+# A file_path ending in .html always puts the string ".html" somewhere in the
+# payload, so this cannot miss one. A payload that merely mentions .html falls
+# through to the parse and is rejected there, at the old cost. 19 ms → 0.05 ms.
+case "$payload" in
+  *.html*) ;;
+  *) exit 0 ;;
+esac
+
 file="$(printf '%s' "$payload" | python3 -c '
 import json,sys
 try:
@@ -51,20 +65,18 @@ case "$file" in
 esac
 [ -f "$file" ] || exit 0
 
-# Locate the design repo that owns this file: the nearest ancestor holding the
-# checker. Editing an HTML file in an unrelated project must stay silent.
-dir="$(cd "$(dirname "$file")" 2>/dev/null && pwd)" || exit 0
-repo=""
-while [ -n "$dir" ] && [ "$dir" != "/" ]; do
-  if [ -f "$dir/skills/design-review/scripts/verify.py" ]; then repo="$dir"; break; fi
-  dir="$(dirname "$dir")"
-done
-[ -n "$repo" ] || exit 0
-
 command -v python3 >/dev/null 2>&1 || exit 0
 
-rel="${file#"$repo"/}"
-state="$repo/.design-gate"
+# Which project owns this page, and where the checker lives — two questions,
+# answered separately. See owner.sh for why that separation is the whole fix.
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)" || exit 0
+# shellcheck source=owner.sh
+. "$HERE/owner.sh" 2>/dev/null || exit 0
+dir="$(cd "$(dirname "$file")" 2>/dev/null && pwd)" || exit 0
+dg_owner "$dir" || exit 0
+
+rel="${file#"$DG_ROOT"/}"
+state="$DG_ROOT/.design-gate"
 mkdir -p "$state" 2>/dev/null || exit 0
 
 sha="$(python3 - "$file" <<'PY' 2>/dev/null
@@ -80,9 +92,22 @@ if ! grep -qs "^$sha	" "$state/pending.tsv" 2>/dev/null; then
   printf '%s\t%s\n' "$sha" "$rel" >> "$state/pending.tsv"
 fi
 
-out="$(cd "$repo" && python3 skills/design-review/scripts/verify.py "$rel" 2>&1)"
+# The same two flags bin/design-review would derive from this DESIGN.md, so the
+# hook and a manual run say the same thing about the same page. Anything else
+# and the hook becomes a second opinion nobody asked for.
+flags=()
+[ -n "$DG_SKILL" ] && flags+=("--skill=$DG_SKILL")
+[ -n "$DG_MONO" ] && flags+=("--allow-monolingual")
+
+out="$(cd "$DG_ROOT" && python3 "$DG_VERIFY" "${flags[@]+"${flags[@]}"}" "$rel" 2>&1)"
 rc=$?
 [ "$rc" -eq 0 ] && exit 0
+
+# A downstream project has no bin/design-review of its own, so name the one in
+# the checkout the hook came from. A command the reader cannot paste is not
+# advice.
+review="bin/design-review"
+[ -x "$DG_ROOT/bin/design-review" ] || review="$DG_SKY_ROOT/bin/design-review"
 
 {
   echo "design gate · verify.py failed on $rel"
@@ -91,6 +116,6 @@ rc=$?
   echo ""
   echo "This is the structural check only — it needs no browser and cost 0.05s."
   echo "The rendered, accessibility and interaction checks have not run yet:"
-  echo "  cd $repo && bin/design-review $rel"
+  echo "  cd $DG_ROOT && $review $rel"
 } >&2
 exit 2
