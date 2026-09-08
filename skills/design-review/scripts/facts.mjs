@@ -46,6 +46,7 @@ const ROSTER = {
   'md-to-pdf': 'systems',
   'tech-pdf-reader': 'systems',
   'datasheet-reading': 'systems',
+  'hardware-3d': 'systems',
 
   'anthropic-design': 'design',
   'apple-design': 'design',
