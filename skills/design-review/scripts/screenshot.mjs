@@ -9,6 +9,11 @@
 // deterministic terminal frame (glass.js freeze contract; the four light
 // skills' CSS already collapses motion under this media query).
 //
+// That media query collapses transition DURATIONS. It does not reveal anything.
+// Four skills ship a reveal-on-scroll pattern where the element starts at
+// opacity:0 and JS adds a class when it scrolls into view — see the scroll pass
+// below for why that had to be handled separately.
+//
 // NOTE: unified from 4 byte-identical copies (one per design skill).
 
 import { chromium } from 'playwright';
@@ -63,9 +68,10 @@ if (/^file:\/\//.test(target)) {
 }
 
 const out = outRaw || `shot-${Date.now()}.png`;
+const VIEWPORT = { width: 1440, height: 900 };
 const browser = await chromium.launch();
 const page = await browser
-  .newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' })
+  .newContext({ viewport: VIEWPORT, reducedMotion: 'reduce' })
   .then((c) => c.newPage());
 await page.goto(url, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
@@ -73,7 +79,59 @@ if (themeArg) {
   await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), themeArg);
   await page.waitForTimeout(200);
 }
+// Scroll the whole page once, then come back to the top.
+//
+// Four of the nine skills document a reveal-on-scroll pattern (motion.md): the
+// element starts at opacity:0 and an IntersectionObserver adds .is-visible when
+// it comes into view. This script never scrolled, so on a full-page capture
+// every such element below the first viewport stayed at opacity 0 and the image
+// came out with holes in it.
+//
+// The damage is worse than a cosmetic one because gate 5 exists to be looked at
+// by a person. A blank block does not read as "the capture is wrong" — it reads
+// as "this section is missing its figure", and the reader goes off to fix
+// something that was never broken. The same image fed to a model produces the
+// same confident, wrong finding.
+//
+// Step is half the viewport rather than a round number of pixels: every band of
+// the page then sits fully inside the viewport at some stop instead of
+// straddling two, which is what an observer with a non-zero threshold needs.
+// The dwell is there because the observer is a callback — it does not run
+// during the scroll call. The step ceiling is for a page that grows as you
+// scroll; without it this loop would not terminate.
+await page.evaluate(async ({ step, dwell, maxSteps }) => {
+  let y = 0;
+  for (let i = 0; i < maxSteps && y < document.body.scrollHeight; i += 1) {
+    window.scrollTo(0, y);
+    await new Promise((r) => setTimeout(r, dwell));
+    y += step;
+  }
+  window.scrollTo(0, 0);
+  await new Promise((r) => setTimeout(r, 300));
+}, { step: VIEWPORT.height / 2, dwell: 40, maxSteps: 400 });
+
 await page.screenshot({ path: out, fullPage: true });
+
+// Say so when the capture still has holes. Scrolling handles the documented
+// pattern; a project with its own reveal mechanism may not respond to it, and
+// the failure mode of this whole gate is an image that looks fine and is not.
+// Scoped to elements that call themselves reveal — a dropdown parked at
+// opacity 0 is doing its job, and reporting it would train people to skip
+// this line.
+const holes = await page.evaluate(() =>
+  [...document.querySelectorAll('[class*="reveal"]')].filter((el) => {
+    const box = el.getBoundingClientRect();
+    if (!box.width || !box.height) return false;
+    const st = getComputedStyle(el);
+    if (st.display === 'none' || st.visibility === 'hidden') return false;
+    return parseFloat(st.opacity) === 0;
+  }).length);
+
 await browser.close();
 if (server) server.close();
 console.log(`✓ saved ${out}  ←  ${url}`);
+if (holes) {
+  console.log(`  ⚠ ${holes} reveal element(s) still at opacity 0 after the scroll pass —`);
+  console.log('    this capture has blank areas where content should be. Judging the');
+  console.log('    page from it will produce findings about content that is really there.');
+}

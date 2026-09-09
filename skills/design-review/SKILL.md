@@ -43,7 +43,17 @@ it instead of asserting its own number.
    link-name、aria-prohibited-attr、svg-img-alt。**全仓两主题实测 0 违规**
    —— glass light 那 84 处欠账已于 2026-08-27 在 CSS token 层还清,见 known-bugs §6.6)
 4. `interaction-audit.mjs` — **点开之后才存在的那些状态**(2026-09-05 加)
-5. `screenshot.mjs` — 全页截图(只产物;评判它的是人眼)
+5. `screenshot.mjs` — 全页截图(只产物;评判它的是人眼)。**截之前先把整页滚一遍
+   再回到顶部** —— 九套里有四套(anthropic / apple / ember / sage)的
+   `references/motion.md` 教项目写「滚动才浮现」:元素初始 `opacity:0`,靠
+   IntersectionObserver 加 `.is-visible`。不滚的话,**首屏以下这类元素在截图里
+   全是空白**。这一道没有机器判读它,所以错的截图不会失败、只会误导 ——
+   一块空白读起来像「这节漏配图了」,人会去改一个根本不存在的问题;
+   把同一张图喂给模型,得到的是同样自信的错结论。
+   滚完之后仍然停在 `opacity:0` 的 reveal 元素会被数出来单独提示。
+   自检 `scripts/screenshot_selftest.sh`,10 项。
+   ⚠ `reducedMotion:'reduce'` **不覆盖这件事**:它收的是过渡时长,
+   不会替你加那个 class。
 
 ### 第四道在补什么(为什么前三道漏得掉)
 
@@ -171,7 +181,7 @@ waivers:
 | Gate 1 · structural verify | **shipped** | `scripts/verify.py`(8 类 check + 双语强制 + `--allow-monolingual` 豁免)|
 | Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(86 条 known-bugs 里能机器化的那些)|
 | Gate 3 · accessibility axe-audit | **shipped** (2026-08-14) | `scripts/axe-audit.mjs`(axe-core;四条阻断规则;当时清账每页只量一个主题,glass light 仍有欠账 —— known-bugs §6.6)|
-| Gate 4 · full-page screenshot | **shipped** | `scripts/screenshot.mjs`(Playwright · 绝对路径 + `file://` 通用)|
+| Gate 4 · full-page screenshot | **shipped** | `scripts/screenshot.mjs`(Playwright · 绝对路径 + `file://` 通用 · 截前滚一遍让「滚动才浮现」的内容真的出现)|
 | 口味评审(五道之外)· solo critic | **shipped** | `.claude/agents/design-critic.md` |
 | 口味评审(五道之外)· multi-critic(4 专家) | **shipped** (2026-04-22) | `.claude/agents/design-{composition,copy,illustration,brand}-critic.md` 权重 25/25/20/30 |
 | Learning-loop · 回灌成规则 | **shipped** (2026-04-22) | `.claude/agents/design-learner.md` + `scripts/learning-loop.mjs` |
@@ -333,7 +343,7 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 - `scripts/verify.py` — Gate 1 结构 check
 - `scripts/visual-audit.mjs` — Gate 2 渲染 check(51 项)
 - `scripts/axe-audit.mjs` — Gate 3 可达性 check(axe-core)
-- `scripts/screenshot.mjs` — Gate 4 全页截图
+- `scripts/screenshot.mjs` — Gate 4 全页截图(截前滚一遍;自检 `screenshot_selftest.sh` 10 项)
 - `scripts/count-check.py` — 全仓计数判定(承载短语 vs 磁盘真值 + 检查模型)
 - `scripts/learning-loop.mjs` — 组件 07 · critic verdict → design-learner prompt
 - `references/known-bugs.md` — 84 条 bug 大全
