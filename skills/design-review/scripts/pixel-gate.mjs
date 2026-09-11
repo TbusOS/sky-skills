@@ -29,6 +29,27 @@
 // that, and baselines are per-machine-family, not universal: regenerate after
 // a Chromium bump and commit the result as a deliberate act.
 //
+// WHICH IS WHY EACH BASELINE RECORDS THE ENVIRONMENT IT WAS TAKEN IN.
+// The line above said "regenerate after a Chromium bump" and nothing told you
+// a bump had happened. On 2026-09-11 all seven committed baselines reported a
+// regression — 1.65% on atelier's dashboard — and it took an afternoon to
+// establish that nothing about the page had changed: the baselines were taken
+// on Chromium 147 and the machine had moved to 148. Rendering with 147 again
+// brought the difference down 4.5×, and the difference vanished entirely when
+// the images were downsampled, which is the signature of glyph rasterisation
+// rather than of anything moving.
+//
+// The defect was not the stale baseline. It was that "the design changed" and
+// "the browser changed" came out of this script looking identical — one
+// percentage, no way to tell which. A number you cannot interpret is not a
+// result. So a baseline now carries a sidecar .json naming the Chromium build,
+// the viewport, and the web fonts that were actually loaded, and a comparison
+// against a different environment says so instead of reporting a regression.
+//
+// Web fonts are in there for the same reason: rendering this repo's pages with
+// the network cut off differs from the baseline by 3.55% — worse than the
+// browser bump — because the faces come from a CDN at render time.
+//
 // Usage:
 //   node pixel-gate.mjs --baseline [--theme=t] <html> [...]   record
 //   node pixel-gate.mjs           [--theme=t] <html> [...]   compare
@@ -41,9 +62,16 @@
 //                     the calibration note in parseArgs — 0.06+ is blind)
 //   --full-page       capture the whole scroll height (default: viewport only)
 //   --out=<dir>       where diff PNGs land (default <repo>/shots)
+//   --baseline-dir=<dir>  where baselines live (default skills/design-review/
+//                     baselines) — for tests, so they never touch committed ones
 //   --json            machine-readable summary
 //
 // Exit: 0 pass / baseline written · 1 regression or missing baseline · 2 bad CLI
+//       3 the baseline was taken in a different environment, so the comparison
+//         cannot mean anything either way — re-record, or go back to the build
+//         it was taken on. Separate from 1 on purpose: these need opposite
+//         responses, and a caller that cannot tell them apart will treat the
+//         next real regression as "probably just the browser again".
 
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
@@ -57,7 +85,7 @@ import process from 'node:process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
-const BASELINE_DIR = resolve(__dirname, '../baselines');
+const DEFAULT_BASELINE_DIR = resolve(__dirname, '../baselines');
 
 function parseArgs(argv) {
   // CALIBRATED 2026-08-14 against a real change, not guessed. Probe: move
@@ -87,6 +115,10 @@ function parseArgs(argv) {
     else if (a.startsWith('--max-diff=')) out.maxDiff = parseFloat(a.slice(11));
     else if (a.startsWith('--threshold=')) out.threshold = parseFloat(a.slice(12));
     else if (a.startsWith('--out=')) out.out = a.slice(6);
+    // So a test can exercise recording and comparing without writing into the
+    // committed baselines. A self-test that has to clean up after itself is one
+    // crash away from overwriting a real baseline.
+    else if (a.startsWith('--baseline-dir=')) out.baselineDir = a.slice(15);
     else if (a.startsWith('--repo=')) out.repo = a.slice(7);
     else if (a === '-h' || a === '--help') out.help = true;
     else if (a.startsWith('--')) out.bad = a;
@@ -102,7 +134,7 @@ pixel-gate.mjs — pixel visual regression (pixelmatch)
   node skills/design-review/scripts/pixel-gate.mjs            <html> [...]
 
   --theme=dark|light  --max-diff=0.0005  --threshold=0.03
-  --full-page  --out=<dir>  --repo=<path>  --json
+  --full-page  --out=<dir>  --repo=<path>  --json  --baseline-dir=<dir>
 `;
 
 const args = parseArgs(process.argv.slice(2));
@@ -111,6 +143,7 @@ if (args.bad) { console.error(`pixel-gate: unknown flag ${args.bad}`); process.e
 
 const root = args.repo ? resolve(args.repo) : process.cwd();
 const outDir = args.out ? resolve(args.out) : resolve(REPO_ROOT, 'shots');
+const BASELINE_DIR = args.baselineDir ? resolve(args.baselineDir) : DEFAULT_BASELINE_DIR;
 
 // Baseline key: path relative to the repo, slashes flattened, plus the theme.
 // Keeping the full path means two skills can both have a `dashboard` page.
@@ -118,6 +151,41 @@ function keyFor(target, theme) {
   const rel = resolve(root, target).replace(REPO_ROOT + '/', '');
   return `${rel.replace(/[\/\\]/g, '__').replace(/\.html$/, '')}--${theme || 'as-authored'}.png`;
 }
+
+// What has to be the same for two renders of one page to be comparable.
+//
+// Only things that change the raster go in here. The Chromium build because it
+// rasterises glyphs; the viewport and scale factor because they set the grid;
+// the web fonts that actually arrived because a page rendered in the fallback
+// face is a different page (3.55% different, measured — more than a browser
+// bump costs). The date is carried for the reader and never compared.
+//
+// The font list is families-plus-count rather than the raw FontFace set: the
+// set also holds every face the stylesheet declares and never used, and its
+// size moves with the stylesheet instead of with what was painted. Measured
+// stable across three consecutive renders of the same page before being
+// trusted — a field that flickers here would report "the environment changed"
+// at random, which is the one thing this must not do.
+async function envOf(page) {
+  const fonts = await page.evaluate(() => {
+    const loaded = [...document.fonts].filter((f) => f.status === 'loaded');
+    const families = [...new Set(loaded.map((f) => f.family))].sort();
+    return families.length ? `${families.join(', ')} (${loaded.length})` : 'none';
+  });
+  return {
+    chromium: browser.version(),
+    viewport: '1440x1000@1',
+    fonts,
+    recorded: new Date().toISOString().slice(0, 10),
+  };
+}
+
+const ENV_KEYS = ['chromium', 'viewport', 'fonts'];   // `recorded` is prose, not a condition
+const envDiff = (was, now) => ENV_KEYS
+  .filter((k) => (was[k] ?? '(not recorded)') !== now[k])
+  .map((k) => `${k}: baseline ${was[k] ?? '(not recorded)'} · now ${now[k]}`);
+
+const sidecarFor = (pngPath) => pngPath.replace(/\.png$/, '.json');
 
 const MIME = {
   '.html': 'text/html;charset=utf-8', '.css': 'text/css;charset=utf-8',
@@ -148,7 +216,8 @@ await mkdir(outDir, { recursive: true });
 
 const browser = await chromium.launch();
 const results = [];
-let failed = 0;
+let failed = 0;        // real regressions
+let envFailed = 0;     // comparisons that cannot mean anything — a different exit code
 
 for (const target of args.targets) {
   const ctx = await browser.newContext({
@@ -169,9 +238,13 @@ for (const target of args.targets) {
     await page.waitForTimeout(160);
     const shot = await page.screenshot({ fullPage: !!args.fullPage });
 
+    const env = await envOf(page);
+
     if (args.baseline) {
       await writeFile(basePath, shot);
-      results.push({ target, theme: args.theme ?? 'as-authored', action: 'baseline', file: key });
+      // Written in the same statement as the PNG so the two cannot drift apart.
+      await writeFile(sidecarFor(basePath), `${JSON.stringify(env, null, 2)}\n`);
+      results.push({ target, theme: args.theme ?? 'as-authored', action: 'baseline', file: key, env });
       continue;
     }
 
@@ -180,6 +253,15 @@ for (const target of args.targets) {
       failed++;
       continue;
     }
+
+    // Before any pixels are counted. A baseline from another environment does
+    // not produce a wrong number — it produces a number that answers a
+    // different question, which is worse, because it still looks like an answer.
+    let recordedEnv = null;
+    if (existsSync(sidecarFor(basePath))) {
+      try { recordedEnv = JSON.parse(await readFile(sidecarFor(basePath), 'utf-8')); } catch { /* treated as missing */ }
+    }
+    const drift = recordedEnv ? envDiff(recordedEnv, env) : null;
 
     const a = PNG.sync.read(await readFile(basePath));
     const b = PNG.sync.read(shot);
@@ -198,18 +280,27 @@ for (const target of args.targets) {
       alpha: 0.25,
     });
     const ratio = changed / (a.width * a.height);
-    const pass = ratio <= args.maxDiff;
+    const withinBudget = ratio <= args.maxDiff;
+
+    // The comparison still runs when the environment moved, and the number is
+    // still printed — sometimes it is 0 and that is worth knowing. It is just
+    // never presented as a verdict, because it is not one.
+    let status = withinBudget ? 'pass' : 'regression';
+    if (!recordedEnv) status = 'no-env';
+    else if (drift.length) status = 'env-changed';
+
     let diffFile = null;
-    if (!pass) {
+    if (status === 'regression' || (status !== 'pass' && !withinBudget)) {
       diffFile = resolve(outDir, `pixeldiff-${key}`);
       await writeFile(diffFile, PNG.sync.write(diff));
-      failed++;
     }
+    if (status === 'regression') failed++;
+    else if (status !== 'pass') envFailed++;
+
     results.push({
-      target, theme: args.theme ?? 'as-authored',
-      status: pass ? 'pass' : 'regression',
+      target, theme: args.theme ?? 'as-authored', status,
       changed, ratio: +(ratio * 100).toFixed(4), maxDiff: +(args.maxDiff * 100).toFixed(4),
-      diffFile,
+      diffFile, drift: drift ?? undefined, env, recordedEnv: recordedEnv ?? undefined,
     });
   } catch (err) {
     results.push({ target, status: 'error', error: String(err && err.message ? err.message : err) });
@@ -226,7 +317,11 @@ if (args.json) {
   console.log(JSON.stringify({ maxDiff: args.maxDiff, threshold: args.threshold, results }, null, 2));
 } else {
   for (const r of results) {
-    if (r.action === 'baseline') { console.log(`pixel-gate: baseline written  ${r.file}`); continue; }
+    if (r.action === 'baseline') {
+      console.log(`pixel-gate: baseline written  ${r.file}`);
+      console.log(`  taken on ${r.env.chromium} · ${r.env.viewport} · fonts ${r.env.fonts}`);
+      continue;
+    }
     if (r.status === 'error') { console.log(`pixel-gate: ERROR  ${r.target}\n  ${r.error}`); continue; }
     if (r.status === 'no-baseline') {
       console.log(`pixel-gate: NO BASELINE  ${r.target}\n  expected ${r.file} — run with --baseline first`);
@@ -236,10 +331,37 @@ if (args.json) {
       console.log(`pixel-gate: SIZE CHANGED  ${r.target}\n  baseline ${r.baseline} → current ${r.current} (page height moved; re-baseline if intended)`);
       continue;
     }
+    // Two failures that need opposite responses must not print the same word.
+    // "REGRESSION" tells you to look at the page; the ones below tell you the
+    // comparison never had standing, and looking at the page would waste the
+    // afternoon it wasted on 2026-09-11.
+    if (r.status === 'no-env') {
+      console.log(`pixel-gate: BASELINE PREDATES ENVIRONMENT RECORDING  ${r.target}`);
+      console.log(`  ${r.changed} px differ (${r.ratio}%) — but this baseline does not say what it was`);
+      console.log('  taken in, so that number cannot be read as a regression or as a pass.');
+      console.log(`  here and now: ${r.env.chromium} · ${r.env.viewport} · fonts ${r.env.fonts}`);
+      console.log('  re-record it (--pixel-baseline) and the next comparison will mean something.');
+      if (r.diffFile) console.log(`  diff → ${r.diffFile}`);
+      continue;
+    }
+    if (r.status === 'env-changed') {
+      console.log(`pixel-gate: ENVIRONMENT CHANGED, NOT THE PAGE  ${r.target}`);
+      for (const d of r.drift) console.log(`  ${d}`);
+      console.log(`  ${r.changed} px differ (${r.ratio}%) — reported for context, not as a verdict.`);
+      console.log('  Either go back to the build the baseline was taken on, or re-record it');
+      console.log('  (--pixel-baseline) as a deliberate act. Do not read this as a regression.');
+      if (r.diffFile) console.log(`  diff → ${r.diffFile}`);
+      continue;
+    }
     const mark = r.status === 'pass' ? 'OK' : 'REGRESSION';
     console.log(`pixel-gate: ${mark}  ${r.changed} px changed (${r.ratio}% · budget ${r.maxDiff}%)  ${r.target}${args.theme ? ` · ${args.theme}` : ''}`);
     if (r.diffFile) console.log(`  diff → ${r.diffFile}`);
   }
 }
 
-process.exit(failed > 0 && !args.baseline ? 1 : 0);
+// 1 and 3 are different questions, so they are different exit codes. A real
+// regression outranks an unusable comparison: if both are present the run has
+// something to look at, and that is what the caller should hear first.
+if (args.baseline) process.exit(0);
+if (failed > 0) process.exit(1);
+process.exit(envFailed > 0 ? 3 : 0);

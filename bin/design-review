@@ -586,12 +586,27 @@ if [ -n "$PIXEL_GATE" ]; then
     for html in "${HTMLS[@]}"; do
       echo ""
       echo "━━ [5/$TOTAL_GATES] pixel-gate.mjs (visual regression)  $html$pixel_label"
-      if ! ( cd "$REPO" && node "$PIXEL" "${PIXEL_FLAGS[@]}" --out="$OUT_DIR" "$html" ); then
-        exit_pixel=1
-      fi
+      pg_rc=0
+      ( cd "$REPO" && node "$PIXEL" "${PIXEL_FLAGS[@]}" --out="$OUT_DIR" "$html" ) || pg_rc=$?
+      # 3 means the baseline was taken somewhere else — a different Chromium, a
+      # different set of web fonts. Saying "visual regressions" about that sends
+      # the reader to look at a page that did not change. Kept apart here for
+      # the same reason pixel-gate keeps the exit codes apart.
+      case "$pg_rc" in
+        0) ;;
+        3) [ "$exit_pixel" -eq 0 ] && exit_pixel=3 ;;
+        *) exit_pixel=1 ;;
+      esac
     done
   done
-  if [ "$exit_pixel" -ne 0 ]; then
+  if [ "$exit_pixel" -eq 3 ]; then
+    echo ""
+    echo "✗ pixel-gate could not compare: the baseline was recorded in a different" >&2
+    echo "  environment (see the lines above for which part). Nothing is known about" >&2
+    echo "  the page either way. Re-record with --pixel-baseline, or go back to the" >&2
+    echo "  build the baseline was taken on." >&2
+    exit 1
+  elif [ "$exit_pixel" -ne 0 ]; then
     echo ""
     echo "✗ pixel-gate found visual regressions — inspect the diff PNGs, then" >&2
     echo "  re-baseline with --pixel-baseline only if the change is intended" >&2
