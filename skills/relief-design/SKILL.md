@@ -77,8 +77,10 @@ container_of · list_head · 私有数据 · drvdata · 设备树属性 · 越�
 
 1. `references/design-tokens.md` — 变量层、七套皮肤、尺寸档
 2. `references/diagram-craft.md` — 四十五种框图各自的画法与判断依据 · **开头第一条是「图为了让代码更直观」**
-3. `references/dos-and-donts.md` — 已经踩过的坑，含每条的实测数字
-4. `references/canonical/` — 八张参考页（controls / diagram / hardware / platform / code / struct / debug / git）
+3. **`references/snippets.md` — 每个部件可直接复制的标记。画新图从这里开始，
+   不用再去 canonical 里扒**。三十九段，每段都被 `check_snippets.mjs` 渲染核对过
+4. `references/dos-and-donts.md` — 已经踩过的坑，含每条的实测数字
+5. `references/canonical/` — 八张参考页（controls / diagram / hardware / platform / code / struct / debug / git）
 
 ## §6 发布前检查（MUST）
 
@@ -91,6 +93,7 @@ for t in gray ink matte mist clay sage; do
   node skills/design-review/scripts/axe-audit.mjs --theme=$t $R/references/canonical/<页>.html
 done
 node    $R/scripts/check_gallery_links.mjs        # 改过图集页或任何 canonical 页就跑
+node    $R/scripts/check_snippets.mjs             # 改过 relief.css 或 snippets.md 就跑
 ```
 
 **两道对比度检查查的不是一回事，缺一不可：**
@@ -99,6 +102,12 @@ node    $R/scripts/check_gallery_links.mjs        # 改过图集页或任何 can
 |---|---|---|
 | `check_skin_contrast.py` | 渐变底上的文字 | **axe 算不了渐变背景**，白字压在橙渐变上它一条都不报 |
 | `axe-audit.mjs --theme=<皮肤>` | 真实 DOM 每个元素 | 脚本只查列出的角色对，不扫 DOM |
+
+**改过 `relief.css` 就跑 `check_snippets.mjs`。** 片段库最容易的坏法不是写错，
+是**跟着 CSS 一起老掉** —— 类名改了名，片段还写着旧的，复制过去渲染出来是一堆
+没有凹凸的方块，不报错。它查四件事：类名都有定义（**不分前缀** —— 漏写 `relief-`
+写成 `class="sn"` 正是最常见的那个错）· 每段渲染得出尺寸 · 七套皮肤下文字都够 4.5:1 ·
+`diagram-craft.md` 点名的部件都有对应片段。
 
 **图集页改过就跑 `check_gallery_links.mjs`。** 它点一遍 45 个按钮，核对落到的那张图
 是不是按钮上写的那张。这道检查不看链接字符串 —— 看的是浏览器解析出来的 `:target`
