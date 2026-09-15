@@ -69,7 +69,11 @@ const TARGET = {
   // bootloader picks, how an interrupt number is translated twice on its way to
   // a handler. Same vocabulary, different subject, and a reader looking for one
   // should not have to scroll through the other.
-  relief: ['controls', 'diagram', 'hardware', 'platform'],
+  // 'code' joined in the same split as 'platform': hardware is inside a chip,
+  // platform is the board and the stack on it, code is the software's own shape
+  // — a stack, a call graph, which files are yours, what may sleep, who waits
+  // on whom. Three subjects, three pages, one vocabulary.
+  relief: ['controls', 'diagram', 'hardware', 'platform', 'code'],
 };
 
 function parseArgs(argv) {

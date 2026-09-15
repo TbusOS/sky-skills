@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Relief · Code diagrams / 代码框图</title>
+<meta name="description" content="Call stack, call graph, architecture, execution contexts and sequence, drawn so depth says what you may not touch and who waits on whom.">
+<meta property="og:title" content="Relief · Code diagrams">
+<meta property="og:description" content="Call stack, call graph, architecture, execution contexts and sequence, drawn so depth carries meaning.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/relief.css">
+</head>
+<body>
+
+<button class="lang-toggle" id="lang">中文 / EN</button>
+<div class="relief-skins relief-raised" id="skins">
+  <b class="on" data-s="">Warm</b><b data-s="gray">Gray</b><b data-s="matte">Matte</b><b data-s="ink">Ink</b><b data-s="mist">Mist</b><b data-s="clay">Clay</b><b data-s="sage">Sage</b>
+</div>
+
+<div class="relief-wrap">
+  <header class="relief-hero">
+    <div class="relief-container">
+    <span class="relief-badge">RELIEF · CODE</span>
+    <h1 class="relief-h1"><span class="lang-en">Five ways to draw software</span><span class="lang-zh">画软件的五种画法</span></h1>
+    <p class="relief-lede"><span class="lang-en">Where it died, who calls whom, which files are yours, what may sleep, and who is waiting on whom. Same two words as every other page here — <b>raised</b> is a thing that exists, <b>sunken</b> is somewhere you cannot go or a channel something travels down.</span><span class="lang-zh">死在哪、谁调谁、哪些文件是你的、什么能睡眠、谁在等谁。还是这套页面一贯的两个词 —— <b>凸起</b>是一个存在的东西，<b>凹陷</b>是去不了的地方、或者一条东西从里面走过的通道。</span></p>
+    <div class="relief-rail"><span></span></div>
+    </div>
+  </header>
+
+<h2><span class="lang-en">A · Call stack</span><span class="lang-zh">A · 函数堆栈</span></h2>
+<p class="relief-note"><span class="lang-en">A backtrace read top to bottom goes <b>from where it died back to where it started</b> — but the stack pointer runs the other way, which is the one thing a bare list of symbols never tells you. The address gutter says it. The accent frame is the innermost one, because that is the line the reader actually came for.</span><span class="lang-zh">栈回溯从上往下读是<b>从出事的地方回到起点</b> —— 但栈指针是反着走的，而一串光秃秃的符号名从来不会告诉你这件事。左边那列地址就是说这个的。强调色标的是最里面那一帧，因为读者来就是找这一行的。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">BACKTRACE · touch driver</span><span class="lang-zh">栈回溯 · 触摸驱动</span><em><span class="lang-en">addresses grow downward here, so the frame printed first sits at the highest address</span><span class="lang-zh">这里地址是往下增长的，所以先打印出来的那一帧在最高地址</span></em></div>
+<div class="relief-stack"><div class="relief-sp">0xffffffc0_11a4</div><div class="relief-frame relief-raised relief-crash"><b>my_tp_report()</b><i>drivers/input/tp_core.c:412</i></div><div class="relief-fnote"><span class="lang-en">where it died</span><span class="lang-zh">出事的地方</span></div><div class="relief-sp">0xffffffc0_11e8</div><div class="relief-frame relief-raised"><b>tp_irq_thread()</b><i>drivers/input/tp_core.c:508</i></div><div class="relief-fnote"><span class="lang-en">caller</span><span class="lang-zh">调它的</span></div><div class="relief-sp">0xffffffc0_1240</div><div class="relief-frame relief-raised"><b>irq_thread_fn()</b><i>kernel/irq/manage.c</i></div><div class="relief-fnote"><span class="lang-en"></span><span class="lang-zh"></span></div><div class="relief-sp">0xffffffc0_1298</div><div class="relief-frame relief-raised"><b>irq_thread()</b><i>kernel/irq/manage.c</i></div><div class="relief-fnote"><span class="lang-en"></span><span class="lang-zh"></span></div><div class="relief-sp">0xffffffc0_12f0</div><div class="relief-frame relief-raised"><b>kthread()</b><i>kernel/kthread.c</i></div><div class="relief-fnote"><span class="lang-en"></span><span class="lang-zh"></span></div><div class="relief-sp">0xffffffc0_1338</div><div class="relief-frame relief-raised"><b>ret_from_fork()</b><i>arch/arm64/kernel/entry.S</i></div><div class="relief-fnote"><span class="lang-en">bottom of stack</span><span class="lang-zh">栈底</span></div></div></div>
+
+<h2><span class="lang-en">B · Call graph</span><span class="lang-zh">B · 函数调用关系</span></h2>
+<p class="relief-note"><span class="lang-en">Callers above, callees below, the function in question in the middle with the accent — that is the reading convention, and putting it any other way costs the reader a moment working out which half is which. Two things most call graphs leave out are marked here: a <b>dashed</b> edge is conditional, and a <b>ringed</b> node is reachable from interrupt context, which is to say nothing under it may sleep.</span><span class="lang-zh">调它的在上，它调的在下，被问的那个在中间给强调色 —— 这是读调用图的约定，反过来摆读者得先花一会儿弄清哪边是哪边。这里标了两件多数调用图会漏的事：<b>虚线</b>是条件调用，<b>描圈</b>的节点在中断上下文里会走到，也就是说它下面的一切都不许睡眠。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">tp_read_frame() · who calls it, what it calls</span><span class="lang-zh">tp_read_frame() · 谁调它，它调谁</span><em><span class="lang-en">the ringed pair is why this function cannot be called from the hardirq half</span><span class="lang-zh">描圈那两个，就是这个函数不能在硬中断那一半里调的原因</span></em></div>
+<div class="relief-cg">
+  <div class="relief-cgrow">
+    <div class="relief-fn relief-raised"><b>tp_irq_thread()</b><i><span class="lang-en">threaded irq · may sleep</span><span class="lang-zh">中断线程 · 可以睡眠</span></i></div>
+    <div class="relief-fn relief-raised"><b>tp_resume()</b><i><span class="lang-en">pm callback</span><span class="lang-zh">电源回调</span></i></div>
+    <div class="relief-fn relief-raised"><b>tp_open()</b><i><span class="lang-en">first user opens the device</span><span class="lang-zh">第一个用户打开设备</span></i></div>
+  </div>
+  <div class="relief-cgedge"><svg viewBox="0 0 800 34" width="100%" height="34" preserveAspectRatio="none"><path d="M400 2 C400 18 90 14 90 32"/><path d="M400 2 C400 18 400 14 400 32"/><path d="M400 2 C400 18 710 14 710 32"/></svg></div>
+  <div class="relief-cgrow"><div class="relief-fn relief-raised relief-focus"><b>tp_read_frame()</b><i><span class="lang-en">the function this figure is about</span><span class="lang-zh">这张图讲的就是它</span></i></div></div>
+  <div class="relief-cgedge"><svg viewBox="0 0 800 34" width="100%" height="34" preserveAspectRatio="none"><path d="M400 2 C400 18 90 14 90 32"/><path d="M400 2 C400 18 296 14 296 32"/><path d="M400 2 C400 18 502 14 502 32"/><path d="M400 2 C400 18 708 14 708 32" class="relief-cond"/></svg></div>
+  <div class="relief-cgrow">
+    <div class="relief-fn relief-raised relief-atomic"><b>i2c_transfer()</b><i><span class="lang-en">sleeps — never call from hardirq</span><span class="lang-zh">会睡眠 —— 硬中断里不能调</span></i></div>
+    <div class="relief-fn relief-raised"><b>crc16()</b><i><span class="lang-en">pure</span><span class="lang-zh">纯计算</span></i></div>
+    <div class="relief-fn relief-raised"><b>input_report_abs()</b></div>
+    <div class="relief-fn relief-raised relief-atomic"><b>tp_recover()</b><i><span class="lang-en">only on checksum failure</span><span class="lang-zh">只在校验失败时走</span></i></div>
+  </div>
+</div></div>
+
+<h2><span class="lang-en">C · Code architecture</span><span class="lang-zh">C · 代码架构</span></h2>
+<p class="relief-note"><span class="lang-en">Three layers, and the bottom one is <b>sunken because you must not edit it</b> — it is the vendor drop, and the next one overwrites whatever you changed. Depth here is not decoration: a new person on the codebase needs to know which files are theirs before anything else, and this diagram answers that before they read a single name.</span><span class="lang-zh">三层，最下面一层<b>凹下去是因为不能改</b> —— 那是厂商给的，下一版一来你改的全没了。这里的深度不是装饰：一个新人接手代码，第一件要知道的事就是哪些文件是自己的，这张图在他读第一个文件名之前就回答了。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">TOUCH DRIVER · file layout</span><span class="lang-zh">触摸驱动 · 文件分层</span><em><span class="lang-en">a bug in the sunken layer is a ticket to the vendor, not a patch</span><span class="lang-zh">凹那层里的 bug 是给厂商开单，不是自己打补丁</span></em></div>
+<div class="relief-soc">
+  <div class="relief-socrow" style="grid-template-columns:1fr">
+    <div class="relief-well relief-sunken"><div class="relief-wname"><span class="lang-en">Facing the kernel</span><span class="lang-zh">对上：给内核看的一面</span> <span><span class="lang-en">what other subsystems call</span><span class="lang-zh">别的子系统调的是这些</span></span></div>
+      <div class="relief-blocks">
+        <div class="relief-blk relief-raised">tp_probe()<i><span class="lang-en">registers everything</span><span class="lang-zh">注册全部资源</span></i></div>
+        <div class="relief-blk relief-raised">file_operations<i><span class="lang-en">open · read · ioctl</span><span class="lang-zh"></span></i></div>
+        <div class="relief-blk relief-raised">input_dev<i><span class="lang-en">reports touches</span><span class="lang-zh">上报触摸点</span></i></div>
+        <div class="relief-blk relief-raised">pm_ops<i><span class="lang-en">suspend · resume</span><span class="lang-zh"></span></i></div>
+      </div></div>
+  </div>
+  <div class="relief-stubs" style="grid-template-columns:1fr"><div class="relief-stub"></div></div>
+  <div class="relief-socrow" style="grid-template-columns:1fr">
+    <div class="relief-well relief-sunken"><div class="relief-wname"><span class="lang-en">Core logic — ours</span><span class="lang-zh">核心逻辑：我们写的</span> <span><span class="lang-en">the only files a bug report should send you to</span><span class="lang-zh">出问题该翻的就是这几个文件</span></span></div>
+      <div class="relief-blocks">
+        <div class="relief-blk relief-raised relief-hot">tp_core.c<i><span class="lang-en">state machine, frame parsing</span><span class="lang-zh">状态机、帧解析</span></i></div>
+        <div class="relief-blk relief-raised">tp_fw.c<i><span class="lang-en">firmware update</span><span class="lang-zh">固件升级</span></i></div>
+        <div class="relief-blk relief-raised">tp_gesture.c<i><span class="lang-en">wake gestures</span><span class="lang-zh">手势唤醒</span></i></div>
+        <div class="relief-blk relief-raised">tp_debug.c<i><span class="lang-en">sysfs, register dump</span><span class="lang-zh">sysfs、寄存器 dump</span></i></div>
+      </div></div>
+  </div>
+  <div class="relief-stubs" style="grid-template-columns:1fr"><div class="relief-stub"></div></div>
+  <div class="relief-socrow" style="grid-template-columns:1fr">
+    <div class="relief-well relief-sunken"><div class="relief-wname"><span class="lang-en">Facing the hardware — vendor code</span><span class="lang-zh">对下：厂商代码</span> <span><span class="lang-en">read it, do not edit it — a vendor drop overwrites the lot</span><span class="lang-zh">只读不改 —— 厂商下一版一来全部覆盖</span></span></div>
+      <div class="relief-blocks">
+        <div class="relief-blk relief-sunken">tp_hal_i2c.c<i><span class="lang-en">vendor · read only</span><span class="lang-zh">厂商 · 只读</span></i></div>
+        <div class="relief-blk relief-sunken">tp_reg_map.h<i><span class="lang-en">vendor · read only</span><span class="lang-zh">厂商 · 只读</span></i></div>
+        <div class="relief-blk relief-sunken">tp_fw_bin.h<i><span class="lang-en">vendor blob</span><span class="lang-zh">厂商二进制</span></i></div>
+      </div></div>
+  </div>
+</div></div>
+
+<h2><span class="lang-en">D · Execution contexts</span><span class="lang-zh">D · 运行与调度关系</span></h2>
+<p class="relief-note"><span class="lang-en">Bands are contexts, ordered by what preempts what — the top band interrupts everything below it. The property the reader actually needs is <b>can this code sleep</b>, so the two bands where it cannot are ringed. Getting this wrong does not fail at build time; it deadlocks under load, weeks later.</span><span class="lang-zh">带是上下文，按谁打断谁排 —— 最上面那条打断它下面的一切。读者真正需要的属性是<b>这段代码能不能睡眠</b>，所以不能睡的那两条带描了圈。这件事搞错不会在编译时报错，会在跑满负载的时候死锁，而且是几周以后。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">WHO RUNS WHERE</span><span class="lang-zh">谁在什么上下文里跑</span><em><span class="lang-en">the same function body is legal in one band and a deadlock in another</span><span class="lang-zh">同一段函数体，在这条带里合法，在那条带里就是死锁</span></em></div>
+<div class="relief-boot">
+  <div class="relief-bootband relief-sunken">
+    <div class="relief-bandname"><span class="lang-en">Hard IRQ context</span><span class="lang-zh">硬中断上下文</span><em style="color:var(--warn)"><span class="lang-en">cannot sleep · preempts everything below</span><span class="lang-zh">不能睡眠 · 打断下面所有的</span></em></div>
+    <div class="relief-stagerow">
+      <div class="relief-bstage relief-raised relief-sealed"><b>tp_irq_handler()</b><i><span class="lang-en">reads the status byte, wakes the thread</span><span class="lang-zh">读一个状态字节，唤醒线程</span></i></div>
+    </div>
+  </div>
+  <div class="relief-bootband relief-sunken">
+    <div class="relief-bandname"><span class="lang-en">Soft IRQ / tasklet</span><span class="lang-zh">软中断 / tasklet</span><em style="color:var(--warn)"><span class="lang-en">still cannot sleep</span><span class="lang-zh">照样不能睡眠</span></em></div>
+    <div class="relief-stagerow">
+      <div class="relief-bstage relief-raised relief-sealed"><b>net_rx_action()</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div>
+      <div class="relief-bstage relief-raised relief-sealed"><b>timer softirq</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div>
+    </div>
+  </div>
+  <div class="relief-bootband relief-sunken">
+    <div class="relief-bandname"><span class="lang-en">Process context</span><span class="lang-zh">进程上下文</span><em><span class="lang-en">may sleep — i2c, mutex, kmalloc(GFP_KERNEL) are all fine here</span><span class="lang-zh">可以睡眠 —— i2c、mutex、kmalloc(GFP_KERNEL) 在这里都没问题</span></em></div>
+    <div class="relief-stagerow">
+      <div class="relief-bstage relief-raised"><b>tp_irq_thread()</b><i><span class="lang-en">the threaded half of the irq</span><span class="lang-zh">中断的线程那一半</span></i></div>
+      <div class="relief-bstage relief-raised"><b>workqueue</b><i><span class="lang-en">tp_fw_update_work</span><span class="lang-zh"></span></i></div>
+      <div class="relief-bstage relief-raised"><b>read() syscall</b><i><span class="lang-en">a user process asking for data</span><span class="lang-zh">用户进程来要数据</span></i></div>
+    </div>
+  </div>
+</div></div>
+
+<h2><span class="lang-en">E · Sequence diagram</span><span class="lang-zh">E · 函数时序图</span></h2>
+<p class="relief-note"><span class="lang-en">Each participant gets a <b>groove running down the page</b> — that is its lifeline, a channel through time. A raised block on the groove means that participant is on the stack right now. So the figure answers "who is waiting on whom" by shape alone: wherever two blocks overlap, the upper one is blocked.</span><span class="lang-zh">每个参与者有一条<b>竖着贯穿页面的凹槽</b> —— 那是它的生命线，一条穿过时间的通道。槽上压一个凸块，表示这段时间它在栈上。所以这张图光靠形状就回答了「谁在等谁」：两个块重叠的地方，上面那个就在阻塞。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">ONE read() FROM APP TO CHIP</span><span class="lang-zh">一次 read() 从应用到芯片</span><em><span class="lang-en">the accent block is the one holding the mutex the whole way down</span><span class="lang-zh">强调色那一块，是全程握着那把锁的那个</span></em></div>
+<div class="relief-seq" style="grid-template-columns:repeat(5,1fr);grid-template-rows:auto repeat(7,46px)"><div class="relief-seqhead relief-raised" style="grid-column:1"><b>read()</b><i><span class="lang-en">the app</span><span class="lang-zh">应用</span></i></div><div class="relief-seqhead relief-raised" style="grid-column:2"><b>VFS</b></div><div class="relief-seqhead relief-raised" style="grid-column:3"><b>tp_core.c</b></div><div class="relief-seqhead relief-raised" style="grid-column:4"><b>i2c bus</b></div><div class="relief-seqhead relief-raised" style="grid-column:5"><b>TP chip</b></div><div class="relief-life" style="grid-column:1;grid-row:2/-1"></div><div class="relief-life" style="grid-column:2;grid-row:2/-1"></div><div class="relief-life" style="grid-column:3;grid-row:2/-1"></div><div class="relief-life" style="grid-column:4;grid-row:2/-1"></div><div class="relief-life" style="grid-column:5;grid-row:2/-1"></div><div class="relief-act" style="grid-column:2;grid-row:2/9"></div><div class="relief-act relief-hot" style="grid-column:3;grid-row:3/9"></div><div class="relief-act" style="grid-column:4;grid-row:4/6"></div><div class="relief-act" style="grid-column:5;grid-row:4/6"></div><div class="relief-seqmsg" style="grid-column:1/3;grid-row:2;padding-left:25.000%;padding-right:25.000%"><span class="relief-lbl2"><span class="lang-en">read(fd, buf, 16)</span><span class="lang-zh">read(fd, buf, 16)</span></span><div class="relief-seqline"><div class="relief-ln"></div><svg width="15" height="13" viewBox="0 0 15 13"><path d="M14 6.5 L1 1 L4.5 6.5 L1 12 Z" fill="var(--navy)"/></svg></div></div><div class="relief-seqmsg" style="grid-column:2/4;grid-row:3;padding-left:25.000%;padding-right:25.000%"><span class="relief-lbl2"><span class="lang-en">.read = tp_read()</span><span class="lang-zh">.read = tp_read()</span></span><div class="relief-seqline"><div class="relief-ln"></div><svg width="15" height="13" viewBox="0 0 15 13"><path d="M14 6.5 L1 1 L4.5 6.5 L1 12 Z" fill="var(--navy)"/></svg></div></div><div class="relief-seqmsg" style="grid-column:3/5;grid-row:4;padding-left:25.000%;padding-right:25.000%"><span class="relief-lbl2"><span class="lang-en">i2c_transfer()</span><span class="lang-zh">i2c_transfer()</span></span><div class="relief-seqline"><div class="relief-ln"></div><svg width="15" height="13" viewBox="0 0 15 13"><path d="M14 6.5 L1 1 L4.5 6.5 L1 12 Z" fill="var(--navy)"/></svg></div></div><div class="relief-seqmsg" style="grid-column:4/6;grid-row:5;padding-left:25.000%;padding-right:25.000%"><span class="relief-lbl2"><span class="lang-en">START · addr · reg</span><span class="lang-zh">START · 地址 · 寄存器</span></span><div class="relief-seqline"><div class="relief-ln"></div><svg width="15" height="13" viewBox="0 0 15 13"><path d="M14 6.5 L1 1 L4.5 6.5 L1 12 Z" fill="var(--navy)"/></svg></div></div><div class="relief-seqmsg" style="grid-column:4/6;grid-row:6;padding-left:25.000%;padding-right:25.000%"><span class="relief-lbl2"><span class="lang-en">16 bytes</span><span class="lang-zh">16 字节</span></span><div class="relief-seqline"><svg width="15" height="13" viewBox="0 0 15 13"><path d="M1 6.5 L14 1 L10.5 6.5 L14 12 Z" fill="var(--navy)"/></svg><div class="relief-ln"></div></div></div><div class="relief-seqmsg" style="grid-column:3/5;grid-row:7;padding-left:25.000%;padding-right:25.000%"><span class="relief-lbl2"><span class="lang-en">returns — <b>this is where it slept</b></span><span class="lang-zh">返回 —— <b>睡眠发生在这里</b></span></span><div class="relief-seqline"><svg width="15" height="13" viewBox="0 0 15 13"><path d="M1 6.5 L14 1 L10.5 6.5 L14 12 Z" fill="var(--navy)"/></svg><div class="relief-ln"></div></div></div><div class="relief-seqmsg" style="grid-column:1/4;grid-row:8;padding-left:16.667%;padding-right:16.667%"><span class="relief-lbl2"><span class="lang-en">copy_to_user()</span><span class="lang-zh">copy_to_user()</span></span><div class="relief-seqline"><svg width="15" height="13" viewBox="0 0 15 13"><path d="M1 6.5 L14 1 L10.5 6.5 L14 12 Z" fill="var(--navy)"/></svg><div class="relief-ln"></div></div></div></div></div>
+
+</div>
+
+<script>
+document.getElementById('skins').addEventListener('click', e => {
+  const b = e.target.closest('b'); if (!b) return;
+  document.querySelectorAll('#skins b').forEach(x => x.classList.toggle('on', x === b));
+  const s = b.dataset.s;
+  if (s) document.documentElement.setAttribute('data-theme', s);
+  else document.documentElement.removeAttribute('data-theme');
+});
+const root = document.documentElement;
+const saved = localStorage.getItem('relief-lang');
+root.setAttribute('data-lang', saved || ((navigator.language || '').startsWith('zh') ? 'zh' : 'en'));
+document.getElementById('lang').addEventListener('click', () => {
+  const next = root.getAttribute('data-lang') === 'zh' ? 'en' : 'zh';
+  root.setAttribute('data-lang', next);
+  try { localStorage.setItem('relief-lang', next); } catch (e) {}
+});
+</script>
+
+<!-- design-review:self-diff v1
+Skill: relief
+Page-type: code
+Created: 2026-09-15
+
+Decisions (6):
+1. [the-address-gutter-is-the-point] chose "print the stack pointer beside every frame of the backtrace" over "a plain top-to-bottom list of symbols". Because: a backtrace reads from the crash back to the entry point while the stack pointer runs the other way, and a bare symbol list never says so — the reader is left to remember which direction memory grew, which is exactly the thing they get wrong at 2am.
+2. [callers-above-callees-below] chose "the focus function in the middle with callers above and callees below" over "a left-to-right flow". Because: it is the convention every call-graph tool already prints, so the reader spends no attention working out which half is which, and the vertical axis is then free to mean depth of call rather than order in time.
+3. [atomic-context-gets-a-ring] chose "ring the call-graph nodes reachable from interrupt context" over "leaving context as prose next to the figure". Because: the question a reader brings to a call graph in kernel work is usually 'may this sleep', and a property that lives in a caption cannot be scanned — a ring can, and its absence is as readable as its presence.
+4. [vendor-code-is-sunken] chose "draw the vendor layer of the architecture as a sunken well" over "labelling it read-only". Because: depth already means 'you cannot go here' everywhere else on this page, so reusing it here teaches nothing new and answers a newcomer's first question — which files are mine — before they read a single name.
+5. [lifelines-are-grooves] chose "a sunken vertical channel per participant, with raised activation blocks on it" over "the plain vertical line of a UML sequence diagram". Because: the groove already reads as a channel through time in this vocabulary, and the raised block on it then means 'on the stack right now' without a key — so overlapping blocks show who is blocked on whom by shape alone.
+6. [contexts-are-bands-not-nodes] chose "execution contexts as stacked bands, ordered by what preempts what" over "a flowchart of scheduling decisions". Because: the reader is not tracing a path, they are asking which band a given function body is allowed to run in — the answer is containment, and containment is what a band draws.
+
+Known trade-offs:
+- The sequence diagram is a fixed grid: adding a participant means editing every message's column span by hand.
+- The call graph shows one level of callers and one of callees. Anything deeper needs a second figure, because a third rank makes the fan unreadable at this width.
+- The architecture figure is drawn for a three-layer driver. A subsystem with a different shape needs its wells rebuilt rather than relabelled.
+/design-review:self-diff -->
+
+</body>
+</html>

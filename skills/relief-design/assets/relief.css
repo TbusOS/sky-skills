@@ -237,7 +237,9 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
 
 /* ══════ A 状态机 ══════ */
 .relief-fsm{position:relative;width:960px;height:430px;margin:0 auto}
-.relief-fsm svg{position:absolute;inset:0;width:960px;height:430px;overflow:visible}
+/* SVG 跟着容器走，不写死尺寸 —— 写死 960x430 会把 viewBox 不同的图纵向拉伸，
+   状态框还在原位，箭头却整体偏掉，看起来像坐标算错了。 */
+.relief-fsm svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .relief-st{position:absolute;display:grid;place-items:center;border-radius:20px;
   font:700 17px 「Noto Sans SC」;color:var(--navy-d);text-align:center;line-height:1.3}
 .relief-st small{display:block;font:500 12px 「JetBrains Mono」;color:var(--muted);margin-top:3px}
@@ -464,3 +466,90 @@ html[data-lang="zh"] .lang-en{display:none!important}
 .relief-padname{font:700 14.5px var(--relief-mono);color:var(--navy-d)}
 .relief-padname span{display:block;font:400 11px var(--relief-sans);color:var(--muted);margin-top:4px}
 .relief-padclash{box-shadow:inset 5px 5px 10px var(--dark),inset -5px -5px 10px var(--lite),inset 0 0 0 2px var(--warn)}
+
+/* ═══════════════ 软件框图部件 ═══════════════ */
+
+/* 函数堆栈。栈往低地址长，所以「视觉上在上面」和「地址上在下面」是反的 ——
+   左边那列地址就是用来把这件事说清楚的，不然读者只能靠记。 */
+.relief-stack{display:grid;grid-template-columns:128px 1fr 118px;gap:0 14px;align-items:stretch}
+.relief-frame{border-radius:13px;padding:12px 17px;margin-bottom:7px;--off:5px;--blur:10px;
+  display:flex;align-items:center;gap:12px;min-height:48px}
+.relief-frame b{font:700 14px var(--relief-mono);color:var(--navy-d)}
+.relief-frame i{font-style:normal;font:400 12px var(--relief-sans);color:var(--muted);margin-left:auto;text-align:right}
+.relief-frame.relief-crash{background:linear-gradient(145deg,var(--hot-a),var(--hot-b));
+  box-shadow:5px 5px 11px var(--dark),-5px -5px 11px var(--lite)}
+.relief-frame.relief-crash b{color:var(--on-hot)}
+.relief-frame.relief-crash i{color:var(--on-hot);opacity:.82}
+.relief-sp{font:500 12px var(--relief-mono);color:var(--muted);text-align:right;align-self:center;
+  padding-bottom:7px;white-space:nowrap}
+.relief-fnote{font:400 11.5px var(--relief-sans);color:var(--muted);align-self:center;padding-bottom:7px}
+
+/* 调用关系。被关注的函数在中间，调它的在上、它调的在下 —— 这是读调用图的约定，
+   反过来摆，读者得先花时间弄清哪边是哪边。 */
+.relief-cg{display:flex;flex-direction:column;align-items:center;gap:0}
+.relief-cgrow{display:flex;justify-content:center;gap:13px;flex-wrap:wrap}
+.relief-fn{padding:11px 16px;border-radius:13px;--off:4px;--blur:9px;text-align:center;white-space:nowrap}
+.relief-fn b{display:block;font:700 13.5px var(--relief-mono);color:var(--navy-d)}
+.relief-fn i{display:block;font-style:normal;font:400 11px var(--relief-sans);color:var(--muted);margin-top:3px}
+.relief-fn.relief-focus{background:linear-gradient(145deg,var(--hot-a),var(--hot-b));
+  box-shadow:6px 6px 13px var(--dark),-6px -6px 13px var(--lite);padding:14px 24px}
+.relief-fn.relief-focus b{color:var(--on-hot);font-size:15.5px}
+.relief-fn.relief-focus i{color:var(--on-hot);opacity:.8}
+/* 中断上下文里会走到的路径描警示色：这一支下面不能睡眠 */
+.relief-fn.relief-atomic{box-shadow:4px 4px 9px var(--dark),-4px -4px 9px var(--lite),inset 0 0 0 2px var(--warn)}
+.relief-cgedge{height:34px;width:100%;display:grid;place-items:center}
+.relief-cgedge svg{overflow:visible}
+.relief-cgedge path{fill:none;stroke:var(--line);stroke-width:6;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 -1.5px 0 var(--hi))}
+.relief-cgedge path.relief-cond{stroke-dasharray:8 7}
+
+/* 函数时序图。生命线是一道竖凹槽 —— 参与者在时间里的那条通道；
+   激活块是压在槽上的凸块 —— 这段时间它在栈上。 */
+.relief-seq{display:grid;position:relative;row-gap:0;column-gap:0;padding-bottom:8px}
+.relief-seqhead{grid-row:1;align-self:end;padding:11px 10px;border-radius:13px;text-align:center;
+  --off:4px;--blur:9px;margin:0 7px 14px}
+.relief-seqhead b{display:block;font:700 12.5px var(--relief-mono);color:var(--navy-d)}
+.relief-seqhead i{display:block;font-style:normal;font:400 10.5px var(--relief-sans);color:var(--muted);margin-top:3px}
+.relief-life{justify-self:center;width:9px;border-radius:999px;
+  box-shadow:inset 3px 3px 6px var(--dark),inset -2px -2px 5px var(--lite)}
+.relief-act{justify-self:center;width:24px;border-radius:8px;z-index:1;
+  box-shadow:4px 4px 8px var(--dark),-4px -4px 8px var(--lite);background:var(--surf)}
+.relief-act.relief-hot{background:linear-gradient(145deg,var(--hot-a),var(--hot-b))}
+/* 消息：标签居中在线的上方，不压住任何激活块。
+   箭头画在线的终点那一端 —— 第一版把两个箭头形状写反了，
+   所有正向消息的箭头都指着起点，图整个读反。 */
+.relief-seqmsg{z-index:2;align-self:center;display:flex;flex-direction:column;
+  align-items:center;gap:5px;width:100%}   /* 左右内缩由每条消息按跨度算，写在行内 */
+.relief-seqmsg .relief-lbl2{font:500 11.5px var(--relief-mono);color:var(--muted);white-space:nowrap;
+  padding:4px 11px;border-radius:999px;background:var(--surf);
+  box-shadow:inset 3px 3px 6px var(--dark),inset -2px -2px 5px var(--lite)}
+.relief-seqline{display:flex;align-items:center;width:100%;gap:0}
+.relief-seqline svg{flex:none;filter:drop-shadow(0 -1.1px 0 var(--hi)) drop-shadow(0 2px 1.4px var(--lo))}
+.relief-seqline .relief-ln{flex:1;height:7px;border-radius:999px;
+  box-shadow:inset 2px 2px 5px var(--dark),inset -2px -2px 4px var(--lite)}
+
+/* DMA 描述符链。每块描述符是凸的，next 指针是凹槽 ——
+   最后一块的 next 是空的，所以那一格画成凹陷的死区，
+   「链在这里结束」和「这里有个东西」用形状就分开了。 */
+.relief-dchain{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:4px 0}
+.relief-desc{min-width:186px;flex:none;border-radius:16px;padding:14px 16px;--off:5px;--blur:10px}
+.relief-desc h4{margin:0 0 10px;font:700 12px var(--relief-mono);color:var(--muted);letter-spacing:.05em}
+.relief-desc dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:5px 10px;align-items:baseline}
+.relief-desc dt{font:500 11px var(--relief-sans);color:var(--muted)}
+.relief-desc dd{margin:0;font:700 12.5px var(--relief-mono);color:var(--navy-d);text-align:right}
+.relief-desc dd.relief-null{color:var(--muted);font-weight:500}
+.relief-desc.relief-live{box-shadow:5px 5px 11px var(--dark),-5px -5px 11px var(--lite),inset 0 0 0 2px var(--orange)}
+.relief-dlink{width:44px;flex:none;display:grid;place-items:center}
+.relief-dlink svg{filter:drop-shadow(0 -1.2px 0 var(--hi)) drop-shadow(1px 2px 1.5px var(--lo))}
+.relief-dend{width:44px;flex:none;display:grid;place-items:center}
+.relief-dend i{width:26px;height:9px;border-radius:999px;
+  box-shadow:inset 3px 3px 6px var(--dark),inset -2px -2px 5px var(--lite)}
+
+/* 电源域：域套域套设备。深度就是包含关系，不用画线。 */
+.relief-pd{display:grid;gap:13px}
+.relief-pdom{padding:16px 17px 18px;border-radius:21px}
+.relief-pdname{font:700 12.5px var(--relief-sans);color:var(--muted);letter-spacing:.05em;
+  margin-bottom:12px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.relief-pdname em{font-style:normal;font-weight:500;font-size:11px;font-family:var(--relief-mono)}
+.relief-pdname .relief-alwayson{padding:3px 10px;border-radius:999px;font:700 10.5px var(--relief-mono);
+  color:var(--on-hot);background:linear-gradient(145deg,var(--hot-a),var(--hot-b))}
