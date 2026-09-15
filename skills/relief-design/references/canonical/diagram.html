@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Relief · Diagrams / 框图</title>
+<meta name="description" content="Five diagram shapes — pipeline, tree, before/after, call layers and struct fields — drawn so that grooves mean relationships and raised blocks mean things.">
+<meta property="og:title" content="Relief · Diagrams">
+<meta property="og:description" content="Five diagram shapes — pipeline, tree, before/after, call layers and struct fields — drawn so that grooves mean relationships and raised blocks mean things.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/relief.css">
+</head>
+<body>
+
+<button class="lang-toggle" id="lang">中文 / EN</button>
+<div class="relief-skins relief-raised" id="skins">
+  <b class="on" data-s="">Warm</b><b data-s="gray">Gray</b><b data-s="matte">Matte</b><b data-s="ink">Ink</b><b data-s="mist">Mist</b><b data-s="clay">Clay</b><b data-s="sage">Sage</b>
+</div>
+
+<div class="relief-wrap">
+  <header class="relief-hero">
+    <div class="relief-container">
+    <span class="relief-badge">RELIEF · DIAGRAMS</span>
+    <h1 class="relief-h1"><span class="lang-en">Five diagram shapes</span><span class="lang-zh">五种框图</span></h1>
+    <p class="relief-lede"><span class="lang-en">A block is a thing. A groove is a relationship. Once those two are fixed, most technical diagrams are a matter of arranging them — and the reader never needs a legend.</span><span class="lang-zh">凸块是一个东西，凹槽是一种关系。这两样定下来之后，多数技术框图就只是怎么摆的问题 —— 而且读者永远不需要图例。</span></p>
+    <div class="relief-rail"><span></span></div>
+    </div>
+  </header>
+<h2><span class="lang-en">Five diagram shapes</span><span class="lang-zh">五种框图</span></h2>
+<p class="relief-note"><span class="lang-en">Drawing diagrams in this style needs two things the control kit does not give you. Connectors are <b>grooves</b> — <code>inset</code>, so the line reads as cut into the surface rather than laid on top. And arrowheads and stroke ends are raised with a paired <code>filter: drop-shadow()</code>, because <b>an SVG stroke does not take <code>box-shadow</code> at all</b> — the recipe that lifts every HTML block has no effect on the element a diagram is mostly made of.</span><span class="lang-zh">用这个风格画框图，要多两件控件集里没有的东西。连线是<b>凹槽</b> —— 加 <code>inset</code>，线就读作刻进面料，而不是搭在上面。箭头和线端靠成对的 <code>filter: drop-shadow()</code> 浮起，因为 <b>SVG 描边根本吃不到 <code>box-shadow</code></b> —— 那个把每个 HTML 方块顶起来的配方，对框图里占比最大的元素完全没作用。</span></p>
+
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">PIPELINE</span><span class="lang-zh">流程链</span></div>
+<div class="relief-flow">
+  <div class="relief-node relief-raised relief-thin"><span class="lang-en">schematic</span><span class="lang-zh">电路信息</span></div><div class="relief-wire"></div>
+  <div class="relief-node relief-raised relief-thin"><span class="lang-en">device tree source</span><span class="lang-zh">设备树文件</span></div><div class="relief-wire"></div>
+  <div class="relief-node relief-raised relief-thin"><span class="lang-en">kernel parses it</span><span class="lang-zh">内核解析</span></div><div class="relief-wire"></div>
+  <div class="relief-node relief-hot"><span class="lang-en">driver matches</span><span class="lang-zh">驱动匹配</span></div>
+</div></div>
+
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">TREE</span><span class="lang-zh">树状结构</span></div>
+<div class="relief-tree">
+  <div class="relief-tier"><div class="relief-tnode relief-root"><span class="lang-en">/ root node</span><span class="lang-zh">/ 根节点</span></div></div>
+  <div class="relief-rung"><svg width="420" height="38" viewBox="0 0 420 38"><path d="M210 2v12a8 8 0 0 1-8 8H118a8 8 0 0 0-8 8v6M210 2v12a8 8 0 0 0 8 8h84a8 8 0 0 1 8 8v6"/></svg></div>
+  <div class="relief-tier" style="gap:172px"><div class="relief-tnode relief-raised relief-thin">cpu</div><div class="relief-tnode relief-raised relief-thin">memory</div></div>
+  <div class="relief-rung"><svg width="620" height="38" viewBox="0 0 620 38"><path d="M164 2v10a8 8 0 0 1-8 8H98a8 8 0 0 0-8 8v8M164 2v10a8 8 0 0 0 8 8h58a8 8 0 0 1 8 8v8M456 2v10a8 8 0 0 1-8 8h-58a8 8 0 0 0-8 8v8M456 2v10a8 8 0 0 0 8 8h58a8 8 0 0 1 8 8v8"/></svg></div>
+  <div class="relief-tier" style="gap:44px">
+    <div><div class="relief-tnode relief-raised relief-thin">cpu@0</div><div class="relief-leafrow"><span class="relief-prop">compatible</span></div></div>
+    <div><div class="relief-tnode relief-raised relief-thin">soc</div><div class="relief-leafrow"><span class="relief-prop">reg</span></div></div>
+    <div><div class="relief-tnode relief-raised relief-thin">gpio0</div><div class="relief-leafrow"><span class="relief-prop">reg</span></div></div>
+    <div><div class="relief-tnode relief-raised relief-thin">i2c0</div><div class="relief-leafrow"><span class="relief-prop">status</span></div></div>
+  </div>
+</div></div>
+
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">BEFORE / AFTER</span><span class="lang-zh">左右对比</span></div>
+<div class="relief-split">
+  <div class="relief-panel relief-sunken"><div class="relief-cap"><span class="lang-en">Before: hardware facts hard-coded in the driver</span><span class="lang-zh">以前：硬件信息写死在驱动里</span></div>
+    <div class="relief-body relief-raised" style="box-shadow:5px 5px 10px var(--dark),-5px -5px 10px var(--lite)"><span class="lang-en">a new board means editing code</span><span class="lang-zh">换个板子就要改代码</span><br><span class="lang-en">a pile of board files under arch/arm/mach-xxx</span><span class="lang-zh">arch/arm/mach-xxx 一堆板级文件</span></div></div>
+  <div class="relief-bigarrow"><svg width="46" height="34" viewBox="0 0 46 34"><path d="M2 17h30M26 5l14 12-14 12" fill="none" stroke="var(--navy)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-panel relief-sunken"><div class="relief-cap"><span class="lang-en">Now: hardware facts live in the device tree</span><span class="lang-zh">现在：硬件信息写在 DTS 里</span></div>
+    <div class="relief-body relief-raised" style="box-shadow:5px 5px 10px var(--dark),-5px -5px 10px var(--lite)"><span class="lang-en">one driver for all</span><span class="lang-zh">驱动通用</span><br><span class="lang-en">a new board means editing the DTS</span><span class="lang-zh">换板子只改 DTS</span></div></div>
+</div></div>
+
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">CALL LAYERS</span><span class="lang-zh">分层调用</span></div>
+<div class="relief-layers">
+  <div class="relief-layer relief-raised relief-thin"><span class="relief-idx">1</span><span class="relief-nm"><span class="lang-en">Application</span><span class="lang-zh">应用程序</span></span><span class="relief-hint">open / read / write</span></div>
+  <div class="relief-drop"><svg width="20" height="18" viewBox="0 0 20 18"><path d="M10 2v10M4 8l6 6 6-6" fill="none" stroke="var(--line)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-layer relief-raised relief-thin"><span class="relief-idx">2</span><span class="relief-nm"><span class="lang-en">System call</span><span class="lang-zh">系统调用</span></span><span class="relief-hint">sys_read</span></div>
+  <div class="relief-drop"><svg width="20" height="18" viewBox="0 0 20 18"><path d="M10 2v10M4 8l6 6 6-6" fill="none" stroke="var(--line)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-layer relief-raised relief-thin"><span class="relief-idx">3</span><span class="relief-nm"><span class="lang-en">VFS layer</span><span class="lang-zh">VFS 层</span></span><span class="relief-hint">file_operations</span></div>
+  <div class="relief-drop"><svg width="20" height="18" viewBox="0 0 20 18"><path d="M10 2v10M4 8l6 6 6-6" fill="none" stroke="var(--line)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-layer relief-raised relief-thin"><span class="relief-idx">4</span><span class="relief-nm"><span class="lang-en">Driver op</span><span class="lang-zh">驱动函数</span></span><span class="relief-hint">my_drv_read</span></div>
+</div></div>
+
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">STRUCT FIELDS · implemented ones rise, unimplemented ones sink</span><span class="lang-zh">结构体字段 · 实现了的亮起，没实现的凹下去</span></div>
+<div class="relief-grid4">
+  <div class="relief-slot relief-raised relief-thin relief-set">owner</div><div class="relief-slot relief-raised relief-thin relief-set">open</div>
+  <div class="relief-slot relief-raised relief-thin relief-set">read</div><div class="relief-slot relief-raised relief-thin relief-set">write</div>
+  <div class="relief-slot relief-sunken relief-thin">llseek</div><div class="relief-slot relief-sunken relief-thin">poll</div>
+  <div class="relief-slot relief-raised relief-thin relief-set">unlocked_ioctl</div><div class="relief-slot relief-sunken relief-thin">mmap</div>
+  <div class="relief-slot relief-raised relief-thin relief-set">release</div><div class="relief-slot relief-sunken relief-thin">fsync</div>
+  <div class="relief-slot relief-sunken relief-thin">flush</div><div class="relief-slot relief-sunken relief-thin">fasync</div>
+</div></div>
+
+
+</div>
+
+<script>
+document.getElementById('skins').addEventListener('click', e => {
+  const b = e.target.closest('b'); if (!b) return;
+  document.querySelectorAll('#skins b').forEach(x => x.classList.toggle('on', x === b));
+  const s = b.dataset.s;
+  if (s) document.documentElement.setAttribute('data-theme', s);
+  else document.documentElement.removeAttribute('data-theme');
+});
+const root = document.documentElement;
+const saved = localStorage.getItem('relief-lang');
+root.setAttribute('data-lang', saved || ((navigator.language || '').startsWith('zh') ? 'zh' : 'en'));
+document.getElementById('lang').addEventListener('click', () => {
+  const next = root.getAttribute('data-lang') === 'zh' ? 'en' : 'zh';
+  root.setAttribute('data-lang', next);
+  try { localStorage.setItem('relief-lang', next); } catch (e) {}
+});
+</script>
+
+<!-- design-review:self-diff v1
+Skill: relief
+Page-type: diagram
+Created: 2026-09-15
+
+Decisions (5):
+1. [connectors-are-grooves] chose "every connector is an inset channel cut into the surface" over "drawing connectors as raised rails like the nodes". Because: if nodes and links share the same depth the eye cannot separate what is a thing from what is a relationship, and a diagram whose two vocabularies look alike forces the reader to parse it by position instead of by shape.
+2. [svg-strokes-need-filters] chose "raise arrowheads and stroke ends with a paired filter: drop-shadow()" over "assuming the box-shadow recipe applies everywhere". Because: SVG strokes ignore box-shadow entirely, so without the filter the connectors render flat while every block around them is raised — a half-finished look with no error anywhere to explain it.
+3. [before-after-nests-raised-in-sunken] chose "each side of the comparison is a sunken panel holding a raised card" over "two raised panels side by side". Because: the sunken panel reads as a frame around a claim, and nesting raised inside it gives the pair a figure-and-ground relation that says these two are alternatives to each other, not two unrelated items.
+4. [struct-fields-encode-state-as-depth] chose "implemented fields raised, unimplemented fields sunken" over "ticks, colours or opacity". Because: the page already spends depth on meaning everywhere else, so reusing it here costs no new vocabulary — and the reader can scan a twelve-field struct for holes without reading a single label.
+5. [the-accent-marks-the-subject] chose "exactly one node per diagram carries the accent colour" over "colouring by category". Because: these diagrams accompany prose that is about one specific stage, and the accent's job here is to say which one — spend it on categories and it can no longer answer the question the reader arrived with.
+
+Known trade-offs:
+- The pipeline and tree diagrams are fixed-width markup; they pan horizontally on a phone rather than reflowing.
+- Depth carries the node-versus-link distinction with no redundant encoding, so a monochrome print or a very dim screen loses it.
+/design-review:self-diff -->
+
+</body>
+</html>

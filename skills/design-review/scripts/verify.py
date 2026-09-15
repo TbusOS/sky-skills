@@ -18,7 +18,7 @@ Usage:
 
 If --skill is omitted, the script auto-detects the skill by scanning the HTML
 for a `<link>` to one of
-{anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer}.css. Pass --skill
+{anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer|relief}.css. Pass --skill
 when detection is ambiguous.
 
 CSS class-definition lookup: unions classes from
@@ -154,6 +154,19 @@ SKILLS: dict[str, dict] = {
         "acceptable_hero": {"primer-container", "primer-container--wide"},
         "container_modifiers": ("narrow", "wide"),
         "hero_advice": "primer-container (default 1080px) or primer-container--wide (1280px)",
+    },
+    "relief": {
+        "prefix": "relief-",
+        "css": "relief.css",
+        "dir": "relief-design",
+        # relief draws DIAGRAMS. The page opens with a .relief-hero strip rather
+        # than a full-bleed hero, because a diagram sheet's first screen has to
+        # start showing diagrams — a tall hero would push the first figure below
+        # the fold, which is the one thing this page-type cannot afford.
+        "narrow_hero": {"relief-wrap--narrow"},
+        "acceptable_hero": {"relief-wrap", "relief-hero"},
+        "container_modifiers": ("narrow", "wide"),
+        "hero_advice": "relief-wrap (1180px) or relief-wrap--wide (1360px)",
     },
 }
 

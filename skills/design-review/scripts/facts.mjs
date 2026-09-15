@@ -57,6 +57,7 @@ const ROSTER = {
   'lectern-design': 'design',
   'atelier-design': 'design',
   'primer-design': 'design',
+  'relief-design': 'design',
 
   'design-review': 'harness',
   'design-planner': 'harness',

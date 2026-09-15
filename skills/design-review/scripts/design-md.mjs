@@ -44,7 +44,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, '..', '..', '..');
 
 export const SKILLS = ['anthropic', 'apple', 'atelier', 'eclat', 'ember',
-                       'glass', 'lectern', 'primer', 'sage'];
+                       'glass', 'lectern', 'primer', 'relief', 'sage'];
 
 // The check ids a waiver may name. visual-audit's are read out of its source so
 // this list cannot drift from the checks that actually exist — a waiver for a

@@ -9,7 +9,7 @@
 //
 // Usage:
 //   node skills/design-review/scripts/sprint-contract.mjs \
-//     --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer> \
+//     --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer|relief> \
 //     --page=<pricing|landing|docs-home|feature-deep|any-other-type>
 //
 // Unknown page-types are accepted: the contract borrows structure from
@@ -25,7 +25,7 @@ import process from 'node:process';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
 
-const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage', 'glass', 'eclat', 'lectern', 'atelier', 'primer'];
+const VALID_SKILLS = ['anthropic', 'apple', 'ember', 'sage', 'glass', 'eclat', 'lectern', 'atelier', 'primer', 'relief'];
 const VALID_PAGES = ['pricing', 'landing', 'docs-home', 'feature-deep'];
 
 // Unknown page-types are not rejected — they borrow structure from the
@@ -183,6 +183,21 @@ const BRAND = {
     // Fredoka is primer's OWN display face, so it is absent here and present in all eight siblings.
     forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#22D3EE (glass)', '#ff5b34 (eclat)', '#DD4F92 (atelier)'],
   },
+  relief: {
+    accent: '#f9922f / #dd731a',
+    name: 'relief orange',
+    minCoverage: '0.68%',
+    howTo: 'the orange .relief-badge above the h1 plus the .relief-rail strip under the lede — both sit in the hero, which is where the measured 1.36-1.37% comes from',
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Fredoka'],
+    // lectern navy #1d3a6e is omitted on purpose, and unlike primer's omissions
+    // this is NOT a follow-up left undone: relief's own --deep-b #25395f sits
+    // 17.0 from it, inside the euclidean-22 matcher, so the entry would fire on
+    // every relief page instead of guarding anything. Measured 2026-09-15 across
+    // 93 colour values (7 skins x their role variables, taken PER SKIN — merging
+    // them into one map drops the first six and reports a comfortable 46.0).
+    // Mirrors visual-audit.mjs's relief block, which carries the full numbers.
+    forbiddenColors: ['#d97757 (anthropic)', '#0071E3 (apple)', '#c49464 (ember)', '#97B077 (sage)', '#22D3EE (glass)', '#ff5b34 (eclat)', '#2f5bb0 (lectern)', '#DD4F92 (atelier)', '#7a5cd6 (primer)'],
+  },
 };
 
 // Per-skill diagram sizing + color-presence contract (mirror of each skill's
@@ -260,7 +275,7 @@ sprint-contract.mjs — generate a contract for a new page
 
 Usage:
   node skills/design-review/scripts/sprint-contract.mjs \\
-    --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer> \\
+    --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer|relief> \\
     --page=<pricing|landing|docs-home|feature-deep|any-other-type> \\
     [--format=md|json]
 

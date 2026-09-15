@@ -56,6 +56,13 @@ const TARGET = {
   // marketing ones: "what X is", "what happens step by step", "how A differs
   // from B". A page-type here names a teaching order, not a sales stage.
   primer: ['concept', 'process', 'compare'],
+  // relief draws DIAGRAMS, so its page-types are not marketing stages and not
+  // teaching orders — they are what a diagram sheet can be ABOUT: the recipe
+  // itself and the controls built from it, the general diagram shapes, and the
+  // hardware ones. 'hardware' is its own type rather than more entries under
+  // 'diagram' because those seven carry domain conventions (masters above the
+  // bus, addresses growing upward) that a generic pipeline diagram does not.
+  relief: ['controls', 'diagram', 'hardware'],
 };
 
 function parseArgs(argv) {

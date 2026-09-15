@@ -1,0 +1,433 @@
+/* ══════════════════════════════════════════════════════════════
+   新拟态（neumorphism）的全部秘密就一条：
+   控件底色 = 页面底色，靠一对方向相反的外阴影顶出立体。
+   左上放亮色 = 光从左上来；右下放暗色 = 那边是背光面。
+   两道都 inset，就从凸起变成凹陷。
+   ══════════════════════════════════════════════════════════════ */
+:root{
+  --surf:#efe3cd;                    /* 面料。所有控件都用它，不许各自填色 */
+  --lite:#fffaf0;                    /* 左上高光 */
+  --dark:#c9b58f;                    /* 右下暗影 */
+  --off:9px; --blur:18px;            /* 位移 / 模糊，成对调 */
+  --navy:#2e456f; --navy-d:#1e3153;
+  --orange:#ef7a1e; --orange-d:#c25c0c;
+  --ink:#4a4036;
+  /* 下面这层是「角色」不是「颜色」。加皮肤时只改这一层，页面里不许再写死色值。 */
+  --muted:#6a5c4b;                   /* 说明文字 */
+  --warn:#9d3f0d;                    /* 警示 / 易错处 */
+  --hot-a:#f9922f; --hot-b:#dd731a;  /* 强调块渐变。收窄过：两端跨度太大，深字在暗端会挂 */
+  --on-hot:#3a1e06;                  /* 强调块上的字 */
+  --on-deep:#ffffff;                 /* 深色块上的字 */
+  --deep-a:#4b6497; --deep-b:#25395f;/* 深色块渐变 */
+  --line:var(--dark);                /* 框图连线。暗色皮肤下要比底色亮 */
+  --hi:rgba(255,255,255,.85);        /* SVG 浮雕的上沿亮边 */
+  --lo:rgba(120,96,58,.45);          /* SVG 浮雕的下投暗影 */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--surf);color:var(--ink);font-family:"Noto Sans SC",system-ui,sans-serif;
+     padding:44px 40px 80px;font-size:16px}
+.relief-wrap{max-width:1180px;margin:0 auto}
+
+/* ── 三条基础配方 ── */
+.relief-raised{background:var(--surf);
+  box-shadow:calc(var(--off)*-1) calc(var(--off)*-1) var(--blur) var(--lite),
+             var(--off) var(--off) var(--blur) var(--dark)}
+.relief-sunken{background:var(--surf);
+  box-shadow:inset calc(var(--off)*-1) calc(var(--off)*-1) var(--blur) var(--lite),
+             inset var(--off) var(--off) var(--blur) var(--dark)}
+/* 薄件（按钮/药丸/小方块）位移要跟着缩，否则阴影糊成一坨 */
+.relief-thin{--off:5px;--blur:10px}
+.relief-thick{--off:13px;--blur:26px}
+/* 浮雕 + 厚度。纯 neumorphism 是「面料鼓起来」，没有厚度；
+   参考图那种是捏出来的实体块，所以要再加一道外落影把它抬离底面。 */
+.relief-solid{background:var(--surf);
+  box-shadow:calc(var(--off)*1.1) calc(var(--off)*1.5) calc(var(--blur)*1.4) rgba(122,92,48,.30),
+             inset calc(var(--off)*-.9) calc(var(--off)*-.9) calc(var(--blur)*.9) var(--lite),
+             inset calc(var(--off)*.7) calc(var(--off)*.7) calc(var(--blur)*.8) var(--dark)}
+
+h2{font-size:23px;font-weight:900;color:var(--navy-d);margin:56px 0 8px;letter-spacing:.01em}
+h2:first-child{margin-top:0}
+.relief-note{font-size:14.5px;line-height:1.75;color:var(--muted);margin-bottom:22px;max-width:760px}
+.relief-note b{color:var(--navy-d)}
+code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radius:5px;
+  /* 底色必须是中性的：草稿里写死的暖色 rgba 在暗皮肤上把前景压到 2.99:1。
+     前景用 --navy-d，它在每个皮肤都对着面料验过 8:1 以上，16% 灰不会吃掉余量。 */
+  color:var(--navy-d);background:rgba(128,128,128,.16)}
+
+/* ── 给 SVG 描边用的浮雕。SVG 吃不到 box-shadow，只能靠成对 drop-shadow：
+      第一道贴一条白边在上沿，第二道往下投一道暗影。 ── */
+.relief-emboss{filter:drop-shadow(0 -1.2px 0 var(--hi)) drop-shadow(0 2px 1.6px var(--lo))}
+
+/* ── 框图通用件 ── */
+.relief-board{padding:34px 32px;border-radius:30px;margin-bottom:26px}
+.relief-bt{font-size:14px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin-bottom:22px}
+.relief-bt em{font-style:normal;font-weight:500;color:var(--muted);margin-left:10px;letter-spacing:0}
+
+/* ══════════════════════════════════════════════════════════════
+   中性灰皮肤。新拟态原本就长在中性灰上（neumorphism.relief-io 的默认底色
+   是 #e0e0e0），因为灰色两头都留得出余量：往白走有高光的空间，
+   往黑走有暗影的空间。暖米白的亮度已经到 78%，高光只剩 4% 可涨，
+   所以凸起会比灰底弱一截 —— 这不是配色好看不好看的问题，是物理上限。
+   ══════════════════════════════════════════════════════════════ */
+[data-theme="gray"]{
+  --surf:#e3e6ea; --lite:#ffffff; --dark:#b6bcc7; --ink:#333a45;
+  --navy:#2c4470; --navy-d:#1b2c4e; --orange:#e8721a; --orange-d:#bd5509;
+  --muted:#59616e; --warn:#a8480e;
+  --hot-a:#f2842a; --hot-b:#de7620; --on-hot:#3a1e06; --deep-a:#44608f; --deep-b:#1f3356;
+  --hi:rgba(255,255,255,.95); --lo:rgba(74,84,102,.40);
+}
+
+/* 皮肤切换条 */
+.relief-skins{position:fixed;top:16px;right:20px;z-index:9;display:flex;gap:5px;padding:6px;border-radius:15px;
+  --off:5px;--blur:10px}
+.relief-skins b{padding:7px 13px;border-radius:11px;font:700 12.5px "Noto Sans SC";color:var(--muted);cursor:pointer;white-space:nowrap}
+.relief-skins b.on{color:var(--navy-d);background:var(--surf);
+  box-shadow:3px 3px 7px var(--dark),-3px -3px 7px var(--lite)}
+
+/* ══════════════════════════════════════════════════════════════
+   皮肤。每个皮肤只覆盖上面那层「角色」变量，一行样式都不用重写。
+   暗色那个要单独说：高光不能用白 —— 白边在暗底上会变成一圈灯管，
+   不像鼓起来像发光。暗色的高光是「比底色亮一点的同色」，
+   暗影是「比底色暗一点的同色」，两边都往自己那头挪一小步。
+   代价是明暗差更小，所以位移和模糊要加大才看得出凹凸。
+   ══════════════════════════════════════════════════════════════ */
+[data-theme="ink"]{
+  --surf:#2e333b; --lite:#3d444e; --dark:#1e2228; --ink:#c7cedb;
+  --navy:#8fb2e8; --navy-d:#bcd0f0; --orange:#f0954a; --orange-d:#c8701f;
+  --muted:#9aa5b6; --warn:#f0946a; --line:#4d5663;
+  --hot-a:#e89340; --hot-b:#c56c1c; --on-hot:#2a1503; --deep-a:#4e6285; --deep-b:#2f3d57;
+  --hi:rgba(255,255,255,.10); --lo:rgba(0,0,0,.60);
+  --off:11px; --blur:22px;
+}
+[data-theme="mist"]{            /* 低饱和青灰 */
+  --surf:#dce4e3; --lite:#f4fbfa; --dark:#aeb9b7; --ink:#2d3938;
+  --navy:#2f5a55; --navy-d:#1d403b; --orange:#a86a4e; --orange-d:#844e35;
+  --muted:#556360; --warn:#8a4526; --line:var(--dark);
+  --hot-a:#35766f; --hot-b:#275b56; --on-hot:#ffffff; --deep-a:#476b66; --deep-b:#2a4844;
+  --hi:rgba(255,255,255,.90); --lo:rgba(56,74,72,.42);
+}
+[data-theme="clay"]{            /* 低饱和陶土 */
+  --surf:#e6ddd7; --lite:#faf4f0; --dark:#bfb2aa; --ink:#3c332e;
+  --navy:#4a5769; --navy-d:#3d4a55; --orange:#a9694f; --orange-d:#854c35;
+  --muted:#6b5d55; --warn:#8c4128; --line:var(--dark);
+  --hot-a:#ae5f45; --hot-b:#96492f; --on-hot:#ffffff; --deep-a:#5f6e83; --deep-b:#3e4a5b;
+  --hi:rgba(255,255,255,.88); --lo:rgba(96,80,68,.42);
+}
+[data-theme="sage"]{            /* 低饱和鼠尾草 */
+  --surf:#e2e5db; --lite:#f7faf0; --dark:#b4bbab; --ink:#353a2e;
+  --navy:#47573d; --navy-d:#2f3c28; --orange:#9c7a3c; --orange-d:#775b26;
+  --muted:#5c6353; --warn:#8d5a2c; --line:var(--dark);
+  --hot-a:#98682f; --hot-b:#7d5424; --on-hot:#ffffff; --deep-a:#55664a; --deep-b:#354330;
+  --hi:rgba(255,255,255,.88); --lo:rgba(74,82,64,.42);
+}
+
+/* 磨砂黑。比 ink 再深一档，接近纯黑。
+   深到这个程度，高光/暗影和底色的明暗差被压得更扁，所以位移要再加大。
+   颗粒层一半为质感，一半是[推断，未实测]：8 位色深下大面积近黑的平缓渐变
+   容易出色带，颗粒能打散它。真要确认得在目标屏上看，不是在这里下结论。 */
+[data-theme="matte"]{
+  --surf:#1b1e23; --lite:#282d34; --dark:#0d0f12; --ink:#d3d9e2;
+  --navy:#7ea6e6; --navy-d:#a8c3ee; --orange:#e08a3c; --orange-d:#b05f14;
+  --muted:#8590a0; --warn:#ef9a70; --line:#3b424c;
+  --hot-a:#e08b30; --hot-b:#cc7524; --on-hot:#241202; --deep-a:#42557a; --deep-b:#212c40;
+  --hi:rgba(255,255,255,.07); --lo:rgba(0,0,0,.72);
+  --off:12px; --blur:24px;
+}
+[data-theme="matte"] body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;
+  opacity:.30;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.relief-w3.relief-org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>")}
+
+/* ─────────── 基础框图部件 ─────────── */
+/* ══════ 3 框图 ══════ */
+
+/* 流程链 */
+.relief-flow{display:flex;align-items:center;justify-content:center;gap:0}
+.relief-node{padding:18px 26px;border-radius:19px;font-size:17px;font-weight:700;color:var(--navy-d);
+  white-space:nowrap}
+.relief-node.relief-hot{color:var(--on-hot);background:linear-gradient(145deg,var(--hot-a),var(--hot-b));
+  box-shadow:6px 6px 13px var(--dark),-6px -6px 13px var(--lite)}
+/* 连线：凹槽 + 浮起的箭头。凹槽让线看起来是刻进面料里的 */
+.relief-wire{width:76px;height:10px;border-radius:999px;position:relative;flex:none;
+  box-shadow:inset 3px 3px 6px var(--dark),inset -2px -2px 5px var(--lite)}
+.relief-wire::after{content:"";position:absolute;right:-7px;top:50%;transform:translateY(-50%);
+  width:0;height:0;border:11px solid transparent;border-left:16px solid var(--navy);
+  filter:drop-shadow(0 -1px 0 var(--hi)) drop-shadow(1px 2px 1.5px var(--lo))}
+
+/* 树状 */
+.relief-tree{display:flex;flex-direction:column;align-items:center;gap:0}
+.relief-tier{display:flex;justify-content:center;gap:34px}
+.relief-tnode{padding:13px 24px;border-radius:15px;font:700 16px "JetBrains Mono","Noto Sans SC";
+  color:var(--navy-d)}
+.relief-tnode.relief-root{color:var(--on-hot);background:linear-gradient(145deg,var(--hot-a),var(--hot-b));
+  box-shadow:6px 6px 13px var(--dark),-6px -6px 13px var(--lite)}
+.relief-rung{height:38px;width:100%;display:grid;place-items:center}
+.relief-rung svg{overflow:visible}
+.relief-rung path{fill:none;stroke:var(--line);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 -1.5px 0 rgba(255,250,240,.95))}
+.relief-leafrow{display:flex;justify-content:center;gap:18px;margin-top:6px}
+.relief-prop{padding:6px 14px;border-radius:999px;font:500 13px "JetBrains Mono";color:var(--muted);
+  box-shadow:inset 3px 3px 6px var(--dark),inset -2px -2px 5px var(--lite)}
+
+/* 左右对比 */
+.relief-split{display:grid;grid-template-columns:1fr 72px 1fr;align-items:stretch;gap:0}
+.relief-panel{padding:26px 24px;border-radius:24px;text-align:center;display:flex;flex-direction:column}
+.relief-panel .relief-cap{font-size:15px;font-weight:700;color:var(--navy-d);margin-bottom:14px}
+.relief-panel .relief-body{flex:1;display:grid;place-items:center;padding:22px 16px;border-radius:17px;font-size:15px;line-height:1.7;color:var(--muted);
+  box-shadow:inset 5px 5px 10px var(--dark),inset -5px -5px 10px var(--lite)}
+.relief-bigarrow{display:grid;place-items:center}
+.relief-bigarrow svg{filter:drop-shadow(0 -1.5px 0 rgba(255,250,240,.9)) drop-shadow(2px 3px 2px var(--lo))}
+
+/* 分层 */
+.relief-layers{display:flex;flex-direction:column;gap:14px;max-width:560px;margin:0 auto}
+.relief-layer{display:flex;align-items:center;gap:16px;padding:17px 24px;border-radius:19px}
+.relief-layer .relief-idx{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;
+  font:900 15px "JetBrains Mono";color:var(--on-deep);background:linear-gradient(145deg,var(--deep-a),var(--deep-b));
+  box-shadow:3px 3px 7px var(--dark),-3px -3px 7px var(--lite)}
+.relief-layer .relief-nm{font-size:17px;font-weight:700;color:var(--navy-d)}
+.relief-layer .relief-hint{margin-left:auto;font:500 13.5px "JetBrains Mono";color:var(--muted)}
+.relief-drop{height:20px;display:grid;place-items:center}
+.relief-drop svg{filter:drop-shadow(0 -1px 0 rgba(255,250,240,.9)) drop-shadow(0 2px 1.5px var(--lo))}
+
+/* 结构体字段 */
+.relief-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
+.relief-slot{padding:15px 12px;border-radius:15px;text-align:center;font:500 15px "JetBrains Mono";color:var(--muted)}
+.relief-slot.relief-set{color:var(--navy-d);font-weight:700}
+.relief-slot.relief-set::after{content:"●";display:block;margin-top:6px;font-size:10px;color:var(--orange)}
+
+/* ─────────── 控件 ─────────── */
+/* ══════ 2 控件 ══════ */
+.relief-kit{display:flex;flex-wrap:wrap;gap:20px;align-items:center}
+/* background 必须显式写：<button> 有浏览器默认底色，浅皮肤下它碰巧接近面料
+   看不出来，暗皮肤下就是一块浅灰。凸起态靠 .relief-raised 补底，按下态没有。 */
+.relief-btn{padding:15px 30px;border-radius:17px;border:0;background:var(--surf);font:700 16px "Noto Sans SC";
+  color:var(--navy-d);cursor:pointer;transition:box-shadow .16s}
+.relief-btn:active,.relief-btn.on{box-shadow:inset 5px 5px 10px var(--dark),inset -5px -5px 10px var(--lite)}
+.relief-btn-pri{color:var(--on-hot);background:linear-gradient(145deg,var(--hot-a),var(--hot-b));
+  box-shadow:5px 5px 10px var(--dark),-5px -5px 10px var(--lite)}
+.relief-pill{padding:9px 20px;border-radius:999px;font-size:14.5px;font-weight:700;color:var(--navy)}
+
+.relief-switch{width:82px;height:42px;border-radius:999px;position:relative;cursor:pointer}
+.relief-switch i{position:absolute;top:6px;left:6px;width:30px;height:30px;border-radius:50%;
+  background:var(--surf);box-shadow:3px 3px 7px var(--dark),-3px -3px 7px var(--lite);
+  transition:left .22s cubic-bezier(.4,0,.2,1)}
+.relief-switch.on i{left:46px;background:linear-gradient(145deg,var(--hot-a),var(--hot-b))}
+
+.relief-slider{width:250px;height:16px;border-radius:999px;position:relative}
+.relief-slider .relief-fill{position:absolute;inset:3px auto 3px 3px;width:58%;border-radius:999px;
+  background:linear-gradient(90deg,#f0a35a,#e0700f)}
+.relief-slider .relief-knob{position:absolute;left:56%;top:50%;transform:translateY(-50%);
+  width:32px;height:32px;border-radius:50%;background:var(--surf);
+  box-shadow:4px 4px 9px var(--dark),-4px -4px 9px var(--lite)}
+
+.relief-field{width:280px;padding:15px 20px;border-radius:15px;border:0;background:var(--surf);
+  font:500 15px "Noto Sans SC";color:var(--ink);outline:0;
+  box-shadow:inset 5px 5px 10px var(--dark),inset -5px -5px 10px var(--lite)}
+.relief-seg{display:inline-flex;padding:6px;border-radius:16px;gap:4px}
+.relief-seg span{padding:9px 20px;border-radius:12px;font-size:14.5px;font-weight:700;color:var(--muted);cursor:pointer}
+.relief-seg span.on{color:var(--navy-d);background:var(--surf);
+  box-shadow:3px 3px 7px var(--dark),-3px -3px 7px var(--lite)}
+.relief-disc{width:78px;height:78px;border-radius:50%;display:grid;place-items:center}
+
+
+/* ─────────── 硬件框图部件 ─────────── */
+/* ══ 通用：浮雕描边。SVG 描边吃不到 box-shadow，只能成对 drop-shadow ══ */
+.relief-wire-stroke{fill:none;stroke:var(--dark);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 -1.4px 0 var(--lite))}
+.relief-arrowhead{fill:var(--navy);filter:drop-shadow(0 -1px 0 var(--hi)) drop-shadow(1px 2px 1.5px var(--lo))}
+
+/* ══════ A 状态机 ══════ */
+.relief-fsm{position:relative;width:960px;height:430px;margin:0 auto}
+.relief-fsm svg{position:absolute;inset:0;width:960px;height:430px;overflow:visible}
+.relief-st{position:absolute;display:grid;place-items:center;border-radius:20px;
+  font:700 17px 「Noto Sans SC」;color:var(--navy-d);text-align:center;line-height:1.3}
+.relief-st small{display:block;font:500 12px 「JetBrains Mono」;color:var(--muted);margin-top:3px}
+.relief-st.relief-entry{color:var(--on-hot);background:linear-gradient(145deg,var(--hot-a),var(--hot-b));
+  box-shadow:6px 6px 13px var(--dark),-6px -6px 13px var(--lite)}
+.relief-st.relief-entry small{color:var(--on-hot);opacity:.75}
+.relief-lbl{position:absolute;padding:6px 13px;border-radius:999px;white-space:nowrap;
+  font:500 12.5px 「Noto Sans SC」;color:var(--muted);
+  box-shadow:inset 3px 3px 6px var(--dark),inset -2px -2px 5px var(--lite)}
+.relief-lbl.relief-bad{color:var(--warn)}
+
+/* ══════ B 时序图 ══════ */
+.relief-scope{padding:22px 18px;border-radius:24px}
+.relief-scope svg{display:block;width:100%;height:auto}
+.relief-wave{fill:none;stroke:var(--navy);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 -1.3px 0 var(--lite)) drop-shadow(0 2px 1.6px var(--lo))}
+.relief-wave.relief-busline{stroke:var(--warn)}
+.relief-guide{stroke:var(--dark);stroke-width:1.6;stroke-dasharray:4 5;opacity:.85}
+.relief-siglbl{font:700 14px 「Noto Sans SC」;fill:var(--navy-d)}
+.relief-signote{font:500 11px 「JetBrains Mono」;fill:var(--muted)}
+.relief-tspan{stroke:var(--navy);stroke-width:2.2;fill:none}
+.relief-tcap{font:500 11.5px 「Noto Sans SC」;fill:var(--muted);text-anchor:middle}
+.relief-tcap b{font-family:「JetBrains Mono」;fill:var(--warn)}
+
+/* ══════ C 寄存器位域 ══════ */
+.relief-regbar{display:grid;grid-template-columns:repeat(32,1fr);gap:3px}
+.relief-bitno{font:500 10.5px 「JetBrains Mono」;color:var(--muted);text-align:center;padding-bottom:6px}
+.relief-fld{border-radius:11px;height:88px;display:grid;place-items:center;text-align:center;
+  font:700 13px 「JetBrains Mono」;color:var(--navy-d);padding:4px;--off:5px;--blur:10px}
+.relief-fld.relief-rsvd{color:var(--muted);font-weight:400}
+.relief-fld.relief-narrow{writing-mode:vertical-rl;transform:rotate(180deg);font-size:11.5px;letter-spacing:.04em}
+.relief-fld .relief-rst{display:block;font-weight:400;font-size:10.5px;color:var(--muted);margin-top:4px}
+.relief-fld.relief-wo{color:var(--warn)}
+.relief-regfoot{display:flex;gap:26px;margin-top:16px;font:500 13px 「JetBrains Mono」;color:var(--muted);flex-wrap:wrap}
+.relief-regtab{width:100%;border-collapse:separate;border-spacing:0 7px;margin-top:20px;font-size:14px}
+.relief-regtab th{text-align:left;font:700 12px 「Noto Sans SC」;color:var(--muted);letter-spacing:.05em;padding:0 14px 4px}
+.relief-regtab td{padding:11px 14px;background:var(--surf);color:var(--ink)}
+.relief-regtab tr td:first-child{border-radius:12px 0 0 12px}
+.relief-regtab tr td:last-child{border-radius:0 12px 12px 0}
+.relief-regtab tbody tr{box-shadow:4px 4px 9px var(--dark),-4px -4px 9px var(--lite)}
+.relief-regtab .relief-nm{font:700 13.5px 「JetBrains Mono」;color:var(--navy-d)}
+/* 描边标签，不给底色。半透明底会把面料压暗十几级，而前景色是照纯面料
+   验的对比度，余量不到 0.5，一压就破 —— 标签要的是「这是个标记」，
+   描边同样做得到，还不动底。 */
+.relief-acc{display:inline-block;padding:3px 10px;border-radius:999px;font:700 11.5px 「JetBrains Mono」;
+  background:transparent;box-shadow:inset 0 0 0 1.4px currentColor}
+.relief-acc.relief-rw{color:var(--navy-d)} .relief-acc.relief-ro{color:var(--muted)} .relief-acc.relief-wo{color:var(--warn)}
+
+
+/* ══════ E 内存布局 ══════ */
+.relief-memmap{display:grid;grid-template-columns:132px 1fr 96px;gap:0 14px;align-items:stretch}
+.relief-addr{font:500 12.5px 「JetBrains Mono」;color:var(--muted);text-align:right;white-space:nowrap;
+  align-self:end;padding-bottom:9px}   /* 贴住区块底边：地址往上增长，起始地址在下边界 */
+.relief-region{border-radius:13px;padding:13px 18px;margin-bottom:7px;--off:5px;--blur:10px;
+  display:flex;align-items:center;gap:12px;min-height:50px}
+.relief-region .relief-rn{font:700 14.5px 「Noto Sans SC」;color:var(--navy-d)}
+.relief-region .relief-rd{font:400 12px 「Noto Sans SC」;color:var(--muted);margin-left:auto;text-align:right}
+.relief-region.relief-dead .relief-rn{color:var(--muted);font-weight:500}
+.relief-region.relief-hot{background:linear-gradient(145deg,var(--hot-a),var(--hot-b));
+  box-shadow:5px 5px 11px var(--dark),-5px -5px 11px var(--lite)}
+.relief-region.relief-hot .relief-rn,.relief-region.relief-hot .relief-rd{color:var(--on-hot)}
+.relief-region.relief-hot .relief-rd{opacity:.8}
+.relief-size{font:500 12px 「JetBrains Mono」;color:var(--muted);align-self:center;padding-bottom:7px}
+
+/* ══════ F 数据通路 ══════ */
+.relief-path{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:4px 0}
+.relief-stagebox{min-width:104px;flex:1;display:flex;flex-direction:column;align-items:center}
+.relief-stage{width:100%;border-radius:15px;padding:13px 7px;text-align:center;--off:5px;--blur:10px;min-height:76px;
+  display:flex;flex-direction:column;justify-content:center}
+.relief-stage .relief-sn{font:700 13px 「Noto Sans SC」;color:var(--navy-d)}
+.relief-stage .relief-ss{font:400 11px 「JetBrains Mono」;color:var(--muted);margin-top:4px}
+.relief-stage.relief-store{background:linear-gradient(145deg,var(--deep-a),var(--deep-b));
+  box-shadow:5px 5px 11px var(--dark),-5px -5px 11px var(--lite)}
+.relief-stage.relief-store .relief-sn{color:var(--on-deep)} .relief-stage.relief-store .relief-ss{color:var(--on-deep);opacity:.74}
+.relief-rate{margin-top:8px;font:500 10.5px 「JetBrains Mono」;color:var(--muted);text-align:center;line-height:1.5}
+.relief-gap{width:34px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:32px}
+.relief-gap svg{filter:drop-shadow(0 -1.2px 0 var(--hi)) drop-shadow(1px 2px 1.5px var(--lo))}
+.relief-bwbar{margin-top:22px;height:15px;border-radius:999px;position:relative;overflow:hidden}
+.relief-bwbar span{position:absolute;top:3px;bottom:3px;left:3px;border-radius:999px;
+  background:linear-gradient(90deg,var(--hot-a),var(--hot-b))}
+.relief-bwcap{display:flex;justify-content:space-between;margin-top:8px;font:500 11.5px 「JetBrains Mono」;color:var(--muted)}
+
+/* ══════ G 时钟树 ══════ */
+.relief-clk{display:grid;grid-template-columns:auto 1fr;gap:18px 0;align-items:center}
+.relief-clkrow{display:flex;align-items:center;gap:0;flex-wrap:wrap}
+.relief-cnode{border-radius:13px;padding:11px 16px;--off:4px;--blur:9px;text-align:center;white-space:nowrap}
+.relief-cnode .relief-cn{font:700 13.5px 「JetBrains Mono」;color:var(--navy-d)}
+.relief-cnode .relief-cf{font:500 11px 「JetBrains Mono」;color:var(--muted);margin-top:3px}
+.relief-cnode.relief-src{background:linear-gradient(145deg,var(--deep-a),var(--deep-b));
+  box-shadow:4px 4px 9px var(--dark),-4px -4px 9px var(--lite)}
+.relief-cnode.relief-src .relief-cn{color:var(--on-deep)} .relief-cnode.relief-src .relief-cf{color:var(--on-deep);opacity:.74}
+.relief-cnode.relief-leaf{background:linear-gradient(145deg,var(--hot-a),var(--hot-b));
+  box-shadow:4px 4px 9px var(--dark),-4px -4px 9px var(--lite)}
+.relief-cnode.relief-leaf .relief-cn{color:var(--on-hot)} .relief-cnode.relief-leaf .relief-cf{color:var(--on-hot);opacity:.78}
+.relief-crun{width:34px;height:8px;border-radius:999px;flex:none;margin:0 7px;
+  /* 只用在真的串联的两级之间。并联支路一律不连线，连了就是画错 */
+  box-shadow:inset 3px 3px 6px var(--dark),inset -2px -2px 5px var(--lite)}
+/* 选择器和门控本来就是控件 —— 直接用控件的样子画，不另造图形 */
+.relief-mux{display:inline-flex;padding:4px;border-radius:13px;gap:3px;--off:4px;--blur:9px}
+.relief-mux i{font:700 11.5px 「JetBrains Mono」;font-style:normal;padding:6px 11px;border-radius:9px;color:var(--muted)}
+.relief-mux i.on{color:var(--navy-d);background:var(--surf);box-shadow:3px 3px 6px var(--dark),-3px -3px 6px var(--lite)}
+.relief-gate{width:56px;height:30px;border-radius:999px;position:relative;flex:none;margin:0 9px;--off:4px;--blur:9px}
+.relief-gate b{position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:var(--surf);
+  box-shadow:2px 2px 5px var(--dark),-2px -2px 5px var(--lite)}
+.relief-gate.on b{left:30px;background:linear-gradient(145deg,var(--hot-a),var(--hot-b))}
+.relief-clklbl{font:700 12.5px 「Noto Sans SC」;color:var(--muted);padding-right:20px;text-align:right;white-space:nowrap}
+
+/* ══════ D IP 内部框图 ══════ */
+.relief-soc{display:flex;flex-direction:column;align-items:center;gap:0}
+.relief-socrow{display:grid;gap:20px;width:100%}
+.relief-well{padding:18px 18px 20px;border-radius:22px}
+.relief-wname{font:700 12.5px 「Noto Sans SC」;color:var(--muted);letter-spacing:.05em;margin-bottom:13px;
+  display:flex;align-items:center;gap:8px}
+.relief-wname span{font:500 11px 「JetBrains Mono」;color:var(--muted);letter-spacing:0}
+.relief-blocks{display:flex;flex-wrap:wrap;gap:9px}
+.relief-blk{padding:11px 14px;border-radius:13px;font:700 13.5px 「JetBrains Mono」;color:var(--navy-d);
+  --off:4px;--blur:9px}
+.relief-blk i{display:block;font:400 10.5px 「Noto Sans SC」;color:var(--muted);font-style:normal;margin-top:3px}
+.relief-blk.relief-big{background:linear-gradient(145deg,var(--deep-a),var(--deep-b));color:var(--on-deep);
+  box-shadow:4px 4px 9px var(--dark),-4px -4px 9px var(--lite)}
+.relief-blk.relief-big i{color:var(--on-deep);opacity:.74}
+.relief-blk.relief-hot{background:linear-gradient(145deg,var(--hot-a),var(--hot-b));color:var(--on-hot);
+  box-shadow:4px 4px 9px var(--dark),-4px -4px 9px var(--lite)}
+.relief-blk.relief-hot i{color:var(--on-hot);opacity:.72}
+/* 总线：一条凹槽轨。主设备接在上面，从设备接在下面 —— 这是读图的约定 */
+.relief-bus{width:100%;height:46px;border-radius:14px;margin:0;display:grid;place-items:center;
+  font:700 13.5px 「JetBrains Mono」;color:var(--navy-d);letter-spacing:.06em;position:relative}
+.relief-bus em{font-style:normal;font-weight:500;font-size:11.5px;color:var(--muted);margin-left:12px;letter-spacing:0}
+.relief-stubs{display:grid;width:100%;height:26px}
+.relief-stub{justify-self:center;width:9px;height:26px;border-radius:999px;
+  box-shadow:inset 3px 3px 6px var(--dark),inset -2px -2px 5px var(--lite)}
+.relief-legend{display:flex;gap:22px;flex-wrap:wrap;margin-top:18px;font-size:13px;color:var(--muted)}
+.relief-legend i{display:inline-block;width:26px;height:13px;border-radius:5px;vertical-align:-2px;margin-right:7px}
+.relief-legend i.relief-m{background:linear-gradient(145deg,var(--deep-a),var(--deep-b))}
+.relief-legend i.relief-s{background:var(--surf);box-shadow:2px 2px 3px var(--dark),-2px -2px 3px var(--lite),inset 0 0 0 1px var(--dark)}
+.relief-legend i.relief-h{background:linear-gradient(145deg,var(--hot-a),var(--hot-b))}
+
+/* ═══════════════ 双语切换（cross-skill-rules §G）═══════════════ */
+html[data-lang="en"] .lang-zh{display:none!important}
+html[data-lang="zh"] .lang-en{display:none!important}
+.lang-toggle{position:fixed;top:16px;left:20px;z-index:9;padding:9px 16px;border:0;cursor:pointer;
+  border-radius:13px;background:var(--surf);color:var(--navy-d);font:700 13px var(--relief-sans);
+  box-shadow:5px 5px 10px var(--dark),-5px -5px 10px var(--lite)}
+.lang-toggle:active{box-shadow:inset 4px 4px 8px var(--dark),inset -4px -4px 8px var(--lite)}
+
+/* ═══════════════ 页头（§K 品牌色必须出现在顶部 1440×500）═══════════════ */
+.relief-hero{padding:74px 0 8px}
+.relief-badge{display:inline-flex;align-items:center;gap:9px;padding:9px 20px;border-radius:999px;
+  font:700 13px var(--relief-mono);letter-spacing:.06em;color:var(--on-hot);
+  background:linear-gradient(145deg,var(--hot-a),var(--hot-b));
+  box-shadow:5px 5px 11px var(--dark),-5px -5px 11px var(--lite)}
+.relief-h1{margin:26px 0 14px;font:900 46px/1.16 var(--relief-sans);color:var(--navy-d);letter-spacing:-.01em}
+.relief-lede{max-width:760px;font-size:17px;line-height:1.8;color:var(--muted)}
+.relief-lede b{color:var(--navy-d)}
+.relief-rail{margin:30px 0 0;height:15px;border-radius:999px;position:relative;overflow:hidden;
+  box-shadow:inset 5px 5px 10px var(--dark),inset -4px -4px 9px var(--lite)}
+.relief-rail span{position:absolute;top:3px;bottom:3px;left:3px;width:38%;border-radius:999px;
+  background:linear-gradient(90deg,var(--hot-a),var(--hot-b))}
+.relief-mono{font-family:var(--relief-mono)}
+.relief-wrap--narrow{max-width:900px}
+.relief-wrap--wide{max-width:1360px}
+.relief-container{max-width:1180px;margin:0 auto}
+.relief-container--narrow{max-width:900px;margin:0 auto}
+.relief-container--wide{max-width:1360px;margin:0 auto}
+
+/* ═══════════════ 术语表（known-bugs 1.63：中文正文里的术语要有定义）═══════════════ */
+.relief-glossary{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(252px,1fr));gap:12px}
+.relief-glossary div{padding:15px 18px;border-radius:15px;--off:5px;--blur:10px}
+.relief-glossary dt{font:700 14px var(--relief-mono);color:var(--navy-d);margin-bottom:5px}
+.relief-glossary dd{margin:0;font-size:13.5px;line-height:1.7;color:var(--muted)}
+
+/* 键盘焦点必须看得见。新拟态没有边框，焦点若只靠颜色变化就等于没有 */
+:focus-visible{outline:3px solid var(--orange);outline-offset:3px;border-radius:9px}
+
+/* 固定像素宽的图（状态机的节点是按坐标摆的，缩不了）放进可横向拖的容器，
+   否则窄屏下整页跟着横向滚动 —— 那会把每一段正文都拖歪。 */
+.relief-pan{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.relief-pan::-webkit-scrollbar{height:9px}
+.relief-pan::-webkit-scrollbar-thumb{border-radius:999px;background:var(--dark)}
+
+/* ═══════════════ 质感对照（教学部件）═══════════════ */
+.relief-vs{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.relief-cell{padding:26px 22px;border-radius:26px;text-align:center}
+.relief-swatch{height:112px;border-radius:24px;margin-bottom:16px;display:grid;place-items:center;
+  font:900 34px var(--relief-sans);color:var(--navy)}
+.relief-cell h3{font-size:16px;font-weight:700;color:var(--navy-d);margin-bottom:5px}
+.relief-cell p{font-size:13.5px;line-height:1.6;color:var(--muted)}
+/* 反面样本：渐变填充 + 单向落影。这是 claymorphism 的做法，
+   没有左上那道亮色，所以看着是「贴上去」的，不是从面料上顶起来的。 */
+.relief-wrong{background:linear-gradient(158deg,var(--lite),var(--surf) 48%,var(--dark));
+  box-shadow:0 20px 30px -14px rgba(96,62,28,.30),
+             inset 0 8px 12px -5px rgba(255,255,255,.55),
+             inset 0 -11px 16px -7px rgba(70,42,16,.26)}

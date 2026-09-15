@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Relief · Hardware diagrams / 硬件框图</title>
+<meta name="description" content="Seven hardware diagrams — state machine, timing, register map, block diagram, memory map, data path, clock tree — drawn so depth carries meaning.">
+<meta property="og:title" content="Relief · Hardware diagrams">
+<meta property="og:description" content="State machine, timing, register bitfield, IP block diagram, memory map, data path and clock tree, drawn so that depth carries meaning.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/relief.css">
+</head>
+<body>
+
+<button class="lang-toggle" id="lang">中文 / EN</button>
+<div class="relief-skins relief-raised" id="skins">
+  <b class="on" data-s="">Warm</b><b data-s="gray">Gray</b><b data-s="matte">Matte</b><b data-s="ink">Ink</b><b data-s="mist">Mist</b><b data-s="clay">Clay</b><b data-s="sage">Sage</b>
+</div>
+
+<div class="relief-wrap">
+  <header class="relief-hero">
+    <div class="relief-container">
+    <span class="relief-badge">RELIEF · HARDWARE</span>
+    <h1 class="relief-h1"><span class="lang-en">Seven hardware diagrams, drawn in relief</span><span class="lang-zh">七种硬件框图，用凹凸画出来</span></h1>
+    <p class="relief-lede"><span class="lang-en">Every shape on this page carries meaning. <b>Raised</b> is a thing that exists; <b>sunken</b> is a place you cannot reach, a condition, or a channel cut into the surface. Nothing here is decoration — if a block is pressed in, that is the diagram telling you something.</span><span class="lang-zh">这一页上每个形状都有意思。<b>凸起</b>是一个存在的东西；<b>凹陷</b>是你够不到的地方、一个条件、或者刻进面料的一道槽。没有一处是装饰 —— 一块凹进去，是图在告诉你一件事。</span></p>
+    <div class="relief-rail"><span></span></div>
+    </div>
+  </header>
+
+
+<h2><span class="lang-en">A · State machine</span><span class="lang-zh">A · 状态机</span></h2>
+<p class="relief-note"><span class="lang-en">States are raised blocks, transitions are embossed lines, and each condition sits in a <b>sunken</b> pill. Sunken means condition, raised means state — the reader never needs a legend. The entry state carries the accent colour. Below are the kernel's four runtime-PM states.</span><span class="lang-zh">状态用凸起的块，迁移用浮雕线，条件写在凹进去的药丸里——<b>凹的是条件，凸的是状态</b>，不用看图例也分得清谁是谁。入口状态给强调色。下面画的是内核 runtime PM 的四个状态。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">RUNTIME PM STATE MACHINE</span><span class="lang-zh">RUNTIME PM 状态机</span><em><span class="lang-en">the failure path back to ACTIVE is the line most diagrams leave out</span><span class="lang-zh">失败回退那条线是重点，多数图会漏掉</span></em></div>
+<div class="relief-pan"><div class="relief-fsm">
+  <svg viewBox="0 0 960 430">
+    <defs>
+      <!-- 箭头交给 marker。手算多边形顶点必错方向 —— marker 的 orient="auto"
+           自己沿路径切线转，改路径不用跟着改箭头。 -->
+      <marker id="ah" viewBox="0 0 12 12" refX="10.5" refY="6"
+              markerWidth="6.5" markerHeight="6.5" orient="auto">
+        <path d="M0 0 L12 6 L0 12 Z" fill="var(--navy)"/>
+      </marker>
+    </defs>
+    <g class="relief-wire-stroke" marker-end="url(#ah)">
+      <path d="M170 168 Q244 62 366 56"/>
+      <path d="M594 62 Q762 72 850 164"/>
+      <path d="M850 248 Q762 348 594 350"/>
+      <path d="M366 350 Q240 344 168 248"/>
+      <path d="M430 98 Q340 182 234 196" stroke-dasharray="9 7"/>
+      <path d="M72 246 C50 316 142 314 124 250"/>
+    </g>
+  </svg>
+
+  <div class="relief-st relief-entry" style="left:40px;top:170px;width:190px;height:72px">ACTIVE<small><span class="lang-en">in use</span><span class="lang-zh">设备在用</span></small></div>
+  <div class="relief-st relief-raised relief-thin" style="left:372px;top:22px;width:216px;height:72px">SUSPENDING<small><span class="lang-en">suspend callback running</span><span class="lang-zh">正在调 suspend</span></small></div>
+  <div class="relief-st relief-raised relief-thin" style="left:752px;top:170px;width:190px;height:72px">SUSPENDED<small><span class="lang-en">powered down</span><span class="lang-zh">已掉电</span></small></div>
+  <div class="relief-st relief-raised relief-thin" style="left:372px;top:316px;width:216px;height:72px">RESUMING<small><span class="lang-en">resume callback running</span><span class="lang-zh">正在调 resume</span></small></div>
+
+  <div class="relief-lbl" style="left:186px;top:100px"><span class="lang-en">usage count hits zero</span><span class="lang-zh">引用计数归零</span></div>
+  <div class="relief-lbl" style="left:654px;top:88px"><span class="lang-en">suspend returned 0</span><span class="lang-zh">suspend 返回 0</span></div>
+  <div class="relief-lbl" style="left:646px;top:296px"><span class="lang-en">accessed · get_sync()</span><span class="lang-zh">被访问 · get_sync()</span></div>
+  <div class="relief-lbl" style="left:196px;top:300px"><span class="lang-en">resume returned 0</span><span class="lang-zh">resume 返回 0</span></div>
+  <div class="relief-lbl relief-bad" style="left:266px;top:146px"><span class="lang-en">suspend returned −EBUSY</span><span class="lang-zh">suspend 返回 −EBUSY</span></div>
+  <div class="relief-lbl" style="left:16px;top:352px"><span class="lang-en">get() / put() only move the count, not the state</span><span class="lang-zh">get() / put() 只改计数，不换状态</span></div>
+</div></div></div>
+
+<h2><span class="lang-en">B · Timing diagram</span><span class="lang-zh">B · 时序图</span></h2>
+<p class="relief-note"><span class="lang-en">The waveforms live inside a <b>sunken panel</b> — it is a screen, so sunken is the honest shape. Traces are embossed strokes floating on it; alignment guides and measurement bars sit one layer below in the surface colour, so they never compete with the traces. Below is a panel power-on sequence.</span><span class="lang-zh">波形放进一块<b>凹陷的面板</b>里——它本来就是一块显示屏，凹进去比凸出来对。信号线用浮雕描边浮在面板上；基准虚线和量取条用面料色，压在波形下面一层，不抢。下面是一块屏的上电时序。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">PANEL POWER-ON SEQUENCE</span><span class="lang-zh">屏上电时序</span><em><span class="lang-en">the four delays are what gets missed when porting to a new panel</span><span class="lang-zh">四段延时是换屏时最容易抄漏的东西</span></em></div>
+<div class="relief-scope relief-sunken"><svg viewBox="0 0 1120 396">
+  <!-- 基准虚线，先画，压在波形下 -->
+  <g class="relief-guide">
+    <line x1="238" y1="30" x2="238" y2="330"/><line x1="342" y1="30" x2="342" y2="330"/>
+    <line x1="516" y1="30" x2="516" y2="330"/><line x1="642" y1="30" x2="642" y2="330"/>
+    <line x1="918" y1="30" x2="918" y2="330"/>
+  </g>
+  <!-- 五路信号。高电平 y=顶，低电平 y=顶+30 -->
+  <text class="relief-siglbl" x="140" y="62" text-anchor="end">VCI</text>
+  <text class="lang-en relief-signote" x="140" y="78" text-anchor="end">panel analog rail</text><text class="lang-zh relief-signote" x="140" y="78" text-anchor="end">面板模拟电源</text>
+  <path class="relief-wave" d="M162 78 H238 V48 H1090"/>
+
+  <text class="relief-siglbl" x="140" y="132" text-anchor="end">VDDI</text>
+  <text class="lang-en relief-signote" x="140" y="148" text-anchor="end">IO rail</text><text class="lang-zh relief-signote" x="140" y="148" text-anchor="end">IO 电源</text>
+  <path class="relief-wave" d="M162 148 H342 V118 H1090"/>
+
+  <text class="relief-siglbl" x="140" y="202" text-anchor="end">RESETn</text>
+  <text class="lang-en relief-signote" x="140" y="218" text-anchor="end">active-low reset</text><text class="lang-zh relief-signote" x="140" y="218" text-anchor="end">低有效复位</text>
+  <path class="relief-wave" d="M162 218 H516 V188 H1090"/>
+
+  <text class="relief-siglbl" x="140" y="272" text-anchor="end">MIPI DSI</text>
+  <text class="lang-en relief-signote" x="140" y="288" text-anchor="end">commands / video stream</text><text class="lang-zh relief-signote" x="140" y="288" text-anchor="end">命令 / 视频流</text>
+  <path class="relief-wave relief-busline" d="M162 273 H630 L642 258 H1078 L1090 273"/>
+  <path class="relief-wave relief-busline" d="M162 273 H630 L642 288 H1078 L1090 273"/>
+  <text class="lang-en relief-signote" x="860" y="280" text-anchor="middle" style="fill:var(--warn)">init commands → first frame</text><text class="lang-zh relief-signote" x="860" y="280" text-anchor="middle" style="fill:var(--warn)">初始化命令 → 首帧数据</text>
+
+  <text class="lang-en relief-siglbl" x="140" y="342" text-anchor="end">backlight</text><text class="lang-zh relief-siglbl" x="140" y="342" text-anchor="end">背光 BL</text>
+  <text class="lang-en relief-signote" x="140" y="358" text-anchor="end">PWM enable</text><text class="lang-zh relief-signote" x="140" y="358" text-anchor="end">PWM 使能</text>
+  <path class="relief-wave" d="M162 358 H918 V328 H1090"/>
+
+  <!-- 量取条 -->
+  <g class="relief-tspan">
+    <path d="M238 384 H342 M244 379 l-8 5 8 5 M336 379 l8 5 -8 5"/>
+    <path d="M342 384 H516 M348 379 l-8 5 8 5 M510 379 l8 5 -8 5"/>
+    <path d="M516 384 H642 M522 379 l-8 5 8 5 M636 379 l8 5 -8 5"/>
+    <path d="M642 384 H918 M648 379 l-8 5 8 5 M912 379 l8 5 -8 5"/>
+  </g>
+  <text class="relief-tcap" x="290" y="373">t1 <tspan font-weight="700">≥ 1ms</tspan></text>
+  <text class="relief-tcap" x="429" y="373">t2 <tspan font-weight="700">≥ 10ms</tspan></text>
+  <text class="relief-tcap" x="579" y="373">t3 <tspan font-weight="700">≥ 120ms</tspan></text>
+  <text class="lang-en relief-tcap" x="780" y="373">t4 <tspan font-weight="700">≥ 2 frames after first frame</tspan></text><text class="lang-zh relief-tcap" x="780" y="373">t4 <tspan font-weight="700">首帧后 ≥ 2 帧</tspan></text>
+</svg></div></div>
+
+<h2><span class="lang-en">C · Register bitfield</span><span class="lang-zh">C · 寄存器位域</span></h2>
+<p class="relief-note"><span class="lang-en">Reserved bits are <b>sunken dead zones</b>, usable bits are raised — you know which bits you may touch without reading the access column. The write-only self-clearing bit takes the accent colour, because it is the one people get wrong: it always reads back 0, and that does not mean the write missed.</span><span class="lang-zh">保留位画成<b>凹进去的死区</b>，能用的位凸起——不用读属性列就知道哪些位是能碰的。只写自清的位给强调色，因为它是最容易写错的一类（读回来永远是 0，不代表没生效）。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">Quartz-3550 · DSI_CTRL</span><span class="lang-zh">Quartz-3550 · DSI_CTRL</span><em><span class="lang-en">offset 0x0010 · reset 0x0003_FF00</span><span class="lang-zh">偏移 0x0010 · 复位值 0x0003_FF00</span></em></div>
+  <div class="relief-regbar">
+    <div class="relief-bitno" style="grid-column:span 12">31 ······ 20</div>
+    <div class="relief-bitno" style="grid-column:span 4">19·16</div>
+    <div class="relief-bitno" style="grid-column:span 8">15 ··· 8</div>
+    <div class="relief-bitno" style="grid-column:span 3">7·5</div>
+    <div class="relief-bitno">4</div><div class="relief-bitno">3</div><div class="relief-bitno">2</div>
+    <div class="relief-bitno">1</div><div class="relief-bitno">0</div>
+  </div>
+  <div class="relief-regbar" style="margin-top:0">
+    <div class="relief-fld relief-sunken relief-rsvd" style="grid-column:span 12">RSVD</div>
+    <div class="relief-fld relief-raised" style="grid-column:span 4">LANE_NUM<span class="relief-rst">0x3</span></div>
+    <div class="relief-fld relief-raised" style="grid-column:span 8">TIMEOUT<span class="relief-rst">0xFF</span></div>
+    <div class="relief-fld relief-sunken relief-rsvd" style="grid-column:span 3">RSVD</div>
+    <div class="relief-fld relief-raised relief-narrow">LP_MODE</div>
+    <div class="relief-fld relief-raised relief-narrow">ERR_IE</div>
+    <div class="relief-fld relief-raised relief-narrow">DONE_IE</div>
+    <div class="relief-fld relief-raised relief-narrow relief-wo">RESET</div>
+    <div class="relief-fld relief-raised relief-narrow">ENABLE</div>
+  </div>
+  <div class="relief-regfoot">
+    <span><span class="lang-en">reset value</span><span class="lang-zh">复位值</span> <b style="color:var(--navy-d)">0x0003_FF00</b></span>
+    <span><span class="lang-en">write 0 to reserved bits; read-back is not guaranteed</span><span class="lang-zh">保留位写 0，读回不保证</span></span>
+    <span style="color:var(--warn)"><span class="lang-en">RESET is write-only self-clearing · always reads back 0</span><span class="lang-zh">RESET 位只写自清 · 读回恒为 0</span></span>
+  </div>
+  <table class="relief-regtab">
+    <thead><tr><th style="width:92px"><span class="lang-en">Bits</span><span class="lang-zh">位</span></th><th style="width:170px"><span class="lang-en">Name</span><span class="lang-zh">名称</span></th><th style="width:96px"><span class="lang-en">Access</span><span class="lang-zh">属性</span></th><th style="width:92px"><span class="lang-en">Reset</span><span class="lang-zh">复位</span></th><th><span class="lang-en">Notes</span><span class="lang-zh">说明</span></th></tr></thead>
+    <tbody>
+      <tr><td class="relief-mono">31:20</td><td class="relief-nm">RSVD</td><td><span class="relief-acc relief-ro">RO</span></td><td class="relief-mono">0</td><td><span class="lang-en">Reserved. Write 0. Read-back is not guaranteed — never branch on it</span><span class="lang-zh">保留。写 0；读回值不保证，不要拿来做判断</span></td></tr>
+      <tr><td class="relief-mono">19:16</td><td class="relief-nm">LANE_NUM</td><td><span class="relief-acc relief-rw">RW</span></td><td class="relief-mono">0x3</td><td><span class="lang-en">Data lane count minus one. 0x3 = four lanes</span><span class="lang-zh">数据通道数减一。写 0x3 = 四通道</span></td></tr>
+      <tr><td class="relief-mono">15:8</td><td class="relief-nm">TIMEOUT</td><td><span class="relief-acc relief-rw">RW</span></td><td class="relief-mono">0xFF</td><td><span class="lang-en">Command timeout in byte-clock cycles. 0 = never time out</span><span class="lang-zh">命令超时，单位为字节时钟周期。写 0 = 不超时</span></td></tr>
+      <tr><td class="relief-mono">4</td><td class="relief-nm">LP_MODE</td><td><span class="relief-acc relief-rw">RW</span></td><td class="relief-mono">0</td><td><span class="lang-en">1 = send commands on the low-power lane. Must be 1 while sending init commands</span><span class="lang-zh">1 = 命令走低功耗通道。发初始化命令时必须为 1</span></td></tr>
+      <tr><td class="relief-mono">3</td><td class="relief-nm">ERR_IE</td><td><span class="relief-acc relief-rw">RW</span></td><td class="relief-mono">0</td><td><span class="lang-en">Error interrupt enable</span><span class="lang-zh">错误中断使能</span></td></tr>
+      <tr><td class="relief-mono">2</td><td class="relief-nm">DONE_IE</td><td><span class="relief-acc relief-rw">RW</span></td><td class="relief-mono">0</td><td><span class="lang-en">Transfer-done interrupt enable</span><span class="lang-zh">传输完成中断使能</span></td></tr>
+      <tr><td class="relief-mono">1</td><td class="relief-nm">RESET</td><td><span class="relief-acc relief-wo">WO</span></td><td class="relief-mono">0</td><td><span class="lang-en">Write 1 to reset the controller; hardware clears it. </span><span class="lang-zh">写 1 复位控制器，硬件自清。</span><b style="color:var(--warn)"><span class="lang-en">Always reads back 0 — you cannot tell from the register whether the reset happened</span><span class="lang-zh">读回恒为 0，不能用读回值判断复位是否做过</span></b></td></tr>
+      <tr><td class="relief-mono">0</td><td class="relief-nm">ENABLE</td><td><span class="relief-acc relief-rw">RW</span></td><td class="relief-mono">0</td><td><span class="lang-en">Controller master enable. Clear it before changing any other field</span><span class="lang-zh">控制器总开关。改其它位前应先置 0</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2><span class="lang-en">D · IP block diagram</span><span class="lang-zh">D · IP 内部框图</span></h2>
+<p class="relief-note"><span class="lang-en">Groups sit in sunken wells, modules are raised blocks inside them — a well says <b>these belong together</b>, a block says <b>this is one thing</b>. The bus is a sunken rail: <b>masters attach above it, slaves below</b>. That is the reading convention; break it and every reader has to trace each line to find who initiates a transfer.</span><span class="lang-zh">分组用<b>凹陷的槽</b>装，模块用凸起的块摆进去——槽是「这几个归一起」，块是「这是一个东西」。总线画成一条凹槽轨：<b>主设备接在轨上方，从设备接在下方</b>，这是读图的约定，不按这个摆，看图的人得逐条线追才知道谁发起访问。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">Quartz-3550 application processor · internal structure</span><span class="lang-zh">Quartz-3550 应用处理器 · 内部结构</span><em><span class="lang-en">illustrative name, not a real product</span><span class="lang-zh">示意名，非真实产品</span></em></div>
+<div class="relief-soc">
+  <div class="relief-socrow" style="grid-template-columns:2.15fr 1fr">
+    <div class="relief-well relief-sunken"><div class="relief-wname"><span class="lang-en">CPU subsystem</span><span class="lang-zh">CPU 子系统</span> <span><span class="lang-en">master</span><span class="lang-zh">主设备</span></span></div>
+      <div class="relief-blocks">
+        <div class="relief-blk relief-big">Core A ×4<i><span class="lang-en">big cores · 2.0GHz</span><span class="lang-zh">大核 · 2.0GHz</span></i></div>
+        <div class="relief-blk relief-big">Core B ×4<i><span class="lang-en">little cores · 1.5GHz</span><span class="lang-zh">小核 · 1.5GHz</span></i></div>
+        <div class="relief-blk relief-raised">L3 Cache<i><span class="lang-en">1MB shared</span><span class="lang-zh">1MB 共享</span></i></div>
+        <div class="relief-blk relief-raised"><span class="lang-en">Coherency port</span><span class="lang-zh">一致性接口</span><i><span class="lang-en">snoop bus</span><span class="lang-zh">侦听总线</span></i></div>
+      </div></div>
+    <div class="relief-well relief-sunken"><div class="relief-wname"><span class="lang-en">Accelerators</span><span class="lang-zh">加速器</span> <span><span class="lang-en">master</span><span class="lang-zh">主设备</span></span></div>
+      <div class="relief-blocks">
+        <div class="relief-blk relief-big">GPU<i><span class="lang-en">graphics</span><span class="lang-zh">图形</span></i></div>
+        <div class="relief-blk relief-big">NPU<i><span class="lang-en">inference</span><span class="lang-zh">推理</span></i></div>
+        <div class="relief-blk relief-raised">DMA<i><span class="lang-en">bulk copy</span><span class="lang-zh">搬运</span></i></div>
+      </div></div>
+  </div>
+
+  <div class="relief-stubs" style="grid-template-columns:2.15fr 1fr"><div class="relief-stub"></div><div class="relief-stub"></div></div>
+  <div class="relief-bus relief-sunken"><span class="lang-en">SYSTEM INTERCONNECT · AXI</span><span class="lang-zh">系统互连 · AXI</span><em><span class="lang-en">masters above · slaves below</span><span class="lang-zh">主设备在上 · 从设备在下</span></em></div>
+  <div class="relief-stubs" style="grid-template-columns:repeat(4,1fr)">
+    <div class="relief-stub"></div><div class="relief-stub"></div><div class="relief-stub"></div><div class="relief-stub"></div></div>
+
+  <div class="relief-socrow" style="grid-template-columns:repeat(4,1fr)">
+    <div class="relief-well relief-sunken"><div class="relief-wname"><span class="lang-en">Storage</span><span class="lang-zh">存储</span> <span><span class="lang-en">slave</span><span class="lang-zh">从设备</span></span></div>
+      <div class="relief-blocks">
+        <div class="relief-blk relief-hot"><span class="lang-en">DDR controller</span><span class="lang-zh">DDR 控制器</span></div><div class="relief-blk relief-raised">DDR PHY</div>
+        <div class="relief-blk relief-raised"><span class="lang-en">On-chip SRAM</span><span class="lang-zh">片上 SRAM</span><i>256KB</i></div><div class="relief-blk relief-raised">eMMC / SD</div>
+      </div></div>
+    <div class="relief-well relief-sunken"><div class="relief-wname"><span class="lang-en">Display & media</span><span class="lang-zh">显示与多媒体</span> <span><span class="lang-en">slave</span><span class="lang-zh">从设备</span></span></div>
+      <div class="relief-blocks">
+        <div class="relief-blk relief-hot">VOP<i><span class="lang-en">display output</span><span class="lang-zh">显示输出</span></i></div><div class="relief-blk relief-raised">MIPI DSI</div>
+        <div class="relief-blk relief-raised">ISP</div><div class="relief-blk relief-raised"><span class="lang-en">Video codec</span><span class="lang-zh">视频编解码</span></div>
+      </div></div>
+    <div class="relief-well relief-sunken"><div class="relief-wname"><span class="lang-en">Peripherals</span><span class="lang-zh">外设</span> <span><span class="lang-en">slave</span><span class="lang-zh">从设备</span></span></div>
+      <div class="relief-blocks">
+        <div class="relief-blk relief-raised">I2C ×6</div><div class="relief-blk relief-raised">SPI ×3</div>
+        <div class="relief-blk relief-raised">UART ×8</div><div class="relief-blk relief-raised">GPIO ×5</div>
+        <div class="relief-blk relief-raised">PWM ×4</div><div class="relief-blk relief-raised">USB</div>
+      </div></div>
+    <div class="relief-well relief-sunken"><div class="relief-wname"><span class="lang-en">System control</span><span class="lang-zh">系统控制</span> <span><span class="lang-en">slave</span><span class="lang-zh">从设备</span></span></div>
+      <div class="relief-blocks">
+        <div class="relief-blk relief-raised">GIC<i><span class="lang-en">interrupts</span><span class="lang-zh">中断</span></i></div><div class="relief-blk relief-raised">CRU<i><span class="lang-en">clock & reset</span><span class="lang-zh">时钟复位</span></i></div>
+        <div class="relief-blk relief-raised">PMU<i><span class="lang-en">power domains</span><span class="lang-zh">电源域</span></i></div><div class="relief-blk relief-raised">OTP<i><span class="lang-en">fuses</span><span class="lang-zh">熔丝</span></i></div>
+        <div class="relief-blk relief-raised">Crypto</div>
+      </div></div>
+  </div>
+</div>
+<div class="relief-legend">
+  <span><i class="relief-m"></i><span class="lang-en">Master: initiates bus transfers on its own</span><span class="lang-zh">主设备：自己发起总线访问</span></span>
+  <span><i class="relief-s"></i><span class="lang-en">Slave: only responds, never initiates</span><span class="lang-zh">从设备：只响应，不发起</span></span>
+  <span><i class="relief-h"></i><span class="lang-en">The block this page is about</span><span class="lang-zh">本次讨论涉及的模块</span></span>
+</div>
+</div>
+
+
+<h2><span class="lang-en">E · Memory map</span><span class="lang-zh">E · 内存布局</span></h2>
+<p class="relief-note"><span class="lang-en">The address space runs top to bottom and <b>anything you cannot reach is drawn as a groove</b> — reserved regions, holes, the secure world. The right-hand column says what each region is for, because that is what a reader of this diagram actually asks. Not how big it is.</span><span class="lang-zh">地址空间从上往下排，<b>访问不到的区间画成凹槽</b>——保留区、空洞、安全世界，凹下去的一眼就是「这块你碰不了」。右边留一列写用途，因为读这种图的人真正要问的是「这块归谁」，不是「它多大」。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">Quartz-3550 · physical address space</span><span class="lang-zh">Quartz-3550 · 物理地址空间</span><em><span class="lang-en">leave the TEE region out of reserved-memory and the kernel allocates into it, then dies later</span><span class="lang-zh">TEE 保留区没在设备树里 reserve 掉，内核会分配进去，跑着跑着就挂</span></em></div>
+<div class="relief-memmap">
+  <div class="relief-addr">0xFFFF_FFFF</div><div></div><div></div>
+  <div class="relief-addr">0x87E0_0000</div>
+    <div class="relief-region relief-raised"><span class="relief-rn"><span class="lang-en">Usable system memory</span><span class="lang-zh">可用系统内存</span></span><span class="relief-rd"><span class="lang-en">this is what the kernel buddy allocator manages</span><span class="lang-zh">内核 buddy 分配器管的就是这段</span></span></div>
+    <div class="relief-size">≈1.9 GB</div>
+  <div class="relief-addr">0x8660_0000</div>
+    <div class="relief-region relief-raised"><span class="relief-rn"><span class="lang-en">framebuffer reserved</span><span class="lang-zh">framebuffer 保留</span></span><span class="relief-rd"><span class="lang-en">the display controller fetches from here — it cannot be moved</span><span class="lang-zh">显示控制器直接取数，不能被搬走</span></span></div>
+    <div class="relief-size">24 MB</div>
+  <div class="relief-addr">0x8260_0000</div>
+    <div class="relief-region relief-raised"><span class="relief-rn"><span class="lang-en">CMA contiguous pool</span><span class="lang-zh">CMA 连续内存</span></span><span class="relief-rd"><span class="lang-en">for devices that need large physically contiguous buffers</span><span class="lang-zh">给要物理连续大块的外设</span></span></div>
+    <div class="relief-size">64 MB</div>
+  <div class="relief-addr">0x8060_0000</div>
+    <div class="relief-region relief-hot"><span class="relief-rn"><span class="lang-en">Kernel image</span><span class="lang-zh">内核镜像</span></span><span class="relief-rd"><span class="lang-en">where the decompressed Image lands</span><span class="lang-zh">Image 解压后落在这</span></span></div>
+    <div class="relief-size">32 MB</div>
+  <div class="relief-addr">0x8040_0000</div>
+    <div class="relief-region relief-raised"><span class="relief-rn">ATF / BL31</span><span class="relief-rd"><span class="lang-en">resident — never overwrite</span><span class="lang-zh">常驻，不能覆盖</span></span></div>
+    <div class="relief-size">2 MB</div>
+  <div class="relief-addr">0x8000_0000</div>
+    <div class="relief-region relief-sunken relief-dead"><span class="relief-rn"><span class="lang-en">TEE reserved</span><span class="lang-zh">TEE 保留</span></span><span class="relief-rd"><span class="lang-en">secure world only · reads back all zeroes from the non-secure side</span><span class="lang-zh">安全世界独占 · 非安全侧读回全 0</span></span></div>
+    <div class="relief-size">4 MB</div>
+  <div class="relief-addr">0x4000_0000</div>
+    <div class="relief-region relief-sunken relief-dead"><span class="relief-rn"><span class="lang-en">Hole</span><span class="lang-zh">空洞</span></span><span class="relief-rd"><span class="lang-en">nothing responds here · an access raises an external abort</span><span class="lang-zh">没有任何东西响应 · 访问触发外部中止</span></span></div>
+    <div class="relief-size">1 GB</div>
+  <div class="relief-addr">0x2000_0000</div>
+    <div class="relief-region relief-raised"><span class="relief-rn"><span class="lang-en">Peripheral register window</span><span class="lang-zh">外设寄存器窗口</span></span><span class="relief-rd"><span class="lang-en">this is the range ioremap maps in</span><span class="lang-zh">ioremap 映射进来的就是这段</span></span></div>
+    <div class="relief-size">256 MB</div>
+  <div class="relief-addr">0x0010_0000</div>
+    <div class="relief-region relief-raised"><span class="relief-rn"><span class="lang-en">On-chip SRAM</span><span class="lang-zh">片上 SRAM</span></span><span class="relief-rd"><span class="lang-en">code runs here before DDR is trained</span><span class="lang-zh">DDR 还没初始化时，代码跑在这</span></span></div>
+    <div class="relief-size">256 KB</div>
+  <div class="relief-addr">0x0000_0000</div>
+    <div class="relief-region relief-sunken relief-dead"><span class="relief-rn">BootROM</span><span class="relief-rd"><span class="lang-en">mask ROM · fixed at manufacture, cannot be changed</span><span class="lang-zh">掩膜只读 · 出厂固化，改不了</span></span></div>
+    <div class="relief-size">1 MB</div>
+</div></div>
+
+<h2><span class="lang-en">F · Data path</span><span class="lang-zh">F · 数据通路</span></h2>
+<p class="relief-note"><span class="lang-en">Stages run left to right and <b>under each one is what it turned the data into</b> — a data path drawn as a row of boxes leaves the reader still not knowing what happened in between. Places that store data use the deep block; places that transform it use the plain raised block.</span><span class="lang-zh">一级一级往右走，<b>每级底下写它把数据变成了什么</b>——数据通路图最容易画成「几个盒子连起来」，那样看完还是不知道中间发生了什么。存数据的地方用深色块，加工数据的地方用普通凸块，两类分开。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">DISPLAY PATH · one frame from memory to glass</span><span class="lang-zh">显示通路 · 一帧从内存到屏</span><em><span class="lang-en">the DMA lives in the display controller, not in the DSI block</span><span class="lang-zh">DMA 在显示控制器里，不在 DSI 里</span></em></div>
+<div class="relief-path">
+  <div class="relief-stagebox"><div class="relief-stage relief-raised relief-store"><span class="relief-sn">DDR</span><span class="relief-ss">framebuffer</span></div>
+    <div class="relief-rate">1080×2400×4B<br><span class="lang-en">≈9.9 MB / frame</span><span class="lang-zh">≈9.9 MB / 帧</span></div></div>
+  <div class="relief-gap"><svg width="26" height="22" viewBox="0 0 26 22"><path d="M1 11h16M14 3l9 8-9 8" fill="none" stroke="var(--navy)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-stagebox"><div class="relief-stage relief-raised"><span class="relief-sn"><span class="lang-en">AXI read channel</span><span class="lang-zh">AXI 读通道</span></span><span class="relief-ss"><span class="lang-en">DMA fetch</span><span class="lang-zh">DMA 搬运</span></span></div>
+    <div class="relief-rate"><span class="lang-en">burst read</span><span class="lang-zh">突发读</span><br><span class="lang-en">128-bit wide</span><span class="lang-zh">128 bit 位宽</span></div></div>
+  <div class="relief-gap"><svg width="26" height="22" viewBox="0 0 26 22"><path d="M1 11h16M14 3l9 8-9 8" fill="none" stroke="var(--navy)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-stagebox"><div class="relief-stage relief-raised"><span class="relief-sn"><span class="lang-en">Layer blend</span><span class="lang-zh">图层合成</span></span><span class="relief-ss">VOP</span></div>
+    <div class="relief-rate"><span class="lang-en">multi-layer</span><span class="lang-zh">多层叠加</span><br><span class="lang-en">scale · crop</span><span class="lang-zh">缩放 · 裁剪</span></div></div>
+  <div class="relief-gap"><svg width="26" height="22" viewBox="0 0 26 22"><path d="M1 11h16M14 3l9 8-9 8" fill="none" stroke="var(--navy)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-stagebox"><div class="relief-stage relief-raised"><span class="relief-sn"><span class="lang-en">Colour convert</span><span class="lang-zh">色彩转换</span></span><span class="relief-ss"><span class="lang-en">gamma · dither</span><span class="lang-zh">Gamma · 抖动</span></span></div>
+    <div class="relief-rate">RGB888<br><span class="lang-en">→ panel bit depth</span><span class="lang-zh">→ 面板位深</span></div></div>
+  <div class="relief-gap"><svg width="26" height="22" viewBox="0 0 26 22"><path d="M1 11h16M14 3l9 8-9 8" fill="none" stroke="var(--navy)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-stagebox"><div class="relief-stage relief-raised"><span class="relief-sn"><span class="lang-en">DSI packetise</span><span class="lang-zh">DSI 打包</span></span><span class="relief-ss"><span class="lang-en">add header + ECC</span><span class="lang-zh">加包头校验</span></span></div>
+    <div class="relief-rate"><span class="lang-en">pixel stream</span><span class="lang-zh">像素流</span><br><span class="lang-en">→ packets</span><span class="lang-zh">→ 数据包</span></div></div>
+  <div class="relief-gap"><svg width="26" height="22" viewBox="0 0 26 22"><path d="M1 11h16M14 3l9 8-9 8" fill="none" stroke="var(--navy)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-stagebox"><div class="relief-stage relief-raised"><span class="relief-sn"><span class="lang-en">D-PHY serialise</span><span class="lang-zh">D-PHY 串化</span></span><span class="relief-ss"><span class="lang-en">parallel → serial</span><span class="lang-zh">并转串</span></span></div>
+    <div class="relief-rate">4 lane<br><span class="lang-en">differential pairs</span><span class="lang-zh">差分对</span></div></div>
+  <div class="relief-gap"><svg width="26" height="22" viewBox="0 0 26 22"><path d="M1 11h16M14 3l9 8-9 8" fill="none" stroke="var(--navy)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-stagebox"><div class="relief-stage relief-raised relief-store"><span class="relief-sn"><span class="lang-en">Panel</span><span class="lang-zh">面板</span></span><span class="relief-ss"><span class="lang-en">driver IC</span><span class="lang-zh">驱动 IC</span></span></div>
+    <div class="relief-rate">60 Hz<br><span class="lang-en">line by line</span><span class="lang-zh">逐行刷新</span></div></div>
+</div>
+<div class="relief-bwbar relief-sunken relief-thin"><span style="width:58%"></span></div>
+<div class="relief-bwcap"><span><span class="lang-en">Whole-path bandwidth ≈ 594 MB/s (9.9 MB × 60 Hz)</span><span class="lang-zh">整链带宽占用 ≈ 594 MB/s（9.9 MB × 60 Hz）</span></span><span><span class="lang-en">58% of the 1.03 GB/s DDR theoretical bandwidth</span><span class="lang-zh">DDR 理论带宽 1.03 GB/s 的 58%</span></span></div>
+</div>
+
+<h2><span class="lang-en">G · Clock tree</span><span class="lang-zh">G · 时钟树</span></h2>
+<p class="relief-note"><span class="lang-en">The mux and the gate in a clock tree <b>already are controls</b> — picking one of the divided outputs is a segmented control, enabling the branch is a switch. Draw them as the controls they are and the reader learns no new symbols, while which path is live reads at a glance.</span><span class="lang-zh">时钟树里的<b>选择器和门控本来就是控件</b>——分频后选哪一路是个分段控件，开不开这条时钟是个开关。直接拿控件画，不另造图形：看图的人不用学新符号，而且哪一路是通的一眼看得出。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">DISPLAY CLOCK · crystal to pixel clock</span><span class="lang-zh">显示时钟 · 从晶振到像素时钟</span><em><span class="lang-en">with the gate closed a register read in that branch hangs — the register is not broken</span><span class="lang-zh">门控关着的时候读寄存器会挂，不是寄存器坏了</span></em></div>
+<div class="relief-clk">
+  <div class="relief-clklbl"><span class="lang-en">Source</span><span class="lang-zh">时钟源</span></div>
+  <div class="relief-clkrow">
+    <div class="relief-cnode relief-raised relief-src"><div class="relief-cn">OSC</div><div class="relief-cf"><span class="lang-en">24 MHz crystal</span><span class="lang-zh">24 MHz 晶振</span></div></div>
+    <div class="relief-crun"></div>
+    <div class="relief-cnode relief-raised"><div class="relief-cn">PLL_VIDEO</div><div class="relief-cf">×49.5 → 1188 MHz</div></div>
+  </div>
+
+  <div class="relief-clklbl"><span class="lang-en">Dividers</span><span class="lang-zh">分频</span></div>
+  <div class="relief-clkrow">
+    <div class="relief-cnode relief-raised" style="margin-right:14px"><div class="relief-cn">÷ 2</div><div class="relief-cf">594 MHz</div></div>
+    <div class="relief-cnode relief-raised" style="margin-right:14px"><div class="relief-cn">÷ 4</div><div class="relief-cf">297 MHz</div></div>
+    <div class="relief-cnode relief-raised"><div class="relief-cn">÷ 8</div><div class="relief-cf">148.5 MHz</div></div>
+    <span style="font:500 12px 'Noto Sans SC';color:var(--muted);margin-left:18px"><span class="lang-en">three parallel branches, all hanging off PLL_VIDEO</span><span class="lang-zh">三路并联，都挂在 PLL_VIDEO 上</span></span>
+  </div>
+
+  <div class="relief-clklbl"><span class="lang-en">Mux</span><span class="lang-zh">选一路</span></div>
+  <div class="relief-clkrow">
+    <div class="relief-mux relief-sunken"><i>594</i><i class="on">297</i><i>148.5</i><i><span class="lang-en">external</span><span class="lang-zh">外部</span></i></div>
+    <span style="font:500 12px 'Noto Sans SC';color:var(--muted);margin-left:16px"><span class="lang-en">only the selected branch continues downstream</span><span class="lang-zh">选中的这一路才往下走</span></span>
+  </div>
+
+  <div class="relief-clklbl"><span class="lang-en">Gate</span><span class="lang-zh">门控</span></div>
+  <div class="relief-clkrow">
+    <div class="relief-gate relief-sunken on"><b></b></div>
+    <span style="font:500 12.5px 'JetBrains Mono';color:var(--navy-d)">CLK_VOP_EN&nbsp;</span>
+    <span style="font:500 12px 'Noto Sans SC';color:var(--muted)"><span class="lang-en">with it closed, every register below this branch reads all zeroes or hangs outright</span><span class="lang-zh">关着的时候，这一支下面所有寄存器读回全 0 或直接挂</span></span>
+  </div>
+
+  <div class="relief-clklbl"><span class="lang-en">Leaf clocks</span><span class="lang-zh">叶子时钟</span></div>
+  <div class="relief-clkrow">
+    <div class="relief-cnode relief-raised relief-leaf" style="margin-right:14px"><div class="relief-cn">dclk_vop</div><div class="relief-cf"><span class="lang-en">297 MHz · pixel clock</span><span class="lang-zh">297 MHz · 像素时钟</span></div></div>
+    <div class="relief-cnode relief-raised" style="margin-right:14px"><div class="relief-cn">aclk_vop</div><div class="relief-cf"><span class="lang-en">297 MHz · bus clock</span><span class="lang-zh">297 MHz · 总线时钟</span></div></div>
+    <div class="relief-cnode relief-raised"><div class="relief-cn">hclk_vop</div><div class="relief-cf"><span class="lang-en">148.5 MHz · register clock</span><span class="lang-zh">148.5 MHz · 寄存器时钟</span></div></div>
+  </div>
+</div></div>
+
+
+<h2><span class="lang-en">Terms used above</span><span class="lang-zh">上面用到的术语</span></h2>
+<p class="relief-note"><span class="lang-en">A diagram that needs a word the reader does not have is not a diagram, it is a quiz. Every term below appears somewhere on this page.</span><span class="lang-zh">一张图要是用了读者没有的词，那不是图，是考试。下面每个词在这页上都出现过。</span></p>
+<div class="relief-board relief-raised"><dl class="relief-glossary"><div class="relief-raised"><dt>取数 · fetch</dt><dd><span class="lang-en">the display controller issues its own bus reads to pull a frame out of memory — the CPU does not copy it there.</span><span class="lang-zh">显示控制器自己发起总线读，把一帧像素从内存搬进来。不是 CPU 拷贝给它的。</span></dd></div><div class="relief-raised"><dt>物理地址 · physical address</dt><dd><span class="lang-en">the address that actually appears on the bus. Most addresses in kernel code are virtual; page tables map between them.</span><span class="lang-zh">硬件总线上真实的地址。内核代码里看到的多数是虚拟地址，两者靠页表对应。</span></dd></div><div class="relief-raised"><dt>一致性 · coherency</dt><dd><span class="lang-en">when several masters each hold a cache, keeping what they see of the same memory identical. Without it you flush caches by hand.</span><span class="lang-zh">多个主设备各有缓存时，保证它们看到的同一块内存内容相同。做不到就得手工刷缓存。</span></dd></div><div class="relief-raised"><dt>突发 · burst</dt><dd><span class="lang-en">one bus transaction carrying several beats of data instead of one address per beat. Fetching a whole frame relies on it.</span><span class="lang-zh">一次总线事务连续搬多拍数据，而不是一拍一个地址。取整帧像素靠的就是它。</span></dd></div><div class="relief-raised"><dt>片上 SRAM · on-chip SRAM</dt><dd><span class="lang-en">a small memory inside the chip, usable the moment power is up. Early boot code runs here because DDR is not trained yet.</span><span class="lang-zh">做在芯片里的一小块内存，上电就能用。DDR 还没训练好之前，早期代码只能跑在这。</span></dd></div><div class="relief-raised"><dt>设备树 · device tree</dt><dd><span class="lang-en">a text file describing what hardware is on the board and which address range each piece owns; the kernel reads it at boot.</span><span class="lang-zh">一份描述板上有哪些硬件、各自占哪段地址的文本文件，内核启动时读它。</span></dd></div><div class="relief-raised"><dt>门控 · clock gate</dt><dd><span class="lang-en">a switch deciding whether this clock branch continues downstream. With it closed the modules below simply do not run.</span><span class="lang-zh">一个开关，决定这一支时钟往不往下走。关着的时候下游模块整个不工作。</span></dd></div><div class="relief-raised"><dt>分频 · divider</dt><dd><span class="lang-en">divides a clock down to a lower frequency. One PLL usually feeds several parallel branches at different rates.</span><span class="lang-zh">把时钟频率整除成更低的一档。一个 PLL 常常并联出好几路不同频率。</span></dd></div><div class="relief-raised"><dt>位域 · bitfield</dt><dd><span class="lang-en">a register's 32 bits cut into runs, each run controlling one thing.</span><span class="lang-zh">把一个寄存器的 32 位切成几段，每段各管一件事。</span></dd></div><div class="relief-raised"><dt>自清 · self-clearing</dt><dd><span class="lang-en">writing 1 triggers an action and the hardware clears the bit itself, so it always reads back 0.</span><span class="lang-zh">写 1 触发一个动作，硬件做完自己把这位清回 0。所以读回来永远是 0。</span></dd></div></dl></div>
+
+</div>
+
+<script>
+document.getElementById('skins').addEventListener('click', e => {
+  const b = e.target.closest('b'); if (!b) return;
+  document.querySelectorAll('#skins b').forEach(x => x.classList.toggle('on', x === b));
+  const s = b.dataset.s;
+  if (s) document.documentElement.setAttribute('data-theme', s);
+  else document.documentElement.removeAttribute('data-theme');
+});
+const root = document.documentElement;
+const saved = localStorage.getItem('relief-lang');
+root.setAttribute('data-lang', saved || (navigator.language || '').startsWith('zh') ? 'zh' : 'en');
+document.getElementById('lang').addEventListener('click', () => {
+  const next = root.getAttribute('data-lang') === 'zh' ? 'en' : 'zh';
+  root.setAttribute('data-lang', next);
+  try { localStorage.setItem('relief-lang', next); } catch (e) {}
+});
+</script>
+
+<!-- design-review:self-diff v1
+Skill: relief
+Page-type: hardware
+Created: 2026-09-15
+
+Decisions (6):
+1. [sunken-means-unreachable] chose "every region a reader cannot touch is drawn sunken — reserved memory, address holes, RSVD bits, the closed clock gate" over "colour-coding those regions with a legend". Because: relief already owns a depth axis, and depth carries the meaning without spending a colour or asking the reader to look up a key; a legend is a second lookup the diagram can avoid entirely.
+2. [controls-are-the-clock-tree] chose "draw the clock mux as the segmented control and the clock gate as the switch" over "inventing trapezoid mux and AND-gate glyphs". Because: this skill already ships those two controls, their on-state is unambiguous, and a reader who has used a settings screen needs no symbol lesson to see which branch is live.
+3. [dark-highlight-is-not-white] chose "on the ink and matte skins the highlight is a lighter shade of the surface, not white" over "reusing the white highlight from the light skins". Because: a white edge on a near-black ground reads as an emissive strip rather than a lit edge — the object stops looking raised and starts looking backlit, which destroys the one axis the skill depends on.
+4. [dark-text-on-the-accent] chose "deep-brown text on the orange blocks" over "white text, as the reference images use". Because: white on that orange measures 2.37:1 — the orange dark enough to carry white text is no longer that orange. The trade is real and it was taken in favour of legibility; scripts/check_skin_contrast.py holds the line at 4.5:1 for every skin.
+5. [svg-strokes-get-filters-not-shadows] chose "emboss diagram connectors with a paired filter: drop-shadow()" over "box-shadow on the stroke". Because: SVG strokes do not take box-shadow at all, so the recipe that raises every HTML block has no effect on the one element a diagram is mostly made of — connectors — and the page would silently render half-flat.
+6. [parallel-branches-carry-no-connector] chose "the three dividers and the three leaf clocks sit side by side with no connector between them" over "chaining them with the same groove used elsewhere". Because: the groove means "signal flows from here to there", so chaining parallel siblings states series where the hardware is parallel — a wrong diagram, not an ugly one.
+
+Known trade-offs:
+- The orange accent is legible everywhere but no longer matches the white-on-orange look of the source images this style was reconstructed from.
+- Depth carries so much meaning that a viewer with a low-brightness screen or a monochrome print loses the sunken/raised distinction entirely; there is no redundant encoding for it yet.
+- Every diagram here is hand-authored markup. Nothing generates these from a data file, so a twelve-block diagram is twelve blocks of HTML.
+/design-review:self-diff -->
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+/* relief-design — web fonts
+ * Inter (400/500/600/700/900): the Latin face for everything — body, labels,
+ *   and the display sizes. A neutral grotesque is the right choice here because
+ *   this skill draws TECHNICAL diagrams: register names, addresses and signal
+ *   labels sit next to prose, and a face with personality would fight the
+ *   monospace beside it. The 900 weight is what carries the big headings —
+ *   relief has no separate display face on purpose (see design-tokens.md §2).
+ * Noto Sans SC (400/500/700/900): the Chinese pairing for Inter, per
+ *   cross-skill-rules §H (sans display + sans body → Noto Sans SC). Also the
+ *   face that actually sets every Chinese heading, since Inter has no CJK
+ *   coverage at all — expected, not a fallback accident.
+ * JetBrains Mono (400/500/700): register fields, addresses, clock frequencies,
+ *   signal names, bit numbers. In a hardware diagram the mono face is not
+ *   decoration — it is what says "this string is a literal from the datasheet".
+ *   CJK monospace is rare; Chinese inside a mono span falls back to Noto Sans SC
+ *   by the stack below, which is the §H-sanctioned behaviour.
+ *
+ * NOT loaded on purpose: no rounded display face. An early draft set the
+ * headings in a rounded gothic to chase the clay look of the reference images;
+ * at 900 weight Chinese glyph counters close up and the heading turns to mush
+ * (measured — see dos-and-donts.md §1). The rounded feel in this skill comes
+ * from border-radius and the shadow pair, never from the typeface.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap");
+
+:root{
+  --relief-sans: "Inter", "Noto Sans SC", "PingFang SC", system-ui, sans-serif;
+  --relief-mono: "JetBrains Mono", "Noto Sans SC", ui-monospace, monospace;
+}
+html[data-lang="zh"] body,
+html[data-lang="zh"] p,
+html[data-lang="zh"] li,
+html[data-lang="zh"] .note{
+  font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  font-style: normal;   /* CJK 没有真 italic，强制消掉英文侧的斜体 */
+}

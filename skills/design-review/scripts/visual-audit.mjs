@@ -361,6 +361,47 @@ const SKILL_SIGNATURES = {
     ],
     forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Space Grotesk'],
   },
+  relief: {
+    name: 'relief orange',
+    accents: [[249, 146, 47], [221, 115, 26]],   // #f9922f + #dd731a — the badge
+                                                  // and rail gradient. Both ends are
+                                                  // listed because the accent always
+                                                  // ships as that gradient, never flat.
+    threshold: 0.0068,                            // calibrated 2026-09-15 the way primer's
+                                                  // was: set high enough to force the warn
+                                                  // to print, then read the measured
+                                                  // top-1440x500 coverage off the three
+                                                  // canonicals — controls 1.37% · diagram
+                                                  // 1.36% · hardware 1.36%. min(1.36)/2 =
+                                                  // 0.68%, above the 0.2% floor. The three
+                                                  // sit within 0.01% of each other because
+                                                  // the accent is spent in exactly two
+                                                  // places up there, by design: the badge
+                                                  // and the rail.
+    // lectern navy #1d3a6e is OMITTED, and unlike primer's omissions this one is
+    // not a follow-up left undone: it would fire on every relief page. Measured
+    // 2026-09-15 across all 93 colour values (7 skins x their role variables,
+    // taken per skin — merging the skins into one map silently drops the first
+    // six and reports a comfortable 46.0 instead of the truth): the nearest is
+    // the warm skin's --deep-b #25395f at euclidean 17.0, inside the matcher's
+    // 22. relief's deep blocks ARE a navy, so the entry would be a permanent
+    // false positive rather than a guard. Every other sibling accent clears:
+    // anthropic orange 33.7 · apple blue 107.6 · ember gold 44.4 · sage green
+    // 41.9 · glass cyan 102.7 · eclat flare 41.2 · lectern blue #2f5bb0 38.6 ·
+    // atelier rose 82.0 · primer violet 75.8.
+    forbiddenColors: [
+      { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
+      { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
+      { rgb: [196, 148, 100], note: 'ember gold #c49464' },
+      { rgb: [151, 176, 119], note: 'sage brand green #97B077' },
+      { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
+      { rgb: [255, 91, 52], note: 'eclat flare #ff5b34' },
+      { rgb: [47, 91, 176], note: 'lectern blue #2f5bb0' },
+      { rgb: [221, 79, 146], note: 'atelier rose #DD4F92' },
+      { rgb: [122, 92, 214], note: 'primer violet #7a5cd6' },
+    ],
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Fredoka'],
+  },
 };
 
 function detectSkill(target, html) {
