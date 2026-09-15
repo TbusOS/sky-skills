@@ -49,6 +49,7 @@ CHECKS = [
     ('navy-d',  'surf', 4.5, '节点 / 模块名'),
     ('navy',    'surf', 4.5, '强调文字 · 连线'),
     ('warn',    'surf', 4.5, '警示文字'),
+    ('kw',      'surf', 4.5, '代码关键字'),   # 2026-09-15 补:借用 --orange-d 曾漏检
 ]
 GRADS = [('on-hot',  'hot-a',  'hot-b',  4.5, '强调块上的字'),
          ('on-deep', 'deep-a', 'deep-b', 4.5, '深色块上的字')]

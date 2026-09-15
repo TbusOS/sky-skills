@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Relief · Data structures / 数据结构关系</title>
+<meta name="description" content="What a struct occupies, three relations that look alike in code, where a private pointer is parked, and how a device-tree property becomes a field.">
+<meta property="og:title" content="Relief · Data structures">
+<meta property="og:description" content="Struct layout, embed versus point versus link, the private-pointer round trip, and device-tree properties becoming fields.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/relief.css">
+</head>
+<body>
+
+<button class="lang-toggle" id="lang">中文 / EN</button>
+<div class="relief-skins relief-raised" id="skins">
+  <b class="on" data-s="">Warm</b><b data-s="gray">Gray</b><b data-s="matte">Matte</b><b data-s="ink">Ink</b><b data-s="mist">Mist</b><b data-s="clay">Clay</b><b data-s="sage">Sage</b>
+</div>
+
+<div class="relief-wrap">
+  <header class="relief-hero">
+    <div class="relief-container">
+    <span class="relief-badge">RELIEF · STRUCTS</span>
+    <h1 class="relief-h1"><span class="lang-en">The code is on the left of every figure</span><span class="lang-zh">每张图左边都贴着它的代码</span></h1>
+    <p class="relief-lede"><span class="lang-en">A diagram of a data structure earns its place only if the reader can point at the line it came from. So on this page <b>the source sits in a sunken panel beside each figure</b> — the code is the original, the figure is the reading of it, and the mapping is done by the eye instead of by memory.</span><span class="lang-zh">一张画数据结构的图，只有在读者能指着它对应的那行代码时才值得存在。所以这一页<b>源码就放在每张图旁边的凹陷面板里</b> —— 代码是原文，图是对原文的解释，而这层对应关系用眼睛就完成了，不用靠记。</span></p>
+    <div class="relief-rail"><span></span></div>
+    </div>
+  </header>
+
+<h2><span class="lang-en">1 · What a struct actually occupies</span><span class="lang-zh">1 · 结构体到底占了多少</span></h2>
+<p class="relief-note"><span class="lang-en">The fields you wrote are on the left, what the compiler laid out is on the right — and <b>the padding is drawn as sunken gaps, because that is what it is: nothing</b>. Two holes here cost 15 of 56 bytes. The dashed line is the cache line boundary, which is the reason this matters beyond tidiness.</span><span class="lang-zh">你写的字段在左边，编译器排出来的在右边 —— 而<b>填充画成凹陷的空格，因为它就是这个：什么都没有</b>。这里两个空洞吃掉了 56 字节里的 15 个。那条虚线是 cache line 边界，也是这件事不只是「整不整齐」的原因。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">struct tp_data · 56 bytes, 15 wasted</span><span class="lang-zh">struct tp_data · 56 字节，浪费 15 个</span><em><span class="lang-en">pahole prints these numbers; the figure is for seeing which two moves fix them</span><span class="lang-zh">pahole 会打出这些数字，图是用来看清「挪哪两下能修好」的</span></em></div>
+<div class="relief-codefig"><div><div class="relief-code relief-sunken" tabindex="0" role="region" aria-label="source"><i>/* drivers/input/tp_core.c */</i>
+struct tp_data {
+    <b>bool</b>              present;
+    <b>u64</b>               last_ts;
+    <b>u8</b>                lanes;
+    <b>struct mutex</b>      lock;
+    <b>struct i2c_client</b> *client;
+    <b>char</b>              name[16];
+};
+
+<i>/* $ pahole -C tp_data tp_core.o */</i>
+<em>/* size: 72, holes: 2, sum holes: 14 */</em></div><div class="relief-figcap"><span class="lang-en">Move <code>lanes</code> up next to <code>present</code>: the two holes become one 6-byte hole, 72 bytes becomes 64, and the struct lands on exactly one cache line — <code>name</code> stops straddling.</span><span class="lang-zh">把 <code>lanes</code> 挪到 <code>present</code> 旁边：两个空洞并成一个 6 字节的，72 字节变 64，结构体正好落在一条 cache line 上 —— <code>name</code> 不再跨界。</span></div></div><div><div class="relief-layout"><div class="relief-off">0</div><div class="relief-fieldrow relief-raised"><b>present</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">1 B</div><div class="relief-off">1</div><div class="relief-fieldrow relief-sunken relief-hole"><b>&mdash;</b><i><span class="lang-en">7 bytes of nothing — u64 must start on an 8-byte boundary</span><span class="lang-zh">7 个字节的空 —— u64 必须落在 8 字节边界上</span></i></div><div class="relief-sz">7 B</div><div class="relief-off">8</div><div class="relief-fieldrow relief-raised"><b>last_ts</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">8 B</div><div class="relief-off">16</div><div class="relief-fieldrow relief-raised"><b>lanes</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">1 B</div><div class="relief-off">17</div><div class="relief-fieldrow relief-sunken relief-hole"><b>&mdash;</b><i><span class="lang-en">7 more — the mutex behind it needs 8-byte alignment too</span><span class="lang-zh">又 7 个 —— 它后面的 mutex 同样要 8 字节对齐</span></i></div><div class="relief-sz">7 B</div><div class="relief-off">24</div><div class="relief-fieldrow relief-raised"><b>lock</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">24 B</div><div class="relief-off">48</div><div class="relief-fieldrow relief-raised"><b>client</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">8 B</div><div class="relief-off">56</div><div class="relief-fieldrow relief-raised"><b>name[16]</b><i><span class="lang-en">straddles the boundary — one field, two cache lines</span><span class="lang-zh">跨在边界上 —— 一个字段，两条 cache line</span></i></div><div class="relief-sz">16 B</div><div class="relief-cl"><span>cache line 64 B</span></div></div></div></div></div>
+<h2><span class="lang-en">2 · Three relations that look alike in code</span><span class="lang-zh">2 · 代码里长得像的三种关系</span></h2>
+<p class="relief-note"><span class="lang-en"><code>struct B b</code>, <code>struct B *b</code> and <code>struct list_head n</code> are one character apart in the source and <b>three different lifetimes</b> in reality. Embedding is drawn as containment, a pointer as a hop out to somewhere else, and a list_head as neither — because the list holds the head, not your struct.</span><span class="lang-zh"><code>struct B b</code>、<code>struct B *b</code>、<code>struct list_head n</code> 在源码里差一个字符，在现实里是<b>三条不同的生命周期</b>。嵌入画成包含，指针画成跳到别处，而 list_head 两者都不是 —— 因为链表串的是那个 head，不是你的结构体。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">EMBED / POINT / LINK</span><span class="lang-zh">嵌入 / 指针 / 挂链</span><em><span class="lang-en">only the middle one can give you a use-after-free, and that is the whole reason to tell them apart</span><span class="lang-zh">三个里只有中间那个会给你释放后使用，而这就是要分清它们的全部理由</span></em></div>
+<div class="relief-rel"><div class="relief-relcard relief-raised"><h4>struct A { struct B b; }</h4><div class="relief-sub"><span class="lang-en">embedded &mdash; B lives INSIDE A</span><span class="lang-zh">嵌入 —— B 就住在 A 里面</span></div><div class="relief-outer"><span class="relief-tag">struct A</span><div class="relief-inner">u32 flags</div><div class="relief-inner">struct B b</div></div><div class="relief-relnote"><span class="lang-en"><b>One allocation.</b> Free A and B is gone with it — you never free B. <code>&amp;a->b</code> is a valid pointer for exactly as long as A is.</span><span class="lang-zh"><b>只有一次分配。</b> 释放 A，B 跟着没了 —— 你永远不 free B。<code>&amp;a-&gt;b</code> 这个指针的有效期，和 A 完全一样长。</span></div></div><div class="relief-relcard relief-raised"><h4>struct A { struct B *b; }</h4><div class="relief-sub"><span class="lang-en">pointer &mdash; B lives somewhere else</span><span class="lang-zh">指针 —— B 住在别的地方</span></div><div class="relief-outer"><span class="relief-tag">struct A</span><div class="relief-inner">u32 flags</div><div class="relief-inner relief-ptrfield">struct B *b &rarr;</div></div><div class="relief-hop"><svg width="16" height="18" viewBox="0 0 16 18"><path d="M8 1v10M3 7l5 6 5-6" fill="none" stroke="var(--line)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="relief-inner" style="margin-top:0">struct B</div><div class="relief-relnote"><span class="lang-en"><b>Two allocations, two lifetimes.</b> This is the one that produces use-after-free: A can outlive B, or hold a pointer to something already freed.</span><span class="lang-zh"><b>两次分配，两条生命周期。</b> 释放后使用就出在这一种：A 可能活得比 B 久，也可能手里攥着一个已经被释放的东西。</span></div></div><div class="relief-relcard relief-raised"><h4>struct A { struct list_head n; }</h4><div class="relief-sub"><span class="lang-en">a link, not a container</span><span class="lang-zh">是个挂钩，不是容器</span></div><div class="relief-outer"><span class="relief-tag">struct A</span><div class="relief-inner">u32 flags</div><div class="relief-inner relief-ptrfield">struct list_head n</div></div><div class="relief-relnote"><span class="lang-en"><b>The list holds the list_head, not A.</b> That is why you need <code>container_of(pos, struct A, n)</code> to get back to A — and why the offset of <code>n</code> is what makes it work.</span><span class="lang-zh"><b>链表串起来的是 list_head，不是 A。</b> 所以才需要 <code>container_of(pos, struct A, n)</code> 才能拿回 A —— 而让它成立的，正是 <code>n</code> 在结构体里的偏移。</span></div></div></div></div>
+<h2><span class="lang-en">3 · Where your private pointer is parked</span><span class="lang-zh">3 · 你的私有指针存在哪</span></h2>
+<p class="relief-note"><span class="lang-en">Four lines of probe, drawn. The kernel hands you a <code>struct device</code>; you allocate your own struct and then <b>park a pointer to it on the kernel&rsquo;s side</b> so that every later callback can get it back. The chain is short — what makes it worth a figure is that it is walked from memory every single time.</span><span class="lang-zh">probe 里的四行，画出来。内核给你一个 <code>struct device</code>；你分配自己的结构体，然后<b>把指向它的指针寄存在内核那边</b>，让之后每一次回调都能取回来。链很短 —— 值得画成图，是因为它每次都是凭记忆走的。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">device &rarr; client &rarr; yours</span><span class="lang-zh">device &rarr; client &rarr; 你的</span><em><span class="lang-en">get the direction backwards and you get a pointer that is valid, wrong, and silent</span><span class="lang-zh">方向弄反，你得到的是一个合法的、错的、而且不报错的指针</span></em></div>
+<div class="relief-codefig"><div><div class="relief-code relief-sunken" tabindex="0" role="region" aria-label="source"><i>/* probe 里这四行，就是下面那张图 */</i>
+static int tp_probe(<b>struct i2c_client</b> *cl)
+{
+    struct tp_data *tp;
+    tp = devm_kzalloc(<b>&amp;cl-&gt;dev</b>, sizeof(*tp), GFP_KERNEL);
+    tp-&gt;client = cl;              <i>/* 往下记 */</i>
+    <em>i2c_set_clientdata(cl, tp);</em>  <i>/* 往上挂 */</i>
+    ...
+}
+
+<i>/* 别处要拿回来: */</i>
+struct tp_data *tp = <em>i2c_get_clientdata(cl)</em>;</div><div class="relief-figcap"><span class="lang-en">The two orange lines are the round trip: <code>set_clientdata</code> stores your struct on the kernel&rsquo;s side, <code>get_clientdata</code> takes it back. Everything else in the chain the kernel already built for you.</span><span class="lang-zh">橙色那两行就是这一来一回：<code>set_clientdata</code> 把你的结构体存到内核那边，<code>get_clientdata</code> 再取回来。链上其余的部分，内核早就替你搭好了。</span></div></div><div><div class="relief-dchain" tabindex="0" role="region" aria-label="chain"><div class="relief-desc relief-raised"><h4>struct device</h4><dl><dt><span class="lang-en">the kernel&rsquo;s</span><span class="lang-zh">内核那边的</span></dt><dd>dev</dd><dt>driver_data</dt><dd class="relief-null">void *</dd></dl></div><div class="relief-dlink"><svg width="26" height="20" viewBox="0 0 26 20"><path d="M1 10h14M12 3l9 7-9 7" fill="none" stroke="var(--navy)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="relief-desc relief-raised"><h4>struct i2c_client</h4><dl><dt><span class="lang-en">contains</span><span class="lang-zh">内含</span></dt><dd>struct device dev</dd><dt>addr</dt><dd>0x38</dd></dl></div><div class="relief-dlink"><svg width="26" height="20" viewBox="0 0 26 20"><path d="M1 10h14M12 3l9 7-9 7" fill="none" stroke="var(--navy)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="relief-desc relief-raised relief-live"><h4>struct tp_data</h4><dl><dt>client</dt><dd><span class="lang-en">points back</span><span class="lang-zh">指回去</span></dd><dt>lock</dt><dd>mutex</dd><dt>input</dt><dd>input_dev *</dd></dl></div></div></div></div></div>
+<h2><span class="lang-en">4 · From a device tree property to a struct field</span><span class="lang-zh">4 · 从设备树属性到结构体字段</span></h2>
+<p class="relief-note"><span class="lang-en">Each row is one property and the field it becomes, with <b>the function that does the conversion named on the row itself</b> — because that name is what you actually go looking for. The last row is sunken on purpose: <code>compatible</code> never becomes a field at all.</span><span class="lang-zh">每一行是一个属性和它变成的那个字段，而且<b>做这次转换的函数就写在这一行上</b> —— 因为你真正要找的就是那个函数名。最后一行故意是凹的：<code>compatible</code> 根本不会变成任何字段。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">ONE NODE, THREE PROPERTIES</span><span class="lang-zh">一个节点，三个属性</span><em><span class="lang-en">a typo in compatible is silent; a typo in quartz,lanes gives you a zero — two very different bugs</span><span class="lang-zh">compatible 写错是一片安静，quartz,lanes 写错给你一个 0 —— 两种完全不同的 bug</span></em></div>
+<div class="relief-codefig"><div><div class="relief-code relief-sunken" tabindex="0" role="region" aria-label="source"><i>/* arch/arm64/boot/dts/... */</i>
+touch@38 {
+    compatible = "quartz,tp-q1";
+    reg = &lt;0x38&gt;;
+    <b>quartz,lanes</b> = &lt;4&gt;;
+    <b>reset-gpios</b> = &lt;&amp;gpio4 18 GPIO_ACTIVE_LOW&gt;;
+};
+
+<i>/* probe 里读出来 */</i>
+<em>of_property_read_u32</em>(np, "quartz,lanes", &amp;tp-&gt;lanes);
+tp-&gt;rst = <em>devm_gpiod_get</em>(dev, "reset", GPIOD_OUT_HIGH);</div><div class="relief-figcap"><span class="lang-en">Note the last row: <code>compatible</code> is the one property that never becomes a field. It is consumed before your code runs, which is why a typo there produces silence rather than a wrong value.</span><span class="lang-zh">注意最后一行：<code>compatible</code> 是唯一一个永远不会变成字段的属性。它在你的代码跑起来之前就被消费掉了 —— 所以那里写错得到的是一片安静，不是一个错的值。</span></div></div><div><div class="relief-layout"><div class="relief-off">dts</div><div class="relief-fieldrow relief-raised"><b>quartz,lanes = &lt;4&gt;</b><i><span class="lang-en">of_property_read_u32()</span><span class="lang-zh">of_property_read_u32()</span></i></div><div class="relief-sz">u32</div><div class="relief-off">&rarr;</div><div class="relief-fieldrow relief-raised"><b>tp-&gt;lanes = 4</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">1 B</div><div class="relief-off">dts</div><div class="relief-fieldrow relief-raised"><b>reset-gpios = &lt;&hellip;&gt;</b><i><span class="lang-en">devm_gpiod_get(dev, "reset", &hellip;)</span><span class="lang-zh">devm_gpiod_get(dev, "reset", …)</span></i></div><div class="relief-sz">&mdash;</div><div class="relief-off">&rarr;</div><div class="relief-fieldrow relief-raised"><b>tp-&gt;rst</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">8 B</div><div class="relief-off">dts</div><div class="relief-fieldrow relief-raised"><b>compatible</b><i><span class="lang-en">of_match_table</span><span class="lang-zh">of_match_table</span></i></div><div class="relief-sz">&mdash;</div><div class="relief-off">&times;</div><div class="relief-fieldrow relief-sunken relief-hole"><b>&mdash;</b><i><span class="lang-en">never reaches your struct — it only decides whether probe runs</span><span class="lang-zh">根本到不了你的结构体 —— 它只决定 probe 跑不跑</span></i></div><div class="relief-sz">&mdash;</div></div></div></div></div>
+</div>
+
+<script>
+document.getElementById('skins').addEventListener('click', e => {
+  const b = e.target.closest('b'); if (!b) return;
+  document.querySelectorAll('#skins b').forEach(x => x.classList.toggle('on', x === b));
+  const s = b.dataset.s;
+  if (s) document.documentElement.setAttribute('data-theme', s);
+  else document.documentElement.removeAttribute('data-theme');
+});
+const root = document.documentElement;
+const saved = localStorage.getItem('relief-lang');
+root.setAttribute('data-lang', saved || ((navigator.language || '').startsWith('zh') ? 'zh' : 'en'));
+document.getElementById('lang').addEventListener('click', () => {
+  const next = root.getAttribute('data-lang') === 'zh' ? 'en' : 'zh';
+  root.setAttribute('data-lang', next);
+  try { localStorage.setItem('relief-lang', next); } catch (e) {}
+});
+</script>
+
+<!-- design-review:self-diff v1
+Skill: relief
+Page-type: struct
+Created: 2026-09-15
+
+Decisions (5):
+1. [the-code-sits-beside-the-figure] chose "every figure on this page ships with the source it explains, in a sunken panel to its left" over "a figure with a caption naming the file". Because: a diagram of a data structure is only worth drawing if the reader can point at the line it came from — with the code beside it the mapping is done by the eye, and with a filename in the caption it is done by the reader going and finding the file.
+2. [padding-is-drawn-as-nothing] chose "compiler padding as a sunken empty row" over "a labelled grey block". Because: depth already means 'nothing is here' on every other page in this skill, so a hole reads as a hole without a legend — and the two rows that cost 15 of 56 bytes are then the two rows that look empty.
+3. [three-relations-get-three-shapes] chose "embed as containment, pointer as a hop out, list_head as neither" over "one diagram with differently-labelled arrows". Because: the three differ by one character in source and by an entire lifetime in reality, and the bug they produce (use-after-free) belongs to exactly one of them — shapes that differ are what make that one stand out.
+4. [the-round-trip-is-the-figure] chose "show set_clientdata and get_clientdata as the two ends of one chain" over "a static ownership diagram". Because: what a driver author actually forgets is the direction, not the participants — so the figure is built around the round trip and the two lines are the only ones marked.
+5. [compatible-gets-a-sunken-row] chose "give compatible a row in the property table and draw it sunken" over "leaving it out because it is not a field". Because: its absence is the point — it is the property people expect to find in their struct and never do, and the sunken row says that in the same place they would go looking.
+
+Known trade-offs:
+- The layout figure is for one struct on one ABI. Change the architecture and the holes move, so it teaches the method rather than the numbers.
+- The device-model chain is drawn for i2c. platform and spi have the same shape with different accessor names, which the figure does not show.
+- Code panels are hand-written HTML, not generated from the real source, so they can drift from the tree they describe.
+/design-review:self-diff -->
+
+</body>
+</html>

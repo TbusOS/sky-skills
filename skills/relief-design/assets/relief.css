@@ -20,6 +20,8 @@
   --on-deep:#ffffff;                 /* 深色块上的字 */
   --deep-a:#4b6497; --deep-b:#25395f;/* 深色块渐变 */
   --line:var(--dark);                /* 框图连线。暗色皮肤下要比底色亮 */
+  --kw:#8f4108;                      /* 代码里的关键字。必须单列一个角色 —— 借用 --orange-d
+                                        曾经漏检：它是「强调块的暗端」，不是「面料上的前景色」 */
   --hi:rgba(255,255,255,.85);        /* SVG 浮雕的上沿亮边 */
   --lo:rgba(120,96,58,.45);          /* SVG 浮雕的下投暗影 */
 }
@@ -75,6 +77,7 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
   --muted:#59616e; --warn:#a8480e;
   --hot-a:#f2842a; --hot-b:#de7620; --on-hot:#3a1e06; --deep-a:#44608f; --deep-b:#1f3356;
   --hi:rgba(255,255,255,.95); --lo:rgba(74,84,102,.40);
+  --kw:#8a3f07;
 }
 
 /* 皮肤切换条 */
@@ -98,6 +101,7 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
   --hot-a:#e89340; --hot-b:#c56c1c; --on-hot:#2a1503; --deep-a:#4e6285; --deep-b:#2f3d57;
   --hi:rgba(255,255,255,.10); --lo:rgba(0,0,0,.60);
   --off:11px; --blur:22px;
+  --kw:#f0a45c;
 }
 [data-theme="mist"]{            /* 低饱和青灰 */
   --surf:#dce4e3; --lite:#f4fbfa; --dark:#aeb9b7; --ink:#2d3938;
@@ -105,6 +109,7 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
   --muted:#556360; --warn:#8a4526; --line:var(--dark);
   --hot-a:#35766f; --hot-b:#275b56; --on-hot:#ffffff; --deep-a:#476b66; --deep-b:#2a4844;
   --hi:rgba(255,255,255,.90); --lo:rgba(56,74,72,.42);
+  --kw:#7d3f22;
 }
 [data-theme="clay"]{            /* 低饱和陶土 */
   --surf:#e6ddd7; --lite:#faf4f0; --dark:#bfb2aa; --ink:#3c332e;
@@ -112,6 +117,7 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
   --muted:#6b5d55; --warn:#8c4128; --line:var(--dark);
   --hot-a:#ae5f45; --hot-b:#96492f; --on-hot:#ffffff; --deep-a:#5f6e83; --deep-b:#3e4a5b;
   --hi:rgba(255,255,255,.88); --lo:rgba(96,80,68,.42);
+  --kw:#7e3a1e;
 }
 [data-theme="sage"]{            /* 低饱和鼠尾草 */
   --surf:#e2e5db; --lite:#f7faf0; --dark:#b4bbab; --ink:#353a2e;
@@ -119,6 +125,7 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
   --muted:#5c6353; --warn:#8d5a2c; --line:var(--dark);
   --hot-a:#98682f; --hot-b:#7d5424; --on-hot:#ffffff; --deep-a:#55664a; --deep-b:#354330;
   --hi:rgba(255,255,255,.88); --lo:rgba(74,82,64,.42);
+  --kw:#6f4a18;
 }
 
 /* 磨砂黑。比 ink 再深一档，接近纯黑。
@@ -132,6 +139,7 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
   --hot-a:#e08b30; --hot-b:#cc7524; --on-hot:#241202; --deep-a:#42557a; --deep-b:#212c40;
   --hi:rgba(255,255,255,.07); --lo:rgba(0,0,0,.72);
   --off:12px; --blur:24px;
+  --kw:#f2a862;
 }
 [data-theme="matte"] body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;
   opacity:.30;mix-blend-mode:overlay;
@@ -681,3 +689,77 @@ html[data-lang="zh"] .lang-en{display:none!important}
   box-shadow:3px 3px 7px var(--dark),-3px -3px 7px var(--lite)}
 .relief-cap.relief-no{color:var(--muted);font-weight:500;
   box-shadow:inset 3px 3px 6px var(--dark),inset -2px -2px 5px var(--lite)}
+
+/* ═══════════════ 代码与图并排 ═══════════════
+   图是为了让代码更直观。所以数据结构这类图，旁边必须贴着它对应的那段代码 ——
+   读者不用在脑子里做映射，指着看就行。代码放凹陷面板(它是「原文」)，
+   图放凸起(它是「对原文的解释」)。 */
+.relief-codefig{display:grid;grid-template-columns:minmax(260px,0.85fr) 1.15fr;gap:20px;align-items:start}
+.relief-code{padding:16px 18px;border-radius:18px;font:500 12.5px var(--relief-mono);
+  color:var(--navy-d);line-height:1.95;white-space:pre;overflow-x:auto}
+.relief-code em{font-style:normal;color:var(--warn);font-weight:700}
+.relief-code b{color:var(--kw);font-weight:700}
+.relief-code i{font-style:normal;color:var(--muted);font-weight:400}
+.relief-figcap{margin-top:11px;font:400 12px var(--relief-sans);color:var(--muted);line-height:1.65}
+
+/* 结构体内存布局：字段凸起，填充空洞凹陷（那里真的什么都没有），
+   cache line 边界用一条横线标出来。 */
+.relief-layout{display:grid;grid-template-columns:70px 1fr 78px;gap:0 12px}
+.relief-off{font:500 11.5px var(--relief-mono);color:var(--muted);text-align:right;
+  align-self:center;padding-bottom:6px}
+.relief-fieldrow{border-radius:11px;padding:10px 14px;margin-bottom:6px;--off:4px;--blur:9px;
+  display:flex;align-items:center;gap:11px;min-height:40px}
+.relief-fieldrow b{font:700 12.5px var(--relief-mono);color:var(--navy-d)}
+.relief-fieldrow i{font-style:normal;font:400 11.5px var(--relief-sans);color:var(--muted);margin-left:auto}
+.relief-fieldrow.relief-hole{box-shadow:inset 4px 4px 9px var(--dark),inset -3px -3px 8px var(--lite)}
+.relief-fieldrow.relief-hole b{color:var(--muted);font-weight:500}
+.relief-cl{grid-column:1/-1;height:0;border-top:2px dashed var(--warn);margin:3px 0 9px;position:relative}
+.relief-cl span{position:absolute;right:0;top:-9px;font:700 10.5px var(--relief-mono);color:var(--warn);
+  background:var(--surf);padding:0 8px}
+.relief-sz{font:500 11.5px var(--relief-mono);color:var(--muted);align-self:center;padding-bottom:6px}
+
+/* 三种关系：嵌入是套在凹槽里，指针是连到外面，链表是链上的挂钩 */
+.relief-rel{display:grid;grid-template-columns:repeat(auto-fit,minmax(272px,1fr));gap:16px}
+.relief-relcard{padding:16px 17px 18px;border-radius:20px}
+.relief-relcard h4{margin:0 0 4px;font:700 13.5px var(--relief-mono);color:var(--navy-d)}
+.relief-relcard .relief-sub{font:400 11.5px var(--relief-sans);color:var(--muted);margin-bottom:13px;line-height:1.6}
+.relief-outer{padding:12px 13px 13px;border-radius:15px;
+  box-shadow:inset 5px 5px 10px var(--dark),inset -4px -4px 9px var(--lite)}
+.relief-outer .relief-tag{font:700 11.5px var(--relief-mono);color:var(--muted);margin-bottom:9px;display:block}
+.relief-inner{padding:10px 13px;border-radius:11px;font:700 12px var(--relief-mono);color:var(--navy-d);
+  box-shadow:4px 4px 9px var(--dark),-4px -4px 9px var(--lite);background:var(--surf);margin-bottom:7px}
+.relief-inner:last-child{margin-bottom:0}
+.relief-inner.relief-ptrfield{color:var(--kw)}
+.relief-relnote{margin-top:11px;font:400 11.5px var(--relief-sans);color:var(--muted);line-height:1.65}
+.relief-relnote b{color:var(--navy-d)}
+.relief-hop{display:grid;place-items:center;height:26px}
+.relief-hop svg{filter:drop-shadow(0 -1.1px 0 var(--hi)) drop-shadow(0 2px 1.4px var(--lo))}
+
+/* slab 对象越界：对象凸起，红区凹陷并描警示色，下一个对象再凸起。
+   越界落在红区 = 检测得到；越过红区落进下一个对象 = 静悄悄把别人的数据改了。 */
+.relief-slab{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:4px 0}
+.relief-slot{border-radius:14px;padding:13px 15px;--off:5px;--blur:10px;min-width:150px;flex:none;text-align:center}
+.relief-slot b{display:block;font:700 12.5px var(--relief-mono);color:var(--navy-d)}
+.relief-slot i{display:block;font-style:normal;font:400 11px var(--relief-sans);color:var(--muted);margin-top:5px;line-height:1.5}
+.relief-slot.relief-redzone{box-shadow:inset 5px 5px 10px var(--dark),inset -4px -4px 9px var(--lite),
+  inset 0 0 0 2px var(--warn);min-width:96px}
+.relief-slot.relief-redzone b{color:var(--warn)}
+.relief-slot.relief-victim{box-shadow:5px 5px 11px var(--dark),-5px -5px 11px var(--lite),
+  inset 0 0 0 2px var(--orange)}
+.relief-gapx{width:7px;flex:none}
+
+/* dmesg 时间线：打印是凸点，中间那段没有输出的空档是凹带 —— 空档才是线索 */
+.relief-tl{display:grid;grid-template-columns:106px 1fr;gap:8px 14px;align-items:center}
+.relief-ts{font:500 12px var(--relief-mono);color:var(--muted);text-align:right}
+.relief-ev{padding:10px 15px;border-radius:12px;--off:4px;--blur:9px;
+  font:500 12.5px var(--relief-mono);color:var(--navy-d);min-height:40px;display:flex;align-items:center;gap:10px}
+.relief-ev i{font-style:normal;font:400 11.5px var(--relief-sans);color:var(--muted);margin-left:auto}
+.relief-gapband{grid-column:2;border-radius:15px;padding:13px 16px;margin:3px 0;
+  font:600 12px var(--relief-sans);color:var(--warn);text-align:center;
+  box-shadow:inset 5px 5px 10px var(--dark),inset -4px -4px 9px var(--lite),inset 0 0 0 2px var(--warn)}
+
+/* 图集页：一页看完所有框图，每条直接跳到它所在的那一页 */
+.relief-gitems{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:10px}
+.relief-gitem{padding:12px 15px;border-radius:13px;text-decoration:none;
+  font:600 13px var(--relief-sans);color:var(--navy-d);line-height:1.5;display:block}
+.relief-gitem:hover{box-shadow:inset 4px 4px 9px var(--dark),inset -3px -3px 8px var(--lite)}

@@ -77,7 +77,7 @@ const TARGET = {
   // 'code' is the software's shape, 'debug' is what you open while a failure is
   // still on screen, and 'git' is the repository's shape. Different questions,
   // so different pages — a reader looking for one should not scroll the others.
-  relief: ['controls', 'diagram', 'hardware', 'platform', 'code', 'debug', 'git'],
+  relief: ['controls', 'diagram', 'hardware', 'platform', 'code', 'struct', 'debug', 'git'],
 };
 
 function parseArgs(argv) {
