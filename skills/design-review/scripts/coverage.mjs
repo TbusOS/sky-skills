@@ -73,7 +73,11 @@ const TARGET = {
   // platform is the board and the stack on it, code is the software's own shape
   // — a stack, a call graph, which files are yours, what may sleep, who waits
   // on whom. Three subjects, three pages, one vocabulary.
-  relief: ['controls', 'diagram', 'hardware', 'platform', 'code'],
+  // 'debug' and 'git' split off for the same reason 'platform' and 'code' did:
+  // 'code' is the software's shape, 'debug' is what you open while a failure is
+  // still on screen, and 'git' is the repository's shape. Different questions,
+  // so different pages — a reader looking for one should not scroll the others.
+  relief: ['controls', 'diagram', 'hardware', 'platform', 'code', 'debug', 'git'],
 };
 
 function parseArgs(argv) {
