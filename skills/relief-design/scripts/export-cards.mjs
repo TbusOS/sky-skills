@@ -4,14 +4,17 @@
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { extname, resolve, basename } from 'node:path';
+import { extname, resolve, basename, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const argv = process.argv.slice(2);
 const scale = Number((argv.find(a => a.startsWith('--scale=')) || '=1').split('=')[1]) || 1;
 const [file, prefixRaw] = argv.filter(a => !a.startsWith('--'));
 if (!file) { console.error('usage: node shoot.mjs <html> [prefix] [--scale=2]'); process.exit(2); }
 const prefix = prefixRaw || basename(file, '.html');
-const ROOT = resolve('/home/zhangbh/claude-tools/sky-skills');
+// 仓库根目录从脚本自身位置推出来。写死绝对路径既把作者的用户名带进公开仓，
+// 别人 clone 下来也直接跑不了 —— 而且它不会报错，只会 404。
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const mime = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8',
   '.js':'application/javascript', '.svg':'image/svg+xml', '.png':'image/png', '.jpg':'image/jpeg' };
 
