@@ -62,6 +62,27 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
 
 /* ── 框图通用件 ── */
 .relief-board{padding:34px 32px;border-radius:30px;margin-bottom:26px}
+/* 从图集页点进来时，要能一眼认出落到的是哪一张 —— 一页十张图，
+   光滚过去不够。滚动留一段余量，再让边沿亮一下就退回常态。
+   注意这里不给 html 加 scroll-behavior:smooth：截图脚本是 scrollTo 分步
+   滚完立刻截，平滑滚动会让它截在没停稳的位置上。 */
+.relief-board{scroll-margin-top:28px}
+.relief-board:target{animation:relief-land 2.6s ease-out 1}
+@keyframes relief-land{
+  0%,55%{box-shadow:0 0 0 3px var(--hot-b),
+    calc(var(--off)*-1) calc(var(--off)*-1) var(--blur) var(--lite),
+    var(--off) var(--off) var(--blur) var(--dark)}
+  100%{box-shadow:0 0 0 3px transparent,
+    calc(var(--off)*-1) calc(var(--off)*-1) var(--blur) var(--lite),
+    var(--off) var(--off) var(--blur) var(--dark)}
+}
+/* 关掉动效的人看不到那道闪，给他留一条不动的标记 */
+@media (prefers-reduced-motion:reduce){
+  .relief-board:target{animation:none;
+    box-shadow:0 0 0 3px var(--hot-b),
+      calc(var(--off)*-1) calc(var(--off)*-1) var(--blur) var(--lite),
+      var(--off) var(--off) var(--blur) var(--dark)}
+}
 .relief-bt{font-size:14px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin-bottom:22px}
 .relief-bt em{font-style:normal;font-weight:500;color:var(--muted);margin-left:10px;letter-spacing:0}
 

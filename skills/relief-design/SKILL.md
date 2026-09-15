@@ -90,6 +90,7 @@ python3 $R/scripts/check_skin_contrast.py $R/assets/relief.css                  
 for t in gray ink matte mist clay sage; do
   node skills/design-review/scripts/axe-audit.mjs --theme=$t $R/references/canonical/<页>.html
 done
+node    $R/scripts/check_gallery_links.mjs        # 改过图集页或任何 canonical 页就跑
 ```
 
 **两道对比度检查查的不是一回事，缺一不可：**
@@ -98,6 +99,10 @@ done
 |---|---|---|
 | `check_skin_contrast.py` | 渐变底上的文字 | **axe 算不了渐变背景**，白字压在橙渐变上它一条都不报 |
 | `axe-audit.mjs --theme=<皮肤>` | 真实 DOM 每个元素 | 脚本只查列出的角色对，不扫 DOM |
+
+**图集页改过就跑 `check_gallery_links.mjs`。** 它点一遍 45 个按钮，核对落到的那张图
+是不是按钮上写的那张。这道检查不看链接字符串 —— 看的是浏览器解析出来的 `:target`
+元素自己的标题。**用同一套字符串匹配去改、再去验，改错了它也说过。**
 
 **`--theme` 不传就等于没测。** 七个皮肤不传参数会报出一模一样的数字，看着像「都过了」，
 其实是把默认皮肤测了七遍（本仓 glass 的浅色主题因此漏测 11 天、带着 84 个阻塞元素）。

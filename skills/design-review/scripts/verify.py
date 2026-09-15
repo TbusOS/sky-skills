@@ -41,7 +41,7 @@ Checks:
   2. <!doctype html> + viewport meta present
   3. Hero inner element uses an acceptable container (per skill)
   4. Every `class="{prefix}-*"` token is defined somewhere in the CSS union
-  5. <svg> tag balance
+  5. <svg> tag balance · <div> balance (comments and code blocks excluded)
   6. Container modifier never used without its base class (BEM bug)
   7. Bilingual toggle on public pages (lang-toggle / lang-en / lang-zh)
   8. Half-width ASCII punctuation inside lang-zh spans · self-diff block
@@ -435,6 +435,44 @@ def check_file(
                 f"Use <tspan font-weight=\"600\"> for emphasis."
             )
 
+    # 5c. <div> balance. A missing </div> does not break the render loudly:
+    # the browser just nests every following sibling inside the block that
+    # never closed, so the last few sections of the page quietly render one
+    # level deeper — indented, inside the previous card's padding. Nothing
+    # errors, screenshots still look plausible, and only a reader who knows
+    # what the page should look like notices. Caught 2026-09-15 in relief's
+    # hardware page, where the last three figures had been living inside the
+    # MESI figure since the day it shipped.
+    #
+    # Comments, <script>, <style>, <pre> and <code> are blanked first: a
+    # self-diff note that says "wrapped from <div> to <figure>" is prose about
+    # a tag, not a tag. Without that step this check reports two false
+    # positives on pages that are perfectly fine — the same trap the inline-CSS
+    # comment once sprang on the <svg> check.
+    def _blank(m):
+        return re.sub(r"[^\n]", " ", m.group(0))
+
+    stripped = re.sub(r"<!--.*?-->", _blank, html, flags=re.DOTALL)
+    stripped = re.sub(r"<(script|style|pre|code)\b.*?</\1>", _blank, stripped,
+                      flags=re.DOTALL | re.IGNORECASE)
+    d_open = len(re.findall(r"<div\b", stripped, re.IGNORECASE))
+    d_close = len(re.findall(r"</div\s*>", stripped, re.IGNORECASE))
+    if d_open != d_close:
+        if d_open > d_close:
+            what = (f"{d_open - d_close} missing </div> — everything after the "
+                    f"unclosed block renders nested inside it")
+        else:
+            what = (f"{d_close - d_open} stray </div> — the browser drops it, "
+                    f"so the page looks fine and the source stays wrong")
+        errors.append(
+            f"{path}: unbalanced <div> ({d_open} open, {d_close} close): {what}. "
+            f"To find it, walk the file with a stack — but read the report with "
+            f"care: the element still open at EOF is the OUTERMOST one, not the "
+            f"culprit, because every close after the missing one shifts up a "
+            f"level. The browser's own DOM is the honest witness: load the page "
+            f"and look for a block whose parent carries the same class."
+        )
+
     # 6. Modifier-only container (BEM bug)
     mod_re = re.compile(
         re.escape(prefix) + r"container--(?:"
@@ -605,7 +643,7 @@ def check_file(
         # 取待检正文。双语页只看 lang-zh span;**单语页(整页一个 lang-zh 都没有)
         # 退回整页**,否则待检文本恒为空、这道检查在纯中文页上完全空转。
         # 2026-09-01 实测:一批纯中文投资报告 err=0 warn=0 全绿,而人工按同样
-        # 逻辑跑正文,5 个术语确实没定义 —— 闸一个都没看见,绿灯是假的。
+        # 逻辑跑正文,5 个术语确实没定义 —— 检查一条都没看见,绿灯是假的。
         # 空转的检查比没有检查更糟:它让人以为查过了。见 known-bugs.md 1.63。
         zh_bodies = zh_span_pattern.findall(html)
         zh_src = " ".join(zh_bodies) if zh_bodies else html

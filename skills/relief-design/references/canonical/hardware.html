@@ -30,7 +30,7 @@
 
 <h2><span class="lang-en">A · State machine</span><span class="lang-zh">A · 状态机</span></h2>
 <p class="relief-note"><span class="lang-en">States are raised blocks, transitions are embossed lines, and each condition sits in a <b>sunken</b> pill. Sunken means condition, raised means state — the reader never needs a legend. The entry state carries the accent colour. Below are the kernel's four runtime-PM states.</span><span class="lang-zh">状态用凸起的块，迁移用浮雕线，条件写在凹进去的药丸里——<b>凹的是条件，凸的是状态</b>，不用看图例也分得清谁是谁。入口状态给强调色。下面画的是内核 runtime PM 的四个状态。</span></p>
-<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">RUNTIME PM STATE MACHINE</span><span class="lang-zh">RUNTIME PM 状态机</span><em><span class="lang-en">the failure path back to ACTIVE is the line most diagrams leave out</span><span class="lang-zh">失败回退那条线是重点，多数图会漏掉</span></em></div>
+<div class="relief-board relief-raised" id="fig-runtime-pm-state-machine"><div class="relief-bt"><span class="lang-en">RUNTIME PM STATE MACHINE</span><span class="lang-zh">RUNTIME PM 状态机</span><em><span class="lang-en">the failure path back to ACTIVE is the line most diagrams leave out</span><span class="lang-zh">失败回退那条线是重点，多数图会漏掉</span></em></div>
 <div class="relief-pan" tabindex="0" role="region" aria-label="diagram"><div class="relief-fsm">
   <svg viewBox="0 0 960 430">
     <defs>
@@ -66,7 +66,7 @@
 
 <h2><span class="lang-en">B · Timing diagram</span><span class="lang-zh">B · 时序图</span></h2>
 <p class="relief-note"><span class="lang-en">The waveforms live inside a <b>sunken panel</b> — it is a screen, so sunken is the honest shape. Traces are embossed strokes floating on it; alignment guides and measurement bars sit one layer below in the surface colour, so they never compete with the traces. Below is a panel power-on sequence.</span><span class="lang-zh">波形放进一块<b>凹陷的面板</b>里——它本来就是一块显示屏，凹进去比凸出来对。信号线用浮雕描边浮在面板上；基准虚线和量取条用面料色，压在波形下面一层，不抢。下面是一块屏的上电时序。</span></p>
-<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">PANEL POWER-ON SEQUENCE</span><span class="lang-zh">屏上电时序</span><em><span class="lang-en">the four delays are what gets missed when porting to a new panel</span><span class="lang-zh">四段延时是换屏时最容易抄漏的东西</span></em></div>
+<div class="relief-board relief-raised" id="fig-panel-power-on-sequence"><div class="relief-bt"><span class="lang-en">PANEL POWER-ON SEQUENCE</span><span class="lang-zh">屏上电时序</span><em><span class="lang-en">the four delays are what gets missed when porting to a new panel</span><span class="lang-zh">四段延时是换屏时最容易抄漏的东西</span></em></div>
 <div class="relief-scope relief-sunken"><svg viewBox="0 0 1120 396">
   <!-- 基准虚线，先画，压在波形下 -->
   <g class="relief-guide">
@@ -112,7 +112,7 @@
 
 <h2><span class="lang-en">C · Register bitfield</span><span class="lang-zh">C · 寄存器位域</span></h2>
 <p class="relief-note"><span class="lang-en">Reserved bits are <b>sunken dead zones</b>, usable bits are raised — you know which bits you may touch without reading the access column. The write-only self-clearing bit takes the accent colour, because it is the one people get wrong: it always reads back 0, and that does not mean the write missed.</span><span class="lang-zh">保留位画成<b>凹进去的死区</b>，能用的位凸起——不用读属性列就知道哪些位是能碰的。只写自清的位给强调色，因为它是最容易写错的一类（读回来永远是 0，不代表没生效）。</span></p>
-<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">Quartz-3550 · DSI_CTRL</span><span class="lang-zh">Quartz-3550 · DSI_CTRL</span><em><span class="lang-en">offset 0x0010 · reset 0x0003_FF00</span><span class="lang-zh">偏移 0x0010 · 复位值 0x0003_FF00</span></em></div>
+<div class="relief-board relief-raised" id="fig-quartz-3550-dsi-ctrl"><div class="relief-bt"><span class="lang-en">Quartz-3550 · DSI_CTRL</span><span class="lang-zh">Quartz-3550 · DSI_CTRL</span><em><span class="lang-en">offset 0x0010 · reset 0x0003_FF00</span><span class="lang-zh">偏移 0x0010 · 复位值 0x0003_FF00</span></em></div>
   <div class="relief-regbar">
     <div class="relief-bitno" style="grid-column:span 12">31 ······ 20</div>
     <div class="relief-bitno" style="grid-column:span 4">19·16</div>
@@ -154,7 +154,7 @@
 
 <h2><span class="lang-en">D · IP block diagram</span><span class="lang-zh">D · IP 内部框图</span></h2>
 <p class="relief-note"><span class="lang-en">Groups sit in sunken wells, modules are raised blocks inside them — a well says <b>these belong together</b>, a block says <b>this is one thing</b>. The bus is a sunken rail: <b>masters attach above it, slaves below</b>. That is the reading convention; break it and every reader has to trace each line to find who initiates a transfer.</span><span class="lang-zh">分组用<b>凹陷的槽</b>装，模块用凸起的块摆进去——槽是「这几个归一起」，块是「这是一个东西」。总线画成一条凹槽轨：<b>主设备接在轨上方，从设备接在下方</b>，这是读图的约定，不按这个摆，看图的人得逐条线追才知道谁发起访问。</span></p>
-<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">Quartz-3550 application processor · internal structure</span><span class="lang-zh">Quartz-3550 应用处理器 · 内部结构</span><em><span class="lang-en">illustrative name, not a real product</span><span class="lang-zh">示意名，非真实产品</span></em></div>
+<div class="relief-board relief-raised" id="fig-quartz-3550-application-processor-internal-structure"><div class="relief-bt"><span class="lang-en">Quartz-3550 application processor · internal structure</span><span class="lang-zh">Quartz-3550 应用处理器 · 内部结构</span><em><span class="lang-en">illustrative name, not a real product</span><span class="lang-zh">示意名，非真实产品</span></em></div>
 <div class="relief-soc">
   <div class="relief-socrow" style="grid-template-columns:2.15fr 1fr">
     <div class="relief-well relief-sunken"><div class="relief-wname"><span class="lang-en">CPU subsystem</span><span class="lang-zh">CPU 子系统</span> <span><span class="lang-en">master</span><span class="lang-zh">主设备</span></span></div>
@@ -212,7 +212,7 @@
 
 <h2><span class="lang-en">E · Memory map</span><span class="lang-zh">E · 内存布局</span></h2>
 <p class="relief-note"><span class="lang-en">The address space runs top to bottom and <b>anything you cannot reach is drawn as a groove</b> — reserved regions, holes, the secure world. The right-hand column says what each region is for, because that is what a reader of this diagram actually asks. Not how big it is.</span><span class="lang-zh">地址空间从上往下排，<b>访问不到的区间画成凹槽</b>——保留区、空洞、安全世界，凹下去的一眼就是「这块你碰不了」。右边留一列写用途，因为读这种图的人真正要问的是「这块归谁」，不是「它多大」。</span></p>
-<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">Quartz-3550 · physical address space</span><span class="lang-zh">Quartz-3550 · 物理地址空间</span><em><span class="lang-en">leave the TEE region out of reserved-memory and the kernel allocates into it, then dies later</span><span class="lang-zh">TEE 保留区没在设备树里 reserve 掉，内核会分配进去，跑着跑着就挂</span></em></div>
+<div class="relief-board relief-raised" id="fig-quartz-3550-physical-address-space"><div class="relief-bt"><span class="lang-en">Quartz-3550 · physical address space</span><span class="lang-zh">Quartz-3550 · 物理地址空间</span><em><span class="lang-en">leave the TEE region out of reserved-memory and the kernel allocates into it, then dies later</span><span class="lang-zh">TEE 保留区没在设备树里 reserve 掉，内核会分配进去，跑着跑着就挂</span></em></div>
 <div class="relief-memmap">
   <div class="relief-addr">0xFFFF_FFFF</div><div></div><div></div>
   <div class="relief-addr">0x87E0_0000</div>
@@ -249,7 +249,7 @@
 
 <h2><span class="lang-en">F · Data path</span><span class="lang-zh">F · 数据通路</span></h2>
 <p class="relief-note"><span class="lang-en">Stages run left to right and <b>under each one is what it turned the data into</b> — a data path drawn as a row of boxes leaves the reader still not knowing what happened in between. Places that store data use the deep block; places that transform it use the plain raised block.</span><span class="lang-zh">一级一级往右走，<b>每级底下写它把数据变成了什么</b>——数据通路图最容易画成「几个盒子连起来」，那样看完还是不知道中间发生了什么。存数据的地方用深色块，加工数据的地方用普通凸块，两类分开。</span></p>
-<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">DISPLAY PATH · one frame from memory to glass</span><span class="lang-zh">显示通路 · 一帧从内存到屏</span><em><span class="lang-en">the DMA lives in the display controller, not in the DSI block</span><span class="lang-zh">DMA 在显示控制器里，不在 DSI 里</span></em></div>
+<div class="relief-board relief-raised" id="fig-display-path-one-frame-from-memory-to-glass"><div class="relief-bt"><span class="lang-en">DISPLAY PATH · one frame from memory to glass</span><span class="lang-zh">显示通路 · 一帧从内存到屏</span><em><span class="lang-en">the DMA lives in the display controller, not in the DSI block</span><span class="lang-zh">DMA 在显示控制器里，不在 DSI 里</span></em></div>
 <div class="relief-path" tabindex="0" role="region" aria-label="path">
   <div class="relief-stagebox"><div class="relief-stage relief-raised relief-store"><span class="relief-sn">DDR</span><span class="relief-ss">framebuffer</span></div>
     <div class="relief-rate">1080×2400×4B<br><span class="lang-en">≈9.9 MB / frame</span><span class="lang-zh">≈9.9 MB / 帧</span></div></div>
@@ -278,7 +278,7 @@
 
 <h2><span class="lang-en">G · Clock tree</span><span class="lang-zh">G · 时钟树</span></h2>
 <p class="relief-note"><span class="lang-en">The mux and the gate in a clock tree <b>already are controls</b> — picking one of the divided outputs is a segmented control, enabling the branch is a switch. Draw them as the controls they are and the reader learns no new symbols, while which path is live reads at a glance.</span><span class="lang-zh">时钟树里的<b>选择器和门控本来就是控件</b>——分频后选哪一路是个分段控件，开不开这条时钟是个开关。直接拿控件画，不另造图形：看图的人不用学新符号，而且哪一路是通的一眼看得出。</span></p>
-<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">DISPLAY CLOCK · crystal to pixel clock</span><span class="lang-zh">显示时钟 · 从晶振到像素时钟</span><em><span class="lang-en">with the gate closed a register read in that branch hangs — the register is not broken</span><span class="lang-zh">门控关着的时候读寄存器会挂，不是寄存器坏了</span></em></div>
+<div class="relief-board relief-raised" id="fig-display-clock-crystal-to-pixel-clock"><div class="relief-bt"><span class="lang-en">DISPLAY CLOCK · crystal to pixel clock</span><span class="lang-zh">显示时钟 · 从晶振到像素时钟</span><em><span class="lang-en">with the gate closed a register read in that branch hangs — the register is not broken</span><span class="lang-zh">门控关着的时候读寄存器会挂，不是寄存器坏了</span></em></div>
 <div class="relief-clk">
   <div class="relief-clklbl"><span class="lang-en">Source</span><span class="lang-zh">时钟源</span></div>
   <div class="relief-clkrow">
@@ -319,7 +319,7 @@
 
 <h2><span class="lang-en">H · Cache line states</span><span class="lang-zh">H · 缓存一致性状态</span></h2>
 <p class="relief-note"><span class="lang-en">Four states, and the one that costs you is <b>S</b> — the accent marks it because writing to a shared line is the transition that has to stop every other core first. The dashed edge is that write. A driver that memcpy()s into a buffer another master is reading lives on that dashed line.</span><span class="lang-zh">四个状态，代价最大的是 <b>S</b> —— 给它强调色，是因为往一行共享数据里写，这次跳转必须先把别的核全叫停。那条虚线就是这次写。一个驱动往别的主设备正在读的缓冲区里 memcpy，走的就是这条虚线。</span></p>
-<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">MESI · one cache line</span><span class="lang-zh">MESI · 一行缓存</span><em><span class="lang-en">this is why a DMA buffer needs either a flush or a coherent allocation — not an opinion, a state transition</span><span class="lang-zh">这就是为什么 DMA 缓冲区要么刷缓存要么用一致性分配 —— 这不是风格问题，是状态跳转</span></em></div>
+<div class="relief-board relief-raised" id="fig-mesi-one-cache-line"><div class="relief-bt"><span class="lang-en">MESI · one cache line</span><span class="lang-zh">MESI · 一行缓存</span><em><span class="lang-en">this is why a DMA buffer needs either a flush or a coherent allocation — not an opinion, a state transition</span><span class="lang-zh">这就是为什么 DMA 缓冲区要么刷缓存要么用一致性分配 —— 这不是风格问题，是状态跳转</span></em></div>
 <div class="relief-pan" tabindex="0" role="region" aria-label="diagram"><div class="relief-fsm" style="height:370px">
   <svg viewBox="0 0 960 370">
     <defs><marker id="ah2" viewBox="0 0 12 12" refX="10.5" refY="6" markerWidth="4.6" markerHeight="4.6" orient="auto">
@@ -341,16 +341,16 @@
   <div class="relief-lbl" style="left:750px;top:172px"><span class="lang-en">another core reads it</span><span class="lang-zh">别的核来读</span></div>
   <div class="relief-lbl" style="left:352px;top:322px"><span class="lang-en">another core writes it</span><span class="lang-zh">别的核来写</span></div>
   <div class="relief-lbl" style="left:246px;top:172px"><span class="lang-en">write to a shared line — every other copy must be invalidated first</span><span class="lang-zh">写一行共享数据 —— 必须先把其它副本全部作废</span></div>
-</div></div>
+</div></div></div>
 
 <h2><span class="lang-en">I · DMA descriptor chain</span><span class="lang-zh">I · DMA 描述符链</span></h2>
 <p class="relief-note"><span class="lang-en">Each descriptor is a raised block and its <code>next</code> pointer is the groove between them. The last one has no next, so that slot is drawn as a <b>dead groove</b> rather than a value — the chain ending and a value being present then look different, which matters because a descriptor left pointing at freed memory is the bug this figure is about.</span><span class="lang-zh">每块描述符是凸的，它的 <code>next</code> 指针就是块之间那道凹槽。最后一块没有 next，所以那一格画成<b>凹陷的死区</b>而不是一个值 —— 这样「链在这里结束」和「这里有个值」长得不一样，而这很要紧，因为描述符指向已经释放的内存正是这张图要讲的那个 bug。</span></p>
-<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">SCATTER-GATHER LIST</span><span class="lang-zh">分散聚集链表</span><em><span class="lang-en">the ringed one is where the engine is right now — read it while the engine runs and you get a torn value</span><span class="lang-zh">描圈那块是引擎当前所在。引擎在跑的时候去读它，读到的是撕裂的值</span></em></div>
+<div class="relief-board relief-raised" id="fig-scatter-gather-list"><div class="relief-bt"><span class="lang-en">SCATTER-GATHER LIST</span><span class="lang-zh">分散聚集链表</span><em><span class="lang-en">the ringed one is where the engine is right now — read it while the engine runs and you get a torn value</span><span class="lang-zh">描圈那块是引擎当前所在。引擎在跑的时候去读它，读到的是撕裂的值</span></em></div>
 <div class="relief-dchain" tabindex="0" role="region" aria-label="chain"><div class="relief-desc relief-raised"><h4>DESC 0</h4><dl><dt><span class="lang-en">buffer</span><span class="lang-zh">缓冲区</span></dt><dd>0x8720_0000</dd><dt><span class="lang-en">length</span><span class="lang-zh">长度</span></dt><dd>4 KB</dd><dt>next</dt><dd>&rarr; DESC 1</dd></dl></div><div class="relief-dlink"><svg width="26" height="20" viewBox="0 0 26 20"><path d="M1 10h14M12 3l9 7-9 7" fill="none" stroke="var(--navy)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="relief-desc relief-raised relief-live"><h4>DESC 1</h4><dl><dt><span class="lang-en">buffer</span><span class="lang-zh">缓冲区</span></dt><dd>0x8721_0000</dd><dt><span class="lang-en">length</span><span class="lang-zh">长度</span></dt><dd>4 KB</dd><dt>next</dt><dd>&rarr; DESC 2</dd></dl></div><div class="relief-dlink"><svg width="26" height="20" viewBox="0 0 26 20"><path d="M1 10h14M12 3l9 7-9 7" fill="none" stroke="var(--navy)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="relief-desc relief-raised"><h4>DESC 2</h4><dl><dt><span class="lang-en">buffer</span><span class="lang-zh">缓冲区</span></dt><dd>0x8722_0000</dd><dt><span class="lang-en">length</span><span class="lang-zh">长度</span></dt><dd>2 KB</dd><dt>next</dt><dd class="relief-null">NULL</dd></dl></div><div class="relief-dend"><i></i></div></div></div>
 
 <h2><span class="lang-en">J · Bus transaction timing</span><span class="lang-zh">J · 总线事务时序</span></h2>
 <p class="relief-note"><span class="lang-en">Protocol level, not electrical level — the question a driver author brings here is <b>which beat stopped getting acknowledged</b>. The two measure bars name the two failures that look identical from userspace: no ACK on the address means nobody answered, no ACK on the register means the chip is there but does not know that register.</span><span class="lang-zh">这是协议层不是电气层 —— 写驱动的人来看这张图，问的是<b>从哪一拍开始没人应答</b>。底下两条量取条标出的，正是从用户态看长得一模一样的两种失败：地址没 ACK 是根本没人答，寄存器没 ACK 是器件在、但不认这个寄存器。</span></p>
-<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">I2C WRITE · one register address</span><span class="lang-zh">I2C 写 · 一个寄存器地址</span><em><span class="lang-en">an analyser shows the same picture; this one labels what each missing ACK means</span><span class="lang-zh">逻辑分析仪抓出来的就是这张图，这里多标了每个缺失的 ACK 各自意味着什么</span></em></div>
+<div class="relief-board relief-raised" id="fig-i2c-write-one-register-address"><div class="relief-bt"><span class="lang-en">I2C WRITE · one register address</span><span class="lang-zh">I2C 写 · 一个寄存器地址</span><em><span class="lang-en">an analyser shows the same picture; this one labels what each missing ACK means</span><span class="lang-zh">逻辑分析仪抓出来的就是这张图，这里多标了每个缺失的 ACK 各自意味着什么</span></em></div>
 <div class="relief-scope relief-sunken"><svg viewBox="0 0 1120 250">
   <g class="relief-guide">
     <line x1="200" y1="28" x2="200" y2="196"/><line x1="332" y1="28" x2="332" y2="196"/>
