@@ -336,7 +336,7 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
   /* 只用在真的串联的两级之间。并联支路一律不连线，连了就是画错 */
   box-shadow:inset 3px 3px 6px var(--dark),inset -2px -2px 5px var(--lite)}
 /* 选择器和门控本来就是控件 —— 直接用控件的样子画，不另造图形 */
-.relief-mux{display:inline-flex;padding:4px;border-radius:13px;gap:3px;--off:4px;--blur:9px}
+.relief-mux{display:inline-flex;padding:4px;border-radius:13px;gap:3px;--off:4px;--blur:9px;justify-self:start}   /* grid 里默认 stretch，会把它拉满整列 */
 .relief-mux i{font:700 11.5px 「JetBrains Mono」;font-style:normal;padding:6px 11px;border-radius:9px;color:var(--muted)}
 .relief-mux i.on{color:var(--navy-d);background:var(--surf);box-shadow:3px 3px 6px var(--dark),-3px -3px 6px var(--lite)}
 .relief-gate{width:56px;height:30px;border-radius:999px;position:relative;flex:none;margin:0 9px;--off:4px;--blur:9px}
@@ -431,3 +431,36 @@ html[data-lang="zh"] .lang-en{display:none!important}
   box-shadow:0 20px 30px -14px rgba(96,62,28,.30),
              inset 0 8px 12px -5px rgba(255,255,255,.55),
              inset 0 -11px 16px -7px rgba(70,42,16,.26)}
+
+/* ═══════════════ 平台级框图部件 ═══════════════ */
+/* 启动链：阶段按「跑在哪块内存里」分带。带是凹槽，阶段是凸块 ——
+   深度在这里直接回答「这一级的代码在哪执行」，不用再画一列注解。 */
+.relief-boot{display:flex;flex-direction:column;gap:0}
+.relief-bootband{padding:17px 18px 19px;border-radius:22px}
+.relief-bandname{font:700 12.5px var(--relief-sans);color:var(--muted);letter-spacing:.05em;
+  margin-bottom:13px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.relief-bandname em{font-style:normal;font-weight:500;font-size:11.5px;font-family:var(--relief-mono)}
+.relief-stagerow{display:flex;align-items:stretch;flex-wrap:wrap;gap:0}
+.relief-bstage{padding:12px 15px;border-radius:14px;--off:4px;--blur:9px;min-width:126px}
+.relief-bstage b{display:block;font:700 14px var(--relief-mono);color:var(--navy-d)}
+.relief-bstage i{display:block;font-style:normal;font:400 11.5px var(--relief-sans);color:var(--muted);margin-top:4px;line-height:1.5}
+.relief-bstage.relief-sealed{box-shadow:5px 5px 11px var(--dark),-5px -5px 11px var(--lite),inset 0 0 0 2px var(--orange)}
+.relief-barrow{width:30px;flex:none;display:grid;place-items:center}
+.relief-barrow svg{filter:drop-shadow(0 -1.2px 0 var(--hi)) drop-shadow(1px 2px 1.5px var(--lo))}
+.relief-banddrop{height:22px;display:grid;place-items:center}
+.relief-banddrop svg{filter:drop-shadow(0 -1.2px 0 var(--hi)) drop-shadow(0 2px 1.5px var(--lo))}
+
+/* 编号翻译：同一个东西在两侧叫不同的名字 */
+.relief-xlate{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:18px;
+  padding:18px 20px;border-radius:19px}
+.relief-xside{text-align:center}
+.relief-xside b{display:block;font:700 19px var(--relief-mono);color:var(--navy-d)}
+.relief-xside i{display:block;font-style:normal;font:500 12px var(--relief-sans);color:var(--muted);margin-top:5px}
+.relief-xmid{font:700 12px var(--relief-mono);color:var(--warn);text-align:center;white-space:nowrap}
+
+/* 焊盘复用：一个焊盘 N 个功能，只有一路接得通 */
+.relief-pad{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center;
+  padding:15px 18px;border-radius:18px;margin-bottom:11px}
+.relief-padname{font:700 14.5px var(--relief-mono);color:var(--navy-d)}
+.relief-padname span{display:block;font:400 11px var(--relief-sans);color:var(--muted);margin-top:4px}
+.relief-padclash{box-shadow:inset 5px 5px 10px var(--dark),inset -5px -5px 10px var(--lite),inset 0 0 0 2px var(--warn)}

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Relief · Platform diagrams / 平台框图</title>
+<meta name="description" content="Boot chain, partition layout, interrupt path and pin multiplexing, drawn so that depth says which memory a stage runs from and which spans you must not touch.">
+<meta property="og:title" content="Relief · Platform diagrams">
+<meta property="og:description" content="Boot chain, partition layout, interrupt path and pin multiplexing, drawn so depth carries meaning.">
+<link rel="stylesheet" href="../../assets/fonts.css">
+<link rel="stylesheet" href="../../assets/relief.css">
+</head>
+<body>
+
+<button class="lang-toggle" id="lang">中文 / EN</button>
+<div class="relief-skins relief-raised" id="skins">
+  <b class="on" data-s="">Warm</b><b data-s="gray">Gray</b><b data-s="matte">Matte</b><b data-s="ink">Ink</b><b data-s="mist">Mist</b><b data-s="clay">Clay</b><b data-s="sage">Sage</b>
+</div>
+
+<div class="relief-wrap">
+  <header class="relief-hero">
+    <div class="relief-container">
+    <span class="relief-badge">RELIEF · PLATFORM</span>
+    <h1 class="relief-h1"><span class="lang-en">The board, and the stack standing on it</span><span class="lang-zh">板子，和站在它上面的那一摞</span></h1>
+    <p class="relief-lede"><span class="lang-en">Four diagrams about the platform rather than the die. Each one is built from the same two words as every other page here — <b>raised</b> for a thing that exists, <b>sunken</b> for somewhere you cannot go or something that holds others — which is why none of them needs a legend.</span><span class="lang-zh">四张讲平台而不是讲裸片的图。每一张都只用这套页面一贯的两个词搭出来 —— <b>凸起</b>是一个存在的东西，<b>凹陷</b>是去不了的地方、或者装着别人的容器 —— 所以它们都不需要图例。</span></p>
+    <div class="relief-rail"><span></span></div>
+    </div>
+  </header>
+
+<h2><span class="lang-en">A · Boot chain</span><span class="lang-zh">A · 启动链</span></h2>
+<p class="relief-note"><span class="lang-en">Stages are grouped by <b>which memory they execute from</b>, and the group is the sunken band — so the diagram answers "where is this code actually running" without a separate column. The orange ring marks a stage that <b>verifies the next one</b>: that ring is the chain of trust, and the first stage without it is where the chain ends.</span><span class="lang-zh">阶段按<b>在哪块内存里执行</b>分组，组就是那条凹带 —— 这样图本身就回答了「这段代码到底跑在哪」，不用另开一列。橙色圈标的是<b>会验下一级签名</b>的阶段：那一圈就是信任链，第一个没有圈的地方就是链断掉的位置。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">QUARTZ-3550 · BOOT CHAIN</span><span class="lang-zh">QUARTZ-3550 · 启动链</span><em><span class="lang-en">the band a stage sits in tells you what a hang there means: no UART output at all usually means it never left SRAM</span><span class="lang-zh">一个阶段在哪条带里，决定了卡在那儿意味着什么：完全没有串口输出，通常是根本没离开 SRAM</span></em></div>
+<div class="relief-boot">
+  <div class="relief-bootband relief-sunken">
+    <div class="relief-bandname"><span class="lang-en">Runs from on-chip SRAM</span><span class="lang-zh">跑在片上 SRAM 里</span><em><span class="lang-en">DDR is not trained yet</span><span class="lang-zh">DDR 还没训练好</span></em></div>
+    <div class="relief-stagerow">
+      <div class="relief-bstage relief-raised relief-sealed"><b>BootROM</b><i><span class="lang-en">mask ROM · verifies the next stage</span><span class="lang-zh">掩膜固化 · 验下一级的签名</span></i></div><div class="relief-barrow"><svg width="20" height="16" viewBox="0 0 20 16"><path d="M1 8h11M9 2l7 6-7 6" fill="none" stroke="var(--navy)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="relief-bstage relief-raised relief-sealed"><b>SPL</b><i><span class="lang-en">trains DDR, loads ATF</span><span class="lang-zh">训练 DDR，加载 ATF</span></i></div>
+    </div>
+  </div>
+  <div class="relief-banddrop"><svg width="18" height="16" viewBox="0 0 18 16"><path d="M9 1v8M3 6l6 6 6-6" fill="none" stroke="var(--line)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-bootband relief-sunken">
+    <div class="relief-bandname"><span class="lang-en">Runs from DDR</span><span class="lang-zh">跑在 DDR 里</span><em><span class="lang-en">memory is up from here on</span><span class="lang-zh">从这里开始内存可用</span></em></div>
+    <div class="relief-stagerow">
+      <div class="relief-bstage relief-raised relief-sealed"><b>ATF BL31</b><i><span class="lang-en">resident · secure monitor</span><span class="lang-zh">常驻 · 安全监视</span></i></div><div class="relief-barrow"><svg width="20" height="16" viewBox="0 0 20 16"><path d="M1 8h11M9 2l7 6-7 6" fill="none" stroke="var(--navy)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="relief-bstage relief-raised relief-sealed"><b>OP-TEE</b><i><span class="lang-en">optional · secure world</span><span class="lang-zh">可选 · 安全世界</span></i></div><div class="relief-barrow"><svg width="20" height="16" viewBox="0 0 20 16"><path d="M1 8h11M9 2l7 6-7 6" fill="none" stroke="var(--navy)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="relief-bstage relief-raised relief-sealed"><b>U-Boot</b><i><span class="lang-en">picks the A/B slot, verifies boot.img</span><span class="lang-zh">选 A/B 槽，验 boot.img</span></i></div><div class="relief-barrow"><svg width="20" height="16" viewBox="0 0 20 16"><path d="M1 8h11M9 2l7 6-7 6" fill="none" stroke="var(--navy)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="relief-bstage relief-raised"><b>Linux</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-barrow"><svg width="20" height="16" viewBox="0 0 20 16"><path d="M1 8h11M9 2l7 6-7 6" fill="none" stroke="var(--navy)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="relief-bstage relief-raised"><b>Android init</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div>
+    </div>
+  </div>
+</div></div>
+
+<h2><span class="lang-en">B · Partition layout</span><span class="lang-zh">B · 分区表</span></h2>
+<p class="relief-note"><span class="lang-en">Same vocabulary as the memory map, different medium. What you must not move is drawn sunken — the bootloader partition is at a fixed offset because the mask ROM looks for it there, so resizing it does not fail at build time, it fails at power-on. The A/B pair is shown as a pair on purpose: touching one without the other is the mistake this diagram exists to prevent.</span><span class="lang-zh">和内存布局同一套说法，换了个介质。不能动的画成凹陷 —— bootloader 分区在固定偏移，因为掩膜 ROM 就去那个位置找它，所以改它的大小不会在编译时报错，会在上电时报错。A/B 两个成对画也是有意的：只改一个不改另一个，正是这张图要防的事。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">GPT LAYOUT · A/B SLOTS</span><span class="lang-zh">GPT 布局 · A/B 双槽</span><em><span class="lang-en">changing any size here breaks OTA from every older build — partitions are a one-shot decision</span><span class="lang-zh">这里任何一个尺寸改了，从所有旧版本过来的 OTA 都会挂 —— 分区是一次性决定</span></em></div>
+<div class="relief-memmap"><div class="relief-addr">#0</div><div class="relief-region relief-sunken relief-dead"><span class="relief-rn">bootloader</span><span class="relief-rd"><span class="lang-en">SPL + U-Boot · <b>never resize</b></span><span class="lang-zh">SPL + U-Boot · <b>不能改大小</b></span></span></div><div class="relief-size">2 MB</div><div class="relief-addr">#1</div><div class="relief-region relief-raised"><span class="relief-rn">misc</span><span class="relief-rd"><span class="lang-en">the A/B slot flag lives here</span><span class="lang-zh">A/B 槽的选择标志在这</span></span></div><div class="relief-size">1 MB</div><div class="relief-addr">#2</div><div class="relief-region relief-raised relief-hot"><span class="relief-rn">boot_a</span><span class="relief-rd"><span class="lang-en">kernel + ramdisk, slot A</span><span class="lang-zh">内核 + ramdisk，A 槽</span></span></div><div class="relief-size">32 MB</div><div class="relief-addr">#3</div><div class="relief-region relief-raised"><span class="relief-rn">boot_b</span><span class="relief-rd"><span class="lang-en">kernel + ramdisk, slot B</span><span class="lang-zh">内核 + ramdisk，B 槽</span></span></div><div class="relief-size">32 MB</div><div class="relief-addr">#4</div><div class="relief-region relief-raised"><span class="relief-rn">vbmeta_a</span><span class="relief-rd"><span class="lang-en">the signature that covers boot_a</span><span class="lang-zh">盖住 boot_a 的那份签名</span></span></div><div class="relief-size">512 KB</div><div class="relief-addr">#5</div><div class="relief-region relief-raised"><span class="relief-rn">vbmeta_b</span><span class="relief-rd"><span class="lang-en">the signature that covers boot_b</span><span class="lang-zh">盖住 boot_b 的那份签名</span></span></div><div class="relief-size">512 KB</div><div class="relief-addr">#6</div><div class="relief-region relief-raised"><span class="relief-rn">super</span><span class="relief-rd"><span class="lang-en">dynamic partitions live inside</span><span class="lang-zh">动态分区都在这里面</span></span></div><div class="relief-size">4 GB</div><div class="relief-addr">#7</div><div class="relief-region relief-raised"><span class="relief-rn">userdata</span><span class="relief-rd"><span class="lang-en">grows into whatever is left</span><span class="lang-zh">剩下多少占多少</span></span></div><div class="relief-size">rest</div></div></div>
+
+<h2><span class="lang-en">C · Interrupt path</span><span class="lang-zh">C · 中断路径</span></h2>
+<p class="relief-note"><span class="lang-en">One interrupt has <b>two numbers</b>, and confusing them costs an afternoon. The number in the SoC manual is the GIC input line; the number <code>request_irq()</code> wants is allocated at runtime and is not stable across boots. The groove between them is the translation, which is the whole point of the figure.</span><span class="lang-zh">一个中断有<b>两个编号</b>，搞混它们要花掉一个下午。芯片手册上的那个是 GIC 的输入线号；<code>request_irq()</code> 要的那个是运行时分配的，重启不保证一样。中间那道凹槽就是这次翻译，也是这张图存在的全部理由。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">ONE INTERRUPT, TWO NUMBERS</span><span class="lang-zh">一个中断，两个编号</span><em><span class="lang-en">cat /proc/interrupts prints the virq — matching it against the manual will not work</span><span class="lang-zh">cat /proc/interrupts 打出来的是 virq —— 拿它去对手册是对不上的</span></em></div>
+<div class="relief-xlate relief-sunken">
+  <div class="relief-xside"><b>hwirq 42</b><i><span class="lang-en">what the SoC manual calls it — the GIC input line</span><span class="lang-zh">芯片手册上的叫法 —— GIC 的输入线号</span></i></div>
+  <div class="relief-xmid"><span class="lang-en">irq_domain maps it</span><span class="lang-zh">irq_domain 做映射</span><br>→</div>
+  <div class="relief-xside"><b>virq 78</b><i><span class="lang-en">what request_irq() takes — allocated at runtime, not stable across boots</span><span class="lang-zh">request_irq() 收的是这个 —— 运行时分配，重启不保证一样</span></i></div>
+</div>
+<div class="relief-path" style="margin-top:20px">
+  <div class="relief-stagebox"><div class="relief-stage relief-raised relief-store"><span class="relief-sn"><span class="lang-en">Device</span><span class="lang-zh">外设</span></span><span class="relief-ss"><span class="lang-en">pulls the line</span><span class="lang-zh">拉低中断线</span></span></div></div>
+  <div class="relief-gap"><svg width="22" height="18" viewBox="0 0 22 18"><path d="M1 9h10M8 3l7 6-7 6" fill="none" stroke="var(--navy)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-stagebox"><div class="relief-stage relief-raised"><span class="relief-sn">GIC</span><span class="relief-ss">hwirq 42</span></div></div>
+  <div class="relief-gap"><svg width="22" height="18" viewBox="0 0 22 18"><path d="M1 9h10M8 3l7 6-7 6" fill="none" stroke="var(--navy)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-stagebox"><div class="relief-stage relief-raised"><span class="relief-sn">irq_domain</span><span class="relief-ss"><span class="lang-en">maps 42 → 78</span><span class="lang-zh">把 42 映射成 78</span></span></div></div>
+  <div class="relief-gap"><svg width="22" height="18" viewBox="0 0 22 18"><path d="M1 9h10M8 3l7 6-7 6" fill="none" stroke="var(--navy)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-stagebox"><div class="relief-stage relief-raised"><span class="relief-sn"><span class="lang-en">CPU</span><span class="lang-zh">CPU</span></span><span class="relief-ss"><span class="lang-en">takes the exception</span><span class="lang-zh">进异常</span></span></div></div>
+  <div class="relief-gap"><svg width="22" height="18" viewBox="0 0 22 18"><path d="M1 9h10M8 3l7 6-7 6" fill="none" stroke="var(--navy)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="relief-stagebox"><div class="relief-stage relief-raised relief-store"><span class="relief-sn"><span class="lang-en">Your handler</span><span class="lang-zh">你的处理函数</span></span><span class="relief-ss">virq 78</span></div></div>
+</div></div>
+
+<h2><span class="lang-en">D · Pin multiplexing</span><span class="lang-zh">D · 引脚复用</span></h2>
+<p class="relief-note"><span class="lang-en">A pad has several possible functions and <b>exactly one is connected</b> — which is a segmented control, so it is drawn as one. The third row is outlined in the warning colour because two device-tree nodes both claim that pad: the kernel will not always refuse, and the symptom is a peripheral that works until the other driver probes.</span><span class="lang-zh">一个焊盘有好几种可能的功能，<b>同时只有一路接得通</b> —— 这就是个分段控件，所以直接画成分段控件。第三行描了警示色，因为有两个设备树节点都声称占用这个焊盘：内核不一定会拒绝，症状是某个外设一直好用，直到另一个驱动 probe 起来。</span></p>
+<div class="relief-board relief-raised"><div class="relief-bt"><span class="lang-en">PAD FUNCTION SELECT</span><span class="lang-zh">焊盘功能选择</span><em><span class="lang-en">the selected segment is the only path that conducts</span><span class="lang-zh">选中的那一段是唯一接得通的路</span></em></div>
+<div class="relief-pad relief-sunken"><div class="relief-padname">GPIO2_A3<span>SPI0_CLK</span></div><div class="relief-mux relief-sunken"><i class="on">func0 SPI0_CLK</i><i class="">func1 I2C3_SCL</i><i class="">func2 PWM1</i><i class="">gpio</i></div></div><div class="relief-pad relief-sunken"><div class="relief-padname">GPIO2_A4<span>I2C3_SDA</span></div><div class="relief-mux relief-sunken"><i class="">func0 SPI0_MOSI</i><i class="on">func1 I2C3_SDA</i><i class="">func2 UART4_TX</i><i class="">gpio</i></div></div><div class="relief-pad relief-sunken relief-padclash"><div class="relief-padname">GPIO4_B2<span>TP_RST</span></div><div class="relief-mux relief-sunken"><i class="">func0 CIF_D7</i><i class="">func1 UART7_RX</i><i class="on">gpio</i></div></div></div>
+
+</div>
+
+<script>
+document.getElementById('skins').addEventListener('click', e => {
+  const b = e.target.closest('b'); if (!b) return;
+  document.querySelectorAll('#skins b').forEach(x => x.classList.toggle('on', x === b));
+  const s = b.dataset.s;
+  if (s) document.documentElement.setAttribute('data-theme', s);
+  else document.documentElement.removeAttribute('data-theme');
+});
+const root = document.documentElement;
+const saved = localStorage.getItem('relief-lang');
+root.setAttribute('data-lang', saved || ((navigator.language || '').startsWith('zh') ? 'zh' : 'en'));
+document.getElementById('lang').addEventListener('click', () => {
+  const next = root.getAttribute('data-lang') === 'zh' ? 'en' : 'zh';
+  root.setAttribute('data-lang', next);
+  try { localStorage.setItem('relief-lang', next); } catch (e) {}
+});
+</script>
+
+<!-- design-review:self-diff v1
+Skill: relief
+Page-type: platform
+Created: 2026-09-15
+
+Decisions (5):
+1. [the-band-is-the-answer] chose "group boot stages into sunken bands by which memory they execute from" over "a column of annotations saying SRAM or DDR". Because: where a stage runs is what decides what a hang there means — no UART output at all usually means it never left SRAM — so making that the diagram's structure answers the reader's real question before they ask it, and costs no ink.
+2. [the-ring-is-the-chain-of-trust] chose "an accent ring on every stage that verifies the next one" over "drawing signature arrows between stages". Because: the reader is looking for where the chain ENDS, and a missing ring is easier to spot than a missing arrow among many arrows — absence reads faster than presence when the whole row is otherwise identical.
+3. [partitions-reuse-the-memory-map] chose "render the GPT layout with the same address-region-size component as the memory map" over "a purpose-built partition widget". Because: both answer "which span belongs to whom, and which spans may I not touch", so a reader who has learned one has already learned the other; a second vocabulary for the same question would be the page teaching two things where one was needed.
+4. [two-numbers-get-two-sides] chose "show hwirq and virq as two facing values with the translation named in the groove between them" over "a single labelled arrow through the interrupt path". Because: the mistake this figure exists to prevent is treating them as one number, and any layout that shows one number travelling reinforces exactly that.
+5. [pinmux-is-a-segmented-control] chose "draw pad function select as the segmented control the skill already ships" over "a truth table or a fan of lines". Because: the semantics match exactly (several options, exactly one connected), the on-state is unambiguous at a glance, and the conflicting pad can then be marked by outlining the whole control rather than annotating a table cell.
+
+Known trade-offs:
+- The boot chain is drawn for one topology (SPL then ATF then U-Boot). Platforms that skip a stage or run U-Boot as SPL need the bands rebuilt by hand.
+- The partition table shows an A/B layout; a single-slot device gets a diagram with two rows that do not apply.
+- Every figure here is hand-authored markup, so a real board's forty partitions would be forty blocks of HTML.
+/design-review:self-diff -->
+
+</body>
+</html>

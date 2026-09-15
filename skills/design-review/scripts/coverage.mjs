@@ -62,7 +62,14 @@ const TARGET = {
   // hardware ones. 'hardware' is its own type rather than more entries under
   // 'diagram' because those seven carry domain conventions (masters above the
   // bus, addresses growing upward) that a generic pipeline diagram does not.
-  relief: ['controls', 'diagram', 'hardware'],
+  // 'platform' is split out from 'hardware' rather than folded into it because
+  // the two answer different questions. 'hardware' is inside one chip — a
+  // register, a clock branch, a bus. 'platform' is the board and the software
+  // stack on it — which stage runs from which memory, which partition the
+  // bootloader picks, how an interrupt number is translated twice on its way to
+  // a handler. Same vocabulary, different subject, and a reader looking for one
+  // should not have to scroll through the other.
+  relief: ['controls', 'diagram', 'hardware', 'platform'],
 };
 
 function parseArgs(argv) {

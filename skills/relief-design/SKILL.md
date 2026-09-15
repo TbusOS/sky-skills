@@ -1,6 +1,6 @@
 ---
 name: relief-design
-description: 用新拟态（neumorphism / soft UI）画**技术框图和控件**的 HTML 页面 —— 凸起 = 一个存在的东西，凹陷 = 够不到的地方 / 一个条件 / 刻进面料的一道槽，深度本身就是图例。七套皮肤(暖米白 / 中性灰 / 磨砂黑 / 墨黑 / 雾青 / 陶土 / 鼠尾草)，含状态机 · 时序图 · 寄存器位域 · IP 内部框图 · 内存布局 · 数据通路 · 时钟树七种硬件图，以及流程链 · 树状 · 左右对比 · 分层调用 · 结构体字段五种通用框图。TRIGGER 当用户提到 新拟态 / neumorphism / neomorphism / soft UI / 凹凸感 / 浮雕风格 / relief 风格 / 拟物按钮，或要画 框图 / 状态机 / 时序图 / 寄存器位域 / 芯片内部框图 / 内存布局 / 数据通路 / 时钟树 / 架构框图 时使用。DO NOT TRIGGER：玻璃拟态 aurora 展示页(用 glass)、应用界面 / 仪表盘(用 atelier)、科普图解读本(用 primer)、营销落地页(用 apple / ember / anthropic)、商务汇报 deck(用 lectern)、发布会(用 eclat)、照片级 3D 硬件动画(用 hardware-3d)。
+description: 用新拟态（neumorphism / soft UI）画**技术框图和控件**的 HTML 页面 —— 凸起 = 一个存在的东西，凹陷 = 够不到的地方 / 一个条件 / 刻进面料的一道槽，深度本身就是图例。七套皮肤(暖米白 / 中性灰 / 磨砂黑 / 墨黑 / 雾青 / 陶土 / 鼠尾草)，含状态机 · 时序图 · 寄存器位域 · IP 内部框图 · 内存布局 · 数据通路 · 时钟树七种硬件图，流程链 · 树状 · 左右对比 · 分层调用 · 结构体字段五种通用框图，以及启动链 · 分区表 · 编号翻译 · 引脚复用四种平台框图。TRIGGER 当用户提到 新拟态 / neumorphism / neomorphism / soft UI / 凹凸感 / 浮雕风格 / relief 风格 / 拟物按钮，或要画 框图 / 状态机 / 时序图 / 寄存器位域 / 芯片内部框图 / 内存布局 / 数据通路 / 时钟树 / 架构框图 时使用。DO NOT TRIGGER：玻璃拟态 aurora 展示页(用 glass)、应用界面 / 仪表盘(用 atelier)、科普图解读本(用 primer)、营销落地页(用 apple / ember / anthropic)、商务汇报 deck(用 lectern)、发布会(用 eclat)、照片级 3D 硬件动画(用 hardware-3d)。
 last-verified: 2026-09-15
 ---
 
@@ -52,7 +52,8 @@ last-verified: 2026-09-15
 
 新拟态 · neumorphism · neomorphism · soft UI · 凹凸感 · 浮雕风格 · relief 风格 · 拟物按钮 ·
 框图 · 状态机 · 时序图 · 寄存器位域 · 位域图 · 芯片内部框图 · IP 框图 · SoC 框图 ·
-内存布局 · 地址空间图 · 数据通路 · 时钟树 · 架构框图 · 流程链 · 分层调用图
+内存布局 · 地址空间图 · 数据通路 · 时钟树 · 架构框图 · 流程链 · 分层调用图 ·
+启动链 · 分区表 · GPT 布局 · 中断路径 · 引脚复用 · pinmux
 
 ## §4 不要用于
 
@@ -71,7 +72,7 @@ last-verified: 2026-09-15
 1. `references/design-tokens.md` — 变量层、七套皮肤、尺寸档
 2. `references/diagram-craft.md` — 十二种框图各自的画法与判断依据
 3. `references/dos-and-donts.md` — 已经踩过的坑，含每条的实测数字
-4. `references/canonical/` — 三张参考页（controls / diagram / hardware）
+4. `references/canonical/` — 四张参考页（controls / diagram / hardware / platform）
 
 ## §6 发布前检查（MUST）
 

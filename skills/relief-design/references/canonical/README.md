@@ -1,14 +1,15 @@
 # relief-design · canonical
 
-三张参考页。每张都是**这个风格在一种页型上的完整样子**，不是片段集。
+四张参考页。每张都是**这个风格在一种页型上的完整样子**，不是片段集。
 
 | 文件 | page-type | 内容 |
 |---|---|---|
 | `controls.html` | `controls` | 四档质感对照（含一个故意做错的样本）+ 按钮 / 开关 / 滑块 / 输入框 / 分段控件 |
 | `diagram.html` | `diagram` | 流程链 · 树状 · 左右对比 · 分层调用 · 结构体字段 |
 | `hardware.html` | `hardware` | 状态机 · 时序 · 寄存器位域 · IP 内部框图 · 内存布局 · 数据通路 · 时钟树 + 术语表 |
+| `platform.html` | `platform` | 启动链 · 分区表 · 编号翻译（中断号）· 引脚复用 |
 
-## 三张都必须满足
+## 四张都必须满足
 
 - **双语**（cross-skill-rules §G）：`lang-toggle` + 每段散文和每个图内标签都有 `lang-en` / `lang-zh`
 - **self-diff 块**（§M）：`</body>` 前，至少 3 条决策 + Known trade-offs 段
