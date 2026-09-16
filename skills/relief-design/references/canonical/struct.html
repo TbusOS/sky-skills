@@ -77,6 +77,100 @@ touch@38 {
 tp-&gt;rst = <em>devm_gpiod_get</em>(dev, "reset", GPIOD_OUT_HIGH);</div><div class="relief-figcap"><span class="lang-en">Note the last row: <code>compatible</code> is the one property that never becomes a field. It is consumed before your code runs, which is why a typo there produces silence rather than a wrong value.</span><span class="lang-zh">注意最后一行：<code>compatible</code> 是唯一一个永远不会变成字段的属性。它在你的代码跑起来之前就被消费掉了 —— 所以那里写错得到的是一片安静，不是一个错的值。</span></div></div><div><div class="relief-layout"><div class="relief-off">dts</div><div class="relief-fieldrow relief-raised"><b>quartz,lanes = &lt;4&gt;</b><i><span class="lang-en">of_property_read_u32()</span><span class="lang-zh">of_property_read_u32()</span></i></div><div class="relief-sz">u32</div><div class="relief-off">&rarr;</div><div class="relief-fieldrow relief-raised"><b>tp-&gt;lanes = 4</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">1 B</div><div class="relief-off">dts</div><div class="relief-fieldrow relief-raised"><b>reset-gpios = &lt;&hellip;&gt;</b><i><span class="lang-en">devm_gpiod_get(dev, "reset", &hellip;)</span><span class="lang-zh">devm_gpiod_get(dev, "reset", …)</span></i></div><div class="relief-sz">&mdash;</div><div class="relief-off">&rarr;</div><div class="relief-fieldrow relief-raised"><b>tp-&gt;rst</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">8 B</div><div class="relief-off">dts</div><div class="relief-fieldrow relief-raised"><b>compatible</b><i><span class="lang-en">of_match_table</span><span class="lang-zh">of_match_table</span></i></div><div class="relief-sz">&mdash;</div><div class="relief-off">&times;</div><div class="relief-fieldrow relief-sunken relief-hole"><b>&mdash;</b><i><span class="lang-en">never reaches your struct — it only decides whether probe runs</span><span class="lang-zh">根本到不了你的结构体 —— 它只决定 probe 跑不跑</span></i></div><div class="relief-sz">&mdash;</div></div></div></div></div>
 </div>
 
+<h2><span class="lang-en">5 &middot; Bitfields, and what <code>__packed</code> does to them</span><span class="lang-zh">5 &middot; 位域，以及 <code>__packed</code> 对它做了什么</span></h2>
+<p class="relief-note"><span class="lang-en">Two things the source does not show. First, bitfields are cut out of a <b>storage unit</b> the compiler picks, filling from the least significant bit on a little-endian target &mdash; so <code>mode</code> is bits 2:0, not the top of the byte. Second, <code>__packed</code> does not just make the struct smaller: it moves every later field, and a <code>u32</code> that used to sit at offset 4 can end up at offset 3. On arm64 that read is fixed up in a trap handler; on some 32-bit cores it is a fault. The figure puts both views under the source: the bit strip for the unit, the byte list for what moved.</span><span class="lang-zh">源码上看不出来的两件事。第一，位域是从编译器挑的一个<b>存储单元</b>里切出来的，小端目标上从最低位开始填 —— 所以 <code>mode</code> 是 bit 2:0，不是那个字节的高位。第二，<code>__packed</code> 不只是把结构体变小：它会把后面每个字段都往前挪，本来在偏移 4 的 <code>u32</code> 可能落到偏移 3。arm64 上这次读会掉进处理非对齐访问的陷阱里，有些 32 位核上直接是异常。这张图把两个视角都摆在源码下面：位带看单元怎么切，字节表看什么挪了位置。</span></p>
+<div class="relief-board relief-raised" id="fig-bitfields-and-packed"><div class="relief-bt"><span class="lang-en">struct tp_cfg &middot; with and without <code>__packed</code></span><span class="lang-zh">struct tp_cfg &middot; 加不加 <code>__packed</code></span><em><span class="lang-en">the saved byte costs you an unaligned 32-bit read on every access</span><span class="lang-zh">省下来的那一个字节，代价是此后每次访问都是一次非对齐的 32 位读</span></em></div>
+<div class="relief-codefig">
+  <div>
+    <div class="relief-code relief-sunken" tabindex="0" role="region" aria-label="source"><i>/* drivers/input/tp_core.h */</i>
+<b>struct</b> tp_cfg {
+    <b>u8</b>   mode   : 3;   <i>/* bit 2:0 */</i>
+    <b>u8</b>   lanes  : 2;   <i>/* bit 4:3 */</i>
+    <b>u16</b>  rate;
+    <b>u32</b>  window;
+} <em>__packed</em>;
+
+<i>/* $ pahole -C tp_cfg tp_core.o */</i>
+<em>/* __packed:    size 7, window @ 3  */</em>
+<em>/* 不加 __packed: size 8, window @ 4 */</em></div>
+    <div class="relief-figcap"><span class="lang-en">the source, as written</span><span class="lang-zh">源码原文</span></div>
+  </div>
+  <div>
+    <div class="relief-regbar" style="grid-template-columns:repeat(8,1fr)">
+      <div class="relief-bitno" style="grid-column:span 3">7&middot;5</div>
+      <div class="relief-bitno" style="grid-column:span 2">4&middot;3</div>
+      <div class="relief-bitno" style="grid-column:span 3">2&middot;0</div>
+    </div>
+    <div class="relief-regbar" style="grid-template-columns:repeat(8,1fr);margin-top:0">
+      <div class="relief-fld relief-sunken relief-rsvd" style="grid-column:span 3">&mdash;</div>
+      <div class="relief-fld relief-raised" style="grid-column:span 2">lanes<span class="relief-rst">2 b</span></div>
+      <div class="relief-fld relief-raised" style="grid-column:span 3">mode<span class="relief-rst">3 b</span></div>
+    </div>
+    <div class="relief-regfoot"><span><span class="lang-en">byte 0 &middot; filled from bit 0 up</span><span class="lang-zh">第 0 字节 &middot; 从 bit 0 往上填</span></span></div>
+    <div class="relief-layout" style="margin-top:18px">
+      <div class="relief-off">0</div>
+      <div class="relief-fieldrow relief-raised"><b>mode / lanes</b><i><span class="lang-en">5 bits used, 3 left over</span><span class="lang-zh">用了 5 位，剩 3 位</span></i></div>
+      <div class="relief-sz">1 B</div>
+      <div class="relief-off">1</div>
+      <div class="relief-fieldrow relief-raised"><b>rate</b><i>u16</i></div>
+      <div class="relief-sz">2 B</div>
+      <div class="relief-off">3</div>
+      <div class="relief-fieldrow relief-raised relief-risk"><b>window</b><i><span class="lang-en">u32 at an odd offset &mdash; unaligned</span><span class="lang-zh">u32 落在奇数偏移 —— 非对齐</span></i></div>
+      <div class="relief-sz">4 B</div>
+    </div>
+    <div class="relief-figcap"><span class="lang-en">with <code>__packed</code> &mdash; total 7 B</span><span class="lang-zh">加了 <code>__packed</code> —— 共 7 B</span></div>
+  </div>
+</div>
+<div class="relief-ctnote relief-sunken"><span class="lang-en"><b>0 + 1 + 2 = 3, and 3 + 4 = 7.</b> Without <code>__packed</code> the compiler inserts one pad byte at offset 3, <code>window</code> lands at 4, and the struct is 8 bytes. You trade one byte for an unaligned access on every read of <code>window</code> &mdash; and the compiler will not warn, because you asked for it.</span><span class="lang-zh"><b>0 + 1 + 2 = 3，3 + 4 = 7。</b>不加 <code>__packed</code> 时编译器会在偏移 3 塞一个填充字节，<code>window</code> 落在 4，结构体 8 字节。你用一个字节换来的是此后每次读 <code>window</code> 都非对齐 —— 而且编译器不会警告，因为是你自己要的。</span></div>
+</div>
+
+<h2><span class="lang-en">6 &middot; A union is not a struct with fewer bytes</span><span class="lang-zh">6 &middot; 联合体不是「字段少一点的结构体」</span></h2>
+<p class="relief-note"><span class="lang-en">An offset list cannot draw a union, because an offset list assumes one field comes after another. Here every member starts at byte 0 and they sit <b>on top of each other</b>. That is the whole point and it is also the whole danger: writing one member and reading another does not convert anything, it re-reads the same bytes under a different type. The bar that is longest sets the size; the tail nobody covers is still allocated.</span><span class="lang-zh">偏移表画不出联合体，因为偏移表的前提是「一个字段接着一个字段」。这里每个成员都从第 0 字节开始，<b>互相压在一起</b>。这既是它的全部用处，也是它的全部风险：写了一个成员再读另一个，不会做任何转换，只是换个类型把同一批字节再读一遍。最长的那根决定大小；没人盖到的尾巴照样占着内存。</span></p>
+<div class="relief-board relief-raised" id="fig-a-union-is-not-a-struct"><div class="relief-bt"><span class="lang-en">union tp_arg &middot; all four start at byte 0</span><span class="lang-zh">union tp_arg &middot; 四个都从第 0 字节开始</span><em><span class="lang-en">the bytes are shared; only the reading rule changes</span><span class="lang-zh">字节是共用的，变的只是解读规则</span></em></div>
+<div class="relief-codefig">
+  <div>
+    <div class="relief-code relief-sunken" tabindex="0" role="region" aria-label="source"><i>/* 一个 ioctl 的参数 */</i>
+<b>union</b> tp_arg {
+    <b>u32</b>  raw;
+    <b>struct</b> { <b>u16</b> x, y; } point;
+    <b>u8</b>   bytes[4];
+    <b>u64</b>  stamp;
+};
+
+<i>/* 小端上写 raw = 0x0002_0001 之后 */</i>
+<em>/* point.x == 1, point.y == 2  */</em>
+<em>/* 大端上正好反过来           */</em></div>
+    <div class="relief-figcap"><span class="lang-en">the source, as written</span><span class="lang-zh">源码原文</span></div>
+  </div>
+  <div>
+    <div class="relief-ovl" style="grid-template-columns:118px repeat(8,1fr)">
+      <div class="relief-ovlname"><span class="lang-en">byte</span><span class="lang-zh">字节</span></div>
+      <div class="relief-ovlno">0</div><div class="relief-ovlno">1</div><div class="relief-ovlno">2</div><div class="relief-ovlno">3</div>
+      <div class="relief-ovlno">4</div><div class="relief-ovlno">5</div><div class="relief-ovlno">6</div><div class="relief-ovlno">7</div>
+
+      <div class="relief-ovlname">raw</div>
+      <div class="relief-ovlbar relief-raised" style="grid-column:2/6">u32<i>4 B</i></div>
+      <div class="relief-ovltail" style="grid-column:6/10"><span class="lang-en">not covered</span><span class="lang-zh">没盖到</span></div>
+
+      <div class="relief-ovlname">point</div>
+      <div class="relief-ovlbar relief-hot" style="grid-column:2/4">x<i>u16</i></div>
+      <div class="relief-ovlbar relief-hot" style="grid-column:4/6">y<i>u16</i></div>
+      <div class="relief-ovltail" style="grid-column:6/10"><span class="lang-en">not covered</span><span class="lang-zh">没盖到</span></div>
+
+      <div class="relief-ovlname">bytes[4]</div>
+      <div class="relief-ovlbar relief-raised" style="grid-column:2/6">u8 &times; 4<i>4 B</i></div>
+      <div class="relief-ovltail" style="grid-column:6/10"><span class="lang-en">not covered</span><span class="lang-zh">没盖到</span></div>
+
+      <div class="relief-ovlname">stamp</div>
+      <div class="relief-ovlbar relief-raised" style="grid-column:2/10">u64<i><span class="lang-en">8 B &mdash; this one sets the size</span><span class="lang-zh">8 B —— 大小由它决定</span></i></div>
+    </div>
+    <div class="relief-figcap"><span class="lang-en">sizeof(union tp_arg) == 8</span><span class="lang-zh">sizeof(union tp_arg) == 8</span></div>
+  </div>
+</div>
+<div class="relief-ctnote relief-sunken"><span class="lang-en"><b>The bug this figure is about:</b> user space fills <code>point</code> (4 bytes) and the driver reads <code>stamp</code> (8 bytes). Bytes 4&ndash;7 were never written, so the driver reads whatever was on the stack &mdash; and it reads it <i>successfully</i>, every time, with a different value. Copy the union in full or check which member the ioctl number promised; the type system will not do it for you.</span><span class="lang-zh"><b>这张图讲的那个 bug：</b>用户态填的是 <code>point</code>（4 字节），驱动读的是 <code>stamp</code>（8 字节）。第 4&ndash;7 字节从来没被写过，驱动读到的是栈上残留的东西 —— 而且每次都<i>读成功</i>，每次值还不一样。要么整个联合体拷全，要么按 ioctl 号确认该读哪个成员；类型系统不会替你挡。</span></div>
+</div>
+
+
 <script>
 document.getElementById('skins').addEventListener('click', e => {
   const b = e.target.closest('b'); if (!b) return;
@@ -100,13 +194,15 @@ Skill: relief
 Page-type: struct
 Created: 2026-09-15
 
-Decisions (5):
+Decisions (7):
 1. [the-code-sits-beside-the-figure] chose "every figure on this page ships with the source it explains, in a sunken panel to its left" over "a figure with a caption naming the file". Because: a diagram of a data structure is only worth drawing if the reader can point at the line it came from — with the code beside it the mapping is done by the eye, and with a filename in the caption it is done by the reader going and finding the file.
 2. [padding-is-drawn-as-nothing] chose "compiler padding as a sunken empty row" over "a labelled grey block". Because: depth already means 'nothing is here' on every other page in this skill, so a hole reads as a hole without a legend — and the two rows that cost 15 of 56 bytes are then the two rows that look empty.
 3. [three-relations-get-three-shapes] chose "embed as containment, pointer as a hop out, list_head as neither" over "one diagram with differently-labelled arrows". Because: the three differ by one character in source and by an entire lifetime in reality, and the bug they produce (use-after-free) belongs to exactly one of them — shapes that differ are what make that one stand out.
 4. [the-round-trip-is-the-figure] chose "show set_clientdata and get_clientdata as the two ends of one chain" over "a static ownership diagram". Because: what a driver author actually forgets is the direction, not the participants — so the figure is built around the round trip and the two lines are the only ones marked.
 5. [compatible-gets-a-sunken-row] chose "give compatible a row in the property table and draw it sunken" over "leaving it out because it is not a field". Because: its absence is the point — it is the property people expect to find in their struct and never do, and the sunken row says that in the same place they would go looking.
 
+6. [two-views-under-one-source] chose "a bit strip AND a byte list under the same source block" over "one of them". Because: a bitfield bug is either about which bits the compiler picked or about where __packed moved the later fields, and the two questions need different pictures; showing only one leaves half the readers looking at the wrong figure.
+7. [a-union-needs-overlap-not-offsets] chose "every member drawn from byte 0, stacked" over "reusing the offset list". Because: the offset list exists to say one field follows another, which is exactly what a union does not do — reusing it would state the opposite of the truth.
 Known trade-offs:
 - The layout figure is for one struct on one ABI. Change the architecture and the holes move, so it teaches the method rather than the numbers.
 - The device-model chain is drawn for i2c. platform and spi have the same shape with different accessor names, which the figure does not show.

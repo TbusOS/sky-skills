@@ -158,6 +158,55 @@
 <div class="relief-dchain" tabindex="0" role="region" aria-label="chain"><div class="relief-desc relief-raised"><h4>struct device *dev</h4><dl><dt></dt><dd>probe() 的参数</dd><dt>bus</dt><dd>platform</dd><dt>driver_data</dt><dd>&rarr;</dd></dl></div><div class="relief-dlink"><svg width="26" height="20" viewBox="0 0 26 20"><path d="M1 10h14M12 3l9 7-9 7" fill="none" stroke="var(--navy)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="relief-desc relief-raised"><h4>platform_device</h4><dl><dt>container_of</dt><dd>dev</dd><dt>id</dt><dd>-1</dd><dt>resource</dt><dd>&rarr;</dd></dl></div><div class="relief-dlink"><svg width="26" height="20" viewBox="0 0 26 20"><path d="M1 10h14M12 3l9 7-9 7" fill="none" stroke="var(--navy)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="relief-desc relief-raised"><h4>drvdata</h4><dl><dt>set by</dt><dd>platform_set_drvdata()</dd><dt></dt><dd>&rarr; 你的私有结构</dd></dl></div><div class="relief-dlink"><svg width="26" height="20" viewBox="0 0 26 20"><path d="M1 10h14M12 3l9 7-9 7" fill="none" stroke="var(--navy)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="relief-desc relief-raised relief-live"><h4>struct tp_data</h4><dl><dt>client</dt><dd>i2c_client *</dd><dt>input</dt><dd>input_dev *</dd><dt>lock</dt><dd>mutex</dd></dl></div></div></div>
 </div>
 
+<h2><span class="lang-en">J &middot; One trace, indented</span><span class="lang-zh">J &middot; 一次执行，缩进着看</span></h2>
+<p class="relief-note"><span class="lang-en">This is the shape everything in the kernel already uses &mdash; <code>ftrace</code>&rsquo;s function_graph, the <code>Call trace:</code> in an oops, <code>gdb</code>&rsquo;s <b>bt</b>. Indentation <i>is</i> call depth, so the reader does not have to learn a legend first, and the figure lines up with the tool output still open in the other terminal. The call graph in section B answers a different question &mdash; who calls me and what do I call. This one answers <b>what actually happened this time</b>, in order, with the time each frame cost.</span><span class="lang-zh">内核里已经全是这个形状了 —— <code>ftrace</code> 的 function_graph、oops 里的 <code>Call trace:</code>、<code>gdb</code> 的 <b>bt</b>。缩进<i>就是</i>调用深度，读者不用先学图例，而且这张图能和另一个终端里还开着的工具输出逐行对上。B 节那张调用关系图回答的是另一个问题 —— 谁调我、我调谁。这一张回答的是<b>这一次到底走了哪条路</b>，按顺序，每一帧花了多久。</span></p>
+<div class="relief-board relief-raised" id="fig-one-trace-indented"><div class="relief-bt"><span class="lang-en">ftrace &middot; one touch interrupt</span><span class="lang-zh">ftrace &middot; 一次触摸中断</span><em><span class="lang-en">the indent is the depth; the number on the right is where the time went</span><span class="lang-zh">缩进是深度，右边那个数说明时间花在哪了</span></em></div>
+<div class="relief-ct">
+  <div class="relief-ctrow" style="--d:0"><span class="relief-ctfn relief-raised relief-thin"><b>tp_irq_thread()</b><i>drivers/input/tp_core.c:508</i></span><span class="relief-ctus">148.3 &micro;s</span></div>
+  <div class="relief-ctrow" style="--d:1"><span class="relief-ctfn relief-raised relief-thin"><b>mutex_lock()</b><i>kernel/locking/mutex.c</i></span><span class="relief-ctus">0.9 &micro;s</span></div>
+  <div class="relief-ctrow" style="--d:1"><span class="relief-ctfn relief-hot"><b>tp_read_frame()</b><i><span class="lang-en">the one you came here for</span><span class="lang-zh">你要找的就是它</span></i></span><span class="relief-ctus relief-slow">141.6 &micro;s</span></div>
+  <div class="relief-ctrow" style="--d:2"><span class="relief-ctfn relief-raised relief-thin"><b>i2c_transfer()</b><i>drivers/i2c/i2c-core-base.c</i></span><span class="relief-ctus relief-slow">138.2 &micro;s</span></div>
+  <div class="relief-ctrow" style="--d:3"><span class="relief-ctfn relief-raised relief-thin"><b>rk_i2c_xfer()</b><i><span class="lang-en">bus driver &middot; 100 kHz</span><span class="lang-zh">总线驱动 &middot; 100 kHz</span></i></span><span class="relief-ctus relief-slow">137.4 &micro;s</span></div>
+  <div class="relief-ctrow" style="--d:4"><span class="relief-ctfn relief-raised relief-thin"><b>wait_for_completion_timeout()</b><i><span class="lang-en">sleeps until the controller is done</span><span class="lang-zh">睡到控制器做完</span></i></span><span class="relief-ctus relief-slow">136.1 &micro;s</span></div>
+  <div class="relief-ctrow" style="--d:2"><span class="relief-ctfn relief-raised relief-thin"><b>tp_parse_points()</b><i><span class="lang-en">pure arithmetic</span><span class="lang-zh">纯算术</span></i></span><span class="relief-ctus">2.1 &micro;s</span></div>
+  <div class="relief-ctrow" style="--d:2"><span class="relief-ctfn relief-skip"><b>tp_recalibrate()</b><i><span class="lang-en">not entered &mdash; the drift threshold was not crossed</span><span class="lang-zh">没进去 —— 漂移没到阈值</span></i></span><span class="relief-ctus">&mdash;</span></div>
+  <div class="relief-ctrow" style="--d:1"><span class="relief-ctfn relief-raised relief-thin"><b>input_report_abs()</b><i>drivers/input/input.c</i></span><span class="relief-ctus">1.4 &micro;s</span></div>
+  <div class="relief-ctrow" style="--d:1"><span class="relief-ctfn relief-raised relief-thin"><b>mutex_unlock()</b></span><span class="relief-ctus">0.3 &micro;s</span></div>
+</div>
+<div class="relief-ctnote relief-sunken"><span class="lang-en"><b>93% of the 148 &micro;s is one I2C transfer, and inside it the thread is asleep.</b> So the fix is not in <code>tp_read_frame()</code> &mdash; it is a bus clock or a transfer-size question. The indentation is what makes that readable at a glance: the expensive number is four levels deep, in code you do not own.</span><span class="lang-zh"><b>148 &micro;s 里 93% 是一次 I2C 传输，而且那段时间线程在睡。</b>所以要改的不是 <code>tp_read_frame()</code>，是总线时钟或者一次传多少字节。缩进就是让这件事一眼看出来的东西：那个大数字在第四层，在不归你管的代码里。</span></div>
+</div>
+
+<h2><span class="lang-en">K &middot; Where a pointer in a table actually goes</span><span class="lang-zh">K &middot; 表里那个指针到底跳到哪</span></h2>
+<p class="relief-note"><span class="lang-en">&ldquo;I changed that function and nothing happened&rdquo; is usually this: the table entry points somewhere else. The table is the source, sunken because it is the text you already have; each raised block on the right is the function the slot actually lands in. An empty slot is drawn sunken and unlabelled &mdash; the kernel supplies a default, and knowing <i>which</i> default is the whole question.</span><span class="lang-zh">「我改了那个函数，一点反应都没有」多半就是这件事：表里那一项指到别处去了。左边那张表是源码，凹陷因为它是你已经有的原文；右边每个凸块是这一项真正落到的函数。空的槽画成凹的、不写名字 —— 内核会给一个默认实现，而<i>是哪一个</i>默认实现正是要问的。</span></p>
+<div class="relief-board relief-raised" id="fig-where-a-pointer-in-a-table-actually-goes"><div class="relief-bt"><span class="lang-en">struct file_operations &middot; slot by slot</span><span class="lang-zh">struct file_operations &middot; 逐项看去向</span><em><span class="lang-en">grep the slot name, not the function name &mdash; the function name is not what the kernel calls</span><span class="lang-zh">要 grep 的是槽名不是函数名 —— 内核喊的不是函数名</span></em></div>
+<div class="relief-codefig">
+  <div>
+    <div class="relief-code relief-sunken" tabindex="0" role="region" aria-label="source"><i>/* drivers/input/tp_core.c */</i>
+<b>static const struct</b> file_operations tp_fops = {
+    .owner          = THIS_MODULE,
+    .open           = tp_open,
+    .read           = tp_read,
+    .unlocked_ioctl = tp_ioctl,
+    <em>/* .llseek 没写 */</em>
+    .release        = tp_release,
+};</div>
+    <div class="relief-figcap"><span class="lang-en">the table, as written</span><span class="lang-zh">表的原文</span></div>
+  </div>
+  <div>
+    <div class="relief-ct">
+      <div class="relief-ctrow" style="--d:0"><span class="relief-ctfn relief-raised relief-thin"><b>.open</b><i>&rarr; tp_open()</i></span><span class="relief-ctus">tp_core.c:96</span></div>
+      <div class="relief-ctrow" style="--d:0"><span class="relief-ctfn relief-hot"><b>.read</b><i>&rarr; tp_read()</i></span><span class="relief-ctus">tp_core.c:141</span></div>
+      <div class="relief-ctrow" style="--d:1"><span class="relief-ctfn relief-raised relief-thin"><b>tp_read_frame()</b><i><span class="lang-en">the function you edited</span><span class="lang-zh">你改的是这个</span></i></span><span class="relief-ctus">tp_core.c:412</span></div>
+      <div class="relief-ctrow" style="--d:0"><span class="relief-ctfn relief-raised relief-thin"><b>.unlocked_ioctl</b><i>&rarr; tp_ioctl()</i></span><span class="relief-ctus">tp_core.c:203</span></div>
+      <div class="relief-ctrow" style="--d:0"><span class="relief-ctfn relief-skip"><b>.llseek</b><i><span class="lang-en">left NULL &rarr; the kernel uses default_llseek()</span><span class="lang-zh">留空 &rarr; 内核走 default_llseek()</span></i></span><span class="relief-ctus">fs/read_write.c</span></div>
+      <div class="relief-ctrow" style="--d:0"><span class="relief-ctfn relief-raised relief-thin"><b>.release</b><i>&rarr; tp_release()</i></span><span class="relief-ctus">tp_core.c:118</span></div>
+    </div>
+    <div class="relief-figcap"><span class="lang-en">where each slot lands</span><span class="lang-zh">每一项的去向</span></div>
+  </div>
+</div>
+<div class="relief-ctnote relief-sunken"><span class="lang-en"><b>A NULL slot is not &ldquo;nothing happens&rdquo;.</b> <code>.llseek</code> left out means <code>default_llseek()</code>, which succeeds &mdash; so a seek on this device silently moves a file position nobody reads. That is a different bug from &ldquo;seek returns an error&rdquo;, and the table alone does not show it.</span><span class="lang-zh"><b>槽留空不等于「什么都不会发生」。</b><code>.llseek</code> 没写，内核会用 <code>default_llseek()</code>，而它是成功返回的 —— 于是对这个设备 seek 会悄悄挪动一个没人读的文件位置。这和「seek 报错」是两种不同的 bug，光看表看不出来。</span></div>
+</div>
+
 <script>
 document.getElementById('skins').addEventListener('click', e => {
   const b = e.target.closest('b'); if (!b) return;
@@ -181,7 +230,7 @@ Skill: relief
 Page-type: code
 Created: 2026-09-15
 
-Decisions (6):
+Decisions (8):
 1. [the-address-gutter-is-the-point] chose "print the stack pointer beside every frame of the backtrace" over "a plain top-to-bottom list of symbols". Because: a backtrace reads from the crash back to the entry point while the stack pointer runs the other way, and a bare symbol list never says so — the reader is left to remember which direction memory grew, which is exactly the thing they get wrong at 2am.
 2. [callers-above-callees-below] chose "the focus function in the middle with callers above and callees below" over "a left-to-right flow". Because: it is the convention every call-graph tool already prints, so the reader spends no attention working out which half is which, and the vertical axis is then free to mean depth of call rather than order in time.
 3. [atomic-context-gets-a-ring] chose "ring the call-graph nodes reachable from interrupt context" over "leaving context as prose next to the figure". Because: the question a reader brings to a call graph in kernel work is usually 'may this sleep', and a property that lives in a caption cannot be scanned — a ring can, and its absence is as readable as its presence.
@@ -189,9 +238,12 @@ Decisions (6):
 5. [lifelines-are-grooves] chose "a sunken vertical channel per participant, with raised activation blocks on it" over "the plain vertical line of a UML sequence diagram". Because: the groove already reads as a channel through time in this vocabulary, and the raised block on it then means 'on the stack right now' without a key — so overlapping blocks show who is blocked on whom by shape alone.
 6. [contexts-are-bands-not-nodes] chose "execution contexts as stacked bands, ordered by what preempts what" over "a flowchart of scheduling decisions". Because: the reader is not tracing a path, they are asking which band a given function body is allowed to run in — the answer is containment, and containment is what a band draws.
 
+7. [indent-is-the-legend] chose "an indented call tree, the shape ftrace function_graph and gdb bt already print" over "another side-by-side layout". Because: the reader arrives holding that exact output in another terminal, so a figure in the same shape needs no legend and lines up row for row. It does not replace the call graph in section B — that one answers who-calls-me, this one answers what-happened-this-time.
+8. [a-branch-not-taken-is-sunken] chose "draw the call that was not entered as a sunken pill" over "omitting it". Because: knowing a branch exists and was skipped is often the finding; omitting it leaves the reader unable to tell "not called" from "not in the code".
 Known trade-offs:
 - The sequence diagram is a fixed grid: adding a participant means editing every message's column span by hand.
 - The call graph shows one level of callers and one of callees. Anything deeper needs a second figure, because a third rank makes the fan unreadable at this width.
+- The call tree carries depth in a --d variable on a flat list of rows. That keeps it writable by hand and matches trace output order, but it means the rails are drawn per row rather than per subtree: a tree that is not a plain preorder descent would need real nesting.
 - The architecture figure is drawn for a three-layer driver. A subsystem with a different shape needs its wells rebuilt rather than relabelled.
 /design-review:self-diff -->
 

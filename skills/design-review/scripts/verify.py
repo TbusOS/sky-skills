@@ -41,7 +41,7 @@ Checks:
   2. <!doctype html> + viewport meta present
   3. Hero inner element uses an acceptable container (per skill)
   4. Every `class="{prefix}-*"` token is defined somewhere in the CSS union
-  5. <svg> tag balance · <div> balance (comments and code blocks excluded)
+  5. <svg> tag balance · <div> balance (comments and code blocks excluded) · font-family names are ASCII
   6. Container modifier never used without its base class (BEM bug)
   7. Bilingual toggle on public pages (lang-toggle / lang-en / lang-zh)
   8. Half-width ASCII punctuation inside lang-zh spans · self-diff block
@@ -472,6 +472,42 @@ def check_file(
             f"level. The browser's own DOM is the honest witness: load the page "
             f"and look for a block whose parent carries the same class."
         )
+
+    # 5d. Font-family names must be ASCII. A full-width or CJK quote around a
+    # family name — font: 500 12px 「JetBrains Mono」 — is not a syntax error:
+    # CSS lets an identifier hold those code points, so the declaration parses,
+    # matches no installed font, and the element silently falls back. Worse, the
+    # `font` shorthand RESETS font-family, so there is no inherited stack left
+    # either: the text renders in the browser default with no CJK coverage
+    # guaranteed. Nothing errors, the layout still looks plausible, and only
+    # someone who knows what the page should look like notices.
+    #
+    # Found 2026-09-16 in relief.css: 30 declarations had CJK corner brackets
+    # instead of ASCII quotes. Register bit numbers, memory addresses, SoC block
+    # names and clock nodes had been rendering in the browser default font since
+    # the day the skill shipped. Measured across the repo's CSS the day it was
+    # fixed: zero other occurrences, so this check starts with no false positives.
+    for css_path in sorted(css_files_used):
+        try:
+            css_src = open(css_path, encoding="utf-8").read()
+        except OSError:
+            continue
+        # Blank comments, keeping offsets so the reported line stays right.
+        css_src = re.sub(r"/\*.*?\*/",
+                         lambda m: re.sub(r"[^\n]", " ", m.group(0)),
+                         css_src, flags=re.DOTALL)
+        for fm in re.finditer(r"(?<![\w-])(font|font-family)\s*:\s*([^;}]*)", css_src):
+            nonascii = sorted({c for c in fm.group(2) if ord(c) > 127})
+            if not nonascii:
+                continue
+            line = css_src.count("\n", 0, fm.start()) + 1
+            errors.append(
+                f"{os.path.relpath(css_path)}:{line}: non-ASCII in a "
+                f"{fm.group(1)} value ({' '.join(nonascii)}) — a family name in "
+                f"full-width or CJK quotes parses fine, matches no font, and the "
+                f"`font` shorthand leaves no fallback. Use ASCII \" quotes, or "
+                f"better, a var() that carries the whole stack."
+            )
 
     # 6. Modifier-only container (BEM bug)
     mod_re = re.compile(

@@ -641,6 +641,34 @@ hwirq/virq、物理地址/总线地址、次设备号/设备节点。
 
 `<i>` 里那个 `文件:行号` 是这张图的全部价值 —— **没有它，图只是把 dmesg 抄了一遍**。
 
+## 缩进式调用树 `.relief-ct`
+
+**什么时候用**：这一次执行走了哪条路、时间花在哪一层。
+**内核里看调用关系从来不是并排的** —— ftrace function_graph、oops 的
+`Call trace:`、gdb `bt`，全是缩进的一棵树。照这个形状画，读者不用先学图例，
+而且能和另一个终端里还开着的工具输出逐行对上。
+
+```html
+<div class="relief-ct">
+  <div class="relief-ctrow" style="--d:0"><span class="relief-ctfn relief-raised relief-thin"><b>tp_irq_thread()</b><i>drivers/input/tp_core.c:508</i></span><span class="relief-ctus">148.3 µs</span></div>
+  <div class="relief-ctrow" style="--d:1"><span class="relief-ctfn relief-hot"><b>tp_read_frame()</b><i><span class="lang-en">the one you came for</span><span class="lang-zh">你要找的就是它</span></i></span><span class="relief-ctus relief-slow">141.6 µs</span></div>
+  <div class="relief-ctrow" style="--d:2"><span class="relief-ctfn relief-raised relief-thin"><b>i2c_transfer()</b><i>i2c-core-base.c</i></span><span class="relief-ctus relief-slow">138.2 µs</span></div>
+  <div class="relief-ctrow" style="--d:3"><span class="relief-ctfn relief-atomic"><b>rk_i2c_xfer()</b><i><span class="lang-en">bus driver</span><span class="lang-zh">总线驱动</span></i></span><span class="relief-ctus">137.4 µs</span></div>
+  <div class="relief-ctrow" style="--d:2"><span class="relief-ctfn relief-skip"><b>tp_recalibrate()</b><i><span class="lang-en">not entered this time</span><span class="lang-zh">这次没进去</span></i></span><span class="relief-ctus">—</span></div>
+</div>
+<div class="relief-ctnote relief-sunken"><span class="lang-en"><b>So what:</b> the expensive number is three levels deep, in code you do not own.</span><span class="lang-zh"><b>所以呢：</b>那个大数字在第三层，在不归你管的代码里。</span></div>
+```
+
+- **深度写在 `--d` 上，扁平地列出来就行** —— 不用嵌套 div。
+  竖凹槽每行各画各的，前序遍历里「深度大于 k 的行」正好是那一级的全部子孙、
+  而且连续，所以线自然接得上，深度一降槽自己消失。
+- 修饰：`relief-hot` 这次最该看的一帧 · `relief-atomic` 这一支不能睡 ·
+  **`relief-skip` 画成凹的 = 这条路这次没走**（凹=够不到，和别的图一致）·
+  `relief-slow` 把耗时标成警示色。
+- **`.relief-ctnote` 那一句是这张图的结论**，不是复述。没有它，读者只看到一堆数字。
+- **和 `.relief-cg` 不是一回事**：`.relief-cg` 回答「谁调我 / 我调谁」（扇入扇出），
+  这个回答「这一次发生了什么」（一条轨迹）。两张图别互相替代。
+
 ## 两个栈并排比 `.relief-vs2`
 
 **什么时候用**：能跑通的那次 vs 卡死的那次，差在哪几帧。
@@ -783,6 +811,21 @@ hwirq/virq、物理地址/总线地址、次设备号/设备节点。
 
 **别手算，用 `pahole -C <结构体> <目标文件>.o` 的输出照抄。**
 
+落在坏地方的字段加 `.relief-risk`（描一圈警示色，不动底色）——
+比如 `__packed` 之后落到奇数偏移的 `u32`：
+
+```html
+<div class="relief-layout">
+  <div class="relief-off">3</div>
+  <div class="relief-fieldrow relief-raised relief-risk"><b>window</b><i><span class="lang-en">u32 at an odd offset — unaligned</span><span class="lang-zh">u32 落在奇数偏移 —— 非对齐</span></i></div>
+  <div class="relief-sz">4 B</div>
+</div>
+```
+
+位域本身用 `.relief-regbar` 画，把列数改成位宽即可
+（一个字节就是 `style="grid-template-columns:repeat(8,1fr)"`）。
+**小端上从最低位往上填**，所以 `bit 2:0` 画在最右边。
+
 ## 三种包含关系 `.relief-rel`
 
 **什么时候用**：嵌进去 / 指过去 / 挂到链上 —— 这三种的**生命周期完全不同**，
@@ -826,6 +869,32 @@ hwirq/virq、物理地址/总线地址、次设备号/设备节点。
 
 `.relief-relnote` 必须写**生命周期**，不是写结构长什么样 ——
 结构看代码就有，读者不知道的是「谁负责释放」。
+
+## 联合体 `.relief-ovl`
+
+**什么时候用**：几个成员压在同一批字节上。
+**偏移表（`.relief-layout`）画不出联合体** —— 那种图的前提是「一个接一个」。
+
+```html
+<div class="relief-ovl" style="grid-template-columns:118px repeat(8,1fr)">
+  <div class="relief-ovlname"><span class="lang-en">byte</span><span class="lang-zh">字节</span></div>
+  <div class="relief-ovlno">0</div><div class="relief-ovlno">1</div><div class="relief-ovlno">2</div><div class="relief-ovlno">3</div>
+  <div class="relief-ovlno">4</div><div class="relief-ovlno">5</div><div class="relief-ovlno">6</div><div class="relief-ovlno">7</div>
+
+  <div class="relief-ovlname">raw</div>
+  <div class="relief-ovlbar relief-raised" style="grid-column:2/6">u32<i>4 B</i></div>
+  <div class="relief-ovltail" style="grid-column:6/10"><span class="lang-en">not covered</span><span class="lang-zh">没盖到</span></div>
+
+  <div class="relief-ovlname">stamp</div>
+  <div class="relief-ovlbar relief-raised" style="grid-column:2/10">u64<i><span class="lang-en">this one sets the size</span><span class="lang-zh">大小由它决定</span></i></div>
+</div>
+```
+
+- **每个成员一行，都从第 2 列起**（第 1 列是名字）。横向占几格就是几个字节。
+- 没被最短成员盖到的尾巴用 `.relief-ovltail`（凹的，不写值）——
+  **那几个字节照样占着内存，只是这个成员管不到**。
+- 最长那根决定 `sizeof`。图注要写清**「写了 A 读 B」会读到什么**，
+  那才是这张图存在的理由。
 
 ## 越界落在哪 `.relief-slab`
 

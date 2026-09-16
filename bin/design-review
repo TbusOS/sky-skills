@@ -38,6 +38,8 @@
 #                      iOS-frost variant; both must be clean).
 #   --css=<path>       Extra CSS file for class-definition lookup. Can repeat.
 #   --strict           Treat visual-audit warnings as failure (default: only errors).
+#   --no-skill-checks  Skip the skill's own check scripts (see below). They are
+#                      cheap (relief's three together: ~6 s) and run by default.
 #   --viewport2=WxH    Width of the second-viewport geometry pass (default 1024).
 #                      visual-audit re-runs the overlap/overflow checks at this
 #                      narrower width and reports width-dependent collisions as
@@ -227,6 +229,7 @@ for arg in "$@"; do
     --pixel)          PIXEL_GATE=1 ;;
     --pixel-baseline) PIXEL_GATE=1; PIXEL_BASELINE=1 ;;
     --no-axe)         NO_AXE=1 ;;
+    --no-skill-checks) NO_SKILL_CHECKS=1 ;;
     --multi-critic) MULTI_CRITIC=1 ;;
     --learn)        LEARN=1 ;;
     --plan)    PLAN=1 ;;
@@ -667,6 +670,56 @@ if [ -n "$LEARN" ]; then
   done
 fi
 
+# ---------- Skill-owned checks ----------
+# 每个 skill 自己写的检查脚本。以前它们只写在各自的 SKILL.md §6 里，靠人记得
+# 读那一节 —— 仓库自己的规矩是「触发不了的检查是死代码」，而只靠文档触发的
+# 检查离死代码只差一次「这次先不跑了」。登记在这里，跑 design-review 就带上。
+#
+# 它们查的是各道通用检查**看不到**的东西：渐变底上的对比度(axe 算不了渐变)、
+# 图集页的按钮点了落对地方(没有任何通用检查会去点)、片段库有没有和 CSS 脱节。
+# 都很便宜 —— relief 这三个加起来约 6 秒。
+skill_check_list() {
+  case "$1" in
+    relief)
+      printf '%s\n' \
+        "python3|skills/relief-design/scripts/check_skin_contrast.py skills/relief-design/assets/relief.css" \
+        "node|skills/relief-design/scripts/check_gallery_links.mjs" \
+        "node|skills/relief-design/scripts/check_snippets.mjs"
+      ;;
+  esac
+}
+
+if [ -z "${NO_SKILL_CHECKS:-}" ]; then
+  # 没显式给 --skill 时，从被检查的页面路径里认出 skill
+  sc_skill="$SKILL"
+  if [ -z "$sc_skill" ]; then
+    for html in "${HTMLS[@]}"; do
+      case "$html" in
+        *relief-design*) sc_skill=relief ;;
+      esac
+      [ -n "$sc_skill" ] && break
+    done
+  fi
+  sc_lines="$(skill_check_list "$sc_skill")"
+  if [ -n "$sc_lines" ]; then
+    sc_failed=0
+    while IFS='|' read -r sc_runner sc_cmd; do
+      [ -z "$sc_runner" ] && continue
+      echo ""
+      echo "━━ skill check · ${sc_skill}   $(basename "${sc_cmd%% *}")"
+      # shellcheck disable=SC2086
+      ( cd "$SKY_ROOT" && $sc_runner $sc_cmd ) || sc_failed=1
+    done <<< "$sc_lines"
+    if [ "$sc_failed" -ne 0 ]; then
+      echo ""
+      echo "✗ a skill-owned check failed — see the lines above." >&2
+      echo "  These cover what the numbered gates cannot see (contrast on gradient fills," >&2
+      echo "  gallery buttons landing on the right figure, snippets drifting from CSS)." >&2
+      exit 1
+    fi
+  fi
+fi
+
 echo ""
 echo "┌─ Summary"
 echo "│  ✓ verify.py       (structural)"
@@ -679,6 +732,7 @@ else
 fi
 echo "│  ✓ screenshot      (in $OUT_DIR)"
 [ -n "$PIXEL_GATE" ] && echo "│  ✓ pixel-gate      (visual regression vs baseline)"
+[ -z "${NO_SKILL_CHECKS:-}" ] && [ -n "${sc_lines:-}" ] && echo "│  ✓ skill checks    (the skill's own scripts — see its SKILL.md §6)"
 [ -n "$CRITIC" ] && echo "│  ✓ critic prompt   (solo — feed to LLM)"
 [ -n "$MULTI_CRITIC" ] && echo "│  ✓ multi-critic    (4 specialists + aggregator prompts)"
 [ -n "$LEARN" ] && echo "│  ✓ learning-loop   (proposal prompt for known-bugs / check / dos-and-donts)"

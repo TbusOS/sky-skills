@@ -76,9 +76,9 @@ container_of · list_head · 私有数据 · drvdata · 设备树属性 · 越�
 ## §5 阅读顺序
 
 1. `references/design-tokens.md` — 变量层、七套皮肤、尺寸档
-2. `references/diagram-craft.md` — 四十五种框图各自的画法与判断依据 · **开头第一条是「图为了让代码更直观」**
+2. `references/diagram-craft.md` — 四十九种框图各自的画法与判断依据 · **开头第一条是「图为了让代码更直观」**
 3. **`references/snippets.md` — 每个部件可直接复制的标记。画新图从这里开始，
-   不用再去 canonical 里扒**。三十九段，每段都被 `check_snippets.mjs` 渲染核对过
+   不用再去 canonical 里扒**。四十二段，每段都被 `check_snippets.mjs` 渲染核对过
 4. `references/dos-and-donts.md` — 已经踩过的坑，含每条的实测数字
 5. `references/canonical/` — 八张参考页（controls / diagram / hardware / platform / code / struct / debug / git）
 
@@ -109,7 +109,7 @@ node    $R/scripts/check_snippets.mjs             # 改过 relief.css 或 snippe
 写成 `class="sn"` 正是最常见的那个错）· 每段渲染得出尺寸 · 七套皮肤下文字都够 4.5:1 ·
 `diagram-craft.md` 点名的部件都有对应片段。
 
-**图集页改过就跑 `check_gallery_links.mjs`。** 它点一遍 45 个按钮，核对落到的那张图
+**图集页改过就跑 `check_gallery_links.mjs`。** 它点一遍 49 个按钮，核对落到的那张图
 是不是按钮上写的那张。这道检查不看链接字符串 —— 看的是浏览器解析出来的 `:target`
 元素自己的标题。**用同一套字符串匹配去改、再去验，改错了它也说过。**
 
