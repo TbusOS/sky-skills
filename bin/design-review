@@ -670,6 +670,20 @@ if [ -n "$LEARN" ]; then
   done
 fi
 
+# ---------- Vendored fonts ----------
+# 字体是搬进仓的，中日韩还是按用字切的子集。**新写一个没出现过的汉字，
+# 它会回落到系统字体而且不报错** —— 这道检查就是堵它的。仓库级，跑一次。
+if [ -z "${NO_SKILL_CHECKS:-}" ] && [ -f "$SKY_ROOT/assets/fonts/manifest.json" ]; then
+  echo ""
+  echo "━━ repo check · check_fonts.py (搬进仓的字体还够不够用)"
+  if ! ( cd "$SKY_ROOT" && python3 skills/design-review/scripts/check_fonts.py ); then
+    echo ""
+    echo "✗ 字体检查没过 —— 多半是加了新字之后没重跑 build_fonts.py。" >&2
+    echo "  跑 python3 skills/design-review/scripts/build_fonts.py 再来一遍。" >&2
+    exit 1
+  fi
+fi
+
 # ---------- Skill-owned checks ----------
 # 每个 skill 自己写的检查脚本。以前它们只写在各自的 SKILL.md §6 里，靠人记得
 # 读那一节 —— 仓库自己的规矩是「触发不了的检查是死代码」，而只靠文档触发的

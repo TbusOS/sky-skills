@@ -269,6 +269,29 @@ Task(subagent_type='design-critic'))。输出 0-100 分 + 7 维度分解 +
 
 ## H. Chinese font stack(每 skill fonts.css 强制)
 
+> **2026-09-16 起字体搬进仓了,不再从 Google 现取。**
+> `assets/fonts/` 下 37 个 woff2,共 1.86 MB。拉丁字体原样搬 Google 的 woff2
+> (只挑 `unicode-range` 和本仓用字有交集的块),**中日韩做子集** ——
+> 全量 Noto Sans SC + Noto Serif SC 是 10 MB,而整个仓库只用到两千多个字形。
+>
+> - 生成:`python3 skills/design-review/scripts/build_fonts.py`(可重复跑)
+> - 检查:`python3 skills/design-review/scripts/check_fonts.py`(已接进 `bin/design-review`)
+> - **各 skill 的 fonts.css 里那段 `@font-face` 是生成的,别手改**;
+>   上面那条 `/* source: ... */` 注释是重跑时用来找回「本来要哪些字体」的,删了就废。
+>
+> **为什么非要配检查**:子集是按*当时*用到的字切的。以后写一个没出现过的汉字,
+> 它会回落到系统字体 —— **不报错、不留痕**,只是那几个字长得不一样。
+> 真栽过:生成脚本里写了 `cps.discard(0x20)`(以为空格不用管),
+> 于是每个空格都回落到 DejaVu Sans,整页版面偏移 51px。
+> 肉眼、截图对比、对比度检查全没看出来,是用 CDP 的
+> `CSS.getPlatformFontsForNode` 问「这个节点实际用哪个字体渲染」才看见的:
+> `Noto Sans SC ×14  DejaVu Sans ×3`。**查字体到底生效没有,就用这个。**
+>
+> 搬进仓之后 `screenshot.mjs` 也补了 `await document.fonts.ready` ——
+> 以前 `networkidle` 不覆盖字体,带 `font-display:swap` 的页面会截到回落状态,
+> 同一页对着 CDN 截和对着本地截差 3.77% 像素,而**对着 CDN 那张是错的**。
+
+
 每个 design skill 的 `assets/fonts.css` 必须包含中文字体导入,配对规则如下:
 
 | 英文字体类 | 对应中文 | 配对逻辑 |

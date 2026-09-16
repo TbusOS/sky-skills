@@ -74,6 +74,13 @@ const page = await browser
   .newContext({ viewport: VIEWPORT, reducedMotion: 'reduce' })
   .then((c) => c.newPage());
 await page.goto(url, { waitUntil: 'networkidle' });
+// Wait for fonts before measuring anything. `networkidle` does not cover them:
+// a face requested by CSS can still be in flight, and with font-display:swap the
+// page renders in the fallback until it lands — so the screenshot silently
+// captures the wrong typeface and the wrong line breaks. Caught 2026-09-16 while
+// vendoring the web fonts: the same page shot against the Google CDN and against
+// local files differed by 3.77% of pixels, and the CDN one was the wrong one.
+await page.evaluate(() => document.fonts.ready);
 await page.waitForTimeout(500);
 if (themeArg) {
   await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), themeArg);
