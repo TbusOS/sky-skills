@@ -194,7 +194,7 @@ claude install github:TbusOS/sky-skills/skills/design-review
 - **版式** —— 白/浅灰/黑交替段落、居中 hero、5 列产品 lineup、3 栏文档、newsroom 卡片网格、事件页
 - **组件** —— 27 个 `.apple-*` 开箱即用：毛玻璃 sticky nav、5 栏页脚、仅 Buy 用的填色按钮、表单控件、颜色/容量选项卡、分段控件、标签页、轮播、视频（带 ASL badge）、徽章、pull quote、details 折叠、info/warning/success/danger 四种 admonition、面包屑、全屏搜索
 - **模板** —— 9 个可直接打开的 HTML（landing / article / docs / slide-deck / stat-callout / nav-footer / form / product-configurator / specs-page）
-- **图表** —— 14 个手工 SVG 模板（flow / architecture / hierarchy / timeline / sequence / register-bitfield / soc-block / hw-timing-waveform / sched-timeline / build-pipeline / function-flowchart / algorithm-ringbuffer / deployment / state-machine），苹果风圆角矩形 + 细灰描边 —— 全部可在[图表画廊](demos/apple-design/diagrams.html)预览
+- **图表** —— 31 个手工 SVG 模板（flow / architecture / hierarchy / timeline / sequence / register-bitfield / soc-block / hw-timing-waveform / sched-timeline / build-pipeline / function-flowchart / algorithm-ringbuffer / deployment / state-machine），苹果风圆角矩形 + 细灰描边 —— 全部可在[图表画廊](demos/apple-design/diagrams.html)预览
 - **交付** —— 纯 `apple.css`（零构建），配套 Tailwind preset
 
 **自动触发条件：** 用户说"apple 风格"/"apple style"/"苹果官网风格"/"like apple.com"，或要求做落地页 / 幻灯片 / 文档 / 图表 / 选配器贴合苹果官网。
@@ -209,7 +209,7 @@ claude install github:TbusOS/sky-skills/skills/design-review
 - **版式** —— 编辑式卡片网格、长文 720px 单栏、研究论文含内联低饱和图表、产品总览、三档 pricing 卡、企业页（logo 墙）
 - **组件** —— 27 个 `.anth-*` 含：实心橙胶囊按钮、Lora 斜体 + 橙色左边 + 客户 logo 的 pull quote、低饱和柱/折/散/地图 调色板、带 `01 / 21` 计数器的引用轮播、pricing 卡（推荐款橙细边）、grayscale hover 还原的 logo 墙
 - **模板** —— 9 个 HTML（landing / article / docs / slide-deck / pricing / data-report / enterprise / product-overview / nav-footer）
-- **图表** —— 15 个 SVG 模板（橙/蓝/绿节点分类、菱形决策 gate），含内核级图型（register-bitfield / soc-block / hw-timing-waveform / sched-timeline / state-machine / deployment）—— 全部可在 [24 图画廊](demos/anthropic-design/diagrams.html)预览
+- **图表** —— 65 个 SVG 模板（橙/蓝/绿节点分类、菱形决策 gate），含内核级图型（register-bitfield / soc-block / hw-timing-waveform / sched-timeline / state-machine / deployment）—— 全部可在 [24 图画廊](demos/anthropic-design/diagrams.html)预览
 - **交付** —— 纯 `anthropic.css` + `fonts.css`（Google Fonts 导入 Poppins/Lora/JetBrains Mono），配套 Tailwind preset
 
 **自动触发条件：** 用户说"anthropic 风格"/"anthropic style"/"claude 官网风格"/"Anthropic 品牌"，或要求做编辑式长文、研究文章、pricing 卡片、带温度的填色按钮风格。

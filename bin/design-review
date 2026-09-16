@@ -675,6 +675,14 @@ fi
 # 它会回落到系统字体而且不报错** —— 这道检查就是堵它的。仓库级，跑一次。
 if [ -z "${NO_SKILL_CHECKS:-}" ] && [ -f "$SKY_ROOT/assets/fonts/manifest.json" ]; then
   echo ""
+  echo "━━ repo check · check_gallery_counts.py (图集说自己几张图,处处要一致)"
+  if ! ( cd "$SKY_ROOT" && python3 skills/design-review/scripts/check_gallery_counts.py ); then
+    echo ""
+    echo "✗ 图集张数对不上 —— 多半是加了图之后只改了一处说明。" >&2
+    echo "  数一下那页的 <figure>,然后把 title / meta / h1 / README 一起改齐。" >&2
+    exit 1
+  fi
+  echo ""
   echo "━━ repo check · check_fonts.py (搬进仓的字体还够不够用)"
   if ! ( cd "$SKY_ROOT" && python3 skills/design-review/scripts/check_fonts.py ); then
     echo ""
