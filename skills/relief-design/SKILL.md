@@ -94,6 +94,7 @@ for t in gray ink matte mist clay sage; do
 done
 node    $R/scripts/check_gallery_links.mjs        # 改过图集页或任何 canonical 页就跑
 node    $R/scripts/check_snippets.mjs             # 改过 relief.css 或 snippets.md 就跑
+python3 $R/scripts/gen_struct_figure.py --check    # 结构体布局图和 pahole 对不对得上
 ```
 
 **两道对比度检查查的不是一回事，缺一不可：**
@@ -102,6 +103,13 @@ node    $R/scripts/check_snippets.mjs             # 改过 relief.css 或 snippe
 |---|---|---|
 | `check_skin_contrast.py` | 渐变底上的文字 | **axe 算不了渐变背景**，白字压在橙渐变上它一条都不报 |
 | `axe-audit.mjs --theme=<皮肤>` | 真实 DOM 每个元素 | 脚本只查列出的角色对，不扫 DOM |
+
+**结构体布局图是生成的，不许手敲。** `references/structs/tp_data.c` 里放图上
+展示的那段结构体，`gen_struct_figure.py` 用真编译器编出 DWARF、让 `pahole` 算布局，
+再渲染成 `.relief-layout` 写回 `<!-- gen:struct X -->` 块。
+**一张算错的布局图比没有图更糟** —— 读者会拿它当依据去改代码，
+而第一版手写的图就写过「两个空洞共 15 字节」，实际 7+7=14。
+生成器还比人细：它标出了我手写时漏掉的那处非对齐（`u16` 落在偏移 1）。
 
 **改过 `relief.css` 就跑 `check_snippets.mjs`。** 片段库最容易的坏法不是写错，
 是**跟着 CSS 一起老掉** —— 类名改了名，片段还写着旧的，复制过去渲染出来是一堆

@@ -82,6 +82,7 @@ import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
 import process from 'node:process';
+import { revealByScrolling } from './_reveal-scroll.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
@@ -236,6 +237,9 @@ for (const target of args.targets) {
     // A fallback font renders a different page and reads as a real regression.
     await page.evaluate(() => document.fonts && document.fonts.ready);
     await page.waitForTimeout(160);
+    // Same for reveal-on-scroll: an un-revealed block is blank in the capture,
+    // so the baseline and the comparison would both be of a page nobody sees.
+    await revealByScrolling(page, 1000);   // 和上面 newContext 的 viewport 高度一致
     const shot = await page.screenshot({ fullPage: !!args.fullPage });
 
     const env = await envOf(page);

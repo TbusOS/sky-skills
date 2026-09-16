@@ -41,7 +41,35 @@ struct tp_data {
 };
 
 <i>/* $ pahole -C tp_data tp_core.o */</i>
-<em>/* size: 72, holes: 2, sum holes: 14 */</em></div><div class="relief-figcap"><span class="lang-en">Move <code>lanes</code> up next to <code>present</code>: the two holes become one 6-byte hole, 72 bytes becomes 64, and the struct lands on exactly one cache line — <code>name</code> stops straddling.</span><span class="lang-zh">把 <code>lanes</code> 挪到 <code>present</code> 旁边：两个空洞并成一个 6 字节的，72 字节变 64，结构体正好落在一条 cache line 上 —— <code>name</code> 不再跨界。</span></div></div><div><div class="relief-layout"><div class="relief-off">0</div><div class="relief-fieldrow relief-raised"><b>present</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">1 B</div><div class="relief-off">1</div><div class="relief-fieldrow relief-sunken relief-hole"><b>&mdash;</b><i><span class="lang-en">7 bytes of nothing — u64 must start on an 8-byte boundary</span><span class="lang-zh">7 个字节的空 —— u64 必须落在 8 字节边界上</span></i></div><div class="relief-sz">7 B</div><div class="relief-off">8</div><div class="relief-fieldrow relief-raised"><b>last_ts</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">8 B</div><div class="relief-off">16</div><div class="relief-fieldrow relief-raised"><b>lanes</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">1 B</div><div class="relief-off">17</div><div class="relief-fieldrow relief-sunken relief-hole"><b>&mdash;</b><i><span class="lang-en">7 more — the mutex behind it needs 8-byte alignment too</span><span class="lang-zh">又 7 个 —— 它后面的 mutex 同样要 8 字节对齐</span></i></div><div class="relief-sz">7 B</div><div class="relief-off">24</div><div class="relief-fieldrow relief-raised"><b>lock</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">24 B</div><div class="relief-off">48</div><div class="relief-fieldrow relief-raised"><b>client</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">8 B</div><div class="relief-off">56</div><div class="relief-fieldrow relief-raised"><b>name[16]</b><i><span class="lang-en">straddles the boundary — one field, two cache lines</span><span class="lang-zh">跨在边界上 —— 一个字段，两条 cache line</span></i></div><div class="relief-sz">16 B</div><div class="relief-cl"><span>cache line 64 B</span></div></div></div></div></div>
+<em>/* size: 72, holes: 2, sum holes: 14 */</em></div><div class="relief-figcap"><span class="lang-en">Move <code>lanes</code> up next to <code>present</code>: the two holes become one 6-byte hole, 72 bytes becomes 64, and the struct lands on exactly one cache line — <code>name</code> stops straddling.</span><span class="lang-zh">把 <code>lanes</code> 挪到 <code>present</code> 旁边：两个空洞并成一个 6 字节的，72 字节变 64，结构体正好落在一条 cache line 上 —— <code>name</code> 不再跨界。</span></div></div><div><!-- gen:struct tp_data -->
+<div class="relief-layout">
+  <div class="relief-off">0</div>
+  <div class="relief-fieldrow relief-raised"><b>present</b><i>bool</i></div>
+  <div class="relief-sz">1 B</div>
+  <div class="relief-off">1</div>
+  <div class="relief-fieldrow relief-sunken relief-hole"><b>—</b><i><span class="lang-en">padding the compiler inserted</span><span class="lang-zh">编译器填的空洞</span></i></div>
+  <div class="relief-sz">7 B</div>
+  <div class="relief-off">8</div>
+  <div class="relief-fieldrow relief-raised"><b>last_ts</b><i>u64</i></div>
+  <div class="relief-sz">8 B</div>
+  <div class="relief-off">16</div>
+  <div class="relief-fieldrow relief-raised"><b>lanes</b><i>u8</i></div>
+  <div class="relief-sz">1 B</div>
+  <div class="relief-off">17</div>
+  <div class="relief-fieldrow relief-sunken relief-hole"><b>—</b><i><span class="lang-en">padding the compiler inserted</span><span class="lang-zh">编译器填的空洞</span></i></div>
+  <div class="relief-sz">7 B</div>
+  <div class="relief-off">24</div>
+  <div class="relief-fieldrow relief-raised"><b>lock</b><i>struct mutex</i></div>
+  <div class="relief-sz">24 B</div>
+  <div class="relief-off">48</div>
+  <div class="relief-fieldrow relief-raised"><b>client</b><i>struct i2c_client *</i></div>
+  <div class="relief-sz">8 B</div>
+  <div class="relief-off">56</div>
+  <div class="relief-fieldrow relief-raised"><b>name[16]</b><i>char</i></div>
+  <div class="relief-sz">16 B</div>
+  <div class="relief-cl"><span>cache line 64 B</span></div>
+</div>
+<!-- /gen:struct --></div></div></div>
 <h2><span class="lang-en">2 · Three relations that look alike in code</span><span class="lang-zh">2 · 代码里长得像的三种关系</span></h2>
 <p class="relief-note"><span class="lang-en"><code>struct B b</code>, <code>struct B *b</code> and <code>struct list_head n</code> are one character apart in the source and <b>three different lifetimes</b> in reality. Embedding is drawn as containment, a pointer as a hop out to somewhere else, and a list_head as neither — because the list holds the head, not your struct.</span><span class="lang-zh"><code>struct B b</code>、<code>struct B *b</code>、<code>struct list_head n</code> 在源码里差一个字符，在现实里是<b>三条不同的生命周期</b>。嵌入画成包含，指针画成跳到别处，而 list_head 两者都不是 —— 因为链表串的是那个 head，不是你的结构体。</span></p>
 <div class="relief-board relief-raised" id="fig-embed-point-link"><div class="relief-bt"><span class="lang-en">EMBED / POINT / LINK</span><span class="lang-zh">嵌入 / 指针 / 挂链</span><em><span class="lang-en">only the middle one can give you a use-after-free, and that is the whole reason to tell them apart</span><span class="lang-zh">三个里只有中间那个会给你释放后使用，而这就是要分清它们的全部理由</span></em></div>
@@ -75,11 +103,11 @@ touch@38 {
 <i>/* probe 里读出来 */</i>
 <em>of_property_read_u32</em>(np, "quartz,lanes", &amp;tp-&gt;lanes);
 tp-&gt;rst = <em>devm_gpiod_get</em>(dev, "reset", GPIOD_OUT_HIGH);</div><div class="relief-figcap"><span class="lang-en">Note the last row: <code>compatible</code> is the one property that never becomes a field. It is consumed before your code runs, which is why a typo there produces silence rather than a wrong value.</span><span class="lang-zh">注意最后一行：<code>compatible</code> 是唯一一个永远不会变成字段的属性。它在你的代码跑起来之前就被消费掉了 —— 所以那里写错得到的是一片安静，不是一个错的值。</span></div></div><div><div class="relief-layout"><div class="relief-off">dts</div><div class="relief-fieldrow relief-raised"><b>quartz,lanes = &lt;4&gt;</b><i><span class="lang-en">of_property_read_u32()</span><span class="lang-zh">of_property_read_u32()</span></i></div><div class="relief-sz">u32</div><div class="relief-off">&rarr;</div><div class="relief-fieldrow relief-raised"><b>tp-&gt;lanes = 4</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">1 B</div><div class="relief-off">dts</div><div class="relief-fieldrow relief-raised"><b>reset-gpios = &lt;&hellip;&gt;</b><i><span class="lang-en">devm_gpiod_get(dev, "reset", &hellip;)</span><span class="lang-zh">devm_gpiod_get(dev, "reset", …)</span></i></div><div class="relief-sz">&mdash;</div><div class="relief-off">&rarr;</div><div class="relief-fieldrow relief-raised"><b>tp-&gt;rst</b><i><span class="lang-en"></span><span class="lang-zh"></span></i></div><div class="relief-sz">8 B</div><div class="relief-off">dts</div><div class="relief-fieldrow relief-raised"><b>compatible</b><i><span class="lang-en">of_match_table</span><span class="lang-zh">of_match_table</span></i></div><div class="relief-sz">&mdash;</div><div class="relief-off">&times;</div><div class="relief-fieldrow relief-sunken relief-hole"><b>&mdash;</b><i><span class="lang-en">never reaches your struct — it only decides whether probe runs</span><span class="lang-zh">根本到不了你的结构体 —— 它只决定 probe 跑不跑</span></i></div><div class="relief-sz">&mdash;</div></div></div></div></div>
-</div>
+
 
 <h2><span class="lang-en">5 &middot; Bitfields, and what <code>__packed</code> does to them</span><span class="lang-zh">5 &middot; 位域，以及 <code>__packed</code> 对它做了什么</span></h2>
-<p class="relief-note"><span class="lang-en">Two things the source does not show. First, bitfields are cut out of a <b>storage unit</b> the compiler picks, filling from the least significant bit on a little-endian target &mdash; so <code>mode</code> is bits 2:0, not the top of the byte. Second, <code>__packed</code> does not just make the struct smaller: it moves every later field, and a <code>u32</code> that used to sit at offset 4 can end up at offset 3. On arm64 that read is fixed up in a trap handler; on some 32-bit cores it is a fault. The figure puts both views under the source: the bit strip for the unit, the byte list for what moved.</span><span class="lang-zh">源码上看不出来的两件事。第一，位域是从编译器挑的一个<b>存储单元</b>里切出来的，小端目标上从最低位开始填 —— 所以 <code>mode</code> 是 bit 2:0，不是那个字节的高位。第二，<code>__packed</code> 不只是把结构体变小：它会把后面每个字段都往前挪，本来在偏移 4 的 <code>u32</code> 可能落到偏移 3。arm64 上这次读会掉进处理非对齐访问的陷阱里，有些 32 位核上直接是异常。这张图把两个视角都摆在源码下面：位带看单元怎么切，字节表看什么挪了位置。</span></p>
-<div class="relief-board relief-raised" id="fig-bitfields-and-packed"><div class="relief-bt"><span class="lang-en">struct tp_cfg &middot; with and without <code>__packed</code></span><span class="lang-zh">struct tp_cfg &middot; 加不加 <code>__packed</code></span><em><span class="lang-en">the saved byte costs you an unaligned 32-bit read on every access</span><span class="lang-zh">省下来的那一个字节，代价是此后每次访问都是一次非对齐的 32 位读</span></em></div>
+<p class="relief-note"><span class="lang-en">Two things the source does not show. First, bitfields are cut out of a <b>storage unit</b> the compiler picks, filling from the least significant bit on a little-endian target &mdash; so <code>mode</code> is bits 2:0, not the top of the byte. Second, <code>__packed</code> does not just make the struct smaller: it moves every later field, and <b>both</b> of the ones after the bitfield land off their natural boundary &mdash; the <code>u16</code> at offset 1, the <code>u32</code> at offset 3. On arm64 that read is fixed up in a trap handler; on some 32-bit cores it is a fault. The figure puts both views under the source: the bit strip for the unit, the byte list for what moved.</span><span class="lang-zh">源码上看不出来的两件事。第一，位域是从编译器挑的一个<b>存储单元</b>里切出来的，小端目标上从最低位开始填 —— 所以 <code>mode</code> 是 bit 2:0，不是那个字节的高位。第二，<code>__packed</code> 不只是把结构体变小：它会把后面每个字段都往前挪，位域后面那<b>两个</b>字段都落在了非自然边界上 —— <code>u16</code> 在偏移 1，<code>u32</code> 在偏移 3。arm64 上这次读会掉进处理非对齐访问的陷阱里，有些 32 位核上直接是异常。这张图把两个视角都摆在源码下面：位带看单元怎么切，字节表看什么挪了位置。</span></p>
+<div class="relief-board relief-raised" id="fig-bitfields-and-packed"><div class="relief-bt"><span class="lang-en">struct tp_cfg &middot; with and without <code>__packed</code></span><span class="lang-zh">struct tp_cfg &middot; 加不加 <code>__packed</code></span><em><span class="lang-en">one byte saved, two fields left unaligned &mdash; the byte list is generated from pahole, not typed by hand</span><span class="lang-zh">省下一个字节，换来两个字段非对齐 —— 右边那张字节表是 pahole 生成的，不是手敲的</span></em></div>
 <div class="relief-codefig">
   <div>
     <div class="relief-code relief-sunken" tabindex="0" role="region" aria-label="source"><i>/* drivers/input/tp_core.h */</i>
@@ -91,8 +119,8 @@ tp-&gt;rst = <em>devm_gpiod_get</em>(dev, "reset", GPIOD_OUT_HIGH);</div><div cl
 } <em>__packed</em>;
 
 <i>/* $ pahole -C tp_cfg tp_core.o */</i>
-<em>/* __packed:    size 7, window @ 3  */</em>
-<em>/* 不加 __packed: size 8, window @ 4 */</em></div>
+<em>/* __packed:    size 7, rate @ 1, window @ 3 */</em>
+<em>/* 不加 __packed: size 8, rate @ 2, window @ 4 */</em></div>
     <div class="relief-figcap"><span class="lang-en">the source, as written</span><span class="lang-zh">源码原文</span></div>
   </div>
   <div>
@@ -107,21 +135,23 @@ tp-&gt;rst = <em>devm_gpiod_get</em>(dev, "reset", GPIOD_OUT_HIGH);</div><div cl
       <div class="relief-fld relief-raised" style="grid-column:span 3">mode<span class="relief-rst">3 b</span></div>
     </div>
     <div class="relief-regfoot"><span><span class="lang-en">byte 0 &middot; filled from bit 0 up</span><span class="lang-zh">第 0 字节 &middot; 从 bit 0 往上填</span></span></div>
-    <div class="relief-layout" style="margin-top:18px">
-      <div class="relief-off">0</div>
-      <div class="relief-fieldrow relief-raised"><b>mode / lanes</b><i><span class="lang-en">5 bits used, 3 left over</span><span class="lang-zh">用了 5 位，剩 3 位</span></i></div>
-      <div class="relief-sz">1 B</div>
-      <div class="relief-off">1</div>
-      <div class="relief-fieldrow relief-raised"><b>rate</b><i>u16</i></div>
-      <div class="relief-sz">2 B</div>
-      <div class="relief-off">3</div>
-      <div class="relief-fieldrow relief-raised relief-risk"><b>window</b><i><span class="lang-en">u32 at an odd offset &mdash; unaligned</span><span class="lang-zh">u32 落在奇数偏移 —— 非对齐</span></i></div>
-      <div class="relief-sz">4 B</div>
-    </div>
+    <!-- gen:struct tp_cfg -->
+<div class="relief-layout" style="margin-top:18px">
+  <div class="relief-off">0</div>
+  <div class="relief-fieldrow relief-raised"><b>mode / lanes</b><i><span class="lang-en">5 bits used, 3 left over</span><span class="lang-zh">用了 5 位，剩 3 位</span></i></div>
+  <div class="relief-sz">1 B</div>
+  <div class="relief-off">1</div>
+  <div class="relief-fieldrow relief-raised relief-risk"><b>rate</b><i><span class="lang-en">16-bit field at offset 1 — unaligned</span><span class="lang-zh">16 位字段落在偏移 1 —— 非对齐</span></i></div>
+  <div class="relief-sz">2 B</div>
+  <div class="relief-off">3</div>
+  <div class="relief-fieldrow relief-raised relief-risk"><b>window</b><i><span class="lang-en">32-bit field at offset 3 — unaligned</span><span class="lang-zh">32 位字段落在偏移 3 —— 非对齐</span></i></div>
+  <div class="relief-sz">4 B</div>
+</div>
+<!-- /gen:struct -->
     <div class="relief-figcap"><span class="lang-en">with <code>__packed</code> &mdash; total 7 B</span><span class="lang-zh">加了 <code>__packed</code> —— 共 7 B</span></div>
   </div>
 </div>
-<div class="relief-ctnote relief-sunken"><span class="lang-en"><b>0 + 1 + 2 = 3, and 3 + 4 = 7.</b> Without <code>__packed</code> the compiler inserts one pad byte at offset 3, <code>window</code> lands at 4, and the struct is 8 bytes. You trade one byte for an unaligned access on every read of <code>window</code> &mdash; and the compiler will not warn, because you asked for it.</span><span class="lang-zh"><b>0 + 1 + 2 = 3，3 + 4 = 7。</b>不加 <code>__packed</code> 时编译器会在偏移 3 塞一个填充字节，<code>window</code> 落在 4，结构体 8 字节。你用一个字节换来的是此后每次读 <code>window</code> 都非对齐 —— 而且编译器不会警告，因为是你自己要的。</span></div>
+<div class="relief-ctnote relief-sunken"><span class="lang-en"><b>0 + 1 + 2 = 3, and 3 + 4 = 7.</b> Without <code>__packed</code> the compiler inserts one pad byte at offset 1, <code>rate</code> lands at 2 and <code>window</code> at 4, and the struct is 8 bytes. You trade that one byte for an unaligned access on every read of <i>both</i> &mdash; and the compiler will not warn, because you asked for it. Every number here comes out of <code>pahole</code>; none of it is typed by hand.</span><span class="lang-zh"><b>0 + 1 + 2 = 3，3 + 4 = 7。</b>不加 <code>__packed</code> 时编译器会在偏移 1 塞一个填充字节，<code>rate</code> 落在 2、<code>window</code> 落在 4，结构体 8 字节。你用那一个字节换来的是此后每次读<i>这两个</i>都非对齐 —— 而且编译器不会警告，因为是你自己要的。这里每个数字都出自 <code>pahole</code>，没有一个是手敲的。</span></div>
 </div>
 
 <h2><span class="lang-en">6 &middot; A union is not a struct with fewer bytes</span><span class="lang-zh">6 &middot; 联合体不是「字段少一点的结构体」</span></h2>
@@ -168,6 +198,7 @@ tp-&gt;rst = <em>devm_gpiod_get</em>(dev, "reset", GPIOD_OUT_HIGH);</div><div cl
   </div>
 </div>
 <div class="relief-ctnote relief-sunken"><span class="lang-en"><b>The bug this figure is about:</b> user space fills <code>point</code> (4 bytes) and the driver reads <code>stamp</code> (8 bytes). Bytes 4&ndash;7 were never written, so the driver reads whatever was on the stack &mdash; and it reads it <i>successfully</i>, every time, with a different value. Copy the union in full or check which member the ioctl number promised; the type system will not do it for you.</span><span class="lang-zh"><b>这张图讲的那个 bug：</b>用户态填的是 <code>point</code>（4 字节），驱动读的是 <code>stamp</code>（8 字节）。第 4&ndash;7 字节从来没被写过，驱动读到的是栈上残留的东西 —— 而且每次都<i>读成功</i>，每次值还不一样。要么整个联合体拷全，要么按 ioctl 号确认该读哪个成员；类型系统不会替你挡。</span></div>
+</div>
 </div>
 
 

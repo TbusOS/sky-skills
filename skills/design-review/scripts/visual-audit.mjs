@@ -35,6 +35,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { dirname, extname, resolve } from 'node:path';
 import process from 'node:process';
 import { PNG } from 'pngjs';
+import { revealByScrolling } from './_reveal-scroll.mjs';
 
 const args = process.argv.slice(2);
 const ignoreIntentional = args.includes('--ignore-intentional');
@@ -79,7 +80,21 @@ if (!args.includes('--no-second-viewport')) {
   if (vp2Match) secondViewport = { width: +vp2Match[1], height: +vp2Match[2] };
   else if (!vpArg) secondViewport = { width: 1024, height: 900 };
 }
-const target = args.filter((a) => !a.startsWith('--'))[0];
+const positional = args.filter((a) => !a.startsWith('--'));
+// One file per run. It used to take [0] and drop the rest without a word, so
+// `visual-audit a.html b.html c.html` audited a.html and printed one clean
+// "0 error(s)" line — which reads as "all three are clean". That is the exact
+// failure this repo keeps writing down: a gate that reports OK without having
+// looked. Refuse instead; bin/design-review already loops, and a shell loop
+// works for direct calls.
+if (positional.length > 1) {
+  console.error(`visual-audit: got ${positional.length} files, and this script audits one per run.`);
+  console.error('  Only the first would have been checked and the run would still print OK.');
+  console.error('  Use bin/design-review (it loops), or:');
+  console.error('    for f in <files>; do node visual-audit.mjs "$f" || break; done');
+  process.exit(2);
+}
+const target = positional[0];
 if (!target) {
   console.error('usage: node visual-audit.mjs [--ignore-intentional] [--theme=dark|light] <html-path>');
   process.exit(2);
@@ -451,11 +466,19 @@ const page = await (await browser.newContext({
   reducedMotion: 'reduce',
 })).newPage();
 await page.goto(url, { waitUntil: 'networkidle' });
+// Fonts first: networkidle does not cover them, and with font-display:swap the
+// page is still in the fallback face — every width this gate measures would be
+// the wrong one.
+await page.evaluate(() => document.fonts && document.fonts.ready);
 await page.waitForTimeout(500);
 if (themeArg) {
   await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), themeArg);
   await page.waitForTimeout(200);
 }
+// Then reveal-on-scroll content. Measuring an element that is still at
+// opacity:0 gives a contrast reading and an overlap verdict for something the
+// reader never sees — wrong in both directions, and silent.
+await revealByScrolling(page, VIEWPORT.height);
 
 // Read the HTML so we can detect the skill, then pass cross-skill-smell
 // data into page.evaluate. The smell check needs to know this skill's

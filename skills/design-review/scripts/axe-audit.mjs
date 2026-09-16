@@ -43,6 +43,7 @@ import { existsSync } from 'node:fs';
 import { extname, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
+import { revealByScrolling } from './_reveal-scroll.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
@@ -185,10 +186,15 @@ for (const target of args.targets) {
   const page = await ctx.newPage();
   try {
     await page.goto(urlFor(target), { waitUntil: 'networkidle', timeout: 45000 });
+    await page.evaluate(() => document.fonts && document.fonts.ready);
     if (args.theme) {
       await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), args.theme);
       await page.waitForTimeout(120);
     }
+    // Reveal-on-scroll first. axe skips elements it considers invisible, so
+    // without this every such element below the first viewport is simply not
+    // audited — and the run still reports OK.
+    await revealByScrolling(page, 1000);   // 和上面 newContext 的 viewport 高度一致
     await page.addScriptTag({ content: axeSource });
     const results = await page.evaluate(async (tags) => {
       // eslint-disable-next-line no-undef

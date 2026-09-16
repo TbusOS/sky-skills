@@ -20,6 +20,7 @@ import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
+import { revealByScrolling } from './_reveal-scroll.mjs';
 
 const argv = process.argv.slice(2);
 const themeArg = (argv.find((a) => a.startsWith('--theme=')) || '').split('=')[1] || null;
@@ -106,16 +107,9 @@ if (themeArg) {
 // The dwell is there because the observer is a callback — it does not run
 // during the scroll call. The step ceiling is for a page that grows as you
 // scroll; without it this loop would not terminate.
-await page.evaluate(async ({ step, dwell, maxSteps }) => {
-  let y = 0;
-  for (let i = 0; i < maxSteps && y < document.body.scrollHeight; i += 1) {
-    window.scrollTo(0, y);
-    await new Promise((r) => setTimeout(r, dwell));
-    y += step;
-  }
-  window.scrollTo(0, 0);
-  await new Promise((r) => setTimeout(r, 300));
-}, { step: VIEWPORT.height / 2, dwell: 40, maxSteps: 400 });
+// 实现在 _reveal-scroll.mjs —— 四道检查共用一份，
+// 免得改一处漏三处（这个仓自己记过这个坑）。
+await revealByScrolling(page, VIEWPORT.height);
 
 await page.screenshot({ path: out, fullPage: true });
 
