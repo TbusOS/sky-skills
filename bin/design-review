@@ -31,6 +31,14 @@
 #   --no-design-md     Ignore a DESIGN.md that would otherwise apply.
 #   --skill=<name>     Force a skill: anthropic | apple | ember | sage | glass | eclat | lectern | atelier | primer | relief.
 #                      If omitted, verify.py auto-detects from the HTML's <link>.
+#   --lang=<list>      en | zh | en,zh — forwarded to screenshot + pixel-gate.
+#                      Omitted: each gate-5 capture is taken as authored, and a
+#                      page that carries .lang-zh markup gets one EXTRA capture
+#                      in Chinese. Every canonical here is bilingual in one
+#                      file and Playwright's locale is en-US, so before this
+#                      existed the zh half of the whole repo had never been
+#                      photographed by anything. pixel-gate stays opt-in on
+#                      language: a zh baseline is another committed PNG.
 #   --theme=<t>        dark | light — forwarded to visual-audit + screenshot
 #                      (flips html[data-theme] after load). With --skill=glass
 #                      and no explicit --theme, gates 2-4 run BOTH themes
@@ -218,6 +226,7 @@ for arg in "$@"; do
     --skill=*) SKILL="${arg#--skill=}" ;;
     --page=*)  PAGE="${arg#--page=}" ;;
     --theme=*) THEME="${arg#--theme=}" ;;
+    --lang=*)  LANG_LIST="${arg#--lang=}" ;;
     --viewport2=*) VIEWPORT2="${arg#--viewport2=}" ;;
     --no-second-viewport) NO_SECOND_VP=1 ;;
     --css=*)   CSS_ARGS+=("$arg") ;;
@@ -460,6 +469,20 @@ elif [ "$SKILL" = "glass" ]; then
   THEMES=("dark" "light")
 fi
 
+# ---------- Language matrix ----------
+# Explicit --lang=en,zh: exactly those. Nothing given: the page as authored,
+# plus one extra zh capture for pages that actually carry .lang-zh markup —
+# checked with grep first so a monolingual page does not pay for a second
+# browser launch. "as-authored" is spelled out rather than left empty because
+# an empty element in a bash array is not a thing you can loop over safely.
+LANGS=("as-authored")
+if [ -n "${LANG_LIST:-}" ]; then
+  IFS=',' read -r -a LANGS <<< "$LANG_LIST"
+  for l in "${LANGS[@]}"; do
+    case "$l" in en|zh) ;; *) echo "design-review: --lang=$l is not one of en|zh" >&2; exit 2 ;; esac
+  done
+fi
+
 # ---------- Gate 2 · visual-audit ----------
 exit_visual=0
 for theme in "${THEMES[@]}"; do
@@ -555,6 +578,7 @@ if [ "$exit_interact" -ne 0 ]; then
 fi
 
 # ---------- Gate 5 · screenshot ----------
+exit_shot=0
 for theme in "${THEMES[@]}"; do
   SCREEN_FLAGS=()
   suffix=""
@@ -564,12 +588,40 @@ for theme in "${THEMES[@]}"; do
   fi
   for html in "${HTMLS[@]}"; do
     base="$(basename "$html" .html)"
-    out="$OUT_DIR/${base}${suffix}-$(date +%Y%m%d-%H%M%S).png"
-    echo ""
-    echo "━━ [5/$TOTAL_GATES] screenshot.mjs    $html  →  $out"
-    ( cd "$REPO" && node "$SCREEN" "${SCREEN_FLAGS[@]}" "$html" "$out" )
+    # The languages this page gets captured in. With no --lang that is "as
+    # authored" plus zh when the page has a Chinese side to show; the grep is
+    # what keeps a monolingual page from paying for a second launch.
+    shot_langs=("${LANGS[@]}")
+    if [ -z "${LANG_LIST:-}" ] && ( cd "$REPO" && grep -q 'class="lang-zh"' "$html" 2>/dev/null ); then
+      shot_langs+=("zh")
+    fi
+    for lang in "${shot_langs[@]}"; do
+      SL_FLAGS=("${SCREEN_FLAGS[@]}")
+      lsuffix=""
+      if [ "$lang" != "as-authored" ]; then
+        SL_FLAGS+=("--lang=$lang")
+        lsuffix="-$lang"
+      fi
+      out="$OUT_DIR/${base}${suffix}${lsuffix}-$(date +%Y%m%d-%H%M%S).png"
+      echo ""
+      echo "━━ [5/$TOTAL_GATES] screenshot.mjs    $html$([ -n "$lsuffix" ] && echo "  [lang=$lang]")  →  $out"
+      # A capture in the wrong language misleads exactly like a blank block, so
+      # screenshot.mjs exits non-zero on it. Do not let that kill the run —
+      # the other captures are still worth having — but do not swallow it either.
+      if ! ( cd "$REPO" && node "$SCREEN" "${SL_FLAGS[@]}" "$html" "$out" ); then
+        exit_shot=1
+      fi
+    done
   done
 done
+
+if [ "$exit_shot" -ne 0 ]; then
+  echo ""
+  echo "✗ screenshot.mjs refused a capture (see above) — most likely --lang did not" >&2
+  echo "  take on a page, which would have produced a plausible image of the wrong" >&2
+  echo "  language. The other captures were still written." >&2
+  exit 1
+fi
 
 # ---------- Gate 5 · pixel regression (opt-in) ----------
 # Opt-in because it needs a committed baseline per page+theme. It is the only
@@ -587,19 +639,36 @@ if [ -n "$PIXEL_GATE" ]; then
       pixel_label="  [theme=$theme]"
     fi
     for html in "${HTMLS[@]}"; do
+     # Language is opt-in here, unlike gate 5: every zh baseline is another PNG
+     # committed to the repo (14 of them, 9.5 MB as of 2026-09-22 — the zh half
+     # doubled it), so the decision to carry one belongs to whoever runs it
+     # rather than to a default.
+     for lang in "${LANGS[@]}"; do
+      PL_FLAGS=("${PIXEL_FLAGS[@]}")
+      lang_label=""
+      if [ "$lang" != "as-authored" ]; then
+        PL_FLAGS+=("--lang=$lang")
+        lang_label="  [lang=$lang]"
+      fi
       echo ""
-      echo "━━ [5/$TOTAL_GATES] pixel-gate.mjs (visual regression)  $html$pixel_label"
+      echo "━━ [5/$TOTAL_GATES] pixel-gate.mjs (visual regression)  $html$pixel_label$lang_label"
       pg_rc=0
-      ( cd "$REPO" && node "$PIXEL" "${PIXEL_FLAGS[@]}" --out="$OUT_DIR" "$html" ) || pg_rc=$?
+      ( cd "$REPO" && node "$PIXEL" "${PL_FLAGS[@]}" --out="$OUT_DIR" "$html" ) || pg_rc=$?
       # 3 means the baseline was taken somewhere else — a different Chromium, a
       # different set of web fonts. Saying "visual regressions" about that sends
       # the reader to look at a page that did not change. Kept apart here for
       # the same reason pixel-gate keeps the exit codes apart.
+      # 4 means --lang never took, so nothing was recorded or compared. Saying
+      # "visual regressions, inspect the diff PNGs" about that sends the reader
+      # to look for a file that was deliberately not written — the same class
+      # of wrong signpost that exit 3 was split off to avoid.
       case "$pg_rc" in
         0) ;;
         3) [ "$exit_pixel" -eq 0 ] && exit_pixel=3 ;;
+        4) [ "$exit_pixel" -eq 0 ] && exit_pixel=4 ;;
         *) exit_pixel=1 ;;
       esac
+     done
     done
   done
   if [ "$exit_pixel" -eq 3 ]; then
@@ -608,6 +677,13 @@ if [ -n "$PIXEL_GATE" ]; then
     echo "  environment (see the lines above for which part). Nothing is known about" >&2
     echo "  the page either way. Re-record with --pixel-baseline, or go back to the" >&2
     echo "  build the baseline was taken on." >&2
+    exit 1
+  elif [ "$exit_pixel" -eq 4 ]; then
+    echo ""
+    echo "✗ pixel-gate skipped a page: --lang never took on it, so nothing was" >&2
+    echo "  recorded and nothing was compared (see above for which half failed)." >&2
+    echo "  There is no diff PNG to look at. Fix the page's html[data-lang] rules," >&2
+    echo "  or drop --lang for that page." >&2
     exit 1
   elif [ "$exit_pixel" -ne 0 ]; then
     echo ""
@@ -680,6 +756,16 @@ if [ -z "${NO_SKILL_CHECKS:-}" ] && [ -f "$SKY_ROOT/assets/fonts/manifest.json" 
     echo ""
     echo "✗ 图集张数对不上 —— 多半是加了图之后只改了一处说明。" >&2
     echo "  数一下那页的 <figure>,然后把 title / meta / h1 / README 一起改齐。" >&2
+    exit 1
+  fi
+  echo ""
+  echo "━━ repo check · check_call_site_figures.mjs (调用链定位图的出处 / 原文 / 高亮对位)"
+  if ! ( cd "$SKY_ROOT" && node skills/design-review/scripts/check_call_site_figures.mjs ); then
+    echo ""
+    echo "✗ 调用链定位图没过 —— 这类图的价值全在「读者能自己去核」上。" >&2
+    echo "  每一层要有 file:line；拿不到行号的那层要写清为什么拿不到；" >&2
+    echo "  关键行贴原文而不是转述；SVG 高亮块的 x 要按字符步进算，别目测。" >&2
+    echo "  改完拿 --self-test 复核一遍这道检查本身还抓得住。" >&2
     exit 1
   fi
   echo ""
