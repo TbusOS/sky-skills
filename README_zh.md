@@ -26,7 +26,7 @@
 - [**一个比特是怎么存住的**](./demos/anthropic-design/one-bit.html) —— 用符号之前先把它打开的阶梯、只让颜色动的三联图、把十个数量级放进一根轴的对数尺
 - [**一张图怎么被读**](./demos/anthropic-design/reading.html) —— 五张图讲读者而不是题材：三种「把里面画出来」的画法、底图不动只动高亮、可拨的步进图、语法铁路图、以及一张被截屏发走仍然成立的卡
 - [**时间去哪儿了**](./demos/anthropic-design/pressure.html) —— 两张会讲道理而不是汇报的图：给采样图的横轴加上单位，以及把等待画在利用率上、标出那个膝点
-- [**apple 图表画廊**](./demos/apple-design/diagrams.html) —— 同类图型的 apple.com 干净几何风版本，共 31 幅
+- [**apple 图表画廊**](./demos/apple-design/diagrams.html) —— 同类图型的 apple.com 干净几何风版本，共 32 幅
 - [**ember 图表画廊**](./demos/ember-design/diagrams.html) —— 同类图型的暖棕 + 金单焦点版本，共 8 幅
 - [**sage 图表画廊**](./demos/sage-design/diagrams.html) —— 同类图型的抹茶绿 + 靛蓝墨版本，共 8 幅
 - [**glass 图表画廊**](./demos/glass-design/diagrams.html) —— 同类图型的暗玻璃版本，共 25 幅（aurora 光场上的毛玻璃面板，SVG 墨色主题免疫）
@@ -194,7 +194,7 @@ claude install github:TbusOS/sky-skills/skills/design-review
 - **版式** —— 白/浅灰/黑交替段落、居中 hero、5 列产品 lineup、3 栏文档、newsroom 卡片网格、事件页
 - **组件** —— 27 个 `.apple-*` 开箱即用：毛玻璃 sticky nav、5 栏页脚、仅 Buy 用的填色按钮、表单控件、颜色/容量选项卡、分段控件、标签页、轮播、视频（带 ASL badge）、徽章、pull quote、details 折叠、info/warning/success/danger 四种 admonition、面包屑、全屏搜索
 - **模板** —— 9 个可直接打开的 HTML（landing / article / docs / slide-deck / stat-callout / nav-footer / form / product-configurator / specs-page）
-- **图表** —— 31 个手工 SVG 模板（flow / architecture / hierarchy / timeline / sequence / register-bitfield / soc-block / hw-timing-waveform / sched-timeline / build-pipeline / function-flowchart / algorithm-ringbuffer / deployment / state-machine），苹果风圆角矩形 + 细灰描边 —— 全部可在[图表画廊](demos/apple-design/diagrams.html)预览
+- **图表** —— 32 个手工 SVG 模板（flow / architecture / hierarchy / timeline / sequence / register-bitfield / soc-block / hw-timing-waveform / sched-timeline / build-pipeline / function-flowchart / algorithm-ringbuffer / deployment / state-machine），苹果风圆角矩形 + 细灰描边 —— 全部可在[图表画廊](demos/apple-design/diagrams.html)预览
 - **交付** —— 纯 `apple.css`（零构建），配套 Tailwind preset
 
 **自动触发条件：** 用户说"apple 风格"/"apple style"/"苹果官网风格"/"like apple.com"，或要求做落地页 / 幻灯片 / 文档 / 图表 / 选配器贴合苹果官网。

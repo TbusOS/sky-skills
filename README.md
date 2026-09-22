@@ -26,7 +26,7 @@ Ten design skills ship with single-page flagship demos under [`demos/`](./demos/
 - [**how one bit is held**](./demos/anthropic-design/one-bit.html) — a ladder that opens every symbol before using it, a triptych that keeps one geometry and moves only the colour, and a rule that fits ten decades on one axis
 - [**how a figure gets read**](./demos/anthropic-design/reading.html) — five figures about the reader rather than the subject: three ways to show an inside, moving the highlight instead of the drawing, an interactive stepper, a railroad diagram, and a card that survives being screenshotted
 - [**where the time goes**](./demos/anthropic-design/pressure.html) — two figures that argue rather than report: width with a unit on a sampled profile, and the wait against utilisation with its knee drawn in
-- [**apple diagram gallery**](./demos/apple-design/diagrams.html) — 31 of the same diagram types in apple.com's clean geometric style
+- [**apple diagram gallery**](./demos/apple-design/diagrams.html) — 32 of the same diagram types in apple.com's clean geometric style
 - [**ember diagram gallery**](./demos/ember-design/diagrams.html) — 8 of the same diagram types in warm browns with a single gold focus
 - [**sage diagram gallery**](./demos/sage-design/diagrams.html) — 8 of the same diagram types in sage green + indigo ink
 - [**glass diagram gallery**](./demos/glass-design/diagrams.html) — 25 of the same diagram types as frosted panels on the aurora field (theme-proof SVG ink)
@@ -193,7 +193,7 @@ Render any HTML/CSS in the visual language of apple.com:
 - **Layouts** — alternating white/pale-gray/black sections, centered hero, 5-col product lineup, 3-col docs, newsroom card grid, event page
 - **Components** — 27 ready-to-use `.apple-*` classes: sticky blurred nav, 5-col footer, filled-only-for-buy buttons, inputs, option cards, segmented controls, tabs, carousel, video with ASL badge, badges, pull quotes, details, info/warning/success/danger admonitions, breadcrumbs, search overlay
 - **Templates** — 9 drop-in HTML files (landing, article, docs, slide-deck, stat-callout, nav-footer, form, product-configurator, specs-page)
-- **Diagrams** — 31 hand-crafted SVG templates (flow / architecture / hierarchy / timeline / sequence / register-bitfield / soc-block / hw-timing-waveform / sched-timeline / build-pipeline / function-flowchart / algorithm-ringbuffer / deployment / state-machine / call-graph / runtime-timeline / frame-pipeline …) matching Apple's clean geometric style — browse them all in the [31-figure gallery](demos/apple-design/diagrams.html)
+- **Diagrams** — 32 hand-crafted SVG templates (flow / architecture / hierarchy / timeline / sequence / register-bitfield / soc-block / hw-timing-waveform / sched-timeline / build-pipeline / function-flowchart / algorithm-ringbuffer / deployment / state-machine / call-graph / runtime-timeline / frame-pipeline …) matching Apple's clean geometric style — browse them all in the [31-figure gallery](demos/apple-design/diagrams.html)
 - **Delivery** — plain `.apple.css` (no build), plus Tailwind preset
 
 **Auto-triggers when:** the user says "apple 风格" / "apple style" / "苹果官网风格" / "like apple.com", or asks for a landing page / slide / doc / diagram / configurator matching Apple's web look.

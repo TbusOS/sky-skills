@@ -71,9 +71,26 @@ const PROBE = () => {
 
   // ── SVG：深色代码卡上的等宽行 + 压在它下面的高亮块 ──
   for (const svg of document.querySelectorAll('svg')) {
+    // 深色代码卡的色值每个 skill 各定各的（anthropic #1f1e1b · apple #1d1d1f），
+    // 所以按「暗到能承白字」判，不按某一个写死的值判 —— 只认一个值，
+    // 等于假设别的 skill 不会画这类图，而 apple 这次就画了。
     const dark = [...svg.querySelectorAll('rect')].filter((r) => {
-      const f = (r.getAttribute('fill') || '').toLowerCase();
-      return f === '#1f1e1b' || f === '#1f1e1f' || f === '#1f1e1d';
+      const f = (r.getAttribute('fill') || '').trim();
+      if (!/^#[0-9a-f]{6}$/i.test(f)) return false;
+      const [x, y, z] = [1, 3, 5].map((i) => parseInt(f.slice(i, i + 2), 16));
+      const lum = 0.2126 * x + 0.7152 * y + 0.0722 * z;
+      const box = r.getBBox ? r.getBBox() : null;
+      if (!(lum < 60 && box && box.width > 120 && box.height > 20)) return false;
+      // 还要装着成行的代码才算代码卡。**光看「暗 + 够大」会把装饰图形收进来** ——
+      // apple 那张首页图里有个芯片图标：深色方块、蓝色内芯、当中一个字母 K，
+      // 三样都对上了「深色卡 + 高亮块 + 一行字」的形状，于是被报了三条。
+      // 判断依据只能是「这块里有没有成行的代码」，不是「它是不是暗的」。
+      return [...svg.querySelectorAll('text')].some((t) => {
+        if ((t.textContent || '').trim().length < 8) return false;
+        let b; try { b = t.getBBox(); } catch { return false; }
+        return b.x >= box.x - 2 && b.x <= box.x + box.width + 2
+            && b.y >= box.y - 2 && b.y + b.height <= box.y + box.height + 6;
+      });
     });
     if (!dark.length) continue;
     const label = (svg.getAttribute('aria-label') || '(no aria-label)').slice(0, 48);
@@ -247,7 +264,7 @@ const candidates = [...await walk('skills', 4), ...await walk('demos', 2), ...aw
 const files = [];
 for (const f of candidates) {
   const src = await readFile(resolve(ROOT, f), 'utf8');
-  if (/relief-siterow|#1f1e1b/i.test(src)) files.push(f);
+  if (/relief-siterow|<rect[^>]*fill="#(1f1e1b|1d1d1f|0b0b0c|111112)"/i.test(src)) files.push(f);
 }
 if (files.length === 0) {
   // 取子集的检查要问「子集为空怎么办」：一个文件都没筛到多半是类名改了,

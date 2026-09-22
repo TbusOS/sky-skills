@@ -49,6 +49,7 @@ last-verified: 2026-04-19
 | 系统结构 / 分层 / 依赖 | 架构图 | 时间演进 / 版本 / 里程碑 | 时间线 |
 | 产品 / UI 描述 | 设备线稿 mock（diagram-craft §8 + `templates/diagrams/device-mock.svg`） | 连续纯文字 > 2 屏 | ≥ 1 个视觉元素 |
 | 函数控制流 / 寄存器位域 | 函数流程图 / 位域图 | SoC 结构 / 信号时序 / 编译链 / 调度 | 对应内核图型（diagram-craft §12） |
+| 排查一个具体故障 / 论证「改这里会影响那里」 | 调用链定位图（§17.5，每层挂 `file:line`、关键行贴原文） | 两条链共用了一个东西但彼此不调用 | 同上，并排画 · 蓝只给那道耦合 |
 
 节奏：每 1.5 屏（≈1300px @1440）≥ 1 个 SVG / figure / stat。机器闸 `text-desert` 在连续
 2600px 无视觉元素时 warn（known-bugs 1.31）。动笔画图前再读 `references/diagram-craft.md`：
