@@ -177,6 +177,7 @@ await revealByScrolling(page, VIEWPORT.height);
 // capture would hand back an image that answers a different question, and the
 // filename would still say what you asked for.
 let elCount = null;
+let hidden = 0;
 if (elArg) {
   const els = await page.$$(elArg);
   elCount = els.length;
@@ -185,6 +186,37 @@ if (elArg) {
     await browser.close(); if (server) server.close();
     process.exit(1);
   }
+  // A sticky or fixed element parks itself over the viewport, and an element
+  // capture photographs the RECTANGLE, not the element — so whatever is
+  // floating above the target lands in the image too. Found by taking a figure
+  // out of the anthropic gallery and getting a slice of its sticky <nav>
+  // across the top: not an error, not a crash, just a picture with a piece of
+  // something else in it, which is the failure mode this whole gate is about.
+  //
+  // Scroll first. elementHandle.screenshot() scrolls the target into view by
+  // itself, but it does that AFTER this check would have run — so the overlap
+  // test would be reading rectangles from the wrong scroll position and
+  // dutifully report "0 to hide" while the sticky bar still lands in the image.
+  // That is the "counted zero because the code never got there" shape, and it
+  // looks exactly like "counted zero because there was nothing to count".
+  await els[0].scrollIntoViewIfNeeded();
+  await page.waitForTimeout(150);
+  // Only the ones that actually overlap the target and are not part of it get
+  // hidden — a table's own sticky header belongs in a capture of that table.
+  hidden = await els[0].evaluate((target) => {
+    const box = target.getBoundingClientRect();
+    let n = 0;
+    for (const el of document.querySelectorAll('*')) {
+      const pos = getComputedStyle(el).position;
+      if (pos !== 'fixed' && pos !== 'sticky') continue;
+      if (el === target || target.contains(el) || el.contains(target)) continue;
+      const r = el.getBoundingClientRect();
+      if (r.right < box.left || r.left > box.right || r.bottom < box.top || r.top > box.bottom) continue;
+      el.style.visibility = 'hidden';
+      n += 1;
+    }
+    return n;
+  });
   await els[0].screenshot({ path: out });
 } else {
   await page.screenshot({ path: out, fullPage: true });
@@ -245,6 +277,10 @@ console.log(`✓ saved ${out}  ←  ${url}`);
 if (elCount !== null) {
   console.log(`  · --el=${elArg} matched ${elCount}; captured the first one`
     + (elCount > 1 ? ` — the other ${elCount - 1} are NOT in this image` : ''));
+  if (hidden) {
+    console.log(`  · hid ${hidden} sticky/fixed element(s) that overlapped it —`
+      + ' they would have been photographed on top of the target');
+  }
 }
 if (holes) {
   console.log(`  ⚠ ${holes} reveal element(s) still at opacity 0 after the scroll pass —`);

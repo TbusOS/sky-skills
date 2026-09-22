@@ -169,6 +169,44 @@ o="$(node "$SHOT" --el='span' ".scratch/shot-selftest/bi.html" "$D/el-many.png" 
 case "$o" in *"are NOT in this image"*) t y y "several matches: says the rest are not in the image";;
   *) t n y "several matches: says the rest are not in the image ($o)";; esac
 
+# An element capture photographs the RECTANGLE, so anything parked over the
+# target by position:sticky lands in the image too. Found for real: pulling one
+# figure out of the anthropic gallery brought a slice of its sticky <nav> along
+# the top. It does not fail and it does not crash — the picture just has a piece
+# of something else in it, which is the exact failure this gate exists to catch.
+cat > "$D/sticky.html" <<'EOF'
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>sticky</title>
+<style>body{margin:0;font-family:sans-serif}
+nav{position:sticky;top:0;height:60px;background:#c00;color:#fff}
+.spacer{height:1200px}
+/* Taller than the 900px viewport ON PURPOSE. A short figure scrolls to the
+   middle of the screen and the sticky bar never reaches it — the first version
+   of this fixture did that, reported "hid 0", and the red-pixel count agreed,
+   so the probe passed by testing nothing. Only an element taller than the
+   viewport gets its top parked under the bar, which is the real case. */
+figure{margin:0;height:1000px;background:#efefef;border:1px solid #999}</style></head><body>
+<nav>sticky bar</nav><div class="spacer"></div>
+<figure id="target">the figure we want</figure>
+<div class="spacer"></div></body></html>
+EOF
+echo "--el hides sticky things parked over the target"
+o="$(node "$SHOT" --el='#target' ".scratch/shot-selftest/sticky.html" "$D/el-sticky.png" 2>&1)"
+t "$?" "0" "the capture succeeds"
+case "$o" in *"hid 1 sticky/fixed"*) t y y "and says it hid the overlapping bar";;
+  *) t n y "and says it hid the overlapping bar ($o)";; esac
+# Pixels, because the message could be right while the image is still wrong.
+# The bar is pure red; the figure is grey. Any red at all means it got in.
+red="$(python3 - "$D/el-sticky.png" <<'PY' 2>/dev/null
+import sys
+try: from PIL import Image
+except ImportError: print("skip"); raise SystemExit
+im = Image.open(sys.argv[1]).convert("RGB")
+print(sum(1 for r,g,b in im.getdata() if r > 150 and g < 80 and b < 80))
+PY
+)"
+if [ "$red" = "skip" ] || [ -z "$red" ]; then echo "  --   pixel check skipped (no PIL)"
+else t "$([ "$red" -eq 0 ] && echo yes || echo no)" "yes" "and no pixel of it is in the image ($red red pixels)"; fi
+
 echo "bad flag values are rejected before the browser starts"
 node "$SHOT" --lang=de "index.html" "$D/x.png" >/dev/null 2>&1; t "$?" "2" "--lang=de is refused"
 node "$SHOT" --scale=9 "index.html" "$D/x.png" >/dev/null 2>&1; t "$?" "2" "--scale=9 is refused"
