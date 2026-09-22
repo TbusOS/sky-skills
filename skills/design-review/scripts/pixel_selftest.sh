@@ -112,6 +112,52 @@ has "$out" "REGRESSION" "and says REGRESSION"
 hasnt "$out" "ENVIRONMENT CHANGED" "and does not blame the environment"
 has "$out" "diff →" "and writes a diff image to look at"
 
+# ─────────────────────────────────────────────────────────────────────
+# --lang: the zh half of every page here had no baseline at all, because the
+# default locale is en-US. Two things must hold for that to be fixable safely:
+# the key must only GAIN a segment (so the seven committed baselines keep
+# working), and a switch that did not take must refuse to record (so a capture
+# of the wrong language never becomes the reference).
+
+cat > "$D/site/bi.html" <<'EOF'
+<!doctype html><html lang="en" data-lang="en"><head><meta charset="utf-8"><title>bi</title>
+<style>html[data-lang="en"] .lang-zh{display:none}
+html[data-lang="zh"] .lang-en{display:none}
+body{margin:0;font:16px/1.5 Arial,sans-serif;padding:40px}</style></head><body>
+<h1><span class="lang-en">English heading</span><span class="lang-zh">中文标题</span></h1>
+<p><span class="lang-en">A paragraph in one language.</span><span class="lang-zh">一段只有一种语言的话。</span></p>
+</body></html>
+EOF
+# Same markup minus the rule that hides the other side: the page then shows
+# both languages at once. Asking only "is the side I wanted visible" passes it.
+sed '/data-lang="zh"\] \.lang-en/d' "$D/site/bi.html" > "$D/site/bi-broken.html"
+BI=".scratch/pixel-selftest/site/bi.html"
+BI_BAD=".scratch/pixel-selftest/site/bi-broken.html"
+
+echo "--lang only ever adds a key segment"
+run --baseline "$BI" >/dev/null
+run --baseline --lang=zh "$BI" >/dev/null
+# find, not a glob — same reason as the note above: these keys start with a dot.
+en_png="$(find "$D/bl" -name '*site__bi--as-authored.png' | wc -l)"
+zh_png="$(find "$D/bl" -name '*site__bi--as-authored--zh.png' | wc -l)"
+t "$en_png" "1" "the no-lang baseline keeps its old two-part name"
+t "$zh_png" "1" "and the zh one lands beside it rather than over it"
+
+echo "a zh capture is a different image from the en one"
+# If the flag silently did nothing these two would be byte-identical, and every
+# zh baseline in the repo would be a copy of the English page.
+a="$(find "$D/bl" -name '*site__bi--as-authored.png' | head -1)"
+b="$(find "$D/bl" -name '*site__bi--as-authored--zh.png' | head -1)"
+t "$(cmp -s "$a" "$b" && echo same || echo different)" "different" \
+  "the two baselines differ, so the switch really happened"
+
+echo "★ a switch that did not take refuses to record"
+out="$(run --baseline --lang=zh "$BI_BAD")"; rc=$?
+t "$rc" "4" "exits 4 — not 0, and not the regression code either"
+has "$out" "DID NOT TAKE" "and says the flag did not take"
+has "$out" "both languages are showing" "and names the half-broken case"
+t "$(find "$D/bl" -name '*bi-broken*' | wc -l)" "0" "and wrote no baseline for it"
+
 echo ""
 echo "$pass passed, $fail failed"
 [ "$fail" -eq 0 ]

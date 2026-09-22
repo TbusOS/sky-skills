@@ -51,12 +51,19 @@
 // browser bump — because the faces come from a CDN at render time.
 //
 // Usage:
-//   node pixel-gate.mjs --baseline [--theme=t] <html> [...]   record
-//   node pixel-gate.mjs           [--theme=t] <html> [...]   compare
+//   node pixel-gate.mjs --baseline [--theme=t] [--lang=l] <html> [...]   record
+//   node pixel-gate.mjs           [--theme=t] [--lang=l] <html> [...]   compare
 //
 // Flags:
 //   --baseline        write/overwrite the reference PNG instead of comparing
 //   --theme=<t>       dark | light
+//   --lang=<l>        en | zh — capture one side of a bilingual page.
+//                     Omitting it keeps the page as authored AND keeps the old
+//                     baseline filenames, so the seven already committed stay
+//                     valid; a lang only ever adds a segment to the key.
+//                     Every page in this repo is bilingual in one file and the
+//                     default locale is en-US, so until this flag existed the
+//                     zh half had no baseline and could regress unnoticed.
 //   --max-diff=<f>    share of pixels allowed to differ (default 0.0005 = 0.05%)
 //   --threshold=<f>   pixelmatch per-pixel sensitivity 0-1 (default 0.03; see
 //                     the calibration note in parseArgs — 0.06+ is blind)
@@ -72,6 +79,12 @@
 //         it was taken on. Separate from 1 on purpose: these need opposite
 //         responses, and a caller that cannot tell them apart will treat the
 //         next real regression as "probably just the browser again".
+//       4 --lang did not take on this page: either the requested side is not
+//         visible, or both sides are. Also separate from 1, and for the same
+//         reason — there is no diff PNG to go and look at here, and a message
+//         that says "regression, inspect the diff" sends the reader nowhere.
+//         Nothing is recorded and nothing is compared: an image of the wrong
+//         language committed as a baseline would lock the mistake in.
 
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
@@ -113,6 +126,7 @@ function parseArgs(argv) {
     else if (a === '--full-page') out.fullPage = true;
     else if (a === '--json') out.json = true;
     else if (a.startsWith('--theme=')) out.theme = a.slice(8);
+    else if (a.startsWith('--lang=')) out.lang = a.slice(7);
     else if (a.startsWith('--max-diff=')) out.maxDiff = parseFloat(a.slice(11));
     else if (a.startsWith('--threshold=')) out.threshold = parseFloat(a.slice(12));
     else if (a.startsWith('--out=')) out.out = a.slice(6);
@@ -134,23 +148,33 @@ pixel-gate.mjs — pixel visual regression (pixelmatch)
   node skills/design-review/scripts/pixel-gate.mjs --baseline <html> [...]
   node skills/design-review/scripts/pixel-gate.mjs            <html> [...]
 
-  --theme=dark|light  --max-diff=0.0005  --threshold=0.03
+  --theme=dark|light  --lang=en|zh  --max-diff=0.0005  --threshold=0.03
   --full-page  --out=<dir>  --repo=<path>  --json  --baseline-dir=<dir>
 `;
 
 const args = parseArgs(process.argv.slice(2));
 if (args.help || !args.targets.length) { console.log(HELP); process.exit(args.help ? 0 : 2); }
 if (args.bad) { console.error(`pixel-gate: unknown flag ${args.bad}`); process.exit(2); }
+if (args.lang && !['en', 'zh'].includes(args.lang)) {
+  console.error(`pixel-gate: --lang=${args.lang} is not one of en|zh`); process.exit(2);
+}
 
 const root = args.repo ? resolve(args.repo) : process.cwd();
 const outDir = args.out ? resolve(args.out) : resolve(REPO_ROOT, 'shots');
 const BASELINE_DIR = args.baselineDir ? resolve(args.baselineDir) : DEFAULT_BASELINE_DIR;
 
-// Baseline key: path relative to the repo, slashes flattened, plus the theme.
+// Baseline key: path relative to the repo, slashes flattened, plus the theme,
+// plus a language segment ONLY when one was asked for.
 // Keeping the full path means two skills can both have a `dashboard` page.
-function keyFor(target, theme) {
+// The language segment is conditional rather than defaulted to something like
+// `--as-authored` because the seven baselines committed before 2026-09-22 used the old
+// two-part name: defaulting would have renamed every one of them, and a renamed
+// baseline does not fail loudly — it reports `no-baseline`, which reads like
+// "nobody recorded this yet" rather than "you broke the key".
+function keyFor(target, theme, lang) {
   const rel = resolve(root, target).replace(REPO_ROOT + '/', '');
-  return `${rel.replace(/[\/\\]/g, '__').replace(/\.html$/, '')}--${theme || 'as-authored'}.png`;
+  const stem = `${rel.replace(/[\/\\]/g, '__').replace(/\.html$/, '')}--${theme || 'as-authored'}`;
+  return lang ? `${stem}--${lang}.png` : `${stem}.png`;
 }
 
 // What has to be the same for two renders of one page to be comparable.
@@ -161,29 +185,48 @@ function keyFor(target, theme) {
 // face is a different page (3.55% different, measured — more than a browser
 // bump costs). The date is carried for the reader and never compared.
 //
-// The font list is families-plus-count rather than the raw FontFace set: the
-// set also holds every face the stylesheet declares and never used, and its
-// size moves with the stylesheet instead of with what was painted. Measured
-// stable across three consecutive renders of the same page before being
-// trusted — a field that flickers here would report "the environment changed"
-// at random, which is the one thing this must not do.
+// FAMILIES ARE THE CONDITION; THE FACE COUNT IS ONLY WRITTEN DOWN.
+// The families answer the question this field exists for — was the page painted
+// in the intended typefaces or in a fallback. The count of loaded faces does
+// not: faces load on demand, so two consecutive renders of the SAME page can
+// report 8 and then 9 while the rasters are byte-identical.
+//
+// That is not a hypothesis. On 2026-09-22, recording a baseline and immediately
+// comparing against it gave `0 px differ (0%)` together with
+// `fonts: baseline … (8) · now … (9)` — the pixels agreed completely and the
+// environment field claimed the environment had moved. The comment that used
+// to sit here said the count had been "measured stable across three consecutive
+// renders", and the gate's own first paragraph says a field that flickers is
+// the one thing this must not do. It was flickering, and the result was a page
+// on which this gate could never return a verdict again.
+//
+// So the count moves out of the comparison and stays in the record, next to
+// `recorded`: useful to a person reading the sidecar, never a reason to refuse
+// a comparison. Older sidecars wrote it inside the string as "… (12)", so the
+// comparison strips a trailing parenthetical before matching — otherwise every
+// baseline recorded before today would read as a font change.
 async function envOf(page) {
-  const fonts = await page.evaluate(() => {
-    const loaded = [...document.fonts].filter((f) => f.status === 'loaded');
-    const families = [...new Set(loaded.map((f) => f.family))].sort();
-    return families.length ? `${families.join(', ')} (${loaded.length})` : 'none';
+  const f = await page.evaluate(() => {
+    const loaded = [...document.fonts].filter((x) => x.status === 'loaded');
+    const families = [...new Set(loaded.map((x) => x.family))].sort();
+    return { families: families.length ? families.join(', ') : 'none', count: loaded.length };
   });
   return {
     chromium: browser.version(),
     viewport: '1440x1000@1',
-    fonts,
+    fonts: f.families,
+    fontFaces: f.count,
     recorded: new Date().toISOString().slice(0, 10),
   };
 }
 
-const ENV_KEYS = ['chromium', 'viewport', 'fonts'];   // `recorded` is prose, not a condition
+// `recorded` and `fontFaces` are prose, not conditions.
+const ENV_KEYS = ['chromium', 'viewport', 'fonts'];
+const bareFonts = (v) => String(v ?? '(not recorded)').replace(/\s*\(\d+\)\s*$/, '');
 const envDiff = (was, now) => ENV_KEYS
-  .filter((k) => (was[k] ?? '(not recorded)') !== now[k])
+  .filter((k) => (k === 'fonts'
+    ? bareFonts(was[k]) !== bareFonts(now[k])
+    : (was[k] ?? '(not recorded)') !== now[k]))
   .map((k) => `${k}: baseline ${was[k] ?? '(not recorded)'} · now ${now[k]}`);
 
 const sidecarFor = (pngPath) => pngPath.replace(/\.png$/, '.json');
@@ -219,24 +262,66 @@ const browser = await chromium.launch();
 const results = [];
 let failed = 0;        // real regressions
 let envFailed = 0;     // comparisons that cannot mean anything — a different exit code
+let langFailed = 0;    // --lang did not take: nothing recorded, nothing compared
 
 for (const target of args.targets) {
   const ctx = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
     deviceScaleFactor: 1,
     reducedMotion: 'reduce',
+    // Half of what --lang does: a page that reads navigator.language picks its
+    // own side before first paint. The explicit attribute below is the other
+    // half, for pages that hard-code it.
+    ...(args.lang ? { locale: args.lang === 'zh' ? 'zh-CN' : 'en-US' } : {}),
   });
   const page = await ctx.newPage();
-  const key = keyFor(target, args.theme);
+  const key = keyFor(target, args.theme, args.lang);
   const basePath = resolve(BASELINE_DIR, key);
   try {
     await page.goto(urlFor(target), { waitUntil: 'networkidle', timeout: 45000 });
     if (args.theme) {
       await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), args.theme);
     }
+    if (args.lang) {
+      await page.evaluate((l) => document.documentElement.setAttribute('data-lang', l), args.lang);
+    }
     // A fallback font renders a different page and reads as a real regression.
     await page.evaluate(() => document.fonts && document.fonts.ready);
     await page.waitForTimeout(160);
+    // Verify the switch BEFORE anything is recorded or compared. Two conditions,
+    // because the broken-halfway case is the one that slips through: a page that
+    // sets the attribute but is missing its `html[data-lang="zh"] .lang-en
+    // {display:none}` rule shows both languages, and asking only "is the side I
+    // wanted visible" passes it. Committing that as a baseline would freeze a
+    // render nobody ever sees, and every later comparison would agree with it.
+    if (args.lang) {
+      const st = await page.evaluate(() => {
+        const boxed = (sel) => [...document.querySelectorAll(sel)]
+          .filter((e) => e.getClientRects().length > 0).length;
+        return {
+          attr: document.documentElement.getAttribute('data-lang'),
+          en: document.querySelectorAll('.lang-en').length,
+          zh: document.querySelectorAll('.lang-zh').length,
+          enShown: boxed('.lang-en'), zhShown: boxed('.lang-zh'),
+        };
+      });
+      const want = args.lang === 'zh' ? st.zhShown : st.enShown;
+      const other = args.lang === 'zh' ? st.enShown : st.zhShown;
+      const why = (st.en + st.zh === 0)
+        ? `this page carries no .lang-en/.lang-zh markup, so --lang has nothing to switch`
+        : want === 0
+          ? `html[data-lang]=${st.attr} but 0 .lang-${args.lang} elements are visible (${other} of the other side are)`
+          : other > 0
+            ? `both languages are showing (${want} + ${other}) — the page is missing its html[data-lang] hide rule`
+            : null;
+      if (why) {
+        results.push({ target, theme: args.theme ?? 'as-authored', lang: args.lang,
+          status: 'lang-not-applied', reason: why, file: key });
+        langFailed++;
+        await ctx.close();
+        continue;
+      }
+    }
     // Same for reveal-on-scroll: an un-revealed block is blank in the capture,
     // so the baseline and the comparison would both be of a page nobody sees.
     await revealByScrolling(page, 1000);   // 和上面 newContext 的 viewport 高度一致
@@ -248,7 +333,8 @@ for (const target of args.targets) {
       await writeFile(basePath, shot);
       // Written in the same statement as the PNG so the two cannot drift apart.
       await writeFile(sidecarFor(basePath), `${JSON.stringify(env, null, 2)}\n`);
-      results.push({ target, theme: args.theme ?? 'as-authored', action: 'baseline', file: key, env });
+      results.push({ target, theme: args.theme ?? 'as-authored', lang: args.lang ?? null,
+        action: 'baseline', file: key, env });
       continue;
     }
 
@@ -323,10 +409,20 @@ if (args.json) {
   for (const r of results) {
     if (r.action === 'baseline') {
       console.log(`pixel-gate: baseline written  ${r.file}`);
-      console.log(`  taken on ${r.env.chromium} · ${r.env.viewport} · fonts ${r.env.fonts}`);
+      console.log(`  taken on ${r.env.chromium} · ${r.env.viewport} · fonts ${r.env.fonts}`
+        + ` (${r.env.fontFaces} face(s) loaded at capture — recorded, not compared)`);
       continue;
     }
     if (r.status === 'error') { console.log(`pixel-gate: ERROR  ${r.target}\n  ${r.error}`); continue; }
+    if (r.status === 'lang-not-applied') {
+      console.log(`pixel-gate: --lang=${r.lang} DID NOT TAKE  ${r.target}`);
+      console.log(`  ${r.reason}`);
+      console.log('  Nothing was recorded and nothing was compared: an image of the wrong');
+      console.log('  language committed as a baseline would lock the mistake in, and every');
+      console.log('  later comparison would agree with it. There is no diff to look at —');
+      console.log('  fix the page\'s html[data-lang] rules, or drop --lang for this page.');
+      continue;
+    }
     if (r.status === 'no-baseline') {
       console.log(`pixel-gate: NO BASELINE  ${r.target}\n  expected ${r.file} — run with --baseline first`);
       continue;
@@ -363,9 +459,13 @@ if (args.json) {
   }
 }
 
-// 1 and 3 are different questions, so they are different exit codes. A real
+// 1, 3 and 4 are different questions, so they are different exit codes. A real
 // regression outranks an unusable comparison: if both are present the run has
 // something to look at, and that is what the caller should hear first.
+// 4 outranks 0 even in --baseline mode — a recording run that skipped pages
+// must not report success, or the missing baselines surface much later as
+// "nobody recorded this yet".
+if (langFailed > 0 && failed === 0) process.exit(4);
 if (args.baseline) process.exit(0);
 if (failed > 0) process.exit(1);
 process.exit(envFailed > 0 ? 3 : 0);
