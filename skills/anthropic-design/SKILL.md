@@ -52,6 +52,7 @@ last-verified: 2026-04-19
 | 系统结构 / 分层 / 依赖 | 架构图 | 时间演进 / 版本 / 里程碑 | 时间线 |
 | 产品 / UI 描述 | 窗口 mock | 连续纯文字 > 2 屏 | ≥ 1 个视觉元素 |
 | 函数控制流 / 寄存器位域 | 函数流程图 / 位域图 | SoC 结构 / 信号时序 / 编译链 / 调度 | 对应内核图型(diagram-craft §15) |
+| 排查一个具体故障 / 论证「改这里会影响那里」 | 调用链定位图(§15.50，每层挂 `file:line`、关键行贴原文) | 30 层以上、纯标识符的调用链 | ASCII 树(§18，两者分工见 §18 末尾那张表) |
 
 节奏：每 1.5 屏（≈1300px @1440）≥ 1 个 SVG / figure / stat。机器检查 `text-desert` 在连续
 2600px 无视觉元素时 warn（known-bugs 1.31）。动笔画图前再读 `references/diagram-craft.md`：
@@ -105,6 +106,12 @@ last-verified: 2026-04-19
    **brand-presence §K / italic-overuse §J / cross-skill-smell §K**)
 3. `axe-audit.mjs` — 可达性(axe-core,color-contrast 阻断)
 4. `screenshot.mjs` — 全页 PNG 存 `shots/`
+
+四道之外还有一道仓库级的:`check_call_site_figures.mjs` —— 深色代码卡上的高亮色块，
+它的 x 是「字符步进 × 起始下标」算出来的，**算错了肉眼分辨不出**（0.94 的渲染缩放、
+3px 圆角、字形左边距，任何一个都足以掩盖一个字符的偏移）。它用 SVG DOM 自己的
+`getStartPositionOfChar(i)` 反查，顺带核对色块盖住的是不是一个完整 token。
+带 `--self-test`,七种坏法的探针。跑 `bin/design-review` 时自动带上。
 
 四道之外,`--critic` 再跑 LLM taste 评审(输出 JSON + 0-100 分,canonical 自跑 ≥ 90)。
 **任一 error 整个失败**。warn 要判断是否放行。critic 得分 < 75 必修。

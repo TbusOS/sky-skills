@@ -1,6 +1,6 @@
 ---
 name: relief-design
-description: 用新拟态（neumorphism / soft UI）画**技术框图和控件**的 HTML 页面 —— 凸起 = 一个存在的东西，凹陷 = 够不到的地方 / 一个条件 / 刻进面料的一道槽，深度本身就是图例。七套皮肤(暖米白 / 中性灰 / 磨砂黑 / 墨黑 / 雾青 / 陶土 / 鼠尾草)，含状态机 · 时序图 · 寄存器位域 · IP 内部框图 · 内存布局 · 数据通路 · 时钟树七种硬件图，流程链 · 树状 · 左右对比 · 分层调用 · 结构体字段五种通用框图，启动链 · 分区表 · 编号翻译 · 引脚复用 · 电源域五种平台框图，函数堆栈（含两栈对比 · 栈溢出 · 中断栈）· 调用关系 · 代码架构 · 运行调度 · 函数时序图 · 结构体指针九种代码框图，probe 绑定 · 锁持有 · 引用计数 · 竞态窗口 · oops 解读 · 等待队列六种排查框图，分支合并 · 仓库拓扑 · 补丁流向 · 领先落后四种 git 关系图，以及结构体内存布局 · 嵌入指针链表三种关系 · 私有指针链 · 设备树到字段四种数据结构关系图。TRIGGER 当用户提到 新拟态 / neumorphism / neomorphism / soft UI / 凹凸感 / 浮雕风格 / relief 风格 / 拟物按钮，或要画 框图 / 状态机 / 时序图 / 寄存器位域 / 芯片内部框图 / 内存布局 / 数据通路 / 时钟树 / 架构框图 时使用。DO NOT TRIGGER：玻璃拟态 aurora 展示页(用 glass)、应用界面 / 仪表盘(用 atelier)、科普图解读本(用 primer)、营销落地页(用 apple / ember / anthropic)、商务汇报 deck(用 lectern)、发布会(用 eclat)、照片级 3D 硬件动画(用 hardware-3d)。
+description: 用新拟态（neumorphism / soft UI）画**技术框图和控件**的 HTML 页面 —— 凸起 = 一个存在的东西，凹陷 = 够不到的地方 / 一个条件 / 刻进面料的一道槽，深度本身就是图例。七套皮肤(暖米白 / 中性灰 / 磨砂黑 / 墨黑 / 雾青 / 陶土 / 鼠尾草)，含状态机 · 时序图 · 寄存器位域 · IP 内部框图 · 内存布局 · 数据通路 · 时钟树七种硬件图，流程链 · 树状 · 左右对比 · 分层调用 · 结构体字段五种通用框图，启动链 · 分区表 · 编号翻译 · 引脚复用 · 缓存一致性 · DMA 描述符链 · 电源域七种平台框图，函数堆栈（含两栈对比 · 栈溢出 · 中断栈）· 调用关系 · 代码架构 · 运行调度 · 函数时序图 · 总线时序 · 结构体指针 · 缩进调用树 · 调用链定位（file:line + 关键行原文）十三种代码框图，probe 绑定 · 锁持有 · 引用计数 · 竞态窗口 · oops 解读 · 等待队列六种排查框图，分支合并 · 仓库拓扑 · 补丁流向 · 领先落后四种 git 关系图，以及结构体内存布局 · 嵌入指针链表三种关系 · 私有指针链 · 设备树到字段 · 越界落点 · dmesg 空档 · 位域与 __packed · 联合体八种数据结构关系图。TRIGGER 当用户提到 新拟态 / neumorphism / neomorphism / soft UI / 凹凸感 / 浮雕风格 / relief 风格 / 拟物按钮，或要画 框图 / 状态机 / 时序图 / 寄存器位域 / 芯片内部框图 / 内存布局 / 数据通路 / 时钟树 / 架构框图 时使用。DO NOT TRIGGER：玻璃拟态 aurora 展示页(用 glass)、应用界面 / 仪表盘(用 atelier)、科普图解读本(用 primer)、营销落地页(用 apple / ember / anthropic)、商务汇报 deck(用 lectern)、发布会(用 eclat)、照片级 3D 硬件动画(用 hardware-3d)。
 last-verified: 2026-09-15
 ---
 
@@ -59,7 +59,8 @@ last-verified: 2026-09-15
 probe 没跑 · 死锁 · deadlock · lockdep · 引用计数 · use-after-free · 竞态 · race ·
 oops · panic · 空指针 · 丢失唤醒 · 总线时序 · i2c 时序 · git 分支图 · 提交图 ·
 仓库拓扑 · cherry-pick · 领先落后 · ahead behind · 结构体布局 · pahole · 内存对齐 ·
-container_of · list_head · 私有数据 · drvdata · 设备树属性 · 越界 · KASAN · dmesg 空档
+container_of · list_head · 私有数据 · drvdata · 设备树属性 · 越界 · KASAN · dmesg 空档 ·
+调用链定位 · 为什么卡在这一行 · file:line · 改这里会影响哪里 · 影响面 · 隐式耦合
 
 ## §4 不要用于
 
@@ -76,9 +77,9 @@ container_of · list_head · 私有数据 · drvdata · 设备树属性 · 越�
 ## §5 阅读顺序
 
 1. `references/design-tokens.md` — 变量层、七套皮肤、尺寸档
-2. `references/diagram-craft.md` — 四十九种框图各自的画法与判断依据 · **开头第一条是「图为了让代码更直观」**
+2. `references/diagram-craft.md` — 五十种框图各自的画法与判断依据 · **开头第一条是「图为了让代码更直观」**
 3. **`references/snippets.md` — 每个部件可直接复制的标记。画新图从这里开始，
-   不用再去 canonical 里扒**。四十二段，每段都被 `check_snippets.mjs` 渲染核对过
+   不用再去 canonical 里扒**。四十三段，每段都被 `check_snippets.mjs` 渲染核对过
 4. `references/dos-and-donts.md` — 已经踩过的坑，含每条的实测数字
 5. `references/canonical/` — 八张参考页（controls / diagram / hardware / platform / code / struct / debug / git）
 
@@ -95,6 +96,7 @@ done
 node    $R/scripts/check_gallery_links.mjs        # 改过图集页或任何 canonical 页就跑
 node    $R/scripts/check_snippets.mjs             # 改过 relief.css 或 snippets.md 就跑
 python3 $R/scripts/gen_struct_figure.py --check    # 结构体布局图和 pahole 对不对得上
+node    skills/design-review/scripts/check_call_site_figures.mjs   # 画过调用链定位图就跑
 ```
 
 **两道对比度检查查的不是一回事，缺一不可：**
@@ -117,9 +119,14 @@ python3 $R/scripts/gen_struct_figure.py --check    # 结构体布局图和 pahol
 写成 `class="sn"` 正是最常见的那个错）· 每段渲染得出尺寸 · 七套皮肤下文字都够 4.5:1 ·
 `diagram-craft.md` 点名的部件都有对应片段。
 
-**图集页改过就跑 `check_gallery_links.mjs`。** 它点一遍 49 个按钮，核对落到的那张图
+**图集页改过就跑 `check_gallery_links.mjs`。** 它点一遍 50 个按钮，核对落到的那张图
 是不是按钮上写的那张。这道检查不看链接字符串 —— 看的是浏览器解析出来的 `:target`
 元素自己的标题。**用同一套字符串匹配去改、再去验，改错了它也说过。**
+
+**画过调用链定位图（`.relief-site`）就跑 `check_call_site_figures.mjs`。** 这类图的价值
+全在「读者能自己去核」上，而它坏掉的方式全都不报错：少一个 `file:line`，那一层就核不了；
+「给不出行号」那格只写个破折号，等于没写；关键行写成转述，读者只能选择相信。
+这三条都是能机器查的，所以查。它还带 `--self-test` —— 七种坏法的探针，改过判据就跑一遍。
 
 **`--theme` 不传就等于没测。** 七个皮肤不传参数会报出一模一样的数字，看着像「都过了」，
 其实是把默认皮肤测了七遍（本仓 glass 的浅色主题因此漏测 11 天、带着 84 个阻塞元素）。

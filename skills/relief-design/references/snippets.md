@@ -669,6 +669,39 @@ hwirq/virq、物理地址/总线地址、次设备号/设备节点。
 - **和 `.relief-cg` 不是一回事**：`.relief-cg` 回答「谁调我 / 我调谁」（扇入扇出），
   这个回答「这一次发生了什么」（一条轨迹）。两张图别互相替代。
 
+## 调用链定位图 `.relief-site`
+
+**什么时候用**：排查一个具体故障、论证「改这里会影响那里」、评审一个改动的影响面。
+**和上面那棵调用树不是一回事**：调用树答「这一次走了哪条路、时间花在哪层」，
+这张答「**为什么这件事卡在这一行**」—— 所以每层右边挂 `file:line`，
+决定结局的那一层底下贴代码原文。
+
+```html
+<div class="relief-sitehead"><span class="lang-en">BOOT &middot; the chain someone shortened</span><span class="lang-zh">开机 &middot; 被人精简过的那条链</span></div>
+<div class="relief-site">
+  <div class="relief-siterow" style="--d:0"><span class="relief-sitefn relief-raised relief-thin"><b>tp_probe()</b><i><span class="lang-en">once, at boot</span><span class="lang-zh">开机时跑一次</span></i></span><span class="relief-siteat">drivers/input/tp_core.c:612</span></div>
+  <div class="relief-siterow" style="--d:1"><span class="relief-sitefn relief-skip"><b>tp_fw_version_read()</b><span class="relief-sitepin">tp_fw_major</span><i><span class="lang-en">deleted</span><span class="lang-zh">被删了</span></i></span><span class="relief-siteat">tp_core.c:288</span></div>
+  <div class="relief-sitesrc" style="--d:1"><code class="relief-sitecode"><em>tp_fw_major</em> = buf[0];   <i>/* static, file scope */</i></code><span class="relief-sitewhy"><span class="lang-en">&larr; the only line that ever writes it</span><span class="lang-zh">&larr; 唯一一次给它赋值的地方</span></span></div>
+  <div class="relief-siterow" style="--d:1"><span class="relief-sitefn relief-hot"><b>tp_gesture_enable()</b><i><span class="lang-en">the line you came for</span><span class="lang-zh">你要找的就是这行</span></i></span><span class="relief-siteat">tp_core.c:441</span></div>
+  <div class="relief-siterow" style="--d:2"><span class="relief-sitefn relief-raised relief-thin"><b>PM core</b></span><span class="relief-siteat relief-noline"><span class="lang-en">no line to give &mdash; dispatched at runtime</span><span class="lang-zh">给不出行号 —— 运行时分派</span></span></div>
+</div>
+```
+
+- **每一层都要有 `file:line`。** 拿不到的那一层用 `.relief-noline` 并**写清为什么拿不到**
+  （运行时按表分派 / 宏展开后才有）。没有行号又不说原因的一层，读者没法核，
+  这张图就退回成一段文字。
+- **关键那一层贴原文，不许转述。** 转述会丢掉 `return 0` 和 `return -EINVAL` 的区别，
+  而那个区别常常就是全部结论。`<em>` 标决定结局的那几个字，`<i>` 放注释，`<b>` 放关键字。
+- **`.relief-sitewhy` 紧跟在代码条右边**，写「为什么这一行是关键」。
+  它凸起、代码条凹陷 —— 一眼分得出哪句是代码说的、哪句是写图的人说的。
+- **`.relief-sitepin` 是耦合扣子**：同一个名字的扣子出现在两处，
+  就是说那两处是同一个东西。「A 的私有步骤产出了 B 依赖的东西」这类耦合靠它认。
+  两端常常隔着十几行，画连线会跨屏，扣子不会。
+- **两条互不相干的链各戴一个 `.relief-sitehead`。** 不分段，读者会把第二条读成第一条的下一步。
+- 出处成列**不靠空格**。纯文本版这张图最难的正是这步：`file:line` 要凑空格才对齐，  <!-- bw-ok:排版义 -->
+  中文注释一进来宽度就乱。grid 的右列天生对齐，混排也不歪。  <!-- bw-ok:排版义 -->
+- 超过 6~7 层就拆成两张 —— 缩进槽再多，读者也开始数不清自己在第几层。
+
 ## 两个栈并排比 `.relief-vs2`
 
 **什么时候用**：能跑通的那次 vs 卡死的那次，差在哪几帧。
@@ -1183,6 +1216,7 @@ python3 $R/scripts/check_skin_contrast.py $R/assets/relief.css
 for t in gray ink matte mist clay sage; do
   node skills/design-review/scripts/axe-audit.mjs --theme=$t $R/references/canonical/<页>.html
 done
+node    skills/design-review/scripts/check_call_site_figures.mjs   # 画了 .relief-site 就跑
 node    $R/scripts/check_gallery_links.mjs                  # 图集页的按钮点了落对地方
 ./bin/design-review --facts                                 # 图的数量变了，文档里的计数要跟着变
 ```
