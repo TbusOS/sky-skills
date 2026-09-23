@@ -435,15 +435,15 @@ total: 0 errors, 2 warnings, 4 lines checked
     </p>
 
     <div class="term" style="margin-bottom:var(--space-5);">
-<span class="dim"># tests/eval/demo-answer.md — sensor_probe() 节选</span>
-s = devm_kzalloc(&amp;pdev->dev, sizeof(*s), GFP_KERNEL);   <span class="bad">// 返回值没查 NULL</span>
+<span class="dim"># tests/eval/demo-answer.md — sensor_probe() <span class="lang-en">excerpt</span><span class="lang-zh">节选</span></span>
+s = devm_kzalloc(&amp;pdev->dev, sizeof(*s), GFP_KERNEL);   <span class="bad"><span class="lang-en">// NULL return not checked</span><span class="lang-zh">// 返回值没查 NULL</span></span>
 spin_lock_init(&amp;s->lock);
 
 spin_lock_irqsave(&amp;s->lock, flags);
-s->base = devm_ioremap_resource(&amp;pdev->dev, res);       <span class="bad">// 睡眠调用在 spinlock 里!</span>
-s->last = readl(s->base) * 9 / 5 + 32;                  <span class="bad">// 读+换算挤一行;IS_ERR 没查</span>
+s->base = devm_ioremap_resource(&amp;pdev->dev, res);       <span class="bad"><span class="lang-en">// sleeping call inside a spinlock!</span><span class="lang-zh">// 睡眠调用在 spinlock 里!</span></span>
+s->last = readl(s->base) * 9 / 5 + 32;                  <span class="bad"><span class="lang-en">// read + convert on one line; IS_ERR unchecked</span><span class="lang-zh">// 读+换算挤一行；IS_ERR 没查</span></span>
 spin_unlock_irqrestore(&amp;s->lock, flags);
-return 0;                                               <span class="bad">// 无错误路径</span>
+return 0;                                               <span class="bad"><span class="lang-en">// no error path</span><span class="lang-zh">// 无错误路径</span></span>
     </div>
 
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(232px, 1fr)); gap:var(--space-4);">
@@ -454,7 +454,7 @@ return 0;                                               <span class="bad">// 无
       </div>
       <div style="padding:var(--space-4); border:1px solid #c0392b; border-radius:var(--radius-lg); background:#fdf2ef;">
         <div style="display:flex; justify-content:space-between; align-items:baseline;"><h4 style="font-family:var(--font-heading); font-size:16px; font-weight:600; margin:0; color:var(--anth-text);">safety <span style="font-size:10px; font-weight:700; color:#c0392b; letter-spacing:0.1em;">VETO</span></h4><span style="font-family:var(--font-heading); font-size:30px; font-weight:700; color:#c0392b;">22</span></div>
-        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.1em; color:var(--anth-text-secondary); text-transform:uppercase; margin:2px 0 8px;">weight 22% · 一票否决</div>
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.1em; color:var(--anth-text-secondary); text-transform:uppercase; margin:2px 0 8px;">weight 22% · <span class="lang-en">veto</span><span class="lang-zh">一票否决</span></div>
         <p style="font-size:13px; line-height:1.5; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body);"><span class="lang-en">A sleeping call (<code>devm_ioremap_resource</code>) inside <code>spin_lock_irqsave</code> — Forbidden #1. Vetoes the answer.</span><span class="lang-zh">spin_lock_irqsave 里调睡眠函数 devm_ioremap_resource——Forbidden #1 原子态睡眠，一票否决。</span></p>
       </div>
       <div style="padding:var(--space-4); border:1px solid var(--anth-light-gray); border-radius:var(--radius-lg); background:var(--anth-bg);">
@@ -571,7 +571,7 @@ $ node ~/.claude/skills/linux-kernel-dev/scripts/kernel-tree.mjs list
       <h5><span class="lang-en">Code</span><span class="lang-zh">代码</span></h5>
       <a href="https://github.com/TbusOS/sky-skills">GitHub</a>
       <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/linux-kernel-dev"><span class="lang-en">linux-kernel-dev</span><span class="lang-zh">linux-kernel-dev</span></a>
-      <a href="https://github.com/TbusOS/sky-skills/discussions">Discussions</a>
+      <a href="https://github.com/TbusOS/sky-skills/discussions"><span class="lang-en">Discussions</span><span class="lang-zh">讨论区</span></a>
     </div>
     <div class="anth-footer-group">
       <h5><span class="lang-en">About</span><span class="lang-zh">关于</span></h5>

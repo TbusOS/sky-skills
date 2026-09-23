@@ -809,8 +809,12 @@ html.glass-liquid body,
 html.glass-liquid a,
 html.glass-liquid button,
 html.glass-liquid [role="button"] { cursor: none !important; }
-/* the water cursor never installs on touch/coarse pointers — hide its toggle */
-@media (hover: none), (pointer: coarse) {
+/* the water cursor never installs on touch/coarse pointers — hide its toggle.
+   Also below 960px: a narrow window is where the nav runs out of room first,
+   and once the label became bilingual ("System cursor" is ~40px wider than
+   系统光标) it pushed the roadmap page sideways at 390 and 900. The cursor
+   itself keeps working; only the switch goes. */
+@media (hover: none), (pointer: coarse), (max-width: 960px) {
   .glass-cursor-toggle { display: none; }
 }
 .glass-water-head {

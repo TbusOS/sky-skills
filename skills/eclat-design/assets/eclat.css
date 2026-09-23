@@ -175,3 +175,27 @@
 
 /* ---------- footer ---------- */
 .eclat-footer { border-top: 1px solid var(--eclat-line); padding: 34px 0; color: var(--eclat-faint); font-size: 13px; text-align: center; }
+
+/* ---------- narrow screens ----------
+ * Until 2026-09-23 this file had no narrow rules at all, and five eclat pages
+ * scrolled sideways at 390px: the nav kept its 40px link gaps on one row, the
+ * spec strip held four max-content columns, the spec cards three. Nothing
+ * here is a fixed-geometry diagram, so all of it reflows — nothing pans. */
+@media (max-width: 640px) {
+  :root { --eclat-gutter: 20px; }
+  .eclat-nav { height: auto; min-height: 64px; flex-wrap: wrap; row-gap: 10px; padding-top: 14px; padding-bottom: 14px; }
+  .eclat-nav-links { order: 3; width: 100%; gap: 22px; }
+  .eclat-nav-live { padding: 6px 12px; }
+  /* The nav floats over the first section (position:absolute). On a desktop
+   * the hero is a centred 100vh moment and never reaches it; on a phone the
+   * hero is taller than the screen, starts at the top, and ran straight into
+   * the two-row nav. Leave the nav's height clear. */
+  .eclat-hero { padding-top: 128px; padding-bottom: 40px; }
+  .eclat-specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .eclat-specs-item { padding: 24px 12px; }
+  .eclat-specs-item:nth-child(2n) { border-right: 0; }
+  .eclat-specs-item:nth-child(-n+2) { border-bottom: 1px solid var(--eclat-line); }
+  .eclat-specs-num { font-size: 36px; }
+  .eclat-spec-grid { grid-template-columns: minmax(0, 1fr); }
+  .eclat-spec-card { padding: 22px; }
+}

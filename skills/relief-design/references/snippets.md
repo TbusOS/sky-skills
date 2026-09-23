@@ -53,6 +53,7 @@
 
 状态机、波形图这两种的节点是**按坐标摆的，缩不了**。不包这一层，
 窄屏下**整页**会跟着横向滚动 —— 每一段正文都被拖歪，不只是那张图。
+放在 `.relief-board` 里的不用包：图板在 ≤1023px 下自己横向拖（dos-and-donts §9）。
 
 ```html
 <div class="relief-pan" tabindex="0" role="region" aria-label="state machine">
@@ -1110,7 +1111,7 @@ struct tp_data {
 
 ```html
 <div class="relief-oops">
-  <div class="relief-dump relief-sunken">Unable to handle kernel NULL pointer dereference at virtual address <em>0000000000000018</em>
+  <div class="relief-dump relief-sunken" lang="en">Unable to handle kernel NULL pointer dereference at virtual address <em>0000000000000018</em>
 pc : <em>tp_read_frame+0x48</em>/0x120 [tp_core]
 lr : tp_irq_thread+0x9c/0x1e0 [tp_core]
 Call trace:

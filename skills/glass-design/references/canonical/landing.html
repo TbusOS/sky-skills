@@ -15,6 +15,10 @@
 
   /* Hero — text on the plain canvas, blobs flank it (R1 geometry) */
   .hero-grid { display: grid; gap: var(--space-7); }
+  /* The mock pans inside its .glass-scroll (svg min-width 920px). A grid item's
+     min-width is its content by default, so between 769 and ~1000px the figure
+     grew to the svg and took the page with it (978px at 900). */
+  .hero-grid > figure { min-width: 0; }
   .hero-copy { max-width: 760px; }
   .hero-actions { display: flex; gap: var(--space-4); align-items: center; margin-top: var(--space-6); flex-wrap: wrap; }
   .hero-meta {
@@ -47,6 +51,16 @@
   .cta-panel { text-align: center; padding: var(--space-8) var(--space-6); }
   .cta-panel .glass-hairline { margin-inline: auto; }
 
+  /* —— Between phone and desktop: four 72px numbers ("99.99%", "1,200+") are
+     wider than four columns at 1024 — the page scrolled to 1090px there
+     (1117 in Chinese). The number scales with the viewport until the strip
+     is wide enough to hold it at full size; minmax(0,1fr) keeps a track from
+     growing past its share. —— */
+  @media (max-width: 1280px) {
+    .stat-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .stat-strip .glass-stat-number { font-size: clamp(40px, 5vw, 72px); }
+    .stat-strip > div { padding-inline: var(--space-4); }
+  }
   /* —— Mobile ≤768px: grids collapse, dense figures pan in .glass-scroll —— */
   @media (max-width: 768px) {
     .stat-strip { grid-template-columns: repeat(2, 1fr); }
@@ -54,9 +68,8 @@
     .stat-strip > div:nth-child(odd) { border-left: none; padding-left: 0; }
     .stat-strip .glass-stat-number { font-size: clamp(28px, 8.5vw, 40px); }
     .feat-row { grid-template-columns: 1fr; }
-    /* dense wide diagrams keep label size and pan instead of shrinking;
-       min-width:0 stops the pan width from propagating up the grid item */
-    .hero-grid > figure { min-width: 0; }
+    /* dense wide diagrams keep label size and pan instead of shrinking
+       (the min-width:0 that stops it propagating is now a base rule above) */
     .glass-scroll--wide > svg { min-width: 1080px; }
     /* nav CTA moves into the burger menu on phones */
     .glass-nav-inner .glass-button { display: none; }

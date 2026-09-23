@@ -11,7 +11,7 @@
 
 | 属性 | 行为 |
 |---|---|
-| `data-route="pane"` | 侧栏项 → 显示 `[data-pane="pane"]`;`data-route-title` 写进标题槽 |
+| `data-route="pane"` | 侧栏项 → 显示 `[data-pane="pane"]`;侧栏项的 `.lang-en`/`.lang-zh` 标签拷进标题槽(单语页用 `data-route-title`) |
 | `data-tab="pane"` + `data-tab-group` | 标签页 → `[data-tabpane]` |
 | `data-seg-group="name"` | 分段控件(装饰) |
 | `data-accordion` | 折叠同级 `.atl-accordion__body` |

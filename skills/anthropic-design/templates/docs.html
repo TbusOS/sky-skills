@@ -12,7 +12,7 @@
         margin: 0 auto;
         padding: var(--space-7) var(--space-5);
         display: grid;
-        grid-template-columns: 240px 1fr 240px;
+        grid-template-columns: 240px minmax(0, 1fr) 240px;
         gap: var(--space-7);
       }
       .docs-side {
@@ -39,7 +39,9 @@
       .docs-side a.is-current { color: var(--anth-orange); font-weight: 500; }
       .docs-toc a { display: block; padding: var(--space-1) 0; }
       @media (max-width: 1024px) {
-        .docs-shell { grid-template-columns: 1fr; }
+        /* minmax(0,1fr), not 1fr: a bare 1fr track grows to its widest child's
+           min-content (a code block here), and the page scrolled sideways at 712px */
+        .docs-shell { grid-template-columns: minmax(0, 1fr); }
         .docs-toc { display: none; }
       }
     </style>

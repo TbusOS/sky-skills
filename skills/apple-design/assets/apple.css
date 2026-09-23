@@ -827,6 +827,14 @@ mark {
   .apple-footer-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+  /* Tablet widths. Until 2026-09-23 this band set only the two rules above,
+     and three pages scrolled sideways at 768: a 120px stat number in a third
+     of the screen, a code token that would not break inside a tier card, a
+     code block widening a docs column. Same three fixes the phone band has. */
+  [class*="grid"] > *, [class*="row"] > *, [class*="strip"] > *,
+  [class*="stat"] > *, [class*="glance"] > *, [class*="scenario"] > * { min-width: 0; }
+  code, kbd { overflow-wrap: anywhere; }
+  .apple-stat-number { font-size: clamp(56px, 9vw, 120px); }
 }
 
 .apple-sr-only {

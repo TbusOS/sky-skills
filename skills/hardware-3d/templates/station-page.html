@@ -158,7 +158,7 @@
 
 <aside class="caption panel" id="caption">
   <button class="cap-x" id="cHide" title="Collapse (H) · 收起说明卡（H）" aria-expanded="true"><span class="lang-en">Hide ⌄</span><span class="lang-zh">收起 ⌄</span></button>
-  <div class="k" id="cK">第一幕 · 01 / 14</div>
+  <div class="k" id="cK"><span class="lang-en">Act one</span><span class="lang-zh">第一幕</span> · 01 / 14</div>
   <h2 id="cT">—</h2>
   <div class="body" id="cB"></div>
   <div class="clk" id="clk">
@@ -169,7 +169,7 @@
   </div>
   <div class="nav">
     <button id="bPrev">← <span class="lang-en">Back</span><span class="lang-zh">上一站</span></button>
-    <button id="bNext" class="pri">下一站 →</button>
+    <button id="bNext" class="pri"><span class="lang-en">Next</span><span class="lang-zh">下一站</span> →</button>
   </div>
 </aside>
 
@@ -1347,7 +1347,8 @@ function camEye(){ const ce=Math.cos(cam.el), se=Math.sin(cam.el);
 // 把这个助手整个挡住,而且只在有数据流的站才炸。
 const BI=(en,zh)=>`<span class="lang-en">${en}</span><span class="lang-zh">${zh}</span>`;
 // 三问文案模板 —— 顺序不能换,篇幅不够砍机制不砍这三问
-const Q=(a,b,c,en)=>`<span class="q"><em>是什么</em>${a}</span><span class="q"><em>没有它</em>${b}</span><span class="q"><em>为什么这样</em>${c}</span>${en?`<span class="q en">${en}</span>`:''}`;
+// 三问的小标题也走 BI —— 原来写死中文,英文视图里每一站都顶着「是什么 / 没有它 / 为什么这样」。
+const Q=(a,b,c,en)=>`<span class="q"><em>${BI('What it is','是什么')}</em>${a}</span><span class="q"><em>${BI('Without it','没有它')}</em>${b}</span><span class="q"><em>${BI('Why this way','为什么这样')}</em>${c}</span>${en?`<span class="q en">${en}</span>`:''}`;
 const STATIONS=[
  { act:0, title:BI('The whole board','整板俯视'), cam:{tgt:[0,1.2,0], az:-0.55, el:0.85, dist:170, fov:26, ap:0.35, focus:'plane', fy:1.2, ex:1.55},
    state:{},

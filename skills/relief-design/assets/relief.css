@@ -107,6 +107,14 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
 .relief-skins b{padding:7px 13px;border-radius:11px;font:700 12.5px "Noto Sans SC";color:var(--muted);cursor:pointer;white-space:nowrap}
 .relief-skins b.on{color:var(--navy-d);background:var(--surf);
   box-shadow:3px 3px 7px var(--dark),-3px -3px 7px var(--lite)}
+/* 窄屏：七个皮肤一行比 390px 的屏还宽，右对齐之后左端被屏幕切掉，而且整条压在
+   左上角的语言按钮上面 —— 手机上语言切换点不到。让皮肤条只占语言按钮右边的那段，
+   放不下就在条里横着滑。 */
+@media (max-width:640px){
+  .lang-toggle{left:10px;top:12px}
+  .relief-skins{top:12px;right:10px;max-width:calc(100vw - 122px);overflow-x:auto;scrollbar-width:none}
+  .relief-skins::-webkit-scrollbar{display:none}
+}
 
 /* ══════════════════════════════════════════════════════════════
    皮肤。每个皮肤只覆盖上面那层「角色」变量，一行样式都不用重写。
@@ -295,6 +303,9 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
 
 /* ══════ C 寄存器位域 ══════ */
 .relief-regbar{display:grid;grid-template-columns:repeat(32,1fr);gap:3px}
+/* 一格一位，位宽就是意思：窄屏下不跟着缩（390px 下每位只剩 7px，字段名叠在一起），
+   保持 720px，由图板横向拖 */
+@media (max-width:1023px){.relief-regbar{min-width:720px}}
 .relief-bitno{font:500 10.5px var(--relief-mono);color:var(--muted);text-align:center;padding-bottom:6px}
 .relief-fld{border-radius:11px;height:88px;display:grid;place-items:center;text-align:center;
   font:700 13px var(--relief-mono);color:var(--navy-d);padding:4px;--off:5px;--blur:10px}
@@ -449,6 +460,37 @@ html[data-lang="zh"] .lang-en{display:none!important}
 .relief-pan::-webkit-scrollbar{height:9px}
 .relief-pan::-webkit-scrollbar-thumb{border-radius:999px;background:var(--dark)}
 
+/* 窄屏下图板自己就是 .relief-pan。
+   上面那条规矩（固定宽的部件包一层 .relief-pan）写在 dos-and-donts §9 里，
+   但一直没有检查逼它：2026-09-23 在 390px 下量，9 个 relief 页整页横滚，
+   冲出去的是二十多种图 —— 栈回溯、时序图、调用链、内存图、寄存器表。
+   这些图的几何就是意思（地址往下长、生命线并排、缩进=调用深度），
+   窄屏下不能重排，只能在自己的图板里左右拖。所以不再指望每张图都记得包，
+   而是让图板在窄屏下自己承担：一条规则，以后新画的图也自动在内。
+   两条边上的暗槽只在「那边还有内容」时出现（background-attachment:
+   local 那两层遮住、scroll 那两层露出来），读者靠它知道这块能拖；拖到头就消失。
+   内边距收到 16px：子部件的凸起阴影约 5px 偏移 + 10px 模糊，
+   16px 刚好还在滚动容器的内边距里，不会被裁成一刀齐。
+   分界宽度是 1023px，不是 640px：第一版只在 ≤640px 生效，768 / 900 下照样整页横滚。
+   上限也不能去掉，有两个原因，都是改的时候量出来的：
+   · 暗槽是渐变底，axe 在渐变底上算不出对比度，只报「无法判定」。桌面宽度（axe 跑的
+     就是 1440）也画的话，relief 每张图里的文字会悄悄退出 axe 的对比度检查；
+   · overflow 让图板成为独立的裁剪层，桌面端 17/18 张整页截图出现 11–1109 个像素、
+     最大 6/255 的抗锯齿差。桌面上放得下，拖动用不上，这点差不值得付。
+   现在桌面端与改动前逐像素相同（9 页 × 中英，改动时比过）。 */
+@media (max-width:1023px){
+  .relief-board{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+    background:
+    linear-gradient(to right,var(--surf) 45%,transparent) left center/28px 100% no-repeat local,
+    linear-gradient(to left,var(--surf) 45%,transparent) right center/28px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%,var(--dark),transparent) left center/12px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%,var(--dark),transparent) right center/12px 100% no-repeat scroll,
+    var(--surf)}
+}
+@media (max-width:640px){
+  .relief-board{padding:22px 16px;border-radius:22px}
+}
+
 /* ═══════════════ 质感对照（教学部件）═══════════════ */
 .relief-vs{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .relief-cell{padding:26px 22px;border-radius:26px;text-align:center}
@@ -456,6 +498,12 @@ html[data-lang="zh"] .lang-en{display:none!important}
   font:900 34px var(--relief-sans);color:var(--navy)}
 .relief-cell h3{font-size:16px;font-weight:700;color:var(--navy-d);margin-bottom:5px}
 .relief-cell p{font-size:13.5px;line-height:1.6;color:var(--muted)}
+/* 四张样例是并列的卡片，不是按坐标摆的图：窄屏下两列排，不做横向拖 */
+@media (max-width:640px){
+  .relief-vs{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .relief-cell{padding:18px 12px}
+  .relief-swatch{height:84px}
+}
 /* 反面样本：渐变填充 + 单向落影。这是 claymorphism 的做法，
    没有左上那道亮色，所以看着是「贴上去」的，不是从面料上顶起来的。 */
 .relief-wrong{background:linear-gradient(158deg,var(--lite),var(--surf) 48%,var(--dark));

@@ -60,6 +60,9 @@
   .rv-card h4 { font-family:var(--font-heading); font-size:17px; font-weight:600; margin:0 0 var(--space-2); color:var(--anth-text); }
   .rv-card p { font-size:14.5px; line-height:1.55; color:var(--anth-text-secondary); margin:0; font-family:var(--font-body); }
   .rv-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--space-4); }
+  /* two cards side by side leave ~150px each on a phone; long names
+     (AutoCommenter, C/C++/Java/Go/Python) then run out of their card */
+  @media (max-width: 640px) { .rv-grid { grid-template-columns: minmax(0, 1fr); } }
 
   /* Mapping table */
   .rv-table { width:100%; border-collapse:collapse; font-family:var(--font-body); }
@@ -211,13 +214,13 @@
       <div class="rv-card"><h4><span class="lang-en">AI never signs off</span><span class="lang-zh">AI 绝不 sign-off</span></h4><p><span class="lang-en">The kernel's rule became Forbidden Action #11: an AI/tool never adds <code>Signed-off-by</code>; disclose with <code>Assisted-by:</code>; the human signs and owns it.</span><span class="lang-zh">内核这条成了 Forbidden Action 第 11 条：AI/工具绝不加 <code>Signed-off-by</code>；用 <code>Assisted-by:</code> 披露；人类签名并负责。</span></p></div>
     </div>
     <div class="term" role="img" aria-label="Example commit trailer: Assisted-by tag present, Signed-off-by added only by a human">
-<span class="dim"># a kernel-bound commit trailer the skill now teaches:</span>
-subsystem: fix the thing in imperative mood
+<span class="dim"><span class="lang-en"># a kernel-bound commit trailer the skill now teaches:</span><span class="lang-zh"># skill 现在教的、要进内核的提交尾部写法：</span></span>
+<span lang="en">subsystem: fix the thing in imperative mood</span>
 
-<span class="dim">What / why / side effects.</span>
+<span class="dim" lang="en">What / why / side effects.</span>
 
 <span class="accent">Assisted-by:</span> AGENT_NAME:MODEL_VERSION [coccinelle] [sparse]
-<span class="ok">Signed-off-by:</span> A Human &lt;human@example.org&gt;   <span class="dim"># only a human — certifies the DCO</span>
+<span class="ok">Signed-off-by:</span> A Human &lt;human@example.org&gt;   <span class="dim"><span class="lang-en"># only a human — certifies the DCO</span><span class="lang-zh"># 只能是人 —— 由人为 DCO 作保证</span></span>
     </div>
     <p style="font-family:var(--font-body); color:var(--anth-text-secondary); font-size:13.5px; margin:var(--space-4) 0 0; line-height:1.5;">
       <span class="lang-en">Third: the submission workflow (<code>patch-workflow.md</code>) gained the static-analysis tools (sparse / smatch / coccinelle / clang-format), SPDX, and the DCO flow — so review-grade output is documented end to end, from checkpatch to sign-off.</span>

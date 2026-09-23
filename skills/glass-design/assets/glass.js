@@ -823,7 +823,12 @@
           }
           var btns = document.querySelectorAll('.glass-cursor-toggle');
           for (var i = 0; i < btns.length; i++) {
-            btns[i].textContent = m === 'water' ? '系统光标' : '水珠光标';
+            // Both languages, switched by the page's html[data-lang] rule like
+            // every other label. It used to write the Chinese words only, so the
+            // English view of a page with this button showed 系统光标.
+            btns[i].innerHTML = m === 'water'
+              ? '<span class="lang-en">System cursor</span><span class="lang-zh">系统光标</span>'
+              : '<span class="lang-en">Water cursor</span><span class="lang-zh">水珠光标</span>';
             btns[i].setAttribute('aria-pressed', m === 'water' ? 'true' : 'false');
           }
         }

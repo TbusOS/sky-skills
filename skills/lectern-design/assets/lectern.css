@@ -150,3 +150,25 @@
 /* ---------- footer ---------- */
 .lectern-footer { color: var(--lectern-mut); font-size: 12px; text-align: center;
   padding: 34px 0; margin-top: 48px; border-top: 1px solid var(--lectern-line); }
+
+/* ---------- narrow screens ----------
+ * Until 2026-09-23 there were none, and four lectern pages scrolled sideways at
+ * 390px: four KPI tiles on one row, and 4-5 column tables wider than the
+ * screen. KPIs reflow to two a row. Tables do NOT reflow — a table's columns
+ * are its meaning — so the panel holding one pans on its own instead of the
+ * page. minmax(0, 1fr) keeps a grid track from growing to a table's
+ * min-content width, which is how the demo's one-column board still ran wide. */
+@media (max-width: 640px) {
+  :root { --lectern-gutter: 18px; }
+  .lectern-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .lectern-kpi { padding: 16px; }
+  .lectern-kpi-val { font-size: 30px; }
+  .lectern-panel { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 16px; }
+  .lectern-tbl { min-width: 520px; }
+  /* Brand, meta, the confidential tag and the toggle all on one 60px row
+   * squeezed each into a column of one-word lines. Let the right-hand group
+   * drop under the brand, and keep each piece on one line. */
+  .lectern-topbar-inner { height: auto; min-height: 56px; flex-wrap: wrap; row-gap: 6px; padding-top: 10px; padding-bottom: 10px; }
+  .lectern-topbar-right { flex-wrap: wrap; gap: 6px 12px; }
+  .lectern-topbar-brand, .lectern-topbar-meta, .lectern-topbar-right .lang-toggle { white-space: nowrap; }
+}

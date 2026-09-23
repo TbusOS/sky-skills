@@ -46,6 +46,8 @@
     padding: 1px 6px;
     white-space: nowrap;
   }
+  /* a repo path in nowrap is wider than a phone; let it break there */
+  @media (max-width: 640px) { .krs-code { white-space: normal; overflow-wrap: anywhere; } }
 
   .krs-hero-stats {
     display: grid;
@@ -56,6 +58,8 @@
     border-top: 1px solid var(--anth-light-gray);
   }
   @media (max-width: 900px) { .krs-hero-stats { grid-template-columns: repeat(2, 1fr); } }
+  /* "237,950★" at 64px needs ~300px; two columns only give that above ~700 */
+  @media (max-width: 700px) { .krs-hero-stats { grid-template-columns: 1fr; } }
 
   .krs-figure { margin: 0; }
   .krs-figure svg { width: 100%; height: auto; display: block; }
@@ -852,7 +856,7 @@ Decisions (6):
 1. [data-provenance-first] chose "hero states verification method (gh api, 2026-07-02) before any number" over "just listing star counts". Because: the report's whole value is that numbers are verified, not remembered; unverified figures must not flow into public documents, so provenance is the lede.
 2. [landscape-diagram] chose "four-group landscape map (norm-source / knowledge / labs / agent-skills) with per-repo node cards" over "one big table". Because: the survey's first question is 'what categories exist and how alive is each' — a map answers that in one glance; tables then carry the detail per category. 4 semantic hues (orange/blue/olive/gold), solid dots, 2 orange focus cards (torvalds/linux, cel-kdev).
 3. [rec-marker] chose "thin orange left-border (.krs-rec) on recommended rows" over "checkmark/emoji column". Because: ported from canonical comparison decision 4 — a quiet chromatic bar marks 'follow these' without turning tables into scoreboards.
-4. [spotlight-card] chose "single orange-tinted spotlight card for cel-kdev" over <!-- facts-ignore: counts the surveyed repos in this card layout, not this repo's skills -->"equal cards for all 6 skills". Because: the finding worth surfacing is that a sitting NFS maintainer ships agent skills — star count (2) argues against it, authorship argues for it; the spotlight carries that argument where a uniform grid would bury it.
+4. [spotlight-card] chose "single orange-tinted spotlight card for cel-kdev" over "equal cards for all 6 skills". Because: the finding worth surfacing is that a sitting NFS maintainer ships agent skills — star count (2) argues against it, authorship argues for it; the spotlight carries that argument where a uniform grid would bury it.  facts-ignore: the 6 counts the surveyed repos in this card layout, not this repo's skills (no comment markers here: this line sits inside the self-diff comment, and a nested comment close once ended it early)
 5. [complementarity-diagram] chose "two-pillar diagram with an explicit borrow-path (numbered badges → references focus card)" over "prose-only conclusion". Because: 'complementary, not overlapping' is a structural claim; showing which node flowed where makes the landed change auditable.
 6. [bilingual-docs-page] chose "full EN/zh toggle per §G" over "keeping the original monolingual zh standalone". Because: this page ships under docs/ on the public Pages site where every page is bilingual; the standalone zh copy remains outside the repo for local reading.
 

@@ -721,7 +721,12 @@ mark {
   code, kbd { overflow-wrap: anywhere; }
 
   /* Nav links wrap instead of overflowing (no JS burger on this skill) */
-  .anth-nav-inner, .anth-nav-inner > div { flex-wrap: wrap; gap: var(--space-3); row-gap: var(--space-2); }
+  .anth-nav-inner, .anth-nav-inner > div, .anth-nav-inner > nav { flex-wrap: wrap; gap: var(--space-3); row-gap: var(--space-2); }
+  /* > nav added 2026-09-23: the templates put their links in a <nav> inside
+     the bar, which the > div rule never reached, and seven of them scrolled
+     sideways at 390px. A bar that wraps also needs its height to follow. */
+  .anth-nav { height: auto; min-height: 64px; }
+  .anth-nav-inner { padding-block: var(--space-2); }
 
   /* Opt-in pan wrapper for genuinely wide figures (strategy A): wrap the <svg>
      in <div class="anth-scroll"> to keep a readable width and pan on a phone.

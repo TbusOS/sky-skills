@@ -46,14 +46,19 @@ KPI 是内容,那里需要签名笔触。这不是不一致,是两个不同的�
 ## §3 路由
 
 ```html
-<button class="atl-nav" data-route="directory" data-route-title="Directory">…</button>
+<button class="atl-nav" data-route="directory" data-route-title="Directory">
+  <svg …/><span class="lang-en">Directory</span><span class="lang-zh">员工名册</span>
+</button>
 …
 <section class="atl-pane" data-pane="directory" hidden>…</section>
-<h1 data-route-title-slot>Dashboard</h1>
+<h1 data-route-title-slot><span class="lang-en">Dashboard</span><span class="lang-zh">控制台</span></h1>
 ```
 
 - `data-route` 的值匹配 `data-pane`。
-- `data-route-title` 会写进 `[data-route-title-slot]` —— 标题跟着路由走。
+- 切路由时,侧栏项自己的 `.lang-en` / `.lang-zh` 标签被**拷进** `[data-route-title-slot]`,
+  标题跟着路由走、也跟着语言切换走。`data-route-title` 只在单语页(侧栏项里没有 `.lang-*`)时用。
+  2026-09-23 之前拷的是英文的 `data-route-title`:中文视图里侧栏写「控制台」,标题还是 Dashboard。
+  **标题槽的初始内容也要写成双语**,否则首屏(没点过任何侧栏项时)还是英文。
 - **所有面板的 markup 都在页面里**,只用 `[hidden]` 切换。不 fetch、不构建。
   理由:canonical 页必须在没有 JS 时可读,评审者必须不运行任何东西就能看到第二个面板有什么。
 - 切换后 `replay()` 会重跑该面板内的 count-up / grow / reveal。

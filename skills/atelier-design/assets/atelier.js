@@ -10,7 +10,8 @@
  * writes data-* on markup. That keeps the generator honest: if a behaviour is
  * not expressible as an attribute, it does not belong in a canonical page.
  *
- *   data-route="<pane>"        rail item → shows [data-pane="<pane>"]
+ *   data-route="<pane>"        rail item → shows [data-pane="<pane>"], and its
+ *                              .lang-en/.lang-zh label becomes the page title
  *   data-tab="<pane>"          tab → shows [data-tabpane="<pane>"]
  *   data-seg-group="<name>"    segmented control member
  *   data-accordion             <button> toggles its sibling body
@@ -63,12 +64,31 @@
         all('[data-pane]').forEach(function (pane) {
           pane.hidden = pane.getAttribute('data-pane') !== target;
         });
-        var title = item.getAttribute('data-route-title');
-        var slot = document.querySelector('[data-route-title-slot]');
-        if (title && slot) slot.textContent = title;
+        setRouteTitle(item);
         replay();
       });
     });
+  }
+
+  /* The title slot follows the route. On a bilingual page it copies the rail
+   * item's own .lang-en / .lang-zh labels, so the language toggle (a CSS rule on
+   * html[data-lang]) keeps working on the title too. It used to copy the
+   * English-only data-route-title as plain text: the rail said 控制台 and the
+   * title above it said Dashboard, in the Chinese view of every atelier page
+   * with a rail. data-route-title stays as the fallback for one-language pages. */
+  function setRouteTitle(item) {
+    var slot = document.querySelector('[data-route-title-slot]');
+    if (!slot) return;
+    var sides = all('.lang-en, .lang-zh', item).filter(function (n) {
+      return n.parentNode === item;
+    });
+    if (sides.length) {
+      while (slot.firstChild) slot.removeChild(slot.firstChild);
+      sides.forEach(function (n) { slot.appendChild(n.cloneNode(true)); });
+      return;
+    }
+    var title = item.getAttribute('data-route-title');
+    if (title) slot.textContent = title;
   }
 
   /* ---------- 2. Tabs ---------- */

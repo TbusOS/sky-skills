@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>View — SwiftUI | Apple Developer Documentation</title>
   <link rel="stylesheet" href="../assets/apple.css">
+<style>
+  /* Three columns (240 + content + 240) do not fit a tablet: drop the
+     on-this-page list and keep navigation + content. !important because the
+     column list is an inline style. The phone band in apple.css already
+     collapses inline grids to one column below 735px. */
+  @media (max-width: 1068px) {
+    .docs-main { grid-template-columns: 200px minmax(0, 1fr) !important; }
+    .docs-toc { display: none; }
+  }
+</style>
 </head>
 <body>
   <nav class="apple-nav" aria-label="Developer">
@@ -24,7 +34,7 @@
     </div>
   </nav>
 
-  <main style="display:grid; grid-template-columns:240px 1fr 240px; gap:var(--space-7); max-width:1280px; margin:0 auto; padding:var(--space-7) var(--space-5);">
+  <main class="docs-main" style="display:grid; grid-template-columns:240px minmax(0,1fr) 240px; gap:var(--space-7); max-width:1280px; margin:0 auto; padding:var(--space-7) var(--space-5);">
     <aside aria-label="Section navigation">
       <h5 style="font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:var(--apple-text-secondary); margin-bottom:var(--space-3);">SwiftUI</h5>
       <nav style="display:flex; flex-direction:column; gap:var(--space-2);">
@@ -91,7 +101,7 @@
       </details>
     </article>
 
-    <aside aria-label="On this page">
+    <aside class="docs-toc" aria-label="On this page">
       <h5 style="font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:var(--apple-text-secondary); margin-bottom:var(--space-3);">On this page</h5>
       <nav style="display:flex; flex-direction:column; gap:var(--space-2);">
         <a class="apple-link apple-link--no-arrow" href="#overview">Overview</a>
