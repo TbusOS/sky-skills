@@ -107,6 +107,8 @@ last-verified: 2026-04-19
 3. `axe-audit.mjs` — 可达性(axe-core,color-contrast 阻断)
 4. `screenshot.mjs` — 全页 PNG 存 `shots/`
 
+调用链定位图（§15.50）**不手画**：写一份源文本，跑 `skills/design-review/scripts/gen_call_site_figure.py 你的.chain --style=anthropic`。原文由它按行号从文件里读出来，每一层的行号都核过；仓里登记的那张由 runner 里的 `--check` 守着。
+
 四道之外还有一道仓库级的:`check_call_site_figures.mjs` —— 深色代码卡上的高亮色块，
 它的 x 是「字符步进 × 起始下标」算出来的，**算错了肉眼分辨不出**（0.94 的渲染缩放、
 3px 圆角、字形左边距，任何一个都足以掩盖一个字符的偏移）。它用 SVG DOM 自己的

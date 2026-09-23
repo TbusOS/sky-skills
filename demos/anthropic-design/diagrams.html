@@ -52,6 +52,10 @@
     margin: 0 0 var(--space-6);
   }
   .gal-fig svg { display: block; width: 100%; height: auto; }
+  /* 调用链定位图在手机上不等比缩小，改成横向滚动：缩到 290px 宽时最小的字只剩 3px。
+     min-width 按「最小字号渲染后不低于 9px」算出来的。 */
+  .gal-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .gal-scroll > svg { min-width: 960px; }
   .gal-fig--dark { background: #faf9f5; }
   .gal-cap {
     display: flex; justify-content: space-between; align-items: flex-end;
@@ -8449,136 +8453,117 @@
       </figcaption>
     </figure>
 
-    <figure class="gal-fig">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 620" role="img" aria-label="A call-site locator. Two call chains are drawn as indented white cards inside two tinted groups, and every level carries a file and line number right-aligned in its own column, joined to the card by a row of leader dots like a page number in a table of contents. The upper gold group is the packaging chain: pack_release_archive at build dot sh line 182 calls its own private step copy_manifest at line 141, and the dark card below quotes that step verbatim, a cp of ship_manifest.txt into OUT_DIR, with the filename highlighted in orange. The lower olive group is the verification chain, which never calls the one above: verify_all has no line number to give because it is dispatched by job name, so its slot in the column carries a bracketed note instead of leader dots; it calls check_coverage at verify_all dot sh line 751, which calls list_expected at check_coverage dot sh lines 98 to 103, the focus card in orange. The dark card under it quotes two lines, a shell glob looking for any manifest file and a test that returns 1 when it finds none, with return 1 highlighted. An orange dashed line runs from a capsule reading ship_manifest.txt in the first group, out around the right edge, to an identical capsule in the second: the same file, produced by one chain as a private step and required by the other. Two numbered notes on the right explain that this is the only way the manifest gets there, and that the failure goes towards stopping the build rather than passing silently" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
-        <defs>
-          <pattern id="cslDots" width="24" height="24" patternUnits="userSpaceOnUse">
-            <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
-          </pattern>
-          <filter id="cslCard" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/>
-          </filter>
-          <marker id="cslArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
-          </marker>
-        </defs>
-
-        <rect width="1200" height="620" rx="16" fill="#faf9f5" stroke="#eceadf"/>
-        <rect width="1200" height="620" rx="16" fill="url(#cslDots)"/>
-
-        <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">CALL-SITE LOCATOR &#183; WHY THE BUILD STOPS AT ONE LINE</text>
-        <text x="1168" y="34" text-anchor="end" font-size="11.5" font-style="italic" fill="#8c8a7d">every level carries a file:line &#183; the deciding line is quoted, never described</text>
-
-        <!-- ═══ group A · packaging ═══ -->
-        <rect x="32" y="54" width="828" height="202" rx="12" fill="#f0e4d8" stroke="#e0cdb4"/>
-        <rect x="32" y="54" width="4" height="202" rx="2" fill="#c9913f"/>
-        <circle cx="54" cy="78" r="4" fill="#c9913f"/>
-        <text x="66" y="82" font-size="11.5" font-weight="700" letter-spacing="0.9" fill="#8a5a2a">PACKAGING &#183; THE CHAIN SOMEONE WANTS TO DELETE</text>
-        <text x="844" y="82" text-anchor="end" font-size="11.5" font-style="italic" fill="#8c8a7d">runs once, at release time</text>
-
-        <!-- structure rails: grey solid = the call nesting, which is always there -->
-        <g fill="none" stroke="#a8a496" stroke-width="1.2">
-          <path d="M64,142 V165 Q64,173 72,173 H76"/>
-          <path d="M88,196 V204"/>
-        </g>
-
-        <rect x="52" y="96" width="200" height="46" rx="9" fill="#ffffff" stroke="#d8d4c8" filter="url(#cslCard)"/>
-        <circle cx="66" cy="112" r="3.5" fill="#c9913f"/>
-        <text x="76" y="116" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">pack_release_archive()</text>
-        <text x="66" y="132" font-size="11.5" fill="#6b6a5f">called once, at release time</text>
-        <path d="M262,119 H751" stroke="#c9c5b6" stroke-width="1" stroke-dasharray="1.5 5"/>
-        <text x="844" y="123" text-anchor="end" font-size="11.5" fill="#4a7bab" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">build.sh:182</text>
-
-        <rect x="76" y="150" width="200" height="46" rx="9" fill="#ffffff" stroke="#d8d4c8" filter="url(#cslCard)"/>
-        <circle cx="90" cy="166" r="3.5" fill="#c9913f"/>
-        <text x="100" y="170" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">copy_manifest()</text>
-        <text x="90" y="186" font-size="11.5" fill="#6b6a5f">its own private step</text>
-        <path d="M286,173 H751" stroke="#c9c5b6" stroke-width="1" stroke-dasharray="1.5 5"/>
-        <text x="844" y="177" text-anchor="end" font-size="11.5" fill="#4a7bab" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">build.sh:141</text>
-
-        <!-- the line itself, quoted -->
-        <rect x="76" y="204" width="312" height="40" rx="8" fill="#1f1e1b"/>
-        <rect x="154.8" y="219" width="122.4" height="17" rx="3" fill="#d97757" opacity="0.32"/>
-        <text x="90" y="229" font-size="12" textLength="280.8" lengthAdjust="spacing" xml:space="preserve" fill="#e8e6dd" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">cp "$SRC/ship_manifest.txt" "$OUT_DIR/"</text>
-        <circle cx="80" cy="208" r="9" fill="#d97757"/>
-        <text x="80" y="212" text-anchor="middle" font-size="11.5" font-weight="600" fill="#ffffff">1</text>
-
-        <rect x="404" y="211" width="152" height="26" rx="13" fill="#f7e4dc" stroke="#d97757" stroke-width="1.2"/>
-        <text x="480" y="228" text-anchor="middle" font-size="11.5" font-weight="600" fill="#c2613f" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">ship_manifest.txt</text>
-
-        <!-- ═══ group B · verification ═══ -->
-        <rect x="32" y="280" width="828" height="280" rx="12" fill="#e5e9dd" stroke="#d3dcc6"/>
-        <rect x="32" y="280" width="4" height="280" rx="2" fill="#788c5d"/>
-        <circle cx="54" cy="304" r="4" fill="#788c5d"/>
-        <text x="66" y="308" font-size="11.5" font-weight="700" letter-spacing="0.9" fill="#5d7045">VERIFICATION &#183; NEVER CALLS THE CHAIN ABOVE</text>
-        <text x="844" y="308" text-anchor="end" font-size="11.5" font-style="italic" fill="#8c8a7d">runs after every build</text>
-
-        <g fill="none" stroke="#a8a496" stroke-width="1.2">
-          <path d="M64,368 V391 Q64,399 72,399 H76"/>
-          <path d="M88,422 V445 Q88,453 96,453 H100"/>
-          <path d="M112,476 V484"/>
-        </g>
-
-        <rect x="52" y="322" width="200" height="46" rx="9" fill="#ffffff" stroke="#d8d4c8" filter="url(#cslCard)"/>
-        <circle cx="66" cy="338" r="3.5" fill="#788c5d"/>
-        <text x="76" y="342" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">verify_all()</text>
-        <text x="66" y="358" font-size="11.5" fill="#6b6a5f">entry point of the gate</text>
-        <text x="844" y="349" text-anchor="end" font-size="11.5" font-style="italic" fill="#8c8a7d">[no line &#8212; dispatched by job name]</text>
-
-        <rect x="76" y="376" width="200" height="46" rx="9" fill="#ffffff" stroke="#d8d4c8" filter="url(#cslCard)"/>
-        <circle cx="90" cy="392" r="3.5" fill="#788c5d"/>
-        <text x="100" y="396" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">check_coverage()</text>
-        <text x="90" y="412" font-size="11.5" fill="#6b6a5f">one of eleven checks</text>
-        <path d="M286,399 H717" stroke="#c9c5b6" stroke-width="1" stroke-dasharray="1.5 5"/>
-        <text x="844" y="403" text-anchor="end" font-size="11.5" fill="#4a7bab" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">verify_all.sh:751</text>
-
-        <rect x="100" y="430" width="200" height="46" rx="9" fill="#f7e4dc" stroke="#d97757" stroke-width="1.5" filter="url(#cslCard)"/>
-        <circle cx="114" cy="446" r="3.5" fill="#d97757"/>
-        <text x="124" y="450" font-size="13" font-weight="600" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">list_expected()</text>
-        <text x="114" y="466" font-size="11.5" fill="#c2613f">the line you came here for</text>
-        <path d="M310,453 H668" stroke="#c9c5b6" stroke-width="1" stroke-dasharray="1.5 5"/>
-        <text x="844" y="457" text-anchor="end" font-size="11.5" fill="#4a7bab" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">check_coverage.sh:98-103</text>
-
-        <rect x="100" y="484" width="464" height="64" rx="8" fill="#1f1e1b"/>
-        <rect x="272.4" y="521" width="57.6" height="17" rx="3" fill="#d97757" opacity="0.32"/>
-        <text x="114" y="508" font-size="12" textLength="432" lengthAdjust="spacing" xml:space="preserve" fill="#e8e6dd" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">manifest="$(ls "$dir"/*manifest*.txt 2&gt;/dev/null | head -1)"</text>
-        <text x="114" y="531" font-size="12" textLength="216" lengthAdjust="spacing" xml:space="preserve" fill="#e8e6dd" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">[ -n "$manifest" ] || return 1</text>
-        <circle cx="104" cy="488" r="9" fill="#d97757"/>
-        <text x="104" y="492" text-anchor="middle" font-size="11.5" font-weight="600" fill="#ffffff">2</text>
-
-        <rect x="590" y="502" width="152" height="26" rx="13" fill="#f7e4dc" stroke="#d97757" stroke-width="1.2"/>
-        <text x="666" y="519" text-anchor="middle" font-size="11.5" font-weight="600" fill="#c2613f" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">ship_manifest.txt</text>
-
-        <!-- the coupling · orange dashed = the one thing this figure is about -->
-        <path d="M558,224 H862 Q870,224 870,232 V507 Q870,515 862,515 H746" fill="none" stroke="#d97757"
-              stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#cslArrO)"/>
-
-        <!-- ═══ notes ═══ -->
-        <circle cx="910" cy="208" r="9" fill="#d97757"/>
-        <text x="910" y="212" text-anchor="middle" font-size="11.5" font-weight="600" fill="#ffffff">1</text>
-        <text x="928" y="212" font-size="13" font-weight="600" fill="#141413">The only way in</text>
-        <text x="928" y="232" font-size="11.5" fill="#6b6a5f">Nothing else copies the manifest into</text>
-        <text x="928" y="248" font-size="11.5" fill="#6b6a5f">$OUT_DIR. It rides along inside a</text>
-        <text x="928" y="264" font-size="11.5" fill="#6b6a5f">packaging step that looks unrelated,</text>
-        <text x="928" y="280" font-size="11.5" fill="#6b6a5f">which is why deleting that step for a</text>
-        <text x="928" y="296" font-size="11.5" fill="#6b6a5f">debug build looks free of consequence.</text>
-
-        <circle cx="910" cy="488" r="9" fill="#d97757"/>
-        <text x="910" y="492" text-anchor="middle" font-size="11.5" font-weight="600" fill="#ffffff">2</text>
-        <text x="928" y="492" font-size="13" font-weight="600" fill="#141413">Which way it fails</text>
-        <text x="928" y="512" font-size="11.5" fill="#6b6a5f">The quoted line matters: <tspan font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="11.5">return 1</tspan></text>
-        <text x="928" y="528" font-size="11.5" fill="#6b6a5f">stops the build. Had it been</text>
-        <text x="928" y="544" font-size="11.5" fill="#6b6a5f"><tspan font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="11.5">return 0</tspan>, coverage would report</text>
-        <text x="928" y="560" font-size="11.5" fill="#6b6a5f">a pass on a package with no manifest</text>
-        <text x="928" y="576" font-size="11.5" fill="#6b6a5f">&#8212; the same bug, silent.</text>
-
-        <text x="32" y="592" font-size="11.5" font-style="italic" fill="#8c8a7d">grep finds neither end of the orange line: the two chains share a filename, not a call. That is what makes this class of coupling worth a figure.</text>
-      </svg>
+    <figure class="gal-fig" data-allow-tall>
+      <!-- gen:callsite build-manifest anthropic -->
+<div class="gal-scroll gal-scroll--anthropic">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1049.7 856" role="img" aria-label="CALL-SITE LOCATOR · WHY THE BUILD STOPS AT ONE LINE. Packaging · part of every full build: main() at build.sh line 34; calls pack_release_archive() at build.sh line 37 — this call was removed; calls copy_manifest() at build.sh line 30 — not reached; the quoted source at build.sh lines 25 to 25 reads: cp &quot;$SRC/ship_manifest.txt&quot; &quot;$OUT_DIR/&quot;; nothing else puts the manifest in $OUT_DIR; Verification · runs after the build, never calls packaging: CI job &quot;verify&quot; with no line number, because outside this repo · run by CI; calls verify_all() at verify_all.sh line 21; calls check_coverage() at verify_all.sh line 17; calls find_manifest() at check_coverage.sh line 14 — the level this figure is about; the quoted source at check_coverage.sh lines 6 to 9 reads: for m in &quot;$1&quot;/*manifest*.txt; do / [ -f &quot;$m&quot; ] &amp;&amp; { echo &quot;$m&quot;; return 0; } / done / return 1; no manifest → return 1, and every caller passes it up; the result travels back up to CI job &quot;verify&quot; as exit 1: the job fails and the build goes red. The two chains are coupled only through ship_manifest.txt, marked in both. grep finds neither end of the coupling: the two chains share a filename, not a call." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <!-- generated by skills/design-review/scripts/gen_call_site_figure.py from references/callsites/build-manifest/figure.chain — edit the source, not this file -->
+  <defs>
+    <pattern id="cslDots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/>
+    </pattern>
+    <filter id="cslCard" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#141413" flood-opacity="0.06"/>
+    </filter>
+    <marker id="cslArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/>
+    </marker>
+    <marker id="cslArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/>
+    </marker>
+  </defs>
+  <rect width="1049.7" height="856" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1049.7" height="856" rx="16" fill="url(#cslDots)"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">CALL-SITE LOCATOR · WHY THE BUILD STOPS AT ONE LINE</text>
+  <text x="32" y="52" font-size="11.5" font-style="italic" fill="#8c8a7d">every level carries a file:line · the deciding lines are read from the file, never retyped</text>
+  <rect x="32" y="70" width="941.7" height="282" rx="12" fill="#f0e4d8" stroke="#e0cdb4"/>
+  <rect x="32" y="70" width="4" height="282" rx="2" fill="#c9913f"/>
+  <circle cx="54" cy="92" r="4" fill="#c9913f"/>
+  <text x="66" y="96" font-size="11.5" font-weight="700" letter-spacing="0.9" fill="#8a5a2a">PACKAGING · PART OF EVERY FULL BUILD</text>
+  <rect x="52" y="114" width="200" height="46" rx="9" fill="#ffffff" stroke="#d8d4c8" filter="url(#cslCard)"/>
+  <circle cx="66" cy="138" r="3.5" fill="#c9913f"/>
+  <text x="76" y="142" font-size="13" font-weight="600" textLength="46.8" lengthAdjust="spacing" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">main()</text>
+  <path d="M262,137 H867.8" stroke="#c9c5b6" stroke-width="1" stroke-dasharray="1.5 5"/>
+  <text x="953.7" y="141" font-size="11.5" text-anchor="end" textLength="75.9" lengthAdjust="spacing" fill="#4a7bab" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">build.sh:34</text>
+  <path d="M64,160 V183 Q64,191 72,191 H76" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+  <rect x="76" y="168" width="375" height="46" rx="9" fill="#faf9f5" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <circle cx="90" cy="184" r="3.5" fill="#c9c5b6"/>
+  <text x="100" y="188" font-size="13" font-weight="600" textLength="171.6" lengthAdjust="spacing" fill="#8c8a7d" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">pack_release_archive()</text>
+  <line x1="98" y1="183.5" x2="273.6" y2="183.5" stroke="#c2613f" stroke-width="1.6"/>
+  <text x="90" y="204" font-size="11.5" fill="#c2613f">removed · cut from main() for a faster debug build</text>
+  <path d="M461,191 H867.8" stroke="#c9c5b6" stroke-width="1" stroke-dasharray="1.5 5"/>
+  <text x="953.7" y="195" font-size="11.5" text-anchor="end" textLength="75.9" lengthAdjust="spacing" fill="#4a7bab" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">build.sh:37</text>
+  <path d="M88,214 V237 Q88,245 96,245 H100" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+  <rect x="100" y="222" width="200" height="46" rx="9" fill="#ffffff" stroke="#e3e0d4"/>
+  <circle cx="114" cy="238" r="3.5" fill="#c9c5b6"/>
+  <text x="124" y="242" font-size="13" font-weight="600" textLength="117" lengthAdjust="spacing" fill="#8c8a7d" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">copy_manifest()</text>
+  <text x="114" y="258" font-size="11.5" fill="#6b6a5f">its own private step</text>
+  <path d="M310,245 H867.8" stroke="#c9c5b6" stroke-width="1" stroke-dasharray="1.5 5"/>
+  <text x="953.7" y="249" font-size="11.5" text-anchor="end" textLength="75.9" lengthAdjust="spacing" fill="#4a7bab" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">build.sh:30</text>
+  <rect x="124" y="276" width="308.8" height="58" rx="8" fill="#1f1e1b"/>
+  <rect x="124" y="276" width="308.8" height="22" rx="8" fill="#2b2924"/>
+  <rect x="124" y="288" width="308.8" height="10" fill="#2b2924"/>
+  <text x="136" y="291" font-size="11.5" textLength="75.9" lengthAdjust="spacing" fill="#a8a496" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">build.sh:25</text>
+  <rect x="201.3" y="307" width="125.4" height="18" rx="3" fill="none" stroke="#d97757" stroke-width="1.2"/>
+  <text x="138" y="320" font-size="12" textLength="280.8" lengthAdjust="spacing" xml:space="preserve" fill="#e8e6dd" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">cp "$SRC/ship_manifest.txt" "$OUT_DIR/"</text>
+  <rect x="808.4" y="276" width="145.3" height="26" rx="13" fill="#f7e4dc" stroke="#d97757" stroke-width="1.2"/>
+  <text x="881.05" y="293" font-size="11.5" font-weight="600" text-anchor="middle" fill="#c2613f" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">ship_manifest.txt</text>
+  <text x="450.8" y="320" font-size="11.5" fill="#6b6a5f">← nothing else puts the manifest in $OUT_DIR</text>
+  <rect x="32" y="376" width="941.7" height="430" rx="12" fill="#e5e9dd" stroke="#d3dcc6"/>
+  <rect x="32" y="376" width="4" height="430" rx="2" fill="#788c5d"/>
+  <circle cx="54" cy="398" r="4" fill="#788c5d"/>
+  <text x="66" y="402" font-size="11.5" font-weight="700" letter-spacing="0.9" fill="#5d7045">VERIFICATION · RUNS AFTER THE BUILD, NEVER CALLS PACKAGING</text>
+  <rect x="52" y="420" width="200" height="46" rx="9" fill="#ffffff" stroke="#d8d4c8" filter="url(#cslCard)"/>
+  <circle cx="66" cy="444" r="3.5" fill="#788c5d"/>
+  <text x="76" y="448" font-size="13" font-weight="600" textLength="117" lengthAdjust="spacing" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">CI job "verify"</text>
+  <text x="953.7" y="447" font-size="11.5" text-anchor="end" font-style="italic" fill="#8c8a7d">[outside this repo · run by CI]</text>
+  <path d="M64,466 V489 Q64,497 72,497 H76" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+  <rect x="76" y="474" width="200" height="46" rx="9" fill="#ffffff" stroke="#d8d4c8" filter="url(#cslCard)"/>
+  <circle cx="90" cy="490" r="3.5" fill="#788c5d"/>
+  <text x="100" y="494" font-size="13" font-weight="600" textLength="93.6" lengthAdjust="spacing" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">verify_all()</text>
+  <text x="90" y="510" font-size="11.5" fill="#6b6a5f">every post-build check</text>
+  <path d="M286,497 H833.3" stroke="#c9c5b6" stroke-width="1" stroke-dasharray="1.5 5"/>
+  <text x="953.7" y="501" font-size="11.5" text-anchor="end" textLength="110.4" lengthAdjust="spacing" fill="#4a7bab" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">verify_all.sh:21</text>
+  <path d="M88,520 V543 Q88,551 96,551 H100" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+  <rect x="100" y="528" width="200" height="46" rx="9" fill="#ffffff" stroke="#d8d4c8" filter="url(#cslCard)"/>
+  <circle cx="114" cy="544" r="3.5" fill="#788c5d"/>
+  <text x="124" y="548" font-size="13" font-weight="600" textLength="124.8" lengthAdjust="spacing" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">check_coverage()</text>
+  <text x="114" y="564" font-size="11.5" fill="#6b6a5f">one of three checks</text>
+  <path d="M310,551 H833.3" stroke="#c9c5b6" stroke-width="1" stroke-dasharray="1.5 5"/>
+  <text x="953.7" y="555" font-size="11.5" text-anchor="end" textLength="110.4" lengthAdjust="spacing" fill="#4a7bab" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">verify_all.sh:17</text>
+  <path d="M112,574 V597 Q112,605 120,605 H124" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+  <rect x="124" y="582" width="209.4" height="46" rx="9" fill="#f7e4dc" stroke="#d97757" stroke-width="1.5" filter="url(#cslCard)"/>
+  <circle cx="138" cy="598" r="3.5" fill="#d97757"/>
+  <text x="148" y="602" font-size="13" font-weight="600" textLength="117" lengthAdjust="spacing" fill="#141413" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">find_manifest()</text>
+  <text x="138" y="618" font-size="11.5" fill="#c2613f">the line you came here for</text>
+  <path d="M343.4,605 H805.7" stroke="#c9c5b6" stroke-width="1" stroke-dasharray="1.5 5"/>
+  <text x="953.7" y="609" font-size="11.5" text-anchor="end" textLength="138" lengthAdjust="spacing" fill="#4a7bab" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">check_coverage.sh:14</text>
+  <rect x="148" y="636" width="323.2" height="118" rx="8" fill="#1f1e1b"/>
+  <rect x="148" y="636" width="323.2" height="22" rx="8" fill="#2b2924"/>
+  <rect x="148" y="648" width="323.2" height="10" fill="#2b2924"/>
+  <text x="160" y="651" font-size="11.5" textLength="144.9" lengthAdjust="spacing" fill="#a8a496" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">check_coverage.sh:6-9</text>
+  <rect x="261.3" y="667" width="103.8" height="18" rx="3" fill="none" stroke="#d97757" stroke-width="1.2"/>
+  <text x="162" y="680" font-size="12" textLength="230.4" lengthAdjust="spacing" xml:space="preserve" fill="#e8e6dd" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">for m in "$1"/*manifest*.txt; do</text>
+  <text x="162" y="700" font-size="12" textLength="295.2" lengthAdjust="spacing" xml:space="preserve" fill="#e8e6dd" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">  [ -f "$m" ] &amp;&amp; { echo "$m"; return 0; }</text>
+  <text x="162" y="720" font-size="12" textLength="28.8" lengthAdjust="spacing" xml:space="preserve" fill="#e8e6dd" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">done</text>
+  <rect x="160.5" y="727" width="60.6" height="18" rx="3" fill="#d97757" opacity="0.32"/>
+  <text x="162" y="740" font-size="12" textLength="57.6" lengthAdjust="spacing" xml:space="preserve" fill="#e8e6dd" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">return 1</text>
+  <rect x="808.4" y="636" width="145.3" height="26" rx="13" fill="#f7e4dc" stroke="#d97757" stroke-width="1.2"/>
+  <text x="881.05" y="653" font-size="11.5" font-weight="600" text-anchor="middle" fill="#c2613f" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">ship_manifest.txt</text>
+  <text x="489.2" y="680" font-size="11.5" fill="#6b6a5f">← no manifest → return 1, and every caller</text>
+  <text x="489.2" y="698" font-size="11.5" fill="#6b6a5f">   passes it up</text>
+  <path d="M148,773 H84" fill="none" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#cslArrG)"/>
+  <text x="158" y="777" font-size="11.5" fill="#6b6a5f"><tspan font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-weight="600" fill="#c2613f">exit 1</tspan><tspan dx="8">the job fails and the build goes red</tspan></text>
+  <path d="M953.7,289 H967.7 Q975.7,289 975.7,297 V641 Q975.7,649 967.7,649 H956.7" fill="none" stroke="#d97757" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#cslArrO)"/>
+  <text x="32" y="834" font-size="11.5" font-style="italic" fill="#8c8a7d">grep finds neither end of the coupling: the two chains share a filename, not a call.</text>
+</svg>
+</div>
+      <!-- /gen:callsite -->
       <figcaption class="gal-cap">
         <span class="gal-cap-text">
           <span class="gal-tag"><span class="lang-en">call-site locator &middot; why it stops at one line</span><span class="lang-zh">调用链定位 &middot; 为什么卡在这一行</span></span>
-          <span class="lang-en">Two chains that never call each other, drawn so the coupling between them becomes visible. Every level carries a <code>file:line</code> right-aligned in its own column, joined to its card by leader dots &mdash; and the level that has no line number to give says so instead, with no dots, because a chain you cannot check is just prose. The deciding lines are <b>quoted verbatim</b> in the dark cards: &#9312; shows the packaging step that is the only writer of the manifest, &#9313; shows the test that reads it and the <code>return 1</code> that stops the build. A description would lose the difference between <code>return 1</code> and <code>return 0</code>, and that difference is the whole finding. Template: <code>templates/diagrams/call-site-locator.svg</code>.</span>
-          <span class="lang-zh">两条彼此不调用的链，画成能看见它们之间那道耦合。每一层的 <code>file:line</code> 右对齐在自己那一列，用引导点线连回卡片 —— 而给不出行号的那一层就直说，并且不画点线，因为读者核不了的链跟一段文字没区别。决定结局的那几行<b>贴的是原文</b>：&#9312; 是那个打包步骤，它是清单唯一的写入方；&#9313; 是读它的那次判断，以及让构建停下的 <code>return 1</code>。写成描述就会丢掉 <code>return 1</code> 和 <code>return 0</code> 的区别，而那个区别就是全部结论。模板：<code>templates/diagrams/call-site-locator.svg</code>。</span>
+          <span class="lang-en">Two chains that never call each other, drawn so the coupling between them becomes visible. Every level carries the <code>file:line</code> where it is called, right-aligned in its own column and joined to its card by leader dots; the level with no line to give says why instead, with no dots. The dashed card is the call someone deleted, and everything under it is dimmed because it no longer runs. The dark cards are <b>read from the files at those lines</b> by the generator, not retyped — so <code>return 1</code> cannot quietly become <code>return 0</code> on the way into the figure. The grey arrow at the bottom is where that value lands. Generated from <code>design-review/references/callsites/build-manifest/figure.chain</code>; template: <code>templates/diagrams/call-site-locator.svg</code>.</span>
+          <span class="lang-zh">两条彼此不调用的链，画成能看见它们之间那道耦合。每一层右边是它<b>被调用的那一行</b>的 <code>file:line</code>，单独成一列、用引导点线连回卡片；给不出行号的那一层就直说为什么，不画点线。虚线框是被人删掉的那次调用，它下面的全部变灰，因为已经不会跑了。深色卡里的原文是<b>生成器按行号从文件里读出来的</b>，不是手抄 —— <code>return 1</code> 不可能在进图的路上悄悄变成 <code>return 0</code>。最下面那道灰箭头是这个返回值落到了哪一层。源：<code>design-review/references/callsites/build-manifest/figure.chain</code>；模板：<code>templates/diagrams/call-site-locator.svg</code>。</span>
         </span>
         <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
       </figcaption>

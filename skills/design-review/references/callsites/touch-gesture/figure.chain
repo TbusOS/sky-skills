@@ -1,0 +1,29 @@
+# relief-design's call-site locator: a touch driver whose double-tap wake stops
+# working after someone deletes one "debug-only" read at probe.
+#
+# Source of truth for the figure in relief-design/references/canonical/code.html.
+# Do not hand-edit that block; edit this and run
+#   python3 skills/design-review/scripts/gen_call_site_figure.py
+# Format: skills/design-review/references/callsites/README.md
+
+id: touch-gesture
+title: ONE LINE DELETED, ONE FEATURE GONE | 删掉一行，坏掉一个功能
+subtitle: the two chains never call each other — all they share is the static variable on the two ringed tags | 两条链彼此不调用 —— 它们共用的只有那两枚扣子上的静态变量
+couple: tp_fw_major
+couple.note: written by one chain, read by the other | 一条链写，另一条链读
+foot: grep for callers of tp_fw_version_read() finds only tp_fw_init() — nothing points at resume. | 搜 tp_fw_version_read() 的调用方只能找到 tp_fw_init() —— 没有任何东西指向唤醒。
+
+chain: BOOT · probe runs this once | 开机 · probe 里跑一次
+tp_fw_init()                drivers/input/tp_fw.c:27    -- called once from probe | probe 调它一次
+  tp_fw_version_read()      drivers/input/tp_fw.c:31    @removed    -- looked like it only fed the debug print | 看上去只是给那行调试打印用的
+    > drivers/input/tp_fw.c:23    share=tp_fw_major
+    ! the only line in the driver that ever writes it | 整个驱动里唯一一次给它赋值
+
+chain: RESUME · the chain that broke | 唤醒 · 坏掉的那条链
+PM core                     - no line to give · dispatched at runtime through dev_pm_ops | 给不出行号 · 运行时按 dev_pm_ops 分派
+  tp_resume()               drivers/input/tp_pm.c:16    -- the .resume slot of tp_pm_ops | tp_pm_ops 的 .resume
+    tp_gesture_enable()     drivers/input/tp_pm.c:24    @focus    -- the line you came here for | 你要找的就是这一行
+      > drivers/input/tp_fw.c:41-42    mark=return 0    share=tp_fw_major
+      ! reads 0, decides the firmware is too old, returns success | 读到 0，判「固件太旧」，然后返回成功
+      tp_write_reg()        drivers/input/tp_fw.c:44    @skip    -- never reached — the write that arms double-tap | 没走到 —— 真正打开双击唤醒的那次写
+  ^ tp_resume() = 0 : so the dev_warn() two lines below never fires | 所以下两行那句 dev_warn() 永远不打

@@ -97,6 +97,7 @@ node    $R/scripts/check_gallery_links.mjs        # 改过图集页或任何 can
 node    $R/scripts/check_snippets.mjs             # 改过 relief.css 或 snippets.md 就跑
 python3 $R/scripts/gen_struct_figure.py --check    # 结构体布局图和 pahole 对不对得上
 node    skills/design-review/scripts/check_call_site_figures.mjs   # 画过调用链定位图就跑
+python3 skills/design-review/scripts/gen_call_site_figure.py --check  # 定位图和源、和真实文件对得上
 ```
 
 **两道对比度检查查的不是一回事，缺一不可：**
@@ -122,6 +123,8 @@ node    skills/design-review/scripts/check_call_site_figures.mjs   # 画过调�
 **图集页改过就跑 `check_gallery_links.mjs`。** 它点一遍 50 个按钮，核对落到的那张图
 是不是按钮上写的那张。这道检查不看链接字符串 —— 看的是浏览器解析出来的 `:target`
 元素自己的标题。**用同一套字符串匹配去改、再去验，改错了它也说过。**
+
+**调用链定位图（`.relief-site`）不手画，从源文本生成**：`gen_call_site_figure.py`，格式在 `skills/design-review/references/callsites/README.md`。它按行号去文件里读原文、核对每一层的行号，`--check` 在 runner 里跑。
 
 **画过调用链定位图（`.relief-site`）就跑 `check_call_site_figures.mjs`。** 这类图的价值
 全在「读者能自己去核」上，而它坏掉的方式全都不报错：少一个 `file:line`，那一层就核不了；

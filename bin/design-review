@@ -769,6 +769,15 @@ if [ -z "${NO_SKILL_CHECKS:-}" ] && [ -f "$SKY_ROOT/assets/fonts/manifest.json" 
     exit 1
   fi
   echo ""
+  echo "━━ repo check · gen_call_site_figure.py --check (调用链定位图和源、和真实文件对不对得上)"
+  if ! ( cd "$SKY_ROOT" && python3 skills/design-review/scripts/gen_call_site_figure.py --check ); then
+    echo ""
+    echo "✗ 调用链定位图过期了 —— 要么源里的行号和文件对不上了，要么有人手改了生成出来的那一段。" >&2
+    echo "  改 skills/design-review/references/callsites/<例子>/figure.chain，" >&2
+    echo "  再跑 python3 skills/design-review/scripts/gen_call_site_figure.py 重新生成。" >&2
+    exit 1
+  fi
+  echo ""
   echo "━━ repo check · check_fonts.py (搬进仓的字体还够不够用)"
   if ! ( cd "$SKY_ROOT" && python3 skills/design-review/scripts/check_fonts.py ); then
     echo ""

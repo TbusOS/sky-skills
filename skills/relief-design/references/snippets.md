@@ -673,34 +673,47 @@ hwirq/virq、物理地址/总线地址、次设备号/设备节点。
 
 **什么时候用**：排查一个具体故障、论证「改这里会影响那里」、评审一个改动的影响面。
 **和上面那棵调用树不是一回事**：调用树答「这一次走了哪条路、时间花在哪层」，
-这张答「**为什么这件事卡在这一行**」—— 所以每层右边挂 `file:line`，
-决定结局的那一层底下贴代码原文。
+这张答「**为什么这件事卡在这一行**」。
+
+**不要照着下面这段手写** —— 写一份源文本，让生成器出这段标记：
+
+```bash
+python3 skills/design-review/scripts/gen_call_site_figure.py 你的.chain --style=relief
+```
+
+生成器按行号去文件里把原文读出来、核对每一层的行号，手写的话这两件事没人查。
+格式见 `skills/design-review/references/callsites/README.md`。
+下面这段就是它对 `touch-gesture/figure.chain` 的输出，放在这里是为了让你看清每个部件：
 
 ```html
-<div class="relief-sitehead"><span class="lang-en">BOOT &middot; the chain someone shortened</span><span class="lang-zh">开机 &middot; 被人精简过的那条链</span></div>
+<div class="relief-sitehead"><span class="lang-en">BOOT · probe runs this once</span><span class="lang-zh">开机 · probe 里跑一次</span></div>
 <div class="relief-site">
-  <div class="relief-siterow" style="--d:0"><span class="relief-sitefn relief-raised relief-thin"><b>tp_probe()</b><i><span class="lang-en">once, at boot</span><span class="lang-zh">开机时跑一次</span></i></span><span class="relief-siteat">drivers/input/tp_core.c:612</span></div>
-  <div class="relief-siterow" style="--d:1"><span class="relief-sitefn relief-skip"><b>tp_fw_version_read()</b><span class="relief-sitepin">tp_fw_major</span><i><span class="lang-en">deleted</span><span class="lang-zh">被删了</span></i></span><span class="relief-siteat">tp_core.c:288</span></div>
-  <div class="relief-sitesrc" style="--d:1"><code class="relief-sitecode"><em>tp_fw_major</em> = buf[0];   <i>/* static, file scope */</i></code><span class="relief-sitewhy"><span class="lang-en">&larr; the only line that ever writes it</span><span class="lang-zh">&larr; 唯一一次给它赋值的地方</span></span></div>
-  <div class="relief-siterow" style="--d:1"><span class="relief-sitefn relief-hot"><b>tp_gesture_enable()</b><i><span class="lang-en">the line you came for</span><span class="lang-zh">你要找的就是这行</span></i></span><span class="relief-siteat">tp_core.c:441</span></div>
-  <div class="relief-siterow" style="--d:2"><span class="relief-sitefn relief-raised relief-thin"><b>PM core</b></span><span class="relief-siteat relief-noline"><span class="lang-en">no line to give &mdash; dispatched at runtime</span><span class="lang-zh">给不出行号 —— 运行时分派</span></span></div>
+  <div class="relief-siterow" style="--d:0"><span class="relief-sitefn relief-raised relief-thin"><b>tp_fw_init()</b><i><span class="lang-en">called once from probe</span><span class="lang-zh">probe 调它一次</span></i></span><span class="relief-siteat">drivers/input/tp_fw.c:27</span></div>
+  <div class="relief-siterow" style="--d:1"><span class="relief-sitefn relief-removed"><b>tp_fw_version_read()</b><span class="relief-sitecut"><span class="lang-en">removed</span><span class="lang-zh">删掉了</span></span><span class="relief-sitepin">tp_fw_major</span><i><span class="lang-en">looked like it only fed the debug print</span><span class="lang-zh">看上去只是给那行调试打印用的</span></i></span><span class="relief-siteat">tp_fw.c:31</span></div>
+  <div class="relief-sitesrc" style="--d:1"><span class="relief-sitequote"><span class="relief-siteat">tp_fw.c:23</span><code class="relief-sitecode"><u>tp_fw_major</u> = buf[0];</code></span><span class="relief-sitewhy"><span class="lang-en">← the only line in the driver that ever writes it</span><span class="lang-zh">← 整个驱动里唯一一次给它赋值</span></span></div>
+</div>
+<div class="relief-sitehead"><span class="lang-en">RESUME · the chain that broke</span><span class="lang-zh">唤醒 · 坏掉的那条链</span></div>
+<div class="relief-site">
+  <div class="relief-siterow" style="--d:0"><span class="relief-sitefn relief-raised relief-thin"><b>PM core</b></span><span class="relief-siteat relief-noline"><span class="lang-en">no line to give · dispatched at runtime through dev_pm_ops</span><span class="lang-zh">给不出行号 · 运行时按 dev_pm_ops 分派</span></span></div>
+  <div class="relief-siterow" style="--d:1"><span class="relief-sitefn relief-raised relief-thin"><b>tp_resume()</b><i><span class="lang-en">the .resume slot of tp_pm_ops</span><span class="lang-zh">tp_pm_ops 的 .resume</span></i></span><span class="relief-siteat">drivers/input/tp_pm.c:16</span></div>
+  <div class="relief-siterow" style="--d:2"><span class="relief-sitefn relief-hot"><b>tp_gesture_enable()</b><span class="relief-sitepin">tp_fw_major</span><i><span class="lang-en">the line you came here for</span><span class="lang-zh">你要找的就是这一行</span></i></span><span class="relief-siteat">tp_pm.c:24</span></div>
+  <div class="relief-sitesrc" style="--d:2"><span class="relief-sitequote"><span class="relief-siteat">tp_fw.c:41-42</span><code class="relief-sitecode">if (<u>tp_fw_major</u> &lt; 3)
+        <em>return 0</em>;</code></span><span class="relief-sitewhy"><span class="lang-en">← reads 0, decides the firmware is too old, returns success</span><span class="lang-zh">← 读到 0，判「固件太旧」，然后返回成功</span></span></div>
+  <div class="relief-siterow" style="--d:3"><span class="relief-sitefn relief-skip"><b>tp_write_reg()</b><i><span class="lang-en">never reached — the write that arms double-tap</span><span class="lang-zh">没走到 —— 真正打开双击唤醒的那次写</span></i></span><span class="relief-siteat">tp_fw.c:44</span></div>
+  <div class="relief-siteret" style="--d:2;--span:1"><span class="relief-siteretbar"></span><b>0</b><i><span class="lang-en">so the dev_warn() two lines below never fires</span><span class="lang-zh">所以下两行那句 dev_warn() 永远不打</span></i></div>
 </div>
 ```
 
-- **每一层都要有 `file:line`。** 拿不到的那一层用 `.relief-noline` 并**写清为什么拿不到**
-  （运行时按表分派 / 宏展开后才有）。没有行号又不说原因的一层，读者没法核，
-  这张图就退回成一段文字。
-- **关键那一层贴原文，不许转述。** 转述会丢掉 `return 0` 和 `return -EINVAL` 的区别，
-  而那个区别常常就是全部结论。`<em>` 标决定结局的那几个字，`<i>` 放注释，`<b>` 放关键字。
-- **`.relief-sitewhy` 紧跟在代码条右边**，写「为什么这一行是关键」。
-  它凸起、代码条凹陷 —— 一眼分得出哪句是代码说的、哪句是写图的人说的。
-- **`.relief-sitepin` 是耦合扣子**：同一个名字的扣子出现在两处，
-  就是说那两处是同一个东西。「A 的私有步骤产出了 B 依赖的东西」这类耦合靠它认。
-  两端常常隔着十几行，画连线会跨屏，扣子不会。
-- **两条互不相干的链各戴一个 `.relief-sitehead`。** 不分段，读者会把第二条读成第一条的下一步。
-- 出处成列**不靠空格**。纯文本版这张图最难的正是这步：`file:line` 要凑空格才对齐，  <!-- bw-ok:排版义 -->
-  中文注释一进来宽度就乱。grid 的右列天生对齐，混排也不歪。  <!-- bw-ok:排版义 -->
-- 超过 6~7 层就拆成两张 —— 缩进槽再多，读者也开始数不清自己在第几层。
+- **`.relief-siteat` 指向这一层被调用的那一行**（和 `gdb bt` 一样）；给不出的那一层用
+  `.relief-noline` 并写清为什么
+- **四种状态各管一件事**：普通凸起 = 跑了 · `.relief-hot` = 你要找的这一层 ·
+  `.relief-skip` = 代码在、这次没走到 · **`.relief-removed` = 代码没了**（名字划掉 + `.relief-sitecut` 小字）。
+  被删那一层下面的孩子画成 `.relief-skip`，因为它们是「因此没走到」
+- **原文放在 `.relief-sitequote` 里**，上面压一条它自己的出处 —— 原文常常和调用不在同一个文件。
+  `<em>` 是决定结局的那几个字，`<u>` 是两条链共用的那个东西（和 `.relief-sitepin` 同一种圈）
+- **`.relief-siteret` 是失败往上传的落点**：`--d` = 落回的那一层，`--span` = 往上穿过了几层
+- **两条互不相干的链各戴一个 `.relief-sitehead`** —— 不分段，读者会把第二条读成第一条的下一步
+- 窄屏（640px 以下）自动改成上下排列，不用另写
 
 ## 两个栈并排比 `.relief-vs2`
 

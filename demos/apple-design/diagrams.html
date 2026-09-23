@@ -51,6 +51,10 @@
     margin: 0 0 32px;
   }
   .gal-fig svg { display: block; width: 100%; height: auto; }
+  /* 调用链定位图在手机上不等比缩小，改成横向滚动：缩到 290px 宽时最小的字只剩 3px。
+     min-width 按「最小字号渲染后不低于 9px」算出来的。 */
+  .gal-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .gal-scroll > svg { min-width: 840px; }
   .gal-cap {
     display: flex; justify-content: space-between; align-items: flex-end;
     gap: 24px; margin-top: 24px; flex-wrap: wrap;
@@ -3147,84 +3151,91 @@
     </figure>
 
     <figure class="gal-fig">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 580" role="img" aria-label="A call-site locator, drawn as two chains side by side because neither one calls the other. The left group, on a pale grey panel, is the packaging chain: pack_release_archive, called once at release time, calls copy_manifest, its own private step. Each card has its file and line number set in a column of its own to the right — build dot sh line 182 and line 141 — so every level can be checked. Under them a dark card quotes that step verbatim, a cp of ship_manifest.txt into OUT_DIR, with the filename lit in blue and the rest of the line in grey. The right group is the verification chain: verify_all, whose slot in the line-number column says no line, dispatched by job name, because there is nothing to point at; then check_coverage at verify_all dot sh line 751; then list_expected at check_coverage dot sh lines 98 to 103. The dark card under it quotes two lines, a shell glob looking for any manifest file, with the glob lit in blue, and a test that returns 1 when it finds none, with return 1 picked out in white. At the foot of each group sits a small blue-edged chip reading ship_manifest.txt, and a single blue line runs from the left chip to the right one. That line is the only blue in the figure and the only thing the two chains share: one produces the file as a private step, the other requires it" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
-        <defs>
-          <marker id="cslBlue" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
-          </marker>
-          <filter id="cslCard" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
-          </filter>
-        </defs>
-
-        <rect width="1120" height="580" fill="#ffffff"/>
-
-        <text x="32" y="34" font-size="12.5" font-weight="600" letter-spacing="1.2" fill="#86868b">CALL-SITE LOCATOR &#183; WHY THE BUILD STOPS AT ONE LINE</text>
-        <text x="1088" y="34" text-anchor="end" font-size="12.5" fill="#aeaeb2">every level carries a file:line &#183; the deciding line is quoted, never described</text>
-
-        <!-- ═══ left · packaging ═══ -->
-        <rect x="32" y="56" width="520" height="460" rx="18" fill="#f5f5f7"/>
-        <text x="60" y="88" font-size="12.5" font-weight="500" fill="#86868b">Packaging &#183; run once, at release time</text>
-
-        <rect x="60" y="104" width="280" height="64" rx="14" fill="#ffffff" filter="url(#cslCard)"/>
-        <text x="80" y="132" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">pack_release_archive()</text>
-        <text x="80" y="152" font-size="12.5" fill="#86868b">the entry point of a release</text>
-        <text x="372" y="140" font-size="12.5" fill="#6e6e73" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">build.sh:182</text>
-
-        <rect x="84" y="180" width="280" height="64" rx="14" fill="#ffffff" filter="url(#cslCard)"/>
-        <text x="104" y="208" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">copy_manifest()</text>
-        <text x="104" y="228" font-size="12.5" fill="#86868b">its own private step</text>
-        <text x="372" y="216" font-size="12.5" fill="#6e6e73" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">build.sh:141</text>
-
-        <rect x="84" y="264" width="440" height="44" rx="10" fill="#1d1d1f"/>
-        <rect x="167.5" y="277" width="127.5" height="18" rx="3" fill="#0071e3" opacity="0.26"/>
-        <text x="100" y="291" font-size="12.5" textLength="292.5" lengthAdjust="spacing" xml:space="preserve" fill="#86868b" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">cp "$SRC/ship_manifest.txt" "$OUT_DIR/"</text>
-        <text x="84" y="336" font-size="12.5" fill="#86868b">Nothing else puts the manifest in $OUT_DIR. Deleting this</text>
-        <text x="84" y="356" font-size="12.5" fill="#86868b">step for a debug build looks free of consequence.</text>
-
-        <rect x="84" y="470" width="184" height="32" rx="10" fill="#eaf3fe" stroke="#0071e3" stroke-width="1.5"/>
-        <text x="176" y="491" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">ship_manifest.txt</text>
-
-        <!-- ═══ right · verification ═══ -->
-        <rect x="568" y="56" width="520" height="460" rx="18" fill="#f5f5f7"/>
-        <text x="596" y="88" font-size="12.5" font-weight="500" fill="#86868b">Verification &#183; never calls the chain on the left</text>
-
-        <rect x="596" y="104" width="280" height="64" rx="14" fill="#ffffff" filter="url(#cslCard)"/>
-        <text x="616" y="132" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">verify_all()</text>
-        <text x="616" y="152" font-size="12.5" fill="#86868b">runs after every build</text>
-        <text x="896" y="140" font-size="12.5" fill="#aeaeb2">no line &#183; job-name dispatch</text>
-
-        <rect x="620" y="180" width="280" height="64" rx="14" fill="#ffffff" filter="url(#cslCard)"/>
-        <text x="640" y="208" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">check_coverage()</text>
-        <text x="640" y="228" font-size="12.5" fill="#86868b">one of eleven checks</text>
-        <text x="896" y="216" font-size="12.5" fill="#6e6e73" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">verify_all.sh:751</text>
-
-        <rect x="644" y="256" width="280" height="64" rx="14" fill="#ffffff" filter="url(#cslCard)"/>
-        <text x="664" y="284" font-size="13.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">list_expected()</text>
-        <text x="664" y="304" font-size="12.5" fill="#86868b">the line you came here for</text>
-        <text x="896" y="292" font-size="12.5" fill="#6e6e73" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">check_coverage.sh:98</text>
-
-        <rect x="644" y="336" width="420" height="64" rx="10" fill="#1d1d1f"/>
-        <rect x="824.5" y="352" width="105" height="18" rx="3" fill="#0071e3" opacity="0.26"/>
-        <text x="659.5" y="366" font-size="12.5" textLength="360" lengthAdjust="spacing" xml:space="preserve" fill="#86868b" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">manifest="$(ls "$dir"/*manifest*.txt | head -1)"</text>
-        <text x="659.5" y="390" font-size="12.5" textLength="225" lengthAdjust="spacing" xml:space="preserve" fill="#ffffff" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">[ -n "$manifest" ] || return 1</text>
-        <text x="644" y="424" font-size="12.5" fill="#86868b">The quoted line is the finding: <tspan font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">return 1</tspan> stops the</text>
-        <text x="644" y="444" font-size="12.5" fill="#86868b">build. <tspan font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">return 0</tspan> would have passed a package with no manifest.</text>
-
-        <rect x="644" y="470" width="184" height="32" rx="10" fill="#eaf3fe" stroke="#0071e3" stroke-width="1.5"/>
-        <text x="736" y="491" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">ship_manifest.txt</text>
-
-        <!-- the one blue line: the only thing the two chains share -->
-        <path d="M268,486 H636" fill="none" stroke="#0071e3" stroke-width="1.5" marker-end="url(#cslBlue)"/>
-        <text x="452" y="474" font-size="12.5" fill="#86868b">produced here, required there</text>
-
-        <text x="32" y="556" font-size="12.5" fill="#86868b">grep finds neither end of the blue line: the two chains share a filename, not a call. That is what makes this class of coupling worth a figure.</text>
-      </svg>
+      <!-- gen:callsite build-manifest apple -->
+<div class="gal-scroll gal-scroll--apple">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 744" role="img" aria-label="CALL-SITE LOCATOR · WHY THE BUILD STOPS AT ONE LINE. Packaging · part of every full build: main() at build.sh line 34; calls pack_release_archive() at build.sh line 37 — this call was removed; calls copy_manifest() at build.sh line 30 — not reached; the quoted source at build.sh lines 25 to 25 reads: cp &quot;$SRC/ship_manifest.txt&quot; &quot;$OUT_DIR/&quot;; nothing else puts the manifest in $OUT_DIR; Verification · runs after the build, never calls packaging: CI job &quot;verify&quot; with no line number, because outside this repo · run by CI; calls verify_all() at verify_all.sh line 21; calls check_coverage() at verify_all.sh line 17; calls find_manifest() at check_coverage.sh line 14 — the level this figure is about; the quoted source at check_coverage.sh lines 6 to 9 reads: for m in &quot;$1&quot;/*manifest*.txt; do / [ -f &quot;$m&quot; ] &amp;&amp; { echo &quot;$m&quot;; return 0; } / done / return 1; no manifest → return 1, and every caller passes it up; the result travels back up to CI job &quot;verify&quot; as exit 1: the job fails and the build goes red. The two chains are coupled only through ship_manifest.txt, marked in both. grep finds neither end of the coupling: the two chains share a filename, not a call." font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif">
+  <!-- generated by skills/design-review/scripts/gen_call_site_figure.py from references/callsites/build-manifest/figure.chain — edit the source, not this file -->
+  <defs>
+    <marker id="cslBlue" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#0071e3"/>
+    </marker>
+    <marker id="cslArrG" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#aeaeb2"/>
+    </marker>
+    <filter id="cslCard" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+  <rect width="1120" height="744" fill="#ffffff"/>
+  <text x="32" y="34" font-size="12.5" font-weight="600" letter-spacing="1.2" fill="#86868b">CALL-SITE LOCATOR · WHY THE BUILD STOPS AT ONE LINE</text>
+  <text x="32" y="54" font-size="12.5" fill="#aeaeb2">every level carries a file:line · the deciding lines are read from the file, never retyped</text>
+  <rect x="32" y="74" width="482.9" height="618" rx="18" fill="#f5f5f7"/>
+  <text x="60" y="106" font-size="12.5" font-weight="500" fill="#86868b">Packaging · part of every full build</text>
+  <rect x="60" y="122" width="220" height="60" rx="14" fill="#ffffff" filter="url(#cslCard)"/>
+  <text x="80" y="157" font-size="13.5" font-weight="600" textLength="48.6" lengthAdjust="spacing" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">main()</text>
+  <text x="357.9" y="156" font-size="12.5" textLength="82.5" lengthAdjust="spacing" fill="#6e6e73" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">build.sh:34</text>
+  <rect x="84" y="194" width="253.9" height="80" rx="14" fill="none" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <text x="104" y="220" font-size="13.5" font-weight="600" textLength="178.2" lengthAdjust="spacing" fill="#86868b" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">pack_release_archive()</text>
+  <line x1="102" y1="215.5" x2="284.2" y2="215.5" stroke="#86868b" stroke-width="1.4"/>
+  <text x="104" y="240" font-size="12.5" fill="#86868b">removed · cut from main() for a</text>
+  <text x="104" y="260" font-size="12.5" fill="#86868b">faster debug build</text>
+  <text x="357.9" y="228" font-size="12.5" textLength="82.5" lengthAdjust="spacing" fill="#6e6e73" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">build.sh:37</text>
+  <rect x="108" y="286" width="220" height="60" rx="14" fill="#ffffff"/>
+  <text x="128" y="312" font-size="13.5" font-weight="600" textLength="121.5" lengthAdjust="spacing" fill="#86868b" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">copy_manifest()</text>
+  <text x="128" y="332" font-size="12.5" fill="#86868b">its own private step</text>
+  <text x="357.9" y="320" font-size="12.5" textLength="82.5" lengthAdjust="spacing" fill="#6e6e73" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">build.sh:30</text>
+  <rect x="132" y="358" width="324.5" height="64" rx="10" fill="#1d1d1f"/>
+  <rect x="132" y="358" width="324.5" height="24" rx="10" fill="#2c2c2e"/>
+  <rect x="132" y="370" width="324.5" height="12" fill="#2c2c2e"/>
+  <text x="146" y="374.5" font-size="12.5" textLength="82.5" lengthAdjust="spacing" fill="#aeaeb2" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">build.sh:25</text>
+  <rect x="214" y="392" width="130.5" height="19" rx="3" fill="#0071e3" opacity="0.26"/>
+  <text x="148" y="406" font-size="12.5" textLength="292.5" lengthAdjust="spacing" xml:space="preserve" fill="#86868b" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace"><tspan fill="#86868b">cp "$SRC/</tspan><tspan fill="#ffffff">ship_manifest.txt</tspan><tspan fill="#86868b">" "$OUT_DIR/"</tspan></text>
+  <text x="132" y="444" font-size="12.5" fill="#86868b">↑ nothing else puts the manifest in $OUT_DIR</text>
+  <rect x="60" y="632" width="161.5" height="32" rx="10" fill="#eaf3fe" stroke="#0071e3" stroke-width="1.5"/>
+  <text x="140.75" y="653" font-size="12.5" font-weight="600" text-anchor="middle" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">ship_manifest.txt</text>
+  <rect x="530.9" y="74" width="557.1" height="618" rx="18" fill="#f5f5f7"/>
+  <text x="558.9" y="106" font-size="12.5" font-weight="500" fill="#86868b">Verification · runs after the build, never calls packaging</text>
+  <rect x="558.9" y="122" width="220" height="60" rx="14" fill="#ffffff" filter="url(#cslCard)"/>
+  <text x="578.9" y="157" font-size="13.5" font-weight="600" textLength="121.5" lengthAdjust="spacing" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">CI job "verify"</text>
+  <text x="870.9" y="156" font-size="12.5" fill="#aeaeb2">outside this repo · run</text>
+  <text x="870.9" y="174" font-size="12.5" fill="#aeaeb2">by CI</text>
+  <rect x="582.9" y="194" width="220" height="60" rx="14" fill="#ffffff" filter="url(#cslCard)"/>
+  <text x="602.9" y="220" font-size="13.5" font-weight="600" textLength="97.2" lengthAdjust="spacing" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">verify_all()</text>
+  <text x="602.9" y="240" font-size="12.5" fill="#86868b">every post-build check</text>
+  <text x="870.9" y="228" font-size="12.5" textLength="120" lengthAdjust="spacing" fill="#6e6e73" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">verify_all.sh:21</text>
+  <rect x="606.9" y="266" width="220" height="60" rx="14" fill="#ffffff" filter="url(#cslCard)"/>
+  <text x="626.9" y="292" font-size="13.5" font-weight="600" textLength="129.6" lengthAdjust="spacing" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">check_coverage()</text>
+  <text x="626.9" y="312" font-size="12.5" fill="#86868b">one of three checks</text>
+  <text x="870.9" y="300" font-size="12.5" textLength="120" lengthAdjust="spacing" fill="#6e6e73" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">verify_all.sh:17</text>
+  <rect x="630.9" y="338" width="220" height="60" rx="14" fill="#ffffff" filter="url(#cslCard)"/>
+  <text x="650.9" y="364" font-size="13.5" font-weight="600" textLength="121.5" lengthAdjust="spacing" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">find_manifest()</text>
+  <text x="650.9" y="384" font-size="12.5" fill="#1d1d1f">the line you came here for</text>
+  <text x="870.9" y="372" font-size="12.5" textLength="150" lengthAdjust="spacing" fill="#6e6e73" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">check_coverage.sh:14</text>
+  <rect x="654.9" y="410" width="339.5" height="130" rx="10" fill="#1d1d1f"/>
+  <rect x="654.9" y="410" width="339.5" height="24" rx="10" fill="#2c2c2e"/>
+  <rect x="654.9" y="422" width="339.5" height="12" fill="#2c2c2e"/>
+  <text x="668.9" y="426.5" font-size="12.5" textLength="157.5" lengthAdjust="spacing" fill="#aeaeb2" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">check_coverage.sh:6-9</text>
+  <rect x="774.4" y="444" width="108" height="19" rx="3" fill="#0071e3" opacity="0.26"/>
+  <text x="670.9" y="458" font-size="12.5" textLength="240" lengthAdjust="spacing" xml:space="preserve" fill="#86868b" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace"><tspan fill="#86868b">for m in "$1"/</tspan><tspan fill="#ffffff">*manifest*.txt</tspan><tspan fill="#86868b">; do</tspan></text>
+  <text x="670.9" y="480" font-size="12.5" textLength="307.5" lengthAdjust="spacing" xml:space="preserve" fill="#86868b" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace"><tspan fill="#86868b">  [ -f "$m" ] &amp;&amp; { echo "$m"; return 0; }</tspan></text>
+  <text x="670.9" y="502" font-size="12.5" textLength="30" lengthAdjust="spacing" xml:space="preserve" fill="#86868b" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace"><tspan fill="#86868b">done</tspan></text>
+  <text x="670.9" y="524" font-size="12.5" textLength="60" lengthAdjust="spacing" xml:space="preserve" fill="#86868b" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace"><tspan fill="#ffffff" font-weight="600">return 1</tspan></text>
+  <text x="654.9" y="562" font-size="12.5" fill="#86868b">↑ no manifest → return 1, and every caller passes it up</text>
+  <path d="M654.9,596 H590.9" fill="none" stroke="#aeaeb2" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#cslArrG)"/>
+  <text x="666.9" y="600.5" font-size="12.5" fill="#86868b"><tspan font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace" font-weight="600" fill="#1d1d1f">exit 1</tspan><tspan dx="8">the job fails and the build goes red</tspan></text>
+  <rect x="558.9" y="632" width="161.5" height="32" rx="10" fill="#eaf3fe" stroke="#0071e3" stroke-width="1.5"/>
+  <text x="639.65" y="653" font-size="12.5" font-weight="600" text-anchor="middle" fill="#1d1d1f" font-family="'SF Mono', ui-monospace, Menlo, Monaco, monospace">ship_manifest.txt</text>
+  <path d="M223.5,648 H555.9" fill="none" stroke="#0071e3" stroke-width="1.5" marker-end="url(#cslBlue)"/>
+  <text x="237.5" y="638" font-size="12.5" fill="#86868b">produced by one chain, required by the other</text>
+  <text x="32" y="726" font-size="12.5" fill="#86868b">grep finds neither end of the coupling: the two chains share a filename, not a call.</text>
+</svg>
+</div>
+      <!-- /gen:callsite -->
       <figcaption class="gal-cap">
         <span class="gal-cap-text">
           <span class="gal-tag"><span class="lang-en">call-site locator &#183; why it stops at one line</span><span class="lang-zh">调用链定位 &#183; 为什么卡在这一行</span></span>
-          <span class="lang-en">Two chains, side by side because neither calls the other &mdash; drawn that way on purpose, since stacking them reads as &#8220;first this, then that&#8221;. Every level carries a <code>file:line</code> in a column of its own, and the level that has none says why instead. The deciding lines are quoted verbatim in the dark cards rather than described, because a description loses the difference between <code>return 1</code> and <code>return 0</code>. The blue goes to the coupling and nothing else: two chips and the line between them, one file produced as a private step on the left and required on the right. Template: <code>templates/diagrams/call-site-locator.svg</code>.</span>
-          <span class="lang-zh">两条链并排，因为它们彼此不调用 &mdash;&mdash; 这么摆是刻意的，上下叠会读成「先这个，再那个」。每一层的 <code>file:line</code> 单独成一列，给不出行号的那一层就说清为什么。决定结局的那几行在深色卡里<b>贴的是原文</b>而不是描述，因为描述会丢掉 <code>return 1</code> 和 <code>return 0</code> 的区别。蓝色只给耦合，别的一概不给：两枚标签和它们之间那条线 &mdash;&mdash; 同一个文件，左边当作私有步骤产出，右边要用。模板：<code>templates/diagrams/call-site-locator.svg</code>。</span>
+          <span class="lang-en">Two chains, side by side because neither calls the other &mdash; stacking them reads as &#8220;first this, then that&#8221;. Every level carries the <code>file:line</code> where it is called; the one that has none says why. The dashed card is the deleted call, and the pale card under it no longer runs. The dark cards are read from the files by the generator rather than retyped, and within them brightness does the job colour cannot: the deciding words are white, the rest grey. The blue goes to the coupling and nothing else. Generated from <code>design-review/references/callsites/build-manifest/figure.chain</code>; template: <code>templates/diagrams/call-site-locator.svg</code>.</span>
+          <span class="lang-zh">两条链并排，因为它们彼此不调用 &mdash;&mdash; 上下叠会读成「先这个，再那个」。每一层挂的是它<b>被调用的那一行</b>的 <code>file:line</code>，给不出的那一层说清为什么。虚线框是被删掉的那次调用，它下面那张浅卡已经不会跑了。深色卡里的原文由生成器从文件里读出来，不是手抄；在卡里，颜色做不到的事交给明度：决定结局的字是白的，其余是灰的。蓝色只给耦合，别的一概不给。源：<code>design-review/references/callsites/build-manifest/figure.chain</code>；模板：<code>templates/diagrams/call-site-locator.svg</code>。</span>
         </span>
         <button type="button" class="gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
       </figcaption>

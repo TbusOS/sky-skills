@@ -1,0 +1,29 @@
+# The call-site locator from issue #28: two build scripts that never call each
+# other, coupled through one file. Rendered for anthropic-design and apple-design.
+#
+# Source of truth for those figures. Do not hand-edit the SVG; edit this and run
+#   python3 skills/design-review/scripts/gen_call_site_figure.py
+# Format: skills/design-review/references/callsites/README.md
+
+id: build-manifest
+title: CALL-SITE LOCATOR · WHY THE BUILD STOPS AT ONE LINE | 调用链定位 · 构建为什么停在这一行
+subtitle: every level carries a file:line · the deciding lines are read from the file, never retyped | 每一层都挂 file:line · 决定结局的那几行从文件里读出来，不手抄
+couple: ship_manifest.txt
+couple.note: produced by one chain, required by the other | 一条链产出，另一条链要用
+foot: grep finds neither end of the coupling: the two chains share a filename, not a call. | grep 找不到这道耦合的任何一端：两条链共用的是一个文件名，不是一次调用。
+
+chain: Packaging · part of every full build | 打包 · 每次完整构建都会跑
+main()                      build.sh:34
+  pack_release_archive()    build.sh:37    @removed   -- cut from main() for a faster debug build | 为了让调试构建快一点，从 main() 里删掉了
+    copy_manifest()         build.sh:30    -- its own private step | 它自己的私有步骤
+      > build.sh:25    share=ship_manifest.txt
+      ! nothing else puts the manifest in $OUT_DIR | 清单进 $OUT_DIR 只有这一条通道
+
+chain: Verification · runs after the build, never calls packaging | 验收 · 构建完才跑，从不调用打包
+CI job "verify"             - outside this repo · run by CI | 仓库外 · 由 CI 启动
+  verify_all()              verify_all.sh:21    -- every post-build check | 构建后的全部检查
+    check_coverage()        verify_all.sh:17    -- one of three checks | 三道检查之一
+      find_manifest()       check_coverage.sh:14    @focus    -- the line you came here for | 你要找的就是这一行
+        > check_coverage.sh:6-9    mark=return 1    share=*manifest*.txt
+        ! no manifest → return 1, and every caller passes it up | 找不到清单就 return 1，每一层调用方都原样往上交
+  ^ CI job "verify" = exit 1 : the job fails and the build goes red | job 失败，构建标红
