@@ -1491,6 +1491,12 @@ const auditFn = (arg) => {
       if (r.width < 4 || r.height < 4) return false;
       const cs = getComputedStyle(el);
       if (cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity === 0) return false;
+      // …and an ANCESTOR at opacity 0 hides it just as well. The hardware-3d
+      // scene labels fade their wrapper (.lb) to 0 when the caption panel covers
+      // them; the spans inside keep opacity 1, and this filter only read the
+      // leaf's own value, so invisible labels "overlapped" the caption text.
+      // checkVisibility() walks the ancestors (the interaction gate uses it too).
+      if (el.checkVisibility && !el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) return false;
       if (inClosedDetails(el)) return false;
       if (srOnly(el)) return false;
       if (allowOverlap(el)) return false;
@@ -1504,12 +1510,32 @@ const auditFn = (arg) => {
       const c = clipRect(el.parentElement);
       return [...el.getClientRects()].map((r) => painted(r, c)).filter((r) => r.width > 0 && r.height > 0);
     };
-    const fragments = leaves.map((el) => ({ el, rects: rectsOf(el) }));
+    // What floats. A bar pinned to the bottom of the screen (sticky or fixed,
+    // bottom set, top auto) covers whatever scrolls under it — that is what it
+    // is for, and which content it covers depends only on where the reader has
+    // scrolled. Measured at scroll 0 it "overlapped" the product copy under the
+    // buy bar at 390px (apple product-configurator). Such a pair is skipped only
+    // when the OTHER side is in normal flow: two overlays on top of each other
+    // (a floating toggle over a panel's Next button) are still a real collision.
+    const overlayOf = new Map();
+    const overlay = (el) => {
+      for (let n = el; n && n !== document.body; n = n.parentElement) {
+        if (overlayOf.has(n)) { const v = overlayOf.get(n); if (v) return v; continue; }
+        const cs = getComputedStyle(n);
+        const floating = cs.position === 'fixed' || cs.position === 'sticky';
+        const v = floating ? (cs.bottom !== 'auto' && cs.top === 'auto' ? 'bottom' : 'other') : null;
+        overlayOf.set(n, v);
+        if (v) return v;
+      }
+      return null;
+    };
+    const fragments = leaves.map((el) => ({ el, rects: rectsOf(el), ov: overlay(el) }));
     for (let i = 0; i < fragments.length; i++) {
       const A = fragments[i];
       for (let j = i + 1; j < fragments.length; j++) {
         const B = fragments[j];
         if (isAncestor(A.el, B.el) || isAncestor(B.el, A.el)) continue;
+        if ((A.ov === 'bottom' && !B.ov) || (B.ov === 'bottom' && !A.ov)) continue;
         // find any pair (one rect from A × one from B) that overlaps enough
         let hit = null;
         outer:
@@ -2092,6 +2118,58 @@ const auditFn = (arg) => {
     }
   }
 
+  // ---------- 15b2) Content a pan container can never scroll to ----------
+  // A horizontal scroller only scrolls one way: from its left edge to the
+  // right. Content laid out LEFT of that edge — a centred flex row wider than
+  // its box overflows on both sides — is cut off for good; no swipe reaches
+  // it. 2026-09-23, relief at 390px: once the figure boards became pan
+  // containers, the pipeline figure lost its first 308px that way, and the
+  // tree lost its leftmost node. Nothing reported it; a screenshot did.
+  // Painted rects only: a decorative circle bleeding past its own <svg> is
+  // clipped by that svg and is not content anyone can miss (lesson: measure
+  // what is drawn — the overlap check fell into the same hole).
+  {
+    const clips = (n) => {
+      const cs = getComputedStyle(n);
+      return cs.overflow !== 'visible' || cs.clip !== 'auto' || n.tagName.toLowerCase() === 'svg';
+    };
+    for (const sc of document.querySelectorAll('*')) {
+      const cs = getComputedStyle(sc);
+      if (cs.overflowX !== 'auto' && cs.overflowX !== 'scroll') continue;
+      if (sc.scrollLeft > 0 || sc.scrollWidth <= sc.clientWidth + 1) continue;
+      const box = sc.getBoundingClientRect();
+      if (!box.width) continue;
+      let worst = null;
+      for (const el of sc.querySelectorAll('*')) {
+        const r = el.getBoundingClientRect();
+        if (!r.width || !r.height || r.left >= box.left - 2) continue;
+        if (el.checkVisibility && !el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) continue;
+        let left = r.left, right = r.right;
+        for (let n = el.parentElement; n && n !== sc; n = n.parentElement) {
+          if (!clips(n)) continue;
+          const c = n.getBoundingClientRect();
+          left = Math.max(left, c.left); right = Math.min(right, c.right);
+        }
+        if (right - left < 1) continue;
+        const cut = Math.round(box.left - left);
+        if (cut > 2 && (!worst || cut > worst.cut)) {
+          const c = (el.getAttribute('class') || '').trim().split(/\s+/).filter(Boolean)[0];
+          worst = { cut, tag: el.tagName.toLowerCase() + (c ? '.' + c : ''), text: (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40) };
+        }
+      }
+      if (worst) {
+        const c = (sc.getAttribute('class') || '').trim().split(/\s+/).filter(Boolean)[0];
+        issues.push({
+          kind: 'pan-unreachable',
+          severity: 'error',
+          container: sc.id ? '#' + sc.id : sc.tagName.toLowerCase() + (c ? '.' + c : ''),
+          ...worst,
+          viewport: window.innerWidth,
+        });
+      }
+    }
+  }
+
   // ---------- 15c) Language leaks on bilingual pages ----------
   // 双语页（.lang-en 和 .lang-zh 都有）上，读者选了一种语言，却看到另一种语言的字。
   // 两类：
@@ -2123,7 +2201,8 @@ const auditFn = (arg) => {
     const q = (s) => [...document.querySelectorAll(s)];
     const enEls = q('.lang-en, .lang-en-text');
     const zhEls = q('.lang-zh, .lang-zh-text');
-    const shown = (e) => e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden';
+    const shown = (e) => e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden'
+      && (!e.checkVisibility || e.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }));
     let side = arg.lang || null;
     if (enEls.length && zhEls.length && !side) {
       const a = document.documentElement.getAttribute('data-lang');
@@ -2786,17 +2865,38 @@ if (secondViewport && VIEWPORT.width >= secondViewport.width + 80) {
 // One kind kept: does the root scroll sideways. Its own id (narrow-overflow-x),
 // so a desktop-only page can waive the narrow widths without also waiving
 // overflow at the desktop width.
+// Two widths — the phone and the tablet one — also get the whole in-page audit
+// every time, not only when the page is too wide: content a pan container can
+// never reach (pan-unreachable, an error) does not widen the page, and the
+// overlaps that only happen once columns get narrow need a look of their own.
+// Those geometry kinds are kept as warnings, the same rule as the 1024 pass.
+// Measured before adding: 29 phone-only overlaps across the repo, found by hand.
+const FULL_AT = new Set([390, 768]);
+const NARROW_GEOM = new Set(['text-overlap', 'text-glyph-overflow', 'layout-overflow']);
 const sweep = narrowWidths.filter((w) => VIEWPORT.width >= w + 80);
 if (sweep.length) {
   try {
+    const nkey = (f) => [f.kind, f.selector || '', f.text || '', f.textA || '', f.textB || '', f.container || ''].join('|');
+    const seenN = new Set(findings.map(nkey));
     for (const w of sweep) {
       await page.setViewportSize({ width: w, height: 844 });
       await page.waitForTimeout(120);
       const docW = await page.evaluate(() => document.documentElement.scrollWidth);
-      if (docW <= w + 2) continue;
+      const over = docW > w + 2;
+      if (!over && !FULL_AT.has(w)) continue;
       const at = await page.evaluate(auditFn, evalArg);
-      const f = at.find((x) => x.kind === 'page-overflow-x') || { docWidth: docW, viewport: w, culprits: [] };
-      findings.push({ ...f, kind: 'narrow-overflow-x', severity: 'error' });
+      if (over) {
+        const f = at.find((x) => x.kind === 'page-overflow-x') || { docWidth: docW, viewport: w, culprits: [] };
+        findings.push({ ...f, kind: 'narrow-overflow-x', severity: 'error' });
+      }
+      for (const f of at) {
+        const keep = f.kind === 'pan-unreachable' || NARROW_GEOM.has(f.kind);
+        if (!keep) continue;
+        const k = nkey(f);
+        if (seenN.has(k)) continue;
+        seenN.add(k);
+        findings.push({ ...f, severity: f.kind === 'pan-unreachable' ? 'error' : 'warn', atNarrow: w });
+      }
     }
     await page.setViewportSize(VIEWPORT);
     await page.waitForTimeout(150);
@@ -3151,6 +3251,10 @@ for (const i of visibleFindings) {
     for (const c of i.culprits || []) {
       console.log(`      ${c.sel}  → right edge ${c.right}px${c.n > 1 ? `  (×${c.n})` : ''}`);
     }
+  } else if (i.kind === 'pan-unreachable') {
+    console.log(
+      `  [${i.severity}] pan-unreachable: in ${i.container}, <${i.tag}> "${i.text}" starts ${i.cut}px LEFT of the scroller's edge at ${i.viewport}px — a pan container only scrolls rightward, so that part can never be reached. Centre with justify-content/place-items: safe center, or give the content a min-width so it lays out from the left${i.atNarrow ? ` [narrow-width sweep, ${i.atNarrow}px]` : ''}`
+    );
   } else if (i.kind === 'narrow-pass-failed') {
     console.log(`  [${i.severity}] narrow-pass-failed: the narrow-width sweep threw (${i.message}) — sideways scrolling below 1024px was NOT checked on this page`);
   } else if (i.kind === 'lang-both-showing') {

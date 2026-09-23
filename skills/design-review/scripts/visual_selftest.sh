@@ -134,6 +134,19 @@ t "$(has "$out" "text-overlap")" "no" "a visually-hidden label is not an overlap
 page ".box{position:relative;height:40px} .abs{position:absolute;left:0;top:0;white-space:nowrap}" "<div class=\"box\"><span class=\"abs\"><span>Average review score by month, seven values</span></span><span>100%</span></div>" > "$D/sr-control.html"
 out="$(run "$R/sr-control.html")"
 t "$(has "$out" "text-overlap")" "yes" "(control) the same label drawn on top of it is"
+# 外层透明度 0、里面的字透明度 1：看不见。只读文字自己透明度的第一版把它算成重叠
+# （hardware-3d 被说明面板遮住后淡出的场景标注）。
+page ".box{position:relative;height:40px} .abs{position:absolute;left:0;top:0;white-space:nowrap;opacity:0}" "<div class=\"box\"><span class=\"abs\"><span>Average review score by month, seven values</span></span><span>100%</span></div>" > "$D/faded.html"
+out="$(run "$R/faded.html")"
+t "$(has "$out" "text-overlap")" "no" "text inside a wrapper faded to opacity 0 is not an overlap"
+# 吸底的购买条遮住滚到它下面的正文：这是它的用途，不是排版错误。
+# 但两个浮层互相压（浮动按钮压在固定面板的按钮上）照样要报。
+page "main p{margin:0 0 8px} .bar{position:sticky;bottom:0;background:#fff;padding:8px}" "$(for i in $(seq 1 60); do printf '<p>line %s of body copy that scrolls</p>' $i; done)<div class=\"bar\"><b>Buy it now for less than you think</b></div>" > "$D/stickybar.html"
+out="$(run "$R/stickybar.html")"
+t "$(has "$out" "text-overlap")" "no" "a bottom-pinned bar over body copy is not an overlap"
+page ".pan{position:fixed;left:10px;bottom:10px;width:300px;background:#eee;padding:10px} .fab{position:fixed;left:20px;bottom:18px}" "<div class=\"pan\"><button>Next station please</button></div><button class=\"fab\">Language switch</button>" > "$D/twofloat.html"
+out="$(run "$R/twofloat.html")"
+t "$(has "$out" "text-overlap")" "yes" "two overlays stacked on each other still are"
 
 # ─────────────────────────── narrow widths ───────────────────────────
 echo "narrow widths"
@@ -166,6 +179,29 @@ out="$(node "$VA" "$R/tablet.html" 2>&1)"; rc=$?
 t "$(has "$out" "in a 768px viewport")" "yes" "a page that only overflows between phone and desktop widths is reported at 768"
 t "$(has "$out" "in a 390px viewport")" "no" "and not at 390, where it fits"
 t "$rc" "1" "and it fails the page"
+
+# ─────────────────────────── pan containers ───────────────────────────
+# 横向滚动容器只能往右拖。居中的一行比容器宽，会往两边溢出，左边那段永远拖不到
+# （relief 流水线图在 390px 下前 308px 看不见，就是这样）。
+echo "pan containers"
+PAN=".pan{overflow-x:auto;width:300px} .row{display:flex;gap:10px} .row span{flex:none;width:120px;background:#eee}"
+page "$PAN .row{justify-content:center}" "<div class=\"pan\"><div class=\"row\"><span>first step</span><span>second</span><span>third</span><span>fourth</span></div></div>" > "$D/pancut.html"
+out="$(run "$R/pancut.html")"; rc=$?
+t "$(has "$out" "pan-unreachable")" "yes" "a centred row wider than its scroller: the left part is reported as unreachable"
+t "$rc" "1" "and it is an error"
+page "$PAN .row{justify-content:safe center}" "<div class=\"pan\"><div class=\"row\"><span>first step</span><span>second</span><span>third</span><span>fourth</span></div></div>" > "$D/pansafe.html"
+out="$(run "$R/pansafe.html")"
+t "$(has "$out" "pan-unreachable")" "no" "the same row with safe center is not"
+page ".pan{overflow-x:auto;width:300px}" "<div class=\"pan\"><svg width=\"500\" height=\"60\" viewBox=\"0 0 500 60\"><circle cx=\"20\" cy=\"30\" r=\"200\" fill=\"#eee\"/><text x=\"10\" y=\"30\">label</text></svg></div>" > "$D/panclip.html"
+out="$(run "$R/panclip.html")"
+t "$(has "$out" "pan-unreachable")" "no" "(control) a shape bleeding past its own svg is clipped by it, not unreachable"
+
+# 只在手机宽度才出现的重叠：以 warn 报出，并写明是在哪个宽度。
+# 格子里放行内 span：行内盒子按字宽算。直接把字写在网格项里，网格项的盒子就是那一格，
+# 溢出的只是字，重叠检查量的是盒子 —— 第一版探针就这样打空了。
+page ".two{display:grid;grid-template-columns:1fr 1fr;gap:4px} .two div{white-space:nowrap;font-size:22px} @media (max-width:500px){.two{grid-template-columns:120px 120px}}" "<div class=\"two\"><div><span>Departure date</span></div><div><span>Return date</span></div></div>" > "$D/phonelap.html"
+out="$(node "$VA" "$R/phonelap.html" 2>&1)"
+t "$(has "$out" "only at 390px viewport")" "yes" "an overlap that only exists at 390 is reported, tagged with the width"
 
 echo ""
 echo "$pass passed, $fail failed"
