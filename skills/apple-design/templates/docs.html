@@ -8,9 +8,11 @@
 <style>
   /* Three columns (240 + content + 240) do not fit a tablet: drop the
      on-this-page list and keep navigation + content. !important because the
-     column list is an inline style. The phone band in apple.css already
-     collapses inline grids to one column below 735px. */
-  @media (max-width: 1068px) {
+     column list is an inline style. Tablet band only: the phone band in
+     apple.css collapses inline grids to one column below 735px, and a
+     max-width-only query here (the first version) won that tie on source
+     order and left a 130px content column on a phone. */
+  @media (min-width: 735px) and (max-width: 1068px) {
     .docs-main { grid-template-columns: 200px minmax(0, 1fr) !important; }
     .docs-toc { display: none; }
   }

@@ -83,13 +83,20 @@ function buildLabels(){
 function updateLabels(){
   if(!labelEls.length) return;
   const vp=camMats(0).vp, cw=cv.clientWidth, ch=cv.clientHeight;
+  // 标注被说明面板遮住时不显示：面板在上层、底是半透明加模糊，压在下面的标注只剩
+  // 一团看不清的影子（390px 下面板占了大半屏，几乎每站都这样）。按标注自己的矩形判。
+  const capEl=document.getElementById('caption');
+  // getClientRects 而不是 offsetParent：面板是 position:fixed，它的 offsetParent 永远是 null
+  const cap=capEl&&capEl.getClientRects().length?capEl.getBoundingClientRect():null;
   for(const L of labelEls){
     const [x,y,z]=L.p;
     const w=vp[3]*x+vp[7]*y+vp[11]*z+vp[15];
     if(w<=0.01){ L.el.classList.remove('show'); L.ln.setAttribute('opacity','0'); continue; }
     const sx=((vp[0]*x+vp[4]*y+vp[8]*z+vp[12])/w*0.5+0.5)*cw;
     const sy=(1-((vp[1]*x+vp[5]*y+vp[9]*z+vp[13])/w*0.5+0.5))*ch;
-    const on=labelsOn && sx>-50 && sx<cw+50 && sy>-50 && sy<ch+50;
+    const lw=L.el.offsetWidth, lh=L.el.offsetHeight, ly=sy+L.dy;
+    const under=cap && sx+lw/2>cap.left && sx-lw/2<cap.right && ly>cap.top && ly-lh<cap.bottom;
+    const on=labelsOn && !under && sx>-50 && sx<cw+50 && sy>-50 && sy<ch+50;
     if(L.live && FLOW.live && FLOW.live[L.live]!=null && FLOW.live[L.live]!==L.last){
       L.last=FLOW.live[L.live]; L.el.innerHTML=L.base.replace(/<small>.*<\/small>/,'')+'<small>'+L.last+'</small>'; }
     L.el.style.left=sx+'px'; L.el.style.top=(sy+L.dy)+'px';
@@ -99,6 +106,9 @@ function updateLabels(){
     L.ln.setAttribute('opacity',on?'1':'0');
   }
 }
+// 窗口尺寸变了（平板转屏）也要重算：画面收敛后渲染循环会停，只靠每帧调用的话，
+// 标注会一直停在旧布局的位置上，被挪了位置的说明面板遮住。
+window.addEventListener('resize',()=>updateLabels());
 // —— UI ——
 function renderUI(){
   const st=STATIONS[cur];

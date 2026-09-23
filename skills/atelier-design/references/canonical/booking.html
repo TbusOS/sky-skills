@@ -34,8 +34,20 @@
     font-size: 16px; font-weight: 700; letter-spacing: -0.015em;
   }
   .search-slot__value svg { width: 16px; height: 16px; opacity: 0.55; flex: none; }
+  /* Phone: four fields and the button on one row left each field ~60px —
+     "Yogyakarta" ran into "Singapore" and the dates stood one word per line.
+     Two fields a row, the button on its own. !important because the
+     multi-city bar sets its column list inline. */
+  @media (max-width: 760px) {
+    .search-bar { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    .search-bar > button { grid-column: 1 / -1; }
+  }
 
   .layout { display: grid; grid-template-columns: 276px minmax(0, 1fr); gap: var(--space-5); }
+  /* Tablet: a 276px filter column left the results about 390px at 768, and the
+     expanded result's two inner columns then stacked "20kg checked" on top of
+     "Wi-Fi available". Filters go above the results instead. */
+  @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
   .slider-track {
     position: relative; height: 3px; border-radius: 3px;
     background: var(--atl-track); margin: 20px 8px 6px;

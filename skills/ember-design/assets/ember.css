@@ -578,7 +578,15 @@ mark { background: rgba(196, 148, 100, 0.32); color: inherit; }
   code, kbd { overflow-wrap: anywhere; }
 
   /* Nav links wrap instead of overflowing (no JS burger on this skill) */
-  .ember-nav-inner, .ember-nav-inner > div { flex-wrap: wrap; gap: var(--space-3); row-gap: var(--space-2); }
+  .ember-nav-inner, .ember-nav-inner > div, .ember-nav-inner > nav { flex-wrap: wrap; gap: var(--space-3); row-gap: var(--space-2); }
+  /* A bar that wraps needs its height to follow. It was fixed at 72px, so
+     the second and third rows of links hung over the page below — the
+     "Get skills" button sat on the announcement card at 390px. Same fix as
+     anthropic.css (2026-09-23). */
+  /* …and it stops being sticky: wrapped to two or three rows it is ~190px
+     tall on a phone, a quarter of the screen held for good while reading. */
+  .ember-nav { height: auto; position: relative; min-height: 72px; }
+  .ember-nav-inner { padding-block: var(--space-2); }
 
   /* Opt-in pan wrapper for genuinely wide figures (strategy A): wrap the <svg>
      in <div class="ember-scroll"> to keep a readable width and pan on a phone.

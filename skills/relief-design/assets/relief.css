@@ -178,7 +178,10 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
 /* ══════ 3 框图 ══════ */
 
 /* 流程链 */
-.relief-flow{display:flex;align-items:center;justify-content:center;gap:0}
+/* safe center：放得下时居中，放不下时从左边排起。只写 center 的话，比图板宽的一行
+   会往两边溢出，而左边溢出的那段在横向滚动容器里拖不到（滚动只能往右）——
+   390px 下流水线图的前 308px 就是这样看不见的。桌面放得下，渲染不变。 */
+.relief-flow{display:flex;align-items:center;justify-content:safe center;gap:0}
 .relief-node{padding:18px 26px;border-radius:19px;font-size:17px;font-weight:700;color:var(--navy-d);
   white-space:nowrap}
 .relief-node.relief-hot{color:var(--on-hot);background:linear-gradient(145deg,var(--hot-a),var(--hot-b));
@@ -193,6 +196,10 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
 /* 树状 */
 .relief-tree{display:flex;flex-direction:column;align-items:center;gap:0}
 .relief-tier{display:flex;justify-content:center;gap:34px}
+/* 树的连线（.relief-rung 里固定宽度的 svg）要和每一层节点共用同一根中线。窄屏下
+   各层居中往两边溢出、连线从左边起排，两者对不上，最左的节点还拖不到。给整棵树
+   一个不小于最宽那层连线（620）的宽度，几何和桌面一样，由图板横向拖。 */
+@media (max-width:1023px){.relief-tree{min-width:640px}}
 .relief-tnode{padding:13px 24px;border-radius:15px;font:700 16px "JetBrains Mono","Noto Sans SC";
   color:var(--navy-d)}
 .relief-tnode.relief-root{color:var(--on-hot);background:linear-gradient(145deg,var(--hot-a),var(--hot-b));
