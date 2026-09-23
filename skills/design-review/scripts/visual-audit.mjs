@@ -15,9 +15,17 @@
 //      anywhere (outline stripped) · positive tabindex hijacking tab order
 //  12. Perf: LCP > 4000ms / CLS > 0.1 via buffered PerformanceObserver —
 //      local render, indicative only; skipped silently if API unavailable
+//  13. Language (bilingual pages): the other side still showing
+//      (lang-both-showing), or text of the other language outside any .lang-*
+//      (lang-leak) — known-bugs 1.65. With --lang=zh the zh side is audited;
+//      a switch that did not take exits 4 with no result
+//  14. Narrow widths: the page must not scroll sideways at 390/600/768/900
+//      (narrow-overflow-x, error) — known-bugs 1.66; the finding names what
+//      pushed the page wide, including text spilling out of a box that fits
 //
 // Usage:
-//   node skills/design-review/scripts/visual-audit.mjs [--ignore-intentional] <html-path>
+//   node skills/design-review/scripts/visual-audit.mjs [--ignore-intentional]
+//        [--theme=dark|light] [--lang=en|zh] [--narrow=390,600,768,900 | --no-narrow] <html-path>
 //
 // Flags:
 //   --ignore-intentional  Suppress contrast warnings for colour pairs explicitly
@@ -26,7 +34,8 @@
 //                         trade-off, see known-bugs.md 2.1). Reduces noise so real
 //                         new-bug warnings don't get lost in "the usual 5 warnings."
 //
-// Exit code 0 = pass, 1 = errors found, 2 = bad CLI. Run from repo root.
+// Exit code 0 = pass, 1 = errors found, 2 = bad CLI, 4 = --lang did not take
+// (nothing audited). Run from repo root. Selftest: visual_selftest.sh.
 // Requires: playwright  (npm i playwright --no-save, then npx playwright install chromium)
 
 import { chromium } from 'playwright';
@@ -36,6 +45,7 @@ import { dirname, extname, resolve } from 'node:path';
 import process from 'node:process';
 import { PNG } from 'pngjs';
 import { revealByScrolling } from './_reveal-scroll.mjs';
+import { LANGS, localeFor, switchLang, judgeLang } from './_lang.mjs';
 
 const args = process.argv.slice(2);
 const ignoreIntentional = args.includes('--ignore-intentional');
@@ -80,6 +90,44 @@ if (!args.includes('--no-second-viewport')) {
   if (vp2Match) secondViewport = { width: +vp2Match[1], height: +vp2Match[2] };
   else if (!vpArg) secondViewport = { width: 1024, height: 900 };
 }
+// --lang=en|zh — audit one side of a bilingual page. Until 2026-09-23 this gate
+// only ever looked at the English half: pages pick their side from
+// navigator.language and Playwright's default locale is en-US. Chinese wraps,
+// line-heights and widths are a different layout, and an overlap or an overflow
+// that only exists in the zh render was invisible to every check here.
+// The switch is verified before anything is measured (_lang.mjs); if it did not
+// take, the run stops with exit 4 instead of printing a clean result about the
+// wrong language — same code pixel-gate uses for the same situation.
+const langArg = (args.find((a) => a.startsWith('--lang=')) || '').split('=')[1] || null;
+if (langArg && !LANGS.includes(langArg)) {
+  console.error(`visual-audit: --lang=${langArg} is not one of ${LANGS.join('|')}`);
+  process.exit(2);
+}
+// --narrow=390,600,768,900 / --no-narrow — does the page scroll sideways at
+// the widths between a phone and the 1024 pass. Until 2026-09-23 the narrowest
+// width anything here looked at was 1024, and 27 of the repo's 166 pages
+// scrolled sideways at 390 (two of them are deliberately broken fixtures) —
+// eight relief canonicals among them. Testing 390 alone was not enough either:
+// a sweep found eleven more pages that fit at 390 and at 1024 but not at 768
+// or 900 (a grid switches to one column below 768; between 769 and 1000 its
+// two columns hold a figure wider than half the screen).
+// So every width in the list is measured — cheap, one resize and one
+// scrollWidth read each — and only a width that overflows pays for a full
+// in-page audit, to name what pushed the page wide.
+// Unlike the 1024 pass these are ERRORS: a page that pans sideways on a phone
+// or a tablet is broken for every reader on one, and "informed, never failed"
+// is how 27 pages stayed that way. A page that really is desktop-only says so
+// in DESIGN.md (waiver visual-audit:narrow-overflow-x).
+const narrowArg = (args.find((a) => a.startsWith('--narrow=')) || '').split('=')[1] || null;
+let narrowWidths = args.includes('--no-narrow') ? [] : [390, 600, 768, 900];
+if (narrowArg) {
+  const ws = narrowArg.split(',').map((x) => +x);
+  if (ws.some((w) => !Number.isInteger(w) || w < 200 || w > 2000)) {
+    console.error(`visual-audit: --narrow=${narrowArg} must be a comma list of widths in px`);
+    process.exit(2);
+  }
+  narrowWidths = ws;
+}
 const positional = args.filter((a) => !a.startsWith('--'));
 // One file per run. It used to take [0] and drop the rest without a word, so
 // `visual-audit a.html b.html c.html` audited a.html and printed one clean
@@ -96,7 +144,7 @@ if (positional.length > 1) {
 }
 const target = positional[0];
 if (!target) {
-  console.error('usage: node visual-audit.mjs [--ignore-intentional] [--theme=dark|light] <html-path>');
+  console.error('usage: node visual-audit.mjs [--ignore-intentional] [--theme=dark|light] [--lang=en|zh] <html-path>');
   process.exit(2);
 }
 
@@ -436,7 +484,8 @@ function detectSkill(target, html) {
 // don't need to cd into a specific repo root first.
 const root = process.cwd();
 const mime = { '.html':'text/html;charset=utf-8','.css':'text/css;charset=utf-8','.js':'application/javascript','.svg':'image/svg+xml','.png':'image/png','.woff2':'font/woff2' };
-const PORT = 8801;
+// Fixed by default; VISUAL_AUDIT_PORT lets several runs go side by side.
+const PORT = +(process.env.VISUAL_AUDIT_PORT || 8801);
 let server = null;
 let url;
 if (/^file:\/\//.test(target)) {
@@ -464,6 +513,7 @@ const browser = await chromium.launch();
 const page = await (await browser.newContext({
   viewport: VIEWPORT,
   reducedMotion: 'reduce',
+  ...(langArg ? { locale: localeFor(langArg) } : {}),
 })).newPage();
 await page.goto(url, { waitUntil: 'networkidle' });
 // Fonts first: networkidle does not cover them, and with font-display:swap the
@@ -471,6 +521,24 @@ await page.goto(url, { waitUntil: 'networkidle' });
 // the wrong one.
 await page.evaluate(() => document.fonts && document.fonts.ready);
 await page.waitForTimeout(500);
+if (langArg) {
+  const lj = judgeLang(await switchLang(page, langArg), langArg);
+  if (lj.verdict === 'not-applied' || lj.verdict === 'half') {
+    const why = lj.verdict === 'not-applied'
+      ? `html[data-lang]=${lj.attr}, and 0 of ${lj.total} .lang-${langArg} elements are visible (${lj.other} of the other side are)`
+      : `${lj.want} .lang-${langArg} visible, but ${lj.other} .lang-${lj.otherSide} still showing — the page is missing its html[data-lang] hide rule`;
+    console.error(`visual-audit: --lang=${langArg} DID NOT TAKE  (${target})`);
+    console.error(`  ${why}.`);
+    console.error('  Nothing was audited: every finding would be about a page in the wrong language,');
+    console.error('  and a clean result would read as "the zh side is fine".');
+    await browser.close();
+    if (server) server.close();
+    process.exit(4);
+  }
+  if (lj.verdict === 'no-markup') {
+    console.log(`  · --lang=${langArg}: this page carries no .lang-en/.lang-zh markup — audited as authored`);
+  }
+}
 if (themeArg) {
   await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), themeArg);
   await page.waitForTimeout(200);
@@ -1380,6 +1448,41 @@ const auditFn = (arg) => {
       const summary = d.querySelector(':scope > summary');
       return !(summary && summary.contains(el));
     };
+    // Measure what is PAINTED, not what is laid out. An ancestor with overflow
+    // other than visible clips its content, but getClientRects() still reports
+    // the full text box — so text scrolled out of a code pane, or held in a
+    // 1×1px sr-only box (read aloud, never drawn), "overlapped" whatever sat
+    // next to it. Both happened on 2026-09-23: a bilingual chart name in an
+    // sr-only span (94% over the axis label, atelier dashboard) and code lines
+    // running past a pan-able code box at 390px (relief struct). Each rect is
+    // cut to the intersection of its clipping ancestors' boxes; what is left
+    // is what the reader can see. Cached per ancestor: most leaves share them.
+    const clipOf = new Map();
+    const clipRect = (el) => {
+      if (!el || el === document.body || el === document.documentElement) return null;
+      if (clipOf.has(el)) return clipOf.get(el);
+      const up = clipRect(el.parentElement);
+      const cs = getComputedStyle(el);
+      let c = up;
+      if (cs.overflow !== 'visible' || cs.clip !== 'auto') {
+        const r = el.getBoundingClientRect();
+        const box = { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+        c = up ? { left: Math.max(up.left, box.left), top: Math.max(up.top, box.top),
+                   right: Math.min(up.right, box.right), bottom: Math.min(up.bottom, box.bottom) } : box;
+      }
+      clipOf.set(el, c);
+      return c;
+    };
+    const painted = (r, c) => {
+      if (!c) return r;
+      const left = Math.max(r.left, c.left), top = Math.max(r.top, c.top);
+      const right = Math.min(r.right, c.right), bottom = Math.min(r.bottom, c.bottom);
+      return { left, top, right, bottom, width: right - left, height: bottom - top };
+    };
+    const srOnly = (el) => {
+      const c = clipRect(el.parentElement);
+      return !!(c && (c.right - c.left <= 2 || c.bottom - c.top <= 2));
+    };
     const leaves = [...document.querySelectorAll('*')].filter((el) => {
       if (el.children.length > 0) return false;
       const txt = (el.textContent || '').trim();
@@ -1389,6 +1492,7 @@ const auditFn = (arg) => {
       const cs = getComputedStyle(el);
       if (cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity === 0) return false;
       if (inClosedDetails(el)) return false;
+      if (srOnly(el)) return false;
       if (allowOverlap(el)) return false;
       return true;
     });
@@ -1396,7 +1500,10 @@ const auditFn = (arg) => {
     // <code> that wraps across 2 lines produces a single bbox spanning both
     // lines, mathematically intersecting any element on the start line even
     // when there's no actual visual collision. Per-fragment comparison fixes it.
-    const rectsOf = (el) => [...el.getClientRects()].filter((r) => r.width > 0 && r.height > 0);
+    const rectsOf = (el) => {
+      const c = clipRect(el.parentElement);
+      return [...el.getClientRects()].map((r) => painted(r, c)).filter((r) => r.width > 0 && r.height > 0);
+    };
     const fragments = leaves.map((el) => ({ el, rects: rectsOf(el) }));
     for (let i = 0; i < fragments.length; i++) {
       const A = fragments[i];
@@ -1923,12 +2030,197 @@ const auditFn = (arg) => {
   {
     const docW = document.documentElement.scrollWidth;
     if (docW > window.innerWidth + 2) {
+      // 光说「整页宽 726px」不够：一页上常常是好几种东西各自撑出去，作者只修了
+      // 报出来的那个数，下次还横滚。所以把撑出去的那一层列出来 —— 右缘越过视口、
+      // 而父元素没越过的元素（父元素也越过的话，该算的是父元素）。已经在自己的
+      // 横向滚动容器里的不算，它不会把整页撑宽。按「父 > 自己」去重，最宽的在前。
+      const W = window.innerWidth;
+      const tag = (el) => {
+        const c = (el.getAttribute('class') || '').trim().split(/\s+/).filter(Boolean).slice(0, 2);
+        return el.tagName.toLowerCase() + c.map((x) => '.' + x).join('');
+      };
+      const panned = (el) => {
+        for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+          if (getComputedStyle(p).overflowX !== 'visible') return true;
+        }
+        return false;
+      };
+      const seen = new Map();
+      const note = (el, right) => {
+        const k = `${tag(el.parentElement)} > ${tag(el)}`;
+        const o = seen.get(k) || { sel: k, right: 0, n: 0 };
+        o.right = Math.max(o.right, Math.round(right)); o.n += 1;
+        seen.set(k, o);
+      };
+      // Two ways to push a page wide, and the list needs both:
+      //   · a box that is wider than the screen (a fixed-width grid track) —
+      //     the outermost such box is the one to fix;
+      //   · a box that fits, holding content that does not (64px "237,950★"
+      //     in half a phone, a nowrap path). Its own rect is inside the screen,
+      //     so the first rule never sees it. The first version of this list
+      //     had only the first rule, and on that page it named an innocent span
+      //     at 443px while the page was 516px wide. Report the deepest element
+      //     whose own content spills — its ancestors spill only because of it.
+      const spill = [];
+      const wide = [];   // every box past the edge; an element holding one spills because of it
+      for (const el of document.body.querySelectorAll('*')) {
+        const b = el.getBoundingClientRect();
+        if (!b.width || panned(el)) continue;
+        if (b.right > W + 1) {
+          wide.push(el);
+          const par = el.parentElement;
+          if (par === document.body || par.getBoundingClientRect().right <= W + 1) note(el, b.right);
+          continue;
+        }
+        const cs = getComputedStyle(el);
+        if (cs.overflowX !== 'visible' || el.scrollWidth <= el.clientWidth + 1) continue;
+        const right = b.left + el.scrollWidth;
+        if (right > W + 1) spill.push({ el, right });
+      }
+      for (const s of spill) {
+        if (wide.some((w) => s.el.contains(w))) continue;
+        if (spill.some((o) => o !== s && s.el.contains(o.el))) continue;
+        note(s.el, s.right);
+      }
       issues.push({
         kind: 'page-overflow-x',
         severity: 'error',
         docWidth: docW,
-        viewport: window.innerWidth,
+        viewport: W,
+        culprits: [...seen.values()].sort((a, b) => b.right - a.right).slice(0, 5),
       });
+    }
+  }
+
+  // ---------- 15c) Language leaks on bilingual pages ----------
+  // 双语页（.lang-en 和 .lang-zh 都有）上，读者选了一种语言，却看到另一种语言的字。
+  // 两类：
+  //   lang-both-showing  另一边的 .lang-* 元素还显示着 —— 页面缺隐藏规则。
+  //   lang-leak          没包进任何 .lang-* 的字，在这个视图里是另一种语言。
+  //                      「没包」本身不算错：数字、代码、人名、品牌两边都该一样。
+  //                      错的是「它是语言，而且是另一种」。
+  //
+  // 两个方向判法不一样，因为能判准的东西不一样（2026-09-23 在全仓 125 个双语页上量过）：
+  //   英文视图里的汉字：见到就是。汉字不会是标识符，也不会是人名的英文写法。
+  //     量到的每一处都是漏翻，或者是故意展示中文（字体样张、画出来的中文文档）——
+  //     后者该在元素上写 lang="zh-CN"，那是 HTML 本来就有的声明，读屏也靠它换发音。
+  //   中文视图里的英文：按词形猜不可靠。露在外面的拉丁字母 1934 处（SVG 另有 8598 处），
+  //     绝大多数是函数名、路径、日志原文、人名、品牌。试过的三种猜法：
+  //       ·「整段等于页面上某个 .lang-en 的原文」—— 120 处，里面有 i2c_transfer()、
+  //         RESET、Skypad，准的不到三成；限定成「只由字母和空格组成、且不是任何
+  //         .lang-zh 的原文」之后才可用（见 translated-elsewhere）
+  //       ·「含两个以上英语虚词、四个以上单词」—— 抓到的是真句子（按钮、说明）
+  //       ·「两个以上小写单词」—— 91 处，几乎全是标识符和日志，没采用
+  //     所以中文方向只收三种判得准的：月份 / 星期名、页面别处已经翻译过的词、英文句子。
+  //     「Staff Platform Engineer」这种职位名三种都抓不到 —— 它和人名、品牌在字面上
+  //     分不开。这是这道检查的边界，要靠人看。
+  //   中文方向不查 SVG 里的字：图集里的模板图是整张英文的可复用文件，那是现状，
+  //     不是漏翻；查它会一次报出几千处，把真问题淹掉。
+  //
+  // 有意保留另一种语言的字，用 HTML 自己的写法声明：lang="en" / lang="zh-CN"，
+  // 或者 translate="no"（名字、代码、品牌）。不另造一套放行标记。
+  {
+    const q = (s) => [...document.querySelectorAll(s)];
+    const enEls = q('.lang-en, .lang-en-text');
+    const zhEls = q('.lang-zh, .lang-zh-text');
+    const shown = (e) => e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden';
+    let side = arg.lang || null;
+    if (enEls.length && zhEls.length && !side) {
+      const a = document.documentElement.getAttribute('data-lang');
+      if (a === 'en' || a === 'zh') side = a;
+      else {
+        const e = enEls.filter(shown).length, z = zhEls.filter(shown).length;
+        side = e && !z ? 'en' : z && !e ? 'zh' : null;
+      }
+    }
+    if (enEls.length && zhEls.length && side) {
+      const other = side === 'zh' ? 'en' : 'zh';
+      const clip = (t) => t.replace(/\s+/g, ' ').trim().slice(0, 60);
+      const path = (el) => {
+        const out = [];
+        for (let n = el; n && n !== document.body && out.length < 3; n = n.parentElement) {
+          const c = (n.getAttribute('class') || '').trim().split(/\s+/).filter(Boolean)[0];
+          out.unshift(n.tagName.toLowerCase() + (c ? '.' + c : ''));
+        }
+        return out.join(' > ');
+      };
+      const leaked = (side === 'zh' ? enEls : zhEls).filter((e) => shown(e) && e.textContent.trim());
+      if (leaked.length) {
+        issues.push({
+          kind: 'lang-both-showing',
+          severity: 'error',
+          side, other,
+          count: leaked.length,
+          samples: leaked.slice(0, 4).map((e) => ({ text: clip(e.textContent), where: path(e) })),
+        });
+      }
+
+      const mine = side === 'zh' ? '.lang-zh, .lang-zh-text' : '.lang-en, .lang-en-text';
+      const theirs = side === 'zh' ? '.lang-en, .lang-en-text' : '.lang-zh, .lang-zh-text';
+      const toggle = '.lang-toggle, [data-lang-toggle], [data-set-lang], button[data-lang]';
+      // 离得最近的、html 以外的 lang 属性。html 上那个是整页的，切换时会被改掉，不算声明。
+      const declared = (el) => {
+        for (let n = el; n && n !== document.documentElement; n = n.parentElement) {
+          const l = n.getAttribute && n.getAttribute('lang');
+          if (l) return l.toLowerCase();
+        }
+        return null;
+      };
+      const norm = (t) => t.replace(/\s+/g, ' ').trim().toLowerCase();
+      const enTexts = new Set(enEls.map((e) => norm(e.textContent)).filter(Boolean));
+      const zhTexts = new Set(zhEls.map((e) => norm(e.textContent)).filter(Boolean));
+      const HAN = /[㐀-䶿一-鿿豈-﫿]/;
+      const MONTH = '(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)';
+      const DAY = '(?:mon(?:day)?|tue(?:s(?:day)?)?|wed(?:nesday)?|thu(?:rs(?:day)?)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)';
+      const CAL = new RegExp(`^(?:${MONTH}\\.?(?:\\s+\\d{1,2}(?:,?\\s+\\d{4})?|\\s+\\d{4})?|${DAY}\\.?)$`, 'i');
+      // 只收没有歧义的虚词。不收 a（变量名 A/B/a 太多）、不收 I。
+      const STOP = new Set(('the an of to and is are was were be been has have had not with from for that this ' +
+        'these those it its at by on in or can will would should just yet than into only also when which who').split(' '));
+      const WORD = /(?<![\w./\\-])[A-Za-z]+(?:['’-][A-Za-z]+)*(?![\w(./\\-])/g;
+
+      const hits = new Map();   // why → [{text, where}]
+      const add = (why, t, el) => {
+        const arr = hits.get(why) || [];
+        arr.push({ text: clip(t), where: path(el) });
+        hits.set(why, arr);
+      };
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        const t = n.nodeValue;
+        if (!t || !t.trim()) continue;
+        const el = n.parentElement;
+        if (!el || el.closest('script, style, noscript, template, textarea, title')) continue;
+        if (el.closest(mine) || el.closest(theirs) || el.closest(toggle)) continue;
+        if (!shown(el) || parseFloat(getComputedStyle(el).opacity) === 0) continue;
+        const dl = declared(el);
+        if (side === 'en') {
+          if (!HAN.test(t)) continue;
+          if (dl && /^(zh|ja|ko)/.test(dl)) continue;
+          add('cjk-in-english-view', t, el);
+          continue;
+        }
+        // side === 'zh'
+        if (!/[A-Za-z]{2}/.test(t)) continue;
+        if (dl && dl.startsWith('en')) continue;
+        if (el.closest('svg, code, pre, kbd, samp, var, [translate="no"]')) continue;
+        const nt = norm(t);
+        if (CAL.test(nt)) { add('month-or-weekday', t, el); continue; }
+        if (/^[a-z][a-z '’-]*$/.test(nt) && enTexts.has(nt) && !zhTexts.has(nt) && /[a-z]/.test(t)) {
+          add('translated-elsewhere', t, el); continue;
+        }
+        const words = nt.match(WORD) || [];
+        const stops = new Set(words.filter((w) => STOP.has(w)));
+        if (words.length >= 4 && stops.size >= 2 && !HAN.test(t)) add('english-sentence', t, el);
+      }
+      for (const [why, list] of hits) {
+        issues.push({
+          kind: 'lang-leak',
+          severity: 'error',
+          side, why,
+          count: list.length,
+          samples: list.slice(0, 5),
+        });
+      }
     }
   }
 
@@ -2456,7 +2748,7 @@ const auditFn = (arg) => {
 
   return issues;
 };
-const evalArg = { crossSkill: crossSkillData, focusInExternalCss, remoteCssPresent, theme: themeArg };
+const evalArg = { crossSkill: crossSkillData, focusInExternalCss, remoteCssPresent, theme: themeArg, lang: langArg };
 let findings = await page.evaluate(auditFn, evalArg);
 
 // ---------- 12d) Second-viewport geometry pass (issue #20 FU2) ----------
@@ -2487,6 +2779,31 @@ if (secondViewport && VIEWPORT.width >= secondViewport.width + 80) {
     await page.waitForTimeout(150);
   } catch {
     // best-effort — a flaky second pass must never kill the audit
+  }
+}
+
+// ---------- 12e) Narrow-width sweep ----------
+// One kind kept: does the root scroll sideways. Its own id (narrow-overflow-x),
+// so a desktop-only page can waive the narrow widths without also waiving
+// overflow at the desktop width.
+const sweep = narrowWidths.filter((w) => VIEWPORT.width >= w + 80);
+if (sweep.length) {
+  try {
+    for (const w of sweep) {
+      await page.setViewportSize({ width: w, height: 844 });
+      await page.waitForTimeout(120);
+      const docW = await page.evaluate(() => document.documentElement.scrollWidth);
+      if (docW <= w + 2) continue;
+      const at = await page.evaluate(auditFn, evalArg);
+      const f = at.find((x) => x.kind === 'page-overflow-x') || { docWidth: docW, viewport: w, culprits: [] };
+      findings.push({ ...f, kind: 'narrow-overflow-x', severity: 'error' });
+    }
+    await page.setViewportSize(VIEWPORT);
+    await page.waitForTimeout(150);
+  } catch (e) {
+    // Unlike the 1024 pass this one can fail the page, so a broken pass must
+    // not look like a clean one.
+    findings.push({ kind: 'narrow-pass-failed', severity: 'warn', message: String(e).slice(0, 160) });
   }
 }
 
@@ -2612,13 +2929,13 @@ function reportWaivers() {
 
 if (visibleFindings.length === 0) {
   const noise = suppressed > 0 ? ` (${suppressed} brand-intentional suppressed)` : '';
-  console.log(`visual-audit: OK  (${target})${noise}`);
+  console.log(`visual-audit: OK  (${target})${langArg ? `  [lang=${langArg}]` : ''}${noise}`);
   reportWaivers();
   process.exit(0);
 }
 
 const noise = suppressed > 0 ? ` · ${suppressed} brand-intentional suppressed` : '';
-console.log(`visual-audit: ${errors.length} error(s), ${warns.length} warning(s)  (${target})${noise}`);
+console.log(`visual-audit: ${errors.length} error(s), ${warns.length} warning(s)  (${target})${langArg ? `  [lang=${langArg}]` : ''}${noise}`);
 reportWaivers();
 for (const i of visibleFindings) {
   if (i.kind === 'contrast') {
@@ -2827,10 +3144,29 @@ for (const i of visibleFindings) {
     console.log(
       `  [${i.severity}] glass-cyan-svg-text: SVG text "${i.text}" computes to ${i.fill} under the LIGHT theme (~1.7:1 on light panels) — a literal cyan fill; use class="glass-svg-accent-ink" so the ink flips to #0E7490 in light (known-bugs 6.4)`
     );
-  } else if (i.kind === 'page-overflow-x') {
+  } else if (i.kind === 'page-overflow-x' || i.kind === 'narrow-overflow-x') {
     console.log(
-      `  [${i.severity}] page-overflow-x: document is ${i.docWidth}px wide in a ${i.viewport}px viewport — the page scrolls sideways; collapse the offending grid/figure or wrap it in a designed pan container (.glass-scroll / .glass-table-wrap)${i.atNarrow ? ` [surfaced by the ${i.atNarrow}px second-viewport pass — width-dependent, §1.34]` : ''}`
+      `  [${i.severity}] ${i.kind}: document is ${i.docWidth}px wide in a ${i.viewport}px viewport — the page scrolls sideways; collapse the offending grid/figure or wrap it in a designed pan container (.glass-scroll / .glass-table-wrap)${i.atNarrow ? ` [surfaced by the ${i.atNarrow}px second-viewport pass — width-dependent, §1.34]` : ''}${i.kind === 'narrow-overflow-x' ? ' [narrow-width sweep; a desktop-only page waives visual-audit:narrow-overflow-x in DESIGN.md]' : ''}`
     );
+    for (const c of i.culprits || []) {
+      console.log(`      ${c.sel}  → right edge ${c.right}px${c.n > 1 ? `  (×${c.n})` : ''}`);
+    }
+  } else if (i.kind === 'narrow-pass-failed') {
+    console.log(`  [${i.severity}] narrow-pass-failed: the narrow-width sweep threw (${i.message}) — sideways scrolling below 1024px was NOT checked on this page`);
+  } else if (i.kind === 'lang-both-showing') {
+    console.log(
+      `  [${i.severity}] lang-both-showing: ${i.count} .lang-${i.other} element(s) are visible in the ${i.side} view — both languages render at once. The page is missing html[data-lang="${i.side}"] .lang-${i.other}{display:none} (or its JS toggle did not run)`
+    );
+    for (const x of i.samples) console.log(`      "${x.text}"  (${x.where})`);
+  } else if (i.kind === 'lang-leak') {
+    const WHY = {
+      'cjk-in-english-view': 'Chinese text in the English view, outside any .lang-zh — wrap both languages, or mark a deliberate Chinese sample lang="zh-CN"',
+      'month-or-weekday': 'English month / weekday names in the Chinese view — the zh reader gets 2 月 / 周三 everywhere else',
+      'translated-elsewhere': 'text this page translates elsewhere (it is some .lang-en\'s text) shown untranslated in the Chinese view — often a label copied by JS from an English-only attribute',
+      'english-sentence': 'an English sentence in the Chinese view, outside any .lang-en — wrap both languages, or mark a deliberate English quote lang="en" (names / code: translate="no")',
+    };
+    console.log(`  [${i.severity}] lang-leak (${i.why}): ${i.count} text node(s) — ${WHY[i.why] || i.why}`);
+    for (const x of i.samples) console.log(`      "${x.text}"  (${x.where})`);
   } else if (i.kind === 'glass-aurora-text') {
     console.log(
       `  [${i.severity}] glass-aurora-text: SVG text "${i.text}" computes to ${i.fill} (${i.hue}) on the dark theme — aurora hues are geometry/blob colors, not ink; route indigo labels through .glass-svg-ref-ink, never use violet/pink as text (known-bugs 6.4)`

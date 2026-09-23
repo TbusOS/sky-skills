@@ -384,6 +384,27 @@ python3 skills/design-review/scripts/verify.py --allow-monolingual <path/to/inte
 
 **历史教训**:2026-04-20 写 5 张 canonical 时,直接英文写了 —— 用户 push back。现在写进规则并机器化 check。内部中文工程 memo 另加 `--allow-monolingual` 豁免,不牺牲对外站点的双语保证。
 
+### §G 追加 · 「有双语标记」不等于「两边都是那种语言」(visual-audit 强制 · 2026-09-23)
+
+verify.py 只能看到标记在不在。2026-09-23 第一次把每页切到中文渲染来审,约 30 页露着另一种语言:
+中文视图里的 **Dashboard**、**Feb / Mar**、**Oct 18**、页脚 **Discussions**、一整组英文步骤按钮;
+英文视图里的中文代码注释、中文示例提示词、「取数 · fetch」式术语对照。写的时候照这四条:
+
+1. **没包进 `.lang-*` 的字,两种视图都会显示。** 数字、代码、人名、品牌、工号可以不包;
+   是「语言」的都要成对包 —— 包括月份和日期(`<span class="lang-en">Oct 18</span><span class="lang-zh">10 月 18 日</span>`)
+2. **JS 写进页面的文字也要双语。** 从 `data-*` 属性拷一段英文进标题槽(atelier 的路由标题)、
+   `textContent = '系统光标'`(glass 的光标按钮)—— 源码里看不出来,只有渲染后才露。
+   拷贝页面上现成的 `.lang-en` / `.lang-zh` 节点,或者两段都写进去
+3. **故意保留另一种语言,用 HTML 自己的声明,不另造标记。** 内核 oops 原文、按惯例用英文写的
+   提交信息 → `lang="en"`;字体样张「中文 · CJK」、画出来的一份中文文档 → `lang="zh-CN"`;
+   名字 / 品牌 / 团队名 → `translate="no"`。这也是读屏换发音靠的那个属性
+4. **SVG 里切语言要和页面用同一套类名**。HARNESS-ROADMAP.ember 的切换脚本选 `tspan.lang-en`,
+   SVG 里写的是 `.lang-en-text` —— 一个都没选中,中文读者看到的图一直是英文
+
+机器检查:visual-audit `--lang=zh`(runner 与 `--audit` 对双语页自动多跑这一遍)·
+`lang-both-showing` · `lang-leak`。**抓不到的**:职位名这种和人名、品牌字面上分不开的英文;
+`aria-label` / `title` / `alt` 里只写了英文 —— 这两类要人看。见 known-bugs §1.65。
+
 ---
 
 ## M. Generator self-diff note(每张 canonical 强制 · HARNESS-ROADMAP Phase 03)

@@ -96,6 +96,7 @@ import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
 import process from 'node:process';
 import { revealByScrolling } from './_reveal-scroll.mjs';
+import { localeFor, switchLang, judgeLang } from './_lang.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
@@ -272,7 +273,7 @@ for (const target of args.targets) {
     // Half of what --lang does: a page that reads navigator.language picks its
     // own side before first paint. The explicit attribute below is the other
     // half, for pages that hard-code it.
-    ...(args.lang ? { locale: args.lang === 'zh' ? 'zh-CN' : 'en-US' } : {}),
+    ...(args.lang ? { locale: localeFor(args.lang) } : {}),
   });
   const page = await ctx.newPage();
   const key = keyFor(target, args.theme, args.lang);
@@ -282,9 +283,8 @@ for (const target of args.targets) {
     if (args.theme) {
       await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), args.theme);
     }
-    if (args.lang) {
-      await page.evaluate((l) => document.documentElement.setAttribute('data-lang', l), args.lang);
-    }
+    let langSt = null;
+    if (args.lang) langSt = judgeLang(await switchLang(page, args.lang), args.lang);   // _lang.mjs
     // A fallback font renders a different page and reads as a real regression.
     await page.evaluate(() => document.fonts && document.fonts.ready);
     await page.waitForTimeout(160);
@@ -294,24 +294,13 @@ for (const target of args.targets) {
     // {display:none}` rule shows both languages, and asking only "is the side I
     // wanted visible" passes it. Committing that as a baseline would freeze a
     // render nobody ever sees, and every later comparison would agree with it.
-    if (args.lang) {
-      const st = await page.evaluate(() => {
-        const boxed = (sel) => [...document.querySelectorAll(sel)]
-          .filter((e) => e.getClientRects().length > 0).length;
-        return {
-          attr: document.documentElement.getAttribute('data-lang'),
-          en: document.querySelectorAll('.lang-en').length,
-          zh: document.querySelectorAll('.lang-zh').length,
-          enShown: boxed('.lang-en'), zhShown: boxed('.lang-zh'),
-        };
-      });
-      const want = args.lang === 'zh' ? st.zhShown : st.enShown;
-      const other = args.lang === 'zh' ? st.enShown : st.zhShown;
-      const why = (st.en + st.zh === 0)
+    if (langSt) {
+      const { verdict, want, other, attr } = langSt;
+      const why = verdict === 'no-markup'
         ? `this page carries no .lang-en/.lang-zh markup, so --lang has nothing to switch`
-        : want === 0
-          ? `html[data-lang]=${st.attr} but 0 .lang-${args.lang} elements are visible (${other} of the other side are)`
-          : other > 0
+        : verdict === 'not-applied'
+          ? `html[data-lang]=${attr} but 0 .lang-${args.lang} elements are visible (${other} of the other side are)`
+          : verdict === 'half'
             ? `both languages are showing (${want} + ${other}) — the page is missing its html[data-lang] hide rule`
             : null;
       if (why) {

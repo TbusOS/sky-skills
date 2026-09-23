@@ -39,7 +39,7 @@
 //   1 = at least one file has an error
 
 import { spawnSync } from 'node:child_process';
-import { readdirSync, statSync, mkdirSync, writeFileSync, existsSync } from 'node:fs';
+import { readdirSync, statSync, mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
 import { resolve, dirname, relative, basename, join, extname } from 'node:path';
 import process from 'node:process';
 import { tmpdir } from 'node:os';
@@ -292,7 +292,26 @@ function parseVerify(r) {
 function runVisualAudit(htmlAbs) {
   const args = [VISUAL, '--ignore-intentional', htmlAbs];
   const r = spawnSync('node', args, { cwd: repoAbs, encoding: 'utf8' });
-  return parseVisual(r);
+  const out = parseVisual(r);
+  // A bilingual page is audited in Chinese too, the same rule bin/design-review
+  // follows: the zh render wraps and overflows differently, and the language
+  // leak check only means something from inside the zh view. A monolingual
+  // project (DESIGN.md monolingual:) has no second side to look at.
+  let bilingual = false;
+  try { bilingual = !allowMonolingual && /class=["'][^"']*\blang-zh\b/.test(readFileSync(htmlAbs, 'utf8')); } catch { /* unreadable: the first run already said so */ }
+  if (!bilingual) return out;
+  const zr = spawnSync('node', [VISUAL, '--ignore-intentional', '--lang=zh', htmlAbs], { cwd: repoAbs, encoding: 'utf8' });
+  const zh = parseVisual(zr);
+  if (zr.status === 4) {
+    zh.findings.push({ severity: 'error', kind: 'lang-not-applied',
+      message: 'lang-not-applied: --lang=zh did not take, so the Chinese side was not audited (see visual-audit output)' });
+  }
+  for (const f of zh.findings) f.message = `[zh] ${f.message}`;
+  return {
+    exitCode: Math.max(out.exitCode ?? 0, zr.status === 4 ? 1 : (zr.status ?? 0)),
+    findings: [...out.findings, ...zh.findings],
+    raw: `${out.raw}\n--- lang=zh ---\n${zh.raw}`,
+  };
 }
 
 function parseVisual(r) {
@@ -378,6 +397,11 @@ const VISUAL_KIND_RULES = [
   [/^text-glyph-overflow/, 'text-glyph-overflow'],
   [/^grid-track-shrink-risk:/, 'grid-track-shrink-risk'],
   [/^page-overflow-x:/, 'page-overflow-x'],
+  [/^narrow-overflow-x:/, 'narrow-overflow-x'],
+  [/^narrow-pass-failed:/, 'narrow-pass-failed'],
+  [/^lang-both-showing:/, 'lang-both-showing'],
+  [/^lang-leak \(/, 'lang-leak'],
+  [/^lang-not-applied:/, 'lang-not-applied'],
   [/^margin:auto block renders off-center/, 'margin-auto-offcenter'],
   [/^svg-shape-over-text in/, 'svg-shape-over-text'],
   [/^\d+ <h1> elements on the page/, 'multiple-h1'],

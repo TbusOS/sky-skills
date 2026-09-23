@@ -1222,3 +1222,77 @@
   夹具 `fixtures/bad-interaction-contrast-after-click.html` + `interaction_selftest.sh` 锁住这条。
 - **同类要一起查的**：任何"基类定义了 hover / focus,修饰符只改了静止态"的组合。
   九套 skill 各自的 `--ghost` / `--outline` / `--text` 变体都属于这个形态。
+
+### 1.65 双语页的中文那一半从没被审过 —— 切一半、露出另一种语言，全都不报错
+
+- **Reader sees**：atelier dashboard 切到中文，侧栏写「控制台」，主标题还是 **Dashboard**，
+  柱状图月份 **Feb / Mar**，正文却写「6 月」。HARNESS-ROADMAP.ember 切到中文，**SVG 里的字
+  全是英文** —— 切换脚本找的是 `tspan.lang-en`，标记写的是 `.lang-en-text`，一个都没选中。
+  全仓量下来约 30 页有这一类：英文视图露中文（代码注释、示例提示词、术语表），
+  中文视图露英文（月份、日期、页脚链接、步骤按钮）。
+- **Why**：Playwright 默认 locale 是 en-US，页面按 `navigator.language` 选边 ——
+  **visual-audit 从有这道检查起只看过英文那一半**（截图和像素基线 2026-09-22 才能拍中文）。
+  而「切过去了没有」只数 `.lang-en/.lang-zh`，SVG 里靠页面 JS 改行内 `display` 的
+  `.lang-*-text` 不在里面，那种「切一半」正是最常见的。
+- **为什么活到 2026-09-23**：没包进 `.lang-*` 的字本来就可以是对的（数字、代码、人名、品牌），
+  verify.py §G 只查双语标记在不在，看不到「在的是哪种语言」。
+- **Defense**：`scripts/_lang.mjs` 一处定义切语言（locale + `data-lang` + `html[lang]` +
+  排版后等字体）和「切过去没有」（`.lang-*` 与 `.lang-*-text` 都数）；截图 / 像素 / 渲染审查
+  三道共用。visual-audit `--lang=zh`，切不过去 **exit 4、不出结果**；runner 与 `--audit`
+  对有 `.lang-zh` 的页自动多跑一遍中文。两个新检查：`lang-both-showing`（另一边还显示着）、
+  `lang-leak`（英文视图的汉字；中文视图的月份 / 星期名、页面别处翻译过的词、英文句子）。
+  有意保留的另一种语言写 HTML 自己的 `lang="en"` / `lang="zh-CN"` / `translate="no"`。
+  自检 `visual_selftest.sh`。
+- **边界（量过才定的）**：中文视图里露在外面的拉丁字母有 1934 处（SVG 另有 8598 处），
+  多数是标识符和名字。按词形猜试了三种，两种不可用，所以中文方向只收判得准的三类；
+  「Staff Platform Engineer」这种职位名抓不到。中文方向不查 SVG（图集模板整张英文是现状）。
+  `aria-label` / `title` / `alt` 不查 —— 双语页上只写英文的 `aria-label` 还有很多。
+
+### 1.66 手机和平板宽度从没被测过 —— 27 个页面在 390px 下整页横滚
+
+- **Reader sees**：390px 下 27/166 页整页左右滑（2 页是故意做坏的测试样本）：relief 9 页
+  （struct 998px、debug 870px）、eclat 5 页、lectern 4 页、anthropic 模板 8 页。
+  只测 390 还不够：另有 11 页 390 和 1024 都放得下，600–1280 之间横滚
+  （glass landing 900px 下 978px；anthropic docs 模板 1100px 下 1288px）。
+  relief 每一页的语言按钮在手机上被皮肤条整个压住，**切不了语言**。
+- **Why**：runner 的第二视口只有 1024，而且那一趟的横滚只报 warn。`1fr` 等于
+  `minmax(auto, 1fr)`，轨道会长到里面最宽东西的最小宽度（一张图、一段代码、一个表），
+  在两列变一列的那个宽度之前，页面就被撑出去。eclat 和 lectern 的样式表里一条窄屏规则都没有。
+- **Defense**：visual-audit 扫 390 / 600 / 768 / 900 四个宽度（只量整页宽，超了才在那个宽度
+  跑整套、列出是谁撑宽的），**超了是 error**（`narrow-overflow-x`；真是只给桌面的页在
+  DESIGN.md 里 waive）。relief 的图板在 ≤1023px 下自己横向拖（图的几何就是意思，不重排；
+  桌面端逐像素不变）；eclat / lectern 补窄屏规则；apple 平板段补齐；`minmax(0, 1fr)`。
+- **同类要一起查的**：固定定位的控件（语言按钮、皮肤条、导航）在窄屏下会叠在一起；
+  这一类手机宽度下的**重叠**还剩约 30 处（hardware-3d、atelier booking、apple 模板），
+  窄屏扫描目前只查横滚。
+
+### 1.67 注释里嵌注释 —— 内层的 `-->` 提前关掉外层，半段 self-diff 显示在页面底部
+
+- **Reader sees**：docs/KERNEL-REPOS-SURVEY.html 页面最底下多出一大段英文：
+  「"equal cards for all 6 skills". Because: the finding worth surfacing…」—— 那是 self-diff
+  块的后半截，已经发布在线上。
+- **Why**：有人在 self-diff 这段注释里又写了一个 `<!-- facts-ignore: … -->`。注释不嵌套：
+  内层的 `-->` 结束的是外层，之后到外层 `-->` 之间的全部当正文渲染。
+- **为什么没被抓**：标签配平跳过注释；露出来的是普通英文段落，每道检查都过。
+  是 visual-audit 的中文视图语言检查报「英文句子、父元素是 `<body>`」才看见。
+- **Defense**：verify.py 5d —— 注释里出现 `<!--` 即报（行号 + 外层起始行）。
+  `facts-ignore` 本来就不需要注释标记（认的是「这一行或上一行有 `facts-ignore: 理由`」），
+  写在注释里面时直接写，不再套 `<!-- -->`。
+
+### 1.68 被裁掉的文字也算重叠 —— 读屏专用的标签、代码框里滚出去的代码，都报成压住了别人
+
+- **Reader sees**：没东西。报告里却有 `text-overlap 94%`（atelier dashboard 图表名 ↔ 坐标轴
+  「100%」）和 390px 下 relief struct 的十几处代码 ↔ 旁边一栏。
+- **Why**：`getClientRects()` 给的是排版出来的矩形，不管祖先有没有把它裁掉。1×1px 的
+  sr-only 盒子、`overflow-x:auto` 的代码框，里面的字都按完整宽度算。
+- **Defense**：重叠检查先把每个文字矩形截到祖先裁剪框的交集里，截完剩下的才是读者看得见的。
+  一对探针锁住：同一个标签放进 sr-only 盒子不报，画在上面报。
+
+### 1.69 「谁把页面撑宽了」只看盒子边缘 —— 字溢出盒子的那个指不出来，还指错了别人
+
+- **Reader sees**：`page-overflow-x` 报页面 516px，清单里最宽的却只到 443px，而且是一个无关的 span。
+- **Why**：64px 的「237,950★」排在半屏宽的格子里：格子（盒子）没越界，是里面的字越界。
+  清单只找「右缘越过视口、父元素没越过」的盒子，这种一个都找不到。
+- **Defense**：清单加第二条规则 —— 盒子在屏内、但内容溢出的，报最深的那一层；
+  后代里已经有越界盒子的不算（它只是被带出去的）。探针：字放在第二列、格子不许被撑开
+  （放第一列、或用普通 `1fr`，页面根本不溢出，探针会打空 —— 第一版两次都是这样）。

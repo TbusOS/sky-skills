@@ -1,6 +1,6 @@
 ---
 name: design-review
-description: "Independent evaluator for any design-skill output (anthropic-design / apple-design / ember-design / sage-design / glass-design / eclat-design / lectern-design / atelier-design / primer-design). TRIGGER when a demo / template / landing page has just been written with one of the 9 design skills and is about to be shipped. Runs the gate chain — structural verify (placeholders, BEM, undefined classes, bilingual toggles), rendered visual-audit (contrast, hero diagram sizing, orphan cards, SVG text, known-bugs), axe-core accessibility conformance (color-contrast and three structural rules blocking), full-page screenshot, opt-in pixel regression vs a committed baseline (--pixel), and LLM taste judgment (solo design-critic or 4 parallel specialists — composition / copy / illustration / brand). Pairs with design-learner to codify every critic miss so the same bug is never caught twice. Inspired by GAN's discriminator: this skill deliberately lives outside the generator skills so the reviewer does not inherit the generator's assumptions."
+description: "Independent evaluator for any design-skill output (anthropic-design / apple-design / ember-design / sage-design / glass-design / eclat-design / lectern-design / atelier-design / primer-design / relief-design). TRIGGER when a demo / template / landing page has just been written with one of the 10 design skills and is about to be shipped. Runs the gate chain — structural verify (placeholders, BEM, undefined classes, bilingual toggles), rendered visual-audit (contrast, hero diagram sizing, orphan cards, SVG text, known-bugs), axe-core accessibility conformance (color-contrast and three structural rules blocking), full-page screenshot, opt-in pixel regression vs a committed baseline (--pixel), and LLM taste judgment (solo design-critic or 4 parallel specialists — composition / copy / illustration / brand). Pairs with design-learner to codify every critic miss so the same bug is never caught twice. Inspired by GAN's discriminator: this skill deliberately lives outside the generator skills so the reviewer does not inherit the generator's assumptions."
 last-verified: 2026-04-23
 ---
 
@@ -12,7 +12,7 @@ last-verified: 2026-04-23
 long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)
 and the GAN paradigm:
 
-1. **The agent doing the work praises its own work.** The 9 design skills
+1. **The agent doing the work praises its own work.** The 10 design skills
    (apple / anthropic / ember / sage / glass / eclat / lectern / atelier / primer)
    are **generators** — they know the
    style, they can produce HTML, and they will naturally rate their own
@@ -38,7 +38,14 @@ it instead of asserting its own number.
 **五道机械检查**(`bin/design-review` 默认全跑,按序):
 
 1. `verify.py` — 结构(静态)
-2. `visual-audit.mjs` — 渲染(Playwright)
+2. `visual-audit.mjs` — 渲染(Playwright)。**双语页跑两遍**:页面默认的那一边,加
+   `--lang=zh` 一遍 —— 2026-09-23 之前这道检查只看过英文那一半(Playwright 默认
+   en-US,页面按浏览器语言选边)。切不过去就 **exit 4、不出结果**,不拿另一种语言的结果
+   冒充。两类语言检查:`lang-both-showing`(另一边还显示着)、`lang-leak`(英文视图里的汉字;
+   中文视图里的月份 / 星期名、页面别处翻译过的词、英文句子)—— 有意保留的另一种语言写
+   `lang="en"` / `lang="zh-CN"` / `translate="no"`。**窄屏扫描**:390 / 600 / 768 / 900
+   四个宽度下整页横滚是 error(`narrow-overflow-x`,报出是谁撑宽的),1024 那一趟仍只报
+   warn。known-bugs §1.65–1.69。自检 `scripts/visual_selftest.sh`,36 项。
 3. `axe-audit.mjs` — 可达性(axe-core;阻断规则四条:color-contrast、
    link-name、aria-prohibited-attr、svg-img-alt。**全仓两主题实测 0 违规**
    —— glass light 那 84 处欠账已于 2026-08-27 在 CSS token 层还清,见 known-bugs §6.6)
@@ -51,7 +58,7 @@ it instead of asserting its own number.
    一块空白读起来像「这节漏配图了」,人会去改一个根本不存在的问题;
    把同一张图喂给模型,得到的是同样自信的错结论。
    滚完之后仍然停在 `opacity:0` 的 reveal 元素会被数出来单独提示。
-   自检 `scripts/screenshot_selftest.sh`,10 项。
+   自检 `scripts/screenshot_selftest.sh`,28 项。
    ⚠ `reducedMotion:'reduce'` **不覆盖这件事**:它收的是过渡时长,
    不会替你加那个 class。
 
@@ -161,7 +168,7 @@ waivers:
 
 `DESIGN.md` 写坏了**整轮不跑**,在第一道之前就停 —— 它决定检查怎么做,
 半读半猜比直接拒绝更坏。模板见 `references/DESIGN.md.template`,
-自检 `scripts/design_md_selftest.sh`,36 项。`--no-design-md` 可以忽略它。
+自检 `scripts/design_md_selftest.sh`,43 项。`--no-design-md` 可以忽略它。
 
 **五道之外**,按需叠加,不计入"五道":
 
@@ -176,7 +183,7 @@ waivers:
   **毛病不在基线过期,在于「设计变了」和「浏览器变了」从这个脚本出来长得一模一样** ——
   一个百分比,没法判断是哪种。看不懂的数字不算结果。
   字体也记进去,是因为断网渲染跟基线差 3.55%,比换浏览器还严重(字体从 CDN 现取)。
-  自检 `scripts/pixel_selftest.sh`,21 项 —— 其中最要紧的一条是
+  自检 `scripts/pixel_selftest.sh`,28 项 —— 其中最要紧的一条是
   **环境不同的页面里塞一个真改动,必须仍然报回归**,防止新机制把信号一起吞掉。
 - LLM critic(`--critic` solo / `--multi-critic` 4 专家)— 口味评审。
   **critic 不是第五道机械检查**,它在机械检查之外
@@ -191,7 +198,7 @@ waivers:
 | 组件 | 状态 | 实体 |
 |---|---|---|
 | Gate 1 · structural verify | **shipped** | `scripts/verify.py`(8 类 check + 双语强制 + `--allow-monolingual` 豁免)|
-| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(86 条 known-bugs 里能机器化的那些)|
+| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(99 条 known-bugs 里能机器化的那些)|
 | Gate 3 · accessibility axe-audit | **shipped** (2026-08-14) | `scripts/axe-audit.mjs`(axe-core;四条阻断规则;当时清账每页只量一个主题,glass light 仍有欠账 —— known-bugs §6.6)|
 | Gate 4 · full-page screenshot | **shipped** | `scripts/screenshot.mjs`(Playwright · 绝对路径 + `file://` 通用 · 截前滚一遍让「滚动才浮现」的内容真的出现)|
 | 口味评审(五道之外)· solo critic | **shipped** | `.claude/agents/design-critic.md` |
@@ -284,14 +291,14 @@ node skills/design-review/scripts/learning-loop.mjs \
 | 检查 | 抓哪些 | 依赖 |
 |---|---|---|
 | Gate 1 `verify.py` | 占位符(文档页 `<pre>`/`<code>` 块自动剥除,不误报)、BEM modifier-only、未定义 class(union: 默认 skill CSS + HTML link + `--css`)、`<svg>` 不平衡、hero 容器用错、`container --mod` 未与 base 同列(BEM base-less 错)、公开页缺双语(`lang-toggle` + `lang-en/zh`)| Python 标准库 |
-| Gate 2 `visual-audit.mjs` | WCAG contrast < 4.5、hero 框图渲染 < 900px、SVG `<text>` 实际像素 < 9px、多列网格孤儿卡、SVG `<text>` 重叠、SVG 文字 fill 和承载 shape RGB 距离 < 40、多 h1 / heading 跳级 / 无 alt img / 无文本 a、brand 色在 top region 占比 < 0.4%、cross-skill-smell(别扮成另一个 skill)、hollow-card §10b、asymmetric-first-col-hero §10c、svg-foreign-hex、figure 无 figcaption、Fraunces/Newsreader 等非本 skill 字体、italic 滥用 —— 共 26 类,每类对应 `known-bugs.md` 1 行 | playwright |
+| Gate 2 `visual-audit.mjs` | WCAG contrast < 4.5、hero 框图渲染 < 900px、SVG `<text>` 实际像素 < 9px、多列网格孤儿卡、SVG `<text>` 重叠、SVG 文字 fill 和承载 shape RGB 距离 < 40、多 h1 / heading 跳级 / 无 alt img / 无文本 a、brand 色在 top region 占比 < 0.4%、cross-skill-smell(别扮成另一个 skill)、hollow-card §10b、asymmetric-first-col-hero §10c、svg-foreign-hex、figure 无 figcaption、Fraunces/Newsreader 等非本 skill 字体、italic 滥用 —— 每类对应 `known-bugs.md` 1 行(类数实时跑 `--facts --list`) | playwright |
 | Gate 3 `axe-audit.mjs` | axe-core 可达性:color-contrast、link-name、aria-prohibited-attr、svg-img-alt 阻断,其余只报告 | playwright + axe-core |
 | Gate 4 `screenshot.mjs` | 只产物不评审 —— 给人看的 | playwright |
 | 口味评审(五道之外)solo `design-critic` | 整页口味(构图 + 文案 + 插画 + 品牌)一位通才评审 | `Task()` subagent |
 | 口味评审(五道之外)multi-critic × 4 | 构图 / 文案 / 插画 / 品牌 四位专家独立 fresh-context · 权重 25/25/20/30 聚合 | `Task()` × 4 + 聚合 |
 
 具体清单在:
-- `references/known-bugs.md`(84 条,每条写 Reader sees / Why / Defense)
+- `references/known-bugs.md`(条数跑 `--facts --list`,每条写 Reader sees / Why / Defense)
 - `references/cross-skill-rules.md`(9 种风格共通工艺底线 · 有 §G 双语规则 + §I 卡片分组规则)
 - `references/dos-and-donts.md`(每 skill 下的风格特定反例)
 
@@ -353,12 +360,12 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 
 - `~/.claude/skills/design-review/dr-cli` — 一条命令跑完 5 道检查 + 可选 `--multi-critic` / `--learn`
 - `scripts/verify.py` — Gate 1 结构 check
-- `scripts/visual-audit.mjs` — Gate 2 渲染 check(51 项)
+- `scripts/visual-audit.mjs` — Gate 2 渲染 check(57 项)
 - `scripts/axe-audit.mjs` — Gate 3 可达性 check(axe-core)
-- `scripts/screenshot.mjs` — Gate 4 全页截图(截前滚一遍;自检 `screenshot_selftest.sh` 10 项)
+- `scripts/screenshot.mjs` — Gate 4 全页截图(截前滚一遍;自检 `screenshot_selftest.sh` 28 项)
 - `scripts/count-check.py` — 全仓计数判定(承载短语 vs 磁盘真值 + 检查模型)
 - `scripts/learning-loop.mjs` — 组件 07 · critic verdict → design-learner prompt
-- `references/known-bugs.md` — 84 条 bug 大全
+- `references/known-bugs.md` — bug 大全(条数跑 `--facts --list`)
 - `references/cross-skill-rules.md` — 9 种风格共通规则(含 §G 双语 / §I 卡片分组)
 - `references/canonical/README.md` — canonical 参考库说明 + 扩库流程
 

@@ -31,14 +31,16 @@
 #   --no-design-md     Ignore a DESIGN.md that would otherwise apply.
 #   --skill=<name>     Force a skill: anthropic | apple | ember | sage | glass | eclat | lectern | atelier | primer | relief.
 #                      If omitted, verify.py auto-detects from the HTML's <link>.
-#   --lang=<list>      en | zh | en,zh — forwarded to screenshot + pixel-gate.
-#                      Omitted: each gate-5 capture is taken as authored, and a
-#                      page that carries .lang-zh markup gets one EXTRA capture
-#                      in Chinese. Every canonical here is bilingual in one
-#                      file and Playwright's locale is en-US, so before this
-#                      existed the zh half of the whole repo had never been
-#                      photographed by anything. pixel-gate stays opt-in on
-#                      language: a zh baseline is another committed PNG.
+#   --lang=<list>      en | zh | en,zh — forwarded to visual-audit, screenshot
+#                      and pixel-gate. Omitted: gate 2 and each gate-5 capture
+#                      run the page as authored, and a page that carries
+#                      .lang-zh markup gets one EXTRA run in Chinese. Every
+#                      canonical here is bilingual in one file and Playwright's
+#                      locale is en-US, so before this existed the zh half of
+#                      the whole repo had never been photographed (until
+#                      2026-09-22) or audited (until 2026-09-23) by anything.
+#                      pixel-gate stays opt-in on language: a zh baseline is
+#                      another committed PNG.
 #   --theme=<t>        dark | light — forwarded to visual-audit + screenshot
 #                      (flips html[data-theme] after load). With --skill=glass
 #                      and no explicit --theme, gates 2-4 run BOTH themes
@@ -55,6 +57,12 @@
 #                      already narrow.
 #   --no-second-viewport
 #                      Disable that second pass (main viewport only).
+#   --narrow=<list>    Widths of visual-audit's narrow sweep (default
+#                      390,600,768,900). It checks one thing — does the page
+#                      scroll sideways at that width — and, unlike the 1024 pass,
+#                      reports it as an ERROR. A page that is really desktop-only
+#                      waives visual-audit:narrow-overflow-x in DESIGN.md.
+#   --no-narrow        Skip the narrow sweep.
 #   --internal         (alias --allow-monolingual) Forwarded to gate 1 verify.py:
 #                      skip the bilingual-page rule for internal monolingual docs.
 #                      Gates 2/3/4 unchanged — glass still auto-runs both themes.
@@ -228,6 +236,8 @@ for arg in "$@"; do
     --theme=*) THEME="${arg#--theme=}" ;;
     --lang=*)  LANG_LIST="${arg#--lang=}" ;;
     --viewport2=*) VIEWPORT2="${arg#--viewport2=}" ;;
+    --narrow=*) NARROW="${arg#--narrow=}" ;;
+    --no-narrow) NO_NARROW=1 ;;
     --no-second-viewport) NO_SECOND_VP=1 ;;
     --css=*)   CSS_ARGS+=("$arg") ;;
     --strict)  STRICT=1 ;;
@@ -489,19 +499,50 @@ for theme in "${THEMES[@]}"; do
   VISUAL_FLAGS=(--ignore-intentional)
   [ -n "$VIEWPORT2" ] && VISUAL_FLAGS+=("--viewport2=$VIEWPORT2")
   [ -n "$NO_SECOND_VP" ] && VISUAL_FLAGS+=("--no-second-viewport")
+  [ -n "${NARROW:-}" ] && VISUAL_FLAGS+=("--narrow=$NARROW")
+  [ -n "${NO_NARROW:-}" ] && VISUAL_FLAGS+=("--no-narrow")
   theme_label=""
   if [ "$theme" != "default" ]; then
     VISUAL_FLAGS+=("--theme=$theme")
     theme_label="  [theme=$theme]"
   fi
   for html in "${HTMLS[@]}"; do
-    echo ""
-    echo "━━ [2/$TOTAL_GATES] visual-audit.mjs (rendered + brand + italic + smell)  $html$theme_label"
-    if ! ( cd "$REPO" && node "$VISUAL" "${VISUAL_FLAGS[@]}" "${DESIGN_WAIVERS[@]}" "${DESIGN_WAIVE_QUIET[@]}" "$html" ); then
-      exit_visual=1
+    # Same language rule as the gate-5 captures below: as authored, plus zh
+    # when the page has a Chinese side. The zh run is not a formality — the
+    # Chinese render wraps, widens and overflows differently, and the language
+    # leak check only means anything from inside the zh view.
+    va_langs=("${LANGS[@]}")
+    if [ -z "${LANG_LIST:-}" ] && ( cd "$REPO" && grep -q 'class="lang-zh"' "$html" 2>/dev/null ); then
+      va_langs+=("zh")
     fi
+    for lang in "${va_langs[@]}"; do
+      VL_FLAGS=("${VISUAL_FLAGS[@]}")
+      lang_label=""
+      if [ "$lang" != "as-authored" ]; then
+        VL_FLAGS+=("--lang=$lang")
+        lang_label="  [lang=$lang]"
+      fi
+      echo ""
+      echo "━━ [2/$TOTAL_GATES] visual-audit.mjs (rendered + brand + italic + smell)  $html$theme_label$lang_label"
+      # `|| rc=$?`, not a bare `rc=$?` on the next line: this script runs
+      # under set -e, which would end it at the first page with an error.
+      rc=0
+      ( cd "$REPO" && node "$VISUAL" "${VL_FLAGS[@]}" "${DESIGN_WAIVERS[@]}" "${DESIGN_WAIVE_QUIET[@]}" "$html" ) || rc=$?
+      if [ "$rc" -eq 4 ]; then
+        exit_visual_lang=1
+      elif [ "$rc" -ne 0 ]; then
+        exit_visual=1
+      fi
+    done
   done
 done
+if [ "${exit_visual_lang:-0}" -ne 0 ]; then
+  echo ""
+  echo "✗ visual-audit skipped a page: --lang never took on it, so nothing was" >&2
+  echo "  audited in that language. A clean line there would have been about the" >&2
+  echo "  other language. Fix the page's html[data-lang] rules, or drop --lang." >&2
+  exit 1
+fi
 if [ "$exit_visual" -ne 0 ]; then
   echo ""
   echo "✗ visual-audit produced errors — fix before continuing" >&2

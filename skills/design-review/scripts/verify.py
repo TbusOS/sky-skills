@@ -42,6 +42,7 @@ Checks:
   3. Hero inner element uses an acceptable container (per skill)
   4. Every `class="{prefix}-*"` token is defined somewhere in the CSS union
   5. <svg> tag balance · <div> balance (comments and code blocks excluded) · font-family names are ASCII
+     · no comment inside a comment (the inner --> ends the outer one early)
   6. Container modifier never used without its base class (BEM bug)
   7. Bilingual toggle on public pages (lang-toggle / lang-en / lang-zh)
   8. Half-width ASCII punctuation inside lang-zh spans · self-diff block
@@ -434,6 +435,35 @@ def check_file(
                 f"it leaks into the page as loose text. "
                 f"Use <tspan font-weight=\"600\"> for emphasis."
             )
+
+    # 5d. A comment inside a comment. HTML comments do not nest: the inner
+    # `-->` closes the OUTER one, and everything between it and the outer
+    # `-->` renders as page text. Nothing else notices — tag balance skips
+    # comments, and the leaked text is plain prose, so the page still passes.
+    # Caught 2026-09-23 on a published page: a `<!-- facts-ignore: … -->`
+    # marker written inside the self-diff comment put the second half of the
+    # self-diff block at the bottom of the page. (visual-audit's language
+    # check found it: English prose in the Chinese view, parented to <body>.)
+    scan = re.sub(r"<(script|style)\b.*?</\1>", _blank_keep_offsets, html,
+                  flags=re.DOTALL | re.IGNORECASE)
+    pos = 0
+    while True:
+        a = scan.find("<!--", pos)
+        if a < 0:
+            break
+        b = scan.find("-->", a + 4)
+        if b < 0:
+            break
+        inner = scan.find("<!--", a + 4, b)
+        if inner >= 0:
+            line = html.count("\n", 0, inner) + 1
+            errors.append(
+                f"{path}:{line}: `<!--` inside another comment (opened on line "
+                f"{html.count(chr(10), 0, a) + 1}) — comments do not nest; the "
+                f"inner `-->` ends the outer one and the rest of it renders as "
+                f"page text. Drop the inner markers (facts-ignore works without them)."
+            )
+        pos = b + 3
 
     # 5c. <div> balance. A missing </div> does not break the render loudly:
     # the browser just nests every following sibling inside the block that

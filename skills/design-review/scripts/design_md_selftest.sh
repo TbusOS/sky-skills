@@ -13,7 +13,10 @@ PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../../.." && pwd)"
 DM="node $HERE/design-md.mjs"
-VA="node $HERE/visual-audit.mjs"
+# --no-narrow: the overlap fixture also scrolls sideways at 390px, and the
+# tests below count errors to prove what ONE waiver does. The narrow sweep has
+# its own selftest (visual_selftest.sh).
+VA="node $HERE/visual-audit.mjs --no-narrow"
 FIX="skills/design-review/scripts/fixtures"
 LAP="$FIX/bad-anthropic-severe-overlap.html"
 cd "$REPO"

@@ -88,6 +88,9 @@ const CORE_SURFACES = [
   'docs/KERNEL-CAPABILITIES.html',
   'docs/KERNEL-CODE-REVIEW.html',
   'docs/KERNEL-REPOS-SURVEY.html',
+  // The evaluator's own manual. It was never a surface, and by 2026-09-23 it
+  // said 84 and 86 known-bugs (99 on disk) and 51 visual-audit checks (57).
+  'skills/design-review/SKILL.md',
 ];
 
 // The flagship demos retell the repo in each aesthetic. They make the same
@@ -157,6 +160,20 @@ function buildChecks(truth) {
   const z = `(\\d+|${ZH_WORDS})`;
   const notPath = '(?![\\/\\w-])';   // keeps "python3 skills/…" out
   return [
+    {
+      id: 'visual-audit-checks',
+      truth: truth.visualAudit.checks,
+      what: 'distinct check ids in visual-audit.mjs',
+      patterns: [
+        // matched on tag-stripped text (see scanSurfaces): <code> is a space here
+        new RegExp(`\\b(\\d+)-check\\s+visual-audit\\.mjs`, 'g'),
+        new RegExp(`(\\d+)\\s*项\\s*visual-audit\\.mjs`, 'g'),
+        // SKILL.md's file list: "`visual-audit.mjs` — Gate 2 渲染 check(51 项)"
+        new RegExp(`visual-audit\\.mjs[^(\\n]{0,24}\\((\\d+)\\s*项\\)`, 'g'),
+        // the roadmap's pipeline card: "51 checks · 94 known-bugs"
+        new RegExp(`\\b(\\d+)\\s+checks\\s*·\\s*\\d+\\s+known-bugs`, 'g'),
+      ],
+    },
     {
       id: 'skills-total',
       truth: truth.skills.total,
@@ -308,11 +325,24 @@ async function deriveTruth() {
   const families = { systems: 0, design: 0, harness: 0 };
   for (const s of skills) if (ROSTER[s]) families[ROSTER[s]] += 1;
 
+  // How many checks visual-audit carries: the distinct finding ids in its
+  // source — the same rule design-md.mjs uses to decide which waiver ids
+  // exist, so "a check" means one thing everywhere. The pages said 51 (zh) and
+  // 38 (en) about the same paragraph while the source held 53; nobody had
+  // counted since the number was first written.
+  let vaChecks = 0;
+  const vaPath = resolve(REPO_ROOT, 'skills/design-review/scripts/visual-audit.mjs');
+  if (await exists(vaPath)) {
+    const src = await readFile(vaPath, 'utf-8');
+    vaChecks = new Set([...src.matchAll(/kind:\s*'([a-z0-9-]+)'/g)].map((m) => m[1])).size;
+  }
+
   return {
     skills: { total: skills.length, design: design.length, list: skills, families },
     canonical: { total: canonicalTotal, perSkill },
     knownBugs: { total: ids.length, dupes: [...new Set(dupes)] },
     kernel: { cases, subsys, rules: kRules },
+    visualAudit: { checks: vaChecks },
   };
 }
 
@@ -588,6 +618,7 @@ function printTruth(truth) {
     console.log(`      ${s.replace(/-design$/, '').padEnd(12)}${n}`);
   }
   console.log(`  known-bugs        ${truth.knownBugs.total}`);
+  console.log(`  visual-audit      ${truth.visualAudit.checks} checks`);
   console.log(`  kernel eval cases ${truth.kernel.cases}` +
     `  (subsystems ${truth.kernel.subsys} · rules ${truth.kernel.rules})`);
   if (truth.knownBugs.dupes.length) {

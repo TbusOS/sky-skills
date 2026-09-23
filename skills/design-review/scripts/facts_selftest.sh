@@ -91,20 +91,27 @@ VICTIM="docs/HARNESS-ROADMAP.html"
 cp "$VICTIM" "$VICTIM.selftest-bak"
 restore() { [ -f "$VICTIM.selftest-bak" ] && mv "$VICTIM.selftest-bak" "$VICTIM"; }
 trap restore EXIT
-python3 - "$VICTIM" <<'PY'
-import sys
+# The count on that page moves every time a canonical is added (59 → 67 on
+# 2026-09-15), and this test used to name the number: it then failed from that
+# day on, with the assertion below, and nobody ran it. Find the claim by its
+# shape, and make the Chinese half one less than whatever it currently says.
+STALE="$(python3 - "$VICTIM" <<'PY'
+import re, sys
 p = sys.argv[1]
 s = open(p, encoding='utf-8').read()
-old = '<span class="lang-zh">59 / 59 张 canonical'
-assert old in s, 'the fixture this test edits is gone — update the test, not the check'
-open(p, 'w', encoding='utf-8').write(s.replace(old, '<span class="lang-zh">58 / 58 张 canonical', 1))
+m = re.search(r'<span class="lang-zh">(\d+) / \1 张 canonical', s)
+assert m, 'the fixture this test edits is gone — update the test, not the check'
+n = int(m.group(1)) - 1
+open(p, 'w', encoding='utf-8').write(s[:m.start()] + f'<span class="lang-zh">{n} / {n} 张 canonical' + s[m.end():])
+print(n)
 PY
+)"
 out="$(bash "$REPO/bin/design-review" --facts 2>&1)"; rc=$?
 t "$rc" "1" "one half left stale fails the run"
 case "$out" in *"bilingual halves disagree"*) t y y "it is reported as its own kind, not as a stale count";;
                                           *) t n y "it is reported as its own kind, not as a stale count";; esac
 case "$out" in *"$VICTIM"*) t y y "the report names the file";; *) t n y "the report names the file";; esac
-case "$out" in *"58,58"*) t y y "and prints both halves so the reader can tell which is wrong";;
+case "$out" in *"$STALE,$STALE"*) t y y "and prints both halves so the reader can tell which is wrong";;
                        *) t n y "and prints both halves so the reader can tell which is wrong";; esac
 restore; trap - EXIT
 

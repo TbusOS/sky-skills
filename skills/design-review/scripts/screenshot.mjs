@@ -44,6 +44,7 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
 import { revealByScrolling } from './_reveal-scroll.mjs';
+import { localeFor, switchLang, judgeLang } from './_lang.mjs';
 
 const argv = process.argv.slice(2);
 const flag = (name) => (argv.find((a) => a.startsWith(`--${name}=`)) || '').split('=').slice(1).join('=') || null;
@@ -113,7 +114,7 @@ const page = await browser
     viewport: VIEWPORT,
     reducedMotion: 'reduce',
     deviceScaleFactor: scaleArg,
-    ...(langArg ? { locale: langArg === 'zh' ? 'zh-CN' : 'en-US' } : {}),
+    ...(langArg ? { locale: localeFor(langArg) } : {}),
   })
   .then((c) => c.newPage());
 await page.goto(url, { waitUntil: 'networkidle' });
@@ -127,23 +128,11 @@ await page.evaluate(() => document.fonts.ready);
 await page.waitForTimeout(500);
 let langReport = null;
 if (langArg) {
-  await page.evaluate((l) => document.documentElement.setAttribute('data-lang', l), langArg);
-  await page.waitForTimeout(200);
-  // Did it actually take? Count the elements of each side that have boxes.
+  // Switch + count what is showing on each side (_lang.mjs has the why).
   // `getClientRects().length` rather than a style read: the switch is done with
   // `display:none` on the other side, and a zero-box element is exactly what
   // "hidden" means here regardless of which rule hid it.
-  langReport = await page.evaluate(() => {
-    const boxed = (sel) => [...document.querySelectorAll(sel)]
-      .filter((e) => e.getClientRects().length > 0).length;
-    return {
-      attr: document.documentElement.getAttribute('data-lang'),
-      en: document.querySelectorAll('.lang-en').length,
-      zh: document.querySelectorAll('.lang-zh').length,
-      enShown: boxed('.lang-en'),
-      zhShown: boxed('.lang-zh'),
-    };
-  });
+  langReport = judgeLang(await switchLang(page, langArg), langArg);
 }
 if (themeArg) {
   await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), themeArg);
@@ -245,18 +234,15 @@ if (server) server.close();
 // So both get said out loud, and the language one can fail the run.
 let langBad = false;
 if (langReport) {
-  const { attr, en, zh, enShown, zhShown } = langReport;
-  const bilingual = en + zh > 0;
-  const want = langArg === 'zh' ? zhShown : enShown;
-  const other = langArg === 'zh' ? enShown : zhShown;
-  if (!bilingual) {
+  const { verdict, attr, want, other, total } = langReport;
+  if (verdict === 'no-markup') {
     console.log(`  · --lang=${langArg} had nothing to switch: this page carries no .lang-en/.lang-zh markup`);
-  } else if (want === 0) {
+  } else if (verdict === 'not-applied') {
     console.error(`✗ --lang=${langArg} did not take: html[data-lang]=${attr}, and 0 of `
-      + `${langArg === 'zh' ? zh : en} .lang-${langArg} elements are visible `
+      + `${total} .lang-${langArg} elements are visible `
       + `(${other} of the other side are). The image is in the wrong language.`);
     langBad = true;
-  } else if (other > 0) {
+  } else if (verdict === 'half') {
     // Found by probing rather than by reasoning: a page that sets the attribute
     // but is missing the `html[data-lang="zh"] .lang-en{display:none}` rule
     // shows BOTH sides, and the first version of this check passed it — it only
