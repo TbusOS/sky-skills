@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Diagram Gallery — anthropic-design</title>
-<meta name="description" content="77 copy-ready SVG diagrams in the anthropic-design language: architecture, flow, sequence, git graph, state machine, deployment, product mocks, and report charts.">
+<meta name="description" content="87 copy-ready SVG diagrams in the anthropic-design language: architecture, flow, sequence, git graph, state machine, deployment, product mocks, and report charts.">
 <meta property="og:title" content="Diagram Gallery — anthropic-design">
-<meta property="og:description" content="77 copy-ready SVG diagrams in the anthropic-design language: architecture, flow, sequence, git graph, state machine, deployment, product mocks, and report charts.">
+<meta property="og:description" content="87 copy-ready SVG diagrams in the anthropic-design language: architecture, flow, sequence, git graph, state machine, deployment, product mocks, and report charts.">
 <meta property="og:type" content="website">
 <link rel="stylesheet" href="../../skills/anthropic-design/assets/fonts.css">
 <link rel="stylesheet" href="../../skills/anthropic-design/assets/anthropic.css">
@@ -89,6 +89,7 @@
     <a href="#calls"><span class="lang-en">Calls</span><span class="lang-zh">调用与时序</span></a>
     <a href="#product"><span class="lang-en">Product</span><span class="lang-zh">产品展示</span></a>
     <a href="#reporting"><span class="lang-en">Reporting</span><span class="lang-zh">演讲汇报</span></a>
+    <a href="#judgement"><span class="lang-en">Checks</span><span class="lang-zh">判断与覆盖</span></a>
     <a href="index.html"><span class="lang-en">Demo</span><span class="lang-zh">主 demo</span></a>
   </div>
   <div style="display:flex; gap:var(--space-3); align-items:center;">
@@ -105,8 +106,8 @@
       <span class="lang-zh">让图替你把话说清</span>
     </h1>
     <p class="gal-intro">
-      <span class="lang-en">77 hand-built SVG figures in the anthropic-design language — for engineering docs, kernel &amp; hardware work, product walkthroughs, and slide decks. Every figure follows the diagram-craft contract: sized to its content, ≥2 semantic hues, solid color dots, readable at every label. Copy any of them straight into your page.</span>
-      <span class="lang-zh">77 张手工 SVG 图，覆盖工程文档、内核与硬件、产品演示、演讲汇报四类场合。每张都按 diagram-craft 工艺合约执行：画布贴内容、每图 ≥ 2 个语义色、实心色点、所有标签可读。点 Copy SVG 即可直接用进你的页面。</span>
+      <span class="lang-en">87 hand-built SVG figures in the anthropic-design language — for engineering docs, kernel &amp; hardware work, product walkthroughs, and slide decks. Every figure follows the diagram-craft contract: sized to its content, ≥2 semantic hues, solid color dots, readable at every label. Copy any of them straight into your page.</span>
+      <span class="lang-zh">87 张手工 SVG 图，覆盖工程文档、内核与硬件、产品演示、演讲汇报四类场合。每张都按 diagram-craft 工艺合约执行：画布贴内容、每图 ≥ 2 个语义色、实心色点、所有标签可读。点 Copy SVG 即可直接用进你的页面。</span>
     </p>
   </div>
 </header>
@@ -10000,6 +10001,1245 @@
     </figure>
   </div>
 </section>
+
+<!-- ===================== §7 JUDGEMENT ===================== -->
+<section class="anth-section" id="judgement">
+  <div class="anth-container anth-container--wide">
+    <span class="gal-kicker"><span class="lang-en">07 · checks &amp; coverage</span><span class="lang-zh">07 · 判断与覆盖</span></span>
+    <h2 style="font-family:var(--font-heading); font-size:34px; font-weight:600; letter-spacing:-0.01em; margin:var(--space-2) 0 0;">
+      <span class="lang-en">Checks, gates, and what they really cover</span>
+      <span class="lang-zh">检查、关卡，和它们真正管到了什么</span>
+    </h2>
+    <p class="gal-section-note">
+      <span class="lang-en">Ten figures for documents that explain how a tool decides: which gate stops which path, which check catches which failure, where a reading goes stale, what a wildcard swallowed. They came out of rewriting a sixteen-page design document where none of the existing types fit. Each one answers a question that a table or a flowchart leaves the reader to work out by hand.</span>
+      <span class="lang-zh">十张图，给「讲一个工具怎么判断」的文档用：哪道关卡拦下哪条路、哪道检查抓哪种问题、一个读数在哪一刻就旧了、通配符到底吞掉了什么。它们是整改一套 16 页设计文档时画出来的——那时图库里没有合适的画法。每一张回答的，都是表格或流程图会留给读者自己去一行行对的那个问题。</span>
+    </p>
+
+    <figure class="gal-fig">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Five ways to read a customer record, drawn as five horizontal paths running left to right into one target, the customers table, with four gates standing across them as vertical columns: an API gateway that checks token scope, a policy engine whose enforce flag is set per route, query alerts that page on bulk reads, and database grants, which see only who connects rather than who is asking. Each gate leaves one of four marks on each path: a solid bar where it really rejects the read, a dashed box where it runs but does not reject, a dashed box with a note where it is hooked in but not honoured, or grey text saying it never reaches that path. After the first solid bar a path turns into a faint dashed line. The public API is rejected at the gateway, the SQL console and the read replica at the database grants, and internal RPC at the policy engine. The admin panel is the one path still drawn as a solid orange line all the way into the table: the gateway never sees it, the database sees only the service's own role, and the only gate that does see it is the policy engine, which on that route is in audit mode, so it logs a deny and lets the read through. The query alerts never reject anything on any path." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs><pattern id="pgtDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern><marker id="pgtArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker></defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#pgtDot)"/>
+  <line x1="336" y1="94" x2="336" y2="96" stroke="#6a9bcc" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="336" y1="150" x2="336" y2="172" stroke="#6a9bcc" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="336" y1="198" x2="336" y2="234" stroke="#6a9bcc" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="336" y1="260" x2="336" y2="296" stroke="#6a9bcc" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="336" y1="322" x2="336" y2="358" stroke="#6a9bcc" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="336" y1="384" x2="336" y2="412" stroke="#6a9bcc" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="496" y1="94" x2="496" y2="96" stroke="#788c5d" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="496" y1="150" x2="496" y2="158" stroke="#788c5d" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="496" y1="212" x2="496" y2="234" stroke="#788c5d" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="496" y1="260" x2="496" y2="282" stroke="#788c5d" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="496" y1="336" x2="496" y2="358" stroke="#788c5d" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="496" y1="384" x2="496" y2="412" stroke="#788c5d" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="656" y1="94" x2="656" y2="220" stroke="#c9913f" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="656" y1="274" x2="656" y2="358" stroke="#c9913f" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="656" y1="384" x2="656" y2="412" stroke="#c9913f" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="816" y1="94" x2="816" y2="110" stroke="#141413" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="816" y1="136" x2="816" y2="172" stroke="#141413" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="816" y1="198" x2="816" y2="220" stroke="#141413" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="816" y1="274" x2="816" y2="296" stroke="#141413" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="816" y1="322" x2="816" y2="344" stroke="#141413" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <line x1="816" y1="398" x2="816" y2="412" stroke="#141413" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>
+  <rect x="912" y="100" width="176" height="304" rx="12" fill="#f3f1ea" stroke="#141413" stroke-width="1.4"/>
+  <rect x="32" y="108" width="200" height="48" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <path d="M232,132 H330" stroke="#6b6a5f" stroke-width="1.6" fill="none"/>
+  <path d="M342,132 H912" stroke="#cfccc0" stroke-width="1.4" stroke-dasharray="4 4" fill="none"/>
+  <rect x="32" y="170" width="200" height="48" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <path d="M232,194 H910" stroke="#d97757" stroke-width="1.8" marker-end="url(#pgtArrO)" fill="none"/>
+  <rect x="32" y="232" width="200" height="48" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <path d="M232,256 H810" stroke="#6b6a5f" stroke-width="1.6" fill="none"/>
+  <path d="M822,256 H912" stroke="#cfccc0" stroke-width="1.4" stroke-dasharray="4 4" fill="none"/>
+  <rect x="32" y="294" width="200" height="48" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <path d="M232,318 H490" stroke="#6b6a5f" stroke-width="1.6" fill="none"/>
+  <path d="M502,318 H912" stroke="#cfccc0" stroke-width="1.4" stroke-dasharray="4 4" fill="none"/>
+  <rect x="32" y="356" width="200" height="48" rx="8" fill="#ffffff" stroke="#e3e0d4"/>
+  <path d="M232,380 H810" stroke="#6b6a5f" stroke-width="1.6" fill="none"/>
+  <path d="M822,380 H912" stroke="#cfccc0" stroke-width="1.4" stroke-dasharray="4 4" fill="none"/>
+  <rect x="330" y="116" width="12" height="32" rx="3" fill="#6a9bcc"/>
+  <rect x="490" y="116" width="12" height="32" rx="3" fill="#788c5d"/>
+  <rect x="489" y="178" width="14" height="32" rx="3" fill="#ffffff" stroke="#788c5d" stroke-width="1.4" stroke-dasharray="3 2"/>
+  <rect x="649" y="240" width="14" height="32" rx="3" fill="#ffffff" stroke="#c9913f" stroke-width="1.4" stroke-dasharray="3 2"/>
+  <rect x="810" y="240" width="12" height="32" rx="3" fill="#141413"/>
+  <rect x="490" y="302" width="12" height="32" rx="3" fill="#788c5d"/>
+  <rect x="810" y="364" width="12" height="32" rx="3" fill="#141413"/>
+  <rect x="32" y="426" width="8" height="22" rx="2" fill="#6b6a5f"/>
+  <rect x="176" y="426" width="10" height="22" rx="2" fill="#ffffff" stroke="#6b6a5f" stroke-width="1.3" stroke-dasharray="3 2"/>
+  <path d="M32,464 H60" stroke="#6b6a5f" stroke-width="1.6" fill="none"/>
+  <path d="M256,464 H284" stroke="#cfccc0" stroke-width="1.4" stroke-dasharray="4 4" fill="none"/>
+  <path d="M476,464 H500" stroke="#d97757" stroke-width="1.8" marker-end="url(#pgtArrO)" fill="none"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">PATHS &#215; GATES &#183; WHICH GATE ACTUALLY STOPS EACH PATH</text>
+  <text x="1088" y="34" text-anchor="end" font-size="12" fill="#6b6a5f">all four gates installed</text>
+  <text x="336" y="64" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">API gateway</text>
+  <text x="336" y="82" text-anchor="middle" font-size="12" fill="#6b6a5f">checks the token's scope</text>
+  <text x="496" y="64" text-anchor="middle" font-size="13" font-weight="600" fill="#5d7045">Policy engine</text>
+  <text x="496" y="82" text-anchor="middle" font-size="12" fill="#6b6a5f">enforce flag, per route</text>
+  <text x="656" y="64" text-anchor="middle" font-size="13" font-weight="600" fill="#8a5a2a">Query alerts</text>
+  <text x="656" y="82" text-anchor="middle" font-size="12" fill="#6b6a5f">pages on bulk reads</text>
+  <text x="816" y="64" text-anchor="middle" font-size="13" font-weight="600" fill="#141413">DB grants</text>
+  <text x="816" y="82" text-anchor="middle" font-size="12" fill="#6b6a5f">sees only the DB role</text>
+  <text x="32" y="82" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">FIVE WAYS IN</text>
+  <text x="928" y="64" font-size="13" font-weight="600" fill="#141413">customers table</text>
+  <text x="928" y="82" font-size="12" fill="#6b6a5f">email &#183; phone &#183; address</text>
+  <text x="48" y="128" font-size="13" font-weight="600" fill="#141413">Public API</text>
+  <text x="48" y="146" font-size="12" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">GET /v1/customers/:id</text>
+  <text x="928" y="136" font-size="12" fill="#6b6a5f">stopped by the gateway</text>
+  <text x="48" y="190" font-size="13" font-weight="600" fill="#141413">Admin panel</text>
+  <text x="48" y="208" font-size="12" fill="#6b6a5f">support staff, in the browser</text>
+  <text x="928" y="198" font-size="12" font-weight="600" fill="#c2613f">arrives</text>
+  <text x="48" y="252" font-size="13" font-weight="600" fill="#141413">SQL console</text>
+  <text x="48" y="270" font-size="12" fill="#6b6a5f">psql on the bastion host</text>
+  <text x="928" y="260" font-size="12" fill="#6b6a5f">stopped by DB grants</text>
+  <text x="48" y="314" font-size="13" font-weight="600" fill="#141413">Internal RPC</text>
+  <text x="48" y="332" font-size="12" fill="#6b6a5f">another service asks</text>
+  <text x="928" y="322" font-size="12" fill="#6b6a5f">stopped by policy</text>
+  <text x="48" y="376" font-size="13" font-weight="600" fill="#141413">Read replica</text>
+  <text x="48" y="394" font-size="12" fill="#6b6a5f">a BI tool connects directly</text>
+  <text x="928" y="384" font-size="12" fill="#6b6a5f">stopped by DB grants</text>
+  <text x="336" y="109" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">rejects &#183; no scope</text>
+  <text x="496" y="109" text-anchor="middle" font-size="12" font-weight="600" fill="#5d7045">rejects</text>
+  <text x="816" y="124" text-anchor="middle" font-size="12" font-style="italic" fill="#8c8a7d">not reached</text>
+  <text x="336" y="186" text-anchor="middle" font-size="12" font-style="italic" fill="#8c8a7d">not reached</text>
+  <text x="496" y="171" text-anchor="middle" font-size="12" fill="#5d7045">audit mode &#183; allows</text>
+  <text x="816" y="186" text-anchor="middle" font-size="12" font-style="italic" fill="#8c8a7d">not reached</text>
+  <text x="336" y="248" text-anchor="middle" font-size="12" font-style="italic" fill="#8c8a7d">not reached</text>
+  <text x="496" y="248" text-anchor="middle" font-size="12" font-style="italic" fill="#8c8a7d">not reached</text>
+  <text x="656" y="233" text-anchor="middle" font-size="12" fill="#8a5a2a">pages after the fact</text>
+  <text x="816" y="233" text-anchor="middle" font-size="12" font-weight="600" fill="#141413">rejects &#183; no grant</text>
+  <text x="336" y="310" text-anchor="middle" font-size="12" font-style="italic" fill="#8c8a7d">not reached</text>
+  <text x="496" y="295" text-anchor="middle" font-size="12" font-weight="600" fill="#5d7045">rejects &#183; caller id</text>
+  <text x="816" y="310" text-anchor="middle" font-size="12" font-style="italic" fill="#8c8a7d">not reached</text>
+  <text x="336" y="372" text-anchor="middle" font-size="12" font-style="italic" fill="#8c8a7d">not reached</text>
+  <text x="496" y="372" text-anchor="middle" font-size="12" font-style="italic" fill="#8c8a7d">not reached</text>
+  <text x="656" y="372" text-anchor="middle" font-size="12" font-style="italic" fill="#8c8a7d">no such event</text>
+  <text x="816" y="357" text-anchor="middle" font-size="12" font-weight="600" fill="#141413">rejects &#183; grants copied</text>
+  <text x="48" y="442" font-size="12" fill="#6b6a5f">rejects the read</text>
+  <text x="194" y="442" font-size="12" fill="#6b6a5f">runs, does not reject (alert only, or audit mode)</text>
+  <text x="520" y="442" font-size="12" font-style="italic" fill="#8c8a7d">not reached</text>
+  <text x="596" y="442" font-size="12" fill="#6b6a5f">= this gate cannot see that path at all</text>
+  <text x="68" y="468" font-size="12" fill="#6b6a5f">still getting through here</text>
+  <text x="292" y="468" font-size="12" fill="#6b6a5f">already stopped upstream</text>
+  <text x="512" y="468" font-size="12" fill="#6b6a5f">reaches the table &#8212; no gate stops it</text>
+  <text x="32" y="500" font-size="12" fill="#6b6a5f">Four of five paths meet a real rejection. The admin panel meets exactly one gate, and on that route the policy engine is in audit mode: it logs deny, then allows.</text>
+  <text x="32" y="520" font-size="12" fill="#6b6a5f">Query alerts reject nothing anywhere &#8212; a detector drawn as a gate. DB grants only see who connects, so any path through the service's own role passes them.</text>
+  <text x="32" y="540" font-size="12" font-style="italic" fill="#8c8a7d">Stepper: step k installs gates 1..k from the same table, and each line fades after the first solid bar among the installed gates. Nothing else moves.</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">paths &#215; gates &#183; which one stops each path</span><span class="lang-zh">通路 × 关卡 · 每条路被谁拦下</span></span>
+          <span class="lang-en">Five ways to reach one table, four gates across them. On each path a gate is one of four marks: a solid bar where it rejects, a dashed box where it runs but lets the read through (an alert, a policy in audit mode), a grey label where it cannot see that path at all. After the first solid bar the line fades; the one path that meets no solid bar reaches the table in colour. A matrix holds the same cells, but the reader has to walk every row to find where it stops &mdash; here the stop is where the line changes. As a stepper, step k installs gates 1..k from the same table and the default step shows all four. Template: <code>templates/diagrams/path-gates.svg</code>.</span>
+          <span class="lang-zh">五条路通向同一张表，路上横着四道关卡。每道关卡在每条路上只用四种记号：实心条是真拒绝；虚框是会跑但放行（只报警、策略处在审计模式）；灰字是这条路它根本看不见。碰到第一根实心条之后那条线就变淡；一根实心条都没碰到的那条路，带着颜色一直走到表。对照表也装得下这些格子，但读者得把每一行自己串起来才知道停在哪——这里停在哪，就是线变样的地方。做成步进图时，第 k 步装上第 1 到 k 道关卡，所有步从同一张表生成，默认显示四道都装上那一步。模板：<code>templates/diagrams/path-gates.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="A coverage dot chart for one web service's release pipeline. Six ways a release goes wrong run down the left as rows; four checks run across the top as columns, grouped by when they run: unit tests and an API contract diff before merge, a migration test on a production-size copy before deploy, and a five percent canary on real traffic in production. A solid dot means the check fails the release for that row, a grey capsule means it only prints a warning, a cross means the row is left out of that check on purpose, and a blank means nobody looks. A last column counts the solid dots in each row. Row one is caught only by unit tests, row two by both the contract diff and the canary, row three only by the migration test, rows four and five only by the canary (row four's unit test merely prints, row five is crossed out of unit tests because they pin every flag off), and row six by nobody: the contract diff skips schemas the team does not own and webhooks are not routed through the canary. Four rows hang on a single check, one row has none, and no two columns share a pattern." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs><pattern id="cvdDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern></defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#cvdDot)"/>
+  <rect x="32" y="138" width="1056" height="36" rx="6" fill="#f3f1ea"/>
+  <rect x="32" y="218" width="1056" height="36" rx="6" fill="#f3f1ea"/>
+  <rect x="32" y="298" width="1056" height="36" rx="6" fill="#f3f1ea"/>
+  <rect x="388" y="72" width="132" height="54" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+  <rect x="388" y="72" width="132" height="4" rx="2" fill="#6a9bcc"/>
+  <rect x="526" y="72" width="132" height="54" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+  <rect x="526" y="72" width="132" height="4" rx="2" fill="#6a9bcc"/>
+  <rect x="664" y="72" width="132" height="54" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+  <rect x="664" y="72" width="132" height="4" rx="2" fill="#788c5d"/>
+  <rect x="802" y="72" width="132" height="54" rx="10" fill="#ffffff" stroke="#e3e0d4"/>
+  <rect x="802" y="72" width="132" height="4" rx="2" fill="#c9913f"/>
+  <circle cx="46" cy="156" r="10" fill="#141413"/>
+  <circle cx="454" cy="156" r="7" fill="#141413"/>
+  <rect x="948" y="144" width="140" height="24" rx="12" fill="#f0e4d8" stroke="#c9913f"/>
+  <circle cx="46" cy="196" r="10" fill="#141413"/>
+  <circle cx="592" cy="196" r="7" fill="#141413"/>
+  <circle cx="868" cy="196" r="7" fill="#141413"/>
+  <circle cx="46" cy="236" r="10" fill="#141413"/>
+  <circle cx="730" cy="236" r="7" fill="#141413"/>
+  <rect x="948" y="224" width="140" height="24" rx="12" fill="#f0e4d8" stroke="#c9913f"/>
+  <circle cx="46" cy="276" r="10" fill="#141413"/>
+  <rect x="404" y="265" width="100" height="22" rx="11" fill="#e7e4d9" stroke="#d8d4c8"/>
+  <circle cx="868" cy="276" r="7" fill="#141413"/>
+  <rect x="948" y="264" width="140" height="24" rx="12" fill="#f0e4d8" stroke="#c9913f"/>
+  <circle cx="46" cy="316" r="10" fill="#141413"/>
+  <path d="M448,310 L460,322 M448,322 L460,310" stroke="#6b6a5f" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <circle cx="868" cy="316" r="7" fill="#141413"/>
+  <rect x="948" y="304" width="140" height="24" rx="12" fill="#f0e4d8" stroke="#c9913f"/>
+  <circle cx="46" cy="356" r="10" fill="#141413"/>
+  <path d="M586,350 L598,362 M586,362 L598,350" stroke="#6b6a5f" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <path d="M862,350 L874,362 M862,362 L874,350" stroke="#6b6a5f" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <rect x="948" y="344" width="140" height="24" rx="12" fill="#f4d9cd" stroke="#d97757"/>
+  <circle cx="38" cy="406" r="6" fill="#141413"/>
+  <rect x="172" y="396" width="34" height="20" rx="10" fill="#e7e4d9" stroke="#d8d4c8"/>
+  <path d="M368,401 L378,411 M368,411 L378,401" stroke="#6b6a5f" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <rect x="690" y="396" width="34" height="20" rx="10" fill="#f0e4d8" stroke="#c9913f"/>
+  <rect x="830" y="396" width="34" height="20" rx="10" fill="#f4d9cd" stroke="#d97757"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">COVERAGE DOTS &#183; WHICH CHECK CATCHES WHICH FAILURE</text>
+  <text x="1088" y="34" text-anchor="end" font-size="12" fill="#6b6a5f">one web service's release pipeline</text>
+  <text x="523" y="62" text-anchor="middle" font-size="12" font-weight="600" letter-spacing="1.2" fill="#2f5c8a">BEFORE MERGE</text>
+  <text x="454" y="98" text-anchor="middle" font-size="13" font-weight="600" fill="#141413">unit tests</text>
+  <text x="454" y="116" text-anchor="middle" font-size="12" fill="#6b6a5f">one function</text>
+  <text x="592" y="98" text-anchor="middle" font-size="13" font-weight="600" fill="#141413">contract diff</text>
+  <text x="592" y="116" text-anchor="middle" font-size="12" fill="#6b6a5f">API schema</text>
+  <text x="730" y="62" text-anchor="middle" font-size="12" font-weight="600" letter-spacing="1.2" fill="#5d7045">BEFORE DEPLOY</text>
+  <text x="730" y="98" text-anchor="middle" font-size="13" font-weight="600" fill="#141413">migration test</text>
+  <text x="730" y="116" text-anchor="middle" font-size="12" fill="#6b6a5f">prod-size copy</text>
+  <text x="868" y="62" text-anchor="middle" font-size="12" font-weight="600" letter-spacing="1.2" fill="#8a5a2a">IN PRODUCTION</text>
+  <text x="868" y="98" text-anchor="middle" font-size="13" font-weight="600" fill="#141413">canary &#183; 5%</text>
+  <text x="868" y="116" text-anchor="middle" font-size="12" fill="#6b6a5f">real traffic</text>
+  <text x="1018" y="98" text-anchor="middle" font-size="13" font-weight="600" fill="#141413">caught by</text>
+  <text x="1018" y="116" text-anchor="middle" font-size="12" fill="#6b6a5f">solid dots only</text>
+  <text x="32" y="116" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">WHAT GOES WRONG</text>
+  <text x="46" y="160" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">1</text>
+  <text x="66" y="161" font-size="13" fill="#141413">A pure function returns the wrong total</text>
+  <text x="1018" y="160" text-anchor="middle" font-size="12" font-weight="600" fill="#8a5a2a">only unit tests</text>
+  <text x="46" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">2</text>
+  <text x="66" y="201" font-size="13" fill="#141413">A response field is renamed</text>
+  <text x="1018" y="200" text-anchor="middle" font-size="12" fill="#6b6a5f">2 checks</text>
+  <text x="46" y="240" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">3</text>
+  <text x="66" y="241" font-size="13" fill="#141413">A migration locks a big table for minutes</text>
+  <text x="1018" y="240" text-anchor="middle" font-size="12" font-weight="600" fill="#8a5a2a">only migration test</text>
+  <text x="46" y="280" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">4</text>
+  <text x="66" y="281" font-size="13" fill="#141413">An N+1 query triples p99 latency</text>
+  <text x="454" y="280" text-anchor="middle" font-size="12" fill="#6b6a5f">prints, passes</text>
+  <text x="1018" y="280" text-anchor="middle" font-size="12" font-weight="600" fill="#8a5a2a">only the canary</text>
+  <text x="46" y="320" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">5</text>
+  <text x="66" y="321" font-size="13" fill="#141413">A flag defaults to on in production only</text>
+  <text x="1018" y="320" text-anchor="middle" font-size="12" font-weight="600" fill="#8a5a2a">only the canary</text>
+  <text x="46" y="360" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">6</text>
+  <text x="66" y="361" font-size="13" fill="#141413">A payment webhook changes its signature</text>
+  <text x="1018" y="360" text-anchor="middle" font-size="12" font-weight="600" fill="#c2613f">nobody</text>
+  <text x="52" y="410" font-size="12" fill="#6b6a5f">fails the release</text>
+  <text x="214" y="410" font-size="12" fill="#6b6a5f">prints, does not fail</text>
+  <text x="388" y="410" font-size="12" fill="#6b6a5f">left out on purpose</text>
+  <text x="534" y="410" font-size="12" font-style="italic" fill="#8c8a7d">blank = nobody looks</text>
+  <text x="732" y="410" font-size="12" fill="#6b6a5f">one catcher</text>
+  <text x="872" y="410" font-size="12" fill="#6b6a5f">no catcher</text>
+  <text x="32" y="448" font-size="12" fill="#6b6a5f">Read along the rows. Rows 1, 3, 4 and 5 hang on one check each: drop that column and the failure ships. Row 4 looks covered twice,</text>
+  <text x="32" y="468" font-size="12" fill="#6b6a5f">but the unit test only prints. Row 6 is empty twice over &#8212; the contract diff skips schemas we don't own, and webhooks skip the canary.</text>
+  <text x="32" y="488" font-size="12" fill="#6b6a5f">That empty row is not a gap in the drawing; it is the next check to write.</text>
+  <text x="32" y="516" font-size="12" font-style="italic" fill="#8c8a7d">Then read down the columns: no two share a pattern, so none of them is redundant. The &#215; in row 5 is a decision, not a gap &#8212;</text>
+  <text x="32" y="536" font-size="12" font-style="italic" fill="#8c8a7d">unit tests pin every feature flag off, which is exactly why they cannot see a flag's production default.</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">coverage &#183; which check catches what</span><span class="lang-zh">覆盖 · 哪道检查抓哪种问题</span></span>
+          <span class="lang-en">Six failures down the side, four checks across. A solid dot fails the release, a grey pill prints and passes, &#215; is a check left out on purpose, and blank means nobody looks. The right-hand column names each row&rsquo;s shape: rows 1, 3, 4 and 5 each hang on a single check, and row 6 is caught by nobody &mdash; not a gap in the drawing but the next check to write. Row 4 looks covered twice, but the unit test only prints. Read down the columns as well: no two share a pattern, so none of them is redundant. Template: <code>templates/diagrams/coverage-dots.svg</code>.</span>
+          <span class="lang-zh">竖着是六种会出的问题，横着是四道检查。实心点是会让发布失败；灰色胶囊是只打印、不判失败；× 是故意不给这道检查；空白是没人看。右边一列直接说出每一行的形状：第 1、3、4、5 行各自只靠一道检查；第 6 行谁都抓不到——那不是图画漏了，是下一道该写的检查。第 4 行看着有两道检查，其实单元测试那道只打印、不判失败。再竖着读每一列：没有两列长得一样，所以没有哪一道是多余的。模板：<code>templates/diagrams/coverage-dots.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="A grid for why a number printed at build time can already be out of date. Four horizontal bands are places: the advisory database that says what counts as vulnerable and the lockfile in the repository, grouped as what the scan reads, then the container image and the running pods, grouped as what actually runs. Three columns are moments: the build, when the scan runs; the weeks after; and a re-scan now. The build's reading, zero known vulnerabilities, is drawn as a gold stamp over the first column covering only the two rows it was computed from. Five numbered badges sit where things go stale. One, at build time in the image row: the base image ships an old TLS library, and lockfile scans never read OS packages, so the stamp was wrong the moment it was printed. Two, in the weeks after, in the advisory row: a new advisory names a version that is pinned, and nobody had to change anything. Three, in the lockfile row: a dependency is bumped but the image is not rebuilt. Four and five, in the running pods row: someone installs a package inside a live pod, and a paused rollout leaves half the pods on the old image. The re-scan column is shaded orange and reads a different pair of rows: today's advisories and the image digests actually running, not the lockfile. It sees badges one, two and five, and still misses four, because a change made inside a live pod is in no image." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs><pattern id="wwgDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern></defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#wwgDot)"/>
+  <rect x="868" y="44" width="220" height="360" rx="12" fill="#f7e4dc" stroke="#d97757" stroke-width="1.2"/>
+  <line x1="548" y1="52" x2="548" y2="404" stroke="#e3e0d4" stroke-width="1"/>
+  <line x1="860" y1="52" x2="860" y2="404" stroke="#e3e0d4" stroke-width="1"/>
+  <line x1="32" y1="96" x2="860" y2="96" stroke="#d8d4c8" stroke-width="1"/>
+  <line x1="32" y1="182" x2="860" y2="182" stroke="#e3e0d4" stroke-width="1"/>
+  <line x1="32" y1="246" x2="860" y2="246" stroke="#d8d4c8" stroke-width="1"/>
+  <line x1="32" y1="330" x2="860" y2="330" stroke="#e3e0d4" stroke-width="1"/>
+  <circle cx="40" cy="147" r="4.5" fill="#6a9bcc"/>
+  <circle cx="40" cy="207" r="4.5" fill="#6a9bcc"/>
+  <circle cx="40" cy="295" r="4.5" fill="#788c5d"/>
+  <circle cx="40" cy="355" r="4.5" fill="#788c5d"/>
+  <path d="M280,128 H274 V236 H280" stroke="#c9913f" stroke-width="1.6" fill="none"/>
+  <rect x="292" y="150" width="236" height="64" rx="6" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.8"/>
+  <rect x="296" y="154" width="228" height="56" rx="4" fill="none" stroke="#c9913f" stroke-width="0.8"/>
+  <circle cx="294" cy="294" r="10" fill="#141413"/>
+  <circle cx="582" cy="146" r="10" fill="#141413"/>
+  <circle cx="582" cy="206" r="10" fill="#141413"/>
+  <circle cx="582" cy="346" r="10" fill="#141413"/>
+  <circle cx="582" cy="376" r="10" fill="#141413"/>
+  <circle cx="38" cy="428" r="4.5" fill="#6a9bcc"/>
+  <circle cx="194" cy="428" r="4.5" fill="#788c5d"/>
+  <circle cx="350" cy="428" r="10" fill="#141413"/>
+  <rect x="566" y="418" width="30" height="20" rx="4" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.6"/>
+  <rect x="790" y="418" width="30" height="20" rx="6" fill="#f7e4dc" stroke="#d97757" stroke-width="1.2"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">WHERE &#215; WHEN &#183; WHY THE BUILD'S NUMBER IS ALREADY OLD</text>
+  <text x="1088" y="34" text-anchor="end" font-size="12" fill="#6b6a5f">one service, one container image</text>
+  <text x="284" y="64" font-size="13" font-weight="600" fill="#141413">build &#183; the scan runs</text>
+  <text x="284" y="82" font-size="12" fill="#6b6a5f">lockfile vs today's advisories</text>
+  <text x="572" y="64" font-size="13" font-weight="600" fill="#141413">the weeks after</text>
+  <text x="572" y="82" font-size="12" fill="#6b6a5f">nobody has to touch anything</text>
+  <text x="884" y="64" font-size="13" font-weight="600" fill="#c2613f">re-scan now</text>
+  <text x="884" y="82" font-size="12" fill="#6b6a5f">reads what runs, not the repo</text>
+  <text x="32" y="82" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">WHERE IT LIVES</text>
+  <text x="32" y="116" font-size="12" font-weight="600" letter-spacing="1.2" fill="#2f5c8a">WHAT THE SCAN READS</text>
+  <text x="32" y="264" font-size="12" font-weight="600" letter-spacing="1.2" fill="#5d7045">WHAT ACTUALLY RUNS</text>
+  <text x="52" y="152" font-size="13" font-weight="600" fill="#141413">Advisory database</text>
+  <text x="52" y="170" font-size="12" fill="#6b6a5f">what counts as vulnerable</text>
+  <text x="52" y="212" font-size="13" font-weight="600" fill="#141413">Lockfile</text>
+  <text x="52" y="230" font-size="12" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">package-lock.json</text>
+  <text x="52" y="300" font-size="13" font-weight="600" fill="#141413">Container image</text>
+  <text x="52" y="318" font-size="12" fill="#6b6a5f">base OS layers + app</text>
+  <text x="52" y="360" font-size="13" font-weight="600" fill="#141413">Running pods</text>
+  <text x="52" y="378" font-size="12" fill="#6b6a5f">what is serving traffic</text>
+  <text x="410" y="178" text-anchor="middle" font-size="14" font-weight="600" fill="#8a5a2a">0 known vulnerabilities</text>
+  <text x="410" y="198" text-anchor="middle" font-size="12" fill="#8a5a2a">computed from these two rows</text>
+  <text x="294" y="298" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">1</text>
+  <text x="312" y="298" font-size="12.5" font-weight="600" fill="#141413">base image ships an old libssl</text>
+  <text x="312" y="316" font-size="12" fill="#6b6a5f">lockfile scans skip OS packages</text>
+  <text x="284" y="364" font-size="12" font-style="italic" fill="#8c8a7d">rolled out to every pod</text>
+  <text x="582" y="150" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">2</text>
+  <text x="600" y="150" font-size="12.5" font-weight="600" fill="#141413">new advisory for a pinned version</text>
+  <text x="600" y="168" font-size="12" fill="#6b6a5f">nobody changed anything</text>
+  <text x="582" y="210" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">3</text>
+  <text x="600" y="210" font-size="12.5" font-weight="600" fill="#141413">lockfile bumped, image not rebuilt</text>
+  <text x="600" y="228" font-size="12" fill="#6b6a5f">the repo now describes something else</text>
+  <text x="572" y="304" font-size="12" font-style="italic" fill="#8c8a7d">unchanged &#8212; an image never changes</text>
+  <text x="582" y="350" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">4</text>
+  <text x="600" y="350" font-size="12.5" font-weight="600" fill="#141413">npm install inside a live pod</text>
+  <text x="582" y="380" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">5</text>
+  <text x="600" y="380" font-size="12.5" font-weight="600" fill="#141413">half the pods still run the old image</text>
+  <text x="884" y="152" font-size="12.5" font-weight="600" fill="#c2613f">reads today's list</text>
+  <text x="884" y="170" font-size="12" fill="#6b6a5f">&#8212; so it sees 2</text>
+  <text x="884" y="216" font-size="12" font-style="italic" fill="#8c8a7d">not read: not what runs</text>
+  <text x="884" y="300" font-size="12.5" font-weight="600" fill="#c2613f">reads the digests running</text>
+  <text x="884" y="318" font-size="12" fill="#6b6a5f">&#8212; sees 1, and 5's old image</text>
+  <text x="884" y="356" font-size="12" font-style="italic" fill="#8c8a7d">misses 4: a change made in</text>
+  <text x="884" y="374" font-size="12" font-style="italic" fill="#8c8a7d">a live pod is in no image</text>
+  <text x="50" y="432" font-size="12" fill="#6b6a5f">what the scan reads</text>
+  <text x="206" y="432" font-size="12" fill="#6b6a5f">what actually runs</text>
+  <text x="350" y="432" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">1</text>
+  <text x="366" y="432" font-size="12" fill="#6b6a5f">where and when it goes stale</text>
+  <text x="604" y="432" font-size="12" fill="#6b6a5f">the number printed at build</text>
+  <text x="828" y="432" font-size="12" fill="#6b6a5f">what the re-scan reads</text>
+  <text x="32" y="476" font-size="12" fill="#6b6a5f">The build printed &#8220;0 known vulnerabilities&#8221; and it was wrong at that very moment: badge 1 sits in a row the scan never read.</text>
+  <text x="32" y="496" font-size="12" fill="#6b6a5f">Badges 2&#8211;5 happen later, in three different places &#8212; and badge 2 needs nobody to do anything except wait.</text>
+  <text x="32" y="516" font-size="12" fill="#6b6a5f">So the re-scan reads a different pair of rows &#8212; today's advisories and the digests actually running, not the lockfile &#8212; and still misses badge 4.</text>
+  <text x="32" y="540" font-size="12" font-style="italic" fill="#8c8a7d">A reading is only as fresh as the rows it was computed from, at the moment it was computed. Draw those rows under the stamp.</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">where &#215; when &#183; why a reading is already old</span><span class="lang-zh">放在哪 × 什么时候 · 读数为什么当场就旧</span></span>
+          <span class="lang-en">Bands are places &mdash; what the scan reads, what actually runs &mdash; and columns are moments: the build, the weeks after, the re-scan. The number printed at build time is a stamp over the two rows it was computed from, and numbered badges sit in the cell where each failure really happens. Badge 1 is already true at the build, in a row the scan never read; badge 2 needs nobody to act, only time. The re-scan column reads a different pair of rows and still misses badge 4. Template: <code>templates/diagrams/where-when-grid.svg</code>.</span>
+          <span class="lang-zh">横带是地方——扫描读的是什么、真正在跑的是什么；竖列是时刻——构建那一刻、之后几周、重扫这一刻。构建时打出来的那个数，画成盖在它所依据的那两行上的一个戳；编号徽章钉在每种失效真实发生的那一格。徽章 1 在构建那一刻就已经成立，只是落在扫描根本没读的那一行；徽章 2 不需要任何人动手，等着就会发生。重扫那一列读的是另外两行，照样漏掉徽章 4。模板：<code>templates/diagrams/where-when-grid.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="One path drawn one cell per segment, with a rule's segments aligned underneath, in two panels. Panel A: the path logs/eu/2026/09/app.gz against the rule logs/*/app.gz, read by two tools. Where the star stops at a slash, it takes only the segment eu, the rule's app.gz lands under 2026 and is outlined in orange as a mismatch, and two path segments are left with no rule segment under them: no match. Where the star crosses slashes, one wide star cell spans eu, 2026 and 09, and app.gz lands on app.gz: match. Panel B: the path services/billing/secrets/key.pem, with a dashed vertical cut between billing and secrets because a sync tool has been pointed at services/billing/ instead of the repository root, so it now sees secrets/key.pem. The two segments left of the cut are greyed. Rule one, **/billing/secrets/**, has its billing segment left of the cut, outlined in orange: it no longer matches, and the key gets synced. Rule two, **/secrets/**, names only segments right of the cut and still matches." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs><pattern id="sgaDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern></defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#sgaDot)"/>
+  <line x1="32" y1="236" x2="1088" y2="236" stroke="#e3e0d4" stroke-width="1"/>
+  <line x1="444" y1="282" x2="444" y2="428" stroke="#141413" stroke-width="1.6" stroke-dasharray="5 4"/>
+  <rect x="960" y="52" width="128" height="22" rx="6" fill="#e2ecf5" stroke="#6a9bcc"/>
+  <rect x="216" y="88" width="68" height="32" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="308" y="88" width="52" height="32" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="384" y="88" width="68" height="32" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="476" y="88" width="52" height="32" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="552" y="88" width="84" height="32" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="216" y="136" width="68" height="32" rx="6" fill="#e2ecf5" stroke="#6a9bcc" stroke-width="1.2"/>
+  <rect x="308" y="136" width="52" height="32" rx="6" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.2"/>
+  <rect x="384" y="136" width="68" height="32" rx="6" fill="#f7e4dc" stroke="#d97757" stroke-width="1.8"/>
+  <rect x="476" y="136" width="52" height="32" rx="6" fill="none" stroke="#cfccc0" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <rect x="552" y="136" width="84" height="32" rx="6" fill="none" stroke="#cfccc0" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <rect x="704" y="140" width="100" height="24" rx="12" fill="#e7e4d9" stroke="#d8d4c8"/>
+  <rect x="216" y="184" width="68" height="32" rx="6" fill="#e2ecf5" stroke="#6a9bcc" stroke-width="1.2"/>
+  <rect x="308" y="184" width="220" height="32" rx="6" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.2"/>
+  <rect x="552" y="184" width="84" height="32" rx="6" fill="#e2ecf5" stroke="#6a9bcc" stroke-width="1.2"/>
+  <rect x="704" y="188" width="100" height="24" rx="12" fill="#e5e9dd" stroke="#788c5d"/>
+  <rect x="216" y="292" width="100" height="32" rx="6" fill="#f1efe8" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="340" y="292" width="92" height="32" rx="6" fill="#f1efe8" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="456" y="292" width="92" height="32" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="572" y="292" width="92" height="32" rx="6" fill="#ffffff" stroke="#d8d4c8" stroke-width="1.2"/>
+  <rect x="216" y="340" width="100" height="32" rx="6" fill="#f1efe8" stroke="#d9bf94" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <rect x="340" y="340" width="92" height="32" rx="6" fill="#f7e4dc" stroke="#d97757" stroke-width="1.8"/>
+  <rect x="456" y="340" width="92" height="32" rx="6" fill="#e2ecf5" stroke="#6a9bcc" stroke-width="1.2"/>
+  <rect x="572" y="340" width="92" height="32" rx="6" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.2"/>
+  <rect x="704" y="344" width="100" height="24" rx="12" fill="#f4d9cd" stroke="#d97757"/>
+  <rect x="216" y="388" width="216" height="32" rx="6" fill="#f1efe8" stroke="#d9bf94" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <rect x="456" y="388" width="92" height="32" rx="6" fill="#e2ecf5" stroke="#6a9bcc" stroke-width="1.2"/>
+  <rect x="572" y="388" width="92" height="32" rx="6" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.2"/>
+  <rect x="704" y="392" width="100" height="24" rx="12" fill="#e5e9dd" stroke="#788c5d"/>
+  <rect x="32" y="468" width="28" height="20" rx="5" fill="#e2ecf5" stroke="#6a9bcc"/>
+  <rect x="218" y="468" width="28" height="20" rx="5" fill="#f0e4d8" stroke="#c9913f"/>
+  <rect x="544" y="468" width="28" height="20" rx="5" fill="#f7e4dc" stroke="#d97757" stroke-width="1.6"/>
+  <rect x="836" y="468" width="28" height="20" rx="5" fill="#f1efe8" stroke="#d8d4c8"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">SEGMENT ALIGNMENT &#183; WHAT * SWALLOWS, WHAT A CUT LEAVES</text>
+  <text x="1088" y="34" text-anchor="end" font-size="12" fill="#6b6a5f">one cell per path segment</text>
+  <text x="32" y="66" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">A &#183; ONE RULE, TWO MEANINGS OF *</text>
+  <text x="952" y="66" text-anchor="end" font-size="12" fill="#6b6a5f">the rule, in both tools</text>
+  <text x="1024" y="67" text-anchor="middle" font-size="13" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">logs/*/app.gz</text>
+  <text x="32" y="109" font-size="13" font-weight="600" fill="#141413">path</text>
+  <text x="250" y="109" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#141413">logs</text>
+  <text x="334" y="109" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#141413">eu</text>
+  <text x="418" y="109" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#141413">2026</text>
+  <text x="502" y="109" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#141413">09</text>
+  <text x="594" y="109" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#141413">app.gz</text>
+  <text x="296" y="109" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">/</text>
+  <text x="372" y="109" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">/</text>
+  <text x="464" y="109" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">/</text>
+  <text x="540" y="109" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">/</text>
+  <text x="32" y="149" font-size="13" font-weight="600" fill="#141413">segment glob</text>
+  <text x="32" y="166" font-size="12" fill="#6b6a5f">* stops at /</text>
+  <text x="250" y="157" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">logs</text>
+  <text x="334" y="157" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">*</text>
+  <text x="418" y="157" text-anchor="middle" font-size="14" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c2613f">app.gz</text>
+  <text x="754" y="156" text-anchor="middle" font-size="12" font-weight="600" fill="#141413">no match</text>
+  <text x="820" y="156" font-size="12" fill="#6b6a5f">* took one segment, and app.gz &#8800; 2026</text>
+  <text x="32" y="197" font-size="13" font-weight="600" fill="#141413">string glob</text>
+  <text x="32" y="214" font-size="12" fill="#6b6a5f">* crosses /</text>
+  <text x="250" y="205" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">logs</text>
+  <text x="324" y="205" font-size="14" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">*</text>
+  <text x="344" y="205" font-size="13" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">= eu/2026/09</text>
+  <text x="594" y="205" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">app.gz</text>
+  <text x="754" y="204" text-anchor="middle" font-size="12" font-weight="600" fill="#5d7045">match</text>
+  <text x="820" y="204" font-size="12" fill="#6b6a5f">* took three segments, slashes and all</text>
+  <text x="32" y="266" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">B &#183; CUT AT A NEW ROOT</text>
+  <text x="1088" y="266" text-anchor="end" font-size="12" fill="#6b6a5f">a sync tool is pointed at services/billing/ instead of the repo root</text>
+  <text x="444" y="450" text-anchor="middle" font-size="12" font-weight="600" fill="#141413">the cut &#183; the tool's root starts here</text>
+  <text x="32" y="313" font-size="13" font-weight="600" fill="#141413">path</text>
+  <text x="266" y="313" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#a8a496">services</text>
+  <text x="386" y="313" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#a8a496">billing</text>
+  <text x="502" y="313" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#141413">secrets</text>
+  <text x="618" y="313" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#141413">key.pem</text>
+  <text x="328" y="313" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#c8c4b6">/</text>
+  <text x="560" y="313" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">/</text>
+  <text x="704" y="306" font-size="12" fill="#6b6a5f">what the tool now sees</text>
+  <text x="704" y="324" font-size="13" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#141413">secrets/key.pem</text>
+  <text x="32" y="353" font-size="13" font-weight="600" fill="#141413">rule 1</text>
+  <text x="32" y="370" font-size="12" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">**/billing/secrets/**</text>
+  <text x="266" y="361" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#a8a496">**</text>
+  <text x="386" y="361" text-anchor="middle" font-size="14" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#c2613f">billing</text>
+  <text x="502" y="361" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">secrets</text>
+  <text x="618" y="361" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">**</text>
+  <text x="754" y="360" text-anchor="middle" font-size="12" font-weight="600" fill="#c2613f">no match</text>
+  <text x="820" y="360" font-size="12" font-weight="600" fill="#c2613f">billing is left of the cut &#8594; key.pem syncs</text>
+  <text x="32" y="401" font-size="13" font-weight="600" fill="#141413">rule 2</text>
+  <text x="32" y="418" font-size="12" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">**/secrets/**</text>
+  <text x="324" y="409" text-anchor="middle" font-size="13" font-family="'JetBrains Mono', monospace" fill="#a8a496">** &#183; zero segments now</text>
+  <text x="502" y="409" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#2f5c8a">secrets</text>
+  <text x="618" y="409" text-anchor="middle" font-size="14" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">**</text>
+  <text x="754" y="408" text-anchor="middle" font-size="12" font-weight="600" fill="#5d7045">match</text>
+  <text x="820" y="408" font-size="12" fill="#6b6a5f">nothing left of the cut &#8594; still excluded</text>
+  <text x="68" y="482" font-size="12" fill="#6b6a5f">rule segment, literal</text>
+  <text x="254" y="482" font-size="12" fill="#6b6a5f">wildcard &#8212; its width is what it swallowed</text>
+  <text x="580" y="482" font-size="12" fill="#6b6a5f">the segment that decides the verdict</text>
+  <text x="872" y="482" font-size="12" fill="#6b6a5f">left of the cut, gone</text>
+  <text x="32" y="516" font-size="12" fill="#6b6a5f">A shared rule is only shared text: test it against a path deeper than you meant. A rule naming a segment above the new root dies without a word.</text>
+  <text x="32" y="540" font-size="12" font-style="italic" fill="#8c8a7d">Same segment, same x in every row &#8212; the eye compares columns, never strings. That alignment is the whole drawing.</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">paths &#183; segment by segment</span><span class="lang-zh">路径 · 逐段对照</span></span>
+          <span class="lang-en">One cell per path segment, and every row keeps each segment at the same x, so the eye compares columns rather than strings. Part A puts one rule under two meanings of <code>*</code>, and draws the wildcard cell as wide as what it swallowed: one segment in a segment glob, three in a string glob. Part B points a tool at a sub-directory: everything left of the dashed cut is gone, and a rule that names a segment over there quietly stops matching &mdash; the file it was written to exclude syncs. Template: <code>templates/diagrams/segment-align.svg</code>.</span>
+          <span class="lang-zh">路径一段一格，每一行里同一段都在同一个横坐标上，眼睛比的是列，不是两串字。上半张把同一条规则放进两种 <code>*</code> 语义里，通配那一格画成它吞掉的那么宽：按段匹配只吞一段，按字符串匹配吞三段。下半张把工具指向一个子目录：虚线那一刀左边的全部没了，规则里落在刀左边的那一段一失效，整条规则就不声不响地不再命中——它本来要排除的文件照样被同步出去。模板：<code>templates/diagrams/segment-align.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Two variants of a directory tree with verdicts drawn beside each node. Panel A: the same two lines, node_modules and .env, sit in both a .gitignore and a .dockerignore, and a small project tree is judged by both readers in two aligned columns. The root node_modules and the root .env are skipped by both, the source file and the Dockerfile are kept by both, but app/.env and app/node_modules are skipped by git and kept by docker, so those two rows carry a pale orange band: git matches a pattern without a slash at any depth, while docker anchors every pattern at the build context root, and app/.env is a secret sent into the build context. Panel B: a cleanup job's list has the entry /srv/builds/team-a/cache, which is missing. The missing nodes are dashed boxes; an orange dashed arrow walks up from cache past team-a to builds, the first ancestor that exists, outlined in gold. Two questions are asked there: is it a mount point, yes, and is anything else in it, no, it is empty. The verdict is that the disk is not mounted, so nothing is changed; had other projects been there, team-a would really be gone and the entry could be pruned." font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs><pattern id="vtrDot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern><marker id="vtrArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker></defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#vtrDot)"/>
+  <line x1="32" y1="154" x2="640" y2="154" stroke="#d8d4c8" stroke-width="1"/>
+  <rect x="32" y="300" width="608" height="28" rx="4" fill="#f7e4dc"/>
+  <rect x="32" y="328" width="608" height="28" rx="4" fill="#f7e4dc"/>
+  <line x1="664" y1="52" x2="664" y2="424" stroke="#e3e0d4" stroke-width="1"/>
+  <path d="M712,145 V170 H728" stroke="#a8a496" stroke-width="1.2" fill="none"/>
+  <path d="M736,183 V208 H752" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="3 3" fill="none"/>
+  <path d="M760,221 V246 H776" stroke="#a8a496" stroke-width="1.2" stroke-dasharray="3 3" fill="none"/>
+  <rect x="290" y="80" width="112" height="22" rx="6" fill="#e7e4d9" stroke="#d8d4c8"/>
+  <rect x="410" y="80" width="52" height="22" rx="6" fill="#e7e4d9" stroke="#d8d4c8"/>
+  <rect x="704" y="119" width="60" height="26" rx="6" fill="#ffffff" stroke="#141413" stroke-width="1.2"/>
+  <rect x="728" y="157" width="76" height="26" rx="6" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.8"/>
+  <rect x="752" y="195" width="76" height="26" rx="6" fill="none" stroke="#b9b5a8" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <rect x="776" y="233" width="68" height="26" rx="6" fill="none" stroke="#b9b5a8" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <path d="M846,246 H852 Q860,246 860,238 V178 Q860,170 852,170 H808" stroke="#d97757" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#vtrArrO)" fill="none"/>
+  <circle cx="697" cy="290" r="9" fill="#141413"/>
+  <circle cx="697" cy="316" r="9" fill="#141413"/>
+  <rect x="688" y="338" width="400" height="30" rx="15" fill="#e5e9dd" stroke="#788c5d"/>
+  <rect x="32" y="442" width="28" height="20" rx="4" fill="#f7e4dc"/>
+  <rect x="220" y="442" width="28" height="20" rx="5" fill="none" stroke="#b9b5a8" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <rect x="376" y="442" width="28" height="20" rx="5" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.8"/>
+  <path d="M600,452 H632" stroke="#d97757" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#vtrArrO)" fill="none"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">VERDICT TREE &#183; ONE JUDGEMENT, NODE BY NODE</text>
+  <text x="1088" y="34" text-anchor="end" font-size="12" fill="#6b6a5f">two variants of one drawing</text>
+  <text x="32" y="66" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">A &#183; SAME TWO LINES, TWO READERS</text>
+  <text x="32" y="94" font-size="12" fill="#6b6a5f">both .gitignore and .dockerignore say</text>
+  <text x="346" y="95" text-anchor="middle" font-size="13" font-family="'JetBrains Mono', monospace" fill="#141413">node_modules</text>
+  <text x="436" y="95" text-anchor="middle" font-size="13" font-family="'JetBrains Mono', monospace" fill="#141413">.env</text>
+  <text x="40" y="132" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">PATH</text>
+  <text x="484" y="126" text-anchor="middle" font-size="13" font-weight="600" fill="#2f5c8a">git</text>
+  <text x="484" y="143" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">.gitignore</text>
+  <text x="588" y="126" text-anchor="middle" font-size="13" font-weight="600" fill="#5d7045">docker build</text>
+  <text x="588" y="143" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', monospace" fill="#6b6a5f">.dockerignore</text>
+  <text x="40" y="179" font-size="13" font-family="'JetBrains Mono', monospace" fill="#141413">./</text>
+  <text x="484" y="178" text-anchor="middle" font-size="12" fill="#8c8a7d">&#8212;</text>
+  <text x="588" y="178" text-anchor="middle" font-size="12" fill="#8c8a7d">&#8212;</text>
+  <text x="40" y="207" font-size="13" font-family="'JetBrains Mono', monospace" fill="#141413">&#9500;&#9472; node_modules/</text>
+  <text x="484" y="206" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">skipped</text>
+  <text x="588" y="206" text-anchor="middle" font-size="12" font-weight="600" fill="#5d7045">skipped</text>
+  <text x="40" y="235" font-size="13" font-family="'JetBrains Mono', monospace" fill="#141413">&#9500;&#9472; .env</text>
+  <text x="484" y="234" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">skipped</text>
+  <text x="588" y="234" text-anchor="middle" font-size="12" font-weight="600" fill="#5d7045">skipped</text>
+  <text x="40" y="263" font-size="13" font-family="'JetBrains Mono', monospace" fill="#141413">&#9500;&#9472; app/</text>
+  <text x="484" y="262" text-anchor="middle" font-size="12" fill="#8c8a7d">kept</text>
+  <text x="588" y="262" text-anchor="middle" font-size="12" fill="#8c8a7d">kept</text>
+  <text x="40" y="291" font-size="13" font-family="'JetBrains Mono', monospace" fill="#141413">&#9474;  &#9500;&#9472; src/index.js</text>
+  <text x="484" y="290" text-anchor="middle" font-size="12" fill="#8c8a7d">kept</text>
+  <text x="588" y="290" text-anchor="middle" font-size="12" fill="#8c8a7d">kept</text>
+  <text x="40" y="319" font-size="13" font-family="'JetBrains Mono', monospace" fill="#141413">&#9474;  &#9500;&#9472; .env</text>
+  <text x="220" y="318" font-size="12" font-weight="600" fill="#c2613f">&#8592; a secret sent into the context</text>
+  <text x="484" y="318" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">skipped</text>
+  <text x="588" y="318" text-anchor="middle" font-size="12" font-weight="600" fill="#c2613f">kept</text>
+  <text x="40" y="347" font-size="13" font-family="'JetBrains Mono', monospace" fill="#141413">&#9474;  &#9492;&#9472; node_modules/</text>
+  <text x="220" y="346" font-size="12" font-weight="600" fill="#c2613f">&#8592; sent in as well</text>
+  <text x="484" y="346" text-anchor="middle" font-size="12" font-weight="600" fill="#2f5c8a">skipped</text>
+  <text x="588" y="346" text-anchor="middle" font-size="12" font-weight="600" fill="#c2613f">kept</text>
+  <text x="40" y="375" font-size="13" font-family="'JetBrains Mono', monospace" fill="#141413">&#9492;&#9472; Dockerfile</text>
+  <text x="484" y="374" text-anchor="middle" font-size="12" fill="#8c8a7d">kept</text>
+  <text x="588" y="374" text-anchor="middle" font-size="12" fill="#8c8a7d">kept</text>
+  <text x="32" y="408" font-size="12" fill="#6b6a5f">git: a pattern with no slash matches at any depth.</text>
+  <text x="32" y="426" font-size="12" fill="#6b6a5f">docker: every pattern is anchored at the context root.</text>
+  <text x="688" y="66" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">B &#183; WALK UP TO THE FIRST ANCESTOR</text>
+  <text x="688" y="94" font-size="12" fill="#6b6a5f">a cleanup job's list holds an entry that is missing</text>
+  <text x="734" y="137" text-anchor="middle" font-size="13" font-family="'JetBrains Mono', monospace" fill="#141413">/srv/</text>
+  <text x="872" y="136" font-size="12" fill="#6b6a5f">exists</text>
+  <text x="766" y="175" text-anchor="middle" font-size="13" font-weight="600" font-family="'JetBrains Mono', monospace" fill="#8a5a2a">builds/</text>
+  <text x="872" y="174" font-size="12" font-weight="600" fill="#8a5a2a">exists &#183; empty</text>
+  <text x="790" y="213" text-anchor="middle" font-size="13" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">team-a/</text>
+  <text x="872" y="212" font-size="12" font-style="italic" fill="#8c8a7d">missing</text>
+  <text x="810" y="251" text-anchor="middle" font-size="13" font-family="'JetBrains Mono', monospace" fill="#8c8a7d">cache/</text>
+  <text x="872" y="250" font-size="12" font-style="italic" fill="#8c8a7d">missing &#183; the entry points here</text>
+  <text x="697" y="294" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">1</text>
+  <text x="714" y="294" font-size="12.5" font-weight="600" fill="#141413">is builds/ a mount point in fstab?</text>
+  <text x="1088" y="294" text-anchor="end" font-size="12" fill="#6b6a5f">yes</text>
+  <text x="697" y="320" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">2</text>
+  <text x="714" y="320" font-size="12.5" font-weight="600" fill="#141413">is anything else in it?</text>
+  <text x="1088" y="320" text-anchor="end" font-size="12" fill="#6b6a5f">no &#8212; it is empty</text>
+  <text x="888" y="358" text-anchor="middle" font-size="13" font-weight="600" fill="#5d7045">the disk is not mounted &#8594; change nothing</text>
+  <text x="688" y="392" font-size="12" fill="#6b6a5f">had question 2 found team-b/ and team-c/ there,</text>
+  <text x="688" y="410" font-size="12" fill="#6b6a5f">team-a/ would really be gone &#8594; prune the entry</text>
+  <text x="68" y="456" font-size="12" fill="#6b6a5f">the readers disagree</text>
+  <text x="256" y="456" font-size="12" fill="#6b6a5f">does not exist</text>
+  <text x="412" y="456" font-size="12" fill="#6b6a5f">first ancestor that exists</text>
+  <text x="644" y="456" font-size="12" fill="#6b6a5f">walk up, one parent at a time</text>
+  <text x="32" y="490" font-size="12" fill="#6b6a5f">A &#8212; one rule file stops being one rule: git and docker disagree on exactly two of eight nodes, and one of them sends a secret into the build.</text>
+  <text x="32" y="510" font-size="12" fill="#6b6a5f">B &#8212; a missing path means &#8220;gone&#8221; only if its first surviving ancestor still holds its siblings; an empty mount point makes everything below it look gone.</text>
+  <text x="32" y="536" font-size="12" font-style="italic" fill="#8c8a7d">Tree in monospace on the left, one verdict column per judge on the right: a disagreement reads as a coloured row, not as a sentence to parse.</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">trees &#183; a verdict on every node</span><span class="lang-zh">目录树 · 每个节点都带判定</span></span>
+          <span class="lang-en">Two variants of one drawing. In A, a monospace tree on the left and one verdict column per reader on the right; where the readers disagree the whole row turns colour &mdash; the same two ignore lines mean different things to git and to docker build, and one of the differences sends a secret into the build context. In B, a missing path walks up to the first ancestor that still exists, and two questions are asked there before anyone decides the entry is gone: an empty mount point makes everything below it look deleted. Template: <code>templates/diagrams/verdict-tree.svg</code>.</span>
+          <span class="lang-zh">同一种画法的两个变体。A：左边是等宽字体的目录树，右边每个判定方一列；两方判得不一样的那一行整行变色——同样两行忽略规则，git 和 docker build 理解得不一样，其中一处差别把一个密钥文件送进了构建上下文。B：从一个不存在的路径往上找，找到第一个还在的祖先，先在那一层问两个问题，再决定这条记录是不是真没了：一个空的挂载点会让它下面的一切看起来都被删了。模板：<code>templates/diagrams/verdict-tree.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="Where thirty-one findings came from and where they went, drawn so that the height of every bar is the number of findings in it, six pixels each. On the left, a card for the in-house test suite: nine hundred and forty tests, all passing, and none of them caught any of the thirty-one. After it went green, outside beta testers who were given the user guide but not the code reported thirty-one findings, stacked in one bar as three blockers, sixteen normal and twelve cosmetic. Translucent bands carry each part to where it went. The three blockers and sixteen normal findings flow straight across into a bar of nineteen fixed before release. The twelve cosmetic ones curve down into a bar of twelve that were deferred and re-checked before anyone touched them. That bar splits again: nine still happened and were fixed, three were already gone because fixing blocker B2 had fixed them too. A thin dashed branch leaves the re-check with no band behind it, ending in a bar of two new findings that were never among the thirty-one; they turned up while reproducing one of the twelve. Notes say that heights add up at every split, thirty-one is nineteen plus twelve and twelve is nine plus three, that the two new ones have nothing feeding them because they were not in the batch, and that a green suite count is not the same thing as the ability to find problems" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="cflDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <marker id="cflArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/></marker>
+    <marker id="cflArrB" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6a9bcc"/></marker>
+    <filter id="cflSh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.06"/></filter>
+  </defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#cflDots)"/>
+  <text x="32" y="34" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">COUNT FLOW &#183; 31 FINDINGS, WHERE THEY CAME FROM AND WHERE THEY WENT</text>
+  <text x="1088" y="34" text-anchor="end" font-size="12" fill="#6b6a5f">bar height = number of findings &#183; 6 px each</text>
+  <text x="1088" y="54" text-anchor="end" font-size="12" font-weight="600" fill="#141413">heights add up at every split: 31 = 19 + 12 &#183; 12 = 9 + 3</text>
+  <!-- bands: each carries one part of a bar to where it went; translucent so the text above stays readable -->
+  <path d="M324,108 C442.0,108 442.0,108 560,108 V126 C442.0,126 442.0,126 324,126 Z" fill="#d97757" fill-opacity="0.18"/>
+  <path d="M324,126 C442.0,126 442.0,126 560,126 V222 C442.0,222 442.0,222 324,222 Z" fill="#141413" fill-opacity="0.08"/>
+  <path d="M324,222 C442.0,222 442.0,324 560,324 V396 C442.0,396 442.0,294 324,294 Z" fill="#8c8a7d" fill-opacity="0.16"/>
+  <path d="M584,324 C696.0,324 696.0,324 808,324 V378 C696.0,378 696.0,378 584,378 Z" fill="#6a9bcc" fill-opacity="0.16"/>
+  <path d="M584,378 C696.0,378 696.0,396 808,396 V414 C696.0,414 696.0,396 584,396 Z" fill="#6a9bcc" fill-opacity="0.16"/>
+  <!-- column 1: not a bar. 940 tests at 6 px each would be 5640 px, and tests are not findings -->
+  <rect x="32" y="108" width="208" height="178" rx="12" fill="#e2ecf5" stroke="#c4d5e6" filter="url(#cflSh)"/>
+  <rect x="32" y="122" width="4" height="150" rx="2" fill="#6a9bcc"/>
+  <circle cx="58" cy="134" r="10" fill="#141413"/><text x="58" y="138" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">1</text>
+  <text x="76" y="138" font-size="13" font-weight="600" fill="#141413">In-house test suite</text>
+  <text x="52" y="184" font-size="32" font-weight="600" fill="#4a7bab">940</text>
+  <text x="124" y="184" font-size="12.5" fill="#6b6a5f">tests, all passing</text>
+  <text x="52" y="208" font-size="12" fill="#6b6a5f">at the moment outsiders</text>
+  <text x="52" y="225" font-size="12" fill="#6b6a5f">were asked to look</text>
+  <text x="52" y="252" font-size="12.5" font-weight="600" fill="#141413">caught none of the 31</text>
+  <text x="52" y="269" font-size="12.5" font-weight="600" fill="#141413">on the right</text>
+  <path d="M240,197 H292" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#cflArr)"/>
+  <text x="266.0" y="189" text-anchor="middle" font-size="12" fill="#8c8a7d">then</text>
+  <!-- column 2: one stacked bar, split by severity -->
+  <circle cx="308" cy="66" r="10" fill="#141413"/><text x="308" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">2</text>
+  <text x="326" y="70" font-size="13" font-weight="600" fill="#141413">Outside beta testers</text>
+  <text x="296" y="92" font-size="12" fill="#6b6a5f">given the user guide, not the code</text>
+  <rect x="300" y="108" width="24" height="18" fill="#d97757"/>
+  <rect x="300" y="126" width="24" height="96" fill="#141413"/>
+  <rect x="300" y="222" width="24" height="72" fill="#8c8a7d"/>
+  <text x="334" y="122" font-size="12.5" font-weight="700" fill="#c2613f">3 blockers</text>
+  <text x="334" y="178.0" font-size="12.5" font-weight="600" fill="#141413">16 normal</text>
+  <text x="334" y="246" font-size="12.5" font-weight="600" fill="#6b6a5f">12 cosmetic</text>
+  <text x="288" y="292" text-anchor="end" font-size="12" font-weight="600" fill="#6b6a5f">31</text>
+  <text x="440" y="292" text-anchor="middle" font-size="12" fill="#8c8a7d">deferred as cosmetic</text>
+  <!-- column 3: fixed now, and the deferred ones re-checked first -->
+  <rect x="560" y="108" width="24" height="18" fill="#d97757"/>
+  <rect x="560" y="126" width="24" height="96" fill="#141413"/>
+  <text x="598" y="122" font-size="13" font-weight="600" fill="#141413">Fixed before release &#183; 19</text>
+  <text x="598" y="144" font-size="12" fill="#6b6a5f"><tspan font-weight="700" fill="#c2613f">B1</tspan>  a renamed folder is deleted on the other device</text>
+  <text x="598" y="162" font-size="12" fill="#6b6a5f"><tspan font-weight="700" fill="#c2613f">B2</tspan>  a conflict copy overwrites the newer file</text>
+  <text x="598" y="180" font-size="12" fill="#6b6a5f"><tspan font-weight="700" fill="#c2613f">B3</tspan>  sync stalls after the laptop wakes from sleep</text>
+  <text x="598" y="202" font-size="12" fill="#6b6a5f">16 normal, N1&#8211;N16 &#183; all shipped in 3.2.0</text>
+  <rect x="560" y="324" width="24" height="72" fill="#6a9bcc"/>
+  <circle cx="572" cy="302" r="10" fill="#141413"/><text x="572" y="306" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">3</text>
+  <text x="590" y="306" font-size="13" font-weight="600" fill="#4a7bab">Re-checked first &#183; 12</text>
+  <text x="598" y="346" font-size="12" fill="#6b6a5f">does each one still</text>
+  <text x="598" y="363" font-size="12" fill="#6b6a5f">happen? before any fix</text>
+  <!-- column 4: what the re-check found -->
+  <rect x="808" y="324" width="24" height="54" fill="#6a9bcc"/>
+  <rect x="808" y="396" width="24" height="18" fill="#6a9bcc" fill-opacity="0.45"/>
+  <rect x="808" y="454" width="24" height="12" fill="#6a9bcc"/>
+  <text x="846" y="344" font-size="13" font-weight="600" fill="#141413">9 still happen &#8594; fixed in 3.2.1</text>
+  <text x="846" y="362" font-size="12" fill="#6b6a5f">C1&#8211;C6, C8, C10, C11</text>
+  <text x="846" y="408" font-size="13" font-weight="600" fill="#141413">3 already gone</text>
+  <text x="846" y="426" font-size="12" fill="#6b6a5f">fixed as a side effect of B2 &#8212;</text>
+  <text x="846" y="443" font-size="12" fill="#6b6a5f">fixing them again fixes nothing</text>
+  <path d="M584,393 C696.0,393 696.0,460 800,460" fill="none" stroke="#6a9bcc" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#cflArrB)"/>
+  <text x="846" y="465" font-size="13" font-weight="600" fill="#4a7bab">+2 not on the list &#183; D1, D2</text>
+  <text x="846" y="483" font-size="12" fill="#6b6a5f">hit while reproducing C7;</text>
+  <text x="846" y="500" font-size="12" fill="#6b6a5f">never among the 31</text>
+  <text x="702.0" y="480" text-anchor="middle" font-size="12" font-style="italic" fill="#4a7bab">no band: not from the batch</text>
+  <!-- legend: colour is who found it; orange is the focus, not a third source -->
+  <g font-size="12" fill="#6b6a5f">
+    <circle cx="38" cy="512" r="5" fill="#6a9bcc"/><text x="50" y="516">found or re-checked by us</text>
+    <circle cx="230" cy="512" r="5" fill="#141413"/><text x="242" y="516">found by outside testers</text>
+    <circle cx="414" cy="512" r="5" fill="#d97757"/><text x="426" y="516">blocker</text>
+    <circle cx="496" cy="512" r="5" fill="#8c8a7d"/><text x="508" y="516">cosmetic</text>
+  </g>
+  <text x="32" y="542" font-size="12" fill="#6b6a5f">An all-passing count on the left is not the ability to find problems. And a re-check of a deferred list both shrinks it (3 gone) and grows it (2 new).</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">findings &#183; where they went</span><span class="lang-zh">发现 · 条数流向</span></span>
+          <span class="lang-en">Bar height is the number of findings, six pixels each, so every split has to add up on the page: 31 = 19 + 12, then 12 = 9 + 3. Translucent bands carry each part to where it went. The dashed branch out of step 3 has no band behind it &mdash; the two new findings were never in the batch, and that missing band is the point: re-checking a deferred list both shrinks it and grows it. The in-house suite on the left is a card, not a bar: 940 passing tests is not a count of findings, and drawing it to scale would claim it is. Template: <code>templates/diagrams/count-flow.svg</code>.</span>
+          <span class="lang-zh">竖条高度就是条数（每条 6 px），所以每一次分流在图上都得加得起来：31 = 19 + 12，12 = 9 + 3。半透明的带子把每一份带到它去的地方。从第 3 步伸出来的那根虚线细支后面没有带子——那 2 条新发现根本不在这一批里，少的这条带子正是要说的话：复测一张延后清单，清单会变短，也会变长。左边的自测画成卡片、不画成竖条：940 条测试全绿不是「发现了几条」，按比例画出来就等于宣称它是。模板：<code>templates/diagrams/count-flow.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="One question at the top, the authorization check could not give an answer, and four branches under it that have nothing to do with each other: the policy engine did not answer, the policy bundle will not load, a token cannot be verified, and a request matches no rule. Each branch holds its own column of leaf cards, ten in all. Every leaf names one case, the reason behind its outcome, the outcome itself as a coloured dot, green for allow, orange for deny, gold for refusing the change before it ships, and a grey line with the price of that choice. The engine branch shows the split most clearly: a write is denied, a read with a decision cached in the last minute is allowed from the cache, a read with nothing cached is denied, and the health check is allowed because denying it would take the whole fleet out of rotation. A bar along the bottom sets two leaves side by side: A1 and A4 fail in exactly the same way and fall in opposite directions, and the difference is who gets hurt by a deny" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="lgrDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <marker id="lgrArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/></marker>
+    <filter id="lgrSh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.06"/></filter>
+  </defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#lgrDots)"/>
+  <text x="32" y="32" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">LEAF GROUPS &#183; ONE KIND OF FAILURE, TEN CASES</text>
+  <g font-size="12" fill="#6b6a5f">
+    <circle cx="772" cy="28" r="5" fill="#788c5d"/><text x="782" y="32">allow</text>
+    <circle cx="840" cy="28" r="5" fill="#d97757"/><text x="850" y="32">deny</text>
+    <circle cx="904" cy="28" r="5" fill="#c9913f"/><text x="914" y="32">refuse the change</text>
+  </g>
+  <!-- the question: one box, no main path underneath it -->
+  <rect x="340" y="46" width="440" height="36" rx="10" fill="#ffffff" stroke="#141413" stroke-width="1.5" filter="url(#lgrSh)"/>
+  <text x="560" y="69" text-anchor="middle" font-size="14" font-weight="600" fill="#141413">The authorization check could not give an answer</text>
+  <g fill="none" stroke="#a8a496" stroke-width="1.4">
+    <path d="M560,82 V96"/>
+    <path d="M158,108 V100 Q158,96 162,96 H958 Q962,96 962,100 V108"/>
+    <path d="M158,100 V108" marker-end="url(#lgrArr)"/>
+    <path d="M426,100 V108" marker-end="url(#lgrArr)"/>
+    <path d="M694,100 V108" marker-end="url(#lgrArr)"/>
+    <path d="M962,100 V108" marker-end="url(#lgrArr)"/>
+    <path d="M426,96 V100"/>
+    <path d="M694,96 V100"/>
+  </g>
+  <!-- branch A -->
+  <rect x="32" y="110" width="252" height="38" rx="10" fill="#e7e4d9" stroke="#d8d4c8"/>
+  <text x="46" y="126" font-size="13" font-weight="600" fill="#141413">Policy engine did not answer</text>
+  <text x="46" y="142" font-size="12" fill="#6b6a5f">timeout or crash</text>
+  <path d="M44,148 V430" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+  <path d="M44,178 H56" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="58" y="156" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="70" y="174" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">A1</tspan>  Write request</text>
+  <text x="70" y="191" font-size="12" fill="#6b6a5f">a wrong allow changes data</text>
+  <circle cx="74" cy="204" r="4" fill="#d97757"/>
+  <text x="84" y="208" font-size="12" font-weight="600" fill="#c2613f">deny</text>
+  <text x="70" y="225" font-size="12" fill="#8c8a7d">writes fail until it is back</text>
+  <path d="M44,262 H56" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="58" y="240" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="70" y="258" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">A2</tspan>  Read, answer cached</text>
+  <text x="70" y="275" font-size="12" fill="#6b6a5f">cached less than 60 s ago</text>
+  <circle cx="74" cy="288" r="4" fill="#788c5d"/>
+  <text x="84" y="292" font-size="12" font-weight="600" fill="#5d7045">allow from the cache</text>
+  <text x="70" y="309" font-size="12" fill="#8c8a7d">a revoke takes up to 60 s</text>
+  <path d="M44,346 H56" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="58" y="324" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="70" y="342" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">A3</tspan>  Read, nothing cached</text>
+  <text x="70" y="359" font-size="12" fill="#6b6a5f">no answer to fall back on</text>
+  <circle cx="74" cy="372" r="4" fill="#d97757"/>
+  <text x="84" y="376" font-size="12" font-weight="600" fill="#c2613f">deny</text>
+  <text x="70" y="393" font-size="12" fill="#8c8a7d">reads fail until it is back</text>
+  <path d="M44,430 H56" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="58" y="408" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="70" y="426" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">A4</tspan>  Health check</text>
+  <text x="70" y="443" font-size="12" fill="#6b6a5f">no user data behind it</text>
+  <circle cx="74" cy="456" r="4" fill="#788c5d"/>
+  <text x="84" y="460" font-size="12" font-weight="600" fill="#5d7045">allow</text>
+  <text x="70" y="477" font-size="12" fill="#8c8a7d">none; denying it drains the fleet</text>
+  <!-- branch B -->
+  <rect x="300" y="110" width="252" height="38" rx="10" fill="#e7e4d9" stroke="#d8d4c8"/>
+  <text x="314" y="126" font-size="13" font-weight="600" fill="#141413">Policy bundle will not load</text>
+  <text x="314" y="142" font-size="12" fill="#6b6a5f">syntax error, file missing</text>
+  <path d="M312,148 V262" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+  <path d="M312,178 H324" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="326" y="156" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="338" y="174" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">B1</tspan>  New bundle, on reload</text>
+  <text x="338" y="191" font-size="12" fill="#6b6a5f">the old bundle still works</text>
+  <circle cx="342" cy="204" r="4" fill="#c9913f"/>
+  <text x="352" y="208" font-size="12" font-weight="600" fill="#8a5a2a">refuse the new bundle</text>
+  <text x="338" y="225" font-size="12" fill="#8c8a7d">the new rule is not live</text>
+  <path d="M312,262 H324" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="326" y="240" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="338" y="258" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">B2</tspan>  No bundle at start-up</text>
+  <text x="338" y="275" font-size="12" fill="#6b6a5f">nothing to keep serving</text>
+  <circle cx="342" cy="288" r="4" fill="#d97757"/>
+  <text x="352" y="292" font-size="12" font-weight="600" fill="#c2613f">deny everything</text>
+  <text x="338" y="309" font-size="12" fill="#8c8a7d">up, but every call is a 403</text>
+  <!-- branch C -->
+  <rect x="568" y="110" width="252" height="38" rx="10" fill="#e7e4d9" stroke="#d8d4c8"/>
+  <text x="582" y="126" font-size="13" font-weight="600" fill="#141413">Token cannot be verified</text>
+  <text x="582" y="142" font-size="12" fill="#6b6a5f">key server unreachable</text>
+  <path d="M580,148 V262" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+  <path d="M580,178 H592" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="594" y="156" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="606" y="174" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">C1</tspan>  Signed by a cached key</text>
+  <text x="606" y="191" font-size="12" fill="#6b6a5f">that key is still trusted</text>
+  <circle cx="610" cy="204" r="4" fill="#788c5d"/>
+  <text x="620" y="208" font-size="12" font-weight="600" fill="#5d7045">allow</text>
+  <text x="606" y="225" font-size="12" fill="#8c8a7d">a key pulled &lt; 1 h ago works</text>
+  <path d="M580,262 H592" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="594" y="240" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="606" y="258" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">C2</tspan>  Signed by an unseen key</text>
+  <text x="606" y="275" font-size="12" fill="#6b6a5f">nothing to check it against</text>
+  <circle cx="610" cy="288" r="4" fill="#d97757"/>
+  <text x="620" y="292" font-size="12" font-weight="600" fill="#c2613f">deny</text>
+  <text x="606" y="309" font-size="12" fill="#8c8a7d">its users sign in again</text>
+  <!-- branch D -->
+  <rect x="836" y="110" width="252" height="38" rx="10" fill="#e7e4d9" stroke="#d8d4c8"/>
+  <text x="850" y="126" font-size="13" font-weight="600" fill="#141413">Request matches no rule</text>
+  <text x="850" y="142" font-size="12" fill="#6b6a5f">route or resource unknown</text>
+  <path d="M848,148 V262" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+  <path d="M848,178 H860" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="862" y="156" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="874" y="174" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">D1</tspan>  Unknown public path</text>
+  <text x="874" y="191" font-size="12" fill="#6b6a5f">no rule means no owner</text>
+  <circle cx="878" cy="204" r="4" fill="#d97757"/>
+  <text x="888" y="208" font-size="12" font-weight="600" fill="#c2613f">deny (404)</text>
+  <text x="874" y="225" font-size="12" fill="#8c8a7d">a new route needs a rule first</text>
+  <path d="M848,262 H860" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="862" y="240" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="874" y="258" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">D2</tspan>  Change adds a bare route</text>
+  <text x="874" y="275" font-size="12" fill="#6b6a5f">caught before it ships</text>
+  <circle cx="878" cy="288" r="4" fill="#c9913f"/>
+  <text x="888" y="292" font-size="12" font-weight="600" fill="#8a5a2a">refuse the change</text>
+  <text x="874" y="309" font-size="12" fill="#8c8a7d">the merge waits for a rule</text>
+  <!-- reading key: what the four lines of every leaf mean -->
+  <rect x="568" y="340" width="520" height="134" rx="10" fill="#ffffff" fill-opacity="0.6" stroke="#d8d4c8" stroke-dasharray="4 3"/>
+  <text x="584" y="364" font-size="12" font-weight="600" letter-spacing="1" fill="#6b6a5f">READING A LEAF</text>
+  <text x="584" y="386" font-size="12" fill="#8c8a7d">line 1</text>
+  <text x="638" y="386" font-size="12" font-weight="600" fill="#141413">the case</text>
+  <text x="728" y="386" font-size="12" fill="#6b6a5f">one concrete situation, with an id to cite it by</text>
+  <text x="584" y="404" font-size="12" fill="#8c8a7d">line 2</text>
+  <text x="638" y="404" font-size="12" font-weight="600" fill="#141413">why</text>
+  <text x="728" y="404" font-size="12" fill="#6b6a5f">the one fact the outcome turns on</text>
+  <text x="584" y="422" font-size="12" fill="#8c8a7d">dot</text>
+  <text x="638" y="422" font-size="12" font-weight="600" fill="#141413">the outcome</text>
+  <text x="728" y="422" font-size="12" fill="#6b6a5f">allow, deny, or refuse the change</text>
+  <text x="584" y="440" font-size="12" fill="#8c8a7d">grey</text>
+  <text x="638" y="440" font-size="12" font-weight="600" fill="#141413">the price</text>
+  <text x="728" y="440" font-size="12" fill="#6b6a5f">what that choice costs, and who pays it</text>
+  <circle cx="589" cy="456" r="4" fill="#c9913f"/>
+  <text x="600" y="460" font-size="12" fill="#6b6a5f"><tspan font-weight="600" fill="#8a5a2a">gold is not a softer deny:</tspan> it rejects a change (a merge, a reload), never a request.</text>
+  <!-- the one comparison that crosses branches -->
+  <rect x="32" y="494" width="1056" height="48" rx="10" fill="#ffffff" stroke="#141413" stroke-width="1.2"/>
+  <text x="560" y="513" text-anchor="middle" font-size="12.5" fill="#141413"><tspan font-weight="700">A1 and A4</tspan> fail in exactly the same way &#8212; the engine did not answer &#8212; and fall in opposite directions.</text>
+  <text x="560" y="531" text-anchor="middle" font-size="12.5" fill="#6b6a5f">Denying a write stops that one write. Denying the health check takes every node out of rotation, which is an outage of its own.</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">failure handling &#183; leaf groups</span><span class="lang-zh">失败处理 · 分组叶子树</span></span>
+          <span class="lang-en">Ten ways one check can fail to give an answer, grouped by what went wrong instead of strung along a main path &mdash; there is no main path. Every leaf carries the case, the one fact its outcome turns on, the outcome as a coloured dot, and a grey line with the price. The bar along the bottom is the one comparison that crosses branches: A1 and A4 fail in exactly the same way and fall in opposite directions, because denying a health check is an outage of its own. Template: <code>templates/diagrams/leaf-groups.svg</code>.</span>
+          <span class="lang-zh">同一个检查「给不出答案」的十种情况，按出错的地方分成四支，不串在一条主路径上——这里本来就没有主路径。每片叶子写四样：哪种情况、结局取决于哪一个事实、结局（色点）、代价（灰字）。底部横框是唯一一条跨分支的对比：A1 和 A4 失败的方式一模一样，却倒向相反两边，因为把健康检查拦下，本身就是一次停机。模板：<code>templates/diagrams/leaf-groups.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="One line from a CI job, cd web and-and TAG equals CI_TAG with a default of dev, semicolon, a subshell that runs cd docs and make, semicolon, npm run build with a tag of dollar TAG, followed through five processing steps. Every row draws the same line at the same coordinates: each segment keeps its column from top to bottom, and the only thing that changes is which cells are dark, meaning this step changed them. A right-hand column lists the state each step leaves behind for the rest of the line. Step A splits the line into four segments on the and-and and the semicolons but not inside the parentheses. Step B follows cd: the first segment moves the working directory from slash ci to slash ci slash web, while the cd inside the parentheses is marked as ending at the closing parenthesis. Step C assigns TAG, which becomes dev because CI_TAG is not set. Step D expands dollar TAG in the last segment, which becomes npm run build dash-dash tag dev. Step E shows where each segment really ran, and the npm segment is outlined: it runs in slash ci slash web, not in the docs directory. Below a dashed rule the same line is run again with CI_TAG set to 2.1.0, and only the two cells that depend on it change. A closing note says the command that actually runs is not written anywhere in the raw line" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="tstDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+  </defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#tstDots)"/>
+  <g font-size="12" font-weight="600" letter-spacing="1" fill="#6b6a5f">
+    <text x="32" y="32">STEP</text>
+    <text x="256" y="32">THE LINE AT THIS POINT &#183; CELLS NEVER MOVE; DARK = CHANGED HERE</text>
+    <text x="904" y="32">CARRIED FORWARD</text>
+  </g>
+  <!-- row 0: one box, but the text is placed at the cell coordinates it will keep in every later row -->
+  <circle cx="42" cy="63" r="5" fill="#a8a496"/>
+  <text x="60" y="60" font-size="13" font-weight="600" fill="#141413">Line arrives</text>
+  <text x="60" y="77" font-size="12" fill="#6b6a5f">from a CI job step</text>
+  <rect x="256" y="48" width="616" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="266" y="67.5" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">cd web</text>
+  <text x="357" y="67.5" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">TAG=${CI_TAG:-dev}</text>
+  <text x="527" y="67.5" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">(cd docs &amp;&amp; make)</text>
+  <text x="689" y="67.5" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">npm run build --tag $TAG</text>
+  <text x="333.0" y="67.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">&amp;&amp;</text>
+  <text x="507.0" y="67.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">;</text>
+  <text x="669.0" y="67.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">;</text>
+  <text x="904" y="60" font-size="12" fill="#8c8a7d">cwd</text>
+  <text x="944" y="60" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">/ci</text>
+  <text x="904" y="76" font-size="12" fill="#8c8a7d">vars</text>
+  <text x="944" y="76" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">CI_TAG unset</text>
+  <!-- A: split -->
+  <circle cx="42" cy="121" r="10" fill="#141413"/>
+  <text x="42" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">A</text>
+  <text x="60" y="118" font-size="13" font-weight="600" fill="#141413">Split</text>
+  <text x="60" y="135" font-size="12" fill="#6b6a5f">on &amp;&amp; and ; but never</text>
+  <text x="60" y="152" font-size="12" fill="#6b6a5f">inside ( )</text>
+  <rect x="256" y="106" width="63" height="30" rx="6" fill="#e7e4d9" stroke="#141413" stroke-width="1.4"/>
+  <text x="266" y="125.5" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">cd web</text>
+  <rect x="347" y="106" width="150" height="30" rx="6" fill="#e7e4d9" stroke="#141413" stroke-width="1.4"/>
+  <text x="357" y="125.5" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">TAG=${CI_TAG:-dev}</text>
+  <rect x="517" y="106" width="142" height="30" rx="6" fill="#e7e4d9" stroke="#141413" stroke-width="1.4"/>
+  <text x="527" y="125.5" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">(cd docs &amp;&amp; make)</text>
+  <rect x="679" y="106" width="193" height="30" rx="6" fill="#e7e4d9" stroke="#141413" stroke-width="1.4"/>
+  <text x="689" y="125.5" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">npm run build --tag $TAG</text>
+  <text x="333.0" y="125.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">&amp;&amp;</text>
+  <text x="507.0" y="125.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">;</text>
+  <text x="669.0" y="125.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">;</text>
+  <text x="904" y="118" font-size="12" fill="#8c8a7d">now</text>
+  <circle cx="896" cy="114" r="3" fill="#6a9bcc"/>
+  <text x="944" y="118" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#4a7bab">4 segments</text>
+  <!-- B: follow cd -->
+  <circle cx="42" cy="179" r="10" fill="#141413"/>
+  <text x="42" y="183" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">B</text>
+  <text x="60" y="176" font-size="13" font-weight="600" fill="#141413">Follow cd</text>
+  <text x="60" y="193" font-size="12" fill="#6b6a5f">the cwd each later</text>
+  <text x="60" y="210" font-size="12" fill="#6b6a5f">segment starts in</text>
+  <rect x="256" y="164" width="63" height="30" rx="6" fill="#e7e4d9" stroke="#141413" stroke-width="1.4"/>
+  <text x="266" y="183.5" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">cd web</text>
+  <rect x="347" y="164" width="150" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="357" y="183.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">TAG=${CI_TAG:-dev}</text>
+  <rect x="517" y="164" width="142" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="527" y="183.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">(cd docs &amp;&amp; make)</text>
+  <rect x="514" y="161" width="148" height="36" rx="8" fill="none" stroke="#c9913f" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <rect x="679" y="164" width="193" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="689" y="183.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">npm run build --tag $TAG</text>
+  <text x="333.0" y="183.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">&amp;&amp;</text>
+  <text x="507.0" y="183.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">;</text>
+  <text x="669.0" y="183.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">;</text>
+  <text x="258" y="209" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#4a7bab">/ci &#8594; /ci/web</text>
+  <text x="519" y="209" font-size="12" font-weight="400" fill="#8a5a2a">subshell: its cd ends at )</text>
+  <text x="904" y="176" font-size="12" fill="#8c8a7d">cwd</text>
+  <circle cx="896" cy="172" r="3" fill="#6a9bcc"/>
+  <text x="944" y="176" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#4a7bab">/ci/web</text>
+  <!-- C: assign -->
+  <circle cx="42" cy="237" r="10" fill="#141413"/>
+  <text x="42" y="241" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">C</text>
+  <text x="60" y="234" font-size="13" font-weight="600" fill="#141413">Assign</text>
+  <text x="60" y="251" font-size="12" fill="#6b6a5f">a default applies only</text>
+  <text x="60" y="268" font-size="12" fill="#6b6a5f">when unset or empty (:-)</text>
+  <rect x="256" y="222" width="63" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="266" y="241.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">cd web</text>
+  <rect x="347" y="222" width="150" height="30" rx="6" fill="#e7e4d9" stroke="#141413" stroke-width="1.4"/>
+  <text x="357" y="241.5" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">TAG=dev</text>
+  <rect x="517" y="222" width="142" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="527" y="241.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">(cd docs &amp;&amp; make)</text>
+  <rect x="679" y="222" width="193" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="689" y="241.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">npm run build --tag $TAG</text>
+  <text x="333.0" y="241.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">&amp;&amp;</text>
+  <text x="507.0" y="241.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">;</text>
+  <text x="669.0" y="241.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">;</text>
+  <text x="349" y="267" font-size="12" font-weight="400" fill="#4a7bab">CI_TAG unset &#8594; dev</text>
+  <text x="904" y="234" font-size="12" fill="#8c8a7d">cwd</text>
+  <text x="944" y="234" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">/ci/web</text>
+  <text x="904" y="250" font-size="12" fill="#8c8a7d">vars</text>
+  <circle cx="896" cy="246" r="3" fill="#6a9bcc"/>
+  <text x="944" y="250" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#4a7bab">TAG=dev</text>
+  <!-- D: expand -->
+  <circle cx="42" cy="295" r="10" fill="#141413"/>
+  <text x="42" y="299" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">D</text>
+  <text x="60" y="292" font-size="13" font-weight="600" fill="#141413">Expand</text>
+  <text x="60" y="309" font-size="12" fill="#6b6a5f">uses the vars carried</text>
+  <text x="60" y="326" font-size="12" fill="#6b6a5f">from step C</text>
+  <rect x="256" y="280" width="63" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="266" y="299.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">cd web</text>
+  <rect x="347" y="280" width="150" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="357" y="299.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">TAG=dev</text>
+  <rect x="517" y="280" width="142" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="527" y="299.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">(cd docs &amp;&amp; make)</text>
+  <rect x="679" y="280" width="193" height="30" rx="6" fill="#e7e4d9" stroke="#141413" stroke-width="1.4"/>
+  <text x="689" y="299.5" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">npm run build --tag dev</text>
+  <text x="333.0" y="299.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">&amp;&amp;</text>
+  <text x="507.0" y="299.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">;</text>
+  <text x="669.0" y="299.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">;</text>
+  <text x="904" y="292" font-size="12" fill="#8c8a7d">cwd</text>
+  <text x="944" y="292" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">/ci/web</text>
+  <text x="904" y="308" font-size="12" fill="#8c8a7d">vars</text>
+  <text x="944" y="308" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">TAG=dev</text>
+  <!-- E: where each segment really ran -->
+  <circle cx="42" cy="353" r="10" fill="#141413"/>
+  <text x="42" y="357" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">E</text>
+  <text x="60" y="350" font-size="13" font-weight="600" fill="#141413">What runs, where</text>
+  <text x="60" y="367" font-size="12" fill="#6b6a5f">each segment with the</text>
+  <text x="60" y="384" font-size="12" fill="#6b6a5f">cwd it actually had</text>
+  <rect x="256" y="338" width="63" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="266" y="357.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">cd web</text>
+  <rect x="347" y="338" width="150" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="357" y="357.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">TAG=dev</text>
+  <rect x="517" y="338" width="142" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="527" y="357.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">(cd docs &amp;&amp; make)</text>
+  <rect x="679" y="338" width="193" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="689" y="357.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">npm run build --tag dev</text>
+  <rect x="676" y="335" width="199" height="36" rx="8" fill="none" stroke="#d97757" stroke-width="1.8"/>
+  <text x="333.0" y="357.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">&amp;&amp;</text>
+  <text x="507.0" y="357.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">;</text>
+  <text x="669.0" y="357.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">;</text>
+  <text x="258" y="383" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">/ci</text>
+  <text x="349" y="383" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">/ci/web</text>
+  <text x="519" y="383" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">/ci/web/docs</text>
+  <text x="681" y="383" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#c2613f">/ci/web &#8212; not docs</text>
+  <rect x="900" y="338" width="184" height="30" rx="15" fill="#f7e4dc" stroke="#d97757" stroke-width="1.2"/>
+  <text x="992" y="357.5" text-anchor="middle" font-size="12" font-weight="600" fill="#c2613f">npm runs in /ci/web</text>
+  <line x1="32" y1="398" x2="1088" y2="398" stroke="#c9c5b8" stroke-dasharray="6 5"/>
+  <!-- contrast: same line, one input changed; only the dependent cells go dark -->
+  <circle cx="42" cy="427" r="5" fill="#a8a496"/>
+  <text x="60" y="424" font-size="13" font-weight="600" fill="#141413">Same line, CI_TAG=2.1.0</text>
+  <text x="60" y="441" font-size="12" fill="#6b6a5f">only the cells that</text>
+  <text x="60" y="458" font-size="12" fill="#6b6a5f">depend on it change</text>
+  <rect x="256" y="412" width="63" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="266" y="431.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">cd web</text>
+  <rect x="347" y="412" width="150" height="30" rx="6" fill="#e7e4d9" stroke="#141413" stroke-width="1.4"/>
+  <text x="357" y="431.5" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">TAG=2.1.0</text>
+  <rect x="517" y="412" width="142" height="30" rx="6" fill="#ffffff" stroke="#d8d4c8"/>
+  <text x="527" y="431.5" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">(cd docs &amp;&amp; make)</text>
+  <rect x="679" y="412" width="193" height="30" rx="6" fill="#e7e4d9" stroke="#141413" stroke-width="1.4"/>
+  <text x="689" y="431.5" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">npm run build --tag 2.1.0</text>
+  <text x="333.0" y="431.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">&amp;&amp;</text>
+  <text x="507.0" y="431.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">;</text>
+  <text x="669.0" y="431.5" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">;</text>
+  <text x="904" y="424" font-size="12" fill="#8c8a7d">cwd</text>
+  <text x="944" y="424" font-size="12" font-weight="400" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">/ci/web</text>
+  <text x="904" y="440" font-size="12" fill="#8c8a7d">vars</text>
+  <circle cx="896" cy="436" r="3" fill="#6a9bcc"/>
+  <text x="944" y="440" font-size="12" font-weight="600" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#4a7bab">TAG=2.1.0</text>
+  <g font-size="12" fill="#6b6a5f">
+    <rect x="32" y="480" width="22" height="14" rx="3" fill="#e7e4d9" stroke="#141413" stroke-width="1.2"/><text x="62" y="491">changed by this step</text>
+    <rect x="210" y="480" width="22" height="14" rx="3" fill="#ffffff" stroke="#d8d4c8"/><text x="240" y="491">same as the row above</text>
+    <circle cx="398" cy="487" r="3" fill="#6a9bcc"/><text x="408" y="491">state this step changed</text>
+    <rect x="568" y="480" width="22" height="14" rx="3" fill="none" stroke="#c9913f" stroke-width="1.4" stroke-dasharray="4 3"/><text x="598" y="491">scope that does not carry</text>
+    <rect x="782" y="480" width="22" height="14" rx="3" fill="none" stroke="#d97757" stroke-width="1.8"/><text x="812" y="491">the answer</text>
+  </g>
+  <text x="32" y="522" font-size="12" fill="#6b6a5f">The command that actually runs, <tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">npm run build --tag dev</tspan> in <tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">/ci/web</tspan>, is not written anywhere in the raw line.</text>
+  <text x="32" y="540" font-size="12" fill="#6b6a5f">It exists only once the carried state is applied &#8212; and the cells stay put so the eye reads one column down instead of re-parsing every row.</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">text &#183; processed in steps</span><span class="lang-zh">文本 · 逐步加工</span></span>
+          <span class="lang-en">One line from a CI job followed through five steps, with every segment locked to its column: reading a step means looking one column down, not re-parsing a row. Dark cells are what that step changed; the right-hand column is the state it leaves for the rest of the line. Step C is where the default kicks in, and step E shows the answer the raw line never states &mdash; npm runs in <code>/ci/web</code>, because the <code>cd</code> inside the parentheses ended at the closing bracket. The last row changes one input, and only the two cells that depend on it go dark. Template: <code>templates/diagrams/text-steps.svg</code>.</span>
+          <span class="lang-zh">CI 任务里的一行命令走五步加工，每一段在每一行里都钉在同一列：看一步只要往下看一格，不用把整行重新读一遍。深底的格子是这一步改了的，右边一列是这一步留下、带给后面几段的状态。步骤 C 是默认值生效的地方；步骤 E 给出原始那行里从没写出来的答案——npm 在 <code>/ci/web</code> 里跑，因为括号里的 <code>cd</code> 到右括号就失效了。最后一行只换一个输入，只有依赖它的两格变深。模板：<code>templates/diagrams/text-steps.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="A deploy pipeline drawn as three aligned columns. On the left, a merged change enters six step cards, lettered A to F: pin the artifact, validate the config, fill in defaults, check the migration, a five per cent canary, and rolling out in waves. In the middle runs a single dashed exit lane. Every step that can stop a deploy sends a short line into it, and a card on the lane states the trigger, such as the tag naming no digest, an unknown config key, a migration that drops a column the old version still reads, errors above baseline during the canary, or two nodes in one wave failing health checks. Step C sends nothing, because it cannot stop anything; it only rewrites the change by filling in defaults. On the right, each row carries the real incident that put that step there, from a re-pushed tag to a region taken down by a change that reached every zone at once. Three outcome boxes along the bottom double as the legend: rolled out as built, rolled out with defaults filled in, and stopped with the reason printed, which is where the lane ends. A dashed card under the incidents lists one incident with no step beside it, a feature flag flipped at runtime, which no step above can see because it never goes through a deploy" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="pexDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <marker id="pexArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6b6a5f"/></marker>
+    <marker id="pexArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <filter id="pexSh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.06"/></filter>
+  </defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#pexDots)"/>
+  <g font-size="12" font-weight="600" letter-spacing="1" fill="#6b6a5f">
+    <text x="32" y="28">STEP &#183; EVERY CHANGE GOES THROUGH ALL SIX</text>
+    <text x="428" y="28">CAN STOP HERE</text>
+    <text x="676" y="28">THE INCIDENT THAT PUT THE STEP HERE</text>
+  </g>
+  <rect x="32" y="40" width="360" height="40" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <text x="48" y="56" font-size="13" font-weight="600" fill="#141413">A merged change</text>
+  <text x="48" y="72" font-size="12" fill="#6b6a5f">its build artifact and the target environment</text>
+  <!-- the exit lane: one dashed line that every stoppable step feeds -->
+  <path d="M540,114 V436" fill="none" stroke="#d97757" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#pexArrO)"/>
+  <g fill="none" stroke="#6b6a5f" stroke-width="1.4">
+    <path d="M56,80 V90" marker-end="url(#pexArr)"/>
+    <path d="M56,136 V144" marker-end="url(#pexArr)"/>
+    <path d="M56,190 V198" marker-end="url(#pexArr)"/>
+    <path d="M56,244 V252" marker-end="url(#pexArr)"/>
+    <path d="M56,298 V306" marker-end="url(#pexArr)"/>
+    <path d="M56,352 V360" marker-end="url(#pexArr)"/>
+  </g>
+  <!-- row A -->
+  <rect x="32" y="92" width="360" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <circle cx="56" cy="114" r="10" fill="#141413"/>
+  <text x="56" y="118" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">A</text>
+  <text x="76" y="110" font-size="13" font-weight="600" fill="#141413">Pin the artifact</text>
+  <text x="76" y="127" font-size="12" fill="#6b6a5f">resolve the tag to an immutable digest</text>
+  <path d="M392,114 H426" fill="none" stroke="#d97757" stroke-width="1.4" marker-end="url(#pexArrO)"/>
+  <rect x="428" y="94" width="224" height="40" rx="8" fill="#ffffff" stroke="#e8c5b5"/>
+  <text x="440" y="109" font-size="12" fill="#141413">the tag names no digest, or</text>
+  <text x="440" y="126" font-size="12" fill="#141413">it moved since the build</text>
+  <rect x="676" y="92" width="412" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <rect x="676" y="100" width="4" height="28" rx="2" fill="#c9913f"/>
+  <text x="692" y="110" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-1</tspan>  a tag was re-pushed between test and deploy</text>
+  <text x="692" y="127" font-size="12" fill="#6b6a5f">the build that shipped was never the one that was tested</text>
+  <!-- row B -->
+  <rect x="32" y="146" width="360" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <circle cx="56" cy="168" r="10" fill="#141413"/>
+  <text x="56" y="172" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">B</text>
+  <text x="76" y="164" font-size="13" font-weight="600" fill="#141413">Validate the config</text>
+  <text x="76" y="181" font-size="12" fill="#6b6a5f">check it against the service schema</text>
+  <path d="M392,168 H426" fill="none" stroke="#d97757" stroke-width="1.4" marker-end="url(#pexArrO)"/>
+  <rect x="428" y="148" width="224" height="40" rx="8" fill="#ffffff" stroke="#e8c5b5"/>
+  <text x="440" y="163" font-size="12" fill="#141413">an unknown key, or a</text>
+  <text x="440" y="180" font-size="12" fill="#141413">required key is missing</text>
+  <rect x="676" y="146" width="412" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <rect x="676" y="154" width="4" height="28" rx="2" fill="#c9913f"/>
+  <text x="692" y="164" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-2</tspan>  a misspelt key was silently ignored</text>
+  <text x="692" y="181" font-size="12" fill="#6b6a5f">rate limits were off for three days before anyone noticed</text>
+  <!-- row C -->
+  <rect x="32" y="200" width="360" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <circle cx="56" cy="222" r="10" fill="#141413"/>
+  <text x="56" y="226" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">C</text>
+  <text x="76" y="218" font-size="13" font-weight="600" fill="#141413">Fill in defaults</text>
+  <text x="76" y="235" font-size="12" fill="#6b6a5f">missing resource limits get team defaults</text>
+  <rect x="306" y="206" width="74" height="20" rx="10" fill="#e2ecf5" stroke="#6a9bcc"/>
+  <text x="343" y="220" text-anchor="middle" font-size="12" font-weight="600" fill="#4a7bab">rewrites</text>
+  <rect x="448" y="211" width="184" height="22" rx="11" fill="#faf9f5"/>
+  <text x="540" y="226" text-anchor="middle" font-size="12" font-style="italic" fill="#8c8a7d">no exit: it cannot stop anything</text>
+  <rect x="676" y="200" width="412" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <rect x="676" y="208" width="4" height="28" rx="2" fill="#c9913f"/>
+  <text x="692" y="218" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-3</tspan>  a service with no memory limit took its node down</text>
+  <text x="692" y="235" font-size="12" fill="#6b6a5f">every other service on that node went down with it</text>
+  <!-- row D -->
+  <rect x="32" y="254" width="360" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <circle cx="56" cy="276" r="10" fill="#141413"/>
+  <text x="56" y="280" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">D</text>
+  <text x="76" y="272" font-size="13" font-weight="600" fill="#141413">Check the migration</text>
+  <text x="76" y="289" font-size="12" fill="#6b6a5f">can the running version still read it?</text>
+  <path d="M392,276 H426" fill="none" stroke="#d97757" stroke-width="1.4" marker-end="url(#pexArrO)"/>
+  <rect x="428" y="256" width="224" height="40" rx="8" fill="#ffffff" stroke="#e8c5b5"/>
+  <text x="440" y="271" font-size="12" fill="#141413">drops or renames a column</text>
+  <text x="440" y="288" font-size="12" fill="#141413">the old version still reads</text>
+  <rect x="676" y="254" width="412" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <rect x="676" y="262" width="4" height="28" rx="2" fill="#c9913f"/>
+  <text x="692" y="272" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-4</tspan>  a column rename broke the old pods mid-rollout</text>
+  <text x="692" y="289" font-size="12" fill="#6b6a5f">nine minutes of errors while both versions were live</text>
+  <!-- row E -->
+  <rect x="32" y="308" width="360" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <circle cx="56" cy="330" r="10" fill="#141413"/>
+  <text x="56" y="334" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">E</text>
+  <text x="76" y="326" font-size="13" font-weight="600" fill="#141413">Canary at 5 %</text>
+  <text x="76" y="343" font-size="12" fill="#6b6a5f">real traffic on one slice for ten minutes</text>
+  <path d="M392,330 H426" fill="none" stroke="#d97757" stroke-width="1.4" marker-end="url(#pexArrO)"/>
+  <rect x="428" y="310" width="224" height="40" rx="8" fill="#ffffff" stroke="#e8c5b5"/>
+  <text x="440" y="325" font-size="12" fill="#141413">errors above baseline + 1 pt</text>
+  <text x="440" y="342" font-size="12" fill="#141413">&#8594; roll back, then stop</text>
+  <rect x="676" y="308" width="412" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <rect x="676" y="316" width="4" height="28" rx="2" fill="#c9913f"/>
+  <text x="692" y="326" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-5</tspan>  a cache-key bug only failed on real traffic</text>
+  <text x="692" y="343" font-size="12" fill="#6b6a5f">staging was green; staging never sends that header</text>
+  <!-- row F -->
+  <rect x="32" y="362" width="360" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <circle cx="56" cy="384" r="10" fill="#141413"/>
+  <text x="56" y="388" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">F</text>
+  <text x="76" y="380" font-size="13" font-weight="600" fill="#141413">Roll out in waves</text>
+  <text x="76" y="397" font-size="12" fill="#6b6a5f">25 % at a time, health-checked</text>
+  <path d="M392,384 H426" fill="none" stroke="#d97757" stroke-width="1.4" marker-end="url(#pexArrO)"/>
+  <rect x="428" y="364" width="224" height="40" rx="8" fill="#ffffff" stroke="#e8c5b5"/>
+  <text x="440" y="379" font-size="12" fill="#141413">two nodes in one wave fail</text>
+  <text x="440" y="396" font-size="12" fill="#141413">their health checks</text>
+  <rect x="676" y="362" width="412" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <rect x="676" y="370" width="4" height="28" rx="2" fill="#c9913f"/>
+  <text x="692" y="380" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-6</tspan>  one bad zone took a whole region down at once</text>
+  <text x="692" y="397" font-size="12" fill="#6b6a5f">the change had reached every zone in a single step</text>
+  <!-- three outcomes; they double as the legend -->
+  <g fill="none" stroke="#6b6a5f" stroke-width="1.4">
+    <path d="M56,406 V436" marker-end="url(#pexArr)"/>
+    <path d="M56,414 Q56,420 62,420 H322 Q328,420 328,426 V436" marker-end="url(#pexArr)"/>
+  </g>
+  <rect x="32" y="438" width="180" height="48" rx="10" fill="#e5e9dd" stroke="#788c5d" stroke-width="1.2"/>
+  <text x="122.0" y="458" text-anchor="middle" font-size="13" font-weight="600" fill="#5d7045">Rolled out as built</text>
+  <text x="122.0" y="475" text-anchor="middle" font-size="12" fill="#6b6a5f">C left it alone</text>
+  <rect x="238" y="438" width="180" height="48" rx="10" fill="#e2ecf5" stroke="#6a9bcc" stroke-width="1.2"/>
+  <text x="328.0" y="458" text-anchor="middle" font-size="13" font-weight="600" fill="#4a7bab">Rolled out, rewritten</text>
+  <text x="328.0" y="475" text-anchor="middle" font-size="12" fill="#6b6a5f">C filled in defaults</text>
+  <rect x="428" y="438" width="224" height="48" rx="10" fill="#f7e4dc" stroke="#d97757" stroke-width="1.4"/>
+  <text x="540" y="458" text-anchor="middle" font-size="13" font-weight="600" fill="#c2613f">Stopped, reason printed</text>
+  <text x="540" y="475" text-anchor="middle" font-size="12" fill="#6b6a5f">it never reaches a user</text>
+  <!-- an incident with no step beside it: still open -->
+  <rect x="676" y="438" width="412" height="48" rx="10" fill="none" stroke="#c9913f" stroke-width="1.2" stroke-dasharray="5 4"/>
+  <text x="692" y="458" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-7</tspan>  a feature flag was flipped at runtime</text>
+  <text x="692" y="475" font-size="12" fill="#6b6a5f">no step above can see it: it never goes through a deploy</text>
+  <text x="1076" y="458" text-anchor="end" font-size="12" font-weight="700" fill="#8a5a2a">OPEN</text>
+  <text x="32" y="518" font-size="12" fill="#6b6a5f">Five exits share one lane, so &#8220;what can stop a deploy&#8221; is one column to scan. Each row&#8217;s incident is the reason that step exists:</text>
+  <text x="32" y="536" font-size="12" fill="#6b6a5f">a step with no incident beside it is a candidate for removal, and an incident with no step beside it is still open.</text>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">pipeline &#183; exits and incidents</span><span class="lang-zh">处理流程 · 出口与事故</span></span>
+          <span class="lang-en">Read it one row at a time: the step, the condition under which it can stop the deploy, and the incident that put the step there. Five exits share one lane, so &ldquo;what can stop a deploy&rdquo; is a single column to scan; step C sends nothing into it because it only rewrites. The dashed card under the incidents is why the columns stay row-aligned: an incident with no step beside it is still open, and a step with no incident beside it is a candidate for removal. The three outcome boxes double as the legend. Template: <code>templates/diagrams/pipeline-exits.svg</code>.</span>
+          <span class="lang-zh">一行一行横着读：这一步、它在什么条件下能把这次发布拦下、是哪一次事故把它逼出来的。五个出口共用一列，「什么能拦下发布」就成了一列能一眼扫完的东西；步骤 C 不往出口列里送任何东西，因为它只改写、不拦。事故列下面那张虚线卡说明了三列为什么要一行对一行：旁边没有步骤的事故还没解决，旁边没有事故的步骤可以考虑删掉。底部三格结局兼当图例。模板：<code>templates/diagrams/pipeline-exits.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+
+    <figure class="gal-fig">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="A search query's path through a service, drawn once as a shared base and then dimmed everywhere except the part this page is about. The base runs left to right: the raw text from the search box, a normaliser that trims it, lower-cases it and folds accents, then four matchers fanned out in a column, exact title, prefix for autocomplete, full text, and did-you-mean, each feeding what the user sees on the right: the top hit, the autocomplete dropdown, the ranked result list and public API, and a did-you-mean banner. Inside the full-text matcher sit three small steps, tokenise, stem and rank. On this page a translucent layer the same colour as the background covers the whole base except a hole around those three steps, and an ink dashed frame outlines the hole, so nothing is recoloured and no new colour appears. A strip at the bottom names the three pages that share this base and marks this one as page two" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <!-- HOW THIS TEMPLATE IS SHARED ACROSS PAGES
+       Everything inside <g data-basemap="query-flow"> must be byte-identical on every page that uses it.
+       Only the layer after that group (mask hole, dashed frame, page strip) may differ from page to page.
+       A check pulls the group out of each page by name and compares the bytes; see diagram-craft §15.60. -->
+  <defs>
+    <pattern id="dspDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <marker id="dspArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/></marker>
+    <filter id="dspSh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.06"/></filter>
+  </defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#dspDots)"/>
+  <g data-basemap="query-flow">
+    <text x="32" y="30" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">HOW A SEARCH QUERY IS SERVED &#183; ONE BASE, SHARED BY THREE PAGES</text>
+    <rect x="32" y="204" width="176" height="96" rx="12" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.2"/>
+    <rect x="32" y="218" width="4" height="68" rx="2" fill="#c9913f"/>
+    <text x="48" y="228" font-size="13" font-weight="600" fill="#8a5a2a">Search box</text>
+    <text x="48" y="246" font-size="12" fill="#6b6a5f">what the user typed</text>
+    <rect x="48" y="258" width="140" height="26" rx="5" fill="#ffffff" stroke="#e3d3bd"/>
+    <text x="58" y="275" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">" Caf&#233; Menus "</text>
+    <path d="M208,252 H234" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+    <rect x="238" y="200" width="184" height="104" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <text x="254" y="224" font-size="13" font-weight="600" fill="#141413">Normalise</text>
+    <text x="254" y="242" font-size="12" fill="#6b6a5f">trim, lower-case,</text>
+    <text x="254" y="259" font-size="12" fill="#6b6a5f">fold accents</text>
+    <rect x="254" y="268" width="152" height="24" rx="5" fill="#f3f1ea"/>
+    <text x="264" y="284" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">cafe menus</text>
+    <g fill="none" stroke="#a8a496" stroke-width="1.4">
+      <path d="M422,252 H440"/>
+      <path d="M440,96 V384"/>
+      <path d="M440,96 Q440,88 448,88 H458" marker-end="url(#dspArr)"/>
+      <path d="M440,384 Q440,392 448,392 H458" marker-end="url(#dspArr)"/>
+      <path d="M440,158 H458" marker-end="url(#dspArr)"/>
+      <path d="M440,228 H458" marker-end="url(#dspArr)"/>
+    </g>
+    <rect x="462" y="60" width="356" height="56" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <rect x="474" y="72" width="20" height="20" rx="5" fill="#e2ecf5" stroke="#6a9bcc"/>
+    <text x="484" y="86" text-anchor="middle" font-size="12" font-weight="700" fill="#4a7bab">A</text>
+    <text x="504" y="87" font-size="13" font-weight="600" fill="#141413">Exact title</text>
+    <text x="804" y="87" text-anchor="end" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">title_index</text>
+    <text x="504" y="105" font-size="12" fill="#6b6a5f">the whole string against titles</text>
+    <rect x="462" y="130" width="356" height="56" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <rect x="474" y="142" width="20" height="20" rx="5" fill="#e2ecf5" stroke="#6a9bcc"/>
+    <text x="484" y="156" text-anchor="middle" font-size="12" font-weight="700" fill="#4a7bab">B</text>
+    <text x="504" y="157" font-size="13" font-weight="600" fill="#141413">Prefix</text>
+    <text x="804" y="157" text-anchor="end" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">prefix_trie</text>
+    <text x="504" y="175" font-size="12" fill="#6b6a5f">first letters, for autocomplete</text>
+    <rect x="462" y="200" width="356" height="150" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <rect x="474" y="212" width="20" height="20" rx="5" fill="#e2ecf5" stroke="#6a9bcc"/>
+    <text x="484" y="226" text-anchor="middle" font-size="12" font-weight="700" fill="#4a7bab">C</text>
+    <text x="504" y="227" font-size="13" font-weight="600" fill="#141413">Full text</text>
+    <text x="804" y="227" text-anchor="end" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">fts_index</text>
+    <text x="504" y="245" font-size="12" fill="#6b6a5f">every word, ranked</text>
+    <rect x="462" y="364" width="356" height="56" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <rect x="474" y="376" width="20" height="20" rx="5" fill="#e2ecf5" stroke="#6a9bcc"/>
+    <text x="484" y="390" text-anchor="middle" font-size="12" font-weight="700" fill="#4a7bab">D</text>
+    <text x="504" y="391" font-size="13" font-weight="600" fill="#141413">Did you mean</text>
+    <text x="804" y="391" text-anchor="end" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">spell_model</text>
+    <text x="504" y="409" font-size="12" fill="#6b6a5f">near misses; never changes results</text>
+    <g>
+      <rect x="476" y="266" width="100" height="50" rx="8" fill="#e2ecf5" stroke="#6a9bcc"/>
+      <circle cx="490" cy="282" r="8" fill="#6a9bcc"/>
+      <text x="490" y="286" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">1</text>
+      <text x="503" y="286" font-size="12.5" font-weight="600" fill="#141413">Tokenise</text>
+      <text x="486" y="306" font-size="12" fill="#6b6a5f">into words</text>
+      <path d="M576,291 H586" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+      <rect x="590" y="266" width="100" height="50" rx="8" fill="#e2ecf5" stroke="#6a9bcc"/>
+      <circle cx="604" cy="282" r="8" fill="#6a9bcc"/>
+      <text x="604" y="286" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">2</text>
+      <text x="617" y="286" font-size="12.5" font-weight="600" fill="#141413">Stem</text>
+      <text x="600" y="306" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#6b6a5f">menus &#8594; menu</text>
+      <path d="M690,291 H700" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+      <rect x="704" y="266" width="100" height="50" rx="8" fill="#e2ecf5" stroke="#6a9bcc"/>
+      <circle cx="718" cy="282" r="8" fill="#6a9bcc"/>
+      <text x="718" y="286" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">3</text>
+      <text x="731" y="286" font-size="12.5" font-weight="600" fill="#141413">Rank</text>
+      <text x="714" y="306" font-size="12" fill="#6b6a5f">hit &#8594; score</text>
+    </g>
+    <text x="476" y="338" font-size="12" fill="#8c8a7d">1 splits &#183; 2 rewrites words &#183; 3 orders hits</text>
+    <path d="M818,88 H846" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+    <rect x="850" y="62" width="238" height="52" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <circle cx="866" cy="82" r="4" fill="#788c5d"/>
+    <text x="878" y="86" font-size="13" font-weight="600" fill="#141413">Top hit</text>
+    <text x="878" y="103" font-size="12" fill="#6b6a5f">shown above the results</text>
+    <path d="M818,158 H846" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+    <rect x="850" y="132" width="238" height="52" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <circle cx="866" cy="152" r="4" fill="#788c5d"/>
+    <text x="878" y="156" font-size="13" font-weight="600" fill="#141413">Autocomplete dropdown</text>
+    <text x="878" y="173" font-size="12" fill="#6b6a5f">on every keystroke</text>
+    <path d="M818,228 H846" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+    <rect x="850" y="202" width="238" height="52" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <circle cx="866" cy="222" r="4" fill="#788c5d"/>
+    <text x="878" y="226" font-size="13" font-weight="600" fill="#141413">Ranked result list</text>
+    <text x="878" y="243" font-size="12" fill="#6b6a5f">the page and the public API</text>
+    <path d="M818,392 H846" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+    <rect x="850" y="366" width="238" height="52" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <circle cx="866" cy="386" r="4" fill="#788c5d"/>
+    <text x="878" y="390" font-size="13" font-weight="600" fill="#141413">Did-you-mean banner</text>
+    <text x="878" y="407" font-size="12" fill="#6b6a5f">only when it scores high</text>
+    <g font-size="12" fill="#6b6a5f">
+      <circle cx="38" cy="486" r="5" fill="#c9913f"/><text x="50" y="490">where the query comes from</text>
+      <circle cx="246" cy="486" r="5" fill="#6a9bcc"/><text x="258" y="490">matchers</text>
+      <circle cx="340" cy="486" r="5" fill="#788c5d"/><text x="352" y="490">what the user sees</text>
+      <rect x="500" y="479" width="24" height="14" rx="3" fill="none" stroke="#141413" stroke-width="1.4" stroke-dasharray="5 4"/>
+      <text x="532" y="490">what this page is about; the rest is dimmed, not recoloured</text>
+    </g>
+  </g>
+  <!-- per-page layer: this is the only part allowed to differ between the pages that share the base -->
+  <path d="M0,44 H1120 V466 H0 Z M468,256 V346 H812 V256 Z" fill="#faf9f5" fill-opacity="0.72" fill-rule="evenodd" data-allow-overlap="dimming layer: background-coloured and translucent, it is meant to sit over the text outside the hole"/>
+  <rect x="468" y="256" width="344" height="90" rx="10" fill="none" stroke="#141413" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <g font-size="12">
+    <text x="32" y="530" fill="#8c8a7d">pages sharing this base</text>
+    <rect x="190" y="513" width="188" height="26" rx="13" fill="#ffffff" stroke="#d8d4c8"/>
+    <text x="284.0" y="530" text-anchor="middle" fill="#6b6a5f">1 &#183; Normalise</text>
+    <rect x="388" y="513" width="250" height="26" rx="13" fill="#141413"/>
+    <text x="513.0" y="530" text-anchor="middle" font-weight="600" fill="#ffffff">2 &#183; Inside the full-text matcher</text>
+    <rect x="648" y="513" width="226" height="26" rx="13" fill="#ffffff" stroke="#d8d4c8"/>
+    <text x="761.0" y="530" text-anchor="middle" fill="#6b6a5f">3 &#183; Who reads which matcher</text>
+  </g>
+</svg>
+      <figcaption class="gal-cap">
+        <span class="gal-cap-text">
+          <span class="gal-tag"><span class="lang-en">series &#183; shared base, dimmed</span><span class="lang-zh">图族 · 共用底图 + 调暗</span></span>
+          <span class="lang-en">One base drawing shared by three pages, byte for byte; this is page 2. Instead of recolouring the block being discussed, everything else is covered by a translucent layer the same colour as the background, with a hole cut where this page&rsquo;s block sits and an ink dashed frame around the hole. No new colour appears and the base is never touched &mdash; the only thing that differs between the pages is where the hole is. The base sits inside <code>&lt;g data-basemap="query-flow"&gt;</code> so a check can pull it out of every page and compare the bytes. Template: <code>templates/diagrams/dim-spotlight.svg</code>.</span>
+          <span class="lang-zh">三页共用一份逐字节相同的底图，这是第 2 页。不给当前那一块上色，而是给其余部分盖一层跟背景同色、半透明的遮罩，在这一页讲的那块上挖一个洞，再用墨色虚线框圈住洞口。不引入新颜色，底图一个字节都不动——几页之间唯一不同的就是洞开在哪。底图那一段包在 <code>&lt;g data-basemap="query-flow"&gt;</code> 里，检查才能按名字从每一页取出来逐字节比对。模板：<code>templates/diagrams/dim-spotlight.svg</code>。</span>
+        </span>
+        <button type="button" class="anth-button anth-button--ghost gal-copy" data-copy-svg><span class="lang-en">Copy SVG</span><span class="lang-zh">复制 SVG</span></button>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
 
 <footer class="anth-section" style="border-top:1px solid var(--anth-light-gray); padding-top:var(--space-7); padding-bottom:var(--space-8);">
   <div class="anth-container anth-container--wide" style="display:flex; justify-content:space-between; gap:var(--space-5); flex-wrap:wrap; align-items:baseline;">

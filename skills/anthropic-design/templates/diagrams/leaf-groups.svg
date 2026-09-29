@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="One question at the top, the authorization check could not give an answer, and four branches under it that have nothing to do with each other: the policy engine did not answer, the policy bundle will not load, a token cannot be verified, and a request matches no rule. Each branch holds its own column of leaf cards, ten in all. Every leaf names one case, the reason behind its outcome, the outcome itself as a coloured dot, green for allow, orange for deny, gold for refusing the change before it ships, and a grey line with the price of that choice. The engine branch shows the split most clearly: a write is denied, a read with a decision cached in the last minute is allowed from the cache, a read with nothing cached is denied, and the health check is allowed because denying it would take the whole fleet out of rotation. A bar along the bottom sets two leaves side by side: A1 and A4 fail in exactly the same way and fall in opposite directions, and the difference is who gets hurt by a deny" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="lgrDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <marker id="lgrArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/></marker>
+    <filter id="lgrSh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.06"/></filter>
+  </defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#lgrDots)"/>
+  <text x="32" y="32" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">LEAF GROUPS &#183; ONE KIND OF FAILURE, TEN CASES</text>
+  <g font-size="12" fill="#6b6a5f">
+    <circle cx="772" cy="28" r="5" fill="#788c5d"/><text x="782" y="32">allow</text>
+    <circle cx="840" cy="28" r="5" fill="#d97757"/><text x="850" y="32">deny</text>
+    <circle cx="904" cy="28" r="5" fill="#c9913f"/><text x="914" y="32">refuse the change</text>
+  </g>
+  <!-- the question: one box, no main path underneath it -->
+  <rect x="340" y="46" width="440" height="36" rx="10" fill="#ffffff" stroke="#141413" stroke-width="1.5" filter="url(#lgrSh)"/>
+  <text x="560" y="69" text-anchor="middle" font-size="14" font-weight="600" fill="#141413">The authorization check could not give an answer</text>
+  <g fill="none" stroke="#a8a496" stroke-width="1.4">
+    <path d="M560,82 V96"/>
+    <path d="M158,108 V100 Q158,96 162,96 H958 Q962,96 962,100 V108"/>
+    <path d="M158,100 V108" marker-end="url(#lgrArr)"/>
+    <path d="M426,100 V108" marker-end="url(#lgrArr)"/>
+    <path d="M694,100 V108" marker-end="url(#lgrArr)"/>
+    <path d="M962,100 V108" marker-end="url(#lgrArr)"/>
+    <path d="M426,96 V100"/>
+    <path d="M694,96 V100"/>
+  </g>
+  <!-- branch A -->
+  <rect x="32" y="110" width="252" height="38" rx="10" fill="#e7e4d9" stroke="#d8d4c8"/>
+  <text x="46" y="126" font-size="13" font-weight="600" fill="#141413">Policy engine did not answer</text>
+  <text x="46" y="142" font-size="12" fill="#6b6a5f">timeout or crash</text>
+  <path d="M44,148 V430" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+  <path d="M44,178 H56" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="58" y="156" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="70" y="174" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">A1</tspan>  Write request</text>
+  <text x="70" y="191" font-size="12" fill="#6b6a5f">a wrong allow changes data</text>
+  <circle cx="74" cy="204" r="4" fill="#d97757"/>
+  <text x="84" y="208" font-size="12" font-weight="600" fill="#c2613f">deny</text>
+  <text x="70" y="225" font-size="12" fill="#8c8a7d">writes fail until it is back</text>
+  <path d="M44,262 H56" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="58" y="240" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="70" y="258" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">A2</tspan>  Read, answer cached</text>
+  <text x="70" y="275" font-size="12" fill="#6b6a5f">cached less than 60 s ago</text>
+  <circle cx="74" cy="288" r="4" fill="#788c5d"/>
+  <text x="84" y="292" font-size="12" font-weight="600" fill="#5d7045">allow from the cache</text>
+  <text x="70" y="309" font-size="12" fill="#8c8a7d">a revoke takes up to 60 s</text>
+  <path d="M44,346 H56" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="58" y="324" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="70" y="342" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">A3</tspan>  Read, nothing cached</text>
+  <text x="70" y="359" font-size="12" fill="#6b6a5f">no answer to fall back on</text>
+  <circle cx="74" cy="372" r="4" fill="#d97757"/>
+  <text x="84" y="376" font-size="12" font-weight="600" fill="#c2613f">deny</text>
+  <text x="70" y="393" font-size="12" fill="#8c8a7d">reads fail until it is back</text>
+  <path d="M44,430 H56" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="58" y="408" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="70" y="426" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">A4</tspan>  Health check</text>
+  <text x="70" y="443" font-size="12" fill="#6b6a5f">no user data behind it</text>
+  <circle cx="74" cy="456" r="4" fill="#788c5d"/>
+  <text x="84" y="460" font-size="12" font-weight="600" fill="#5d7045">allow</text>
+  <text x="70" y="477" font-size="12" fill="#8c8a7d">none; denying it drains the fleet</text>
+  <!-- branch B -->
+  <rect x="300" y="110" width="252" height="38" rx="10" fill="#e7e4d9" stroke="#d8d4c8"/>
+  <text x="314" y="126" font-size="13" font-weight="600" fill="#141413">Policy bundle will not load</text>
+  <text x="314" y="142" font-size="12" fill="#6b6a5f">syntax error, file missing</text>
+  <path d="M312,148 V262" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+  <path d="M312,178 H324" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="326" y="156" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="338" y="174" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">B1</tspan>  New bundle, on reload</text>
+  <text x="338" y="191" font-size="12" fill="#6b6a5f">the old bundle still works</text>
+  <circle cx="342" cy="204" r="4" fill="#c9913f"/>
+  <text x="352" y="208" font-size="12" font-weight="600" fill="#8a5a2a">refuse the new bundle</text>
+  <text x="338" y="225" font-size="12" fill="#8c8a7d">the new rule is not live</text>
+  <path d="M312,262 H324" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="326" y="240" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="338" y="258" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">B2</tspan>  No bundle at start-up</text>
+  <text x="338" y="275" font-size="12" fill="#6b6a5f">nothing to keep serving</text>
+  <circle cx="342" cy="288" r="4" fill="#d97757"/>
+  <text x="352" y="292" font-size="12" font-weight="600" fill="#c2613f">deny everything</text>
+  <text x="338" y="309" font-size="12" fill="#8c8a7d">up, but every call is a 403</text>
+  <!-- branch C -->
+  <rect x="568" y="110" width="252" height="38" rx="10" fill="#e7e4d9" stroke="#d8d4c8"/>
+  <text x="582" y="126" font-size="13" font-weight="600" fill="#141413">Token cannot be verified</text>
+  <text x="582" y="142" font-size="12" fill="#6b6a5f">key server unreachable</text>
+  <path d="M580,148 V262" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+  <path d="M580,178 H592" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="594" y="156" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="606" y="174" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">C1</tspan>  Signed by a cached key</text>
+  <text x="606" y="191" font-size="12" fill="#6b6a5f">that key is still trusted</text>
+  <circle cx="610" cy="204" r="4" fill="#788c5d"/>
+  <text x="620" y="208" font-size="12" font-weight="600" fill="#5d7045">allow</text>
+  <text x="606" y="225" font-size="12" fill="#8c8a7d">a key pulled &lt; 1 h ago works</text>
+  <path d="M580,262 H592" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="594" y="240" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="606" y="258" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">C2</tspan>  Signed by an unseen key</text>
+  <text x="606" y="275" font-size="12" fill="#6b6a5f">nothing to check it against</text>
+  <circle cx="610" cy="288" r="4" fill="#d97757"/>
+  <text x="620" y="292" font-size="12" font-weight="600" fill="#c2613f">deny</text>
+  <text x="606" y="309" font-size="12" fill="#8c8a7d">its users sign in again</text>
+  <!-- branch D -->
+  <rect x="836" y="110" width="252" height="38" rx="10" fill="#e7e4d9" stroke="#d8d4c8"/>
+  <text x="850" y="126" font-size="13" font-weight="600" fill="#141413">Request matches no rule</text>
+  <text x="850" y="142" font-size="12" fill="#6b6a5f">route or resource unknown</text>
+  <path d="M848,148 V262" fill="none" stroke="#a8a496" stroke-width="1.2"/>
+  <path d="M848,178 H860" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="862" y="156" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="874" y="174" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">D1</tspan>  Unknown public path</text>
+  <text x="874" y="191" font-size="12" fill="#6b6a5f">no rule means no owner</text>
+  <circle cx="878" cy="204" r="4" fill="#d97757"/>
+  <text x="888" y="208" font-size="12" font-weight="600" fill="#c2613f">deny (404)</text>
+  <text x="874" y="225" font-size="12" fill="#8c8a7d">a new route needs a rule first</text>
+  <path d="M848,262 H860" fill="none" stroke="#a8a496" stroke-width="1.2" marker-end="url(#lgrArr)"/>
+  <rect x="862" y="240" width="226" height="78" rx="8" fill="#ffffff" stroke="#d8d4c8" filter="url(#lgrSh)"/>
+  <text x="874" y="258" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8c8a7d">D2</tspan>  Change adds a bare route</text>
+  <text x="874" y="275" font-size="12" fill="#6b6a5f">caught before it ships</text>
+  <circle cx="878" cy="288" r="4" fill="#c9913f"/>
+  <text x="888" y="292" font-size="12" font-weight="600" fill="#8a5a2a">refuse the change</text>
+  <text x="874" y="309" font-size="12" fill="#8c8a7d">the merge waits for a rule</text>
+  <!-- reading key: what the four lines of every leaf mean -->
+  <rect x="568" y="340" width="520" height="134" rx="10" fill="#ffffff" fill-opacity="0.6" stroke="#d8d4c8" stroke-dasharray="4 3"/>
+  <text x="584" y="364" font-size="12" font-weight="600" letter-spacing="1" fill="#6b6a5f">READING A LEAF</text>
+  <text x="584" y="386" font-size="12" fill="#8c8a7d">line 1</text>
+  <text x="638" y="386" font-size="12" font-weight="600" fill="#141413">the case</text>
+  <text x="728" y="386" font-size="12" fill="#6b6a5f">one concrete situation, with an id to cite it by</text>
+  <text x="584" y="404" font-size="12" fill="#8c8a7d">line 2</text>
+  <text x="638" y="404" font-size="12" font-weight="600" fill="#141413">why</text>
+  <text x="728" y="404" font-size="12" fill="#6b6a5f">the one fact the outcome turns on</text>
+  <text x="584" y="422" font-size="12" fill="#8c8a7d">dot</text>
+  <text x="638" y="422" font-size="12" font-weight="600" fill="#141413">the outcome</text>
+  <text x="728" y="422" font-size="12" fill="#6b6a5f">allow, deny, or refuse the change</text>
+  <text x="584" y="440" font-size="12" fill="#8c8a7d">grey</text>
+  <text x="638" y="440" font-size="12" font-weight="600" fill="#141413">the price</text>
+  <text x="728" y="440" font-size="12" fill="#6b6a5f">what that choice costs, and who pays it</text>
+  <circle cx="589" cy="456" r="4" fill="#c9913f"/>
+  <text x="600" y="460" font-size="12" fill="#6b6a5f"><tspan font-weight="600" fill="#8a5a2a">gold is not a softer deny:</tspan> it rejects a change (a merge, a reload), never a request.</text>
+  <!-- the one comparison that crosses branches -->
+  <rect x="32" y="494" width="1056" height="48" rx="10" fill="#ffffff" stroke="#141413" stroke-width="1.2"/>
+  <text x="560" y="513" text-anchor="middle" font-size="12.5" fill="#141413"><tspan font-weight="700">A1 and A4</tspan> fail in exactly the same way &#8212; the engine did not answer &#8212; and fall in opposite directions.</text>
+  <text x="560" y="531" text-anchor="middle" font-size="12.5" fill="#6b6a5f">Denying a write stops that one write. Denying the health check takes every node out of rotation, which is an outage of its own.</text>
+</svg>

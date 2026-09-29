@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="A deploy pipeline drawn as three aligned columns. On the left, a merged change enters six step cards, lettered A to F: pin the artifact, validate the config, fill in defaults, check the migration, a five per cent canary, and rolling out in waves. In the middle runs a single dashed exit lane. Every step that can stop a deploy sends a short line into it, and a card on the lane states the trigger, such as the tag naming no digest, an unknown config key, a migration that drops a column the old version still reads, errors above baseline during the canary, or two nodes in one wave failing health checks. Step C sends nothing, because it cannot stop anything; it only rewrites the change by filling in defaults. On the right, each row carries the real incident that put that step there, from a re-pushed tag to a region taken down by a change that reached every zone at once. Three outcome boxes along the bottom double as the legend: rolled out as built, rolled out with defaults filled in, and stopped with the reason printed, which is where the lane ends. A dashed card under the incidents lists one incident with no step beside it, a feature flag flipped at runtime, which no step above can see because it never goes through a deploy" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <pattern id="pexDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <marker id="pexArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#6b6a5f"/></marker>
+    <marker id="pexArrO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#d97757"/></marker>
+    <filter id="pexSh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.06"/></filter>
+  </defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#pexDots)"/>
+  <g font-size="12" font-weight="600" letter-spacing="1" fill="#6b6a5f">
+    <text x="32" y="28">STEP &#183; EVERY CHANGE GOES THROUGH ALL SIX</text>
+    <text x="428" y="28">CAN STOP HERE</text>
+    <text x="676" y="28">THE INCIDENT THAT PUT THE STEP HERE</text>
+  </g>
+  <rect x="32" y="40" width="360" height="40" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <text x="48" y="56" font-size="13" font-weight="600" fill="#141413">A merged change</text>
+  <text x="48" y="72" font-size="12" fill="#6b6a5f">its build artifact and the target environment</text>
+  <!-- the exit lane: one dashed line that every stoppable step feeds -->
+  <path d="M540,114 V436" fill="none" stroke="#d97757" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#pexArrO)"/>
+  <g fill="none" stroke="#6b6a5f" stroke-width="1.4">
+    <path d="M56,80 V90" marker-end="url(#pexArr)"/>
+    <path d="M56,136 V144" marker-end="url(#pexArr)"/>
+    <path d="M56,190 V198" marker-end="url(#pexArr)"/>
+    <path d="M56,244 V252" marker-end="url(#pexArr)"/>
+    <path d="M56,298 V306" marker-end="url(#pexArr)"/>
+    <path d="M56,352 V360" marker-end="url(#pexArr)"/>
+  </g>
+  <!-- row A -->
+  <rect x="32" y="92" width="360" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <circle cx="56" cy="114" r="10" fill="#141413"/>
+  <text x="56" y="118" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">A</text>
+  <text x="76" y="110" font-size="13" font-weight="600" fill="#141413">Pin the artifact</text>
+  <text x="76" y="127" font-size="12" fill="#6b6a5f">resolve the tag to an immutable digest</text>
+  <path d="M392,114 H426" fill="none" stroke="#d97757" stroke-width="1.4" marker-end="url(#pexArrO)"/>
+  <rect x="428" y="94" width="224" height="40" rx="8" fill="#ffffff" stroke="#e8c5b5"/>
+  <text x="440" y="109" font-size="12" fill="#141413">the tag names no digest, or</text>
+  <text x="440" y="126" font-size="12" fill="#141413">it moved since the build</text>
+  <rect x="676" y="92" width="412" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <rect x="676" y="100" width="4" height="28" rx="2" fill="#c9913f"/>
+  <text x="692" y="110" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-1</tspan>  a tag was re-pushed between test and deploy</text>
+  <text x="692" y="127" font-size="12" fill="#6b6a5f">the build that shipped was never the one that was tested</text>
+  <!-- row B -->
+  <rect x="32" y="146" width="360" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <circle cx="56" cy="168" r="10" fill="#141413"/>
+  <text x="56" y="172" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">B</text>
+  <text x="76" y="164" font-size="13" font-weight="600" fill="#141413">Validate the config</text>
+  <text x="76" y="181" font-size="12" fill="#6b6a5f">check it against the service schema</text>
+  <path d="M392,168 H426" fill="none" stroke="#d97757" stroke-width="1.4" marker-end="url(#pexArrO)"/>
+  <rect x="428" y="148" width="224" height="40" rx="8" fill="#ffffff" stroke="#e8c5b5"/>
+  <text x="440" y="163" font-size="12" fill="#141413">an unknown key, or a</text>
+  <text x="440" y="180" font-size="12" fill="#141413">required key is missing</text>
+  <rect x="676" y="146" width="412" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <rect x="676" y="154" width="4" height="28" rx="2" fill="#c9913f"/>
+  <text x="692" y="164" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-2</tspan>  a misspelt key was silently ignored</text>
+  <text x="692" y="181" font-size="12" fill="#6b6a5f">rate limits were off for three days before anyone noticed</text>
+  <!-- row C -->
+  <rect x="32" y="200" width="360" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <circle cx="56" cy="222" r="10" fill="#141413"/>
+  <text x="56" y="226" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">C</text>
+  <text x="76" y="218" font-size="13" font-weight="600" fill="#141413">Fill in defaults</text>
+  <text x="76" y="235" font-size="12" fill="#6b6a5f">missing resource limits get team defaults</text>
+  <rect x="306" y="206" width="74" height="20" rx="10" fill="#e2ecf5" stroke="#6a9bcc"/>
+  <text x="343" y="220" text-anchor="middle" font-size="12" font-weight="600" fill="#4a7bab">rewrites</text>
+  <rect x="448" y="211" width="184" height="22" rx="11" fill="#faf9f5"/>
+  <text x="540" y="226" text-anchor="middle" font-size="12" font-style="italic" fill="#8c8a7d">no exit: it cannot stop anything</text>
+  <rect x="676" y="200" width="412" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <rect x="676" y="208" width="4" height="28" rx="2" fill="#c9913f"/>
+  <text x="692" y="218" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-3</tspan>  a service with no memory limit took its node down</text>
+  <text x="692" y="235" font-size="12" fill="#6b6a5f">every other service on that node went down with it</text>
+  <!-- row D -->
+  <rect x="32" y="254" width="360" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <circle cx="56" cy="276" r="10" fill="#141413"/>
+  <text x="56" y="280" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">D</text>
+  <text x="76" y="272" font-size="13" font-weight="600" fill="#141413">Check the migration</text>
+  <text x="76" y="289" font-size="12" fill="#6b6a5f">can the running version still read it?</text>
+  <path d="M392,276 H426" fill="none" stroke="#d97757" stroke-width="1.4" marker-end="url(#pexArrO)"/>
+  <rect x="428" y="256" width="224" height="40" rx="8" fill="#ffffff" stroke="#e8c5b5"/>
+  <text x="440" y="271" font-size="12" fill="#141413">drops or renames a column</text>
+  <text x="440" y="288" font-size="12" fill="#141413">the old version still reads</text>
+  <rect x="676" y="254" width="412" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <rect x="676" y="262" width="4" height="28" rx="2" fill="#c9913f"/>
+  <text x="692" y="272" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-4</tspan>  a column rename broke the old pods mid-rollout</text>
+  <text x="692" y="289" font-size="12" fill="#6b6a5f">nine minutes of errors while both versions were live</text>
+  <!-- row E -->
+  <rect x="32" y="308" width="360" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <circle cx="56" cy="330" r="10" fill="#141413"/>
+  <text x="56" y="334" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">E</text>
+  <text x="76" y="326" font-size="13" font-weight="600" fill="#141413">Canary at 5 %</text>
+  <text x="76" y="343" font-size="12" fill="#6b6a5f">real traffic on one slice for ten minutes</text>
+  <path d="M392,330 H426" fill="none" stroke="#d97757" stroke-width="1.4" marker-end="url(#pexArrO)"/>
+  <rect x="428" y="310" width="224" height="40" rx="8" fill="#ffffff" stroke="#e8c5b5"/>
+  <text x="440" y="325" font-size="12" fill="#141413">errors above baseline + 1 pt</text>
+  <text x="440" y="342" font-size="12" fill="#141413">&#8594; roll back, then stop</text>
+  <rect x="676" y="308" width="412" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <rect x="676" y="316" width="4" height="28" rx="2" fill="#c9913f"/>
+  <text x="692" y="326" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-5</tspan>  a cache-key bug only failed on real traffic</text>
+  <text x="692" y="343" font-size="12" fill="#6b6a5f">staging was green; staging never sends that header</text>
+  <!-- row F -->
+  <rect x="32" y="362" width="360" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <circle cx="56" cy="384" r="10" fill="#141413"/>
+  <text x="56" y="388" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">F</text>
+  <text x="76" y="380" font-size="13" font-weight="600" fill="#141413">Roll out in waves</text>
+  <text x="76" y="397" font-size="12" fill="#6b6a5f">25 % at a time, health-checked</text>
+  <path d="M392,384 H426" fill="none" stroke="#d97757" stroke-width="1.4" marker-end="url(#pexArrO)"/>
+  <rect x="428" y="364" width="224" height="40" rx="8" fill="#ffffff" stroke="#e8c5b5"/>
+  <text x="440" y="379" font-size="12" fill="#141413">two nodes in one wave fail</text>
+  <text x="440" y="396" font-size="12" fill="#141413">their health checks</text>
+  <rect x="676" y="362" width="412" height="44" rx="10" fill="#ffffff" stroke="#d8d4c8" filter="url(#pexSh)"/>
+  <rect x="676" y="370" width="4" height="28" rx="2" fill="#c9913f"/>
+  <text x="692" y="380" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-6</tspan>  one bad zone took a whole region down at once</text>
+  <text x="692" y="397" font-size="12" fill="#6b6a5f">the change had reached every zone in a single step</text>
+  <!-- three outcomes; they double as the legend -->
+  <g fill="none" stroke="#6b6a5f" stroke-width="1.4">
+    <path d="M56,406 V436" marker-end="url(#pexArr)"/>
+    <path d="M56,414 Q56,420 62,420 H322 Q328,420 328,426 V436" marker-end="url(#pexArr)"/>
+  </g>
+  <rect x="32" y="438" width="180" height="48" rx="10" fill="#e5e9dd" stroke="#788c5d" stroke-width="1.2"/>
+  <text x="122.0" y="458" text-anchor="middle" font-size="13" font-weight="600" fill="#5d7045">Rolled out as built</text>
+  <text x="122.0" y="475" text-anchor="middle" font-size="12" fill="#6b6a5f">C left it alone</text>
+  <rect x="238" y="438" width="180" height="48" rx="10" fill="#e2ecf5" stroke="#6a9bcc" stroke-width="1.2"/>
+  <text x="328.0" y="458" text-anchor="middle" font-size="13" font-weight="600" fill="#4a7bab">Rolled out, rewritten</text>
+  <text x="328.0" y="475" text-anchor="middle" font-size="12" fill="#6b6a5f">C filled in defaults</text>
+  <rect x="428" y="438" width="224" height="48" rx="10" fill="#f7e4dc" stroke="#d97757" stroke-width="1.4"/>
+  <text x="540" y="458" text-anchor="middle" font-size="13" font-weight="600" fill="#c2613f">Stopped, reason printed</text>
+  <text x="540" y="475" text-anchor="middle" font-size="12" fill="#6b6a5f">it never reaches a user</text>
+  <!-- an incident with no step beside it: still open -->
+  <rect x="676" y="438" width="412" height="48" rx="10" fill="none" stroke="#c9913f" stroke-width="1.2" stroke-dasharray="5 4"/>
+  <text x="692" y="458" font-size="12.5" font-weight="600" fill="#141413"><tspan font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" fill="#8a5a2a">INC-7</tspan>  a feature flag was flipped at runtime</text>
+  <text x="692" y="475" font-size="12" fill="#6b6a5f">no step above can see it: it never goes through a deploy</text>
+  <text x="1076" y="458" text-anchor="end" font-size="12" font-weight="700" fill="#8a5a2a">OPEN</text>
+  <text x="32" y="518" font-size="12" fill="#6b6a5f">Five exits share one lane, so &#8220;what can stop a deploy&#8221; is one column to scan. Each row&#8217;s incident is the reason that step exists:</text>
+  <text x="32" y="536" font-size="12" fill="#6b6a5f">a step with no incident beside it is a candidate for removal, and an incident with no step beside it is still open.</text>
+</svg>

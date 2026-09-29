@@ -28,6 +28,7 @@
 // Exit: 0 clean · 1 violations found · 2 bad CLI / repo shape.
 
 import { readdir, readFile, stat } from 'node:fs/promises';
+import { realpathSync } from 'node:fs';
 import { resolve, dirname, relative, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
@@ -749,7 +750,11 @@ function reportPairs(label, violations) {
 // yet. (design-md.mjs guards the same way.)
 export { langPairs, pairNumbers, pairMismatch, PAIR_MAX_NUMBERS };
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Compare real paths, not strings. Skills are installed as symlinks under
+// ~/.claude/skills/, so process.argv[1] is the link while import.meta.url is
+// the resolved file: the string test was never true through the link, and the
+// script exited 0 having done nothing — which reads exactly like a pass.
+if ((() => { try { return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url)); } catch { return false; } })()) {
   main().then((c) => process.exit(c)).catch((e) => {
     console.error(e?.stack || String(e));
     process.exit(2);

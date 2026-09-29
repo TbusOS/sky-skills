@@ -61,6 +61,11 @@ let maxFiles = 0;
 let strict = false;
 let allowMonolingual = false;
 let designMd = '';
+// DESIGN.md waivers, forwarded by bin/design-review. The audit branch used to
+// drop them: bin/design-review turned DESIGN.md into --skill / --internal for
+// this script but never passed the waivers on, so a waived finding still
+// failed here while the non-audit branch demoted it. Same file, two verdicts.
+const waives = [];
 let runVisual = true;
 let discoverOnly = false;
 
@@ -79,6 +84,7 @@ for (const a of argv) {
   // was read at all. That silence is what let the audit branch ignore
   // DESIGN.md for a whole release without anyone noticing.
   else if (a.startsWith('--design-md=')) designMd = a.slice(12);
+  else if (a.startsWith('--waive=')) waives.push(a);
   else if (a === '--no-visual') runVisual = false;
   else if (a === '--discover') discoverOnly = true;
   else if (a.startsWith('--')) { console.error(`unknown flag: ${a}`); process.exit(2); }
@@ -255,7 +261,7 @@ console.log('┌─ design-review --audit · ' + new Date().toISOString().slice(
 console.log(`│  repo=${repoAbs}  skill=${skill || 'auto'}  visual=${runVisual ? 'on' : 'off'}  strict=${strict}`);
 console.log(`│  files: ${finalTargets.length}${maxFiles && targets.length > maxFiles ? ` (capped from ${targets.length})` : ''}`);
 if (designMd) {
-  console.log(`│  DESIGN.md: ${designMd}${allowMonolingual ? '  (monolingual)' : ''}`);
+  console.log(`│  DESIGN.md: ${designMd}${allowMonolingual ? '  (monolingual)' : ''}  (${waives.length} waiver(s))`);
 }
 console.log('└──────────────────────────────────────────────────');
 console.log('');
@@ -290,7 +296,10 @@ function parseVerify(r) {
 }
 
 function runVisualAudit(htmlAbs) {
-  const args = [VISUAL, '--ignore-intentional', htmlAbs];
+  // One page not tripping a waiver says nothing about the rest of the set, so
+  // the per-page stale-waiver line is only kept for a single-page audit.
+  const waiveArgs = waives.length ? [...waives, ...(finalTargets.length > 1 ? ['--waive-quiet'] : [])] : [];
+  const args = [VISUAL, '--ignore-intentional', ...waiveArgs, htmlAbs];
   const r = spawnSync('node', args, { cwd: repoAbs, encoding: 'utf8' });
   const out = parseVisual(r);
   // A bilingual page is audited in Chinese too, the same rule bin/design-review
@@ -300,7 +309,7 @@ function runVisualAudit(htmlAbs) {
   let bilingual = false;
   try { bilingual = !allowMonolingual && /class=["'][^"']*\blang-zh\b/.test(readFileSync(htmlAbs, 'utf8')); } catch { /* unreadable: the first run already said so */ }
   if (!bilingual) return out;
-  const zr = spawnSync('node', [VISUAL, '--ignore-intentional', '--lang=zh', htmlAbs], { cwd: repoAbs, encoding: 'utf8' });
+  const zr = spawnSync('node', [VISUAL, '--ignore-intentional', '--lang=zh', ...waiveArgs, htmlAbs], { cwd: repoAbs, encoding: 'utf8' });
   const zh = parseVisual(zr);
   if (zr.status === 4) {
     zh.findings.push({ severity: 'error', kind: 'lang-not-applied',
@@ -325,6 +334,16 @@ function parseVisual(r) {
       const message = m[2].trim();
       findings.push({ severity: m[1], kind: visualKind(message), message });
     }
+  }
+  // A crash — playwright not installed, a browser that will not launch — prints
+  // a stack trace and no "[error]" line, which used to parse as zero findings:
+  // "✓ pass err=0 warn=0" for a page nobody looked at. Only visual-audit's own
+  // summary line proves it ran, so without that line the file fails.
+  if (!/^visual-audit: \d+ error\(s\)/m.test(text)) {
+    const lines2 = text.trim().split('\n');
+    const why = (lines2.find((l) => /Error\b|error:/.test(l)) || lines2[0] || '(no output)').trim();
+    findings.push({ severity: 'error', kind: 'visual-did-not-run',
+      message: `visual-did-not-run: visual-audit exited ${r.status} without its summary line — ${why.slice(0, 200)}` });
   }
   return {
     exitCode: r.status,
