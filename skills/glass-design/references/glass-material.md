@@ -42,6 +42,9 @@ light 主题下色散只用白(彩色 cast 在白底上读作脏)。
 SVG filter 合成 —— 做不出真折射,只能扭曲面板自身」。实测 headless Chromium 1223:
 元素只平移或缩放时,背后的字被正确放大弯折;加上 `rotate()` 才错位。
 第二天的液态光标(`612c3a7`)用的正是这项技术。「面板不用它」的结论不变。
+验证范围:以上是 headless 软件渲染下的实测。去掉旋转后的 v3,同日由 user 在
+Windows 版 Chrome(显卡渲染)上目测确认折射落在水珠里;旋转造成的错位本身
+只在 headless 下复现过,显卡渲染下没对照测。
 光标怎么绕开旋转见 `glass.js` 的 liquid cursor v3 注释,
 回归检查 `scripts/check_water_refraction.mjs`。
 
