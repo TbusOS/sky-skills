@@ -335,6 +335,16 @@ function parseVisual(r) {
       findings.push({ severity: m[1], kind: visualKind(message), message });
     }
   }
+  // A crash — playwright not installed, a browser that will not launch — prints
+  // a stack trace and no "[error]" line, which used to parse as zero findings:
+  // "✓ pass err=0 warn=0" for a page nobody looked at. Only visual-audit's own
+  // summary line proves it ran, so without that line the file fails.
+  if (!/^visual-audit: \d+ error\(s\)/m.test(text)) {
+    const lines2 = text.trim().split('\n');
+    const why = (lines2.find((l) => /Error\b|error:/.test(l)) || lines2[0] || '(no output)').trim();
+    findings.push({ severity: 'error', kind: 'visual-did-not-run',
+      message: `visual-did-not-run: visual-audit exited ${r.status} without its summary line — ${why.slice(0, 200)}` });
+  }
   return {
     exitCode: r.status,
     findings,
