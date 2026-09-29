@@ -36,7 +36,7 @@
 | count-up | IO threshold 0.4 | `data-count-to="N"`(+ 可选 `data-count-prefix/suffix`) | 1200ms easeOutExpo,tabular-nums | stat 数字专用 |
 | 视差 | scroll + rAF | `data-parallax="0.08"` | 位移 clamp ±40px | **禁用于文字块**,只给装饰层 |
 | 按压反馈 | `:active` | `.glass-button`(自带) | 即时 `scale(0.97)`,transition 已含 transform | 所有可点元素;反馈在按下不在松开 |
-| 液态光标 v3(真折射水珠) | pointermove + rAF 弹簧 + backdrop-filter 位移透镜 | 自动(`<html data-no-liquid>` 退出;`.glass-cursor-toggle` 运行时切换,localStorage `sky-cursor`) | 弹簧 k=0.22 d=0.72,**按 16.7ms 的真实时间换算**(120Hz 屏和 60Hz 一样);圆 + 5 档拉伸 × 24 个方向的前圆后尖水珠形,空闲时烘好,**元素本身不旋转**;极慢拖动先粘住再滑(拉开 3.2px 才滑,光标停 220ms 后归位);快划拖水流(失稳缩颈断成小水珠,每颗是真折射的小透镜,最多 10 颗,920ms 蒸发);停驻 140ms 回抽尾流和小水珠;双击爆裂→450ms 后汇聚;`data-water-refr`(默认 48 = 物理值)/`data-water-tint`(默认 4)可调;整条水流的折射层默认关、`data-water-trail-refr` opt-in(60fps vs 27fps 实测) | 仅 hover+fine 指针 + `backdrop-filter:url()` 支持;light 主题自动换表面层;冻结下不安装,截图永远看不到它;改动后跑 `scripts/check_water_refraction.mjs` |
+| 液态光标 v3(真折射水珠) | pointermove + rAF 弹簧 + backdrop-filter 位移透镜 | 自动(`<html data-no-liquid>` 退出;`.glass-cursor-toggle` 运行时切换,localStorage `sky-cursor`) | 弹簧 k=0.22 d=0.72,**按 16.7ms 的真实时间换算**(120Hz 屏和 60Hz 一样);圆 + 5 档拉伸 × 24 个方向的前圆后尖水珠形,空闲时烘好,**元素本身不旋转**;极慢拖动先粘住再滑(拉开 3.2px 才滑,光标停 220ms 后归位);快划拖水流(失稳缩颈断成小水珠,每颗是真折射的小透镜,最多 10 颗,920ms 蒸发);停驻 140ms 回抽尾流和小水珠;双击按水珠撞玻璃飞溅(扩开 120ms,半径按 √t 增长 → 停住 70ms,只有指尖还在走 → 匀速回缩 240ms 收成水珠再回弹;甩出的小水珠落地即停、不吸回,蒸发时间和半径²成正比,碰到才并入;水量守恒);`data-water-refr`(默认 48 = 物理值)/`data-water-tint`(默认 4)可调;整条水流的折射层默认关、`data-water-trail-refr` opt-in(60fps vs 27fps 实测) | 仅 hover+fine 指针 + `backdrop-filter:url()` 支持;light 主题自动换表面层;冻结下不安装,截图永远看不到它;改动后跑 `scripts/check_water_refraction.mjs` 和 `scripts/check_water_splash.mjs` |
 
 ## 2. 禁项
 

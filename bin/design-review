@@ -848,8 +848,10 @@ skill_check_list() {
     glass)
       # 水珠光标的折射必须落在位移图说的位置(元素带 rotate() 会错位)。
       # 约 22 秒:从 8 个方向拖到同一点停住,每次等水痕蒸发
+      # 双击飞溅按水珠撞玻璃的物理走(√t 扩展、落地不动、水量守恒)。约 5 秒,虚拟时钟
       printf '%s\n' \
-        "node|skills/glass-design/scripts/check_water_refraction.mjs"
+        "node|skills/glass-design/scripts/check_water_refraction.mjs" \
+        "node|skills/glass-design/scripts/check_water_splash.mjs"
       ;;
   esac
 }
