@@ -845,6 +845,12 @@ skill_check_list() {
         "node|skills/relief-design/scripts/check_snippets.mjs" \
         "python3|skills/relief-design/scripts/gen_struct_figure.py --check"
       ;;
+    glass)
+      # 水珠光标的折射必须落在位移图说的位置(元素带 rotate() 会错位)。
+      # 约 22 秒:从 8 个方向拖到同一点停住,每次等水痕蒸发
+      printf '%s\n' \
+        "node|skills/glass-design/scripts/check_water_refraction.mjs"
+      ;;
   esac
 }
 
@@ -855,6 +861,7 @@ if [ -z "${NO_SKILL_CHECKS:-}" ]; then
     for html in "${HTMLS[@]}"; do
       case "$html" in
         *relief-design*) sc_skill=relief ;;
+        *glass-design*) sc_skill=glass ;;
       esac
       [ -n "$sc_skill" ] && break
     done

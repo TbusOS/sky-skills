@@ -784,26 +784,34 @@ html[data-theme="light"] .glass-svg-node--danger { fill: rgba(225, 29, 72, 0.11)
  * The review harness runs Playwright with reducedMotion:'reduce', so gates
  * always see the deterministic terminal frame. */
 
-/* Liquid cursor v2 — the pointer IS water, physically. glass.js builds the
+/* Liquid cursor v3 — the pointer IS water, physically. glass.js builds the
  * whole system at runtime:
- *   head bead    — an elliptical lens that refracts the REAL page content
- *                  behind it (backdrop-filter + SDF dome displacement map,
- *                  RGB channels displaced separately = chromatic dispersion),
- *                  stretching along velocity through 6 pre-baked aspect states
- *   rivulet      — fast moves lay a continuous water stream behind the bead
- *                  (clip-path ribbon + turbulence refraction) that necks,
- *                  breaks into beads (Plateau–Rayleigh) and evaporates < 1s
- *   retraction   — stopping pulls nearby trail water back into the bead
- *   splash       — double-click bursts the bead into radial water tongues +
+ *   head drop    — a lens that refracts the REAL page content behind it
+ *                  (backdrop-filter + displacement map baked from a
+ *                  spherical-cap height field and Snell's law, n = 1.333).
+ *                  The same bake carries the caustic + shadow the drop throws
+ *                  on the page (multiplied into it) and the surface layer:
+ *                  Fresnel rim reflection + a small highlight. A teardrop
+ *                  when moving, stretched along the velocity through baked
+ *                  direction states — the element itself is NEVER rotated:
+ *                  Chromium misplaces a backdrop-filter displacement map on a
+ *                  rotate()d element (glass-material.md §2)
+ *   rivulet      — fast moves lay a water stream behind the drop that necks
+ *                  and breaks into beads (Plateau–Rayleigh); each bead is a
+ *                  small real lens, and all of it evaporates < 1s
+ *   pinning      — very slow drags stick, lean, then slip
+ *   retraction   — stopping pulls nearby trail water back into the drop
+ *   splash       — double-click bursts the drop into radial water tongues +
  *                  satellite beads; surface tension slowly re-coalesces it
- *   fx layer     — flow-direction highlights, dark refraction edges, glints,
- *                  optional faint sea-blue tint on a canvas overlay
- * Light theme swaps the highlight bake for a dark refractive rim + contact
- * shadow (white highlights vanish on white). Installed only on hover-capable
- * fine pointers, never under the freeze contract. Opt out per page with
- * <html data-no-liquid>; users can switch water/system cursor at runtime via
- * a .glass-cursor-toggle button (persisted in localStorage sky-cursor).
- * Tuning hooks: <html data-water-refr="52" data-water-tint="12">. */
+ *   fx layer     — the rivulet's faint body, refraction edge and glints
+ * Light theme swaps the surface layer: a room reflection darkens the rim on a
+ * white page instead of a sky reflection brightening it on a dark one.
+ * Installed only on hover-capable fine pointers, never under the freeze
+ * contract. Opt out per page with <html data-no-liquid>; users can switch
+ * water/system cursor at runtime via a .glass-cursor-toggle button (persisted
+ * in localStorage sky-cursor). Tuning hooks: <html data-water-refr="48"
+ * data-water-tint="4"> (48 = physical refraction). Regression check:
+ * skills/glass-design/scripts/check_water_refraction.mjs. */
 html.glass-liquid,
 html.glass-liquid body,
 html.glass-liquid a,
@@ -834,7 +842,7 @@ html.glass-liquid [role="button"] { cursor: none !important; }
 }
 .glass-water-bead {
   position: fixed; left: 0; top: 0; z-index: 9994; pointer-events: none;
-  width: 30px; height: 30px;
+  width: 38px; height: 38px;   /* = DSZ in glass.js: the bead plus room for its shadow */
   background-repeat: no-repeat; background-size: 100% 100%;
   -webkit-mask-repeat: no-repeat; -webkit-mask-size: 100% 100%;
   mask-repeat: no-repeat; mask-size: 100% 100%;

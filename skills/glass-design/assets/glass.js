@@ -220,176 +220,313 @@
       });
     }
 
-    /* ---------- liquid cursor v2 — the pointer IS water ----------
-     * Head bead refracts the real page behind it (backdrop-filter + SDF dome
-     * displacement, RGB dispersion). Fast moves lay a continuous rivulet that
-     * necks and breaks per Plateau–Rayleigh, then evaporates < 1s. Stopping
-     * retracts nearby trail water back into the bead. Double-click bursts the
-     * bead into radial tongues + satellites that surface-tension re-coalesce.
-     * Light theme swaps the highlight bake. Never installed under freeze;
-     * opt out per page with <html data-no-liquid>; runtime water/system
-     * switch via .glass-cursor-toggle (localStorage sky-cursor). */
+    /* ---------- liquid cursor v3 — the pointer IS water ----------
+     * The head drop refracts the real page behind it through a
+     * backdrop-filter displacement map. Everything that makes it read as
+     * water is baked per shape from a spherical-cap height field and Snell's
+     * law (n = 1.333): the magnification, the compressed rim, the Fresnel
+     * rim reflection, a small highlight, and the caustic + shadow the drop
+     * throws onto the page under the screen glass. The caustic multiplies
+     * the page, so it shows on bright content and vanishes on black — as it
+     * does on a real window.
+     *
+     * The head element is NEVER rotated. Chromium places a backdrop-filter
+     * displacement map in the wrong spot once the element carries rotate()
+     * (measured 2026-09-29: translate / scale refract in place; rotate puts
+     * the refraction beside the drop and leaves the drop itself flat). The
+     * stretch direction is baked instead — a round state plus 5 stretch
+     * levels × 24 directions, baked in idle time; until a direction is
+     * ready the nearest baked state stands in.
+     *
+     * Moving drops are teardrops (round steep front, longer flatter tail).
+     * Very slow drags stick, lean, then slip (contact-line pinning). Fast
+     * moves lay a rivulet that necks per Plateau–Rayleigh and breaks into
+     * small refracting beads that evaporate < 1s. Stopping pulls nearby trail
+     * water back in. Double-click bursts the drop. All motion is integrated
+     * per unit of real time, so a 120 Hz display behaves like a 60 Hz one.
+     * Never installed under freeze; opt out with <html data-no-liquid>;
+     * runtime water/system switch via .glass-cursor-toggle (localStorage
+     * sky-cursor). Regression check: scripts/check_water_refraction.mjs. */
     if (!html.hasAttribute('data-no-liquid') &&
         window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
         typeof CSS !== 'undefined' && CSS.supports &&
         CSS.supports('backdrop-filter', 'url(#x)')) {
       (function waterCursor() {
-        var REFR = parseInt(html.getAttribute('data-water-refr'), 10) || 52;
+        // data-water-refr: refraction strength. 48 = physical (Snell, n 1.333)
+        var REFR = parseInt(html.getAttribute('data-water-refr'), 10) || 48;
+        // data-water-tint: faint sea-blue body colour. Water is clear, so low
         var TINT = html.hasAttribute('data-water-tint')
-          ? (parseInt(html.getAttribute('data-water-tint'), 10) || 0) : 12;
+          ? (parseInt(html.getAttribute('data-water-tint'), 10) || 0) : 4;
         var mode = 'water';
         try {
           var savedCur = localStorage.getItem('sky-cursor');
           if (savedCur === 'system' || savedCur === 'water') mode = savedCur;
         } catch (e) { /* storage unavailable */ }
 
-        /* --- SDF + bake: displacement / highlight / mask maps --- */
-        function ellipseSDF(x, y, cx, cy, a, b) {
-          var dx = (x - cx) / a, dy = (y - cy) / b;
-          return (Math.sqrt(dx * dx + dy * dy) - 1) * Math.min(a, b);
+        /* --- optics --- */
+        var ETA = 1 / 1.333;            // air → water
+        // The page sits GAP px under the screen glass the drop rests on.
+        // Centre magnification ≈ 1 / (1 − (1 − ETA)·(h0 + GAP)/Rc):
+        // GAP 0 → about 1.2×, GAP 8 → about 1.4× (read back from the baked
+        // map: 1.38–1.44× at radius 4–14px).
+        var GAP = 8;
+        var DISP_FS = 48;               // displacement code 0..255 spans ±24px at scale 48
+        // Light multiplier (caustic > 1, shadow < 1) rides in the map's B
+        // channel: M = M_MIN + M_SPAN·code/255, so code 64 is exactly 1.
+        var M_MIN = 0.36, M_SPAN = 2.55, M_ONE = 64;
+        // Only part of the light is the direct key light; sky and room fill
+        // the rest from every side, which is why a real drop's shadow is soft.
+        var DIRECT = 0.4;
+        var DEG = Math.PI / 180;
+        function norm3(x, y, z) { var n = Math.sqrt(x * x + y * y + z * z); return [x / n, y / n, z / n]; }
+        var LK = norm3(-0.46, -0.64, 0.86);   // key light, upper-left
+        var LF = norm3(0.52, 0.40, 0.75);     // weaker fill, lower-right
+        // Snell: unit ray (ix,iy,iz) through unit normal n facing the ray.
+        function refract(ix, iy, iz, nx, ny, nz) {
+          var cosi = -(ix * nx + iy * ny + iz * nz);
+          var k = 1 - ETA * ETA * (1 - cosi * cosi);
+          if (k < 0) return null;
+          var f = ETA * cosi - Math.sqrt(k);
+          return [ETA * ix + f * nx, ETA * iy + f * ny, ETA * iz + f * nz];
         }
-        function circleSDF(x, y, cx, cy, r) {
-          var dx = x - cx, dy = y - cy;
-          return Math.sqrt(dx * dx + dy * dy) - r;
-        }
-        var DISP_FS = 48; // displacement encode full-scale (px at scale=48)
-        function bake(W, H, RES, sdf, domeRim, headX, headY, magK, edgeK) {
-          var c = document.createElement('canvas');
-          c.width = W * RES; c.height = H * RES;
-          var ctx = c.getContext('2d');
-          var disp = ctx.createImageData(W * RES, H * RES);
-          var spec = ctx.createImageData(W * RES, H * RES);   // dark-bg highlights
-          var specL = ctx.createImageData(W * RES, H * RES);  // light-bg variant
-          var mask = ctx.createImageData(W * RES, H * RES);
-          var e = 0.75;
-          var Lx = -0.46, Ly = -0.64, Lz = 0.86;
-          var Ln = Math.sqrt(Lx * Lx + Ly * Ly + Lz * Lz);
-          Lx /= Ln; Ly /= Ln; Lz /= Ln;
-          for (var py = 0; py < H * RES; py++) for (var px = 0; px < W * RES; px++) {
-            var x = px / RES, y = py / RES, i = (py * (W * RES) + px) * 4;
-            var d = sdf(x, y);
-            var a = Math.max(0, Math.min(1, (0.6 - d) / 1.2));
-            mask.data[i] = 255; mask.data[i + 1] = 255; mask.data[i + 2] = 255;
-            mask.data[i + 3] = Math.round(a * 255);
-            var ox = 0, oy = 0, sR = 0, sG = 0, sB = 0, sA = 0;
-            if (d < 1.5) {
-              var gx = (sdf(x + e, y) - sdf(x - e, y)) / (2 * e);
-              var gy = (sdf(x, y + e) - sdf(x, y - e)) / (2 * e);
-              var gn = Math.max(Math.sqrt(gx * gx + gy * gy), 1e-4);
-              gx /= gn; gy /= gn;
-              var inside = Math.max(0, -d);
-              var t = Math.max(0, Math.min(1, inside / domeRim));
-              var Hh = Math.sin(t * Math.PI / 2), slope = Math.cos(t * Math.PI / 2);
-              ox = (x - headX) * (-magK * Hh) + gx * (edgeK * slope * Hh);
-              oy = (y - headY) * (-magK * Hh) + gy * (edgeK * slope * Hh);
-              var nx = -gx * slope * 1.85, ny = -gy * slope * 1.85, nz = 1;
-              var nn = Math.sqrt(nx * nx + ny * ny + nz * nz);
-              nx /= nn; ny /= nn; nz /= nn;
-              var dotNL = Math.max(0, nx * Lx + ny * Ly + nz * Lz);
-              var rz = 2 * dotNL * nz - Lz;
-              var specV = Math.pow(Math.max(0, rz), 42) * 1.5 + Math.pow(Math.max(0, rz), 6) * 0.22;
-              var fres = Math.pow(1 - Math.max(0, Math.min(1, nz)), 1.7);
-              var rim = fres * 1.35, sheen = 0.08 * Hh;
-              sR = Math.min(1, specV + rim * 0.72 + sheen);
-              sG = Math.min(1, specV + rim * 0.86 + sheen);
-              sB = Math.min(1, specV + rim * 1.0 + sheen);
-              sA = Math.min(1, specV * 1.2 + rim * 0.85 + sheen);
-              /* light-bg: dark refractive rim + contact shadow + white spec */
-              var dsh = Math.max(0, gy) * slope * Hh;
-              var aW = Math.min(1, specV * 1.15);
-              var aD = Math.min(1, fres * 0.62 + dsh * 0.34);
-              var aT = Math.min(1, aW + aD);
-              var wF = (aW + aD) > 0 ? aW / (aW + aD) : 0;
-              specL.data[i] = Math.round((wF + (1 - wF) * 0.16) * 255);
-              specL.data[i + 1] = Math.round((wF + (1 - wF) * 0.21) * 255);
-              specL.data[i + 2] = Math.round((wF + (1 - wF) * 0.28) * 255);
-              specL.data[i + 3] = Math.round(aT * a * 255);
+        function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+        function smooth(e0, e1, v) { var t = clamp01((v - e0) / (e1 - e0)); return t * t * (3 - 2 * t); }
+
+        /* --- drop footprint: signed distance in px (negative inside) ---
+         * In the drop's own frame, u along the motion and v across it: the
+         * advancing front is round, the tail longer and a little narrower.
+         * asym 0 is an ellipse (at rest, a circle). The front stands steeper
+         * than the tail (advancing vs receding contact angle). */
+        function dropShape(a, b, asym, phi) {
+          var c = Math.cos(phi), s = Math.sin(phi), ex = asym / 0.28;
+          return {
+            rho: Math.min(a * (1 - asym), b),     // largest inside distance
+            sdf: function (dx, dy) {
+              var u = dx * c + dy * s, v = -dx * s + dy * c;
+              var au = u >= 0 ? a * (1 - asym) : a * (1 + asym);
+              var bv = u >= 0 ? b : b * (1 - 0.35 * asym * Math.min(1, -u / au));
+              var q = Math.sqrt((u / au) * (u / au) + (v / bv) * (v / bv));
+              return (q - 1) * Math.min(au, bv);
+            },
+            theta: function (dx, dy) {            // contact angle, degrees
+              var u = Math.max(-1, Math.min(1, (dx * c + dy * s) / a));
+              return 72 + ex * (u >= 0 ? 14 * u : 16 * u);
             }
-            disp.data[i] = Math.max(0, Math.min(255, Math.round(128 + ox * 255 / DISP_FS)));
-            disp.data[i + 1] = Math.max(0, Math.min(255, Math.round(128 + oy * 255 / DISP_FS)));
-            disp.data[i + 2] = 128; disp.data[i + 3] = 255;
-            spec.data[i] = Math.round(sR * 255);
-            spec.data[i + 1] = Math.round(sG * 255);
-            spec.data[i + 2] = Math.round(sB * 255);
-            spec.data[i + 3] = Math.round(Math.max(0, Math.min(1, sA)) * a * 255);
+          };
+        }
+        // Surface of a spherical cap over the footprint, at (dx,dy).
+        function surface(shape, dx, dy) {
+          var d = shape.sdf(dx, dy);
+          if (d >= 0) return null;
+          var e = 0.5;
+          var gx = (shape.sdf(dx + e, dy) - shape.sdf(dx - e, dy)) / (2 * e);
+          var gy = (shape.sdf(dx, dy + e) - shape.sdf(dx, dy - e)) / (2 * e);
+          var gn = Math.max(Math.sqrt(gx * gx + gy * gy), 1e-4);
+          gx /= gn; gy /= gn;
+          var th = shape.theta(dx, dy) * DEG, R = shape.rho;
+          var Rc = R / Math.sin(th), r = Math.max(0, R + d);   // r: distance from the crown
+          var q = Math.sqrt(Math.max(1e-6, Rc * Rc - r * r));
+          var h = Math.max(0, q - Rc * Math.cos(th));
+          var hp = r / q;                                        // dh/d(inside distance)
+          var n = norm3(hp * gx, hp * gy, 1);
+          return { d: d, h: h, nx: n[0], ny: n[1], nz: n[2] };
+        }
+
+        /* --- bake one drop state into four small images ---
+         *   disp   R,G = where to sample the page (Snell) · B = light multiplier
+         *   spec / specLight = what the water surface adds on dark / light pages
+         *   mask   = the drop + the patch of page its caustic and shadow touch */
+        // premultiplied "over" of colour (r,g,b) at alpha a onto accumulator c
+        function over(c, r, g, b, a) {
+          c[0] = r * a + c[0] * (1 - a); c[1] = g * a + c[1] * (1 - a);
+          c[2] = b * a + c[2] * (1 - a); c[3] = a + c[3] * (1 - a);
+        }
+        var SPLAT_SS = 2;
+        // shadowOverlay: bake the shadow into the surface images as a plain
+        // dark layer (used by the small beads, whose filter has no lighting step).
+        function bake(S, RES, shape, shadowOverlay) {
+          var N = S * RES, c0 = S / 2;
+          var cv0 = document.createElement('canvas');
+          cv0.width = N; cv0.height = N;
+          var ctx = cv0.getContext('2d');
+          var disp = ctx.createImageData(N, N), spec = ctx.createImageData(N, N);
+          var specL = ctx.createImageData(N, N), mask = ctx.createImageData(N, N);
+          // 1) caustic + shadow: every light ray through the drop lands
+          //    somewhere else than it would have without the drop. Splat both,
+          //    take the difference — excess is caustic, deficit is shadow.
+          var dE = new Float32Array(N * N);
+          function splat(px, py, w) {
+            var fx = px * RES - 0.5, fy = py * RES - 0.5;
+            var ix = Math.floor(fx), iy = Math.floor(fy), ax = fx - ix, ay = fy - iy;
+            for (var oy = 0; oy < 2; oy++) for (var ox = 0; ox < 2; ox++) {
+              var X = ix + ox, Y = iy + oy;
+              if (X < 0 || Y < 0 || X >= N || Y >= N) continue;
+              dE[Y * N + X] += w * (ox ? ax : 1 - ax) * (oy ? ay : 1 - ay);
+            }
           }
-          function toURL(im) {
-            var cc = document.createElement('canvas');
-            cc.width = W * RES; cc.height = H * RES;
-            cc.getContext('2d').putImageData(im, 0, 0);
-            return cc.toDataURL();
+          var Dx = -LK[0], Dy = -LK[1], Dz = -LK[2];          // light travel direction
+          var straight = GAP / -Dz, M = SPLAT_SS * RES, wRay = 1 / (SPLAT_SS * SPLAT_SS);
+          for (var sy = 0; sy < S * M; sy++) for (var sx = 0; sx < S * M; sx++) {
+            var qx = (sx + 0.5) / M - c0, qy = (sy + 0.5) / M - c0;
+            var su = surface(shape, qx, qy);
+            if (!su) continue;
+            var T = refract(Dx, Dy, Dz, su.nx, su.ny, su.nz);
+            var cosi = -(Dx * su.nx + Dy * su.ny + Dz * su.nz);
+            var Ft = 1 - (0.02 + 0.98 * Math.pow(1 - Math.max(0, cosi), 5));  // transmitted
+            splat(qx + Dx * straight + c0, qy + Dy * straight + c0, -wRay);
+            if (T) {
+              var tt = (GAP + su.h) / -T[2];
+              splat(qx + T[0] * tt + c0, qy + T[1] * tt + c0, wRay * Ft);
+            }
           }
+          var dB = new Float32Array(N * N);                   // 3×3 blur: rays are sparse
+          for (var y0 = 0; y0 < N; y0++) for (var x0 = 0; x0 < N; x0++) {
+            var acc = 0, cnt = 0;
+            for (var j = -1; j <= 1; j++) for (var i2 = -1; i2 <= 1; i2++) {
+              var X2 = x0 + i2, Y2 = y0 + j;
+              if (X2 < 0 || Y2 < 0 || X2 >= N || Y2 >= N) continue;
+              acc += dE[Y2 * N + X2]; cnt++;
+            }
+            dB[y0 * N + x0] = acc / cnt;
+          }
+          // 2) per output sample: refraction offset, surface shading, mask
+          var tintA = TINT * 0.011;
+          for (var py = 0; py < N; py++) for (var px = 0; px < N; px++) {
+            var x = (px + 0.5) / RES - c0, y = (py + 0.5) / RES - c0, k4 = (py * N + px) * 4;
+            var su2 = surface(shape, x, y);
+            var d = su2 ? su2.d : shape.sdf(x, y);
+            var cov = clamp01((0.6 - d) / 1.2);
+            var offx = 0, offy = 0;
+            var sA = 0, sR = 0, sG = 0, sB = 0, lA = 0, lR = 0, lG = 0, lB = 0;
+            if (su2) {
+              var T2 = refract(0, 0, -1, su2.nx, su2.ny, su2.nz);
+              if (T2) {
+                var t2 = (GAP + su2.h) / -T2[2];
+                offx = T2[0] * t2; offy = T2[1] * t2;
+              }
+              var F = 0.02 + 0.98 * Math.pow(1 - su2.nz, 5);            // Schlick, view straight down
+              var rk = 2 * su2.nz * (su2.nx * LK[0] + su2.ny * LK[1] + su2.nz * LK[2]) - LK[2];
+              var rf = 2 * su2.nz * (su2.nx * LF[0] + su2.ny * LF[1] + su2.nz * LF[2]) - LF[2];
+              var hl = Math.min(1, Math.pow(Math.max(0, rk), 60) * 1.6 + Math.pow(Math.max(0, rk), 8) * 0.08 +
+                                   Math.pow(Math.max(0, rf), 40) * 0.35);
+              // premultiplied "over": tint, then environment reflection, then highlight
+              var cd = [0, 0, 0, 0], cl = [0, 0, 0, 0];
+              over(cd, 0.55, 0.78, 0.89, tintA);
+              over(cd, 0.80, 0.87, 0.96, Math.min(1, F * 0.7));       // bright sky over a dark page
+              over(cd, 1, 1, 1, hl);
+              over(cl, 0.55, 0.78, 0.89, tintA * 0.6);
+              over(cl, 0.24, 0.28, 0.34, Math.min(1, F * 0.85));      // room reflection over a white page
+              over(cl, 1, 1, 1, hl);
+              sA = cd[3]; if (sA > 0) { sR = cd[0] / sA; sG = cd[1] / sA; sB = cd[2] / sA; }
+              lA = cl[3]; if (lA > 0) { lR = cl[0] / lA; lG = cl[1] / lA; lB = cl[2] / lA; }
+            }
+            var Mv = Math.max(M_MIN, Math.min(M_MIN + M_SPAN, 1 + DIRECT * dB[py * N + px]));
+            if (shadowOverlay && Mv < 1) {                      // darken under everything else
+              var shA = (1 - Mv) * 0.9;
+              sR = (sR * sA) / Math.max(1e-4, sA + shA * (1 - sA)); sG = (sG * sA) / Math.max(1e-4, sA + shA * (1 - sA));
+              sB = (sB * sA) / Math.max(1e-4, sA + shA * (1 - sA)); sA = sA + shA * (1 - sA);
+              lR = (lR * lA) / Math.max(1e-4, lA + shA * (1 - lA)); lG = (lG * lA) / Math.max(1e-4, lA + shA * (1 - lA));
+              lB = (lB * lA) / Math.max(1e-4, lA + shA * (1 - lA)); lA = lA + shA * (1 - lA);
+              cov = Math.max(cov, 1);                           // the shadow lies outside the drop too
+            }
+            disp.data[k4] = Math.max(0, Math.min(255, Math.round(128 + offx * 255 / DISP_FS)));
+            disp.data[k4 + 1] = Math.max(0, Math.min(255, Math.round(128 + offy * 255 / DISP_FS)));
+            disp.data[k4 + 2] = Math.abs(Mv - 1) < 0.004 ? M_ONE
+              : Math.max(0, Math.min(255, Math.round((Mv - M_MIN) / M_SPAN * 255)));
+            disp.data[k4 + 3] = 255;
+            spec.data[k4] = Math.round(sR * 255); spec.data[k4 + 1] = Math.round(sG * 255);
+            spec.data[k4 + 2] = Math.round(sB * 255); spec.data[k4 + 3] = Math.round(sA * cov * 255);
+            specL.data[k4] = Math.round(lR * 255); specL.data[k4 + 1] = Math.round(lG * 255);
+            specL.data[k4 + 2] = Math.round(lB * 255); specL.data[k4 + 3] = Math.round(lA * cov * 255);
+            var mA = Math.max(cov, smooth(0.008, 0.05, Math.abs(Mv - 1)));
+            mask.data[k4] = 255; mask.data[k4 + 1] = 255; mask.data[k4 + 2] = 255;
+            mask.data[k4 + 3] = Math.round(mA * 255);
+          }
+          function toURL(im) { ctx.putImageData(im, 0, 0); return cv0.toDataURL(); }
           return { disp: toURL(disp), spec: toURL(spec), specLight: toURL(specL), mask: toURL(mask) };
         }
 
-        /* --- SVG filters: head lens (RGB dispersion) / rivulet / bead --- */
+        /* --- SVG filters: head / bead (light, then Snell, slight dispersion) / rivulet --- */
         var defs = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         defs.setAttribute('width', '0'); defs.setAttribute('height', '0');
         defs.setAttribute('aria-hidden', 'true');
         defs.style.position = 'absolute';
-        function dispChain(idp, mapExtra) {
+        // Four primitives: read the map, light the page (caustic / shadow land
+        // on it), then look at that page through the drop. No per-channel
+        // dispersion: water's index differs by ~2% across the visible range,
+        // which at these offsets (≤ 8px) splits the channels by < 0.3px —
+        // invisible, and it cost 7 more primitives per drop.
+        // Small beads skip the lighting step (lit = false): their shadow is a
+        // pixel or two, and with up to 10 of them on screen it is the part of
+        // the effect that costs frames (measured: 14 lit beads 145 frames / 3s
+        // vs 173 without beads, software rendering).
+        function dispChain(idp, mapExtra, lit) {
           return '<filter id="' + idp + '" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">' +
             '<feImage id="' + idp + 'Map" result="map" x="0" y="0"' + (mapExtra || '') + '/>' +
-            '<feDisplacementMap id="' + idp + 'R" in="SourceGraphic" in2="map" scale="48" xChannelSelector="R" yChannelSelector="G" result="dr"/>' +
-            '<feColorMatrix in="dr" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="cr"/>' +
-            '<feDisplacementMap id="' + idp + 'G" in="SourceGraphic" in2="map" scale="53" xChannelSelector="R" yChannelSelector="G" result="dg"/>' +
-            '<feColorMatrix in="dg" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="cg"/>' +
-            '<feDisplacementMap id="' + idp + 'B" in="SourceGraphic" in2="map" scale="58" xChannelSelector="R" yChannelSelector="G" result="db"/>' +
-            '<feColorMatrix in="db" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="cb"/>' +
-            '<feComposite in="cr" in2="cg" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="rg"/>' +
-            '<feComposite in="rg" in2="cb" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="rgb"/>' +
-            '<feGaussianBlur in="rgb" stdDeviation="0.2" result="soft"/>' +
-            '<feColorMatrix in="soft" type="saturate" values="1.22" result="sat"/>' +
-            '<feComponentTransfer in="sat">' +
-            '<feFuncR id="' + idp + 'FR" type="linear" slope="1.12"/>' +
-            '<feFuncG id="' + idp + 'FG" type="linear" slope="1.12"/>' +
-            '<feFuncB id="' + idp + 'FB" type="linear" slope="1.12"/>' +
-            '</feComponentTransfer></filter>';
+            (lit
+              ? '<feColorMatrix in="map" values="0 0 1 0 0  0 0 1 0 0  0 0 1 0 0  0 0 0 0 1" result="lm"/>' +
+                '<feComposite in="SourceGraphic" in2="lm" operator="arithmetic" k1="' + M_SPAN + '" k2="' + M_MIN + '" k3="0" k4="0" result="lit"/>'
+              : '') +
+            '<feDisplacementMap id="' + idp + 'D" in="' + (lit ? 'lit' : 'SourceGraphic') + '" in2="map" scale="48" xChannelSelector="R" yChannelSelector="G"/>' +
+            '</filter>';
         }
+        var DSZ = 38, BR = 12;          // satellite / trail bead: bake box (room for the shadow) and radius
         defs.innerHTML =
-          dispChain('glassWaterHead') +
-          dispChain('glassWaterBead', ' width="30" height="30"') +
+          dispChain('glassWaterHead', '', true) +
+          dispChain('glassWaterBead', ' width="' + DSZ + '" height="' + DSZ + '"', false) +
           '<filter id="glassWaterTrail" x="-4%" y="-4%" width="108%" height="108%" color-interpolation-filters="sRGB">' +
           '<feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="1" seed="11" result="n"/>' +
-          '<feDisplacementMap id="glassWaterTrailDisp" in="SourceGraphic" in2="n" scale="26" xChannelSelector="R" yChannelSelector="G" result="d"/>' +
-          '<feGaussianBlur in="d" stdDeviation="0.25" result="db"/>' +
-          '<feColorMatrix in="db" type="saturate" values="1.15" result="sat"/>' +
-          '<feComponentTransfer in="sat">' +
-          '<feFuncR id="glassWaterTrailFR" type="linear" slope="1.10"/>' +
-          '<feFuncG id="glassWaterTrailFG" type="linear" slope="1.10"/>' +
-          '<feFuncB id="glassWaterTrailFB" type="linear" slope="1.10"/>' +
-          '</feComponentTransfer></filter>';
+          '<feDisplacementMap id="glassWaterTrailDisp" in="SourceGraphic" in2="n" scale="26" xChannelSelector="R" yChannelSelector="G"/>' +
+          '</filter>';
         document.body.appendChild(defs);
         function setScale(v) {
-          document.getElementById('glassWaterHeadR').setAttribute('scale', v);
-          document.getElementById('glassWaterHeadG').setAttribute('scale', Math.round(v * 1.10));
-          document.getElementById('glassWaterHeadB').setAttribute('scale', Math.round(v * 1.21));
-          var dv = Math.round(v * 0.62);
-          document.getElementById('glassWaterBeadR').setAttribute('scale', dv);
-          document.getElementById('glassWaterBeadG').setAttribute('scale', Math.round(dv * 1.10));
-          document.getElementById('glassWaterBeadB').setAttribute('scale', Math.round(dv * 1.21));
+          document.getElementById('glassWaterHeadD').setAttribute('scale', v);
+          document.getElementById('glassWaterBeadD').setAttribute('scale', v);
           document.getElementById('glassWaterTrailDisp').setAttribute('scale', Math.round(v * 0.5));
         }
         setScale(REFR);
 
-        /* --- bake head states (6 equal-area stretch ellipses) + bead --- */
-        var R0 = 16, PADE = 3;
-        var ASPECTS = [1.12, 1.25, 1.42, 1.62, 1.85, 2.10];
-        var STATES = [];
-        for (var si = 0; si < ASPECTS.length; si++) {
-          (function (s) {
-            var a = R0 * Math.sqrt(s), b = R0 / Math.sqrt(s);
-            var W = Math.ceil(2 * (a + PADE)), H = Math.ceil(2 * (b + PADE));
-            STATES.push({
-              asp: s, a: a, b: b, W: W, H: H,
-              maps: bake(W, H, 2, function (x, y) { return ellipseSDF(x, y, W / 2, H / 2, a, b); },
-                b * 0.92, W / 2, H / 2, 0.72, 2.8)
-            });
-          })(ASPECTS[si]);
+        /* --- drop states: round + 5 stretch levels × 24 directions --- */
+        var R0 = 16, NDIR = 24, ASYM_MAX = 0.28;
+        var ASPECTS = [1.15, 1.35, 1.6, 1.85, 2.1];
+        function makeState(s, k) {
+          var a = R0 * Math.sqrt(s), b = R0 / Math.sqrt(s);
+          var asym = ASYM_MAX * (s - 1) / (ASPECTS[ASPECTS.length - 1] - 1);
+          var phi = k < 0 ? 0 : k * 2 * Math.PI / NDIR;
+          var S = 2 * Math.ceil(Math.max(a * (1 + asym), b) + 10);
+          var shape = dropShape(a, b, asym, phi);
+          return { a: a, b: b, S: S, maps: bake(S, 2, shape) };
         }
-        var DSZ = 30;
-        var BEAD = bake(DSZ, DSZ, 2, function (x, y) { return circleSDF(x, y, DSZ / 2, DSZ / 2, DSZ / 2 - 2); },
-          DSZ / 2 - 2, DSZ / 2, DSZ / 2, 0.58, 3.4);
+        var ROUND = makeState(1, -1);
+        var STATES = new Array(ASPECTS.length * NDIR);
+        var bakeQueue = [];
+        for (var qa = 0; qa < ASPECTS.length; qa++) for (var qk = 0; qk < NDIR; qk++) bakeQueue.push(qa * NDIR + qk);
+        function bakeSome() {
+          var t0 = performance.now();
+          while (bakeQueue.length && performance.now() - t0 < 8) {
+            var key = bakeQueue.shift();
+            if (!STATES[key]) STATES[key] = makeState(ASPECTS[Math.floor(key / NDIR)], key % NDIR);
+          }
+          if (bakeQueue.length) scheduleBake();
+        }
+        function scheduleBake() {
+          if (window.requestIdleCallback) window.requestIdleCallback(bakeSome, { timeout: 400 });
+          else setTimeout(bakeSome, 30);
+        }
+        scheduleBake();
+        function stateFor(ai, k) {
+          if (ai < 0) return ROUND;
+          var key = ai * NDIR + k;
+          if (STATES[key]) return STATES[key];
+          var qi = bakeQueue.indexOf(key);                  // needed now: bake it next
+          if (qi > 0) { bakeQueue.splice(qi, 1); bakeQueue.unshift(key); }
+          for (var j = ai - 1; j >= 0; j--) if (STATES[j * NDIR + k]) return STATES[j * NDIR + k];
+          return ROUND;
+        }
+        var BEAD = makeBead();
+        function makeBead() {
+          return bake(DSZ, 2, dropShape(BR, BR, 0, 0), true);
+        }
         document.getElementById('glassWaterBeadMap').setAttribute('href', BEAD.disp);
 
         /* --- elements --- */
@@ -420,28 +557,20 @@
 
         function isLight() { return html.getAttribute('data-theme') === 'light'; }
         var headMap = document.getElementById('glassWaterHeadMap');
-        var curState = -1;
-        function setState(i, force) {
-          if (i === curState && !force) return;
-          curState = i;
-          var st = STATES[i];
-          head.style.width = st.W + 'px'; head.style.height = st.H + 'px';
+        var cur = null;
+        function setState(st, force) {
+          if (st === cur && !force) return;
+          cur = st;
+          head.style.width = st.S + 'px'; head.style.height = st.S + 'px';
           head.style.backgroundImage = 'url(' + (isLight() ? st.maps.specLight : st.maps.spec) + ')';
           head.style.webkitMaskImage = 'url(' + st.maps.mask + ')';
           head.style.maskImage = 'url(' + st.maps.mask + ')';
-          head.style.backgroundColor = 'rgba(140,200,228,' + (TINT * 0.011) + ')';
           headMap.setAttribute('href', st.maps.disp);
-          headMap.setAttribute('width', st.W); headMap.setAttribute('height', st.H);
+          headMap.setAttribute('width', st.S); headMap.setAttribute('height', st.S);
         }
-        setState(0);
+        setState(ROUND);
         new MutationObserver(function () {
-          setState(curState, true);
-          var b2 = isLight() ? '1.0' : '1.12', t2 = isLight() ? '1.0' : '1.10';
-          ['FR', 'FG', 'FB'].forEach(function (sfx) {
-            document.getElementById('glassWaterHead' + sfx).setAttribute('slope', b2);
-            document.getElementById('glassWaterBead' + sfx).setAttribute('slope', b2);
-            document.getElementById('glassWaterTrail' + sfx).setAttribute('slope', t2);
-          });
+          setState(cur, true);
           for (var j = 0; j < drops.length; j++) {
             drops[j].el.style.backgroundImage = 'url(' + (isLight() ? BEAD.specLight : BEAD.spec) + ')';
           }
@@ -449,8 +578,14 @@
 
         /* --- physics state --- */
         var tx = -300, ty = -300, x = -300, y = -300, vx = 0, vy = 0;
-        var active = false, pointing = false;
+        var active = false, pointing = false, lastMoveT = 0;
+        // Spring tuned at 60 Hz, applied per 16.7ms of real time (k below).
         var STIFF = 0.22, DAMP = 0.72;
+        // Contact-line pinning: a resting drop holds on until pulled PIN_BREAK
+        // px away, leaning toward the pull. After PIN_HOLD ms without pointer
+        // motion it lets go, so a resting drop always ends on the pointer.
+        var PIN_BREAK = 3.2, PIN_HOLD = 220;
+        var pinned = false, lean = 0, leanDir = 0;
         var theta = 0, vol = 1.0, wob = 0, wobV = 0;
         var stillSince = 0, lastNow = 0, prevSpeed = 0, lastSat = 0;
         var expl = null;
@@ -458,21 +593,19 @@
         var LIFE = 920, NECK_T = 0.26, LAM = 27;
         var DEPOSIT_V = 4, GAP_PX = 3;
         var drops = [], POOL = [];
+        var promoted = {}, MAX_TRAIL_BEADS = 10;
         var trailGeom = { x: -1, y: -1, w: -1, h: -1 };
-        // The rivulet's refraction layer is OPT-IN (<html data-water-trail-refr>).
-        // Measured on the real glass page (software rendering): animating
-        // clip-path on a turbulence backdrop-filter element re-runs the whole
-        // filter chain every frame — 27fps with it, 60fps without; the head
-        // lens is free by comparison. The canvas fx ribbon (tint, refraction
-        // edges, flow highlight, glints) keeps the trail fully visible, and
-        // the head keeps true refraction — that is the part that reads as
-        // "real water". Demo pages that want the full effect opt in and get
-        // the auto-degrade guard below as a safety net.
+        // The rivulet's continuous refraction layer is OPT-IN
+        // (<html data-water-trail-refr>). Measured on the real glass page
+        // (software rendering): animating clip-path on a turbulence
+        // backdrop-filter element re-runs the whole filter chain every frame —
+        // 27fps with it, 60fps without. By default the rivulet refracts where
+        // it matters: once it breaks into beads, each bead is a small real lens.
         var trailRefr = html.hasAttribute('data-water-trail-refr');
         var slowFrames = 0;
 
         document.addEventListener('pointermove', function (e) {
-          tx = e.clientX; ty = e.clientY;
+          tx = e.clientX; ty = e.clientY; lastMoveT = performance.now();
           if (mode !== 'water') return;
           if (!active) {
             active = true; x = tx; y = ty;
@@ -501,9 +634,13 @@
           while (d < -Math.PI) d += 2 * Math.PI;
           return d;
         }
+        function dirIndex(a) {
+          var t = a / (2 * Math.PI / NDIR);
+          return ((Math.round(t) % NDIR) + NDIR) % NDIR;
+        }
 
         /* --- rivulet deposit (interpolated so fast moves stay continuous) --- */
-        function deposit(now, sp, st, sV) {
+        function deposit(now, sp, st, sV, k) {
           var bx = x - Math.cos(theta) * st.a * sV * 0.7;
           var by = y - Math.sin(theta) * st.a * sV * 0.7;
           var w0 = Math.min(9.5, 2.6 + R0 * sV * 0.16 + Math.min(sp, 34) * 0.075);
@@ -511,8 +648,8 @@
             var dgap = Math.sqrt(Math.pow(bx - lastDep.x, 2) + Math.pow(by - lastDep.y, 2));
             if (dgap < GAP_PX) return;
             var steps = Math.min(30, Math.floor(dgap / 4));
-            for (var k = 1; k <= steps; k++) {
-              var f = k / (steps + 1);
+            for (var s = 1; s <= steps; s++) {
+              var f = s / (steps + 1);
               cumArc += dgap / (steps + 1);
               pts.push({ x: lastDep.x + (bx - lastDep.x) * f, y: lastDep.y + (by - lastDep.y) * f, t: now, w0: w0, arc: cumArc, ph: strokePh, retr: 1 });
             }
@@ -523,7 +660,7 @@
           }
           pts.push({ x: bx, y: by, t: now, w0: w0, arc: cumArc, ph: strokePh, retr: 1 });
           lastDep = { x: bx, y: by }; lastDepT = now;
-          vol = Math.max(0.55, vol - 0.0035);
+          vol = Math.max(0.55, vol - 0.0035 * k);
         }
         function trailWidth(p, now) {
           var age = (now - p.t) / LIFE;
@@ -536,20 +673,42 @@
           }
           return w;
         }
+        // Once the necks have broken, each bead the rivulet leaves behind
+        // becomes a small real lens (a pooled bead element), so the trail
+        // refracts without the full-trail filter.
+        function promoteBeads(now) {
+          var alive = 0;
+          for (var j = 0; j < drops.length; j++) if (drops[j].trail) alive++;
+          for (var i = 0; i < pts.length && alive < MAX_TRAIL_BEADS; i++) {
+            var p = pts[i], age = (now - p.t) / LIFE;
+            if (p.ex || age < NECK_T + 0.12 || age > 0.8) continue;
+            var u = p.arc / LAM + p.ph / 6.2832;             // bead centre where sin(...) = −1
+            var c = Math.round(u - 0.75) + 0.75;
+            if (Math.abs(u - c) * LAM > 2.2) continue;
+            var key = p.ph.toFixed(3) + ':' + Math.round(c * 4);
+            if (promoted[key]) continue;
+            var w = trailWidth(p, now);
+            if (w < 1.3) continue;
+            promoted[key] = 1; alive++;
+            var fv = Math.pow(w * 1.05 / (R0 * 2.2), 2);
+            spawnSatAt(now, p.x, p.y, 0, 0, fv, LIFE * (1 - age) + 240, true);
+          }
+        }
         function renderTrail(now) {
           while (pts.length && now - pts[0].t >= LIFE) pts.shift();
+          if (!pts.length) promoted = {};
           fctx.clearRect(0, 0, fx.width, fx.height);
           if (!pts.length) { trailEl.style.display = 'none'; return; }
-          var segs = [], cur = null;
+          var segs = [], cs = null;
           for (var i = 0; i < pts.length; i++) {
             var p = pts[i], w = trailWidth(p, now);
-            var brk = cur && (Math.sqrt(Math.pow(p.x - cur.pts[cur.pts.length - 1].x, 2) + Math.pow(p.y - cur.pts[cur.pts.length - 1].y, 2)) > 24);
+            var brk = cs && (Math.sqrt(Math.pow(p.x - cs.pts[cs.pts.length - 1].x, 2) + Math.pow(p.y - cs.pts[cs.pts.length - 1].y, 2)) > 24);
             if (w > 0.6 && !brk) {
-              if (!cur) { cur = { pts: [], ws: [] }; segs.push(cur); }
+              if (!cs) { cs = { pts: [], ws: [] }; segs.push(cs); }
               // wavy organic edges — real water boundaries are never smooth math
               var wv = w * (1 + 0.15 * Math.sin(p.arc * 0.34 + p.ph * 2.1) + 0.08 * Math.sin(p.arc * 0.91));
-              cur.pts.push(p); cur.ws.push(Math.max(wv, 0.4));
-            } else cur = null;
+              cs.pts.push(p); cs.ws.push(Math.max(wv, 0.4));
+            } else cs = null;
           }
           segs = segs.filter(function (s) { return s.pts.length >= 2; });
           if (!segs.length) { trailEl.style.display = 'none'; return; }
@@ -563,10 +722,9 @@
           });
           // Quantize the refraction element's geometry to a 128px grid:
           // per-frame left/top/width/height changes force the browser to
-          // re-capture the backdrop and re-run feTurbulence every frame —
-          // the single biggest cost on pages that already stack
-          // backdrop-filter panels. Snapped geometry only changes when the
-          // trail crosses a grid line; the clip-path keeps animating at 60Hz.
+          // re-capture the backdrop and re-run feTurbulence every frame.
+          // Snapped geometry only changes when the trail crosses a grid line;
+          // the clip-path keeps animating at 60Hz.
           var Q = 128;
           x0 = Math.floor(x0 / Q) * Q; y0 = Math.floor(y0 / Q) * Q;
           var qw = Math.ceil((x1 - x0) / Q) * Q, qh = Math.ceil((y1 - y0) / Q) * Q;
@@ -577,8 +735,7 @@
             trailEl.style.width = qw + 'px';
             trailEl.style.height = qh + 'px';
           }
-          // canvas-only mode compensates with a touch more tint
-          var path = '', tintA = TINT * (trailRefr ? 0.012 : 0.016), light = isLight();
+          var path = '', tintA = TINT * 0.016, light = isLight();
           segs.forEach(function (s) {
             var n = s.pts.length, L = [], R = [];
             for (var k = 0; k < n; k++) {
@@ -595,16 +752,19 @@
               for (var k = n - 1; k >= 0; k--) sp2 += 'L' + (R[k][0] - x0).toFixed(1) + ' ' + (R[k][1] - y0).toFixed(1);
               path += sp2 + 'Z';
             }
-            /* fx layer: tint fill, refraction edges, flow highlight, glints */
+            /* fx layer: faint body, refraction edge, a thin highlight on the
+             * light-facing edge (no painted centre line — water has none) */
             var P = new Path2D();
             P.moveTo(L[0][0] * FXDPR, L[0][1] * FXDPR);
             for (var k = 1; k < n; k++) P.lineTo(L[k][0] * FXDPR, L[k][1] * FXDPR);
             for (var k = n - 1; k >= 0; k--) P.lineTo(R[k][0] * FXDPR, R[k][1] * FXDPR);
             P.closePath();
-            var ageMid = (now - s.pts[Math.floor(n / 2)].t) / LIFE, fade = 1 - ageMid * 0.8;
+            var ageMid = (now - s.pts[Math.floor(n / 2)].t) / LIFE;
+            // after the break the beads carry the look; the ribbon steps back
+            var fade = (1 - ageMid * 0.8) * (ageMid > NECK_T + 0.12 ? 0.45 : 1);
             if (tintA > 0.003) { fctx.fillStyle = 'rgba(135,198,226,' + (tintA * fade) + ')'; fctx.fill(P); }
-            fctx.lineWidth = 1.1 * FXDPR;
-            fctx.strokeStyle = light ? 'rgba(30,52,72,' + (0.30 * fade) + ')' : 'rgba(185,225,252,' + (0.22 * fade) + ')';
+            fctx.lineWidth = 1.0 * FXDPR;
+            fctx.strokeStyle = light ? 'rgba(30,52,72,' + (0.30 * fade) + ')' : 'rgba(200,230,255,' + (0.20 * fade) + ')';
             fctx.stroke(P);
             fctx.lineCap = 'round'; fctx.lineJoin = 'round';
             fctx.beginPath();
@@ -614,49 +774,37 @@
               var tx2 = p1.x - p0.x, ty2 = p1.y - p0.y;
               var tn = Math.max(Math.sqrt(tx2 * tx2 + ty2 * ty2), 1e-4);
               var nx = -ty2 / tn, ny = tx2 / tn;
-              if (nx * (-0.5) + ny * (-0.7) < 0) { nx = -nx; ny = -ny; }
-              var hx = (p.x + nx * w * 0.38) * FXDPR, hy = (p.y + ny * w * 0.38) * FXDPR;
+              if (nx * LK[0] + ny * LK[1] < 0) { nx = -nx; ny = -ny; }
+              var hx = (p.x + nx * w * 0.62) * FXDPR, hy = (p.y + ny * w * 0.62) * FXDPR;
               if (k === 0) fctx.moveTo(hx, hy); else fctx.lineTo(hx, hy);
             }
             var wAvg = 0;
             for (var k = 0; k < n; k++) wAvg += s.ws[k];
             wAvg /= n;
-            fctx.lineWidth = Math.max(1, wAvg * 0.34) * FXDPR;
-            fctx.strokeStyle = 'rgba(255,255,255,' + (0.50 * fade) + ')';
+            fctx.lineWidth = Math.max(0.8, wAvg * 0.18) * FXDPR;
+            fctx.strokeStyle = 'rgba(255,255,255,' + (0.28 * fade) + ')';
             fctx.stroke();
-            for (var k = 0; k < n; k += 4) {
+            for (var k = 0; k < n; k += 6) {
               var p = s.pts[k];
               var r1 = Math.sin(p.arc * 12.9898 + p.ph * 78.233) * 43758.5453;
               r1 -= Math.floor(r1);
-              if (r1 < 0.34) {
-                fctx.fillStyle = 'rgba(255,255,255,' + (0.55 * fade) + ')';
-                fctx.fillRect((p.x + (r1 - 0.5) * s.ws[k]) * FXDPR, (p.y + (r1 * 2 - 1) * s.ws[k] * 0.5) * FXDPR, 1.5 * FXDPR, 1.5 * FXDPR);
+              if (r1 < 0.25) {
+                fctx.fillStyle = 'rgba(255,255,255,' + (0.45 * fade) + ')';
+                fctx.fillRect((p.x + (r1 - 0.5) * s.ws[k]) * FXDPR, (p.y + (r1 * 2 - 1) * s.ws[k] * 0.5) * FXDPR, 1.4 * FXDPR, 1.4 * FXDPR);
               }
             }
           });
           if (trailRefr) trailEl.style.clipPath = 'path("' + path + '")';
         }
-        function drawHeadGlint(sp, st, sV) {
-          if (!active) return;
-          var a = Math.min(0.42, sp * 0.028);
-          if (a < 0.05) return;
-          var ca = Math.cos(theta), sa = Math.sin(theta);
-          var ox = -0.30 * st.b * sV, oy = -0.46 * st.b * sV;
-          fctx.beginPath();
-          fctx.moveTo((x - ca * st.a * sV * 0.45 + ox) * FXDPR, (y - sa * st.a * sV * 0.45 + oy) * FXDPR);
-          fctx.lineTo((x + ca * st.a * sV * 0.30 + ox) * FXDPR, (y + sa * st.a * sV * 0.30 + oy) * FXDPR);
-          fctx.lineWidth = 1.7 * FXDPR; fctx.lineCap = 'round';
-          fctx.strokeStyle = 'rgba(255,255,255,' + a + ')';
-          fctx.stroke();
-        }
 
-        /* --- satellites (fast-move shed / splash debris, re-absorbable) --- */
-        function spawnSatAt(now, px, py, velx, vely, fv, life) {
+        /* --- satellites + trail beads (small real lenses, re-absorbable) --- */
+        function spawnSatAt(now, px, py, velx, vely, fv, life, trail) {
           var el = POOL.pop();
           if (!el) {
             el = document.createElement('div');
             el.className = 'glass-water-bead';
             el.setAttribute('aria-hidden', 'true');
+            el.style.width = DSZ + 'px'; el.style.height = DSZ + 'px';
             el.style.backdropFilter = 'url(#glassWaterBead)';
             el.style.webkitBackdropFilter = 'url(#glassWaterBead)';
             el.style.webkitMaskImage = 'url(' + BEAD.mask + ')';
@@ -665,7 +813,7 @@
           }
           el.style.backgroundImage = 'url(' + (isLight() ? BEAD.specLight : BEAD.spec) + ')';
           el.style.display = 'block';
-          drops.push({ el: el, x: px, y: py, vx: velx, vy: vely, fv: fv, t: now, life: life, abs: false });
+          drops.push({ el: el, x: px, y: py, vx: velx, vy: vely, fv: fv, t: now, life: life, abs: false, trail: !!trail });
         }
         function burst(now) {
           expl = { t0: now };
@@ -679,13 +827,13 @@
             strokePh = Math.random() * 6.28;
             var curv = (Math.random() - 0.5) * 0.045;
             var steps = Math.ceil(len / 3.5);
-            for (var k = 1; k <= steps; k++) {
-              var s = k / steps * len;
+            for (var s = 1; s <= steps; s++) {
+              var sl = s / steps * len;
               cumArc += 3.5;
               pts.push({
-                x: x + Math.cos(ang) * s - Math.sin(ang) * curv * s * s,
-                y: y + Math.sin(ang) * s + Math.cos(ang) * curv * s * s,
-                t: now, w0: w0 * (1 - (k / steps) * 0.5), arc: cumArc, ph: strokePh, retr: 1, ex: 1
+                x: x + Math.cos(ang) * sl - Math.sin(ang) * curv * sl * sl,
+                y: y + Math.sin(ang) * sl + Math.cos(ang) * curv * sl * sl,
+                t: now, w0: w0 * (1 - (s / steps) * 0.5), arc: cumArc, ph: strokePh, retr: 1, ex: 1
               });
             }
           }
@@ -703,47 +851,63 @@
           var dt = Math.min(now - lastNow, 50) || 16.7;
           lastNow = now;
           if (mode !== 'water') { requestAnimationFrame(step); return; }
-          if (trailRefr && active) {
+          var k = dt / 16.7;                               // 1 at 60 Hz, 0.5 at 120 Hz
+          if (active) {
             // 22ms ≈ 45fps. Only count frames where the cursor is doing work.
             if (dt > 22) { slowFrames++; } else if (slowFrames > 0) { slowFrames--; }
-            if (slowFrames > 90) { trailRefr = false; trailEl.style.display = 'none'; }
+            if (slowFrames > 90) {                         // degrade: trail filter first, then trail beads
+              slowFrames = 0;
+              if (trailRefr) { trailRefr = false; trailEl.style.display = 'none'; }
+              else MAX_TRAIL_BEADS = Math.max(0, MAX_TRAIL_BEADS - 7);
+            }
           }
-          vx = (vx + (tx - x) * STIFF) * DAMP;
-          vy = (vy + (ty - y) * STIFF) * DAMP;
-          x += vx; y += vy;
+          var dxT = tx - x, dyT = ty - y, distT = Math.sqrt(dxT * dxT + dyT * dyT);
+          if (pinned && (distT > PIN_BREAK || now - lastMoveT > PIN_HOLD)) pinned = false;
+          if (pinned) {
+            vx = 0; vy = 0; lean = distT / PIN_BREAK; leanDir = Math.atan2(dyT, dxT);
+          } else {
+            var damp = Math.pow(DAMP, k);
+            vx = (vx + dxT * STIFF * k) * damp;
+            vy = (vy + dyT * STIFF * k) * damp;
+            x += vx * k; y += vy * k;
+            lean = 0;
+          }
           var sp = Math.sqrt(vx * vx + vy * vy);
+          if (!pinned && sp < 0.35 && distT < 1.2 && now - lastMoveT < PIN_HOLD) pinned = true;
           if (sp < 2) { if (!stillSince) stillSince = now; } else stillSince = 0;
           if (prevSpeed > 6 && sp <= 2) wobV += 0.10;
           prevSpeed = sp;
-          if (sp > 1.2) theta += angDiff(Math.atan2(vy, vx), theta) * 0.25;
-          var eN = Math.max(0, Math.min(1, sp / 22));
-          var desired = 1.12 + (2.10 - 1.12) * eN;
-          var bi = 0, bd = 1e9;
-          for (var i = 0; i < STATES.length; i++) {
-            var dd = Math.abs(STATES[i].asp - desired);
-            if (dd < bd) { bd = dd; bi = i; }
+          if (sp > 1.2) theta += angDiff(Math.atan2(vy, vx), theta) * (1 - Math.pow(0.75, k));
+          // stretch level from speed; a pinned drop leans toward the pull
+          var desired = 1 + 1.1 * Math.max(0, Math.min(1, sp / 22));
+          var ai = -1, bd = Math.abs(desired - 1);
+          for (var i = 0; i < ASPECTS.length; i++) {
+            var dd = Math.abs(ASPECTS[i] - desired);
+            if (dd < bd) { bd = dd; ai = i; }
           }
-          setState(bi);
-          var st = STATES[bi];
-          var resid = Math.sqrt(desired / st.asp);
-          wobV += (-0.16 * wob - 0.11 * wobV) * (dt / 16.7);
-          wob += wobV * (dt / 16.7);
+          var dirA = theta;
+          if (pinned && lean > 0.35) { ai = Math.max(ai, 0); dirA = leanDir; }
+          var st = stateFor(ai, dirIndex(dirA));
+          setState(st);
+          wobV += (-0.16 * wob - 0.11 * wobV) * k;
+          wob += wobV * k;
           var breathe = (stillSince && now - stillSince > 500) ? 0.012 * Math.sin(now * 0.0021) : 0;
           var sV = Math.sqrt(vol) * (pointing ? 0.85 : 1);
+          // translate + uniform scale only — see the header: no rotate() here
           head.style.transform =
-            'translate(' + (x - st.W / 2) + 'px,' + (y - st.H / 2) + 'px)' +
-            ' rotate(' + theta + 'rad)' +
-            ' scale(' + (sV * resid * (1 + wob + breathe)) + ',' + (sV / resid * (1 - wob * 0.6 + breathe * 0.4)) + ')';
+            'translate(' + (x - st.S / 2) + 'px,' + (y - st.S / 2) + 'px)' +
+            ' scale(' + (sV * (1 + wob + breathe)).toFixed(4) + ')';
 
-          if (active && sp > DEPOSIT_V) deposit(now, sp, st, sV);
+          if (active && sp > DEPOSIT_V) deposit(now, sp, st, sV, k);
           else lastDep = null;
           /* stopping retracts nearby trail — disabled mid-splash or the
            * tongues get eaten in place instead of visibly flying out */
-          if (stillSince && now - stillSince > 140 && !expl) {
+          var retracting = stillSince && now - stillSince > 140 && !expl;
+          if (retracting) {
             for (var j = pts.length - 1; j >= 0; j--) {
               var p = pts[j];
               if (Math.sqrt(Math.pow(p.x - x, 2) + Math.pow(p.y - y, 2)) < 62) {
-                p.retr -= 0.085 * (dt / 16.7);
+                p.retr -= 0.085 * k;
                 if (p.retr <= 0) { pts.splice(j, 1); vol = Math.min(1.25, vol + 0.004); }
               }
             }
@@ -751,7 +915,7 @@
           if (expl) {
             var ph = now - expl.t0;
             if (ph > 450) {
-              var kk = Math.min(0.060, 0.016 + (ph - 450) * 0.00008) * (dt / 16.7);
+              var kk = Math.min(0.060, 0.016 + (ph - 450) * 0.00008) * k;
               var alive = 0;
               for (var j = pts.length - 1; j >= 0; j--) {
                 var p = pts[j];
@@ -769,7 +933,7 @@
             if (ph > 3200) expl = null;
           }
           renderTrail(now);
-          drawHeadGlint(sp, st, sV);
+          promoteBeads(now);
 
           if (sp > 20 && now - lastSat > 70) {
             lastSat = now;
@@ -778,24 +942,27 @@
               Math.cos(ang) * 1.5 + vx * 0.1, Math.sin(ang) * 1.5 + vy * 0.1,
               0.018 + Math.random() * 0.025, 380 + Math.random() * 300);
           }
+          var d86 = Math.pow(0.86, k), d92 = Math.pow(0.92, k);
           for (var j = drops.length - 1; j >= 0; j--) {
             var dr = drops[j];
+            if (retracting && !dr.abs && Math.sqrt(Math.pow(dr.x - x, 2) + Math.pow(dr.y - y, 2)) < 62) dr.abs = true;
             if (dr.abs) dr.t = Math.max(dr.t, now - dr.life * 0.85);
             var age = (now - dr.t) / dr.life;
             if (age >= 1) { dr.el.style.display = 'none'; POOL.push(dr.el); drops.splice(j, 1); continue; }
             if (dr.abs) {
               var adx = x - dr.x, ady = y - dr.y;
               var adist = Math.max(Math.sqrt(adx * adx + ady * ady), 1);
-              dr.vx = (dr.vx + adx / adist * 0.30 * (dt / 16.7)) * 0.92;
-              dr.vy = (dr.vy + ady / adist * 0.30 * (dt / 16.7)) * 0.92;
+              dr.vx = (dr.vx + adx / adist * 0.30 * k) * d92;
+              dr.vy = (dr.vy + ady / adist * 0.30 * k) * d92;
               if (adist < st.a * sV * 0.9) {
                 vol = Math.min(1.25, vol + dr.fv * 0.85); wobV += 0.05;
                 dr.el.style.display = 'none'; POOL.push(dr.el); drops.splice(j, 1); continue;
               }
-            } else { dr.vx *= 0.86; dr.vy *= 0.86; }
-            dr.x += dr.vx * (dt / 16.7); dr.y += dr.vy * (dt / 16.7);
+            } else { dr.vx *= d86; dr.vy *= d86; }
+            dr.x += dr.vx * k; dr.y += dr.vy * k;
             var rpx = R0 * Math.sqrt(dr.fv) * 2.2, shrink = dr.abs ? 1 : 1 - age * age;
-            dr.el.style.transform = 'translate(' + (dr.x - DSZ / 2) + 'px,' + (dr.y - DSZ / 2) + 'px) scale(' + Math.max(rpx * 2 / DSZ * shrink, 0.04) + ')';
+            // bead lens radius BR in its bake → rendered radius ≈ 0.87·rpx
+            dr.el.style.transform = 'translate(' + (dr.x - DSZ / 2) + 'px,' + (dr.y - DSZ / 2) + 'px) scale(' + Math.max(rpx * 0.87 / BR * shrink, 0.04).toFixed(4) + ')';
             dr.el.style.opacity = String(dr.abs ? 1 : 1 - age);
           }
           requestAnimationFrame(step);
@@ -816,7 +983,7 @@
             for (var j = drops.length - 1; j >= 0; j--) {
               drops[j].el.style.display = 'none'; POOL.push(drops[j].el);
             }
-            drops.length = 0; pts.length = 0; expl = null;
+            drops.length = 0; pts.length = 0; expl = null; promoted = {};
           } else if (active) {
             html.classList.add('glass-liquid');
             head.style.opacity = '1';
