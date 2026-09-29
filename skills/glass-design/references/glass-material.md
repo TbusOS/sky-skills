@@ -32,9 +32,18 @@ light 主题下色散只用白(彩色 cast 在白底上读作脏)。
 
 **为什么不用 `feTurbulence`/`feDisplacementMap`(否决,写死):**
 
-1. Chromium 里 backdrop 内容不参与 SVG filter 合成 —— 做不出真折射,只能扭曲面板自身;
+1. Chromium 里 `backdrop-filter: url(#svg滤镜)` **能**折射背后的页面内容,
+   但元素一带平面 `rotate()`,位移图就贴错位置 —— 折射跑到元素旁边,元素自己什么都不折射
+   (实测 5° 的 `rotateX/rotateY` 3D 倾斜没有错位,`[data-tilt]` 写的就是这种);
 2. 多卡片场景性能崩;
 3. 渲染非确定,截图检查(像素回归)直接炸。
+
+失效(2026-09-29,冲突记录 C-20260929-06):第 1 条原文「Chromium 里 backdrop 内容不参与
+SVG filter 合成 —— 做不出真折射,只能扭曲面板自身」。实测 headless Chromium 1223:
+元素只平移或缩放时,背后的字被正确放大弯折;加上 `rotate()` 才错位。
+第二天的液态光标(`612c3a7`)用的正是这项技术。「面板不用它」的结论不变。
+光标怎么绕开旋转见 `glass.js` 的 liquid cursor v3 注释,
+回归检查 `scripts/check_water_refraction.mjs`。
 
 折射环 + inset 顶部白高光(`inset 0 1px 0 var(--glass-highlight)`)已经给足 specular 暗示。
 
