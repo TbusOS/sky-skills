@@ -39,21 +39,35 @@
   .stations button.on{background:#5aa0eb;color:#0b1b2c}
   .stations button.done{color:#c0c0c8}
   /* —— 说明卡 —— */
-  .caption{position:fixed;left:22px;bottom:22px;z-index:20;width:min(430px,calc(100vw - 44px));
-    padding:18px 56px 16px 20px;transition:opacity .35s}
-  .caption .k{font:600 11px/1 "JetBrains Mono",monospace;color:#5aa0eb;letter-spacing:.12em;text-transform:uppercase}
+  /* 宽度 320~360px(约 28% 屏宽):以前 430px 占了 1280 宽屏幕的 35%,die 内部几站主体一半在它后面。
+     右边距只留给顶行(收起按钮在那儿),正文用满整宽 —— 变窄后不至于长高太多。
+     真超高时**只滚正文**:整卡滚动会把「下一站」按钮滚出视野(1280×800 下第 3、5 站实测会超高) */
+  .caption{position:fixed;left:22px;bottom:22px;z-index:20;
+    width:min(clamp(320px,calc(28vw - 22px),360px),calc(100vw - 44px));
+    max-height:calc(100vh - 36px - var(--title-b,104px));display:flex;flex-direction:column;   /* --title-b 由 JS 量标题下沿 */
+    padding:18px 20px 16px 20px;transition:opacity .35s}
+  .caption>*{flex:none}
+  .caption .body{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+    scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.28) transparent}
+  .caption .k{font:600 11px/1 "JetBrains Mono",monospace;color:#5aa0eb;letter-spacing:.12em;text-transform:uppercase;
+    padding-right:64px;line-height:1.5;text-wrap:balance}
+  .caption .k .n{white-space:nowrap}   /* 窄卡片上顶行会折成两行:均衡折,页码不拆开 */
   .caption h2{font-size:19px;font-weight:700;margin:9px 0 10px;letter-spacing:.01em;color:#f3f3f5}
   .caption .body{font-size:13px;line-height:1.72;color:#c6c6cd}
+  @media (max-height:860px) and (min-width:901px){
+    .caption .body{font-size:12.5px;line-height:1.62}
+  }
   .caption .body b{color:#f0f0f3;font-weight:600}
   .caption .body .q{display:block;margin-top:7px}
   .caption .body .q em{font-style:normal;color:#8fb3d9;font-weight:600;margin-right:6px}
   .caption .body .en{color:#8a8a92;font-size:12px}
-  .caption .clk{display:none;align-items:center;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:#a9a9b1}
+  .caption .clk{display:none;align-items:center;gap:6px;flex-wrap:nowrap;margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:#a9a9b1}
   .caption .clk.on{display:flex}
   .caption .clk button{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);color:#dcdce2;border-radius:7px;padding:5px 9px;font:500 12px/1 "Noto Sans SC",sans-serif;cursor:pointer}
   .caption .clk button:hover{background:rgba(255,255,255,.13);color:#fff}
   .caption .clk label{display:flex;align-items:center;gap:6px}
-  .caption .clk input[type=range]{width:80px;accent-color:#5aa0eb}
+  .caption .clk input[type=range]{width:56px;accent-color:#5aa0eb}
+  .caption .clk button,.caption .clk label,.caption .clk #cTick{white-space:nowrap}
   .caption .clk #cTick{margin-left:auto;color:#5aa0eb}
   .caption .nav{display:flex;justify-content:space-between;align-items:center;margin-top:13px;gap:10px}
   .caption .nav button{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);
@@ -76,7 +90,7 @@
     backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
     box-shadow:0 6px 24px rgba(0,0,0,.4);transition:.18s}
   .lang-toggle:hover{background:#5aa0eb;color:#0b1b2c}
-  .caption.mini{width:auto;max-width:min(430px,calc(100vw - 44px));padding:12px 62px 12px 16px}
+  .caption.mini{width:auto;max-width:min(360px,calc(100vw - 44px));padding:12px 16px 12px 16px}
   .caption.mini h2{font-size:14.5px;margin:7px 0 0}
   .caption.mini .body,.caption.mini .nav{display:none}
   /* 收起后保留时钟控件:收起卡片多半就是为了看动画,暂停/单步正是这时候要用的 */
@@ -90,6 +104,9 @@
     padding:5px 9px 5px 9px;font-size:12px;line-height:1.35;color:#eaeaee;
     box-shadow:0 4px 18px rgba(0,0,0,.35);opacity:0;transition:opacity .4s;backdrop-filter:blur(8px)}
   .lb.show{opacity:1}
+  /* 只在出现时淡入;消失是立刻的。被说明卡盖住、切站、改窗口时要马上让开 ——
+     带 0.4s 淡出的话,这段时间里半透明的标签叠在说明卡正文上(visual-audit 在 390px 下量到过) */
+  .lb:not(.show){transition:none}
   .lb small{display:block;font:400 10.5px/1.3 "JetBrains Mono",monospace;color:#8fb3d9;margin-top:2px}
   .lb::after{content:"";position:absolute;left:50%;bottom:-5px;width:8px;height:8px;
     background:#5aa0eb;border-radius:50%;transform:translate(-50%,50%);box-shadow:0 0 0 3px rgba(90,160,235,.25)}
@@ -188,8 +205,8 @@
   </div>
 </aside>
 
-<aside class="hud panel" id="hud">
-  <button class="hud-x" id="hHide" title="Collapse (R) · 收起渲染状态（R）" aria-expanded="true"><span class="lang-en">Hide ⌄</span><span class="lang-zh">收起 ⌄</span></button>
+<aside class="hud panel mini" id="hud">
+  <button class="hud-x" id="hHide" title="Expand (R) · 展开渲染状态（R）" aria-expanded="false"><span class="lang-en">Show ⌃</span><span class="lang-zh">展开 ⌃</span></button>
   <b><span class="lang-en">Render state</span><span class="lang-zh">渲染状态</span></b>
   <div class="row"><span><span class="lang-en">Samples</span><span class="lang-zh">累积采样</span></span><span id="hSpp" class="mono">0 / 0</span></div>
   <div class="row"><span><span class="lang-en">Frame time</span><span class="lang-zh">帧时间</span></span><span id="hMs" class="mono">—</span></div>
@@ -893,7 +910,27 @@ void silk(inout vec3 alb, inout float ro, vec2 lxz, vec4 atl){
   alb=mix(alb, vec3(0.78,0.78,0.76), a*0.92);
   ro =mix(ro, 0.70, a*0.6);
 }
+// —— die 显微照片用的两个小工具 ——
+// 周期线:x 是以周期为单位的坐标,w 是线宽占周期的比例,fw 是 x 在一个像素上的变化量
+float lineAA(float x, float w, float fw){
+  float d=0.5-abs(fract(x)-0.5); fw=max(fw,1e-4);
+  return 1.0-smoothstep(w*0.5-fw, w*0.5+fw, d);
+}
+// 介质膜厚不均 → 薄膜干涉的淡彩。显微镜下看 die,不同区域偏金 / 偏粉 / 偏绿就是这个。
+// 只改反照率、不发光;混合量压得很低,过 check_realism 的饱和度闸
+vec3 filmTint(vec2 p, float off){
+  float d=off+0.55*fbm(vec3(p*0.035,off*3.1))+0.20*fbm(vec3(p*0.21,7.0));
+  vec3 c=0.5+0.5*cos(6.2831853*(d+vec3(0.0,0.33,0.67)));
+  return mix(vec3(1.0), c*1.6, 0.22);
+}
 void main(){
+  // 导数放在任何分支之前取:分支里的 fwidth 在 GLSL ES 里是未定义行为
+  vec2 dW=fwidth(vW.xz), dL=fwidth(vLocal.xz);
+  float fw=max(dW.x,dW.y);
+  // 方块自身的半边长(世界单位)。blk 原型是 1×1×1、vLocal ∈ [-1,1],
+  // 世界坐标 = 中心 + vLocal×半边长,两者导数之比正好就是半边长(方块不带 yaw)
+  vec2 hs=dW/max(dL,vec2(1e-6));
+  vec2 pe=(vLocal.xz+1.0)*hs;               // 从方块一角量起的世界坐标
   // 隐藏已抬走的散热组件;剖切封装组
   if(vExt.x>0.5 && vExt.x<1.5 && uLift>150.0) discard;
   if(vExt.x>1.5 && vExt.x<2.5 && vExt.y>0.5 && vExt.y<1.5 && vW.x>uCutX) discard;
@@ -953,14 +990,65 @@ void main(){
     // 阻焊哑光颗粒
     ro=clamp(ro+(fbm(vW*88.0)-0.5)*0.18, 0.22, 1.0);
   }
+  else if(top && txw>5.5){
+    // ============ die 上的功能块:照显微照片的样子画 ============
+    //   6 = 存储阵列(DRAM mat / SRAM)  7 = 标准单元逻辑
+    //   8 = 沿 z 重复的外围电路(PHY 通道 / 行译码器)  9 = 同 8,沿 x 重复(读出放大器 / 列译码)
+    vec3 base=alb;
+    if(txw<6.5){
+      // 阵列切成一块块 mat,mat 之间是读出放大器 / 字线驱动的窄带;从方块的边起排,整数块
+      vec2 S=2.0*hs, nm=max(vec2(1.0),floor(S/vec2(3.9,3.3)+0.5));
+      vec2 m=pe/S*nm; vec2 mf=abs(fract(m)-0.5);
+      float band=smoothstep(0.405,0.43,max(mf.x,mf.y));
+      float cells=max(lineAA(vW.x*7.0,0.30,fw*7.0), lineAA(vW.z*5.0,0.30,fw*5.0));
+      float bl=lineAA(vW.x*14.0,0.45,fw*14.0);                  // 位线:竖向细金属
+      float sa=lineAA(vW.x*5.0,0.50,fw*5.0);                    // 窄带里一根位线一个放大器
+      float wl=lineAA(vW.z*1.25,0.16,fw*1.25);                 // 字线横条:中等距离也看得出纹理
+      float mv=h31(vec3(floor(m),8.0));                         // 每块 mat 亮度略有差异
+      vec3 tint=filmTint(vW.xz,1.55);
+      vec3 arr=base*tint*(0.84+0.10*mv+0.26*bl-0.20*cells-0.22*wl);
+      vec3 per=base*tint*(0.60+0.30*sa);
+      alb=mix(arr,per,band);
+      me=mix(me,0.30,bl*(1.0-band)*0.5); ro=mix(0.28,ro,band);
+    } else if(txw<7.5){
+      // 标准单元一行一行排(行高 0.45),每行里单元宽度随机;布局密度大尺度起伏 → 斑驳
+      float ry=pe.y/0.45, row=floor(ry);
+      float cid=floor(pe.x*2.2+h31(vec3(row,1.0,0.0))*7.0);
+      float v=h31(vec3(cid,row,4.0));
+      float dens=fbm(vec3(pe*0.18,3.0));
+      float rails=lineAA(ry,0.12,fw/0.45);                     // 每行上下的电源轨
+      float straps=lineAA(pe.x/4.0,0.06,fw/4.0);               // 竖向电源条
+      vec3 tint=filmTint(vW.xz,0.85);
+      vec3 lg=base*tint*(0.62+0.50*v*dens+0.30*dens);
+      lg=mix(lg,lg*1.30,rails*0.5);
+      alb=mix(lg,vec3(0.26,0.25,0.24)*tint,straps*0.55);
+      me=mix(me,0.5,straps); ro=mix(ro,0.36,straps);
+    } else {
+      bool sw=txw>8.5;
+      vec2 p=sw?pe.yx:pe; float ux=sw?(vLocal.z*0.5+0.5):(vLocal.x*0.5+0.5);
+      float fing=lineAA(p.y*4.0,0.40,fw*4.0);                  // 驱动管的指条
+      float lane=lineAA(p.y/5.3,0.05,fw/5.3);                  // 通道分隔
+      vec2 sq=abs(fract(p*0.9)-0.5);
+      float esd=1.0-smoothstep(0.30,0.36,max(sq.x,sq.y));      // ESD 大方块
+      vec3 tint=filmTint(vW.xz,1.35);
+      vec3 c1=base*tint*(0.72+0.42*fing), c2=base*tint*(0.62+0.46*esd);
+      alb=mix(c1,c2,step(0.58,ux))*(1.0-0.35*lane);
+      me=mix(me,0.35,fing*0.4);
+    }
+    ro=clamp(ro+(fbm(vW*14.0)-0.5)*0.08,0.18,1.0);
+  }
   else if(top && txw>4.5){
-    // ============ 城的硅基底:细密单元格 ============
-    vec2 g=vW.xz*0.35; vec2 f=abs(fract(g)-0.5);
-    float ln=1.0-smoothstep(0.44,0.49,max(f.x,f.y));
-    alb*=(0.82+0.40*ln);
-    vec2 g2=vW.xz*2.4; float fine=step(0.5,h31(vec3(floor(g2),5.0)));
-    alb*=(0.92+0.14*fine);
-    ro=clamp(ro+(fbm(vW*12.0)-0.5)*0.12,0.2,1.0);
+    // ============ die 的空地:顶层电源网格 + 金属填充 ============
+    // 工艺要求每层金属密度均匀,空地上铺满小方块(dummy fill);粗的是顶层电源网格
+    vec2 p=vW.xz;
+    float pg=max(lineAA(p.x/6.0,0.10,fw/6.0), lineAA(p.y/6.0,0.10,fw/6.0));
+    vec2 q=p*1.6; vec2 qf=abs(fract(q)-0.5);
+    float fill=(1.0-smoothstep(0.26,0.32,max(qf.x,qf.y)))*step(0.25,h31(vec3(floor(q),2.0)));
+    vec3 tint=filmTint(p,1.15);
+    alb=alb*tint*(0.80+0.34*fill);
+    alb=mix(alb,vec3(0.30,0.29,0.28)*tint,pg*0.60);
+    me=mix(me,0.55,pg); ro=mix(ro,0.34,pg);
+    ro=clamp(ro+(fbm(vW*12.0)-0.5)*0.10,0.2,1.0);
   }
   else if(top && txw>2.5){
     // ============ 硅 die:SM 阵列版图 ============
@@ -1424,13 +1512,13 @@ function buildScene(){
   const BX=[-42,-14,14,42], BZ=[-30,30];
   for(let bi=0;bi<4;bi++) for(let bj=0;bj<2;bj++){
     const x=BX[bi], z=BZ[bj], sgn=bj?-1:1;
-    blk(MAT.blockSM, at(WB,x,2.9,z),            [23,3.4,30], {tx:5});
-    blk(MAT.blockMC, at(WB,x-13.6,2.7,z),       [3.2,3.0,30]);
-    blk(MAT.blockL2, at(WB,x,2.75,z+sgn*17.6),  [23,2.9,3.4]);
+    blk(MAT.blockSM, at(WB,x,2.9,z),            [23,3.4,30], {tx:6});   // 存储阵列
+    blk(MAT.blockMC, at(WB,x-13.6,2.7,z),       [3.2,3.0,30], {tx:8});  // 行译码器:一根字线一个驱动
+    blk(MAT.blockL2, at(WB,x,2.75,z+sgn*17.6),  [23,2.9,3.4], {tx:9});  // 行缓冲 = 读出放大器
     railLine(at(WB,x,0,z+sgn*19.6), at(WB,x,0,sgn*4.6), 7.6, 2, 2.4);
   }
-  blk(MAT.blockIO,  at(WB,0,2.7,0), [118,3.0,7.6]);
-  for(let bi=0;bi<4;bi++) blk(MAT.blockROP, at(WB,BX[bi],3.05,0), [23,3.4,4.8]);
+  blk(MAT.blockIO,  at(WB,0,2.7,0), [118,3.0,7.6], {tx:7});                      // 中央外围逻辑
+  for(let bi=0;bi<4;bi++) blk(MAT.blockROP, at(WB,BX[bi],3.05,0), [23,3.4,4.8], {tx:9});  // 列译码
   railLine(at(WB,-58,0,0), at(WB,58,0,0), 9.6, 3, 2.6);
   POS.bank  =at(WB,14,6.6,-30);
   POS.rowdec=at(WB,0.4,6.0,-30);
@@ -1439,17 +1527,17 @@ function buildScene(){
 
   // ============ 世界 C · CPU die 的城 ============
   blk(MAT.siliconCity, at(WC,0,0,0), [140,2.6,112], {tx:5});
-  blk(MAT.blockMC, at(WC,-58,3.0,0), [15,3.6,86], {tx:5});         // 内存控制器 + PHY
-  for(let i=0;i<8;i++) blk(MAT.blockIO, at(WC,-58,4.95,(i-3.5)*10.6), [11,0.6,7.4]);
+  blk(MAT.blockMC, at(WC,-58,3.0,0), [15,3.6,86], {tx:8});         // 内存控制器 + PHY
+  for(let i=0;i<8;i++) blk(MAT.blockIO, at(WC,-58,4.95,(i-3.5)*10.6), [11,0.6,7.4], {tx:9});
   for(let i=0;i<2;i++) for(let j=0;j<2;j++)                        // L3 四片
-    blk(MAT.blockL2, at(WC,-24+i*26, 2.9, (j?1:-1)*24), [22,3.4,30], {tx:5});
+    blk(MAT.blockL2, at(WC,-24+i*26, 2.9, (j?1:-1)*24), [22,3.4,30], {tx:6});
   for(const cz of [-24,24]){                                       // 两个核
-    blk(MAT.blockSM,   at(WC,44,3.1,cz),      [42,3.8,42], {tx:5});
-    blk(MAT.blockL2,   at(WC,32,5.15,cz),     [11,0.9,34]);        // L2
-    for(let i=0;i<6;i++)                                           // 执行单元
-      blk(MAT.blockIO, at(WC,41+(i%2)*8, 5.15, cz-12+Math.floor(i/2)*12), [7,0.9,10]);
-    blk(MAT.blockDisp, at(WC,58,5.15,cz+11),  [10,0.9,16]);        // L1 数据缓存
-    blk(MAT.blockROP,  at(WC,58,5.15,cz-11),  [10,0.9,16]);        // 寄存器堆
+    blk(MAT.blockSM,   at(WC,44,3.1,cz),      [42,3.8,42], {tx:7});   // 核:标准单元逻辑
+    blk(MAT.blockL2,   at(WC,32,5.15,cz),     [11,0.9,34], {tx:6});   // L2
+    for(let i=0;i<6;i++)                                              // 执行单元
+      blk(MAT.blockIO, at(WC,41+(i%2)*8, 5.15, cz-12+Math.floor(i/2)*12), [7,0.9,10], {tx:7});
+    blk(MAT.blockDisp, at(WC,58,5.15,cz+11),  [10,0.9,16], {tx:6});   // L1 数据缓存
+    blk(MAT.blockROP,  at(WC,58,5.15,cz-11),  [10,0.9,16], {tx:6});   // 寄存器堆
   }
   for(const cz of [-24,24]){
     railLine(at(WC,-50,0,cz), at(WC,20,0,cz), 9.4, 3, 2.8);
@@ -1458,7 +1546,7 @@ function buildScene(){
   railLine(at(WC,-11,0,-42), at(WC,-11,0,42), 9.4, 3, 2.8);        // 环形互连
   railLine(at(WC, 15,0,-42), at(WC, 15,0,42), 9.4, 3, 2.8);
   POS.mc  =at(WC,-58,7.2,26);
-  POS.l3  =at(WC,-11,6.6,24);
+  POS.l3  =at(WC,-24,6.6,36);      // 指 L3 切片;标签再往右让开数据路径(见第 5 站 dx)
   POS.l1  =at(WC,58,6.4,35);
   POS.reg =at(WC,58,6.4,13);
 
@@ -1498,7 +1586,7 @@ const STATIONS=[
  { act:0, title:BI('One DRAM package','一颗 DRAM 颗粒'),
    cam:{tgt:[-68,4.5,1], az:0.72, el:0.30, dist:66, fov:26, ap:0.16, focus:'point', fy:4.6, ex:1.60},
    state:{},
-   labels:[{p:'dram1',t:BI('DRAM package','DRAM 颗粒'),s:BI('a slab of silicon under the moulding','塑封底下是一片硅')},
+   labels:[{p:'dram1',t:BI('DRAM package','DRAM 颗粒'),s:BI('8 banks inside · 16 data pins','里面 8 个 bank · 16 根数据引脚')},
            {p:[-60.2,5.8,0], t:BI('The ones beside it','旁边这几颗'),s:BI('four together make up the 64 bits','4 颗一起凑出 64 位'),dy:56}],
    body:Q(BI('One DRAM in an FBGA package. A module carries 4 to 16 of them side by side; they are selected together and drive their outputs together — each one owns only 8 or 16 of the 64 bus bits.',
            '一颗 FBGA 封装的 DRAM。一条内存条上有 4 到 16 颗这样的颗粒并排,它们同时被选中、同时输出 —— 每颗只负责 64 位总线里的 8 位或 16 位。'),
@@ -1537,7 +1625,7 @@ const STATIONS=[
    cam:{tgt:[6,6.0,468], az:-1.36, el:0.68, dist:230, fov:28, ap:0.30, focus:'plane', fy:6.0, ex:1.55},
    state:{}, flow:'city',
    labels:[{p:'mc', t:BI('Memory controller','内存控制器'),s:BI('where the data enters the die','数据从这儿进 die'),dy:-44},
-           {p:'l3', t:BI('L3 · ring interconnect','L3 · 环形互连'),s:'…',live:'city',dy:-42},
+           {p:'l3', t:BI('L3 · ring interconnect','L3 · 环形互连'),s:'…',live:'city',dy:-18,dx:190},
            {p:'l1', t:BI('L1 data cache','L1 数据缓存'),s:BI('reachable in one tick','一拍就能访问'),dy:36},
            {p:'reg',t:BI('Register file','寄存器堆'),s:BI('the end — the instruction can compute','终点:指令能算了'),dy:-36}],
    body:Q(BI('Once inside the silicon the data does not arrive in one step. The memory controller takes it, then the ring interconnect, then L3, L2, L1, and only then a register. Every level means queueing again. The elevated copper rails are the real metal interconnect layers: transistors sit at the bottom of the silicon, a dozen-odd copper layers route above them.',
@@ -1985,6 +2073,10 @@ function wordOnWires(a,b,u,n,spacing,bitFn,col,inten){
   const p=V(a,b,u); const dx=b[0]-a[0], dz=b[2]-a[2], len=Math.hypot(dx,dz);
   const yaw=Math.atan2(dz,dx);
   wordRow(p, yaw+Math.PI/2, n, spacing, bitFn, col, inten, spacing*0.8);
+  // 拖尾:身后几道横跨整束线的淡光。单帧截图里只有一行格子,看不出往哪走
+  const g=Math.max(spacing*2.2,0.9);
+  for(let k=1;k<=4 && len>1e-3;k++){ const uu=u-k*g/len; if(uu<=0) break;
+    pad(V(a,b,uu), g*0.8, n*spacing, col, (inten||1)*0.16*Math.pow(0.55,k-1), yaw); }
 }
 // 一块(缓存行 / 矩阵 / 帧缓冲片)网格
 function gridObj(center,yaw,cols,rows,cell,colFn,inten){
@@ -2008,11 +2100,20 @@ function cardObj(p,yaw,col,inten,scale){
 // —— 组合原语(从形状原语拼出来的常用件) ——
 // 光球:包 / 粒子 / 光子。不能用圆角盒代替,会变花皮足球
 function orb(p,r,col,inten){ FLOW.list.push({p, s:[r,r,r], c:col, me:inten, ro:1.0, orb:1}); }
-// 数据块沿路径走(底下垫一层淡光,远看也有形)
+// 拖尾:数据身后留几块渐暗的淡光。单帧截图 / 暂停时也看得出它从哪来、往哪去
+const pathLen=(pts)=>{ let L=0; for(let i=0;i<pts.length-1;i++) L+=dist3(pts[i],pts[i+1]); return L; };
+function trail(P,u,gap,n,sx,sz,col,inten){
+  const L=pathLen(P); if(L<1e-3) return;
+  for(let k=1;k<=n;k++){ const uu=u-k*gap/L; if(uu<=0) break;
+    const p=pathAt(P,uu); glow([p[0],p[1]-0.3,p[2]],[sx,0.02,sz],col,inten*Math.pow(0.5,k-1)); }
+}
+// 数据块沿路径走(底下垫一层淡光,远看也有形;身后带拖尾)
 function tileAlong(P,u,cols,rows,col,seed,inten,cell){
   const p=pathAt(P,u), c=cell||1.45;
   gridObj(p,0,cols,rows,c,(i,j)=>({col,inten:(inten||1.4)*1.5*(h1(seed,i,j)>0.5?1:0.22)}),1);
-  glow([p[0],p[1]-0.3,p[2]],[cols*c+1.2,0.02,rows*c+1.2],col,0.25);
+  glow([p[0],p[1]-0.3,p[2]],[cols*c+1.2,0.02,rows*c+1.2],col,0.38);
+  const fp=Math.max(cols,rows)*c;
+  trail(P,u,fp*0.55,4,cols*c*0.8,rows*c*0.8,col,0.22);
 }
 // 一张卡沿路径走
 function tokenAlong(P,u,col){
@@ -2040,14 +2141,14 @@ function buildFlow(kind,T){
     // 字线:译码器拉高的那一根,横穿整个阵列
     if(st>=2&&st<5){
       const w=(st===2)?ease(u):1;
-      pad(at(WB,bx-11.5+11.5*w,y,bz), 23*w, 0.55, FC.cmd, 2.2);
+      pad(at(WB,bx-11.5+11.5*w,y,bz), 23*w, 1.30, FC.cmd, 2.2);
       blockGlow(at(WB,bx,gy,bz),23,30,FC.cmd,0.08+0.10*pulse(T,0.7));
     }
     // 整行电荷抬进行缓冲 —— tRCD 等的就是这几拍
     const fill = st<2 ? 0 : st===2 ? ease(u)*0.45
                : st<5 ? 0.45+0.55*Math.min(1,(st-3+u)/2) : 1;
     if(fill>0) wordRow(RB, 0, 32, 0.70,
-      (i)=>(h1(bz,i,7)>0.42 && i/32 < fill+0.04), FC.data, 1.4+0.7*fill, 0.50);
+      (i)=>(h1(bz,i,7)>0.42 && i/32 < fill+0.04), FC.data, 1.4+0.7*fill, 0.62);
     if(st>=5) blockGlow(at(WB,bx,gy,bz+17.6),23,3.4,FC.data,0.20);
     // 列地址 → 列选
     if(st>=5&&st<7){
@@ -2056,10 +2157,10 @@ function buildFlow(kind,T){
     }
     // 按列取出 8 个字节,沿铜轨走到中央 IO,再出颗粒
     if(st>=7&&st<10){
-      tileAlong([RB,CS],(st-7+u)/3,8,2,FC.data,tk,1.5,1.05);
+      tileAlong([RB,CS],(st-7+u)/3,8,2,FC.data,tk,1.5,1.30);
       blockGlow(at(WB,bx,gy,0),23,4.8,FC.data,0.40);
     }
-    if(st>=10) tileAlong([CS,OUT],(st-10+u)/2,8,2,FC.data,tk,1.5,1.05);
+    if(st>=10) tileAlong([CS,OUT],(st-10+u)/2,8,2,FC.data,tk,1.5,1.30);
     const A1=BI('① row address into the decoder','①行地址进译码器'),
           A2=BI('② word line high, the row meets the bit lines','②拉高字线,整行接到位线'),
           A3=BI('③ the whole row lifts into the row buffer','③整行电荷抬进行缓冲'),
@@ -2100,7 +2201,7 @@ function buildFlow(kind,T){
     ribbon([at(WC,58,y2,cz),L1],[0.85,0.55,0.25],0.05,1.6);
     ribbon([at(WC,58,y2,cz),RG],[0.85,0.55,0.25],0.05,1.6);
     blockGlow(at(WC,-58,4.95,0),15,86,FC.cmd,0.10);
-    const line=(P,uu)=>tileAlong(P,uu,8,8,FC.data,7,1.35,1.15);
+    const line=(P,uu)=>tileAlong(P,uu,8,8,FC.data,7,1.35,1.45);   // 1.15 在这个机位下只有指甲盖大
     let where='';
     if(st<4){       line([MC,L3a],(st+u)/4);
                     where=BI('on the ring interconnect, heading for L3','在环形互连上,去 L3'); }
@@ -2204,32 +2305,62 @@ function buildLabels(){
     const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
     ln.setAttribute('stroke','rgba(120,180,245,.75)'); ln.setAttribute('stroke-width','1.2');
     svg.appendChild(ln);
-    labelEls.push({el,ln,p,dy:lb.dy||-34,live:lb.live||null,base:lb.t+(lb.s?'<small>'+lb.s+'</small>':''),last:null});
+    labelEls.push({el,ln,p,dy:lb.dy||-34,dx:lb.dx||0,live:lb.live||null,base:lb.t+(lb.s?'<small>'+lb.s+'</small>':''),last:null});
   }
 }
+// 标签自动避让。以前靠每站手调 dy,换个视角 / 窗口宽度 / 实时文字一变长就又叠上了
+// (2026-09-29 demo 第 3 站「行缓冲」被「列选」压住半行,第 1 站 CPU 标签被渲染状态面板截断)。
+//   1 先按原位放;撞了先试上一帧的错开量 —— 实时文字每帧宽度不同,不这样会来回跳
+//   2 还撞就由近到远试:先沿自己 dy 的方向,再反方向,再左右、斜向;取第一个不撞的
+//   3 要躲的:已经放好的标签 + 固定面板(渲染状态 / 章节条 / 站点圆点 / 标题)+ 屏幕边
+//   4 说明卡照旧不躲:压在它底下就不显示 —— 它太大,躲开会把引线拉得老长
+const LB_PANELS=['hud','acts','stations'];
+const rectOf=el=>(el&&el.getClientRects().length)?el.getBoundingClientRect():null;
+const hitRect=(a,b,m)=>a.l<b.right+m && a.r>b.left-m && a.t<b.bottom+m && a.b>b.top-m;
 function updateLabels(){
   if(!labelEls.length) return;
   const vp=camMats(0).vp, cw=cv.clientWidth, ch=cv.clientHeight;
-  // 标注被说明面板遮住时不显示：面板在上层、底是半透明加模糊，压在下面的标注只剩
-  // 一团看不清的影子（390px 下面板占了大半屏，几乎每站都这样）。按标注自己的矩形判。
-  const capEl=document.getElementById('caption');
   // getClientRects 而不是 offsetParent：面板是 position:fixed，它的 offsetParent 永远是 null
-  const cap=capEl&&capEl.getClientRects().length?capEl.getBoundingClientRect():null;
+  const cap=rectOf(document.getElementById('caption'));
+  const obs=LB_PANELS.map(id=>rectOf(document.getElementById(id))).filter(Boolean)
+    .concat([...document.querySelectorAll('.title')].map(rectOf).filter(Boolean));
+  const placed=[], M=6;
   for(const L of labelEls){
     const [x,y,z]=L.p;
     const w=vp[3]*x+vp[7]*y+vp[11]*z+vp[15];
     if(w<=0.01){ L.el.classList.remove('show'); L.ln.setAttribute('opacity','0'); continue; }
     const sx=((vp[0]*x+vp[4]*y+vp[8]*z+vp[12])/w*0.5+0.5)*cw;
     const sy=(1-((vp[1]*x+vp[5]*y+vp[9]*z+vp[13])/w*0.5+0.5))*ch;
-    const lw=L.el.offsetWidth, lh=L.el.offsetHeight, ly=sy+L.dy;
-    const under=cap && sx+lw/2>cap.left && sx-lw/2<cap.right && ly>cap.top && ly-lh<cap.bottom;
-    const on=labelsOn && !under && sx>-50 && sx<cw+50 && sy>-50 && sy<ch+50;
+    // 实时文字先换上,量到的宽度才是这一帧真实的宽度
     if(L.live && FLOW.live && FLOW.live[L.live]!=null && FLOW.live[L.live]!==L.last){
       L.last=FLOW.live[L.live]; L.el.innerHTML=L.base.replace(/<small>.*<\/small>/,'')+'<small>'+L.last+'</small>'; }
-    L.el.style.left=sx+'px'; L.el.style.top=(sy+L.dy)+'px';
+    // bx / by = 标签底边中点。dx 让标签横向让开 —— 数据路径在屏幕上是竖线时,只调 dy 躲不开
+    const lw=L.el.offsetWidth, lh=L.el.offsetHeight, bx=sx+L.dx, by=sy+L.dy;
+    const R=(ox,oy)=>({l:bx+ox-lw/2, r:bx+ox+lw/2, t:by+oy-lh, b:by+oy});
+    const blocked=r=>r.l<4 || r.r>cw-4 || r.t<4 || r.b>ch-4 ||
+      obs.some(o=>hitRect(r,o,M)) || placed.some(o=>hitRect(r,{left:o.l,right:o.r,top:o.t,bottom:o.b},M));
+    let off=[0,0];
+    if(blocked(R(0,0))){
+      if(L.off && !blocked(R(L.off[0],L.off[1]))) off=L.off;
+      else {
+        const dir=L.dy<0?-1:1; let got=null;
+        for(let s=1;s<=16 && !got;s++){ const d=s*10;
+          for(const c of [[0,dir*d],[0,-dir*d],[d,0],[-d,0],[d,dir*d],[-d,dir*d]])
+            if(!blocked(R(c[0],c[1]))){ got=c; break; } }
+        off=got||[0,0];
+      }
+    }
+    L.off=(off[0]||off[1])?off:null;
+    const r=R(off[0],off[1]);
+    // 标注被说明面板遮住时不显示：面板在上层、底是半透明加模糊，压在下面的标注只剩
+    // 一团看不清的影子（390px 下面板占了大半屏，几乎每站都这样）。按标注自己的矩形判。
+    const under=cap && hitRect(r,cap,0);
+    const on=labelsOn && !under && sx>-50 && sx<cw+50 && sy>-50 && sy<ch+50;
+    if(on) placed.push(r);
+    L.el.style.left=(bx+off[0])+'px'; L.el.style.top=(by+off[1])+'px';
     L.el.classList.toggle('show',on);
     L.ln.setAttribute('x1',sx); L.ln.setAttribute('y1',sy);
-    L.ln.setAttribute('x2',sx); L.ln.setAttribute('y2',sy+L.dy+4);
+    L.ln.setAttribute('x2',bx+off[0]); L.ln.setAttribute('y2',by+off[1]+4);
     L.ln.setAttribute('opacity',on?'1':'0');
   }
 }
@@ -2242,7 +2373,7 @@ function renderUI(){
   document.querySelectorAll('#acts button').forEach((b,k)=>b.classList.toggle('on',k===st.act));
   document.querySelectorAll('#stations button').forEach((b,k)=>{
     b.classList.toggle('on',k===cur); b.classList.toggle('done',k<cur); });
-  $('cK').innerHTML=ACTS[st.act]+' · '+String(cur+1).padStart(2,'0')+' / '+STATIONS.length;
+  $('cK').innerHTML=ACTS[st.act]+' <span class="n">· '+String(cur+1).padStart(2,'0')+' / '+String(STATIONS.length).padStart(2,'0')+'</span>';
   $('cT').innerHTML=st.title;
   $('cB').innerHTML=st.body;
   $('bPrev').disabled=(cur===0);
@@ -2280,13 +2411,22 @@ function buildUI(){
     hudBtn.setAttribute('aria-expanded', String(!on)); };
   const toggleHud=()=>setHud(!hud.classList.contains('mini'));
   hudBtn.onclick=toggleHud;
+  // 默认收起:采样数 / 帧时间 / 三角形数是给做页面的人看的,读者用不上,还占着右上一块。
+  // 收起后仍留标题和累积进度条(看得出"还在变清楚");要调光圈 / 移轴按 R 展开
+  setHud(true);
   capBtn.onclick=toggleMini;
   // 中英切换:整页靠 html[data-lang] 一个属性驱动,不用重建 DOM
   const langBtn=$('langBtn'), docEl=document.documentElement;
+  // 说明卡最高只长到标题下沿。标题在窄一点的屏幕上会折成三四行,写死的 max-height
+  // 在 1024×700 下 5 站里 4 站压住标题(改前就这样);标题高度随语言和字体加载变,都要重量
+  const fitCap=()=>{ const t=document.querySelector('.title'); if(!t) return;
+    docEl.style.setProperty('--title-b', Math.round(t.getBoundingClientRect().bottom)+'px'); };
+  fitCap(); window.addEventListener('resize',fitCap);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitCap);
   langBtn.onclick=()=>{ const zh = docEl.getAttribute('data-lang')==='zh';
     docEl.setAttribute('data-lang', zh?'en':'zh');
     docEl.setAttribute('lang', zh?'en':'zh');
-    langBtn.textContent = zh ? '中文' : 'English'; };
+    langBtn.textContent = zh ? '中文' : 'English'; fitCap(); };
   $('gBtn').onclick=()=>$('gPanel').classList.toggle('open');
   $('gClose').onclick=()=>$('gPanel').classList.remove('open');
   window.addEventListener('keydown',e=>{

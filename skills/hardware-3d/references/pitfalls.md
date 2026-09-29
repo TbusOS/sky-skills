@@ -61,3 +61,8 @@
 | headless 截图全黑 | playwright 要带 `--enable-gpu --use-angle=metal`(macOS) |
 | 批量出图时,头两站正常、之后全是纯黑 | 渲染分辨率太高(2400×1500 以上)时连续多站跑累积采样会渲不出东西,而 `isContextLost()` 仍返回 false,不会报错。**批量出图固定用 1280×800 @dpr1.5(1920×1200)**,并在每张后读一次中心像素自检 |
 | 光看单帧判断不了动画在不在动 | 同一站截相隔 0.7s 的两帧对比(`shoot-motion.mjs` 那种做法) |
+| **Linux 上检查全过,截图却是一块空画布** | `_launch.mjs` 以前写死 `--use-angle=metal`。Linux 上 WebGL 开机就丢上下文,之后每次绘制都什么也不做,采样数照样涨到 200;`check_realism` 量到的只是 UI 面板,三个指标全在区间内(2026-09-29 实测 5 站全「通过」)。现在按系统选后端(macOS metal / Linux swiftshader,`HW3D_ANGLE` 覆盖),`open()` 后立刻查 `isContextLost()`;`check_realism` 另加「画布是空的」:把面板藏起来量亮度标准差,真实画面 0.09~0.23,空画布 0.000 |
+| playwright 升级后 launch 报 `Executable doesn't exist` | 新版要的浏览器修订号缓存里没有。`_launch.mjs` 会退回缓存里最新的一版 chromium;也可 `HW3D_CHROMIUM=<路径>` 指定 |
+| Linux 上 `check_perf` 数字大得离谱 | 软件渲染量的是 CPU,不是显卡。它会照实打印、不判失败;帧时间上限只在 macOS 或有 GPU 的 Linux(`HW3D_ANGLE=gl` / `vulkan`)上判 |
+| 说明卡收窄后「下一站」按钮被滚出视野 | 整卡 `overflow-y:auto`。改成上下分段只滚正文(`.caption .body`),顶行和翻页按钮始终可见 |
+| 说明卡压住左上标题(1024×700 下 5 站里 4 站,改前就有) | 写死的 `max-height` 没算标题折行。JS 量标题下沿写进 `--title-b` |

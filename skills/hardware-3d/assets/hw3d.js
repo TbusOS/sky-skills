@@ -655,7 +655,27 @@ void silk(inout vec3 alb, inout float ro, vec2 lxz, vec4 atl){
   alb=mix(alb, vec3(0.78,0.78,0.76), a*0.92);
   ro =mix(ro, 0.70, a*0.6);
 }
+// —— die 显微照片用的两个小工具 ——
+// 周期线:x 是以周期为单位的坐标,w 是线宽占周期的比例,fw 是 x 在一个像素上的变化量
+float lineAA(float x, float w, float fw){
+  float d=0.5-abs(fract(x)-0.5); fw=max(fw,1e-4);
+  return 1.0-smoothstep(w*0.5-fw, w*0.5+fw, d);
+}
+// 介质膜厚不均 → 薄膜干涉的淡彩。显微镜下看 die,不同区域偏金 / 偏粉 / 偏绿就是这个。
+// 只改反照率、不发光;混合量压得很低,过 check_realism 的饱和度闸
+vec3 filmTint(vec2 p, float off){
+  float d=off+0.55*fbm(vec3(p*0.035,off*3.1))+0.20*fbm(vec3(p*0.21,7.0));
+  vec3 c=0.5+0.5*cos(6.2831853*(d+vec3(0.0,0.33,0.67)));
+  return mix(vec3(1.0), c*1.6, 0.22);
+}
 void main(){
+  // 导数放在任何分支之前取:分支里的 fwidth 在 GLSL ES 里是未定义行为
+  vec2 dW=fwidth(vW.xz), dL=fwidth(vLocal.xz);
+  float fw=max(dW.x,dW.y);
+  // 方块自身的半边长(世界单位)。blk 原型是 1×1×1、vLocal ∈ [-1,1],
+  // 世界坐标 = 中心 + vLocal×半边长,两者导数之比正好就是半边长(方块不带 yaw)
+  vec2 hs=dW/max(dL,vec2(1e-6));
+  vec2 pe=(vLocal.xz+1.0)*hs;               // 从方块一角量起的世界坐标
   // 隐藏已抬走的散热组件;剖切封装组
   if(vExt.x>0.5 && vExt.x<1.5 && uLift>150.0) discard;
   if(vExt.x>1.5 && vExt.x<2.5 && vExt.y>0.5 && vExt.y<1.5 && vW.x>uCutX) discard;
@@ -715,14 +735,65 @@ void main(){
     // 阻焊哑光颗粒
     ro=clamp(ro+(fbm(vW*88.0)-0.5)*0.18, 0.22, 1.0);
   }
+  else if(top && txw>5.5){
+    // ============ die 上的功能块:照显微照片的样子画 ============
+    //   6 = 存储阵列(DRAM mat / SRAM)  7 = 标准单元逻辑
+    //   8 = 沿 z 重复的外围电路(PHY 通道 / 行译码器)  9 = 同 8,沿 x 重复(读出放大器 / 列译码)
+    vec3 base=alb;
+    if(txw<6.5){
+      // 阵列切成一块块 mat,mat 之间是读出放大器 / 字线驱动的窄带;从方块的边起排,整数块
+      vec2 S=2.0*hs, nm=max(vec2(1.0),floor(S/vec2(3.9,3.3)+0.5));
+      vec2 m=pe/S*nm; vec2 mf=abs(fract(m)-0.5);
+      float band=smoothstep(0.405,0.43,max(mf.x,mf.y));
+      float cells=max(lineAA(vW.x*7.0,0.30,fw*7.0), lineAA(vW.z*5.0,0.30,fw*5.0));
+      float bl=lineAA(vW.x*14.0,0.45,fw*14.0);                  // 位线:竖向细金属
+      float sa=lineAA(vW.x*5.0,0.50,fw*5.0);                    // 窄带里一根位线一个放大器
+      float wl=lineAA(vW.z*1.25,0.16,fw*1.25);                 // 字线横条:中等距离也看得出纹理
+      float mv=h31(vec3(floor(m),8.0));                         // 每块 mat 亮度略有差异
+      vec3 tint=filmTint(vW.xz,1.55);
+      vec3 arr=base*tint*(0.84+0.10*mv+0.26*bl-0.20*cells-0.22*wl);
+      vec3 per=base*tint*(0.60+0.30*sa);
+      alb=mix(arr,per,band);
+      me=mix(me,0.30,bl*(1.0-band)*0.5); ro=mix(0.28,ro,band);
+    } else if(txw<7.5){
+      // 标准单元一行一行排(行高 0.45),每行里单元宽度随机;布局密度大尺度起伏 → 斑驳
+      float ry=pe.y/0.45, row=floor(ry);
+      float cid=floor(pe.x*2.2+h31(vec3(row,1.0,0.0))*7.0);
+      float v=h31(vec3(cid,row,4.0));
+      float dens=fbm(vec3(pe*0.18,3.0));
+      float rails=lineAA(ry,0.12,fw/0.45);                     // 每行上下的电源轨
+      float straps=lineAA(pe.x/4.0,0.06,fw/4.0);               // 竖向电源条
+      vec3 tint=filmTint(vW.xz,0.85);
+      vec3 lg=base*tint*(0.62+0.50*v*dens+0.30*dens);
+      lg=mix(lg,lg*1.30,rails*0.5);
+      alb=mix(lg,vec3(0.26,0.25,0.24)*tint,straps*0.55);
+      me=mix(me,0.5,straps); ro=mix(ro,0.36,straps);
+    } else {
+      bool sw=txw>8.5;
+      vec2 p=sw?pe.yx:pe; float ux=sw?(vLocal.z*0.5+0.5):(vLocal.x*0.5+0.5);
+      float fing=lineAA(p.y*4.0,0.40,fw*4.0);                  // 驱动管的指条
+      float lane=lineAA(p.y/5.3,0.05,fw/5.3);                  // 通道分隔
+      vec2 sq=abs(fract(p*0.9)-0.5);
+      float esd=1.0-smoothstep(0.30,0.36,max(sq.x,sq.y));      // ESD 大方块
+      vec3 tint=filmTint(vW.xz,1.35);
+      vec3 c1=base*tint*(0.72+0.42*fing), c2=base*tint*(0.62+0.46*esd);
+      alb=mix(c1,c2,step(0.58,ux))*(1.0-0.35*lane);
+      me=mix(me,0.35,fing*0.4);
+    }
+    ro=clamp(ro+(fbm(vW*14.0)-0.5)*0.08,0.18,1.0);
+  }
   else if(top && txw>4.5){
-    // ============ 城的硅基底:细密单元格 ============
-    vec2 g=vW.xz*0.35; vec2 f=abs(fract(g)-0.5);
-    float ln=1.0-smoothstep(0.44,0.49,max(f.x,f.y));
-    alb*=(0.82+0.40*ln);
-    vec2 g2=vW.xz*2.4; float fine=step(0.5,h31(vec3(floor(g2),5.0)));
-    alb*=(0.92+0.14*fine);
-    ro=clamp(ro+(fbm(vW*12.0)-0.5)*0.12,0.2,1.0);
+    // ============ die 的空地:顶层电源网格 + 金属填充 ============
+    // 工艺要求每层金属密度均匀,空地上铺满小方块(dummy fill);粗的是顶层电源网格
+    vec2 p=vW.xz;
+    float pg=max(lineAA(p.x/6.0,0.10,fw/6.0), lineAA(p.y/6.0,0.10,fw/6.0));
+    vec2 q=p*1.6; vec2 qf=abs(fract(q)-0.5);
+    float fill=(1.0-smoothstep(0.26,0.32,max(qf.x,qf.y)))*step(0.25,h31(vec3(floor(q),2.0)));
+    vec3 tint=filmTint(p,1.15);
+    alb=alb*tint*(0.80+0.34*fill);
+    alb=mix(alb,vec3(0.30,0.29,0.28)*tint,pg*0.60);
+    me=mix(me,0.55,pg); ro=mix(ro,0.34,pg);
+    ro=clamp(ro+(fbm(vW*12.0)-0.5)*0.10,0.2,1.0);
   }
   else if(top && txw>2.5){
     // ============ 硅 die:SM 阵列版图 ============

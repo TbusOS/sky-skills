@@ -123,6 +123,10 @@ function wordOnWires(a,b,u,n,spacing,bitFn,col,inten){
   const p=V(a,b,u); const dx=b[0]-a[0], dz=b[2]-a[2], len=Math.hypot(dx,dz);
   const yaw=Math.atan2(dz,dx);
   wordRow(p, yaw+Math.PI/2, n, spacing, bitFn, col, inten, spacing*0.8);
+  // 拖尾:身后几道横跨整束线的淡光。单帧截图里只有一行格子,看不出往哪走
+  const g=Math.max(spacing*2.2,0.9);
+  for(let k=1;k<=4 && len>1e-3;k++){ const uu=u-k*g/len; if(uu<=0) break;
+    pad(V(a,b,uu), g*0.8, n*spacing, col, (inten||1)*0.16*Math.pow(0.55,k-1), yaw); }
 }
 // 一块(缓存行 / 矩阵 / 帧缓冲片)网格
 function gridObj(center,yaw,cols,rows,cell,colFn,inten){
@@ -149,11 +153,20 @@ function cardObj(p,yaw,col,inten,scale){
 
 // 光球:包 / 粒子 / 光子。不能用圆角盒代替 —— 26 个面各自算边缘发光会变花皮足球
 function orb(p,r,col,inten){ FLOW.list.push({p, s:[r,r,r], c:col, me:inten, ro:1.0, orb:1}); }
-// 数据块沿路径走(底下垫一层淡光,远看也有形)
+// 拖尾:数据身后留几块渐暗的淡光。单帧截图 / 暂停时也看得出它从哪来、往哪去
+const pathLen=(pts)=>{ let L=0; for(let i=0;i<pts.length-1;i++) L+=dist3(pts[i],pts[i+1]); return L; };
+function trail(P,u,gap,n,sx,sz,col,inten){
+  const L=pathLen(P); if(L<1e-3) return;
+  for(let k=1;k<=n;k++){ const uu=u-k*gap/L; if(uu<=0) break;
+    const p=pathAt(P,uu); glow([p[0],p[1]-0.3,p[2]],[sx,0.02,sz],col,inten*Math.pow(0.5,k-1)); }
+}
+// 数据块沿路径走(底下垫一层淡光,远看也有形;身后带拖尾)
 function tileAlong(P,u,cols,rows,col,seed,inten,cell){
   const p=pathAt(P,u), c=cell||1.45;
   gridObj(p,0,cols,rows,c,(i,j)=>({col,inten:(inten||1.4)*1.5*(h1(seed,i,j)>0.5?1:0.22)}),1);
-  glow([p[0],p[1]-0.3,p[2]],[cols*c+1.2,0.02,rows*c+1.2],col,0.25);
+  glow([p[0],p[1]-0.3,p[2]],[cols*c+1.2,0.02,rows*c+1.2],col,0.38);
+  const fp=Math.max(cols,rows)*c;
+  trail(P,u,fp*0.55,4,cols*c*0.8,rows*c*0.8,col,0.22);
 }
 // 一张卡沿路径走
 function tokenAlong(P,u,col){

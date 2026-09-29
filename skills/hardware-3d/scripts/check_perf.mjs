@@ -4,7 +4,7 @@
 // 相机静止时它决定收敛快慢(40ms → 200 采样约 8 秒),相机拖动时它就是帧时间。
 // 40ms = 25fps,拖动时略有顿挫但可用;实测 62 号 15 站里 13 站在 30ms 以内,
 // 最重的是层叠剖面(重叠面多、overdraw 大)。低于 30 才算宽裕。
-import {open} from './_launch.mjs';
+import {open, SOFTWARE_GL, ANGLE} from './_launch.mjs';
 const file = process.argv[2];
 const LIMIT = Number(process.argv[3] || 40);
 if(!file){ console.error('用法: node check_perf.mjs <页面.html> [毫秒上限]'); process.exit(2); }
@@ -27,4 +27,11 @@ for(let i=0;i<n;i++){
 await browser.close();
 console.log(rows.join('\n'));
 console.log(`最慢:站 ${worstAt} ${worst.toFixed(1)} ms(上限 ${LIMIT} ms)`);
+// 软件渲染(Linux 默认)量出来的是 CPU 模拟 GPU 的速度,比真显卡慢一个数量级,
+// 拿它对 40ms 的上限没有意义 —— 照实打印,不判失败,并说清楚要去哪儿测
+if(SOFTWARE_GL){
+  console.log(`软件渲染(ANGLE ${ANGLE})下不判帧时间上限:这个数反映的是 CPU,不是显卡。` +
+    `\n要判就在 macOS 上跑,或有 GPU 的 Linux 上加 HW3D_ANGLE=gl / vulkan。`);
+  process.exit(0);
+}
 process.exit(worst>LIMIT?1:0);

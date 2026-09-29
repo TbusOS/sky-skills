@@ -77,32 +77,62 @@ function buildLabels(){
     const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
     ln.setAttribute('stroke','rgba(120,180,245,.75)'); ln.setAttribute('stroke-width','1.2');
     svg.appendChild(ln);
-    labelEls.push({el,ln,p,dy:lb.dy||-34,live:lb.live||null,base:lb.t+(lb.s?'<small>'+lb.s+'</small>':''),last:null});
+    labelEls.push({el,ln,p,dy:lb.dy||-34,dx:lb.dx||0,live:lb.live||null,base:lb.t+(lb.s?'<small>'+lb.s+'</small>':''),last:null});
   }
 }
+// 标签自动避让。以前靠每站手调 dy,换个视角 / 窗口宽度 / 实时文字一变长就又叠上了
+// (2026-09-29 demo 第 3 站「行缓冲」被「列选」压住半行,第 1 站 CPU 标签被渲染状态面板截断)。
+//   1 先按原位放;撞了先试上一帧的错开量 —— 实时文字每帧宽度不同,不这样会来回跳
+//   2 还撞就由近到远试:先沿自己 dy 的方向,再反方向,再左右、斜向;取第一个不撞的
+//   3 要躲的:已经放好的标签 + 固定面板(渲染状态 / 章节条 / 站点圆点 / 标题)+ 屏幕边
+//   4 说明卡照旧不躲:压在它底下就不显示 —— 它太大,躲开会把引线拉得老长
+const LB_PANELS=['hud','acts','stations'];
+const rectOf=el=>(el&&el.getClientRects().length)?el.getBoundingClientRect():null;
+const hitRect=(a,b,m)=>a.l<b.right+m && a.r>b.left-m && a.t<b.bottom+m && a.b>b.top-m;
 function updateLabels(){
   if(!labelEls.length) return;
   const vp=camMats(0).vp, cw=cv.clientWidth, ch=cv.clientHeight;
-  // 标注被说明面板遮住时不显示：面板在上层、底是半透明加模糊，压在下面的标注只剩
-  // 一团看不清的影子（390px 下面板占了大半屏，几乎每站都这样）。按标注自己的矩形判。
-  const capEl=document.getElementById('caption');
   // getClientRects 而不是 offsetParent：面板是 position:fixed，它的 offsetParent 永远是 null
-  const cap=capEl&&capEl.getClientRects().length?capEl.getBoundingClientRect():null;
+  const cap=rectOf(document.getElementById('caption'));
+  const obs=LB_PANELS.map(id=>rectOf(document.getElementById(id))).filter(Boolean)
+    .concat([...document.querySelectorAll('.title')].map(rectOf).filter(Boolean));
+  const placed=[], M=6;
   for(const L of labelEls){
     const [x,y,z]=L.p;
     const w=vp[3]*x+vp[7]*y+vp[11]*z+vp[15];
     if(w<=0.01){ L.el.classList.remove('show'); L.ln.setAttribute('opacity','0'); continue; }
     const sx=((vp[0]*x+vp[4]*y+vp[8]*z+vp[12])/w*0.5+0.5)*cw;
     const sy=(1-((vp[1]*x+vp[5]*y+vp[9]*z+vp[13])/w*0.5+0.5))*ch;
-    const lw=L.el.offsetWidth, lh=L.el.offsetHeight, ly=sy+L.dy;
-    const under=cap && sx+lw/2>cap.left && sx-lw/2<cap.right && ly>cap.top && ly-lh<cap.bottom;
-    const on=labelsOn && !under && sx>-50 && sx<cw+50 && sy>-50 && sy<ch+50;
+    // 实时文字先换上,量到的宽度才是这一帧真实的宽度
     if(L.live && FLOW.live && FLOW.live[L.live]!=null && FLOW.live[L.live]!==L.last){
       L.last=FLOW.live[L.live]; L.el.innerHTML=L.base.replace(/<small>.*<\/small>/,'')+'<small>'+L.last+'</small>'; }
-    L.el.style.left=sx+'px'; L.el.style.top=(sy+L.dy)+'px';
+    // bx / by = 标签底边中点。dx 让标签横向让开 —— 数据路径在屏幕上是竖线时,只调 dy 躲不开
+    const lw=L.el.offsetWidth, lh=L.el.offsetHeight, bx=sx+L.dx, by=sy+L.dy;
+    const R=(ox,oy)=>({l:bx+ox-lw/2, r:bx+ox+lw/2, t:by+oy-lh, b:by+oy});
+    const blocked=r=>r.l<4 || r.r>cw-4 || r.t<4 || r.b>ch-4 ||
+      obs.some(o=>hitRect(r,o,M)) || placed.some(o=>hitRect(r,{left:o.l,right:o.r,top:o.t,bottom:o.b},M));
+    let off=[0,0];
+    if(blocked(R(0,0))){
+      if(L.off && !blocked(R(L.off[0],L.off[1]))) off=L.off;
+      else {
+        const dir=L.dy<0?-1:1; let got=null;
+        for(let s=1;s<=16 && !got;s++){ const d=s*10;
+          for(const c of [[0,dir*d],[0,-dir*d],[d,0],[-d,0],[d,dir*d],[-d,dir*d]])
+            if(!blocked(R(c[0],c[1]))){ got=c; break; } }
+        off=got||[0,0];
+      }
+    }
+    L.off=(off[0]||off[1])?off:null;
+    const r=R(off[0],off[1]);
+    // 标注被说明面板遮住时不显示：面板在上层、底是半透明加模糊，压在下面的标注只剩
+    // 一团看不清的影子（390px 下面板占了大半屏，几乎每站都这样）。按标注自己的矩形判。
+    const under=cap && hitRect(r,cap,0);
+    const on=labelsOn && !under && sx>-50 && sx<cw+50 && sy>-50 && sy<ch+50;
+    if(on) placed.push(r);
+    L.el.style.left=(bx+off[0])+'px'; L.el.style.top=(by+off[1])+'px';
     L.el.classList.toggle('show',on);
     L.ln.setAttribute('x1',sx); L.ln.setAttribute('y1',sy);
-    L.ln.setAttribute('x2',sx); L.ln.setAttribute('y2',sy+L.dy+4);
+    L.ln.setAttribute('x2',bx+off[0]); L.ln.setAttribute('y2',by+off[1]+4);
     L.ln.setAttribute('opacity',on?'1':'0');
   }
 }
@@ -115,7 +145,7 @@ function renderUI(){
   document.querySelectorAll('#acts button').forEach((b,k)=>b.classList.toggle('on',k===st.act));
   document.querySelectorAll('#stations button').forEach((b,k)=>{
     b.classList.toggle('on',k===cur); b.classList.toggle('done',k<cur); });
-  $('cK').innerHTML=ACTS[st.act]+' · '+String(cur+1).padStart(2,'0')+' / '+STATIONS.length;
+  $('cK').innerHTML=ACTS[st.act]+' <span class="n">· '+String(cur+1).padStart(2,'0')+' / '+String(STATIONS.length).padStart(2,'0')+'</span>';
   $('cT').innerHTML=st.title;
   $('cB').innerHTML=st.body;
   $('bPrev').disabled=(cur===0);
@@ -153,13 +183,22 @@ function buildUI(){
     hudBtn.setAttribute('aria-expanded', String(!on)); };
   const toggleHud=()=>setHud(!hud.classList.contains('mini'));
   hudBtn.onclick=toggleHud;
+  // 默认收起:采样数 / 帧时间 / 三角形数是给做页面的人看的,读者用不上,还占着右上一块。
+  // 收起后仍留标题和累积进度条(看得出"还在变清楚");要调光圈 / 移轴按 R 展开
+  setHud(true);
   capBtn.onclick=toggleMini;
   // 中英切换:整页靠 html[data-lang] 一个属性驱动,不用重建 DOM
   const langBtn=$('langBtn'), docEl=document.documentElement;
+  // 说明卡最高只长到标题下沿。标题在窄一点的屏幕上会折成三四行,写死的 max-height
+  // 在 1024×700 下 5 站里 4 站压住标题(改前就这样);标题高度随语言和字体加载变,都要重量
+  const fitCap=()=>{ const t=document.querySelector('.title'); if(!t) return;
+    docEl.style.setProperty('--title-b', Math.round(t.getBoundingClientRect().bottom)+'px'); };
+  fitCap(); window.addEventListener('resize',fitCap);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitCap);
   langBtn.onclick=()=>{ const zh = docEl.getAttribute('data-lang')==='zh';
     docEl.setAttribute('data-lang', zh?'en':'zh');
     docEl.setAttribute('lang', zh?'en':'zh');
-    langBtn.textContent = zh ? '中文' : 'English'; };
+    langBtn.textContent = zh ? '中文' : 'English'; fitCap(); };
   $('gBtn').onclick=()=>$('gPanel').classList.toggle('open');
   $('gClose').onclick=()=>$('gPanel').classList.remove('open');
   window.addEventListener('keydown',e=>{

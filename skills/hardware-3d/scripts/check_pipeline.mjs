@@ -1,5 +1,5 @@
 // 管线齐全 / 无 GL 错误 / 每站都能收敛
-import {open, settle} from './_launch.mjs';
+import {open, settle, assertAlive} from './_launch.mjs';
 const file = process.argv[2];
 if(!file){ console.error('用法: node check_pipeline.mjs <页面.html>'); process.exit(2); }
 const NEED = ['shadow','gbuffer','ssao','ibl-lighting','accum','bloom','post'];
@@ -13,6 +13,7 @@ const n = caps.stations || 1;
 for(let i=0;i<n;i++){
   await page.evaluate(k=>window.__hw3d.go(k,true), i);
   const ok = await settle(page);
+  await assertAlive(page, browser);      // 中途丢上下文也要当场停,不然后面几站全是空转
   const spp = await page.evaluate(()=>window.__hw3d.spp());
   if(!ok){ console.log(`站 ${i+1} 没收敛(spp=${spp})`); fail++; }
 }
