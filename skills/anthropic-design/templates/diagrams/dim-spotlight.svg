@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" role="img" aria-label="A search query's path through a service, drawn once as a shared base and then dimmed everywhere except the part this page is about. The base runs left to right: the raw text from the search box, a normaliser that trims it, lower-cases it and folds accents, then four matchers fanned out in a column, exact title, prefix for autocomplete, full text, and did-you-mean, each feeding what the user sees on the right: the top hit, the autocomplete dropdown, the ranked result list and public API, and a did-you-mean banner. Inside the full-text matcher sit three small steps, tokenise, stem and rank. On this page a translucent layer the same colour as the background covers the whole base except a hole around those three steps, and an ink dashed frame outlines the hole, so nothing is recoloured and no new colour appears. A strip at the bottom names the three pages that share this base and marks this one as page two" font-family="Poppins, 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif">
+  <!-- HOW THIS TEMPLATE IS SHARED ACROSS PAGES
+       Everything inside <g data-basemap="query-flow"> must be byte-identical on every page that uses it.
+       Only the layer after that group (mask hole, dashed frame, page strip) may differ from page to page.
+       A check pulls the group out of each page by name and compares the bytes; see diagram-craft §15.60. -->
+  <defs>
+    <pattern id="dspDots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#141413" opacity="0.05"/></pattern>
+    <marker id="dspArr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 Z" fill="#a8a496"/></marker>
+    <filter id="dspSh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.06"/></filter>
+  </defs>
+  <rect width="1120" height="560" rx="16" fill="#faf9f5" stroke="#eceadf"/>
+  <rect width="1120" height="560" rx="16" fill="url(#dspDots)"/>
+  <g data-basemap="query-flow">
+    <text x="32" y="30" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6b6a5f">HOW A SEARCH QUERY IS SERVED &#183; ONE BASE, SHARED BY THREE PAGES</text>
+    <rect x="32" y="204" width="176" height="96" rx="12" fill="#f0e4d8" stroke="#c9913f" stroke-width="1.2"/>
+    <rect x="32" y="218" width="4" height="68" rx="2" fill="#c9913f"/>
+    <text x="48" y="228" font-size="13" font-weight="600" fill="#8a5a2a">Search box</text>
+    <text x="48" y="246" font-size="12" fill="#6b6a5f">what the user typed</text>
+    <rect x="48" y="258" width="140" height="26" rx="5" fill="#ffffff" stroke="#e3d3bd"/>
+    <text x="58" y="275" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">" Caf&#233; Menus "</text>
+    <path d="M208,252 H234" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+    <rect x="238" y="200" width="184" height="104" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <text x="254" y="224" font-size="13" font-weight="600" fill="#141413">Normalise</text>
+    <text x="254" y="242" font-size="12" fill="#6b6a5f">trim, lower-case,</text>
+    <text x="254" y="259" font-size="12" fill="#6b6a5f">fold accents</text>
+    <rect x="254" y="268" width="152" height="24" rx="5" fill="#f3f1ea"/>
+    <text x="264" y="284" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#141413">cafe menus</text>
+    <g fill="none" stroke="#a8a496" stroke-width="1.4">
+      <path d="M422,252 H440"/>
+      <path d="M440,96 V384"/>
+      <path d="M440,96 Q440,88 448,88 H458" marker-end="url(#dspArr)"/>
+      <path d="M440,384 Q440,392 448,392 H458" marker-end="url(#dspArr)"/>
+      <path d="M440,158 H458" marker-end="url(#dspArr)"/>
+      <path d="M440,228 H458" marker-end="url(#dspArr)"/>
+    </g>
+    <rect x="462" y="60" width="356" height="56" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <rect x="474" y="72" width="20" height="20" rx="5" fill="#e2ecf5" stroke="#6a9bcc"/>
+    <text x="484" y="86" text-anchor="middle" font-size="12" font-weight="700" fill="#4a7bab">A</text>
+    <text x="504" y="87" font-size="13" font-weight="600" fill="#141413">Exact title</text>
+    <text x="804" y="87" text-anchor="end" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">title_index</text>
+    <text x="504" y="105" font-size="12" fill="#6b6a5f">the whole string against titles</text>
+    <rect x="462" y="130" width="356" height="56" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <rect x="474" y="142" width="20" height="20" rx="5" fill="#e2ecf5" stroke="#6a9bcc"/>
+    <text x="484" y="156" text-anchor="middle" font-size="12" font-weight="700" fill="#4a7bab">B</text>
+    <text x="504" y="157" font-size="13" font-weight="600" fill="#141413">Prefix</text>
+    <text x="804" y="157" text-anchor="end" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">prefix_trie</text>
+    <text x="504" y="175" font-size="12" fill="#6b6a5f">first letters, for autocomplete</text>
+    <rect x="462" y="200" width="356" height="150" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <rect x="474" y="212" width="20" height="20" rx="5" fill="#e2ecf5" stroke="#6a9bcc"/>
+    <text x="484" y="226" text-anchor="middle" font-size="12" font-weight="700" fill="#4a7bab">C</text>
+    <text x="504" y="227" font-size="13" font-weight="600" fill="#141413">Full text</text>
+    <text x="804" y="227" text-anchor="end" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">fts_index</text>
+    <text x="504" y="245" font-size="12" fill="#6b6a5f">every word, ranked</text>
+    <rect x="462" y="364" width="356" height="56" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <rect x="474" y="376" width="20" height="20" rx="5" fill="#e2ecf5" stroke="#6a9bcc"/>
+    <text x="484" y="390" text-anchor="middle" font-size="12" font-weight="700" fill="#4a7bab">D</text>
+    <text x="504" y="391" font-size="13" font-weight="600" fill="#141413">Did you mean</text>
+    <text x="804" y="391" text-anchor="end" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#8c8a7d">spell_model</text>
+    <text x="504" y="409" font-size="12" fill="#6b6a5f">near misses; never changes results</text>
+    <g>
+      <rect x="476" y="266" width="100" height="50" rx="8" fill="#e2ecf5" stroke="#6a9bcc"/>
+      <circle cx="490" cy="282" r="8" fill="#6a9bcc"/>
+      <text x="490" y="286" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">1</text>
+      <text x="503" y="286" font-size="12.5" font-weight="600" fill="#141413">Tokenise</text>
+      <text x="486" y="306" font-size="12" fill="#6b6a5f">into words</text>
+      <path d="M576,291 H586" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+      <rect x="590" y="266" width="100" height="50" rx="8" fill="#e2ecf5" stroke="#6a9bcc"/>
+      <circle cx="604" cy="282" r="8" fill="#6a9bcc"/>
+      <text x="604" y="286" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">2</text>
+      <text x="617" y="286" font-size="12.5" font-weight="600" fill="#141413">Stem</text>
+      <text x="600" y="306" font-size="12" font-family="'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" fill="#6b6a5f">menus &#8594; menu</text>
+      <path d="M690,291 H700" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+      <rect x="704" y="266" width="100" height="50" rx="8" fill="#e2ecf5" stroke="#6a9bcc"/>
+      <circle cx="718" cy="282" r="8" fill="#6a9bcc"/>
+      <text x="718" y="286" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">3</text>
+      <text x="731" y="286" font-size="12.5" font-weight="600" fill="#141413">Rank</text>
+      <text x="714" y="306" font-size="12" fill="#6b6a5f">hit &#8594; score</text>
+    </g>
+    <text x="476" y="338" font-size="12" fill="#8c8a7d">1 splits &#183; 2 rewrites words &#183; 3 orders hits</text>
+    <path d="M818,88 H846" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+    <rect x="850" y="62" width="238" height="52" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <circle cx="866" cy="82" r="4" fill="#788c5d"/>
+    <text x="878" y="86" font-size="13" font-weight="600" fill="#141413">Top hit</text>
+    <text x="878" y="103" font-size="12" fill="#6b6a5f">shown above the results</text>
+    <path d="M818,158 H846" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+    <rect x="850" y="132" width="238" height="52" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <circle cx="866" cy="152" r="4" fill="#788c5d"/>
+    <text x="878" y="156" font-size="13" font-weight="600" fill="#141413">Autocomplete dropdown</text>
+    <text x="878" y="173" font-size="12" fill="#6b6a5f">on every keystroke</text>
+    <path d="M818,228 H846" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+    <rect x="850" y="202" width="238" height="52" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <circle cx="866" cy="222" r="4" fill="#788c5d"/>
+    <text x="878" y="226" font-size="13" font-weight="600" fill="#141413">Ranked result list</text>
+    <text x="878" y="243" font-size="12" fill="#6b6a5f">the page and the public API</text>
+    <path d="M818,392 H846" fill="none" stroke="#a8a496" stroke-width="1.4" marker-end="url(#dspArr)"/>
+    <rect x="850" y="366" width="238" height="52" rx="12" fill="#ffffff" stroke="#d8d4c8" filter="url(#dspSh)"/>
+    <circle cx="866" cy="386" r="4" fill="#788c5d"/>
+    <text x="878" y="390" font-size="13" font-weight="600" fill="#141413">Did-you-mean banner</text>
+    <text x="878" y="407" font-size="12" fill="#6b6a5f">only when it scores high</text>
+    <g font-size="12" fill="#6b6a5f">
+      <circle cx="38" cy="486" r="5" fill="#c9913f"/><text x="50" y="490">where the query comes from</text>
+      <circle cx="246" cy="486" r="5" fill="#6a9bcc"/><text x="258" y="490">matchers</text>
+      <circle cx="340" cy="486" r="5" fill="#788c5d"/><text x="352" y="490">what the user sees</text>
+      <rect x="500" y="479" width="24" height="14" rx="3" fill="none" stroke="#141413" stroke-width="1.4" stroke-dasharray="5 4"/>
+      <text x="532" y="490">what this page is about; the rest is dimmed, not recoloured</text>
+    </g>
+  </g>
+  <!-- per-page layer: this is the only part allowed to differ between the pages that share the base -->
+  <path d="M0,44 H1120 V466 H0 Z M468,256 V346 H812 V256 Z" fill="#faf9f5" fill-opacity="0.72" fill-rule="evenodd" data-allow-overlap="dimming layer: background-coloured and translucent, it is meant to sit over the text outside the hole"/>
+  <rect x="468" y="256" width="344" height="90" rx="10" fill="none" stroke="#141413" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <g font-size="12">
+    <text x="32" y="530" fill="#8c8a7d">pages sharing this base</text>
+    <rect x="190" y="513" width="188" height="26" rx="13" fill="#ffffff" stroke="#d8d4c8"/>
+    <text x="284.0" y="530" text-anchor="middle" fill="#6b6a5f">1 &#183; Normalise</text>
+    <rect x="388" y="513" width="250" height="26" rx="13" fill="#141413"/>
+    <text x="513.0" y="530" text-anchor="middle" font-weight="600" fill="#ffffff">2 &#183; Inside the full-text matcher</text>
+    <rect x="648" y="513" width="226" height="26" rx="13" fill="#ffffff" stroke="#d8d4c8"/>
+    <text x="761.0" y="530" text-anchor="middle" fill="#6b6a5f">3 &#183; Who reads which matcher</text>
+  </g>
+</svg>
