@@ -791,27 +791,28 @@ html[data-theme="light"] .glass-svg-node--danger { fill: rgba(225, 29, 72, 0.11)
  *                  spherical-cap height field and Snell's law, n = 1.333).
  *                  The same bake carries the caustic + shadow the drop throws
  *                  on the page (multiplied into it) and the surface layer:
- *                  Fresnel rim reflection + a small highlight. A teardrop
- *                  when moving, stretched along the velocity through baked
+ *                  Fresnel rim reflection + a small highlight. Moving, it
+ *                  slides the way a drop on glass does: round front, a corner
+ *                  then a cusp at the rear as it speeds up, through baked
  *                  direction states — the element itself is NEVER rotated:
  *                  Chromium misplaces a backdrop-filter displacement map on a
- *                  rotate()d element (glass-material.md §2)
- *   rivulet      — fast moves lay a water stream behind the drop that necks
- *                  and breaks into beads (Plateau–Rayleigh); each bead is a
- *                  small real lens, and all of it evaporates < 1s
+ *                  rotate()d element (glass-material.md §2). Overdamped: it
+ *                  never overshoots the pointer
+ *   pearls       — only past the cusp: a thin tail pinches off small droplets
+ *                  at a steady spacing; they stay put and evaporate
  *   pinning      — very slow drags stick, lean, then slip
- *   retraction   — stopping pulls nearby trail water back into the drop
- *   splash       — double-click bursts the drop into radial water tongues +
- *                  satellite beads; surface tension slowly re-coalesces it
- *   fx layer     — the rivulet's faint body, refraction edge and glints
+ *   splash       — double-click: a drop hitting glass, slowed ~25× (sheet,
+ *                  rim, fingers, droplets that land and stay)
+ *   fx layer     — painted fingers, the pearling tail, and droplets too small
+ *                  for a lens (bigger ones use .glass-water-bead)
  * Light theme swaps the surface layer: a room reflection darkens the rim on a
  * white page instead of a sky reflection brightening it on a dark one.
  * Installed only on hover-capable fine pointers, never under the freeze
  * contract. Opt out per page with <html data-no-liquid>; users can switch
  * water/system cursor at runtime via a .glass-cursor-toggle button (persisted
  * in localStorage sky-cursor). Tuning hooks: <html data-water-refr="48"
- * data-water-tint="4"> (48 = physical refraction). Regression check:
- * skills/glass-design/scripts/check_water_refraction.mjs. */
+ * data-water-tint="4"> (48 = physical refraction). Regression checks:
+ * skills/glass-design/scripts/check_water_{refraction,splash,drag}.mjs. */
 html.glass-liquid,
 html.glass-liquid body,
 html.glass-liquid a,
@@ -831,10 +832,6 @@ html.glass-liquid [role="button"] { cursor: none !important; }
   -webkit-mask-repeat: no-repeat; -webkit-mask-size: 100% 100%;
   mask-repeat: no-repeat; mask-size: 100% 100%;
   will-change: transform; opacity: 0;
-}
-.glass-water-trail {
-  position: fixed; left: 0; top: 0; z-index: 9993; pointer-events: none;
-  will-change: clip-path; display: none;
 }
 .glass-water-fx {
   position: fixed; inset: 0; width: 100vw; height: 100vh;

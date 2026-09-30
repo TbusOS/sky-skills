@@ -234,21 +234,26 @@
      * displacement map in the wrong spot once the element carries rotate()
      * (measured 2026-09-29: translate / scale refract in place; rotate puts
      * the refraction beside the drop and leaves the drop itself flat). The
-     * stretch direction is baked instead — a round state plus 5 stretch
-     * levels × 24 directions, baked in idle time; until a direction is
-     * ready the nearest baked state stands in.
+     * direction is baked instead — a round state plus 5 speed levels × 24
+     * directions, baked in idle time; until a direction is ready the nearest
+     * baked state stands in.
      *
-     * Moving drops are teardrops (round steep front, longer flatter tail).
-     * Very slow drags stick, lean, then slip (contact-line pinning). Fast
-     * moves lay a rivulet that necks per Plateau–Rayleigh and breaks into
-     * small refracting beads that evaporate < 1s. Stopping pulls nearby trail
-     * water back in. Double-click splashes it the way a drop hitting glass
-     * does (see the splash sections below). All motion is integrated
-     * per unit of real time, so a 120 Hz display behaves like a 60 Hz one.
+     * Moving drops do what a drop sliding on glass does (Le Grand, Daerr &
+     * Limat 2005): the front stays round; faster, the rear turns into a
+     * corner with straight sides, then a cusp; faster still the cusp pulls
+     * out a thin tail that pinches off pearls at a steady spacing. Slower
+     * than that a moving drop leaves nothing behind. The motion is
+     * overdamped — speed follows the pull, so the drop never overshoots and
+     * swings back. Very slow drags stick, lean, then slip (contact-line
+     * pinning). Pearls and splash droplets stay where they are and evaporate,
+     * small ones first; the drop swallows any it touches. Double-click
+     * splashes it the way a drop hitting glass does (see the splash sections
+     * below). All motion is integrated per unit of real time, so a 120 Hz
+     * display behaves like a 60 Hz one.
      * Never installed under freeze; opt out with <html data-no-liquid>;
      * runtime water/system switch via .glass-cursor-toggle (localStorage
      * sky-cursor). Regression checks: scripts/check_water_refraction.mjs,
-     * scripts/check_water_splash.mjs. */
+     * scripts/check_water_splash.mjs, scripts/check_water_drag.mjs. */
     if (!html.hasAttribute('data-no-liquid') &&
         window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
         typeof CSS !== 'undefined' && CSS.supports &&
@@ -295,24 +300,32 @@
         function smooth(e0, e1, v) { var t = clamp01((v - e0) / (e1 - e0)); return t * t * (3 - 2 * t); }
 
         /* --- drop footprint: signed distance in px (negative inside) ---
-         * In the drop's own frame, u along the motion and v across it: the
-         * advancing front is round, the tail longer and a little narrower.
-         * asym 0 is an ellipse (at rest, a circle). The front stands steeper
-         * than the tail (advancing vs receding contact angle). */
-        function dropShape(a, b, asym, phi) {
-          var c = Math.cos(phi), s = Math.sin(phi), ex = asym / 0.28;
+         * In the drop's own frame, u along the motion and v across it. The
+         * front is a half-ellipse (af along the motion, b across); the rear is
+         * round at rest and, for a fast drop, the hull of that circle and a
+         * point behind it: two straight edges meeting in a corner of half-angle
+         * phi (90 = no corner). A sliding drop grows exactly this: the front
+         * curvature stays put while the rear turns into a corner, then a cusp
+         * (Le Grand, Daerr & Limat 2005). ex 0..1: how fast — the front stands
+         * steeper and the rear flatter (advancing vs receding contact angle). */
+        function dropShape(af, b, phiDeg, dir, ex) {
+          var c = Math.cos(dir), s = Math.sin(dir), ph = phiDeg * DEG;
+          var sp = Math.sin(ph), cp = Math.cos(ph), psiT = Math.PI / 2 + ph, tip = b / sp;
           return {
-            rho: Math.min(a * (1 - asym), b),     // largest inside distance
+            rho: Math.min(af, b),                 // largest inside distance
             sdf: function (dx, dy) {
-              var u = dx * c + dy * s, v = -dx * s + dy * c;
-              var au = u >= 0 ? a * (1 - asym) : a * (1 + asym);
-              var bv = u >= 0 ? b : b * (1 - 0.35 * asym * Math.min(1, -u / au));
-              var q = Math.sqrt((u / au) * (u / au) + (v / bv) * (v / bv));
-              return (q - 1) * Math.min(au, bv);
+              var u = dx * c + dy * s, v = Math.abs(-dx * s + dy * c);
+              if (u >= 0) {
+                var q = Math.sqrt((u / af) * (u / af) + (v / b) * (v / b));
+                return (q - 1) * Math.min(af, b);
+              }
+              if (Math.atan2(v, u) <= psiT) return Math.sqrt(u * u + v * v) - b;
+              return -u * sp + v * cp - b;        // a straight edge running into the corner
             },
             theta: function (dx, dy) {            // contact angle, degrees
-              var u = Math.max(-1, Math.min(1, (dx * c + dy * s) / a));
-              return 72 + ex * (u >= 0 ? 14 * u : 16 * u);
+              var u = dx * c + dy * s;
+              var un = u >= 0 ? Math.min(1, u / af) : Math.max(-1, u / tip);
+              return 72 + ex * (un >= 0 ? 14 * un : 30 * un);
             }
           };
         }
@@ -456,7 +469,7 @@
           return { disp: toURL(disp), spec: toURL(spec), specLight: toURL(specL), mask: toURL(mask) };
         }
 
-        /* --- SVG filters: head / bead (light, then Snell, slight dispersion) / rivulet --- */
+        /* --- SVG filters: head and bead (light, then Snell) --- */
         var defs = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         defs.setAttribute('width', '0'); defs.setAttribute('height', '0');
         defs.setAttribute('aria-hidden', 'true');
@@ -466,10 +479,9 @@
         // dispersion: water's index differs by ~2% across the visible range,
         // which at these offsets (≤ 8px) splits the channels by < 0.3px —
         // invisible, and it cost 7 more primitives per drop.
-        // Small beads skip the lighting step (lit = false): their shadow is a
-        // pixel or two, and with up to 10 of them on screen it is the part of
-        // the effect that costs frames (measured: 14 lit beads 145 frames / 3s
-        // vs 173 without beads, software rendering).
+        // Beads skip the lighting step (lit = false): their shadow is a pixel
+        // or two, and lighting them is the part that costs frames (measured:
+        // 14 lit beads 145 frames / 3s vs 173 without beads, software rendering).
         function dispChain(idp, mapExtra, lit) {
           return '<filter id="' + idp + '" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">' +
             '<feImage id="' + idp + 'Map" result="map" x="0" y="0"' + (mapExtra || '') + '/>' +
@@ -480,44 +492,56 @@
             '<feDisplacementMap id="' + idp + 'D" in="' + (lit ? 'lit' : 'SourceGraphic') + '" in2="map" scale="48" xChannelSelector="R" yChannelSelector="G"/>' +
             '</filter>';
         }
-        var DSZ = 38, BR = 12;          // satellite / trail bead: bake box (room for the shadow) and radius
+        var DSZ = 38, BR = 12;          // bead lens (big leftover droplets): bake box (room for the shadow) and radius
         defs.innerHTML =
           dispChain('glassWaterHead', '', true) +
-          dispChain('glassWaterBead', ' width="' + DSZ + '" height="' + DSZ + '"', false) +
-          '<filter id="glassWaterTrail" x="-4%" y="-4%" width="108%" height="108%" color-interpolation-filters="sRGB">' +
-          '<feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="1" seed="11" result="n"/>' +
-          '<feDisplacementMap id="glassWaterTrailDisp" in="SourceGraphic" in2="n" scale="26" xChannelSelector="R" yChannelSelector="G"/>' +
-          '</filter>';
+          dispChain('glassWaterBead', ' width="' + DSZ + '" height="' + DSZ + '"', false);
         document.body.appendChild(defs);
         function setScale(v) {
           document.getElementById('glassWaterHeadD').setAttribute('scale', v);
           document.getElementById('glassWaterBeadD').setAttribute('scale', v);
-          document.getElementById('glassWaterTrailDisp').setAttribute('scale', Math.round(v * 0.5));
         }
         setScale(REFR);
 
-        /* --- drop states: round + 5 stretch levels × 24 directions --- */
-        var R0 = 16, NDIR = 24, ASYM_MAX = 0.28;
-        var ASPECTS = [1.15, 1.35, 1.6, 1.85, 2.1];
-        function makeState(s, k) {
-          var a = R0 * Math.sqrt(s), b = R0 / Math.sqrt(s);
-          var asym = ASYM_MAX * (s - 1) / (ASPECTS[ASPECTS.length - 1] - 1);
-          var phi = k < 0 ? 0 : k * 2 * Math.PI / NDIR;
-          var S = 2 * Math.ceil(Math.max(a * (1 + asym), b) + 10);
-          var shape = dropShape(a, b, asym, phi);
-          return { a: a, b: b, S: S, maps: bake(S, 2, shape) };
+        /* --- drop states: round + 5 speed levels × 24 directions ---
+         * Speeds in px per 16.7ms, smoothed. Width shrinks and length grows
+         * with speed while the footprint area (volume, at constant height)
+         * stays the same.
+         *   v   from this speed up
+         *   f   front half-length / half-width
+         *   phi rear corner half-angle. The corner appears at V_CORNER and then
+         *       follows sin(phi) = V_CORNER / speed: the contact line can only
+         *       recede so fast, so it slants to keep its normal speed there
+         *       (Le Grand et al. 2005); past ~45° it turns into a cusp. Each
+         *       level's phi is that law at a speed inside the level. */
+        var R0 = 16, NDIR = 24, V_CORNER = 8;
+        var LEVELS = [
+          { v: 1.5, f: 1.10, phi: 90 },   // oval
+          { v: 5, f: 1.18, phi: 84 },     // rounded corner: the rear starts to flatten
+          { v: 8, f: 1.22, phi: 62 },     // corner, sin(62°) = 8 / 9
+          { v: 10.5, f: 1.26, phi: 45 },  // cusp onset, 8 / 11.3
+          { v: 13, f: 1.30, phi: 32 }     // cusp, 8 / 15: from here the tail pinches off pearls
+        ];
+        function makeState(li, k) {
+          var L = li < 0 ? { f: 1, phi: 90 } : LEVELS[li], ph = L.phi * DEG;
+          var b = R0 * Math.sqrt(Math.PI / (Math.PI * L.f / 2 + ph + Math.cos(ph) / Math.sin(ph)));
+          var af = L.f * b, tip = b / Math.sin(ph);
+          var dir = k < 0 ? 0 : k * 2 * Math.PI / NDIR;
+          var S = 2 * Math.ceil(Math.max(af, tip) + 10);
+          var shape = dropShape(af, b, L.phi, dir, li < 0 ? 0 : (li + 1) / LEVELS.length);
+          return { a: Math.max(af, tip), b: b, tip: tip, S: S, maps: bake(S, 2, shape) };
         }
-        var ROUND = makeState(1, -1);
-        var STATES = new Array(ASPECTS.length * NDIR);
+        var ROUND = makeState(-1, -1);
+        var STATES = new Array(LEVELS.length * NDIR);
         var bakeQueue = [];
-        for (var qa = 0; qa < ASPECTS.length; qa++) for (var qk = 0; qk < NDIR; qk++) bakeQueue.push(qa * NDIR + qk);
+        for (var qa = 0; qa < LEVELS.length; qa++) for (var qk = 0; qk < NDIR; qk++) bakeQueue.push(qa * NDIR + qk);
         function bakeSome() {
           var t0 = performance.now();
           // the splash frames first: a double-click has no stand-in to fall back on
           while (spQueue.length && performance.now() - t0 < 8) bakeSplashKey(spQueue.shift());
           while (bakeQueue.length && performance.now() - t0 < 8) {
             var key = bakeQueue.shift();
-            if (!STATES[key]) STATES[key] = makeState(ASPECTS[Math.floor(key / NDIR)], key % NDIR);
+            if (!STATES[key]) STATES[key] = makeState(Math.floor(key / NDIR), key % NDIR);
           }
           if (bakeQueue.length || spQueue.length) scheduleBake();
         }
@@ -537,7 +561,7 @@
         }
         var BEAD = makeBead();
         function makeBead() {
-          return bake(DSZ, 2, dropShape(BR, BR, 0, 0), true);
+          return bake(DSZ, 2, dropShape(BR, BR, 90, 0, 0), true);
         }
         document.getElementById('glassWaterBeadMap').setAttribute('href', BEAD.disp);
 
@@ -621,15 +645,9 @@
         head.setAttribute('aria-hidden', 'true');
         head.style.backdropFilter = 'url(#glassWaterHead)';
         head.style.webkitBackdropFilter = 'url(#glassWaterHead)';
-        var trailEl = document.createElement('div');
-        trailEl.className = 'glass-water-trail';
-        trailEl.setAttribute('aria-hidden', 'true');
-        trailEl.style.backdropFilter = 'url(#glassWaterTrail)';
-        trailEl.style.webkitBackdropFilter = 'url(#glassWaterTrail)';
         var fx = document.createElement('canvas');
         fx.className = 'glass-water-fx';
         fx.setAttribute('aria-hidden', 'true');
-        document.body.appendChild(trailEl);
         document.body.appendChild(fx);
         document.body.appendChild(head);
         var fctx = fx.getContext('2d');
@@ -657,9 +675,6 @@
         setState(ROUND);
         new MutationObserver(function () {
           setState(cur, true);
-          for (var j = 0; j < drops.length; j++) {
-            drops[j].el.style.backgroundImage = 'url(' + (isLight() ? BEAD.specLight : BEAD.spec) + ')';
-          }
           for (var j = 0; j < wet.length; j++) {
             if (wet[j].el) wet[j].el.style.backgroundImage = 'url(' + (isLight() ? BEAD.specLight : BEAD.spec) + ')';
           }
@@ -668,30 +683,23 @@
         /* --- physics state --- */
         var tx = -300, ty = -300, x = -300, y = -300, vx = 0, vy = 0;
         var active = false, pointing = false, lastMoveT = 0;
-        // Spring tuned at 60 Hz, applied per 16.7ms of real time (k below).
-        var STIFF = 0.22, DAMP = 0.72;
+        // Overdamped: a sliding drop's speed follows the pull (it rises
+        // linearly with the driving force, Le Grand et al. 2005), there is no
+        // inertia to carry it past the pointer and back. TAU: how quickly it
+        // closes the gap (ms). Speed at 1000 px/s lags the pointer by ~30px.
+        var TAU = 30;
         // Contact-line pinning: a resting drop holds on until pulled PIN_BREAK
         // px away, leaning toward the pull. After PIN_HOLD ms without pointer
         // motion it lets go, so a resting drop always ends on the pointer.
         var PIN_BREAK = 3.2, PIN_HOLD = 220;
         var pinned = false, lean = 0, leanDir = 0;
-        var theta = 0, vol = 1.0, wob = 0, wobV = 0;
-        var stillSince = 0, lastNow = 0, prevSpeed = 0, lastSat = 0;
+        var theta = 0, vol = 1.0, wob = 0, wobV = 0, spS = 0;
+        var stillSince = 0, lastNow = 0;
         var splash = null;              // the running double-click splash
-        var wet = [], MAX_WET_LENS = 10; // droplets the splash left on the glass
-        var pts = [], cumArc = 0, lastDep = null, strokePh = Math.random() * 6.28, lastDepT = 0;
-        var LIFE = 920, NECK_T = 0.26, LAM = 27;
-        var DEPOSIT_V = 4, GAP_PX = 3;
-        var drops = [], POOL = [];
-        var promoted = {}, MAX_TRAIL_BEADS = 10;
-        var trailGeom = { x: -1, y: -1, w: -1, h: -1 };
-        // The rivulet's continuous refraction layer is OPT-IN
-        // (<html data-water-trail-refr>). Measured on the real glass page
-        // (software rendering): animating clip-path on a turbulence
-        // backdrop-filter element re-runs the whole filter chain every frame —
-        // 27fps with it, 60fps without. By default the rivulet refracts where
-        // it matters: once it breaks into beads, each bead is a small real lens.
-        var trailRefr = html.hasAttribute('data-water-trail-refr');
+        // droplets left on the glass (splash, pearls); past MAX_WET the oldest dry off early
+        var wet = [], MAX_WET_LENS = 10, MAX_WET = 320;
+        var POOL = [];
+        var tail = { arc: 0, end: null, a: 0, r: 0, lam: 1 };   // pearling tail
         var slowFrames = 0;
 
         document.addEventListener('pointermove', function (e) {
@@ -728,165 +736,7 @@
           return ((Math.round(t) % NDIR) + NDIR) % NDIR;
         }
 
-        /* --- rivulet deposit (interpolated so fast moves stay continuous) --- */
-        function deposit(now, sp, st, sV, k) {
-          var bx = x - Math.cos(theta) * st.a * sV * 0.7;
-          var by = y - Math.sin(theta) * st.a * sV * 0.7;
-          var w0 = Math.min(9.5, 2.6 + R0 * sV * 0.16 + Math.min(sp, 34) * 0.075);
-          if (lastDep && now - lastDepT <= 120) {
-            var dgap = Math.sqrt(Math.pow(bx - lastDep.x, 2) + Math.pow(by - lastDep.y, 2));
-            if (dgap < GAP_PX) return;
-            var steps = Math.min(30, Math.floor(dgap / 4));
-            for (var s = 1; s <= steps; s++) {
-              var f = s / (steps + 1);
-              cumArc += dgap / (steps + 1);
-              pts.push({ x: lastDep.x + (bx - lastDep.x) * f, y: lastDep.y + (by - lastDep.y) * f, t: now, w0: w0, arc: cumArc, ph: strokePh, retr: 1 });
-            }
-            cumArc += dgap / (steps + 1);
-          } else {
-            strokePh = Math.random() * 6.28;
-            cumArc += GAP_PX;
-          }
-          pts.push({ x: bx, y: by, t: now, w0: w0, arc: cumArc, ph: strokePh, retr: 1 });
-          lastDep = { x: bx, y: by }; lastDepT = now;
-          vol = Math.max(0.55, vol - 0.0035 * k);
-        }
-        function trailWidth(p, now) {
-          var age = (now - p.t) / LIFE;
-          if (age >= 1) return 0;
-          var env = age < NECK_T ? 1 : Math.pow(1 - (age - NECK_T) / (1 - NECK_T), 1.15);
-          var w = p.w0 * env * p.retr;
-          if (age > NECK_T) { // Plateau–Rayleigh necking: beads form, necks break first
-            var nd = Math.min(1, (age - NECK_T) / 0.30) * 0.96;
-            w *= (1 - nd * Math.max(0, Math.sin(p.arc / LAM * 6.2832 + p.ph)));
-          }
-          return w;
-        }
-        // Once the necks have broken, each bead the rivulet leaves behind
-        // becomes a small real lens (a pooled bead element), so the trail
-        // refracts without the full-trail filter.
-        function promoteBeads(now) {
-          var alive = 0;
-          for (var j = 0; j < drops.length; j++) if (drops[j].trail) alive++;
-          for (var i = 0; i < pts.length && alive < MAX_TRAIL_BEADS; i++) {
-            var p = pts[i], age = (now - p.t) / LIFE;
-            if (p.ex || age < NECK_T + 0.12 || age > 0.8) continue;
-            var u = p.arc / LAM + p.ph / 6.2832;             // bead centre where sin(...) = −1
-            var c = Math.round(u - 0.75) + 0.75;
-            if (Math.abs(u - c) * LAM > 2.2) continue;
-            var key = p.ph.toFixed(3) + ':' + Math.round(c * 4);
-            if (promoted[key]) continue;
-            var w = trailWidth(p, now);
-            if (w < 1.3) continue;
-            promoted[key] = 1; alive++;
-            var fv = Math.pow(w * 1.05 / (R0 * 2.2), 2);
-            spawnSatAt(now, p.x, p.y, 0, 0, fv, LIFE * (1 - age) + 240, true);
-          }
-        }
-        function renderTrail(now) {
-          while (pts.length && now - pts[0].t >= LIFE) pts.shift();
-          if (!pts.length) promoted = {};
-          fctx.clearRect(0, 0, fx.width, fx.height);
-          if (!pts.length) { trailEl.style.display = 'none'; return; }
-          var segs = [], cs = null;
-          for (var i = 0; i < pts.length; i++) {
-            var p = pts[i], w = trailWidth(p, now);
-            var brk = cs && (Math.sqrt(Math.pow(p.x - cs.pts[cs.pts.length - 1].x, 2) + Math.pow(p.y - cs.pts[cs.pts.length - 1].y, 2)) > 24);
-            if (w > 0.6 && !brk) {
-              if (!cs) { cs = { pts: [], ws: [] }; segs.push(cs); }
-              // wavy organic edges — real water boundaries are never smooth math
-              var wv = w * (1 + 0.15 * Math.sin(p.arc * 0.34 + p.ph * 2.1) + 0.08 * Math.sin(p.arc * 0.91));
-              cs.pts.push(p); cs.ws.push(Math.max(wv, 0.4));
-            } else cs = null;
-          }
-          segs = segs.filter(function (s) { return s.pts.length >= 2; });
-          if (!segs.length) { trailEl.style.display = 'none'; return; }
-          var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
-          segs.forEach(function (s) {
-            s.pts.forEach(function (p, k) {
-              var w = s.ws[k] + 3;
-              if (p.x - w < x0) x0 = p.x - w; if (p.x + w > x1) x1 = p.x + w;
-              if (p.y - w < y0) y0 = p.y - w; if (p.y + w > y1) y1 = p.y + w;
-            });
-          });
-          // Quantize the refraction element's geometry to a 128px grid:
-          // per-frame left/top/width/height changes force the browser to
-          // re-capture the backdrop and re-run feTurbulence every frame.
-          // Snapped geometry only changes when the trail crosses a grid line;
-          // the clip-path keeps animating at 60Hz.
-          var Q = 128;
-          x0 = Math.floor(x0 / Q) * Q; y0 = Math.floor(y0 / Q) * Q;
-          var qw = Math.ceil((x1 - x0) / Q) * Q, qh = Math.ceil((y1 - y0) / Q) * Q;
-          trailEl.style.display = trailRefr ? 'block' : 'none';
-          if (trailGeom.x !== x0 || trailGeom.y !== y0 || trailGeom.w !== qw || trailGeom.h !== qh) {
-            trailGeom = { x: x0, y: y0, w: qw, h: qh };
-            trailEl.style.left = x0 + 'px'; trailEl.style.top = y0 + 'px';
-            trailEl.style.width = qw + 'px';
-            trailEl.style.height = qh + 'px';
-          }
-          var path = '', tintA = TINT * 0.016, light = isLight();
-          segs.forEach(function (s) {
-            var n = s.pts.length, L = [], R = [];
-            for (var k = 0; k < n; k++) {
-              var p = s.pts[k];
-              var p0 = s.pts[Math.max(0, k - 1)], p1 = s.pts[Math.min(n - 1, k + 1)];
-              var tx2 = p1.x - p0.x, ty2 = p1.y - p0.y;
-              var tn = Math.max(Math.sqrt(tx2 * tx2 + ty2 * ty2), 1e-4);
-              var nx = -ty2 / tn, ny = tx2 / tn, w = s.ws[k];
-              L.push([p.x + nx * w, p.y + ny * w]); R.push([p.x - nx * w, p.y - ny * w]);
-            }
-            if (trailRefr) {
-              var sp2 = 'M' + (L[0][0] - x0).toFixed(1) + ' ' + (L[0][1] - y0).toFixed(1);
-              for (var k = 1; k < n; k++) sp2 += 'L' + (L[k][0] - x0).toFixed(1) + ' ' + (L[k][1] - y0).toFixed(1);
-              for (var k = n - 1; k >= 0; k--) sp2 += 'L' + (R[k][0] - x0).toFixed(1) + ' ' + (R[k][1] - y0).toFixed(1);
-              path += sp2 + 'Z';
-            }
-            /* fx layer: faint body, refraction edge, a thin highlight on the
-             * light-facing edge (no painted centre line — water has none) */
-            var P = new Path2D();
-            P.moveTo(L[0][0] * FXDPR, L[0][1] * FXDPR);
-            for (var k = 1; k < n; k++) P.lineTo(L[k][0] * FXDPR, L[k][1] * FXDPR);
-            for (var k = n - 1; k >= 0; k--) P.lineTo(R[k][0] * FXDPR, R[k][1] * FXDPR);
-            P.closePath();
-            var ageMid = (now - s.pts[Math.floor(n / 2)].t) / LIFE;
-            // after the break the beads carry the look; the ribbon steps back
-            var fade = (1 - ageMid * 0.8) * (ageMid > NECK_T + 0.12 ? 0.45 : 1);
-            if (tintA > 0.003) { fctx.fillStyle = 'rgba(135,198,226,' + (tintA * fade) + ')'; fctx.fill(P); }
-            fctx.lineWidth = 1.0 * FXDPR;
-            fctx.strokeStyle = light ? 'rgba(30,52,72,' + (0.30 * fade) + ')' : 'rgba(200,230,255,' + (0.20 * fade) + ')';
-            fctx.stroke(P);
-            fctx.lineCap = 'round'; fctx.lineJoin = 'round';
-            fctx.beginPath();
-            for (var k = 0; k < n; k++) {
-              var p = s.pts[k], w = s.ws[k];
-              var p0 = s.pts[Math.max(0, k - 1)], p1 = s.pts[Math.min(n - 1, k + 1)];
-              var tx2 = p1.x - p0.x, ty2 = p1.y - p0.y;
-              var tn = Math.max(Math.sqrt(tx2 * tx2 + ty2 * ty2), 1e-4);
-              var nx = -ty2 / tn, ny = tx2 / tn;
-              if (nx * LK[0] + ny * LK[1] < 0) { nx = -nx; ny = -ny; }
-              var hx = (p.x + nx * w * 0.62) * FXDPR, hy = (p.y + ny * w * 0.62) * FXDPR;
-              if (k === 0) fctx.moveTo(hx, hy); else fctx.lineTo(hx, hy);
-            }
-            var wAvg = 0;
-            for (var k = 0; k < n; k++) wAvg += s.ws[k];
-            wAvg /= n;
-            fctx.lineWidth = Math.max(0.8, wAvg * 0.18) * FXDPR;
-            fctx.strokeStyle = 'rgba(255,255,255,' + (0.28 * fade) + ')';
-            fctx.stroke();
-            for (var k = 0; k < n; k += 6) {
-              var p = s.pts[k];
-              var r1 = Math.sin(p.arc * 12.9898 + p.ph * 78.233) * 43758.5453;
-              r1 -= Math.floor(r1);
-              if (r1 < 0.25) {
-                fctx.fillStyle = 'rgba(255,255,255,' + (0.45 * fade) + ')';
-                fctx.fillRect((p.x + (r1 - 0.5) * s.ws[k]) * FXDPR, (p.y + (r1 * 2 - 1) * s.ws[k] * 0.5) * FXDPR, 1.4 * FXDPR, 1.4 * FXDPR);
-              }
-            }
-          });
-          if (trailRefr) trailEl.style.clipPath = 'path("' + path + '")';
-        }
-
-        /* --- satellites + trail beads (small real lenses, re-absorbable) --- */
+        /* --- bead lens: a pooled element for the bigger leftover droplets --- */
         function getBead() {
           var el = POOL.pop();
           if (!el) {
@@ -905,10 +755,6 @@
           el.style.display = 'block';
           return el;
         }
-        function spawnSatAt(now, px, py, velx, vely, fv, life, trail) {
-          drops.push({ el: getBead(), x: px, y: py, vx: velx, vy: vely, fv: fv, t: now, life: life, abs: false, trail: !!trail });
-        }
-
         /* --- double-click splash: fingers and droplets ---
          * The count and places of the fingers are set at first contact and
          * stay put while the sheet spreads; near the halt only the finger tips
@@ -940,6 +786,10 @@
             el: r >= 3.2 && lens < MAX_WET_LENS ? getBead() : null
           };
           wet.push(w);
+          if (wet.length > MAX_WET) {                               // too many on screen: the oldest dries off now
+            var o = wet[wet.length - 1 - MAX_WET];
+            if (now >= o.tLand) o.life = Math.min(o.life, now - o.tLand + 150);
+          }
           if (splash) splash.lost += wetFv(r);
           return w;
         }
@@ -969,7 +819,8 @@
           var nS = 2 + Math.floor(Math.random() * 3);
           splash.spray = [];
           for (var i = 0; i < nS; i++) splash.spray.push({ t: 10 + 25 * Math.random(), a: Math.random() * 2 * Math.PI });
-          vx = 0; vy = 0; pinned = false; wob = 0; wobV = 0; lastDep = null;
+          vx = 0; vy = 0; pinned = false; wob = 0; wobV = 0; tail.end = null;
+          stillSince = 0;                 // at rest again only once it has gathered (the refill waits for that)
         }
         function tauAt(t) {
           if (t < SP_T) return t / SP_T;
@@ -1050,13 +901,12 @@
           splash = null;
           setState(ROUND);
         }
-        // painted parts: fingers (clipped to outside the rim — the rim itself is
-        // the refracting keyframe) and droplets too small to need a lens
+        // Painted parts: fingers, the pearling tail, and droplets too small to
+        // need a lens. The edge bends light away (dark on a light page, a pale
+        // line on a dark one); a droplet focuses light into a bright spot on the
+        // side away from the lamp; a small glint faces the lamp.
         function paintWater(P, cx, cy, r, light, tintA) {
           if (tintA > 0.003) { fctx.fillStyle = 'rgba(135,198,226,' + tintA + ')'; fctx.fill(P); }
-          // the edge bends light away (dark on a light page, a pale line on a
-          // dark one); the droplet focuses light into a bright spot on the side
-          // away from the lamp; a small glint faces the lamp
           fctx.lineWidth = Math.max(0.6, Math.min(1, r * 0.4)) * FXDPR;
           fctx.strokeStyle = light ? 'rgba(24,40,58,0.34)' : 'rgba(196,224,248,0.24)';
           fctx.stroke(P);
@@ -1067,7 +917,57 @@
           fctx.fillStyle = 'rgba(255,255,255,' + (light ? 0.95 : 0.85) + ')';
           fctx.beginPath(); fctx.arc((cx - 0.36 * r) * FXDPR, (cy - 0.42 * r) * FXDPR, Math.max(0.35, 0.24 * r) * FXDPR, 0, 6.2832); fctx.fill();
         }
-        function renderSplashFx(now) {
+        // A thread of water from (bx,by) along (c,s): starts at r0, reaches L
+        // further, half-width w, widening by `widen` where it joins its source,
+        // ending in a bulb of radius rb.
+        function ligament(bx, by, c, s, r0, L, w, rb, widen) {
+          var nx = -s, ny = c, lft = [], rgt = [], n = 10;
+          for (var k = 0; k <= n; k++) {
+            var u = k / n, d = u * (L - rb), hw = w * (1 + widen * (1 - u) * (1 - u));
+            var px = bx + c * (r0 + d), py = by + s * (r0 + d);
+            lft.push([px + nx * hw, py + ny * hw]); rgt.push([px - nx * hw, py - ny * hw]);
+          }
+          var ex = bx + c * (r0 + L - rb), ey = by + s * (r0 + L - rb);
+          var P = new Path2D();
+          P.moveTo(rgt[0][0] * FXDPR, rgt[0][1] * FXDPR);
+          for (var k = 1; k <= n; k++) P.lineTo(rgt[k][0] * FXDPR, rgt[k][1] * FXDPR);
+          var aR = Math.atan2(rgt[n][1] - ey, rgt[n][0] - ex), aL = Math.atan2(lft[n][1] - ey, lft[n][0] - ex);
+          P.arc(ex * FXDPR, ey * FXDPR, rb * FXDPR, aR, aL, false);   // round the outer end
+          for (var k = n; k >= 0; k--) P.lineTo(lft[k][0] * FXDPR, lft[k][1] * FXDPR);
+          P.closePath();
+          return { P: P, x: ex, y: ey };
+        }
+        // all painted droplets in a handful of draw calls (there can be hundreds)
+        function paintDroplets(light, tintA) {
+          var body = new Path2D(), dot = new Path2D(), thin = new Path2D(), thick = new Path2D(), glint = new Path2D(), spot = new Path2D(), n = 0;
+          for (var j = 0; j < wet.length; j++) {
+            var w = wet[j], r = w.r;
+            if (w.el || r < 0.3) continue;
+            var X = w.x * FXDPR, Y = w.y * FXDPR, R = r * FXDPR;
+            if (r < 1.3) {                                          // too small to show an inside: a speck with a glint
+              dot.moveTo(X + R, Y); dot.arc(X, Y, R, 0, 6.2832);
+              glint.moveTo(X - 0.3 * R + 0.35 * FXDPR, Y - 0.35 * R); glint.arc(X - 0.3 * R, Y - 0.35 * R, 0.35 * FXDPR, 0, 6.2832);
+              n++; continue;
+            }
+            body.moveTo(X + R, Y); body.arc(X, Y, R, 0, 6.2832);
+            (r < 2 ? thin : thick).moveTo(X + R, Y); (r < 2 ? thin : thick).arc(X, Y, R, 0, 6.2832);
+            var gr = Math.max(0.35, 0.24 * r) * FXDPR, gx = X - 0.36 * R, gy = Y - 0.42 * R;
+            glint.moveTo(gx + gr, gy); glint.arc(gx, gy, gr, 0, 6.2832);
+            var sr = Math.max(0.35, 0.34 * r) * FXDPR, sx = X + 0.3 * R, sy = Y + 0.36 * R;
+            spot.moveTo(sx + sr, sy); spot.arc(sx, sy, sr, 0, 6.2832);
+            n++;
+          }
+          if (!n) return;
+          if (tintA > 0.003) { fctx.fillStyle = 'rgba(135,198,226,' + tintA + ')'; fctx.fill(body); }
+          fctx.fillStyle = light ? 'rgba(24,40,58,0.26)' : 'rgba(196,224,248,0.22)'; fctx.fill(dot);
+          fctx.strokeStyle = light ? 'rgba(24,40,58,0.34)' : 'rgba(196,224,248,0.24)';
+          fctx.lineWidth = 0.7 * FXDPR; fctx.stroke(thin);
+          fctx.lineWidth = 1 * FXDPR; fctx.stroke(thick);
+          if (light) { fctx.fillStyle = 'rgba(255,255,255,0.5)'; fctx.fill(spot); }
+          fctx.fillStyle = 'rgba(255,255,255,' + (light ? 0.95 : 0.85) + ')'; fctx.fill(glint);
+        }
+        function renderFx(now) {
+          fctx.clearRect(0, 0, fx.width, fx.height);
           var light = isLight(), tintA = TINT * 0.02;
           if (splash && splash.fingers) {
             var S = splash;
@@ -1075,39 +975,23 @@
             fctx.beginPath();
             fctx.rect(0, 0, fx.width, fx.height);
             fctx.arc(S.x * FXDPR, S.y * FXDPR, Math.max(0, S.rOut - 0.6) * FXDPR, 0, 6.2832, true);
-            fctx.clip('evenodd');
+            fctx.clip('evenodd');                                   // the rim itself is the refracting keyframe
             for (var i = 0; i < S.fingers.length; i++) {
               var f = S.fingers[i];
               if (f.len < 0.5) continue;
-              var c = Math.cos(f.a), s = Math.sin(f.a), nx = -s, ny = c;
               var r0 = S.rOut - Math.max(1, S.b), L = S.rOut + f.len - r0;
               var rb = f.cut >= 0 ? f.w * 0.9 : Math.min(1.5 * f.w, L * 0.5);  // after the tip left, a plain stub
-              var lft = [], rgt = [], n = 10;
-              for (var k = 0; k <= n; k++) {
-                var u = k / n, d = u * (L - rb);
-                var hw = f.w * (1 + 1.1 * (1 - u) * (1 - u));             // widens where it joins the rim
-                var px = S.x + c * (r0 + d), py = S.y + s * (r0 + d);
-                lft.push([px + nx * hw, py + ny * hw]); rgt.push([px - nx * hw, py - ny * hw]);
-              }
-              var tx = S.x + c * (r0 + L - rb), ty = S.y + s * (r0 + L - rb);
-              var P = new Path2D();
-              P.moveTo(rgt[0][0] * FXDPR, rgt[0][1] * FXDPR);
-              for (var k = 1; k <= n; k++) P.lineTo(rgt[k][0] * FXDPR, rgt[k][1] * FXDPR);
-              var aR = Math.atan2(rgt[n][1] - ty, rgt[n][0] - tx), aL = Math.atan2(lft[n][1] - ty, lft[n][0] - tx);
-              P.arc(tx * FXDPR, ty * FXDPR, rb * FXDPR, aR, aL, false);  // the bulb, round the outer end
-              for (var k = n; k >= 0; k--) P.lineTo(lft[k][0] * FXDPR, lft[k][1] * FXDPR);
-              P.closePath();
-              paintWater(P, tx, ty, rb, light, tintA);
+              var g = ligament(S.x, S.y, Math.cos(f.a), Math.sin(f.a), r0, L, f.w, rb, 1.1);
+              paintWater(g.P, g.x, g.y, rb, light, tintA);
             }
             fctx.restore();
           }
-          for (var j = 0; j < wet.length; j++) {
-            var w = wet[j];
-            if (w.el || w.r < 0.3) continue;
-            var P2 = new Path2D();
-            P2.arc(w.x * FXDPR, w.y * FXDPR, w.r * FXDPR, 0, 6.2832);
-            paintWater(P2, w.x, w.y, w.r, light, tintA);
+          if (tail.a > 0 && tail.end) {                             // the thread behind a pearling drop
+            var c = -Math.cos(theta), s = -Math.sin(theta), rb = Math.max(tail.a * 1.2, tail.r * Math.cbrt(tail.arc / tail.lam));
+            var g2 = ligament(tail.x0, tail.y0, c, s, 0, tail.len, tail.a, Math.min(rb, tail.len * 0.5), 0.8);
+            paintWater(g2.P, g2.x, g2.y, rb, light, tintA);
           }
+          paintDroplets(light, tintA);
         }
         function updateWet(now, dt, headR) {
           for (var j = wet.length - 1; j >= 0; j--) {
@@ -1125,7 +1009,7 @@
                 if (dx * dx + dy * dy < Math.pow(headR + w.r * 0.6, 2)) {
                   var V = Math.pow(vol, 1.5), fv = wetFv(w.r);
                   x += dx * fv / (V + fv); y += dy * fv / (V + fv);
-                  vol = Math.min(1.25, Math.pow(V + fv, 2 / 3)); wobV += 0.02 + fv * 4;
+                  vol = Math.min(1.25, Math.pow(V + fv, 2 / 3));   // merges within a frame at this size: no ringing
                   dropWet(j); continue;
                 }
               }
@@ -1133,6 +1017,39 @@
             if (w.el) w.el.style.transform = 'translate(' + (w.x - DSZ / 2) + 'px,' + (w.y - DSZ / 2) + 'px) scale(' +
               Math.max(0.02, w.r / BR).toFixed(4) + ')';
           }
+        }
+
+        /* --- pearling ---
+         * Past the cusp the rear pulls out a thin tail whose end pinches off
+         * pearls along the drop's axis. Measured off the top-view photograph at
+         * the onset (Le Grand et al. 2005, fig. 4e): a pearl is ~1/23 of the
+         * drop's width across and pearls sit ~6.4 diameters apart. Pearls grow
+         * with speed (ibid.); faster, the pinch-off also leaves a smaller
+         * satellite (the cascade of their fig. 6). Pearls stay where they fall;
+         * each takes its water from the drop. */
+        var V_PEARL = LEVELS[LEVELS.length - 1].v;
+        function pearling(now, st, sV) {
+          if (spS < V_PEARL || pinned || vol < 0.5) { tail.a = 0; tail.end = null; return; }
+          var rP = (0.8 + 1.7 * clamp01((spS - V_PEARL) / 18)) * sV, lam = 12.8 * rP, a = 0.45 * rP;
+          var c = Math.cos(theta), s = Math.sin(theta), tipD = st.tip * sV;
+          tail.a = a; tail.lam = lam; tail.r = rP; tail.len = Math.max(0.5 * lam, 0.35 * st.b * sV);
+          tail.x0 = x - c * (tipD - 0.8); tail.y0 = y - s * (tipD - 0.8);
+          var ex = x - c * (tipD + tail.len), ey = y - s * (tipD + tail.len);
+          if (!tail.end) { tail.end = { x: ex, y: ey }; tail.arc = 0; return; }
+          var dx = ex - tail.end.x, dy = ey - tail.end.y, d = Math.sqrt(dx * dx + dy * dy), done = 0;
+          while (tail.arc + d - done >= lam) {                    // one pearl per wavelength travelled
+            done += lam - tail.arc; tail.arc = 0;
+            var f = done / Math.max(d, 1e-6), px = tail.end.x + dx * f, py = tail.end.y + dy * f;
+            var fv = wetFv(rP);
+            vol = Math.pow(Math.max(0.05, Math.pow(vol, 1.5) - fv), 2 / 3);
+            addWet(now, px, py, rP, 0, 0, 0);
+            if (Math.random() < Math.min(0.6, (spS - V_PEARL) / 20)) {
+              var bf = Math.max(0, f - 0.5 * lam / Math.max(d, 1e-6));
+              addWet(now, tail.end.x + dx * bf + c * 0.5 * lam, tail.end.y + dy * bf + s * 0.5 * lam, 0.45 * rP, 0, 0, 0);
+            }
+          }
+          tail.arc += d - done;
+          tail.end = { x: ex, y: ey };
         }
 
         /* --- main loop --- */
@@ -1144,10 +1061,10 @@
           if (active) {
             // 22ms ≈ 45fps. Only count frames where the cursor is doing work.
             if (dt > 22) { slowFrames++; } else if (slowFrames > 0) { slowFrames--; }
-            if (slowFrames > 90) {                         // degrade: trail filter first, then trail beads
+            if (slowFrames > 90) {                         // degrade: no bead lenses, then fewer droplets
               slowFrames = 0;
-              if (trailRefr) { trailRefr = false; trailEl.style.display = 'none'; }
-              else MAX_TRAIL_BEADS = Math.max(0, MAX_TRAIL_BEADS - 7);
+              if (MAX_WET_LENS) MAX_WET_LENS = 0;
+              else MAX_WET = Math.max(60, Math.floor(MAX_WET / 2));
             }
           }
           if (splash && !stepSplash(now)) endSplash();
@@ -1158,87 +1075,39 @@
             if (pinned) {
               vx = 0; vy = 0; lean = distT / PIN_BREAK; leanDir = Math.atan2(dyT, dxT);
             } else {
-              var damp = Math.pow(DAMP, k);
-              vx = (vx + dxT * STIFF * k) * damp;
-              vy = (vy + dyT * STIFF * k) * damp;
-              x += vx * k; y += vy * k;
+              var al = 1 - Math.exp(-dt / TAU);
+              vx = dxT * al / k; vy = dyT * al / k;         // px per 16.7ms
+              x += dxT * al; y += dyT * al;
               lean = 0;
             }
             sp = Math.sqrt(vx * vx + vy * vy);
+            // the shape follows the speed within a couple of frames (a mm drop
+            // relaxes in ~10ms; its ringing, ~80Hz, is too fast to show)
+            spS += (sp - spS) * (1 - Math.exp(-dt / 25));
             if (!pinned && sp < 0.35 && distT < 1.2 && now - lastMoveT < PIN_HOLD) pinned = true;
             if (sp < 2) { if (!stillSince) stillSince = now; } else stillSince = 0;
-            if (prevSpeed > 6 && sp <= 2) wobV += 0.10;
-            prevSpeed = sp;
             if (sp > 1.2) theta += angDiff(Math.atan2(vy, vx), theta) * (1 - Math.pow(0.75, k));
-            // stretch level from speed; a pinned drop leans toward the pull
-            var desired = 1 + 1.1 * Math.max(0, Math.min(1, sp / 22));
-            var ai = -1, bd = Math.abs(desired - 1);
-            for (var i = 0; i < ASPECTS.length; i++) {
-              var dd = Math.abs(ASPECTS[i] - desired);
-              if (dd < bd) { bd = dd; ai = i; }
-            }
+            // speed level; a pinned drop leans toward the pull
+            var ai = -1;
+            for (var i = 0; i < LEVELS.length; i++) if (spS >= LEVELS[i].v) ai = i;
             var dirA = theta;
             if (pinned && lean > 0.35) { ai = Math.max(ai, 0); dirA = leanDir; }
             st = stateFor(ai, dirIndex(dirA));
             setState(st);
-            wobV += (-0.16 * wob - 0.11 * wobV) * k;
+            wobV += (-0.16 * wob - 0.11 * wobV) * k;       // only the splash's recoil rings (it runs slowed down)
             wob += wobV * k;
-            var breathe = (stillSince && now - stillSince > 500) ? 0.012 * Math.sin(now * 0.0021) : 0;
             // translate + uniform scale only — see the header: no rotate() here
             head.style.transform =
               'translate(' + (x - st.S / 2) + 'px,' + (y - st.S / 2) + 'px)' +
-              ' scale(' + (sV * (1 + wob + breathe)).toFixed(4) + ')';
-
-            if (active && sp > DEPOSIT_V) deposit(now, sp, st, sV, k);
-            else lastDep = null;
-          }
-          /* stopping retracts nearby trail (its own water, still joined to the
-           * drop); splash droplets are not part of it — they sit where they land */
-          var retracting = stillSince && now - stillSince > 140 && !splash;
-          if (retracting) {
-            for (var j = pts.length - 1; j >= 0; j--) {
-              var p = pts[j];
-              if (Math.sqrt(Math.pow(p.x - x, 2) + Math.pow(p.y - y, 2)) < 62) {
-                p.retr -= 0.085 * k;
-                if (p.retr <= 0) { pts.splice(j, 1); vol = Math.min(1.25, vol + 0.004); }
-              }
-            }
-          }
-          renderTrail(now);
-          promoteBeads(now);
+              ' scale(' + (sV * (1 + wob)).toFixed(4) + ')';
+            if (active) pearling(now, st, sV);
+            // The one rule that is not physics: a drop at rest slowly returns to
+            // its own size, so the cursor never ends up shrunk or swollen after
+            // pearls and splashes. Nothing on the glass is pulled back for it.
+            if (stillSince && now - stillSince > 400) vol += (1 - vol) * (1 - Math.exp(-dt / 1800));
+          } else { tail.a = 0; tail.end = null; }
           updateWet(now, dt, splash ? 0 : R0 * sV * (1 + wob));
-          renderSplashFx(now);
-
-          if (sp > 20 && now - lastSat > 70) {
-            lastSat = now;
-            var ang = theta + Math.PI + (Math.random() - 0.5) * 1.2;
-            spawnSatAt(now, x + Math.cos(ang) * st.a * sV, y + Math.sin(ang) * st.a * sV,
-              Math.cos(ang) * 1.5 + vx * 0.1, Math.sin(ang) * 1.5 + vy * 0.1,
-              0.018 + Math.random() * 0.025, 380 + Math.random() * 300);
-          }
-          var d86 = Math.pow(0.86, k), d92 = Math.pow(0.92, k);
-          for (var j = drops.length - 1; j >= 0; j--) {
-            var dr = drops[j];
-            if (retracting && !dr.abs && Math.sqrt(Math.pow(dr.x - x, 2) + Math.pow(dr.y - y, 2)) < 62) dr.abs = true;
-            if (dr.abs) dr.t = Math.max(dr.t, now - dr.life * 0.85);
-            var age = (now - dr.t) / dr.life;
-            if (age >= 1) { dr.el.style.display = 'none'; POOL.push(dr.el); drops.splice(j, 1); continue; }
-            if (dr.abs) {
-              var adx = x - dr.x, ady = y - dr.y;
-              var adist = Math.max(Math.sqrt(adx * adx + ady * ady), 1);
-              dr.vx = (dr.vx + adx / adist * 0.30 * k) * d92;
-              dr.vy = (dr.vy + ady / adist * 0.30 * k) * d92;
-              if (adist < st.a * sV * 0.9) {
-                vol = Math.min(1.25, vol + dr.fv * 0.85); wobV += 0.05;
-                dr.el.style.display = 'none'; POOL.push(dr.el); drops.splice(j, 1); continue;
-              }
-            } else { dr.vx *= d86; dr.vy *= d86; }
-            dr.x += dr.vx * k; dr.y += dr.vy * k;
-            var rpx = R0 * Math.sqrt(dr.fv) * 2.2, shrink = dr.abs ? 1 : 1 - age * age;
-            // bead lens radius BR in its bake → rendered radius ≈ 0.87·rpx
-            dr.el.style.transform = 'translate(' + (dr.x - DSZ / 2) + 'px,' + (dr.y - DSZ / 2) + 'px) scale(' + Math.max(rpx * 0.87 / BR * shrink, 0.04).toFixed(4) + ')';
-            dr.el.style.opacity = String(dr.abs ? 1 : 1 - age);
-          }
+          renderFx(now);
           requestAnimationFrame(step);
         }
         requestAnimationFrame(step);
@@ -1252,13 +1121,9 @@
           if (m === 'system') {
             html.classList.remove('glass-liquid');
             head.style.opacity = '0';
-            trailEl.style.display = 'none';
             fctx.clearRect(0, 0, fx.width, fx.height);
-            for (var j = drops.length - 1; j >= 0; j--) {
-              drops[j].el.style.display = 'none'; POOL.push(drops[j].el);
-            }
-            drops.length = 0; pts.length = 0; promoted = {};
             for (var j = wet.length - 1; j >= 0; j--) dropWet(j);
+            tail.a = 0; tail.end = null;
             if (splash) { splash = null; setState(ROUND); }
           } else if (active) {
             html.classList.add('glass-liquid');

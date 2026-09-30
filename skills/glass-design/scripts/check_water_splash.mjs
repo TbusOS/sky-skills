@@ -11,7 +11,8 @@
 //   2 扩得开也收得回 最大半径是静止半径的 1.8–3.5 倍;600ms 后回到 1.3 倍以内
 //   3 落地就不动     900ms 和 1500ms 两张图里,水珠一个个对上,位置差 < 0.75px,
 //                    且至少 3 颗(没有水珠留下来也算不过,否则这条查了等于没查)
-//   4 水量守恒       飞溅后的水珠不小于双击前的 0.9 倍,也不大于 1.05 倍
+//   4 水量守恒       飞溅后(700–900ms 的平均,抵掉回弹)水珠不小于双击前的 0.9 倍,也不大于 1.05 倍
+//                    (水珠静止后会慢慢回到原大小,所以要在它开始回填之前量)
 //
 // 用法: node check_water_splash.mjs [glass.js 路径]
 //   不给路径就查本 skill 的 assets/glass.js。
@@ -155,12 +156,16 @@ const r0 = outerR(0);
 await page.mouse.dblclick(CX, CY);
 // 双击后第 n 帧截图,按 60Hz 记成毫秒(17、33、50…)
 const FR = [1, 2, 3, 4, 5, 6, 7, 8, 36, 54, 90, 156];
-let fPrev = 0;
+let fPrev = 0, wSum = 0, wN = 0;
 for (const f of FR) {
+  if (f === 54) for (let g = fPrev + 1; g < 54; g++) {   // 700–900ms:逐帧量水珠宽度
+    await page.evaluate(() => __adv(1)); fPrev = g;
+    if (g >= 42) { wSum += await headW(); wN++; }
+  }
   await page.evaluate(n => __adv(n), f - fPrev); fPrev = f; await page.waitForTimeout(30);
   await grab(Math.round(f * 16.667));
 }
-const w1 = await headW();
+const w1 = wSum / Math.max(1, wN);
 await browser.close();
 
 const rows = [], fail = [];
