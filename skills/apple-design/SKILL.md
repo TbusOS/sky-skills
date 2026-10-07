@@ -1,49 +1,54 @@
 ---
 name: apple-design
-description: "Render HTML/CSS in apple.com visual aesthetic — white/pale-gray alternating sections, SF Pro typography, minimal text links (no filled buttons except Buy CTA), large statistic callouts, product-photography-driven layout, isometric infographics, hand-drawn SVG flow/architecture diagrams. TRIGGER when the user says 'apple 风格' / 'apple style' / '苹果官网风格' / 'like apple.com', or asks to design a landing page / slide / doc / diagram / spec page / configurator matching Apple's web look. DO NOT TRIGGER for native iOS/macOS UI (use an Apple HIG skill instead)."
-last-verified: 2026-04-19
+description: "apple.com 风格的讲解页 / 产品页 / 技术介绍页 HTML。定死的是它的配色和克制:白 #FFFFFF 与浅灰 #F5F5F7 交替、正文 #1D1D1F、次要字 #6E6E73、蓝 #0066CC 是全页唯一的强调色,层级靠灰阶和留白;版式、字体、动画由模型按内容自由发挥(推荐系统无衬线,Apple 设备上就是 SF Pro)。配图例库(templates/diagrams/ 33 张现成 SVG + diagram-craft.md + 图集页)和「让人看懂」三种做法的范例 demos/apple-design/explainer.html(首屏动画演示机制 · 证据模块 · 读者能点选的解释器)。检查只查客观缺陷:design-review/scripts/check_objective.mjs。TRIGGER: 'apple 风格' / 'apple style' / '苹果官网风格' / 'like apple.com' / SF Pro / apple 极简 / 产品叙事 / 巨字号统计. DO NOT TRIGGER: iOS / macOS 原生 App UI、深色玻璃展示(glass-design)、anthropic 配色(anthropic-design)。"
+last-verified: 2026-10-07
 ---
 
-# Apple Design — HTML 风格
+# Apple 风格的讲解页
 
-这份 skill 让 Claude 在任何 HTML 任务里以 apple.com 的视觉语言输出：纯白底 + 交替浅灰段落、SF 字体、克制的文字链、巨字号统计、产品摄影主导、等距插画与手工 SVG 流程图。
+配色和克制照 apple,其余自由。目标只有一个:读者看完能懂这件事。
 
-## 使用方式
+**2026-10-07 改版(user 定,和 anthropic-design 同一思路)**:原来有 10 行写着「必须」——
+图密度配额、动笔前先跑 `dr-cli --plan`、交付前嵌 self-diff、critic ≥ 75、canonical 当评分标准、hero 必须用某个容器类。
 
-1. 在 HTML 里引入 `<link rel="stylesheet" href="assets/apple.css">`（或把 `assets/apple.tailwind.js` merge 到你的 tailwind config）。
-2. 配合 `<link rel="stylesheet" href="assets/fonts.css">` 启用字体栈。
-3. 写业务结构时套用 `apple-*` class 前缀。具体组件用法见 `references/components.md`。
-4. 新开模板直接从 `templates/` 复制。
+现在只定死配色和「蓝色只用一处」的克制,其余改成指引和案例。`references/` 里写的「MUST」当经验看;和本文件冲突时以本文件为准。
 
-## 触发关键词
+## 1. 定死的:配色和克制
 
-`apple 风格` / `apple style` / `苹果官网风格` / `like apple.com` / `SF Pro` / `apple 极简` / `产品叙事` / `巨字号统计`
+| 用途 | 颜色 |
+|---|---|
+| 页面底 · 交替段落底 · 黑色章节 | `#FFFFFF` · `#F5F5F7` · `#000000` |
+| 正文字 · 次要字 · 分隔线 | `#1D1D1F` · `#6E6E73` · `#D2D2D7` |
+| 唯一的强调色 | 蓝 `#0066CC`:链接、主按钮、图里的焦点 |
+| 状态(只在需要表达状态时用) | 绿 `#1F7A37` · 橙 `#B25000` · 红 `#D70015`(白底上 5.39 / 5.20 / 5.38,能当小字) |
+| 深色框(终端 / 代码) | 底 `#1D1D1F` · 标题条 `#2C2C2E` · 字 `#F5F5F7` · 次要字 `#98989D` |
 
-## 不要用于
+- **蓝色只用一处**:强调靠位置、字号和留白,不靠多加颜色。层级、分类用灰阶区分。
+- 文字用色要过 WCAG AA。下面的数是 2026-10-07 按 WCAG 相对亮度公式算的:
+  - 次要字 `#6E6E73` 在白底 5.07、在 `#F5F5F7` 4.66,放到更深的灰块(代码块、选中态)上就不够了,那里用 `#636366`(≥ 4.85)。
+  - 蓝底按钮上用白字(5.57);深字在 `#0066CC` 上只有 3.0。
+  - 深色框里的次要字用 `#98989D`(在 `#2C2C2E` 上 4.85),`#8E8E93` 只有 4.27。
+- `assets/apple.css`(`apple-*` 组件)和 `assets/fonts.css` 可以用,不强制。
 
-- iOS / iPadOS / macOS 原生 App UI（用 Apple HIG 专属 skill）
-- 需要深色 Material / 彩虹渐变 / AI-slop 美学的场景
+## 2. 让人看懂的三种做法(案例,不是规则)
 
-## 阅读顺序
+范例:`demos/apple-design/explainer.html` —— whetstone 介绍站首页换成 apple 风格(白 / 浅灰交替、蓝色单一强调、系统无衬线粗标题)。
 
-1. `references/design-tokens.md` — 所有 CSS 变量
-2. `references/typography.md` — 字体层级与规则
-3. `references/layout-patterns.md` — 六类版式骨架 + **容器选择表**
-4. `references/components.md` — 28 组件（含 §28 Inline SVG 插画模板）
-5. `references/diagram-craft.md` — **手工 SVG 图示工艺（画任何架构/流程/层级/时间线/时序图前 MUST 读）**：美靠"少"、蓝色单焦点、柔影白卡、布局公式、时序图 pattern、图密度合约、反模式
-6. `references/motion.md` — 动效两层体系：入场缓动（禁弹）+ 手势组件 spring 手感（可中断 / 跟手 / 速度交接 / 橡皮筋），JS 动画的 reduced-motion 自查规则
-7. `references/imagery.md` — 摄影与圆角规则
-8. `references/data-display.md` — 巨字号统计 + 等距插画
-9. `references/responsive.md` — 断点与 max-width
-10. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
+| 做法 | 为什么管用 | 范例里看哪 |
+|---|---|---|
+| **首屏用动画演示机制** | 读者第一眼看到的是这个东西怎么动 | 首屏右侧:经验被分进 L1–L4 四层 |
+| **证据模块** | 页面越好看,内容越容易被当真;证据让读者能自己核对 | `#evidence`:命令输出终端、检查计数条、REFUSED 票据、局限一节 |
+| **读者能点选的解释器** | 自己点一下,比读三段文字快 | `#evidence` 的置信度表、`#layers` 点选岩层、`#flow` 流程步进 |
 
-## 图密度合约（写任何页面前 MUST — 不只画图时）
+- 示意图要注明是示意:范例 `#why` 的曲线图下面写着 "illustration, not measured data"。
+- 巨字号统计是 apple 的老办法,适合「一个数字说明一件事」;数字要有出处。
+- 动画演示机制里的某一步,只是装饰的能删就删;打开「减少动态效果」时内容必须完整。
 
-**尽可能用图表达**——这是默认要求，不需要用户提醒。下表任一形态出现就该配视觉化
-（图型列是**默认起点不是强制规格**——结构按实际内容定制、可混搭可自创，硬约束只有
-"该有图的地方有图" + 工艺质量闸，三层约束见 `diagram-craft.md` 开头）：
+## 3. 图例库
 
-| 内容形态 | 必须配 | 内容形态 | 必须配 |
+先按内容选图型。下表是起点,结构按实际内容改,可以混搭,也可以自创:
+
+| 内容 | 可以用 | 内容 | 可以用 |
 |---|---|---|---|
 | 数字对比 / 统计 | **巨字号统计**（apple 的视觉主角，计入视觉元素） | ≥3 步流程 / 启动链 / 数据流 | 流程图或时序图 |
 | 系统结构 / 分层 / 依赖 | 架构图 | 时间演进 / 版本 / 里程碑 | 时间线 |
@@ -51,54 +56,26 @@ last-verified: 2026-04-19
 | 函数控制流 / 寄存器位域 | 函数流程图 / 位域图 | SoC 结构 / 信号时序 / 编译链 / 调度 | 对应内核图型（diagram-craft §12） |
 | 排查一个具体故障 / 论证「改这里会影响那里」 | 调用链定位图（§17.5，每层挂 `file:line`、关键行贴原文；**不手画**，`gen_call_site_figure.py --style=apple` 从源文本生成） | 两条链共用了一个东西但彼此不调用 | 同上，并排画 · 蓝只给那道耦合 |
 
-节奏：每 1.5 屏（≈1300px @1440）≥ 1 个 SVG / figure / stat。机器闸 `text-desert` 在连续
-2600px 无视觉元素时 warn（known-bugs 1.31）。动笔画图前再读 `references/diagram-craft.md`：
-§6 先定尺寸再画（**内容多就加宽加高画布，禁止把图缩小去迁就版式——看不清 = 没画**；
-信息密集图必须走 `--hero` 1280px 容器 + `grid-column: 1 / -1`，否则文字被压到 <9px）、
-§0 色彩身份（灰阶为本 + 蓝 `#0071e3` 全图一处——apple 的"少"靠柔影和留白做层次，不是单调）。
-现成图直接抄 `templates/diagrams/`（30 件图型 + device-mock 底版），案例库见
-`demos/apple-design/diagrams.html`（每张带 Copy SVG）。
+- `templates/diagrams/`:33 张现成 SVG(含 `device-mock.svg` 设备线稿底版),图集 `demos/apple-design/diagrams.html`(每张带 Copy SVG)。
+- `references/diagram-craft.md`:画图手法(灰阶为本、蓝色一处、柔影白卡、先定尺寸再画)。
+- 调用链定位图不手画:`python3 ~/.claude/skills/design-review/scripts/gen_call_site_figure.py <源文本> --style=apple`。
+- 手机上的宽图包进 `<div class="apple-scroll" style="--pan-w:NNNpx">` 左右拖,`--pan-w` 是最小字刚好 9px 时图的宽度;不需要读字的图片类标 `data-allow-shrink`。
 
-## 发布前检查(MUST — 交给 design-review skill)
-
-### 生成**前**读 canonical + 拿合约
+## 4. 检查:只查客观缺陷
 
 ```bash
-~/.claude/skills/design-review/dr-cli --plan --skill=apple --page=<pricing|landing|docs-home>
-# 读 ~/.claude/skills/apple-design/references/canonical/<page>.html + .md
+node ~/.claude/skills/design-review/scripts/check_objective.mjs page.html [...]
 ```
 
-### 生成**后**写 self-diff note(交付前 MUST)
+五项:O1 JS 报错 · O2 文字对比度 · O3 真实横向滚动 · O4 手机上图里的字 ≥ 9px · O5 关掉动画也完整。
+版式、字体、组件写法一概不查。每项怎么判、为什么这么判,见 `anthropic-design/SKILL.md` 第 4 节。
 
-生成器在写完 HTML、跑 4 闸之前,必须在 `</body>` 前 embed 一个
-`design-review:self-diff v1` HTML 注释块,列出 5-7 条本次生成的关键
-设计决策 + 2-3 条 known trade-offs。contract 见
-`~/.claude/skills/design-review/references/cross-skill-rules.md §M`,示范参考
-`~/.claude/skills/anthropic-design/references/canonical/comparison.html` 末尾。
+O2 用的 axe 不查 SVG 里文字的对比度,图里的小标签要自己看一眼。
 
-没有 self-diff = canonical 不被 `verify.py` 承认。critic 也无法做实
-质评审(没有作者意图的靶子)。HARNESS-ROADMAP Phase 03 的硬规则。
+## 5. 可选:想要风格上的第二意见时
 
-### 生成**后**跑四闸
-
-```bash
-~/.claude/skills/design-review/dr-cli --critic <path/to/your.html>
-```
-
-四闸:`verify.py` · `visual-audit.mjs`(加 §J italic / §K brand + smell)·
-`screenshot.mjs` · `critic.mjs`(LLM taste 0-100 分)。
-
-任一 error = 失败。critic 得分 < 75 必修。canonical 自回归 ≥ 90。
-
-规则:`~/.claude/skills/design-review/references/cross-skill-rules.md` A-L +
-`known-bugs.md`。canonical:`~/.claude/skills/apple-design/references/canonical/`。
-
-Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
-[harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)
-里的 GAN 式 discriminator。
-
-### apple 专属要点
-
-- Hero 段必须 `class="apple-container apple-container--hero"`(**base + modifier 都要**)。apple 的 base container 是窄(980px)的, hero 必须 `--hero` (1280px) 否则 SoC / multi-repo 这种信息密集框图会被压得文字 <9px
-- 信息密集的 hero 框图必须 `grid-column: 1 / -1`
-- 风格规则详见 `references/dos-and-donts.md`
+- `design-review` 的四道检查 + critic 评分、`dr-cli --audit`:还能用,不是交付门槛。critic 拿 canonical 当靶子,偏离范例的版式会被扣分,在本 skill 里不算问题。
+- 参考资料都当案例和经验看:`references/` 下 design-tokens / typography / layout-patterns / components(28 组件)/
+  diagram-craft / motion(入场缓动 + 手势 spring)/ imagery / data-display / responsive / dos-and-donts,
+  `references/canonical/` 10 个范例页,`templates/` 页面模板。
+- 旧经验仍然有用的一条:apple 默认容器较窄(980px),信息密集的大图放进宽容器(`apple-container--hero`,1280px)再横跨整行,否则字会被压到 9px 以下。
