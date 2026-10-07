@@ -104,6 +104,7 @@ const CORE_SURFACES = [
 // script exists to break.
 const SHOWCASE_SURFACES = [
   'demos/anthropic-design/index.html',
+  'demos/anthropic-design/story.html',
   'demos/apple-design/index.html',
   'demos/ember-design/index.html',
   'demos/sage-design/index.html',

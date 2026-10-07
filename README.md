@@ -12,7 +12,7 @@ Ten design skills ship with single-page flagship demos under [`demos/`](./demos/
 - [**explain-ladder demo**](./demos/explain-ladder/index.html) — one topic at all four rungs: a real STE rewrite with the checker's output, a call chain as prose and as an ASCII figure, a live throwaway page (25 SKILL.md files checked at a fixed commit, rebuildable byte for byte), and a video that only appears after you say yes
 
 - [**apple-design demo**](./demos/apple-design/index.html) — sky-skills in apple.com's crisp voice
-- [**anthropic-design demo**](./demos/anthropic-design/index.html) — sky-skills in anthropic.com's warm editorial voice
+- [**anthropic-design**](./demos/anthropic-design/index.html) — only the palette is fixed: a contrast lab, a diagram chooser, five objective checks · [the sky-skills story in this voice](./demos/anthropic-design/story.html)
 - [**ember-design demo**](./demos/ember-design/index.html) — handcraft editorial warmth (cream + chocolate + gold)
 - [**sage-design demo**](./demos/sage-design/index.html) — quiet Nordic minimalism (cream + sage green + deep indigo)
 - [**glass-design demo**](./demos/glass-design/index.html) — Apple liquid-glass / aurora glassmorphism (deep navy + cyan + frosted panels, dark/light dual theme)

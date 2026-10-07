@@ -12,7 +12,7 @@
 - [**explain-ladder demo**](./demos/explain-ladder/index.html) —— 四级各演示一遍:一段真实的 STE 改写和检查输出、同一条调用链的文字版和 ASCII 图版、一个真的看懂就扔页(在固定提交下体检 25 份 SKILL.md,能逐字节重建),以及点头之后才出现的视频
 
 - [**apple-design demo**](./demos/apple-design/index.html) —— apple.com 的冷感克制
-- [**anthropic-design demo**](./demos/anthropic-design/index.html) —— anthropic.com 的暖编辑感
+- [**anthropic-design**](./demos/anthropic-design/index.html) —— 只定死配色:对比度试验台、按内容挑图、五项客观检查 · [用这套配色讲 sky-skills 的旧版演示](./demos/anthropic-design/story.html)
 - [**ember-design demo**](./demos/ember-design/index.html) —— 手作 · 暖棕 · 文学式的咖啡色系（米白 + 巧克力 + 金）
 - [**sage-design demo**](./demos/sage-design/index.html) —— 安静 · 北欧极简（米黄 + 抹茶绿 + 深靛蓝）
 - [**glass-design demo**](./demos/glass-design/index.html) —— Apple 液态玻璃 / aurora 玻璃拟态（深藏青 + cyan + 毛玻璃面板，dark/light 双主题）

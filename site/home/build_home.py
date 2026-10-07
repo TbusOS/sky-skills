@@ -57,7 +57,7 @@ S = {
  'anthropic-design': ('des', 'An', 'anthropic', 'Voice', '风格',
    'The anthropic.com palette with a free layout: warm cream, orange, low-saturation semantic hues, ink text. 78 diagram templates and an 87-figure gallery; the check covers objective defects only.',
    '只定死 anthropic.com 的配色:暖米白、橙、低饱和语义色、墨色字,版式自由。78 张图例模板、87 图案例库;检查只查客观缺陷。',
-   DREL + ['explain-ladder'], [('demos/anthropic-design/explainer.html', 'Reworked example', '改版示范页'), ('demos/anthropic-design/diagrams.html', 'Diagram gallery', '图例库'), ('demos/anthropic-design/index.html', 'Earlier flagship', '旧版 flagship')]),
+   DREL + ['explain-ladder'], [('demos/anthropic-design/index.html', 'Skill page', '介绍页'), ('demos/anthropic-design/explainer.html', 'Reworked example', '改版示范页'), ('demos/anthropic-design/diagrams.html', 'Diagram gallery', '图例库'), ('demos/anthropic-design/story.html', 'Earlier flagship', '旧版 flagship')]),
  'apple-design': ('des', 'Ap', 'apple', 'Voice', '风格',
    'The apple.com palette and restraint: white and light-grey sections, one blue accent, hierarchy carried by grey and whitespace. 33 diagram templates.',
    'apple.com 的配色和克制:白 / 浅灰段落交替、只有一个蓝色强调、层级靠灰阶和留白。33 张图例模板。',

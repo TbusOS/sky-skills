@@ -419,7 +419,7 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
 </head>
 <body>
 <!-- facts-ignore: the next line embeds git commit subjects for the history chart; their counts describe the repo on those dates -->
-<script type="application/json" id="page-data">{"palette":[{"id":"cream","hex":"#faf9f5","en":"Page","zh":"页面底","kind":"bg"},{"id":"subtle","hex":"#f0ede3","en":"Subtle band","zh":"次级段落底","kind":"bg"},{"id":"card","hex":"#ffffff","en":"Card","zh":"卡片","kind":"bg"},{"id":"line","hex":"#e8e6dc","en":"Rule","zh":"分隔线","kind":"bg"},{"id":"ink","hex":"#141413","en":"Ink","zh":"正文字","kind":"text"},{"id":"ink2","hex":"#5e5d55","en":"Secondary","zh":"次要字","kind":"text"},{"id":"orange","hex":"#d97757","en":"Orange","zh":"主色","kind":"hue"},{"id":"orange2","hex":"#c56544","en":"Orange, darker","zh":"深一档橙","kind":"hue"},{"id":"orangek","hex":"#a8502f","en":"Orange for text","zh":"小字用橙","kind":"text"},{"id":"blue","hex":"#6a9bcc","en":"Blue","zh":"蓝","kind":"hue"},{"id":"olive","hex":"#788c5d","en":"Olive","zh":"橄榄绿","kind":"hue"},{"id":"gold","hex":"#c9913f","en":"Gold","zh":"金","kind":"hue"},{"id":"grey","hex":"#b0aea5","en":"Grey","zh":"灰","kind":"hue"},{"id":"danger","hex":"#a14238","en":"Danger","zh":"危险","kind":"hue"},{"id":"dark","hex":"#1c1b18","en":"Dark box","zh":"深色框底","kind":"dark"},{"id":"darkbar","hex":"#2a2925","en":"Title bar","zh":"标题条","kind":"dark"},{"id":"darkink","hex":"#ece9df","en":"Dark-box text","zh":"深色框字","kind":"dark"},{"id":"dred","hex":"#ec9488","en":"Error, light","zh":"浅色报错","kind":"dark"},{"id":"dgold","hex":"#dcb062","en":"Warning, light","zh":"浅色警告","kind":"dark"},{"id":"dgreen","hex":"#a9bf8f","en":"Pass, light","zh":"浅色通过","kind":"dark"}],"cr":{"orange_cream":2.96,"orange2_cream":3.75,"orangek_cream":5.17,"ink_orange":5.9,"white_orange":3.12,"ink_cream":17.5,"ink2_cream":6.28,"danger_cream":5.95,"danger_dark":2.75,"ink2_dark":2.6,"grey_cream":2.11,"dred_dark":7.51,"dgold_dark":8.55,"dgreen_dark":8.64,"darkink_dark":14.18,"blue_raw":2.78,"blue_mix":5.53,"blue_mixhex":"#496886","olive_raw":3.49,"olive_mix":6.57,"olive_mixhex":"#525e41","gold_raw":2.62,"gold_mix":5.29,"gold_mixhex":"#84622e"},"history":[{"h":"8e81588","d":"2026-04-19","s":"feat(anthropic-design): 新增基础层（SKILL.md + tokens + CSS + fonts + Tailwind preset）","must":0,"lines":37},{"h":"1431d55","d":"2026-04-19","s":"feat(apple-design,anthropic-design): 反向固化 demo 失败教训到两个 skill","must":5,"lines":45},{"h":"3b483c6","d":"2026-04-19","s":"feat(apple-design,anthropic-design): 把'发布前 checklist'从文字升级为可执行闸","must":6,"lines":72},{"h":"16e7014","d":"2026-04-19","s":"feat(sage-design): 新增第四个设计 skill + 强化所有设计 skill 的视觉审核闸","must":7,"lines":85},{"h":"a7cfc64","d":"2026-04-20","s":"feat(design-review): 新增独立评审 skill,4 个设计 skill 的三道闸去重","must":5,"lines":66},{"h":"c68c5ba","d":"2026-04-21","s":"feat(review): Phase E + F · library-grower skeleton + 文档锁入","must":6,"lines":82},{"h":"457241d","d":"2026-04-24","s":"feat(review): codify two new learning-loop rules · §M self-diff + §1.22 zh-halfwidth-punct","must":8,"lines":93},{"h":"a82d8b3","d":"2026-04-27","s":"feat(anthropic): v2 — scenario recipes + ux-writing + recipe components","must":9,"lines":129},{"h":"92f3ee0","d":"2026-05-25","s":"feat(anthropic): md 渲染四件套 · 解决链向 md 浏览器 raw 显示难看 + 单目录可移植分发","must":9,"lines":204},{"h":"5bbcc64","d":"2026-06-10","s":"feat(design): diagram-craft 工艺上线 · 8 模板重写 + 双 diagram-craft.md + saturated-band 审计闸","must":10,"lines":206},{"h":"fe3c43b","d":"2026-06-11","s":"feat(design): diagram-craft v3 · 尺寸/色彩/图密度三类新闸 + 文档七处同步","must":14,"lines":221},{"h":"9ed1234","d":"2026-06-11","s":"feat(design): 内核/嵌入式七图型谱系 · 模板 14+12 · apple gallery 上线 · 约束三层化","must":13,"lines":224},{"h":"b0d5c50","d":"2026-06-12","s":"perf(anthropic): fonts.css 默认不加载 CJK webfont,拆出按需的 fonts-cjk.css (#10)","must":14,"lines":224},{"h":"585d9f8","d":"2026-06-15","s":"feat(harness): design 生成+评审全套可从任意目录调用(CWD 无关化)","must":14,"lines":224},{"h":"02c353f","d":"2026-07-01","s":"skills: 示例素材脱敏 — 移除残留内部标识 + 领域示例中性化","must":14,"lines":224},{"h":"ea2cd88","d":"2026-07-06","s":"design harness: 用户反馈四坑 codify —— 评审端两新闸 + 重叠升档,规则进全部 7 美学","must":14,"lines":224},{"h":"2fbab5f","d":"2026-08-24","s":"docs: 设计 skill 计数 8→9 + primer 接入全部文档面 + atelier 注册欠账清理","must":14,"lines":225},{"h":"a4b3b5b","d":"2026-08-25","s":"fix: 定义唯一的检查模型并按它扫平计数与清单长度","must":14,"lines":226},{"h":"b012209","d":"2026-09-22","s":"feat: design 系列加一种图例 —— 调用链定位图（issue #28）","must":14,"lines":233},{"h":"9aee001","d":"2026-09-23","s":"feat: 调用链定位图改由源文本生成 —— 原文从真实文件里读，每层行号都核过","must":14,"lines":235},{"h":"592d7ca","d":"2026-09-29","s":"feat(anthropic): 十种「判断与覆盖」类图型(issue #32)—— 图集 77 → 87,模板 69 → 79","must":14,"lines":240},{"h":"daee1e7","d":"2026-10-07","s":"anthropic-design 改版:配色定死,其余改成指引 + 案例;检查只查客观缺陷","must":3,"lines":206},{"h":"3d4ea69","d":"2026-10-07","s":"check_objective 移到 design-review/scripts,三个设计 skill 共用;加 --themes;打不开的页面报失败不崩","must":3,"lines":206},{"h":"a49d13c","d":"2026-10-07","s":"新增 explain-ladder:讲解四级阶梯 文字 \u003c 图 \u003c 网页 \u003c 视频,一个入口","must":3,"lines":206},{"h":"5e50d06","d":"2026-10-07","s":"anthropic-design:订正橙色当字色那一句(C-20261007-03)","must":3,"lines":206}],"diagrams":[{"n":"abstraction-ladder","sec":"15.39","g":"hw"},{"n":"address-map","sec":"15.10","g":"hw"},{"n":"address-spaces","sec":"15.28","g":"hw"},{"n":"algorithm-ringbuffer","sec":"","g":"hw"},{"n":"architecture","sec":"","g":"general"},{"n":"arm64-display-path","sec":"","g":"hw"},{"n":"buffer-roles","sec":"","g":"hw"},{"n":"build-pipeline","sec":"15.6","g":"hw"},{"n":"bus-fabric","sec":"15.17","g":"hw"},{"n":"bus-tenants","sec":"","g":"hw"},{"n":"call-graph","sec":"15.18","g":"hw"},{"n":"call-site-locator","sec":"15.50","g":"judge"},{"n":"call-stack","sec":"15.19","g":"hw"},{"n":"cheatsheet","sec":"15.48","g":"hw"},{"n":"copy-vs-share","sec":"15.29","g":"hw"},{"n":"count-flow","sec":"15.56","g":"judge"},{"n":"coverage-dots","sec":"15.52","g":"judge"},{"n":"cross-section","sec":"15.34","g":"hw"},{"n":"dataflow-animated","sec":"15.30","g":"hw"},{"n":"datapath","sec":"15.13","g":"hw"},{"n":"debug-map","sec":"15.36","g":"hw"},{"n":"deployment","sec":"","g":"general"},{"n":"die-floorplan","sec":"15.12","g":"hw"},{"n":"dim-spotlight","sec":"15.60","g":"judge"},{"n":"display-controller-inside","sec":"","g":"hw"},{"n":"display-triage","sec":"","g":"hw"},{"n":"display-vocabulary","sec":"","g":"hw"},{"n":"dsi-panel-inside","sec":"","g":"hw"},{"n":"exploded-view","sec":"15.35","g":"hw"},{"n":"flame-graph","sec":"15.45","g":"hw"},{"n":"flow","sec":"","g":"general"},{"n":"frame-pipeline","sec":"15.21","g":"hw"},{"n":"function-flowchart","sec":"15.1","g":"hw"},{"n":"glyphs","sec":"","g":"hw"},{"n":"glyphs-memory","sec":"","g":"hw"},{"n":"gpu-dataflow","sec":"15.25","g":"hw"},{"n":"gpu-memory-flow","sec":"","g":"hw"},{"n":"gpu-tile-render","sec":"","g":"hw"},{"n":"hierarchy","sec":"","g":"general"},{"n":"highlight-in-place","sec":"15.44","g":"hw"},{"n":"hw-timing-waveform","sec":"15.5","g":"hw"},{"n":"interconnect-map","sec":"15.8","g":"hw"},{"n":"isometric-stack","sec":"","g":"general"},{"n":"leaf-groups","sec":"15.57","g":"judge"},{"n":"magnitude-ruler","sec":"15.37","g":"hw"},{"n":"multicore-calls","sec":"15.22","g":"hw"},{"n":"packet-encap","sec":"15.14","g":"hw"},{"n":"page-flip","sec":"","g":"hw"},{"n":"path-gates","sec":"15.51","g":"judge"},{"n":"pinout","sec":"15.38","g":"hw"},{"n":"pipeline-exits","sec":"15.59","g":"judge"},{"n":"platform-block","sec":"15.27","g":"hw"},{"n":"power-sequence","sec":"15.23","g":"hw"},{"n":"process-steps","sec":"15.41","g":"hw"},{"n":"protocol-stack","sec":"15.9","g":"hw"},{"n":"queue-pressure","sec":"15.47","g":"hw"},{"n":"railroad","sec":"15.46","g":"hw"},{"n":"register-bitfield","sec":"15.3","g":"hw"},{"n":"runtime-timeline","sec":"15.20","g":"hw"},{"n":"scale-ladder","sec":"15.42","g":"hw"},{"n":"sched-timeline","sec":"15.7","g":"hw"},{"n":"see-inside","sec":"15.43","g":"hw"},{"n":"segment-align","sec":"15.54","g":"judge"},{"n":"sequence","sec":"","g":"general"},{"n":"soc-block","sec":"15.4","g":"hw"},{"n":"soc-dataflow","sec":"15.24","g":"hw"},{"n":"state-machine","sec":"","g":"general"},{"n":"state-triptych","sec":"15.40","g":"hw"},{"n":"struct-graph","sec":"15.16","g":"hw"},{"n":"system-topology","sec":"15.11","g":"hw"},{"n":"terminal-annotated","sec":"15.15","g":"hw"},{"n":"text-steps","sec":"15.58","g":"judge"},{"n":"timeline","sec":"","g":"general"},{"n":"verdict-tree","sec":"15.55","g":"judge"},{"n":"vram-copy-flow","sec":"","g":"hw"},{"n":"vram-dataflow","sec":"15.26","g":"hw"},{"n":"what-is-a-frame","sec":"","g":"hw"},{"n":"where-when-grid","sec":"15.53","g":"judge"}],"chooser":[{"en":"A process of three or more steps, a boot chain, a data flow","zh":"≥3 步流程 / 启动链 / 数据流","files":["flow","sequence"],"recipe":"","sec":[]},{"en":"Numbers to compare, statistics","zh":"数字对比 / 统计","files":["magnitude-ruler","scale-ladder"],"recipe":"","sec":["15.37","15.42"]},{"en":"System structure, layers, dependencies","zh":"系统结构 / 分层 / 依赖","files":["architecture","hierarchy","isometric-stack"],"recipe":"","sec":[]},{"en":"Change over time, versions, milestones","zh":"时间演进 / 版本 / 里程碑","files":["timeline"],"recipe":"","sec":[]},{"en":"A product or a UI","zh":"产品 / UI 描述","files":[],"recipe":"§10","sec":[]},{"en":"Control flow of a function, a register bit field","zh":"函数控制流 / 寄存器位域","files":["function-flowchart","register-bitfield"],"recipe":"","sec":["15.1","15.3"]},{"en":"SoC structure, signal timing, a build chain, scheduling","zh":"SoC 结构 / 信号时序 / 编译链 / 调度","files":["soc-block","hw-timing-waveform","build-pipeline","sched-timeline"],"recipe":"","sec":["15.4","15.5","15.6","15.7"]},{"en":"Tracking down a fault; arguing that a change here reaches there","zh":"排查一个故障 / 论证「改这里会影响那里」","files":["call-site-locator"],"recipe":"","sec":["15.50"]},{"en":"A call chain over 30 deep, identifiers only","zh":"30 层以上、纯标识符的调用链","files":[],"recipe":"§18","sec":[]},{"en":"Several paths through several gates","zh":"几条路 × 几道关卡","files":["path-gates"],"recipe":"","sec":["15.51"]},{"en":"Several kinds of problem × several checks: who catches what","zh":"几种问题 × 几道检查,谁抓得到","files":["coverage-dots"],"recipe":"","sec":["15.52"]},{"en":"Why a reading is already stale when you take it","zh":"一个读数为什么当场就旧","files":["where-when-grid"],"recipe":"","sec":["15.53"]},{"en":"One wildcard rule, two meanings","zh":"同一条通配规则两种语义","files":["segment-align"],"recipe":"","sec":["15.54"]},{"en":"A directory tree two parties judge differently","zh":"目录树上两方判法不同","files":["verdict-tree"],"recipe":"","sec":["15.55"]},{"en":"Where a batch of findings came from and where it went","zh":"一批发现从哪来、分到哪去","files":["count-flow"],"recipe":"","sec":["15.56"]},{"en":"One kind of failure, a dozen cases, which way each falls","zh":"同一类失败十几种情况各往哪倒","files":["leaf-groups"],"recipe":"","sec":["15.57"]},{"en":"A string of text processed step by step","zh":"一串文本被一步步加工","files":["text-steps"],"recipe":"","sec":["15.58"]},{"en":"Where each step of a process can stop it","zh":"流程每一步能在哪拦下","files":["pipeline-exits"],"recipe":"","sec":["15.59"]},{"en":"Several pages, each about one part of the same process","zh":"几页讲同一个流程的不同一块","files":["dim-spotlight"],"recipe":"","sec":["15.60"]}],"examples":[{"f":"explainer.html","art":"layers","title":"Whetstone · 磨刀石 — distill a dev session into a skill, refuse what it can't prove","feature":true,"lines":1752,"en":"The reworked example: a mechanism animated in the first screen, an evidence module, three explainers you can click.","zh":"改版范例:首屏动画演示机制、证据模块、三个能点的解释器。"},{"f":"hardware.html","art":"screen","title":"How a picture physically reaches a phone screen","feature":false,"lines":2005,"en":"Every hardware block one frame passes through on its way to a phone screen.","zh":"一帧画面上屏要经过的每一块硬件。"},{"f":"bringup.html","art":"panel","title":"Bringing a panel up","feature":false,"lines":1052,"en":"What is inside a display module, and the power-up order you cannot change.","zh":"显示模组里面有什么,和不能换的上电顺序。"},{"f":"one-bit.html","art":"bit","title":"How one bit is held","feature":false,"lines":846,"en":"One memory bit: an abstraction ladder, a three-state triptych, ten decades on one axis.","zh":"一个比特怎么存:逐级抽象、三种状态并排、十个数量级画在一根轴上。"},{"f":"packaging.html","art":"chip","title":"How a chip is assembled","feature":false,"lines":891,"en":"From a board you can hold to a joint you cannot see: zoom chain, process steps, exploded view.","zh":"从拿得动的板到看不见的焊点:放大链、工序图、爆炸图。"},{"f":"pressure.html","art":"queue","title":"Where the time goes","feature":false,"lines":557,"en":"Two figures that argue: width with a unit, and the queue that bends at its knee.","zh":"两张会下判断的图:有量纲的宽度,和到拐点就陡起来的排队曲线。"},{"f":"reading.html","art":"eye","title":"How a figure gets read","feature":false,"lines":1078,"en":"How a dense figure gets read: three ways to show an inside, stepping, and what a figure must carry.","zh":"一张密图怎么被读懂:三种看内部的画法、步进、一张图要自带什么。"},{"f":"story.html","art":"story","title":"Sky Skills — thoughtful tools for Claude.","feature":false,"lines":1112,"en":"The old landing page: the sky-skills story told in this palette, as the other design voices tell it.","zh":"旧版首页:用这套配色讲 sky-skills 的故事,和其他设计 skill 的演示页讲同一件事。"},{"f":"diagrams.html","art":"grid","title":"Diagram Gallery","feature":true,"lines":11347,"en":"The gallery: every diagram type in this palette, numbered by section.","zh":"图集:这套配色下的每一种图型,按编号分节。"},{"f":"index-v2.html","art":"v2","title":"Sky Skills — thoughtful tools for Claude. · v2 diagram craft","feature":false,"lines":1207,"en":"Scenario showcase: dashboard, form, table and modal recipes.","zh":"场景展示:仪表盘、表单、数据表、弹窗这些配方。"}],"phrases":["anthropic 风格","anthropic style","claude 官网风格","Anthropic 品牌","暖米白加橙","技术介绍页","原理讲解页","编辑式长文","报告页","架构图","流程图","editorial long-form page"],"routes":[{"what":"apple 风格","to":"apple-design"},{"what":"零基础图解","to":"primer-design"},{"what":"深色玻璃展示","to":"glass-design"},{"what":"只给自己看一次的数据页","to":"explain-ladder 第 3 级"},{"what":"高饱和霓虹","to":""}],"checks":{"date":"2026-10-07","cmd":"node skills/design-review/scripts/check_objective.mjs demos/anthropic-design/\u003cpage>.html","pages":[{"f":"explainer.html","rc":0,"res":{"O1":{"st":"pass","msg":"JS 报错:没有"},"O2":{"st":"pass","msg":"文字对比度:axe color-contrast 0 处"},"O3":{"st":"pass","msg":"横向滚动:1280 / 390 都滚不动,布局也不超宽"},"O4":{"st":"pass","msg":"手机上图里的字:都 ≥ 9px"},"O5":{"st":"pass","msg":"关掉动画也完整:标题和正文都看得见"}},"summary":"5 通过 / 0 失败 / 0 提醒"},{"f":"hardware.html","rc":0,"res":{"O1":{"st":"pass","msg":"JS 报错:没有"},"O2":{"st":"pass","msg":"文字对比度:axe color-contrast 0 处"},"O3":{"st":"pass","msg":"横向滚动:1280 / 390 都滚不动,布局也不超宽"},"O4":{"st":"pass","msg":"手机上图里的字:都 ≥ 9px"},"O5":{"st":"pass","msg":"关掉动画也完整:标题和正文都看得见"}},"summary":"5 通过 / 0 失败 / 0 提醒"},{"f":"bringup.html","rc":0,"res":{"O1":{"st":"pass","msg":"JS 报错:没有"},"O2":{"st":"pass","msg":"文字对比度:axe color-contrast 0 处"},"O3":{"st":"pass","msg":"横向滚动:1280 / 390 都滚不动,布局也不超宽"},"O4":{"st":"pass","msg":"手机上图里的字:都 ≥ 9px"},"O5":{"st":"pass","msg":"关掉动画也完整:标题和正文都看得见"}},"summary":"5 通过 / 0 失败 / 0 提醒"},{"f":"one-bit.html","rc":0,"res":{"O1":{"st":"pass","msg":"JS 报错:没有"},"O2":{"st":"pass","msg":"文字对比度:axe color-contrast 0 处"},"O3":{"st":"pass","msg":"横向滚动:1280 / 390 都滚不动,布局也不超宽"},"O4":{"st":"pass","msg":"手机上图里的字:都 ≥ 9px"},"O5":{"st":"pass","msg":"关掉动画也完整:标题和正文都看得见"}},"summary":"5 通过 / 0 失败 / 0 提醒"},{"f":"packaging.html","rc":0,"res":{"O1":{"st":"pass","msg":"JS 报错:没有"},"O2":{"st":"pass","msg":"文字对比度:axe color-contrast 0 处"},"O3":{"st":"pass","msg":"横向滚动:1280 / 390 都滚不动,布局也不超宽"},"O4":{"st":"pass","msg":"手机上图里的字:都 ≥ 9px"},"O5":{"st":"pass","msg":"关掉动画也完整:标题和正文都看得见"}},"summary":"5 通过 / 0 失败 / 0 提醒"},{"f":"pressure.html","rc":0,"res":{"O1":{"st":"pass","msg":"JS 报错:没有"},"O2":{"st":"pass","msg":"文字对比度:axe color-contrast 0 处"},"O3":{"st":"pass","msg":"横向滚动:1280 / 390 都滚不动,布局也不超宽"},"O4":{"st":"pass","msg":"手机上图里的字:都 ≥ 9px"},"O5":{"st":"pass","msg":"关掉动画也完整:标题和正文都看得见"}},"summary":"5 通过 / 0 失败 / 0 提醒"},{"f":"reading.html","rc":0,"res":{"O1":{"st":"pass","msg":"JS 报错:没有"},"O2":{"st":"pass","msg":"文字对比度:axe color-contrast 0 处"},"O3":{"st":"pass","msg":"横向滚动:1280 / 390 都滚不动,布局也不超宽"},"O4":{"st":"pass","msg":"手机上图里的字:都 ≥ 9px"},"O5":{"st":"pass","msg":"关掉动画也完整:标题和正文都看得见"}},"summary":"5 通过 / 0 失败 / 0 提醒"},{"f":"diagrams.html","rc":0,"res":{"O1":{"st":"pass","msg":"JS 报错:没有"},"O2":{"st":"pass","msg":"文字对比度:axe color-contrast 0 处"},"O3":{"st":"pass","msg":"横向滚动:1280 / 390 都滚不动,布局也不超宽"},"O4":{"st":"pass","msg":"手机上图里的字:都 ≥ 9px"},"O5":{"st":"pass","msg":"关掉动画也完整:标题和正文都看得见"}},"summary":"5 通过 / 0 失败 / 0 提醒"},{"f":"story.html","rc":0,"res":{"O1":{"st":"pass","msg":"JS 报错:没有"},"O2":{"st":"pass","msg":"文字对比度:axe color-contrast 0 处"},"O3":{"st":"pass","msg":"横向滚动:1280 / 390 都滚不动,布局也不超宽"},"O4":{"st":"pass","msg":"手机上图里的字:都 ≥ 9px"},"O5":{"st":"pass","msg":"关掉动画也完整:标题和正文都看得见"}},"summary":"5 通过 / 0 失败 / 0 提醒"},{"f":"index-v2.html","rc":0,"res":{"O1":{"st":"pass","msg":"JS 报错:没有"},"O2":{"st":"pass","msg":"文字对比度:axe color-contrast 0 处"},"O3":{"st":"pass","msg":"横向滚动:1280 / 390 都滚不动,布局也不超宽"},"O4":{"st":"pass","msg":"手机上图里的字:都 ≥ 9px"},"O5":{"st":"pass","msg":"关掉动画也完整:标题和正文都看得见"}},"summary":"5 通过 / 0 失败 / 0 提醒"}],"selftest":"  通过  正常页面:五项都过\n  通过  ★ 脚本报错 → O1 失败\n  通过  ★ 浅灰字 → O2 失败\n  通过  ★ 超宽元素且没挡住 → O3 失败\n  通过  ★ 超宽但 body 挡住 → O3 只提醒\n  通过  ★ 宽图在手机上跟着缩 → O4 失败\n  通过    同一张图标成图片类 → O4 不报\n  通过    只有浅色主题看不清,不加 --themes → O2 不报\n  通过  ★ 只有浅色主题看不清,加 --themes → O2 失败\n  通过  ★ 滚动浮现不认减少动态 → O5 失败\n\n自测:10 通过 / 0 失败"},"mustNow":[{"n":11,"t":"**2026-10-07 改版(user 定)**:原来有 14 行写着「必须」—— 图密度配额、动笔前先跑 `dr-cli --plan`、"},{"n":15,"t":"现在只定死配色,其余改成指引和案例。`references/` 和 `references/canonical/` 里写的「MUST」当经验看;"},{"n":52,"t":"- 打开「减少动态效果」时内容必须完整(检查 O5 查这个)。"}]}</script>
+<script type="application/json" id="page-data">__DATA__</script>
 
 <div class="strip" id="strip-top" aria-hidden="true"></div>
 <header class="top">
@@ -445,7 +445,7 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
   <span class="crop tl"></span><span class="crop tr"></span><span class="crop bl"></span><span class="crop br"></span><span class="reg"></span>
   <div class="wrap hero-grid">
     <div class="hero-copy">
-      <p class="kicker"><i style="--k:var(--orange)"></i><span class="lang-en">A design skill in sky-skills · reworked 2026-10-07</span><span class="lang-zh">sky-skills 的设计 skill · 2026-10-07 改版</span></p>
+      <p class="kicker"><i style="--k:var(--orange)"></i><span class="lang-en">A design skill in sky-skills · reworked {{REWRITE_D}}</span><span class="lang-zh">sky-skills 的设计 skill · {{REWRITE_D}} 改版</span></p>
       <h1><span class="lang-en">Only the <em>colour</em><br>is fixed.</span><span class="lang-zh">只定死<em>配色</em>,<br>其余按内容来。</span></h1>
       <p class="lede">
         <span class="lang-en">anthropic-design is a Claude Code skill for explainer pages, technical introductions and long editorial reads. It pins one thing: a warm cream, ink, one orange and four quiet hues. Layout, typefaces, motion and components are left to the model and the content. The only goal is a reader who understands.</span>
@@ -456,15 +456,15 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
         <a class="btn ghost" href="explainer.html"><span class="lang-en">See an example page</span><span class="lang-zh">看范例页</span></a>
       </div>
       <p class="btn-note">
-        <span class="lang-en">The orange button carries ink, not white: <b>5.90 : 1</b> against <b>3.12 : 1</b>. <a href="#find-btn">Why</a></span>
-        <span class="lang-zh">橙色按钮上用墨色字,不用白字:<b>5.90 : 1</b> 对 <b>3.12 : 1</b>。<a href="#find-btn">为什么</a></span>
+        <span class="lang-en">The orange button carries ink, not white: <b>{{CR_INK_ORANGE}} : 1</b> against <b>{{CR_WHITE_ORANGE}} : 1</b>. <a href="#find-btn">Why</a></span>
+        <span class="lang-zh">橙色按钮上用墨色字,不用白字:<b>{{CR_INK_ORANGE}} : 1</b> 对 <b>{{CR_WHITE_ORANGE}} : 1</b>。<a href="#find-btn">为什么</a></span>
       </p>
     </div>
     <figure class="fan-fig">
       <div class="fan" id="fan" role="group" aria-label="Palette chips"></div>
       <figcaption class="fan-cap" id="fan-cap" aria-live="polite">
-        <span class="lang-en">20 values, one table (SKILL.md §1). Point at a chip for its job and its contrast.</span>
-        <span class="lang-zh">20 个色值,一张表(SKILL.md §1)。指一张色卡,看它的用途和对比度。</span>
+        <span class="lang-en">{{N_PALETTE}} values, one table (SKILL.md §1). Point at a chip for its job and its contrast.</span>
+        <span class="lang-zh">{{N_PALETTE}} 个色值,一张表(SKILL.md §1)。指一张色卡,看它的用途和对比度。</span>
       </figcaption>
     </figure>
   </div>
@@ -477,8 +477,8 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
       <p class="kicker"><i style="--k:var(--orange)"></i>01 · <span class="lang-en">What is fixed</span><span class="lang-zh">定死什么</span></p>
       <h2><span class="lang-en">One table is fixed. The page is yours.</span><span class="lang-zh">定死的只有一张色表,页面怎么排由你定。</span></h2>
       <p class="lede">
-        <span class="lang-en">Before 2026-10-07 the skill also fixed density quotas, class names and a scoring target, and every page drifted toward the ten reference pages. Now the colour is the identity, and the arrangement follows the content.</span>
-        <span class="lang-zh">2026-10-07 之前,这个 skill 还规定了图密度配额、类名、评分靶子,结果每一页都往 10 个参考页的样子靠。现在身份只靠配色,怎么排跟着内容走。</span>
+        <span class="lang-en">Before {{REWRITE_D}} the skill also fixed density quotas, class names and a scoring target, and every page drifted toward the ten reference pages. Now the colour is the identity, and the arrangement follows the content.</span>
+        <span class="lang-zh">{{REWRITE_D}} 之前,这个 skill 还规定了图密度配额、类名、评分靶子,结果每一页都往 10 个参考页的样子靠。现在身份只靠配色,怎么排跟着内容走。</span>
       </p>
     </header>
     <div class="free-grid">
@@ -487,7 +487,7 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
           <h3><span class="lang-en">Fixed</span><span class="lang-zh">定死</span> <small>SKILL.md §1</small></h3>
           <div class="strip" id="strip-ff" aria-hidden="true"></div>
           <ul>
-            <li><span class="lang-en">The colours: 20 values for page, text, accent, meaning, danger and the dark box.</span><span class="lang-zh">配色:页面底、字、主色、语义色、危险色、深色框,共 20 个色值。</span></li>
+            <li><span class="lang-en">The colours: {{N_PALETTE}} values for page, text, accent, meaning, danger and the dark box.</span><span class="lang-zh">配色:页面底、字、主色、语义色、危险色、深色框,共 {{N_PALETTE}} 个色值。</span></li>
             <li><span class="lang-en">Text colours that pass WCAG AA, with the numbers worked out (next section).</span><span class="lang-zh">字色要过 WCAG AA,数字都算好了(下一节)。</span></li>
           </ul>
         </div>
@@ -526,8 +526,8 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
       <p class="kicker"><i style="--k:var(--orange-ink)"></i>02 · <span class="lang-en">Palette</span><span class="lang-zh">配色</span></p>
       <h2><span class="lang-en">Pick a pair. The ratio is computed, not quoted.</span><span class="lang-zh">挑一对颜色。对比度是算出来的,不是抄来的。</span></h2>
       <p class="lede">
-        <span class="lang-en">WCAG AA asks for <strong>4.5 : 1</strong> on body text and <strong>3 : 1</strong> on large text (24px, or 18.66px bold). Every number in this section is computed in your browser from the relative-luminance formula, the same one the skill used on 2026-10-07.</span>
-        <span class="lang-zh">WCAG AA 要求正文 <strong>4.5 : 1</strong>,大字(24px,或粗体 18.66px)<strong>3 : 1</strong>。这一节的每个数都由你的浏览器按相对亮度公式现算,和 skill 在 2026-10-07 用的是同一个公式。</span>
+        <span class="lang-en">WCAG AA asks for <strong>4.5 : 1</strong> on body text and <strong>3 : 1</strong> on large text (24px, or 18.66px bold). Every number in this section is computed in your browser from the relative-luminance formula, the same one the skill used on {{REWRITE_D}}.</span>
+        <span class="lang-zh">WCAG AA 要求正文 <strong>4.5 : 1</strong>,大字(24px,或粗体 18.66px)<strong>3 : 1</strong>。这一节的每个数都由你的浏览器按相对亮度公式现算,和 skill 在 {{REWRITE_D}} 用的是同一个公式。</span>
       </p>
     </header>
     <div class="lab rv" id="lab">
@@ -561,11 +561,11 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
           <text x="22" y="48" font-family="Lora, serif" font-size="30" fill="#d97757">Aa</text>
           <text x="118" y="48" font-family="Lora, serif" font-size="30" fill="#c56544">Aa</text>
           <text x="214" y="48" font-family="Lora, serif" font-size="30" fill="#a8502f">Aa</text>
-          <text x="22" y="78" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">2.96</text>
-          <text x="118" y="78" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">3.75</text>
-          <text x="214" y="78" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">5.17</text>
+          <text x="22" y="78" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">{{CR_ORANGE_CREAM}}</text>
+          <text x="118" y="78" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">{{CR_ORANGE2_CREAM}}</text>
+          <text x="214" y="78" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">{{CR_ORANGEK_CREAM}}</text>
         </svg>
-        <p><span class="lang-en"><b>#d97757</b> is 2.96 on cream, under even the 3 : 1 bar for large text: use it for fills, lines and buttons. Large text can take <b>#c56544</b> (3.75); small text takes <b>#a8502f</b> (5.17).</span><span class="lang-zh"><b>#d97757</b> 在米白底上 2.96,连大字的 3 : 1 都不到:只用作色块、线条、按钮底。大字可以用 <b>#c56544</b>(3.75),小字用 <b>#a8502f</b>(5.17)。</span></p>
+        <p><span class="lang-en"><b>#d97757</b> is {{CR_ORANGE_CREAM}} on cream, under even the 3 : 1 bar for large text: use it for fills, lines and buttons. Large text can take <b>#c56544</b> ({{CR_ORANGE2_CREAM}}); small text takes <b>#a8502f</b> ({{CR_ORANGEK_CREAM}}).</span><span class="lang-zh"><b>#d97757</b> 在米白底上 {{CR_ORANGE_CREAM}},连大字的 3 : 1 都不到:只用作色块、线条、按钮底。大字可以用 <b>#c56544</b>({{CR_ORANGE2_CREAM}}),小字用 <b>#a8502f</b>({{CR_ORANGEK_CREAM}})。</span></p>
         <button class="load" type="button" data-fg="orange" data-bg="cream" data-size="28" data-bold="0"><span class="lang-en">Load in the lab</span><span class="lang-zh">装进试验台</span></button>
       </article>
       <article class="find rv" id="find-btn">
@@ -576,22 +576,22 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
           <text x="78" y="41" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="600" fill="#ffffff">Start</text>
           <rect x="158" y="16" width="128" height="40" rx="20" fill="#d97757"/>
           <text x="222" y="41" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="600" fill="#141413">Start</text>
-          <text x="78" y="80" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">3.12</text>
-          <text x="222" y="80" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">5.90</text>
+          <text x="78" y="80" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">{{CR_WHITE_ORANGE}}</text>
+          <text x="222" y="80" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">{{CR_INK_ORANGE}}</text>
         </svg>
-        <p><span class="lang-en">The old rule required white text on orange buttons. White is <b>3.12</b>, enough only for large bold labels; ink is <b>5.90</b>. The rule was changed to fit the numbers.</span><span class="lang-zh">旧规则要求橙色按钮一律白字。白字只有 <b>3.12</b>,只够大号粗体;墨色字 <b>5.90</b>。规则按这组数改了。</span></p>
+        <p><span class="lang-en">The old rule required white text on orange buttons. White is <b>{{CR_WHITE_ORANGE}}</b>, enough only for large bold labels; ink is <b>{{CR_INK_ORANGE}}</b>. The rule was changed to fit the numbers.</span><span class="lang-zh">旧规则要求橙色按钮一律白字。白字只有 <b>{{CR_WHITE_ORANGE}}</b>,只够大号粗体;墨色字 <b>{{CR_INK_ORANGE}}</b>。规则按这组数改了。</span></p>
         <button class="load" type="button" data-fg="white" data-bg="orange" data-size="16" data-bold="1"><span class="lang-en">Load in the lab</span><span class="lang-zh">装进试验台</span></button>
       </article>
       <article class="find rv" id="find-hue">
         <h3><span class="lang-en">Hues as lines; mixed with ink as text</span><span class="lang-zh">语义色画线用原色,当字色先混墨色</span></h3>
         <svg viewBox="0 0 300 96" role="img" aria-label="Blue, olive and gold: raw and mixed with ink">
           <rect width="300" height="96" rx="10" fill="#faf9f5"/>
-          <rect x="18" y="18" width="78" height="10" rx="5" fill="#6a9bcc"/><rect x="18" y="34" width="78" height="10" rx="5" fill="#496886"/>
-          <rect x="111" y="18" width="78" height="10" rx="5" fill="#788c5d"/><rect x="111" y="34" width="78" height="10" rx="5" fill="#525e41"/>
-          <rect x="204" y="18" width="78" height="10" rx="5" fill="#c9913f"/><rect x="204" y="34" width="78" height="10" rx="5" fill="#84622e"/>
-          <text x="57" y="74" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">2.78→5.53</text>
-          <text x="150" y="74" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">3.49→6.57</text>
-          <text x="243" y="74" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">2.62→5.29</text>
+          <rect x="18" y="18" width="78" height="10" rx="5" fill="#6a9bcc"/><rect x="18" y="34" width="78" height="10" rx="5" fill="{{CR_BLUE_MIXHEX}}"/>
+          <rect x="111" y="18" width="78" height="10" rx="5" fill="#788c5d"/><rect x="111" y="34" width="78" height="10" rx="5" fill="{{CR_OLIVE_MIXHEX}}"/>
+          <rect x="204" y="18" width="78" height="10" rx="5" fill="#c9913f"/><rect x="204" y="34" width="78" height="10" rx="5" fill="{{CR_GOLD_MIXHEX}}"/>
+          <text x="57" y="74" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">{{CR_BLUE_RAW}}→{{CR_BLUE_MIX}}</text>
+          <text x="150" y="74" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">{{CR_OLIVE_RAW}}→{{CR_OLIVE_MIX}}</text>
+          <text x="243" y="74" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">{{CR_GOLD_RAW}}→{{CR_GOLD_MIX}}</text>
         </svg>
         <p><span class="lang-en">Blue, olive and gold sit under 3.5 on cream. As text, mix 62% with ink: <code>color-mix(in srgb, hue 62%, #141413)</code>. As fills and lines, use them as they are.</span><span class="lang-zh">蓝、橄榄绿、金在米白底上都不到 3.5。当字色时和墨色混一下:<code>color-mix(in srgb, 语义色 62%, #141413)</code>;当色块、线条用原色。</span></p>
         <button class="load" type="button" data-fg="blueT" data-bg="cream" data-size="16" data-bold="0"><span class="lang-en">Load in the lab</span><span class="lang-zh">装进试验台</span></button>
@@ -600,14 +600,14 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
         <h3><span class="lang-en">The dark box gets its own set</span><span class="lang-zh">深色框里另配一组浅色</span></h3>
         <svg viewBox="0 0 300 96" role="img" aria-label="Dark box with the light error, warning and pass colours">
           <rect width="300" height="96" rx="10" fill="#1c1b18"/>
-          <text x="18" y="34" font-family="JetBrains Mono, monospace" font-size="13" fill="#a14238">✗ 2.75</text>
-          <text x="18" y="62" font-family="JetBrains Mono, monospace" font-size="13" fill="#ec9488">✗ 7.51</text>
-          <text x="118" y="62" font-family="JetBrains Mono, monospace" font-size="13" fill="#dcb062">! 8.55</text>
-          <text x="210" y="62" font-family="JetBrains Mono, monospace" font-size="13" fill="#a9bf8f">✓ 8.64</text>
+          <text x="18" y="34" font-family="JetBrains Mono, monospace" font-size="13" fill="#a14238">✗ {{CR_DANGER_DARK}}</text>
+          <text x="18" y="62" font-family="JetBrains Mono, monospace" font-size="13" fill="#ec9488">✗ {{CR_DRED_DARK}}</text>
+          <text x="118" y="62" font-family="JetBrains Mono, monospace" font-size="13" fill="#dcb062">! {{CR_DGOLD_DARK}}</text>
+          <text x="210" y="62" font-family="JetBrains Mono, monospace" font-size="13" fill="#a9bf8f">✓ {{CR_DGREEN_DARK}}</text>
           <text class="lang-en" x="118" y="34" font-family="JetBrains Mono, monospace" font-size="12" fill="#b4b0a3">cream-page red</text><text class="lang-zh" x="118" y="34" font-family="Noto Sans SC, sans-serif" font-size="12" fill="#b4b0a3">米白底用的红</text>
           <text x="18" y="84" font-family="JetBrains Mono, monospace" font-size="12" fill="#b4b0a3">#ec9488 · #dcb062 · #a9bf8f</text>
         </svg>
-        <p><span class="lang-en">The danger red that reads <b>5.95</b> on cream falls to <b>2.75</b> on <code>#1c1b18</code>. Inside terminals and code boxes, errors, warnings and passes switch to a lighter set.</span><span class="lang-zh">危险红在米白底上 <b>5.95</b>,放进 <code>#1c1b18</code> 只剩 <b>2.75</b>。终端、代码框里的报错 / 警告 / 通过,换成另一组浅色。</span></p>
+        <p><span class="lang-en">The danger red that reads <b>{{CR_DANGER_CREAM}}</b> on cream falls to <b>{{CR_DANGER_DARK}}</b> on <code>#1c1b18</code>. Inside terminals and code boxes, errors, warnings and passes switch to a lighter set.</span><span class="lang-zh">危险红在米白底上 <b>{{CR_DANGER_CREAM}}</b>,放进 <code>#1c1b18</code> 只剩 <b>{{CR_DANGER_DARK}}</b>。终端、代码框里的报错 / 警告 / 通过,换成另一组浅色。</span></p>
         <button class="load" type="button" data-fg="danger" data-bg="dark" data-size="14" data-bold="0"><span class="lang-en">Load in the lab</span><span class="lang-zh">装进试验台</span></button>
       </article>
     </div>
@@ -619,10 +619,10 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
   <div class="wrap">
     <header class="sec-head rv">
       <p class="kicker"><i style="--k:var(--gold)"></i>03 · <span class="lang-en">History</span><span class="lang-zh">改版</span></p>
-      <h2><span class="lang-en">14 lines of MUST. Then one, and a check holds it.</span><span class="lang-zh">14 行「必须」,改到一行,还有检查盯着。</span></h2>
+      <h2><span class="lang-en">{{BEFORE}} lines of MUST. Then one, and a check holds it.</span><span class="lang-zh">{{BEFORE}} 行「必须」,改到一行,还有检查盯着。</span></h2>
       <p class="lede">
-        <span class="lang-en">25 commits have touched SKILL.md since 2026-04-19. The lines containing MUST or 必须 climbed to 14 by 2026-06-11. The rewrite on 2026-10-07 (<code>daee1e7</code>) took them from 14 to 3, and the file from 240 lines to 206.</span>
-        <span class="lang-zh">从 2026-04-19 起,SKILL.md 一共改过 25 次。含 MUST 或「必须」的行,到 2026-06-11 涨到 14 行。2026-10-07 那次改版(<code>daee1e7</code>)把它从 14 行降到 3 行,整个文件从 240 行减到 206 行。</span>
+        <span class="lang-en">{{N_COMMITS}} commits have touched SKILL.md since {{FIRST_DATE}}. The lines containing MUST or 必须 climbed to {{PEAK}} by {{PEAK_DATE}}. The rewrite on {{REWRITE_D}} (<code>{{REWRITE_H}}</code>) took them from {{BEFORE}} to {{AFTER}}, and the file from {{LINES_BEFORE}} lines to {{LINES_AFTER}}.</span>
+        <span class="lang-zh">从 {{FIRST_DATE}} 起,SKILL.md 一共改过 {{N_COMMITS}} 次。含 MUST 或「必须」的行,到 {{PEAK_DATE}} 涨到 {{PEAK}} 行。{{REWRITE_D}} 那次改版(<code>{{REWRITE_H}}</code>)把它从 {{BEFORE}} 行降到 {{AFTER}} 行,整个文件从 {{LINES_BEFORE}} 行减到 {{LINES_AFTER}} 行。</span>
       </p>
     </header>
     <div class="rules-grid">
@@ -630,14 +630,14 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
         <div class="pan" style="--pan-w:680px"><svg class="hist-svg" id="hist" viewBox="0 0 1000 400" role="img" aria-label="Lines containing MUST in SKILL.md, per commit"></svg></div>
         <div class="tip" id="hist-tip"></div>
         <div class="stats">
-          <div><b>25</b><span><span class="lang-en">commits to SKILL.md since 2026-04-19</span><span class="lang-zh">次提交,2026-04-19 起</span></span></div>
-          <div><b>14</b><span><span class="lang-en">lines of MUST at the peak, 2026-06-11</span><span class="lang-zh">行「必须」,2026-06-11 最多时</span></span></div>
-          <div><b>1</b><span><span class="lang-en">left that is a rule, and check O5 tests it</span><span class="lang-zh">行还是规则,检查 O5 查它</span></span></div>
+          <div><b>{{N_COMMITS}}</b><span><span class="lang-en">commits to SKILL.md since {{FIRST_DATE}}</span><span class="lang-zh">次提交,{{FIRST_DATE}} 起</span></span></div>
+          <div><b>{{PEAK}}</b><span><span class="lang-en">lines of MUST at the peak, {{PEAK_DATE}}</span><span class="lang-zh">行「必须」,{{PEAK_DATE}} 最多时</span></span></div>
+          <div><b>{{N_REQ}}</b><span><span class="lang-en">left that is a rule, and check O5 tests it</span><span class="lang-zh">行还是规则,检查 O5 查它</span></span></div>
         </div>
         <figcaption class="note"><span class="lang-en">Each dot is one commit. Counted with</span><span class="lang-zh">每个点是一次提交。数法:</span> <code>git show &lt;commit&gt;:SKILL.md | grep -cE 'MUST|必须'</code>. <span class="lang-en">Grey steps: total lines (right axis). Hover or tap a dot.</span><span class="lang-zh">灰色台阶:总行数(右轴)。指一个点看那次提交。</span></figcaption>
       </figure>
       <div class="rv">
-        <h3><span class="lang-en">What the 14 lines asked for</span><span class="lang-zh">那 14 行要求过什么</span></h3>
+        <h3><span class="lang-en">What the {{BEFORE}} lines asked for</span><span class="lang-zh">那 {{BEFORE}} 行要求过什么</span></h3>
         <ol class="tickets" id="tickets">
           <li style="--i:0"><span class="lang-en">A quota of figures per page</span><span class="lang-zh">每页的图密度配额</span></li>
           <li style="--i:1"><span class="lang-en">Run <code>dr-cli --plan</code> before writing</span><span class="lang-zh">动笔前先跑 <code>dr-cli --plan</code></span></li>
@@ -646,7 +646,7 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
           <li style="--i:4"><span class="lang-en">The reference pages as the scoring target</span><span class="lang-zh">拿参考页当评分标准</span></li>
           <li style="--i:5"><span class="lang-en"><code>anth-*</code> class names everywhere</span><span class="lang-zh">一律用 <code>anth-*</code> 类名</span></li>
         </ol>
-        <h3><span class="lang-en">What the 3 lines say now</span><span class="lang-zh">现在那 3 行说的是什么</span></h3>
+        <h3><span class="lang-en">What the {{AFTER}} lines say now</span><span class="lang-zh">现在那 {{AFTER}} 行说的是什么</span></h3>
         <div class="left-lines" id="left-lines"></div>
       </div>
     </div>
@@ -704,7 +704,7 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
   <div class="wrap">
     <header class="sec-head rv">
       <p class="kicker"><i style="--k:var(--blue)"></i>05 · <span class="lang-en">Diagram library</span><span class="lang-zh">图例库</span></p>
-      <h2><span class="lang-en">78 drawings to copy. Pick by what you are explaining.</span><span class="lang-zh">78 张现成的图。按你要讲的内容挑。</span></h2>
+      <h2><span class="lang-en">{{N_DIAGRAMS}} drawings to copy. Pick by what you are explaining.</span><span class="lang-zh">{{N_DIAGRAMS}} 张现成的图。按你要讲的内容挑。</span></h2>
       <p class="lede"><span class="lang-en">Start from the content, not the shape. The list is the table in SKILL.md §3; each row lights the templates that fit. Change the structure, mix them, or invent one.</span><span class="lang-zh">先看内容,再定图型。左边是 SKILL.md §3 那张表;点一行,下面亮起合适的模板。结构可以改,可以混搭,也可以自创。</span></p>
     </header>
     <div class="pick rv">
@@ -752,8 +752,8 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
         <svg viewBox="0 0 240 124" aria-hidden="true">
           <rect width="240" height="124" rx="10" fill="#faf9f5" stroke="#e8e6dc"/>
           <text x="18" y="78" font-family="Lora, serif" font-size="54" class="v-fade" fill="#141413">Aa</text>
-          <text x="128" y="50" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">ink 17.50</text>
-          <text x="128" y="74" font-family="JetBrains Mono, monospace" font-size="13" fill="#6b312a">grey 2.11</text>
+          <text x="128" y="50" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">ink {{CR_INK_CREAM}}</text>
+          <text x="128" y="74" font-family="JetBrains Mono, monospace" font-size="13" fill="#6b312a">grey {{CR_GREY_CREAM}}</text>
           <line x1="128" y1="90" x2="222" y2="90" stroke="#141413" stroke-dasharray="3 3"/>
           <text x="128" y="108" font-family="JetBrains Mono, monospace" font-size="12" fill="#5e5d55">AA 4.5</text>
         </svg>
@@ -786,7 +786,7 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
             <rect x="154" y="22" width="56" height="30" rx="5" fill="#ffffff" stroke="#c9913f" stroke-width="2"/>
             <line x1="70" y1="37" x2="84" y2="37" stroke="#141413" stroke-width="2"/><line x1="140" y1="37" x2="154" y2="37" stroke="#141413" stroke-width="2"/>
           </g>
-          <text x="14" y="84" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">12px → 3.6px</text>
+          <text x="14" y="84" font-family="JetBrains Mono, monospace" font-size="13" fill="#141413">12px → {{O4_PX}}px</text>
           <text x="14" y="106" font-family="JetBrains Mono, monospace" font-size="12" fill="#5e5d55">min 9px · pan box</text>
         </svg>
         <span class="fw"><span class="lang-en">SVG text drawn under 9px at 390 wide. Pictures marked data-allow-shrink are skipped.</span><span class="lang-zh">390 宽下 SVG 文字实际不到 9px。标了 data-allow-shrink 的图片类不查。</span></span>
@@ -809,8 +809,8 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
     </p>
     <div class="evid" id="evidence">
       <div class="matrix-wrap rv">
-        <h3><span class="lang-en">10 pages in this palette, run on 2026-10-07</span><span class="lang-zh">这套配色的 10 张页面,2026-10-07 跑的结果</span></h3>
-        <p class="note" style="margin:6px 0 12px"><span class="lang-en">50 of 50 cells pass. These pages were written or reworked to pass, so this table alone proves little; the self-test on the right shows the checker can fail.</span><span class="lang-zh">50 格里 50 格通过。这些页面本来就是按能过的标准写或改的,单看这张表说明不了多少;右边的自测说明这道检查真的会报错。</span></p>
+        <h3><span class="lang-en">{{N_CHECK_PAGES}} pages in this palette, run on {{CHECK_DATE}}</span><span class="lang-zh">这套配色的 {{N_CHECK_PAGES}} 张页面,{{CHECK_DATE}} 跑的结果</span></h3>
+        <p class="note" style="margin:6px 0 12px"><span class="lang-en">{{N_CHECK_PASS}} of {{N_CHECK_CELLS}} cells pass. These pages were written or reworked to pass, so this table alone proves little; the self-test on the right shows the checker can fail.</span><span class="lang-zh">{{N_CHECK_CELLS}} 格里 {{N_CHECK_PASS}} 格通过。这些页面本来就是按能过的标准写或改的,单看这张表说明不了多少;右边的自测说明这道检查真的会报错。</span></p>
         <table class="matrix" id="matrix"></table>
         <div class="legend"><span><i class="mk pass"></i> <span class="lang-en">pass</span><span class="lang-zh">通过</span></span><span><i class="mk warn"></i> <span class="lang-en">warning</span><span class="lang-zh">提醒</span></span><span><i class="mk fail"></i> <span class="lang-en">fail</span><span class="lang-zh">失败</span></span></div>
       </div>
@@ -819,7 +819,7 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
           <div class="term-bar"><i></i><i></i><i></i><span>check_objective.mjs --self-test</span></div>
           <pre id="selftest"></pre>
         </div>
-        <p class="note" style="margin-top:12px"><span class="lang-en">Tool output, unedited (the tool reports in Chinese). 10 self-test pages; the 7 marked ★ are broken on purpose and must be reported.</span><span class="lang-zh">工具原样输出。10 张自测页,标 ★ 的 7 张是故意做坏的,必须报出来。</span></p>
+        <p class="note" style="margin-top:12px"><span class="lang-en">Tool output, unedited (the tool reports in Chinese). {{N_SELFTEST}} self-test pages; the {{N_SELFTEST_BAD}} marked ★ are broken on purpose and must be reported.</span><span class="lang-zh">工具原样输出。{{N_SELFTEST}} 张自测页,标 ★ 的 {{N_SELFTEST_BAD}} 张是故意做坏的,必须报出来。</span></p>
       </div>
     </div>
   </div>
@@ -887,9 +887,9 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
     <h2><span class="lang-en">Where the numbers on this page come from</span><span class="lang-zh">这一页的数从哪来</span></h2>
     <ul class="src">
       <li><b><span class="lang-en">Contrast ratios</span><span class="lang-zh">对比度</span></b> — <span class="lang-en">computed in your browser with the WCAG 2.x relative-luminance formula; the figures in the text are computed by the build script with the same formula and checked against SKILL.md.</span><span class="lang-zh">浏览器按 WCAG 2.x 相对亮度公式现算;正文里的数由生成脚本用同一公式算出,并和 SKILL.md 对过。</span></li>
-      <li><b><span class="lang-en">Rule history</span><span class="lang-zh">规则行数</span></b> — <code>git show &lt;commit&gt;:skills/anthropic-design/SKILL.md | grep -cE 'MUST|必须'</code>, <span class="lang-en">for each of the 25 commits.</span><span class="lang-zh">25 次提交逐个数。</span></li>
+      <li><b><span class="lang-en">Rule history</span><span class="lang-zh">规则行数</span></b> — <code>git show &lt;commit&gt;:skills/anthropic-design/SKILL.md | grep -cE 'MUST|必须'</code>, <span class="lang-en">for each of the {{N_COMMITS}} commits.</span><span class="lang-zh">{{N_COMMITS}} 次提交逐个数。</span></li>
       <li><b><span class="lang-en">Diagram templates</span><span class="lang-zh">图例模板</span></b> — <code>skills/anthropic-design/templates/diagrams/*.svg</code>; <span class="lang-en">groups from the §15 headings of diagram-craft.md.</span><span class="lang-zh">分组按 diagram-craft.md 的 §15 小节标题。</span></li>
-      <li><b><span class="lang-en">Check results</span><span class="lang-zh">检查结果</span></b> — <code>check_objective.mjs</code> <span class="lang-en">on 2026-10-07, stored in</span><span class="lang-zh">2026-10-07 跑的,存在</span> <code>site/anthropic-design/checks.json</code>.</li>
+      <li><b><span class="lang-en">Check results</span><span class="lang-zh">检查结果</span></b> — <code>check_objective.mjs</code> <span class="lang-en">on {{CHECK_DATE}}, stored in</span><span class="lang-zh">{{CHECK_DATE}} 跑的,存在</span> <code>site/anthropic-design/checks.json</code>.</li>
       <li><b><span class="lang-en">This page</span><span class="lang-zh">这一页</span></b> — <span class="lang-en">generated by</span><span class="lang-zh">由</span> <code>site/anthropic-design/build.py</code><span class="lang-zh"> 生成</span>; <code>--check</code> <span class="lang-en">compares it byte for byte.</span><span class="lang-zh">逐字节比对。</span></li>
       <li><b><span class="lang-en">Illustrations</span><span class="lang-zh">示意图</span></b> — <span class="lang-en">the fan, the stage, the small loops and the example covers are drawn, not measured.</span><span class="lang-zh">色卡扇、排版台、小动画和范例封面是画的,不是测量结果。</span></li>
     </ul>
@@ -1231,11 +1231,11 @@ html.rv-on .matrix-wrap:not(.in) .mk { transform: scale(0); }
         'Scroll to the end, wait for fade-in animations to finish, then run axe-core\'s color-contrast rule at WCAG AA. Without the wait, text is measured halfway through its fade. axe-core does not measure text inside SVG, so figures need their own care: the numbers in section 02.',
         '滚到底、等浮现动画播完,再跑 axe-core 的 color-contrast(WCAG AA)。不等的话,字是在淡入到一半时被量的。axe-core 不量 SVG 里的字,图里的字色要自己照第 02 节的数挑。'],
       O3: ['Sideways scroll', '横向滚动',
-        'At 1280 and 390 wide, scroll sideways once with a real mouse wheel; the page fails only if it moves. Measured on 2026-10-07: a layout 1540px wide in a 1280px window, yet scrollX stayed 0 because body had overflow-x: hidden. Without that line the same wheel moved the page 260px. A wide layout is a warning; a page that slides is a defect. Touch dragging on a real phone is not simulated.',
-        '1280 / 390 两个宽度下用鼠标真的横滚一次,页面动了才失败。2026-10-07 实测:窗口 1280 宽,布局 1540 宽,可 body 上有 overflow-x: hidden,scrollX 一直是 0;去掉那条再滚,页面动了 260px。布局超宽只算提醒,页面滑得动才是缺陷。手机上的触摸拖动模拟不了,真机才算数。'],
+        'At 1280 and 390 wide, scroll sideways once with a real mouse wheel; the page fails only if it moves. Measured on 2026-10-07: a layout {{O3_SW}}px wide in a {{O3_VW}}px window, yet scrollX stayed 0 because body had overflow-x: hidden. Without that line the same wheel moved the page {{O3_SX}}px. A wide layout is a warning; a page that slides is a defect. Touch dragging on a real phone is not simulated.',
+        '1280 / 390 两个宽度下用鼠标真的横滚一次,页面动了才失败。2026-10-07 实测:窗口 {{O3_VW}} 宽,布局 {{O3_SW}} 宽,可 body 上有 overflow-x: hidden,scrollX 一直是 0;去掉那条再滚,页面动了 {{O3_SX}}px。布局超宽只算提醒,页面滑得动才是缺陷。手机上的触摸拖动模拟不了,真机才算数。'],
       O4: ['Figure text on a phone', '手机上图里的字',
-        'At 390 wide, any SVG text that renders under 9px fails. A figure drawn 1200 units wide and squeezed into a 358px column turns 12-unit labels into 3.6px. The skill\'s answer is a pan box: give the figure a minimum width so its smallest text stays at 9px, and let it drag sideways inside its frame. Pictures whose text needs no reading are marked data-allow-shrink and skipped.',
-        '390 宽下,SVG 文字实际渲染不到 9px 就失败。一张按 1200 宽画的图塞进 358px 宽的栏,12 号字会缩成 3.6px。skill 给的办法是拖动框:给图一个最小宽度,让最小的字刚好 9px,图在框里左右拖。字不需要读的图片类标 data-allow-shrink,不查。'],
+        'At 390 wide, any SVG text that renders under 9px fails. A figure drawn 1200 units wide and squeezed into a 358px column turns 12-unit labels into {{O4_PX}}px. The skill\'s answer is a pan box: give the figure a minimum width so its smallest text stays at 9px, and let it drag sideways inside its frame. Pictures whose text needs no reading are marked data-allow-shrink and skipped.',
+        '390 宽下,SVG 文字实际渲染不到 9px 就失败。一张按 1200 宽画的图塞进 358px 宽的栏,12 号字会缩成 {{O4_PX}}px。skill 给的办法是拖动框:给图一个最小宽度,让最小的字刚好 9px,图在框里左右拖。字不需要读的图片类标 data-allow-shrink,不查。'],
       O5: ['Complete without motion', '关掉动画也完整',
         'With prefers-reduced-motion: reduce and no scrolling, no h1–h3, p or li may be invisible. Scroll reveals usually start at opacity 0 and wait for a scroll that never comes for someone who turned motion off. This page adds its reveal class only from script, and only when motion is allowed.',
         '「减少动态效果」打开、不滚动时,h1–h3、p、li 不能有看不见的。滚动浮现通常从透明开始,等一次滚动;关掉动画的读者那里,这次滚动永远不来。这一页的浮现类只由脚本加,而且只在允许动画时才加。']
