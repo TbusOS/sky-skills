@@ -49,8 +49,11 @@ class SourceText(str):
 
 
 class Page:
-    def __init__(self, title):
+    def __init__(self, title, relative=False):
+        """relative=True:出处里的文件路径和命令目录按 build.py 所在目录记相对路径。
+        页面要放进公开仓时用,免得把本机家目录路径带出去;check_page.py 按页面目录去找。"""
         self.title = title
+        self.base = os.path.dirname(os.path.abspath(sys.argv[0])) if relative else None
         self.sources = []
         self.items = []      # 按调用顺序:{'type': 'html'} 或控件
         self.data = {}       # 自定义脚本用的数据,页面里是 PAGE_DATA.data
@@ -65,7 +68,7 @@ class Page:
         text = raw.decode(encoding, errors='replace')
         s = SourceText(text)
         s.idx = self._add_source({
-            'path': path,
+            'path': self._shown(path),
             'sha256': hashlib.sha256(raw).hexdigest(),
             'bytes': len(raw),
             'lines': len(text.splitlines()),
@@ -79,11 +82,14 @@ class Page:
         s = SourceText(raw.decode('utf-8', errors='replace'))
         s.idx = self._add_source({
             'cmd': cmd,
-            'cwd': cwd,
+            'cwd': self._shown(cwd),
             'sha256': hashlib.sha256(raw).hexdigest(),
             'bytes': len(raw),
         })
         return s
+
+    def _shown(self, path):
+        return os.path.relpath(path, self.base) if self.base else path
 
     def _add_source(self, entry):
         self.sources.append(entry)

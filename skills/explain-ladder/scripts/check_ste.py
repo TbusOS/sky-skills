@@ -16,7 +16,8 @@
   S5 图太宽    带框线字符(─ │ ┌ 等)或 +--+ 的行、代码块里带箭头的行,显示宽度超过 --cols 列(默认 80)。
                汉字和全角符号按两列算 —— 按字符数数会少一半,终端里照样折行
 
-跳过:``` 代码块(S5 除外)、行内代码、网址、Markdown 链接、「」里的示例、带 ste-ok / bw-ok 的行。
+跳过:``` 代码块(S5 除外)、行内代码、网址、Markdown 链接、「」里的示例、带 ste-ok / bw-ok 的行;
+HTML 里带 data-ste-ok 属性的元素(故意放的反例用它标)。
 
 STE 的另外几条(一句只说一件事、同一个东西只用一个名字、条件写在动作前面)要靠人判断,
 机器查不准,本脚本不查。
@@ -54,7 +55,8 @@ PASSIVE = re.compile(r"\b(am|is|are|was|were|be|been|being)\s+"
 STEP_ITEM = re.compile(r"^\s*\d{1,3}[.)、]\s+")
 MASK = re.compile(r"`[^`\n]*`|https?://\S+|\[[^\]]*\]\([^)]*\)|「[^」\n]*」")
 CJK = re.compile(r"[㐀-鿿豈-﫿]")
-ZH_SPLIT = re.compile(r"(?<=[。！？；!?！？；])")
+# 分号不断句:STE 里用分号把两件事连成一句本身就是毛病,连起来的整句一起算长度
+ZH_SPLIT = re.compile(r"(?<=[。!?\uff01\uff1f])")
 EN_SPLIT = re.compile(r"(?<=[.!?;])\s+(?=[A-Z\"'(`])")
 ASCII_RUN = re.compile(r"[A-Za-z0-9_][\w./:+#-]*")
 # 框线字符(U+2500–257F)算图;箭头在正文里也常用,只在代码块里才算图
@@ -88,21 +90,30 @@ class _Text(html.parser.HTMLParser):
     def __init__(self):
         super().__init__()
         self.out, self.skip = [''], 0
+        self.ok_tag, self.ok_n = None, 0     # data-ste-ok 元素:整个元素不查
 
     def handle_starttag(self, tag, attrs):
+        if self.ok_tag:
+            self.ok_n += tag == self.ok_tag
+        elif any(k == 'data-ste-ok' for k, _ in attrs):
+            self.ok_tag, self.ok_n = tag, 1
         if tag in self.SKIP:
             self.skip += 1
         if tag in self.BLOCK:
             self.out.append('')
 
     def handle_endtag(self, tag):
+        if self.ok_tag and tag == self.ok_tag:
+            self.ok_n -= 1
+            if self.ok_n == 0:
+                self.ok_tag = None
         if tag in self.SKIP and self.skip:
             self.skip -= 1
         if tag in self.BLOCK:
             self.out.append('')
 
     def handle_data(self, data):
-        if not self.skip:
+        if not self.skip and not self.ok_tag:
             self.out[-1] += re.sub(r'\s+', ' ', data)
 
 
@@ -225,6 +236,9 @@ CASES = [
     ('S1 拆成三句(各 ≤25 字)不报',
      '模块启动时先读配置文件里的设备地址。然后按这个地址初始化总线。最后检查设备有没有响应。',
      [], []),
+    ('S1 分号连起来的两个分句算一句(反向验证:按分号断句就不报)',
+     '模块启动时先读配置文件里的设备地址,再按这个地址初始化总线\uff1b最后还要检查一遍设备有没有正常响应,通过了才继续往下走。',
+     [], ['S1']),
     ('S1 句里的路径按一个字算:短句带长路径不报',
      '改 drivers/input/touchscreen/vendor_ts_core_driver_main.c 的第 120 行。',
      [], []),
@@ -293,11 +307,12 @@ def self_test():
     with tempfile.TemporaryDirectory() as td:
         p = os.path.join(td, 'a.html')
         with open(p, 'w', encoding='utf-8') as f:
-            f.write('<p>需要对日志进行分析。</p><pre>进行分析</pre><script>var s="进行分析";</script>')
+            f.write('<p>需要对日志进行分析。</p><pre>进行分析</pre><script>var s="进行分析";</script>'
+                    '<div data-ste-ok><p>反例:进行分析。</p><p>再一个:作出验证。</p></div><p>结尾。</p>')
         got = [c for _, _, c, _ in check_lines(read_lines(p), p, parse(['x']))]
         if got == ['S2']:
             passed += 1
-            print('  通过  HTML:<p> 里的报,<pre> / <script> 里的不报')
+            print('  通过  HTML:<p> 里的报,<pre> / <script> / data-ste-ok 元素里的不报')
         else:
             failed += 1
             print('  失败  HTML 抽字:期望 [S2],实际 %s' % got)

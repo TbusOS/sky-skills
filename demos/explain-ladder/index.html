@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>讲解阶梯 · explain-ladder</title>
+<meta name="description" content="sky-skills explain-ladder:要让人看懂一件事时,先在文字、图、网页、视频四级里选形式,再动笔。视频默认不做,先问、点头才做。">
+<meta name="theme-color" content="#faf9f5">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #faf9f5; --bg-2: #f0ede3; --panel: #ffffff; --line: #e8e6dc; --line-2: #d9d6cb;
+  --text: #141413; --muted: #5e5d55; --dim: #6b6a62;
+  --ember: #d97757; --ember-ink: #a8502f;
+  --blue: #6a9bcc; --olive: #788c5d; --gold: #c9913f; --gray: #b0aea5; --danger: #a14238;
+  --blue-ink: color-mix(in srgb, #6a9bcc 62%, #141413);
+  --olive-ink: color-mix(in srgb, #788c5d 62%, #141413);
+  --gold-ink: color-mix(in srgb, #c9913f 62%, #141413);
+  --term: #1c1b18; --term-bar: #2a2925; --term-text: #ece9df;
+  --t-err: #ec9488; --t-warn: #dcb062; --t-ok: #a9bf8f;
+  --serif: "Iowan Old Style", "Charter", "Palatino Linotype", Georgia, "Songti SC", "Noto Serif SC", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --mono: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, Consolas, "PingFang SC", monospace;
+  --gutter: clamp(16px, 4vw, 40px); --wrap: 1160px; --r: 14px;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; }
+code, .mono { font-family: var(--mono); font-size: .9em; }
+code { background: rgba(20,20,19,.08); padding: .1em .38em; border-radius: 5px; }
+:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding-inline: var(--gutter); }
+section { padding-block: clamp(64px, 9vw, 112px); }
+section + section { border-top: 1px solid rgba(20,20,19,.06); }
+.alt { background: var(--bg-2); }
+.kicker { display: inline-flex; align-items: center; gap: 10px; font: 600 12px/1 var(--mono); letter-spacing: .08em; color: var(--ember-ink); }
+.kicker::before { content: ""; width: 22px; height: 1px; background: currentColor; opacity: .7; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; letter-spacing: 0; text-wrap: balance; }
+h1 { font-size: clamp(40px, 6.2vw, 72px); line-height: 1.12; }
+h2 { font-size: clamp(30px, 4.2vw, 46px); line-height: 1.22; margin-top: 16px; max-width: 18em; }
+h3 { font-size: 21px; line-height: 1.3; }
+/* 宽屏上中文标题只在标点处断行,不把「看懂」拆成两行;窄屏放开,免得一句太长撑出屏幕 */
+@media (min-width: 760px) { h1, h2 { word-break: keep-all; overflow-wrap: anywhere; } }
+em.hl { font-style: normal; color: var(--ember-ink); }
+.lede { color: var(--muted); font-size: clamp(16px, 1.6vw, 18px); max-width: 60ch; margin: 18px 0 0; }
+.btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font: 600 15px/1 var(--sans); padding: 13px 20px; border-radius: 999px; border: 1px solid transparent; transition: transform .2s, box-shadow .2s, border-color .2s; cursor: pointer; }
+.btn--hot { background: var(--ember); color: #141413; box-shadow: 0 10px 28px -12px rgba(217,119,87,.8); }
+.btn--hot:hover { transform: translateY(-2px); }
+.btn--ghost { border-color: var(--line-2); color: var(--text); background: transparent; }
+.btn--ghost:hover { border-color: var(--muted); transform: translateY(-2px); }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.js .rv { opacity: 0; transform: translateY(16px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+.js .rv.in { opacity: 1; transform: none; }
+
+/* nav */
+.nav { position: sticky; top: 0; z-index: 50; background: rgba(250,249,245,.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(20,20,19,.09); }
+.nav .wrap { display: flex; align-items: center; gap: 24px; height: 60px; }
+.brand { font: 600 15px/1 var(--sans); text-decoration: none; white-space: nowrap; }
+.brand small { color: var(--dim); font-weight: 500; margin-left: 6px; }
+.nav-links { display: flex; gap: 18px; margin-left: auto; }
+.nav-links a { text-decoration: none; color: var(--muted); font-size: 14px; white-space: nowrap; }
+.nav-links a:hover { color: var(--text); }
+.gh { margin-left: 8px; text-decoration: none; font: 600 13px/1 var(--sans); padding: 9px 14px; border-radius: 999px; background: var(--text); color: var(--bg); white-space: nowrap; }
+@media (max-width: 860px) { .nav-links { display: none; } .gh { margin-left: auto; } }
+
+/* hero */
+.hero { padding-block: clamp(48px, 7vw, 96px) clamp(56px, 8vw, 104px); }
+.hero-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(28px, 4vw, 56px); align-items: center; }
+@media (max-width: 920px) { .hero-grid { grid-template-columns: 1fr; } }
+.sorter { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px; position: relative; box-shadow: 0 24px 60px -36px rgba(20,20,19,.35); overflow: hidden; }
+.sorter-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 92px; }
+.inbox { flex: 1; min-width: 0; }
+.inbox-label { font: 600 11px/1 var(--mono); letter-spacing: .06em; color: var(--dim); }
+.q-card { margin-top: 8px; display: inline-block; max-width: 100%; background: var(--bg); border: 1px solid var(--line-2); border-radius: 12px; padding: 10px 14px; font-size: 15px; position: relative; z-index: 3; }
+.q-test { margin-top: 8px; font: 500 13px/1.4 var(--mono); color: var(--ember-ink); min-height: 1.4em; }
+.rungs { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
+.rung { display: grid; grid-template-columns: 34px auto minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); transition: background .35s, border-color .35s, transform .35s; }
+.rung[data-k="4"] { margin-left: 18%; } .rung[data-k="3"] { margin-left: 12%; } .rung[data-k="2"] { margin-left: 6%; }
+@media (max-width: 520px) { .rung[data-k="4"] { margin-left: 9%; } .rung[data-k="3"] { margin-left: 6%; } .rung[data-k="2"] { margin-left: 3%; } }
+.rung .rn { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 600 14px/1 var(--mono); color: #fff; }
+.rung[data-k="1"] .rn { background: var(--olive-ink); } .rung[data-k="2"] .rn { background: var(--blue-ink); }
+.rung[data-k="3"] .rn { background: var(--gold-ink); } .rung[data-k="4"] .rn { background: var(--danger); }
+.rung b { font-weight: 600; } .rung small { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.rung output { font: 600 15px/1 var(--mono); min-width: 2ch; text-align: right; }
+.rung.hit { background: #fff6f1; border-color: var(--ember); transform: translateX(4px); }
+.rung .lock { font: 600 11px/1 var(--mono); color: var(--danger); border: 1px solid currentColor; border-radius: 999px; padding: 4px 7px; white-space: nowrap; }
+.rung.ask .lock { background: var(--danger); color: #fff; }
+.rung .chips { display: none; }
+.sorter-note { margin: 12px 0 0; font-size: 12.5px; color: var(--dim); }
+.flyer { position: absolute; z-index: 5; pointer-events: none; background: var(--panel); border: 1px solid var(--ember); border-radius: 10px; padding: 6px 10px; font-size: 13px; white-space: nowrap; box-shadow: 0 8px 24px -10px rgba(20,20,19,.4); }
+
+/* tables, cards */
+.tbl { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; font-size: 15px; }
+.tbl th, .tbl td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tbl th { background: var(--bg-2); font: 600 13px/1.3 var(--sans); color: var(--muted); }
+.tbl tr:last-child td { border-bottom: 0; }
+.lv { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; white-space: nowrap; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.tbl-wrap { overflow-x: auto; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(20px, 3vw, 40px); align-items: start; }
+.grid2 > *, .hero-grid > * { min-width: 0; }
+@media (max-width: 880px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 22px; }
+.rules { list-style: none; margin: 0; padding: 0; counter-reset: r; }
+.rules li { counter-increment: r; display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px dashed var(--line-2); }
+.rules li:last-child { border-bottom: 0; }
+.rules li::before { content: counter(r); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: 600 13px/1 var(--mono); background: var(--bg-2); color: var(--ember-ink); }
+.rules b { display: block; }
+.rules span { color: var(--muted); font-size: 14.5px; }
+
+/* toggles */
+.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 999px; padding: 3px; background: var(--panel); }
+.seg button { border: 0; background: transparent; font: 600 13.5px/1 var(--sans); color: var(--muted); padding: 9px 14px; border-radius: 999px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+.pane[hidden] { display: none; }
+.quote { font-size: 16px; line-height: 1.85; background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--ember); border-radius: 10px; padding: 16px 18px; margin: 16px 0 0; }
+.quote.ok { border-left-color: var(--olive); }
+.quote .s { display: block; }
+.quote .s + .s { margin-top: 4px; }
+.src { font-size: 13px; color: var(--muted); margin-top: 10px; }
+
+/* terminal */
+.term { background: var(--term); color: var(--term-text); border-radius: 12px; overflow: hidden; margin-top: 16px; font: 13px/1.65 var(--mono); }
+.term-bar { background: var(--term-bar); padding: 8px 12px; color: #b9b5a8; font-size: 12px; display: flex; gap: 6px; align-items: center; }
+.term-bar i { width: 9px; height: 9px; border-radius: 50%; background: #55524a; display: inline-block; }
+.term pre { margin: 0; padding: 14px 16px; overflow-x: auto; white-space: pre; }
+.term .p { color: #b9b5a8; } .term .e { color: var(--t-err); } .term .w { color: var(--t-warn); } .term .g { color: var(--t-ok); }
+.ascii { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; margin: 16px 0 0; padding: 16px 18px; overflow-x: auto; font: 13.5px/1.55 var(--mono); white-space: pre; }
+.callout { margin-top: 16px; padding: 14px 16px; border-radius: 10px; background: #fff6f1; border: 1px solid #f0c9b8; font-size: 15px; }
+.callout b { color: var(--ember-ink); }
+
+/* page frame */
+.frame { margin-top: 18px; border: 1px solid var(--line-2); border-radius: 14px; overflow: hidden; background: var(--panel); box-shadow: 0 30px 70px -40px rgba(20,20,19,.4); }
+.frame-bar { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: var(--bg-2); border-bottom: 1px solid var(--line); font: 12.5px/1.2 var(--mono); color: var(--muted); }
+.frame-bar .url { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.frame-bar a { color: var(--ember-ink); font-weight: 600; text-decoration: none; white-space: nowrap; }
+.frame iframe { display: block; width: 100%; height: 560px; border: 0; background: #fff; }
+@media (max-width: 600px) { .frame iframe { height: 460px; } }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 22px; }
+@media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.stat .n { font: 600 30px/1 var(--serif); }
+.stat .l { margin-top: 6px; font-size: 13px; color: var(--muted); }
+
+/* video */
+.ask-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+.bubble { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; }
+.av { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 600 12px/1 var(--mono); background: var(--text); color: var(--bg); }
+.bubble p { margin: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.ask-actions { display: flex; gap: 10px; margin: 14px 0 0 46px; flex-wrap: wrap; }
+.state { margin: 14px 0 0 46px; font-size: 14.5px; color: var(--muted); }
+.state b { color: var(--text); }
+.vid { margin-top: 16px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line-2); background: #000; }
+.vid video { display: block; width: 100%; height: auto; }
+.routes td:first-child { white-space: nowrap; font-weight: 600; }
+
+/* evidence */
+.ev-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 880px) { .ev-grid { grid-template-columns: 1fr; } }
+.ev { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; }
+.ev .big { font: 600 40px/1 var(--serif); }
+.ev .big small { font: 500 15px/1 var(--sans); color: var(--muted); margin-left: 6px; }
+.ev p { margin: 10px 0 0; color: var(--muted); font-size: 14.5px; }
+.ev code { font-size: 12.5px; }
+.limits { margin: 0; padding-left: 20px; }
+.limits li { margin: 10px 0; }
+footer { border-top: 1px solid var(--line); padding-block: 40px calc(40px + env(safe-area-inset-bottom, 0px)); color: var(--dim); font-size: 14px; }
+footer a { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .rung .chips { display: block; grid-column: 2 / -1; font-size: 12.5px; color: var(--muted); }
+}
+html.static .rung .chips { display: block; grid-column: 2 / -1; font-size: 12.5px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="页面导航">
+  <div class="wrap">
+    <a class="brand" href="#top">explain-ladder<small>讲解阶梯</small></a>
+    <div class="nav-links">
+      <a href="#text">1 文字</a><a href="#diagram">2 图</a><a href="#page">3 网页</a><a href="#video">4 视频</a><a href="#evidence">检查</a>
+    </div>
+    <a class="gh" href="https://github.com/TbusOS/sky-skills/tree/main/skills/explain-ladder">GitHub</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="kicker">sky-skills · explain-ladder</span>
+      <h1 style="margin-top:18px;">先选形式,<em class="hl">再动笔</em>。</h1>
+      <p class="lede">要让人看懂一件事,可以写字、画图、做网页、录视频。四种形式的成本差很多。这个 skill 让模型按内容选最便宜、又讲得清的那一级。视频默认不做:模型先提一句,你点头才做。</p>
+      <div class="cta">
+        <a class="btn btn--hot" href="#text">看四级各怎么用</a>
+        <a class="btn btn--ghost" href="ste-report/index.html">打开一个真的看懂就扔页</a>
+      </div>
+    </div>
+
+    <div class="sorter" id="sorter" aria-label="示意:问题按内容落到四级里的某一级">
+      <div class="sorter-top">
+        <div class="inbox">
+          <div class="inbox-label">读者的问题</div>
+          <div class="q-card" id="qcard">按键中断之后,谁调用谁?</div>
+          <div class="q-test" id="qtest">判断:讲的是关系 → 图</div>
+        </div>
+      </div>
+      <ol class="rungs" reversed>
+        <li class="rung" data-k="4"><span class="rn">4</span><b>视频</b><small>随时间展开的过程</small><span class="lock">先问</span><output>0</output>
+          <span class="chips">例:竞争窗口是怎么一步步打开的?(提一句,等点头)</span></li>
+        <li class="rung" data-k="3"><span class="rn">3</span><b>网页</b><small>一大批记录、长时间线</small><output>0</output>
+          <span class="chips">例:3000 行串口 log 卡在哪一阶段? · 25 份 SKILL.md 长句集中在哪?</span></li>
+        <li class="rung" data-k="2"><span class="rn">2</span><b>图</b><small>关系:谁调谁、卡在哪</small><output>0</output>
+          <span class="chips">例:按键中断之后谁调用谁? · 哪个仓库同步哪个?</span></li>
+        <li class="rung" data-k="1"><span class="rn">1</span><b>文字</b><small>结论、数字、一步操作</small><output>0</output>
+          <span class="chips">例:这次编译过了没有? · 这个超时参数默认是多少?</span></li>
+      </ol>
+      <p class="sorter-note">示意:问题是举例,计数是本动画里落下的次数,不是统计。</p>
+    </div>
+  </div>
+</header>
+
+<section id="ladder" class="alt">
+  <div class="wrap">
+    <span class="kicker rv">四级</span>
+    <h2 class="rv">往上走一级之前,先说得出下面那级哪里讲不清。</h2>
+    <p class="lede rv">出处:Karpathy 2026-10-02 的帖子把读懂 AI 输出的形式排成这四级。代码变便宜了,以前不值得做的一次性网页、讲解视频,现在可以随手要。级别高不等于好:写清楚的一段文字,是最快让人看懂的那一级。</p>
+    <div class="tbl-wrap rv" style="margin-top:28px;">
+      <table class="tbl">
+        <thead><tr><th>读者要的是</th><th>用</th><th>在哪看</th><th>这个 skill 给什么</th></tr></thead>
+        <tbody>
+          <tr><td>结论、数字、一步操作</td><td><span class="lv"><i class="dot" style="background:var(--olive)"></i>1 文字</span></td><td>终端</td><td>STE 打八折的写法,「用 STE 讲」开关,<code>check_ste.py</code></td></tr>
+          <tr><td>关系:谁调用谁、哪个同步哪个、卡在哪一级、状态怎么切换</td><td><span class="lv"><i class="dot" style="background:var(--blue)"></i>2 图</span></td><td>终端(ASCII)</td><td>≤ 80 列、汉字算两列;正式出图指向设计 skill 的图例库</td></tr>
+          <tr><td>一大批同类记录、一条长时间线、要过滤 / 排序 / 按行号跳</td><td><span class="lv"><i class="dot" style="background:var(--gold)"></i>3 网页</span></td><td>浏览器</td><td><code>page_kit.py</code> 生成单文件页,<code>check_page.py</code> 四项检查</td></tr>
+          <tr><td>随时间展开的过程,先后顺序和时机本身就是要点</td><td><span class="lv"><i class="dot" style="background:var(--danger)"></i>4 视频</span></td><td>播放器</td><td>默认不做;先提一句,点头才用 <code>record_page.cjs</code> 录</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="text">
+  <div class="wrap">
+    <span class="kicker rv">第 1 级 · 文字</span>
+    <h2 class="rv">按 ASD-STE100 打八折写:一句一事,写出谁做。</h2>
+    <p class="lede rv">ASD-STE100(简化技术英语)本来是飞机维修手册用的受控英语:读者常常不是母语者,读错了没处问。AI 写的长句、被动句、同一个东西换着叫,正是读错的来源。原标准太严,照搬会写成电报,所以只取八成。中文同样适用。</p>
+    <div class="grid2" style="margin-top:32px;">
+      <div class="card rv">
+        <h3>七条规则</h3>
+        <ol class="rules" style="margin-top:8px;">
+          <li><div><b>一句只说一件事</b><span>三件事就写三句。</span></div></li>
+          <li><div><b>写出谁做</b><span>「配置会被加载」→「驱动在 probe 时加载配置」。</span></div></li>
+          <li><div><b>同一个东西只用一个名字</b><span>别一会叫「桥接模块」、一会叫 bridge。</span></div></li>
+          <li><div><b>句子短</b><span>说明句 ≤ 25 词 / 50 字,操作句 ≤ 20 词 / 30 字。</span></div></li>
+          <li><div><b>动词直接写</b><span>「对固件进行烧录」→「烧录固件」。</span></div></li>
+          <li><div><b>一步一个动作,条件写在前面</b><span>「如果重启后没有输出,检查波特率。」</span></div></li>
+          <li><div><b>不确定就直说</b><span>「应该是」→「我没查到 X,要查就跑 Y」。</span></div></li>
+        </ol>
+        <p class="src">开关:说「用 STE 讲」,之后每条回答都这样写;说「停止」关掉。只在本次会话有效。</p>
+      </div>
+      <div class="rv">
+        <div class="seg" role="group" aria-label="切换原文和改写">
+          <button type="button" data-pane="orig" aria-pressed="true">原文</button>
+          <button type="button" data-pane="ste" aria-pressed="false">STE 改写</button>
+        </div>
+        <div class="pane" data-name="orig">
+          <p class="quote" data-ste-ok>位移图按球面圆顶的高度和折射定律(水 n=1.333)烘出:中间放大约 1.4 倍(从烘好的位移图读出:半径 4–14px 处 1.38–1.44 倍)、边缘压缩;同一次烘焙带出它投在页面上的焦散和阴影(乘进页面,亮处看得见、黑处看不见),以及边缘的 Fresnel 反光和小高光。</p>
+          <div class="term"><div class="term-bar"><i></i><i></i><i></i>&nbsp; check_ste.py</div><pre><span class="p">$ printf '%s' "&lt;原文&gt;" | python3 check_ste.py --stdin</span>
+<span class="e">&lt;stdin&gt;:1  S1  句子 94 字,超过 50:「位移图按球面圆顶的高度和折射定律(水 n=1.3…snel 反光和小高光。」</span>
+<span class="e">共 1 处</span></pre></div>
+        </div>
+        <div class="pane" data-name="ste" hidden>
+          <p class="quote ok"><span class="s">位移图按球面圆顶的高度和折射定律(水 n=1.333)烘出。</span><span class="s">中间放大约 1.4 倍,边缘压缩。</span><span class="s">从烘好的位移图读出:半径 4–14px 处放大 1.38–1.44 倍。</span><span class="s">同一次烘焙还带出三样东西:投在页面上的焦散和阴影、边缘的 Fresnel 反光、小高光。</span><span class="s">焦散和阴影乘进页面:亮处看得见,黑处看不见。</span></p>
+          <div class="term"><div class="term-bar"><i></i><i></i><i></i>&nbsp; check_ste.py</div><pre><span class="p">$ printf '%s' "&lt;改写&gt;" | python3 check_ste.py --stdin</span>
+<span class="g">没有发现</span></pre></div>
+        </div>
+        <p class="src">原文:<code>skills/glass-design/SKILL.md:69</code>(提交 a49d13c),一整行里被报的五句之一。改写后内容一样,换成五句。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="diagram" class="alt">
+  <div class="wrap">
+    <span class="kicker rv">第 2 级 · 图</span>
+    <h2 class="rv">讲的是关系,就先给图,再写字。</h2>
+    <p class="lede rv">谁调用谁、哪个仓库同步哪个、启动卡在哪一级 —— 这类问题写成一段字,读者要自己在脑子里画一遍。终端里先画几行 ASCII 图:不超过 80 列,汉字按两列算。图必须带出文字里看不出的判断;只是把文字框起来的图,不如不画。</p>
+    <div class="rv" style="margin-top:28px;">
+      <div class="seg" role="group" aria-label="切换文字版和图版">
+        <button type="button" data-pane="prose" aria-pressed="false">文字版</button>
+        <button type="button" data-pane="fig" aria-pressed="true">图版</button>
+      </div>
+      <div class="pane" data-name="prose" hidden>
+        <p class="quote" data-ste-ok>按键中断进来后调用 gpio_keys_gpio_isr(),它在 wakeup 按键时处理唤醒,然后看 debounce_use_hrtimer:为真就用 hrtimer_start() 起一个高精度定时器,到期时 gpio_keys_debounce_timer() 被调用;否则用 mod_delayed_work() 排一个延时任务,到期时 gpio_keys_gpio_work_func() 被调用;这两个函数都调 gpio_keys_debounce_event(),它再调 gpio_keys_gpio_report_event(),最后由 input_event() 把按键值交给 input 子系统。</p>
+        <p class="src">每个字都对,但「中断函数里没有上报」这件事,得读到第三个分号才拼得出来。</p>
+      </div>
+      <div class="pane" data-name="fig">
+<pre class="ascii" aria-label="gpio_keys 按键上报调用链">调用链:从上往下,每层挂出处
+行号出自一棵 Linux 6.1.141 内核树的 drivers/input/keyboard/gpio_keys.c,只作示意
+
+  按键中断
+      │
+      ▼
+  gpio_keys_gpio_isr()                      :417   不上报,只排一个延时
+      │
+      ├─ hrtimer_start()                    :439   用 hrtimer 消抖时
+      │    └─ gpio_keys_debounce_timer()    :407   到期后调用
+      │
+      └─ mod_delayed_work()                 :443   不用 hrtimer 时
+           └─ gpio_keys_gpio_work_func()    :399   到期后调用
+
+  gpio_keys_debounce_event()                :390   两条路到期后都调它
+      │
+      ▼
+  gpio_keys_gpio_report_event()             :366
+      │
+      ▼
+  input_event()                             :386   按键值交给 input 子系统</pre>
+        <div class="callout"><b>图带出的判断:</b>中断函数里没有上报;两条消抖的路到期后汇到同一个函数。所以按键上报比按下晚一个消抖时间,这是设计如此。</div>
+      </div>
+      <p class="src">正式出图交给设计 skill 的图例库:<a href="../anthropic-design/diagrams.html">anthropic</a>(78 张现成 SVG)· <a href="../apple-design/diagrams.html">apple</a> · <a href="../glass-design/diagrams.html">glass</a> · <a href="../relief-design/diagrams.html">relief</a>(内核 / 硬件类)。设计 skill 不够用时,模型要明说缺什么,不硬套。</p>
+    </div>
+  </div>
+</section>
+
+<section id="page">
+  <div class="wrap">
+    <span class="kicker rv">第 3 级 · 网页</span>
+    <h2 class="rv">一大批记录,做一个看懂就扔的单文件网页。</h2>
+    <p class="lede rv">下面这页是真的:用 <code>page_kit.py</code> 从固定提交 a49d13c 取 skills 目录的快照,拿同一提交里的 <code>check_ste.py</code> 体检 sky-skills 自己的 25 份 SKILL.md。表能过滤、能排序,原始输出带行号,页尾列出处和 sha256。</p>
+    <div class="stats rv">
+      <div class="stat"><div class="n">25</div><div class="l">份 SKILL.md</div></div>
+      <div class="stat"><div class="n">108</div><div class="l">处发现</div></div>
+      <div class="stat"><div class="n">78 / 30</div><div class="l">长句 / 英文被动</div></div>
+      <div class="stat"><div class="n">7</div><div class="l">个 skill 一处都没有</div></div>
+    </div>
+    <div class="frame rv">
+      <div class="frame-bar"><span class="url">demos/explain-ladder/ste-report/index.html</span><a href="ste-report/index.html" target="_blank" rel="noopener">新标签页打开 ↗</a></div>
+      <iframe src="ste-report/index.html" title="看懂就扔页样例:25 份 SKILL.md 的 STE 体检" loading="lazy"></iframe>
+    </div>
+    <div class="grid2" style="margin-top:32px;">
+      <div class="rv">
+        <h3>两条硬要求</h3>
+        <ol class="rules" style="margin-top:8px;">
+          <li><div><b>数据从文件算出来,标出处</b><span>只经 <code>p.source()</code> / <code>p.command()</code> 读进来再算。页面越好看,里面的数越像真的;手抄错了,页面上看不出来。</span></div></li>
+          <li><div><b>单个文件,不引外部资源</b><span>经共享打开是 <code>file://</code> 页面,读不到旁边的文件;CDN 在内网下不一定通。</span></div></li>
+        </ol>
+        <p class="src">这页的 <code>build.py</code> 还自己核对一次:命令输出最后一行必须是「共 N 处」,解析出的条数必须等于 N。命令中途失败时,它停下报错,不会生成一张空页。</p>
+      </div>
+      <div class="rv">
+        <div class="term"><div class="term-bar"><i></i><i></i><i></i>&nbsp; check_page.py</div><pre><span class="p">$ python3 check_page.py demos/explain-ladder/ste-report</span>
+<span class="g">  ✅ P1 单文件:没有引用外部文件</span>
+<span class="g">  ✅ P2 出处:2 条出处,文件都在、内容没变</span>
+<span class="g">  ✅ P3 能重建:重跑 build.py 得到逐字节相同的页面</span>
+<span class="g">  ✅ P4 打开不报错:打开无报错、无网络请求,3 个控件、2 条出处都画出来了</span>
+ste-report:4 通过 / 0 失败 / 0 跳过</pre></div>
+        <p class="src">P3 是关键:重跑 <code>build.py</code>,和现有页面逐字节比对。手改过页面里的任何一个数,这一项就过不了。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="video" class="alt">
+  <div class="wrap">
+    <span class="kicker rv">第 4 级 · 视频</span>
+    <h2 class="rv">默认不做。先提一句,你点头才做。</h2>
+    <p class="lede rv">视频做起来最贵,看的人也只能从头看到尾,没法过滤、搜索、跳到某一行。只在三种情况下提:要讲的过程里先后和时机就是要点;看的人要被动看完(转给组里、给新人讲);或者你自己提到视频。</p>
+    <div class="grid2" style="margin-top:32px;">
+      <div class="ask-card rv" id="ask">
+        <div class="bubble"><span class="av">AI</span><p>这个分类过程做成 15 秒的无声录屏可能更直观:问题一个个落到哪一级,一眼就能看出来。要做吗?做的话就录上面首屏那段动画,几分钟。</p></div>
+        <div class="ask-actions">
+          <button class="btn btn--hot" type="button" data-answer="yes">做吧</button>
+          <button class="btn btn--ghost" type="button" data-answer="no">不用</button>
+        </div>
+        <p class="state" id="ask-state"><b>还没点头:</b>不录、不装依赖、不写配音稿。</p>
+        <div class="vid" id="vid" hidden>
+          <video controls muted loop playsinline preload="none" src="ladder.webm" aria-label="首屏分类动画的无声录屏"></video>
+        </div>
+        <div class="term" id="vid-check" hidden><div class="term-bar"><i></i><i></i><i></i>&nbsp; record_page.cjs</div><pre><span class="p">$ node record_page.cjs index.html --seconds=15 --out=ladder.webm</span>
+<span class="g" id="v1">  ✅ V1 文件能播:15.48 秒 · 1280×720</span>
+<span class="g" id="v2">  ✅ V2 画面动了:5 个时间点和首帧比,最多 0.42% 的像素变了</span></pre></div>
+      </div>
+      <div class="rv">
+        <h3>点头之后:两条路</h3>
+        <div class="tbl-wrap" style="margin-top:12px;">
+          <table class="tbl routes">
+            <thead><tr><th>路</th><th>做法</th></tr></thead>
+            <tbody>
+              <tr><td>A 无声录屏</td><td>先做第 3 级的页面(带动画或分步按钮),再用 <code>record_page.cjs</code> 录成 webm。录完自己打开一遍核对:能播、画面在动。</td></tr>
+              <tr><td>B 配音 + 字幕</td><td>走 <a href="https://github.com/TbusOS/sky-skills/tree/main/skills/wechat-video-publisher">wechat-video-publisher</a>:edge-tts 配音、逐帧截图、ffmpeg 合成并烧字幕。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="src">V2 抓的是「动画在录之前就播完了」「页面开了减少动态效果」这两种情况 —— 录出来都是一张静止图。录屏用的页面最好就是第 3 级做出来、过了检查的那个,视频里的数也就有出处。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="evidence">
+  <div class="wrap">
+    <span class="kicker rv">检查</span>
+    <h2 class="rv">每个脚本都带「故意做坏,必须报」的自测。</h2>
+    <p class="lede rv">全绿的自测不等于查到了:用例只有一种形态时,整条路径可能从来没跑过。所以每个脚本还做了反向验证 —— 把检查故意改坏,对应的用例必须变红。</p>
+    <div class="ev-grid" style="margin-top:28px;">
+      <div class="ev rv"><div class="big">19<small>条自测</small></div><p><code>check_ste.py</code>:11 条必须报出问题。另外把它故意改坏 14 处(汉字按一列算、不分句、分号断句……),14 处都让对应用例变红。</p></div>
+      <div class="ev rv"><div class="big">13<small>条自测</small></div><p><code>check_page.py</code>:9 条故意做坏(手改页面、源文件变了、引 CDN、脚本报错……)。有一个问题自测查不出:在仓里跑时 node 能自己找到浏览器,从仓外运行就找不到。这是换到仓外手动跑才发现的,已修。</p></div>
+      <div class="ev rv"><div class="big">5<small>条自测</small></div><p><code>record_page.cjs</code>:静止页、动画录之前就播完的页,都必须报 V2;只有一小块在动的页,必须判成在动。V2 数变化像素的占比:静止页 0%,本页首屏 0.42%,门槛 0.1%。</p></div>
+    </div>
+    <div class="grid2" style="margin-top:36px;">
+      <div class="rv">
+        <h3>检查覆盖不到的</h3>
+        <ul class="limits">
+          <li><b>出处对,不等于算得对。</b>四项检查证明「数据确实从这个文件经 build.py 算出来」,不证明 build.py 的分类规则对。第一次试用时,按时间戳数值分段分错了几行,四项照样全过;改成按事件切才对。</li>
+          <li><b>STE 开关没有程序状态。</b>只靠 skill 里的说明;上下文压缩后可能丢,丢了就当关着。</li>
+          <li><b>V2 拿第一帧当基准。</b>页面加载很慢、第一帧还是白屏时,静止页也会被判成在动。</li>
+        </ul>
+      </div>
+      <div class="rv">
+        <h3>自己跑一遍</h3>
+        <div class="term"><div class="term-bar"><i></i><i></i><i></i>&nbsp; 自测</div><pre><span class="p">$ K=~/.claude/skills/explain-ladder/scripts</span>
+<span class="p">$ python3 $K/check_ste.py --self-test</span>
+<span class="g">自测:19 通过 / 0 失败</span>
+<span class="p">$ python3 $K/check_page.py --self-test</span>
+<span class="g">自测:13 通过 / 0 失败</span>
+<span class="p">$ node $K/record_page.cjs --self-test</span>
+<span class="g">自测:5 通过 / 0 失败</span></pre></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    explain-ladder 是 <a href="../../index.html">sky-skills</a> 的一个 skill · <a href="https://github.com/TbusOS/sky-skills/blob/main/skills/explain-ladder/SKILL.md">SKILL.md</a> · 本页配色来自 <a href="../anthropic-design/explainer.html">anthropic-design</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var hasIO = 'IntersectionObserver' in window;
+
+  // 滚动浮现
+  var obs = hasIO && !reduce ? new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
+  }, { rootMargin: '0px 0px -8% 0px' }) : null;
+  document.querySelectorAll('.rv').forEach(function (el) { if (obs) obs.observe(el); else el.classList.add('in'); });
+
+  // 两组切换按钮
+  document.querySelectorAll('.seg').forEach(function (seg) {
+    var box = seg.parentNode;
+    seg.querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        seg.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        box.querySelectorAll('.pane').forEach(function (p) { p.hidden = p.getAttribute('data-name') !== b.getAttribute('data-pane'); });
+      });
+    });
+  });
+
+  // 视频:点头才显示
+  var ask = document.getElementById('ask');
+  ask.querySelectorAll('[data-answer]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var yes = b.getAttribute('data-answer') === 'yes';
+      document.getElementById('vid').hidden = !yes;
+      document.getElementById('vid-check').hidden = !yes;
+      document.getElementById('ask-state').innerHTML = yes
+        ? '<b>点头了:</b>下面是用 record_page.cjs 录的首屏动画,录完已自动核对。'
+        : '<b>不做:</b>就停在网页这一级。同一件事不再追问。';
+      if (yes) { var v = document.querySelector('#vid video'); v.preload = 'auto'; if (!reduce) { v.play().catch(function () {}); } }
+    });
+  });
+
+  // 首屏:问题按内容落到某一级
+  var Q = [
+    { q: '按键中断之后,谁调用谁?', t: '讲的是关系', k: 2 },
+    { q: '这次编译过了没有?', t: '要的是一个结论', k: 1 },
+    { q: '3000 行串口 log 卡在哪一阶段?', t: '一长串记录,要过滤', k: 3 },
+    { q: '这个超时参数默认是多少?', t: '要的是一个数', k: 1 },
+    { q: '哪个仓库同步哪个?', t: '讲的是关系', k: 2 },
+    { q: '竞争窗口是怎么一步步打开的?', t: '顺序和时机就是要点', k: 4 },
+    { q: '25 份 SKILL.md,长句集中在哪?', t: '一大批记录', k: 3 },
+    { q: '启动卡在哪一级?', t: '讲的是关系', k: 2 }
+  ];
+  var NAME = { 1: '文字', 2: '图', 3: '网页', 4: '视频(先问)' };
+  var sorter = document.getElementById('sorter');
+  var card = document.getElementById('qcard'), test = document.getElementById('qtest');
+  var rungs = {}; sorter.querySelectorAll('.rung').forEach(function (r) { rungs[r.getAttribute('data-k')] = r; });
+
+  if (reduce || !sorter.animate) {
+    document.documentElement.classList.add('static');
+    var counts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    Q.forEach(function (x) { counts[x.k]++; });
+    Object.keys(counts).forEach(function (k) { rungs[k].querySelector('output').textContent = counts[k]; });
+    return;
+  }
+
+  var i = 0, visible = true, timer = null;
+  function rel(el) {
+    var a = el.getBoundingClientRect(), b = sorter.getBoundingClientRect();
+    return { x: a.left - b.left, y: a.top - b.top, w: a.width, h: a.height };
+  }
+  function step() {
+    if (!visible) { timer = setTimeout(step, 600); return; }
+    var item = Q[i % Q.length]; i++;
+    card.textContent = item.q;
+    test.textContent = '';
+    card.animate([{ opacity: 0, transform: 'translateY(-8px)' }, { opacity: 1, transform: 'none' }], { duration: 380, easing: 'ease-out' });
+    setTimeout(function () { test.textContent = '判断:' + item.t + ' → ' + NAME[item.k]; }, 650);
+    setTimeout(function () { fly(item); }, 1450);
+    timer = setTimeout(step, 3000);
+  }
+  function fly(item) {
+    var from = rel(card), rung = rungs[item.k], to = rel(rung.querySelector('output'));
+    var f = document.createElement('div');
+    f.className = 'flyer'; f.textContent = item.q;
+    f.style.left = from.x + 'px'; f.style.top = from.y + 'px';
+    sorter.appendChild(f);
+    var dx = Math.max(8, to.x - f.offsetWidth * 0.8) - from.x, dy = to.y - 6 - from.y;
+    var a = f.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: 'translate(' + dx * 0.55 + 'px,' + (dy * 0.45 - 30) + 'px) scale(.92)', opacity: 1, offset: 0.55 },
+      { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.6)', opacity: 0 }
+    ], { duration: 900, easing: 'cubic-bezier(.3,.6,.3,1)' });
+    a.onfinish = function () {
+      f.remove();
+      var out = rung.querySelector('output');
+      out.textContent = String(+out.textContent + 1);
+      rung.classList.add('hit');
+      if (item.k === 4) { rung.classList.add('ask'); test.textContent = '视频:先提一句,等你点头'; }
+      setTimeout(function () { rung.classList.remove('hit'); rung.classList.remove('ask'); }, 900);
+    };
+  }
+  if (hasIO) new IntersectionObserver(function (es) { visible = es[0].isIntersecting; }, { threshold: 0.1 }).observe(sorter);
+  step();
+})();
+</script>
+</body>
+</html>

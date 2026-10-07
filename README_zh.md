@@ -9,6 +9,7 @@
 十个设计类 skill 各自配备了一份单页 flagship demo，位于 [`demos/`](./demos/) 目录 —— 同一份内容，九种美学呈现。`hardware-3d` 是里面的另类：它做的是渲染，不是排版。
 
 - [**hardware-3d demo**](./demos/hardware-3d/index.html) —— 一条数据从内存颗粒走到 CPU 寄存器，分五站。单文件手写 WebGL2：PBR + 现烘棚拍柔光箱 + SSAO，累积 200 次采样换来真软阴影和真景深。数据流那一层画在 **die 内部** —— 逻辑块躺在硅上、架空铜轨在上方 —— 并且按时钟拍走，可以暂停和单步
+- [**explain-ladder demo**](./demos/explain-ladder/index.html) —— 四级各演示一遍:一段真实的 STE 改写和检查输出、同一条调用链的文字版和 ASCII 图版、一个真的看懂就扔页(在固定提交下体检 25 份 SKILL.md,能逐字节重建),以及点头之后才出现的视频
 
 - [**apple-design demo**](./demos/apple-design/index.html) —— apple.com 的冷感克制
 - [**anthropic-design demo**](./demos/anthropic-design/index.html) —— anthropic.com 的暖编辑感
@@ -26,10 +27,13 @@
 - [**一个比特是怎么存住的**](./demos/anthropic-design/one-bit.html) —— 用符号之前先把它打开的阶梯、只让颜色动的三联图、把十个数量级放进一根轴的对数尺
 - [**一张图怎么被读**](./demos/anthropic-design/reading.html) —— 五张图讲读者而不是题材：三种「把里面画出来」的画法、底图不动只动高亮、可拨的步进图、语法铁路图、以及一张被截屏发走仍然成立的卡
 - [**时间去哪儿了**](./demos/anthropic-design/pressure.html) —— 两张会讲道理而不是汇报的图：给采样图的横轴加上单位，以及把等待画在利用率上、标出那个膝点
+- [**anthropic 配色的讲解页**](./demos/anthropic-design/explainer.html) —— 2026-10-07 改版示范:只定死配色,版式和动画放开;首屏动画演示机制、证据模块(真实命令输出、计数的检查)、读者能点选的解释器
 - [**apple 图表画廊**](./demos/apple-design/diagrams.html) —— 同类图型的 apple.com 干净几何风版本，共 32 幅
+- [**apple 风格的讲解页**](./demos/apple-design/explainer.html) —— 同一页内容换成 apple.com 的配色:一个蓝色强调、灰阶分层、系统无衬线标题
 - [**ember 图表画廊**](./demos/ember-design/diagrams.html) —— 同类图型的暖棕 + 金单焦点版本，共 8 幅
 - [**sage 图表画廊**](./demos/sage-design/diagrams.html) —— 同类图型的抹茶绿 + 靛蓝墨版本，共 8 幅
 - [**glass 图表画廊**](./demos/glass-design/diagrams.html) —— 同类图型的暗玻璃版本，共 25 幅（aurora 光场上的毛玻璃面板，SVG 墨色主题免疫）
+- [**液态玻璃的讲解页**](./demos/glass-design/explainer.html) —— 同一页内容做成极光上的毛玻璃面板,前景强调只用 cyan(只有深色)
 - [**eclat lookbook**](./demos/eclat-design/diagrams.html) —— 8 幅电影感发布会构图（聚光产品、产品线、参数揭示、那一刻、定价、开箱、跑分、细节）
 - [**lectern board pack**](./demos/lectern-design/diagrams.html) —— 8 个会议室面板：折线 / 条形 / 环形 / 构成 / 分群留存图，加路线图时间线、KPI 块和决议表
 - [**primer 图解集**](./demos/primer-design/diagrams.html) —— 25 幅厚描边插画，来自三个读本与 demo（书的索引、外卖跑一趟、封好的信封……），每幅只回答一个问题

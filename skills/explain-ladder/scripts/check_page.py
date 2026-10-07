@@ -67,7 +67,7 @@ def load_data(text):
         return None
 
 
-def check_sources(text):
+def check_sources(text, page_dir='.'):
     d = load_data(text)
     if d is None:
         return 'FAIL', '没有出处数据块 —— 不是 page_kit 生成的页面,数据从哪来说不清'
@@ -79,10 +79,12 @@ def check_sources(text):
     bad = []
     for i, s in enumerate(srcs, 1):
         if 'path' in s:
-            if not os.path.exists(s['path']):
+            # Page(relative=True) 记的是相对 build.py 所在目录的路径
+            fp = s['path'] if os.path.isabs(s['path']) else os.path.join(page_dir, s['path'])
+            if not os.path.exists(fp):
                 bad.append('[%d] %s 不在了' % (i, s['path']))
                 continue
-            with open(s['path'], 'rb') as f:
+            with open(fp, 'rb') as f:
                 h = hashlib.sha256(f.read()).hexdigest()
             if h != s.get('sha256'):
                 bad.append('[%d] %s 在页面生成后变了 → 重跑 build.py' % (i, s['path']))
@@ -180,7 +182,7 @@ def run_checks(target, render=True):
     with open(p, encoding='utf-8') as f:
         text = f.read()
     res = [('P1 单文件', check_single_file(text)),
-           ('P2 出处', check_sources(text)),
+           ('P2 出处', check_sources(text, os.path.dirname(os.path.abspath(p)))),
            ('P3 能重建', check_rebuild(p, text)),
            ('P4 打开不报错', check_render(os.path.abspath(p)) if render
             else ('SKIP', '按 --no-render 跳过'))]
@@ -221,14 +223,17 @@ def self_test():
     tmp = tempfile.mkdtemp(prefix='explain-ladder-selftest-')
     passed = failed = 0
 
-    def make(name, extra='', log=LOG):
+    def make(name, extra='', log=LOG, rel=False):
         d = os.path.join(tmp, name)
         os.makedirs(d)
         src = os.path.join(d, 'uart.log')
         with open(src, 'w', encoding='utf-8') as f:
             f.write(log)
         with open(os.path.join(d, 'build.py'), 'w', encoding='utf-8') as f:
-            f.write(BUILD % {'here': HERE, 'src': src, 'extra': extra})
+            b = BUILD % {'here': HERE, 'src': src, 'extra': extra}
+            if rel:
+                b = b.replace("p = Page('自测页')", "p = Page('自测页', relative=True)")
+            f.write(b)
         r = subprocess.run([sys.executable, 'build.py'], cwd=d, stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
         assert r.returncode == 0, r.stderr.decode()
@@ -274,6 +279,20 @@ def self_test():
         with open(f, 'w', encoding='utf-8') as fh:
             fh.write(s.replace('Booting Linux', 'Booting LINUX', 1))
         expect('★ 手改 index.html 里的内容 → P3 失败', d, 1, 'P3 能重建', render=False)
+
+        d = make('relative', rel=True)
+        expect('相对路径模式:四项检查照常判', d, 0, render=False)
+        with open(os.path.join(d, 'index.html'), encoding='utf-8') as fh:
+            leaked = d in fh.read()
+        if not leaked:
+            passed += 1
+            print('  通过  相对路径模式:页面里没有本机绝对路径(反向:不加 relative 时页面里有)')
+        else:
+            failed += 1
+            print('  失败  相对路径模式下页面里仍有绝对路径 %s' % d)
+        with open(os.path.join(d, 'uart.log'), 'a', encoding='utf-8') as fh:
+            fh.write('[    3.000000] new line\n')
+        expect('★ 相对路径模式下源文件变了 → P2 失败', d, 1, 'P2 出处', render=False)
 
         d = make('src-changed')
         with open(os.path.join(d, 'uart.log'), 'a', encoding='utf-8') as fh:

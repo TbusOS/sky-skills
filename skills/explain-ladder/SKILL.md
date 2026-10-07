@@ -79,6 +79,7 @@ printf '%s' "<草稿>" | python3 $K/check_ste.py --stdin
 | S5 | 图太宽:框线字符的行、代码块里带箭头的行超过 80 列,汉字按两列算 |
 
 规则 1、3、6 要靠判断,机器查不准,脚本不查。写文档时跑一遍;聊天回答不要求每条都跑。
+文档里故意放的反例:Markdown 行尾写 `ste-ok`,HTML 元素加 `data-ste-ok` 属性,检查就跳过它。
 
 ## 2. 图:讲关系先给图
 
@@ -91,7 +92,7 @@ printf '%s' "<草稿>" | python3 $K/check_ste.py --stdin
 - **汉字占两列**。按字符个数画的框,一有汉字就歪。`check_ste.py` 的 S5 按显示宽度算。
 - 框线字符(`─ │ ┌ ┐`)在少数终端里宽度不对;对不齐就改用 `+ - |`。
 
-两种最常用的样子。第一张要读者拿到的判断是:中断函数自己不上报按键,而是排一个延时任务,消抖后才上报。
+两种最常用的样子。第一张要读者拿到的判断是:中断函数自己不上报按键。它只排一个延时(hrtimer 或延时任务,二选一),消抖时间到了才上报。
 
 ```
 调用链:从上往下,每层挂出处
@@ -100,19 +101,21 @@ printf '%s' "<草稿>" | python3 $K/check_ste.py --stdin
   按键中断
       │
       ▼
-  gpio_keys_gpio_isr()            :417   不上报,只排延时任务
-      │  mod_delayed_work()       :443
-      ▼
-  gpio_keys_gpio_work_func()      :399   消抖时间到了才跑
+  gpio_keys_gpio_isr()                      :417   不上报,只排一个延时
+      │
+      ├─ hrtimer_start()                    :439   用 hrtimer 消抖时
+      │    └─ gpio_keys_debounce_timer()    :407   到期后调用
+      │
+      └─ mod_delayed_work()                 :443   不用 hrtimer 时
+           └─ gpio_keys_gpio_work_func()    :399   到期后调用
+
+  gpio_keys_debounce_event()                :390   两条路到期后都调它
       │
       ▼
-  gpio_keys_debounce_event()      :390
+  gpio_keys_gpio_report_event()             :366
       │
       ▼
-  gpio_keys_gpio_report_event()   :366
-      │
-      ▼
-  input_event()                   :386   按键值交给 input 子系统
+  input_event()                             :386   按键值交给 input 子系统
 ```
 
 ```
@@ -181,6 +184,10 @@ python3 $K/check_page.py ~/throwaway-pages/<目录>   # 四项检查,有失败�
 
 `templates/build_template.py` 是完整骨架。交给 user 时说三件事:路径、这页回答什么问题、怎么用(过滤框支持 `/正则/`)。
 
+页面要放进公开仓时,用 `Page(标题, relative=True)`:出处里的路径按 `build.py` 所在目录记相对路径,
+不会把本机家目录带出去;`check_page.py` 按页面目录去找这些文件。
+样例:`demos/explain-ladder/ste-report/`(从固定提交取快照,以后也能逐字节重建)。
+
 ### 怎么打开、怎么扔
 
 - **Windows 上的 Chrome**:家目录用 samba 共享出去时,`build.py` 会打印
@@ -223,7 +230,7 @@ python3 $K/check_page.py ~/throwaway-pages/<目录>   # 四项检查,有失败�
 
 | 路 | 做法 | 本机情况(2026-10-07 查) |
 |---|---|---|
-| A 无声录屏 | 先做第 3 级的页面(带动画或分步按钮),再用 `record_page.cjs` 录成 webm | 能用:Playwright 自带的 ffmpeg 录 VP8 webm,自测 4 条全过 |
+| A 无声录屏 | 先做第 3 级的页面(带动画或分步按钮),再用 `record_page.cjs` 录成 webm | 能用:Playwright 自带的 ffmpeg 录 VP8 webm,自测 5 条全过 |
 | B 配音 + 字幕 | 走 `wechat-video-publisher`:edge-tts 配音、逐帧截图、ffmpeg 合成并烧字幕 | 那套写的是 macOS / homebrew;这台 Linux 上 `python3 -c "import edge_tts"` 报找不到模块,`which ffmpeg` 为空。要装先问 user |
 
 ```bash
@@ -231,9 +238,12 @@ node $K/record_page.cjs <page.html> --seconds=30 [--size=1280x720] [--actions=st
 ```
 
 - `--actions` 按顺序点按钮、按键、滚动,用来录分步讲解的页面,格式见脚本开头。
-- 录完自动核对两件事,不过就退出码 1:V1 文件能播(读得到时长和宽度);V2 画面动了(首帧和末帧平均像素差 ≥ 1.0)。
+- 录完自动核对两件事,不过就退出码 1。V1:文件能播,读得到时长和宽度。
+  V2:画面动了 —— 取 5 个时间点和第一帧比,变化像素最多的那一帧要 ≥ 0.1%。
   V2 抓的是「动画在录之前就播完了」「页面开了减少动态效果」,这两种录出来都是静止画面。
-  实测差值:静止页 0.35,`demos/anthropic-design/explainer.html` 首屏动画 2.40,纯平移动画 6.74。
+  2026-10-07 实测:静止页 0%,只有首屏一小块在动的页 0.25%–0.43%,整屏平移 5.8%。
+  不用整幅平均差:一小块在动时平均差只有 0.5–1.1,和静止页的 0.35–0.5 拉不开。
+- V2 拿第一帧当基准:页面加载很慢、第一帧还是白屏时,静止页也会被判成在动。这条往「放过」那边坏。
 - 视频里的数和网页一样要有出处:录的页面最好就是用 `page_kit` 做出来、过了 `check_page.py` 的那个。
 - 用要 API key 的配音服务时,key 放文件、从文件读,不贴进对话。
 - 交给 user 时说:文件路径(`page_kit.py where <文件>` 打印 Windows 路径)、时长、讲的是什么。
@@ -242,20 +252,20 @@ node $K/record_page.cjs <page.html> --seconds=30 [--size=1280x720] [--actions=st
 
 | 文件 | 作用 |
 |---|---|
-| `scripts/check_ste.py` | 第 1 级:S1–S5;`--self-test` 18 条,其中 10 条是「故意写坏,必须报」 |
+| `scripts/check_ste.py` | 第 1 级:S1–S5;`--self-test` 19 条,其中 11 条是「故意写坏,必须报」 |
 | `scripts/page_kit.py` | 第 3 级:生成库 + `new` / `where` / `list` 三个命令 |
 | `scripts/page_base.css`、`page_base.js` | 内嵌进每个页面的样式和控件脚本(亮 / 暗色跟系统) |
-| `scripts/check_page.py` | 第 3 级:四项检查;`--self-test` 10 条,其中 8 条是反向用例 |
+| `scripts/check_page.py` | 第 3 级:四项检查;`--self-test` 13 条,其中 9 条是「故意做坏,必须报」 |
 | `scripts/render_check.cjs` | P4 用的无头浏览器脚本;找不到 playwright 时 P4 明说跳过,不算通过 |
 | `templates/build_template.py` | `page_kit.py new` 用的骨架 |
-| `scripts/record_page.cjs` | 第 4 级:录 webm + V1 / V2 核对;`--self-test` 4 条,其中 2 条是反向用例 |
+| `scripts/record_page.cjs` | 第 4 级:录 webm + V1 / V2 核对;`--self-test` 5 条,其中 2 条是「故意做坏,必须报」 |
 
 自测(2026-10-07 全过):
 
 ```bash
-python3 $K/check_ste.py --self-test      # 18 通过
-python3 $K/check_page.py --self-test     # 10 通过
-node $K/record_page.cjs --self-test      # 4 通过
+python3 $K/check_ste.py --self-test      # 19 通过
+python3 $K/check_page.py --self-test     # 13 通过
+node $K/record_page.cjs --self-test      # 5 通过
 ```
 
 playwright 从 sky-skills 仓根目录的 `node_modules` 里找;放在别处时设 `PLAYWRIGHT_NODE_PATH`(check_page)或 `NODE_PATH`(record_page)。

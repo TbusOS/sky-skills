@@ -13,8 +13,13 @@
 //
 // 录完的核对(不过就退出码 1):
 //   V1 文件能播:Chromium 打开 webm,读得到时长和宽度
-//   V2 画面动了:首帧和末帧缩成 160×90 比平均像素差,小于 1.0 就算没动
-//      —— 动画在录之前就播完了、或者页面开了「减少动态效果」,录出来是一张静止图
+//   V2 画面动了:取 5 个时间点,每帧缩成 160×90 和首帧比,数「单像素差 > 24」的像素占比,
+//      最大值不到 0.1% 就算没动 —— 动画在录之前就播完了、或者页面开了「减少动态效果」,
+//      录出来是一张静止图。
+//      为什么不用整幅平均差:只有一小块在动的页面,平均差被大片静止区域摊薄(实测低到 0.5),
+//      和静止页的 0.35–0.5 拉不开;
+//      循环动画的首末两帧还可能恰好相同。2026-10-07 实测:静止页 0%,只有首屏一小块在动的页
+//      0.25%–0.43%,整屏平移 5.8%。
 //   静止画面确实是想要的(比如只录一张图慢慢滚),加 --allow-static
 //
 // 依赖:playwright(sky-skills 仓根目录的 node_modules 里有)。录屏用的是 Playwright 自带的
@@ -91,11 +96,18 @@ async function probe(file) {
       if (!isFinite(dur)) { await seek(1e6); dur = v.currentTime; }
       const c = document.getElementById('c').getContext('2d');
       async function frame(t) { await seek(t); c.drawImage(v, 0, 0, 160, 90); return c.getImageData(0, 0, 160, 90).data; }
-      const a = await frame(Math.min(0.2, dur / 4));
-      const b = await frame(Math.max(0, dur - 0.2));
-      let sum = 0;
-      for (let i = 0; i < a.length; i += 4) sum += (Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2])) / 3;
-      return { ok: true, duration: dur, width: v.videoWidth, height: v.videoHeight, diff: sum / (a.length / 4) };
+      const ts = [Math.min(0.2, dur / 4), dur * 0.25, dur * 0.5, dur * 0.75, Math.max(0, dur - 0.2)];
+      const a = await frame(ts[0]);
+      let changed = 0;
+      for (const t of ts.slice(1)) {
+        const b = await frame(t);
+        let n = 0;
+        for (let i = 0; i < a.length; i += 4) {
+          if ((Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2])) / 3 > 24) n++;
+        }
+        changed = Math.max(changed, n / (a.length / 4) * 100);
+      }
+      return { ok: true, duration: dur, width: v.videoWidth, height: v.videoHeight, changed: changed };
     });
   } finally {
     await browser.close();
@@ -111,12 +123,13 @@ async function run(a, quiet) {
   if (!p.ok) { lines.push('❌ V1 文件能播:' + p.why); fail++; }
   else {
     lines.push('✅ V1 文件能播:' + p.duration.toFixed(2) + ' 秒 · ' + p.width + '×' + p.height);
-    if (p.diff < 1.0 && !a.allowStatic) {
-      lines.push('❌ V2 画面动了:首帧和末帧平均差 ' + p.diff.toFixed(2) + ' < 1.0,录出来是静止画面' +
+    const what = '5 个时间点和首帧比,最多 ' + p.changed.toFixed(2) + '% 的像素变了';
+    if (p.changed < 0.1 && !a.allowStatic) {
+      lines.push('❌ V2 画面动了:' + what + ',不到 0.1%,录出来是静止画面' +
         '(动画录之前就播完了?页面开了减少动态效果?确实要静止就加 --allow-static)');
       fail++;
     } else {
-      lines.push((p.diff < 1.0 ? '⚠ ' : '✅ ') + 'V2 画面动了:首帧和末帧平均差 ' + p.diff.toFixed(2));
+      lines.push((p.changed < 0.1 ? '⚠ ' : '✅ ') + 'V2 画面动了:' + what);
     }
   }
   if (!quiet) { console.log(out); for (const l of lines) console.log('  ' + l); }
@@ -133,11 +146,16 @@ async function selfTest() {
   fs.writeFileSync(still, `<!doctype html><style>${css}#b{left:200px}</style><div id=b></div>`);
   // 动画只有 0.05 秒:页面打开前就播完了,录到的全是终点 —— 典型的「录了个寂寞」
   fs.writeFileSync(done, `<!doctype html><style>${css}#b{animation:m .05s linear forwards}@keyframes m{from{left:0}to{left:400px}}</style><div id=b></div>`);
+  // 只有一个 20px 小方块来回动:整幅平均差实测 0.9–1.1,和静止页的 0.35–0.5 拉不开;
+  // 变化像素占比实测 0.28%–0.38%,静止页是 0
+  const small = path.join(dir, 'small.html');
+  fs.writeFileSync(small, `<!doctype html><style>body{margin:0;background:#faf9f5}#s{width:20px;height:20px;background:#d97757;position:absolute;top:300px;animation:m 1.3s linear infinite alternate}@keyframes m{from{left:20px}to{left:120px}}</style><div id=s></div>`);
   const cases = [
     ['有动画的页面:V1 V2 都过', { page: moving }, 0],
     ['★ 静止页面:V2 必须报', { page: still }, 1],
     ['★ 静止页面加 --allow-static:不报', { page: still, allowStatic: true }, 0],
     ['★ 动画在录之前就播完了:V2 必须报', { page: done }, 1],
+    ['只有一小块在动(整幅平均差和静止页拉不开):V2 必须判成在动', { page: small }, 0],
   ];
   let passed = 0, failed = 0;
   try {
@@ -161,7 +179,9 @@ async function selfTest() {
   if (argv.includes('--self-test')) process.exit(await selfTest());
   const a = parseArgs(argv);
   if (!a.page) {
-    console.log(fs.readFileSync(__filename, 'utf8').split('\n').filter((l) => l.startsWith('//')).slice(0, 22).map((l) => l.slice(3)).join('\n'));
+    const head = [];
+    for (const l of fs.readFileSync(__filename, 'utf8').split('\n').slice(1)) { if (!l.startsWith('//')) break; head.push(l.slice(3)); }
+    console.log(head.join('\n'));
     process.exit(2);
   }
   if (!a.out) a.out = /^https?:/.test(a.page) ? path.resolve('recording.webm') : path.resolve(a.page).replace(/\.html?$/, '') + '.webm';
