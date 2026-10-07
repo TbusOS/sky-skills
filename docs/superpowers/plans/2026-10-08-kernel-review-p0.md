@@ -18,6 +18,7 @@ Python 3.8+ 标准库(不装第三方包)、git、node(只用于跑仓里现有�
 
 **依据:**
 - 需求:`docs/superpowers/specs/2026-10-08-kernel-review-requirements.md`
+- 当前进度与下一步:`docs/superpowers/ROADMAP.md`(每完成一个任务就更新它)
 - 设计:`docs/superpowers/specs/2026-10-08-kernel-review-design.md`
 
 ## 全局约束
@@ -2209,7 +2210,9 @@ git commit -m "调研页补正:2026-07 漏了 masoncl/review-prompts,补表格�
 - [ ] **步骤 1:确认内核树里有这个提交**
 
 ```bash
-TREE=<含主线历史的内核树;user 本机现成的是 ~/linux-kernel/linux>
+TREE=<包含该提交的内核树,主线或 stable 都可以>
+# 没有现成的树:git clone --filter=blob:none https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+# (只先下载提交记录和目录结构,文件内容用到时再取;审查只用 git show / git grep,够用)
 git -C "$TREE" cat-file -t 7b9b77a8bba9          # 预期:commit
 git -C "$TREE" status --porcelain | shasum -a 256    # 记下来,最后对比
 ```
@@ -2278,8 +2281,10 @@ for f in skills/kernel-review/SKILL.md skills/kernel-review/bsp-guides/index-row
   python3 $G/check_buzzwords.py --rules $G/jargon.tsv --strict "$f"
 done
 # user 本机私有的外发脱敏检查,对本阶段所有新增 / 修改的文件跑,0 命中
-git add skills/kernel-review/tests/e2e/p0-acceptance.md
-git commit -m "kernel-review: P0 端到端验收记录"
+# 更新 docs/superpowers/ROADMAP.md:当前阶段改为「P0 完成」,当前状态写验收结论和提交号,
+# 下一步改为「写 P1 实施计划」,阶段一览里 P0 的状态改为「完成」
+git add skills/kernel-review/tests/e2e/p0-acceptance.md docs/superpowers/ROADMAP.md
+git commit -m "kernel-review: P0 端到端验收记录;ROADMAP 更新为 P0 完成"
 git status -sb && git fetch origin && git log --oneline origin/main..HEAD
 git push origin main
 git ls-remote origin refs/heads/main     # 确认远端已是本地 HEAD

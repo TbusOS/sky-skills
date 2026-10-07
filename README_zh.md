@@ -43,6 +43,8 @@
 
 ## 可用 Skills
 
+> **开发中:`kernel-review`** —— 内核 / BSP patch 审查者,基于 [masoncl/review-prompts](https://github.com/masoncl/review-prompts)([sashiko](https://github.com/sashiko-dev/sashiko) 所用的审查规则)。需求、设计、实施计划、当前进度和下一步见 [docs/superpowers/ROADMAP.md](docs/superpowers/ROADMAP.md)。
+
 | Skill | 语言 | 说明 |
 |-------|------|------|
 | [linux-kernel-dev](skills/linux-kernel-dev/) | EN | Linux 内核与驱动开发 —— 编码规范、模块/驱动/字符设备模板、Kconfig、Makefile、设备树绑定、调试工具、并发模型、内核 API 速查 |

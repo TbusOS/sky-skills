@@ -8,6 +8,7 @@
 
 配套需求文档:[2026-10-08-kernel-review-requirements.md](2026-10-08-kernel-review-requirements.md)
 (要做出什么、做到什么程度算完成,需求逐条编号,对应本文章节)。
+当前进度与下一步见 [ROADMAP](../ROADMAP.md)。
 
 ---
 

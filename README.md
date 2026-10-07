@@ -43,6 +43,8 @@ To preview locally: `python3 -m http.server 8000` from the repo root, then open 
 
 ## Available Skills
 
+> **In development: `kernel-review`** — a Linux kernel / BSP patch reviewer built on [masoncl/review-prompts](https://github.com/masoncl/review-prompts) (the review rules used by [sashiko](https://github.com/sashiko-dev/sashiko)). Requirements, design, implementation plan, current status and next steps: [docs/superpowers/ROADMAP.md](docs/superpowers/ROADMAP.md).
+
 | Skill | Language | Description |
 |-------|----------|-------------|
 | [linux-kernel-dev](skills/linux-kernel-dev/) | EN | Linux kernel & driver development — coding standards, module/driver/chardev templates, Kconfig, Makefile, device tree bindings, debugging tools, concurrency patterns, kernel API reference |
