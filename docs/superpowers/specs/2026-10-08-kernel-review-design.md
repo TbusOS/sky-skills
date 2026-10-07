@@ -96,8 +96,11 @@ sky-skills/
     │   ├── bsp-gpio.md                #   文件名一律加 bsp- 前缀,见 §7.2
     │   └── bsp-false-positive.md      #   BSP 场景专用的误报排除规则
     ├── scripts/
+    │   ├── _common.py                 # 共用常量与小函数
     │   ├── locate_prompts.sh          # 按 §4 的顺序找上游目录
-    │   ├── build_merged_prompts.sh    # 上游 kernel/ + bsp-guides → 合并目录(§7.1)
+    │   ├── build_merged_prompts.py    # 上游 kernel/ + bsp-guides → 合并目录(§7.1)
+    │   ├── prepare_review.py          # 审查前准备:解析提交、建产物目录、记内核树快照,写 session.json
+    │   ├── finish_review.py           # 审查后核对:产物齐全、已读规则真实存在、内核树没被改
     │   ├── prefetch_facts.sh          # 审查前先跑确定性脚本(§7.3)
     │   ├── validate_quotes.py         # 审查意见里引用的代码行是否真实存在(§7.4)
     │   └── bench/                     # 基准测试(§8)
@@ -111,8 +114,8 @@ sky-skills/
 ```
 用户:审一下 HEAD~3..HEAD
  │
- ├─ 0. locate_prompts.sh            找到上游目录;找不到就停,告诉用户怎么装
- ├─ 1. build_merged_prompts.sh      上游 kernel/ + bsp-guides → 合并目录(有缓存)
+ ├─ 1. prepare_review.py <提交>     内部先找上游目录(找不到就停,告诉用户怎么装),
+ │                                  再生成合并目录(有缓存);建树外产物目录,记下内核树快照
  ├─ 2. prefetch_facts.sh <提交>     跑 checkpatch / 调用点分类 / 上下文安全 / 守卫链 /
  │                                  defconfig 检查,结果写进产物目录的 facts.md
  ├─ 3. 按合并目录里的 review-core.md 走上游流程
@@ -120,8 +123,11 @@ sky-skills/
  │      上游要求写到「当前目录」的文件,改写到产物目录)
  ├─ 4. validate_quotes.py           review-inline.txt 里引用的每一行代码,
  │                                  必须在该提交的 diff 或文件里找得到;找不到的意见打回重查
- └─ 5. 输出:review-inline.txt(上游版式,英文)+ 对话里给中文摘要,摘要里列出这次实际加载了哪些规则
+ ├─ 5. finish_review.py <产物目录>   核对产物齐全、声称读过的规则真实存在、内核树没被改
+ └─ 6. 输出:review-inline.txt(上游版式,英文)+ 对话里给中文摘要,摘要里列出这次实际加载了哪些规则
 ```
+
+第 2、4 步(`prefetch_facts.sh`、`validate_quotes.py`)在 P1 加入;P0 只有第 1、3、5、6 步。
 
 **审查产物不放在被审的内核树里。** 默认放 `~/.cache/sky-skills/kernel-review/<树目录名>/<提交号前 12 位>/`。
 原因是上游 `review-core.md:247` 要求把 `review-inline.txt` 写到当前目录,也就是内核树里;
@@ -144,10 +150,11 @@ submodule 的绝对位置。本 skill 直接读合并目录里的文件,不依�
 
 ## 7. 组件规格
 
-### 7.1 build_merged_prompts.sh
+### 7.1 build_merged_prompts.py
 
-- **做什么**:把上游 `kernel/` 整个链接进一个缓存目录,再放入 `bsp-guides/*.md`,
-  把 `index-rows.md` 的行追加进合并后的 `subsystem/subsystem.md`。
+- **做什么**:把上游 `kernel/` 复制进 `~/.cache/sky-skills/kernel-review-prompts/<内容哈希>/`,
+  再放入 `bsp-guides/*.md`,把 `index-rows.md` 的行追加进合并后的 `subsystem/subsystem.md`。
+  上游和 BSP 规则的内容都没变时复用上次的目录。
 - **为什么要合并目录**:上游流程靠 `subsystem/subsystem.md` 这张索引表决定加载哪些规则;
   sashiko 的预筛阶段也读这张表。规则只有登记进这张表才会被加载。
 - **参数**:`--base <目录>` 指定底座。用本 skill 时底座是 submodule;用 sashiko 时底座
@@ -282,7 +289,7 @@ fires / catches 至今全是 0。审查效果必须用真实 bug 量。
 
 | 阶段 | 做什么 | 做完的标准 |
 |---|---|---|
-| **P0 接入** | 加 submodule(固定在 `d048f87` 或当时的 HEAD);`kernel-review/SKILL.md`;`locate_prompts.sh` + `build_merged_prompts.sh`(带 `--selftest`);`linux-kernel-dev/SKILL.md` 的「审码」一行改为指向 kernel-review;README 两份 + 致谢;订正调研页;autoupdate 补 submodule 更新 | 在一棵主线内核树里,对 sashiko 基准里的 1 个已知 bug 提交走完整流程,产出 `review-inline.txt`,产物在树外、内核树 `git status` 干净;自测里「改坏表头必须报错」通过 |
+| **P0 接入** | 加 submodule(固定在 `d048f87` 或当时的 HEAD);`kernel-review/SKILL.md`;`locate_prompts.sh` + `build_merged_prompts.py` + `prepare_review.py` + `finish_review.py`(都带 `--selftest`);`linux-kernel-dev/SKILL.md` 的「审码」一行改为指向 kernel-review;README 两份 + 致谢;订正调研页;autoupdate 补 submodule 更新 | 在一棵主线内核树里,对 sashiko 基准里的 1 个已知 bug 提交走完整流程,产出 `review-inline.txt`,产物在树外、内核树 `git status` 干净;自测里「改坏表头必须报错」通过 |
 | **P1 确定性预检 + 引用核对** | `prefetch_facts.sh`;`validate_quotes.py`(带自测) | 自测:改错一个字符的引用被拦下,改回后通过;对 P0 那个提交跑出 `facts.md` |
 | **P2 第一批 BSP 规则** | `bsp-gpio` / `bsp-asoc` / `bsp-iio` / `bsp-phy` / `bsp-pinctrl` 5 份 + `bsp-false-positive.md` + 索引行 | 引用核对 0 失效;外发脱敏检查 0 命中;本仓中文文档检查(`check_buzzwords.py` 两张表)通过 |
 | **P3 基准测试** | `bench/` 跑分脚本 + 判分;公开 64 条、本地 BSP 题库 | 10 条冒烟跑通;64 条出 ① / ② 两列结果,公开部分提交进仓 |
