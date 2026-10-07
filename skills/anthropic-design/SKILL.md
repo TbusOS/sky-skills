@@ -1,144 +1,109 @@
 ---
 name: anthropic-design
-description: "Render HTML/CSS in anthropic.com visual aesthetic — warm cream background (#faf9f5), Poppins headings + Lora serif body, orange accent (#d97757) for CTAs and emphasis, rounded filled pill buttons, editorial card grids, abstract SVG illustrations, low-saturation data visualizations (soft blue/gray/teal), hand-drawn SVG architecture diagrams with orange/blue/green node categorization and diamond decision gates. TRIGGER when the user says 'anthropic 风格' / 'anthropic style' / 'claude 官网风格' / 'Anthropic 品牌', or asks for an editorial/long-form page, research article layout, pricing card grid, or a filled-button-with-warmth feel. DO NOT TRIGGER for generic 'beautiful web page' requests (use frontend-design) or Apple aesthetic (use apple-design)."
-last-verified: 2026-04-19
+description: "anthropic 配色的讲解页 / 技术介绍页 / 编辑式长文 HTML。只有配色定死:暖米白底 #faf9f5、橙色主色 #d97757、低饱和蓝 #6a9bcc / 橄榄绿 #788c5d / 金 #c9913f 当语义色、墨色字 #141413;版式、字体、动画、组件写法由模型按内容自由发挥。配图例库(templates/diagrams/ 78 张现成 SVG + diagram-craft.md 画图手法 + 图集页,含调用链定位图与十种「判断与覆盖」图)和「让人看懂」的三种做法案例(首屏动画演示机制 · 证据模块 · 读者能点选的解释器,范例 demos/anthropic-design/explainer.html)。检查只查客观缺陷:scripts/check_objective.mjs(JS 报错 / 对比度 / 真实横向滚动 / 手机上图里的字 / 关掉动画也完整)。TRIGGER: 'anthropic 风格' / 'anthropic style' / 'claude 官网风格' / 'Anthropic 品牌' / 暖米白加橙 / 技术介绍页 / 原理讲解页 / 编辑式长文 / 报告页 / 架构图 / 流程图 / editorial long-form page. DO NOT TRIGGER: apple 风格(apple-design)、零基础图解(primer-design)、深色玻璃展示(glass-design)、只给自己看一次的数据页(throwaway-page)、高饱和霓虹。"
+last-verified: 2026-10-07
 ---
 
-# Anthropic Design — HTML 风格
+# Anthropic 配色的讲解页
 
-让 Claude 以 anthropic.com / claude.com 视觉语言输出：暖米白底、Poppins + Lora 字体、橙色主强调、编辑式卡片网格、抽象 SVG 插画、低饱和图表、手工 SVG 架构图。
+配色照 anthropic,其余自由。目标只有一个:读者看完能懂这件事。
 
-## 使用方式
+**2026-10-07 改版(user 定)**:原来有 14 行写着「必须」—— 图密度配额、动笔前先跑 `dr-cli --plan`、
+交付前嵌 self-diff、critic ≥ 75 才算过、canonical 当评分标准、一律用 `anth-*` 类名。
+这些把页面往 10 个范例页的样子拉,版式千篇一律。
 
-1. 在 HTML 里引入 `<link rel="stylesheet" href="assets/fonts.css">` 与 `<link rel="stylesheet" href="assets/anthropic.css">`。fonts.css 默认只含拉丁字体（~80 KB）；中文走系统字体回退（PingFang/微软雅黑/Noto CJK），zh 覆盖的 font-family 链首仍写 "Noto Sans SC"/"Noto Serif SC"。仅当必须保证 CJK webfont 时再追加 `assets/fonts-cjk.css`（+200 KB，CDN 慢时拖慢首屏 2-5 秒）。
-2. 写业务结构时套用 `anth-*` class 前缀。具体组件用法见 `references/components.md`。
-3. 新开模板直接从 `templates/` 复制。
+现在只定死配色,其余改成指引和案例。`references/` 和 `references/canonical/` 里写的「MUST」当经验看;
+和本文件冲突时以本文件为准。
 
-## 触发关键词
+## 1. 定死的:配色
 
-`anthropic 风格` / `anthropic style` / `claude 官网风格` / `Anthropic 品牌` / `warm cream + orange` / `编辑式长文` / `Poppins Lora`
+| 用途 | 颜色 |
+|---|---|
+| 页面底 · 次级段落底 · 卡片 · 分隔线 | `#faf9f5` · `#f0ede3` · `#ffffff` · `#e8e6dc` |
+| 正文字 · 次要字 | `#141413` · `#5e5d55` |
+| 主色 | 橙 `#d97757`:按钮底、重点、主路径 |
+| 语义色 | 蓝 `#6a9bcc` · 橄榄绿 `#788c5d` · 金 `#c9913f` · 灰 `#b0aea5`(画图时各代表什么见 `references/diagram-craft.md` §1) |
+| 危险 | `#a14238` |
+| 深色框(终端 / 代码) | 底 `#1c1b18` · 标题条 `#2a2925` · 字 `#ece9df` |
 
-## 不要用于
+文字用色要过 WCAG AA。下面的数是 2026-10-07 按 WCAG 相对亮度公式算的:
 
-- 通用"好看页面"（用 `frontend-design`）
-- Apple 美学（用 `apple-design`）
-- 零基础图解 / eli5 / picture explainer —— 给完全不懂的人讲一个概念（用 `primer-design`：大图少字、比喻先行；anthropic 是给读得下长文的人看的）
-- 高饱和 / 霓虹 / 赛博朋克
+- **橙色当小字**用深橙 `#a8502f`(米白底上 5.17)。主色 `#d97757` 在米白底上只有 2.96,`#c56544` 3.75,只能用在 ≥ 24px 或粗体 ≥ 18.66px 的大字上。
+- **橙色按钮上的字**用墨色 `#141413`(5.90)。白字只有 3.12,只够大号粗体按钮。旧规则要求一律白字,按这组数改了。
+- **语义色当字色**时跟墨色混一下:`color-mix(in srgb, <语义色> 62%, #141413)`;当色块、线条时用原色。
+- **深色框里**把文字变量改成浅色,报错 / 警告 / 通过另配一组浅色 `#ec9488` / `#dcb062` / `#a9bf8f`。米白底用的那套深色版放进深底就太暗,范例页里有写好的这段 CSS。
 
-## 阅读顺序
+`assets/anthropic.css`(带 `anth-*` 组件)和 `assets/fonts.css`(Poppins + Lora)可以用,不强制。字体自选;范例页用的是衬线标题 + 系统无衬线正文 + 等宽小标签。
 
-1. `references/design-tokens.md` — 所有 CSS 变量
-2. `references/typography.md` — 字体层级（Lora serif 正文是核心差异）
-3. `references/layout-patterns.md` — 六类版式骨架 + **容器选择表** + **版心与阅读纪律（用户反馈四坑：全页窄列 / 密图迁就对齐 / 文字墙 / 重叠三来源，写任何页面前过一遍）** + **L1-L10 scenario recipes**（dashboard / form / table / tab / accordion / modal / sidebar / changelog / video / empty-state）
-4. `references/components.md` — 28 组件（含 §28 Inline SVG 插画模板）+ **C1-C11 scenario recipes**（input / select / check / switch / tab / accordion / toast / dialog / banner / tooltip / skeleton）
-5. `references/diagram-craft.md` — **手工 SVG 图示工艺（画任何架构/流程/层级/时间线图前 MUST 读）**：色彩语义表（颜色做语义不做填充）、嵌套分组、节点卡、连线、编号徽章、布局公式、icon 语法、窗口 mock、图密度合约、反模式
-6. `references/sequence-diagrams.md` — UML 时序图专文（actor / lifeline / step 编号 / 平文本约束）
-7. `references/motion.md` — 动画缓动 + **M1-M10 scenario recipes**（hero / stagger / hover / modal / toast / loading / count-up / route）
-8. `references/imagery.md` — 抽象 SVG 插画规则
-9. `references/data-display.md` — 低饱和图表色板
-10. `references/responsive.md` — 断点与 max-width
-11. `references/ux-writing.md` — CTA / empty state / error / placeholder 文案模式 + 禁用词清单
-12. `references/dos-and-donts.md` — 反例 + **发布前 7 项 checklist（MUST）**
+## 2. 让人看懂的三种做法(案例,不是规则)
 
-## 图密度合约（写任何页面前 MUST — 不只画图时）
+范例:`demos/anthropic-design/explainer.html` —— whetstone 介绍站首页换成 anthropic 配色,版式和动画原样保留。
 
-**尽可能用图表达**——这是默认要求，不需要用户提醒。下表任一形态出现就该配视觉化
-（图型列是**默认起点不是强制规格**——结构按实际内容定制、可混搭可自创，硬约束只有
-"该有图的地方有图" + 工艺质量检查）：
+| 做法 | 为什么管用 | 范例里看哪 |
+|---|---|---|
+| **首屏用动画演示机制** | 读者第一眼看到的是这个东西怎么动,不是一张抽象插画 | 首屏右侧:一条条经验被分进 L1–L4 四层,证不出来的被拒并计数 |
+| **证据模块** | 页面越好看,内容越容易被当真;证据让读者能自己核对 | `#evidence`:命令输出终端、检查计数条、带规则编号的 REFUSED 票据、局限一节 |
+| **读者能点选的解释器** | 自己点一下,比读三段文字快 | `#evidence` 的置信度表、`#layers` 点选岩层、`#flow` 流程步进 |
 
-| 内容形态 | 必须配 | 内容形态 | 必须配 |
+动画的分寸:
+
+- 示意图要注明是示意:范例 `#why` 的曲线图下面写着 "illustration, not measured data"。
+- 动画演示的是机制里的某一步。只是装饰的动效,能删就删。
+- 打开「减少动态效果」时内容必须完整(检查 O5 查这个)。
+- 讲关系的地方先给图,和全局「讲关系先给图」一致;图怎么画见下一节。
+
+## 3. 图例库
+
+先按内容选图型。下表是起点,结构按实际内容改,可以混搭,也可以自创:
+
+| 内容 | 可以用 | 内容 | 可以用 |
 |---|---|---|---|
-| ≥3 步流程 / 启动链 / 数据流 | 流程图或时序图 | 数字对比 / 统计 | stat callout 或图表 |
+| ≥3 步流程 / 启动链 / 数据流 | 流程图或时序图 | 数字对比 / 统计 | 大号数字或图表 |
 | 系统结构 / 分层 / 依赖 | 架构图 | 时间演进 / 版本 / 里程碑 | 时间线 |
-| 产品 / UI 描述 | 窗口 mock | 连续纯文字 > 2 屏 | ≥ 1 个视觉元素 |
-| 函数控制流 / 寄存器位域 | 函数流程图 / 位域图 | SoC 结构 / 信号时序 / 编译链 / 调度 | 对应内核图型(diagram-craft §15) |
-| 排查一个具体故障 / 论证「改这里会影响那里」 | 调用链定位图(§15.50，每层挂 `file:line`、关键行贴原文) | 30 层以上、纯标识符的调用链 | ASCII 树(§18，两者分工见 §18 末尾那张表) |
-| 几条路 × 几道关卡:每条路最后被谁拦、谁只报警 | 通路 × 关卡(§15.51) | 几种问题 × 几道检查:谁抓得到、哪一行谁都抓不到 | 覆盖点阵(§15.52) |
-| 一个读数为什么当场就旧、失效发生在哪一格 | 放在哪 × 什么时候(§15.53) | 同一条通配规则两种语义 / 换个根目录还认不认 | 路径分段对照(§15.54) |
-| 目录树上两方判法不同 / 从不存在的路径往上找 | 带判定列的目录树(§15.55) | 一批发现从哪来、分到哪去、复测又多出几条 | 条数流向(§15.56) |
-| 同一类失败有十几种情况,各往哪倒、代价是什么 | 分组叶子树(§15.57) | 一串文本(一条命令 / 一条规则)被一步步加工 | 文本工序序列(§15.58) |
-| 流程每一步能在哪拦下、是哪次事故逼出来的 | 处理流程 + 拦截出口列 + 同行事故列(§15.59) | 几页讲同一个流程的不同一块 | 跨页共用底图 + 调暗点亮(§15.60) |
+| 产品 / UI 描述 | 窗口示意 | 函数控制流 / 寄存器位域 | 函数流程图 / 位域图 |
+| SoC 结构 / 信号时序 / 编译链 / 调度 | 对应内核图型(diagram-craft §15) | 排查一个故障 / 论证「改这里会影响那里」 | 调用链定位图(§15.50,每层挂 `file:line`、关键行贴原文) |
+| 30 层以上、纯标识符的调用链 | ASCII 树(§18) | 几条路 × 几道关卡 | 通路 × 关卡(§15.51) |
+| 几种问题 × 几道检查,谁抓得到 | 覆盖点阵(§15.52) | 一个读数为什么当场就旧 | 放在哪 × 什么时候(§15.53) |
+| 同一条通配规则两种语义 | 路径分段对照(§15.54) | 目录树上两方判法不同 | 带判定列的目录树(§15.55) |
+| 一批发现从哪来、分到哪去 | 条数流向(§15.56) | 同一类失败十几种情况各往哪倒 | 分组叶子树(§15.57) |
+| 一串文本被一步步加工 | 文本工序序列(§15.58) | 流程每一步能在哪拦下 | 处理流程 + 拦截出口列(§15.59) |
+| 几页讲同一个流程的不同一块 | 跨页共用底图 + 调暗点亮(§15.60) | | |
 
-节奏：每 1.5 屏（≈1300px @1440）≥ 1 个 SVG / figure / stat。机器检查 `text-desert` 在连续
-2600px 无视觉元素时 warn（known-bugs 1.31）。动笔画图前再读 `references/diagram-craft.md`：
-§8.1 先算尺寸选容器档（**密图必须 1200 wide，看不清 = 没画**）、§1 色彩（每图 ≥ 2 语义 hue，
-小元素实心主色）。现成图直接抄 `templates/diagrams/`，案例库见 `demos/anthropic-design/diagrams.html`。
+- `templates/diagrams/`:78 张现成 SVG,直接抄。图集 `demos/anthropic-design/diagrams.html` 按编号分节,硬件类另见 `hardware.html`。
+- `references/diagram-craft.md`:画图手法(语义色、节点卡、连线、编号、先算尺寸再选容器);时序图看 `references/sequence-diagrams.md`。
+- 调用链定位图不手画:`python3 ~/.claude/skills/design-review/scripts/gen_call_site_figure.py <源文本> --style=anthropic`,原文按行号从文件里读。
+- 手机上的宽图包进 `<div class="anth-scroll" style="--pan-w:NNNpx">`,在图框里左右拖。`--pan-w` 是最小字刚好 9px 时图的宽度;不需要读字的图片类标 `data-allow-shrink`。不用 `anthropic.css` 时,范例页里有同样作用的三行 `.pan` CSS。
 
-### 何时读 scenario recipes（重要）
-
-写一个 page-type 之前先看 §3 / §4 / §5 / §9 末尾的 `## Scenario recipes`：
-
-- canonical 只有 pricing / landing / docs-home / feature-deep / comparison 五类
-- 上面之外的版式（dashboard / form / wiki / accordion / modal / toast / 数据表 / 文案规则）必须读对应 recipe
-- generator **不要凭感觉**把 landing 的卡片样式套到 dashboard、把 cream 直链当主 CTA、用 `Click here` 当 CTA 文案
-- recipe 里给的是量化合约（duration / padding / font-size / token），按表执行
-
-## 发布前检查(MUST — 交给 design-review skill)
-
-### 生成**前**读 canonical + 拿合约
-
-任何 page-type(pricing / landing / docs-home / 其他)开写之前必须:
+## 4. 检查:只查客观缺陷
 
 ```bash
-# 生成 sprint-contract(把 MUST/MUST NOT 交给生成器自己)
-~/.claude/skills/design-review/dr-cli --plan --skill=anthropic --page=pricing
-# 然后读 ~/.claude/skills/anthropic-design/references/canonical/<page>.html + .md
+node ~/.claude/skills/anthropic-design/scripts/check_objective.mjs page.html [...]
+node ~/.claude/skills/anthropic-design/scripts/check_objective.mjs --self-test   # 8 条,6 条是故意做坏的
 ```
 
-**不读 canonical 就写 = 必然偏掉风格**。canonical.md 里的 7-8 条设计
-决定 + typography 表就是评分标准。
+| 编号 | 查什么 | 怎么判 |
+|---|---|---|
+| O1 | JS 报错 | 加载并从头滚到尾,有 pageerror / console.error 就失败 |
+| O2 | 文字对比度 | 滚到底、等浮现动画播完,再跑 axe-core 的 color-contrast |
+| O3 | 横向滚动 | 1280 / 390 两个宽度下用鼠标真的横滚一次,页面动了才失败;布局超宽但被 `overflow-x:hidden` 挡住只算提醒 |
+| O4 | 手机上图里的字 | 390 宽下 SVG 文字实际渲染 < 9px 就失败,`data-allow-shrink` 的不查 |
+| O5 | 关掉动画也完整 | 「减少动态效果」下不滚动,标题和正文不能有看不见的 |
 
-### 生成**后**写 self-diff note(交付前 MUST)
+版式、字体、配色比例、组件写法一概不查。退出码:0 没有失败 · 1 有失败 · 2 用法错或起不来浏览器。
 
-生成器在写完 HTML、跑四道检查之前,必须在 `</body>` 前 embed 一个
-`design-review:self-diff v1` HTML 注释块,列出 5-7 条本次生成的关键
-设计决策 + 2-3 条 known trade-offs。contract 见
-`~/.claude/skills/design-review/references/cross-skill-rules.md §M`,示范参考
-`~/.claude/skills/anthropic-design/references/canonical/comparison.html` 末尾。
+O3 为什么不用页面宽度判:2026-10-07 修 whetstone 首页时,`scrollWidth` 是 1540(窗口 1280),
+可 `body` 上有 `overflow-x: hidden`,桌面上鼠标横滚 `scrollX` 一直是 0;去掉那条再滚是 260。
+「布局超宽」和「用户滚得动」是两回事。手机触摸拖动本脚本模拟不了,真机才算数。
 
-没有 self-diff = canonical 不被 `verify.py` 承认。critic 也无法做实
-质评审(没有作者意图的靶子)。HARNESS-ROADMAP Phase 03 的硬规则。
+## 5. 可选:想要风格上的第二意见时
 
-### 生成**后**跑四道机械检查 + critic
+- `design-review` 的四道检查 + critic 评分、`dr-cli --audit` 批量扫存量页,都还能用,但不是交付门槛。
+  critic 拿 canonical 当靶子,偏离范例的版式会被扣分,在本 skill 里这不算问题。
+- `references/` 下的 tokens / typography / layout-patterns / components(28 组件 + C1–C11 场景配方)/
+  motion(M1–M10)/ data-display / responsive / ux-writing / dos-and-donts、`references/canonical/` 10 个范例页、
+  `templates/` 9 个页面模板:都当案例和经验看,挑合用的抄。
 
-```bash
-~/.claude/skills/design-review/dr-cli --critic <path/to/your.html>
-```
-
-四道机械检查依次(检查模型的唯一定义在 `design-review/SKILL.md`):
-1. `verify.py` — 结构(placeholders / DOCTYPE / BEM / SVG / class / §G 双语)
-2. `visual-audit.mjs` — 渲染(contrast / hero 宽 / SVG 字号 / hollow card /
-   **brand-presence §K / italic-overuse §J / cross-skill-smell §K**)
-3. `axe-audit.mjs` — 可达性(axe-core,color-contrast 阻断)
-4. `screenshot.mjs` — 全页 PNG 存 `shots/`
-
-调用链定位图（§15.50）**不手画**：写一份源文本，跑 `skills/design-review/scripts/gen_call_site_figure.py 你的.chain --style=anthropic`。原文由它按行号从文件里读出来，每一层的行号都核过；仓里登记的那张由 runner 里的 `--check` 守着。
-
-四道之外还有一道仓库级的:`check_call_site_figures.mjs` —— 深色代码卡上的高亮色块，
-它的 x 是「字符步进 × 起始下标」算出来的，**算错了肉眼分辨不出**（0.94 的渲染缩放、
-3px 圆角、字形左边距，任何一个都足以掩盖一个字符的偏移）。它用 SVG DOM 自己的
-`getStartPositionOfChar(i)` 反查，顺带核对色块盖住的是不是一个完整 token。
-带 `--self-test`,七种坏法的探针。跑 `bin/design-review` 时自动带上。
-
-四道之外,`--critic` 再跑 LLM taste 评审(输出 JSON + 0-100 分,canonical 自跑 ≥ 90)。
-**任一 error 整个失败**。warn 要判断是否放行。critic 得分 < 75 必修。
-
-规则与已知 bug 全在 `~/.claude/skills/design-review/references/cross-skill-rules.md`
-(A-L)+ `known-bugs.md`。canonical 文件在
-`~/.claude/skills/anthropic-design/references/canonical/`(pricing / landing /
-docs-home 各一对 .html + .md)。
-
-Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
-[harness design for long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)
-里的 GAN 式 discriminator:reviewer 不继承 generator 的立场。
-
-### anthropic 专属要点
-
-- `.anth-button` 橙底必须 `color: #ffffff; font-weight: 600;`(cream 在橙上是 2.96, fail AA)
-- Hero 段必须 `class="anth-container anth-container--wide"`(**base + modifier 都要**)
-- 风格规则详见 `references/dos-and-donts.md`
-
-### 审存量页（不是新生成的） — `--audit` 模式
+## 6. 审存量页:`--audit` 模式(可选)
 
 四道检查只跑刚生成的 HTML。要批量扫存量页面（已有 wiki / 老 memo / 客户给的 HTML），用：
 
@@ -164,11 +129,12 @@ Evaluator 和 generator 分离是刻意的 —— 参考 Anthropic
 
 **审外部 HTML（没链 anthropic.css）**：先在 `<head>` 注入 `<link rel="stylesheet" href="<...>/anthropic.css">` 再扫，否则 audit 会报 "undefined class" / "no brand-presence" 等大量 false positive。
 
-### 让 .md / sibling .html 跳转也变好看 — md-mirror / md-rewrite-links / md-pack / cross-link-pack
+
+## 7. .md 链接与打包工具
 
 场景：anthropic 风格 HTML 文档常链到外部 .md（README / 实施步骤 / 原理详解），或链到 sibling 目录里的其他 .html。浏览器原生显示 raw markdown 难看，单独发文档目录时 sibling .html 链接又会 broken。`scripts/` 下四件套各管一段，按需用。
 
-#### 1. `md-mirror.mjs` · 1→1 渲染原语
+### 1. `md-mirror.mjs` · 1→1 渲染原语
 
 把 .md 渲成同款 anthropic.css 的自包含 .html（1200px 容器，深色代码块，橙色 callout blockquote，GFM 表格，banner 显示 git 相对源路径）。
 
@@ -179,7 +145,7 @@ node skills/anthropic-design/scripts/md-mirror.mjs <src.md> <dst.html> # 显式 
 
 库模式：`import { renderMarkdown } from './md-mirror.mjs'` 让上层（md-pack）注入 rewriteHref hook。
 
-#### 2. `md-rewrite-links.mjs` · href 后缀替换原语
+### 2. `md-rewrite-links.mjs` · href 后缀替换原语
 
 把 HTML 里 `href="*.md(?q)(#f)"` 直接改成 `href="*.html(?q)(#f)"`（in-place，跳过 http(s) / 锚点 / 绝对路径）。简单场景：所有 .md 镜像就放在原位置时用它。
 
@@ -187,7 +153,7 @@ node skills/anthropic-design/scripts/md-mirror.mjs <src.md> <dst.html> # 显式 
 node skills/anthropic-design/scripts/md-rewrite-links.mjs <file.html> [...]
 ```
 
-#### 3. `md-pack.mjs` · 把 .md 链接折叠到子目录（推荐用于发包）
+### 3. `md-pack.mjs` · 把 .md 链接折叠到子目录（推荐用于发包）
 
 发文档目录给同事 / 客户时，主 HTML 跳出去的 .md 散在各处，单发主目录就 broken。md-pack 一次性把所有被链接的 .md 渲染到 `<out>/<flat>.html`（扁平命名避免冲突），主 HTML 重写指向 `_md/...`，镜像之间相互跳转也修对。装到 `_md/` 后整个主目录 cp 哪都行。
 
@@ -211,7 +177,7 @@ node skills/anthropic-design/scripts/md-pack.mjs \
 
 `--dry-run` 看计划不写文件。
 
-#### 4. `cross-link-pack.mjs` · 把跨目录 sibling .html 也折叠进来
+### 4. `cross-link-pack.mjs` · 把跨目录 sibling .html 也折叠进来
 
 md-pack 处理 .md，cross-link-pack 处理 .html。当主 HTML 链到同一文档集其他目录里的兄弟 .html（不是镜像），cp 走主目录后这些链就坏。cross-link-pack 把那些 .html 直接拷到 `_md/`（同款扁平命名），并 rewrite 主 HTML 的 href。
 
@@ -225,7 +191,7 @@ node skills/anthropic-design/scripts/cross-link-pack.mjs \
 
 注意：被 cp 进来的 sibling .html 内部如果还有相对引用（图片 / 子链接 / CSS），那些引用在新位置可能 broken；脚本会扫并 warn。脚本只管把 sibling .html 拽过来，不试图也把 sibling 的依赖一起拽——遵循 single-responsibility，避免无限递归打包。
 
-#### 推荐工作流
+### 推荐工作流
 
 ```bash
 # 1) 主 HTML 跳 .md 都收进来

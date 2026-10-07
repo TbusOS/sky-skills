@@ -1,0 +1,1752 @@
+<!doctype html>
+<!--
+  案例:讲一个工具的介绍页 —— 首屏用动画演示机制、证据模块、读者可以点选的解释器。
+  来源:whetstone 介绍站首页(github.com/TbusOS/whetstone docs/index.html @ a876d72),
+  版式、动画、字体原样保留,只把配色换成 anthropic(暖米白 #faf9f5 + 橙 #d97757 + 低饱和蓝 / 橄榄绿 / 金)。
+  终端框保持深色(墨色 #1c1b18),框里的文字变量改回浅色;小号文字取同色系深色版,axe 对比度 0 处。
+  用法见 skills/anthropic-design/SKILL.md「让人看懂的三种做法」。
+-->
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Whetstone · 磨刀石 — distill a dev session into a skill, refuse what it can't prove</title>
+<meta name="description" content="Whetstone distills a finished dev session into a portable, runtime-neutral Agent Skill — then holds it to an evidence standard you can run.">
+<meta name="theme-color" content="#faf9f5">
+<meta property="og:title" content="Whetstone · 磨刀石">
+<meta property="og:description" content="Distill the session. Refuse what it can't prove. A portable, runtime-neutral Agent Skill distiller with an evidence check that exits non-zero.">
+<meta property="og:url" content="https://doc.tbusos.com/whetstone/">
+<meta property="og:image" content="https://doc.tbusos.com/whetstone/assets/og-home.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://doc.tbusos.com/whetstone/assets/og-home.png">
+<script>(function(){var h=document.documentElement,l='en';h.classList.add('js');try{var q=new URLSearchParams(location.search).get('lang'),s=localStorage.getItem('whetstone-lang');l=(q==='zh'||q==='en')?q:(s==='zh'||s==='en')?s:((navigator.language||'').toLowerCase().indexOf('zh')===0?'zh':'en');}catch(e){}h.setAttribute('data-lang',l);})();</script>
+<style>
+/* 原 whetstone docs/assets/site.css,配色已换成 anthropic */
+/* whetstone docs — shared styles for every page (tokens, base type, nav, footer, timeline, final CTA).
+ * Page-specific styles stay inline in each page. Dark-only by design: the "whetstone" look is graphite + ember. */
+/* ───────────────────────── tokens ───────────────────────── */
+:root {
+  color-scheme: light;
+  --bg: #faf9f5;
+  --bg-2: #f0ede3;
+  --panel: #ffffff;
+  --panel-2: #f3f1ea;
+  --line: #e8e6dc;
+  --line-2: #d9d6cb;
+  --text: #141413;
+  --muted: #5e5d55;
+  --dim: #75736a;
+
+  --ember: #d97757;
+  --ember-2: #c2613f;
+  --refuse: #b5463a;
+  --ok: #5d7045;
+  --warn: #a8792a;
+
+  --l1: #6a9bcc;
+  --l2: #788c5d;
+  --l3: #c9913f;
+  --l4: #b0aea5;
+
+  --serif: "Iowan Old Style", "Charter", "Palatino Linotype", "Georgia", "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --mono: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, Consolas, "PingFang SC", monospace;
+
+  --gutter: clamp(18px, 4vw, 40px);
+  --wrap: 1180px;
+  --r: 14px;
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* ───────────────────────── base ───────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 var(--sans); -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+body::before {               /* stone grain over everything */
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 100;
+  background-image: var(--grain); opacity: .035; mix-blend-mode: multiply;
+}
+html[data-lang="en"] .zh { display: none !important; }
+html[data-lang="zh"] .en { display: none !important; }
+a { color: inherit; }
+code, kbd, .mono { font-family: var(--mono); font-size: .9em; }
+code { background: rgba(20,20,19,0.096); padding: .1em .38em; border-radius: 5px; }
+img, svg { max-width: 100%; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; border-radius: 4px; }
+
+.wrap { max-width: var(--wrap); margin: 0 auto; padding-inline: var(--gutter); }
+section { position: relative; padding-block: clamp(72px, 10vw, 128px); }
+section + section { border-top: 1px solid rgba(20,20,19,0.064); }
+
+.kicker {
+  display: inline-flex; align-items: center; gap: 10px;
+  font: 600 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ember-2);
+}
+.kicker::before { content: ""; width: 22px; height: 1px; background: currentColor; opacity: .7; }
+html[data-lang="zh"] .kicker { letter-spacing: .08em; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -.015em; margin: 0; text-wrap: balance; }
+h2 { font-size: clamp(32px, 4.6vw, 54px); line-height: 1.08; margin-top: 18px; max-width: 20ch; }
+html[data-lang="zh"] h2 { max-width: 16em; letter-spacing: 0; line-height: 1.22; }
+h3 { font-size: 22px; line-height: 1.25; }
+.lede { color: var(--muted); font-size: clamp(16px, 1.6vw, 18.5px); max-width: 62ch; margin: 20px 0 0; }
+.sec-head { margin-bottom: clamp(36px, 5vw, 60px); }
+em.hl { font-style: normal; color: var(--ember); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
+  font: 600 15px/1 var(--sans); padding: 14px 22px; border-radius: 999px;
+  border: 1px solid transparent; transition: transform .2s, background .2s, border-color .2s, box-shadow .2s;
+}
+.btn--hot { background: var(--ember); color: #141413; box-shadow: 0 0 0 0 rgba(217,119,87,0.5), 0 10px 30px -10px rgba(217,119,87,0.7); }
+.btn--hot:hover { transform: translateY(-2px); box-shadow: 0 0 0 6px rgba(217,119,87,0.14), 0 16px 34px -12px rgba(217,119,87,0.8); }
+.btn--ghost { border-color: var(--line-2); color: var(--text); }
+.btn--ghost:hover { border-color: var(--muted); transform: translateY(-2px); }
+
+/* reveal on scroll (only when JS is running) */
+.js .rv { opacity: 0; transform: translateY(18px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+.js .rv.in { opacity: 1; transform: none; }
+.js .rv.d1 { transition-delay: .08s; } .js .rv.d2 { transition-delay: .16s; } .js .rv.d3 { transition-delay: .24s; } .js .rv.d4 { transition-delay: .32s; }
+
+/* ───────────────────────── nav ───────────────────────── */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  padding-top: env(safe-area-inset-top, 0px);
+  background: rgba(250,249,245,.86); backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid rgba(20,20,19,0.096);
+}
+.nav .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 600 16px/1 var(--sans); white-space: nowrap; }
+.brand small { color: var(--dim); font-weight: 500; }
+.nav-links { display: flex; gap: 20px; margin-left: auto; }
+.nav-links a { text-decoration: none; color: var(--muted); font-size: 14px; transition: color .2s; white-space: nowrap; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a[aria-current="page"] { color: var(--ember-2); }
+.nav-act { display: flex; gap: 10px; align-items: center; }
+.lang {
+  background: transparent; color: var(--muted); border: 1px solid var(--line-2); border-radius: 999px;
+  font: 600 12px/1 var(--mono); padding: 8px 12px; cursor: pointer; letter-spacing: .06em; white-space: nowrap;
+}
+.lang:hover { color: var(--text); border-color: var(--muted); }
+.gh { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font: 600 13px/1 var(--sans);
+  padding: 9px 14px; border-radius: 999px; background: var(--text); color: var(--bg); }
+@media (max-width: 1080px) { .nav-links { display: none; } .nav-act { margin-left: auto; } }
+@media (max-width: 480px) { .brand small { display: none; } .nav .wrap { gap: 12px; } }
+
+.banner { border-bottom: 1px solid rgba(20,20,19,0.08); background: linear-gradient(90deg, rgba(217,119,87,0.1), transparent 60%); }
+.banner .wrap { display: flex; gap: 12px; align-items: center; padding-block: 10px; font-size: 13.5px; color: var(--muted); flex-wrap: wrap; }
+.banner b { color: var(--text); font-weight: 600; }
+.tag { font: 700 10.5px/1 var(--mono); letter-spacing: .1em; padding: 5px 8px; border-radius: 6px; background: var(--ember); color: #141413; }
+
+/* ───────────────────────── scenario ───────────────────────── */
+.tl-list { list-style: none; margin: 0; padding: 0; position: relative; max-width: 860px; }
+.tl-list::before { content: ""; position: absolute; left: 21px; top: 10px; bottom: 10px; width: 2px; background: linear-gradient(var(--ember), var(--l2), var(--l1)); opacity: .5; }
+.tl-list li { position: relative; display: grid; grid-template-columns: 44px 1fr; gap: 22px; padding-bottom: 34px; }
+.tl-list li:last-child { padding-bottom: 0; }
+.tl-list li > div { min-width: 0; }
+.tl-list .k { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--bg); border: 2px solid var(--ember); font: 600 15px/1 var(--mono); color: var(--ember-2); position: relative; z-index: 1; }
+.tl-list h3 { font-size: 21px; padding-top: 8px; }
+.tl-list p { margin: 8px 0 0; color: var(--muted); }
+
+/* ───────────────────────── final + footer ───────────────────────── */
+.final { text-align: center; overflow: hidden; }
+.final::before { content: ""; position: absolute; left: 50%; top: 50%; width: 1000px; height: 600px; transform: translate(-50%, -50%); background: radial-gradient(closest-side, rgba(217,119,87,0.14), transparent); pointer-events: none; }
+.final h2 { margin: 18px auto 0; max-width: 16ch; font-size: clamp(40px, 6vw, 76px); position: relative; }
+.final .lede { margin: 22px auto 0; position: relative; }
+.final .cta { justify-content: center; position: relative; }
+footer { border-top: 1px solid var(--line); padding-block: 48px calc(48px + env(safe-area-inset-bottom, 0px)); color: var(--dim); font-size: 13.5px; }
+.foot { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 28px; }
+.foot h5 { margin: 0 0 12px; font: 600 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.foot a { display: block; text-decoration: none; padding: 4px 0; color: var(--dim); }
+.foot a:hover { color: var(--text); }
+.foot p { margin: 12px 0 0; max-width: 40ch; }
+@media (max-width: 760px) { .foot { grid-template-columns: 1fr 1fr; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* ───────────────────────── sub-pages: header, prose, code, tables, cards ───────────────────────── */
+.page-hero { padding-block: clamp(56px, 8vw, 104px) clamp(40px, 5vw, 64px); position: relative; overflow: hidden; }
+.page-hero::before { content: ""; position: absolute; width: 760px; height: 760px; right: -240px; top: -300px; pointer-events: none; background: radial-gradient(closest-side, rgba(217,119,87,0.13), transparent); }
+.page-hero h1 { position: relative; font-size: clamp(38px, 5.4vw, 68px); line-height: 1.06; letter-spacing: -.025em; margin-top: 20px; max-width: 18ch; }
+html[data-lang="zh"] .page-hero h1 { letter-spacing: 0; line-height: 1.2; max-width: 15em; }
+.page-hero .lede { position: relative; }
+.prose { max-width: 720px; }
+.prose p { margin: 0 0 22px; font-size: 17.5px; line-height: 1.8; color: #3d3d3a; }
+.prose h2 { font-size: clamp(26px, 3vw, 34px); margin: 64px 0 20px; max-width: none; }
+.prose ul, .prose ol { margin: 0 0 22px; padding-left: 1.3em; font-size: 17px; line-height: 1.75; color: #3d3d3a; }
+.prose li { margin-bottom: 10px; }
+.prose strong, .prose b { color: var(--text); }
+.pull { margin: 8px 0 28px; padding: 22px 26px; border-left: 3px solid var(--ember); background: linear-gradient(90deg, rgba(217,119,87,0.1), transparent); border-radius: 0 12px 12px 0; font: 400 clamp(19px, 2vw, 23px)/1.5 var(--serif); color: var(--text); }
+.note { font-size: 14.5px !important; color: var(--muted) !important; }
+.codeblock { margin: 0 0 18px; background: #1c1b18; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.codeblock .bar { display: flex; gap: 7px; align-items: center; padding: 11px 14px; background: #2a2925; border-bottom: 1px solid var(--line); font: 12px/1 var(--mono); color: var(--dim); }
+.codeblock .bar i { width: 10px; height: 10px; border-radius: 50%; background: #4b4943; }
+.codeblock .bar i:nth-child(1) { background: #ff6159; } .codeblock .bar i:nth-child(2) { background: #ffbd2e; } .codeblock .bar i:nth-child(3) { background: #28c941; }
+.codeblock .bar span { margin-left: 8px; }
+.codeblock pre { margin: 0; padding: 18px 20px; overflow-x: auto; font: 13px/1.75 var(--mono); color: #e6e3d8; }
+.codeblock pre code { background: none; padding: 0; font-size: inherit; }
+.codeblock .cm { color: var(--dim); } .codeblock .fl { color: var(--ember-2); } .codeblock .p { color: var(--ok); }
+.codeblock .e { color: #ff8c97; } .codeblock .w { color: var(--warn); } .codeblock .s { color: var(--text); font-weight: 700; }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); }
+.tbl { width: 100%; border-collapse: collapse; font-size: 15px; }
+.tbl th, .tbl td { text-align: left; padding: 16px 18px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tbl th { font: 600 11.5px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+html[data-lang="zh"] .tbl th { letter-spacing: .04em; }
+.tbl tbody tr:last-child td { border-bottom: 0; }
+.tbl td:not(.tag-lv) { color: #3d3d3a; }
+.tag-lv { font: 700 13px/1 var(--mono); white-space: nowrap; }
+.c-hi { color: var(--ok); } .c-md { color: #4a7bab; } .c-lo { color: #87867f; }
+.c-l1 { color: var(--l1); } .c-l2 { color: var(--l2); } .c-l3 { color: var(--l3); } .c-l4 { color: var(--l4); } .c-em { color: var(--ember-2); }
+figcaption.cap { margin-top: 12px; font-size: 13.5px; color: var(--dim); }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
+.card .k { font: 700 11.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--cc, var(--ember-2)); }
+html[data-lang="zh"] .card .k { letter-spacing: .04em; }
+.card h3 { margin-top: 12px; font-size: 21px; }
+.card p { margin: 10px 0 0; color: var(--muted); font-size: 14.5px; line-height: 1.65; }
+.card .foot-l3 { display: block; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line-2); font: 12px/1.5 var(--mono); color: var(--l3); }
+.callout { display: flex; gap: 16px; align-items: flex-start; padding: 22px 24px; border-radius: 16px; border: 1px solid rgba(217,119,87,0.45); background: linear-gradient(90deg, rgba(217,119,87,0.12), rgba(217,119,87,0.03)); }
+.callout b { color: var(--ember-2); }
+.callout p { margin: 0; font-size: 16px; line-height: 1.7; }
+.back { display: inline-flex; gap: 8px; color: var(--ember-2); text-underline-offset: 4px; margin-top: 32px; }
+
+/* ───────────────────────── feature pages (routing / use-time check) ───────────────────────── */
+.feat-tag { display: inline-flex; align-items: center; gap: 8px; font: 700 11.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: #141413; background: var(--ember); padding: 7px 10px; border-radius: 6px; }
+html[data-lang="zh"] .feat-tag { letter-spacing: .04em; }
+.page-hero .cta { position: relative; display: flex; gap: 12px; flex-wrap: wrap; margin-top: 30px; }
+.stats3 { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: var(--r); background: rgba(255,255,255,.75); margin-top: 44px; position: relative; }
+.stats3 > div { padding: 22px 24px; }
+.stats3 > div + div { border-left: 1px solid var(--line); }
+.stats3 b { display: block; font: 500 clamp(34px, 4vw, 50px)/1 var(--serif); letter-spacing: -.02em; color: var(--text); }
+.stats3 b.hot { color: var(--ember); }
+.stats3 span { display: block; margin-top: 10px; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+@media (max-width: 720px) { .stats3 { grid-template-columns: 1fr; } .stats3 > div + div { border-left: 0; border-top: 1px solid var(--line); } }
+.sec { padding-block: clamp(64px, 9vw, 112px); border-top: 1px solid rgba(20,20,19,0.064); }
+.sec.alt { background: var(--bg-2); }
+.fig { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: clamp(18px, 3vw, 30px); }
+.fig + .cap, .fig figcaption { margin-top: 14px; font-size: 13.5px; line-height: 1.6; color: var(--dim); max-width: 88ch; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font: 600 11px/1 var(--mono); padding: 5px 8px; border-radius: 999px; border: 1px solid var(--cc, var(--line-2)); color: var(--cc, var(--muted)); background: color-mix(in srgb, var(--cc, #fff) 12%, transparent); white-space: nowrap; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--dc, var(--muted)); flex: none; }
+.kcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.kcard { display: flex; flex-direction: column; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+.kcard .k { display: flex; align-items: center; gap: 8px; font: 700 11.5px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--dc, var(--ember-2)); }
+html[data-lang="zh"] .kcard .k { letter-spacing: .03em; }
+.kcard h3 { font-size: 20px; }
+.kcard p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.65; }
+.kcard .act { margin-top: auto; padding-top: 12px; border-top: 1px dashed var(--line-2); color: var(--text); font-size: 13.5px; }
+.kcard.muted { background: transparent; border-style: dashed; }
+@media (max-width: 960px) { .kcards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .kcards { grid-template-columns: 1fr; } }
+.split { display: grid; grid-template-columns: 2fr 3fr; gap: clamp(24px, 4vw, 48px); align-items: start; }
+.split > * { min-width: 0; }
+@media (max-width: 960px) { .split { grid-template-columns: 1fr; } }
+.blist { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 14px; }
+.blist li { position: relative; padding-left: 20px; color: #3d3d3a; font-size: 15.5px; line-height: 1.65; }
+.blist li::before { content: ""; position: absolute; left: 0; top: 10px; width: 7px; height: 7px; border-radius: 2px; background: var(--ember); transform: rotate(45deg); }
+.blist strong { color: var(--text); }
+.term-out { margin: 0; background: #1c1b18; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.term-out .bar { display: flex; gap: 7px; align-items: center; padding: 11px 14px; background: #2a2925; border-bottom: 1px solid var(--line); }
+.term-out .bar i { width: 10px; height: 10px; border-radius: 50%; background: #ff6159; } .term-out .bar i + i { background: #ffbd2e; } .term-out .bar i + i + i { background: #28c941; }
+.term-out pre { margin: 0; padding: 18px 20px; font: 12.5px/1.7 var(--mono); color: #e6e3d8; white-space: pre-wrap; overflow-wrap: anywhere; }
+.term-out code { background: none; padding: 0; font-size: inherit; }
+.term-out .t-dim { color: var(--dim); } .term-out .t-hi { color: var(--ember-2); } .term-out .t-ok { color: var(--ok); font-weight: 600; }
+.refs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.ref { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; }
+.ref .no { font: 700 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--rc, var(--ember-2)); }
+html[data-lang="zh"] .ref .no { letter-spacing: .04em; }
+.ref h3 { margin-top: 10px; font-size: 18px; }
+.ref h3 a { text-decoration-color: var(--line-2); text-underline-offset: 4px; }
+.ref h3 a:hover { text-decoration-color: var(--ember); }
+.ref p { margin: 8px 0 0; color: var(--muted); font-size: 14.5px; line-height: 1.65; }
+@media (max-width: 760px) { .refs { grid-template-columns: 1fr; } }
+.caveat { max-width: 860px; border: 1px solid rgba(217,119,87,0.4); border-radius: 20px; padding: clamp(22px, 3vw, 34px); background: linear-gradient(135deg, rgba(217,119,87,0.1), transparent 60%); }
+.caveat .kicker { margin-bottom: 4px; }
+.caveat h3 { font-size: clamp(24px, 2.6vw, 30px); margin: 10px 0 16px; }
+.caveat p { margin: 0 0 14px; color: #3d3d3a; font-size: 16px; line-height: 1.75; }
+.caveat p:last-child { margin-bottom: 0; }
+.details { max-width: 860px; }
+.drow { display: grid; grid-template-columns: 170px 1fr; gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.drow:last-child { border-bottom: 0; }
+.drow > span { font: 700 11.5px/1.6 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ember-2); }
+html[data-lang="zh"] .drow > span { letter-spacing: .04em; }
+.drow p { margin: 0; color: #3d3d3a; font-size: 15.5px; line-height: 1.7; }
+.drow code { white-space: nowrap; }
+@media (max-width: 720px) { .drow { grid-template-columns: 1fr; gap: 6px; } }
+.endcard { max-width: 860px; margin-top: 48px; padding: 28px; border-radius: 20px; border: 1px solid var(--line); background: linear-gradient(135deg, rgba(217,119,87,0.1), var(--panel) 55%); }
+.endcard p { margin: 0 0 18px; color: #3d3d3a; font-size: 16px; line-height: 1.7; }
+.endcard .cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.quote { margin: 30px 0 0; padding: 0 0 0 24px; border-left: 3px solid var(--ember); }
+.quote p { margin: 0; font: 400 clamp(21px, 2.4vw, 27px)/1.45 var(--serif); color: var(--text); }
+.quote cite { display: block; margin-top: 12px; font-style: normal; font-size: 13.5px; color: var(--dim); }
+.legend-row { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 16px; font-size: 12.5px; color: var(--muted); }
+.legend-row span { display: inline-flex; align-items: center; gap: 8px; }
+.js .grow { transform: scaleY(0); transform-origin: bottom; transition: transform 1s cubic-bezier(.2,.8,.2,1); }
+.js .in .grow { transform: none; }
+.js .growx { transform: scaleX(0); transform-origin: left; transition: transform 1.1s cubic-bezier(.2,.8,.2,1); }
+.js .in .growx { transform: none; }
+
+</style>
+<style>
+/* page-specific styles; shared tokens, nav, footer and type live in assets/site.css */
+/* ───────────────────────── hero ───────────────────────── */
+.hero { position: relative; padding-block: clamp(48px, 7vw, 96px) clamp(64px, 8vw, 110px); overflow: hidden; }
+.hero::before {
+  content: ""; position: absolute; width: 900px; height: 900px; right: -260px; top: -220px; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(217,119,87,0.16), rgba(217,119,87,0.04) 55%, transparent);
+}
+.hero::after {               /* faint strata lines in the background */
+  content: ""; position: absolute; inset: auto 0 0 0; height: 240px; pointer-events: none; opacity: .5;
+  background: repeating-linear-gradient(180deg, transparent 0 38px, rgba(20,20,19,0.056) 38px 39px);
+  -webkit-mask-image: linear-gradient(transparent, #000); mask-image: linear-gradient(transparent, #000);
+}
+.hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.12fr .95fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
+.hero h1 { font-size: clamp(42px, 5.3vw, 74px); line-height: 1.02; letter-spacing: -.03em; margin-top: 22px; text-wrap: wrap; }
+html[data-lang="zh"] .hero h1 { font-size: clamp(34px, 4.4vw, 60px); line-height: 1.2; letter-spacing: 0; }
+.hero h1 .cut { position: relative; color: var(--ember); white-space: nowrap; }
+.hero h1 .cut::after {        /* the "refused" strike that draws itself */
+  content: ""; position: absolute; left: -2%; right: -2%; top: 55%; height: .07em; background: var(--refuse);
+  transform: scaleX(0); transform-origin: left; border-radius: 2px;
+  animation: strike 1s 1.1s cubic-bezier(.7,0,.2,1) forwards;
+}
+@keyframes strike { to { transform: scaleX(1); } }
+.hero .lede { font-size: clamp(17px, 1.7vw, 19.5px); margin-top: 26px; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 34px; }
+.runtimes { margin-top: 26px; color: var(--dim); font: 13px/1.6 var(--mono); }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: clamp(48px, 6vw, 80px); border: 1px solid var(--line); border-radius: var(--r); position: relative; z-index: 1; background: rgba(255,255,255,.75); }
+.stats > div { padding: 22px 24px; }
+.stats > div + div { border-left: 1px solid var(--line); }
+.stats b { display: block; font: 500 clamp(32px, 3.6vw, 44px)/1 var(--serif); letter-spacing: -.02em; }
+.stats span { display: block; margin-top: 8px; color: var(--muted); font-size: 13.5px; }
+@media (max-width: 960px) { .hero-grid { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } .stats > div:nth-child(3) { border-left: 0; } .stats > div:nth-child(n+3) { border-top: 1px solid var(--line); } }
+
+/* the sieve */
+.sieve {
+  --h: 560px; position: relative; height: var(--h); border-radius: 22px; overflow: hidden;
+  background: radial-gradient(120% 60% at 50% 34%, rgba(217,119,87,0.1), transparent 60%), linear-gradient(180deg, #ece9df, #f0ede3);
+  border: 1px solid var(--line); box-shadow: 0 40px 80px -40px rgba(20,20,19,0.16), inset 0 1px 0 rgba(20,20,19,0.064);
+}
+.sv-src {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px; white-space: nowrap;
+  font: 12px/1 var(--mono); color: var(--muted); padding: 8px 12px; border-radius: 999px; background: rgba(20,20,19,0.064); border: 1px solid var(--line);
+}
+.sv-src i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 10px var(--ok); animation: blink 1.6s infinite; }
+@keyframes blink { 50% { opacity: .3; } }
+.sv-stone {
+  position: absolute; left: 7%; right: 7%; top: 196px; height: 30px; border-radius: 9px;
+  background: var(--grain), linear-gradient(180deg, #6a7078 0%, #484e55 45%, #2f3439 100%);
+  background-size: 180px, auto; background-blend-mode: soft-light, normal;
+  box-shadow: 0 16px 30px -12px rgba(20,20,19,0.18), inset 0 1px 0 rgba(255,255,255,.25);
+  transition: box-shadow .25s;
+}
+.sv-stone.hot { box-shadow: 0 0 0 1px rgba(217,119,87,0.5), 0 0 36px -2px rgba(217,119,87,0.55), inset 0 1px 0 rgba(255,255,255,.3); }
+.sv-stone-lbl { position: absolute; left: 0; right: 0; top: 234px; text-align: center; font: 11px/1 var(--mono); color: var(--dim); letter-spacing: .08em; }
+.sv-rej { position: absolute; left: 14px; right: 14px; top: 262px; height: 38px; display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.sv-rej-lbl { margin-right: auto; font: 700 10.5px/1 var(--mono); letter-spacing: .12em; color: var(--refuse); display: flex; align-items: center; gap: 8px; }
+.sv-rej-lbl b { font-size: 15px; letter-spacing: 0; color: var(--text); }
+.rej-pill { font: 600 11px/1 var(--mono); padding: 6px 8px; border-radius: 6px; color: #8f2f27; background: rgba(181,70,58,0.14); border: 1px solid rgba(181,70,58,0.4); animation: pop .35s cubic-bezier(.3,1.6,.5,1); }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } }
+.sv-strata { position: absolute; left: 14px; right: 14px; bottom: 14px; display: grid; gap: 4px; }
+.band {
+  --c: var(--l1); position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px;
+  height: 52px; padding: 0 16px; border-radius: 10px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 22%, transparent), color-mix(in srgb, var(--c) 8%, transparent));
+  border-left: 3px solid var(--c); transition: box-shadow .3s, background .3s;
+}
+.band b { font: 700 13px/1 var(--mono); color: var(--c); }
+.band span { font: 12px/1.2 var(--mono); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.band output { font: 600 18px/1 var(--mono); color: var(--text); min-width: 2ch; text-align: right; }
+.band.l4 { --c: var(--l4); border-left-style: dashed; height: 44px; }
+.band.l3 { --c: var(--l3); }
+.band.l2 { --c: var(--l2); }
+.band.l1 { --c: var(--l1); height: 60px; }
+.band.hit { box-shadow: 0 0 0 1px var(--c), 0 0 26px -6px var(--c); }
+.chip {
+  position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none; will-change: transform, opacity;
+  font: 12.5px/1.2 var(--mono); color: var(--text); white-space: nowrap; max-width: calc(100% - 28px); overflow: hidden; text-overflow: ellipsis;
+  padding: 7px 11px; border-radius: 8px; background: #ffffff; border: 1px solid #d9d6cb; box-shadow: 0 10px 20px -10px rgba(20,20,19,0.16);
+  transition: border-color .2s, color .2s, background .2s;
+}
+.chip[data-to] { border-color: var(--c); color: var(--c); background: color-mix(in srgb, var(--c) 12%, #f0ede3); }
+.chip.bad { border-color: var(--refuse); color: #8f2f27; background: #f6e1dc; }
+.chip.bad s { text-decoration-color: var(--refuse); text-decoration-thickness: 2px; }
+.chip.bad em { font-style: normal; font-weight: 700; color: var(--refuse); margin-left: 8px; }
+.spark { position: absolute; left: 0; top: 0; z-index: 4; width: 3px; height: 3px; border-radius: 50%; background: var(--ember-2); box-shadow: 0 0 8px 1px var(--ember); pointer-events: none; }
+@media (max-width: 520px) { .band span { display: none; } }
+
+/* ───────────────────────── why ───────────────────────── */
+.why-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(32px, 5vw, 64px); align-items: center; }
+.chart { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 22px 22px 14px; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart .ln { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.js .chart .ln { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); transition: stroke-dashoffset 2.6s cubic-bezier(.4,0,.2,1); }
+.js .chart.in .ln { stroke-dashoffset: 0; }
+.js .chart.in .ln.b { transition-delay: .5s; }
+.chart-note { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; color: var(--dim); font: 12px/1.4 var(--mono); margin-top: 8px; }
+.leaks { list-style: none; margin: 0; padding: 0; display: grid; gap: 26px; }
+.leaks li { display: grid; grid-template-columns: 44px 1fr; gap: 16px; }
+.leaks .n { font: 500 30px/1 var(--serif); color: var(--ember); }
+.leaks h3 { font-size: 21px; }
+.leaks p { margin: 8px 0 0; color: var(--muted); }
+@media (max-width: 900px) { .why-grid { grid-template-columns: 1fr; } }
+
+/* ───────────────────────── evidence ───────────────────────── */
+.ev { background: linear-gradient(180deg, var(--bg-2), var(--bg)); }
+.ev-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 24px; align-items: stretch; }
+.term { background: #1c1b18; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; box-shadow: 0 40px 80px -50px rgba(20,20,19,0.18); }
+.term-bar { display: flex; align-items: center; gap: 7px; padding: 12px 14px; border-bottom: 1px solid var(--line); background: #2a2925; }
+.term-bar i { width: 11px; height: 11px; border-radius: 50%; background: #4b4943; }
+.term-bar i:nth-child(1) { background: #ff6159; } .term-bar i:nth-child(2) { background: #ffbd2e; } .term-bar i:nth-child(3) { background: #28c941; }
+.term-bar span { margin-left: 10px; font: 12px/1 var(--mono); color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.term pre { margin: 0; padding: 18px 18px 22px; font: 12.5px/1.62 var(--mono); color: #e6e3d8; white-space: pre-wrap; word-break: break-word; min-height: 520px; overflow: auto; }
+.term .p { color: var(--ok); } .term .c { color: var(--text); }
+.term .h { color: var(--text); font-weight: 700; }
+.term .e { color: #ff8c97; } .term .w { color: var(--warn); } .term .a { color: var(--dim); }
+.term .s { color: var(--text); font-weight: 700; }
+.term .x { color: var(--refuse); font-weight: 700; }
+.cursor { display: inline-block; width: .6em; height: 1.1em; vertical-align: -2px; background: var(--ember); animation: blink 1s steps(1) infinite; }
+.checks { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 26px; display: flex; flex-direction: column; min-width: 0; }
+.checks-num { display: flex; align-items: baseline; gap: 14px; }
+.checks-num b { font: 500 84px/0.9 var(--serif); letter-spacing: -.04em; color: var(--text); }
+.checks-num span { color: var(--muted); font-size: 15px; }
+.bars { display: grid; gap: 13px; margin: 26px 0 18px; }
+.bar-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.bar-lbl { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; color: var(--muted); }
+.bar-lbl b { font: 600 13px/1.4 var(--mono); color: var(--text); }
+.bar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: rgba(20,20,19,0.064); }
+.bar i { display: block; height: 100%; }
+.js .bar { width: 0; transition: width 1.1s cubic-bezier(.2,.8,.2,1); }
+.js .checks.in .bar { width: var(--w); }
+.bar .E { background: var(--refuse); } .bar .W { background: var(--warn); } .bar .I { background: #6a9bcc; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font: 12px/1.4 var(--mono); color: var(--muted); margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+.ev-foot { margin-top: 18px; color: var(--muted); font-size: 14.5px; max-width: 80ch; }
+@media (max-width: 960px) { .ev-grid { grid-template-columns: 1fr; } .term pre { min-height: 0; } }
+
+/* calculator */
+.calc { margin-top: clamp(64px, 8vw, 100px); display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(28px, 4vw, 56px); align-items: start; }
+.calc h3 { font-size: clamp(26px, 3vw, 36px); }
+.calc .lede { font-size: 16px; }
+.ctl { margin-top: 26px; }
+.ctl-lbl { font: 600 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+html[data-lang="zh"] .ctl-lbl { letter-spacing: .04em; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 12px; background: #f0ede3; border: 1px solid var(--line); }
+.seg button {
+  font: 500 14px/1 var(--sans); color: var(--muted); background: transparent; border: 0; padding: 10px 14px; border-radius: 9px; cursor: pointer; transition: background .2s, color .2s;
+}
+.seg button:hover { color: var(--text); }
+.seg button[aria-pressed="true"] { background: var(--panel-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
+.dots { display: flex; gap: 8px; }
+.dots button { width: 46px; height: 46px; border-radius: 12px; border: 1px solid var(--line-2); background: #f0ede3; color: var(--muted); font: 600 15px/1 var(--mono); cursor: pointer; transition: all .2s; }
+.dots button[aria-pressed="true"] { background: var(--l2); color: #141413; border-color: var(--l2); }
+.verdict { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 26px; position: relative; overflow: hidden; }
+.verdict::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--vc, var(--ok)); transition: background .3s; }
+.meter { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 4px 0 20px; }
+.meter div { height: 54px; border-radius: 10px; background: #f0ede3; border: 1px solid var(--line); display: grid; place-items: center; font: 700 14px/1 var(--mono); color: var(--dim); letter-spacing: .06em; transition: all .35s; }
+.meter div.on { color: #141413; border-color: transparent; }
+.meter div.on.lo { background: #87867f; } .meter div.on.md { background: #4a7bab; } .meter div.on.hi { background: var(--ok); }
+.meter div.cap { box-shadow: 0 0 0 2px var(--text); }
+.v-reason { min-height: 3.2em; margin: 0; font-size: 15.5px; }
+.v-note { color: var(--warn); font-size: 13.5px; margin: 8px 0 0; min-height: 1.4em; }
+.claims { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 8px; }
+.claims-h { font: 600 12px/1 var(--mono); color: var(--dim); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
+.claim { display: grid; grid-template-columns: 116px 1fr; gap: 12px; align-items: center; font-size: 14px; }
+.claim > span:first-child { font: 13px/1 var(--mono); color: var(--muted); }
+.res { font: 600 12.5px/1.3 var(--mono); padding: 7px 10px; border-radius: 8px; }
+.res.err { color: #8f2f27; background: rgba(181,70,58,0.14); border: 1px solid rgba(181,70,58,0.35); }
+.res.ok { color: #3f5230; background: rgba(120,140,93,0.12); border: 1px solid rgba(120,140,93,0.32); }
+.res.inf { color: #2f5a85; background: rgba(106,155,204,0.14); border: 1px solid rgba(106,155,204,0.35); }
+@media (max-width: 960px) { .calc { grid-template-columns: 1fr; } }
+
+/* refusal tickets */
+.tickets { margin-top: clamp(64px, 8vw, 100px); display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.ticket { position: relative; overflow: hidden; background: #ffffff; color: #23201b; border-radius: 6px; padding: 24px 20px 22px; min-height: 250px;
+  -webkit-mask: radial-gradient(circle 7px at 0 64px, transparent 98%, #000) , radial-gradient(circle 7px at 100% 64px, transparent 98%, #000);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+  box-shadow: 0 20px 40px -24px rgba(20,20,19,0.18); }
+.ticket::after { content: ""; position: absolute; left: 14px; right: 14px; top: 64px; border-top: 1.5px dashed rgba(35,32,27,.25); }
+.ticket .no { font: 700 11px/1 var(--mono); letter-spacing: .14em; color: #8b8274; }
+.ticket h3 { font-size: 21px; margin-top: 46px; color: #1b1915; }
+.ticket p { font-size: 14px; line-height: 1.6; color: #4d473e; margin: 10px 0 0; }
+.stamp {
+  position: absolute; right: 14px; top: 14px; font: 800 13px/1 var(--mono); letter-spacing: .14em; color: #b5463a;
+  border: 2.5px solid #b5463a; padding: 7px 9px; border-radius: 6px; transform: rotate(-9deg); opacity: .85;
+}
+.ticket.calm .stamp { color: #4a7bab; border-color: #4a7bab; }
+.js .ticket .stamp { opacity: 0; transform: rotate(-9deg) scale(2.4); transition: opacity .25s, transform .4s cubic-bezier(.2,1.6,.4,1); }
+.js .ticket.in .stamp { opacity: .85; transform: rotate(-9deg) scale(1); transition-delay: .45s; }
+.more { margin-top: 30px; font-size: 16px; }
+.more a { color: var(--ember-2); text-underline-offset: 4px; }
+@media (max-width: 1060px) { .tickets { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .tickets { grid-template-columns: 1fr; } .ticket { min-height: 0; } }
+
+/* ───────────────────────── boundary ───────────────────────── */
+.bound { text-align: left; }
+.bound-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: clamp(24px, 4vw, 48px); align-items: start; margin-top: clamp(32px, 4vw, 48px); }
+.bound .lede { margin-top: 0; }
+.bound h2 { font-size: clamp(38px, 5.6vw, 72px); max-width: 16ch; }
+html[data-lang="zh"] .bound h2 { max-width: 14em; }
+.big { border-top: 2px solid var(--ember); padding-top: 16px; }
+.big b { display: block; font: 500 clamp(56px, 7vw, 92px)/1 var(--serif); letter-spacing: -.03em; color: var(--ember); }
+.big p { color: var(--muted); margin: 10px 0 0; font-size: 15px; }
+.bound .lede a { color: var(--ember-2); }
+@media (max-width: 900px) { .bound-grid { grid-template-columns: 1fr; } }
+
+/* ───────────────────────── strata ───────────────────────── */
+.strata-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: clamp(24px, 4vw, 48px); align-items: center; }
+.strata-fig { position: relative; display: grid; grid-template-columns: 34px 1fr; gap: 14px; }
+.axis { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; font: 11.5px/1.2 var(--mono); color: var(--dim); }
+.axis span { writing-mode: vertical-rl; letter-spacing: .08em; }
+.axis::before { content: ""; position: absolute; top: 34px; bottom: 34px; left: 50%; width: 1px; background: linear-gradient(var(--l4), var(--l1)); }
+.axis::after { content: ""; position: absolute; bottom: 26px; left: calc(50% - 5px); border: 5px solid transparent; border-top: 8px solid var(--l1); }
+.axis span { background: var(--bg); padding: 6px 0; position: relative; z-index: 1; }
+.strata-svg { display: block; width: 100%; height: auto; border-radius: 18px; overflow: hidden; }
+.layer { cursor: pointer; transition: opacity .35s; outline: none; }
+.layer path.fill { transition: fill-opacity .35s; }
+.strata-svg.picking .layer:not(.on) { opacity: .55; }
+.layer text { pointer-events: none; }
+.layer:focus-visible path.fill { stroke: var(--text); stroke-width: 2; }
+.detail { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 28px; border-top: 3px solid var(--dc, var(--l1)); transition: border-color .3s; }
+.detail .lv { font: 700 13px/1 var(--mono); color: var(--dc); letter-spacing: .08em; }
+.detail h3 { font-size: 30px; margin-top: 10px; }
+.detail dl { margin: 22px 0 0; display: grid; gap: 16px; }
+.detail dt { font: 600 11.5px/1 var(--mono); color: var(--dim); letter-spacing: .1em; text-transform: uppercase; }
+.detail dd { margin: 6px 0 0; font-size: 15.5px; }
+.detail dd code { color: var(--dc); }
+.split-note { margin-top: 22px; display: flex; gap: 12px; align-items: flex-start; color: var(--muted); font-size: 14.5px; padding: 16px 18px; border: 1px dashed var(--line-2); border-radius: 12px; }
+.split-note b { color: var(--text); font-weight: 600; }
+@media (max-width: 960px) { .strata-grid { grid-template-columns: 1fr; } }
+
+/* ───────────────────────── flow ───────────────────────── */
+.track { position: relative; display: grid; grid-template-columns: repeat(9, 1fr); gap: 8px; margin-top: 8px; }
+.track::before { content: ""; position: absolute; left: 4%; right: 4%; top: 31px; height: 2px; background: repeating-linear-gradient(90deg, var(--line-2) 0 6px, transparent 6px 12px); }
+.track .fill-line { position: absolute; left: 4%; top: 31px; height: 2px; width: 0; background: linear-gradient(90deg, var(--ember), var(--ember-2)); box-shadow: 0 0 12px var(--ember); transition: width .6s cubic-bezier(.4,0,.2,1); }
+.step { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; background: none; border: 0; color: inherit; cursor: pointer; padding: 0; font: inherit; }
+.step .dot { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--panel); border: 1px solid var(--line-2); font: 600 17px/1 var(--mono); color: var(--muted); transition: all .35s; }
+.step.gate .dot { border-radius: 16px; transform: rotate(45deg); width: 54px; height: 54px; margin: 5px 0; border-color: rgba(217,119,87,0.5); color: var(--ember); }
+.step.gate .dot > * { transform: rotate(-45deg); }
+.step .nm { font-size: 13.5px; color: var(--muted); text-align: center; line-height: 1.3; transition: color .3s; }
+.step.done .dot { border-color: var(--ember); color: var(--text); }
+.step.now .dot { background: var(--ember); color: #141413; border-color: var(--ember); box-shadow: 0 0 0 8px rgba(217,119,87,0.14), 0 0 30px rgba(217,119,87,0.5); }
+.step.now .nm { color: var(--text); }
+.step.gate.wait .dot { animation: pulse 1s infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 14px rgba(217,119,87,0.06), 0 0 30px rgba(217,119,87,0.3); } }
+.step.end .dot { border-color: rgba(120,140,93,0.5); color: var(--ok); }
+.step.end.now .dot { background: var(--ok); border-color: var(--ok); color: #ffffff; box-shadow: 0 0 0 8px rgba(120,140,93,0.14); }
+.flow-panel { margin-top: 36px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 24px 28px; min-height: 120px; }
+.flow-panel .ph { font: 600 12px/1 var(--mono); color: var(--ember-2); letter-spacing: .1em; }
+.flow-panel h3 { margin-top: 8px; font-size: 24px; }
+.flow-panel p { margin: 8px 0 0; color: var(--muted); max-width: 72ch; }
+.flow-panel .who { font: 600 12px/1 var(--mono); padding: 9px 12px; border-radius: 999px; white-space: nowrap; }
+.who.auto { color: var(--muted); border: 1px solid var(--line-2); }
+.who.human { color: #141413; background: var(--ember); }
+@media (max-width: 860px) {
+  .track { grid-template-columns: 1fr; gap: 0; }
+  .track::before, .track .fill-line { display: none; }
+  .step { flex-direction: row; gap: 16px; padding: 6px 0; }
+  .step .dot { width: 46px; height: 46px; font-size: 14px; flex: none; }
+  .step.gate .dot { width: 38px; height: 38px; margin: 4px; }
+  .step .nm { text-align: left; font-size: 15px; }
+  .flow-panel { grid-template-columns: 1fr; }
+}
+
+/* ───────────────────────── architecture ───────────────────────── */
+.arch { display: grid; gap: 14px; }
+.tier { position: relative; display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: center; padding: 22px 24px; border-radius: 18px; border: 1px solid var(--line); background: var(--panel); }
+.tier .tl { font: 700 11.5px/1.5 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--tc); }
+html[data-lang="zh"] .tier .tl { letter-spacing: .04em; }
+.tier .tl small { display: block; color: var(--dim); font-weight: 500; letter-spacing: .02em; text-transform: none; margin-top: 4px; font-size: 12px; }
+.tier .cells { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.cell { background: #f0ede3; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.cell b { display: block; font: 600 14px/1.3 var(--mono); color: var(--text); }
+.cell span { display: block; font-size: 13px; color: var(--muted); margin-top: 4px; }
+.tier.t1 { --tc: var(--ember-2); }
+.tier.t2 { --tc: var(--l2); border-color: color-mix(in srgb, var(--l2) 45%, transparent); background: linear-gradient(90deg, color-mix(in srgb, var(--l2) 10%, var(--panel)), var(--panel)); box-shadow: 0 0 60px -30px var(--l2); }
+.tier.t3 { --tc: var(--muted); background: transparent; border-style: dashed; }
+.tier.t3 .cell { background: transparent; border-style: dashed; }
+.join { display: flex; align-items: center; gap: 10px; padding-left: 244px; font: 12px/1 var(--mono); color: var(--dim); height: 20px; }
+.join::before { content: ""; width: 2px; height: 30px; background: linear-gradient(var(--line-2), var(--ember)); margin-left: -12px; }
+.join.opt::before { background: repeating-linear-gradient(var(--line-2) 0 4px, transparent 4px 8px); }
+@media (max-width: 760px) { .tier { grid-template-columns: 1fr; gap: 14px; } .join { padding-left: 34px; } }
+
+/* ───────────────────────── index hygiene ───────────────────────── */
+.ix { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; }
+.ix-col { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 22px; min-width: 0; }
+.ix-col.menu { border-color: rgba(217,119,87,0.4); box-shadow: 0 0 50px -30px var(--ember); }
+.ix-h { display: flex; justify-content: space-between; gap: 10px; align-items: center; font: 600 12px/1.3 var(--mono); letter-spacing: .06em; color: var(--muted); margin-bottom: 14px; }
+.ix-h .badge { font-size: 10.5px; padding: 5px 8px; border-radius: 6px; white-space: nowrap; }
+.ix-h .badge.on { background: rgba(217,119,87,0.16); color: var(--ember-2); }
+.ix-h .badge.off { background: rgba(20,20,19,0.08); color: var(--dim); }
+.menu-list { display: grid; gap: 7px; }
+.mi { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; padding: 10px 12px; border-radius: 10px; background: #f0ede3; border: 1px solid var(--line); font-size: 13.5px; transition: all .3s; min-width: 0; }
+.mi b { font: 600 13px/1.3 var(--mono); color: var(--text); white-space: nowrap; }
+.mi span { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.mi.sel { border-color: var(--l2); background: color-mix(in srgb, var(--l2) 10%, #f0ede3); }
+.mi.clash { border-color: var(--refuse); background: rgba(181,70,58,0.08); }
+.lint-msg { margin-top: 12px; min-height: 2.6em; font: 12.5px/1.5 var(--mono); color: var(--dim); }
+.lint-msg.bad { color: #ff8c97; }
+.body-view { font: 13px/1.7 var(--mono); color: var(--muted); }
+.body-view .ttl { color: var(--l2); font-weight: 600; }
+.body-view.idle { color: var(--dim); }
+.body-view div { animation: fadein .4s both; }
+@keyframes fadein { from { opacity: 0; transform: translateY(4px); } }
+.tools3 { margin-top: 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.tool { padding: 20px; border-radius: 14px; border: 1px solid var(--line); }
+.tool b { font: 600 14.5px/1.3 var(--mono); color: var(--text); }
+.tool p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+@media (max-width: 900px) { .ix, .tools3 { grid-template-columns: 1fr; } }
+
+/* ───────────────────────── install / cli ───────────────────────── */
+.inst-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: clamp(24px, 4vw, 48px); align-items: start; }
+.inst-grid > *, .why-grid > *, .strata-grid > *, .calc > *, .mig > * { min-width: 0; }
+.clone { display: flex; align-items: center; gap: 10px; margin-top: 26px; background: #1c1b18; border: 1px solid var(--line); border-radius: 12px; padding: 6px 6px 6px 16px; }
+.clone code { background: none; padding: 0; flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; font-size: 13.5px; color: var(--text); }
+.clone code::before { content: "$ "; color: var(--ok); }
+.copy { flex: none; font: 600 12px/1 var(--mono); padding: 10px 12px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line-2); color: var(--text); cursor: pointer; }
+.copy.done { color: var(--ok); border-color: var(--ok); }
+.rt { margin-top: 22px; display: grid; gap: 8px; }
+.rt div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+.rt code { overflow-wrap: anywhere; justify-self: start; }
+@media (max-width: 520px) { .rt div { grid-template-columns: 1fr; gap: 6px; } }
+.rt div span:first-child { color: var(--muted); }
+.cli { background: #1c1b18; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; min-width: 0; }
+.tabs { display: flex; gap: 2px; padding: 8px; border-bottom: 1px solid var(--line); background: #2a2925; overflow-x: auto; }
+.tabs button { font: 600 12.5px/1 var(--mono); color: var(--dim); background: none; border: 0; padding: 10px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+.tabs button[aria-selected="true"] { color: var(--text); background: var(--panel-2); }
+.tabp { padding: 22px; }
+.tabp pre { margin: 0; font: 13px/1.7 var(--mono); color: #e6e3d8; white-space: pre-wrap; word-break: break-word; }
+.tabp pre .p { color: var(--ok); } .tabp pre .a { color: var(--dim); }
+.tabp p { margin: 16px 0 0; color: var(--muted); font-size: 14.5px; }
+@media (max-width: 960px) { .inst-grid { grid-template-columns: 1fr; } }
+
+/* ───────────────────────── migrate ───────────────────────── */
+.mig { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 4vw, 56px); align-items: center; }
+.mig-fig svg { display: block; width: 100%; height: auto; }
+.mig ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; counter-reset: m; }
+.mig li { counter-increment: m; display: grid; grid-template-columns: 36px 1fr; gap: 14px; padding: 16px 18px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); font-size: 15px; }
+.mig li::before { content: counter(m); width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: rgba(217,119,87,0.14); color: var(--ember-2); font: 600 14px/1 var(--mono); }
+.mig li .sub { color: var(--muted); display: block; margin-top: 4px; font-size: 14px; }
+.flowdash { stroke-dasharray: 6 6; animation: dash 1.2s linear infinite; }
+@keyframes dash { to { stroke-dashoffset: -12; } }
+@media (max-width: 900px) { .mig { grid-template-columns: 1fr; } }
+
+
+@media (prefers-reduced-motion: reduce) {
+  .hero h1 .cut::after { animation: none; transform: scaleX(1); }
+}
+</style>
+<style id="anthropic-palette-notes">
+/* 只换配色的样板:版式、动画、字体都和 whetstone 新版一样 */
+/* 讲解图在手机上不跟着缩:图框里左右拖,--pan-w 是最小字到 9px 时图的宽度(同 anthropic.css 的 .anth-scroll) */
+.pan { overflow-x: auto; contain: inline-size; }
+@media (max-width: 1023px) { .pan > svg { min-width: var(--pan-w); } }
+.lint-msg.bad { color: #a14238; }
+/* 终端 / 代码框保持深色:框里的文字变量改回浅色,否则全站墨色字落在深底上看不见 */
+.term, .term-out, .cli, .clone, .codeblock, .tabs, .tabp { --text: #ece9df; --muted: #b8b5aa; --dim: #96948a; color: var(--text); 
+  --refuse: #ec9488; --warn: #dcb062; --ok: #a9bf8f; }   /* 深底上的报错 / 警告 / 通过色:米白底那套深色版放到这里太暗 */
+/* 小号文字用的颜色要过 4.5:橙色标签、层级色当字色时取同色系的深色版 */
+:root { --ember-2: #a8502f; --dim: #67655c; }
+.c-l1 { color: color-mix(in srgb, var(--l1) 62%, #141413); } .c-l2 { color: color-mix(in srgb, var(--l2) 62%, #141413); }
+.c-l3 { color: color-mix(in srgb, var(--l3) 62%, #141413); } .c-l4 { color: color-mix(in srgb, var(--l4) 55%, #141413); }
+.body-view .ttl { color: color-mix(in srgb, var(--l2) 62%, #141413); }
+.detail .lv, .detail dd code { color: color-mix(in srgb, var(--dc) 62%, #141413); }
+.ticket .no { color: #6f675b; }
+.stamp { color: #9e3a2f; border-color: #9e3a2f; } .ticket.calm .stamp { color: #3f6d9c; border-color: #3f6d9c; }
+.clone .copy { color: #141413; }
+.big b { color: #c56544; }   /* 大字橙:#d97757 在米白上 2.96,差一点到大字的 3.0;换 anthropic 令牌里的悬停橙 */
+.ticket.calm .stamp { color: #2f5a85; border-color: #2f5a85; }
+.tabs [role="tab"][aria-selected="true"] { color: #141413; }
+.ticket { box-shadow: 0 0 0 1px #e8e6dc, 0 14px 30px -20px rgba(20,20,19,.35); }
+</style>
+</head>
+<body>
+
+<!-- ───────────── nav ───────────── -->
+<nav class="nav" aria-label="Primary">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="12" width="26" height="9" rx="2.5" fill="#87867f"/><rect x="3" y="12" width="26" height="3" rx="1.5" fill="#6b6a5f"/><path d="M8 9l3-5M16 8V3M24 9l-3-5" stroke="#d97757" stroke-width="2" stroke-linecap="round"/><rect x="5" y="23" width="22" height="3" rx="1.5" fill="#6a9bcc" opacity=".85"/></svg>
+      whetstone <small lang="zh-CN">· 磨刀石</small>
+    </a>
+    <div class="nav-links">
+      <a href="#why"><span class="en">Why</span><span class="zh">为什么</span></a>
+      <a href="#evidence"><span class="en">Evidence</span><span class="zh">证据纪律</span></a>
+      <a href="#layers"><span class="en">Layers</span><span class="zh">分层</span></a>
+      <a href="#flow"><span class="en">How it works</span><span class="zh">流程</span></a>
+      <a href="https://doc.tbusos.com/whetstone/use-time-conflicts.html"><span class="en">Use-time check</span><span class="zh">用时纠错</span></a>
+      <a href="https://doc.tbusos.com/whetstone/routing.html"><span class="en">Routing</span><span class="zh">经验路由</span></a>
+      <a href="#install"><span class="en">Install</span><span class="zh">安装</span></a>
+    </div>
+    <div class="nav-act">
+      <button type="button" class="lang" aria-label="Switch language / 切换语言">中 / EN</button>
+      <a class="gh" href="https://github.com/TbusOS/whetstone">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="banner" id="top">
+  <div class="wrap">
+    <span class="tag">0.2.0</span>
+    <span class="en"><b>whetstone decision</b> now keeps every call you make in review — and <b>verify</b> runs 38 checks that exit non-zero.</span>
+    <span class="zh"><b>whetstone decision</b> 会把你在人审里做的每个决定记下来；<b>verify</b> 现在有 38 条检查，不合格就返回非零退出码。</span>
+  </div>
+</div>
+
+<!-- ───────────── hero ───────────── -->
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <span class="kicker"><span class="en">Self-contained · zero runtime dependency</span><span class="zh">自包含 · 零运行时依赖</span></span>
+        <h1>
+          <span class="en">Distill the session.<br>Refuse what it<br><span class="cut">can't prove.</span></span>
+          <span class="zh">把会话蒸馏成 skill，<br>再把<span class="cut">证不出来的</span><br>挡在门外。</span>
+        </h1>
+        <p class="lede">
+          <span class="en">Whetstone turns a finished dev session — transcript, git diff, the pitfalls you hit — into a portable Agent Skill. Then it holds that skill to an evidence standard you can actually run.</span>
+          <span class="zh">Whetstone 把一次做完的开发 —— transcript、git diff、踩过的坑 —— 蒸馏成可移植的 Agent Skill，再用一条能跑的命令守住证据纪律。</span>
+        </p>
+        <div class="cta">
+          <a class="btn btn--hot" href="https://github.com/TbusOS/whetstone">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"/></svg>
+            <span class="en">Star on GitHub</span><span class="zh">去 GitHub 点个 Star</span>
+          </a>
+          <a class="btn btn--ghost" href="#evidence"><span class="en">See what it refuses</span><span class="zh">看它拒收什么</span> →</a>
+        </div>
+        <p class="runtimes">Claude Code · Codex · Cursor · <span class="en">any skills-compatible runtime</span><span class="zh">任何支持 skills 的 runtime</span></p>
+      </div>
+
+      <div class="sieve" id="sieve" role="img" aria-label="Animation: lines from a dev session fall onto a whetstone and are sorted into four layers, L1 to L4; lines that break the evidence rules are refused with a check code.">
+        <div class="sv-src"><i></i><span class="en">session · transcript + git diff + pitfalls</span><span class="zh">会话 · transcript + git diff + 踩坑</span></div>
+        <div class="sv-stone" id="sv-stone"></div>
+        <div class="sv-stone-lbl">WHETSTONE · L1–L4 · §7</div>
+        <div class="sv-rej" id="sv-rej"><span class="sv-rej-lbl">REFUSED <b id="sv-rej-n">0</b></span></div>
+        <div class="sv-strata">
+          <div class="band l4" data-l="L4"><b>L4</b><span class="en">state → memory, not shipped</span><span class="zh">状态 → memory，不进包</span><output>0</output></div>
+          <div class="band l3" data-l="L3"><b>L3</b><span class="en">platform value → params/</span><span class="zh">平台值 → params/</span><output>0</output></div>
+          <div class="band l2" data-l="L2"><b>L2</b><span class="en">method · pitfall → SKILL.md</span><span class="zh">方法 · 坑 → SKILL.md</span><output>0</output></div>
+          <div class="band l1" data-l="L1"><b>L1</b><span class="en">principle → SKILL.md</span><span class="zh">原理 → SKILL.md</span><output>0</output></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats rv">
+      <div><b>4</b><span class="en">layers, by how far knowledge carries</span><span class="zh">层，按知识能走多远来分</span></div>
+      <div><b>38</b><span class="en">mechanical checks in <code>verify</code></span><span class="zh"><code>verify</code> 里的机械检查</span></div>
+      <div><b>2</b><span class="en">human review gates</span><span class="zh">道人审关</span></div>
+      <div><b>0</b><span class="en">runtime dependencies</span><span class="zh">运行时依赖</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ───────────── why ───────────── -->
+<section id="why">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker">01 · <span class="en">Why</span><span class="zh">为什么</span></span>
+      <h2><span class="en">Every session ends. What you learned usually ends with it.</span><span class="zh">会话一结束，学到的东西大多跟着没了。</span></h2>
+    </div>
+    <div class="why-grid">
+      <figure class="chart rv" id="why-chart" style="margin:0">
+        <div class="pan" style="--pan-w:510px"><svg viewBox="0 0 620 300" role="img" aria-label="Illustration: without whetstone the reusable knowledge you keep drops to zero after every session; with whetstone the floor rises session by session.">
+          <defs>
+            <linearGradient id="gArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d97757" stop-opacity=".28"/><stop offset="1" stop-color="#d97757" stop-opacity="0"/></linearGradient>
+          </defs>
+          <g id="chart-grid" stroke="#e3e0d6" stroke-width="1"></g>
+          <path id="chart-area" fill="url(#gArea)" opacity="0"/>
+          <path class="ln a" id="ln-a" stroke="#75736a"/>
+          <path class="ln b" id="ln-b" stroke="#d97757"/>
+          <g font-family="SF Mono, Menlo, monospace" font-size="11" fill="#75736a" id="chart-x"></g>
+          <text x="40" y="22" font-family="SF Mono, Menlo, monospace" font-size="11" fill="#5e5d55" class="en-svg">reusable knowledge you still have</text>
+          <text x="40" y="22" font-family="PingFang SC, sans-serif" font-size="12" fill="#5e5d55" class="zh-svg">手里还剩多少能复用的经验</text>
+        </svg></div>
+        <figcaption class="chart-note">
+          <span><span style="color:#d97757">━</span> <span class="en">with whetstone: the floor rises</span><span class="zh">用 whetstone：底线一次比一次高</span> &nbsp; <span style="color:#75736a">━</span> <span class="en">without: back to zero</span><span class="zh">不用：每次归零</span></span>
+          <span class="en">illustration, not measured data</span><span class="zh">示意图，不是测量数据</span>
+        </figcaption>
+      </figure>
+      <ol class="leaks">
+        <li class="rv d1"><span class="n">1</span><div>
+          <h3><span class="en">New platform, same explanation — again.</span><span class="zh">换个平台，又从头讲一遍。</span></h3>
+          <p><span class="en">The design and pitfalls live in the skill body. Addresses, key lengths, tool names live in one <code>params/&lt;platform&gt;.md</code>. A new chip is a new table, nothing else.</span><span class="zh">设计和坑留在 skill 正文；地址、密钥长度、工具名放进一张 <code>params/&lt;platform&gt;.md</code>。换芯片就新加一张表，别的不动。</span></p>
+        </div></li>
+        <li class="rv d2"><span class="n">2</span><div>
+          <h3><span class="en">Your teammate can't get it at all.</span><span class="zh">同事根本拿不到。</span></h3>
+          <p><span class="en">The output is a plain-markdown folder with no runtime binding. Hand it to someone on Cursor or Codex; they drop it in and have your know-how.</span><span class="zh">产物是一个纯 markdown 目录，不绑定任何 runtime。递给用 Cursor 或 Codex 的同事，放进去就能用。</span></p>
+        </div></li>
+        <li class="rv d3"><span class="n">3</span><div>
+          <h3><span class="en">A better fix on B never reaches A.</span><span class="zh">在 B 上学到的，A 永远用不上。</span></h3>
+          <p><span class="en">Each new session is reconciled against the library: duplicates merge, changed facts are superseded, evidence for old entries accumulates. The library grows instead of resetting.</span><span class="zh">每次新蒸馏都和已有库比对：重复的合并，变了的事实标注替代，旧条目的证据继续累加。库在长，而不是每次归零。</span></p>
+        </div></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── evidence ───────────── -->
+<section class="ev" id="evidence">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker">02 · <span class="en">Evidence discipline</span><span class="zh">证据纪律</span></span>
+      <h2><span class="en">A rule only the model obeys is one context window from gone.</span><span class="zh">只靠模型自觉遵守的规则，离「不存在」只差一个上下文窗口。</span></h2>
+      <p class="lede"><span class="en">A skill library doesn't fail loudly. It fills up with plausible, once-true advice that still wears a confident label. So every rule a machine can decide became a check with an exit code. Below is a real run on <code>examples/demo-skill</code>, a deliberately broken package that ships with the repo.</span><span class="zh">skill 库不会大声地坏掉，它会慢慢塞满听着有理、只在当时成立、却还顶着高置信标签的条目。所以凡是机器能判的规则，都做成了带退出码的检查。下面是对仓库自带的、故意写坏的 <code>examples/demo-skill</code> 的一次真实运行。</span></p>
+    </div>
+
+    <div class="ev-grid">
+      <div class="term rv">
+        <div class="term-bar"><i></i><i></i><i></i><span>~/whetstone — zsh</span></div>
+        <pre id="term" aria-live="off"></pre>
+      </div>
+      <div class="checks rv d2" id="checks">
+        <div class="checks-num"><b>38</b><span class="en">checks, grouped by what they guard</span><span class="zh">条检查，按守的是什么分组</span></div>
+        <div class="bars" id="bars"></div>
+        <div class="legend">
+          <span><i style="background:var(--refuse)"></i>error · exit 1</span>
+          <span><i style="background:var(--warn)"></i><span class="en">warn · exit 1 with --strict</span><span class="zh">warn · 加 --strict 才 exit 1</span></span>
+          <span><i style="background:#6a9bcc"></i>info</span>
+        </div>
+      </div>
+    </div>
+    <p class="ev-foot rv"><span class="en">Each of the 38 codes is tested in both directions — it fires on a bad package and stays quiet on a good one — and a mutation test deletes checks one at a time to prove the suite notices: 14 of 14 caught.</span><span class="zh">38 个检查码每一个都正反两个方向测过：坏包上必须报、好包上必须不报。另有变异测试逐条删掉检查，确认测试套件会发现：14 条全部抓到。</span></p>
+
+    <!-- calculator -->
+    <div class="calc">
+      <div class="rv">
+        <h3><span class="en">Confidence is a table, not a feeling.</span><span class="zh">置信度是一张表，不是一种感觉。</span></h3>
+        <p class="lede"><span class="en">Try it. This is the exact rule <code>verify</code> enforces (extraction-framework §7). A reviewer may always lower a level; nobody may raise it past the conditions.</span><span class="zh">自己试试。这就是 <code>verify</code> 执行的那条规则（extraction-framework §7）。人审永远可以往下调，但谁都不能越过条件往上调。</span></p>
+
+        <div class="ctl">
+          <div class="ctl-lbl"><span class="en">What kind of entry?</span><span class="zh">这是哪一层的条目？</span></div>
+          <div class="seg" data-k="layer">
+            <button type="button" data-v="L12" aria-pressed="true"><span class="en">L1 / L2 · method</span><span class="zh">L1 / L2 · 做法</span></button>
+            <button type="button" data-v="L3" aria-pressed="false"><span class="en">L3 · platform value</span><span class="zh">L3 · 平台值</span></button>
+          </div>
+        </div>
+        <div class="ctl">
+          <div class="ctl-lbl"><span class="en">Executable check （验证方式）</span><span class="zh">可执行检查（验证方式）</span></div>
+          <div class="seg" data-k="test">
+            <button type="button" data-v="none" aria-pressed="false"><span class="en">none</span><span class="zh">没有</span></button>
+            <button type="button" data-v="untested" aria-pressed="false"><span class="en">written, not run</span><span class="zh">写了，没跑</span></button>
+            <button type="button" data-v="passed" aria-pressed="true"><span class="en">ran · passed</span><span class="zh">实测通过</span></button>
+          </div>
+        </div>
+        <div class="ctl">
+          <div class="ctl-lbl"><span class="en">Seen on how many distinct platforms / projects?</span><span class="zh">在几个不同的平台 / 项目上复现过？</span></div>
+          <div class="dots" data-k="n">
+            <button type="button" data-v="0" aria-pressed="false">0</button>
+            <button type="button" data-v="1" aria-pressed="true">1</button>
+            <button type="button" data-v="2" aria-pressed="false">2</button>
+            <button type="button" data-v="3" aria-pressed="false">3</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="verdict rv d2" id="verdict" aria-live="polite">
+        <div class="ctl-lbl"><span class="en">Highest level allowed</span><span class="zh">最高允许标到</span></div>
+        <div class="meter" id="meter"><div class="lo">LOW</div><div class="md">MED</div><div class="hi">HIGH</div></div>
+        <p class="v-reason" id="v-reason"></p>
+        <p class="v-note" id="v-note"></p>
+        <div class="claims" id="claims"></div>
+      </div>
+    </div>
+
+    <!-- refusals -->
+    <div class="tickets">
+      <article class="ticket rv">
+        <span class="no">V16 · §7</span><span class="stamp">REFUSED</span>
+        <h3><span class="en">Counting one project twice</span><span class="zh">同一个项目算两次</span></h3>
+        <p><span class="en">Reproduction lines are keyed by platform/project. Ten runs on one project is still one line — otherwise the write-back becomes a back door around the gate.</span><span class="zh">复现记录按平台/项目做唯一键。同一个项目跑十次还是一行，否则「回写证据」就成了绕过升级条件的后门。</span></p>
+      </article>
+      <article class="ticket rv d1">
+        <span class="no">V22 · §11</span><span class="stamp">REFUSED</span>
+        <h3><span class="en">Overwriting a fact in silence</span><span class="zh">悄悄改掉一个事实</span></h3>
+        <p><span class="en">A changed value is appended and marked superseded; the old one stays readable. Being quietly wrong is the expensive kind of wrong, most of all for irreversible values.</span><span class="zh">变了的值只能追加并标注替代，旧值仍然可读。错得没人发现是代价最大的错法，不可逆的值尤其如此。</span></p>
+      </article>
+      <article class="ticket rv d2">
+        <span class="no">PHASE 4</span><span class="stamp">REFUSED</span>
+        <h3><span class="en">Grading its own homework</span><span class="zh">自己给自己判卷</span></h3>
+        <p><span class="en">Review runs in a separate context. Self-review bias is something this design assumes will happen, not something it hopes to avoid.</span><span class="zh">质检在独立的上下文里跑。自评偏差是这套设计预设一定会发生的事，不是指望能躲开的事。</span></p>
+      </article>
+      <article class="ticket calm rv d3">
+        <span class="no">--explain</span><span class="stamp">WON'T FAKE</span>
+        <h3><span class="en">Pretending it can judge everything</span><span class="zh">假装什么都能判</span></h3>
+        <p><span class="en">Whether an L1 truly has no counter-example stays with the reviewer, and <code>--explain</code> prints that boundary in full. A mechanised non-mechanical judgement only makes false positives.</span><span class="zh">一条 L1 是不是真的举不出反例，留给人审，<code>--explain</code> 把这条边界原样打印出来。硬把不机械的判断做成机械的，只会制造误报。</span></p>
+      </article>
+    </div>
+    <p class="more rv"><span class="en">What happened when I ran it on my own library: </span><span class="zh">拿它跑我自己的库，结果是：</span><a href="https://doc.tbusos.com/whetstone/why-verify.html"><span class="en">61 entries marked “high confidence”. Not one could name a test. →</span><span class="zh">61 条标着「高置信度」的经验，没有一条说得出验证方式 →</span></a></p>
+    <p class="more rv" style="margin-top:12px"><span class="en">And after an entry is in the library, it is checked again each time it is used: </span><span class="zh">入库之后，每次用到一条经验还会再核一次：</span><a href="https://doc.tbusos.com/whetstone/use-time-conflicts.html"><span class="en">check the note when you use it, not when you file it →</span><span class="zh">经验对不对，用的时候才判得准 →</span></a></p>
+  </div>
+</section>
+
+<!-- ───────────── boundary ───────────── -->
+<section class="bound">
+  <div class="wrap">
+    <div class="rv">
+        <span class="kicker">03 · <span class="en">The honest limit</span><span class="zh">它管不到的地方</span></span>
+        <h2><span class="en">A green run is not a good skill.</span><span class="zh"><code style="font-size:.8em;background:none;padding:0">verify</code> 全绿，不等于 skill 好用。</span></h2>
+      </div>
+    <div class="bound-grid">
+      <div class="rv">
+        <p class="lede"><span class="en">Every check asks whether the knowledge is <b>true and traceable</b>. None asks whether installing it makes its user better — and the two don't predict each other. That is why the human gates stay. Source: <a href="https://microsoft.github.io/SkillLens/">SkillLens (Microsoft)</a>.</span><span class="zh">每条检查问的都是「这条知识<b>真不真、能不能追溯</b>」，没有一条问「装上它，使用者是不是变强了」，而这两件事互相预测不了。所以人审关一直保留。数据来源：<a href="https://microsoft.github.io/SkillLens/">SkillLens(Microsoft)</a>。</span></p>
+      </div>
+      <div class="big rv d1"><b>25%</b><p><span class="en">of extractor/consumer pairings in the SkillLens corpus transferred <em>negatively</em> — the skill made things worse.</span><span class="zh">SkillLens 语料里，25% 的「抽取方 × 使用方」组合出现负迁移 —— 装上 skill 反而变差。</span></p></div>
+      <div class="big rv d2"><b>46.4%</b><p><span class="en">is how often an unguided model judge picks the better of two skills. A coin does 50%.</span><span class="zh">无引导的模型评委在两个 skill 里挑对更好那个的比例。掷硬币是 50%。</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── layers ───────────── -->
+<section id="layers">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker">04 · <span class="en">The ruler</span><span class="zh">一把尺子</span></span>
+      <h2><span class="en">One question sorts everything: how far does it carry?</span><span class="zh">只问一个问题：这条知识能走多远？</span></h2>
+      <p class="lede"><span class="en">Think of it as strata. The deeper a piece of knowledge sits, the more platforms it survives — and the closer it lives to the reusable skill body. Click a layer.</span><span class="zh">把它想成岩层：越往下的知识，换越多平台仍然成立，也越靠近可复用的 skill 正文。点任意一层看看。</span></p>
+    </div>
+    <div class="strata-grid">
+      <div class="strata-fig rv">
+        <div class="axis"><span class="en">this session</span><span class="zh">只在这次</span><span class="en">every platform</span><span class="zh">任何平台</span></div>
+        <div class="pan" style="--pan-w:330px"><svg class="strata-svg" id="strata" viewBox="0 0 760 440" role="group" aria-label="Four layers, from L4 state at the top to L1 principle at the bottom"></svg></div>
+      </div>
+      <div class="detail rv d2" id="detail" aria-live="polite"></div>
+    </div>
+    <div class="split-note rv">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97757" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M6 3v6a6 6 0 0012 0V3M12 15v6M8 21h8"/></svg>
+      <span class="en"><b>A pitfall is always split in two.</b> The lesson (“don't infer hardware state from a software flag”) goes to L2; the value it hinged on (“the flag lives at OTP[ADDR]”) goes to L3. Unsplit pitfalls are refused (V20).</span>
+      <span class="zh"><b>一个坑一定拆成两半。</b>教训（「别从软件 flag 推硬件状态」）进 L2；它依赖的那个值（「flag 在 OTP[ADDR]」）进 L3。不拆的坑会被拒收（V20）。</span>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── flow ───────────── -->
+<section id="flow" style="background:var(--bg-2)">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker">05 · <span class="en">How it works</span><span class="zh">怎么工作</span></span>
+      <h2><span class="en">Mine. Layer. Reconcile. You approve.</span><span class="zh">挖掘，分层，比对，你点头。</span></h2>
+      <p class="lede"><span class="en">Two human gates bracket an automatic middle. Nothing reaches your library without your sign-off.</span><span class="zh">两道人审关夹着中间的自动流程。没有你点头，什么都进不了正式库。</span></p>
+    </div>
+    <div class="track rv" id="track"><span class="fill-line" id="fill-line"></span></div>
+    <div class="flow-panel rv" id="flow-panel" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ───────────── architecture ───────────── -->
+<section id="architecture">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker">06 · <span class="en">Architecture</span><span class="zh">架构</span></span>
+      <h2><span class="en">A distiller, a portable package, optional extras.</span><span class="zh">一个蒸馏器，一个可移植的包，几个可选的下游。</span></h2>
+      <p class="lede"><span class="en">Runtime-specific code is fenced into one thin capture adapter. What you share is plain markdown. Everything below the dashed line is optional — installed, it helps; absent, nothing breaks.</span><span class="zh">跟 runtime 绑定的代码只放在薄薄一层采集适配器里。对外分享的是纯 markdown。虚线以下全是可选：装了能增强，不装也不影响使用。</span></p>
+    </div>
+    <div class="arch">
+      <div class="tier t1 rv">
+        <div class="tl"><span class="en">Distiller</span><span class="zh">蒸馏器</span><small><span class="en">runtime-neutral method</span><span class="zh">跟 runtime 无关的方法</span></small></div>
+        <div class="cells">
+          <div class="cell"><b>extraction-framework</b><span class="en">the L1–L4 rules</span><span class="zh">L1–L4 分层规则</span></div>
+          <div class="cell"><b>SKILL.md</b><span class="en">Phase 0–5 distiller</span><span class="zh">Phase 0–5 蒸馏流程</span></div>
+          <div class="cell"><b>verify · lint</b><span class="en">checks that exit non-zero</span><span class="zh">会返回非零的检查</span></div>
+          <div class="cell"><b>find · route</b><span class="en">finds the right skill once the menu is full</span><span class="zh">菜单装不下之后，帮着找到对的 skill</span></div>
+          <div class="cell"><b>capture/&lt;runtime&gt;</b><span class="en">the only runtime-specific part</span><span class="zh">唯一跟 runtime 绑定的部分</span></div>
+        </div>
+      </div>
+      <div class="join rv"><span class="en">produces</span><span class="zh">产出</span></div>
+      <div class="tier t2 rv">
+        <div class="tl"><span class="en">Portable skill package</span><span class="zh">可移植 skill 包</span><small><span class="en">the unit you share</span><span class="zh">对外分享的就是它</span></small></div>
+        <div class="cells">
+          <div class="cell"><b>SKILL.md</b><span class="en">L1 principles + L2 methods</span><span class="zh">L1 原理 + L2 做法</span></div>
+          <div class="cell"><b>params/&lt;platform&gt;.md</b><span class="en">L3 values — swap per platform</span><span class="zh">L3 平台值，换平台只换它</span></div>
+          <div class="cell"><b>pitfalls.md</b><span class="en">L2 pitfall library</span><span class="zh">L2 坑库</span></div>
+        </div>
+      </div>
+      <div class="join opt rv"><span class="en">optional sync</span><span class="zh">可选同步</span></div>
+      <div class="tier t3 rv">
+        <div class="tl"><span class="en">Optional extras</span><span class="zh">可选下游</span><small><span class="en">install-to-use</span><span class="zh">装了才用</span></small></div>
+        <div class="cells">
+          <div class="cell"><b>engram</b><span class="en">local memory store: recall, supersede</span><span class="zh">本地记忆库：召回、替代</span></div>
+          <div class="cell"><b>llm-wiki</b><span class="en">a wiki page for humans to read</span><span class="zh">发成给人读的 wiki 页</span></div>
+          <div class="cell"><b>darwin-skill</b><span class="en">score and polish one skill (3rd-party)</span><span class="zh">给单个 skill 打分打磨（第三方）</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── scenario ───────────── -->
+<section id="scenario" style="background:var(--bg-2)">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker">07 · <span class="en">One real scenario</span><span class="zh">一个真实场景</span></span>
+      <h2><span class="en">Secure boot, done once — owned by the whole team.</span><span class="zh">安全启动做一次，整个团队都会。</span></h2>
+    </div>
+    <ol class="tl-list">
+      <li class="rv"><span class="k">1</span><div><h3><span class="en">You finish bring-up on one SoC</span><span class="zh">你在一颗 SoC 上做完安全启动</span></h3><p><span class="en">Keys, OTP, the signing chain — and a buffer overrun you only found by dumping bytes.</span><span class="zh">密钥、OTP、签名链，还有一个靠 dump 字节才揪出来的缓冲区越界。</span></p></div></li>
+      <li class="rv"><span class="k">2</span><div><h3><span class="en">Run the distiller</span><span class="zh">跑一次蒸馏</span></h3><p><span class="en">It separates the transferable design and pitfall (L1/L2) from this chip's addresses and key length (L3). You approve at two gates.</span><span class="zh">它把可迁移的设计和坑（L1/L2）跟这颗芯片的地址、密钥长度（L3）分开。你在两道关点头。</span></p></div></li>
+      <li class="rv"><span class="k">3</span><div><h3><span class="en">Out comes <code>verified-boot/</code></span><span class="zh">产出 <code>verified-boot/</code></span></h3><p><span class="en">Plain markdown, self-contained, and <code>verify</code> is clean.</span><span class="zh">纯 markdown，自包含，<code>verify</code> 通过。</span></p></div></li>
+      <li class="rv"><span class="k">4</span><div><h3><span class="en">A teammate on Cursor drops it in</span><span class="zh">用 Cursor 的同事把它放进去</span></h3><p><span class="en">They now have the design, the method, and the byte-dump pitfall. No onboarding call.</span><span class="zh">设计、做法、那个 dump 字节的坑，他马上就有了。不用专门开会讲。</span></p></div></li>
+      <li class="rv"><span class="k">5</span><div><h3><span class="en">Next SoC? Add one table.</span><span class="zh">下一颗 SoC？加一张表。</span></h3><p><span class="en"><code>params/soc-b.md</code>. The design and pitfalls carry over untouched.</span><span class="zh"><code>params/soc-b.md</code>。设计和坑原样复用。</span></p></div></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ───────────── index hygiene ───────────── -->
+<section id="index-hygiene">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker">08 · <span class="en">Index hygiene</span><span class="zh">索引卫生</span></span>
+      <h2><span class="en">More skills shouldn't mean a noisier menu.</span><span class="zh">skill 越多，菜单不该越乱。</span></h2>
+      <p class="lede"><span class="en">A runtime keeps every skill's name + description in context to choose between them. Bodies load only after a pick. So the noise lives in the menu — and that's where <code>lint</code> looks.</span><span class="zh">runtime 把每个 skill 的 name + description 常驻在上下文里用来挑选，正文要等被选中才加载。所以乱就乱在菜单上，<code>lint</code> 查的也正是这里。</span></p>
+    </div>
+    <div class="ix rv" id="ix">
+      <div class="ix-col menu">
+        <div class="ix-h"><span class="en">SELECTION MENU · name + description</span><span class="zh">选择菜单 · name + description</span><span class="badge on"><span class="en">always in context</span><span class="zh">一直在上下文里</span></span></div>
+        <div class="menu-list" id="menu-list"></div>
+        <div class="lint-msg" id="lint-msg"></div>
+      </div>
+      <div class="ix-col">
+        <div class="ix-h"><span class="en">SKILL BODY</span><span class="zh">skill 正文</span><span class="badge off"><span class="en">loaded only when picked</span><span class="zh">选中才加载</span></span></div>
+        <div class="body-view" id="body-view"></div>
+      </div>
+    </div>
+    <div class="tools3">
+      <div class="tool rv d1"><b>whetstone lint</b><p><span class="en">Finds missing triggers, overlapping trigger sets and near-identical names — tells deliberate companions (<code>-audit</code>) from real clashes — and checks whether the whole menu still fits.</span><span class="zh">找出缺触发词、触发词重叠、名字几乎一样的 skill，能分清故意成对的（<code>-audit</code>）和真撞车，还会查整张菜单是不是还放得下。</span></p></div>
+      <div class="tool rv d2"><b>whetstone index</b><p><span class="en">Groups skills into families and writes a browsable <code>INDEX.md</code>.</span><span class="zh">按族归组，生成一份能浏览的 <code>INDEX.md</code>。</span></p></div>
+      <div class="tool rv d3"><b><span class="en">description contract</span><span class="zh">description 写法约定</span></b><p><span class="en">Capability line, concrete triggers, and a boundary that pushes siblings apart — baked into the template.</span><span class="zh">能力一句话 + 具体触发词 + 跟同族划清边界，写进模板，新 skill 一生成就符合。</span></p></div>
+    </div>
+    <p class="more rv"><span class="en">And once the library outgrows what one menu can hold, the right entry still has to be found: </span><span class="zh">库长到一张菜单装不下时，还得让对的那条经验被找到：</span><a href="https://doc.tbusos.com/whetstone/routing.html"><span class="en">a growing library needs a finder, not a longer menu →</span><span class="zh">经验越攒越多，靠的是会找，不是菜单更长 →</span></a></p>
+  </div>
+</section>
+
+<!-- ───────────── install ───────────── -->
+<section id="install" style="background:var(--bg-2)">
+  <div class="wrap">
+    <div class="inst-grid">
+      <div class="rv">
+        <span class="kicker">09 · <span class="en">Install</span><span class="zh">安装</span></span>
+        <h2><span class="en">Drop the folder into any runtime.</span><span class="zh">把目录放进任何 runtime。</span></h2>
+        <p class="lede"><span class="en">Whetstone ships as an Agent Skill plus plain scripts. No package manager, no service, no dependencies.</span><span class="zh">Whetstone 就是一个 Agent Skill 加几个普通脚本。不用包管理器，不起服务，零依赖。</span></p>
+        <div class="clone"><code id="clone-cmd">git clone https://github.com/TbusOS/whetstone.git</code><button class="copy" type="button" data-copy="clone-cmd">copy</button></div>
+        <div class="rt">
+          <div><span>Claude Code</span><code>~/.claude/skills/whetstone/</code></div>
+          <div><span>Codex · Cursor</span><span class="en">the matching skills / rules folder</span><span class="zh">对应的 skills / rules 目录</span></div>
+        </div>
+      </div>
+      <div class="cli rv d2">
+        <div class="tabs" role="tablist" id="tabs"></div>
+        <div class="tabp" id="tabp" role="tabpanel"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── migrate ───────────── -->
+<section id="migrate">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker">10 · <span class="en">Move machines</span><span class="zh">换机迁移</span></span>
+      <h2><span class="en">New laptop? Clone two repos and you're back.</span><span class="zh">换电脑？克隆两个仓，能力全回来。</span></h2>
+      <p class="lede"><span class="en">The tool is public. Your distilled library — with real platform values — lives in a private repo. Keeping them apart means the public one never carries your internal data.</span><span class="zh">工具是公开的；你蒸出来、带真实平台值的 skill 库放在私有仓。两者分开，公开仓就永远不会带出你的内部数据。</span></p>
+    </div>
+    <div class="mig">
+      <div class="mig-fig rv">
+        <div class="pan" style="--pan-w:400px"><svg viewBox="0 0 520 300" role="img" aria-label="The public tool repo and the private skill library are both cloned onto a new machine and deployed into its skills folder.">
+          <g font-family="SF Mono, Menlo, monospace" font-size="12">
+            <rect x="10" y="30" width="180" height="70" rx="12" fill="#ffffff" stroke="#d97757" stroke-opacity=".6"/>
+            <text x="28" y="60" fill="#141413" font-weight="600">whetstone</text>
+            <text x="28" y="80" fill="#5e5d55">public · tool</text>
+            <rect x="10" y="200" width="180" height="70" rx="12" fill="#ffffff" stroke="#6a9bcc" stroke-opacity=".6"/>
+            <text x="28" y="230" fill="#141413" font-weight="600">my-skills</text>
+            <text x="28" y="250" fill="#5e5d55">private · data</text>
+            <path class="flowdash" d="M190 65 C 260 65, 260 140, 318 140" fill="none" stroke="#d97757" stroke-width="2"/>
+            <path class="flowdash" d="M190 235 C 260 235, 260 160, 318 160" fill="none" stroke="#6a9bcc" stroke-width="2"/>
+            <rect x="320" y="70" width="190" height="160" rx="16" fill="#f0ede3" stroke="#788c5d" stroke-opacity=".6"/>
+            <text x="340" y="100" fill="#788c5d" font-weight="600">new machine</text>
+            <rect x="340" y="116" width="150" height="26" rx="6" fill="#f3f1ea"/><text x="352" y="134" fill="#141413">deploy.sh --link</text>
+            <rect x="340" y="150" width="150" height="26" rx="6" fill="#f3f1ea"/><text x="352" y="168" fill="#141413">skills/ ✓</text>
+            <rect x="340" y="184" width="150" height="26" rx="6" fill="#f3f1ea"/><text x="352" y="202" fill="#141413">rules ✓</text>
+          </g>
+        </svg></div>
+      </div>
+      <ol>
+        <li class="rv d1"><div><span class="en">Clone both repos</span><span class="zh">两个仓都 clone 下来</span><span class="sub"><span class="en"><code>whetstone</code> (the public tool) and your private library.</span><span class="zh"><code>whetstone</code>（公开工具）和你的私有库。</span></span></div></li>
+        <li class="rv d2"><div><code>deploy.sh --link &lt;library&gt;</code><span class="sub"><span class="en">Symlinks every skill into the skills folder — one source, no drift.</span><span class="zh">把每个 skill 软链进 skills 目录，只有一份源，不会两边不一致。</span></span></div></li>
+        <li class="rv d3"><div><code>deploy.sh --gen-claudemd &lt;library&gt;</code><span class="sub"><span class="en">Regenerates your always-on rules; <code>--add-import</code> wires them per project.</span><span class="zh">重新生成常驻规则；每个项目再用 <code>--add-import</code> 接上。</span></span></div></li>
+      </ol>
+    </div>
+    <p class="more rv" style="margin-top:28px"><a href="https://doc.tbusos.com/whetstone/claude-md-layering.html"><span class="en">Read the CLAUDE.md layering guide →</span><span class="zh">读 CLAUDE.md 分层设计指南 →</span></a></p>
+  </div>
+</section>
+
+<!-- ───────────── final ───────────── -->
+<section class="final">
+  <div class="wrap">
+    <span class="kicker rv"><span class="en">Your next feature</span><span class="zh">下一个功能</span></span>
+    <h2 class="rv"><span class="en">Stop letting it <em class="hl">evaporate.</em></span><span class="zh">别再让经验<em class="hl">蒸发</em>了。</span></h2>
+    <p class="lede rv"><span class="en">Capture the reusable part once. Prove it. Carry it to every platform and every teammate.</span><span class="zh">把能复用的那部分捕获一次、证明一次，带到每个平台、每个同事那里。</span></p>
+    <div class="cta rv">
+      <a class="btn btn--hot" href="https://github.com/TbusOS/whetstone"><span class="en">Get Whetstone on GitHub</span><span class="zh">在 GitHub 获取 Whetstone</span></a>
+      <a class="btn btn--ghost" href="#evidence"><span class="en">Try the confidence table</span><span class="zh">试试置信度表</span></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="brand" href="#top" style="padding:0">whetstone <small lang="zh-CN">· 磨刀石</small></a>
+        <p><span class="en">MIT · © 2026. Distillation structure inspired by nuwa-skill; ratchet discipline by darwin-skill (3rd-party). Theory: EvolveR · AgentFactory · MemoryBank · SkillLens.</span><span class="zh">MIT · © 2026。蒸馏结构借鉴 nuwa-skill；棘轮纪律借鉴 darwin-skill（第三方）。理论：EvolveR · AgentFactory · MemoryBank · SkillLens。</span></p>
+      </div>
+      <div><h5><span class="en">Page</span><span class="zh">本页</span></h5><a href="#why"><span class="en">Why</span><span class="zh">为什么</span></a><a href="#evidence"><span class="en">Evidence</span><span class="zh">证据纪律</span></a><a href="#layers"><span class="en">Layers</span><span class="zh">分层</span></a><a href="#flow"><span class="en">How it works</span><span class="zh">流程</span></a></div>
+      <div><h5><span class="en">Read</span><span class="zh">延伸阅读</span></h5><a href="https://doc.tbusos.com/whetstone/skills.html"><span class="en">Skills</span><span class="zh">技能</span></a><a href="https://doc.tbusos.com/whetstone/use-time-conflicts.html"><span class="en">Use-time check</span><span class="zh">用时纠错</span></a><a href="https://doc.tbusos.com/whetstone/routing.html"><span class="en">Routing</span><span class="zh">经验路由</span></a><a href="https://doc.tbusos.com/whetstone/why-verify.html"><span class="en">Why verify</span><span class="zh">为什么要 verify</span></a><a href="https://doc.tbusos.com/whetstone/claude-md-layering.html"><span class="en">CLAUDE.md layering</span><span class="zh">CLAUDE.md 分层</span></a></div>
+      <div><h5><span class="en">Related</span><span class="zh">相关</span></h5><a href="https://github.com/TbusOS/whetstone">GitHub</a><a href="https://github.com/TbusOS/whetstone-curator">whetstone-curator</a><a href="https://github.com/alchaincyf/darwin-skill">darwin-skill</a><a href="https://github.com/alchaincyf/nuwa-skill">nuwa-skill</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* 原 whetstone docs/assets/site.js */
+/* whetstone docs — shared behaviour: EN/中 toggle + reveal-on-scroll.
+ * The <head> of every page sets data-lang before first paint; this file wires the toggle,
+ * exposes window.WS for page scripts, and fires a "langchange" event on every switch. */
+(function () {
+  'use strict';
+  var html = document.documentElement;
+  var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var hasIO = 'IntersectionObserver' in window;
+  var lang = html.getAttribute('data-lang') === 'zh' ? 'zh' : 'en';
+
+  function setLang(l) {
+    lang = l;
+    html.setAttribute('data-lang', l);
+    html.setAttribute('lang', l === 'zh' ? 'zh-CN' : 'en');
+    try { localStorage.setItem('whetstone-lang', l); } catch (e) {}
+    document.querySelectorAll('.lang').forEach(function (b) { b.textContent = l === 'zh' ? 'EN / 中' : '中 / EN'; });
+    document.querySelectorAll('.en-svg').forEach(function (t) { t.style.display = l === 'en' ? '' : 'none'; });
+    document.querySelectorAll('.zh-svg').forEach(function (t) { t.style.display = l === 'zh' ? '' : 'none'; });
+    document.dispatchEvent(new Event('langchange'));
+  }
+
+  var revealObs = hasIO && !reduce ? new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); revealObs.unobserve(e.target); } });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }) : null;
+  function reveal(el) { if (revealObs) revealObs.observe(el); else el.classList.add('in'); }
+
+  /* run fn(true/false) as el enters / leaves the screen */
+  function onScreen(el, fn) {
+    if (!hasIO) { fn(true); return; }
+    new IntersectionObserver(function (es) { es.forEach(function (e) { fn(e.isIntersecting); }); }, { threshold: 0.05 }).observe(el);
+  }
+
+  window.WS = {
+    T: function (o) { return o[lang] || o.en; },
+    lang: function () { return lang; },
+    reduce: reduce,
+    hasIO: hasIO,
+    onScreen: onScreen,
+    reveal: reveal
+  };
+
+  document.querySelectorAll('.lang').forEach(function (b) {
+    b.addEventListener('click', function () { setLang(lang === 'zh' ? 'en' : 'zh'); });
+  });
+  document.querySelectorAll('.rv').forEach(reveal);
+  setLang(lang);
+})();
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var WS = window.WS, T = WS.T, reduce = WS.reduce, onScreen = WS.onScreen;
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  /* ───────────── hero sieve ───────────── */
+  (function sieve() {
+    var box = document.getElementById('sieve');
+    if (!box) return;
+    var stone = document.getElementById('sv-stone');
+    var rej = document.getElementById('sv-rej');
+    var rejN = document.getElementById('sv-rej-n');
+    var bands = {};
+    box.querySelectorAll('.band').forEach(function (b) { bands[b.dataset.l] = b; });
+    var items = [
+      { to: 'L1', en: 'OTP writes can’t be undone — dump bytes first', zh: 'OTP 烧了改不回 —— 先 dump 字节' },
+      { to: 'L2', en: 'verify fails? compare both hashes byte by byte', zh: '验签不过？两端 hash 逐字节比' },
+      { to: 'L3', en: 'key hash lives at OTP[ADDR]', zh: 'key hash 存在 OTP[ADDR]' },
+      { to: 'X', code: 'V12', en: '“high” — seen on one platform', zh: '标 high，只在一个平台见过' },
+      { to: 'L4', en: 'HEAD is at 3f2a9c1', zh: '当前 HEAD 是 3f2a9c1' },
+      { to: 'L2', en: 'pitfall: buffer sized for the old key length', zh: '坑：缓冲区按旧密钥长度分配' },
+      { to: 'L3', en: 'key length = RSA-N', zh: '密钥长度 = RSA-N' },
+      { to: 'X', code: 'V16', en: 'one project, counted twice', zh: '同一个项目算了两次' },
+      { to: 'L1', en: 'never trust a flag over the bytes it describes', zh: '别信 flag，信它描述的那几个字节' },
+      { to: 'L3', en: 'signing tool: sign-x', zh: '签名工具：sign-x' },
+      { to: 'L4', en: 'dev key is loaded right now', zh: '现在装的是 dev key' },
+      { to: 'X', code: 'V14', en: '“reproduced 3 times” (bare count)', zh: '「复现 3 次」（裸数字）' }
+    ];
+    var counts = { L1: 0, L2: 0, L3: 0, L4: 0 }, refused = 0, i = 0, timer = null, running = false;
+
+    if (reduce) {   // static, already-sorted picture
+      items.forEach(function (it) { if (it.to === 'X') refused++; else counts[it.to]++; });
+      Object.keys(counts).forEach(function (k) { bands[k].querySelector('output').textContent = counts[k]; });
+      rejN.textContent = refused;
+      ['V12', 'V16', 'V14'].forEach(function (c) { var p = document.createElement('span'); p.className = 'rej-pill'; p.textContent = c; rej.appendChild(p); });
+      return;
+    }
+    function rel(el) {
+      var r = el.getBoundingClientRect(), s = box.getBoundingClientRect();
+      return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height };
+    }
+    function sparks(x, y) {
+      for (var k = 0; k < 12; k++) {
+        var s = document.createElement('span'); s.className = 'spark'; box.appendChild(s);
+        var dx = rand(-90, 90), dy = rand(-70, -10);
+        var a = s.animate([
+          { transform: 'translate(' + x + 'px,' + y + 'px)', opacity: 1 },
+          { transform: 'translate(' + (x + dx) + 'px,' + (y + dy) + 'px)', opacity: 1, offset: .55 },
+          { transform: 'translate(' + (x + dx * 1.25) + 'px,' + (y + dy + 40) + 'px)', opacity: 0 }
+        ], { duration: rand(500, 850), easing: 'cubic-bezier(.2,.7,.4,1)' });
+        a.onfinish = (function (el) { return function () { el.remove(); }; })(s);
+      }
+      stone.classList.add('hot');
+      setTimeout(function () { stone.classList.remove('hot'); }, 260);
+    }
+    function launch(it) {
+      var chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.textContent = T(it);
+      box.appendChild(chip);
+      var W = box.clientWidth, cw = chip.offsetWidth, ch = chip.offsetHeight;
+      var st = rel(stone);
+      var x0 = clamp(W / 2 - cw / 2 + rand(-70, 70), 14, W - cw - 14);
+      var y0 = 58, yS = st.y - ch - 3;
+      var fall = chip.animate([
+        { transform: 'translate(' + x0 + 'px,' + y0 + 'px)', opacity: 0 },
+        { transform: 'translate(' + x0 + 'px,' + (y0 + 12) + 'px)', opacity: 1, offset: .18 },
+        { transform: 'translate(' + x0 + 'px,' + yS + 'px)', opacity: 1 }
+      ], { duration: 1050, easing: 'cubic-bezier(.55,0,.95,.55)', fill: 'forwards' });
+      fall.onfinish = function () {
+        sparks(x0 + cw / 2, st.y + 2);
+        if (it.to === 'X') {
+          chip.classList.add('bad');
+          chip.innerHTML = '<s></s><em></em>';
+          chip.querySelector('s').textContent = T(it);
+          chip.querySelector('em').textContent = it.code;
+          var r = rel(rej);
+          var cw2 = chip.offsetWidth;
+          var xt = r.x + r.w - cw2, yt = r.y + r.h / 2 - ch / 2;
+          var fly = chip.animate([
+            { transform: 'translate(' + x0 + 'px,' + yS + 'px)' },
+            { transform: 'translate(' + (x0 - 6) + 'px,' + yS + 'px)', offset: .1 },
+            { transform: 'translate(' + (x0 + 6) + 'px,' + yS + 'px)', offset: .2 },
+            { transform: 'translate(' + x0 + 'px,' + yS + 'px)', offset: .3 },
+            { transform: 'translate(' + xt + 'px,' + yt + 'px) scale(.9)', opacity: 1, offset: .85 },
+            { transform: 'translate(' + xt + 'px,' + yt + 'px) scale(.6)', opacity: 0 }
+          ], { duration: 1300, easing: 'ease-in-out', fill: 'forwards' });
+          fly.onfinish = function () {
+            chip.remove(); refused++; rejN.textContent = refused;
+            var p = document.createElement('span'); p.className = 'rej-pill'; p.textContent = it.code;
+            rej.appendChild(p);
+            var pills = rej.querySelectorAll('.rej-pill');
+            if (pills.length > 3) pills[0].remove();
+          };
+        } else {
+          var band = bands[it.to];
+          chip.dataset.to = it.to;
+          chip.style.setProperty('--c', getComputedStyle(band).getPropertyValue('--c'));
+          var b = rel(band);
+          var xt2 = clamp(b.x + b.w * rand(.25, .55), 14, W - cw - 14), yt2 = b.y + b.h / 2 - ch / 2;
+          var drop = chip.animate([
+            { transform: 'translate(' + x0 + 'px,' + yS + 'px)', opacity: 1 },
+            { transform: 'translate(' + xt2 + 'px,' + yt2 + 'px) scale(.92)', opacity: 1, offset: .78 },
+            { transform: 'translate(' + xt2 + 'px,' + yt2 + 'px) scale(.7)', opacity: 0 }
+          ], { duration: 1150, easing: 'cubic-bezier(.3,.6,.3,1)', fill: 'forwards' });
+          drop.onfinish = function () {
+            chip.remove(); counts[it.to]++;
+            band.querySelector('output').textContent = counts[it.to];
+            band.classList.add('hit');
+            setTimeout(function () { band.classList.remove('hit'); }, 520);
+          };
+        }
+      };
+    }
+    function tick() { launch(items[i % items.length]); i++; }
+    function start() { if (running) return; running = true; tick(); timer = setInterval(tick, 1650); }
+    function stop() { running = false; clearInterval(timer); }
+    onScreen(box, function (v) { v && !document.hidden ? start() : stop(); });
+    document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); });
+  })();
+
+  /* ───────────── why chart ───────────── */
+  (function chart() {
+    var X0 = 40, Y0 = 262, W = 92, H = 220, N = 6;
+    var kept = [0, .2, .36, .5, .61, .7, .77];
+    function y(v) { return (Y0 - v * H).toFixed(1); }
+    var a = 'M' + X0 + ' ' + y(0), b = 'M' + X0 + ' ' + y(0);
+    for (var k = 0; k < N; k++) {
+      var xs = X0 + k * W, xe = xs + W;
+      a += ' L' + (xe - 14) + ' ' + y(.62) + ' L' + xe + ' ' + y(.02);
+      var peak = Math.min(kept[k] + .62, .98);
+      b += ' L' + (xe - 14) + ' ' + y(peak) + ' L' + xe + ' ' + y(kept[k + 1]);
+    }
+    var la = document.getElementById('ln-a'), lb = document.getElementById('ln-b');
+    la.setAttribute('d', a); lb.setAttribute('d', b);
+    var area = document.getElementById('chart-area');
+    var floor = 'M' + X0 + ' ' + Y0;
+    for (var j = 1; j <= N; j++) floor += ' L' + (X0 + j * W) + ' ' + y(kept[j]);
+    area.setAttribute('d', floor + ' L' + (X0 + N * W) + ' ' + Y0 + ' Z');
+    [la, lb].forEach(function (p) { p.style.setProperty('--len', Math.ceil(p.getTotalLength())); });
+    var g = document.getElementById('chart-grid'), xl = document.getElementById('chart-x');
+    for (var s = 0; s <= N; s++) {
+      var x = X0 + s * W;
+      var l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      l.setAttribute('x1', x); l.setAttribute('x2', x); l.setAttribute('y1', 36); l.setAttribute('y2', Y0);
+      if (s > 0 && s < N) l.setAttribute('stroke-dasharray', '2 5');
+      g.appendChild(l);
+      if (s < N) {
+        var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('x', x + W / 2); t.setAttribute('y', 284); t.setAttribute('text-anchor', 'middle');
+        t.textContent = '#' + (s + 1);
+        xl.appendChild(t);
+      }
+    }
+    var base = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    base.setAttribute('x1', X0); base.setAttribute('x2', X0 + N * W); base.setAttribute('y1', Y0); base.setAttribute('y2', Y0);
+    base.setAttribute('stroke', '#d9d6cb'); g.appendChild(base);
+    var c = document.getElementById('why-chart');
+    var show = function () { area.style.transition = 'opacity 1.4s 2s'; area.style.opacity = 1; };
+    if (reduce || !WS.hasIO) { show(); } else {
+      new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { show(); o.disconnect(); } }, { threshold: .3 }).observe(c);
+    }
+  })();
+
+  /* ───────────── terminal (real output of verify on examples/demo-skill) ───────────── */
+  (function term() {
+    var pre = document.getElementById('term');
+    var L = [
+      ['p', '$ ', 'c', 'whetstone verify examples/demo-skill'],
+      ['', ''],
+      ['h', 'whetstone verify — examples/demo-skill'],
+      ['', ''],
+      ['x', 'ERROR (5)'],
+      ['e', '  ✗ SKILL.md:31  [V16] [溯源] 复现记录 has two lines for the same platform/project: \'soc-x\''],
+      ['a', '      → §7 — the line key is the platform/project; re-confirming on the same one refreshes the date, it does not add a line'],
+      ['e', '  ✗ SKILL.md:31  [V12] [溯源] L2 claims 置信度 high, the table allows only low — 复现记录 has 1 line(s), needs 2'],
+      ['e', '  ✗ pitfalls.md:5  [V14] [从上层状态反推底层状态会看错] 复现记录 is a bare count 「2 次」'],
+      ['a', '      → §7/§8 — must be a list; one line per platform/project · date · pointer'],
+      ['e', '  ✗ pitfalls.md:5  [V12] [从上层状态反推底层状态会看错] L2 claims 置信度 high, the table allows only low — 复现记录 has 0 line(s), needs 2'],
+      ['e', '  ✗ params/soc-x.md:6  [V10] [存储起始位置] L3 claims 置信度 high, the table allows only low — 验证方式 never passed a test; 复现记录 has 1 line(s), needs 2'],
+      ['a', '      → §7 table: tested-and-passed AND 复现记录 >=2 lines for high. A reviewer may downgrade, never upgrade past the conditions'],
+      ['', ''],
+      ['w', 'WARN (3)'],
+      ['w', '  ! SKILL.md:18  [V19] concrete value in the body (hex address/value): \'0x1A40\''],
+      ['w', '  ! SKILL.md  [V25] no section says what must NEVER be done in this domain'],
+      ['w', '  ! params/soc-x.md  [V22] no 替代记录 section'],
+      ['', ''],
+      ['s', 'summary: 5 error(s), 3 warning(s), 0 info'],
+      ['', ''],
+      ['p', '$ ', 'c', 'echo $?'],
+      ['x', '1']
+    ];
+    function lineHTML(l) {
+      var out = '';
+      for (var k = 0; k < l.length; k += 2) {
+        var span = document.createElement('span');
+        if (l[k]) span.className = l[k];
+        span.textContent = l[k + 1];
+        out += span.outerHTML;
+      }
+      return out;
+    }
+    if (reduce) { pre.innerHTML = L.map(lineHTML).join('\n'); return; }
+    var started = false;
+    onScreen(pre, function (v) {
+      if (!v || started) return;
+      started = true;
+      var n = 0, cur = '<span class="cursor"></span>';
+      function next() {
+        if (n >= L.length) { pre.innerHTML = L.map(lineHTML).join('\n') + '\n' + cur; return; }
+        var l = L[n];
+        if (l[0] === 'p') {      // type the command character by character
+          var cmd = l[3], c = 0;
+          var head = L.slice(0, n).map(lineHTML).join('\n') + (n ? '\n' : '');
+          (function type() {
+            pre.innerHTML = head + '<span class="p">$ </span><span class="c">' + cmd.slice(0, c) + '</span>' + cur;
+            if (c++ < cmd.length) setTimeout(type, 38); else { n++; setTimeout(next, 420); }
+          })();
+          return;
+        }
+        n++;
+        pre.innerHTML = L.slice(0, n).map(lineHTML).join('\n') + '\n' + cur;
+        setTimeout(next, l[1] === '' ? 60 : 130);
+      }
+      setTimeout(next, 300);
+    });
+  })();
+
+  /* ───────────── checks chart (counts from `whetstone verify --explain`) ───────────── */
+  (function bars() {
+    var G = [
+      { en: 'Provenance fields', zh: '溯源字段', E: 7, W: 5, I: 0 },
+      { en: 'Package structure', zh: '包结构完整性', E: 4, W: 3, I: 0 },
+      { en: 'Layering discipline', zh: '分层纪律', E: 3, W: 3, I: 0 },
+      { en: 'Reproduction records', zh: '复现记录', E: 3, W: 1, I: 1 },
+      { en: 'Mechanical confidence table', zh: '置信度机械表', E: 2, W: 1, I: 1 },
+      { en: 'Runtime neutrality', zh: 'runtime 中立', E: 2, W: 1, I: 0 },
+      { en: 'Prohibition list (§14)', zh: '禁止清单（§14）', E: 0, W: 1, I: 0 }
+    ];
+    var host = document.getElementById('bars'), max = 12;
+    function render() {
+      host.innerHTML = '';
+      G.forEach(function (g) {
+        var n = g.E + g.W + g.I;
+        var row = document.createElement('div'); row.className = 'bar-row';
+        var lbl = document.createElement('div'); lbl.className = 'bar-lbl';
+        var nm = document.createElement('span'); nm.textContent = T(g);
+        var ct = document.createElement('b'); ct.textContent = n;
+        lbl.appendChild(nm); lbl.appendChild(ct);
+        var bar = document.createElement('div'); bar.className = 'bar';
+        bar.style.setProperty('--w', (n / max * 100) + '%');
+        ['E', 'W', 'I'].forEach(function (k) {
+          if (!g[k]) return;
+          var i = document.createElement('i'); i.className = k; i.style.width = (g[k] / n * 100) + '%';
+          i.title = g[k] + ' ' + k; bar.appendChild(i);
+        });
+        row.appendChild(lbl); row.appendChild(bar); host.appendChild(row);
+      });
+    }
+    render();
+    document.addEventListener('langchange', render);
+  })();
+
+  /* ───────────── confidence calculator (extraction-framework §7) ───────────── */
+  (function calc() {
+    var st = { layer: 'L12', test: 'passed', n: 1 };
+    var LV = ['low', 'med', 'high'];
+    function cap() {
+      var passed = st.test === 'passed';
+      if (st.layer === 'L12' && st.n < 2) return { lv: 'low', code: 'V12', why: {
+        en: 'An L1/L2 method seen on fewer than two platforms is capped at low — verified or not. A method seen once is not yet general.',
+        zh: 'L1/L2 的做法只在不到两个平台见过，不管验没验证都封顶 low。一个做法只见过一次，还不能算通用。' } };
+      if (passed && st.n >= 2) return { lv: 'high', code: 'V10', why: {
+        en: 'A passed executable check and two or more distinct platforms — both conditions for high are met.',
+        zh: '可执行检查实测通过，且在两个以上不同平台复现 —— high 的两个条件都满足。' } };
+      if (st.n >= 2) return { lv: 'med', code: 'V10', why: {
+        en: 'Seen on two or more platforms, but no check has passed. High needs both.',
+        zh: '在两个以上平台复现过，但没有实测通过的检查。high 两样都要。' } };
+      if (passed && st.layer === 'L3') return { lv: 'med', code: 'V10', why: {
+        en: 'A platform value read back once by a passing check is trustworthy on that platform: med.',
+        zh: '平台值被一条检查实测读回过一次，在这个平台上可信：med。' } };
+      return { lv: 'low', code: 'V10', why: {
+        en: 'No passed check and fewer than two platforms.',
+        zh: '没有实测通过的检查，复现也不到两个平台。' } };
+    }
+    var meter = document.getElementById('meter').children;
+    var reason = document.getElementById('v-reason'), note = document.getElementById('v-note');
+    var claims = document.getElementById('claims'), verdict = document.getElementById('verdict');
+    function render() {
+      var c = cap(), ci = LV.indexOf(c.lv);
+      for (var k = 0; k < 3; k++) { meter[k].classList.toggle('on', k <= ci); meter[k].classList.toggle('cap', k === ci); }
+      verdict.style.setProperty('--vc', ['#87867f', '#4a7bab', 'var(--ok)'][ci]);
+      reason.textContent = T(c.why);
+      note.textContent = st.test === 'none' ? T({ en: '⚠ No 验证方式 at all is legal, but V06b warns — and the entry can never reach high.', zh: '⚠ 完全不写验证方式是允许的，但 V06b 会警告，而且这条永远到不了 high。' })
+        : st.test === 'untested' ? T({ en: 'A check that was never run counts as no check. Write it as “· 未实测” (V13b).', zh: '写了没跑的检查等于没有检查。要明确写「· 未实测」(V13b)。' }) : '';
+      claims.innerHTML = '';
+      var h = document.createElement('div'); h.className = 'claims-h';
+      h.textContent = T({ en: 'If the entry claims…  verify says', zh: '如果条目标成……  verify 的判定' });
+      claims.appendChild(h);
+      LV.slice().reverse().forEach(function (lv) {
+        var i = LV.indexOf(lv), row = document.createElement('div'); row.className = 'claim';
+        var a = document.createElement('span'); a.textContent = '置信度 ' + lv;
+        var r = document.createElement('span'); r.className = 'res';
+        if (i > ci) { r.classList.add('err'); r.textContent = 'ERROR ' + c.code + ' · exit 1 — ' + T({ en: 'above what the table allows', zh: '超过表允许的上限' }); }
+        else if (i === ci) { r.classList.add('ok'); r.textContent = 'OK — ' + T({ en: 'exactly the cap', zh: '正好在上限' }); }
+        else { r.classList.add('inf'); r.textContent = 'INFO V11 — ' + T({ en: 'a reviewer downgrade, allowed', zh: '人审下调，允许' }); }
+        row.appendChild(a); row.appendChild(r); claims.appendChild(row);
+      });
+    }
+    document.querySelectorAll('.calc [data-k]').forEach(function (grp) {
+      grp.addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        grp.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+        var k = grp.dataset.k; st[k] = k === 'n' ? +b.dataset.v : b.dataset.v;
+        render();
+      });
+    });
+    render();
+    document.addEventListener('langchange', render);
+  })();
+
+  /* ───────────── strata ───────────── */
+  (function strata() {
+    var svg = document.getElementById('strata'), det = document.getElementById('detail');
+    var NS = 'http://www.w3.org/2000/svg', W = 760;
+    var L = [
+      { k: 'L4', c: '#b0aea5', top: 18, h: 62, name: { en: 'State', zh: '状态' },
+        scope: { en: 'Changes by the next session.', zh: '下次会话就变了。' },
+        ex: { en: 'Which key is loaded right now; the current HEAD.', zh: '现在装的是哪把 key；当前 HEAD。' },
+        home: { en: 'memory, timestamped — never the package', zh: 'memory，带时间戳 —— 不进 skill 包' } },
+      { k: 'L3', c: '#c9913f', h: 88, name: { en: 'Platform value', zh: '平台值' },
+        scope: { en: 'Changes per platform. A value, not a reason.', zh: '换平台就变。它是个值，不是道理。' },
+        ex: { en: 'The OTP hash address, the key length, the signing tool’s name.', zh: 'OTP 里 hash 的地址、密钥长度、签名工具名。' },
+        home: { en: 'params/<platform>.md', zh: 'params/<platform>.md' } },
+      { k: 'L2', c: '#788c5d', h: 118, name: { en: 'Method / pitfall', zh: '做法 / 坑' },
+        scope: { en: 'Carries across platforms — but it is your chosen way, not a law.', zh: '换平台仍然成立，但它是你选的做法，不是定律。' },
+        ex: { en: 'Signature check fails? Compare both hashes byte by byte; don’t infer from a flag.', zh: '验签不过？两端 hash 逐字节比，别从 flag 推。' },
+        home: { en: 'SKILL.md · pitfalls.md', zh: 'SKILL.md · pitfalls.md' } },
+      { k: 'L1', c: '#6a9bcc', h: 150, name: { en: 'Principle', zh: '原理' },
+        scope: { en: 'True on any platform — the problem’s own constraint.', zh: '任何平台都成立 —— 问题本身的客观约束。' },
+        ex: { en: 'OTP writes are irreversible, so dump the bytes before you burn.', zh: 'OTP 烧入不可逆，所以烧之前先 dump 字节。' },
+        home: { en: 'SKILL.md', zh: 'SKILL.md' } }
+    ];
+    function wave(y0, amp, ph, f) {
+      var pts = [];
+      for (var x = 0; x <= W; x += 20) pts.push([x, y0 + amp * Math.sin(x / f + ph) + amp * .5 * Math.sin(x / (f * .43) + ph * 2)]);
+      return pts;
+    }
+    var y = L[0].top, lines = [wave(y, 7, .3, 70)];
+    L.forEach(function (l, i) { y += l.h; lines.push(i === L.length - 1 ? wave(y + 40, 0, 0, 1) : wave(y, 6 - i, i * 1.7 + .8, 80 + i * 14)); });
+    var defs = document.createElementNS(NS, 'defs');
+    defs.innerHTML =
+      '<pattern id="pSand" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="3" cy="4" r="1.1" fill="#fff" opacity=".18"/><circle cx="10" cy="10" r=".8" fill="#fff" opacity=".12"/></pattern>' +
+      '<pattern id="pBed" width="40" height="18" patternUnits="userSpaceOnUse"><path d="M0 9h18M22 9h18M11 0v9M31 9v9" stroke="#fff" stroke-opacity=".08" fill="none"/></pattern>' +
+      '<pattern id="pLine" width="60" height="10" patternUnits="userSpaceOnUse"><path d="M0 5h34" stroke="#fff" stroke-opacity=".07"/></pattern>';
+    svg.appendChild(defs);
+    var pats = ['url(#pSand)', 'url(#pLine)', 'url(#pLine)', 'url(#pBed)'];
+    var groups = [];
+    L.forEach(function (l, i) {
+      var top = lines[i], bot = lines[i + 1];
+      var d = 'M' + top.map(function (p) { return p[0] + ' ' + p[1].toFixed(1); }).join(' L') + ' L' +
+              bot.slice().reverse().map(function (p) { return p[0] + ' ' + p[1].toFixed(1); }).join(' L') + ' Z';
+      var g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', 'layer'); g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
+      g.setAttribute('aria-label', l.k);
+      var p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('fill', l.c); p.setAttribute('fill-opacity', .26 + i * .06); p.setAttribute('class', 'fill');
+      var tx = document.createElementNS(NS, 'path'); tx.setAttribute('d', d); tx.setAttribute('fill', pats[i]);
+      var edge = document.createElementNS(NS, 'path');
+      edge.setAttribute('d', 'M' + top.map(function (q) { return q[0] + ' ' + q[1].toFixed(1); }).join(' L'));
+      edge.setAttribute('stroke', l.c); edge.setAttribute('stroke-opacity', .7); edge.setAttribute('fill', 'none'); edge.setAttribute('stroke-width', 1.5);
+      var midY = (top[2][1] + bot[2][1]) / 2;
+      var t1 = document.createElementNS(NS, 'text');
+      t1.setAttribute('x', 28); t1.setAttribute('y', midY + 7); t1.setAttribute('fill', l.c);
+      t1.setAttribute('font-family', 'SF Mono, Menlo, monospace'); t1.setAttribute('font-size', i === 3 ? 30 : 24); t1.setAttribute('font-weight', 700);
+      t1.textContent = l.k;
+      var t2 = document.createElementNS(NS, 'text');
+      t2.setAttribute('x', i === 3 ? 104 : 96); t2.setAttribute('y', midY + 6); t2.setAttribute('fill', '#141413');
+      t2.setAttribute('font-size', 21); t2.setAttribute('font-family', 'Iowan Old Style, Georgia, Songti SC, serif');
+      t2.setAttribute('class', 'nm');
+      g.appendChild(p); g.appendChild(tx); g.appendChild(edge); g.appendChild(t1); g.appendChild(t2);
+      svg.appendChild(g); groups.push({ g: g, t2: t2, l: l });
+      g.addEventListener('click', function () { pick(i, true); });
+      g.addEventListener('mouseenter', function () { pick(i, true); });
+      g.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(i, true); } });
+    });
+    var cur = 3, userPicked = false;
+    function names() { groups.forEach(function (o) { o.t2.textContent = T(o.l.name); }); }
+    function pick(i, user) {
+      if (user) userPicked = true;
+      cur = i; svg.classList.add('picking');
+      groups.forEach(function (o, k) { o.g.classList.toggle('on', k === i); o.g.setAttribute('aria-pressed', k === i); });
+      var l = L[i];
+      det.style.setProperty('--dc', l.c);
+      det.innerHTML = '';
+      var lv = document.createElement('div'); lv.className = 'lv'; lv.textContent = l.k + ' · ' + ['SURFACE', 'SHALLOW', 'DEEP', 'BEDROCK'][i];
+      var h = document.createElement('h3'); h.textContent = T(l.name);
+      var dl = document.createElement('dl');
+      [[{ en: 'How far it carries', zh: '能走多远' }, l.scope, false], [{ en: 'Example · secure boot', zh: '例子 · 安全启动' }, l.ex, false], [{ en: 'Where it lives', zh: '放在哪' }, l.home, true]].forEach(function (r) {
+        var wrap = document.createElement('div');
+        var dt = document.createElement('dt'); dt.textContent = T(r[0]);
+        var dd = document.createElement('dd');
+        if (r[2]) { var c = document.createElement('code'); c.textContent = T(r[1]); dd.appendChild(c); } else dd.textContent = T(r[1]);
+        wrap.appendChild(dt); wrap.appendChild(dd); dl.appendChild(wrap);
+      });
+      det.appendChild(lv); det.appendChild(h); det.appendChild(dl);
+    }
+    names(); pick(3, false);
+    document.addEventListener('langchange', function () { names(); pick(cur, false); });
+    if (!reduce) {   // gently walk the layers until someone interacts
+      var w = 3, iv = null;
+      onScreen(svg, function (v) {
+        clearInterval(iv);
+        if (v) iv = setInterval(function () { if (userPicked) { clearInterval(iv); return; } w = (w + 3) % 4; pick(w, false); }, 3200);
+      });
+    }
+  })();
+
+  /* ───────────── flow track ───────────── */
+  (function flow() {
+    var S = [
+      { k: '0', ph: 'PHASE 0', who: 'auto', n: { en: 'Scope', zh: '圈范围' },
+        d: { en: 'Lock the material — transcript range, git range, pitfall journal — and decide the domain. A pure typo fix stops here.', zh: '锁定素材 —— 会话范围、git 范围、踩坑记录 —— 判断属于哪个领域。纯改错字之类的到这里就结束。' } },
+      { k: '1', ph: 'PHASE 1', who: 'auto', n: { en: 'Mine', zh: '挖掘' },
+        d: { en: 'Four passes over the same session: what changed, what broke, what was decided and why, what facts were found. Every item carries a pointer to its evidence.', zh: '对同一个会话扫四遍：改了什么、踩了什么坑、做了什么决定和为什么、发现了什么事实。每一条都带证据指针。' } },
+      { k: '2', ph: 'PHASE 2', who: 'auto', n: { en: 'Layer', zh: '分层' },
+        d: { en: 'Route each item to L1–L4. Every pitfall is split into an L2 lesson and an L3 fact.', zh: '把每一条分到 L1–L4。每个坑都拆成 L2 教训 + L3 事实。' } },
+      { k: '①', gate: 1, ph: 'GATE ①', who: 'human', n: { en: 'You check', zh: '人审 ①' },
+        d: { en: 'Was it mined right, and layered right? You see the split before anything is reconciled.', zh: '挖得对不对、分得对不对？在跟已有库比对之前，你先看到分层结果。' } },
+      { k: '3', ph: 'PHASE 3', who: 'auto', n: { en: 'Reconcile', zh: '比对' },
+        d: { en: 'Compare with the existing library: merge duplicates, append evidence to entries this session confirmed, supersede changed facts, flag conflicts for you.', zh: '跟已有库比对：合并重复，给这次印证过的旧条目追加证据，标注被替代的事实，冲突交给你判断。' } },
+      { k: '4', ph: 'PHASE 4', who: 'auto', n: { en: 'Check', zh: '质检' },
+        d: { en: 'whetstone verify --strict first, then an independent agent in a fresh context for what a machine can’t decide.', zh: '先跑 whetstone verify --strict，机器判不了的再交给一个新上下文里的独立 agent。' } },
+      { k: '5', ph: 'PHASE 5', who: 'auto', n: { en: 'Propose', zh: '写提案' },
+        d: { en: 'The result is a diff against your library, written to inbox/. The library itself is untouched.', zh: '产出的是一份「对库的 diff」，写进 inbox/，正式库一个字没动。' } },
+      { k: '②', gate: 1, ph: 'GATE ②', who: 'human', n: { en: 'You decide', zh: '人审 ②' },
+        d: { en: 'In or out? Each call is logged with whetstone decision add — especially the refusals, so the same pitfall isn’t proposed again.', zh: '入不入库？每个决定都用 whetstone decision add 记下来 —— 拒掉的尤其要记，免得同一个坑下次又被提一遍。' } },
+      { k: '✓', end: 1, ph: 'PROMOTE', who: 'auto', n: { en: 'In the library', zh: '进库' },
+        d: { en: 'whetstone promote installs it — and refuses to silently overwrite a skill that already exists.', zh: 'whetstone promote 装进库 —— 撞上已有的 skill 时拒绝悄悄覆盖。' } }
+    ];
+    var track = document.getElementById('track'), fill = document.getElementById('fill-line'), panel = document.getElementById('flow-panel');
+    var btns = S.map(function (s, i) {
+      var b = document.createElement('button'); b.type = 'button';
+      b.className = 'step' + (s.gate ? ' gate' : '') + (s.end ? ' end' : '');
+      var d = document.createElement('span'); d.className = 'dot'; var inner = document.createElement('span'); inner.textContent = s.k; d.appendChild(inner);
+      var n = document.createElement('span'); n.className = 'nm';
+      b.appendChild(d); b.appendChild(n); track.appendChild(b);
+      b.addEventListener('click', function () { manual = Date.now(); go(i); });
+      return b;
+    });
+    var cur = 0, manual = 0, timer = null;
+    function names() { btns.forEach(function (b, i) { b.querySelector('.nm').textContent = T(S[i].n); }); }
+    function go(i) {
+      cur = i;
+      btns.forEach(function (b, k) { b.classList.toggle('done', k < i); b.classList.toggle('now', k === i); b.classList.toggle('wait', k === i && !!S[k].gate); });
+      fill.style.width = (92 * i / (S.length - 1)) + '%';
+      var s = S[i];
+      panel.innerHTML = '';
+      var l = document.createElement('div');
+      var ph = document.createElement('div'); ph.className = 'ph'; ph.textContent = s.ph;
+      var h = document.createElement('h3'); h.textContent = T(s.n);
+      var p = document.createElement('p'); p.textContent = T(s.d);
+      l.appendChild(ph); l.appendChild(h); l.appendChild(p);
+      var who = document.createElement('span'); who.className = 'who ' + s.who;
+      who.textContent = s.who === 'human' ? T({ en: 'waits for you', zh: '等你点头' }) : T({ en: 'automatic', zh: '自动' });
+      panel.appendChild(l); panel.appendChild(who);
+    }
+    names(); go(0);
+    document.addEventListener('langchange', function () { names(); go(cur); });
+    if (!reduce) {
+      onScreen(track, function (v) {
+        clearTimeout(timer);
+        if (!v) return;
+        (function loop() {
+          var hold = S[cur].gate ? 3600 : S[cur].end ? 3200 : 2200;
+          timer = setTimeout(function () { if (Date.now() - manual > 9000) go((cur + 1) % S.length); loop(); }, hold);
+        })();
+      });
+    }
+  })();
+
+  /* ───────────── index hygiene ───────────── */
+  (function ix() {
+    var M = [
+      { n: 'verified-boot', d: { en: 'signature chain · AVB · OTA verification', zh: '验签信任链 · AVB · OTA 验签' },
+        b: ['## Principles (L1)', 'OTP writes are irreversible …', '## Methods (L2)', 'compare hashes byte by byte …', '→ params/soc-a.md · soc-b.md'] },
+      { n: 'partition-table', d: { en: 'GPT layout · grow / shrink partitions', zh: 'GPT 分区布局 · 扩容 / 缩容' },
+        b: ['## Principles (L1)', 'never move a partition holding keys …', '## Pitfalls', 'backup GPT at the disk end …', '→ params/emmc-x.md'] },
+      { n: 'boot-debug', d: { en: 'boot hangs · signature chain · OTA verify', zh: '启动卡死 · 验签信任链 · OTA 验签' }, clash: 0 },
+      { n: 'sdk-migration', d: { en: 'major SDK upgrade · conflict resolution', zh: 'SDK 大版本升级 · 冲突解决' },
+        b: ['## Methods (L2)', 'three-way compare before resolving …', '## Pitfalls', 'upstream macro gates hide code …', '→ params/sdk-v2.md'] },
+      { n: 'git-workflow', d: { en: 'check branch state before any git op', zh: '任何 git 操作前先看分支实际状态' },
+        b: ['## Principles (L1)', 'trust the repo, not memory …', '## Methods (L2)', 'git status -sb before acting …'] }
+    ];
+    var list = document.getElementById('menu-list'), msg = document.getElementById('lint-msg'), body = document.getElementById('body-view');
+    var rows = [];
+    function draw() {
+      list.innerHTML = ''; rows = [];
+      M.forEach(function (m) {
+        var r = document.createElement('div'); r.className = 'mi';
+        var b = document.createElement('b'); b.textContent = m.n;
+        var s = document.createElement('span'); s.textContent = '— ' + T(m.d);
+        r.appendChild(b); r.appendChild(s); list.appendChild(r); rows.push(r);
+      });
+    }
+    var seq = [0, 1, 'clash', 3, 4], si = 0, timer = null;
+    function idle() {
+      body.className = 'body-view idle';
+      body.textContent = T({ en: '(nothing loaded — bodies cost no context until picked)', zh: '（什么都没加载 —— 没被选中的正文不占上下文）' });
+    }
+    function step() {
+      var s = seq[si % seq.length]; si++;
+      rows.forEach(function (r) { r.classList.remove('sel', 'clash'); });
+      msg.className = 'lint-msg'; msg.textContent = '';
+      if (s === 'clash') {
+        rows[0].classList.add('clash'); rows[2].classList.add('clash');
+        msg.className = 'lint-msg bad';
+        msg.textContent = '$ whetstone lint  →  ' + T({ en: 'overlap: verified-boot ↔ boot-debug share “signature chain”, “OTA verify”', zh: '重叠：verified-boot ↔ boot-debug 共用「验签信任链」「OTA 验签」' });
+        idle();
+        return;
+      }
+      rows[s].classList.add('sel');
+      body.className = 'body-view'; body.innerHTML = '';
+      M[s].b.forEach(function (line, k) {
+        var d = document.createElement('div'); d.textContent = line; d.style.animationDelay = (k * 70) + 'ms';
+        if (line.indexOf('##') === 0) d.className = 'ttl';
+        body.appendChild(d);
+      });
+      msg.textContent = T({ en: 'picked → only this body is loaded', zh: '选中 → 只加载这一个正文' });
+    }
+    draw(); idle();
+    document.addEventListener('langchange', function () { draw(); si = Math.max(0, si - 1); step(); });
+    if (reduce) { step(); return; }
+    onScreen(document.getElementById('ix'), function (v) { clearInterval(timer); if (v) { step(); timer = setInterval(step, 2600); } });
+  })();
+
+  /* ───────────── cli tabs ───────────── */
+  (function tabs() {
+    var D = [
+      { t: 'verify', c: ['whetstone verify <pkg> --strict', 'whetstone verify --explain'], d: { en: 'Evidence discipline — the one that says no. --explain lists all 38 checks, their limits, and what stays with humans.', zh: '证据纪律 —— 会说「不」的那个。--explain 列出全部 38 条检查、各自的边界，以及留给人判断的部分。' } },
+      { t: 'lint', c: ['whetstone lint --src ~/skills', 'whetstone index --src ~/skills'], d: { en: 'Menu hygiene: overlapping triggers, name collisions, vague descriptions — plus a grouped catalog.', zh: '菜单卫生：触发词重叠、名字撞车、描述含糊 —— 再加一份分组目录。' } },
+      { t: 'promote', c: ['whetstone promote <proposal>'], d: { en: 'Installs an approved proposal and refuses to overwrite an existing skill without being told to.', zh: '把批准的提案装进库；没有明确指示时，拒绝覆盖已有 skill。' } },
+      { t: 'decision', c: ['whetstone decision add …', 'whetstone decision stats', 'whetstone decision alias --from … --to …'], d: { en: 'Records every review call and why. Records only — it analyses nothing yet, and changes no rule.', zh: '记录每一次人审决定和原因。只记录 —— 目前不做分析，也不改任何规则。' } },
+      { t: 'find · route', c: ['whetstone find "<what you are about to do>"', 'whetstone route events | whetstone route learn --events -', 'whetstone route replay --events <file>', 'whetstone route plan --project <dir>'], d: { en: 'Reach: once a library outgrows the menu the runtime shows, find answers “which skills fit” with one search command, and route learns from past sessions how you ask. The Claude Code adapter is built and tested; Codex, opencode, pi, Gemini CLI and Cursor are designed, not written yet.', zh: '找得到：库大到 runtime 的菜单装不下以后，find 用一条搜索命令回答「哪些 skill 合适」，route 从过去的会话里学你是怎么问的。Claude Code 的适配器已做完并测过；Codex、opencode、pi、Gemini CLI、Cursor 只完成了设计，还没写。' } },
+      { t: 'pack · deploy', c: ['whetstone pack', 'whetstone deploy'], d: { en: 'Move a skill library between machines.', zh: '在机器之间搬运 skill 库。' } }
+    ];
+    var bar = document.getElementById('tabs'), pane = document.getElementById('tabp'), cur = 0;
+    var bs = D.map(function (x, i) {
+      var b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'tab'); b.textContent = x.t;
+      b.addEventListener('click', function () { show(i); });
+      bar.appendChild(b); return b;
+    });
+    function show(i) {
+      cur = i;
+      bs.forEach(function (b, k) { b.setAttribute('aria-selected', k === i ? 'true' : 'false'); });
+      pane.innerHTML = '';
+      var pre = document.createElement('pre');
+      D[i].c.forEach(function (line, k) {
+        var p = document.createElement('span'); p.className = 'p'; p.textContent = '$ ';
+        pre.appendChild(p); pre.appendChild(document.createTextNode(line + (k < D[i].c.length - 1 ? '\n' : '')));
+      });
+      var d = document.createElement('p'); d.textContent = T(D[i].d);
+      pane.appendChild(pre); pane.appendChild(d);
+    }
+    show(0);
+    document.addEventListener('langchange', function () { show(cur); });
+  })();
+
+  /* ───────────── copy ───────────── */
+  document.querySelectorAll('.copy').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var txt = document.getElementById(b.dataset.copy).textContent;
+      function ok() { b.textContent = '✓ copied'; b.classList.add('done'); setTimeout(function () { b.textContent = 'copy'; b.classList.remove('done'); }, 1600); }
+      if (navigator.clipboard) navigator.clipboard.writeText(txt).then(ok, function () {});
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
