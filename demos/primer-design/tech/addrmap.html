@@ -123,7 +123,7 @@
         <span class="lang-zh">那块内存还在条子上、还好好的，只是<strong>在自己的号上够不着</strong>。于是固件另给它一个号，安排在所有东西的最上头。把两本本子并排放，这件事就是一张图。</span>
       </p>
       <figure class="primer-figure primer-fig-wide">
-        <svg viewBox="0 0 960 440" role="img"
+        <div class="primer-scroll" style="--pan-w:580px"><svg viewBox="0 0 960 440" role="img"
           aria-label="两本分开的门牌本。左边是系统看到的那本：低处一段内存、中间一段被 MMIO 占住的空洞、上面又是内存，最上面那段黄色的，是被空洞盖住的那 1 GiB 换了个号重新露面。右边是内存条上真实的那本，连着一整条，其中淡紫那一小段就是被盖住的那段。一条紫线把这两段连起来，写着「重映射」。每个分界都用引线单独标出门牌号"
           data-label-zh="两本分开的门牌本。左边是系统看到的那本：低处一段内存、中间一段被 MMIO 占住的空洞、上面又是内存，最上面那段黄色的，是被空洞盖住的那 1 GiB 换了个号重新露面。右边是内存条上真实的那本，连着一整条，其中淡紫那一小段就是被盖住的那段。一条紫线把这两段连起来，写着「重映射」。每个分界都用引线单独标出门牌号"
           data-label-en="Two separate address books. On the left, what the system sees: a stretch of memory low down, an MMIO hole in the middle, memory again above it, and at the top the yellow band — the gigabyte the hole covered, given a second number. On the right, what the DIMM actually holds: one continuous stretch, with the pale violet slice being the covered part. A violet line joins the two, labelled remap. Every boundary gets its own leader line and number">
@@ -178,7 +178,7 @@
           <path fill="#7a5cd6" stroke="#7a5cd6" d="M430 74 L448 65 L448 83 Z"/>
           <text class="lang-zh" x="524" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">重映射</text>
           <text class="lang-en" x="524" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#5b3fbf">remap</text>
-        </svg>
+        </svg></div>
         <figcaption class="primer-figcaption">
           <span class="lang-en">Two books, never merged. The right one is what the DIMM holds: one continuous stretch, and shorter than the left, because a machine can number far more than it has installed. The left one is what the system sees &mdash; memory at the bottom, the hatched MMIO hole above it (hatching always means &ldquo;this is not memory&rdquo;), memory again, and at the very top the yellow band: the covered gigabyte, back under a second number. The violet line joins the two &mdash; same silicon, two plates. Every boundary gets its own leader, because a boundary is an address while a band is a range; <code>TOLUD</code> marks where the low memory ends and the hole begins. Band heights are not to scale, and low addresses are at the bottom.</span>
           <span class="lang-zh">两本本子，永不合并。右边那本是内存条上真实的一条：连续，而且比左边<strong>短</strong>——机器能编的号远比它插的内存多。左边那本是系统看到的：底下是内存，往上是画斜纹的 MMIO 空洞（斜纹的意思始终是「这一段不是内存」），再往上又是内存，最顶上那条黄色的，就是被盖住的那 1 GiB 换了个号回来了。紫线把两段连起来——<strong>同一块硅片，两块门牌</strong>。每条分界各拉一条引线，因为<strong>分界是一个地址、段是一个范围</strong>；<code>TOLUD</code> 标的是低端内存到头、空洞开始的那一处。段高不按比例，低地址在下。</span>

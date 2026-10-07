@@ -173,7 +173,7 @@
       <!-- 936 is neither the 900 design width nor the self-detecting 960 tier,
            so the stroke stair is told the width once (primer.css Section L). -->
       <figure class="primer-figure primer-fig-wide" style="--primer-vbw: 936">
-        <svg viewBox="12 17.5 936 405" role="img"
+        <div class="primer-scroll" style="--pan-w:570px"><svg viewBox="12 17.5 936 405" role="img"
           aria-label="五条水平带，从上到下是你敲的命令、系统调用、tty 子系统、串口驱动、硬件；四段实线箭头各跨一条边界，虚线从驱动带一段一段回到命令带"
           data-label-zh="五条水平带，从上到下是你敲的命令、系统调用、tty 子系统、串口驱动、硬件；四段实线箭头各跨一条边界，虚线从驱动带一段一段回到命令带"
           data-label-en="Five horizontal bands — your command, the syscall, the tty layer, the serial driver, the hardware; four solid arrows each cross one boundary, and a dashed return climbs from the driver band back to the command band">
@@ -273,7 +273,7 @@
           <text x="520" y="358" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">TX</text>
           <text class="lang-zh" x="762" y="306" font-size="15" font-weight="600" fill="#55617a">排进队列就返回</text>
           <text class="lang-en" x="762" y="306" font-size="15" font-weight="600" fill="#55617a">returns once queued</text>
-        </svg>
+        </svg></div>
         <figcaption class="primer-figcaption">
           <span class="lang-en">Five bands, four arrows — each crosses exactly one boundary, and none skips a band. The three screens below zoom legs 1, 3 and 4. Leg 2 — the kernel handing it to the tty layer — lives only here. The lavender block is the kernel. Violet is that one character, drawn at each place it passes. The landing point is THR, the transmit holding register; the pin that byte finally leaves by is TX. The dashed line is the return: write comes back once the byte is queued. At that moment it has not left the pin.</span>
           <span class="lang-zh">五条带，四段箭头，每段只跨一条边界，没有一段跳层。下面三屏放大的是第 1、3、4 段。第 2 段（内核把它交到 tty 层）只在这张图上。淡紫那块就是内核。紫色画的是同一个字符，它每经过一处就画一次。落点是 THR，也就是发送保持寄存器；这个字节最后从 TX 那根脚出去。虚线是返回：字节排进驱动的队列，write 就返回了，那时它还没出引脚。</span>
@@ -307,7 +307,7 @@
       </p>
 
       <figure class="primer-figure primer-fig-wide">
-        <svg viewBox="0 0 900 500" role="img"
+        <div class="primer-scroll" style="--pan-w:550px"><svg viewBox="0 0 900 500" role="img"
           aria-label="上半是你的终端窗口，字符还在里面；一段箭头穿过墙上那道开口，落到内核自己的内存上，那里是同一个字符的副本"
           data-label-zh="上半是你的终端窗口，字符还在里面；一段箭头穿过墙上那道开口，落到内核自己的内存上，那里是同一个字符的副本"
           data-label-en="Above is your terminal window with the character still in it; one arrow passes through the hatch in the wall and lands on the kernel's own memory, where the same character sits as a copy">
@@ -359,7 +359,7 @@
           <text x="674" y="423" text-anchor="middle" font-size="22" font-weight="700" fill="#ffffff">A</text>
           <text class="lang-zh" x="206" y="340" font-size="15" font-weight="600" fill="#55617a">内核自己的内存</text>
           <text class="lang-en" x="206" y="340" font-size="15" font-weight="600" fill="#55617a">the kernel's own memory</text>
-        </svg>
+        </svg></div>
         <figcaption class="primer-figcaption">
           <span class="lang-en">The thick line is the user–kernel boundary, the only thick one on the page. The sign says write, the name of that syscall. Your character stays put; the kernel takes a copy.</span>
           <span class="lang-zh">那条粗线是用户态和内核的边界，全页只有它是粗的。墙上写的 write 就是这个系统调用的名字。你那个字符没动，内核抄走的是一份副本。</span>
@@ -393,7 +393,7 @@
       </p>
 
       <figure class="primer-figure primer-fig-wide">
-        <svg viewBox="0 0 900 500" role="img"
+        <div class="primer-scroll" style="--pan-w:550px"><svg viewBox="0 0 900 500" role="img"
           aria-label="上半是三个带名牌的分拣格，字符落进 ttyS0 那格；一段箭头下到驱动里，字符排进发送队列，黄圈圈着队列；虚线从队列往上回去，那就是 write 返回"
           data-label-zh="上半是三个带名牌的分拣格，字符落进 ttyS0 那格；一段箭头下到驱动里，字符排进发送队列，黄圈圈着队列；虚线从队列往上回去，那就是 write 返回"
           data-label-en="Above are three sorting slots with nameplates and the character drops into ttyS0; one arrow goes down into the driver where it joins the send queue, ringed in yellow; a dashed arrow climbs back out, which is write returning">
@@ -450,7 +450,7 @@
           <text x="553" y="213" text-anchor="middle" font-size="15" font-weight="600" fill="#5b3fbf">ttyS0</text>
           <text class="lang-zh" x="680" y="172" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">write 就返回了</text>
           <text class="lang-en" x="680" y="172" text-anchor="middle" font-size="15" font-weight="600" fill="#55617a">write returns</text>
-        </svg>
+        </svg></div>
         <figcaption class="primer-figcaption">
           <span class="lang-en">Three pigeonholes, three kinds of terminal; ours enters ttyS0. tty is short for teletype, the old printing terminal. What the kernel matches is really the device number behind that name. The ringed row is the driver's send queue — about 4096 bytes, two pages of plain text. The dashed arrow is write returning, the moment the byte is queued.</span>
           <span class="lang-zh">架子上三个格子是三种终端设备，字符进的是 ttyS0 那格。tty 这三个字母来自老式电报打字机 teletype。内核照的其实是这个名字背后的设备号。黄圈那排是驱动的发送队列，常见 4096 字节，大约两页纯文本。虚线是 write 的返回：字节一排进队列它就回去了。</span>
@@ -477,7 +477,7 @@
       </p>
 
       <figure class="primer-figure primer-fig-wide">
-        <svg viewBox="0 0 900 500" role="img"
+        <div class="primer-scroll" style="--pan-w:550px"><svg viewBox="0 0 900 500" role="img"
           aria-label="队头那个字符下到芯片里，落在黄圈圈着的发送保持寄存器上；从那里进移位器，再从 TX 那根脚出去，线上是一个低起始位、八位数据、一个高停止位"
           data-label-zh="队头那个字符下到芯片里，落在黄圈圈着的发送保持寄存器上；从那里进移位器，再从 TX 那根脚出去，线上是一个低起始位、八位数据、一个高停止位"
           data-label-en="The byte at the head of the queue goes down into the chip and lands on the ringed transmit holding register; from there into the shift register and out of the TX leg, where the wire carries a low start bit, eight data bits and a high stop bit">
@@ -540,7 +540,7 @@
           <text class="lang-zh" x="482" y="336" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">移位器</text>
           <text class="lang-en" x="482" y="336" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">shift register</text>
           <text x="682" y="358" text-anchor="middle" font-size="15" font-weight="700" fill="#243244">TX</text>
-        </svg>
+        </svg></div>
         <figcaption class="primer-figcaption">
           <span class="lang-en">There is no separate data port here. THR, the transmit holding register, is the way out — writing it IS the send. The shift register then pushes the bits out at the baud rate — bits per second on the wire. 115200 divided by 10 bits per byte is 11,520 bytes a second. One blink, about 0.1 s, carries over a thousand bytes. The wave is the letter A (0x41), 8 data bits, no parity, one stop bit. A low start bit, then 1,0,0,0,0,0,1,0 lowest bit first, then a high stop bit. A real 16550 also keeps a 16-byte hardware queue after THR; it is not drawn.</span>
           <span class="lang-zh">这种串口没有另外的数据口。THR 是发送保持寄存器，它这个地址就是数据出口，写它就是发送。之后是移位器的活：按波特率一位一位挤出去——每秒往线上推多少位。115200 除以每字节 10 位，是每秒 11520 个字节。眨一次眼约 0.1 秒，这根线就送得出一千多个字节。线上画的是字母 A（0x41），8 位数据、无校验、1 位停止。先一个低的起始位，再从最低位起送 1、0、0、0、0、0、1、0。最后是一个高的停止位。真芯片上 THR 后面常还有一个 16 字节的硬件队列，这里没画。</span>

@@ -293,7 +293,7 @@
       </p>
 
       <figure class="primer-figure primer-fig-wide">
-        <svg viewBox="0 15 900 514" role="img"
+        <div class="primer-scroll" style="--pan-w:550px"><svg viewBox="0 15 900 514" role="img"
           aria-label="32 格排成一行，左端是第 31 位、右端是第 0 位；第 5 位那一格通到芯片的 5 号引脚，脚上挂着一颗灯"
           data-label-zh="32 格排成一行，左端是第 31 位、右端是第 0 位；第 5 位那一格通到芯片的 5 号引脚，脚上挂着一颗灯"
           data-label-en="Thirty-two slots in one row, bit 31 at the left end and bit 0 at the right; the bit 5 slot runs to pin 5, which carries a lamp">
@@ -363,7 +363,7 @@
           <text class="lang-en" x="163" y="500" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">output: it drives</text>
           <text class="lang-zh" x="470" y="500" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">5 号引脚上的灯</text>
           <text class="lang-en" x="470" y="500" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">the lamp on pin 5</text>
-          </svg>
+          </svg></div>
         <figcaption class="primer-figcaption">
           <span class="lang-en">Convention here: bit numbers run right to left; bit 0 is the lowest bit, the ones place. 0 = input, 1 = output — some chips have it backwards. Your code reaches this row by its address — a house number for the row. The pad must first be switched to GPIO — pin muxing — before this bit does anything. This bit only decides listen or drive; a separate register decides whether it drives 0 or 1. Some chips spend two bits per pin, written [11:10], high bit first, so read the manual.</span>
           <span class="lang-zh">本页约定：位号从右往左数，第 0 位是最低位，也就是个位。0 = 输入，1 = 输出；有的芯片反过来。你的程序靠地址找到这一排，地址就是它的门牌号。这根脚还得先切给 GPIO 用（引脚复用），方向位才管得着。这一位只决定这根脚是听还是送；送 0 还是送 1，另一个寄存器管。也有的一根引脚要两位来配，那一段写成 [11:10]，高位在前，动手前查手册。</span>
@@ -566,7 +566,7 @@
       </p>
 
       <figure class="primer-figure primer-fig-wide">
-        <svg viewBox="0 60 900 413" role="img"
+        <div class="primer-scroll" style="--pan-w:550px"><svg viewBox="0 60 900 413" role="img"
           aria-label="写进去的数只点了第 5 位，芯片里一整排被换成这个数，原来在送电的那根脚变回听着，它上面的灯灭了"
           data-label-zh="写进去的数只点了第 5 位，芯片里一整排被换成这个数，原来在送电的那根脚变回听着，它上面的灯灭了"
           data-label-en="The number written names only bit 5; the chip's whole row is replaced by it, a leg that had been driving falls back to listening, and its lamp goes dark">
@@ -677,7 +677,7 @@
           <text class="lang-en" x="582" y="100" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">the whole row is replaced</text>
           <text class="lang-zh" x="830" y="444" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">别人在用的灯灭了</text>
           <text class="lang-en" x="830" y="444" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">that lamp goes dark</text>
-          </svg>
+          </svg></div>
         <figcaption class="primer-figcaption">
           <span class="lang-en">The number you write names only bit 5, so the other 31 arrive as 0. Read-modify-write is not one step either. An interrupt — an urgent job the chip cuts in — or another core can lose your change. That set/clear pair from the last screen exists for exactly this. Again only the rightmost 8 of the 32 slots are drawn.</span>
           <span class="lang-zh">写进去的那个数只点了第 5 位，其余 31 位就都是 0。读-改-写也不是一步。中间被中断（芯片插进来的急事）或另一个核插进来，改动会丢。上一屏那对置位、清位寄存器，就是为这件事准备的。图上同样只画最右边 8 格。</span>

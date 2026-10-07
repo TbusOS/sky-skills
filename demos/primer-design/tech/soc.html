@@ -174,7 +174,7 @@
       </div>
 
       <figure class="primer-figure primer-fig-wide">
-        <svg viewBox="0 0 900 510" role="img"
+        <div class="primer-scroll" style="--pan-w:510px"><svg viewBox="0 0 900 510" role="img"
           aria-label="左边一座城，右边一颗芯片：市政府对处理器、主干道对中间那条街、办事处对外设，三条虚线一对一连起来"
           data-label-zh="左边一座城，右边一颗芯片：市政府对处理器、主干道对中间那条街、办事处对外设，三条虚线一对一连起来"
           data-label-en="A city on the left, a chip on the right: hall to processor, main street to the street in the middle, branch office to peripheral, paired one to one by three dashed lines">
@@ -245,7 +245,7 @@
           <text class="lang-en" x="589" y="318" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">serial port</text>
           <text class="lang-zh" x="797" y="348" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">计时器</text>
           <text class="lang-en" x="797" y="348" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">timer</text>
-        </svg>
+        </svg></div>
         <figcaption class="primer-figcaption">
           <span class="lang-en">Three dashed pairs: hall to processor, main street to street, office to peripheral. Violet marks the same block on both sides. Two peripherals here; a real chip has a dozen, and memory joins next screen.</span>
           <span class="lang-zh">三条虚线，三对东西。市政府对处理器、主干道对中间那条街、办事处对外设。两边的紫色标的是同一块。这里只画两个外设，真芯片里有十几个，内存下一屏才来。</span>
@@ -274,7 +274,7 @@
       </p>
 
       <figure class="primer-figure primer-fig-wide">
-        <svg viewBox="0 0 900 510" role="img"
+        <div class="primer-scroll" style="--pan-w:550px"><svg viewBox="0 0 900 510" role="img"
           aria-label="左边五个模块两两直连，十条线互相穿插；右边同样五个模块接在一条街上，两个在街上方发起搬运、三个在街下方等着被点到，街上只有一笔传输"
           data-label-zh="左边五个模块两两直连，十条线互相穿插；右边同样五个模块接在一条街上，两个在街上方发起搬运、三个在街下方等着被点到，街上只有一笔传输"
           data-label-en="On the left, five blocks wired in pairs — ten lines crossing each other; on the right the same five sit on one street, two above starting transfers and three below waiting to be addressed, with a single transfer on the street">
@@ -339,7 +339,7 @@
           <text class="lang-en" x="215" y="468" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">wire every pair</text>
           <text class="lang-zh" x="673" y="468" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">一条街</text>
           <text class="lang-en" x="673" y="468" text-anchor="middle" font-size="16" font-weight="700" fill="#243244">one street</text>
-        </svg>
+        </svg></div>
         <figcaption class="primer-figcaption">
           <span class="lang-en">One shared bus, the single-layer AHB kind. One transfer at a time, so two masters queue and an arbiter picks who goes. A modern SoC's fabric is usually a crossbar, a grid of streets where several pairs move at once. That limit is this drawing's, not every chip's. Top row starts transfers, bottom row answers. DMA does both. It is a master when it moves data, and a slave through its own configuration registers. RAM is memory, UART and SPI are serial ports.</span>
           <span class="lang-zh">这条街是一条共享总线，AHB 那样的单层总线。一次只成交一笔，两个主设备得排队。谁先走由一个仲裁器决定。现代 SoC 的主干多是交叉开关，也就是几条街织成的网格。几对可以同时走。所以「一次一笔」是这张图的性质，不是每颗芯片的。上排自己发起传输（主设备），下排被点到才回话（从设备）。DMA 两头都算。搬数据时它是主设备，它自己那组配置寄存器又让它也是从设备。RAM 是内存，UART 和 SPI 是两种串口。</span>
@@ -368,7 +368,7 @@
       </p>
 
       <figure class="primer-figure primer-fig-wide">
-        <svg viewBox="0 0 900 510" role="img"
+        <div class="primer-scroll" style="--pan-w:550px"><svg viewBox="0 0 900 510" role="img"
           aria-label="一条竖着的号码街：最下面是 0x0000_0000 的程序段，往上是内存、串口，最上面一段没接东西；处理器发出的号码落在串口那一段上"
           data-label-zh="一条竖着的号码街：最下面是 0x0000_0000 的程序段，往上是内存、串口，最上面一段没接东西；处理器发出的号码落在串口那一段上"
           data-label-en="A vertical street of numbers: 0x0000_0000 holds program storage at the foot, then memory, then a serial port, and the top range has nothing behind it; the number the processor sends lands on the serial port's range">
@@ -429,7 +429,7 @@
           <text class="lang-zh" x="346" y="442" font-size="16" font-weight="700" fill="#243244">程序放这儿</text>
           <text class="lang-en" x="346" y="442" font-size="16" font-weight="700" fill="#243244">program lives here</text>
           <text x="145" y="226" text-anchor="middle" font-size="17" font-weight="700" fill="#243244">CPU</text>
-        </svg>
+        </svg></div>
         <figcaption class="primer-figcaption">
           <span class="lang-en">Low addresses at the foot, rising up: 0x0000_0000 at the bottom, the top range at 0x5000_0000. Not to scale — big unmapped gaps sit between ranges. UART gets 4 KB from 0x4000_0000, room for 1024 registers where a serial port needs dozens. Nothing sits behind the top range, so an access there faults. Overlaps are a configuration error, bar deliberate mirroring or a boot remap.</span>
           <span class="lang-zh">低地址在下、往上递增：最下面 0x0000_0000，最上面那段起于 0x5000_0000。没按比例画——段与段之间还有大片空号。UART 分到 0x4000_0000 起的 4 KB，能排下 1024 个 32 位寄存器，而一个串口用不到几十个。最上面那段后面没接东西，访问它会出错。号段重叠是配置错误，例外只有刻意的镜像和启动时的重映射。</span>
@@ -458,7 +458,7 @@
       </p>
 
       <figure class="primer-figure primer-fig-wide">
-        <svg viewBox="0 0 900 510" role="img"
+        <div class="primer-scroll" style="--pan-w:550px"><svg viewBox="0 0 900 510" role="img"
           aria-label="左边一整区睡着了：钟停了，街上的线断在边界前；右边常醒的只有计时那一小块，它到点了推一下总开关，把电送回左边，跨边界的那条路上有一个同步块"
           data-label-zh="左边一整区睡着了：钟停了，街上的线断在边界前；右边常醒的只有计时那一小块，它到点了推一下总开关，把电送回左边，跨边界的那条路上有一个同步块"
           data-label-en="The left region is asleep: its clock has stopped and the street's line breaks before the boundary; on the right only the timekeeping corner stays awake, and when its alarm comes due it pushes the master switch and sends power back, with a synchronizer block on the crossing">
@@ -524,7 +524,7 @@
           <text class="lang-en" x="618" y="270" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">sync</text>
           <text class="lang-zh" x="520" y="392" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">叫醒</text>
           <text class="lang-en" x="520" y="392" text-anchor="middle" font-size="15" font-weight="600" fill="#243244">wake it up</text>
-        </svg>
+        </svg></div>
         <figcaption class="primer-figcaption">
           <span class="lang-en">Two domains, dashed edges. The left one sleeps. Its clock stopped and the 100 MHz trace is flat. The street's line breaks at the boundary — no power, no signal. The right runs on a 32.768 kHz crystal — the one in a wristwatch — three thousand times slower. Its alarm pushes the switch that returns power. That crossing spans two clocks, so a synchronizer holds the signal a beat.</span>
           <span class="lang-zh">两块极浅的底色是两个域，虚线是边界。左边睡着了：钟停了，100 MHz 那条线是平的。街上那条路断在边界前——断了电就不该还在发信号。右边那颗 32.768 kHz 晶振，就是石英手表里走秒的那一颗，慢约三千倍。它到点了推一下总开关，电就回来。这一跨跨了两个钟，所以边界上放了个同步块，让信号停一拍。</span>

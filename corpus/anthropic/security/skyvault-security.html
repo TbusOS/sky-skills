@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Security & trust — SkyVault</title>
 <meta name="description" content="How SkyVault keeps your secrets secret: zero-knowledge encryption, a published threat model, third-party audits, and a responsible-disclosure program. Self-hosted, open source.">
-<link rel="stylesheet" href="../../skills/anthropic-design/assets/fonts.css">
-<link rel="stylesheet" href="../../skills/anthropic-design/assets/anthropic.css">
+<link rel="stylesheet" href="../../../skills/anthropic-design/assets/fonts.css">
+<link rel="stylesheet" href="../../../skills/anthropic-design/assets/anthropic.css">
 <style>
   html[data-lang="en"] .lang-zh { display: none !important; }
   html[data-lang="zh"] .lang-en { display: none !important; }
@@ -33,7 +33,7 @@
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--anth-orange);
+    color: var(--anth-orange-ink);
   }
   .sec-card__title { font-size: 20px; margin: var(--space-3) 0 var(--space-3); }
   .sec-card__body { font-size: 15px; color: var(--anth-text-secondary); line-height: 1.65; margin: 0; }
@@ -93,7 +93,7 @@
 <section class="anth-section" style="padding-top:0;">
   <div class="anth-container anth-container--wide">
     <figure style="margin:0;">
-      <svg role="img" aria-label="Encryption data flow: a secret is encrypted in the browser with a key derived from the user's passphrase, then only ciphertext travels to and rests on the self-hosted server" viewBox="0 0 1200 420" style="display:block; width:100%; max-width:1200px; height:auto; border-radius:var(--radius-lg); background:linear-gradient(135deg, #faf9f5 0%, #f0ede3 100%);">
+      <div class="anth-scroll" style="--pan-w:910px"><svg role="img" aria-label="Encryption data flow: a secret is encrypted in the browser with a key derived from the user's passphrase, then only ciphertext travels to and rests on the self-hosted server" viewBox="0 0 1200 420" style="display:block; width:100%; max-width:1200px; height:auto; border-radius:var(--radius-lg); background:linear-gradient(135deg, #faf9f5 0%, #f0ede3 100%);">
         <!-- lanes -->
         <text x="200" y="56" text-anchor="middle" font-family="'Tiempos Headline',Georgia,serif" font-size="18" fill="#28261f">Your device</text>
         <text x="200" y="78" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12" fill="#8a8578">trusted</text>
@@ -140,7 +140,7 @@
         <defs>
           <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#28261f"/></marker>
         </defs>
-      </svg>
+      </svg></div>
       <figcaption style="font-family:var(--font-body); font-size:13.5px; color:var(--anth-text-secondary); margin-top:var(--space-3); text-align:center;">
         <span class="lang-en">The passphrase and plaintext never cross the trust boundary. Encryption happens client-side; the server stores and returns opaque blobs.</span>
         <span class="lang-zh">密码与明文从不越过信任边界。加密在客户端完成；服务器只存取不透明的密文块。</span>
@@ -169,7 +169,7 @@
         <p class="sec-card__body"><span class="lang-en">Traffic is TLS 1.3 on the wire and already-encrypted at the payload layer. A logged proxy or a compromised CDN sees double-wrapped ciphertext, not values.</span><span class="lang-zh">传输层是 TLS 1.3，负载本身已加密。被记录的代理或被攻陷的 CDN 看到的是双层密文，不是明文值。</span></p>
       </article>
       <article class="sec-card">
-        <span class="sec-card__kicker" style="color:#8a8578;"><span class="lang-en">Out of scope</span><span class="lang-zh">不在范围</span></span>
+        <span class="sec-card__kicker" style="color:var(--anth-text-secondary);"><span class="lang-en">Out of scope</span><span class="lang-zh">不在范围</span></span>
         <h3 class="sec-card__title"><span class="lang-en">Your own endpoint</span><span class="lang-zh">你自己的终端</span></h3>
         <p class="sec-card__body"><span class="lang-en">If malware owns the device where you type the passphrase, it can read plaintext at the source. Client-side encryption cannot defend a compromised client — we are explicit about that rather than implying magic.</span><span class="lang-zh">如果恶意软件控制了你输入密码的设备，它能在源头读到明文。客户端加密防不住被攻陷的客户端 —— 我们把这点说清楚，不假装有魔法。</span></p>
       </article>

@@ -457,7 +457,7 @@
       <span class="lang-zh">三个节点，两份 clone，一条 push 方向。satellite 的 <code>origin</code> 指向<em>本地</em>的 gateway——编译树到上游根本不存在协议通路。</span>
     </p>
     <figure class="gdc-figure">
-      <svg viewBox="0 0 1200 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three-tier topology: upstream at top, gateway in middle, satellite at bottom. Push and fetch arrows shown.">
+      <div class="anth-scroll" style="--pan-w:870px"><svg viewBox="0 0 1200 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three-tier topology: upstream at top, gateway in middle, satellite at bottom. Push and fetch arrows shown.">
         <defs>
           <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
             <path d="M0,0 L10,5 L0,10 z" fill="#d97757"/>
@@ -533,7 +533,7 @@
           <line x1="320" y1="32" x2="372" y2="32" stroke="#b0aea5" stroke-width="2.5" stroke-dasharray="7,5"/>
           <text x="384" y="36" font-family="Poppins, sans-serif" font-size="15" fill="#141413" font-weight="500">blocked</text>
         </g>
-      </svg>
+      </svg></div>
       <figcaption>
         <span class="lang-en">Three tiers · two clones · push traffic is physically confined to the gateway. The satellite has no network path to upstream — only to the local gateway on disk.</span>
         <span class="lang-zh">三层结构 · 两份 clone · push 流量被物理约束在 gateway 里。satellite 到上游没有网络路径，只连到本地磁盘上的 gateway。</span>
@@ -744,7 +744,7 @@ git push origin release --dry-run
     </p>
 
     <figure style="margin: 0 auto var(--space-7); max-width: 1080px; text-align: center;">
-      <svg viewBox="36 0 1008 368" role="img" aria-label="3-clone topology — upstream on top, gateway in the middle pushes up, satellite on the left fetches from gateway, clean-verify on the right fetches from gateway and stamps verification back to gateway." style="display:block; width:100%; height:auto;">
+      <div class="anth-scroll" style="--pan-w:830px"><svg viewBox="36 0 1008 368" role="img" aria-label="3-clone topology — upstream on top, gateway in the middle pushes up, satellite on the left fetches from gateway, clean-verify on the right fetches from gateway and stamps verification back to gateway." style="display:block; width:100%; height:auto;">
         <defs>
           <marker id="gdc3-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#6b6a5f"/>
@@ -807,7 +807,7 @@ git push origin release --dry-run
         <path d="M 860 228 Q 860 270 720 288" stroke="#d97757" stroke-width="1.5" fill="none" marker-end="url(#gdc3-arr-orange)" stroke-dasharray="4 3"/>
         <!-- stamp → gateway (read) -->
         <path d="M 420 288 Q 280 270 500 228" stroke="#6b6a5f" stroke-width="1.5" fill="none" marker-end="url(#gdc3-arr)" stroke-dasharray="4 3"/>
-      </svg>
+      </svg></div>
       <figcaption style="margin-top: var(--space-3); font-family: var(--font-heading); font-size: 12.5px; color: var(--anth-text-secondary); letter-spacing: 0.02em;">
         <span class="lang-en">Only gateway reaches upstream. Satellite and clean-verify both fetch from gateway's local path — no network route out, pushurl DISABLED on both. On build pass, clean-verify writes a stamp; gateway's pre-push hook reads it.</span>
         <span class="lang-zh">只有 gateway 能到上游。Satellite 和 clean-verify 都从 gateway 本地路径 fetch —— 没有对外网络路由，pushurl 都禁用。编译通过时 clean-verify 写 stamp，gateway pre-push hook 读。</span>
