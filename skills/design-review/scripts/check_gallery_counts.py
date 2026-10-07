@@ -19,15 +19,19 @@ README 的表格一行里会提到好几个 skill，还会提到模板目录的�
 事实），按名字认必串。写这道检查时先用窗口和名字匹配，一路串到八个图集
 全部互相报错，才换成下面这个：
   1 图集页自己的 `<title>` / `<meta name=description>` / `<meta og:title>` / `<h1>`
-  2 README / index.html 里**指向这个图集的那个链接元素本身**
+  2 README / index.html / demos/README.md 里**指向这个图集的那个链接元素本身**
     （markdown 是那一行；HTML 是整个 `<a href=…>…</a>`，因为 href 和文字常分两行）
+    demos/README.md 是 2026-10-07 加的:那里 anthropic 写 36 张(实际 87)、apple 写 31(32),
+    一直没人报,因为这道检查原来只扫根目录。它的链接写成 ./x-design/diagrams.html,
+    所以匹配路径按每份文档所在目录算相对路径。
 页面中间 “Seven figures about …” 是分组小标题，引言里的「19 张加 6 张」是分项，
 都不在范围内 —— 收进来只会制造误报。
 
 用法: python3 skills/design-review/scripts/check_gallery_counts.py
+      python3 skills/design-review/scripts/check_gallery_counts.py --self-test
 退出码 0 = 每个图集的说法处处一致
 """
-import re, sys, pathlib, glob, collections
+import re, os, sys, pathlib, glob, collections, contextlib, io, tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 
@@ -48,7 +52,13 @@ CLAIM = re.compile(
     rf'(?i)\b({EN_RE}|\d{{1,3}})\s+(?:copy-ready\s+|hand-(?:built|crafted)\s+|dark-glass\s+'
     rf'|cinematic\s+|thick-outline\s+)?(?:SVG\s+)?(?:[a-z][a-z-]*\s+){{0,3}}?'
     rf'(?:diagrams?|figures?|templates?|illustrations?|compositions?|starting\s+points)\b'
-    rf'|({ZH_RE}|\d{{1,3}})\s*(?:张|幅)\s*(?:手工\s*)?(?:SVG\s*)?(?:图|模板|插画|构图)')
+    rf'|({ZH_RE}|\d{{1,3}})\s*(?:张|幅)\s*(?:手工\s*)?(?:SVG\s*)?(?:图|模板|插画|构图)'
+    # 「87-diagram gallery」:数字和量词之间是连字符。只认数字紧跟量词,
+    # 「a 3-step diagram」里的 3 后面跟的是 step,不算。
+    rf'|\b(\d{{1,3}})-(?:diagram|figure|illustration|composition)\b')
+
+# 扫这几份文档里指向图集的链接。路径相对于仓库根
+DOCS = ['README.md', 'README_zh.md', 'index.html', 'demos/README.md']
 
 
 JOIN = re.compile(r'(?i)\bplus\b|加这页|加上|另有|再加')
@@ -72,7 +82,7 @@ def claims_in(seg):
     段里出现连接词就把分项相加。**只对一小段文字这么做** —— 早先对文档开
     上下两行的窗口再求和,把邻行讲别的图集的数字也加了进来,八个图集全报错。
     """
-    vals = [num(m.group(1) or m.group(2)) for m in CLAIM.finditer(seg)]
+    vals = [num(m.group(1) or m.group(2) or m.group(3)) for m in CLAIM.finditer(seg)]
     vals = [v for v in vals if v is not None]
     if not JOIN.search(seg):
         return vals
@@ -100,9 +110,9 @@ def figure_count(src):
     return len(re.findall(r'<figure[\s>]', t))
 
 
-def main():
+def main(root=ROOT):
     galleries = {}
-    for f in sorted(glob.glob(str(ROOT / 'demos/*/diagrams.html'))):
+    for f in sorted(glob.glob(str(root / 'demos/*/diagrams.html'))):
         p = pathlib.Path(f)
         src = p.read_text(encoding='utf-8')
         if figure_count(src):
@@ -111,8 +121,7 @@ def main():
         print('✗ 一个 demos/*/diagrams.html 都没找到', file=sys.stderr)
         return 1
 
-    docs = {d: (ROOT / d).read_text(encoding='utf-8')
-            for d in ['README.md', 'README_zh.md', 'index.html'] if (ROOT / d).exists()}
+    docs = {d: (root / d).read_text(encoding='utf-8') for d in DOCS if (root / d).exists()}
 
     fail = []
     for skill, (p, src, n) in sorted(galleries.items()):
@@ -129,10 +138,10 @@ def main():
         for seg, where in segs:
             for part in by_language(seg):
                 for v in claims_in(strip_tags(part)):
-                    claims[v].append(f'{p.relative_to(ROOT)} 的 {where}')
+                    claims[v].append(f'{p.relative_to(root)} 的 {where}')
 
-        path = f'demos/{skill}-design/diagrams.html'
         for doc, txt in docs.items():
+            path = os.path.relpath(root / 'demos' / f'{skill}-design' / 'diagrams.html', (root / doc).parent)
             if doc.endswith('.md'):
                 # 只认「以 - [ 开头的列表项」。README 的 skill 表格行和
                 # 「Diagrams — N SVG templates」那种要点行里也带着图集链接，
@@ -178,5 +187,39 @@ def main():
     return 0
 
 
+def self_test():
+    """在临时目录里搭一个图集 + 几份文档,每个用例跑一次 main()。
+    标 ★ 的是故意写错的,必须报。"""
+    gallery = ('<html><head><title>Five diagrams — x</title></head><body><h1>Five diagrams</h1>'
+               '<p>intro</p>' + '<figure></figure>' * 5 + '</body></html>')
+    good_root = '- [x gallery](./demos/x-design/diagrams.html) — 5 diagrams\n'
+    item = '- [`x-design/diagrams.html`](./x-design/diagrams.html) — {}\n'
+    cases = [  # 名字, 根 README, demos/README(None = 没有这个文件), 期望退出码
+        ('demos/README 说对了(连字符写法)', good_root, item.format('5-diagram gallery'), 0),
+        ('★ demos/README 张数写错', good_root, item.format('4-diagram gallery'), 1),
+        ('★ 根 README 用连字符写错', '- [x](./demos/x-design/diagrams.html) — 4-diagram gallery\n', None, 1),
+        ('demos/README 的表格行不算(那里写的是模板数)', good_root,
+         '| [`x-design/`](./x-design/diagrams.html) | 12 templates |\n', 0),
+        ('「3-step」不是张数', good_root, item.format('every 3-step flow, drawn'), 0),
+        ('没有 demos/README 也能跑', good_root, None, 0),
+    ]
+    bad = 0
+    for name, readme, demos_readme, want in cases:
+        with tempfile.TemporaryDirectory() as d:
+            r = pathlib.Path(d)
+            (r / 'demos' / 'x-design').mkdir(parents=True)
+            (r / 'demos' / 'x-design' / 'diagrams.html').write_text(gallery, encoding='utf-8')
+            (r / 'README.md').write_text(readme, encoding='utf-8')
+            if demos_readme is not None:
+                (r / 'demos' / 'README.md').write_text(demos_readme, encoding='utf-8')
+            with contextlib.redirect_stdout(io.StringIO()):
+                got = main(r)
+        ok = got == want
+        bad += not ok
+        print(f'  {"通过" if ok else "失败"}  {name}(期望 {want},得到 {got})')
+    print(f'\n自测:{len(cases) - bad} 通过 / {bad} 失败')
+    return 1 if bad else 0
+
+
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(self_test() if '--self-test' in sys.argv else main())
