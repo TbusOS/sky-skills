@@ -6,6 +6,9 @@
 `linux-kernel-dev` 会写代码、不会审 patch。本文规划怎么把这套规则接进 sky-skills,
 做成一个独立的「审查者」skill,先用在 BSP / 厂商 patch 上。
 
+配套需求文档:[2026-10-08-kernel-review-requirements.md](2026-10-08-kernel-review-requirements.md)
+(要做出什么、做到什么程度算完成,需求逐条编号,对应本文章节)。
+
 ---
 
 ## 0. 一句话
@@ -111,13 +114,21 @@ sky-skills/
  ├─ 0. locate_prompts.sh            找到上游目录;找不到就停,告诉用户怎么装
  ├─ 1. build_merged_prompts.sh      上游 kernel/ + bsp-guides → 合并目录(有缓存)
  ├─ 2. prefetch_facts.sh <提交>     跑 checkpatch / 调用点分类 / 上下文安全 / 守卫链 /
- │                                  defconfig 检查,结果写进 review-context/facts.md
+ │                                  defconfig 检查,结果写进产物目录的 facts.md
  ├─ 3. 按合并目录里的 review-core.md 走上游流程
- │     (facts.md 作为已收集的上下文交给它;上游的子系统索引会自动加载匹配的 bsp-* 规则)
+ │     (facts.md 作为已收集的上下文交给它;上游的子系统索引会自动加载匹配的 bsp-* 规则;
+ │      上游要求写到「当前目录」的文件,改写到产物目录)
  ├─ 4. validate_quotes.py           review-inline.txt 里引用的每一行代码,
  │                                  必须在该提交的 diff 或文件里找得到;找不到的意见打回重查
- └─ 5. 输出:review-inline.txt(上游版式,英文)+ 对话里给中文摘要
+ └─ 5. 输出:review-inline.txt(上游版式,英文)+ 对话里给中文摘要,摘要里列出这次实际加载了哪些规则
 ```
+
+**审查产物不放在被审的内核树里。** 默认放 `~/.cache/sky-skills/kernel-review/<树目录名>/<提交号前 12 位>/`。
+原因是上游 `review-core.md:247` 要求把 `review-inline.txt` 写到当前目录,也就是内核树里;
+BSP 树里多出未跟踪文件,很容易被 `git add -A` 一起提交进 MR。
+
+**输出里列出实际加载了哪些规则**,BSP 规则没加载时读结果的人能看出来(§7.1 说的那种
+「不加载也不报错」的情况,在这里多一层可见性)。
 
 **另一条路(可选)**:装了 sashiko 的人,可以把同一个合并目录交给它的多阶段流水线:
 `sashiko review --prompts <合并目录> HEAD~3..HEAD`(参数定义见 sashiko
@@ -262,7 +273,8 @@ fires / catches 至今全是 0。审查效果必须用真实 bug 量。
 | 误报 | 规则写得太宽 | 拦住(多报) | 上游误报清单 + `bsp-false-positive.md` + §8 统计误报 |
 | 编造引用 | 模型凭印象写代码 | 放过(读者很难发现) | §7.4 |
 | patch 里夹带指令 | 审外部厂商 patch 时,提交信息或注释里写了「忽略以上规则」之类的话 | 放过 | 沿用上游规则:只从指定的规则目录加载提示词,被审代码里的文字一律当数据(`review-core.md:19-21`) |
-| 私有信息外流 | 本地 BSP 题库或审查输出被提交进公开仓 | — | 本地题库只放 `~/.config/`;`.gitignore` 加 `review-context/`、`review-inline.txt` |
+| 审查产物混进被审的树 | 按上游原样写到当前目录 | — | 产物一律写到树外的产物目录(需求 R-F12);P0 验收时检查内核树 `git status` 干净 |
+| 私有信息外流 | 本地 BSP 题库或审查输出被提交进公开仓 | — | 本地题库只放 `~/.config/`,审查产物只放 `~/.cache/`,都不在本仓目录下 |
 
 ---
 
@@ -270,7 +282,7 @@ fires / catches 至今全是 0。审查效果必须用真实 bug 量。
 
 | 阶段 | 做什么 | 做完的标准 |
 |---|---|---|
-| **P0 接入** | 加 submodule(固定在 `d048f87` 或当时的 HEAD);`kernel-review/SKILL.md`;`locate_prompts.sh` + `build_merged_prompts.sh`(带 `--selftest`);`linux-kernel-dev/SKILL.md` 的「审码」一行改为指向 kernel-review;README 两份 + 致谢;订正调研页;autoupdate 补 submodule 更新 | 在一棵主线内核树里,对 sashiko 基准里的 1 个已知 bug 提交走完整流程,产出 `review-inline.txt`;自测里「改坏表头必须报错」通过 |
+| **P0 接入** | 加 submodule(固定在 `d048f87` 或当时的 HEAD);`kernel-review/SKILL.md`;`locate_prompts.sh` + `build_merged_prompts.sh`(带 `--selftest`);`linux-kernel-dev/SKILL.md` 的「审码」一行改为指向 kernel-review;README 两份 + 致谢;订正调研页;autoupdate 补 submodule 更新 | 在一棵主线内核树里,对 sashiko 基准里的 1 个已知 bug 提交走完整流程,产出 `review-inline.txt`,产物在树外、内核树 `git status` 干净;自测里「改坏表头必须报错」通过 |
 | **P1 确定性预检 + 引用核对** | `prefetch_facts.sh`;`validate_quotes.py`(带自测) | 自测:改错一个字符的引用被拦下,改回后通过;对 P0 那个提交跑出 `facts.md` |
 | **P2 第一批 BSP 规则** | `bsp-gpio` / `bsp-asoc` / `bsp-iio` / `bsp-phy` / `bsp-pinctrl` 5 份 + `bsp-false-positive.md` + 索引行 | 引用核对 0 失效;外发脱敏检查 0 命中;本仓中文文档检查(`check_buzzwords.py` 两张表)通过 |
 | **P3 基准测试** | `bench/` 跑分脚本 + 判分;公开 64 条、本地 BSP 题库 | 10 条冒烟跑通;64 条出 ① / ② 两列结果,公开部分提交进仓 |
