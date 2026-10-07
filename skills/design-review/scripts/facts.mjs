@@ -48,6 +48,7 @@ const ROSTER = {
   'tech-pdf-reader': 'systems',
   'datasheet-reading': 'systems',
   'hardware-3d': 'systems',
+  'explain-ladder': 'systems',
 
   'anthropic-design': 'design',
   'apple-design': 'design',

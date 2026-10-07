@@ -1,0 +1,42 @@
+:root {
+  --bg: #fbfaf7; --fg: #1f2328; --muted: #6b6f76; --line: #d8d6cf;
+  --panel: #ffffff; --accent: #b4532a; --mark: #ffe58f; --hover: #f2efe6;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC",
+          "Noto Sans CJK SC", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181a; --fg: #e6e6e3; --muted: #9a9c9f; --line: #34363a;
+    --panel: #1f2023; --accent: #e08a5f; --mark: #6b5310; --hover: #2a2b2f;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.6 var(--sans); }
+header { padding: 18px 24px 8px; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; }
+header h1 { font-size: 22px; margin: 0; }
+.tag { color: var(--muted); font-size: 13px; }
+main, footer { max-width: 1400px; padding: 0 24px; }
+h2 { font-size: 17px; margin: 22px 0 6px; }
+.note { color: var(--muted); margin: 0 0 6px; }
+.toolbar { display: flex; gap: 10px; align-items: center; margin: 6px 0; flex-wrap: wrap; }
+.toolbar input[type=search] { font: 14px var(--mono); padding: 5px 8px; min-width: 320px;
+  background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; }
+.count, .src { color: var(--muted); font-size: 13px; }
+.src a { color: var(--accent); }
+.scroll { max-height: 70vh; overflow: auto; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { padding: 4px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--panel); cursor: pointer; user-select: none; white-space: nowrap; }
+th.asc::after { content: " ▲"; } th.desc::after { content: " ▼"; }
+tbody tr:hover { background: var(--hover); }
+td.num { font-family: var(--mono); text-align: right; }
+.log { font: 13px/1.45 var(--mono); padding: 4px 0; }
+.log .ln { display: flex; white-space: pre-wrap; word-break: break-all; }
+.log .ln:hover { background: var(--hover); }
+.log .no { flex: 0 0 auto; width: 6.5em; padding-right: 10px; text-align: right; color: var(--muted); user-select: none; }
+mark { background: var(--mark); color: inherit; }
+.cap { color: var(--accent); font-size: 13px; margin: 4px 0; }
+footer { margin: 28px 0 40px; color: var(--muted); font-size: 13px; }
+footer li { margin: 3px 0; word-break: break-all; }
+footer code { font-family: var(--mono); color: var(--fg); }
