@@ -37,6 +37,7 @@ Python 3.8+ 标准库(不装第三方包)、git、node(只用于跑仓里现有�
 - 新增 / 修改的中文文档跑本仓两张词表检查,0 条:`python3 ~/.claude/skills/tech-writing-gate/scripts/check_buzzwords.py --strict <文件>` 和加 `--rules .../jargon.tsv` 的那一条(R-N04)
 - 推到公开仓之前跑 user 本机私有的外发脱敏检查(清单不入库),0 命中(R-N03)
 - 提交信息不加任何 Claude / Anthropic 署名(user 全局规则)
+- 所有任务都在分支 `feat/kernel-review` 上做,不直接提交到 main;每个任务提交后 `git push origin feat/kernel-review`,换电脑也能接着做。合并回 main 走 PR,由 user 确认(任务 12)
 - 跑 Python 测试一律加 `-B`,不在 `scripts/`、`tests/` 下生成 `__pycache__`
 - 下文 `$SCRATCH` 指执行会话的临时目录(Claude Code 的 scratchpad);备份文件、临时输出都放这里,不用 `/tmp`
 
@@ -109,6 +110,8 @@ gh api 'repos/masoncl/review-prompts/commits?per_page=1' \
 
 ```bash
 cd <sky-skills 仓根>
+git fetch origin
+git switch feat/kernel-review          # 分支已在 GitHub 上,本地没有时 git 会自动建跟踪分支
 git status -sb && git rev-parse HEAD
 git submodule add https://github.com/masoncl/review-prompts.git third_party/review-prompts
 git -C third_party/review-prompts checkout --quiet <步骤 1 的 sha>
@@ -2194,7 +2197,7 @@ git commit -m "调研页补正:2026-07 漏了 masoncl/review-prompts,补表格�
 
 ---
 
-### 任务 12:P0 端到端验收、推送
+### 任务 12:P0 端到端验收、推送、开 PR
 
 **文件:**
 - 新建:`skills/kernel-review/tests/e2e/p0-acceptance.md`
@@ -2285,10 +2288,25 @@ done
 # 下一步改为「写 P1 实施计划」,阶段一览里 P0 的状态改为「完成」
 git add skills/kernel-review/tests/e2e/p0-acceptance.md docs/superpowers/ROADMAP.md
 git commit -m "kernel-review: P0 端到端验收记录;ROADMAP 更新为 P0 完成"
-git status -sb && git fetch origin && git log --oneline origin/main..HEAD
-git push origin main
-git ls-remote origin refs/heads/main     # 确认远端已是本地 HEAD
+git status -sb && git fetch origin && git log --oneline origin/feat/kernel-review..HEAD
+git push origin feat/kernel-review
+git ls-remote origin refs/heads/feat/kernel-review     # 确认远端已是本地 HEAD
 ```
+
+- [ ] **步骤 6:开 PR,等 user 确认后合并**
+
+main 在开发期间可能有别的提交,先把 main 合进分支,重跑步骤 5 的检查,再开 PR:
+
+```bash
+git fetch origin && git merge --no-edit origin/main
+# 重跑步骤 5 的全部检查,通过后:
+git push origin feat/kernel-review
+gh pr create --base main --head feat/kernel-review \
+  --title "kernel-review P0:接入 masoncl/review-prompts 当内核审查者" \
+  --body "需求、设计、计划与进度见 docs/superpowers/ROADMAP.md;端到端验收记录见 skills/kernel-review/tests/e2e/p0-acceptance.md"
+```
+
+**不自动合并。** 把 PR 链接给 user,user 确认后再合并;合并后把 main 上 ROADMAP 的「开发分支」一行改为「已合并」。
 
 ---
 

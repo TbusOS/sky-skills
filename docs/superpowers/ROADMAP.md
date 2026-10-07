@@ -20,6 +20,7 @@
 3. 每个新脚本带 `--selftest`;再把被测的逻辑临时去掉跑一次,测试必须失败,证明测试不是摆设。
 4. 中文文档推送前跑作者本机的中文用词检查(两张词表:商业黑话、自造简称),0 条才推。
 5. 提交信息不加 AI 署名。
+6. **在独立分支上开发**:分支名 `feat/<主题>`,从 main 拉出,第一次就推到 GitHub;每完成一个任务提交并推送,换电脑也能接着做。验收通过后开 PR 合并进 main,合并由人确认。规划文档放在 main 上,代码和进度更新放在分支上 —— 所以开发期间**分支上的 ROADMAP 才是最新进度**,main 上的这份只记分支名。
 
 ---
 
@@ -34,6 +35,7 @@
 | 设计 | [specs/2026-10-08-kernel-review-design.md](specs/2026-10-08-kernel-review-design.md) |
 | P0 实施计划 | [plans/2026-10-08-kernel-review-p0.md](plans/2026-10-08-kernel-review-p0.md) |
 | 开始日期 | 2026-10-08 |
+| 开发分支 | [`feat/kernel-review`](https://github.com/TbusOS/sky-skills/tree/feat/kernel-review) —— 开发期间最新进度看这个分支上的本文件;P0 验收通过后经 PR 合并回 main |
 | 当前阶段 | P0 规划完成,产品代码还没开始写 |
 
 **为什么做**:`linux-kernel-dev` 只会写代码,审 patch 只有代码风格检查。社区的 review-prompts
@@ -52,6 +54,7 @@
 **当前状态**(2026-10-08)
 
 - 三份文档已在 main 上。
+- 开发分支 `feat/kernel-review` 已建并推到 GitHub,目前跟 main 在同一个提交,还没有开发提交。
 - P0 计划里的代码已在临时目录里实跑:48 个单元测试通过;三处「故意改坏」的检查都按预期失败;
   自动更新的 submodule 测试打补丁前失败、打补丁后通过。
 - 仓库里**还没有** `skills/kernel-review/` 目录和 `third_party/review-prompts` submodule,
@@ -60,9 +63,10 @@
 **下一步**
 
 1. 选执行方式:逐个任务派新的 agent 做、每个任务单独审查;或者在一个会话里连续做完,最后整体审查一次。规划时推荐后者,因为四个脚本的代码已经实跑通过。
-2. 按 P0 计划执行任务 1–11。
+2. 在 `feat/kernel-review` 分支上按 P0 计划执行任务 1–11,每个任务提交后推送分支。
 3. 任务 12 端到端验收:**需要人参与**。开一个不带上下文的新会话,在含该提交的内核树里说「用 kernel-review 审一下 7b9b77a8bba9」,不提示答案;再由人判断审查结果有没有指出标准答案(gpiolib_cdev_register() 出错路径泄漏 workqueue 和字符设备)。
-4. P0 完成后写 P1 实施计划(审查前的确定性预检、审查意见里代码引用的核对)。
+4. 验收通过后开 PR,user 确认再合并进 main(P0 计划任务 12 步骤 6)。
+5. P0 完成后写 P1 实施计划(审查前的确定性预检、审查意见里代码引用的核对)。
 
 **阶段一览**
 
@@ -79,6 +83,8 @@
 ```bash
 git clone --recurse-submodules https://github.com/TbusOS/sky-skills.git
 cd sky-skills
+git switch feat/kernel-review                 # 开发在这个分支上
+git submodule update --init                   # 分支上加了 submodule 之后需要这一步
 # 按顺序读:需求 → 设计 → P0 实施计划,再看本文件的「下一步」
 ```
 
