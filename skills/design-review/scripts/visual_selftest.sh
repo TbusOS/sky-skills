@@ -4,6 +4,8 @@
 #   语言泄漏       lang-both-showing / lang-leak 四种判法，各配一个该报的页和一个不该报的页
 #   窄屏扫描      narrow-overflow-x：390/600/768/900 任一宽度撑宽都要报、报出是谁撑的；
 #                 放进横向滚动容器就不报；只在 768 撑宽的页（390 和 1024 都放得下）也要报
+#   窄屏讲解图    diagram-tiny-text 在 390/768 也查：跟着卡片缩小的图要报、报出图框该多宽；
+#                 包进那么宽的图框就不报、图框不够宽照样报；标了 data-allow-shrink 的图片不报
 #
 # 为什么两个方向都要：只测「坏的报了」，检查可以靠「什么都报」通过；只测「好的没报」，
 # 检查可以靠「什么都不报」通过。这个仓记过的教训里，后一种更常见（触发不了的检查是死代码）。
@@ -202,6 +204,38 @@ t "$(has "$out" "pan-unreachable")" "no" "(control) a shape bleeding past its ow
 page ".two{display:grid;grid-template-columns:1fr 1fr;gap:4px} .two div{white-space:nowrap;font-size:22px} @media (max-width:500px){.two{grid-template-columns:120px 120px}}" "<div class=\"two\"><div><span>Departure date</span></div><div><span>Return date</span></div></div>" > "$D/phonelap.html"
 out="$(node "$VA" "$R/phonelap.html" 2>&1)"
 t "$(has "$out" "only at 390px viewport")" "yes" "an overlap that only exists at 390 is reported, tagged with the width"
+
+# ─────────────────────────── narrow diagrams ───────────────────────────
+# 桌面上 900 宽、手机上跟着卡片缩到 280 的图：标签 14 → 4.4px。
+# 第一版检查用「渲染宽 < 300 就当图标跳过」，手机上的图正好落在 250–294，全都漏了。
+# 卡片必须 < 300：探针第一版用了 342 宽的卡片，把那句跳过改回去自检照样全过 —— 打空了。
+echo "narrow diagrams"
+CARD=".card{width:900px} @media (max-width:1023px){.card{width:auto;max-width:280px}} .pan{overflow-x:auto;contain:inline-size} .pan>svg{display:block;min-width:var(--pan-w);height:auto}"
+dia() { printf '<svg %s viewBox="0 0 900 300" role="img" aria-label="%s" style="width:100%%;height:auto">' "$1" "$2"
+        for x in 40 240 440 640; do printf '<text x="%s" y="150" font-size="14">node %s</text>' "$x" "$x"; done; printf '</svg>'; }
+page "$CARD" "<div class=\"card\">$(dia '' 'shrinks')</div>" > "$D/diashrink.html"
+out="$(run "$R/diashrink.html")"; rc=$?
+t "$(has "$out" "diagram smallest text renders at")" "yes" "a diagram that shrinks with its card on a phone is reported"
+t "$(has "$out" "only at 390px viewport")" "yes" "at the phone width, not at 1440 where it is 900px wide"
+t "$(has "$out" "--pan-w:")" "yes" "and the finding says how wide the pan box has to be"
+t "$rc" "0" "as a warning"
+panw="$(grep -o -- '--pan-w:[0-9]*px' <<<"$out" | head -1)"
+page "$CARD" "<div class=\"card\"><div class=\"pan\" style=\"$panw\">$(dia '' 'pans')</div></div>" > "$D/diapan.html"
+out="$(run "$R/diapan.html")"
+t "$(has "$out" "diagram smallest text renders at")" "no" "wrapped in a pan box at the width it printed ($panw): not reported"
+page "$CARD" "<div class=\"card\"><div class=\"pan\" style=\"--pan-w:400px\">$(dia '' 'stale')</div></div>" > "$D/diastale.html"
+out="$(run "$R/diastale.html")"
+t "$(has "$out" "diagram smallest text renders at")" "yes" "a pan box narrower than it needs to be still is"
+page "$CARD" "<div class=\"card\">$(dia 'data-allow-shrink' 'picture')</div><div class=\"card\" data-allow-shrink>$(dia '' 'picture in a card')</div>" > "$D/diapic.html"
+out="$(run "$R/diapic.html")"
+t "$(has "$out" "diagram smallest text renders at")" "no" "a picture marked data-allow-shrink (on itself or an ancestor) is not"
+page "$CARD" "<div class=\"card\">$(dia '' 'first')</div><div class=\"card\">$(dia '' 'second')</div>" > "$D/diatwo.html"
+out="$(run "$R/diatwo.html")"
+t "$(grep -c "diagram smallest text renders at" <<<"$out")" "2" "two shrinking diagrams on one page are two findings, not one"
+# 缩放写在 <g transform> 里：渲染宽 / viewBox 宽算出来是 1 倍、14px，实际是 7px。
+page "" "<svg viewBox=\"0 0 900 300\" width=\"900\" role=\"img\" aria-label=\"scaled group\"><g transform=\"scale(0.5)\">$(for x in 40 440 840 1240; do printf '<text x="%s" y="150" font-size="14">node</text>' "$x"; done)</g></svg>" > "$D/diagroup.html"
+out="$(run "$R/diagroup.html")"
+t "$(has "$out" "renders at 7px")" "yes" "the size comes from the real scale (a <g transform> halving it), not rendered/viewBox width"
 
 echo ""
 echo "$pass passed, $fail failed"

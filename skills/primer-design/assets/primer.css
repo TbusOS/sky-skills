@@ -565,6 +565,32 @@ html:not([data-lang]) .lang-en { display: none; }
   .primer-hero-inner .primer-figure.primer-fig-hero svg .primer-hair { stroke-width: calc(2.45px * var(--primer-vbw, 500) / 500); }
 }
 
+/* ---------- Pan wrapper for content figures (known-bugs §1.71) ----------
+ * Below 1024px a figure stops shrinking with its column: the <svg> keeps the
+ * width at which its smallest label still renders at 9px, and the reader pans
+ * inside the box.
+ *   <div class="primer-scroll" style="--pan-w:550px"><svg …>…</svg></div>
+ * --pan-w is measured, not guessed — visual-audit's diagram-tiny-text finding
+ * prints the value for each figure. Same contract as the other design skills.
+ * contain:inline-size keeps the box from reporting the figure's width to its
+ * parent, so a grid track does not grow to fit it and scroll the whole page.
+ *
+ * The stroke stair above assumes the figure fills the column. A panned one
+ * renders at --pan-w instead, so below 481px the phone step (9 units, sized for
+ * a ≤440px column) would draw it at 9 × 541/900 = 5.4px. It takes the 481–660
+ * step's weight instead: 6.4 units render 3.4–4.4px for pan widths 477–620,
+ * the range this repo's figures need. A --pan-w above 620 moves that line;
+ * from 661px up the column is wider than any of those, the figure fills it,
+ * and the stair applies unchanged. */
+@media (max-width: 1023px) {
+  .primer-scroll { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; contain: inline-size; }
+  .primer-scroll > svg { min-width: var(--pan-w, 720px); }
+}
+@media (max-width: 480px) {
+  .primer-figure.primer-fig-wide .primer-scroll > svg              { stroke-width: calc(6.4px * var(--primer-vbw, 900) / 900); }
+  .primer-figure.primer-fig-wide .primer-scroll > svg .primer-hair { stroke-width: calc(3.4px * var(--primer-vbw, 900) / 900); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .primer-langtoggle button { transition: none; }
 }

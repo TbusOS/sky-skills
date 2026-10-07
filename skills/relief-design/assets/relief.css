@@ -298,6 +298,11 @@ code{font-family:var(--relief-mono);font-size:.92em;padding:1px 6px;border-radiu
 /* ══════ B 时序图 ══════ */
 .relief-scope{padding:22px 18px;border-radius:24px}
 .relief-scope svg{display:block;width:100%;height:auto}
+/* 波形图窄屏下不跟着缩（known-bugs §1.71）：390px 下标注只剩 2–3px。
+   面板本身撑到 --pan-w（量出来的：最小字 9px 时图要多宽，visual-audit 的
+   diagram-tiny-text 提示里给数），由外面的图板横向拖 —— 撑的是面板不是 svg，
+   不然凹槽还是窄的，波形伸到槽外面去。没写 --pan-w 时 calc 无效，这条不生效。 */
+@media (max-width:1023px){.relief-scope{min-width:calc(var(--pan-w) + 36px)}}
 .relief-wave{fill:none;stroke:var(--navy);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;
   filter:drop-shadow(0 -1.3px 0 var(--lite)) drop-shadow(0 2px 1.6px var(--lo))}
 .relief-wave.relief-busline{stroke:var(--warn)}

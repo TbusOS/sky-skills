@@ -199,3 +199,20 @@
   .eclat-spec-grid { grid-template-columns: minmax(0, 1fr); }
   .eclat-spec-card { padding: 22px; }
 }
+
+/* ---------- pan wrapper for content figures (known-bugs §1.71) ----------
+ * Below 1024px a diagram stops shrinking with its column: the <svg> keeps the
+ * width at which its smallest label still renders at 9px, and the reader pans
+ * inside the box.
+ *   <div class="eclat-scroll" style="--pan-w:890px"><svg …>…</svg></div>
+ * --pan-w is measured, not guessed — visual-audit's diagram-tiny-text finding
+ * prints the value for each figure; 720px is only the fallback. Same contract
+ * as .anth-scroll / .apple-scroll / .ember-scroll / .sage-scroll. Pictures —
+ * product renders, thumbnails, illustrations — scale to fit instead and carry
+ * data-allow-shrink on the <svg>. contain:inline-size keeps the box from
+ * reporting the figure's width to its parent — without it a grid track grows
+ * to fit the figure and the page scrolls sideways instead of the box. */
+@media (max-width: 1023px) {
+  .eclat-scroll { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; contain: inline-size; }
+  .eclat-scroll > svg { display: block; min-width: var(--pan-w, 720px); height: auto; }
+}

@@ -562,6 +562,27 @@ mark { background: rgba(196, 148, 100, 0.32); color: inherit; }
  * CSS-only and reaches every page that links this sheet. Genuinely wide figures
  * pan via an opt-in .sage-scroll wrapper (strategy A); hero product mocks
  * scale to fit so the whole window stays visible. */
+/* Pan wrapper for content figures (known-bugs §1.71). Below 1024px a diagram
+ * stops shrinking with its column: the <svg> keeps the width at which its
+ * smallest label still renders at 9px, and the reader pans inside the box.
+ *   <div class="sage-scroll" style="--pan-w:890px"><svg …>…</svg></div>
+ * --pan-w is measured, not guessed — visual-audit's diagram-tiny-text finding
+ * prints the value for each figure; 720px is only the fallback.
+ * Not always on: at desktop widths the figure fits anyway, and overflow turns
+ * the box into its own clipping layer (anti-aliasing differences in full-page
+ * screenshots, measured on relief boards). Not ≤768 either, as it was until
+ * 2026-09-23: at 768 the same figures still rendered their labels at 5–8px.
+ * Product mocks, thumbnails and illustrations are pictures, not diagrams: they
+ * scale to fit (the whole window stays visible, and their own overflow:hidden
+ * would fight a pan anyway) and carry data-allow-shrink on the <svg>.
+ * contain:inline-size keeps the box from reporting the figure's width to its
+ * parent: without it a grid track (1fr = minmax(auto, 1fr)) grows to fit the
+ * figure and the whole page scrolls sideways instead of the box. */
+@media (max-width: 1023px) {
+  .sage-scroll { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; contain: inline-size; }
+  .sage-scroll > svg { display: block; min-width: var(--pan-w, 720px); height: auto; }
+}
+
 @media (max-width: 768px) {
   /* Type — fluid headings, 16px reading floor. !important so the per-page
      inline font-sizes (style="font-size:96px" on hero headings) scale down
@@ -614,13 +635,6 @@ mark { background: rgba(196, 148, 100, 0.32); color: inherit; }
      tall on a phone, a quarter of the screen held for good while reading. */
   .sage-nav { height: auto; position: relative; min-height: 72px; }
   .sage-nav-inner { padding-block: var(--space-2); }
-
-  /* Opt-in pan wrapper for genuinely wide figures (strategy A): wrap the <svg>
-     in <div class="sage-scroll"> to keep a readable width and pan on a phone.
-     Hero product mocks scale-to-fit instead — the whole window stays visible,
-     and their own overflow:hidden (rounded corners) would fight a pan anyway. */
-  .sage-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .sage-scroll > svg { min-width: 720px; }
 
   /* Wide tables + code blocks pan inside their own box; table columns stay
      aligned (min-width:max-content keeps display:table, parent does the scroll) */

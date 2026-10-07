@@ -914,6 +914,14 @@ html[data-theme="dark"] .atl-wall::after { opacity: 0.16; }
 }
 .atl-table__sort:hover { color: var(--atl-accent-ink); }
 .atl-scroll { overflow-x: auto; }
+/* The same wrapper pans a diagram (known-bugs §1.71). Below 1024px its <svg>
+ * keeps the width at which the smallest label still renders at 9px:
+ *   <div class="atl-scroll" style="--pan-w:690px"><svg …>…</svg></div>
+ * --pan-w is measured — visual-audit's diagram-tiny-text finding prints it. */
+@media (max-width: 1023px) {
+  .atl-scroll:has(> svg) { contain: inline-size; }  /* or the grid track grows to fit the figure */
+  .atl-scroll > svg { display: block; min-width: var(--pan-w, 720px); height: auto; }
+}
 
 /* ---------- Section P: Controls ---------- */
 .atl-btn {

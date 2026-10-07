@@ -281,9 +281,13 @@
 
 **什么时候用**：几路信号谁先谁后、每段延时多长。上电时序、总线事务。
 
+面板上写 `--pan-w`：窄屏下面板撑到这个宽度，外面拖（图板或 `.relief-pan`）。不写的话
+波形跟着缩，390px 下标注只剩 2–3px。数值由 visual-audit 在 390 / 768 下报
+`diagram-tiny-text` 时给出（最小字到 9px 时图要多宽），不手估。
+
 ```html
 <div class="relief-pan" tabindex="0" role="region" aria-label="timing">
-<div class="relief-scope relief-sunken">
+<div class="relief-scope relief-sunken" style="--pan-w:920px">
   <svg viewBox="0 0 1120 170">
     <g class="relief-guide">
       <line x1="238" y1="20" x2="238" y2="120"></line>

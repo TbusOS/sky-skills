@@ -46,8 +46,11 @@ it instead of asserting its own number.
    `lang="en"` / `lang="zh-CN"` / `translate="no"`。**窄屏扫描**:390 / 600 / 768 / 900
    四个宽度下整页横滚是 error(`narrow-overflow-x`,报出是谁撑宽的),1024 那一趟仍只报
    warn;390 和 768 两个宽度每次都跑整套页面内检查:横向滚动容器里拖不到的内容是 error
-   (`pan-unreachable`),重叠 / 溢出报 warn。known-bugs §1.65–1.70。
-   自检 `scripts/visual_selftest.sh`,44 项。
+   (`pan-unreachable`),重叠 / 溢出 / 图里的字 < 9px(`diagram-tiny-text`)报 warn。
+   **窄屏下讲解图不跟着缩**:包进各家的图框 `<div class="<skill>-scroll" style="--pan-w:…">`,
+   `--pan-w` 用检查报出的数(最小字到 9px 时图要多宽),在框里左右拖;产品界面示意、
+   缩略图、插画整张缩,`<svg>` 上标 `data-allow-shrink`。known-bugs §1.65–1.71。
+   自检 `scripts/visual_selftest.sh`,53 项。
 3. `axe-audit.mjs` — 可达性(axe-core;阻断规则四条:color-contrast、
    link-name、aria-prohibited-attr、svg-img-alt。**全仓两主题实测 0 违规**
    —— glass light 那 84 处欠账已于 2026-08-27 在 CSS token 层还清,见 known-bugs §6.6)
@@ -200,7 +203,7 @@ waivers:
 | 组件 | 状态 | 实体 |
 |---|---|---|
 | Gate 1 · structural verify | **shipped** | `scripts/verify.py`(8 类 check + 双语强制 + `--allow-monolingual` 豁免)|
-| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(100 条 known-bugs 里能机器化的那些)|
+| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(101 条 known-bugs 里能机器化的那些)|
 | Gate 3 · accessibility axe-audit | **shipped** (2026-08-14) | `scripts/axe-audit.mjs`(axe-core;四条阻断规则;当时清账每页只量一个主题,glass light 仍有欠账 —— known-bugs §6.6)|
 | Gate 4 · full-page screenshot | **shipped** | `scripts/screenshot.mjs`(Playwright · 绝对路径 + `file://` 通用 · 截前滚一遍让「滚动才浮现」的内容真的出现)|
 | 口味评审(五道之外)· solo critic | **shipped** | `.claude/agents/design-critic.md` |

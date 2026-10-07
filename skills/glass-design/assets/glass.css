@@ -733,6 +733,15 @@ html[data-theme="light"] .glass-svg-node--danger { fill: rgba(225, 29, 72, 0.11)
 .glass-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .glass-scroll > svg { min-width: 680px; }
 .glass-scroll--wide > svg { min-width: 920px; }
+/* Below 1024px a figure can say exactly how wide it needs to be — the width at
+ * which its smallest label still renders at 9px, which visual-audit's
+ * diagram-tiny-text finding prints: style="--pan-w:990px" on the wrapper.
+ * Same contract as the other design skills (known-bugs §1.71). The two tiers
+ * stay the fallback, and stay the only rule at desktop widths. */
+@media (max-width: 1023px) {
+  .glass-scroll > svg { min-width: var(--pan-w, 680px); }
+  .glass-scroll--wide > svg { min-width: var(--pan-w, 920px); }
+}
 .glass-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .glass-table-wrap .glass-table { min-width: 560px; }
 

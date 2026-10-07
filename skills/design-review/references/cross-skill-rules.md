@@ -56,6 +56,19 @@
 3. **同 SVG 内任意两个 `<text>` 的 rendered rect 不应相交 ≥ 4×4 px**(svg-text-overlap check)。title + subtitle 垂直紧贴的 1-2px 叠加不算。
 4. **文字颜色不要和它所在 shape 的填充色接近**:文字 `fill` 和承载它的最小不透明 rect/circle/path 的 `fill` RGB 欧氏距离 ≥ 40(simple heuristic,见 known-bugs 1.9)。半透明叠加层(fill-opacity < 0.5)不算背景 —— 真正的背景在它底下。
 5. **SVG `<text>` 源码 `font-size` ≥ 11** 才能在 worst-case 0.84 scale 下仍 ≥ 9 渲染像素。
+6. **窄屏下讲解图不跟着缩,在图框里左右拖**(known-bugs §1.71)。第 5 条管的是桌面;
+   手机上图跟着卡片缩到四分之一,11 号字只剩 3px。各家都有图框类,≤1023px 生效:
+   ```html
+   <div class="anth-scroll" style="--pan-w:890px"><svg …>…</svg></div>
+   ```
+   类名按 skill:`anth` / `apple` / `ember` / `sage` / `glass` / `eclat` / `lectern` / `atl` /
+   `primer` 加 `-scroll`;relief 的波形面板把 `--pan-w` 写在 `.relief-scope` 上(图板本来就拖)。
+   **`--pan-w` 不手估**:visual-audit 在 390 / 768 下报 `diagram-tiny-text` 时给出这个数
+   (最小字到 9px 时图要多宽)。
+   **图片不拖**:产品界面示意、缩略图、插画 —— 画的是「长什么样」,字是画面的一部分 ——
+   整张缩,在 `<svg>` 或它的祖先上标 `data-allow-shrink`。判断依据:读者要读图里的字才能
+   明白这张图,就是讲解图。固定高度、`preserveAspectRatio="… slice"` 的卡片图属于图片:
+   拉宽之后高度跟着宽度算,反而缩小(eclat 首页那张实测 8.5px → 6.55px)。
 
 ## F. HTML 语义 + a11y(visual-audit 强制)
 

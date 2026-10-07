@@ -914,30 +914,54 @@ const auditFn = (arg) => {
   // ---------- 2c) Diagram tiny text — ALL content SVGs (scope widened 2026-06-11) ----------
   // Was hero-only. The real-world failure class is the dense diagram squeezed
   // into a prose column: a non-hero figure whose viewBox is far wider than its
-  // rendered box, so every label lands under 9px. Icon-scale SVGs (<300px) and
+  // rendered box, so every label lands under 9px. Icon-scale SVGs and
   // decorative illustrations (<4 labels) are out of scope.
+  //
+  // 2026-09-23, three changes, all found on phone widths (known-bugs §1.71):
+  // · "Icon-scale" is judged on the viewBox, not only the rendered box. It was
+  //   `rendered < 300px`, and on a 390px phone a diagram sits in a 250–294px
+  //   card — every one of them left the check exactly when its labels were
+  //   smallest (2–4px, 362 figures across the repo, none reported).
+  // · The size is read from getScreenCTM, the real scale after viewBox,
+  //   preserveAspectRatio and <g transform>. rendered/viewBox width is wrong
+  //   for `slice` (it scales up to fill the height) and for a height-limited
+  //   `meet`; it also took the font-size attribute over the CSS that overrides it.
+  // · A picture — product render, thumbnail, illustration — scales as a whole
+  //   like a screenshot and says so with data-allow-shrink on itself or an
+  //   ancestor. A diagram does not: on narrow screens it pans inside a
+  //   .<skill>-scroll box at the width this finding prints (panW).
+  // Hidden text (the other language's .lang-*-text, collapsed groups) has no
+  // box and is skipped; it is measured when the page shows it.
+  let svgIdx = -1;
   document.querySelectorAll('svg').forEach((svg) => {
+    if (svg.parentElement && svg.parentElement.closest('svg')) return;
+    svgIdx += 1;
     const rect = svg.getBoundingClientRect();
-    if (rect.width < 300) return;
+    if (!rect.width) return;
     if (svg.getAttribute('aria-hidden') === 'true') return;
-    const texts = [...svg.querySelectorAll('text')];
+    if (svg.closest('[data-allow-shrink]')) return;
+    const vb = svg.viewBox && svg.viewBox.baseVal;
+    const vbW = vb && vb.width ? vb.width : 0;
+    if (Math.max(rect.width, vbW) < 300) return;
+    const texts = [...svg.querySelectorAll('text')].filter((t) => t.getClientRects().length);
     if (texts.length < 4) return;
-    const vb = (svg.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number);
-    const vbW = vb[2] || 0;
-    const scale = vbW ? rect.width / vbW : 1;
     let minText = Infinity;
     texts.forEach((t) => {
-      const size = parseFloat(t.getAttribute('font-size') || getComputedStyle(t).fontSize);
-      if (!isFinite(size)) return;
-      const effective = size * scale;
+      const m = t.getScreenCTM();
+      const size = parseFloat(getComputedStyle(t).fontSize);
+      if (!m || !isFinite(size)) return;
+      const effective = size * Math.sqrt(Math.abs(m.a * m.d - m.b * m.c));
       if (effective < minText) minText = effective;
     });
     if (isFinite(minText) && minText < 9) {
       issues.push({
         kind: 'diagram-tiny-text',
         severity: 'warn',
+        selector: `svg[${svgIdx}]`,
         renderedPx: +minText.toFixed(1),
         renderedWidth: Math.round(rect.width),
+        // Width at which the smallest label reaches 9px, rounded up to 10.
+        panW: Math.ceil((rect.width * 9) / minText / 10) * 10,
         label: svg.getAttribute('aria-label') || 'unlabeled',
       });
     }
@@ -2872,7 +2896,9 @@ if (secondViewport && VIEWPORT.width >= secondViewport.width + 80) {
 // Those geometry kinds are kept as warnings, the same rule as the 1024 pass.
 // Measured before adding: 29 phone-only overlaps across the repo, found by hand.
 const FULL_AT = new Set([390, 768]);
-const NARROW_GEOM = new Set(['text-overlap', 'text-glyph-overflow', 'layout-overflow']);
+// diagram-tiny-text joined 2026-09-23: at 390 a diagram that fills its card
+// renders its labels at 2–4px, which nothing reported (known-bugs §1.71).
+const NARROW_GEOM = new Set(['text-overlap', 'text-glyph-overflow', 'layout-overflow', 'diagram-tiny-text']);
 const sweep = narrowWidths.filter((w) => VIEWPORT.width >= w + 80);
 if (sweep.length) {
   try {
@@ -3047,8 +3073,11 @@ for (const i of visibleFindings) {
       `  [${i.severity}] hero diagram rendered at only ${i.renderedWidth}px — widen container or reduce card padding  (aria-label: "${i.label}")`
     );
   } else if (i.kind === 'diagram-tiny-text') {
+    const fix = i.atNarrow
+      ? `on a ${i.atNarrow}px screen a diagram should pan, not shrink: wrap the <svg> in <div class="<skill>-scroll" style="--pan-w:${i.panW}px"> (the width at which its smallest label is 9px). A picture — product render, thumbnail, illustration — scales as a whole instead: put data-allow-shrink on the <svg> (known-bugs 1.71) [only at ${i.atNarrow}px viewport]`
+      : 'bump font-size, tighten viewBox, or move the figure to a wider container';
     console.log(
-      `  [${i.severity}] diagram smallest text renders at ${i.renderedPx}px (svg rendered ${i.renderedWidth ?? '?'}px wide) — bump font-size, tighten viewBox, or move the figure to a wider container  (aria-label: "${i.label}")`
+      `  [${i.severity}] diagram smallest text renders at ${i.renderedPx}px (svg rendered ${i.renderedWidth ?? '?'}px wide) — ${fix}  (aria-label: "${i.label}")`
     );
   } else if (i.kind === 'svg-letterbox') {
     console.log(
