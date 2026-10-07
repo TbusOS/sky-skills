@@ -385,6 +385,9 @@ if [ -n "$AUDIT" ]; then
   # file was honoured, because "it silently did not read it" is exactly the
   # failure this ordering used to have.
   [ -n "$DESIGN_MD" ] && audit_args+=("--design-md=${DESIGN_MD#"$REPO"/}")
+  # Waivers too: without them a finding DESIGN.md already accepted still fails
+  # --audit, while the same page passes the non-audit run below.
+  for w in "${DESIGN_WAIVERS[@]}"; do audit_args+=("$w"); done
   for f in "${AUDIT_FORWARD[@]}"; do audit_args+=("$f"); done
   exec node "$SKY_ROOT/skills/design-review/scripts/audit.mjs" "${audit_args[@]}"
 fi

@@ -36,7 +36,7 @@
 //   node design-md.mjs --explain [path]   what it changes about a run
 //   node design-md.mjs --flags   [path]   tab-separated, for bin/design-review
 
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, statSync, realpathSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -198,7 +198,11 @@ export function find(fromPath, root = REPO_ROOT) {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Compare real paths, not strings. Skills are installed as symlinks under
+// ~/.claude/skills/, so process.argv[1] is the link while import.meta.url is
+// the resolved file: the string test was never true through the link, and the
+// script exited 0 having done nothing — which reads exactly like a pass.
+if ((() => { try { return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url)); } catch { return false; } })()) {
   const args = process.argv.slice(2);
   const mode = args.find((a) => a.startsWith('--')) || '--explain';
   const target = args.find((a) => !a.startsWith('--'));
