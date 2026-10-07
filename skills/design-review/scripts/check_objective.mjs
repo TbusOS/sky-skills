@@ -1,11 +1,14 @@
 #!/usr/bin/env node
-// check_objective.mjs — anthropic-design 页面的客观缺陷检查:只查 bug,不查品味。
+// check_objective.mjs — 设计 skill 页面的客观缺陷检查:只查 bug,不查品味。
+// anthropic-design / apple-design / glass-design 共用(2026-10-07 起)。
 //
 //   node check_objective.mjs <page.html> [...]
+//   node check_objective.mjs --themes=dark,light <page.html>   # 双主题页面:O2 每个主题各量一遍
 //   node check_objective.mjs --self-test
 //
 // O1 JS 报错        加载并从头滚到尾,出现 pageerror / console.error 就失败
-// O2 文字对比度      滚到底让滚动浮现的内容都出来,再跑 axe-core 的 color-contrast(WCAG AA)
+// O2 文字对比度      滚到底让滚动浮现的内容都出来,再跑 axe-core 的 color-contrast(WCAG AA);
+//                   给了 --themes 就逐个主题量:设 <html data-theme> 并模拟系统深 / 浅色
 // O3 横向滚动        1280 / 390 两个宽度下用鼠标真的横滚一次,页面动了才算失败;
 //                   只是布局超宽、被 overflow-x:hidden 挡住的,记「提醒」——
 //                   scrollWidth 大于窗口 ≠ 用户滚得动(2026-10-07 实测,见 SKILL.md)
@@ -39,30 +42,37 @@ async function scrollThrough(p) {
   await p.waitForTimeout(200);
 }
 
-async function checkPage(browser, file) {
+async function checkPage(browser, file, themes = [null]) {
   const url = 'file://' + resolve(file);
   const res = [];
   const add = (id, st, msg) => res.push({ id, st, msg });
 
-  // O1 + O2:1280 宽
-  let ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-  let p = await ctx.newPage();
-  const errs = [];
-  p.on('pageerror', e => errs.push('pageerror: ' + e.message));
-  p.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
-  await p.goto(url, { waitUntil: 'load' }); await p.waitForTimeout(400);
-  await scrollThrough(p);
-  add('O1 JS 报错', errs.length ? 'FAIL' : 'PASS', errs.length ? `${errs.length} 条,第一条:${errs[0].slice(0, 160)}` : '没有');
-  await p.addScriptTag({ path: AXE });
-  const low = await p.evaluate(async () => {
-    const r = await axe.run(document, { runOnly: ['color-contrast'] });
-    return r.violations.flatMap(v => v.nodes.map(n => {
-      const d = (n.any[0] && n.any[0].data) || {};
-      return `${n.target.join(' ').slice(-40)}:字 ${d.fgColor} / 底 ${d.bgColor} = ${d.contrastRatio}`;
-    }));
-  });
-  add('O2 文字对比度', low.length ? 'FAIL' : 'PASS', low.length ? `${low.length} 处不到 AA,例:${low.slice(0, 3).join(' ; ')}` : 'axe color-contrast 0 处');
-  await ctx.close();
+  // O1 + O2:1280 宽;O1 只在第一个主题下看,O2 每个主题各量一遍
+  let ctx, p;
+  const low = [];
+  for (const [ti, theme] of themes.entries()) {
+    ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: theme === 'light' ? 'light' : theme === 'dark' ? 'dark' : 'no-preference' });
+    p = await ctx.newPage();
+    const errs = [];
+    p.on('pageerror', e => errs.push('pageerror: ' + e.message));
+    p.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
+    await p.goto(url, { waitUntil: 'load' }); await p.waitForTimeout(400);
+    if (theme) { await p.evaluate(t => document.documentElement.setAttribute('data-theme', t), theme); await p.waitForTimeout(300); }
+    await scrollThrough(p);
+    if (ti === 0) add('O1 JS 报错', errs.length ? 'FAIL' : 'PASS', errs.length ? `${errs.length} 条,第一条:${errs[0].slice(0, 160)}` : '没有');
+    await p.addScriptTag({ path: AXE });
+    const found = await p.evaluate(async () => {
+      const r = await axe.run(document, { runOnly: ['color-contrast'] });
+      return r.violations.flatMap(v => v.nodes.map(n => {
+        const d = (n.any[0] && n.any[0].data) || {};
+        return `${n.target.join(' ').slice(-40)}:字 ${d.fgColor} / 底 ${d.bgColor} = ${d.contrastRatio}`;
+      }));
+    });
+    low.push(...found.map(x => (theme ? `[${theme}] ` : '') + x));
+    await ctx.close();
+  }
+  const tn = themes[0] ? `(主题 ${themes.join(' / ')})` : '';
+  add('O2 文字对比度', low.length ? 'FAIL' : 'PASS', low.length ? `${low.length} 处不到 AA${tn},例:${low.slice(0, 3).join(' ; ')}` : `axe color-contrast 0 处${tn}`);
 
   // O3:两个宽度真的横滚
   const o3 = [], o3warn = [];
@@ -141,13 +151,15 @@ async function selfTest(browser) {
     ['★ 超宽但 body 挡住 → O3 只提醒', PAGE('<h1>t</h1><div style="width:1700px;height:20px"></div>', 'body{overflow-x:hidden}'), { 'O3 横向滚动': 'WARN' }],
     ['★ 宽图在手机上跟着缩 → O4 失败', PAGE('<h1>t</h1>' + SVG()), { 'O4 手机上图里的字': 'FAIL' }],
     ['  同一张图标成图片类 → O4 不报', PAGE('<h1>t</h1>' + SVG('data-allow-shrink')), { 'O4 手机上图里的字': 'PASS' }],
+    ['  只有浅色主题看不清,不加 --themes → O2 不报', PAGE('<p class="t">正文</p>', '[data-theme=light] body{background:#fff} [data-theme=light] .t{color:#dddddd}'), { 'O2 文字对比度': 'PASS' }],
+    ['★ 只有浅色主题看不清,加 --themes → O2 失败', PAGE('<p class="t">正文</p>', '[data-theme=light] body{background:#fff} [data-theme=light] .t{color:#dddddd}'), { 'O2 文字对比度': 'FAIL' }, ['dark', 'light']],
     ['★ 滚动浮现不认减少动态 → O5 失败', PAGE('<h1>t</h1>' + '<p>占位</p>'.repeat(40) + '<p class="rv">只靠滚动才出现的段落</p>',
       '.rv{opacity:0}', 'addEventListener("scroll",()=>document.querySelector(".rv").style.opacity=1)'), { 'O5 关掉动画也完整': 'FAIL' }],
   ];
   let ok = 0, bad = 0;
-  for (const [name, html, want] of cases) {
+  for (const [name, html, want, themes] of cases) {
     const f = join(dir, `c${ok + bad}.html`); writeFileSync(f, html);
-    const res = await checkPage(browser, f);
+    const res = await checkPage(browser, f, themes || [null]);
     const by = Object.fromEntries(res.map(r => [r.id, r.st]));
     const exp = Object.keys(want).length ? want : Object.fromEntries(res.map(r => [r.id, 'PASS']));
     const good = Object.entries(exp).every(([k, v]) => by[k] === v)
@@ -160,12 +172,18 @@ async function selfTest(browser) {
   return bad ? 1 : 0;
 }
 
-const args = process.argv.slice(2);
+const argv = process.argv.slice(2);
+const themeArg = argv.find(a => a.startsWith('--themes='));
+const themes = themeArg ? themeArg.slice(9).split(',').filter(Boolean) : [null];
+const args = argv.filter(a => !a.startsWith('--themes='));
 if (!args.length) { console.log('用法:node check_objective.mjs <page.html> [...] | --self-test'); process.exit(2); }
 let browser;
 try { browser = await chromium.launch(); } catch (e) { console.log('起不来 Chromium(playwright 没装好?):' + e.message.slice(0, 200)); process.exit(2); }
 let code = 0;
 if (args.includes('--self-test')) code = await selfTest(browser);
-else for (const f of args) { if (report(f, await checkPage(browser, f))) code = 1; }
+else for (const f of args) {
+  try { if (report(f, await checkPage(browser, f, themes))) code = 1; }
+  catch (e) { console.log(`${f}\n  ❌ 打不开或检查中途出错:${String(e.message || e).split('\n')[0].slice(0, 200)}`); code = 1; }
+}
 await browser.close();
 process.exit(code);
