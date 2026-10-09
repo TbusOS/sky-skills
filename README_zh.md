@@ -6,7 +6,7 @@
 
 ## 在线 Demo
 
-十一个设计类 skill 各自配备了一份单页 flagship demo，位于 [`demos/`](./demos/) 目录 —— 同一份内容，九种美学呈现。`hardware-3d` 是里面的另类：它做的是渲染，不是排版。
+十一个设计类 skill 各有一份 flagship demo，位于 [`demos/`](./demos/) 目录 —— 十一种画风，各自用最适合它的内容来展示。另有两个不属于设计类的 skill 也带 demo：`hardware-3d` 做的是渲染，不是排版；`explain-ladder` 把同一个题目按四级各讲一遍。
 
 - [**graphite-design**](./demos/graphite-design/index.html) —— 暖纸上的铅笔画。首屏插画是出图模型画的,白板上那张图是代码在它上面当场画的。配套 [37 张图例库](./demos/graphite-design/diagrams.html)、[素材](./demos/graphite-design/assets.html)(壁纸、电影画面、贴纸)和逐帧导出的 [33 秒样片](./demos/graphite-design/reel.html)。
 - [**hardware-3d demo**](./demos/hardware-3d/index.html) —— 一条数据从内存颗粒走到 CPU 寄存器，分五站。单文件手写 WebGL2：PBR + 现烘棚拍柔光箱 + SSAO，累积 200 次采样换来真软阴影和真景深。数据流那一层画在 **die 内部** —— 逻辑块躺在硅上、架空铜轨在上方 —— 并且按时钟拍走，可以暂停和单步

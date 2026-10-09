@@ -6,7 +6,7 @@ A curated collection of **Claude Code Skills** — reusable, domain-specific pro
 
 ## Live Demos
 
-Eleven design skills ship with single-page flagship demos under [`demos/`](./demos/) — same content, nine aesthetics. `hardware-3d` is the odd one out: it renders instead of laying out.
+Each of the eleven design skills has its own flagship demo under [`demos/`](./demos/): eleven looks, each shown on the kind of content it is made for. Two skills outside the design family have demos too: `hardware-3d` renders instead of laying out, and `explain-ladder` explains one topic at all four rungs.
 
 - [**graphite-design**](./demos/graphite-design/index.html) — pencil on warm paper. The hero illustration came from an image model; the diagram on its whiteboard is drawn live by code on top of it. With a [37-figure gallery](./demos/graphite-design/diagrams.html), [assets](./demos/graphite-design/assets.html) (wallpapers, vertical video covers, character pose sheets, film stills, stickers) and a [33-second sample reel](./demos/graphite-design/reel.html) exported frame by frame.
 - [**hardware-3d demo**](./demos/hardware-3d/index.html) — one data word from a DRAM cell to a CPU register, in five stations. Hand-written WebGL2 in a single file: PBR + baked studio softboxes + SSAO, and 200 accumulated samples for real soft shadows and real depth of field. The flow layer draws the path **inside** the die — logic blocks on the silicon, elevated copper rails above — and advances by clock ticks you can pause and single-step
