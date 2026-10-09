@@ -38,11 +38,12 @@
   <div class="hero-text">
     <span class="kicker"><span class="lang-zh">sky-skills · 第 11 个设计风格</span><span class="lang-en">sky-skills · design voice no. 11</span></span>
     <h1><span class="lang-zh">用铅笔,把一件事讲清楚</span><span class="lang-en">Explain it in pencil</span></h1>
-    <p class="lede"><span class="lang-zh">暖纸、石墨线、几支彩铅。画面像随手画的草图,一笔一笔按讲故事的顺序画出来。拿它做讲解页、短视频、动图、壁纸都行。上面这幅插画是出图模型画的,白板上那张图是代码当场画的,两者叠在一起用。</span><span class="lang-en">Warm paper, a graphite line, a few coloured pencils. It looks like a quick sketch and draws itself stroke by stroke, in the order a story is told. Use it for explainer pages, short videos, animations, wallpapers. The picture above came from an image model; the diagram on the whiteboard is drawn by code, live, on top of it.</span></p>
+    <p class="lede"><span class="lang-zh">暖纸、石墨线、几支彩铅。画面像随手画的草图,一笔一笔按讲故事的顺序画出来。拿它做讲解页、短视频、动图、壁纸都行。上面这幅插画是出图模型画的,白板上那张图是代码当场画的,两者叠在一起用。用得越久,它越懂你喜欢什么样的画。</span><span class="lang-en">Warm paper, a graphite line, a few coloured pencils. It looks like a quick sketch and draws itself stroke by stroke, in the order a story is told. Use it for explainer pages, short videos, animations, wallpapers. The picture above came from an image model; the diagram on the whiteboard is drawn by code, live, on top of it. And the longer you use it, the better it knows the drawings you like.</span></p>
     <div class="ctas">
       <a class="g-btn g-btn--accent" href="diagrams.html"><span class="lang-zh">看 {{count:all}} 张图例</span><span class="lang-en">See {{count:all}} figures</span></a>
       <a class="g-btn" href="reel.html"><span class="lang-zh">看短片样片</span><span class="lang-en">Watch the sample reel</span></a>
       <a class="g-btn" href="assets.html"><span class="lang-zh">拿素材</span><span class="lang-en">Get assets</span></a>
+      <a class="g-btn" href="#taste"><span class="lang-zh">看它怎么学你</span><span class="lang-en">How it learns you</span></a>
     </div>
   </div>
 </div></section>
@@ -74,73 +75,16 @@
   </div>
 </div></section>
 
-<section id="who"><div class="wrap">
-  <span class="kicker"><span class="lang-zh">谁来画</span><span class="lang-en">Who draws it</span></span>
-  <h2><span class="lang-zh">同一个题目,出图模型和代码各画了一张</span><span class="lang-en">One brief, drawn twice: by an image model and by code</span></h2>
-  <p class="lede"><span class="lang-zh">题目都是「小机器人在白板前准备画图,一个人在旁边看」。左边是本机 Codex 调 gpt-6-astra 出的图,右边是 sketch.js 画的。看完再定谁来画哪种图。</span><span class="lang-en">Both got the same brief: a small robot about to draw on a whiteboard while someone watches. Left: gpt-6-astra through the local Codex CLI. Right: sketch.js. Decide who draws what after looking.</span></p>
-  <div class="vs">
-    <figure class="g-box card"><img class="illo-light" src="media/hero.webp" width="1672" height="941" alt="出图模型画的版本" data-label-zh="出图模型画的版本" data-label-en="The image-model version" loading="lazy"><img class="illo-dark" src="media/hero-dark.webp" width="1672" height="941" alt="出图模型画的夜间版" data-label-zh="出图模型画的夜间版" data-label-en="The image-model night version" loading="lazy">
-      <figcaption class="cap"><span class="lang-zh">出图模型:人、木头、毛衣的质感都到位,深色版要另出一张。画面里的东西不能单独动。</span><span class="lang-en">Image model: people, wood and wool all read well; the dark version is a second picture. Nothing in it can move on its own.</span></figcaption></figure>
-    <figure class="g-box card">{{fig:scene-whiteboard}}
-      <figcaption class="cap"><span class="lang-zh">代码:简单得多,但每一笔都能动,换主题自动变色,白板上的字和箭头能改。</span><span class="lang-en">Code: far simpler, but every stroke can move, it recolours with the theme, and the words and arrows on the board can be edited.</span></figcaption></figure>
-  </div>
-  <div class="verdict">
-    <table>
-      <thead><tr><th><span class="lang-zh">画什么</span><span class="lang-en">What</span></th><th><span class="lang-zh">谁画得好</span><span class="lang-en">Who does it better</span></th><th><span class="lang-zh">为什么</span><span class="lang-en">Why</span></th></tr></thead>
-      <tbody>
-        <tr><td><span class="lang-zh">大场景、电影画面、壁纸</span><span class="lang-en">Big scenes, film stills, wallpapers</span></td><td><b><span class="lang-zh">出图模型</span><span class="lang-en">Image model</span></b></td><td><span class="lang-zh">质感和光影代码画不出来;这些画面不需要每一笔都准确</span><span class="lang-en">Code cannot match the texture and light; these pictures do not need every stroke to be exact</span></td></tr>
-        <tr><td><span class="lang-zh">框图、流程图、架构图</span><span class="lang-en">Block, flow and architecture diagrams</span></td><td><b><span class="lang-zh">代码</span><span class="lang-en">Code</span></b></td><td><span class="lang-zh">字要对、箭头要连对;出图模型会写错字、连错线</span><span class="lang-en">Words and arrows must be right; image models misspell and miswire</span></td></tr>
-        <tr><td><span class="lang-zh">代码讲解、数学、算法动图</span><span class="lang-en">Code, maths and algorithm animations</span></td><td><b><span class="lang-zh">代码</span><span class="lang-en">Code</span></b></td><td><span class="lang-zh">每一步的数是真跑出来的,画面和代码行要同步</span><span class="lang-en">Each step's numbers come from running it; the picture must keep pace with the code</span></td></tr>
-        <tr><td><span class="lang-zh">开场、比喻、片头</span><span class="lang-en">Openings, metaphors, title shots</span></td><td><b><span class="lang-zh">两个一起</span><span class="lang-en">Both together</span></b></td><td><span class="lang-zh">位图当舞台,代码在上面画会动的部分(本页首屏就是)</span><span class="lang-en">The bitmap is the stage, code draws the moving parts on it (as in this page's hero)</span></td></tr>
-      </tbody>
-    </table>
-  </div>
-</div></section>
-
-<section class="band" id="figures"><div class="wrap">
-  <span class="kicker"><span class="lang-zh">图例</span><span class="lang-en">Figures</span></span>
-  <h2><span class="lang-zh">{{count:all}} 张图例,{{count:motion}} 张会动</span><span class="lang-en">{{count:all}} figures, {{count:motion}} of them animated</span></h2>
-  <p class="lede"><span class="lang-zh">每张都由几十行代码画出来,源码、单独的 SVG 文件都能拿走。下面每类挑一张,点进去看全部。</span><span class="lang-en">Each is a few dozen lines of code; take the source or the standalone SVG. One per kind below; click for all of them.</span></p>
-  <div class="cats">
-    <a class="g-box" href="diagrams.html#cast">{{fig:cast-robot|shrink}}<h3><span class="lang-zh">角色与道具 · {{count:cast}}</span><span class="lang-en">Cast and props · {{count:cast}}</span></h3><p><span class="lang-zh">小机器人、人物、常用物件</span><span class="lang-en">a robot, people, everyday objects</span></p></a>
-    <a class="g-box" href="diagrams.html#scene">{{fig:scene-idea|shrink}}<h3><span class="lang-zh">场景插画 · {{count:scene}}</span><span class="lang-en">Scenes · {{count:scene}}</span></h3><p><span class="lang-zh">一幅画讲一个比喻</span><span class="lang-en">one picture, one metaphor</span></p></a>
-    <a class="g-box" href="diagrams.html#cinema">{{fig:cinema-rain|shrink}}<h3><span class="lang-zh">电影画风 · {{count:cinema}}</span><span class="lang-en">Cinematic · {{count:cinema}}</span></h3><p><span class="lang-zh">黑边、单一光源、镜头慢推</span><span class="lang-en">letterbox, one light, a slow push</span></p></a>
-    <a class="g-box" href="diagrams.html#diagram">{{fig:diagram-layers|shrink}}<h3><span class="lang-zh">框图与架构 · {{count:diagram}}</span><span class="lang-en">Block and architecture · {{count:diagram}}</span></h3><p><span class="lang-zh">请求沿着层往下走</span><span class="lang-en">a request walking the layers</span></p></a>
-    <a class="g-box" href="diagrams.html#flow">{{fig:flow-cache|shrink}}<h3><span class="lang-zh">流程图 · {{count:flow}}</span><span class="lang-en">Flowcharts · {{count:flow}}</span></h3><p><span class="lang-zh">小圆点走的快慢就是要讲的事</span><span class="lang-en">the dot's speed is the point</span></p></a>
-    <a class="g-box" href="diagrams.html#code">{{fig:code-recursion|shrink}}<h3><span class="lang-zh">代码大白话 · {{count:code}}</span><span class="lang-en">Code in plain words · {{count:code}}</span></h3><p><span class="lang-zh">代码行和画面同步高亮</span><span class="lang-en">the code line and the picture move together</span></p></a>
-    <a class="g-box" href="diagrams.html#math">{{fig:math-gradient-descent|shrink}}<h3><span class="lang-zh">数学与算法 · {{count:math}}</span><span class="lang-en">Maths and algorithms · {{count:math}}</span></h3><p><span class="lang-zh">公式每一项和图里同色</span><span class="lang-en">each term coloured like its part</span></p></a>
-    <a class="g-box" href="diagrams.html#chart">{{fig:chart-progress|shrink}}<h3><span class="lang-zh">数据图 · {{count:chart}}</span><span class="lang-en">Charts · {{count:chart}}</span></h3><p><span class="lang-zh">手画坐标,数要对</span><span class="lang-en">hand-drawn axes, right numbers</span></p></a>
-    <a class="g-box" href="diagrams.html#mark">{{fig:mark-kit|shrink}}<h3><span class="lang-zh">标注与叠层 · {{count:mark}}</span><span class="lang-en">Marks and overlays · {{count:mark}}</span></h3><p><span class="lang-zh">圈、箭头、便签、终端卡</span><span class="lang-en">rings, arrows, notes, terminal</span></p></a>
-  </div>
-</div></section>
-
-<section id="motion"><div class="wrap">
-  <span class="kicker"><span class="lang-zh">动起来</span><span class="lang-en">Motion</span></span>
-  <h2><span class="lang-zh">拖一下进度条:每一秒的画面都是定的</span><span class="lang-en">Drag the slider: every second is a fixed picture</span></h2>
-  <p class="lede"><span class="lang-zh">动画全是 CSS,时间由代码算好写进去。所以能暂停、能逐帧拖,导出视频时第 300 帧永远是第 10 秒那个样子。</span><span class="lang-en">The motion is plain CSS with times computed by code. So it pauses, scrubs frame by frame, and frame 300 of an exported video is always what second 10 looks like.</span></p>
-  <div class="lab">
-    <div class="g-box card" data-no-autoplay>{{fig:code-for-loop}}
-      <div class="scrub">
-        <button type="button" class="g-btn g-btn--small" data-scrub-play="code-for-loop" aria-pressed="false"><span class="lang-zh">▶ 播放</span><span class="lang-en">▶ Play</span></button>
-        <button type="button" class="g-btn g-btn--small" data-scrub-step="code-for-loop" data-delta="-0.5" aria-label="后退半秒" data-label-zh="后退半秒" data-label-en="Back half a second">−0.5s</button>
-        <button type="button" class="g-btn g-btn--small" data-scrub-step="code-for-loop" data-delta="0.5" aria-label="前进半秒" data-label-zh="前进半秒" data-label-en="Forward half a second">+0.5s</button>
-        <input type="range" min="0" value="0" data-scrub="code-for-loop" aria-label="时间" data-label-zh="时间" data-label-en="time">
-        <output data-scrub-out="code-for-loop">0.0 s</output>
-      </div>
-    </div>
-    <ol class="rules">
-      <li><b><span class="lang-zh">一支笔。</span><span class="lang-en">One pen.</span></b> <span class="lang-zh">同一时间只画一样东西,每一笔的时长和它的长度成正比。</span><span class="lang-en">One thing at a time; each stroke takes time in proportion to its length.</span></li>
-      <li><b><span class="lang-zh">按故事顺序。</span><span class="lang-en">Story order.</span></b> <span class="lang-zh">先场景,再主角,再动作,最后结果。不是从左到右扫。</span><span class="lang-en">Setting, then the subject, then the action, then the result. Not a left-to-right sweep.</span></li>
-      <li><b><span class="lang-zh">先线后色。</span><span class="lang-en">Ink, then colour.</span></b> <span class="lang-zh">每组里勾线占三分之二的时间,上色占三分之一。</span><span class="lang-en">In each group, outlines take two thirds of the time and colour one third.</span></li>
-      <li><b><span class="lang-zh">一个时钟。</span><span class="lang-en">One clock.</span></b> <span class="lang-zh">画面、代码高亮、计数都挂在同一条时间线上,所以永远对得上。</span><span class="lang-en">Picture, code highlight and counter hang on one timeline, so they always agree.</span></li>
-      <li><b><span class="lang-zh">关掉动画也完整。</span><span class="lang-en">Complete with motion off.</span></b> <span class="lang-zh">系统设置了「减少动态效果」,就直接显示画好的结果。</span><span class="lang-en">With reduced motion set, the finished drawing shows at once.</span></li>
-    </ol>
-  </div>
-</div></section>
-
-<section class="band" id="taste"><div class="wrap">
+<section id="taste"><div class="wrap">
   <span class="kicker"><span class="lang-zh">越用越懂你</span><span class="lang-en">It learns your taste</span></span>
-  <h2><span class="lang-zh">挑你喜欢的那一张,它会记住</span><span class="lang-en">Pick the one you like. It remembers.</span></h2>
+  <h2><span class="lang-zh">用得越久,画得越像你要的样子</span><span class="lang-en">The longer you use it, the more it draws your way</span></h2>
+  <p class="lede"><span class="lang-zh">你挑的每一张、说的每一句「太密了」、留下或删掉的每张图,都记成口味日志里的一行;审查器的意见也记,只是分量轻。AI 画下一张图之前先跑 <code>taste.mjs suggest</code>,拿到按日志算出的参数再动笔。下面三张图是这套算法自己画的:曲线上每个点、每个数,都是 taste.js 在构建时真算出来的。</span><span class="lang-en">Every drawing you pick, every "too dense" you say, every figure you keep or delete becomes a line in a taste log; reviewers' notes go in too, at a lower weight. Before an AI draws the next figure it runs <code>taste.mjs suggest</code> and draws with the values the log gives. The three figures below are drawn by the learner itself: every point and number is computed by taste.js at build time.</span></p>
+  <figure class="taste-fig g-box">{{fig:taste-loop}}<figcaption><b><span class="lang-zh">一圈是怎么转的</span><span class="lang-en">How the loop turns</span></b>{{desc:taste-loop}}</figcaption></figure>
+  <div class="taste-figs">
+    <figure class="taste-fig g-box">{{fig:taste-converge}}<figcaption><b><span class="lang-zh">一个旋钮怎么学到位</span><span class="lang-en">How one knob learns</span></b>{{desc:taste-converge}}</figcaption></figure>
+    <figure class="taste-fig g-box">{{fig:taste-three}}<figcaption><b><span class="lang-zh">三个人,三种样子</span><span class="lang-en">Three readers, three looks</span></b>{{desc:taste-three}}</figcaption></figure>
+  </div>
+  <h3 class="taste-try"><span class="lang-zh">自己试一下:挑你喜欢的那一张,它会记住</span><span class="lang-en">Try it: pick the one you like, it remembers</span></h3>
   <p class="lede"><span class="lang-zh">每一题只改一个参数,左右两张只差这一处。你选一次,参数就往你选的那边挪一点;说一句「颜色太多了」也算。审查器查出的客观问题(比如手机上字太小)会定一条下限,口味再怎么变也不越过去。下面的结果只存在你自己的浏览器里。</span><span class="lang-en">Each question changes one setting; the two drawings differ only there. Every pick moves that setting a little your way; saying "too many colours" counts too. Objective problems a reviewer finds (labels too small on a phone) set a floor that taste never crosses. What you do here stays in your own browser.</span></p>
   <div class="taste">
     <div>
@@ -166,6 +110,72 @@
   </div>
 </div></section>
 
+<section class="band" id="who"><div class="wrap">
+  <span class="kicker"><span class="lang-zh">谁来画</span><span class="lang-en">Who draws it</span></span>
+  <h2><span class="lang-zh">同一个题目,出图模型和代码各画了一张</span><span class="lang-en">One brief, drawn twice: by an image model and by code</span></h2>
+  <p class="lede"><span class="lang-zh">题目都是「小机器人在白板前准备画图,一个人在旁边看」。左边是本机 Codex 调 gpt-6-astra 出的图,右边是 sketch.js 画的。看完再定谁来画哪种图。</span><span class="lang-en">Both got the same brief: a small robot about to draw on a whiteboard while someone watches. Left: gpt-6-astra through the local Codex CLI. Right: sketch.js. Decide who draws what after looking.</span></p>
+  <div class="vs">
+    <figure class="g-box card"><img class="illo-light" src="media/hero.webp" width="1672" height="941" alt="出图模型画的版本" data-label-zh="出图模型画的版本" data-label-en="The image-model version" loading="lazy"><img class="illo-dark" src="media/hero-dark.webp" width="1672" height="941" alt="出图模型画的夜间版" data-label-zh="出图模型画的夜间版" data-label-en="The image-model night version" loading="lazy">
+      <figcaption class="cap"><span class="lang-zh">出图模型:人、木头、毛衣的质感都到位,深色版要另出一张。画面里的东西不能单独动。</span><span class="lang-en">Image model: people, wood and wool all read well; the dark version is a second picture. Nothing in it can move on its own.</span></figcaption></figure>
+    <figure class="g-box card">{{fig:scene-whiteboard}}
+      <figcaption class="cap"><span class="lang-zh">代码:简单得多,但每一笔都能动,换主题自动变色,白板上的字和箭头能改。</span><span class="lang-en">Code: far simpler, but every stroke can move, it recolours with the theme, and the words and arrows on the board can be edited.</span></figcaption></figure>
+  </div>
+  <div class="verdict">
+    <table>
+      <thead><tr><th><span class="lang-zh">画什么</span><span class="lang-en">What</span></th><th><span class="lang-zh">谁画得好</span><span class="lang-en">Who does it better</span></th><th><span class="lang-zh">为什么</span><span class="lang-en">Why</span></th></tr></thead>
+      <tbody>
+        <tr><td><span class="lang-zh">大场景、电影画面、壁纸</span><span class="lang-en">Big scenes, film stills, wallpapers</span></td><td><b><span class="lang-zh">出图模型</span><span class="lang-en">Image model</span></b></td><td><span class="lang-zh">质感和光影代码画不出来;这些画面不需要每一笔都准确</span><span class="lang-en">Code cannot match the texture and light; these pictures do not need every stroke to be exact</span></td></tr>
+        <tr><td><span class="lang-zh">框图、流程图、架构图</span><span class="lang-en">Block, flow and architecture diagrams</span></td><td><b><span class="lang-zh">代码</span><span class="lang-en">Code</span></b></td><td><span class="lang-zh">字要对、箭头要连对;出图模型会写错字、连错线</span><span class="lang-en">Words and arrows must be right; image models misspell and miswire</span></td></tr>
+        <tr><td><span class="lang-zh">代码讲解、数学、算法动图</span><span class="lang-en">Code, maths and algorithm animations</span></td><td><b><span class="lang-zh">代码</span><span class="lang-en">Code</span></b></td><td><span class="lang-zh">每一步的数是真跑出来的,画面和代码行要同步</span><span class="lang-en">Each step's numbers come from running it; the picture must keep pace with the code</span></td></tr>
+        <tr><td><span class="lang-zh">开场、比喻、片头</span><span class="lang-en">Openings, metaphors, title shots</span></td><td><b><span class="lang-zh">两个一起</span><span class="lang-en">Both together</span></b></td><td><span class="lang-zh">位图当舞台,代码在上面画会动的部分(本页首屏就是)</span><span class="lang-en">The bitmap is the stage, code draws the moving parts on it (as in this page's hero)</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div></section>
+
+<section id="figures"><div class="wrap">
+  <span class="kicker"><span class="lang-zh">图例</span><span class="lang-en">Figures</span></span>
+  <h2><span class="lang-zh">{{count:all}} 张图例,{{count:motion}} 张会动</span><span class="lang-en">{{count:all}} figures, {{count:motion}} of them animated</span></h2>
+  <p class="lede"><span class="lang-zh">每张都由几十行代码画出来,源码、单独的 SVG 文件都能拿走。下面每类挑一张(「越用越懂你」那一类在上面),点进去看全部。</span><span class="lang-en">Each is a few dozen lines of code; take the source or the standalone SVG. One per kind below ("learns your taste" is further up); click for all of them.</span></p>
+  <div class="cats">
+    <a class="g-box" href="diagrams.html#cast">{{fig:cast-robot|shrink}}<h3><span class="lang-zh">角色与道具 · {{count:cast}}</span><span class="lang-en">Cast and props · {{count:cast}}</span></h3><p><span class="lang-zh">小机器人、人物、常用物件</span><span class="lang-en">a robot, people, everyday objects</span></p></a>
+    <a class="g-box" href="diagrams.html#scene">{{fig:scene-idea|shrink}}<h3><span class="lang-zh">场景插画 · {{count:scene}}</span><span class="lang-en">Scenes · {{count:scene}}</span></h3><p><span class="lang-zh">一幅画讲一个比喻</span><span class="lang-en">one picture, one metaphor</span></p></a>
+    <a class="g-box" href="diagrams.html#cinema">{{fig:cinema-rain|shrink}}<h3><span class="lang-zh">电影画风 · {{count:cinema}}</span><span class="lang-en">Cinematic · {{count:cinema}}</span></h3><p><span class="lang-zh">黑边、单一光源、镜头慢推</span><span class="lang-en">letterbox, one light, a slow push</span></p></a>
+    <a class="g-box" href="diagrams.html#diagram">{{fig:diagram-layers|shrink}}<h3><span class="lang-zh">框图与架构 · {{count:diagram}}</span><span class="lang-en">Block and architecture · {{count:diagram}}</span></h3><p><span class="lang-zh">请求沿着层往下走</span><span class="lang-en">a request walking the layers</span></p></a>
+    <a class="g-box" href="diagrams.html#flow">{{fig:flow-cache|shrink}}<h3><span class="lang-zh">流程图 · {{count:flow}}</span><span class="lang-en">Flowcharts · {{count:flow}}</span></h3><p><span class="lang-zh">小圆点走的快慢就是要讲的事</span><span class="lang-en">the dot's speed is the point</span></p></a>
+    <a class="g-box" href="diagrams.html#code">{{fig:code-lru|shrink}}<h3><span class="lang-zh">代码大白话 · {{count:code}}</span><span class="lang-en">Code in plain words · {{count:code}}</span></h3><p><span class="lang-zh">LRU 缓存:哪一行在跑,链表就怎么动</span><span class="lang-en">an LRU cache: the running line moves the list</span></p></a>
+    <a class="g-box" href="diagrams.html#math">{{fig:math-fourier|shrink}}<h3><span class="lang-zh">数学与算法 · {{count:math}}</span><span class="lang-en">Maths and algorithms · {{count:math}}</span></h3><p><span class="lang-zh">方波是一圈圈正弦叠出来的,每项同色</span><span class="lang-en">a square wave from circling sines, each term in its colour</span></p></a>
+    <a class="g-box" href="diagrams.html#chart">{{fig:chart-progress|shrink}}<h3><span class="lang-zh">数据图 · {{count:chart}}</span><span class="lang-en">Charts · {{count:chart}}</span></h3><p><span class="lang-zh">手画坐标,数要对</span><span class="lang-en">hand-drawn axes, right numbers</span></p></a>
+    <a class="g-box" href="diagrams.html#mark">{{fig:mark-kit|shrink}}<h3><span class="lang-zh">标注与叠层 · {{count:mark}}</span><span class="lang-en">Marks and overlays · {{count:mark}}</span></h3><p><span class="lang-zh">圈、箭头、便签、终端卡</span><span class="lang-en">rings, arrows, notes, terminal</span></p></a>
+  </div>
+</div></section>
+
+<section class="band" id="motion"><div class="wrap">
+  <span class="kicker"><span class="lang-zh">动起来</span><span class="lang-en">Motion</span></span>
+  <h2><span class="lang-zh">拖一下进度条:每一秒的画面都是定的</span><span class="lang-en">Drag the slider: every second is a fixed picture</span></h2>
+  <p class="lede"><span class="lang-zh">动画全是 CSS,时间由代码算好写进去。所以能暂停、能逐帧拖,导出视频时第 300 帧永远是第 10 秒那个样子。</span><span class="lang-en">The motion is plain CSS with times computed by code. So it pauses, scrubs frame by frame, and frame 300 of an exported video is always what second 10 looks like.</span></p>
+  <div class="lab">
+    <div class="g-box card" data-no-autoplay>{{fig:code-for-loop}}
+      <div class="scrub">
+        <button type="button" class="g-btn g-btn--small" data-scrub-play="code-for-loop" aria-pressed="false"><span class="lang-zh">▶ 播放</span><span class="lang-en">▶ Play</span></button>
+        <button type="button" class="g-btn g-btn--small" data-scrub-step="code-for-loop" data-delta="-0.5" aria-label="后退半秒" data-label-zh="后退半秒" data-label-en="Back half a second">−0.5s</button>
+        <button type="button" class="g-btn g-btn--small" data-scrub-step="code-for-loop" data-delta="0.5" aria-label="前进半秒" data-label-zh="前进半秒" data-label-en="Forward half a second">+0.5s</button>
+        <input type="range" min="0" value="0" data-scrub="code-for-loop" aria-label="时间" data-label-zh="时间" data-label-en="time">
+        <output data-scrub-out="code-for-loop">0.0 s</output>
+      </div>
+    </div>
+    <ol class="rules">
+      <li><b><span class="lang-zh">一支笔。</span><span class="lang-en">One pen.</span></b> <span class="lang-zh">同一时间只画一样东西,每一笔的时长和它的长度成正比。</span><span class="lang-en">One thing at a time; each stroke takes time in proportion to its length.</span></li>
+      <li><b><span class="lang-zh">按故事顺序。</span><span class="lang-en">Story order.</span></b> <span class="lang-zh">先场景,再主角,再动作,最后结果。不是从左到右扫。</span><span class="lang-en">Setting, then the subject, then the action, then the result. Not a left-to-right sweep.</span></li>
+      <li><b><span class="lang-zh">先线后色。</span><span class="lang-en">Ink, then colour.</span></b> <span class="lang-zh">每组里勾线占三分之二的时间,上色占三分之一。</span><span class="lang-en">In each group, outlines take two thirds of the time and colour one third.</span></li>
+      <li><b><span class="lang-zh">一个时钟。</span><span class="lang-en">One clock.</span></b> <span class="lang-zh">画面、代码高亮、计数都挂在同一条时间线上,所以永远对得上。</span><span class="lang-en">Picture, code highlight and counter hang on one timeline, so they always agree.</span></li>
+      <li><b><span class="lang-zh">关掉动画也完整。</span><span class="lang-en">Complete with motion off.</span></b> <span class="lang-zh">系统设置了「减少动态效果」,就直接显示画好的结果。</span><span class="lang-en">With reduced motion set, the finished drawing shows at once.</span></li>
+    </ol>
+  </div>
+</div></section>
+
+
+
 <section id="works"><div class="wrap">
   <span class="kicker"><span class="lang-zh">作品</span><span class="lang-en">Work</span></span>
   <h2><span class="lang-zh">这个画风是从哪来的</span><span class="lang-en">Where this look comes from</span></h2>
@@ -187,7 +197,7 @@
 node skills/graphite-design/scripts/build.mjs
 <span class="dim"># <span class="lang-zh">2 出片:任何一张图或页面,逐帧导出 MP4 / GIF / PNG</span><span class="lang-en">2 export: any figure or page, frame by frame, to MP4 / GIF / PNG</span></span>
 node skills/graphite-design/scripts/export.mjs video reel.html reel.mp4 --size=1280x720
-<span class="dim"># <span class="lang-zh">3 口味:画之前问一下这个人喜欢什么,画完记下他选了哪个</span><span class="lang-en">3 taste: ask what this person likes before drawing; record what they picked after</span></span>
+<span class="dim"># <span class="lang-zh">3 口味:画之前问一下这个人喜欢什么,画完记下对方选了哪个</span><span class="lang-en">3 taste: ask what this person likes before drawing; record what they picked after</span></span>
 node skills/graphite-design/scripts/taste.mjs suggest
 node skills/graphite-design/scripts/taste.mjs say "颜色太多了"</pre>
   <p class="cap"><span class="lang-zh">完整说明在 <a href="https://github.com/TbusOS/sky-skills/blob/main/skills/graphite-design/SKILL.md">SKILL.md</a>;出图模型的提示词写法在 <code>references/image-prompts.md</code>。</span><span class="lang-en">Full guide in <a href="https://github.com/TbusOS/sky-skills/blob/main/skills/graphite-design/SKILL.md">SKILL.md</a>; prompts for image models in <code>references/image-prompts.md</code>.</span></p>

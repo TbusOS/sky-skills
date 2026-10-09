@@ -368,9 +368,14 @@
       return S.path([[x1, y + jit(1)], [lerp(x1, x2, 0.5), y + jit(1.5)], [x2, y + jit(1)]], Object.assign({ cls: 'ul' }, o));
     };
 
+    // A dot is a filled circle: the draw-on animation moves only the stroke, so the
+    // fill would show from second 0 (2026-10-10: robot eyes floating in an empty panel
+    // before the robot was drawn). It fades in at its turn instead.
     S.dot = function (cx, cy, r, o) {
       o = o || {};
-      return put(art, 'ink', r * 4, '<circle cx="' + f(cx) + '" cy="' + f(cy) + '" r="' + f(r) + '" class="' + cls(o, 'dt') + '"%A/>');
+      var item = put(art, 'ink', r * 4, '<circle cx="' + f(cx) + '" cy="' + f(cy) + '" r="' + f(r) + '" class="' + cls(o, 'dt') + '"%A/>');
+      item.fade = true;
+      return item;
     };
 
     S.star = function (cx, cy, r, o) {
@@ -501,7 +506,7 @@
         if (i.kind === 'tag') return i.tpl;
         var a = '';
         if (i.d != null) {
-          var cl = i.kind === 'text' ? 'aw' : i.kind === 'wash' ? 'af' : 'ad';
+          var cl = i.kind === 'text' ? 'aw' : i.kind === 'wash' || i.fade ? 'af' : 'ad';
           // pathLength="1" lets one keyframe (dashoffset 1 -> 0) draw any path, whatever its real length
           a = (cl === 'ad' ? ' pathLength="1"' : '') + ' data-a="' + cl + '" style="--d:' + (Math.round(i.d * 100) / 100) + 's;--t:' + (Math.round(i.t * 100) / 100) + 's"';
         }

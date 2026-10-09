@@ -60,7 +60,7 @@
   // WMAX caps how much accumulated evidence can anchor a value: every new event
   // still moves the estimate at least w / (WMAX + w) of the way. Without the cap a
   // long-time reader's taste could never change again.
-  var PRIOR = 2, WMAX = 8, HALF_LIFE_DAYS = 90;
+  var PRIOR = 2, WMAX = 8, HALF_LIFE_DAYS = 90, STREAK_CAP = 2;
 
   // Words a reader (or a reviewer) uses -> which way knobs should move.
   // Chinese and English. Order matters only for readability; every match applies.
@@ -162,6 +162,11 @@
     // tested: how often each knob was asked; streak: how many answers in a row pointed
     // the same way. A streak means the reader is still far from the current value, so
     // that knob keeps priority until the answers start to alternate around it.
+    // The bonus stops growing after STREAK_CAP answers. Uncapped, a knob whose reader
+    // sits near its floor (lineWeight 1.6, floor 1.4) took 18 of 24 questions: the
+    // "less" option is clamped there, each answer moves the estimate a little, and the
+    // answers never alternate (2026-10-10). 200 simulated readers, 40 questions each:
+    // gap closed 49% → 73%, the busiest knob's share of questions 60% → 21%.
     var tested = {}, last = {}, streak = {};
     events.forEach(function (e) {
       if (e.kind !== 'pick') return;
@@ -173,7 +178,7 @@
     });
     for (var k in KNOBS) {
       if (k === 'colorBudget' || k === 'whitespace' || k === 'pace') continue;   // only knobs a still pair of drawings can show
-      var K = KNOBS[k], u = K.step / (K.max - K.min) / Math.sqrt(1 + t.evidence[k]) / (1 + (tested[k] || 0) * 0.2) * Math.pow(1.8, streak[k] || 0);
+      var K = KNOBS[k], u = K.step / (K.max - K.min) / Math.sqrt(1 + t.evidence[k]) / (1 + (tested[k] || 0) * 0.2) * Math.pow(1.8, Math.min(streak[k] || 0, STREAK_CAP));
       if (!best || u > best.u) best = { k: k, u: u };
     }
     var K2 = KNOBS[best.k], cur = t.knobs[best.k], d = K2.step * 2;

@@ -9,21 +9,21 @@ Every family below is licensed under the **SIL Open Font License 1.1**
 
 | Family | Files | Subset? | Copyright |
 |---|---|---|---|
-| [Fraunces](https://scripts.sil.org/OFL) | 2 | no — upstream woff2 as served | Copyright 2020 The Fraunces Project Authors (github.com/undercasetype/Fraunces) |
-| [Fredoka](http://scripts.sil.org/OFL) | 1 | no — upstream woff2 as served | Copyright 2016 The Fredoka Project Authors (https://github.com/hafontia/Fredoka-One) |
-| [IBM Plex Mono](http://scripts.sil.org/OFL) | 4 | no — upstream woff2 as served | Copyright 2017 IBM Corp. All rights reserved. |
-| [Instrument Serif](https://scripts.sil.org/OFL) | 2 | no — upstream woff2 as served | Copyright 2022 The Instrument Serif Project Authors (https://github.com/Instrument/instrument-serif) |
-| [Inter](https://openfontlicense.org) | 3 | no — upstream woff2 as served | Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter) |
-| [JetBrains Mono](https://scripts.sil.org/OFL) | 6 | no — upstream woff2 as served | Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono) |
+| [Fraunces](https://scripts.sil.org/OFL) | 4 | no — upstream woff2 as served | Copyright 2020 The Fraunces Project Authors (github.com/undercasetype/Fraunces) |
+| [Fredoka](http://scripts.sil.org/OFL) | 2 | no — upstream woff2 as served | Copyright 2016 The Fredoka Project Authors (https://github.com/hafontia/Fredoka-One) |
+| [IBM Plex Mono](http://scripts.sil.org/OFL) | 6 | no — upstream woff2 as served | Copyright 2017 IBM Corp. All rights reserved. |
+| [Instrument Serif](https://scripts.sil.org/OFL) | 4 | no — upstream woff2 as served | Copyright 2022 The Instrument Serif Project Authors (https://github.com/Instrument/instrument-serif) |
+| [Inter](https://openfontlicense.org) | 4 | no — upstream woff2 as served | Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter) |
+| [JetBrains Mono](https://scripts.sil.org/OFL) | 8 | no — upstream woff2 as served | Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono) |
 | [LXGW WenKai GB Screen](https://scripts.sil.org/OFL) | 1 | yes — cut to the characters this repo uses | Copyright 2021-2024 LXGW (https://github.com/lxgw/LxgwWenKai-Screen)
 Copyright 2020 The Klee Project Authors (https://github.com/fontworks-fonts/Klee) |
-| [Lora](https://scripts.sil.org/OFL) | 8 | no — upstream woff2 as served | Copyright 2011 The Lora Project Authors (https://github.com/cyrealtype/Lora-Cyrillic), with Reserved Font Name "Lora". |
+| [Lora](https://scripts.sil.org/OFL) | 10 | no — upstream woff2 as served | Copyright 2011 The Lora Project Authors (https://github.com/cyrealtype/Lora-Cyrillic), with Reserved Font Name "Lora". |
 | [Noto Sans SC](http://scripts.sil.org/OFL) | 1 | yes — cut to the characters this repo uses | © 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'. |
 | [Noto Serif SC](http://scripts.sil.org/OFL) | 1 | yes — cut to the characters this repo uses | © 2017-2024 Adobe (http://www.adobe.com/). |
-| [Nunito](https://scripts.sil.org/OFL) | 2 | no — upstream woff2 as served | Copyright 2014 The Nunito Project Authors (https://github.com/googlefonts/nunito) |
-| [Plus Jakarta Sans](https://scripts.sil.org/OFL) | 2 | no — upstream woff2 as served | Copyright 2020 The Plus Jakarta Sans Project Authors (https://github.com/tokotype/PlusJakartaSans) |
-| [Poppins](https://scripts.sil.org/OFL) | 4 | no — upstream woff2 as served | Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) |
-| [Space Grotesk](https://scripts.sil.org/OFL) | 1 | no — upstream woff2 as served | Copyright 2020 The Space Grotesk Project Authors (https://github.com/floriankarsten/space-grotesk) |
+| [Nunito](https://scripts.sil.org/OFL) | 3 | no — upstream woff2 as served | Copyright 2014 The Nunito Project Authors (https://github.com/googlefonts/nunito) |
+| [Plus Jakarta Sans](https://scripts.sil.org/OFL) | 4 | no — upstream woff2 as served | Copyright 2020 The Plus Jakarta Sans Project Authors (https://github.com/tokotype/PlusJakartaSans) |
+| [Poppins](https://scripts.sil.org/OFL) | 8 | no — upstream woff2 as served | Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) |
+| [Space Grotesk](https://scripts.sil.org/OFL) | 2 | no — upstream woff2 as served | Copyright 2020 The Space Grotesk Project Authors (https://github.com/floriankarsten/space-grotesk) |
 
 The two CJK families are **subsets**: the full faces are about 10 MB together and
 this repository uses roughly two thousand glyphs. OFL permits subsetting; the

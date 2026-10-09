@@ -442,7 +442,10 @@
     S.rect(x, y, w, h, { r: o.r == null ? 12 : o.r, fill: o.pen, style: o.style || 'zig', gap: o.gap, w: o.w });
     var ls = lines(label), size = o.size || 19, lh = size * 1.25;
     var y0 = y + h / 2 - (ls.length - 1) * lh / 2 + size * 0.36 - (o.sub ? size * 0.45 : 0);
-    ls.forEach(function (t, i) { say(S, x + w / 2, y0 + i * lh, t, { anchor: 'middle', size: size, weight: o.weight, font: o.font }); });
+    ls.forEach(function (t, i) {
+      if (t === '' || (typeof t === 'object' && !t.zh && !t.en)) return;   // an empty box writes no empty <text>
+      say(S, x + w / 2, y0 + i * lh, t, { anchor: 'middle', size: size, weight: o.weight, font: o.font });
+    });
     if (o.sub) say(S, x + w / 2, y0 + ls.length * lh - size * 0.1, o.sub, { anchor: 'middle', size: Math.round(size * 0.74), ink: '2', font: o.subFont });
     return { x: x, y: y, w: w, h: h };
   };

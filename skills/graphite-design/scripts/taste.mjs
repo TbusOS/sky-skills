@@ -190,6 +190,20 @@ function selfTest() {
   const okT = tr > 0 && end.trace.hatchGap.every(s => s.kind === 'pick');
   if (!okT) fails++;
   console.log(`  ${okT ? '通过' : '失败'}  explain lists the ${tr} picks that moved hatchGap`);
+  // one knob must not swallow the questions. A reader whose line weight sits near the
+  // floor (1.6, floor 1.4) answers "less" again and again while the estimate creeps
+  // down; before STREAK_CAP that knob took 18 of 24 questions (2026-10-10).
+  const like2 = { lineWeight: 1.6, hatchGap: 5.8, rough: 0.55, grain: 0.2 }, ev2 = [], asked = {};
+  for (let i = 0; i < ROUNDS; i++) {
+    const now = t0 + i * day, q = T.ab(ev2, now), k = q.knob, target = like2[k] ?? T.KNOBS[k].def, [a, b] = q.values;
+    const win = Math.abs(a - target) <= Math.abs(b - target) ? a : b;
+    asked[k] = (asked[k] || 0) + 1;
+    ev2.push({ ts: new Date(now).toISOString(), ...T.pick(k, win, win === a ? b : a, 'sim') });
+  }
+  const [topK, topN] = Object.entries(asked).sort((x, y) => y[1] - x[1])[0];
+  const okS = topN / ROUNDS <= 0.4;
+  if (!okS) fails++;
+  console.log(`  ${okS ? '通过' : '失败'}  no knob takes over the questions: busiest is ${topK}, ${topN} of ${ROUNDS} (limit 40%)`);
   console.log(`\n自测:${fails ? fails + ' 项失败' : '全部通过'}`);
   return fails ? 1 : 0;
 }

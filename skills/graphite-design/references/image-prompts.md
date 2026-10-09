@@ -1,7 +1,7 @@
 # 出图模型:怎么出这套画风的插画
 
 代码画不出的大场景、电影画面、壁纸,交给出图模型。本文件分两部分:
-一是写法(任何出图工具通用),二是本 skill 七张图的原始记录(模型、日期、参考图、提示词原文、为什么选它)。
+一是写法(任何出图工具通用),二、三是本 skill 两批共 13 张图的原始记录(模型、日期、参考图、提示词原文、为什么选它)。
 
 ## 一、写法
 
@@ -19,7 +19,7 @@ codex exec -m gpt-6-astra -C "$PWD" --skip-git-repo-check -s workspace-write \
 - 一张图 2–6 分钟。几张图写进一个脚本顺序跑,别并发。
 - 出图结果不能按种子复现;要重做时用同样的提示词和参考图,结果相近,不会一模一样
   (出处:ai-doc `explain-src/autoresearch/illustrations/intro-night.md`「GPT 出图不能按种子复现」)。
-  所以本 skill 的 7 张图逐张留了记录(本文件第二部分)。
+  所以本 skill 的 13 张图逐张留了记录(本文件第二、三部分)。
 
 ### 提示词骨架
 
@@ -39,7 +39,7 @@ Save the PNG in the current directory as <名字>.png and reply with only its pa
 ```
 
 要点(出处:ai-doc `explain-src/autoresearch/illustrations/intro-night.md` 的「怎么选出来的」表,
-以及本文件第二部分的 7 张图):
+以及本文件第二、三部分的 13 张图):
 
 1. **画风靠参考图定,文字只描述手法。** 只写「铅笔风」出来的线干净但偏冷,像图标;附上参考图后铅笔质感才对。
 2. **同一套里的第二张,附上第一张已定稿的图**,角色才长得一样(本 skill 的人和机器人跨了五张图)。
@@ -62,7 +62,7 @@ flat = np.abs(im - im[cy, cx]).sum(axis=2) < 30      # 和中心颜色接近的�
 浅、深两张图都量一遍,差几个像素以内才能共用一组百分比(本 skill 首屏图:差不到 2px)。
 要叠的图放在比量出的区域再往里收一点的地方,避开画面里伸进来的东西(比如机器人举起的笔)。
 
-## 二、本 skill 的七张图
+## 二、第一批七张:首屏、电影画面、壁纸
 
 共同点:2026-10-10,Codex CLI 0.159.2,`codex exec -m gpt-6-astra`。画风参考图都是 ai-doc 的
 `docs/assets/explain/autoresearch/intro-night.webp`(转 PNG)。成品转 WebP(质量 82)放在 `demos/graphite-design/media/`。
@@ -168,3 +168,103 @@ Save the PNG in the current directory as wall-phone-v1.png and reply with only i
 ```
 
 要求 1920×1080 时实际拿到 1672×941,壁纸页按实际尺寸标,没有放大。
+
+## 三、第二批六张:竖屏封面和角色姿势表
+
+2026-10-10,同一版 Codex CLI 和模型。每张附两张图:画风参考(同上)+ 第一批的 `hero` 成品(让角色保持同一套)。
+六张各出一次,验收全过,没有重出。
+
+| 文件 | 尺寸 | 验收时核对的 |
+|---|---|---|
+| `cover-code.webp` | 941×1672 | 没有字;上面 42% 没有画东西(从顶往下第一条深线在 y 709);屏幕是空的浅蓝 |
+| `cover-board.webp` | 941×1672 | 深色;黑板上只有曲线、点和箭头,**没有字和数字**(这张最容易出字);上面 33% 空(黑板上沿 y 560);台灯是唯一光源 |
+| `cover-walk.webp` | 941×1672 | 背影,两个角色手牵手;上面 56% 只有天空和淡云(山线 y 940) |
+| `poses-robot.webp` | 1672×941 | 八个姿势互不重叠,机器人和 `hero` 是同一个(圆头、两点眼、橙色天线球) |
+| `poses-person.webp` | 1672×941 | 八个姿势;同一个人(发髻、蓝毛衣)。裤子是米白色 |
+| `poses-duo.webp` | 1672×941 | 六个互动;这张人物穿牛仔裤,和上一张不同 —— 提示词没写裤子颜色,两次各画各的。要一致就在提示词里写死 |
+
+「上面多少没有画东西」的量法:转灰度,取最上面 3% 的中位数当底色,从上往下找第一行
+有 3 个以上像素和底色差 70 以上的,那一行就是画面开始的地方。量出的行和图上的物体(天线球、黑板上沿、山线)位置对得上。
+
+姿势表的底色是纸色(约 #fcf7e5),不是透明的。放到浅色页面上用 `mix-blend-mode: multiply`;深色页面上当一张卡片放。
+
+### 提示词原文
+
+`cover-code`:
+
+```
+Attached image 1 is the STYLE REFERENCE (drawing technique only: soft graphite pencil lines with slight texture, warm cream paper, sparse coloured-pencil fills, friendly rounded figures, lots of empty paper). Attached image 2 is an approved illustration from the SAME SERIES; keep its characters (the young woman with a hair bun in a soft blue sweater, the small round light-grey robot with two dot eyes and an orange antenna ball) and its pencil style exactly. Do not copy either composition.
+
+Use your image generation tool to create ONE tall 9:16 vertical video cover (for example 1080x1920):
+- The top 38 % is plain warm cream paper with nothing in it (a title will be laid over it later).
+- Lower part: the small robot sits at a small wooden desk typing on an open laptop whose screen is a flat, evenly lit pale-blue rectangle with nothing drawn on it. A few blank sticky notes (yellow) on the desk edge, a mug, two pencils. The robot looks at the viewer with a small happy wave of one hand.
+- Colour budget: cream paper, graphite lines, blue only on the laptop screen, yellow only on the sticky notes, orange only on the antenna ball, light wood for the desk.
+- Absolutely no text, letters, digits, equations, logos, UI or watermark anywhere.
+Save the PNG in the current directory as cover-code-v1.png and reply with only its path and pixel size.
+```
+
+`cover-board`:
+
+```
+Attached image 1 is the STYLE REFERENCE (drawing technique only: soft graphite pencil lines with slight texture, warm cream paper, sparse coloured-pencil fills, friendly rounded figures, lots of empty paper). Attached image 2 is an approved illustration from the SAME SERIES; keep its characters (the young woman with a hair bun in a soft blue sweater, the small round light-grey robot with two dot eyes and an orange antenna ball) and its pencil style exactly. Do not copy either composition.
+
+Use your image generation tool to create ONE tall 9:16 vertical video cover (for example 1080x1920) in a DARK palette:
+- Deep navy-ink paper (around #141a26), soft light-grey chalk/pencil lines.
+- The top 35 % is calm dark paper with nothing in it (a title will be laid over it later).
+- Middle and lower part: a large dark slate blackboard; on it, drawn in soft chalk, ONLY one smooth U-shaped curve and five small chalk dots stepping down along it towards the bottom, with short arrows between the dots. The small robot stands on a little step stool at the right of the board, holding a stick of chalk, looking back at the viewer. A warm small desk lamp glow at the lower left.
+- The chalk drawing must contain no letters, digits or symbols of any kind — only the curve, the dots and the arrows.
+- Absolutely no text, letters, digits, equations, logos, UI or watermark anywhere.
+Save the PNG in the current directory as cover-board-v1.png and reply with only its path and pixel size.
+```
+
+`cover-walk`:
+
+```
+Attached image 1 is the STYLE REFERENCE (drawing technique only: soft graphite pencil lines with slight texture, warm cream paper, sparse coloured-pencil fills, friendly rounded figures, lots of empty paper). Attached image 2 is an approved illustration from the SAME SERIES; keep its characters (the young woman with a hair bun in a soft blue sweater, the small round light-grey robot with two dot eyes and an orange antenna ball) and its pencil style exactly. Do not copy either composition.
+
+Use your image generation tool to create ONE tall 9:16 vertical video cover (for example 1080x1920):
+- The top 42 % is an open early-morning sky: warm cream paper with a very faint wash of peach near the horizon and light blue higher up, one or two small soft clouds, otherwise empty (a title will be laid over it later).
+- Lower part: a winding path through gentle green hills leading away into the distance. The young woman and the small robot walk side by side along the path towards the horizon, seen from behind, small in the frame, the robot holding her hand. A low sun just rising over the far hills.
+- Colour budget: cream paper, graphite lines, soft green hills, peach and warm yellow only in the sunrise, blue only on the sweater and the high sky, orange only on the antenna ball.
+- Absolutely no text, letters, digits, equations, logos, UI or watermark anywhere.
+Save the PNG in the current directory as cover-walk-v1.png and reply with only its path and pixel size.
+```
+
+`poses-robot`:
+
+```
+Attached image 1 is the STYLE REFERENCE (drawing technique only: soft graphite pencil lines with slight texture, warm cream paper, sparse coloured-pencil fills, friendly rounded figures, lots of empty paper). Attached image 2 is an approved illustration from the SAME SERIES; keep its characters (the young woman with a hair bun in a soft blue sweater, the small round light-grey robot with two dot eyes and an orange antenna ball) and its pencil style exactly. Do not copy either composition.
+
+Use your image generation tool to create ONE wide 16:9 character pose sheet (for example 1920x1080) of the small robot, like a sticker sheet:
+- Plain warm cream paper background, no ground lines, no scenery.
+- Eight separate full-body poses of the SAME robot, arranged in two rows of four, evenly spaced with plenty of empty paper between them so each can be cut out: 1 waving hello, 2 thinking with one hand on its chin, 3 typing on a small laptop on its knees, 4 carrying a cardboard box, 5 pointing to the right, 6 jumping with both arms up in joy, 7 sitting asleep with eyes closed, 8 looking through a magnifying glass.
+- Same proportions, same size and same line weight in every pose. Light grey body with a little graphite shading, orange antenna ball, small props in light colours.
+- Absolutely no text, letters, digits, equations, logos, UI or watermark anywhere.
+Save the PNG in the current directory as poses-robot-v1.png and reply with only its path and pixel size.
+```
+
+`poses-person`:
+
+```
+Attached image 1 is the STYLE REFERENCE (drawing technique only: soft graphite pencil lines with slight texture, warm cream paper, sparse coloured-pencil fills, friendly rounded figures, lots of empty paper). Attached image 2 is an approved illustration from the SAME SERIES; keep its characters (the young woman with a hair bun in a soft blue sweater, the small round light-grey robot with two dot eyes and an orange antenna ball) and its pencil style exactly. Do not copy either composition.
+
+Use your image generation tool to create ONE wide 16:9 character pose sheet (for example 1920x1080) of the young woman, like a sticker sheet:
+- Plain warm cream paper background, no ground lines, no scenery.
+- Eight separate full-body poses of the SAME woman (hair bun, soft blue sweater, light trousers), arranged in two rows of four, evenly spaced with plenty of empty paper between them: 1 waving hello, 2 thinking with a hand on her chin, 3 reading an open book, 4 typing on a laptop on a small stool, 5 pointing to the right, 6 cheering with both arms up, 7 holding a mug and smiling, 8 walking with a backpack.
+- Same proportions, size and line weight in every pose; friendly simple face; blue only on the sweater.
+- Absolutely no text, letters, digits, equations, logos, UI or watermark anywhere.
+Save the PNG in the current directory as poses-person-v1.png and reply with only its path and pixel size.
+```
+
+`poses-duo`:
+
+```
+Attached image 1 is the STYLE REFERENCE (drawing technique only: soft graphite pencil lines with slight texture, warm cream paper, sparse coloured-pencil fills, friendly rounded figures, lots of empty paper). Attached image 2 is an approved illustration from the SAME SERIES; keep its characters (the young woman with a hair bun in a soft blue sweater, the small round light-grey robot with two dot eyes and an orange antenna ball) and its pencil style exactly. Do not copy either composition.
+
+Use your image generation tool to create ONE wide 16:9 sheet (for example 1920x1080) of the young woman and the small robot together, like a sticker sheet:
+- Plain warm cream paper background, no scenery.
+- Six separate small scenes in two rows of three, evenly spaced with plenty of empty paper between them: 1 a high five, 2 the robot handing her a sheet of paper, 3 both looking at a laptop screen that is a blank pale-blue rectangle, 4 carrying one big cardboard box together, 5 sitting back to back on the floor each reading, 6 both pointing at something far away to the upper right.
+- Same character proportions, size and line weight in every scene.
+- Absolutely no text, letters, digits, equations, logos, UI or watermark anywhere.
+Save the PNG in the current directory as poses-duo-v1.png and reply with only its path and pixel size.
+```

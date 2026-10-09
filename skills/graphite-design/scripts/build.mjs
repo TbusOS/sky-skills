@@ -31,6 +31,7 @@ const Props = require(join(SKILL, 'assets/props.js'));
 const args = process.argv.slice(2);
 const CHECK = args.includes('--check');
 const ONLY = (args.find(a => a.startsWith('--only=')) || '').slice(7);
+const SRC = (args.find(a => a.startsWith('--src=')) || '').slice(6);   // dev: load only this templates/src file
 
 // The pencil filter lives in sketch.js (Sketch.filters) so pages, this builder and
 // anyone else's code use the same one. House style = default taste values.
@@ -47,7 +48,7 @@ function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').
 
 async function loadFigures() {
   const dir = join(SKILL, 'templates/src');
-  const files = readdirSync(dir).filter(f => f.endsWith('.mjs')).sort();
+  const files = readdirSync(dir).filter(f => f.endsWith('.mjs') && (!SRC || f === SRC)).sort();
   const figs = [], seen = new Set();
   for (const f of files) {
     const mod = await import(pathToFileURL(join(dir, f)).href);
@@ -118,6 +119,13 @@ function renderPage(tplPath, results, cats) {
     if (!r) throw new Error(`${relative(ROOT, tplPath)}: unknown figure ${id}`);
     const shrink = /\bshrink\b/.test(cls || '');
     return `<div class="gpan">${inline(r, { cls: (cls || '').replace(/\bshrink\b/, '').trim(), shrink })}</div>`;
+  });
+  // {{desc:id}}: the figure's own description, both languages. Descriptions quote
+  // numbers the figure computed, so a page caption written this way cannot go stale.
+  s = s.replace(/\{\{desc:([a-z0-9-]+)\}\}/g, (_, id) => {
+    const r = byId.get(id);
+    if (!r || !r.fig.desc) throw new Error(`${relative(ROOT, tplPath)}: no description for figure ${id}`);
+    return `<span class="lang-zh">${esc(r.fig.desc.zh)}</span><span class="lang-en">${esc(r.fig.desc.en)}</span>`;
   });
   s = s.replace('{{filters}}', `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>${FILTERS}</defs></svg>`);
   const gal = results.filter(r => !isPage(r.fig));

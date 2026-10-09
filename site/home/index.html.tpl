@@ -676,7 +676,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
       <a href="demos/primer-design/tech/index.html"><span class="lang-en">primer technical set</span><span class="lang-zh">primer 技术图解</span></a>
       <a href="demos/lectern-design/diagrams.html"><span class="lang-en">lectern board pack</span><span class="lang-zh">lectern board pack</span></a>
       <a href="demos/relief-design/diagrams.html"><span class="lang-en">relief figure index</span><span class="lang-zh">relief 框图索引</span></a>
-      <a href="demos/graphite-design/diagrams.html"><span class="lang-en">graphite gallery · 27 figures</span><span class="lang-zh">graphite 图例库 · 27 张</span></a>
+      <a href="demos/graphite-design/diagrams.html"><span class="lang-en">graphite gallery · 37 figures</span><span class="lang-zh">graphite 图例库 · 37 张</span></a>
       <a href="demos/anthropic-design/hardware.html"><span class="lang-en">hardware data path</span><span class="lang-zh">硬件数据通路</span></a>
       <a href="demos/anthropic-design/bringup.html"><span class="lang-en">panel bring-up</span><span class="lang-zh">屏的点亮</span></a>
       <a href="demos/anthropic-design/packaging.html"><span class="lang-en">chip assembly</span><span class="lang-zh">芯片装配</span></a>

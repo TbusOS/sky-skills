@@ -1,6 +1,6 @@
 ---
 name: graphite-design
-description: "石墨铅笔手绘画风的 HTML 讲解页、动图、短视频画面和壁纸。定死的只有五样:暖纸底(深色版是藏青墨纸 + 粉笔线,另画不反相)、深灰褐石墨线(会抖、冲出角)、少量来回涂的彩铅(一种颜色一件事,大片留白)、手写批注(霞鹜文楷)、先线后色按讲故事顺序一笔一笔画出来;版式、构图、角色、动画方式都自由。配 assets/sketch.js(带种子的手绘线、彩铅排线、落笔时间表)+ props.js(机器人、人物、物件、框图节点、代码卡)+ 27 张图例(角色 · 场景 · 电影画风 · 框图架构 · 流程图 · 代码大白话 · 数学算法 · 数据图 · 标注,22 张会动)。大场景、电影画面、壁纸交给出图模型(本机 codex -m gpt-6-astra,提示词模板在 references/image-prompts.md),图表类用代码画,两者可叠用。scripts/export.mjs 逐帧导出 MP4 / GIF / PNG;scripts/taste.mjs 记下这个人选了哪张、说了什么、审查器查出什么,下次按他的口味调参数。TRIGGER: 手绘风 / 铅笔画风 / 素描风 / 彩铅 / 白板动画 / 白板手绘 / 手绘动图 / 手绘讲解视频 / 代码大白话动图 / 算法动图 / 手绘流程图 / 手绘架构图 / 电影感插画 / 手绘壁纸 / ai-doc 那种画风 / graphite 风格 / pencil sketch / hand-drawn / whiteboard animation / sketchy diagram. DO NOT TRIGGER: 新拟态凹凸框图(relief-design)、厚描边零基础图画书(primer-design)、anthropic 配色编辑长文(anthropic-design)、照片级 3D 硬件(hardware-3d)、应用界面(atelier-design)。"
+description: "石墨铅笔手绘画风的 HTML 讲解页、动图、短视频画面和壁纸。定死的只有五样:暖纸底(深色版是藏青墨纸 + 粉笔线,另画不反相)、深灰褐石墨线(会抖、冲出角)、少量来回涂的彩铅(一种颜色一件事,大片留白)、手写批注(霞鹜文楷)、先线后色按讲故事顺序一笔一笔画出来;版式、构图、角色、动画方式都自由。配 assets/sketch.js(带种子的手绘线、彩铅排线、落笔时间表)+ props.js(机器人、人物、物件、框图节点、代码卡)+ 37 张图例(角色 · 场景 · 电影画风 · 框图架构 · 流程图 · 代码大白话 · 数学算法 · 数据图 · 标注 · 越用越懂你,32 张会动;含傅立叶、拉格朗日、LRU、调用栈、CFS 调度、内核 read 路径)。大场景、电影画面、壁纸交给出图模型(本机 codex -m gpt-6-astra,提示词模板在 references/image-prompts.md),图表类用代码画,两者可叠用。scripts/export.mjs 逐帧导出 MP4 / GIF / PNG;scripts/taste.mjs 记下这个人选了哪张、说了什么、审查器查出什么,下次按这个人的口味调参数。TRIGGER: 手绘风 / 铅笔画风 / 素描风 / 彩铅 / 白板动画 / 白板手绘 / 手绘动图 / 手绘讲解视频 / 代码大白话动图 / 算法动图 / 手绘流程图 / 手绘架构图 / 电影感插画 / 手绘壁纸 / ai-doc 那种画风 / graphite 风格 / pencil sketch / hand-drawn / whiteboard animation / sketchy diagram. DO NOT TRIGGER: 新拟态凹凸框图(relief-design)、厚描边零基础图画书(primer-design)、anthropic 配色编辑长文(anthropic-design)、照片级 3D 硬件(hardware-3d)、应用界面(atelier-design)。"
 last-verified: 2026-10-10
 ---
 
@@ -30,7 +30,7 @@ last-verified: 2026-10-10
 版式、构图、用哪些角色和道具、用哪几支彩铅、动画怎么动、标题用什么字、位图还是代码、做成网页还是视频还是壁纸。
 
 **图例是例子,不是模板。** 学的是材料和手法:拿 `templates/src/` 里的代码改字、改颜色、改数据,
-或者照着 `assets/props.js` 的写法画一个新角色。别把 27 张图例的版式当成「这个风格只能长这样」。
+或者照着 `assets/props.js` 的写法画一个新角色。别把 37 张图例的版式当成「这个风格只能长这样」。
 
 ## 3. 谁来画:代码、出图模型、还是叠起来
 
@@ -45,7 +45,7 @@ last-verified: 2026-10-10
 
 出图模型:本机 `codex exec -m gpt-6-astra`,**提示词走标准输入**(`-i` 会把后面的提示词也当成图片路径)。
 提示词模板、参考图怎么附、夜间版怎么出、叠加区域怎么量,见 `references/image-prompts.md`;
-本 skill 用到的 7 张图的提示词原文和挑选理由也记在那里。没有出图工具时全部用代码画,`templates/src/20-scene.mjs` 有现成场景。
+本 skill 用到的 13 张图的提示词原文和挑选理由也记在那里。没有出图工具时全部用代码画,`templates/src/20-scene.mjs` 有现成场景。
 
 ## 4. 代码画:两个库
 
@@ -93,20 +93,25 @@ svg.innerHTML = '<defs>' + Sketch.filters() + '</defs><g filter="url(#g-pencil)"
 
 ```bash
 node scripts/taste.mjs suggest          # 画之前:按这个人的口味给出 sketch / 滤镜 / CSS 参数
-node scripts/taste.mjs ab               # 想问一题:只改一个参数,给出 A、B 两个值,各画一张给他挑
-node scripts/taste.mjs pick hatchGap 4.7 3.7 "他说右边太密"   # 他挑了 A
-node scripts/taste.mjs say "颜色太多了,线太抖"              # 他说的话,按词表换成方向
+node scripts/taste.mjs ab               # 想问一题:只改一个参数,给出 A、B 两个值,各画一张给对方挑
+node scripts/taste.mjs pick hatchGap 4.7 3.7 "说右边太密"     # 对方挑了 A
+node scripts/taste.mjs say "颜色太多了,线太抖"              # 对方说的话,按词表换成方向
 node scripts/taste.mjs ingest check_objective输出.txt       # 审查器的结果
 node scripts/taste.mjs explain hatchGap # 这个值是被哪几条记录推到现在的
 ```
 
-- **每次画完、他有反应,就记一条。** 挑了哪张(权重 1)、说了什么(1)、留下或删掉了哪张(0.5)、
+- **每次画完、对方有反应,就记一条。** 挑了哪张(权重 1)、说了什么(1)、留下或删掉了哪张(0.5)、
   critic 评审的意见(0.3,审查器不是这个人)。90 天前的记录只算一半。
 - **审查器查出的客观问题定下限,不算口味。** `check_objective` 的 O4(手机上字太小)→ 图中字号的下限;
   口味再怎么往小走也不越过它,也不会随时间淡掉。
 - 记录存在 `~/.config/sky-skills/graphite-taste.jsonl`(`SKY_TASTE_DIR` 可改),只在本机。展示页的「口味实验室」用同一套算法,导出后 `taste.mjs import` 就能接上。
 - 算法和为什么这么设计写在 `assets/taste.js` 文件头。自测:`node scripts/taste.mjs --self-test`
-  (模拟读者答 40 题,在意的参数要学到一半以上;故意选反的读者必须学不到)。
+  (模拟读者答 40 题,在意的参数要学到一半以上;故意选反的读者必须学不到;
+  不能有一个参数占掉 40% 以上的题 —— 修之前,一个口味贴着下限的读者,24 题里有 18 题问的是线宽)。
+- 「下一题问哪个参数」:挑最没把握的那个;连续几次答案都往同一边,说明还差得远,这个参数优先再问,
+  但这个加成最多算 2 次。200 个模拟读者各答 40 题:平均学到的差距从 49% 升到 73%。
+- 图例「越用越懂你」三张(`templates/src/90-taste.mjs`)是这套算法自己画的:构建时在模拟读者上真跑
+  `taste.js`,曲线上每个点都是算出来的。讲这个功能时直接用它们。
 
 ## 7. 检查
 
@@ -144,12 +149,12 @@ assets/props.js       角色、物件、图表件
 assets/taste.js       口味学习(浏览器和命令行共用)
 assets/player.js      页面:主题 / 语言切换、重画、拖进度
 assets/fonts.css      字体(本仓库里由 build_fonts.py 换成本地文件)
-templates/src/        27 张图例 + 6 个页面部件的源码 · categories.json 分类
+templates/src/        37 张图例 + 6 个页面部件的源码 · categories.json 分类
 templates/figures/    生成的单独 SVG + index.json
 scripts/build.mjs     生成图例和展示页(--check)
 scripts/export.mjs    PNG / MP4 / GIF / WebM 导出
 scripts/taste.mjs     口味档案
 references/material.md       五样材料的色值和理由
-references/image-prompts.md  出图模型的提示词写法 + 本 skill 7 张图的原始记录
-references/recipes.md        九类图各自的画法要点
+references/image-prompts.md  出图模型的提示词写法 + 本 skill 13 张图的原始记录
+references/recipes.md        十类图各自的画法要点
 ```

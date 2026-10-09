@@ -117,7 +117,11 @@ export default [
         S.raw(`<line x1="${cx}" y1="${cy}" x2="${cx + R}" y2="${cy}" class="ln w-t p-orange"/>`, { kind: 'tag' });
         S.raw(`<circle cx="${cx + R}" cy="${cy}" r="8" class="tok p-orange"/>`, { kind: 'tag' });
       }, { repeat: 'infinite', ease: 'linear', origin: `${cx}px ${cy}px` });
-      S.move(wave, t0, T, () => S.raw(`<circle cx="${wave[0][0]}" cy="${wave[0][1]}" r="8" class="tok p-blue"/>`, { kind: 'tag' }), { repeat: 'infinite', ease: 'linear' });
+      // keys at equal steps of time, not of distance: S.move spaces its keyframes by path
+      // length, so a tracer on a wave runs ahead on the steep parts and falls out of step
+      // with the radius (2026-10-10). wave[i] sits at angle i/60 of a turn, so key i is at i/60 of T.
+      const end = wave[wave.length - 1];
+      S.track(wave.map((p, i) => [t0 + i / 60 * T, p[0] - end[0], p[1] - end[1]]), () => S.raw(`<circle cx="${end[0]}" cy="${end[1]}" r="8" class="tok p-blue"/>`, { kind: 'tag' }), { repeat: 'infinite' });
     },
   },
   {

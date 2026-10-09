@@ -221,6 +221,40 @@
   "src": "templates/src/40-flow.mjs"
  },
  {
+  "id": "code-lru",
+  "cat": "code",
+  "w": 830,
+  "h": 470,
+  "motion": true,
+  "duration": 19,
+  "title": {
+   "zh": "LRU 缓存 · 哈希表找得快,双向链表记先后",
+   "en": "An LRU cache · the map finds it, the linked list keeps the order"
+  },
+  "desc": {
+   "zh": "容量 3,跑 8 次请求。map 一步跳到节点;用过的节点挪到链表最前,满了就从最后面淘汰。这一轮:命中 2 次、未命中 1 次、淘汰 2 个。",
+   "en": "Capacity 3, 8 requests. The map jumps straight to a node; a used node moves to the front, and when full the one at the back goes. This run: 2 hits, 1 miss, 2 evicted."
+  },
+  "src": "templates/src/48-code-deep.mjs"
+ },
+ {
+  "id": "code-callstack",
+  "cat": "code",
+  "w": 820,
+  "h": 520,
+  "motion": true,
+  "duration": 16.5,
+  "title": {
+   "zh": "调用栈就是调用树上的一条路 · fib(5)",
+   "en": "The call stack is one path in the call tree · fib(5)"
+  },
+  "desc": {
+   "zh": "右边每个圈是一次 fib(n) 调用,按调用顺序长出来;左边的栈只装着「从根走到当前这一次」的那条路(橙色)。fib(5) 一共调用 15 次,栈最深 5 层;fib(2) 被算了 3 遍。",
+   "en": "Each circle on the right is one call of fib(n), growing in call order; the stack on the left holds only the path from the root to the current call (orange). fib(5) makes 15 calls, 5 deep at most; fib(2) is worked out 3 times."
+  },
+  "src": "templates/src/48-code-deep.mjs"
+ },
+ {
   "id": "code-for-loop",
   "cat": "code",
   "w": 760,
@@ -272,6 +306,91 @@
   "src": "templates/src/50-code.mjs"
  },
  {
+  "id": "math-cfs",
+  "cat": "math",
+  "w": 800,
+  "h": 620,
+  "motion": true,
+  "duration": 17.7,
+  "title": {
+   "zh": "CFS 调度器 · 谁的 vruntime 最小谁先跑",
+   "en": "The CFS scheduler · smallest vruntime runs next"
+  },
+  "desc": {
+   "zh": "三个任务排在一条 vruntime 数轴上,最左边(vruntime 最小)的那个上 CPU。跑的时候 vruntime 按 1024 / 权重 的倍数涨:权重大的涨得慢,很快又排回最左边。模拟 14 轮(每轮固定 3 ms,示意):C 8 次(57%,按权重该分 56%),A 4 次(29%,按权重该分 29%),B 2 次(14%,按权重该分 15%)。这是 2.6.24–6.5 的 CFS 选法;6.6 起改用 EEVDF 选任务,6.8 起树改按虚拟截止时间排序,vruntime 按权重增长这条沿用至今(v7.0-9887-ga43fac2b5813 的 fair.c:1398)。",
+   "en": "Three tasks sit on a vruntime number line; the leftmost (smallest vruntime) gets the CPU. While it runs, its vruntime grows by 1024 / weight per ms: heavy tasks grow slowly and are soon leftmost again. 14 simulated turns (a fixed 3 ms each, for illustration): C 8 turns (57%; its weight share is 56%), A 4 turns (29%; its weight share is 29%), B 2 turns (14%; its weight share is 15%). This is how CFS picked from 2.6.24 to 6.5; since 6.6 EEVDF does the picking and since 6.8 the tree is sorted by virtual deadline, while vruntime still grows by weight (fair.c:1398 at v7.0-9887-ga43fac2b5813)."
+  },
+  "src": "templates/src/57-kernel.mjs"
+ },
+ {
+  "id": "diagram-read-path",
+  "cat": "diagram",
+  "w": 800,
+  "h": 680,
+  "motion": true,
+  "duration": 24.73,
+  "title": {
+   "zh": "调用关系 · 程序读一个 ext4 文件",
+   "en": "Who calls whom · reading an ext4 file"
+  },
+  "desc": {
+   "zh": "read() 从系统调用一路往下:VFS → ext4 → 页缓存。页缓存里有,直接拷给程序,不碰磁盘;没有,页缓存回头调 ext4 的 readahead 去读盘,读完放进页缓存再拷。框里是函数名和定义它的文件:行号(核对的内核树 v7.0-9887-ga43fac2b5813);圆点的快慢是示意,没有实测。",
+   "en": "read() goes down from the system call: VFS → ext4 → page cache. If the page cache has the data, it is copied to the program and the disk is not touched; if not, the page cache calls back into ext4's readahead to read the disk, keeps the data, then copies it. Boxes show the function and the file:line that defines it (checked at v7.0-9887-ga43fac2b5813); the dots' speed is an illustration, not a measurement."
+  },
+  "src": "templates/src/57-kernel.mjs"
+ },
+ {
+  "id": "math-fourier",
+  "cat": "math",
+  "w": 800,
+  "h": 480,
+  "motion": true,
+  "duration": 17,
+  "title": {
+   "zh": "傅立叶级数 · 方波是一串转圈的正弦叠出来的",
+   "en": "Fourier series · a square wave from circles turning on circles"
+  },
+  "desc": {
+   "zh": "四个圆一个套一个地转:频率 1、3、5、7 倍,半径是 1、1/3、1/5、1/7。最外面那个点的高度画到右边,就是四个正弦波的和,已经很像方波。右下角的柱子就是傅立叶变换算出来的东西:每个频率占多少。4 项时边角冲到方波高度的 1.184 倍;加到 400 项还是 1.179 倍——跳变处这一截冲高不会消失(吉布斯现象)。",
+   "en": "Four circles turn on each other at 1, 3, 5 and 7 times the speed, radii 1, 1/3, 1/5, 1/7. The height of the outermost point, traced to the right, is the sum of four sines — already close to a square wave. The bars are what a Fourier transform computes: how much of each frequency. With 4 terms the corner overshoots to 1.184× the wave's height; with 400 terms it is still 1.179× — the overshoot at a jump never goes away (Gibbs phenomenon)."
+  },
+  "src": "templates/src/58-math-deep.mjs"
+ },
+ {
+  "id": "math-lagrange-interp",
+  "cat": "math",
+  "w": 800,
+  "h": 480,
+  "motion": true,
+  "duration": 15,
+  "title": {
+   "zh": "拉格朗日插值 · 先造「开关」,再加权加起来",
+   "en": "Lagrange interpolation · build switches, then add them up"
+  },
+  "desc": {
+   "zh": "四个点,找一条穿过它们的曲线。先给每个点造一个「开关」曲线:在自己那点等于 1,在其余三点等于 0。再各自乘上那点的高度加起来——在任何一个点上,只有它自己的开关是 1,所以和正好是那点的高度。展开就是一个三次多项式 L(x) = 1.00 + 4.08x − 2.49x² + 0.41x³,系数由代码展开算出;把四个点代回展开式,最大误差 1e-14(浮点舍入)。",
+   "en": "Four points; find a curve through all of them. First build a \"switch\" curve for each point: 1 at its own point, 0 at the other three. Multiply each by its point's height and add. At any point only its own switch is on, so the sum is exactly that height. Expanded, it is the cubic L(x) = 1.00 + 4.08x − 2.49x² + 0.41x³; the coefficients are expanded in code; put back into it, the four points are off by at most 1e-14 (floating-point rounding)."
+  },
+  "src": "templates/src/58-math-deep.mjs"
+ },
+ {
+  "id": "math-lagrange-mult",
+  "cat": "math",
+  "w": 800,
+  "h": 480,
+  "motion": true,
+  "duration": 16.7,
+  "title": {
+   "zh": "拉格朗日乘数 · 路上的最高点,是路和等高线相切的地方",
+   "en": "Lagrange multipliers · the highest point on a road touches a contour"
+  },
+  "desc": {
+   "zh": "你只能走在路上(约束 g = 0),想走到路上最高的地方(目标 f)。每停一次画三支箭头:橙色 ∇f 指向山上最陡的方向,蓝色 ∇g 垂直于路,绿色是 ∇f 顺着路的那一截——只要绿色不为 0,沿路还能往上走。四次停下时两支箭头的夹角依次是 48°、36°、20°、0°;最后一点是代码在路上找到的最高点,夹角 0°,等高线正好和路相切:∇f = λ∇g。",
+   "en": "You may only walk on the road (constraint g = 0) and want its highest point (objective f). At each stop three arrows: orange ∇f points straight uphill, blue ∇g is perpendicular to the road, green is the part of ∇f along the road — while green is not zero you can still climb by walking on. The angle between the two arrows at the four stops: 48°, 36°, 20°, 0°. The last stop is the highest point the code finds on the road: 0°, the contour just touches the road, ∇f = λ∇g."
+  },
+  "src": "templates/src/58-math-deep.mjs"
+ },
+ {
   "id": "math-gradient-descent",
   "cat": "math",
   "w": 760,
@@ -311,7 +430,7 @@
   "w": 760,
   "h": 360,
   "motion": true,
-  "duration": 8.8,
+  "duration": 2.6,
   "title": {
    "zh": "正弦波是转圈画出来的",
    "en": "A sine wave is a circle, unrolled"
@@ -457,5 +576,56 @@
    "en": "Where words and subjects go in a short video: title on top, subtitles below, the right edge and bottom left for the platform's buttons. Drawn at 16:9 and 9:16."
   },
   "src": "templates/src/80-mark.mjs"
+ },
+ {
+  "id": "taste-loop",
+  "cat": "taste",
+  "w": 840,
+  "h": 500,
+  "motion": true,
+  "duration": 17.4,
+  "title": {
+   "zh": "越用越懂你 · 一圈是怎么转的",
+   "en": "Learns your taste · how the loop turns"
+  },
+  "desc": {
+   "zh": "你的每个反应记一行日志:二选一和说一句各算 1 份,留下或删掉算 0.5 份,审查器的意见算 0.3 份。每个旋钮从日志里算一个加权平均,越旧的记录越轻(半衰期 90 天)。审查器查出的客观问题不算口味,是硬下限,永远不会被淡忘。下一次,它挑自己最没把握的那个旋钮,拿两张只差这一处的图问你。",
+   "en": "Every reaction is one line in a log: a pick or a sentence weighs 1, keep or delete 0.5, a reviewer's note 0.3. Each knob is a weighted mean over the log, older lines weigh less (half-life 90 days). An objective problem found by a checker is not taste: it is a hard floor and never fades. Next time it asks about the knob it is least sure of, with two drawings that differ only there."
+  },
+  "src": "templates/src/90-taste.mjs"
+ },
+ {
+  "id": "taste-converge",
+  "cat": "taste",
+  "w": 840,
+  "h": 470,
+  "motion": true,
+  "duration": 17.64,
+  "title": {
+   "zh": "一个旋钮怎么学到位",
+   "en": "How one knob learns"
+  },
+  "desc": {
+   "zh": "读者想要疏一点的彩铅(间距 5.5)。出厂是 3.7;答了 10 次之后学到 5.25。100 天没用,旧答案按半衰期变轻,值往出厂回落到 4.92;读者这时改成想要 4.2,又答 7 次,学到 4.29。曲线上每个点都是 taste.js 在那一天真算出来的。",
+   "en": "The reader wants sparser colouring (spacing 5.5). House value 3.7; after 10 answers it has learned 5.25. 100 days unused: old answers fade and the value drifts back to 4.92. The reader now wants 4.2; 7 more answers and it is at 4.29. Every point is what taste.js computes on that day."
+  },
+  "src": "templates/src/90-taste.mjs"
+ },
+ {
+  "id": "taste-three",
+  "cat": "taste",
+  "w": 840,
+  "h": 440,
+  "motion": true,
+  "duration": 6.6,
+  "title": {
+   "zh": "同一张图,三个人用出三种样子",
+   "en": "One drawing, three readers, three looks"
+  },
+  "desc": {
+   "zh": "中间是出厂样子。左右两位各说了两句话,再各答了 60 个二选一(每次问哪个旋钮,由程序挑它最没把握的那个)。画的内容和随机种子一模一样,不同的只有学到的口味:线条抖动、彩铅疏密、浓淡、线宽。",
+   "en": "The middle is the house look. The readers on either side each said two things, then answered 60 A-or-B questions (the learner chose which knob to ask each time). Same drawing, same random seed; only the learned taste differs: wobble, pencil spacing, strength, line weight."
+  },
+  "src": "templates/src/90-taste.mjs"
  }
 ]
