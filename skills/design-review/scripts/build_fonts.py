@@ -36,6 +36,16 @@ CJK_SOURCES = {
     'Noto Serif SC': 'https://raw.githubusercontent.com/notofonts/noto-cjk/main/Serif/Variable/OTF/Subset/NotoSerifSC-VF.otf',
 }
 
+# 不在 Google Fonts 上的中日韩字体:从上游发布页取完整字体,同样按仓库用字做子集。
+# 哪个 fonts.css 要用,就在 @import 那行上面写一行注释(族名 + 字重,空格分隔):
+#     /* local-font: LXGW WenKai GB Screen 400 */
+# 族名要和字体文件自己的英文名一致 —— LICENSE.md 按 name 表认族名,对不上会把子集写成「原样搬运」。
+LOCAL_CJK = {
+    # 霞鹜文楷 GB 屏幕阅读版,graphite-design 的手写体。2026-10-10 加入,v1.522,OFL 1.1
+    'LXGW WenKai GB Screen': 'https://github.com/lxgw/LxgwWenKai-Screen/releases/download/v1.522/LXGWWenKaiGBScreen.ttf',
+}
+LOCAL_MARK = re.compile(r'/\* local-font: (.+?) ((?:\d{3} ?)+) \*/')
+
 
 def fetch(url, binary=True):
     with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=180) as r:
@@ -301,8 +311,18 @@ def main():
         manifest['per_css'].setdefault(owner, []).extend(faces)
         manifest['latin'] = sorted({f['file'] for v in manifest['per_css'].values() for f in v})
 
+    # ── 不在 Google 上的那几个：从 fonts.css 的 local-font 注释认领 ──
+    for f in subprocess.run(['git', 'ls-files', '*fonts*.css'],
+                            cwd=ROOT, capture_output=True, text=True).stdout.split():
+        if f.startswith('assets/fonts/'):
+            continue
+        for fam, weights in LOCAL_MARK.findall((ROOT / f).read_text(encoding='utf-8')):
+            if fam not in LOCAL_CJK:
+                sys.exit(f'{f} 要 local-font「{fam}」,可 LOCAL_CJK 里没有它的来源')
+            cjk_by_owner.setdefault(f, {}).setdefault(fam, set()).update(weights.split())
+
     # ── 中日韩：可变字体做子集，一档盖全部字重 ──
-    for fam, src in CJK_SOURCES.items():
+    for fam, src in {**CJK_SOURCES, **LOCAL_CJK}.items():
         if not any(fam in v for v in cjk_by_owner.values()):
             continue
         name = f'{slug(fam)}-subset.woff2'
@@ -332,6 +352,15 @@ def main():
               + ('' if DRY else f'  {(OUT/name).stat().st_size/1024:.0f} KB'))
 
     if not DRY:
+        # 清掉这一轮没产出的旧文件。拉丁字体按下载顺序编号，而 Google 每次给的
+        # 文件地址会变，同一个字体两次运行编号不同 —— 不清的话旧编号的文件
+        # 留在目录里，check_fonts 报「孤儿」。2026-10-10 加 graphite-design 时
+        # 连跑两次，先后冒出 6 个和 15 个孤儿。
+        produced = set(manifest['latin']) | {c['file'] for c in manifest['cjk']}
+        for f in sorted(OUT.glob('*.woff2')):
+            if f.name not in produced:
+                f.unlink()
+                print(f'  删掉这一轮没产出的旧文件 {f.name}')
         # 记下两件事，check_fonts.py 只比这两件：
         #   requested —— 生成时请求了哪些码点。仓库以后用到 requested 以外的字，
         #                 说明这份子集过期了，必须重跑。**空格那次就是这么漏的**。

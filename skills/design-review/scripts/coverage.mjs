@@ -78,6 +78,12 @@ const TARGET = {
   // still on screen, and 'git' is the repository's shape. Different questions,
   // so different pages — a reader looking for one should not scroll the others.
   relief: ['controls', 'diagram', 'hardware', 'platform', 'code', 'struct', 'debug', 'git'],
+  // graphite fixes a MATERIAL (paper, graphite line, coloured pencil, hand
+  // lettering, stroke-by-stroke drawing), not page shapes — the same stance
+  // anthropic-design took on 2026-10-07. Its references are 27 generated
+  // figures (templates/figures) and four generated showcase pages, so there is
+  // no canonical page-type to count. Empty on purpose, not forgotten.
+  graphite: [],
 };
 
 function parseArgs(argv) {

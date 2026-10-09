@@ -34,7 +34,7 @@ def install_rows():
 
 
 DESIGN = ['anthropic-design', 'apple-design', 'ember-design', 'sage-design', 'glass-design',
-          'eclat-design', 'lectern-design', 'atelier-design', 'primer-design', 'relief-design']
+          'eclat-design', 'lectern-design', 'atelier-design', 'primer-design', 'relief-design', 'graphite-design']
 DREL = ['design-review', 'design-planner', 'design-evolve']
 
 S = {
@@ -71,8 +71,8 @@ S = {
    '安静的北欧极简:米纸白、鼠尾草绿、深靛蓝墨,Instrument Serif。适合阅读应用和植物工作室。',
    DREL, [('demos/sage-design/index.html', 'Demo', 'Demo'), ('demos/sage-design/diagrams.html', 'Diagram gallery', '图例库')]),
  'design-review': ('har', 'Dr', 'review', 'Judge', '裁判',
-   'The independent evaluator for the ten design skills. It reads only the rendered page: structural, rendered, accessibility and screenshot gates, an optional LLM critic, and a learning loop that turns each miss into a known-bug row and a new check.',
-   '十个设计 skill 的独立评审。只看渲染出来的页面:结构、渲染、无障碍、截图几道检查,外加可选的 LLM 评审;每次漏掉的问题都会变成一条 known-bug 和一项新检查。',
+   'The independent evaluator for the eleven design skills. It reads only the rendered page: structural, rendered, accessibility and screenshot gates, an optional LLM critic, and a learning loop that turns each miss into a known-bug row and a new check.',
+   '十一个设计 skill 的独立评审。只看渲染出来的页面:结构、渲染、无障碍、截图几道检查,外加可选的 LLM 评审;每次漏掉的问题都会变成一条 known-bug 和一项新检查。',
    DESIGN + ['design-planner', 'design-evolve'], [('docs/HARNESS-ROADMAP.html', 'Harness roadmap', 'Harness 路线图')]),
  'gated-dual-clone': ('har', 'Gd', 'dual-clone', 'Git', 'Git',
    'Bootstraps a two-repo git workflow for protected branches: a gateway repo that pushes and a satellite repo that builds — and physically cannot reach the remote.',
@@ -134,6 +134,10 @@ S = {
    'Technical diagrams in neumorphism, where depth is the legend: raised is a thing that exists, sunken is a place you cannot reach. Seven skins.',
    '用新拟态画技术框图,深度本身就是图例:凸起是存在的东西,凹陷是够不到的地方。七套皮肤。',
    DREL + ['explain-ladder'], [('demos/relief-design/index.html', 'Demo', 'Demo'), ('skills/relief-design/references/canonical/hardware.html', 'Hardware set', '硬件图'), ('skills/relief-design/references/canonical/debug.html', 'Debugging set', '调试图')]),
+ 'graphite-design': ('des', 'Gr', 'graphite', 'Voice', '风格',
+   'Graphite pencil on warm paper, a few coloured pencils, hand lettering, drawn stroke by stroke in story order. 27 figures (22 animated) from code; scenes and film stills from an image model; frame-exact video export, and a taste log that learns what you pick.',
+   '暖纸上的石墨铅笔线、几支彩铅、手写批注,按讲故事的顺序一笔一笔画出来。27 张代码画的图例(22 张会动),场景和电影画面交给出图模型;能逐帧导出视频,还会记住你挑了哪张、慢慢调成你的口味。',
+   DREL + ['explain-ladder', 'wechat-video-publisher'], [('demos/graphite-design/index.html', 'Skill page', '介绍页'), ('demos/graphite-design/diagrams.html', 'Figure gallery', '图例库'), ('demos/graphite-design/reel.html', 'Sample reel', '短片样片'), ('demos/graphite-design/assets.html', 'Assets', '素材')]),
  'explain-ladder': ('sys', 'El', 'ladder', 'Explain', '讲解',
    'Pick the form before you write: text < diagram < page < video. STE writing with an on / off switch, ASCII diagrams, throwaway pages rebuilt byte for byte, and video only after a yes.',
    '先选形式再动笔:文字 < 图 < 网页 < 视频。STE 写法带开关、ASCII 图、能逐字节重建的看懂就扔页,视频要点头才做。',

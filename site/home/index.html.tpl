@@ -4,22 +4,23 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>sky-skills — a curated collection of Claude Code Skills</title>
-<meta name="description" content="Claude Code Skills for kernel engineering, technical PDFs, video and documents, ten design voices that render HTML their own way, and an independent reviewer that reads only the rendered page.">
+<meta name="description" content="Claude Code Skills for kernel engineering, technical PDFs, video and documents, eleven design voices that render HTML their own way, and an independent reviewer that reads only the rendered page.">
 <meta name="theme-color" content="#141413">
-<meta property="og:title" content="sky-skills — one request, ten voices, one judge">
-<meta property="og:description" content="Claude Code Skills: kernel engineering, PDFs, video, ten design voices, and a harness whose generators never grade their own work.">
+<meta property="og:title" content="sky-skills — one request, eleven voices, one judge">
+<meta property="og:description" content="Claude Code Skills: kernel engineering, PDFs, video, eleven design voices, and a harness whose generators never grade their own work.">
 <meta property="og:type" content="website">
 <link rel="stylesheet" href="skills/anthropic-design/assets/fonts.css">
 <link rel="stylesheet" href="skills/ember-design/assets/fonts.css">
 <link rel="stylesheet" href="skills/sage-design/assets/fonts.css">
 <link rel="stylesheet" href="skills/glass-design/assets/fonts.css">
 <link rel="stylesheet" href="skills/primer-design/assets/fonts.css">
+<link rel="stylesheet" href="skills/graphite-design/assets/fonts.css">
 <link rel="stylesheet" href="skills/atelier-design/assets/fonts.css">
 <script>(function(){var h=document.documentElement,l='en';h.classList.add('js');try{var s=localStorage.getItem('sky-lang');l=(s==='zh'||s==='en')?s:((navigator.language||'').toLowerCase().indexOf('zh')===0?'zh':'en');}catch(e){}h.setAttribute('data-lang',l);h.lang=l==='zh'?'zh-CN':'en';})();</script>
 <style>
 /* ── tokens ─────────────────────────────────────────────────────────────
    The house palette is anthropic's (cream, ink, orange, low-saturation
-   semantic hues); the night bands use its terminal colours. Each of the ten
+   semantic hues); the night bands use its terminal colours. Each of the eleven
    voices further down carries its own real palette, taken from its skill. */
 :root {
   color-scheme: light;
@@ -104,7 +105,7 @@ h3 { font-size: 20px; line-height: 1.3; }
 .prism-label { position: relative; top: 24px; font: 600 11px/1.25 var(--mono); color: var(--night-text); text-align: center; letter-spacing: .04em; }
 .prism .glow { opacity: .25; transition: opacity .5s; }
 .prism.flash .glow { opacity: 1; }
-.tiles { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px 14px; }
+.tiles { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px 14px; }
 .vt-wrap { position: relative; padding-bottom: 22px; }
 .vt { position: relative; aspect-ratio: 4 / 4.6; border-radius: 14px; padding: 9px; display: flex; flex-direction: column; gap: 6px; background: var(--vbg); color: var(--vink); overflow: hidden; opacity: .45; transform: scale(.96); transition: opacity .5s, transform .5s, box-shadow .5s; box-shadow: 0 10px 30px -18px rgba(0,0,0,.8); }
 .vt.lit { opacity: .85; transform: none; }
@@ -126,7 +127,7 @@ h3 { font-size: 20px; line-height: 1.3; }
   .vt { padding: 6px; border-radius: 10px; }
   .vt-name { font-size: 10px; }
 }
-/* the ten voices, real palettes from each skill */
+/* the eleven voices, real palettes from each skill */
 .vt[data-v="apple"]     { --vbg: #ffffff; --vink: #1d1d1f; --vacc: #0066cc; --vfont: -apple-system, "SF Pro Display", "Helvetica Neue", system-ui, sans-serif; }
 .vt[data-v="anthropic"] { --vbg: #faf9f5; --vink: #141413; --vacc: #d97757; --vfont: "Poppins", sans-serif; }
 .vt[data-v="ember"]     { --vbg: #fff2df; --vink: #312520; --vacc: #c49464; --vfont: "Fraunces", Georgia, serif; --vr: 3px; }
@@ -137,6 +138,7 @@ h3 { font-size: 20px; line-height: 1.3; }
 .vt[data-v="atelier"]   { --vbg: radial-gradient(70% 60% at 0% 0%, #e8ae86, transparent 70%), radial-gradient(70% 60% at 100% 100%, #e39ba8, transparent 70%), #e9c3a8; --vink: #2c2723; --vacc: linear-gradient(90deg, #f5854f, #dd4f92); --vfont: "Plus Jakarta Sans", sans-serif; }
 .vt[data-v="primer"]    { --vbg: #fdfaf3; --vink: #243244; --vacc: #7a5cd6; --vfont: "Fredoka", "Nunito", sans-serif; border: 2.5px solid #243244; }
 .vt[data-v="relief"]    { --vbg: #efe3cd; --vink: #4a4036; --vacc: #ef7a1e; --vfont: "Inter", sans-serif; box-shadow: inset 3px 3px 6px #c9b58f, inset -3px -3px 6px #fffaf0, 0 10px 30px -18px rgba(0,0,0,.8); }
+.vt[data-v="graphite"]  { --vbg: #f6efe2; --vink: #39332c; --vacc: #e2772c; --vfont: "LXGW WenKai GB Screen", "Kaiti SC", cursive; border: 1.6px solid #39332c; border-radius: 12px 16px 11px 15px / 15px 11px 16px 12px; }
 .vt[data-v="atelier"] .vt-btn, .vt[data-v="glass"] .vt-btn { box-shadow: 0 0 10px rgba(255,255,255,.35); }
 
 /* stats band */
@@ -433,7 +435,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
       sky-skills
     </a>
     <div class="nav-links">
-      <a href="#voices"><span class="lang-en">Voices</span><span class="lang-zh">十种风格</span></a>
+      <a href="#voices"><span class="lang-en">Voices</span><span class="lang-zh">十一种风格</span></a>
       <a href="#table"><span class="lang-en">All skills</span><span class="lang-zh">全部 skill</span></a>
       <a href="#harness"><span class="lang-en">Harness</span><span class="lang-zh">评审回路</span></a>
       <a href="#kernel"><span class="lang-en">Kernel</span><span class="lang-zh">内核</span></a>
@@ -452,14 +454,14 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
       <div>
         <span class="kicker"><span class="lang-en">Claude Code Skills · MIT</span><span class="lang-zh">Claude Code Skills · MIT 开源</span></span>
         <h1>
-          <span class="lang-en"><span class="l1">One request.</span><br><span class="l2">Ten voices.</span><br><span class="l3">One judge.</span></span>
-          <span class="lang-zh"><span class="l1">一个需求,</span><br><span class="l2">十种声音,</span><br><span class="l3">一个裁判。</span></span>
+          <span class="lang-en"><span class="l1">One request.</span><br><span class="l2">Eleven voices.</span><br><span class="l3">One judge.</span></span>
+          <span class="lang-zh"><span class="l1">一个需求,</span><br><span class="l2">十一种声音,</span><br><span class="l3">一个裁判。</span></span>
         </h1>
       </div>
       <div>
         <p class="lede">
-          <span class="lang-en">sky-skills is a folder of skills for Claude Code: kernel engineering, technical PDFs, video and documents, and ten design voices that each render HTML their own way. The generators never grade their own work — a separate reviewer reads only the rendered page, and the numbers on this page are checked against the disk.</span>
-          <span class="lang-zh">sky-skills 是一组给 Claude Code 用的 skill:内核开发、读技术 PDF、做视频和文档,还有十个各自渲染 HTML 的设计风格。生成的一方从不给自己打分 —— 另有一个评审只看渲染出来的页面;这一页上的数字,也由脚本对着磁盘核对。</span>
+          <span class="lang-en">sky-skills is a folder of skills for Claude Code: kernel engineering, technical PDFs, video and documents, and eleven design voices that each render HTML their own way. The generators never grade their own work — a separate reviewer reads only the rendered page, and the numbers on this page are checked against the disk.</span>
+          <span class="lang-zh">sky-skills 是一组给 Claude Code 用的 skill:内核开发、读技术 PDF、做视频和文档,还有十一个各自渲染 HTML 的设计风格。生成的一方从不给自己打分 —— 另有一个评审只看渲染出来的页面;这一页上的数字,也由脚本对着磁盘核对。</span>
         </p>
         <div class="cta">
           <a class="btn btn--hot" href="#install"><span class="lang-en">Install in 60 seconds</span><span class="lang-zh">60 秒装好</span></a>
@@ -468,7 +470,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
       </div>
     </div>
 
-    <div class="stage" id="stage" role="img" aria-label="Illustration: a request passes a trigger match, splits into ten design voices, and the picked page is checked">
+    <div class="stage" id="stage" role="img" aria-label="Illustration: a request passes a trigger match, splits into eleven design voices, and the picked page is checked">
       <svg class="beams" id="beams" aria-hidden="true"></svg>
       <div class="req" id="req" aria-hidden="true">
         <span class="req-label"><span class="lang-en">a request</span><span class="lang-zh">一个需求</span></span>
@@ -494,8 +496,8 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
     </p>
 
     <div class="stats">
-      <div class="stat"><b data-count="25">25</b> <span><span class="lang-en">skills total</span><span class="lang-zh">全部 25 个 skill</span></span></div>
-      <div class="stat"><b data-count="10">10</b> <span><span class="lang-en">design skills</span><span class="lang-zh">个设计 skill</span></span></div>
+      <div class="stat"><b data-count="26">26</b> <span><span class="lang-en">skills total</span><span class="lang-zh">全部 26 个 skill</span></span></div>
+      <div class="stat"><b data-count="11">11</b> <span><span class="lang-en">design skills</span><span class="lang-zh">个设计 skill</span></span></div>
       <div class="stat"><b data-count="155">155</b> <span><span class="lang-en">diagram templates</span><span class="lang-zh">张图例模板</span></span></div>
       <div class="stat"><b data-count="101">101</b> <span><span class="lang-en">known-bugs</span><span class="lang-zh">条 known-bug</span></span></div>
       <div class="stat"><b data-count="148">148</b> <span><span class="lang-en">eval cases (kernel)</span><span class="lang-zh">个内核用例</span></span></div>
@@ -505,8 +507,8 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
 
 <section id="voices">
   <div class="wrap">
-    <span class="kicker rv"><span class="lang-en">Ten voices · one paragraph</span><span class="lang-zh">十种风格 · 同一段内容</span></span>
-    <h2 class="rv"><span class="lang-en">Same content. Ten ways to say it.</span><span class="lang-zh">同一段内容,十种说法。</span></h2>
+    <span class="kicker rv"><span class="lang-en">Eleven voices · one paragraph</span><span class="lang-zh">十一种风格 · 同一段内容</span></span>
+    <h2 class="rv"><span class="lang-en">Same content. Eleven ways to say it.</span><span class="lang-zh">同一段内容,十一种说法。</span></h2>
     <p class="lede rv"><span class="lang-en">Each design skill fixes an identity — palette, type, material — and leaves the rest to the model. Pick a voice: the page below re-renders in that skill's real colours and fonts. It cycles on its own until you click.</span><span class="lang-zh">每个设计 skill 只定死自己的身份:配色、字体、质感,其余交给模型。点一个风格,下面这页会换成那个 skill 的真实配色和字体重排一遍。不点的时候它自己轮播。</span></p>
     <div class="lab rv">
       <div class="chips" id="chips" role="group" aria-label="Design voices"></div>
@@ -541,17 +543,17 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
 <section id="table" style="background:var(--card);">
   <div class="wrap">
     <span class="kicker rv"><span class="lang-en">The lineup</span><span class="lang-zh">全部成员</span></span>
-    <h2 class="rv"><span class="lang-en">All 25 skills, numbered in the order they arrived.</span><span class="lang-zh">全部 25 个 skill,按加入仓库的先后编号。</span></h2>
+    <h2 class="rv"><span class="lang-en">All 26 skills, numbered in the order they arrived.</span><span class="lang-zh">全部 26 个 skill,按加入仓库的先后编号。</span></h2>
     <p class="lede rv"><span class="lang-en">Hover a tile and the skills it works with light up; click it for what it does, how to trigger it and where to see it. Blue builds systems and content, orange is a design voice, green judges, plans and keeps things current.</span><span class="lang-zh">鼠标移到一格上,和它配合的 skill 会亮起来;点一下看它做什么、怎么触发、去哪看。蓝色是系统与内容,橙色是设计风格,绿色负责评审、规划和更新。</span></p>
     <div class="fams rv" id="fams" role="group" aria-label="Filter by family">
-      <button class="fam-btn" type="button" data-f="all" aria-pressed="true"><i style="--c:var(--ink)"></i><span class="lang-en">All</span><span class="lang-zh">全部</span> · 25</button>
+      <button class="fam-btn" type="button" data-f="all" aria-pressed="true"><i style="--c:var(--ink)"></i><span class="lang-en">All</span><span class="lang-zh">全部</span> · 26</button>
       <button class="fam-btn" type="button" data-f="sys" aria-pressed="false"><i style="--c:var(--fam-sys)"></i><span class="lang-en">Systems &amp; content</span><span class="lang-zh">系统与内容</span> · 8</button>
-      <button class="fam-btn" type="button" data-f="des" aria-pressed="false"><i style="--c:var(--fam-des)"></i><span class="lang-en">Design voices</span><span class="lang-zh">设计风格</span> · 10</button>
+      <button class="fam-btn" type="button" data-f="des" aria-pressed="false"><i style="--c:var(--fam-des)"></i><span class="lang-en">Design voices</span><span class="lang-zh">设计风格</span> · 11</button>
       <button class="fam-btn" type="button" data-f="har" aria-pressed="false"><i style="--c:var(--fam-har)"></i><span class="lang-en">Harness &amp; workflow</span><span class="lang-zh">评审与工作流</span> · 7</button>
     </div>
     <div class="ptable rv" id="ptable">
       <div class="pgroup" data-g="sys"><h3><i style="--c:var(--fam-sys)"></i><span class="lang-en">Systems &amp; content</span><span class="lang-zh">系统与内容</span></h3><div class="pgrid" style="--cols:4"></div></div>
-      <div class="pgroup" data-g="des"><h3><i style="--c:var(--fam-des)"></i><span class="lang-en">Design voices</span><span class="lang-zh">设计风格</span></h3><div class="pgrid" style="--cols:5"></div></div>
+      <div class="pgroup" data-g="des"><h3><i style="--c:var(--fam-des)"></i><span class="lang-en">Design voices</span><span class="lang-zh">设计风格</span></h3><div class="pgrid" style="--cols:6"></div></div>
       <div class="pgroup" data-g="har"><h3><i style="--c:var(--fam-har)"></i><span class="lang-en">Harness &amp; workflow</span><span class="lang-zh">评审与工作流</span></h3><div class="pgrid" style="--cols:4"></div></div>
     </div>
     <div class="pdetail rv" id="pdetail" aria-live="polite"></div>
@@ -572,7 +574,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
   <div class="wrap">
     <span class="kicker rv"><span class="lang-en">The harness</span><span class="lang-zh">评审回路</span></span>
     <h2 class="rv"><span class="lang-en">Generators never grade their own work.</span><span class="lang-zh">生成的一方,从不给自己打分。</span></h2>
-    <p class="lede rv"><span class="lang-en">The ten design skills generate. design-review lives in another folder and sees only the rendered page. Every miss it learns from becomes a known-bug row and a new check, so the same bug is not missed twice. The idea comes from Anthropic's <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">harness design for long-running apps</a>.</span><span class="lang-zh">十个设计 skill 负责生成。design-review 放在另一个目录,只看渲染出来的页面。它每漏掉一次,就多一条 known-bug 和一项新检查,同一个问题不会漏第二次。思路来自 Anthropic 的 <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">harness design for long-running apps</a>。</span></p>
+    <p class="lede rv"><span class="lang-en">The eleven design skills generate. design-review lives in another folder and sees only the rendered page. Every miss it learns from becomes a known-bug row and a new check, so the same bug is not missed twice. The idea comes from Anthropic's <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">harness design for long-running apps</a>.</span><span class="lang-zh">十一个设计 skill 负责生成。design-review 放在另一个目录,只看渲染出来的页面。它每漏掉一次,就多一条 known-bug 和一项新检查,同一个问题不会漏第二次。思路来自 Anthropic 的 <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">harness design for long-running apps</a>。</span></p>
     <div class="h-grid">
       <div class="ring-box rv">
         <div class="pan ring-pan"><svg id="ring" viewBox="0 0 560 520" role="img" aria-label="The review loop: generate, objective check, gate chain, optional critic, learn, known-bugs, back to the generators">
@@ -674,6 +676,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
       <a href="demos/primer-design/tech/index.html"><span class="lang-en">primer technical set</span><span class="lang-zh">primer 技术图解</span></a>
       <a href="demos/lectern-design/diagrams.html"><span class="lang-en">lectern board pack</span><span class="lang-zh">lectern board pack</span></a>
       <a href="demos/relief-design/diagrams.html"><span class="lang-en">relief figure index</span><span class="lang-zh">relief 框图索引</span></a>
+      <a href="demos/graphite-design/diagrams.html"><span class="lang-en">graphite gallery · 27 figures</span><span class="lang-zh">graphite 图例库 · 27 张</span></a>
       <a href="demos/anthropic-design/hardware.html"><span class="lang-en">hardware data path</span><span class="lang-zh">硬件数据通路</span></a>
       <a href="demos/anthropic-design/bringup.html"><span class="lang-en">panel bring-up</span><span class="lang-zh">屏的点亮</span></a>
       <a href="demos/anthropic-design/packaging.html"><span class="lang-en">chip assembly</span><span class="lang-zh">芯片装配</span></a>
@@ -732,7 +735,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
         <div class="term" id="iterm"><div class="term-bar"><i></i><i></i><i></i>&nbsp; ~</div><pre id="ipre"></pre></div>
       </div>
       <div class="i-side">
-        <div class="i-card rv"><h3><span class="lang-en">Runs from any directory</span><span class="lang-zh">在任何目录都能用</span></h3><p><span class="lang-en">All 25 skills, the harness slash-commands (/design-loop, /design-distill, /gdc-audit-critic) and six subagents install under ~/.claude/. The design harness finds its own engine through dr-cli, wherever you call it from.</span><span class="lang-zh">全部 25 个 skill、评审回路的斜杠命令(/design-loop、/design-distill、/gdc-audit-critic)和六个子 agent 都装在 ~/.claude/ 下。设计评审靠 dr-cli 找到自己的引擎,在哪个目录调用都行。</span></p></div>
+        <div class="i-card rv"><h3><span class="lang-en">Runs from any directory</span><span class="lang-zh">在任何目录都能用</span></h3><p><span class="lang-en">All 26 skills, the harness slash-commands (/design-loop, /design-distill, /gdc-audit-critic) and six subagents install under ~/.claude/. The design harness finds its own engine through dr-cli, wherever you call it from.</span><span class="lang-zh">全部 26 个 skill、评审回路的斜杠命令(/design-loop、/design-distill、/gdc-audit-critic)和六个子 agent 都装在 ~/.claude/ 下。设计评审靠 dr-cli 找到自己的引擎,在哪个目录调用都行。</span></p></div>
         <div class="i-card rv"><h3><span class="lang-en">Stays current, with your say-so</span><span class="lang-zh">自动提醒,你点头才更新</span></h3><p><span class="lang-en">skills-sync notices when the repo is ahead, lists the new commits, and pulls only after you confirm. </span><span class="lang-zh">skills-sync 发现仓库有更新时列出新提交,你确认后才拉取。</span><a href="docs/INSTALL.html#stay-updated"><span class="lang-en">How the updater works →</span><span class="lang-zh">自动更新怎么工作 →</span></a></p></div>
         <div class="i-card rv"><h3><span class="lang-en">Full guide</span><span class="lang-zh">完整指南</span></h3><p><span class="lang-en">Trigger words for every skill, the bin/design-review walkthrough, cross-repo setup and a troubleshooting FAQ. </span><span class="lang-zh">每个 skill 的触发词、bin/design-review 用法、跨仓库配置和排错问答。</span><a href="docs/INSTALL.html"><span class="lang-en">Open the install guide →</span><span class="lang-zh">打开安装指南 →</span></a></p></div>
       </div>
@@ -832,7 +835,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
   }, { rootMargin: '0px 0px -6% 0px' }) : null;
   document.querySelectorAll('.rv').forEach(function (el) { if (rvObs) rvObs.observe(el); else el.classList.add('in'); });
 
-  // ── the ten voices: real palettes and type from each skill ──
+  // ── the eleven voices: real palettes and type from each skill ──
   var V = [
     { k: 'anthropic', en: 'Warm cream, orange, low-saturation semantic hues, ink text. Only the palette is fixed.', zh: '暖米白、橙、低饱和语义色、墨色字。只定死配色。', font: 'Poppins + Lora', pal: ['#faf9f5', '#141413', '#d97757', '#6a9bcc', '#788c5d'],
       s: { bg: '#faf9f5', surf: '#ffffff', ink: '#141413', mut: '#5e5d55', acc: '#d97757', accInk: '#a8502f', btn: '#d97757', btnInk: '#141413', fd: '"Poppins", sans-serif', fb: '"Lora", Georgia, serif', r: '14px', line: 'rgba(20,20,19,.12)' } },
@@ -853,15 +856,17 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
     { k: 'primer', en: 'A picture book for beginners: thick outlines, violet, a marker-yellow highlight.', zh: '给外行的图画书:厚描边、紫色,外加马克笔黄的高亮。', font: 'Fredoka + Nunito', pal: ['#fdfaf3', '#243244', '#7a5cd6', '#ffd23f'],
       s: { bg: '#fdfaf3', surf: '#ffffff', ink: '#243244', mut: '#55617a', acc: '#7a5cd6', accInk: '#5b3fbf', btn: '#5b3fbf', btnInk: '#ffffff', fd: '"Fredoka", "Nunito", sans-serif', fb: '"Nunito", sans-serif', r: '16px', line: '#e8e2d4' } },
     { k: 'relief', en: 'Neumorphism for technical diagrams: raised exists, sunken is out of reach.', zh: '画技术框图的新拟态:凸起是存在的,凹陷是够不到的。', font: 'Inter + JetBrains Mono', pal: ['#efe3cd', '#4a4036', '#ef7a1e', '#2e456f'],
-      s: { bg: '#efe3cd', surf: '#efe3cd', ink: '#4a4036', mut: '#5f5243', acc: '#ef7a1e', accInk: '#9d3f0d', btn: '#ef7a1e', btnInk: '#3a1e06', fd: '"Inter", sans-serif', fb: '"Inter", sans-serif', r: '18px', line: 'rgba(74,64,54,.12)' } }
+      s: { bg: '#efe3cd', surf: '#efe3cd', ink: '#4a4036', mut: '#5f5243', acc: '#ef7a1e', accInk: '#9d3f0d', btn: '#ef7a1e', btnInk: '#3a1e06', fd: '"Inter", sans-serif', fb: '"Inter", sans-serif', r: '18px', line: 'rgba(74,64,54,.12)' } },
+    { k: 'graphite', en: 'Graphite pencil on warm paper, a few coloured pencils, hand lettering, drawn stroke by stroke.', zh: '暖纸上的石墨线、几支彩铅、手写批注,一笔一笔画出来。', font: 'LXGW WenKai + Lora', pal: ['#f6efe2', '#39332c', '#e2772c', '#3d6db5', '#4c9a5b'],
+      s: { bg: '#f6efe2', surf: '#fbf7ee', ink: '#1e1a15', mut: '#574e43', acc: '#e2772c', accInk: '#933d12', btn: '#e2772c', btnInk: '#1e1a15', fd: '"LXGW WenKai GB Screen", "Kaiti SC", cursive', fb: '"Lora", "Noto Serif SC", Georgia, serif', r: '14px', line: 'rgba(57,51,44,.35)' } }
   ];
 
-  // ── hero: request → prism → ten voices → judge ──
+  // ── hero: request → prism → eleven voices → judge ──
   safe(function hero() {
     var stage = document.getElementById('stage'), tiles = document.getElementById('tiles');
     var svg = document.getElementById('beams'), prism = document.getElementById('prism');
     var reqText = document.getElementById('req-text'), scan = document.getElementById('scan');
-    var order = ['apple', 'anthropic', 'ember', 'sage', 'glass', 'eclat', 'lectern', 'atelier', 'primer', 'relief'];
+    var order = ['apple', 'anthropic', 'ember', 'sage', 'glass', 'eclat', 'lectern', 'atelier', 'primer', 'relief', 'graphite'];
     var tileEls = {};
     order.forEach(function (k) {
       var w = document.createElement('div'); w.className = 'vt-wrap';
@@ -998,7 +1003,8 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
       lectern: [['demos/lectern-design/index.html', 'Demo', 'Demo'], ['demos/lectern-design/diagrams.html', 'Board pack', 'Board pack']],
       atelier: [['demos/atelier-design/index.html', 'Demo', 'Demo'], ['skills/atelier-design/references/canonical/dashboard.html', 'Live console', '可点的控制台']],
       primer: [['demos/primer-design/index.html', 'Demo', 'Demo'], ['skills/primer-design/references/canonical/concept.html', 'Index explainer', '索引图解']],
-      relief: [['demos/relief-design/index.html', 'Demo', 'Demo'], ['skills/relief-design/references/canonical/hardware.html', 'Hardware set', '硬件图'], ['skills/relief-design/references/canonical/diagram.html', 'Diagram shapes', '框图形状']]
+      relief: [['demos/relief-design/index.html', 'Demo', 'Demo'], ['skills/relief-design/references/canonical/hardware.html', 'Hardware set', '硬件图'], ['skills/relief-design/references/canonical/diagram.html', 'Diagram shapes', '框图形状']],
+      graphite: [['demos/graphite-design/index.html', 'Skill page', '介绍页'], ['demos/graphite-design/diagrams.html', 'Figure gallery', '图例库'], ['demos/graphite-design/reel.html', 'Sample reel', '短片样片']]
     };
     function ab() {
       abTimers.forEach(clearTimeout); abTimers = [];
@@ -1155,7 +1161,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
     var g = document.getElementById('ringnodes'), mid = document.getElementById('ringmid'), pk = document.getElementById('packets'), ringPath = document.getElementById('ringpath');
     var NS = 'http://www.w3.org/2000/svg', cx = 280, cy = 250, R = 178;
     var N = [
-      ['Generate', '生成', '10 design skills', '10 个设计 skill', '#d97757'],
+      ['Generate', '生成', '11 design skills', '11 个设计 skill', '#d97757'],
       ['Objective check', '客观检查', 'JS · contrast · scroll', 'JS · 对比度 · 滚动', '#6a9bcc'],
       ['Gate chain', '检查链', 'verify · audit · axe', 'verify · audit · axe', '#6a9bcc'],
       ['Critic', '口味评审', 'optional', '可选', '#c9913f'],

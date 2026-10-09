@@ -60,6 +60,7 @@ const ROSTER = {
   'atelier-design': 'design',
   'primer-design': 'design',
   'relief-design': 'design',
+  'graphite-design': 'design',
 
   'design-review': 'harness',
   'design-planner': 'harness',

@@ -1,0 +1,253 @@
+/* graphite-design · graphite.css
+ *
+ * The material is the style: warm paper, graphite line, a few coloured pencils.
+ * Dark mode is the same drawing on night paper in chalk — never an inverted image
+ * (inverting turns a night sky into a pale day sky and a lit screen into a dark one).
+ *
+ * Three groups below:
+ *   1 tokens        paper / line / ink / pencils, light and dark
+ *   2 .gfig         classes the sketch.js drawings use (keep in step with sketch.js)
+ *   3 page pieces   optional helpers for pages: paper body, cards, subtitle bar,
+ *                   terminal card, sticky note, marker, buttons, toggles
+ * Only group 1 is the style. Groups 2 and 3 are one way to use it; change them freely.
+ */
+
+/* ── 1 tokens ─────────────────────────────────────────────────────────── */
+:root {
+  --g-paper: #f6efe2;      /* page: warm cream, never pure white */
+  --g-paper-2: #efe6d4;    /* second band */
+  --g-card: #fbf7ee;       /* card / stage */
+  --g-line: #39332c;       /* graphite: dark warm grey, never #000 */
+  --g-line-soft: #7c7266;  /* secondary line, shading */
+  --g-ink: #1e1a15;        /* text */
+  --g-ink-2: #574e43;      /* secondary text (6.9:1 on paper) */
+  --g-ink-3: #8b8073;      /* non-text only: rules, icons */
+  --g-rule: #dccfb8;
+  --g-grid: rgba(87, 78, 67, 0.08);
+
+  /* coloured pencils: fills and strokes. Each one should have one job per figure. */
+  --g-blue: #3d6db5;
+  --g-sky: #7fb2e0;
+  --g-orange: #e2772c;
+  --g-green: #4c9a5b;
+  --g-red: #c94a3c;
+  --g-yellow: #e9b94a;
+  --g-wood: #c79d6e;
+  --g-pink: #e8968f;
+  --g-grey: #9b9284;
+  --g-violet: #8a74c4;
+  /* skin and hair keep their meaning at night: a face stays light, hair stays dark */
+  --g-skin: #f0c9a2;
+  --g-hair: #3d342b;
+  --g-skin-o: 0.42;
+  --g-face: #39332c;       /* eyes and mouth: drawn on skin, so dark in both themes */
+
+  /* text in a pencil colour uses these (≥ 4.5:1 on paper and card) */
+  --g-blue-ink: #2d5a97;
+  --g-orange-ink: #933d12;
+  --g-green-ink: #226b43;
+  --g-red-ink: #a3322b;
+  --g-violet-ink: #5b4a99;
+
+  --g-mark: rgba(233, 185, 74, 0.45);   /* highlighter */
+  --g-wash-o: 0.2;                       /* soft base under coloured pencil */
+  --g-lw: 2.1;                           /* main pencil line width */
+  --g-hz-o: 0.52;                        /* coloured-pencil strokes */
+
+  /* terminal / data cards stay dark in both themes */
+  --g-term-bg: #1e1a15;
+  --g-term-ink: #f3ece0;
+  --g-term-dim: #b3a998;
+  --g-term-ok: #6fd09d;
+  --g-term-err: #f59287;
+  --g-term-warn: #f2c46b;
+
+  --g-hand: "LXGW WenKai GB Screen", "LXGW WenKai Screen", "Kaiti SC", "STKaiti", "KaiTi", "Klee One", cursive;
+  --g-body: "Lora", "Noto Serif SC", "Songti SC", Georgia, serif;
+  --g-sans: "Noto Sans SC", "PingFang SC", system-ui, sans-serif;
+  --g-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --g-paper: #131925;      /* night paper: deep navy ink, never #000 */
+  --g-paper-2: #19202d;
+  --g-card: #1c2331;
+  --g-line: #ddd5c6;       /* chalk */
+  --g-line-soft: #8f96a3;
+  --g-ink: #ece5d8;
+  --g-ink-2: #b5ad9f;
+  --g-ink-3: #7a8191;
+  --g-rule: #2b3342;
+  --g-grid: rgba(236, 229, 216, 0.05);
+  --g-blue: #7ea6e6;
+  --g-sky: #9cc8ee;
+  --g-orange: #f39a52;
+  --g-green: #7cc690;
+  --g-red: #ef7d70;
+  --g-yellow: #f0d070;
+  --g-wood: #b48d63;
+  --g-pink: #e3a29c;
+  --g-grey: #8a909c;
+  --g-violet: #b2a2ea;
+  --g-skin: #e6c8a8;
+  --g-hair: #0d1118;
+  --g-skin-o: 0.88;
+  --g-face: #2a241e;
+  --g-blue-ink: #93b6ec;
+  --g-orange-ink: #f5a26b;
+  --g-green-ink: #6fd09d;
+  --g-red-ink: #f38a80;
+  --g-violet-ink: #c3b6f0;
+  --g-mark: rgba(240, 208, 112, 0.28);
+  --g-wash-o: 0.24;
+  --g-hz-o: 0.62;
+  --g-term-bg: #0a0d13;
+  color-scheme: dark;
+}
+/* follow the system until the reader picks a theme */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --g-paper: #131925; --g-paper-2: #19202d; --g-card: #1c2331;
+    --g-line: #ddd5c6; --g-line-soft: #8f96a3;
+    --g-ink: #ece5d8; --g-ink-2: #b5ad9f; --g-ink-3: #7a8191;
+    --g-rule: #2b3342; --g-grid: rgba(236, 229, 216, 0.05);
+    --g-blue: #7ea6e6; --g-sky: #9cc8ee; --g-orange: #f39a52; --g-green: #7cc690; --g-red: #ef7d70;
+    --g-yellow: #f0d070; --g-wood: #b48d63; --g-pink: #e3a29c; --g-grey: #8a909c; --g-violet: #b2a2ea;
+    --g-skin: #e6c8a8; --g-hair: #0d1118; --g-skin-o: 0.88; --g-face: #2a241e;
+    --g-blue-ink: #93b6ec; --g-orange-ink: #f5a26b; --g-green-ink: #6fd09d; --g-red-ink: #f38a80; --g-violet-ink: #c3b6f0;
+    --g-mark: rgba(240, 208, 112, 0.28); --g-wash-o: 0.24; --g-hz-o: 0.62; --g-term-bg: #0a0d13;
+    color-scheme: dark;
+  }
+}
+
+/* ── 2 drawings (sketch.js output) ────────────────────────────────────── */
+.gfig { display: block; width: 100%; height: auto; overflow: visible; }
+.gfig .ln { fill: none; stroke: var(--g-line); stroke-width: var(--g-lw); stroke-linecap: round; stroke-linejoin: round; }
+.gfig .ln.l2 { stroke-width: calc(var(--g-lw) * 0.52); opacity: 0.55; }
+.gfig .w-b { stroke-width: calc(var(--g-lw) * 1.38); }
+.gfig .w-t { stroke-width: calc(var(--g-lw) * 0.71); }
+.gfig .w-h { stroke-width: calc(var(--g-lw) * 0.48); }
+.gfig .l2.w-b { stroke-width: calc(var(--g-lw) * 0.71); }
+.gfig .l2.w-t, .gfig .l2.w-h { stroke-width: calc(var(--g-lw) * 0.38); }
+.gfig .p-blue { --pc: var(--g-blue); }
+.gfig .p-sky { --pc: var(--g-sky); }
+.gfig .p-orange { --pc: var(--g-orange); }
+.gfig .p-green { --pc: var(--g-green); }
+.gfig .p-red { --pc: var(--g-red); }
+.gfig .p-yellow { --pc: var(--g-yellow); }
+.gfig .p-wood { --pc: var(--g-wood); }
+.gfig .p-pink { --pc: var(--g-pink); }
+.gfig .p-grey { --pc: var(--g-grey); }
+.gfig .p-violet { --pc: var(--g-violet); }
+.gfig .p-skin { --pc: var(--g-skin); }
+.gfig .p-hair { --pc: var(--g-hair); }
+.gfig .p-line { --pc: var(--g-line); }
+.gfig .p-paper { --pc: var(--g-paper); }
+.gfig .ln[class*="p-"] { stroke: var(--pc); }
+.gfig .ws { stroke: none; fill: var(--pc); fill-opacity: var(--g-wash-o); }
+.gfig .ws.solid { fill-opacity: 1; }
+.gfig .ws.p-skin { fill-opacity: var(--g-skin-o); }
+.gfig .ws.p-hair { fill-opacity: 0.85; }
+.gfig .ws.half { fill-opacity: calc(var(--g-wash-o) * 2.2); }
+.gfig .hz { fill: none; stroke: var(--pc); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; opacity: var(--g-hz-o); }
+.gfig .hz.fine { stroke-width: 1.6; }
+.gfig .sh { fill: none; stroke: var(--g-line); stroke-width: 0.9; opacity: 0.3; stroke-linecap: round; }
+.gfig .dt { fill: var(--g-line); }
+.gfig .dt[class*="p-"] { fill: var(--pc); }
+.gfig .ln.fc { stroke: var(--g-face); }
+.gfig .dt.fc { fill: var(--g-face); }
+.gfig .rg { stroke: var(--g-orange); stroke-width: 2.4; }
+.gfig .tok { fill: var(--pc); stroke: var(--g-line); stroke-width: 1.4; }
+.gfig .ln.dash { stroke-dasharray: 5 8; }
+.gfig .hl { fill: var(--g-orange); fill-opacity: 0.3; }
+.gfig .gone { fill: var(--g-paper); fill-opacity: 0.74; }
+.gfig .rain { stroke: var(--g-blue); opacity: 0.5; }
+.gfig .flow { stroke-dasharray: 7 7; animation: g-flow 1.1s linear infinite; }
+@keyframes g-flow { to { stroke-dashoffset: -14; } }
+.gfig .tx { fill: var(--g-ink); font-family: var(--g-hand); }
+.gfig .tx.f-mono { font-family: var(--g-mono); font-variant-ligatures: none; white-space: pre; }
+.gfig .tx.f-sans { font-family: var(--g-sans); }
+.gfig .tx.i-2 { fill: var(--g-ink-2); }
+.gfig .tx.i-blue { fill: var(--g-blue-ink); }
+.gfig .tx.i-orange { fill: var(--g-orange-ink); }
+.gfig .tx.i-green { fill: var(--g-green-ink); }
+.gfig .tx.i-red { fill: var(--g-red-ink); }
+.gfig .tx.i-violet { fill: var(--g-violet-ink); }
+.gfig .tx.i-term { fill: var(--g-term-ink); }
+.gfig .tx.i-term-dim { fill: var(--g-term-dim); }
+.gfig .tx.i-term-ok { fill: var(--g-term-ok); }
+.gfig .tx.i-term-err { fill: var(--g-term-err); }
+.gfig .tx.i-term-warn { fill: var(--g-term-warn); }
+.gfig .term { fill: var(--g-term-bg); }
+.gfig .paper { fill: var(--g-paper); }
+.gfig .card { fill: var(--g-card); }
+.gfig .lang-en { display: none; }
+:root[data-lang="en"] .gfig .lang-en { display: inline; }
+:root[data-lang="en"] .gfig .lang-zh { display: none; }
+
+/* timeline: sketch.js marks timed elements with data-a and --d (delay) / --t (duration) */
+.gfig [data-a="ad"] { stroke-dasharray: 1 2; animation: g-draw var(--t) linear var(--d) both; }
+.gfig [data-a="af"] { animation: g-fade var(--t) ease-out var(--d) both; }
+.gfig [data-a="aw"] { animation: g-write var(--t) linear var(--d) both; }
+@keyframes g-draw { from { stroke-dashoffset: 1.02; } to { stroke-dashoffset: 0; } }
+@keyframes g-fade { from { opacity: 0; } }
+@keyframes g-write { from { clip-path: inset(-30% 100% -30% -2%); } to { clip-path: inset(-30% -4% -30% -2%); } }
+/* a still figure shows finished until someone asks to watch it drawn (player.js removes data-still) */
+.gfig[data-still] [data-a] { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .gfig [data-a], .gfig .mv, .gfig .flow { animation: none !important; }
+  .gfig .tmp { display: none; }   /* S.window(): states that are gone by the end */
+}
+
+/* ── 3 page pieces (optional) ─────────────────────────────────────────── */
+.g-page {
+  margin: 0;
+  background-color: var(--g-paper);
+  /* paper tooth: a faint noise tile, 0.6 KB, no network */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .3 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  color: var(--g-ink);
+  font-family: var(--g-body);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+:root[data-theme="dark"] .g-page { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .85 0 0 0 0 .82 0 0 0 0 .75 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+.g-hand { font-family: var(--g-hand); }
+.g-grid {
+  background-color: var(--g-card);
+  background-image: linear-gradient(var(--g-grid) 1px, transparent 1px), linear-gradient(90deg, var(--g-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+/* a box whose corners are not quite equal reads as drawn, not printed */
+.g-box { border: 1.6px solid var(--g-line); border-radius: 16px 22px 14px 20px / 20px 14px 22px 16px; background: var(--g-card); }
+.g-box--soft { border-color: var(--g-rule); }
+.g-mark { background: linear-gradient(100deg, transparent 2%, var(--g-mark) 4% 96%, transparent 98%) 0 72% / 100% 46% no-repeat; padding: 0 0.1em; }
+.g-sub {
+  display: flex; gap: 0.6em; align-items: baseline; justify-content: center;
+  padding: 14px 20px; font-family: var(--g-hand); font-size: 18px; color: var(--g-ink);
+  border-top: 1px dashed var(--g-rule); background: var(--g-paper-2);
+}
+.g-sub::before { content: "✎"; color: var(--g-orange-ink); }
+.g-term { background: var(--g-term-bg); color: var(--g-term-ink); font-family: var(--g-mono); font-size: 14px; border-radius: 12px; padding: 16px 18px; line-height: 1.6; font-variant-ligatures: none; }
+.g-term .ok { color: var(--g-term-ok); }
+.g-term .err { color: var(--g-term-err); }
+.g-term .dim { color: var(--g-term-dim); }
+.g-note { background: #f7e7a6; color: #2b2416; padding: 16px 18px; font-family: var(--g-hand); transform: rotate(-1.2deg); box-shadow: 0 10px 18px -12px rgba(30, 26, 21, 0.45); position: relative; }
+.g-note::before { content: ""; position: absolute; top: -10px; left: 50%; width: 76px; height: 20px; margin-left: -38px; background: rgba(226, 216, 190, 0.75); transform: rotate(2deg); }
+.g-btn {
+  display: inline-flex; align-items: center; gap: 0.4em; padding: 9px 18px; cursor: pointer;
+  font: 600 15px/1.2 var(--g-hand); color: var(--g-ink); background: var(--g-card);
+  border: 1.6px solid var(--g-line); border-radius: 12px 16px 11px 15px / 15px 11px 16px 12px;
+  box-shadow: 2px 3px 0 var(--g-line); text-decoration: none;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.g-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 4px 0 var(--g-line); }
+.g-btn:active { transform: translate(2px, 3px); box-shadow: 0 0 0 var(--g-line); }
+.g-btn--accent { background: var(--g-orange); color: #1e1a15; }
+.g-tag { display: inline-block; padding: 1px 8px; font: 600 12px/1.6 var(--g-sans); border-radius: 999px; border: 1px solid currentColor; }
+.g-tag--quote { color: var(--g-blue-ink); }
+.g-tag--reading { color: var(--g-green-ink); }
+.g-tag--illus { color: var(--g-orange-ink); }
+:focus-visible { outline: 3px solid var(--g-orange); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .g-btn { transition: none; } }

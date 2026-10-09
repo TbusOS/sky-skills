@@ -15,6 +15,8 @@ Every family below is licensed under the **SIL Open Font License 1.1**
 | [Instrument Serif](https://scripts.sil.org/OFL) | 2 | no — upstream woff2 as served | Copyright 2022 The Instrument Serif Project Authors (https://github.com/Instrument/instrument-serif) |
 | [Inter](https://openfontlicense.org) | 3 | no — upstream woff2 as served | Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter) |
 | [JetBrains Mono](https://scripts.sil.org/OFL) | 6 | no — upstream woff2 as served | Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono) |
+| [LXGW WenKai GB Screen](https://scripts.sil.org/OFL) | 1 | yes — cut to the characters this repo uses | Copyright 2021-2024 LXGW (https://github.com/lxgw/LxgwWenKai-Screen)
+Copyright 2020 The Klee Project Authors (https://github.com/fontworks-fonts/Klee) |
 | [Lora](https://scripts.sil.org/OFL) | 8 | no — upstream woff2 as served | Copyright 2011 The Lora Project Authors (https://github.com/cyrealtype/Lora-Cyrillic), with Reserved Font Name "Lora". |
 | [Noto Sans SC](http://scripts.sil.org/OFL) | 1 | yes — cut to the characters this repo uses | © 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'. |
 | [Noto Serif SC](http://scripts.sil.org/OFL) | 1 | yes — cut to the characters this repo uses | © 2017-2024 Adobe (http://www.adobe.com/). |
