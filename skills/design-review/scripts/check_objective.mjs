@@ -17,8 +17,12 @@
 // O5 关掉动画也完整   prefers-reduced-motion: reduce 下不滚动,h1–h3 / p / li 不能是看不见的
 //
 // 版式、字体、配色比例、组件写法一概不管 —— 那些交给模型和人。
+// 走代理上网的机器:Chromium 自己不读 HTTPS_PROXY,由 _net.mjs 传给它;网页字体存在本机,
+// 第二次起不再下载(见 _net.mjs 开头)。
+//
 // 退出码:0 没有失败(可能有提醒)· 1 有失败 · 2 用法错 / 环境缺 playwright
 import { chromium } from 'playwright';
+import { launchOptions, useFontCache } from './_net.mjs';
 import { createRequire } from 'node:module';
 import { resolve, join } from 'node:path';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
@@ -27,6 +31,13 @@ import { tmpdir } from 'node:os';
 const require = createRequire(import.meta.url);
 const AXE = require.resolve('axe-core/axe.min.js');
 const MIN_SVG_PX = 9;
+
+async function newContext(browser, opts) {
+  const ctx = await browser.newContext(opts);
+  await useFontCache(ctx);
+  ctx.setDefaultNavigationTimeout(180000);  // 缓存是空的时候,第一次要隔着代理下完字体
+  return ctx;
+}
 
 async function scrollThrough(p) {
   const H = await p.evaluate(() => document.documentElement.scrollHeight);
@@ -51,7 +62,7 @@ async function checkPage(browser, file, themes = [null]) {
   let ctx, p;
   const low = [];
   for (const [ti, theme] of themes.entries()) {
-    ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: theme === 'light' ? 'light' : theme === 'dark' ? 'dark' : 'no-preference' });
+    ctx = await newContext(browser, { viewport: { width: 1280, height: 900 }, colorScheme: theme === 'light' ? 'light' : theme === 'dark' ? 'dark' : 'no-preference' });
     p = await ctx.newPage();
     const errs = [];
     p.on('pageerror', e => errs.push('pageerror: ' + e.message));
@@ -77,7 +88,7 @@ async function checkPage(browser, file, themes = [null]) {
   // O3:两个宽度真的横滚
   const o3 = [], o3warn = [];
   for (const w of [1280, 390]) {
-    ctx = await browser.newContext({ viewport: { width: w, height: 860 } }); p = await ctx.newPage();
+    ctx = await newContext(browser, { viewport: { width: w, height: 860 } }); p = await ctx.newPage();
     await p.goto(url, { waitUntil: 'load' }); await p.waitForTimeout(300);
     await scrollThrough(p); await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(150);
     const sw = await p.evaluate(() => document.documentElement.scrollWidth);
@@ -94,7 +105,7 @@ async function checkPage(browser, file, themes = [null]) {
   else add('O3 横向滚动', 'PASS', '1280 / 390 都滚不动,布局也不超宽');
 
   // O4:390 宽下 SVG 文字
-  ctx = await browser.newContext({ viewport: { width: 390, height: 860 } }); p = await ctx.newPage();
+  ctx = await newContext(browser, { viewport: { width: 390, height: 860 } }); p = await ctx.newPage();
   await p.goto(url, { waitUntil: 'load' }); await p.waitForTimeout(300); await scrollThrough(p);
   const tiny = await p.evaluate((MIN) => {
     const out = [];
@@ -112,7 +123,7 @@ async function checkPage(browser, file, themes = [null]) {
   await ctx.close();
 
   // O5:减少动态效果下不滚动
-  ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' }); p = await ctx.newPage();
+  ctx = await newContext(browser, { viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' }); p = await ctx.newPage();
   await p.goto(url, { waitUntil: 'load' }); await p.waitForTimeout(800);
   const hidden = await p.evaluate(() => {
     const vis = e => { for (let a = e; a; a = a.parentElement) { const s = getComputedStyle(a); if (s.display === 'none') return 'skip'; if (+s.opacity < 0.1 || s.visibility === 'hidden') return false; } return true; };
@@ -178,7 +189,7 @@ const themes = themeArg ? themeArg.slice(9).split(',').filter(Boolean) : [null];
 const args = argv.filter(a => !a.startsWith('--themes='));
 if (!args.length) { console.log('用法:node check_objective.mjs <page.html> [...] | --self-test'); process.exit(2); }
 let browser;
-try { browser = await chromium.launch(); } catch (e) { console.log('起不来 Chromium(playwright 没装好?):' + e.message.slice(0, 200)); process.exit(2); }
+try { browser = await chromium.launch(launchOptions()); } catch (e) { console.log('起不来 Chromium(playwright 没装好?):' + e.message.slice(0, 200)); process.exit(2); }
 let code = 0;
 if (args.includes('--self-test')) code = await selfTest(browser);
 else for (const f of args) {

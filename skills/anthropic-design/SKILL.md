@@ -95,6 +95,11 @@ O3 为什么不用页面宽度判:2026-10-07 修 whetstone 首页时,`scrollWidt
 可 `body` 上有 `overflow-x: hidden`,桌面上鼠标横滚 `scrollX` 一直是 0;去掉那条再滚是 260。
 「布局超宽」和「用户滚得动」是两回事。手机触摸拖动本脚本模拟不了,真机才算数。
 
+走代理上网的机器:Chromium 自己不读 `HTTPS_PROXY`,不处理的话页面卡在加载 Google Fonts 上,
+每页都报「打不开」(2026-10-09 实测:直连 15 s 超时,走代理一页 24–55 s)。脚本经
+`scripts/_net.mjs` 把代理传给 Chromium,网页字体存进 `~/.cache/sky-skills/fonts`
+(`SKY_FONT_CACHE` 可改),第一次慢,之后不再下载。自测:`node _net.mjs --self-test`。
+
 ## 5. 可选:想要风格上的第二意见时
 
 - `design-review` 的四道检查 + critic 评分、`dr-cli --audit` 批量扫存量页,都还能用,但不是交付门槛。
