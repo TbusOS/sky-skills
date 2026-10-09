@@ -16,6 +16,7 @@
   <a class="brand" href="index.html">graphite<span>石墨</span></a>
   <nav aria-label="graphite">
     <a href="index.html"><span class="lang-zh">介绍</span><span class="lang-en">About</span></a>
+    <a href="index.html#taste"><span class="lang-zh">越用越懂你</span><span class="lang-en">Learns your taste</span></a>
     <a href="diagrams.html" aria-current="page"><span class="lang-zh">图例库</span><span class="lang-en">Figures</span></a>
     <a href="assets.html"><span class="lang-zh">素材</span><span class="lang-en">Assets</span></a>
     <a href="reel.html"><span class="lang-zh">短片样片</span><span class="lang-en">Sample reel</span></a>
@@ -32,18 +33,10 @@
   <span class="kicker"><span class="lang-zh">图例库</span><span class="lang-en">Figure gallery</span></span>
   <h1><span class="lang-zh">{{count:all}} 张手绘图例</span><span class="lang-en">{{count:all}} hand-drawn figures</span></h1>
   <p class="lede"><span class="lang-zh">{{count:motion}} 张会动,滚到哪张就画哪张;其余 {{count:static}} 张按「看它怎么画」也能一笔一笔重画。每张都是几十行代码,拿去改比照着画快:换字、换颜色、换数据。手机上图框可以左右拖,图里的字不会缩到看不清。</span><span class="lang-en">{{count:motion}} are animated and draw when you scroll to them; the other {{count:static}} redraw stroke by stroke on "Watch it drawn". Each is a few dozen lines of code: changing words, colours or data beats redrawing. On a phone, drag a figure sideways; its labels never shrink below readable.</span></p>
-  <nav class="gal-nav" aria-label="categories">
-    <a href="#cast"><span class="lang-zh">角色与道具</span><span class="lang-en">Cast</span></a>
-    <a href="#scene"><span class="lang-zh">场景</span><span class="lang-en">Scenes</span></a>
-    <a href="#cinema"><span class="lang-zh">电影画风</span><span class="lang-en">Cinematic</span></a>
-    <a href="#diagram"><span class="lang-zh">框图与架构</span><span class="lang-en">Diagrams</span></a>
-    <a href="#flow"><span class="lang-zh">流程图</span><span class="lang-en">Flowcharts</span></a>
-    <a href="#code"><span class="lang-zh">代码大白话</span><span class="lang-en">Code</span></a>
-    <a href="#math"><span class="lang-zh">数学与算法</span><span class="lang-en">Maths</span></a>
-    <a href="#chart"><span class="lang-zh">数据图</span><span class="lang-en">Charts</span></a>
-    <a href="#mark"><span class="lang-zh">标注与叠层</span><span class="lang-en">Marks</span></a>
-  </nav>
 </div></section>
+<div class="gal-bar"><div class="wrap"><nav class="gal-nav" aria-label="categories">
+    {{gallery-nav}}
+  </nav></div></div>
 <div class="wrap">
 {{gallery}}
 </div>

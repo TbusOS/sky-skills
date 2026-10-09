@@ -35,6 +35,7 @@ section.band { background: var(--g-paper-2); }
 /* figures in frames that pan sideways on phones instead of shrinking their labels */
 .gpan { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; }
 .gpan > svg.gfig { margin: 0 auto; }
+.pan-hint { margin: 6px 0 0; text-align: center; font: 13px/1.3 var(--g-hand); color: var(--g-ink-2); }
 .card { padding: 18px; }
 .cap { font-size: 15px; color: var(--g-ink-2); margin-top: 10px; }
 .note { font-size: 14px; color: var(--g-ink-2); }
@@ -127,26 +128,38 @@ td b { font-weight: 600; }
 .works figcaption { font-size: 14.5px; color: var(--g-ink-2); margin-top: 8px; }
 
 /* gallery */
-.gal-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
-.gal-nav a { font: 15px/1 var(--g-hand); padding: 8px 12px; border: 1.4px solid var(--g-rule); border-radius: 999px; text-decoration: none; }
-.gal-sec { padding: 40px 0 10px; }
+/* gallery: one figure per row. Two per row drew every figure at about 0.7x and made
+   the eight densest ones drag sideways (2026-10-10). A figure grows to fill the row,
+   but at most 1.3x its drawn size and never taller than most of the window. */
+.gal-bar { position: sticky; top: 60px; z-index: 15; background: color-mix(in srgb, var(--g-paper) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px dashed var(--g-rule); }
+.gal-nav { display: flex; flex-wrap: nowrap; gap: 8px; padding: 10px 0; overflow-x: auto; scrollbar-width: thin; }
+.gal-nav a { flex: none; font: 15px/1 var(--g-hand); padding: 8px 12px; border: 1.4px solid var(--g-rule); border-radius: 999px; text-decoration: none; }
+.gal-nav a.hi { border-color: var(--g-orange); }
+.gal-nav .hi-tag { margin-left: 6px; font: 600 11px/1 var(--g-sans); color: var(--g-orange-ink); }
+.gal-sec { padding: 40px 0 10px; scroll-margin-top: 120px; }
 .gal-head p { color: var(--g-ink-2); max-width: 52em; }
-.gal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); gap: 20px; }
-.gal-card { margin: 0; padding: 14px; display: flex; flex-direction: column; }
-.gal-card.wide { grid-column: 1 / -1; }
-.gal-card figcaption { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.gal-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; }
+.gal-card { margin: 0; padding: 18px 18px 16px; scroll-margin-top: 120px; }
+.gal-stage > svg.gfig, .assets--wide svg.gfig { max-width: min(100%, calc(var(--fw) * 1.3), calc(78vh * var(--ar))); }
+.gal-card figcaption { margin-top: 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 28px; align-items: start; }
+.gal-card figcaption > :not(.gal-act) { grid-column: 1; }
 .gal-card figcaption b { font: 400 19px/1.35 var(--g-hand); }
 .gal-n { font: 13px/1 var(--g-mono); color: var(--g-ink-2); margin-right: 4px; }
-.gal-desc { font-size: 14.5px; color: var(--g-ink-2); }
-.gal-act { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-.gal-act .g-btn { font-size: 13.5px; padding: 6px 12px; }
-.gal-card .g-tag { align-self: flex-start; }
+.gal-desc { font-size: 14.5px; color: var(--g-ink-2); max-width: 60em; }
+.gal-act { grid-column: 2; grid-row: 1 / span 3; display: flex; flex-direction: column; gap: 8px; }
+.gal-act .g-btn { font-size: 13.5px; padding: 6px 12px; text-align: center; }
+.gal-card .g-tag { justify-self: start; }
+@media (max-width: 760px) {
+  .gal-card figcaption { grid-template-columns: minmax(0, 1fr); }
+  .gal-act { grid-column: 1; grid-row: auto; flex-direction: row; flex-wrap: wrap; }
+}
 
 /* assets */
 .assets { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 24px; }
 .asset { margin: 0; padding: 14px; }
 .asset img { width: 100%; height: auto; display: block; border-radius: 10px; }
 .asset.phone { max-width: 360px; }
+.assets--wide { grid-template-columns: minmax(0, 1fr); }   /* code-drawn figures: one per row, like the gallery */
 .asset figcaption { margin-top: 10px; font-size: 14.5px; color: var(--g-ink-2); }
 .asset figcaption b { display: block; font: 400 18px/1.35 var(--g-hand); color: var(--g-ink); }
 

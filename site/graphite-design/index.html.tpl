@@ -16,6 +16,7 @@
   <a class="brand" href="index.html">graphite<span>石墨</span></a>
   <nav aria-label="graphite">
     <a href="index.html" aria-current="page"><span class="lang-zh">介绍</span><span class="lang-en">About</span></a>
+    <a href="index.html#taste"><span class="lang-zh">越用越懂你</span><span class="lang-en">Learns your taste</span></a>
     <a href="diagrams.html"><span class="lang-zh">图例库</span><span class="lang-en">Figures</span></a>
     <a href="assets.html"><span class="lang-zh">素材</span><span class="lang-en">Assets</span></a>
     <a href="reel.html"><span class="lang-zh">短片样片</span><span class="lang-en">Sample reel</span></a>

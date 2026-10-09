@@ -16,6 +16,7 @@
   <a class="brand" href="index.html">graphite<span>石墨</span></a>
   <nav aria-label="graphite">
     <a href="index.html"><span class="lang-zh">介绍</span><span class="lang-en">About</span></a>
+    <a href="index.html#taste"><span class="lang-zh">越用越懂你</span><span class="lang-en">Learns your taste</span></a>
     <a href="diagrams.html"><span class="lang-zh">图例库</span><span class="lang-en">Figures</span></a>
     <a href="assets.html" aria-current="page"><span class="lang-zh">素材</span><span class="lang-en">Assets</span></a>
     <a href="reel.html"><span class="lang-zh">短片样片</span><span class="lang-en">Sample reel</span></a>
@@ -90,7 +91,7 @@
 <section id="svg"><div class="wrap">
   <h2><span class="lang-zh">代码画的 SVG:贴纸、批注、视频画面</span><span class="lang-en">Code-drawn SVG: stickers, marks, video frames</span></h2>
   <p class="lede"><span class="lang-zh">单独的 SVG 文件跟随系统深浅色,打开就会自己画一遍。要 PNG 或 MP4:<code>node skills/graphite-design/scripts/export.mjs png 文件.svg 输出.png --scale=3</code>。</span><span class="lang-en">The standalone SVGs follow the system light/dark setting and draw themselves when opened. For PNG or MP4: <code>node skills/graphite-design/scripts/export.mjs png file.svg out.png --scale=3</code>.</span></p>
-  <div class="assets">
+  <div class="assets assets--wide">
     <figure class="asset g-box">{{fig:cast-robot}}<figcaption><b><span class="lang-zh">小机器人贴纸</span><span class="lang-en">Robot stickers</span></b><a href="../../skills/graphite-design/templates/figures/cast-robot.svg" download>cast-robot.svg</a></figcaption></figure>
     <figure class="asset g-box">{{fig:cast-people}}<figcaption><b><span class="lang-zh">人物贴纸</span><span class="lang-en">People stickers</span></b><a href="../../skills/graphite-design/templates/figures/cast-people.svg" download>cast-people.svg</a></figcaption></figure>
     <figure class="asset g-box">{{fig:cast-props}}<figcaption><b><span class="lang-zh">物件贴纸</span><span class="lang-en">Object stickers</span></b><a href="../../skills/graphite-design/templates/figures/cast-props.svg" download>cast-props.svg</a></figcaption></figure>

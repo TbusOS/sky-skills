@@ -100,7 +100,10 @@ export function inline(r, o = {}) {
   const { fig } = r;
   const motion = fig.motion ? ` data-motion="1" data-dur="${r.dur}"` : ` data-still="" data-dur="${r.dur}"`;
   const pw = o.shrink ? 0 : panWidth(r);
-  const extra = (o.shrink ? ' data-allow-shrink=""' : '') + (pw > 0 && pw < fig.w ? ` style="min-width:${pw}px"` : pw >= fig.w ? ` style="min-width:${fig.w}px"` : '');
+  // --fw / --ar: natural width and aspect, so a page can cap how far a figure grows
+  // (pages.css: at most 1.3x, and never taller than most of the window)
+  const minw = pw > 0 && pw < fig.w ? `min-width:${pw}px;` : pw >= fig.w ? `min-width:${fig.w}px;` : '';
+  const extra = (o.shrink ? ' data-allow-shrink=""' : '') + ` style="${minw}--fw:${fig.w}px;--ar:${(fig.w / fig.h).toFixed(3)}"`;
   return `<svg viewBox="0 0 ${fig.w} ${fig.h}" class="gfig${o.cls ? ' ' + o.cls : ''}" role="img" aria-label="${esc(label(fig))}" data-fig="${fig.id}"${motion}${extra}>` +
     (r.css ? `<style>${r.css}</style>` : '') +
     (fig.under ? fig.under(fig) : '') +
@@ -138,6 +141,11 @@ function renderPage(tplPath, results, cats) {
     return String(n);
   });
   s = s.replace('{{gallery}}', () => gallery(results, cats));
+  // tabs for every category that has figures, from categories.json: a hand-written
+  // list missed the tenth category when it was added (2026-10-10)
+  s = s.replace('{{gallery-nav}}', () => cats.filter(c => results.some(r => r.fig.cat === c.id)).map(c =>
+    `<a href="#${c.id}"${c.highlight ? ' class="hi"' : ''}><span class="lang-zh">${c.nav.zh}</span><span class="lang-en">${c.nav.en}</span>` +
+    (c.highlight ? '<span class="hi-tag"><span class="lang-zh">亮点</span><span class="lang-en">key idea</span></span>' : '') + '</a>').join('\n    '));
   if (/\{\{[^}]+\}\}/.test(s)) throw new Error(`${relative(ROOT, tplPath)}: unreplaced ${s.match(/\{\{[^}]+\}\}/)[0]}`);
   return s;
 }
@@ -151,8 +159,7 @@ function gallery(results, cats) {
       `<p><span class="lang-zh">${c.dzh}</span><span class="lang-en">${c.den}</span></p></div><div class="gal-grid">` +
       list.map(r => {
         const f = r.fig; n++;
-        const wide = f.h > f.w ? ' tall' : '';
-        return `<figure class="gal-card g-box${wide}" id="fig-${f.id}"><div class="gal-stage gpan">${inline(r)}</div>` +
+        return `<figure class="gal-card g-box" id="fig-${f.id}"><div class="gal-stage gpan">${inline(r)}</div>` +
           `<figcaption><b><span class="gal-n">${String(n).padStart(2, '0')}</span> <span class="lang-zh">${esc(f.title.zh)}</span><span class="lang-en">${esc(f.title.en)}</span></b>` +
           (f.motion ? `<span class="g-tag g-tag--illus"><span class="lang-zh">动图 ${r.dur}s</span><span class="lang-en">motion ${r.dur}s</span></span>` : '') +
           `<span class="gal-desc"><span class="lang-zh">${esc(f.desc.zh)}</span><span class="lang-en">${esc(f.desc.en)}</span></span>` +

@@ -63,6 +63,23 @@
   }
   window.Graphite = { replay: replay, seek: seek, duration: duration, anims: anims, setTheme: setTheme, setLang: setLang };
 
+  // On a narrow screen a figure keeps its labels readable (min-width) and scrolls
+  // sideways instead of shrinking. Say so under the figures that actually overflow,
+  // so a reader knows the rest is there.
+  function panHints() {
+    document.querySelectorAll('.gpan').forEach(function (p) {
+      var over = p.scrollWidth > p.clientWidth + 2, hint = p.nextElementSibling;
+      var has = hint && hint.classList && hint.classList.contains('pan-hint');
+      if (over && !has) {
+        hint = document.createElement('p'); hint.className = 'pan-hint';
+        hint.innerHTML = '<span class="lang-zh">← 左右拖动看全图 →</span><span class="lang-en">← drag sideways to see it all →</span>';
+        p.parentNode.insertBefore(hint, p.nextSibling);
+      } else if (!over && has) hint.remove();
+    });
+  }
+  panHints();
+  window.addEventListener('resize', function () { clearTimeout(panHints.t); panHints.t = setTimeout(panHints, 150); });
+
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   // motion figures play once when they first come into view (they already played at
   // load, off screen, where nobody saw it)
