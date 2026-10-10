@@ -510,7 +510,7 @@ skills/graphite-design/assets/taste.js · taste-profile.js · scripts/taste.mjs 
 ## 16. P0 结论(2026-10-11)
 
 P0 实施计划:[plans/2026-10-10-inkwash-p0.md](../plans/2026-10-10-inkwash-p0.md)。证据截图在
-[`docs/superpowers/evidence/2026-10-10-inkwash-p0/`](../evidence/2026-10-10-inkwash-p0/)。小样代码是一次性的,全文在 P0 计划里。
+[`docs/superpowers/evidence/2026-10-10-inkwash-p0/`](../evidence/2026-10-10-inkwash-p0/)。小样的最终代码在其中的 `code/` 目录(计划里嵌的是第一版,执行中改过的以 `code/` 为准);P2 写正式的 `brush.js` 时照 `code/brush-proto.js`(v3)。
 
 ### 16.1 注册点实测(需求 R-F63、Q6)
 
