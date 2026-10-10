@@ -1,6 +1,6 @@
 ---
 name: design-review
-description: "Independent evaluator for any design-skill output (anthropic-design / apple-design / ember-design / sage-design / glass-design / eclat-design / lectern-design / atelier-design / primer-design / relief-design / graphite-design). TRIGGER when a demo / template / landing page has just been written with one of the 11 design skills and is about to be shipped. Runs the gate chain — structural verify (placeholders, BEM, undefined classes, bilingual toggles), rendered visual-audit (contrast, hero diagram sizing, orphan cards, SVG text, known-bugs), axe-core accessibility conformance (color-contrast and three structural rules blocking), full-page screenshot, opt-in pixel regression vs a committed baseline (--pixel), and LLM taste judgment (solo design-critic or 4 parallel specialists — composition / copy / illustration / brand). Pairs with design-learner to codify every critic miss so the same bug is never caught twice. Inspired by GAN's discriminator: this skill deliberately lives outside the generator skills so the reviewer does not inherit the generator's assumptions."
+description: "Independent evaluator for any design-skill output (anthropic-design / apple-design / ember-design / sage-design / glass-design / eclat-design / lectern-design / atelier-design / primer-design / relief-design / graphite-design). TRIGGER when a demo / template / landing page has just been written with one of the 12 design skills and is about to be shipped. Runs the gate chain — structural verify (placeholders, BEM, undefined classes, bilingual toggles), rendered visual-audit (contrast, hero diagram sizing, orphan cards, SVG text, known-bugs), axe-core accessibility conformance (color-contrast and three structural rules blocking), full-page screenshot, opt-in pixel regression vs a committed baseline (--pixel), and LLM taste judgment (solo design-critic or 4 parallel specialists — composition / copy / illustration / brand). Pairs with design-learner to codify every critic miss so the same bug is never caught twice. Inspired by GAN's discriminator: this skill deliberately lives outside the generator skills so the reviewer does not inherit the generator's assumptions."
 last-verified: 2026-04-23
 ---
 
@@ -12,7 +12,7 @@ last-verified: 2026-04-23
 long-running apps](https://www.anthropic.com/engineering/harness-design-long-running-apps)
 and the GAN paradigm:
 
-1. **The agent doing the work praises its own work.** The 11 design skills
+1. **The agent doing the work praises its own work.** The 12 design skills
    (apple / anthropic / ember / sage / glass / eclat / lectern / atelier / primer)
    are **generators** — they know the
    style, they can produce HTML, and they will naturally rate their own
@@ -25,7 +25,7 @@ and the GAN paradigm:
 **ZH** — 两条原则来自 Anthropic harness-design 和 GAN 范式:(1) 做事的
 agent 倾向自评过高;(2) 独立持怀疑的 evaluator 才是真正的杠杆。9 个
 design skill 是 generator,会给自己打高分;`design-review` 脚本、规则、
-已知 bug 清单 **不属于任何一个风格**,11 种风格共用同一套工艺底线。
+已知 bug 清单 **不属于任何一个风格**,12 种风格共用同一套工艺底线。
 
 ## 检查模型 · The gate model(全仓唯一定义)
 
@@ -312,7 +312,7 @@ node skills/design-review/scripts/learning-loop.mjs \
 
 具体清单在:
 - `references/known-bugs.md`(条数跑 `--facts --list`,每条写 Reader sees / Why / Defense)
-- `references/cross-skill-rules.md`(11 种风格共通工艺底线 · 有 §G 双语规则 + §I 卡片分组规则)
+- `references/cross-skill-rules.md`(12 种风格共通工艺底线 · 有 §G 双语规则 + §I 卡片分组规则)
 - `references/dos-and-donts.md`(每 skill 下的风格特定反例)
 
 ## Learning-loop · 回灌成规则的流程
@@ -390,7 +390,7 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 - `scripts/count-check.py` — 全仓计数判定(承载短语 vs 磁盘真值 + 检查模型)
 - `scripts/learning-loop.mjs` — 组件 07 · critic verdict → design-learner prompt
 - `references/known-bugs.md` — bug 大全(条数跑 `--facts --list`)
-- `references/cross-skill-rules.md` — 11 种风格共通规则(含 §G 双语 / §I 卡片分组)
+- `references/cross-skill-rules.md` — 12 种风格共通规则(含 §G 双语 / §I 卡片分组)
 - `references/canonical/README.md` — canonical 参考库说明 + 扩库流程
 
 ## Reference

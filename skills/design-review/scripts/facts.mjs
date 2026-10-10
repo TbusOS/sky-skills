@@ -61,6 +61,8 @@ const ROSTER = {
   'primer-design': 'design',
   'relief-design': 'design',
   'graphite-design': 'design',
+  'inkwash-design': 'design',
+  'design-taste': 'harness',
 
   'design-review': 'harness',
   'design-planner': 'harness',

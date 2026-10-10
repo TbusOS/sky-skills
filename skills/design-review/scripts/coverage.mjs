@@ -84,6 +84,9 @@ const TARGET = {
   // figures (templates/figures) and four generated showcase pages, so there is
   // no canonical page-type to count. Empty on purpose, not forgotten.
   graphite: [],
+  // inkwash fixes a material too (rice paper, ink, brush, empty paper, seal) and has no
+  // canonical page types — empty on purpose, same reason as graphite.
+  inkwash: [],
 };
 
 function parseArgs(argv) {

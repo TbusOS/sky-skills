@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>sky-skills — a curated collection of Claude Code Skills</title>
-<meta name="description" content="Claude Code Skills for kernel engineering, technical PDFs, video and documents, eleven design voices that render HTML their own way, and an independent reviewer that reads only the rendered page.">
+<meta name="description" content="Claude Code Skills for kernel engineering, technical PDFs, video and documents, twelve design voices that render HTML their own way, and an independent reviewer that reads only the rendered page.">
 <meta name="theme-color" content="#141413">
-<meta property="og:title" content="sky-skills — one request, eleven voices, one judge">
+<meta property="og:title" content="sky-skills — one request, twelve voices, one judge">
 <meta property="og:description" content="Claude Code Skills: kernel engineering, PDFs, video, eleven design voices, and a harness whose generators never grade their own work.">
 <meta property="og:type" content="website">
 <link rel="stylesheet" href="skills/anthropic-design/assets/fonts.css">
@@ -127,7 +127,7 @@ h3 { font-size: 20px; line-height: 1.3; }
   .vt { padding: 6px; border-radius: 10px; }
   .vt-name { font-size: 10px; }
 }
-/* the eleven voices, real palettes from each skill */
+/* the twelve voices, real palettes from each skill */
 .vt[data-v="apple"]     { --vbg: #ffffff; --vink: #1d1d1f; --vacc: #0066cc; --vfont: -apple-system, "SF Pro Display", "Helvetica Neue", system-ui, sans-serif; }
 .vt[data-v="anthropic"] { --vbg: #faf9f5; --vink: #141413; --vacc: #d97757; --vfont: "Poppins", sans-serif; }
 .vt[data-v="ember"]     { --vbg: #fff2df; --vink: #312520; --vacc: #c49464; --vfont: "Fraunces", Georgia, serif; --vr: 3px; }
@@ -435,7 +435,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
       sky-skills
     </a>
     <div class="nav-links">
-      <a href="#voices"><span class="lang-en">Voices</span><span class="lang-zh">十一种风格</span></a>
+      <a href="#voices"><span class="lang-en">Voices</span><span class="lang-zh">十二种风格</span></a>
       <a href="#table"><span class="lang-en">All skills</span><span class="lang-zh">全部 skill</span></a>
       <a href="#harness"><span class="lang-en">Harness</span><span class="lang-zh">评审回路</span></a>
       <a href="#kernel"><span class="lang-en">Kernel</span><span class="lang-zh">内核</span></a>
@@ -454,8 +454,8 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
       <div>
         <span class="kicker"><span class="lang-en">Claude Code Skills · MIT</span><span class="lang-zh">Claude Code Skills · MIT 开源</span></span>
         <h1>
-          <span class="lang-en"><span class="l1">One request.</span><br><span class="l2">Eleven voices.</span><br><span class="l3">One judge.</span></span>
-          <span class="lang-zh"><span class="l1">一个需求,</span><br><span class="l2">十一种声音,</span><br><span class="l3">一个裁判。</span></span>
+          <span class="lang-en"><span class="l1">One request.</span><br><span class="l2">Twelve voices.</span><br><span class="l3">One judge.</span></span>
+          <span class="lang-zh"><span class="l1">一个需求,</span><br><span class="l2">十二种声音,</span><br><span class="l3">一个裁判。</span></span>
         </h1>
       </div>
       <div>
@@ -496,7 +496,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
     </p>
 
     <div class="stats">
-      <div class="stat"><b data-count="26">26</b> <span><span class="lang-en">skills total</span><span class="lang-zh">全部 26 个 skill</span></span></div>
+      <div class="stat"><b data-count="26">26</b> <span><span class="lang-en">skills total</span><span class="lang-zh">全部 28 个 skill</span></span></div>
       <div class="stat"><b data-count="11">11</b> <span><span class="lang-en">design skills</span><span class="lang-zh">个设计 skill</span></span></div>
       <div class="stat"><b data-count="155">155</b> <span><span class="lang-en">diagram templates</span><span class="lang-zh">张图例模板</span></span></div>
       <div class="stat"><b data-count="101">101</b> <span><span class="lang-en">known-bugs</span><span class="lang-zh">条 known-bug</span></span></div>
@@ -507,7 +507,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
 
 <section id="voices">
   <div class="wrap">
-    <span class="kicker rv"><span class="lang-en">Eleven voices · one paragraph</span><span class="lang-zh">十一种风格 · 同一段内容</span></span>
+    <span class="kicker rv"><span class="lang-en">Twelve voices · one paragraph</span><span class="lang-zh">十二种风格 · 同一段内容</span></span>
     <h2 class="rv"><span class="lang-en">Same content. Eleven ways to say it.</span><span class="lang-zh">同一段内容,十一种说法。</span></h2>
     <p class="lede rv"><span class="lang-en">Each design skill fixes an identity — palette, type, material — and leaves the rest to the model. Pick a voice: the page below re-renders in that skill's real colours and fonts. It cycles on its own until you click.</span><span class="lang-zh">每个设计 skill 只定死自己的身份:配色、字体、质感,其余交给模型。点一个风格,下面这页会换成那个 skill 的真实配色和字体重排一遍。不点的时候它自己轮播。</span></p>
     <div class="lab rv">
@@ -543,7 +543,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
 <section id="table" style="background:var(--card);">
   <div class="wrap">
     <span class="kicker rv"><span class="lang-en">The lineup</span><span class="lang-zh">全部成员</span></span>
-    <h2 class="rv"><span class="lang-en">All 26 skills, numbered in the order they arrived.</span><span class="lang-zh">全部 26 个 skill,按加入仓库的先后编号。</span></h2>
+    <h2 class="rv"><span class="lang-en">All 28 skills, numbered in the order they arrived.</span><span class="lang-zh">全部 28 个 skill,按加入仓库的先后编号。</span></h2>
     <p class="lede rv"><span class="lang-en">Hover a tile and the skills it works with light up; click it for what it does, how to trigger it and where to see it. Blue builds systems and content, orange is a design voice, green judges, plans and keeps things current.</span><span class="lang-zh">鼠标移到一格上,和它配合的 skill 会亮起来;点一下看它做什么、怎么触发、去哪看。蓝色是系统与内容,橙色是设计风格,绿色负责评审、规划和更新。</span></p>
     <div class="fams rv" id="fams" role="group" aria-label="Filter by family">
       <button class="fam-btn" type="button" data-f="all" aria-pressed="true"><i style="--c:var(--ink)"></i><span class="lang-en">All</span><span class="lang-zh">全部</span> · 26</button>
@@ -564,7 +564,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
 <section id="growth">
   <div class="wrap">
     <span class="kicker rv"><span class="lang-en">How it grew</span><span class="lang-zh">怎么长起来的</span></span>
-    <h2 class="rv"><span class="lang-en">From one kernel skill to twenty-six.</span><span class="lang-zh">从一个内核 skill,长到 26 个。</span></h2>
+    <h2 class="rv"><span class="lang-en">From one kernel skill to twenty-eight.</span><span class="lang-zh">从一个内核 skill,长到 28 个。</span></h2>
     <!-- facts-ignore: "four design voices" is what arrived on 2026-04-19, a dated step of the chart, not today's count -->
     <p class="lede rv"><span class="lang-en">Each step is the day a SKILL.md first landed in git (<code>git log --diff-filter=A</code>). Four design voices arrived on the same day; the first evaluator came one day later. Hover a dot to see which skill it was.</span><span class="lang-zh">每一级台阶是一个 SKILL.md 第一次进 git 的那天(<code>git log --diff-filter=A</code>)。四个设计风格同一天加入;第一个评审第二天就到了。鼠标移到圆点上看是哪个 skill。</span></p>
     <div class="growth rv" id="growth"><div class="pan"><svg id="gsvg" viewBox="0 0 1000 330" role="img" aria-label="Cumulative number of skills from 2026-03-18 to 2026-10-07"></svg></div><div class="g-tip" id="gtip"></div></div>
@@ -575,7 +575,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
   <div class="wrap">
     <span class="kicker rv"><span class="lang-en">The harness</span><span class="lang-zh">评审回路</span></span>
     <h2 class="rv"><span class="lang-en">Generators never grade their own work.</span><span class="lang-zh">生成的一方,从不给自己打分。</span></h2>
-    <p class="lede rv"><span class="lang-en">The eleven design skills generate. design-review lives in another folder and sees only the rendered page. Every miss it learns from becomes a known-bug row and a new check, so the same bug is not missed twice. The idea comes from Anthropic's <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">harness design for long-running apps</a>.</span><span class="lang-zh">十一个设计 skill 负责生成。design-review 放在另一个目录,只看渲染出来的页面。它每漏掉一次,就多一条 known-bug 和一项新检查,同一个问题不会漏第二次。思路来自 Anthropic 的 <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">harness design for long-running apps</a>。</span></p>
+    <p class="lede rv"><span class="lang-en">The twelve design skills generate. design-review lives in another folder and sees only the rendered page. Every miss it learns from becomes a known-bug row and a new check, so the same bug is not missed twice. The idea comes from Anthropic's <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">harness design for long-running apps</a>.</span><span class="lang-zh">十二个设计 skill 负责生成。design-review 放在另一个目录,只看渲染出来的页面。它每漏掉一次,就多一条 known-bug 和一项新检查,同一个问题不会漏第二次。思路来自 Anthropic 的 <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">harness design for long-running apps</a>。</span></p>
     <div class="h-grid">
       <div class="ring-box rv">
         <div class="pan ring-pan"><svg id="ring" viewBox="0 0 560 520" role="img" aria-label="The review loop: generate, objective check, gate chain, optional critic, learn, known-bugs, back to the generators">
@@ -736,7 +736,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
         <div class="term" id="iterm"><div class="term-bar"><i></i><i></i><i></i>&nbsp; ~</div><pre id="ipre"></pre></div>
       </div>
       <div class="i-side">
-        <div class="i-card rv"><h3><span class="lang-en">Runs from any directory</span><span class="lang-zh">在任何目录都能用</span></h3><p><span class="lang-en">All 26 skills, the harness slash-commands (/design-loop, /design-distill, /gdc-audit-critic) and six subagents install under ~/.claude/. The design harness finds its own engine through dr-cli, wherever you call it from.</span><span class="lang-zh">全部 26 个 skill、评审回路的斜杠命令(/design-loop、/design-distill、/gdc-audit-critic)和六个子 agent 都装在 ~/.claude/ 下。设计评审靠 dr-cli 找到自己的引擎,在哪个目录调用都行。</span></p></div>
+        <div class="i-card rv"><h3><span class="lang-en">Runs from any directory</span><span class="lang-zh">在任何目录都能用</span></h3><p><span class="lang-en">All 28 skills, the harness slash-commands (/design-loop, /design-distill, /gdc-audit-critic) and six subagents install under ~/.claude/. The design harness finds its own engine through dr-cli, wherever you call it from.</span><span class="lang-zh">全部 28 个 skill、评审回路的斜杠命令(/design-loop、/design-distill、/gdc-audit-critic)和六个子 agent 都装在 ~/.claude/ 下。设计评审靠 dr-cli 找到自己的引擎,在哪个目录调用都行。</span></p></div>
         <div class="i-card rv"><h3><span class="lang-en">Stays current, with your say-so</span><span class="lang-zh">自动提醒,你点头才更新</span></h3><p><span class="lang-en">skills-sync notices when the repo is ahead, lists the new commits, and pulls only after you confirm. </span><span class="lang-zh">skills-sync 发现仓库有更新时列出新提交,你确认后才拉取。</span><a href="docs/INSTALL.html#stay-updated"><span class="lang-en">How the updater works →</span><span class="lang-zh">自动更新怎么工作 →</span></a></p></div>
         <div class="i-card rv"><h3><span class="lang-en">Full guide</span><span class="lang-zh">完整指南</span></h3><p><span class="lang-en">Trigger words for every skill, the bin/design-review walkthrough, cross-repo setup and a troubleshooting FAQ. </span><span class="lang-zh">每个 skill 的触发词、bin/design-review 用法、跨仓库配置和排错问答。</span><a href="docs/INSTALL.html"><span class="lang-en">Open the install guide →</span><span class="lang-zh">打开安装指南 →</span></a></p></div>
       </div>
@@ -837,7 +837,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
   }, { rootMargin: '0px 0px -6% 0px' }) : null;
   document.querySelectorAll('.rv').forEach(function (el) { if (rvObs) rvObs.observe(el); else el.classList.add('in'); });
 
-  // ── the eleven voices: real palettes and type from each skill ──
+  // ── the twelve voices: real palettes and type from each skill ──
   var V = [
     { k: 'anthropic', en: 'Warm cream, orange, low-saturation semantic hues, ink text. Only the palette is fixed.', zh: '暖米白、橙、低饱和语义色、墨色字。只定死配色。', font: 'Poppins + Lora', pal: ['#faf9f5', '#141413', '#d97757', '#6a9bcc', '#788c5d'],
       s: { bg: '#faf9f5', surf: '#ffffff', ink: '#141413', mut: '#5e5d55', acc: '#d97757', accInk: '#a8502f', btn: '#d97757', btnInk: '#141413', fd: '"Poppins", sans-serif', fb: '"Lora", Georgia, serif', r: '14px', line: 'rgba(20,20,19,.12)' } },
@@ -1164,7 +1164,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
     var g = document.getElementById('ringnodes'), mid = document.getElementById('ringmid'), pk = document.getElementById('packets'), ringPath = document.getElementById('ringpath');
     var NS = 'http://www.w3.org/2000/svg', cx = 280, cy = 250, R = 178;
     var N = [
-      ['Generate', '生成', '11 design skills', '11 个设计 skill', '#d97757'],
+      ['Generate', '生成', '12 design skills', '12 个设计 skill', '#d97757'],
       ['Objective check', '客观检查', 'JS · contrast · scroll', 'JS · 对比度 · 滚动', '#6a9bcc'],
       ['Gate chain', '检查链', 'verify · audit · axe', 'verify · audit · axe', '#6a9bcc'],
       ['Critic', '口味评审', 'optional', '可选', '#c9913f'],
