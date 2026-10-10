@@ -564,7 +564,8 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
 <section id="growth">
   <div class="wrap">
     <span class="kicker rv"><span class="lang-en">How it grew</span><span class="lang-zh">怎么长起来的</span></span>
-    <h2 class="rv"><span class="lang-en">From one kernel skill to twenty-five.</span><span class="lang-zh">从一个内核 skill,长到 25 个。</span></h2>
+    <h2 class="rv"><span class="lang-en">From one kernel skill to twenty-six.</span><span class="lang-zh">从一个内核 skill,长到 26 个。</span></h2>
+    <!-- facts-ignore: "four design voices" is what arrived on 2026-04-19, a dated step of the chart, not today's count -->
     <p class="lede rv"><span class="lang-en">Each step is the day a SKILL.md first landed in git (<code>git log --diff-filter=A</code>). Four design voices arrived on the same day; the first evaluator came one day later. Hover a dot to see which skill it was.</span><span class="lang-zh">每一级台阶是一个 SKILL.md 第一次进 git 的那天(<code>git log --diff-filter=A</code>)。四个设计风格同一天加入;第一个评审第二天就到了。鼠标移到圆点上看是哪个 skill。</span></p>
     <div class="growth rv" id="growth"><div class="pan"><svg id="gsvg" viewBox="0 0 1000 330" role="img" aria-label="Cumulative number of skills from 2026-03-18 to 2026-10-07"></svg></div><div class="g-tip" id="gtip"></div></div>
   </div>
@@ -750,8 +751,9 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
     <div class="d-grid">
       <div class="dcard rv" style="--c:var(--blue)"><small><span class="lang-en">Kernel</span><span class="lang-zh">内核</span></small><h3><span class="lang-en">The flagship systems skill</span><span class="lang-zh">系统类的主力 skill</span></h3>
         <ul><li><a href="docs/KERNEL-HARNESS.html"><span class="lang-en">Architecture</span><span class="lang-zh">架构</span></a></li><li><a href="docs/KERNEL-CAPABILITIES.html"><span class="lang-en">Capabilities + live demo</span><span class="lang-zh">能力 + 现场演示</span></a></li><li><a href="docs/KERNEL-CODE-REVIEW.html"><span class="lang-en">Code-review research</span><span class="lang-zh">代码评审研究</span></a></li><li><a href="docs/KERNEL-REPOS-SURVEY.html"><span class="lang-en">Community repos survey</span><span class="lang-zh">社区仓库调研</span></a></li></ul></div>
+      <!-- facts-ignore: five counts the roadmap's rendered variants, not the design skills -->
       <div class="dcard rv" style="--c:var(--olive)"><small><span class="lang-en">Harness</span><span class="lang-zh">评审回路</span></small><h3><span class="lang-en">The roadmap, in five voices</span><span class="lang-zh">同一份路线图,五种风格</span></h3>
-        <p><span class="lang-en">The nine-component plan for the design harness, rendered by five of the design skills.</span><span class="lang-zh">设计评审回路的九个组件计划,挑了其中五种风格各渲染一版。</span></p>
+        <!-- facts-ignore: five counts the roadmap's rendered variants, not the design skills --><p><span class="lang-en">The nine-component plan for the design harness, rendered by five of the design skills.</span><span class="lang-zh">设计评审回路的九个组件计划,挑了其中五种风格各渲染一版。</span></p>
         <div class="voices"><a href="docs/HARNESS-ROADMAP.html">anthropic</a><a href="docs/HARNESS-ROADMAP.apple.html">apple</a><a href="docs/HARNESS-ROADMAP.ember.html">ember</a><a href="docs/HARNESS-ROADMAP.sage.html">sage</a><a href="docs/HARNESS-ROADMAP.glass.html">glass</a></div></div>
       <div class="dcard rv" style="--c:var(--orange)"><small><span class="lang-en">Install</span><span class="lang-zh">安装</span></small><h3><span class="lang-en">Setup and updates</span><span class="lang-zh">安装与更新</span></h3>
         <ul><li><a href="docs/INSTALL.html"><span class="lang-en">Full install guide</span><span class="lang-zh">完整安装指南</span></a></li><li><a href="docs/INSTALL.html#stay-updated"><span class="lang-en">Auto-updater (multi-CLI)</span><span class="lang-zh">自动更新(多种 CLI)</span></a></li><li><a href="#install"><span class="lang-en">Quick install on this page</span><span class="lang-zh">本页快速安装</span></a></li></ul></div>
@@ -1126,6 +1128,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
     // [x, y, 文本锚点] 都是图内坐标,摆在曲线上方或右下的空白处
     var NOTES = [
       [124, 274, 'start', '#1 linux-kernel-dev', '#1 linux-kernel-dev'],
+      // facts-ignore: a dated step of the history chart (2026-04-19), not today's count
       [252, 238, 'start', '+4 design voices, 2026-04-19', '2026-04-19 一天加入 4 个设计风格'],
       [274, 202, 'start', '#9 the first evaluator', '#9 第一个评审'],
       [450, 126, 'end', '#15 the harness tunes itself', '#15 回路开始调自己'],
