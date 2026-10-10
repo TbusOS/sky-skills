@@ -57,6 +57,7 @@
   function f2(n) { return String(Math.round(n * 100) / 100); }
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function dist(a, b) { return Math.hypot(b[0] - a[0], b[1] - a[1]); }
+  function bbox(p) { var a = [Infinity, Infinity, -Infinity, -Infinity]; p.forEach(function (q) { a[0] = Math.min(a[0], q[0]); a[1] = Math.min(a[1], q[1]); a[2] = Math.max(a[2], q[0]); a[3] = Math.max(a[3], q[1]); }); return a; }
   function polyLen(p) { var s = 0; for (var i = 1; i < p.length; i++) s += dist(p[i - 1], p[i]); return s; }
 
   function noise1d(r, knots) {               // a smooth random curve on 0..1, values -1..1
@@ -196,15 +197,19 @@
         }
       }
       // ink density inside the stroke: full where the brush lands, thinner as the ink runs out
+      // (a stroke that comes back near its start — a circle — gets no gradient: start and
+      // end would sit side by side and the light end would cut across the dark start)
       var gid = uid + '-g' + k, a1 = Math.max(0.35, Math.min(1, 0.45 + 0.6 * load(1)));
-      defs.push('<linearGradient id="' + gid + '" class="k-' + tn + '" gradientUnits="userSpaceOnUse" x1="' + f1(P[0].x) + '" y1="' + f1(P[0].y) +
+      var bb = bbox(P.map(function (p) { return [p.x, p.y]; })), chord = Math.hypot(P[P.length - 1].x - P[0].x, P[P.length - 1].y - P[0].y);
+      var looped = chord < 0.35 * Math.max(bb[2] - bb[0], bb[3] - bb[1]) && L > 40;
+      if (!looped) defs.push('<linearGradient id="' + gid + '" class="k-' + tn + '" gradientUnits="userSpaceOnUse" x1="' + f1(P[0].x) + '" y1="' + f1(P[0].y) +
         '" x2="' + f1(P[P.length - 1].x) + '" y2="' + f1(P[P.length - 1].y) + '"><stop offset="0" stop-color="currentColor"/>' +
         '<stop offset="0.6" stop-color="currentColor" stop-opacity="' + f2((1 + a1) / 2) + '"/><stop offset="1" stop-color="currentColor" stop-opacity="' + f2(a1) + '"/></linearGradient>');
       var bw = f1(Math.max(0.9, width / N * 1.25));
       var cls = 'k-' + tn + (o.cls ? ' ' + o.cls : ''), op = o.opacity != null ? ' opacity="' + o.opacity + '"' : '';
-      var inner = '<path class="ib" fill="url(#' + gid + ')" d="' + body + '"/>' + (bristles ? '<path class="id" d="' + bristles + '" stroke-width="' + bw + '"/>' : '');
+      var inner = '<path class="ib" fill="' + (looped ? 'currentColor' : 'url(#' + gid + ')') + '" d="' + body + '"/>' + (bristles ? '<path class="id" d="' + bristles + '" stroke-width="' + bw + '"/>' : '');
       var center = 'M' + P.map(function (p) { return f1(p.x) + ' ' + f1(p.y); }).join('L');
-      var it = put(art, 'stroke', L, null, { k: k, cls: cls, op: op, inner: inner, body: body, wet: wet, center: center, wMax: width + 10 });
+      var it = put(art, 'stroke', L, null, { k: k, cls: cls, op: op, inner: inner, body: body, wet: wet, center: center, wMax: width + 10, box: bbox(P.map(function (p) { return [p.x, p.y]; })) });
       it.render = renderStroke;
       return { length: L, dryAt: tDry, hairs: N };
     };
@@ -214,8 +219,11 @@
       var halo = i.wet > 0.02 ? '<path class="ih' + (i.wet > 0.9 ? ' ih-wet' : '') + ' ' + i.cls + '" d="' + i.body + '" style="--w:' + f2(Math.min(1.4, i.wet)) +
         (i.d != null ? ';--d:' + f2(i.d + i.t) + 's;--t:' + f2(0.6 + 0.9 * Math.min(1, i.wet)) + 's" data-a="ab"' : '"') + '/>' : '';
       if (i.d == null) return halo + '<g class="is ' + i.cls + '"' + i.op + '>' + i.inner + '</g>';
-      var mid = uid + '-m' + i.k;
-      defs.push('<mask id="' + mid + '" maskUnits="userSpaceOnUse"><path d="' + i.center + '" pathLength="1" stroke="#fff" stroke-width="' +
+      // An explicit mask region: the stroke's own box plus the brush. Left to the default
+      // (-10%..120% of the viewport) the region was resolved wrongly when several figures
+      // share a page and strokes vanished (2026-10-11); a small region is also cheaper.
+      var mid = uid + '-m' + i.k, pad = i.wMax / 2 + 4, bx = i.box;
+      defs.push('<mask id="' + mid + '" maskUnits="userSpaceOnUse" x="' + f1(bx[0] - pad) + '" y="' + f1(bx[1] - pad) + '" width="' + f1(bx[2] - bx[0] + 2 * pad) + '" height="' + f1(bx[3] - bx[1] + 2 * pad) + '"><path d="' + i.center + '" pathLength="1" stroke="#fff" stroke-width="' +
         f1(i.wMax) + '" fill="none" stroke-linecap="round" stroke-linejoin="round" data-a="ad" style="--d:' + f2(i.d) + 's;--t:' + f2(i.t) + 's"/></mask>');
       return halo + '<g class="is ' + i.cls + '" mask="url(#' + mid + ')"' + i.op + '>' + i.inner + '</g>';
     }
@@ -236,7 +244,7 @@
       var body = 'M' + ring.map(function (p) { return f1(p[0]) + ' ' + f1(p[1]); }).join('L') + 'Z';
       var center = 'M' + f1(x - Math.cos(a) * rr * 1.4) + ' ' + f1(y - Math.sin(a) * rr * 1.4) + 'L' + f1(x + Math.cos(a) * rr) + ' ' + f1(y + Math.sin(a) * rr);
       var wet = (o.wet == null ? 0.6 : o.wet) * (0.4 + 1.2 * WET), cls = 'k-' + tn + (o.cls ? ' ' + o.cls : '');
-      var it = put(art, 'stroke', rr * 2.4, null, { k: k, cls: cls, op: '', inner: '<path class="ib dt" d="' + body + '"/>', body: body, wet: wet, center: center, wMax: rr * 2.6 + 6 });
+      var it = put(art, 'stroke', rr * 2.4, null, { k: k, cls: cls, op: '', inner: '<path class="ib dt" d="' + body + '"/>', body: body, wet: wet, center: center, wMax: rr * 2.6 + 6, box: bbox(ring) });
       it.render = renderStroke;
       return B;
     };
