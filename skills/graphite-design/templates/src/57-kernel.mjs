@@ -67,22 +67,21 @@ function fnBox(S, P, x, y, w, h, f, pen) {
 const mid = b => [b.x + b.w / 2, b.y + b.h / 2];
 
 // One-shot token along pts (time per hop from distance, `speed` px/s, at least `minHop` s).
-// Drawn at the last point; earlier keys are offsets from there. Hidden before, after,
-// and when animations are off (class tmp). Returns the time it arrives.
+// Hidden before, after, and when animations are off (class tmp). Returns the time it arrives.
 function travel(S, pts, t0, speed, o) {
   o = o || {};
-  const last = pts[pts.length - 1], keys = [[t0 - 0.02, pts[0][0] - last[0], pts[0][1] - last[1], 0], [t0, pts[0][0] - last[0], pts[0][1] - last[1], 1]];
+  const last = pts[pts.length - 1], keys = [[t0 - 0.02, pts[0][0], pts[0][1], 0], [t0, pts[0][0], pts[0][1], 1]];
   let t = t0;
   for (let i = 1; i < pts.length; i++) {
     const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
     t += Math.max(o.minHop || 0.16, d / speed);
-    keys.push([t, pts[i][0] - last[0], pts[i][1] - last[1], 1]);
-    if (o.waits && o.waits[i]) { t += o.waits[i]; keys.push([t, pts[i][0] - last[0], pts[i][1] - last[1], 1]); }
+    keys.push([t, pts[i][0], pts[i][1], 1]);
+    if (o.waits && o.waits[i]) { t += o.waits[i]; keys.push([t, pts[i][0], pts[i][1], 1]); }
   }
-  keys.push([t + 0.02, 0, 0, 0]);
-  S.track(keys, () => {
-    if (o.shape === 'doc') S.raw(`<rect x="${last[0] - 7}" y="${last[1] - 9}" width="14" height="18" rx="2" class="ln w-t tok tmp p-${o.pen || 'orange'}"/>`, { kind: 'tag' });
-    else S.raw(`<circle cx="${last[0]}" cy="${last[1]}" r="8" class="tok tmp p-${o.pen || 'orange'}"/>`, { kind: 'tag' });
+  keys.push([t + 0.02, last[0], last[1], 0]);
+  S.follow(keys, (x, y) => {
+    if (o.shape === 'doc') S.raw(`<rect x="${x - 7}" y="${y - 9}" width="14" height="18" rx="2" class="ln w-t tok tmp p-${o.pen || 'orange'}"/>`, { kind: 'tag' });
+    else S.raw(`<circle cx="${x}" cy="${y}" r="8" class="tok tmp p-${o.pen || 'orange'}"/>`, { kind: 'tag' });
   });
   return t;
 }

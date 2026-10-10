@@ -432,6 +432,29 @@
   P.lines = lines;
   P.say = say;
 
+  // A formula in the mono face, built from runs: 'text' or { t, ink, sub }.
+  //   P.formula(S, 400, 44, ['x', { t: '0', sub: true }, ' = ', { t: 'λ', ink: 'violet' }])
+  // Subscripts are smaller runs dropped below the baseline (the next run climbs back),
+  // not the Unicode ₀₁₂ characters: the mono webfont has no glyphs for those, and a
+  // fallback font in the middle of a formula looks pasted in.
+  // o.size (18) o.ink colour for runs without their own o.anchor 'middle' | 'end'
+  P.formula = function (S, x, y, runs, o) {
+    o = o || {};
+    var size = o.size || 18, sub = Math.round(size * 0.66), drop = Math.round(size * 0.3);
+    var inner = '', down = false, n = 0;
+    runs.forEach(function (p) {
+      var q = typeof p === 'string' ? { t: p } : p, ink = q.ink || o.ink, at = '';
+      if (q.sub) at = (down ? '' : ' dy="' + drop + '"') + ' font-size="' + sub + '"';
+      else if (down) at = ' dy="' + (-drop) + '"';
+      down = !!q.sub;
+      inner += '<tspan class="tx f-mono' + (ink ? ' i-' + ink : '') + '"' + at + '>' + String(q.t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</tspan>';
+      n += q.t.length * (q.sub ? 0.66 : 1);
+    });
+    var anchor = o.anchor ? ' text-anchor="' + o.anchor + '"' : '';
+    S.raw('<text x="' + x + '" y="' + y + '" font-size="' + size + '"' + anchor + ' class="tx f-mono" xml:space="preserve"%A>' + inner + '</text>', { layer: 'labels', kind: 'text', len: n * size * 0.6 });
+    return S;
+  };
+
   // A box with a label: the hand-drawn node of every diagram. Returns the box
   // {x, y, w, h} so links can find its edges.
   // o.pen fill colour, o.r corner radius, o.size font size, o.sub small second line, o.font 'mono'.

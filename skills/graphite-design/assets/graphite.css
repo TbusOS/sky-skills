@@ -183,8 +183,9 @@
 .gfig .paper { fill: var(--g-paper); }
 .gfig .card { fill: var(--g-card); }
 .gfig .lang-en { display: none; }
-:root[data-lang="en"] .gfig .lang-en { display: inline; }
-:root[data-lang="en"] .gfig .lang-zh { display: none; }
+/* English: data-lang on the page root, or on a standalone SVG's own root (export.mjs --lang=en) */
+:root[data-lang="en"] .gfig .lang-en, .gfig[data-lang="en"] .lang-en { display: inline; }
+:root[data-lang="en"] .gfig .lang-zh, .gfig[data-lang="en"] .lang-zh { display: none; }
 
 /* timeline: sketch.js marks timed elements with data-a and --d (delay) / --t (duration) */
 .gfig [data-a="ad"] { stroke-dasharray: 1 2; animation: g-draw var(--t) linear var(--d) both; }

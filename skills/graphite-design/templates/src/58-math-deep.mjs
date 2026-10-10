@@ -3,28 +3,8 @@
 // circle radii, the overshoot at the corners, the polynomial's coefficients, the
 // optimum on the road and the angles between the arrows.
 
-function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 function r1(n) { return Math.round(n * 10) / 10; }
 
-// A formula in the mono face, built from runs: 'text' or { t, ink, sub }. Subscripts are
-// smaller runs dropped below the baseline (the next run climbs back), not the Unicode
-// ₀₁₂ characters: the mono webfont has no glyphs for those, and a fallback font in the
-// middle of a formula looks pasted in.
-function formula(S, x, y, runs, o = {}) {
-  const size = o.size || 18, sub = Math.round(size * 0.66), drop = Math.round(size * 0.3);
-  let inner = '', down = false, n = 0;
-  runs.forEach(p => {
-    const q = typeof p === 'string' ? { t: p } : p, ink = q.ink || o.ink;
-    let at = '';
-    if (q.sub) at = (down ? '' : ` dy="${drop}"`) + ` font-size="${sub}"`;
-    else if (down) at = ` dy="${-drop}"`;
-    down = !!q.sub;
-    inner += `<tspan class="tx f-mono${ink ? ' i-' + ink : ''}"${at}>${esc(q.t)}</tspan>`;
-    n += q.t.length * (q.sub ? 0.66 : 1);
-  });
-  const anchor = o.anchor ? ` text-anchor="${o.anchor}"` : '';
-  S.raw(`<text x="${x}" y="${y}" font-size="${size}"${anchor} class="tx f-mono" xml:space="preserve"%A>${inner}</text>`, { layer: 'labels', kind: 'text', len: n * size * 0.6 });
-}
 const sub = t => ({ t, sub: true });
 
 // ── Fourier: a square wave from odd sines ───────────────────────────────────
@@ -95,7 +75,7 @@ export default [
         P.say(S, x1, cy - A - 12, { zh: '虚线:要拼出的方波', en: 'dashed: the square wave we want' }, { anchor: 'end', size: 14, ink: '2' });
       });
       S.at(0.8, 1.4, () => {
-        formula(S, 400, 44, ['f(t) = 4/π · ( ', { t: 'sin t', ink: 'blue' }, ' + ', { t: 'sin 3t/3', ink: 'orange' }, ' + ', { t: 'sin 5t/5', ink: 'green' }, ' + ', { t: 'sin 7t/7', ink: 'violet' }, ' + … )'], { anchor: 'middle', size: 18 });
+        P.formula(S, 400, 44, ['f(t) = 4/π · ( ', { t: 'sin t', ink: 'blue' }, ' + ', { t: 'sin 3t/3', ink: 'orange' }, ' + ', { t: 'sin 5t/5', ink: 'green' }, ' + ', { t: 'sin 7t/7', ink: 'violet' }, ' + … )'], { anchor: 'middle', size: 18 });
         P.say(S, 400, 74, { zh: '方波 = 一串正弦波叠起来:频率 1、3、5、7 倍,频率越高越小', en: 'a square wave = sines stacked up: 1, 3, 5, 7 times the frequency, each smaller' }, { anchor: 'middle', size: 15, ink: '2' });
       });
       // the circles: each one turns relative to its parent, so circle k ends up at k·θ
@@ -150,12 +130,12 @@ export default [
       const tipY = th => cy - part(4, th), keysT = [], keysG = [];
       for (let i = 0; i <= N; i++) {
         const th = i / N * 2 * Math.PI, t = t0 + i / N * T;
-        keysT.push([t, X(th) - x1, tipY(th) - cy]);
+        keysT.push([t, X(th), tipY(th)]);
         keysG.push([t, 0, tipY(th) - cy]);
       }
       S.window(t0, null, () => {
         S.track(keysG, () => S.raw(`<line x1="330" y1="${cy}" x2="${x1 + 8}" y2="${cy}" class="ln w-h dash p-red"/>`, { kind: 'tag' }), { repeat: 'infinite' });
-        S.track(keysT, () => S.raw(`<circle cx="${x1}" cy="${cy}" r="6" class="tok p-red"/>`, { kind: 'tag' }), { repeat: 'infinite' });
+        S.follow(keysT, (x, y) => S.raw(`<circle cx="${r1(x)}" cy="${r1(y)}" r="6" class="tok p-red"/>`, { kind: 'tag' }), { repeat: 'infinite' });
       });
       S.at(t0 + T - 0.8, 0.8, () => P.say(S, 772, 108, { zh: '红点转一圈 = 方波走完一个周期', en: 'one turn = one period of the wave' }, { anchor: 'end', size: 14, ink: 'red' }));
     },
@@ -189,7 +169,7 @@ export default [
         P.say(S, 44, ly0 + 5, '0', { anchor: 'end', size: 14, font: 'mono', ink: '2' });
       });
       S.at(0.6, 1.2, () => {
-        xs.forEach((x, i) => formula(S, lx(x), ly0 + 72, ['x', sub(String(i))], { anchor: 'middle', size: 15, ink: '2' }));
+        xs.forEach((x, i) => P.formula(S, lx(x), ly0 + 72, ['x', sub(String(i))], { anchor: 'middle', size: 15, ink: '2' }));
         P.say(S, 210, 128, { zh: '① 给每个点造一个开关', en: '① a switch for each point' }, { anchor: 'middle', size: 16 });
         P.say(S, 615, 128, { zh: '② 乘上那点的高度,再加起来', en: '② times the point\'s height, then add' }, { anchor: 'middle', size: 16 });
         xs.forEach((x, i) => {
@@ -200,8 +180,8 @@ export default [
         });
       });
       S.at(1.4, 1.6, () => {
-        formula(S, 400, 44, ['L(x) = ', { t: 'y', ink: 'blue' }, { t: '0', sub: true, ink: 'blue' }, { t: 'ℓ', ink: 'blue' }, { t: '0', sub: true, ink: 'blue' }, ' + ', { t: 'y', ink: 'orange' }, { t: '1', sub: true, ink: 'orange' }, { t: 'ℓ', ink: 'orange' }, { t: '1', sub: true, ink: 'orange' }, ' + ', { t: 'y', ink: 'green' }, { t: '2', sub: true, ink: 'green' }, { t: 'ℓ', ink: 'green' }, { t: '2', sub: true, ink: 'green' }, ' + ', { t: 'y', ink: 'violet' }, { t: '3', sub: true, ink: 'violet' }, { t: 'ℓ', ink: 'violet' }, { t: '3', sub: true, ink: 'violet' }], { anchor: 'middle', size: 19 });
-        formula(S, 400, 82, ['ℓ', sub('i'), '(x) = Π ', '(x − x', sub('j'), ') / (x', sub('i'), ' − x', sub('j'), ')   j ≠ i'], { anchor: 'middle', size: 16, ink: '2' });
+        P.formula(S, 400, 44, ['L(x) = ', { t: 'y', ink: 'blue' }, { t: '0', sub: true, ink: 'blue' }, { t: 'ℓ', ink: 'blue' }, { t: '0', sub: true, ink: 'blue' }, ' + ', { t: 'y', ink: 'orange' }, { t: '1', sub: true, ink: 'orange' }, { t: 'ℓ', ink: 'orange' }, { t: '1', sub: true, ink: 'orange' }, ' + ', { t: 'y', ink: 'green' }, { t: '2', sub: true, ink: 'green' }, { t: 'ℓ', ink: 'green' }, { t: '2', sub: true, ink: 'green' }, ' + ', { t: 'y', ink: 'violet' }, { t: '3', sub: true, ink: 'violet' }, { t: 'ℓ', ink: 'violet' }, { t: '3', sub: true, ink: 'violet' }], { anchor: 'middle', size: 19 });
+        P.formula(S, 400, 82, ['ℓ', sub('i'), '(x) = Π ', '(x − x', sub('j'), ') / (x', sub('i'), ' − x', sub('j'), ')   j ≠ i'], { anchor: 'middle', size: 16, ink: '2' });
       });
       const t0 = 3.2, per = 2.2;
       xs.forEach((xi, i) => {
@@ -215,7 +195,7 @@ export default [
           xs.forEach((xj, j) => { if (j !== i) S.circle(lx(xj), ly0, 5, { w: 'h', pen: PEN[i], double: false }); });
         });
         const peakX = samples.reduce((b, x) => (x >= xs[0] && x <= xs[3] && ell(i, x) > ell(i, b) ? x : b), xi);
-        S.window(t + 1.1, null, () => formula(S, lx(peakX) + (i === 3 ? -14 : 12), ly(1) - 14, [{ t: 'ℓ', ink: PEN[i] }, { t: String(i), sub: true, ink: PEN[i] }], { size: 16, anchor: i === 3 ? 'end' : 'start' }), { layer: 'labels' });
+        S.window(t + 1.1, null, () => P.formula(S, lx(peakX) + (i === 3 ? -14 : 12), ly(1) - 14, [{ t: 'ℓ', ink: PEN[i] }, { t: String(i), sub: true, ink: PEN[i] }], { size: 16, anchor: i === 3 ? 'end' : 'start' }), { layer: 'labels' });
         S.window(t + 0.4, next, () => P.say(S, 210, 414, { zh: `第 ${i + 1} 个开关:在自己那点是 1,另外三点是 0`, en: `switch ${i + 1}: 1 at its own point, 0 at the other three` }, { anchor: 'middle', size: 15, ink: PEN[i] }), { layer: 'labels' });
       });
       // the sum: one curve through all four points
@@ -225,7 +205,7 @@ export default [
       S.window(ts + 2.6, null, () => {
         P.say(S, 210, 414, { zh: '在每个点上,只有它自己的开关是 1,', en: 'At each point only its own switch is on,' }, { anchor: 'middle', size: 15 });
         P.say(S, 210, 438, { zh: '所以加起来正好是那个点的高度', en: 'so the sum is exactly that point\'s height' }, { anchor: 'middle', size: 15 });
-        formula(S, 615, 440, coef.map((c, k) => {
+        P.formula(S, 615, 440, coef.map((c, k) => {
           const s = (k ? (c < 0 ? ' − ' : ' + ') : 'L(x) = ' + (c < 0 ? '−' : '')) + Math.abs(c).toFixed(2) + (k ? 'x' : '') + (k === 2 ? '²' : k === 3 ? '³' : '');
           return s;
         }), { anchor: 'middle', size: 15, ink: 'red' });
@@ -244,9 +224,10 @@ export default [
       const { H, ax, ay, q, road, slope, gradF, gradG, xo, angle, stops } = LM;
       // big contours run off the page: clip them to the figure, and the walker's contour
       // also to the band between the title and the legend, so it never crosses the text
-      S.raw('<defs><clipPath id="g-lm-all"><rect x="0" y="0" width="800" height="480"/></clipPath>' +
-        '<clipPath id="g-lm-band"><rect x="0" y="150" width="800" height="296"/></clipPath></defs>', { kind: 'tag' });
-      const clipped = (fn, id = 'g-lm-all') => S.group(`<g clip-path="url(#${id})">`, fn, 'art');
+      const ALL = S.id('all'), BAND = S.id('band');
+      S.raw(`<defs><clipPath id="${ALL}"><rect x="0" y="0" width="800" height="480"/></clipPath>` +
+        `<clipPath id="${BAND}"><rect x="0" y="150" width="800" height="296"/></clipPath></defs>`, { kind: 'tag' });
+      const clipped = (fn, id = ALL) => S.group(`<g clip-path="url(#${id})">`, fn, 'art');
       // the hill: contour ellipses, inner ones higher
       S.at(0, 1.6, () => clipped(() => {
         [195, 155, 115, 75, 35].forEach((rho, k) => S.ellipse(H[0], H[1], rho * ax, rho * ay, { w: k === 4 ? 't' : 'h', double: false }));
@@ -282,21 +263,21 @@ export default [
       // the walk: stop, show the arrows, walk on
       const kf = 80 / Math.hypot(...gradF(xo, road(xo))), kg = 62, t0 = 3.4, dwell = 2.6, travel = 1.1;
       const arrive = stops.map((_, i) => t0 + i * (dwell + travel));
-      const keys = [], fin = [xo, road(xo)], off2 = x => [x - fin[0], road(x) - fin[1]];
+      const keys = [], at = x => [x, road(x)];
       stops.forEach((x, i) => {
-        keys.push([arrive[i], ...off2(x)]);
+        keys.push([arrive[i], ...at(x)]);
         if (i < stops.length - 1) {
-          keys.push([arrive[i] + dwell, ...off2(x)]);
-          for (let k = 1; k < 10; k++) { const xx = x + (stops[i + 1] - x) * k / 10; keys.push([arrive[i] + dwell + travel * k / 10, ...off2(xx)]); }
+          keys.push([arrive[i] + dwell, ...at(x)]);
+          for (let k = 1; k < 10; k++) { const xx = x + (stops[i + 1] - x) * k / 10; keys.push([arrive[i] + dwell + travel * k / 10, ...at(xx)]); }
         }
       });
-      S.window(arrive[0], null, () => S.track(keys, () => S.raw(`<circle cx="${r1(fin[0])}" cy="${r1(fin[1])}" r="7" class="tok p-red"/>`, { kind: 'tag' })));
+      S.window(arrive[0], null, () => S.follow(keys, (x, y) => S.raw(`<circle cx="${r1(x)}" cy="${r1(y)}" r="7" class="tok p-red"/>`, { kind: 'tag' })));
       stops.forEach((x, i) => {
         const y = road(x), last = i === stops.length - 1, until = last ? null : arrive[i] + dwell;
         const f = gradF(x, y), g = gradG(x), s = slope(x), tn = Math.hypot(1, s), tx = [1 / tn, s / tn];
         const along = (f[0] * tx[0] + f[1] * tx[1]) * kf, rho = Math.sqrt(q(x, y));
         S.at(arrive[i], 0.9, () => S.window(arrive[i], until, () => {
-          clipped(() => S.ellipse(H[0], H[1], rho * ax, rho * ay, { pen: 'orange', w: 't', cls: 'dash', double: false }), last ? 'g-lm-all' : 'g-lm-band');
+          clipped(() => S.ellipse(H[0], H[1], rho * ax, rho * ay, { pen: 'orange', w: 't', cls: 'dash', double: false }), last ? ALL : BAND);
           S.arrow([[x, y], [x + f[0] * kf, y + f[1] * kf]], { pen: 'orange', head: 10 });
           S.arrow([[x, y], [x + g[0] * kg, y + g[1] * kg]], { pen: 'blue', head: 10 });
           if (Math.abs(along) > 4) S.arrow([[x, y], [x + tx[0] * along, y + tx[1] * along]], { pen: 'green', w: 'b', head: 9 });
@@ -307,7 +288,7 @@ export default [
       const tEnd = arrive[stops.length - 1];
       S.at(tEnd + 1.2, 1, () => S.ring(xo, road(xo), 22, 22, {}));
       S.window(tEnd + 1.6, null, () => {
-        formula(S, 30, 116, [{ t: '∇f', ink: 'orange' }, ' = ', { t: 'λ', ink: 'violet' }, ' · ', { t: '∇g', ink: 'blue' }], { size: 24 });
+        P.formula(S, 30, 116, [{ t: '∇f', ink: 'orange' }, ' = ', { t: 'λ', ink: 'violet' }, ' · ', { t: '∇g', ink: 'blue' }], { size: 24 });
         P.say(S, 30, 144, { zh: '相切:两支箭头在一条线上', en: 'tangent: the arrows line up' }, { size: 15, ink: 'green' });
         P.say(S, 30, 166, { zh: '顺着路的那一截 = 0', en: 'the part along the road = 0' }, { size: 15, ink: 'green' });
       }, { layer: 'labels' });

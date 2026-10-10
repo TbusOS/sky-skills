@@ -137,10 +137,9 @@ export default [
         }
       });
       Object.keys(kf).forEach(k => {
-        const last = cur(k), keys = kf[k].map(q => [q[0], q[1] - last[1], q[2] - last[2], q[3]]);
         // an evicted node is drawn where it left the list; S.window marks it "tmp" so
         // a still figure (animations off) does not show it sitting on another node
-        const node = () => S.track(keys, () => P.node(S, last[1], last[2], NW, NH, k, { pen: PEN[k], font: 'mono', size: 24, r: 10 }));
+        const node = () => S.follow(kf[k], (x, y) => P.node(S, x, y, NW, NH, k, { pen: PEN[k], font: 'mono', size: 24, r: 10 }));
         if (life[k].end) S.window(life[k].start, life[k].end, node); else node();
       });
 

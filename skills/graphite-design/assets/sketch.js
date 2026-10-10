@@ -440,6 +440,12 @@
       return name;
     };
 
+    // An id scoped to this figure, for a <clipPath>, <mask> or gradient you write
+    // with S.raw: S.id('band') → "f-<figure>-band". A gallery puts every figure inline
+    // in one document, so two figures that both pick id="clip" would share one
+    // clip box, and the second one draws through the first one's.
+    S.id = function (name) { return uid + '-' + name; };
+
     // Move what fn draws along a list of points (translate, relative to the
     // first point), from `start` for `dur` seconds. o.repeat: 'infinite' or a count.
     S.move = function (pts, start, dur, fn, o) {
@@ -472,6 +478,7 @@
     // where fn draws. Between keys it moves in a straight line; two keys at the same
     // place make it wait. Draw things at their FINAL position and give earlier keys
     // as offsets from there: with animations off, the final state is what shows.
+    // S.follow below does that conversion when you have absolute positions.
     S.track = function (keys, fn, o) {
       o = o || {};
       var t0 = tm(keys[0][0]), t1 = tm(keys[keys.length - 1][0]), span = Math.max(t1 - t0, 0.01);
@@ -482,6 +489,19 @@
       S.group('<g class="mv" style="animation:' + name + ' ' + f(span) + 's ' + (o.ease || 'linear') + ' ' + f(t0) + 's ' + (o.repeat || 1) + ' both">', fn, o.layer);
       if (o.repeat !== 'infinite') end = Math.max(end, t1);
       return S;
+    };
+
+    // S.track with absolute positions: keys = [[t, x, y, opacity?], …]. fn(x, y) draws
+    // the thing once, at the LAST key's position (where it ends up, so that is what
+    // shows with animations off), and every key becomes an offset from there.
+    // For a dot that has to stay on a clock — riding a curve in step with a turning
+    // radius — sample the curve at equal steps of time and pass the samples here.
+    // S.move cannot do that: it spaces its keys by distance, so on a curve the dot
+    // runs ahead where the path is steep.
+    S.follow = function (keys, fn, o) {
+      var last = keys[keys.length - 1], x = last[1], y = last[2];
+      var rel = keys.map(function (k) { return [k[0], k[1] - x, k[2] - y, k[3]]; });
+      return S.track(rel, function () { fn(x, y); }, o);
     };
 
     // Visible only from t0 to t1 (seconds). Things that are gone by the end get the

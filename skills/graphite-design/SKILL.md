@@ -67,9 +67,10 @@ svg.innerHTML = '<defs>' + Sketch.filters() + '</defs><g filter="url(#g-pencil)"
 - 笔:`line` `path` `rect` `ellipse` `circle` `blob` `poly` `loop` `arrow` `ring`(圈重点)`underline` `dot` `star` `burst`
 - 彩铅:`fill(points, 'blue', { style: 'zig' | 'hatch' | 'cross' | 'wash', gap })`;图形函数都能带 `fill:` 参数;`shade` 是石墨阴影
 - 字:`text(x, y, '…', { size, anchor, ink, font: 'mono' })`,`ink` 用 `2` `orange` `green` `red` `blue` `term`
-- 时间:`at(start, dur, fn)` 一组按长度分时间;`track(keys, fn)` 按时刻走到几个位置;`window(t0, t1, fn)` 只在这段时间出现;`move` `animate` 任意 CSS 动画
+- 时间:`at(start, dur, fn)` 一组按长度分时间;`track(keys, fn)` 按时刻走到几个位置(写偏移);`follow(keys, fn)` 同上但写绝对坐标,`fn(x, y)` 画在最后一个位置;`window(t0, t1, fn)` 只在这段时间出现;`move` `animate` 任意 CSS 动画
+- 自己用 `S.raw` 写 `<clipPath>` `<mask>` 渐变时,id 用 `S.id('名字')` 生成(带上这张图的前缀),别手写:图例页把所有图放在同一个页面里,两张图都叫 `clip` 就会共用一个裁剪框
 - 角色和物件(`props.js`):`robot` `person` `desk` `monitor` `laptop` `chair` `plant` `lamp` `window` `bed` `mug` `books` `bulb` `cloud` `server` `gear` `doc` `magnifier` `clock` `sun` `moon` `tree` `phone` `envelope` `cat`
-- 图表件:`node` `decision` `cylinder` `link`(框到框的箭头)`token`(沿线走的小点)`code`(深色代码卡,带 `cursor` 高亮行)
+- 图表件:`node` `decision` `cylinder` `link`(框到框的箭头)`token`(沿线走的小点)`code`(深色代码卡,带 `cursor` 高亮行)`formula`(等宽公式,分段上色、带下标)
 
 颜色从不写进 SVG:每样东西带一个 class(`.ln` 线、`.p-blue` 彩铅……),由 `graphite.css` 映射到 CSS 变量。
 所以同一张图换主题就变色。**别在 SVG 属性里写 `var()`**,不生效。
@@ -85,7 +86,7 @@ svg.innerHTML = '<defs>' + Sketch.filters() + '</defs><g filter="url(#g-pencil)"
 
 - 页面里 `assets/player.js` 提供 `Graphite.replay(svg)` `Graphite.seek(svg, 秒)`:滚到哪张画哪张、拖进度条、单步
 - 导出:`node scripts/export.mjs video 页面或图.html 输出.mp4 --size=1280x720 --fps=30`
-  (也支持 `.gif` `.webm`;`png` 子命令导出任意一秒的静帧)。逐帧把所有动画拨到同一时刻再截图,不是录屏,第 300 帧永远是第 10 秒。
+  (也支持 `.gif` `.webm`;`png` 子命令导出任意一秒的静帧;`--lang=en` 导出英文版,不写就是中文)。逐帧把所有动画拨到同一时刻再截图,不是录屏,第 300 帧永远是第 10 秒。
 - 一个页面有自己的时间线时,挂 `window.graphite = { duration, seek(t) }`,导出就调它。范例:`demos/graphite-design/reel.html`(位图镜头推拉 + 代码图 + 字幕,33 秒)。
 - 短视频安全区:图例 `mark-video-safe`(16:9 字幕离底边 ≥ 8%;9:16 避开右侧和底部的平台按钮)。
 

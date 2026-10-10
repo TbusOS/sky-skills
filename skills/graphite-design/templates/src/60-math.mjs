@@ -120,8 +120,7 @@ export default [
       // keys at equal steps of time, not of distance: S.move spaces its keyframes by path
       // length, so a tracer on a wave runs ahead on the steep parts and falls out of step
       // with the radius (2026-10-10). wave[i] sits at angle i/60 of a turn, so key i is at i/60 of T.
-      const end = wave[wave.length - 1];
-      S.track(wave.map((p, i) => [t0 + i / 60 * T, p[0] - end[0], p[1] - end[1]]), () => S.raw(`<circle cx="${end[0]}" cy="${end[1]}" r="8" class="tok p-blue"/>`, { kind: 'tag' }), { repeat: 'infinite' });
+      S.follow(wave.map((p, i) => [t0 + i / 60 * T, p[0], p[1]]), (x, y) => S.raw(`<circle cx="${x}" cy="${y}" r="8" class="tok p-blue"/>`, { kind: 'tag' }), { repeat: 'infinite' });
     },
   },
   {
