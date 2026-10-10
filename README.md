@@ -44,7 +44,7 @@ To preview locally: `python3 -m http.server 8000` from the repo root, then open 
 
 ## Available Skills
 
-> **In development: `kernel-review`** — a Linux kernel / BSP patch reviewer built on [masoncl/review-prompts](https://github.com/masoncl/review-prompts) (the review rules used by [sashiko](https://github.com/sashiko-dev/sashiko)). Requirements, design, implementation plan, current status and next steps: [docs/superpowers/ROADMAP.md](docs/superpowers/ROADMAP.md).
+> **In development:** `kernel-review` — a Linux kernel / BSP patch reviewer built on [masoncl/review-prompts](https://github.com/masoncl/review-prompts) (the review rules used by [sashiko](https://github.com/sashiko-dev/sashiko)); `inkwash-design` — a Chinese ink-wash painting style for pages, animations, videos, wallpapers, technical diagrams and UI, plus `design-taste`, a taste learner shared by all design skills. Requirements, design, implementation plans, current status and next steps: [docs/superpowers/ROADMAP.md](docs/superpowers/ROADMAP.md).
 
 | Skill | Language | Description |
 |-------|----------|-------------|

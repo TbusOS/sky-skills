@@ -44,7 +44,7 @@
 
 ## 可用 Skills
 
-> **开发中:`kernel-review`** —— 内核 / BSP patch 审查者,基于 [masoncl/review-prompts](https://github.com/masoncl/review-prompts)([sashiko](https://github.com/sashiko-dev/sashiko) 所用的审查规则)。需求、设计、实施计划、当前进度和下一步见 [docs/superpowers/ROADMAP.md](docs/superpowers/ROADMAP.md)。
+> **开发中:**`kernel-review` —— 内核 / BSP patch 审查者,基于 [masoncl/review-prompts](https://github.com/masoncl/review-prompts)([sashiko](https://github.com/sashiko-dev/sashiko) 所用的审查规则);`inkwash-design` —— 水墨画风,用来做页面、动图、视频、壁纸、技术图和界面,另带所有设计 skill 共用的口味学习 `design-taste`。需求、设计、实施计划、当前进度和下一步见 [docs/superpowers/ROADMAP.md](docs/superpowers/ROADMAP.md)。
 
 | Skill | 语言 | 说明 |
 |-------|------|------|
