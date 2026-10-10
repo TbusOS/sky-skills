@@ -116,10 +116,10 @@ git -C linux cat-file -t 7b9b77a8bba9    # 应输出 commit
 | 一句话 | 第 12 个设计 skill:教 AI 用水墨画风做页面、动图、视频、壁纸、技术图、界面、发布会;同时把 graphite 的「越用越懂你」抽成所有设计 skill 共用的 `design-taste`,新增分场景记、看图识口味、跨风格共享、画上留出处 |
 | 需求 | [specs/2026-10-10-inkwash-design-requirements.md](specs/2026-10-10-inkwash-design-requirements.md) |
 | 设计 | [specs/2026-10-10-inkwash-design-design.md](specs/2026-10-10-inkwash-design-design.md) |
-| P0 实施计划 | 待写(需求和设计审过之后) |
+| P0 实施计划 | [plans/2026-10-10-inkwash-p0.md](plans/2026-10-10-inkwash-p0.md) |
 | 开始日期 | 2026-10-10 |
 | 开发分支 | `feat/inkwash-design`(写 P0 计划时建) |
-| 当前阶段 | 需求和设计已写,等 user 审阅 |
+| 当前阶段 | P0 计划已写,等 user 审阅并选执行方式 |
 
 **为什么做**:仓里没有中国水墨画风;每做一个设计 skill 方法都要重新摸索,加新 skill 要改的十几处注册点只写在文字里、漏了没人发现;
 「越用越懂你」只有 graphite 有,而且只学 graphite 自己。
@@ -128,20 +128,21 @@ git -C linux cat-file -t 7b9b77a8bba9    # 应输出 commit
 
 **当前状态**(2026-10-10)
 
-- 需求文档、设计书已在 main 上,等 user 审阅。
+- 需求文档、设计书、P0 实施计划已在 main 上;需求和设计 user 已审过(2026-10-10)。
+- P0 计划里的代码已在临时目录实跑:注册点检查脚本自测 13 项、抠层脚本自测 7 项通过,故意改坏都失败;对 11 个设计 skill 跑注册点检查,graphite 漏 18 处、relief 漏 9 处、eclat / lectern 各漏 1 处。
 - 仓库里还没有 `skills/inkwash-design/` 和 `skills/design-taste/`。
 
 **下一步**
 
-1. user 审阅需求和设计。
-2. 写 P0 实施计划:方法第一版、注册点检查脚本(先对 graphite 跑)、三个小样(毛笔笔触、位图抠层、200 笔性能)、毛笔字体许可证查证。
-3. 建 `feat/inkwash-design` 分支,按 P0 计划执行。
+1. user 审阅 P0 计划,选执行方式。
+2. 按 P0 计划执行:建 `feat/inkwash-design` 分支、方法第一版、注册点检查脚本、字体许可证、三个小样。
+3. P0 结论写回设计书,user 定 Q1 / Q6 后写 P1 计划。
 
 **阶段一览**
 
 | 阶段 | 内容 | 状态 |
 |---|---|---|
-| P0 准备 | 方法第一版 + 注册点检查脚本 + 三个小样 + 字体许可证 | 未写计划 |
+| P0 准备 | 方法第一版 + 注册点检查脚本 + 三个小样 + 字体许可证 | 计划已写,未开始 |
 | P1 口味学习 | `design-taste` + graphite 迁移(行为不变) | 未写计划 |
 | P2 水墨底座 | 色值、画笔、物件、构建脚本、SKILL.md;笔墨基础 4 张 | 未写计划 |
 | P3 技术类图例 | 框图、流程、代码、数学、文档 / UI、数据图、越用越懂你 | 未写计划 |
