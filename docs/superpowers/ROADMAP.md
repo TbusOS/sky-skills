@@ -118,8 +118,8 @@ git -C linux cat-file -t 7b9b77a8bba9    # 应输出 commit
 | 设计 | [specs/2026-10-10-inkwash-design-design.md](specs/2026-10-10-inkwash-design-design.md) |
 | P0 实施计划 | [plans/2026-10-10-inkwash-p0.md](plans/2026-10-10-inkwash-p0.md) |
 | 开始日期 | 2026-10-10 |
-| 开发分支 | `feat/inkwash-design`(写 P0 计划时建) |
-| 当前阶段 | P0 计划已写,等 user 审阅并选执行方式 |
+| 开发分支 | [`feat/inkwash-design`](https://github.com/TbusOS/sky-skills/tree/feat/inkwash-design) —— P1 起开发期间最新进度看这个分支上的本文件;P0 的产出都是规划文档,放 main |
+| 当前阶段 | P0 进行中 |
 
 **为什么做**:仓里没有中国水墨画风;每做一个设计 skill 方法都要重新摸索,加新 skill 要改的十几处注册点只写在文字里、漏了没人发现;
 「越用越懂你」只有 graphite 有,而且只学 graphite 自己。
