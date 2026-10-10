@@ -354,8 +354,11 @@ node skills/design-review/scripts/learning-loop.mjs \
 磁盘上是 11 个设计 skill,它照样说 clean —— 这些写法清单里一条都没有,中英两半又都是旧的,
 第二问也看不见。补了设计数的 9 种写法、路线图分项里的系统类计数(`skills-systems`)、
 到三十的英文 / 中文数词;补完放到改之前的版本(`99b234c`)上跑,这些页面都被报出来,
-旧清单在同一版本上说 clean。自检 `scripts/facts_selftest.sh`,38 项(其中 18 项是这次的写法:
-13 项必须报、5 项不许报)。
+旧清单在同一版本上说 clean。同一天又补 canonical 数:路线图写「N/N matrix」「N/N 整张覆盖表」
+「Done · N/N」,图里把「N / N」和「page-types covered」分在两个 `<text>` 里 —— 逐行读,
+哪一行都不算一句声明。所以整行只有「N / N」的也和下一行拼起来读(`joinStats`),
+原来只拼纯数字行。自检 `scripts/facts_selftest.sh`,47 项(其中 27 项是 2026-10-10 补的写法:
+18 项必须报、9 项不许报)。
 
 ## 生命周期规则
 

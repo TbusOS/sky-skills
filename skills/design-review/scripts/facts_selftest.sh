@@ -127,6 +127,28 @@ t "$(hits 'Same review, ten other voices')" none "a word between the count and v
 t "$(hits '第四个设计技能 —— sage-design')" none "an ordinal"
 t "$(hits '这 3 个 skill:a、b、c')" none "a skill list with no breakdown after it"
 
+# joined <line> <next line>  →  the first line as the scan reads it, after joinStats
+joined() {
+  node --input-type=module -e '
+    const { joinStats } = await import("./skills/design-review/scripts/facts.mjs");
+    console.log(joinStats([process.argv[1], process.argv[2]])[0]);
+  ' "$1" "$2" 2>/dev/null
+}
+
+echo "it reads the canonical count in the roadmaps' shapes (2026-10-10)"
+t "$(hits 'the canonical library (02) just reached the full 59/59 matrix')" "canonical-total:59" "N/N matrix"
+t "$(hits 'canonical 库(02)刚补满 59/59 整张覆盖表')" "canonical-total:59" "N/N 整张覆盖表"
+t "$(hits 'Done · 59/59')" "canonical-total:59" "a status badge on its own"
+t "$(hits 'Done · 59/59 matrix')" "canonical-total:59" "badge and matrix together are one claim, read once"
+t "$(hits "$(joined '        58 / 58  ' '         page-types covered    page-type 已覆盖  ')")" "canonical-total:58" \
+  "a figure's count and its label on two lines are read together"
+t "$(hits '58 / 58')" none "the count alone says nothing — the joining is what makes it a claim"
+
+echo "and leaves alone the fractions that are not that count"
+t "$(hits 'Four specialists (weights 25/25/20/30)')" none "weights"
+t "$(hits 'Done · 3/4')" none "progress, not a full count"
+t "$(hits "$(joined ' 25/25 ' ' weights for composition and copy ')")" none "a joined fraction still needs a label the patterns know"
+
 echo "end to end · a broken page fails the run, and the run says where"
 BEFORE_RC=0; bash "$REPO/bin/design-review" --facts >/dev/null 2>&1 || BEFORE_RC=$?
 t "$BEFORE_RC" "0" "the repo is clean before we break it"

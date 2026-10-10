@@ -282,6 +282,18 @@ function buildChecks(truth) {
       patterns: [
         new RegExp(`\\b(\\d+)\\s*/\\s*\\d+\\s+canonical`, 'g'),
         new RegExp(`覆盖\\s*(\\d+)\\s*/\\s*\\d+\\s*canonical`, 'g'),
+        // 2026-10-10: the five roadmaps said "the full 59/59 matrix", "59/59 整张覆盖表",
+        // "Done · 59/59" and, in their coverage figure, "58 / 58" over "page-types
+        // covered", while disk had 67 — none with "canonical" right after the
+        // numbers, so none was read.
+        new RegExp(`\\b(\\d+)\\s*/\\s*\\d+\\s+matrix\\b`, 'g'),
+        new RegExp(`(\\d+)\\s*/\\s*\\d+\\s*(?:整张覆盖表|铺满)`, 'g'),
+        new RegExp(`\\b(\\d+)\\s*/\\s*\\d+\\s+page-types?\\s+covered\\b`, 'g'),
+        new RegExp(`(\\d+)\\s*/\\s*\\d+\\s*page-type\\s*已覆盖`, 'g'),
+        //   a status badge on its own, "Done · 59/59": the same number twice is what
+        //   makes it the full count rather than progress. Skipped when "matrix" or
+        //   铺满 follows, which the patterns above already read.
+        new RegExp(`(?:\\bDone|已完成)\\s*·\\s*(\\d+)\\s*/\\s*\\1\\b(?!\\s*(?:matrix|铺满|整张覆盖表))`, 'g'),
       ],
     },
     {
@@ -462,6 +474,20 @@ function suppression(rawLines, i) {
   return null;
 }
 
+// A stat puts its number on one line and its label on the next: a stat block's
+// <div>18</div> above "skills in one repo", or an SVG figure's <text>58 / 58</text>
+// above <text>page-types covered</text> (the roadmaps' coverage figure, which
+// read one line at a time held no claim at all until 2026-10-10). So a line whose
+// whole text is a number, or a count over a total, is read together with the next.
+// A zero-padded number is a section marker (01 · 02 · 03), not a stat.
+// Joining those produced "02 Design aesthetics" → "2 design aesthetics".
+function joinStats(text) {
+  return text.map((t, i) => (
+    /^\s*\d+(?:\s*\/\s*\d+)?\s*$/.test(t) && !/^\s*0\d/.test(t) && text[i + 1] !== undefined
+      ? `${t.trim()} ${text[i + 1]}` : t
+  ));
+}
+
 async function scanSurfaces(checks, surfaces) {
   const violations = [];
   const suppressed = [];
@@ -483,12 +509,7 @@ async function scanSurfaces(checks, surfaces) {
     // with the next line before matching. Both shapes were carrying stale counts
     // that the first version of this gate reported as clean.
     const text = raw.map((l) => l.replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/gi, ' '));
-    const lines = text.map((t, i) => (
-      // A zero-padded number is a section marker (01 · 02 · 03), not a stat.
-      // Joining those produced "02 Design aesthetics" → "2 design aesthetics".
-      /^\s*\d+\s*$/.test(t) && !/^\s*0\d/.test(t) && text[i + 1] !== undefined
-        ? `${t.trim()} ${text[i + 1]}` : t
-    ));
+    const lines = joinStats(text);
 
     lines.forEach((line, i) => {
       for (const check of checks) {
@@ -798,7 +819,7 @@ function reportPairs(label, violations) {
 // finds today but not for what it would say about a case that is not in the
 // repo — and the cases worth testing are exactly the ones nobody has written
 // yet. (design-md.mjs guards the same way.)
-export { langPairs, pairNumbers, pairMismatch, PAIR_MAX_NUMBERS, buildChecks, isOrdinal, toNumber };
+export { langPairs, pairNumbers, pairMismatch, PAIR_MAX_NUMBERS, buildChecks, isOrdinal, toNumber, joinStats };
 
 // Compare real paths, not strings. Skills are installed as symlinks under
 // ~/.claude/skills/, so process.argv[1] is the link while import.meta.url is
