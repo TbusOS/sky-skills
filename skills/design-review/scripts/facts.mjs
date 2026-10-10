@@ -106,6 +106,9 @@ const CORE_SURFACES = [
 const SHOWCASE_SURFACES = [
   'demos/anthropic-design/index.html',
   'demos/anthropic-design/story.html',
+  // not a retelling, but its banner and hero name the count of design voices
+  // (it said "Nine design skills" until 2026-10-10, unseen because it was not listed)
+  'demos/anthropic-design/index-v2.html',
   'demos/apple-design/index.html',
   'demos/ember-design/index.html',
   'demos/sage-design/index.html',
@@ -120,14 +123,21 @@ const EN_NUM = {
   four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
   eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15,
   sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20,
+  'twenty-one': 21, 'twenty-two': 22, 'twenty-three': 23, 'twenty-four': 24,
+  'twenty-five': 25, 'twenty-six': 26, 'twenty-seven': 27, 'twenty-eight': 28,
+  'twenty-nine': 29, thirty: 30,
 };
 const ZH_NUM = {
   四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10,
   十一: 11, 十二: 12, 十三: 13, 十四: 14, 十五: 15,
   十六: 16, 十七: 17, 十八: 18, 十九: 19, 二十: 20,
+  二十一: 21, 二十二: 22, 二十三: 23, 二十四: 24, 二十五: 25,
+  二十六: 26, 二十七: 27, 二十八: 28, 二十九: 29, 三十: 30,
 };
 
-const EN_WORDS = Object.keys(EN_NUM).join('|');
+// Longest first, so "twenty-five" is tried before "twenty" and the match is
+// not cut at the hyphen into a claim of 20.
+const EN_WORDS = Object.keys(EN_NUM).sort((a, b) => b.length - a.length).join('|');
 const ZH_WORDS = Object.keys(ZH_NUM).sort((a, b) => b.length - a.length).join('|');
 
 function toNumber(raw) {
@@ -202,6 +212,13 @@ function buildChecks(truth) {
         new RegExp(`匹配到\\s*${z}\\s*个\\s*skill`, 'g'),
         new RegExp(`${z}\\s*个\\s*skill\\s*(?:。|一张表|分三族)`, 'g'),
         new RegExp(`${z}\\s*个技能(?=，按类型)`, 'g'),
+        // The roadmaps' breakdown: "26 个 skill:11 个设计 generator、8 个系统 …".
+        // Anchored on the breakdown that follows, so "这 3 个 skill:" listing a
+        // subset is not read as a total.
+        new RegExp(`${z}\\s*个\\s*skill\\s*[:：]\\s*\\d+\\s*个设计`, 'g'),
+        // The home page's history chart: "From one kernel skill to twenty-five."
+        new RegExp(`\\bkernel\\s+skill\\s+to\\s+${d}\\b`, 'gi'),
+        new RegExp(`内核\\s*skill[,，]\\s*长到\\s*${z}\\s*个`, 'g'),
       ],
     },
     {
@@ -218,6 +235,36 @@ function buildChecks(truth) {
         // reach "4 种设计声音" in the roadmaps — that counts the four rendered
         // roadmap variants, and the 设计 between 种 and 声音 keeps them apart.
         new RegExp(`${z}\\s*种声音`, 'g'),
+        // 2026-10-10: eight demo pages and the five roadmaps still said nine
+        // while disk had eleven, and this check reported them clean — none of
+        // the phrasings below was in the list. Each one is a shape those pages
+        // actually used:
+        //   "nine brand aesthetics", "nine page-design aesthetics", "Nine aesthetics."
+        new RegExp(`\\b${d}\\s+(?:brand\\s+|page-design\\s+)?aesthetics\\b`, 'gi'),
+        //   "Nine voices", "the nine design voices"
+        new RegExp(`\\b${d}\\s+(?:design\\s+)?voices\\b`, 'gi'),
+        //   "nine generator skills", "nine design generator skills", "The nine generators"
+        new RegExp(`\\b${d}\\s+(?:design\\s+)?generator\\s+skills\\b`, 'gi'),
+        new RegExp(`\\b${d}\\s+generators\\b`, 'gi'),
+        //   a badge on its own: "Five of the nine". Nothing English may follow, or
+        //   "of the nine-component plan" and "of the nine skills" would land here too.
+        new RegExp(`\\b(?:${EN_WORDS})\\s+of\\s+the\\s+${d}\\b(?!\\s*[-A-Za-z])`, 'gi'),
+        //   九种美学 · 九种品牌美学 · 九种页面设计美学 · 九种品牌风格 · 九种风格
+        new RegExp(`${z}\\s*种(?:页面设计|品牌|设计)?(?:美学|风格)`, 'g'),
+        //   九个设计技能 · 九个生成器 · 九个设计生成器 skill · 九种里的五种
+        new RegExp(`${z}\\s*个设计技能`, 'g'),
+        new RegExp(`${z}\\s*个(?:设计)?\\s*生成器`, 'g'),
+        new RegExp(`${z}\\s*种里的`, 'g'),
+      ],
+    },
+    {
+      id: 'skills-systems',
+      truth: truth.skills.families.systems,
+      what: 'systems & content skills (ROSTER above)',
+      patterns: [
+        // the roadmaps' breakdown: "7 systems / content utilities", "7 个系统 / 内容工具"
+        new RegExp(`\\b${d}\\s+systems\\s*\\/\\s*content\\b`, 'gi'),
+        new RegExp(`${z}\\s*个系统\\s*\\/\\s*内容`, 'g'),
       ],
     },
     {
@@ -751,7 +798,7 @@ function reportPairs(label, violations) {
 // finds today but not for what it would say about a case that is not in the
 // repo — and the cases worth testing are exactly the ones nobody has written
 // yet. (design-md.mjs guards the same way.)
-export { langPairs, pairNumbers, pairMismatch, PAIR_MAX_NUMBERS };
+export { langPairs, pairNumbers, pairMismatch, PAIR_MAX_NUMBERS, buildChecks, isOrdinal, toNumber };
 
 // Compare real paths, not strings. Skills are installed as symlinks under
 // ~/.claude/skills/, so process.argv[1] is the link while import.meta.url is

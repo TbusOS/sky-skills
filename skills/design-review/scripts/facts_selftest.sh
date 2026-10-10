@@ -83,6 +83,50 @@ n3="$(node --input-type=module -e '
 ' "$SPLIT" 2>/dev/null)"
 t "$n3" "0" "two claims in separate blocks are not one claim in two languages"
 
+# hits <text>  →  "check:number …" for every count the patterns read in it, or "none"
+hits() {
+  node --input-type=module -e '
+    const { buildChecks, isOrdinal, toNumber } = await import("./skills/design-review/scripts/facts.mjs");
+    const n = 999;
+    const truth = { skills: { total: n, design: n, list: [], families: { systems: n, design: n, harness: n } },
+      canonical: { total: n, perSkill: {} }, kernel: { cases: n, subsys: n, rules: n },
+      knownBugs: { total: n, dupes: [] }, visualAudit: { checks: n } };
+    const line = process.argv[1], out = [];
+    for (const c of buildChecks(truth)) for (const re of c.patterns) {
+      re.lastIndex = 0; let m;
+      while ((m = re.exec(line)) !== null) if (!isOrdinal(line, m.index)) out.push(c.id + ":" + toNumber(m[1]));
+    }
+    console.log(out.join(" ") || "none");
+  ' "$1" 2>/dev/null
+}
+
+echo "it reads the design count in the shapes the pages drifted in (2026-10-10)"
+# Every one of these sat on a page saying nine while disk had eleven, and the
+# run said clean. Each line here is one of those shapes, copied from the page.
+t "$(hits 'One of nine brand aesthetics in the sky-skills collection.')" "skills-design:9" "brand aesthetics"
+t "$(hits 'nine page-design aesthetics and a four-gate harness')" "skills-design:9" "page-design aesthetics"
+t "$(hits 'Same story, five of the nine voices.')" "skills-design:9" "voices"
+t "$(hits 'The nine generators carry strong opinions')" "skills-design:9" "generators"
+t "$(hits 'the harness — nine generator skills and two evaluators')" "skills-design:9" "generator skills"
+t "$(hits 'Five of the nine')" "skills-design:9" "a badge with nothing after the count"
+t "$(hits '九种页面设计美学，一套四道检查的审查体系')" "skills-design:9" "种……美学"
+t "$(hits '同一页面，九种风格。')" "skills-design:9" "种风格"
+t "$(hits '九个设计技能都是 MIT 许可。')" "skills-design:9" "个设计技能"
+t "$(hits '九个生成器都带着明确的审美立场')" "skills-design:9" "个生成器"
+t "$(hits '九种里的五种')" "skills-design:9" "种里的: the total, not the five"
+t "$(hits 'From one kernel skill to twenty-five.')" "skills-total:25" \
+  "a hyphenated number is read whole, not cut to twenty"
+t "$(hits '23 个 skill:11 个设计 generator、7 个系统 / 内容工具')" \
+  "skills-total:23 skills-design:11 skills-systems:7" "the roadmap breakdown, all three parts"
+
+echo "and leaves alone the numbers that are not the design count"
+t "$(hits 'The nine-component plan, rendered by five of the design skills.')" none \
+  "a component count, and five of them"
+t "$(hits 'four of the nine-component plan')" none "a hyphen after the count ends the badge shape"
+t "$(hits 'Same review, ten other voices')" none "a word between the count and voices"
+t "$(hits '第四个设计技能 —— sage-design')" none "an ordinal"
+t "$(hits '这 3 个 skill:a、b、c')" none "a skill list with no breakdown after it"
+
 echo "end to end · a broken page fails the run, and the run says where"
 BEFORE_RC=0; bash "$REPO/bin/design-review" --facts >/dev/null 2>&1 || BEFORE_RC=$?
 t "$BEFORE_RC" "0" "the repo is clean before we break it"

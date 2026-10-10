@@ -25,7 +25,7 @@ and the GAN paradigm:
 **ZH** — 两条原则来自 Anthropic harness-design 和 GAN 范式:(1) 做事的
 agent 倾向自评过高;(2) 独立持怀疑的 evaluator 才是真正的杠杆。9 个
 design skill 是 generator,会给自己打高分;`design-review` 脚本、规则、
-已知 bug 清单 **不属于任何一个风格**,9 种风格共用同一套工艺底线。
+已知 bug 清单 **不属于任何一个风格**,11 种风格共用同一套工艺底线。
 
 ## 检查模型 · The gate model(全仓唯一定义)
 
@@ -304,7 +304,7 @@ node skills/design-review/scripts/learning-loop.mjs \
 
 具体清单在:
 - `references/known-bugs.md`(条数跑 `--facts --list`,每条写 Reader sees / Why / Defense)
-- `references/cross-skill-rules.md`(9 种风格共通工艺底线 · 有 §G 双语规则 + §I 卡片分组规则)
+- `references/cross-skill-rules.md`(11 种风格共通工艺底线 · 有 §G 双语规则 + §I 卡片分组规则)
 - `references/dos-and-donts.md`(每 skill 下的风格特定反例)
 
 ## Learning-loop · 回灌成规则的流程
@@ -348,7 +348,14 @@ node skills/design-review/scripts/learning-loop.mjs \
 占原始差异的 44/50;上限 4 这条的理由是**一句计数声明活在标题、图注或数据标签里,
 带一两个数字**,而本仓唯一超过 4 的是三段 45 个数字的变更记录 —— 2 和 45 之间没有
 任何东西,阈值是画在空隙里的,不是拍的。代价说清楚:**长段落里的过期数字这一问看不见**,
-那是前一问的活。自检 `scripts/facts_selftest.sh`,20 项。
+那是前一问的活。
+
+2026-10-10 前一问又漏一次:八个 demo 页和五份路线图写「九种美学」「nine voices」「九个生成器」,<!-- facts-ignore: quotes the stale phrasings this paragraph is about -->
+磁盘上是 11 个设计 skill,它照样说 clean —— 这些写法清单里一条都没有,中英两半又都是旧的,
+第二问也看不见。补了设计数的 9 种写法、路线图分项里的系统类计数(`skills-systems`)、
+到三十的英文 / 中文数词;补完放到改之前的版本(`99b234c`)上跑,这些页面都被报出来,
+旧清单在同一版本上说 clean。自检 `scripts/facts_selftest.sh`,38 项(其中 18 项是这次的写法:
+13 项必须报、5 项不许报)。
 
 ## 生命周期规则
 
@@ -371,7 +378,7 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 - `scripts/count-check.py` — 全仓计数判定(承载短语 vs 磁盘真值 + 检查模型)
 - `scripts/learning-loop.mjs` — 组件 07 · critic verdict → design-learner prompt
 - `references/known-bugs.md` — bug 大全(条数跑 `--facts --list`)
-- `references/cross-skill-rules.md` — 9 种风格共通规则(含 §G 双语 / §I 卡片分组)
+- `references/cross-skill-rules.md` — 11 种风格共通规则(含 §G 双语 / §I 卡片分组)
 - `references/canonical/README.md` — canonical 参考库说明 + 扩库流程
 
 ## Reference
