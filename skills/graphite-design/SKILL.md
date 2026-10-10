@@ -105,8 +105,8 @@ node scripts/taste.mjs explain hatchGap # 这个值是被哪几条记录推到�
   critic 评审的意见(0.3,审查器不是这个人)。90 天前的记录只算一半。
 - **审查器查出的客观问题定下限,不算口味。** `check_objective` 的 O4(手机上字太小)→ 图中字号的下限;
   口味再怎么往小走也不越过它,也不会随时间淡掉。
-- 记录存在 `~/.config/sky-skills/graphite-taste.jsonl`(`SKY_TASTE_DIR` 可改),只在本机。展示页的「口味实验室」用同一套算法,导出后 `taste.mjs import` 就能接上。
-- 算法和为什么这么设计写在 `assets/taste.js` 文件头。自测:`node scripts/taste.mjs --self-test`
+- 记录存在 `~/.config/sky-skills/taste.jsonl`(所有设计风格共用一份,每条写明风格;`SKY_TASTE_DIR` 可改),只在本机;旧的 `graphite-taste.jsonl` 照读。展示页的「口味实验室」用同一套算法,导出后 `taste.mjs import` 就能接上。
+- 2026-10-11 起学习算法搬到公共 skill `design-taste`(`skills/design-taste/assets/taste-core.js`,算法和为什么这么设计写在它的文件头),graphite 只留参数表 `assets/taste-profile.js`;`assets/taste.js`、`scripts/taste.mjs` 是薄包装,用法不变。搬过去后多了三样:在别的风格里说的「字太小」「颜色太多」也会以半份分量影响这里的字号、颜色数;`taste.mjs ref 图.jpg` 从你喜欢的图里量留白和颜色数;`--scene` 按场景分开记(graphite 暂未分场景)。自测:`node scripts/taste.mjs --self-test`
   (模拟读者答 40 题,在意的参数要学到一半以上;故意选反的读者必须学不到;
   不能有一个参数占掉 40% 以上的题 —— 修之前,一个口味贴着下限的读者,24 题里有 18 题问的是线宽)。
 - 「下一题问哪个参数」:挑最没把握的那个;连续几次答案都往同一边,说明还差得远,这个参数优先再问,
@@ -147,14 +147,15 @@ python3 skills/design-review/scripts/check_fonts.py        # 在本仓库写了�
 assets/graphite.css   色值(浅 / 深)· 图里线和字的样式 · 页面小部件(纸底、方格纸、手画框、便签、终端卡、字幕条)
 assets/sketch.js      手绘线、彩铅、时间表、铅笔滤镜(Sketch.filters)
 assets/props.js       角色、物件、图表件
-assets/taste.js       口味学习(浏览器和命令行共用)
+assets/taste-profile.js  口味参数表(参数、默认值、范围、词表;引擎在 design-taste)
+assets/taste.js       口味学习薄包装(浏览器和命令行共用,接口不变)
 assets/player.js      页面:主题 / 语言切换、重画、拖进度
 assets/fonts.css      字体(本仓库里由 build_fonts.py 换成本地文件)
 templates/src/        37 张图例 + 6 个页面部件的源码 · categories.json 分类
 templates/figures/    生成的单独 SVG + index.json
 scripts/build.mjs     生成图例和展示页(--check)
 scripts/export.mjs    PNG / MP4 / GIF / WebM 导出
-scripts/taste.mjs     口味档案
+scripts/taste.mjs     口味档案(转调 design-taste/scripts/taste.mjs --style=graphite)
 references/material.md       五样材料的色值和理由
 references/image-prompts.md  出图模型的提示词写法 + 本 skill 13 张图的原始记录
 references/recipes.md        十类图各自的画法要点
