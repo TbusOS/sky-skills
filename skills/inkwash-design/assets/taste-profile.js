@@ -80,7 +80,9 @@
     else if (m.hues && m.hues.length) {
       var warm = m.hues.filter(function (h) { return h <= 45 || h >= 345; }).length;
       var bg = m.hues.filter(function (h) { return h >= 140 && h <= 230; }).length;
-      out.palette = bg && bg >= warm ? 'qinglv' : warm && m.colors <= 2 ? 'qianjiang' : 'mogu';
+      // 浅绛 is ochre + a little indigo: warm present, at most two pigments (blue may join);
+      // 青绿 is azurite + malachite: cool only
+      out.palette = warm && m.colors <= 2 ? 'qianjiang' : bg && !warm ? 'qinglv' : 'mogu';
     }
     return out;
   }
