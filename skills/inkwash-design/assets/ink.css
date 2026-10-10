@@ -1,0 +1,221 @@
+/* inkwash-design · ink.css
+ *
+ * The material is the style: rice paper, ink in five tones, a few mineral and plant
+ * pigments laid in see-through washes, brush strokes that press and lift, empty
+ * paper that is part of the picture, a red seal.
+ * Dark mode is a different paper, not an inverted picture: indigo paper (磁青纸)
+ * with gold lines (泥金), the way sutras were copied — inverting would turn ink
+ * white and the paper black, which reads as a photographic negative.
+ *
+ *   1 tokens        paper / five ink tones / nine pigments / text colours, light and dark
+ *   2 .ifig         classes brush.js writes (keep in step with brush.js)
+ *   3 page pieces   optional: paper body, cards, buttons that bleed when pressed,
+ *                   brush-stroke rules, seal badges, code cards, toggles
+ * Only group 1 is the style. Groups 2 and 3 are one way to use it; change them freely.
+ * Values here win over references/material.md if the two ever disagree.
+ */
+
+/* ── 1 tokens ─────────────────────────────────────────────────────────── */
+:root {
+  --ink-paper: #f2ead8;     /* rice paper: warm, never pure white */
+  --ink-paper-2: #ebe1cb;   /* second band */
+  --ink-card: #f8f3e7;      /* card / figure stage */
+  --ink-rule: #d9ccb2;      /* hairlines */
+  /* 墨分五色: five tones of one ink. Hierarchy comes from depth, not from colour. */
+  --ink-jiao: #1a1714;      /* 焦 burnt: the one stroke that matters most, titles */
+  --ink-nong: #2e2a26;      /* 浓 thick: main outlines, the part being explained */
+  --ink-zhong: #4f4943;     /* 重 heavy: secondary outlines */
+  --ink-dan: #8a837a;       /* 淡 light: far things, background structure */
+  --ink-qing: #c3bcb0;      /* 清 clear: the farthest hills, mist */
+  /* pigments: each one does one job in a picture */
+  --ink-huaqing: #3e5f7a;   /* 花青 indigo: water, far hills, cold, the user's side */
+  --ink-zheshi: #a8643a;    /* 赭石 ochre: rock, autumn, earth, wood */
+  --ink-tenghuang: #d9a521; /* 藤黄 gamboge: light, a decision, "lit up" */
+  --ink-yanzhi: #9d2933;    /* 胭脂 rouge: flowers, warnings */
+  --ink-shiqing: #2f6f9f;   /* 石青 azurite: blue-green landscape, cold emphasis */
+  --ink-shilv: #3f8f74;     /* 石绿 malachite: blue-green landscape, passed, storage */
+  --ink-zhusha: #b8322a;    /* 朱砂 cinnabar: seals, the single most important place */
+  --ink-zhubiao: #d8673c;   /* 朱膘 vermilion wash: autumn leaves, what is happening now */
+  --ink-baifen: #f3efe6;    /* 白粉 white lead: snow, highlights */
+  --ink-gold: #b08a3e;      /* 泥金 on light paper: used sparingly (launch pages) */
+  /* text in a pigment colour uses these (≥ 4.5:1 on paper and card; build.mjs checks) */
+  --ink-t-huaqing: #34536c;
+  --ink-t-zheshi: #8a4d27;
+  --ink-t-shilv: #2a6852;
+  --ink-t-shiqing: #275f88;
+  --ink-t-zhusha: #a32a23;
+  --ink-t-yanzhi: #8e2430;
+
+  --ink-halo-o: 0.5;        /* the bleed under a stroke */
+  --ink-wash-o: 0.32;       /* a broad wash */
+  --ink-blend: multiply;    /* ink on ink gets darker */
+
+  --ink-term-bg: #1d2025;   /* code cards stay dark in both themes */
+  --ink-term-ink: #efe7d6;
+  --ink-term-dim: #a9a294;
+  --ink-term-ok: #8fd0b0;
+  --ink-term-key: #e7b36a;
+
+  --ink-brush: "Ma Shan Zheng", "Kaiti SC", "STKaiti", "KaiTi", serif;     /* titles */
+  --ink-xing: "Zhi Mang Xing", "Xingkai SC", "STXingkai", "Ma Shan Zheng", serif; /* big launch words */
+  --ink-long: "Long Cang", "Ma Shan Zheng", "Kaiti SC", serif;             /* poems, subtitles */
+  --ink-kai: "LXGW WenKai GB Screen", "LXGW WenKai Screen", "Kaiti SC", "STKaiti", "KaiTi", serif;
+  --ink-song: "Noto Serif SC", "Songti SC", "STSong", Georgia, serif;
+  --ink-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --ink-paper: #14213a;     /* 磁青纸 indigo paper */
+  --ink-paper-2: #1a2944;
+  --ink-card: #1d2d4a;
+  --ink-rule: #2c3d5c;
+  --ink-jiao: #f0d89a;      /* 泥金 gold, bright to dull */
+  --ink-nong: #d9b96e;
+  --ink-zhong: #b7995a;
+  --ink-dan: #8a7650;
+  --ink-qing: #5c5240;
+  --ink-huaqing: #7fa6c4;
+  --ink-zheshi: #d08a5c;
+  --ink-tenghuang: #e8c24a;
+  --ink-yanzhi: #d8606a;
+  --ink-shiqing: #5f9fd0;
+  --ink-shilv: #6cbf9c;
+  --ink-zhusha: #e0574a;
+  --ink-zhubiao: #ee8a5a;
+  --ink-baifen: #f3efe6;
+  --ink-gold: #e2c27a;
+  --ink-t-huaqing: #9dbdd6;
+  --ink-t-zheshi: #e0a67f;
+  --ink-t-shilv: #86d0b0;
+  --ink-t-shiqing: #8fbde3;
+  --ink-t-zhusha: #f08a7f;
+  --ink-t-yanzhi: #ec8d95;
+  --ink-halo-o: 0.36;
+  --ink-wash-o: 0.38;
+  --ink-blend: normal;      /* gold over gold must not darken */
+  --ink-term-bg: #0d1424;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --ink-paper: #14213a; --ink-paper-2: #1a2944; --ink-card: #1d2d4a; --ink-rule: #2c3d5c;
+    --ink-jiao: #f0d89a; --ink-nong: #d9b96e; --ink-zhong: #b7995a; --ink-dan: #8a7650; --ink-qing: #5c5240;
+    --ink-huaqing: #7fa6c4; --ink-zheshi: #d08a5c; --ink-tenghuang: #e8c24a; --ink-yanzhi: #d8606a;
+    --ink-shiqing: #5f9fd0; --ink-shilv: #6cbf9c; --ink-zhusha: #e0574a; --ink-zhubiao: #ee8a5a;
+    --ink-baifen: #f3efe6; --ink-gold: #e2c27a;
+    --ink-t-huaqing: #9dbdd6; --ink-t-zheshi: #e0a67f; --ink-t-shilv: #86d0b0; --ink-t-shiqing: #8fbde3;
+    --ink-t-zhusha: #f08a7f; --ink-t-yanzhi: #ec8d95;
+    --ink-halo-o: 0.36; --ink-wash-o: 0.38; --ink-blend: normal; --ink-term-bg: #0d1424;
+    color-scheme: dark;
+  }
+}
+
+/* ── 2 drawings (brush.js output) ─────────────────────────────────────── */
+.ifig { display: block; width: 100%; height: auto; overflow: visible; isolation: isolate; }
+.ifig .paper { fill: var(--ink-paper); }
+.ifig .card { fill: var(--ink-card); }
+.ifig .fiber { opacity: 0.5; }
+.ifig .ink { mix-blend-mode: var(--ink-blend); }
+.ifig .k-jiao { --c: var(--ink-jiao); } .ifig .k-nong { --c: var(--ink-nong); } .ifig .k-zhong { --c: var(--ink-zhong); }
+.ifig .k-dan { --c: var(--ink-dan); } .ifig .k-qing { --c: var(--ink-qing); }
+.ifig .k-huaqing { --c: var(--ink-huaqing); } .ifig .k-zheshi { --c: var(--ink-zheshi); } .ifig .k-tenghuang { --c: var(--ink-tenghuang); }
+.ifig .k-yanzhi { --c: var(--ink-yanzhi); } .ifig .k-shiqing { --c: var(--ink-shiqing); } .ifig .k-shilv { --c: var(--ink-shilv); }
+.ifig .k-zhusha { --c: var(--ink-zhusha); } .ifig .k-zhubiao { --c: var(--ink-zhubiao); } .ifig .k-baifen { --c: var(--ink-baifen); }
+.ifig .k-gold { --c: var(--ink-gold); } .ifig .k-paper { --c: var(--ink-paper); }
+.ifig [class*="k-"] { color: var(--c); }           /* gradients take their colour from here */
+.ifig .is .id { fill: none; stroke: var(--c); stroke-linecap: round; }
+.ifig .is .dt { fill: var(--c); }
+.ifig .ih { fill: var(--c); filter: url(#ink-halo); opacity: calc(var(--ink-halo-o) * var(--w, 0.5)); }
+.ifig .ih.ih-wet { filter: url(#ink-bleed); }
+.ifig .iw { filter: url(#ink-halo); opacity: calc(var(--ink-wash-o) * var(--wo, 1)); }
+.ifig .sl rect, .ifig .sl circle { fill: none; stroke: var(--ink-zhusha); }
+.ifig .sl text { fill: var(--ink-zhusha); font-family: var(--ink-song); font-weight: 700; }
+.ifig .sl-bai rect, .ifig .sl-bai circle { fill: var(--ink-zhusha); }
+.ifig .sl-bai text { fill: var(--ink-paper); }
+.ifig .tx { font-family: var(--ink-kai); fill: var(--ink-nong); }
+.ifig .tx.f-brush { font-family: var(--ink-brush); } .ifig .tx.f-xing { font-family: var(--ink-xing); }
+.ifig .tx.f-long { font-family: var(--ink-long); } .ifig .tx.f-song { font-family: var(--ink-song); }
+.ifig .tx.f-mono { font-family: var(--ink-mono); font-variant-ligatures: none; white-space: pre; }
+.ifig .tx.vt { writing-mode: vertical-rl; text-orientation: upright; }
+.ifig .t-jiao { fill: var(--ink-jiao); } .ifig .t-nong { fill: var(--ink-nong); } .ifig .t-zhong { fill: var(--ink-zhong); }
+.ifig .t-paper { fill: var(--ink-paper); } .ifig .t-gold { fill: var(--ink-gold); }
+.ifig .t-huaqing { fill: var(--ink-t-huaqing); } .ifig .t-zheshi { fill: var(--ink-t-zheshi); } .ifig .t-shilv { fill: var(--ink-t-shilv); }
+.ifig .t-shiqing { fill: var(--ink-t-shiqing); } .ifig .t-zhusha { fill: var(--ink-t-zhusha); } .ifig .t-yanzhi { fill: var(--ink-t-yanzhi); }
+.ifig .t-term { fill: var(--ink-term-ink); } .ifig .t-term-dim { fill: var(--ink-term-dim); }
+.ifig .t-term-ok { fill: var(--ink-term-ok); } .ifig .t-term-key { fill: var(--ink-term-key); }
+.ifig .term { fill: var(--ink-term-bg); }
+.ifig .hair { fill: none; stroke: var(--ink-dan); stroke-width: 1; }
+.ifig .flow { fill: none; stroke: var(--ink-huaqing); stroke-width: 2; stroke-dasharray: 2 10; stroke-linecap: round; animation: ink-flow 1.6s linear infinite; }
+@keyframes ink-flow { to { stroke-dashoffset: -24; } }
+.ifig .lang-en { display: none; }
+:root[data-lang="en"] .ifig .lang-en, .ifig[data-lang="en"] .lang-en { display: inline; }
+:root[data-lang="en"] .ifig .lang-zh, .ifig[data-lang="en"] .lang-zh { display: none; }
+
+/* timeline: brush.js marks timed elements with data-a and --d (delay) / --t (duration) */
+.ifig [data-a="ad"] { stroke-dasharray: 1 2; animation: ink-draw var(--t) linear var(--d) both; }
+.ifig [data-a="ab"] { animation: ink-bleed var(--t) ease-out var(--d) both; }
+.ifig [data-a="af"] { animation: ink-fade var(--t) ease-out var(--d) both; }
+.ifig [data-a="aw"] { animation: ink-write var(--t) linear var(--d) both; }
+.ifig [data-a="awv"] { animation: ink-write-v var(--t) linear var(--d) both; }
+.ifig [data-a="as"] { animation: ink-stamp var(--t) ease-out var(--d) both; transform-box: fill-box; transform-origin: center; }
+@keyframes ink-draw { from { stroke-dashoffset: 1.02; } to { stroke-dashoffset: 0; } }
+@keyframes ink-bleed { from { opacity: 0; } }
+@keyframes ink-fade { from { opacity: 0; } }
+@keyframes ink-write { from { clip-path: inset(-30% 100% -30% -2%); } to { clip-path: inset(-30% -4% -30% -2%); } }
+@keyframes ink-write-v { from { clip-path: inset(-2% -30% 100% -30%); } to { clip-path: inset(-2% -30% -4% -30%); } }
+@keyframes ink-stamp { from { opacity: 0; transform: scale(1.18); } 60% { opacity: 1; transform: scale(0.97); } to { opacity: 0.94; transform: scale(1); } }
+.ifig .sl { opacity: 0.94; }
+/* a still figure shows finished until someone asks to watch it drawn (player.js removes data-still) */
+.ifig[data-still] [data-a] { animation: none; }
+/* player.js: frame rate too low to draw stroke by stroke — show the finished picture (design §6.2) */
+.ifig[data-finished] [data-a] { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .ifig [data-a], .ifig .mv, .ifig .flow { animation: none !important; }
+  .ifig .tmp { display: none; }
+}
+
+/* ── 3 page pieces (optional) ─────────────────────────────────────────── */
+.ink-page {
+  margin: 0;
+  background-color: var(--ink-paper);
+  /* rice-paper fibre: a faint noise tile, no network */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .3' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .42 0 0 0 0 .3 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  color: var(--ink-nong);
+  font-family: var(--ink-song);
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+:root[data-theme="dark"] .ink-page { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .3' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .85 0 0 0 0 .75 0 0 0 0 .5 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.ink-title { font-family: var(--ink-brush); font-weight: 400; color: var(--ink-jiao); letter-spacing: 0.04em; }
+.ink-poem { font-family: var(--ink-long); writing-mode: vertical-rl; letter-spacing: 0.18em; color: var(--ink-jiao); }
+.ink-hand { font-family: var(--ink-kai); }
+.ink-card { background: var(--ink-card); border-radius: 4px; box-shadow: 0 0 0 1px var(--ink-rule); }
+/* a rule drawn with one brush stroke: thick at the start, dry at the end */
+.ink-rule {
+  height: 10px; border: 0; margin: 2.2em 0; background: var(--ink-nong); opacity: 0.8;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 10' preserveAspectRatio='none'%3E%3Cpath d='M2 6 C80 2 200 3 320 5 S520 7 598 5 L598 6 C520 8 330 8 200 7 S60 9 2 8Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 10' preserveAspectRatio='none'%3E%3Cpath d='M2 6 C80 2 200 3 320 5 S520 7 598 5 L598 6 C520 8 330 8 200 7 S60 9 2 8Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+.ink-btn {
+  position: relative; display: inline-flex; align-items: center; gap: 0.45em; padding: 10px 20px; cursor: pointer;
+  font: 500 15px/1.2 var(--ink-kai); color: var(--ink-jiao); background: transparent;
+  border: 1.5px solid var(--ink-nong); border-radius: 3px 6px 4px 7px; text-decoration: none; overflow: hidden;
+  transition: color 0.3s;
+}
+/* pressing a button lets ink bleed out from the middle */
+.ink-btn::before {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px;
+  border-radius: 50%; background: var(--ink-nong); opacity: 0; transform: scale(0); transition: transform 0.5s ease-out, opacity 0.5s; z-index: -1;
+}
+.ink-btn:hover::before { opacity: 0.12; transform: scale(18); }
+.ink-btn:active::before { opacity: 0.9; transform: scale(30); transition-duration: 0.25s; }
+.ink-btn:active { color: var(--ink-paper); }
+.ink-btn--seal { background: var(--ink-zhusha); border-color: var(--ink-zhusha); color: #fff8ee; }
+.ink-btn--seal::before { background: #000; }
+.ink-tag { display: inline-block; padding: 1px 9px; font: 13px/1.6 var(--ink-kai); border: 1px solid currentColor; border-radius: 2px; }
+.ink-seal-badge { display: inline-grid; place-items: center; width: 2.2em; height: 2.2em; background: var(--ink-zhusha); color: #fff8ee; font: 700 0.9em/1 var(--ink-song); border-radius: 2px; }
+.ink-term { background: var(--ink-term-bg); color: var(--ink-term-ink); font: 14px/1.65 var(--ink-mono); border-radius: 6px; padding: 16px 18px; font-variant-ligatures: none; overflow-x: auto; }
+.ink-term .dim { color: var(--ink-term-dim); } .ink-term .ok { color: var(--ink-term-ok); } .ink-term .key { color: var(--ink-term-key); }
+:focus-visible { outline: 3px solid var(--ink-zhusha); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .ink-btn, .ink-btn::before { transition: none; } }

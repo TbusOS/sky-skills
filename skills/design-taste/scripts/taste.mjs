@@ -157,10 +157,12 @@ async function ref(T, files) {
   const ms = await measure(files);
   const evs = [];
   for (const m of ms) {
-    const knobs = T.profile.fromMeasure(m);
+    // fromMeasure may also name a category (ink wash: which colouring); split the two
+    const raw = T.profile.fromMeasure(m), knobs = {}, cat = {};
+    for (const [k, v] of Object.entries(raw)) { if (T.KNOBS[k]) knobs[k] = v; else if (T.CATS[k]) cat[k] = v; }
     console.log(`${m.file}: empty paper ${Math.round(m.whitespace * 100)}% · colours ${m.colors}${m.hues.length ? ' (' + m.hues.join('°, ') + '°)' : ''} · ink tones ${m.tones.map(x => Math.round(x * 100) + '%').join(' ')} · soft edges ${Math.round(m.soft * 100)}%`);
-    console.log(`    → ${Object.keys(knobs).length ? fmt(knobs) : 'nothing this style can use'}`);
-    if (Object.keys(knobs).length) evs.push({ kind: 'ref', knobs, note: 'ref ' + m.file.split('/').pop(), source: 'ref' });
+    console.log(`    → ${Object.keys(raw).length ? fmt(raw) : 'nothing this style can use'}`);
+    if (Object.keys(raw).length) evs.push({ kind: 'ref', knobs, ...(Object.keys(cat).length ? { cat } : {}), note: 'ref ' + m.file.split('/').pop(), source: 'ref' });
   }
   if (evs.length) append(T, evs);
   console.log(`recorded ${evs.length} reference${evs.length === 1 ? '' : 's'} (each weighs ${Core.WEIGHT.ref}, like keeping one figure)`);
