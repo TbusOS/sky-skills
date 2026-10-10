@@ -211,6 +211,9 @@ node skills/graphite-design/scripts/taste.mjs say "颜色太多了"</pre>
 
 <script src="../../skills/graphite-design/assets/sketch.js"></script>
 <script src="../../skills/graphite-design/assets/props.js"></script>
+<script src="../../skills/design-taste/assets/shared.js"></script>
+<script src="../../skills/design-taste/assets/taste-core.js"></script>
+<script src="../../skills/graphite-design/assets/taste-profile.js"></script>
 <script src="../../skills/graphite-design/assets/taste.js"></script>
 <script src="../../skills/graphite-design/assets/player.js"></script>
 <script>
