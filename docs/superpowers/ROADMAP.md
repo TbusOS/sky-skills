@@ -117,6 +117,7 @@ git -C linux cat-file -t 7b9b77a8bba9    # 应输出 commit
 | 需求 | [specs/2026-10-10-inkwash-design-requirements.md](specs/2026-10-10-inkwash-design-requirements.md) |
 | 设计 | [specs/2026-10-10-inkwash-design-design.md](specs/2026-10-10-inkwash-design-design.md) |
 | P0 实施计划 | [plans/2026-10-10-inkwash-p0.md](plans/2026-10-10-inkwash-p0.md) |
+| P1–P5 实施计划 | [plans/2026-10-11-inkwash-p1-p5.md](plans/2026-10-11-inkwash-p1-p5.md)(任务级,user 2026-10-11 让全部做完) |
 | 开始日期 | 2026-10-10 |
 | 开发分支 | [`feat/inkwash-design`](https://github.com/TbusOS/sky-skills/tree/feat/inkwash-design) —— P1 起开发期间最新进度看这个分支上的本文件;P0 的产出都是规划文档,放 main |
 | 当前阶段 | P0 完成并按审查修完;P1 进行中 |
@@ -151,11 +152,11 @@ git -C linux cat-file -t 7b9b77a8bba9    # 应输出 commit
 | 阶段 | 内容 | 状态 |
 |---|---|---|
 | P0 准备 | 方法第一版 + 注册点检查脚本 + 三个小样 + 字体许可证 | 完成(2026-10-11) |
-| P1 口味学习 | `design-taste` + graphite 迁移(行为不变) | 未写计划 |
-| P2 水墨底座 | 色值、画笔、物件、构建脚本、SKILL.md;笔墨基础 4 张 | 未写计划 |
-| P3 技术类图例 | 框图、流程、代码、数学、文档 / UI、数据图、越用越懂你 | 未写计划 |
-| P4 艺术类图例 | 诗词、四季、山水、武侠、电影、壁纸、发布会;代码版与位图择优 | 未写计划 |
-| P5 上线 | 5 个展示页、短片、导出、接入注册、方法第二版 → PR → 合并 | 未写计划 |
+| P1 口味学习 | `design-taste` + graphite 迁移(行为不变) | 进行中 |
+| P2 水墨底座 | 色值、画笔、物件、构建脚本、SKILL.md;笔墨基础 4 张 | 计划已写,未开始 |
+| P3 技术类图例 | 框图、流程、代码、数学、文档 / UI、数据图、越用越懂你 | 计划已写,未开始 |
+| P4 艺术类图例 | 诗词、四季、山水、武侠、电影、壁纸、发布会;代码版与位图择优 | 计划已写,未开始 |
+| P5 上线 | 5 个展示页、短片、导出、接入注册、方法第二版 → PR → 合并 | 计划已写,未开始 |
 
 ---
 
