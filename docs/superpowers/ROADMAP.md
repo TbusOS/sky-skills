@@ -119,7 +119,7 @@ git -C linux cat-file -t 7b9b77a8bba9    # 应输出 commit
 | P0 实施计划 | [plans/2026-10-10-inkwash-p0.md](plans/2026-10-10-inkwash-p0.md) |
 | 开始日期 | 2026-10-10 |
 | 开发分支 | [`feat/inkwash-design`](https://github.com/TbusOS/sky-skills/tree/feat/inkwash-design) —— P1 起开发期间最新进度看这个分支上的本文件;P0 的产出都是规划文档,放 main |
-| 当前阶段 | P0 完成,等 user 看结论 |
+| 当前阶段 | P0 完成并按审查修完;P1 进行中 |
 
 **为什么做**:仓里没有中国水墨画风;每做一个设计 skill 方法都要重新摸索,加新 skill 要改的十几处注册点只写在文字里、漏了没人发现;
 「越用越懂你」只有 graphite 有,而且只学 graphite 自己。
@@ -129,18 +129,22 @@ git -C linux cat-file -t 7b9b77a8bba9    # 应输出 commit
 **当前状态**(2026-10-10)
 
 - P0 完成(2026-10-11),结论在设计书 §16,证据截图在 `docs/superpowers/evidence/2026-10-10-inkwash-p0/`:
-  - 通用方法第一版和注册点检查脚本在私有 skill 仓的 `design-skill-method`;11 个设计 skill 实测:7 个全部登记,graphite 漏 18 处、relief 漏 9 处、eclat / lectern 各漏 1 处
+  - 通用方法第一版和注册点检查脚本在私有 skill 仓的 `design-skill-method`;11 个设计 skill 实测:7 个全部登记,graphite 漏 18 处、relief 漏 10 处、eclat / lectern 各漏 1 处
   - 四个毛笔字体都是 OFL 1.1
-  - 小样 1 毛笔笔触:对照真迹改了 6 处,小改后过关
+  - 小样 1 毛笔笔触:对照真迹改了 6 处,我判「小改后过关」(待 user 看对照图确认)
   - 小样 2 位图分层:做,默认抠成透明层
   - 小样 3 性能:一张图 ≤ 800 笔;去掉打毛滤镜虽快但画质掉,不采用
 - 仓库里还没有 `skills/inkwash-design/` 和 `skills/design-taste/`。
 
 **下一步**
 
-1. user 看 P0 结论(设计书 §16 + 证据截图),定 Q1(字体)、Q3(位图做法)、Q6(漏接注册点怎么处理)。
-2. 写 P1 实施计划:`design-taste` + graphite 迁移(行为不变)。
-3. P1 起在 `feat/inkwash-design` 分支上开发。
+2026-10-11 user 说「全部做完,直到水墨 skill 上线 GitHub Pages」,Q1 / Q3 / Q4 / Q5 / Q6 按我的推荐执行(需求文档 Q 表),上线后可改。
+
+1. 写 P1–P5 实施计划(一份,任务级),在 `feat/inkwash-design` 分支上按顺序做。
+2. 上线前要 user 做的两件事(不挡开发,PR 时一起看):
+   - 看小样 1 对照图 `evidence/2026-10-10-inkwash-p0/spike1-compare.jpg`,确认笔触「小改后过关」;
+   - 在有窗口的浏览器里打开一张 800 笔的图,看 60 帧是否真流畅(无头浏览器只能量帧间隔)。
+3. PR 由 user 确认后合并;合进 main 后 GitHub Pages 自动发布。
 
 **阶段一览**
 
