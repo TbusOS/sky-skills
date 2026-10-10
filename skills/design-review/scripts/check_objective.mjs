@@ -15,6 +15,9 @@
 // O4 手机上图里的字   390 宽下 SVG <text> 实际渲染字号 < 9px 就失败;
 //                   标了 data-allow-shrink 的图片类不查(字不需要读)
 // O5 关掉动画也完整   prefers-reduced-motion: reduce 下不滚动,h1–h3 / p / li 不能是看不见的
+// O6 图里的字对比度   axe 不查 SVG <text>,这里补上(_svg_contrast.mjs,和 axe-audit 的 svg-text-contrast 同一个模块):
+//                   底色取浏览器真画出来的像素、只看笔画底下;门槛同 WCAG AA。
+//                   2026-10-10 全仓量出两千多处旧欠账,还清之前只记「提醒」,不算失败
 //
 // 版式、字体、配色比例、组件写法一概不管 —— 那些交给模型和人。
 // 走代理上网的机器:Chromium 自己不读 HTTPS_PROXY,由 _net.mjs 传给它;网页字体存在本机,
@@ -23,6 +26,7 @@
 // 退出码:0 没有失败(可能有提醒)· 1 有失败 · 2 用法错 / 环境缺 playwright
 import { chromium } from 'playwright';
 import { launchOptions, useFontCache } from './_net.mjs';
+import { svgTextContrast } from './_svg_contrast.mjs';
 import { createRequire } from 'node:module';
 import { resolve, join } from 'node:path';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
@@ -60,7 +64,8 @@ async function checkPage(browser, file, themes = [null]) {
 
   // O1 + O2:1280 宽;O1 只在第一个主题下看,O2 每个主题各量一遍
   let ctx, p;
-  const low = [];
+  const low = [], svgLow = [];
+  let svgMeasured = 0;
   for (const [ti, theme] of themes.entries()) {
     ctx = await newContext(browser, { viewport: { width: 1280, height: 900 }, colorScheme: theme === 'light' ? 'light' : theme === 'dark' ? 'dark' : 'no-preference' });
     p = await ctx.newPage();
@@ -80,6 +85,9 @@ async function checkPage(browser, file, themes = [null]) {
       }));
     });
     low.push(...found.map(x => (theme ? `[${theme}] ` : '') + x));
+    const sv = await svgTextContrast(p);     // 在 axe 之后:它会暂停动画、滚动页面
+    svgMeasured += sv.measured;
+    svgLow.push(...sv.findings.map(f => `${theme ? `[${theme}] ` : ''}「${f.text.slice(0, 16)}」${f.fg} / ${f.bg} = ${f.ratio}(要 ${f.need})`));
     await ctx.close();
   }
   const tn = themes[0] ? `(主题 ${themes.join(' / ')})` : '';
@@ -132,6 +140,10 @@ async function checkPage(browser, file, themes = [null]) {
   });
   add('O5 关掉动画也完整', hidden.length ? 'FAIL' : 'PASS', hidden.length ? `${hidden.length} 处看不见,例:${hidden.slice(0, 3).join(' ; ')}` : '标题和正文都看得见');
   await ctx.close();
+
+  add('O6 图里的字对比度', svgLow.length ? 'WARN' : 'PASS',
+      svgLow.length ? `${svgLow.length} 处不到 AA(量了 ${svgMeasured} 段 SVG 字${tn}),例:${svgLow.slice(0, 3).join(' ; ')}(改字色或底色;暂时只提醒)`
+        : svgMeasured ? `量了 ${svgMeasured} 段 SVG 字${tn},都到 AA` : '页面上没有能量的 SVG 字');
   return res;
 }
 
@@ -154,12 +166,13 @@ async function selfTest(browser) {
   const dir = mkdtempSync(join(tmpdir(), 'anth-objective-'));
   const cases = [
     // 宽图包进可横拖的图框、给足最小宽度:手机上字保持可读,页面本身不横滚
-    ['正常页面:五项都过', PAGE('<h1>标题</h1><p>正文。</p><div style="overflow-x:auto"><div style="min-width:1000px">'
+    ['正常页面:六项都过', PAGE('<h1>标题</h1><p>正文。</p><div style="overflow-x:auto"><div style="min-width:1000px">'
       + '<svg viewBox="0 0 1200 200" width="100%"><text x="10" y="100" font-size="12">节点标签</text></svg></div></div>'), {}],
     ['★ 脚本报错 → O1 失败', PAGE('<h1>t</h1>', '', 'notDefined();'), { 'O1 JS 报错': 'FAIL' }],
     ['★ 浅灰字 → O2 失败', PAGE('<p style="color:#c8c6bd">看不清的字</p>'), { 'O2 文字对比度': 'FAIL' }],
     ['★ 超宽元素且没挡住 → O3 失败', PAGE('<h1>t</h1><div style="width:1700px;height:20px;background:#e8e6dc"></div>'), { 'O3 横向滚动': 'FAIL' }],
     ['★ 超宽但 body 挡住 → O3 只提醒', PAGE('<h1>t</h1><div style="width:1700px;height:20px"></div>', 'body{overflow-x:hidden}'), { 'O3 横向滚动': 'WARN' }],
+    ['★ 图里浅灰字 → O6 提醒', PAGE('<h1>t</h1><svg viewBox="0 0 300 60" width="300"><text x="10" y="36" font-size="14" fill="#b0aea5">浅灰标签</text></svg>'), { 'O6 图里的字对比度': 'WARN' }],
     ['★ 宽图在手机上跟着缩 → O4 失败', PAGE('<h1>t</h1>' + SVG()), { 'O4 手机上图里的字': 'FAIL' }],
     ['  同一张图标成图片类 → O4 不报', PAGE('<h1>t</h1>' + SVG('data-allow-shrink')), { 'O4 手机上图里的字': 'PASS' }],
     ['  只有浅色主题看不清,不加 --themes → O2 不报', PAGE('<p class="t">正文</p>', '[data-theme=light] body{background:#fff} [data-theme=light] .t{color:#dddddd}'), { 'O2 文字对比度': 'PASS' }],

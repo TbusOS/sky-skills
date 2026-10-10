@@ -20,6 +20,15 @@
 // was right by luck; the measurement was wrong. axe composites layered and
 // gradient backgrounds properly, and brings ~90 rules we have none of.
 //
+// ONE RULE HERE IS NOT axe's: svg-text-contrast
+// axe's color-contrast skips SVG <text> entirely, and in this repo a large share
+// of the words a reader sees are inside diagrams. On 2026-10-10 four roadmaps
+// measured 0 under axe and still had 22 diagram labels below AA. The rule is
+// measured by _svg_contrast.mjs (the same module check_objective.mjs O6 uses),
+// reported under its own id so it can never be mistaken for an axe finding, and
+// it sits in this gate because it is the other half of the same WCAG criterion
+// (1.4.3) and needs the same theme loop. It is WARN until promoted below.
+//
 // LICENSE: axe-core is MPL-2.0 — file-level copyleft. Consuming it unmodified
 // as a dependency places no obligation on this repo's MIT code. If we ever
 // patch a file inside node_modules/axe-core, that file must be published.
@@ -44,6 +53,7 @@ import { extname, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { revealByScrolling } from './_reveal-scroll.mjs';
+import { svgTextContrast } from './_svg_contrast.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
@@ -94,6 +104,11 @@ const PROMOTED = new Set([
   // (--glass-ink-3, --glass-accent-ink) were darkened to clear all of them.
   // Seven glass surfaces × two themes now measure 0 (known-bugs §6.6).
   'color-contrast',
+  // NOT here: svg-text-contrast. Measured 2026-10-10 over 143 page runs (every
+  // page, glass and atelier in both themes): 13,806 SVG labels, 2,924 below AA,
+  // nearly all from colours written into three skills' diagram template
+  // libraries (known-bugs §7.11 item 5). Promote it once that debt is paid, by
+  // the same rule as color-contrast: the sample is every page in every theme.
 ]);
 
 // Rules that do not apply to what this repo produces, each with the reason.
@@ -207,6 +222,22 @@ for (const target of args.targets) {
       });
     }, TAGS);
 
+    // SVG text, which axe never looks at. Runs after axe: it pauses animations
+    // and scrolls the page, and axe should see the page exactly as before.
+    const svg = await svgTextContrast(page);
+    if (svg.findings.length) {
+      results.violations.push({
+        id: 'svg-text-contrast',
+        impact: 'serious',
+        help: 'SVG <text> must meet WCAG AA contrast (axe skips SVG text; measured by _svg_contrast.mjs)',
+        nodes: svg.findings.map((f) => ({
+          target: [`svg text "${f.text}" in ${f.where}`],
+          // first line is dropped by the printer below, as axe's own header is
+          failureSummary: `Fix the following:\n${f.fg} on ${f.bg} = ${f.ratio}:1, needs ${f.need}:1 at ${f.px}px`,
+        })),
+      });
+    }
+
     const violations = [];
     for (const v of results.violations) {
       const muted = NOT_APPLICABLE.get(v.id);
@@ -225,7 +256,8 @@ for (const target of args.targets) {
         })),
       });
     }
-    report.push({ target, theme: args.theme ?? 'as-authored', violations });
+    report.push({ target, theme: args.theme ?? 'as-authored', violations,
+      svgText: { measured: svg.measured, skipped: svg.skipped } });
   } catch (err) {
     report.push({ target, error: String(err && err.message ? err.message : err) });
     blocking += 1;
@@ -249,6 +281,10 @@ if (args.json) {
       ? `${live.length} rule(s), ${nodes} element(s)`
       : 'OK';
     console.log(`axe-audit: ${head}  (${r.target}${args.theme ? ` · ${args.theme}` : ''})`);
+    // How many SVG labels were actually measured, so a clean line on a page
+    // full of diagrams can be told apart from a run that measured nothing.
+    const sk = Object.entries(r.svgText.skipped).filter(([, n]) => n).map(([k, n]) => `${k} ${n}`).join(', ');
+    if (r.svgText.measured || sk) console.log(`  svg text: ${r.svgText.measured} measured${sk ? ` · not measured: ${sk}` : ''}`);
     for (const v of live) {
       console.log(`  [${v.severity}] ${v.rule} (${v.impact}) ×${v.count} — ${v.help}`);
       for (const n of v.nodes) {

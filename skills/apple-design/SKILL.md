@@ -67,10 +67,12 @@ last-verified: 2026-10-07
 node ~/.claude/skills/design-review/scripts/check_objective.mjs page.html [...]
 ```
 
-五项:O1 JS 报错 · O2 文字对比度 · O3 真实横向滚动 · O4 手机上图里的字 ≥ 9px · O5 关掉动画也完整。
+六项:O1 JS 报错 · O2 文字对比度 · O3 真实横向滚动 · O4 手机上图里的字 ≥ 9px · O5 关掉动画也完整 ·
+O6 图里的字对比度(暂时只提醒)。
 版式、字体、组件写法一概不查。每项怎么判、为什么这么判,见 `anthropic-design/SKILL.md` 第 4 节。
 
-O2 用的 axe 不查 SVG 里文字的对比度,图里的小标签要自己看一眼。
+O2 用的 axe 不查 SVG 里文字的对比度,O6 补的就是这一块。图例模板里的 `#86868b` 灰字在白底上只有 3.62,
+新画的图别照抄,用 `--apple-text-secondary` 的值 `#6e6e73`(白底 5.07、`#f5f5f7` 底 4.66)。
 
 ## 5. 可选:想要风格上的第二意见时
 

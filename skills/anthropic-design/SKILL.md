@@ -1,6 +1,6 @@
 ---
 name: anthropic-design
-description: "anthropic 配色的讲解页 / 技术介绍页 / 编辑式长文 HTML。只有配色定死:暖米白底 #faf9f5、橙色主色 #d97757、低饱和蓝 #6a9bcc / 橄榄绿 #788c5d / 金 #c9913f 当语义色、墨色字 #141413;版式、字体、动画、组件写法由模型按内容自由发挥。配图例库(templates/diagrams/ 78 张现成 SVG + diagram-craft.md 画图手法 + 图集页,含调用链定位图与十种「判断与覆盖」图)和「让人看懂」的三种做法案例(首屏动画演示机制 · 证据模块 · 读者能点选的解释器,范例 demos/anthropic-design/explainer.html)。检查只查客观缺陷:design-review/scripts/check_objective.mjs(JS 报错 / 对比度 / 真实横向滚动 / 手机上图里的字 / 关掉动画也完整)。TRIGGER: 'anthropic 风格' / 'anthropic style' / 'claude 官网风格' / 'Anthropic 品牌' / 暖米白加橙 / 技术介绍页 / 原理讲解页 / 编辑式长文 / 报告页 / 架构图 / 流程图 / editorial long-form page. DO NOT TRIGGER: apple 风格(apple-design)、零基础图解(primer-design)、深色玻璃展示(glass-design)、只给自己看一次的数据页(explain-ladder 第 3 级)、高饱和霓虹。"
+description: "anthropic 配色的讲解页 / 技术介绍页 / 编辑式长文 HTML。只有配色定死:暖米白底 #faf9f5、橙色主色 #d97757、低饱和蓝 #6a9bcc / 橄榄绿 #788c5d / 金 #c9913f 当语义色、墨色字 #141413;版式、字体、动画、组件写法由模型按内容自由发挥。配图例库(templates/diagrams/ 78 张现成 SVG + diagram-craft.md 画图手法 + 图集页,含调用链定位图与十种「判断与覆盖」图)和「让人看懂」的三种做法案例(首屏动画演示机制 · 证据模块 · 读者能点选的解释器,范例 demos/anthropic-design/explainer.html)。检查只查客观缺陷:design-review/scripts/check_objective.mjs(JS 报错 / 对比度 / 真实横向滚动 / 手机上图里的字 / 关掉动画也完整 / 图里的字对比度)。TRIGGER: 'anthropic 风格' / 'anthropic style' / 'claude 官网风格' / 'Anthropic 品牌' / 暖米白加橙 / 技术介绍页 / 原理讲解页 / 编辑式长文 / 报告页 / 架构图 / 流程图 / editorial long-form page. DO NOT TRIGGER: apple 风格(apple-design)、零基础图解(primer-design)、深色玻璃展示(glass-design)、只给自己看一次的数据页(explain-ladder 第 3 级)、高饱和霓虹。"
 last-verified: 2026-10-07
 ---
 
@@ -78,7 +78,7 @@ last-verified: 2026-10-07
 
 ```bash
 node ~/.claude/skills/design-review/scripts/check_objective.mjs page.html [...]
-node ~/.claude/skills/design-review/scripts/check_objective.mjs --self-test   # 10 条,7 条是故意做坏的
+node ~/.claude/skills/design-review/scripts/check_objective.mjs --self-test   # 11 条,8 条是故意做坏的
 ```
 
 | 编号 | 查什么 | 怎么判 |
@@ -88,6 +88,7 @@ node ~/.claude/skills/design-review/scripts/check_objective.mjs --self-test   # 
 | O3 | 横向滚动 | 1280 / 390 两个宽度下用鼠标真的横滚一次,页面动了才失败;布局超宽但被 `overflow-x:hidden` 挡住只算提醒 |
 | O4 | 手机上图里的字 | 390 宽下 SVG 文字实际渲染 < 9px 就失败,`data-allow-shrink` 的不查 |
 | O5 | 关掉动画也完整 | 「减少动态效果」下不滚动,标题和正文不能有看不见的 |
+| O6 | 图里的字对比度 | axe 不查 SVG 文字,这项补上:取浏览器画出来的、笔画底下的像素当底色,门槛同 AA。模板库里还有旧配色没清,**暂时只提醒** |
 
 版式、字体、配色比例、组件写法一概不查。退出码:0 没有失败 · 1 有失败 · 2 用法错或起不来浏览器。
 

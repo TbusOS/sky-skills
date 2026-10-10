@@ -53,7 +53,15 @@ it instead of asserting its own number.
    自检 `scripts/visual_selftest.sh`,53 项。
 3. `axe-audit.mjs` — 可达性(axe-core;阻断规则四条:color-contrast、
    link-name、aria-prohibited-attr、svg-img-alt。**全仓两主题实测 0 违规**
-   —— glass light 那 84 处欠账已于 2026-08-27 在 CSS token 层还清,见 known-bugs §6.6)
+   —— glass light 那 84 处欠账已于 2026-08-27 在 CSS token 层还清,见 known-bugs §6.6)。
+   **另有一条不是 axe 的规则 `svg-text-contrast`**(2026-10-10 加):axe 的 color-contrast
+   不查 SVG `<text>`,图里的字从来没人量过。由 `scripts/_svg_contrast.mjs` 量 ——
+   字设透明拍一张取底色,字涂黑、涂白各拍一张找出笔画,只看笔画底下的像素,
+   笔画像素对比度的第 20 百分位低于 AA(4.5:1,渲染后 ≥ 24px 或粗体 ≥ 18.66px 的大字 3:1)就报。
+   每页打一行「svg text: N measured · not measured: …」,0 处和什么都没量分得开。
+   **目前只报不拦**:全仓 143 次页面运行量了 13806 段字,2924 处不到 AA,
+   几乎都来自三家图例模板库的固定配色(known-bugs §7.11 第 5 条),还清后再升阻断。
+   `check_objective.mjs` 的 O6 用的是同一个模块。自检 `scripts/svg_contrast_selftest.sh`,12 项。
 4. `interaction-audit.mjs` — **点开之后才存在的那些状态**(2026-09-05 加)
 5. `screenshot.mjs` — 全页截图(只产物;评判它的是人眼)。**截之前先把整页滚一遍
    再回到顶部** —— 九套里有四套(anthropic / apple / ember / sage)的
@@ -297,7 +305,7 @@ node skills/design-review/scripts/learning-loop.mjs \
 |---|---|---|
 | Gate 1 `verify.py` | 占位符(文档页 `<pre>`/`<code>` 块自动剥除,不误报)、BEM modifier-only、未定义 class(union: 默认 skill CSS + HTML link + `--css`)、`<svg>` 不平衡、hero 容器用错、`container --mod` 未与 base 同列(BEM base-less 错)、公开页缺双语(`lang-toggle` + `lang-en/zh`)| Python 标准库 |
 | Gate 2 `visual-audit.mjs` | WCAG contrast < 4.5、hero 框图渲染 < 900px、SVG `<text>` 实际像素 < 9px、多列网格孤儿卡、SVG `<text>` 重叠、SVG 文字 fill 和承载 shape RGB 距离 < 40、多 h1 / heading 跳级 / 无 alt img / 无文本 a、brand 色在 top region 占比 < 0.4%、cross-skill-smell(别扮成另一个 skill)、hollow-card §10b、asymmetric-first-col-hero §10c、svg-foreign-hex、figure 无 figcaption、Fraunces/Newsreader 等非本 skill 字体、italic 滥用 —— 每类对应 `known-bugs.md` 1 行(类数实时跑 `--facts --list`) | playwright |
-| Gate 3 `axe-audit.mjs` | axe-core 可达性:color-contrast、link-name、aria-prohibited-attr、svg-img-alt 阻断,其余只报告 | playwright + axe-core |
+| Gate 3 `axe-audit.mjs` | axe-core 可达性:color-contrast、link-name、aria-prohibited-attr、svg-img-alt 阻断,其余只报告;另加自己的 `svg-text-contrast`(SVG 里的字,axe 不查;暂时只报告)| playwright + axe-core + pngjs |
 | Gate 4 `screenshot.mjs` | 只产物不评审 —— 给人看的 | playwright |
 | 口味评审(五道之外)solo `design-critic` | 整页口味(构图 + 文案 + 插画 + 品牌)一位通才评审 | `Task()` subagent |
 | 口味评审(五道之外)multi-critic × 4 | 构图 / 文案 / 插画 / 品牌 四位专家独立 fresh-context · 权重 25/25/20/30 聚合 | `Task()` × 4 + 聚合 |
@@ -376,7 +384,8 @@ design-review 发现一个 **不在 known-bugs.md 里** 的新问题 → **必�
 - `~/.claude/skills/design-review/dr-cli` — 一条命令跑完 5 道检查 + 可选 `--multi-critic` / `--learn`
 - `scripts/verify.py` — Gate 1 结构 check
 - `scripts/visual-audit.mjs` — Gate 2 渲染 check(58 项)
-- `scripts/axe-audit.mjs` — Gate 3 可达性 check(axe-core)
+- `scripts/axe-audit.mjs` — Gate 3 可达性 check(axe-core + SVG 文字对比度)
+- `scripts/_svg_contrast.mjs` — SVG 文字对比度的测量模块(axe-audit 和 check_objective O6 共用;自检 `svg_contrast_selftest.sh` 12 项)
 - `scripts/screenshot.mjs` — Gate 4 全页截图(截前滚一遍;自检 `screenshot_selftest.sh` 28 项)
 - `scripts/count-check.py` — 全仓计数判定(承载短语 vs 磁盘真值 + 检查模型)
 - `scripts/learning-loop.mjs` — 组件 07 · critic verdict → design-learner prompt

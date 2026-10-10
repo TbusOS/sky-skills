@@ -58,9 +58,10 @@ node ~/.claude/skills/design-review/scripts/check_objective.mjs page.html       
 node ~/.claude/skills/design-review/scripts/check_objective.mjs --themes=dark,light page.html  # 双主题
 ```
 
-五项:O1 JS 报错 · O2 文字对比度 · O3 真实横向滚动 · O4 手机上图里的字 ≥ 9px · O5 关掉动画也完整。
-每项怎么判见 `anthropic-design/SKILL.md` 第 4 节。O2 用的 axe 不查 SVG 里文字的对比度:
-范例页 L3 / L4 两个岩层标签原来在深色岩层上发暗,检查没报,是看截图看出来的,图里的小标签要自己看一眼。
+六项:O1 JS 报错 · O2 文字对比度 · O3 真实横向滚动 · O4 手机上图里的字 ≥ 9px · O5 关掉动画也完整 ·
+O6 图里的字对比度(暂时只提醒)。每项怎么判见 `anthropic-design/SKILL.md` 第 4 节。
+O2 用的 axe 不查 SVG 里文字的对比度,O6 补的就是这一块:范例页 L3 / L4 两个岩层标签原来在深色岩层上发暗,
+当时检查没报,是看截图看出来的。双主题页记得加 `--themes=dark,light`,O6 也是每个主题各量一遍。
 
 整页截图里极光会在第一屏底部「截断」:它是 `position: fixed`,整页截图只画在第一屏。看效果要滚到中段截当前窗口。
 
