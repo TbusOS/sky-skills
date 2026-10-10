@@ -122,7 +122,7 @@ function paperAndInk(r, fig) {
 
 export function standalone(r, base) {
   const { fig } = r;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${fig.w} ${fig.h}" width="${fig.w}" height="${fig.h}" class="ifig" role="img" aria-label="${esc(label(fig))}"${fig.motion ? '' : ' data-still=""'}>` +
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${fig.w} ${fig.h}" width="${fig.w}" height="${fig.h}" class="ifig" role="img" aria-label="${esc(label(fig))}"${fig.paper === 'dark' ? ' data-paper="dark"' : ''}${fig.motion ? '' : ' data-still=""'}>` +
     `<title>${esc(fig.title.zh)} · ${esc(fig.title.en)}</title>` +
     `<style>@import url(../../assets/fonts.css);${base}${r.css}</style><defs>${FILTERS}${r.defs}</defs>` + paperAndInk(r, fig) + `</svg>\n`;
 }
@@ -142,7 +142,7 @@ export function inline(r, o = {}) {
   const pw = o.shrink ? 0 : panWidth(r);
   const minw = pw > 0 && pw < fig.w ? `min-width:${pw}px;` : pw >= fig.w ? `min-width:${fig.w}px;` : '';
   const extra = (o.shrink ? ' data-allow-shrink=""' : '') + ` style="${minw}--fw:${fig.w}px;--ar:${(fig.w / fig.h).toFixed(3)}"` + (o.taste ? ` data-taste="${esc(o.taste)}"` : '');
-  return `<svg viewBox="0 0 ${fig.w} ${fig.h}" class="ifig${o.cls ? ' ' + o.cls : ''}" role="img" aria-label="${esc(label(fig))}" data-fig="${fig.id}"${motion}${extra}>` +
+  return `<svg viewBox="0 0 ${fig.w} ${fig.h}" class="ifig${o.cls ? ' ' + o.cls : ''}" role="img" aria-label="${esc(label(fig))}" data-fig="${fig.id}"${fig.paper === 'dark' ? ' data-paper="dark"' : ''}${motion}${extra}>` +
     (r.css ? `<style>${r.css}</style>` : '') + (r.defs ? `<defs>${r.defs}</defs>` : '') + paperAndInk(r, fig) + `</svg>`;
 }
 

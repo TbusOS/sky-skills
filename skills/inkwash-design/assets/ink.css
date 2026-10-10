@@ -46,6 +46,7 @@
   --ink-t-zhusha: #a32a23;
   --ink-t-yanzhi: #8e2430;
 
+  --ink-snow: #b3ac9f;      /* snow and rain on rice paper: a pale grey, since the paper is the snow */
   --ink-halo-o: 0.5;        /* the bleed under a stroke */
   --ink-wash-o: 0.32;       /* a broad wash */
   --ink-blend: multiply;    /* ink on ink gets darker */
@@ -65,7 +66,7 @@
   color-scheme: light;
 }
 
-:root[data-theme="dark"] {
+:root[data-theme="dark"], .ifig[data-paper="dark"] {
   --ink-paper: #14213a;     /* 磁青纸 indigo paper */
   --ink-paper-2: #1a2944;
   --ink-card: #1d2d4a;
@@ -91,6 +92,7 @@
   --ink-t-shiqing: #8fbde3;
   --ink-t-zhusha: #f08a7f;
   --ink-t-yanzhi: #ec8d95;
+  --ink-snow: #e9e3d4;
   --ink-halo-o: 0.36;
   --ink-wash-o: 0.38;
   --ink-blend: normal;      /* gold over gold must not darken */
@@ -106,13 +108,13 @@
     --ink-baifen: #f3efe6; --ink-gold: #e2c27a;
     --ink-t-huaqing: #9dbdd6; --ink-t-zheshi: #e0a67f; --ink-t-shilv: #86d0b0; --ink-t-shiqing: #8fbde3;
     --ink-t-zhusha: #f08a7f; --ink-t-yanzhi: #ec8d95;
-    --ink-halo-o: 0.36; --ink-wash-o: 0.38; --ink-blend: normal; --ink-term-bg: #0d1424;
+    --ink-snow: #e9e3d4; --ink-halo-o: 0.36; --ink-wash-o: 0.38; --ink-blend: normal; --ink-term-bg: #0d1424;
     color-scheme: dark;
   }
 }
 
 /* ── 2 drawings (brush.js output) ─────────────────────────────────────── */
-.ifig { display: block; width: 100%; height: auto; overflow: visible; isolation: isolate; }
+.ifig { display: block; width: 100%; height: auto; overflow: hidden; isolation: isolate; }
 .ifig .paper { fill: var(--ink-paper); }
 .ifig .card { fill: var(--ink-card); }
 .ifig .fiber { opacity: 0.5; }
@@ -145,6 +147,8 @@
 .ifig .t-term { fill: var(--ink-term-ink); } .ifig .t-term-dim { fill: var(--ink-term-dim); }
 .ifig .t-term-ok { fill: var(--ink-term-ok); } .ifig .t-term-key { fill: var(--ink-term-key); }
 .ifig .term { fill: var(--ink-term-bg); }
+.ifig .snow { fill: var(--ink-snow); }
+.ifig .rain { fill: none; stroke: var(--ink-snow); stroke-width: 1.4; stroke-linecap: round; }
 .ifig .hair { fill: none; stroke: var(--ink-dan); stroke-width: 1; }
 .ifig .flow { fill: none; stroke: var(--ink-huaqing); stroke-width: 2; stroke-dasharray: 2 10; stroke-linecap: round; animation: ink-flow 1.6s linear infinite; }
 @keyframes ink-flow { to { stroke-dashoffset: -24; } }

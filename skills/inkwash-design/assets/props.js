@@ -306,5 +306,28 @@
     B.stroke(c, { tone: o.tone || 'jiao', width: o.width || r * 0.16, press: 'zhong', load: 0.98, wet: 0.5 });
   };
 
+  // ── weather (ambient, repeats forever; reduced motion leaves them where they start) ──
+  // P.fall(B, { kind: 'snow' | 'rain' | 'petal', n, x0, x1, y0, y1, period }) — snow and
+  // petals drift slowly (design rule: ambient motion is slow; rain may be quicker but
+  // still slower than graphite's). Each particle starts at a different point of the
+  // cycle (negative delay), so the first frame is already full.
+  P.fall = function (B, o) {
+    o = o || {};
+    var kind = o.kind || 'snow', n = o.n || 40, x0 = o.x0 || 0, x1 = o.x1 == null ? 1000 : o.x1, y0 = o.y0 || 0, y1 = o.y1 == null ? 560 : o.y1;
+    var H = y1 - y0 + 40, per = o.period || (kind === 'rain' ? 1.6 : kind === 'petal' ? 11 : 9);
+    var body = kind === 'rain' ? 'from{transform:translate(0,-30px)}to{transform:translate(-' + Math.round(H * 0.3) + 'px,' + H + 'px)}'
+      : kind === 'petal' ? '0%{transform:translate(0,-20px) rotate(0deg)}50%{transform:translate(40px,' + Math.round(H / 2) + 'px) rotate(200deg)}100%{transform:translate(-30px,' + H + 'px) rotate(380deg)}'
+        : 'from{transform:translate(0,-20px)}to{transform:translate(-30px,' + H + 'px)}';
+    var name = B.keyframes(body), out = '';
+    for (var i = 0; i < n; i++) {
+      var x = x0 + B.rnd(0, 1) * (x1 - x0), y = y0 + B.rnd(0, 1) * 30 - 20, d = -B.rnd(0, per), sz = B.rnd(0.6, 1.4);
+      var shape = kind === 'rain' ? '<path class="rain" d="M' + x.toFixed(1) + ' ' + y.toFixed(1) + 'l-5 16"/>'
+        : kind === 'petal' ? '<ellipse class="k-' + (o.tone || 'yanzhi') + '" fill="currentColor" opacity="0.75" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" rx="' + (5 * sz).toFixed(1) + '" ry="' + (3 * sz).toFixed(1) + '"/>'
+          : '<circle class="snow" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (2.4 * sz).toFixed(1) + '"/>';
+      out += '<g class="mv amb" style="animation:' + name + ' ' + (per * B.rnd(0.85, 1.25)).toFixed(2) + 's linear ' + d.toFixed(2) + 's infinite;transform-box:fill-box;transform-origin:center">' + shape + '</g>';
+    }
+    B.raw(out, { kind: 'tag', layer: 'labels' });
+  };
+
   return P;
 });
