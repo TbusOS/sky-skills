@@ -79,6 +79,8 @@ export function brushChars(results, pages) {
   const add = t => { for (const ch of t.replace(/<[^>]+>/g, '').replace(/&[a-z]+;/g, ' ')) if (ch.codePointAt(0) > 0x7f) set.add(ch); };
   for (const r of results) for (const m of r.labels.matchAll(/<text[^>]*class="([^"]*)"[^>]*>([\s\S]*?)<\/text>/g)) if (BRUSH_CLS.test(m[1])) add(m[2]);
   for (const html of pages) for (const m of html.matchAll(/<(h1|h2|h3|p|span|div|b|strong|em|figcaption|a|li|text)\b[^>]*class="([^"]*)"[^>]*>([\s\S]*?)<\/\1>/g)) if (BRUSH_CLS.test(m[2])) add(m[3]);
+  // pages.css sets every h1 and h2 in the brush font
+  for (const html of pages) for (const m of html.matchAll(/<(h1|h2)\b[^>]*>([\s\S]*?)<\/\1>/g)) add(m[2]);
   return [...set].sort().join('');
 }
 
