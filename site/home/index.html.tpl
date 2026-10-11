@@ -496,7 +496,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
     </p>
 
     <div class="stats">
-      <div class="stat"><b data-count="26">26</b> <span><span class="lang-en">skills total</span><span class="lang-zh">全部 26 个 skill</span></span></div>
+      <div class="stat"><b data-count="27">27</b> <span><span class="lang-en">skills total</span><span class="lang-zh">全部 27 个 skill</span></span></div>
       <div class="stat"><b data-count="11">11</b> <span><span class="lang-en">design skills</span><span class="lang-zh">个设计 skill</span></span></div>
       <div class="stat"><b data-count="155">155</b> <span><span class="lang-en">diagram templates</span><span class="lang-zh">张图例模板</span></span></div>
       <div class="stat"><b data-count="101">101</b> <span><span class="lang-en">known-bugs</span><span class="lang-zh">条 known-bug</span></span></div>
@@ -543,7 +543,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
 <section id="table" style="background:var(--card);">
   <div class="wrap">
     <span class="kicker rv"><span class="lang-en">The lineup</span><span class="lang-zh">全部成员</span></span>
-    <h2 class="rv"><span class="lang-en">All 26 skills, numbered in the order they arrived.</span><span class="lang-zh">全部 26 个 skill,按加入仓库的先后编号。</span></h2>
+    <h2 class="rv"><span class="lang-en">All 27 skills, numbered in the order they arrived.</span><span class="lang-zh">全部 27 个 skill,按加入仓库的先后编号。</span></h2>
     <p class="lede rv"><span class="lang-en">Hover a tile and the skills it works with light up; click it for what it does, how to trigger it and where to see it. Blue builds systems and content, orange is a design voice, green judges, plans and keeps things current.</span><span class="lang-zh">鼠标移到一格上,和它配合的 skill 会亮起来;点一下看它做什么、怎么触发、去哪看。蓝色是系统与内容,橙色是设计风格,绿色负责评审、规划和更新。</span></p>
     <div class="fams rv" id="fams" role="group" aria-label="Filter by family">
       <button class="fam-btn" type="button" data-f="all" aria-pressed="true"><i style="--c:var(--ink)"></i><span class="lang-en">All</span><span class="lang-zh">全部</span> · 26</button>
@@ -564,7 +564,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
 <section id="growth">
   <div class="wrap">
     <span class="kicker rv"><span class="lang-en">How it grew</span><span class="lang-zh">怎么长起来的</span></span>
-    <h2 class="rv"><span class="lang-en">From one kernel skill to twenty-six.</span><span class="lang-zh">从一个内核 skill,长到 26 个。</span></h2>
+    <h2 class="rv"><span class="lang-en">From one kernel skill to twenty-seven.</span><span class="lang-zh">从一个内核 skill,长到 27 个。</span></h2>
     <!-- facts-ignore: "four design voices" is what arrived on 2026-04-19, a dated step of the chart, not today's count -->
     <p class="lede rv"><span class="lang-en">Each step is the day a SKILL.md first landed in git (<code>git log --diff-filter=A</code>). Four design voices arrived on the same day; the first evaluator came one day later. Hover a dot to see which skill it was.</span><span class="lang-zh">每一级台阶是一个 SKILL.md 第一次进 git 的那天(<code>git log --diff-filter=A</code>)。四个设计风格同一天加入;第一个评审第二天就到了。鼠标移到圆点上看是哪个 skill。</span></p>
     <div class="growth rv" id="growth"><div class="pan"><svg id="gsvg" viewBox="0 0 1000 330" role="img" aria-label="Cumulative number of skills from 2026-03-18 to 2026-10-07"></svg></div><div class="g-tip" id="gtip"></div></div>
@@ -736,7 +736,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
         <div class="term" id="iterm"><div class="term-bar"><i></i><i></i><i></i>&nbsp; ~</div><pre id="ipre"></pre></div>
       </div>
       <div class="i-side">
-        <div class="i-card rv"><h3><span class="lang-en">Runs from any directory</span><span class="lang-zh">在任何目录都能用</span></h3><p><span class="lang-en">All 26 skills, the harness slash-commands (/design-loop, /design-distill, /gdc-audit-critic) and six subagents install under ~/.claude/. The design harness finds its own engine through dr-cli, wherever you call it from.</span><span class="lang-zh">全部 26 个 skill、评审回路的斜杠命令(/design-loop、/design-distill、/gdc-audit-critic)和六个子 agent 都装在 ~/.claude/ 下。设计评审靠 dr-cli 找到自己的引擎,在哪个目录调用都行。</span></p></div>
+        <div class="i-card rv"><h3><span class="lang-en">Runs from any directory</span><span class="lang-zh">在任何目录都能用</span></h3><p><span class="lang-en">All 27 skills, the harness slash-commands (/design-loop, /design-distill, /gdc-audit-critic) and six subagents install under ~/.claude/. The design harness finds its own engine through dr-cli, wherever you call it from.</span><span class="lang-zh">全部 27 个 skill、评审回路的斜杠命令(/design-loop、/design-distill、/gdc-audit-critic)和六个子 agent 都装在 ~/.claude/ 下。设计评审靠 dr-cli 找到自己的引擎,在哪个目录调用都行。</span></p></div>
         <div class="i-card rv"><h3><span class="lang-en">Stays current, with your say-so</span><span class="lang-zh">自动提醒,你点头才更新</span></h3><p><span class="lang-en">skills-sync notices when the repo is ahead, lists the new commits, and pulls only after you confirm. </span><span class="lang-zh">skills-sync 发现仓库有更新时列出新提交,你确认后才拉取。</span><a href="docs/INSTALL.html#stay-updated"><span class="lang-en">How the updater works →</span><span class="lang-zh">自动更新怎么工作 →</span></a></p></div>
         <div class="i-card rv"><h3><span class="lang-en">Full guide</span><span class="lang-zh">完整指南</span></h3><p><span class="lang-en">Trigger words for every skill, the bin/design-review walkthrough, cross-repo setup and a troubleshooting FAQ. </span><span class="lang-zh">每个 skill 的触发词、bin/design-review 用法、跨仓库配置和排错问答。</span><a href="docs/INSTALL.html"><span class="lang-en">Open the install guide →</span><span class="lang-zh">打开安装指南 →</span></a></p></div>
       </div>
