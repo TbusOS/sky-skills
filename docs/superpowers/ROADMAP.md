@@ -109,54 +109,37 @@ git -C linux cat-file -t 7b9b77a8bba9    # 应输出 commit
 
 ---
 
-### inkwash-design —— 水墨画风设计 skill(+ 共用口味学习 design-taste)
+### 设计 skill 共用部件(design-taste 等)—— 水墨 inkwash-design 2026-10-11 停做
 
 | | |
 |---|---|
-| 一句话 | 第 12 个设计 skill:教 AI 用水墨画风做页面、动图、视频、壁纸、技术图、界面、发布会;同时把 graphite 的「越用越懂你」抽成所有设计 skill 共用的 `design-taste`,新增分场景记、看图识口味、跨风格共享、画上留出处 |
-| 需求 | [specs/2026-10-10-inkwash-design-requirements.md](specs/2026-10-10-inkwash-design-requirements.md) |
-| 设计 | [specs/2026-10-10-inkwash-design-design.md](specs/2026-10-10-inkwash-design-design.md) |
-| P0 实施计划 | [plans/2026-10-10-inkwash-p0.md](plans/2026-10-10-inkwash-p0.md) |
-| P1–P5 实施计划 | [plans/2026-10-11-inkwash-p1-p5.md](plans/2026-10-11-inkwash-p1-p5.md)(任务级,user 2026-10-11 让全部做完) |
-| 开始日期 | 2026-10-10 |
-| 开发分支 | [`feat/inkwash-design`](https://github.com/TbusOS/sky-skills/tree/feat/inkwash-design) —— P1 起开发期间最新进度看这个分支上的本文件;P0 的产出都是规划文档,放 main |
-| 当前阶段 | P0 完成并按审查修完;P1 进行中 |
+| 一句话 | 原计划做第 12 个设计 skill「水墨」,顺带把 graphite 的「越用越懂你」抽成所有设计 skill 共用的 `design-taste`。水墨做到 P5 后 user 判效果不好,停做;共用部分留下,单独合进 main |
+| 需求 / 设计 / 计划 | [需求](specs/2026-10-10-inkwash-design-requirements.md) · [设计](specs/2026-10-10-inkwash-design-design.md)(`design-taste` 的设计在 §10,通用方法在 §11)· [P0 计划](plans/2026-10-10-inkwash-p0.md) · [P1–P5 计划](plans/2026-10-11-inkwash-p1-p5.md)。文档保留,当记录 |
+| 当前分支 | [`feat/design-taste`](https://github.com/TbusOS/sky-skills/tree/feat/design-taste)(从 main 新拉,不带水墨的提交和图片视频),等 user 确认合并 |
+| 水墨存档 | [`feat/inkwash-design`](https://github.com/TbusOS/sky-skills/tree/feat/inkwash-design) 停在 `21aa415`,48 张图例、5 个展示页、短片都在上面,不合进 main |
 
-**为什么做**:仓里没有中国水墨画风;每做一个设计 skill 方法都要重新摸索,加新 skill 要改的十几处注册点只写在文字里、漏了没人发现;
-「越用越懂你」只有 graphite 有,而且只学 graphite 自己。
+**为什么停**:2026-10-11 user 看过成品后说「这个水墨风做的不好,这个不做了,把其他的做好提交即可」。
 
-**已定的决策**:见设计书 §15(D1–D10)。
+**`feat/design-taste` 上有什么**(4 笔提交)
 
-**当前状态**(2026-10-10)
+- `design-taste`:口味学习引擎(加权平均、按场景分两步、跨风格只传五个共享参数且算半份、看图量留白和颜色数、画上小印),目前接了 graphite;自测全过,graphite 迁过去后 300 组随机记录上新旧逐值相同
+- graphite `export.mjs` 两处修复:没装 `ffmpeg-static` 时改用 PATH 上的 ffmpeg(原来直接抛错、一帧导不出);视频宽高取偶(奇数尺寸原来报 `width not divisible by 2`)
+- 登记 design-taste:README 两种语言、安装页、首页、名册;全仓 skill 数 26 → 27,设计风格仍是 11 个
+- 私有 skill 仓的 `design-skill-method` 升到 v1.1(先判页型还是材料型、注册表加 match 列),已在本机提交、未推送
 
-- P0 完成(2026-10-11),结论在设计书 §16,证据截图在 `docs/superpowers/evidence/2026-10-10-inkwash-p0/`:
-  - 通用方法第一版和注册点检查脚本在私有 skill 仓的 `design-skill-method`;11 个设计 skill 实测:7 个全部登记,graphite 漏 18 处、relief 漏 10 处、eclat / lectern 各漏 1 处
-  - 四个毛笔字体都是 OFL 1.1
-  - 小样 1 毛笔笔触:对照真迹改了 6 处,我判「小改后过关」(待 user 看对照图确认)
-  - 小样 2 位图分层:做,默认抠成透明层
-  - 小样 3 性能:一张图 ≤ 800 笔;去掉打毛滤镜虽快但画质掉,不采用
-- 仓库里还没有 `skills/inkwash-design/` 和 `skills/design-taste/`。
+**下一步:共用部分还能做什么(待 user 选)**
 
-**下一步**
+| # | 做什么 | 现状(实测) | 建议 |
+|---|---|---|---|
+| 1 | 补现有设计 skill 漏接的注册点 | `check_registration.sh`:graphite 缺 18 处、relief 缺 10 处、eclat / lectern 各缺 known-bugs 小节。后果实测:`verify.py --skill=graphite` 直接报 `unknown --skill`,graphite 页面的结构检查跑不了;`visual-audit.mjs` 认不出是 graphite,跳过串味检查(别的风格的颜色、字体混进来查不到),其余渲染检查照跑 | 先做。graphite 补 6 处 + 12 处写例外(材料型没有示范页可比);relief 10 处全补;eclat / lectern 补小节 |
+| 2 | `check_skill.mjs`:按两档标准逐项查一个设计 skill | 没写(原计划水墨 P5 做) | 第 1 项之后做,对 11 个设计 skill 跑一遍,得到改造清单 |
+| 3 | 慢机器回退:帧率低于 10 时直接显示画完,不再一笔一笔慢慢出 | 水墨 `player.js` 有,graphite `player.js` 没有;graphite 在软件渲染下卡不卡还没量过 | 先量 graphite 最重的一页;卡才移过去 |
+| 4 | 逐帧导出脚本抽成共用 | 现在只有 graphite 用(水墨那份已停);relief 的 `export-cards.mjs` 只截单张图 | 暂不做。设计书 D10 定的是第三个风格要用时再抽 |
+| 5 | 位图抠透明层(做视差) | 水墨 `layers.mjs`,自测 7 项;别的 skill 目前没有用处 | 暂不做,哪个风格要做视差时从存档分支取 |
+| 6 | 其他风格接 `design-taste` | 只有「代码画图、参数可调」的 skill 接了才有用;graphite 已接,其余 10 个的图例是写死的 SVG | 暂不做 |
+| 7 | 方法 v2(`design-skill-method`) | v1.1 已提交本机 | 做完第 1、2 项后写 |
 
-2026-10-11 user 说「全部做完,直到水墨 skill 上线 GitHub Pages」,Q1 / Q3 / Q4 / Q5 / Q6 按我的推荐执行(需求文档 Q 表),上线后可改。
-
-1. 写 P1–P5 实施计划(一份,任务级),在 `feat/inkwash-design` 分支上按顺序做。
-2. 上线前要 user 做的两件事(不挡开发,PR 时一起看):
-   - 看小样 1 对照图 `evidence/2026-10-10-inkwash-p0/spike1-compare.jpg`,确认笔触「小改后过关」;
-   - 在有窗口的浏览器里打开一张 800 笔的图,看 60 帧是否真流畅(无头浏览器只能量帧间隔)。
-3. PR 由 user 确认后合并;合进 main 后 GitHub Pages 自动发布。
-
-**阶段一览**
-
-| 阶段 | 内容 | 状态 |
-|---|---|---|
-| P0 准备 | 方法第一版 + 注册点检查脚本 + 三个小样 + 字体许可证 | 完成(2026-10-11) |
-| P1 口味学习 | `design-taste` + graphite 迁移(行为不变) | 进行中 |
-| P2 水墨底座 | 色值、画笔、物件、构建脚本、SKILL.md;笔墨基础 4 张 | 计划已写,未开始 |
-| P3 技术类图例 | 框图、流程、代码、数学、文档 / UI、数据图、越用越懂你 | 计划已写,未开始 |
-| P4 艺术类图例 | 诗词、四季、山水、武侠、电影、壁纸、发布会;代码版与位图择优 | 计划已写,未开始 |
-| P5 上线 | 5 个展示页、短片、导出、接入注册、方法第二版 → PR → 合并 | 计划已写,未开始 |
+字体子集和缺字检查已经是共用的(`design-review/scripts/build_fonts.py`、`check_fonts.py`),不用再抽。
 
 ---
 
