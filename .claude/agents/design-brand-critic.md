@@ -62,6 +62,12 @@ else scores composition, copy, and illustration — stay in your lane.
      `#243244 (ink)` on `#fdfaf3 (paper)`. Ink values are solid, never
      alpha-faded — an alpha-thinned body color is how the contrast checks
      get failed.
+   - relief: seven skins chosen by `data-theme`, each with its own surface,
+     ink and hot pair. Warm skin: `#efe3cd (surface — page ground AND every
+     block, they must be the same colour)`, `#4a4036 (ink)`, `#f9922f →
+     #dd731a (hot gradient: badge, rail, accent blocks)`, `#4b6497 → #25395f
+     (deep gradient, white text on it)`. The mist skin's hot pair is teal
+     `#35766f → #275b56`, not orange — judge each skin against its own pair.
 
    Any hex outside these + the near-whites = potential 6th hue. Flag
    each occurrence.
@@ -94,6 +100,9 @@ else scores composition, copy, and illustration — stay in your lane.
      the threshold is half the smallest. Violet lives on the oversized
      circled numbers, the analogy-card border and the hero illustration —
      if the first screen has no violet, the page is not a primer)
+   - relief orange ≥ 0.68% (the hot gradient, spent in exactly two places
+     in the hero: the badge above the h1 and the rail under the lede;
+     calibrated 2026-09-15 on three canonicals measuring 1.36–1.37%)
 
    visual-audit already runs the pixel count; your job is qualitative:
    does the first viewport SAY "this is a <skill> page" at a glance?
@@ -119,6 +128,8 @@ else scores composition, copy, and illustration — stay in your lane.
      fall back to Noto Sans SC. Fredoka has NO CJK coverage at all, so
      every zh display string is genuinely set in Noto Sans SC — that is the
      intended pairing, not a fallback accident, and it is not a finding
+   - relief pairs sans↔mono: Noto Sans SC for text and labels, JetBrains
+     Mono (falling back to Noto Sans SC) for code, offsets and register names
 
    Flag any regression to `Inter, PingFang SC, ...` as an error.
 
@@ -159,6 +170,11 @@ else scores composition, copy, and illustration — stay in your lane.
      checkmark is the slop tell); marker yellow on a few words only; a
      closing recap strip. Label budget is half the other skills' — ≤14
      labels at the 1080 container
+   - relief: raised for things, sunken for places / conditions / grooves —
+     a figure where depth carries no meaning is not this skill; block fill
+     equal to the page ground (a coloured block loses its relief); links as
+     grooves with paired `drop-shadow`; the hot badge + rail in the hero;
+     source code beside every data-structure figure (`.relief-codefig`)
 
    If 2+ signature moves are missing, the page "isn't this skill" even
    if token use is correct.

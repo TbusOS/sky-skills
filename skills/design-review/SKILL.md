@@ -211,7 +211,7 @@ waivers:
 | 组件 | 状态 | 实体 |
 |---|---|---|
 | Gate 1 · structural verify | **shipped** | `scripts/verify.py`(8 类 check + 双语强制 + `--allow-monolingual` 豁免)|
-| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(101 条 known-bugs 里能机器化的那些)|
+| Gate 2 · rendered visual-audit | **shipped** | `scripts/visual-audit.mjs`(105 条 known-bugs 里能机器化的那些)|
 | Gate 3 · accessibility axe-audit | **shipped** (2026-08-14) | `scripts/axe-audit.mjs`(axe-core;四条阻断规则;当时清账每页只量一个主题,glass light 仍有欠账 —— known-bugs §6.6)|
 | Gate 4 · full-page screenshot | **shipped** | `scripts/screenshot.mjs`(Playwright · 绝对路径 + `file://` 通用 · 截前滚一遍让「滚动才浮现」的内容真的出现)|
 | 口味评审(五道之外)· solo critic | **shipped** | `.claude/agents/design-critic.md` |

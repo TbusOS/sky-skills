@@ -169,6 +169,18 @@ SKILLS: dict[str, dict] = {
         "container_modifiers": ("narrow", "wide"),
         "hero_advice": "relief-wrap (1180px) or relief-wrap--wide (1360px)",
     },
+    "graphite": {
+        "prefix": "g-",
+        "css": "graphite.css",
+        "dir": "graphite-design",
+        # graphite fixes a material (paper, pencil, coloured pencil), not a page
+        # layout: graphite.css carries small .g-* parts and each page lays itself
+        # out with its own CSS. There is no .g-hero, so the hero check never fires.
+        "narrow_hero": {"g-page--narrow"},
+        "acceptable_hero": {"g-page"},
+        "container_modifiers": ("narrow", "wide"),
+        "hero_advice": "the page's own layout (graphite has no hero container)",
+    },
 }
 
 PLACEHOLDER_PATTERN = re.compile(
@@ -571,7 +583,12 @@ def check_file(
         or "/demos/" in norm_path
     )
     if public_path and not allow_monolingual:
-        has_toggle = re.search(r'class=["\'][^"\']*\blang-toggle\b', html) is not None
+        # A toggle is either class="lang-toggle" (the page-type skills) or a
+        # data-lang-toggle attribute (graphite's player.js binds those buttons).
+        has_toggle = (
+            re.search(r'class=["\'][^"\']*\blang-toggle\b', html) is not None
+            or re.search(r'\bdata-lang-toggle\b', html) is not None
+        )
         has_lang_en = re.search(r'class=["\'][^"\']*\blang-en\b', html) is not None
         has_lang_zh = re.search(r'class=["\'][^"\']*\blang-zh\b', html) is not None
         if not (has_toggle and has_lang_en and has_lang_zh):

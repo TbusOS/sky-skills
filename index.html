@@ -499,7 +499,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
       <div class="stat"><b data-count="27">27</b> <span><span class="lang-en">skills total</span><span class="lang-zh">全部 27 个 skill</span></span></div>
       <div class="stat"><b data-count="11">11</b> <span><span class="lang-en">design skills</span><span class="lang-zh">个设计 skill</span></span></div>
       <div class="stat"><b data-count="155">155</b> <span><span class="lang-en">diagram templates</span><span class="lang-zh">张图例模板</span></span></div>
-      <div class="stat"><b data-count="101">101</b> <span><span class="lang-en">known-bugs</span><span class="lang-zh">条 known-bug</span></span></div>
+      <div class="stat"><b data-count="105">105</b> <span><span class="lang-en">known-bugs</span><span class="lang-zh">条 known-bug</span></span></div>
       <div class="stat"><b data-count="148">148</b> <span><span class="lang-en">eval cases (kernel)</span><span class="lang-zh">个内核用例</span></span></div>
     </div>
   </div>
@@ -589,7 +589,7 @@ footer { background: var(--night); color: var(--night-mute); padding-block: 64px
           <g id="ringmid"></g>
         </svg></div>
         <div class="ring-legend"><span><i style="background:#788c5d"></i><span class="lang-en">passes</span><span class="lang-zh">通过</span></span><span><i style="background:#a14238"></i><span class="lang-en">caught → new rule</span><span class="lang-zh">拦下 → 新规则</span></span></div>
-        <div class="kb"><span class="lang-en">visual-audit: 58 checks · 101 known-bugs</span><span class="lang-zh">visual-audit.mjs(58 项)· 已收录 101 条 known-bug</span></div>
+        <div class="kb"><span class="lang-en">visual-audit: 58 checks · 105 known-bugs</span><span class="lang-zh">visual-audit.mjs(58 项)· 已收录 105 条 known-bug</span></div>
       </div>
       <div>
         <div class="suites rv">

@@ -1044,6 +1044,52 @@
 - **Defense**：mock 里的字号按**最终渲染宽度**反算（预览容器宽 ÷ viewBox 宽 × font-size ≥ 9px），
   别照抄真页面的 font-size；`aria-hidden` 的图一律进人眼复评清单 —— 全绿在这里不代表看过。
 
+## 9. eclat-design
+
+> 2026-10-11 补的小节(注册点检查 R14 报缺)。目前**没有只属于 eclat 的 bug 类**;它踩过的都是跨 skill 的,
+> 在 §1:半角标点 1.22、文字墙 1.45、密图塞窄列 1.29 / 1.44、双语单位重复 1.41、窄屏图里的字 1.71。
+> 风格自己的反例在 `skills/eclat-design/references/dos-and-donts.md`。以后抓到只在 eclat 出现的,编号 9.1 起。
+
+## 10. lectern-design
+
+> 2026-10-11 补的小节(注册点检查 R14 报缺)。目前**没有只属于 lectern 的 bug 类**;它踩过的都在 §1:
+> 半角标点 1.22、可导出数字失实 1.35、双语单位重复 1.41、文字墙 1.45、密图塞窄列 1.29 / 1.44。
+> 风格自己的反例在 `skills/lectern-design/references/dos-and-donts.md`。以后抓到只在 lectern 出现的,编号 10.1 起。
+
+## 11. relief-design
+
+> 2026-10-11 补的小节(注册点检查 R14 报缺)。目前**没有只属于 relief 的 bug 类**;它踩过的在 §1 和 §6:
+> 术语没定义 1.63、窄屏图里的字 1.71、只测一个主题漏掉另一个(glass 浅色主题 §6.6,relief 因此每个皮肤分开量)。
+> relief 的渐变底色 axe 量不出对比度,所以多一道 `check_skin_contrast.py`,见 relief SKILL.md。
+> 风格自己的反例在 `skills/relief-design/references/dos-and-donts.md`。以后抓到只在 relief 出现的,编号 11.1 起。
+
+## 12. graphite-design
+
+> 2026-10-11 把 graphite 接进 `verify.py` / `visual-audit.mjs` 当天抓到的。graphite 是材料型(定死纸、笔、彩铅,
+> 页面版式各页自己写),没有 canonical 示范页;依赖示范页的审查工具不对它跑,见私有仓 design-skill-method 的例外清单。
+
+### 12.1 graphite 页面的中文里用半角 `,;:`,313 处
+- **Reader sees**:四个展示页中文模式下,逗号、分号、冒号是半角,跟楷体字挨着间距不匀(同 §1.22)。
+- **Why**:graphite 一直没登记进 `verify.py`,§1.22 那道检查对它从来没跑过;模板和每张图的 `desc.zh` 都是半角写的。
+- **Defense**:`graphite-design/scripts/build.mjs` 生成页面时最后一步 `zhFullwidth()`,规则和 `verify.py` 的 §1.22 检查相同
+  (只在 lang-zh 里、只在挨着汉字处、跳过 `<code>` 和字符引用)。紧贴 `<code>` 的标点检查算「挨着汉字」(它先删掉 code 再看)、
+  转换不算,这种只有手改模板;2026-10-11 改了 2 处。逐字比对:四页 313 处改动全是半角→全角,图的 SVG 没变。
+
+### 12.2 `verify.py` 不认 `data-lang-toggle`,graphite 每页报「缺语言切换按钮」
+- **Reader sees**:检查报 `missing: lang-toggle button`,页面上按钮其实在,也能用。
+- **Why**:检查只认 `class="lang-toggle"`;graphite 的按钮是 `<button data-lang-toggle="zh">`,由 `player.js` 绑定。
+- **Defense**:`verify.py` 第 7 项改成两种写法都认。这是检查自己的 bug,不是页面的。
+
+### 12.3 `export.mjs` 没装 `ffmpeg-static` 就导不出视频;奇数尺寸编码失败
+- **Reader sees**:`export.mjs video` 直接抛 `Cannot find module 'ffmpeg-static'`(exit 2);`--size` 或 `--selector` 取到奇数宽高时 libx264 报 `width not divisible by 2`。
+- **Defense**:没装就用 PATH 上的 ffmpeg;编码前 `scale=trunc(iw/2)*2:trunc(ih/2)*2`。641x361 实测导出 640x360。
+
+### 12.4 待修:三页有 `visual-audit` 的 error,接入前就有
+- **Reader sees**:`assets.html` 9 个链接(都指向 `media/` 下的图)没有文字、aria-label 或 title,读屏软件读不出内容(§1.12);`index.html` 1 个同样的链接;
+  `index.html`、`reel.html` 中文模式下各有 1 段英文没翻(lang-leak)。
+- **Why**:这几项不依赖风格登记,接入前后数量一样(2026-10-11 用登记前的脚本复跑确认)。
+- **Defense**:还没修。修法:图片链接加 `aria-label` 或给里面的 `<img>` 写 alt;lang-leak 按 `visual-audit` 报的那段文字找出处。
+
 ## 新 bug 类的处置流程（每次必做）
 
 1. design-critic 或人发现一个本表之外的问题。

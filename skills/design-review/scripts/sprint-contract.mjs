@@ -239,6 +239,10 @@ const DIAGRAM = {
     tiers: '720 `primer-container--narrow` is for TEXT only — every explainer figure rides the full 1080 `primer-container` (≤14 labels) · 1280 `primer-container--wide` (**MUST when ≥16 labels or ≥3 cols**); a primer figure IS the section, never a sidebar',
     color: 'Thick-outline picture-book language: 3–4px rounded ink strokes + flat violet/yellow/green fills. Label budget is HALF the sibling skills — a figure that wants 20 labels must become two screens. One figure teaches exactly one idea; a decorative rainbow is the generic-infographic tell.',
   },
+  relief: {
+    tiers: '900 `relief-wrap relief-wrap--narrow` is for text only · 1180 `relief-wrap` (the working tier, ≤18 labels) · 1360 `relief-wrap relief-wrap--wide` (**MUST when ≥20 labels or ≥4 cols**); a figure too dense for 1360 is split, never shrunk below 9px',
+    color: 'Depth is the legend, colour is not: raised = a thing that exists, sunken = a place you cannot reach / a condition / a groove. Block fill MUST equal the page ground — a separately filled block loses its relief. Links are sunken grooves with a paired drop-shadow. Colour is spent on the hot accent (badge, rail, the one block that must jump out) and the deep blocks; a figure coloured by category is the generic-diagram tell.',
+  },
 };
 
 function parseArgs(argv) {

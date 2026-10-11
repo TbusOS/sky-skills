@@ -224,6 +224,10 @@ Task(subagent_type='design-critic'))。输出 0-100 分 + 7 维度分解 +
    - primer violet ≥ 0.485%(#7a5cd6 活在超大圆号数字、比喻卡边框、hero 主插画上。阈值 2026-08-24
      实测标定:三张 canonical 的顶区 1440×500 紫覆盖率分别是 concept 0.97% / process 1.5% /
      compare 1.93%,取最小值的一半 = 0.485%,高于 0.2% 的地板,所以就用这个值)
+   - relief 橙 ≥ 0.68%(#f9922f → #dd731a 渐变两端都算,只花在徽章和导轨两处。2026-09-15 标定:
+     controls 1.37% / diagram 1.36% / hardware 1.36%,取最小值的一半)
+   - graphite 线 ≥ 0.47%(铅笔线色 #39332c。graphite 定死的是材料不是导航色,第一眼认出它靠暖纸上的线稿。
+     2026-10-11 标定:没有 canonical,量四个展示页 index 0.94% / diagrams 1.35% / assets 2.17% / reel 2.17%,取最小值的一半)
    - 实现:Playwright 截图 → pngjs 像素距匹配(tolerance 55,兜住 antialiasing)
 2. **cross-skill-smell**:可见元素的 computed font-family 第一项 / color / bg / fill,若匹配禁忌清单(别 skill 的 signature),warn 一次。
    - sage 禁忌:Fraunces / Poppins / Lora / Space Grotesk / 金色 #c49464 / 橙 #d97757 / glass cyan #22D3EE
@@ -241,6 +245,13 @@ Task(subagent_type='design-critic'))。输出 0-100 分 + 7 维度分解 +
      2026-08-25 按真匹配器实测:ember 金 93.2(对马克笔黄 #ffd23f)· sage 绿 94.3(对 #3aa66b)·
      lectern #1d3a6e 43.3(对正文墨 #243244)· #2f5bb0 54.3(对紫墨 #5b3fbf),全部远在 22 之外。
      四项都可以安全列进去,加进去是行为改动,和上面三条并作同一项跟进。
+   - relief 禁忌:Fraunces / Instrument Serif / Poppins / Lora / Fredoka / anthropic 橙 / apple 蓝 / ember 金 / sage 绿 /
+     glass cyan / eclat flare / lectern 图表蓝 #2f5bb0 / atelier rose / primer violet。**lectern navy #1d3a6e 没有列进去**:
+     relief 暖色皮肤的 --deep-b #25395f 离它欧氏 17.0,在 22 以内,列进去每页都报(2026-09-15 按皮肤分开量了 93 个颜色值)
+   - graphite 禁忌:Fraunces / Instrument Serif / Poppins / Space Grotesk / Fredoka / anthropic 橙 / apple 蓝 / sage 绿 / glass cyan /
+     eclat flare / lectern 图表蓝 / atelier rose / primer violet / relief 橙 #f9922f。**Lora 不列**:它是 graphite 自己的正文字体。
+     **ember 金和 relief 橙 #dd731a 没有列进去**:graphite 的木色彩铅 #c79d6e 离 ember 金 13.8、橙色彩铅 #e2772c 离 #dd731a 19.1,
+     2026-10-11 实测四个展示页都报。lectern 图表蓝留着但最险:graphite 蓝 #3d6db5 离它 23.3,只比 22 多 1.3,四页实测不报
 
 **fix playbook**:
 - brand 不可见 → nav 给品牌 tint 背景,hero 加品牌色 kicker,CTA 用品牌色

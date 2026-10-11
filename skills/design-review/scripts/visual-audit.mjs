@@ -465,6 +465,38 @@ const SKILL_SIGNATURES = {
     ],
     forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Lora', 'Fredoka'],
   },
+  graphite: {
+    name: 'graphite line',
+    accents: [[57, 51, 44]],           // #39332c — the pencil line. graphite fixes a material,
+                                       // not a nav colour: what says "graphite" at first glance
+                                       // is the line drawing on warm paper.
+    threshold: 0.0047,                 // calibrated 2026-10-11 the way primer's and relief's were:
+                                       // threshold forced to 100% so the warn prints, then the
+                                       // measured top-1440x500 coverage read off the four
+                                       // showcase pages — index 0.94% · diagrams 1.35% · assets
+                                       // 2.17% · reel 2.17%. min(0.94)/2 = 0.47%, above the 0.2%
+                                       // floor. graphite has no canonical pages (material type).
+    // Two sibling accents are OMITTED because graphite's own pencils sit inside the
+    // matcher's 22 — measured 2026-10-11, both fired on every showcase page:
+    //   ember gold #c49464 — graphite --g-wood #c79d6e at 13.8 (dark --g-wood 17.5)
+    //   relief #dd731a     — graphite --g-orange #e2772c at 19.1
+    // relief's other end #f9922f stays (nearest graphite colour 36.4). lectern blue
+    // stays too but is the closest call: graphite --g-blue #3d6db5 sits at 23.3,
+    // 1.3 outside the matcher; it measured clean on all four pages.
+    forbiddenColors: [
+      { rgb: [217, 119, 87], note: 'anthropic orange #d97757' },
+      { rgb: [0, 113, 227], note: 'apple brand blue #0071E3' },
+      { rgb: [151, 176, 119], note: 'sage brand green #97B077' },
+      { rgb: [34, 211, 238], note: 'glass aurora cyan #22D3EE' },
+      { rgb: [255, 91, 52], note: 'eclat flare #ff5b34' },
+      { rgb: [47, 91, 176], note: 'lectern blue #2f5bb0' },
+      { rgb: [221, 79, 146], note: 'atelier rose #DD4F92' },
+      { rgb: [122, 92, 214], note: 'primer violet #7a5cd6' },
+      { rgb: [249, 146, 47], note: 'relief orange #f9922f' },
+    ],
+    // Lora is graphite's own body face (--g-body), so it is not listed here.
+    forbiddenFonts: ['Fraunces', 'Instrument Serif', 'Poppins', 'Space Grotesk', 'Fredoka'],
+  },
 };
 
 function detectSkill(target, html) {
