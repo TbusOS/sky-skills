@@ -107,12 +107,15 @@ async function main() {
       const to = opt.to && opt.to !== 'auto' ? Number(opt.to) : await duration(page);
       const hold = Number(opt.hold == null ? 1.5 : opt.hold);
       const n = Math.max(1, Math.round((to - from + hold) * fps));
-      const ffmpeg = require('ffmpeg-static');
+      // ffmpeg-static when installed, else the ffmpeg on PATH
+      let ffmpeg = 'ffmpeg';
+      try { ffmpeg = require('ffmpeg-static') || 'ffmpeg'; } catch { /* use PATH */ }
       const ext = extname(output).toLowerCase();
       const enc = ext === '.gif'
         ? ['-vf', `fps=${Math.min(fps, 15)},scale=${Math.min(W, 800)}:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4`]
-        : ext === '.webm' ? ['-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '34', '-pix_fmt', 'yuv420p']
-          : ['-c:v', 'libx264', '-preset', 'slow', '-crf', '22', '-pix_fmt', 'yuv420p', '-movflags', '+faststart'];
+        // H.264 / VP9 need even sides; --size or a --selector element can be odd (2026-10-11: 592x259 failed)
+        : ext === '.webm' ? ['-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '34', '-pix_fmt', 'yuv420p']
+          : ['-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', '-c:v', 'libx264', '-preset', 'slow', '-crf', '22', '-pix_fmt', 'yuv420p', '-movflags', '+faststart'];
       const ff = spawn(ffmpeg, ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps), '-i', '-', ...enc, output], { stdio: ['pipe', 'inherit', 'inherit'] });
       for (let i = 0; i < n; i++) {
         await seek(page, Math.min(from + i / fps, to));
