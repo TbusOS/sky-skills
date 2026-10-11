@@ -1,6 +1,6 @@
 ---
 name: design-taste
-description: "所有设计风格 skill 共用的口味学习(越用越懂你):记下这个人挑了哪张、说了什么(「字太小」「太花」)、留下或删掉了哪张、审查器查出什么、给过哪些喜欢的参考图,算出下次画图用的参数,并能逐条解释每个参数是被哪几条记录推到现在的。按场景分开记(技术图爱淡、壁纸爱浓互不干扰);在一个风格里说的「字太小」会以半份分量影响其他风格的字号;从参考图量留白和颜色数;画上留一方小印,点开看出处。各风格只写一个参数表 assets/taste-profile.js 就能接入(graphite、inkwash 已接)。命令行 scripts/taste.mjs --style=<风格>。TRIGGER: 越用越懂你 / 口味学习 / 记住我的喜好 / 按我的口味画 / taste profile / 学我的审美 / 参考图学风格 / 这张为什么画成这样 / 新设计风格接口味学习。DO NOT TRIGGER: 页面审查打分(design-review)、某个风格具体怎么画(各风格 skill)。"
+description: "所有设计风格 skill 共用的口味学习(越用越懂你):记下这个人挑了哪张、说了什么(「字太小」「太花」)、留下或删掉了哪张、审查器查出什么、给过哪些喜欢的参考图,算出下次画图用的参数,并能逐条解释每个参数是被哪几条记录推到现在的。按场景分开记(技术图爱淡、壁纸爱浓互不干扰);在一个风格里说的「字太小」会以半份分量影响其他风格的字号;从参考图量留白和颜色数;画上留一方小印,点开看出处。各风格只写一个参数表 assets/taste-profile.js 就能接入(目前接了 graphite)。命令行 scripts/taste.mjs --style=<风格>。TRIGGER: 越用越懂你 / 口味学习 / 记住我的喜好 / 按我的口味画 / taste profile / 学我的审美 / 参考图学风格 / 这张为什么画成这样 / 新设计风格接口味学习。DO NOT TRIGGER: 页面审查打分(design-review)、某个风格具体怎么画(各风格 skill)。"
 ---
 
 # design-taste:所有设计风格共用的口味学习
@@ -9,24 +9,25 @@ description: "所有设计风格 skill 共用的口味学习(越用越懂你):�
 留下了这张删掉了那张、审查器说手机上字太小、拿来一张自己喜欢的画。
 这个 skill 把这些反应记进一份本机日志,下次画图前算出该用的参数;每个参数都能查到是被哪几条记录推过去的。
 
-它只管「学到什么、怎么解释」,不管怎么画:画法在各风格 skill 里(`graphite-design`、`inkwash-design`……)。
+它只管「学到什么、怎么解释」,不管怎么画:画法在各风格 skill 里(目前是 `graphite-design`)。
 
 ## 1. 怎么用
 
 ```bash
 T=skills/design-taste/scripts/taste.mjs
 node $T styles                                          # 哪些风格接了口味学习
-node $T --style=inkwash --scene=tech suggest            # 画之前:这个人画技术图要用什么参数
-node $T --style=inkwash --scene=tech ab                 # 想问一题:只改一个参数,给 A、B 两个值,各画一张给对方挑
-node $T --style=inkwash --scene=tech pick inkDepth 0.42 0.58 "右边太黑"
-node $T --style=inkwash say "颜色太多了,字太小"          # 对方说的话,按词表换成方向
-node $T --style=inkwash ref 我喜欢的画.jpg 另一张.png     # 从参考图量留白、颜色数(水墨还量墨色、湿度)
-node $T --style=inkwash ingest check_objective输出.txt   # 审查器的结果:客观问题定下限
-node $T --style=inkwash --scene=tech explain inkDepth   # 这个值是被哪几条记录推到现在的
+node $T --style=graphite suggest                        # 画之前:这个人要用什么参数
+node $T --style=graphite ab                             # 想问一题:只改一个参数,给 A、B 两个值,各画一张给对方挑
+node $T --style=graphite pick hatchGap 4.2 3.2 "右边太密"
+node $T --style=graphite say "颜色太多了,字太小"         # 对方说的话,按词表换成方向
+node $T --style=graphite ref 我喜欢的画.jpg 另一张.png    # 从参考图量留白、颜色数
+node $T --style=graphite ingest check_objective输出.txt  # 审查器的结果:客观问题定下限
+node $T --style=graphite explain hatchGap               # 这个值是被哪几条记录推到现在的
 node $T --self-test                                     # 模拟读者 + 故意改坏
 ```
 
-- `--scene` 的取值是那个风格的场景组(`node $T styles` 列出来);不带就是「整体口味」。
+- `--scene=<组>`:风格在参数表里写了 `SCENES` 才能用(`node $T styles` 列出来),不带就是「整体口味」。
+  graphite 没分场景组;引擎的场景算法由自测里的假风格 `testink` 验证。
 - 日志:`~/.config/sky-skills/taste.jsonl`(`SKY_TASTE_DIR` 可改),所有风格共用一份,每条写明风格和场景,只在本机,不发到任何地方。
   graphite 以前的 `graphite-taste.jsonl` 照读、不改写。`--file=<路径>` 用另一份日志(某个项目、某个团队)。
 - 展示页上的口味实验室用的是同一个引擎(浏览器里加载 `assets/shared.js`、`assets/taste-core.js` 和风格的 `taste-profile.js`),
@@ -65,7 +66,7 @@ node $T --self-test                                     # 模拟读者 + 故意�
 
 - 别的风格的记录在这里**算半份**,而且**只通过这五个参数**进来。「排线太密」「飞白太多」这种风格专属的话、专属参数一律不传。
 - 传的是「比那个风格的默认值偏了多少,占它范围的几成」,到这边再按这边的范围换算回来。
-  **为什么不传原值**:graphite 留白默认 0.45,水墨默认更大;直接搬 0.5 过来,水墨反而变满了。
+  **为什么不传原值**:graphite 留白默认 0.45,一个留白默认 0.6 的风格直接搬 0.5 过来,反而变满了。
 - 说的话分两张词表:`assets/shared.js` 里的共享词(「字太小」「太花」「太快」「深色」……)能跨风格;风格自己 `LEXICON` 里的只在本风格生效。
 - 审查器定的下限不跨风格:它是对那个风格的图查出来的。
 
@@ -76,7 +77,7 @@ node $T --self-test                                     # 模拟读者 + 故意�
 | 量什么 | 怎么量 |
 |---|---|
 | 留白 | 出现最多的颜色当纸色,和它差 < 24 的像素占比 |
-| 墨色五档 | 非纸像素按亮度从黑到纸分五档的占比 |
+| 墨色五档 | 非纸像素按跟纸色的亮度差分五档的占比(深色底同样适用) |
 | 颜色数 | 饱和度够的像素按色相分组,占非纸像素 > 3% 的组数(灰墨不算颜色) |
 | 晕开程度 | 边缘像素里过渡柔和的占比 |
 
@@ -91,7 +92,7 @@ node $T --self-test                                     # 模拟读者 + 故意�
 导出的壁纸、视频默认不带;导出脚本加 `--provenance` 才在角落写一行题跋小字。
 
 ```js
-var T = TasteCore.create(InkwashTasteProfile), t = T.estimate(events, null, { scene: 'tech' });
+var T = TasteCore.create(GraphiteTasteProfile), t = T.estimate(events, null);
 TasteProvenance.mark(figureEl, T.explain(t), { lang: 'zh', stamp: T.stampOf(t) });
 ```
 
@@ -124,7 +125,7 @@ node skills/design-taste/scripts/taste.mjs --self-test
 |---|---|
 | A | graphite 原来的 40 题模拟读者:在意的参数学到一半以上;故意选反的读者学不到;说话、下限、淡忘、解释、出题分布 |
 | S | 分场景:读者 A 两组学对方向;读者 B 两组差 ≤ 1 步;没有记录的场景跟随整体口味 |
-| X | 跨风格:graphite 说「字太小」水墨字号变大;分量比本风格说的小;按范围换算;排线参数传不过来;下限不跨风格;主题能传 |
+| X | 跨风格:graphite 说「字太小」,另一个风格(自测里的 `testink`)字号变大;分量比本风格说的小;按范围换算;排线参数传不过来;下限不跨风格;主题能传 |
 | R | 参考图留白误差 ≤ 0.05;颜色数 |
 | M | 故意改坏三处(去掉场景那一步 / 跨风格直接搬原值 / 别的风格算全份),各自对应的测试必须失败 |
 

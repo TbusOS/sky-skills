@@ -5,17 +5,17 @@
 // showcase pages). Each style brings its own table: skills/<style>-design/assets/
 // taste-profile.js. This file only reads and writes the log and prints things.
 //
-//   node taste.mjs --style=inkwash show                 current values, evidence per knob
-//   node taste.mjs --style=inkwash --scene=tech show    the same, for one scene group
-//   node taste.mjs --style=inkwash explain [knob]       which events moved each knob
-//   node taste.mjs --style=inkwash suggest [--json]     what to draw with next
-//   node taste.mjs --style=inkwash ab [--json]          the next A/B question
-//   node taste.mjs --style=inkwash pick <knob> <winner> <loser> [note]
-//   node taste.mjs --style=inkwash say "<what the reader said>"
-//   node taste.mjs --style=inkwash keep|drop '<json knobs>' [note]
-//   node taste.mjs --style=inkwash ref <picture> [picture …]   measure pictures the reader likes
-//   node taste.mjs --style=inkwash ingest <file> [--from=objective|critic]
-//   node taste.mjs --style=inkwash import <file.jsonl>  events exported from a taste lab page
+//   node taste.mjs --style=graphite show                current values, evidence per knob
+//   node taste.mjs --style=<s> --scene=<group> show     the same, for one scene group
+//   node taste.mjs --style=graphite explain [knob]      which events moved each knob
+//   node taste.mjs --style=graphite suggest [--json]    what to draw with next
+//   node taste.mjs --style=graphite ab [--json]         the next A/B question
+//   node taste.mjs --style=graphite pick <knob> <winner> <loser> [note]
+//   node taste.mjs --style=graphite say "<what the reader said>"
+//   node taste.mjs --style=graphite keep|drop '<json knobs>' [note]
+//   node taste.mjs --style=graphite ref <picture> [picture …]  measure pictures the reader likes
+//   node taste.mjs --style=graphite ingest <file> [--from=objective|critic]
+//   node taste.mjs --style=graphite import <file.jsonl>  events exported from a taste lab page
 //   node taste.mjs styles                               which styles have a taste profile
 //   node taste.mjs reset --yes                          start over (old log renamed, not deleted)
 //   node taste.mjs --self-test                          simulated readers + deliberate breakage
@@ -157,10 +157,12 @@ async function ref(T, files) {
   const ms = await measure(files);
   const evs = [];
   for (const m of ms) {
-    const knobs = T.profile.fromMeasure(m);
+    // fromMeasure may also name a category (e.g. which colouring scheme); split the two
+    const raw = T.profile.fromMeasure(m), knobs = {}, cat = {};
+    for (const [k, v] of Object.entries(raw)) { if (T.KNOBS[k]) knobs[k] = v; else if (T.CATS[k]) cat[k] = v; }
     console.log(`${m.file}: empty paper ${Math.round(m.whitespace * 100)}% · colours ${m.colors}${m.hues.length ? ' (' + m.hues.join('°, ') + '°)' : ''} · ink tones ${m.tones.map(x => Math.round(x * 100) + '%').join(' ')} · soft edges ${Math.round(m.soft * 100)}%`);
-    console.log(`    → ${Object.keys(knobs).length ? fmt(knobs) : 'nothing this style can use'}`);
-    if (Object.keys(knobs).length) evs.push({ kind: 'ref', knobs, note: 'ref ' + m.file.split('/').pop(), source: 'ref' });
+    console.log(`    → ${Object.keys(raw).length ? fmt(raw) : 'nothing this style can use'}`);
+    if (Object.keys(raw).length) evs.push({ kind: 'ref', knobs, ...(Object.keys(cat).length ? { cat } : {}), note: 'ref ' + m.file.split('/').pop(), source: 'ref' });
   }
   if (evs.length) append(T, evs);
   console.log(`recorded ${evs.length} reference${evs.length === 1 ? '' : 's'} (each weighs ${Core.WEIGHT.ref}, like keeping one figure)`);

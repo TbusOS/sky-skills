@@ -2,7 +2,7 @@
  * that move them.
  *
  * Why only five: a reader who says "the labels are too small" in a pencil drawing
- * means the same thing in an ink-wash one. "Too much dry-brush" means nothing to a
+ * means the same thing in any other style. "Too much dry-brush" means nothing to a
  * pencil. So only knobs whose meaning survives a change of style travel between
  * styles: label size, number of colours, empty space, animation pace, theme.
  * Everything else (hatch spacing, ink wetness …) stays inside its own style.
@@ -10,8 +10,8 @@
  * Each style's taste-profile.js says which of its knobs is which shared knob
  * (`shared: { labelSize: 'labelSize', … }`). A record from another style travels as
  * "how far from that style's default, as a share of that style's range", never as
- * a raw value: graphite's default empty space is 0.45, ink wash wants much more, so
- * copying 0.5 across would make ink wash *fuller*, not emptier.
+ * a raw value: graphite's default empty space is 0.45; for a style whose default is
+ * 0.6, copying 0.5 across would make it *fuller*, not emptier.
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();

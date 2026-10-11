@@ -10,8 +10,8 @@
 //   paper      [r,g,b] — the most common colour (in an ink painting that is the paper;
 //              on a dark page it is the dark ground, which is still "the empty part")
 //   whitespace share of pixels within 24 of the paper colour
-//   tones      five shares of the non-paper pixels, darkest first (焦 浓 重 淡 清),
-//              split evenly between black and the paper's lightness
+//   tones      five shares of the non-paper pixels, strongest contrast first (焦 浓 重 淡 清),
+//              by lightness distance from the paper (works on light and dark grounds)
 //   colors     how many hue groups hold > 3 % of the non-paper pixels (grey ink not counted)
 //   hues       those groups' centre hues in degrees
 //   soft       among edge pixels, the share whose step is gentle (wet, bled) rather than sharp
@@ -52,7 +52,9 @@ function pageScript(dataUrl) {
         const dist = Math.hypot(r - paper[0], g2 - paper[1], b - paper[2]);
         if (dist < 24) { blank++; isPaper[p] = 1; continue; }
         ink++;
-        const L = lum(r, g2, b), band = pl > 1 ? Math.min(4, Math.max(0, Math.floor(L / pl * 5))) : 4;
+        // tone = contrast against the paper, so a dark page (gold on indigo) reads the same
+        // way as ink on rice paper: the strongest contrast is 焦, the faintest 清
+        const L = lum(r, g2, b), span = Math.max(pl, 255 - pl, 1), band = Math.min(4, Math.max(0, 4 - Math.floor(Math.abs(L - pl) / span * 5)));
         tones[band]++;
         const mx = Math.max(r, g2, b), mn = Math.min(r, g2, b);
         if (mx - mn > 40) {

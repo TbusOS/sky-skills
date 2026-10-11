@@ -30,7 +30,7 @@
  * parameters would fit noise, and a mean is the one estimator a reader can check
  * by hand. (This part is graphite's algorithm unchanged, 2026-10-10.)
  *
- * Two steps, so one scene does not drag the others along (inkwash design §10.3):
+ * Two steps, so one scene does not drag the others along (design: docs/superpowers/specs/2026-10-10-inkwash-design-design.md §10.3):
  *   1. style taste — all of this style's events, as above
  *   2. scene taste — start from the step-1 value with weight 2, walk only the
  *      events recorded in that scene group ("tech diagram", "wallpaper" …)
@@ -38,7 +38,7 @@
  *   only many events pull a scene away. Without a scene only step 1 runs, and with
  *   a single style step 1 is exactly graphite's old estimate.
  *
- * Events from other styles (inkwash design §10.5) count in step 1 at half weight,
+ * Events from other styles (same design, §10.5) count in step 1 at half weight,
  * and only through the five shared knobs (shared.js). They carry, written when the
  * event was made: `shared` = how far each shared knob sat from that style's
  * default, as a share of its range; `sdir` = directions from shared words only;
