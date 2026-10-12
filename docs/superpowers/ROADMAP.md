@@ -109,40 +109,44 @@ git -C linux cat-file -t 7b9b77a8bba9    # 应输出 commit
 
 ---
 
-### 设计 skill 共用部件(design-taste 等)—— 水墨 inkwash-design 2026-10-11 停做
+## 已完成
+
+### 设计 skill 共用部件(design-taste 等)—— 2026-10-13 合入 main([PR #38](https://github.com/TbusOS/sky-skills/pull/38),合并提交 `191a2ef`)
 
 | | |
 |---|---|
-| 一句话 | 原计划做第 12 个设计 skill「水墨」,顺带把 graphite 的「越用越懂你」抽成所有设计 skill 共用的 `design-taste`。水墨做到 P5 后 user 判效果不好,停做;共用部分留下,单独合进 main |
+| 一句话 | 原计划做第 12 个设计 skill「水墨」,顺带把 graphite 的「越用越懂你」抽成所有设计 skill 共用的 `design-taste`。水墨做到 P5 后 user 判效果不好,停做;共用部分单独合进 main |
 | 需求 / 设计 / 计划 | [需求](specs/2026-10-10-inkwash-design-requirements.md) · [设计](specs/2026-10-10-inkwash-design-design.md)(`design-taste` 的设计在 §10,通用方法在 §11)· [P0 计划](plans/2026-10-10-inkwash-p0.md) · [P1–P5 计划](plans/2026-10-11-inkwash-p1-p5.md)。文档保留,当记录 |
-| 当前分支 | [`feat/design-taste`](https://github.com/TbusOS/sky-skills/tree/feat/design-taste)(从 main 新拉,不带水墨的提交和图片视频),等 user 确认合并 |
 | 水墨存档 | [`feat/inkwash-design`](https://github.com/TbusOS/sky-skills/tree/feat/inkwash-design) 停在 `21aa415`,48 张图例、5 个展示页、短片都在上面,不合进 main |
 
 **为什么停**:2026-10-11 user 看过成品后说「这个水墨风做的不好,这个不做了,把其他的做好提交即可」。
 
-**`feat/design-taste` 上有什么**(4 笔提交)
+**合进来的 6 笔提交**
 
-- `design-taste`:口味学习引擎(加权平均、按场景分两步、跨风格只传五个共享参数且算半份、看图量留白和颜色数、画上小印),目前接了 graphite;自测全过,graphite 迁过去后 300 组随机记录上新旧逐值相同
-- graphite `export.mjs` 两处修复:没装 `ffmpeg-static` 时改用 PATH 上的 ffmpeg(原来直接抛错、一帧导不出);视频宽高取偶(奇数尺寸原来报 `width not divisible by 2`)
-- 登记 design-taste:README 两种语言、安装页、首页、名册;全仓 skill 数 26 → 27,设计风格仍是 11 个
-- 私有 skill 仓的 `design-skill-method` 升到 v1.1(先判页型还是材料型、注册表加 match 列),已在本机提交、未推送
+- `716a5b2` `d337f48` —— `design-taste` 口味学习引擎(加权平均、按场景分两步、跨风格只传五个共享参数且算半份、看图量留白和颜色数、画上小印),接了 graphite;graphite 迁过去后 300 组随机记录上新旧逐值相同
+- `6b57787` —— graphite `export.mjs`:没装 `ffmpeg-static` 时改用 PATH 上的 ffmpeg;视频宽高取偶
+- `87b46a6` —— 登记 design-taste,全仓 skill 数 26 → 27,设计风格仍是 11 个
+- `2b49f04` —— graphite 页面中文里的半角 `,;:` 改全角,313 处
+- `6ad4040` —— 补漏接的注册点(原「下一步」第 1 项):graphite 补 6 处、依赖示范页的 12 处写进私有仓例外;relief 补 8 处;eclat、lectern 各补 known-bugs 小节;known-bugs 101 → 105
 
-**下一步:共用部分还能做什么(待 user 选)**
+私有 skill 仓 `design-skill-method` 同期推到 v1.2(`9b0d40a`):新增 `check_skill.mjs`,按两档标准逐项查一个设计 skill(原「下一步」第 2 项)。对 11 个风格跑出的改造清单在方法 §2:graphite 基础档 8 项过 7 项,其余 10 个各过 2 项。
+
+**两处有意放宽,坏的时候往「放过」坏**:`verify.py` 双语检查也认 `data-lang-toggle`;graphite 的禁用色不含 ember 金和 relief `#dd731a`(跟 graphite 彩铅的色差只有 13.8 / 19.1,列进去每页都误报)。
+
+**还没做的共用工作(待 user 选)**
 
 | # | 做什么 | 现状(实测) | 建议 |
 |---|---|---|---|
-| 1 | 补现有设计 skill 漏接的注册点 | `check_registration.sh`:graphite 缺 18 处、relief 缺 10 处、eclat / lectern 各缺 known-bugs 小节。后果实测:`verify.py --skill=graphite` 直接报 `unknown --skill`,graphite 页面的结构检查跑不了;`visual-audit.mjs` 认不出是 graphite,跳过串味检查(别的风格的颜色、字体混进来查不到),其余渲染检查照跑 | 先做。graphite 补 6 处 + 12 处写例外(材料型没有示范页可比);relief 10 处全补;eclat / lectern 补小节 |
-| 2 | `check_skill.mjs`:按两档标准逐项查一个设计 skill | 没写(原计划水墨 P5 做) | 第 1 项之后做,对 11 个设计 skill 跑一遍,得到改造清单 |
-| 3 | 慢机器回退:帧率低于 10 时直接显示画完,不再一笔一笔慢慢出 | 水墨 `player.js` 有,graphite `player.js` 没有;graphite 在软件渲染下卡不卡还没量过 | 先量 graphite 最重的一页;卡才移过去 |
-| 4 | 逐帧导出脚本抽成共用 | 现在只有 graphite 用(水墨那份已停);relief 的 `export-cards.mjs` 只截单张图 | 暂不做。设计书 D10 定的是第三个风格要用时再抽 |
-| 5 | 位图抠透明层(做视差) | 水墨 `layers.mjs`,自测 7 项;别的 skill 目前没有用处 | 暂不做,哪个风格要做视差时从存档分支取 |
-| 6 | 其他风格接 `design-taste` | 只有「代码画图、参数可调」的 skill 接了才有用;graphite 已接,其余 10 个的图例是写死的 SVG | 暂不做 |
-| 7 | 方法 v2(`design-skill-method`) | v1.1 已提交本机 | 做完第 1、2 项后写 |
+| 1 | 慢机器回退:帧率低于 10 时直接显示画完 | 水墨 `player.js` 有,graphite 没有;graphite 在软件渲染下卡不卡还没量过 | 先量 graphite 最重的一页,卡才移过去 |
+| 2 | 逐帧导出脚本抽成共用 | 只有 graphite 用 | 暂不做。设计书 D10 定的是第三个风格要用时再抽 |
+| 3 | 位图抠透明层(做视差) | 水墨 `layers.mjs`,别的 skill 目前用不上 | 暂不做,要用时从存档分支取 |
+| 4 | 改造清单里查出的真缺陷 | primer 首页手机上图里的字 5.8px(`check_objective` O4);graphite 三页 visual-audit error(10 个链接没有文字、2 处中英混排,known-bugs §12.4) | 没修 |
+| 5 | `design_md_selftest` 42 过 1 不过 | 改动前就是这样,原因没查 | 没查 |
+
+其他风格接 `design-taste`:2026-10-13 user 定先给 anthropic-design 接(留白、动画节奏两项),设计待 user 确认后写进「进行中」。
 
 字体子集和缺字检查已经是共用的(`design-review/scripts/build_fonts.py`、`check_fonts.py`),不用再抽。
 
 ---
 
-## 已完成
-
-本文件 2026-10-08 新建。之前完成的工作见 `git log` 和各 skill 自己的文档。
+本文件 2026-10-08 新建。更早完成的工作见 `git log` 和各 skill 自己的文档。
