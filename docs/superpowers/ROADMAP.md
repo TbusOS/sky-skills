@@ -109,6 +109,25 @@ git -C linux cat-file -t 7b9b77a8bba9    # 应输出 commit
 
 ---
 
+### 讲清楚 + 口味学习接到所有设计 skill 和平常对话(explain-taste)
+
+| | |
+|---|---|
+| 一句话 | 让别人的 AI 用我们的设计 skill 时越用画得越好,平常对话发出的信息也清楚。两条路:`explain-ladder` 出一份常驻规则(STE 默认开),装进各 CLI 的全局规则;每个设计 skill 正文最前面加「0. 每次都做」,把 `design-taste` 和 `explain-ladder` 带上 |
+| 需求 | [specs/2026-10-13-explain-taste-requirements.md](specs/2026-10-13-explain-taste-requirements.md) |
+| 设计 | [specs/2026-10-13-explain-taste-design.md](specs/2026-10-13-explain-taste-design.md) |
+| 实施计划 | 需求、设计审过后写 |
+| 开始日期 | 2026-10-13 |
+| 开发分支 | `feat/explain-taste`,计划审过后从 main 拉 |
+| 当前阶段 | 需求、设计已写,待 user 审阅 |
+
+**已定决策**
+
+- STE 在平常对话里默认开着,说「停止」关(user 2026-10-13 选 A)
+- 先做 anthropic、graphite 两个样板(P0),user 认可后推到其余 9 个(P1);eclat、lectern、relief 的间距大多写死,要先改成 CSS 变量(P2,做不做由 user 定)
+
+---
+
 ## 已完成
 
 ### 设计 skill 共用部件(design-taste 等)—— 2026-10-13 合入 main([PR #38](https://github.com/TbusOS/sky-skills/pull/38),合并提交 `191a2ef`)
@@ -143,7 +162,7 @@ git -C linux cat-file -t 7b9b77a8bba9    # 应输出 commit
 | 4 | 改造清单里查出的真缺陷 | primer 首页手机上图里的字 5.8px(`check_objective` O4);graphite 三页 visual-audit error(10 个链接没有文字、2 处中英混排,known-bugs §12.4) | 没修 |
 | 5 | `design_md_selftest` 42 过 1 不过 | 改动前就是这样,原因没查 | 没查 |
 
-其他风格接 `design-taste`:2026-10-13 user 定先给 anthropic-design 接(留白、动画节奏两项),设计待 user 确认后写进「进行中」。
+其他风格接 `design-taste`:并进了「进行中」的 explain-taste,所有设计 skill 都接。
 
 字体子集和缺字检查已经是共用的(`design-review/scripts/build_fonts.py`、`check_fonts.py`),不用再抽。
 
