@@ -137,12 +137,16 @@ S = {
  'graphite-design': ('des', 'Gr', 'graphite', 'Voice', '风格',
    'Graphite pencil on warm paper, a few coloured pencils, hand lettering, drawn stroke by stroke in story order. 37 figures (32 animated) from code; scenes and film stills from an image model; frame-exact video export, and a taste log that learns what you pick.',
    '暖纸上的石墨铅笔线、几支彩铅、手写批注,按讲故事的顺序一笔一笔画出来。37 张代码画的图例(32 张会动),场景和电影画面交给出图模型;能逐帧导出视频,还会记住你挑了哪张、慢慢调成你的口味。',
-   DREL + ['explain-ladder', 'wechat-video-publisher'], [('demos/graphite-design/index.html', 'Skill page', '介绍页'), ('demos/graphite-design/diagrams.html', 'Figure gallery', '图例库'), ('demos/graphite-design/reel.html', 'Sample reel', '短片样片'), ('demos/graphite-design/assets.html', 'Assets', '素材')]),
+   DREL + ['design-taste', 'explain-ladder', 'wechat-video-publisher'], [('demos/graphite-design/index.html', 'Skill page', '介绍页'), ('demos/graphite-design/diagrams.html', 'Figure gallery', '图例库'), ('demos/graphite-design/reel.html', 'Sample reel', '短片样片'), ('demos/graphite-design/assets.html', 'Assets', '素材')]),
  'explain-ladder': ('sys', 'El', 'ladder', 'Explain', '讲解',
    'Pick the form before you write: text < diagram < page < video. STE writing with an on / off switch, ASCII diagrams, throwaway pages rebuilt byte for byte, and video only after a yes.',
    '先选形式再动笔:文字 < 图 < 网页 < 视频。STE 写法带开关、ASCII 图、能逐字节重建的看懂就扔页,视频要点头才做。',
    ['wechat-video-publisher', 'anthropic-design', 'apple-design', 'glass-design', 'relief-design', 'primer-design'],
    [('demos/explain-ladder/index.html', 'Demo', 'Demo')]),
+ 'design-taste': ('har', 'Ta', 'taste', 'Taste', '口味',
+   'Taste learning shared by every design style: picks, words, kept and deleted figures, reviewer notes and reference pictures go into one local log; each knob is a weighted mean you can check by hand, and every value can show which records moved it. A style plugs in with one taste-profile.js.',
+   '所有设计风格共用的口味学习:挑了哪张、说了什么、留下删掉了哪张、审查意见、喜欢的参考图,记进一份本机日志;每个参数是能手算核对的加权平均,还能查到是被哪几条记录推过去的。新风格写一个 taste-profile.js 就能接入。',
+   ['graphite-design', 'design-review'], [('https://github.com/TbusOS/sky-skills/blob/main/skills/design-taste/SKILL.md', 'SKILL.md', 'SKILL.md')]),
 }
 
 

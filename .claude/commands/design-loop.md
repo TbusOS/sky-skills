@@ -1,6 +1,6 @@
 ---
 description: "Run the full design iteration loop (harness component 06): planner → generator → four machine gates → critic, up to --max-rounds (default 5). Verdict ≥ 88 ships; anything less feeds the critic's issues into the next round; rounds exhausted escalates to a human with the score trajectory. Accepts a brief + --skill (required), optional --page / --max-rounds."
-argument-hint: "<brief…> --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer> [--page=<type>] [--max-rounds=<n>]"
+argument-hint: "<brief…> --skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer|relief> [--page=<type>] [--max-rounds=<n>]"
 ---
 
 # /design-loop — orchestrated planner → generator → review → critic rounds
@@ -14,10 +14,11 @@ critic cycle for up to N rounds, or escalates to a human.
 
 - **brief** — everything that is not a flag. **Required.**
 - `--skill=<name>` **required** — anthropic | apple | ember | sage | glass |
-  eclat | lectern | atelier | primer
+  eclat | lectern | atelier | primer | relief
 - `--page=<type>` optional — pricing | landing | docs-home | …
   (atelier draws app screens: dashboard | booking | detail | settings |
-  signin; primer draws explainers: concept | process | compare); if
+  signin; primer draws explainers: concept | process | compare; relief
+  draws technical diagrams: controls | diagram | hardware | platform | code | debug | struct | git); if
   omitted, infer it from the brief per design-planner step ①
   (ask the user at most once if it cannot be inferred).
 - `--max-rounds=<n>` optional — default **5**.

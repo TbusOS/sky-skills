@@ -147,7 +147,29 @@ function renderPage(tplPath, results, cats) {
     `<a href="#${c.id}"${c.highlight ? ' class="hi"' : ''}><span class="lang-zh">${c.nav.zh}</span><span class="lang-en">${c.nav.en}</span>` +
     (c.highlight ? '<span class="hi-tag"><span class="lang-zh">亮点</span><span class="lang-en">key idea</span></span>' : '') + '</a>').join('\n    '));
   if (/\{\{[^}]+\}\}/.test(s)) throw new Error(`${relative(ROOT, tplPath)}: unreplaced ${s.match(/\{\{[^}]+\}\}/)[0]}`);
-  return s;
+  return zhFullwidth(s);
+}
+
+// Chinese text gets full-width ，；： — half-width ones keep Latin metrics and sit
+// unevenly against Han glyphs (design-review known-bugs §1.22; verify.py checks it).
+// Same rule as the check: inside <span class="lang-zh"> only, only next to a CJK
+// character, never inside <code> or a character reference. Done here, on the page
+// as written, so the templates and every figure's desc.zh are covered at once.
+const ZH_SPAN = /(<span class=["']lang-zh["']\s*>)(.*?)(<\/span>)/gs;
+const CJK = '[\\u3400-\\u9fff\\u3000-\\u303f\\uff00-\\uffef]';
+const HALF_NEAR_CJK = new RegExp(`(${CJK})(\\s?)([,;:])|([,;:])(\\s?)(${CJK})`, 'g');
+const FULL = { ',': '，', ';': '；', ':': '：' };
+function zhFullwidth(html) {
+  return html.replace(ZH_SPAN, (_, open, body, close) => {
+    const fixed = body.split(/(<code\b[^>]*>.*?<\/code>|&(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);)/s).map((part, i) => {
+      if (i % 2) return part;
+      // twice: "甲,乙" needs both sides; one pass can consume the CJK a later match needs
+      for (let k = 0; k < 2; k++) part = part.replace(HALF_NEAR_CJK, (m, c1, s1, p1, p2, s2, c2) =>
+        c1 !== undefined ? c1 + s1 + FULL[p1] : FULL[p2] + s2 + c2);
+      return part;
+    }).join('');
+    return open + fixed + close;
+  });
 }
 
 function gallery(results, cats) {

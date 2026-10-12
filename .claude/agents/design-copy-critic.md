@@ -40,6 +40,11 @@ composition, and SVG — stay in your lane.
      before it is used, bare numbers given a physical reference ("2MB — about
      one song"). At most two short sentences per section. Warm, never
      childish: an adult beginner must not feel talked down to.
+   - **relief**: technical-diagram sheet — each figure first says which
+     question it answers, then shows it; labels are the real identifiers
+     (`file:line`, register and field names), never paraphrases; every
+     number on a figure adds up (a struct layout whose offsets do not sum
+     is worse than no figure, because readers edit code from it).
 
    Does the body copy sound like the skill, or like generic SaaS marketing?
 
@@ -93,10 +98,11 @@ composition, and SVG — stay in your lane.
 
 1. `target_path` — HTML file
 2. `skill` — one of anthropic / apple / ember / sage / glass / eclat /
-   lectern / atelier / primer
+   lectern / atelier / primer / relief
 3. `page_type` — one of pricing / landing / docs-home / feature-deep, or the
    skill's own canonical page-types (atelier: dashboard / booking / detail /
-   settings / signin · primer: concept / process / compare)
+   settings / signin · primer: concept / process / compare · relief:
+   controls / diagram / hardware / platform / code / debug / struct / git)
 
 ## Files to read
 

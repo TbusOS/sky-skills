@@ -64,6 +64,7 @@ const ROSTER = {
 
   'design-review': 'harness',
   'design-planner': 'harness',
+  'design-taste': 'harness',
   'design-evolve': 'harness',
   'gated-dual-clone': 'harness',
   'gated-dual-clone-audit': 'harness',

@@ -1,6 +1,6 @@
 ---
 description: "Distill a candidate canonical from ≥5 successful same-type pages (harness component 08 · library-grower). Wraps bin/design-review --distill. Accepts --skill / --page (required) + optional --corpus / --out. Below the 5-sample threshold it reports 'insufficient samples' and stops — it never pads the corpus to force a run."
-argument-hint: "--skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer> --page=<pricing|landing|docs-home|new-type> [--corpus=<dir>] [--out=<dir>]"
+argument-hint: "--skill=<anthropic|apple|ember|sage|glass|eclat|lectern|atelier|primer|relief> --page=<pricing|landing|docs-home|new-type> [--corpus=<dir>] [--out=<dir>]"
 ---
 
 # /design-distill — grow the canonical library from real successes
@@ -20,10 +20,11 @@ of producing a low-confidence draft.
 ## Required arguments (parse from `$ARGUMENTS`)
 
 - `--skill=<name>`  **required** — anthropic | apple | ember | sage | glass |
-  eclat | lectern | atelier | primer
+  eclat | lectern | atelier | primer | relief
 - `--page=<type>`   **required** — pricing | landing | docs-home | a new type
   (atelier: dashboard | booking | detail | settings | signin ·
-  primer: concept | process | compare)
+  primer: concept | process | compare ·
+  relief: controls | diagram | hardware | platform | code | debug | struct | git)
 - `--corpus=<dir>`  optional — directory holding the successful pages;
   defaults to `corpus/<skill>/<page>/` under the sky-skills root
 - `--out=<dir>`     optional — where the candidate is written;
