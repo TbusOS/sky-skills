@@ -116,10 +116,10 @@ git -C linux cat-file -t 7b9b77a8bba9    # 应输出 commit
 | 一句话 | 让别人的 AI 用我们的设计 skill 时越用画得越好,平常对话发出的信息也清楚。两条路:`explain-ladder` 出一份常驻规则(STE 默认开),装进各 CLI 的全局规则;每个设计 skill 正文最前面加「0. 每次都做」,把 `design-taste` 和 `explain-ladder` 带上 |
 | 需求 | [specs/2026-10-13-explain-taste-requirements.md](specs/2026-10-13-explain-taste-requirements.md) |
 | 设计 | [specs/2026-10-13-explain-taste-design.md](specs/2026-10-13-explain-taste-design.md) |
-| 实施计划 | 需求、设计审过后写 |
+| 实施计划 | [plans/2026-10-13-explain-taste-p0.md](plans/2026-10-13-explain-taste-p0.md)(P0,9 个任务;代码先在临时副本里实跑过,计划里是原样的代码和 diff) |
 | 开始日期 | 2026-10-13 |
 | 开发分支 | `feat/explain-taste`,计划审过后从 main 拉 |
-| 当前阶段 | 需求、设计已写,待 user 审阅 |
+| 当前阶段 | 需求、设计 user 已确认(2026-10-13);P0 计划已写,待 user 审阅并选执行方式 |
 
 **已定决策**
 
