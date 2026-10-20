@@ -49,6 +49,7 @@ const ROSTER = {
   'datasheet-reading': 'systems',
   'hardware-3d': 'systems',
   'explain-ladder': 'systems',
+  'kernel-explain': 'systems',
 
   'anthropic-design': 'design',
   'apple-design': 'design',
