@@ -9,13 +9,14 @@
 #   pdf_render_page.sh --self-test
 # 默认 dpi=200。图形密集的原理图用 300-400。
 set -euo pipefail
-export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+# /opt/homebrew 是 Apple 芯片 Mac 上 Homebrew 的安装目录,poppler 装在这里;Linux 上没有这个目录,不影响
+export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 export PYTHONNOUSERSITE=1
 
 if [ "${1:-}" = "--self-test" ]; then
     fail=0
     for t in pdftoppm pdfinfo; do
-        if command -v $t >/dev/null 2>&1; then echo "  ok   有 $t"; else echo "  FAIL 缺 $t (装 poppler-utils)"; fail=1; fi
+        if command -v $t >/dev/null 2>&1; then echo "  ok   有 $t"; else echo "  FAIL 缺 $t (Linux 装 poppler-utils,macOS 用 brew install poppler)"; fail=1; fi
     done
     # 参数校验分支必须挡住空参
     if "$0" >/dev/null 2>&1; then echo "  FAIL 无参数时未报错"; fail=1; else echo "  ok   无参数时报错退出"; fi

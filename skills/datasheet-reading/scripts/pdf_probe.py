@@ -14,7 +14,8 @@ pdf_probe.py — 读 PDF 前的体检:告诉你【哪些页不能信文本层】
 """
 import os, re, subprocess, sys
 
-os.environ["PATH"] = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+# /opt/homebrew 是 Apple 芯片 Mac 上 Homebrew 的安装目录,poppler 装在这里;Linux 上没有这个目录,不影响
+os.environ["PATH"] = "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 os.environ["PYTHONNOUSERSITE"] = "1"
 
 # 一页正文低于这个字符数,判为"文本层可疑"(纯图页/表格页/扫描页)
@@ -71,7 +72,7 @@ def run(pdf, keywords):
         txt = subprocess.run(["pdftotext", "-layout", pdf, "-"],
                              capture_output=True, text=True, timeout=300).stdout
     except FileNotFoundError as e:
-        print(f"[X] 缺工具(poppler-utils): {e}")
+        print(f"[X] 缺工具(Linux 装 poppler-utils,macOS 用 brew install poppler): {e}")
         return 2
     except subprocess.TimeoutExpired:
         print("[X] pdftotext 超时")
