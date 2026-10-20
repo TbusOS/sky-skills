@@ -224,9 +224,10 @@ def check(src, is_html):
 
     if "evo" in first_h:
         evo_text = "\n".join(b[1] for b, lay in tagged if lay == "evo" and b[0] != "fig")
-        n_cost = evo_text.count("代价")
-        if n_cost < 2:
-            res.append(("WARN", "E6", "演变线里「代价」只出现 %d 次:每一环都要写代价" % n_cost))
+        n_cost, n_without, n_bound = evo_text.count("代价"), evo_text.count("没有它"), evo_text.count("边界")
+        if n_cost < 2 or n_without < 2 or n_bound < 1:
+            res.append(("WARN", "E6", "演变线里「没有它」%d 次、「代价」%d 次、「边界」%d 次:"
+                        "每个技术点都要写没有它会怎样、边界和代价(各至少 2 / 2 / 1)" % (n_without, n_cost, n_bound)))
         if "推断" not in evo_text and not COMMIT.search(evo_text):
             res.append(("WARN", "E7", "演变线里没有 [推断] 标注,也没有提交号:设计意图要么有一手出处,要么标推断"))
 
@@ -285,8 +286,8 @@ H1 CPU 发出虚拟地址。H2 查 TLB。
 | H2 | 没命中 | 读页表 |
 
 ## ⑤ 演变线
-平铺页表太大,于是多级页表,代价是要读 4 次内存。[推断]
-于是加 TLB,代价是改了页表要刷。
+没有它时用平铺页表,太大,于是多级页表,代价是要读 4 次内存。[推断]
+没有它时每次都走表,于是加 TLB,边界是项数由芯片定,代价是改了页表要刷。
 
 ## ⑥ 细节和出处
 - 4 级页表 arch/arm64/Kconfig:387
@@ -304,7 +305,7 @@ GOOD_HTML = """<!doctype html><html><head><title>t</title><style>.a{}</style></h
 <h2>全貌图</h2><figure><svg><text>软件</text><text>硬件</text></svg></figure>
 <h2>主路径</h2><p>H1 发地址。</p>
 <h2>岔路</h2><table><tr><td>H2</td><td>没命中</td></tr></table>
-<h2>演变线</h2><p>多级页表,代价是读 4 次。TLB,代价是要刷。[推断]</p>
+<h2>演变线</h2><p>没有它时表太大:多级页表,代价是读 4 次。没有它时每次走表:TLB,边界看芯片,代价是要刷。[推断]</p>
 <h2>细节和出处</h2><p>arch/arm64/Kconfig:387 mm/memory.c:4735 mm/memory.c:4835 fault.c:742</p>
 <h2>口述版</h2><p>两半。</p>
 <p data-explain-ok>反例:堪称神来之笔</p>
@@ -340,6 +341,10 @@ SELF_CASES = [
     ("演变线不写代价、不标推断",
      _sub(_sub(GOOD, "代价是要读 4 次内存。[推断]", "很好。"), "代价是改了页表要刷。", "更好。"),
      False, {"E6", "E7"}, set()),
+    ("演变线不写「没有它会怎样」",
+     _sub(_sub(GOOD, "没有它时用平铺页表", "用平铺页表"), "没有它时每次都走表", "每次都走表"),
+     False, {"E6"}, set()),
+    ("演变线不写边界", _sub(GOOD, "边界是项数由芯片定,", ""), False, {"E6"}, set()),
     ("夸读者", _sub(GOOD, "申请是软件记账", "你的直觉非常敏锐!申请是软件记账"), False, {"E8"}, set()),
     ("夸张修辞", _sub(GOOD, "代价是改了页表要刷。", "代价是灭顶之灾。"), False, {"E8"}, set()),
     ("explain-ok 豁免的反例行", _sub(GOOD, "申请是软件记账", "申请是软件记账\n反例:堪称神来之笔 explain-ok"),
