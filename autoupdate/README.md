@@ -14,6 +14,8 @@
   **只读,绝不偷偷改仓库。**
 - 你确认后,AI(或 Claude 的 `/skills-sync`)跑 `bin/do-update.sh`:`git pull --ff-only`
   + 给新 skill 补 `~/.claude/skills/` 下的 symlink,并报告更新了什么。
+  补 symlink 每次都对所有仓检查,不只在这次 pull 了才做:手动 pull 过的仓再跑时已是最新,
+  新 skill 照样能补上。回归测试:`bash autoupdate/tests/test_do_update_links.sh`。
 
 sky-skills 是 symlink 安装的(`~/.claude/skills/X → clone/skills/X`),pull 完文件即刻最新;
 只有新增 skill 要补 symlink、新 hook 要重启对应 CLI。

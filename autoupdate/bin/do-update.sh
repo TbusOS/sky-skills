@@ -4,8 +4,10 @@
 # 对 repos 列表里每个落后的仓:
 #   1) 工作树不干净 → 跳过(不强 pull,避免冲突)
 #   2) git pull --ff-only(只快进;分叉则停下让用户手动处理)
-#   3) 给 clone/skills/ 下的新 skill 目录在 ~/.claude/skills/ 补 symlink
-#   4) 报告拉到的提交;涉及新 skill / hook 变更则提示重启 Claude Code
+#   3) 报告拉到的提交
+# 然后对列表里**所有**仓(不论这次有没有 pull):
+#   4) 给 clone/skills/ 下还没链接的 skill 在 ~/.claude/skills/ 补 symlink
+#   5) 涉及新 skill / hook 变更则提示重启 Claude Code
 #
 # 不锁 PATH:可分发工具,用使用者环境的 git。
 
@@ -19,6 +21,23 @@ SKILLS_DIR="$HOME/.claude/skills"   # 新 skill 补 symlink 仅对 Claude Code �
 
 restart_needed=0
 any=0
+repos=()   # 所有有效的仓,更新完统一补 symlink
+
+# 给 <repo>/skills/ 下还没链接的 skill 补 symlink;同名位置已有东西(链接或目录)就不动
+link_new_skills() {
+  local repo="$1" d sn
+  [ -d "$repo/skills" ] || return 0
+  for d in "$repo"/skills/*/; do
+    [ -d "$d" ] || continue
+    sn="$(basename "$d")"
+    [ -e "$SKILLS_DIR/$sn" ] && continue
+    mkdir -p "$SKILLS_DIR"
+    if ln -s "${d%/}" "$SKILLS_DIR/$sn" 2>/dev/null; then
+      echo "  + 新 skill 已链接：$sn(来自 $(basename "$repo"))"
+      restart_needed=1
+    fi
+  done
+}
 
 while IFS= read -r line; do
   repo="${line%%#*}"
@@ -27,6 +46,7 @@ while IFS= read -r line; do
   [ -d "$repo/.git" ] || { echo "跳过(非 git 仓)：$repo"; continue; }
   name="$(basename "$repo")"
   any=1
+  repos+=("$repo")
 
   if [ -n "$(git -C "$repo" status --porcelain 2>/dev/null)" ]; then
     echo "【${name}】本地有未提交改动，已跳过——请先处理：cd \"$repo\" && git status"
@@ -47,21 +67,6 @@ while IFS= read -r line; do
     echo "【${name}】已更新 ${behind} 个提交："
     git -C "$repo" log --no-merges --format='  · %s' "${before}..HEAD" 2>/dev/null | head -20
 
-    # 给新 skill 补 symlink(仅当本机装了 Claude Code,~/.claude 存在)
-    if [ -d "$repo/skills" ] && [ -d "$HOME/.claude" ]; then
-      for d in "$repo"/skills/*/; do
-        [ -d "$d" ] || continue
-        sn="$(basename "$d")"
-        if [ ! -e "$SKILLS_DIR/$sn" ]; then
-          mkdir -p "$SKILLS_DIR"
-          if ln -s "${d%/}" "$SKILLS_DIR/$sn" 2>/dev/null; then
-            echo "  + 新 skill 已链接：$sn"
-            restart_needed=1
-          fi
-        fi
-      done
-    fi
-
     # 改了 hook 脚本或 SKILL.md → 需重启才完全生效
     if git -C "$repo" diff --name-only "${before}..HEAD" 2>/dev/null \
          | grep -qE "autoupdate/hooks/|/SKILL\.md$"; then
@@ -72,6 +77,15 @@ while IFS= read -r line; do
     echo "         cd \"$repo\" && git status && git log --oneline -5"
   fi
 done < "$REPOS_FILE"
+
+# 补 symlink 每次都对所有仓做,不只在 pull 成功时做:仓库可能是手动 pull 的,
+# 或者上次被跳过,下次跑时已是最新——只在 pull 后补的话,这些新 skill 永远链接不上。
+# 仅当本机装了 Claude Code(~/.claude 存在)才做。
+if [ -d "$HOME/.claude" ]; then
+  for repo in ${repos[@]+"${repos[@]}"}; do
+    link_new_skills "$repo"
+  done
+fi
 
 [ "$any" -eq 0 ] && echo "repos 列表为空：$REPOS_FILE"
 if [ "$restart_needed" -eq 1 ]; then
