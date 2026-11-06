@@ -5,6 +5,7 @@ Uses PyMuPDF Story HTML rendering + DroidSansFallbackFull font.
 
 Usage:
     python3 md2pdf.py <input.md> <output.pdf> [--font /path/to/font.ttf]
+    python3 md2pdf.py --self-test [--font /path/to/font.ttf]
 """
 
 import re
@@ -54,6 +55,14 @@ def find_font(font_arg=None):
 
 
 def build_css(font_path):
+    # No background-color anywhere in this stylesheet.
+    #
+    # PyMuPDF Story (seen on 1.24.11) re-draws the background fill of every
+    # filled box from earlier pages onto each later page, at the same page
+    # coordinates, without the box's text or borders. A table header shaded on
+    # page 1 therefore shows up as a gray bar across unrelated text on pages
+    # 2, 3, ... Borders are not affected, so headers and code blocks are
+    # marked with bold text and borders instead. --self-test checks this.
     return """
 @font-face {
     font-family: 'CJKFont';
@@ -87,8 +96,7 @@ pre {
     font-family: 'CJKFont', monospace;
     font-size: 8pt;
     line-height: 1.4;
-    background-color: #f5f5f5;
-    border: 1px solid #e0e0e0;
+    border: 1px solid #c8c8c8;
     padding: 8px 10px;
     margin: 6pt 0;
     white-space: pre-wrap;
@@ -98,7 +106,6 @@ code {
     font-family: 'CJKFont', monospace;
     font-size: 8pt;
     color: #c7254e;
-    background-color: #f9f2f4;
     padding: 1px 4px;
 }
 blockquote {
@@ -120,7 +127,8 @@ th, td {
     text-align: left;
 }
 th {
-    background-color: #e8e8e8;
+    font-weight: bold;
+    border-bottom: 2px solid #999;
 }
 ul, ol {
     padding-left: 20pt;
@@ -353,12 +361,96 @@ def build_pdf(md_path, pdf_path, font_path):
     return total, len(toc)
 
 
+SELF_TEST_MD = (
+    "# self-test\n\n"
+    "| head A | head B |\n|---|---|\n| 1 | 2 |\n\n"
+    "```\ncode block\n```\n\n"
+    "A line with `inline code`.\n\n"
+    + "\n\n".join("Filler line %d, pushes text onto later pages." % i for i in range(80))
+    + "\n"
+)
+
+
+def _ghost_fills(pdf_path):
+    """Non-white fills on pages 2..N. The self-test document puts every
+    table, code block and inline code on page 1, so any fill found later is a
+    ghost of a page-1 background."""
+    doc = fitz.open(pdf_path)
+    ghosts = []
+    for pn in range(1, len(doc)):
+        for dr in doc[pn].get_drawings():
+            fill = dr.get('fill')
+            if fill and tuple(fill) != (1.0, 1.0, 1.0):
+                ghosts.append((pn + 1, tuple(round(c, 2) for c in fill),
+                               round(dr['rect'].y0)))
+    pages = len(doc)
+    doc.close()
+    return pages, ghosts
+
+
+def self_test(font_arg=None):
+    """T1: the stylesheet in use leaves no ghost fills on later pages.
+    T2: put a header background back; T1's check must now report ghosts,
+    otherwise the check is blind (or this PyMuPDF no longer has the bug)."""
+    import shutil
+    import tempfile
+    global build_css
+    font_path = find_font(font_arg)
+    if not font_path:
+        print('FAIL: no CJK font found, use --font', file=sys.stderr)
+        return 1
+    tmpdir = tempfile.mkdtemp(prefix='md2pdf-selftest-')
+    md_path = os.path.join(tmpdir, 'selftest.md')
+    with open(md_path, 'w', encoding='utf-8') as f:
+        f.write(SELF_TEST_MD)
+    failed = 0
+    try:
+        out1 = os.path.join(tmpdir, 'current.pdf')
+        build_pdf(md_path, out1, font_path)
+        pages, ghosts = _ghost_fills(out1)
+        if pages < 3:
+            print('FAIL T1: self-test document has %d pages, needs >= 3' % pages)
+            failed += 1
+        elif ghosts:
+            print('FAIL T1: ghost fills on later pages: %s' % ghosts[:4])
+            failed += 1
+        else:
+            print('PASS T1: %d pages, no fills on pages 2..%d' % (pages, pages))
+
+        current_css = build_css
+        build_css = lambda fp: current_css(fp) + '\nth { background-color: #e8e8e8; }\n'
+        try:
+            out2 = os.path.join(tmpdir, 'shaded.pdf')
+            build_pdf(md_path, out2, font_path)
+            _, ghosts2 = _ghost_fills(out2)
+        finally:
+            build_css = current_css
+        if ghosts2:
+            print('PASS T2: with a shaded header the check reports %d ghost fills '
+                  '(e.g. %s)' % (len(ghosts2), ghosts2[0]))
+        else:
+            print('NOTE T2: a shaded header left no ghosts; this PyMuPDF (%s) may '
+                  'not have the bug, so the check could not be proven here'
+                  % fitz.VersionBind)
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+    print('self-test: %s' % ('FAIL' if failed else 'PASS'))
+    return 1 if failed else 0
+
+
 def main():
     parser = argparse.ArgumentParser(description='Convert Markdown to PDF with Chinese support and bookmarks')
-    parser.add_argument('input', help='Input Markdown file')
-    parser.add_argument('output', help='Output PDF file')
+    parser.add_argument('input', nargs='?', help='Input Markdown file')
+    parser.add_argument('output', nargs='?', help='Output PDF file')
     parser.add_argument('--font', help='Path to TTF/TTC font file with CJK support', default=None)
+    parser.add_argument('--self-test', action='store_true',
+                        help='Check that no background fill repeats onto later pages')
     args = parser.parse_args()
+
+    if args.self_test:
+        sys.exit(self_test(args.font))
+    if not args.input or not args.output:
+        parser.error('input and output are required')
 
     if not os.path.exists(args.input):
         print(f'Error: {args.input} not found', file=sys.stderr)

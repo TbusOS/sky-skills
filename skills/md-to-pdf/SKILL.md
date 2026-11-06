@@ -16,7 +16,7 @@ Convert Markdown files to professional PDFs with full Chinese support, clickable
 
 - Full CJK + Latin + special character support (├── └── │ etc.)
 - Auto-generated bookmarks from h1/h2/h3 headings with accurate page jumps
-- Code blocks with background shading
+- Code blocks in a bordered box (no background fill, see "No background colors")
 - Tables, blockquotes, lists properly formatted
 - Page numbers at bottom
 - Auto font discovery (DroidSansFallbackFull, NotoSansCJK, WQY, etc.)
@@ -72,14 +72,39 @@ print(doc[0].get_text()[:300])
 | Element | Syntax | PDF Rendering |
 |---------|--------|--------------|
 | Headings | `# ## ###` | Sized text + bookmark entry |
-| Code blocks | ` ``` ` | Gray background, monospace-style |
-| Inline code | `` `code` `` | Red text with pink background |
-| Tables | `\| col \|` | Bordered table with header shading |
+| Code blocks | ` ``` ` | Bordered box, monospace-style |
+| Inline code | `` `code` `` | Red text |
+| Tables | `\| col \|` | Bordered table, bold header with a thicker bottom border |
 | Blockquotes | `> text` | Gray text with left border |
 | Lists | `- item` / `1. item` | Bulleted / numbered |
 | Bold | `**text**` | Bold text |
 | Links | `[text](url)` | Text preserved, URL stripped |
 | HR | `---` | Spacer |
+
+## No background colors (PyMuPDF Story ghost fills)
+
+The stylesheet deliberately has **no `background-color`**. PyMuPDF Story
+(observed on 1.24.11) re-draws the background fill of every filled box from
+earlier pages onto each later page, at the same page coordinates and without
+the box's text or borders. A shaded table header on page 1 then appears as a
+gray bar across unrelated text on pages 2, 3, ... — and on every later page,
+not just the next one. Borders are not affected, so headers and code blocks
+are marked with bold text and borders instead.
+
+Do not add a background color back to the CSS. The self-test catches it:
+
+```bash
+python3 <skill-dir>/scripts/md2pdf.py --self-test      # exit 0 = pass
+```
+
+- **T1** renders a document that keeps every table and code block on page 1
+  and spills plain text to pages 2-4, then fails on any non-white fill found on
+  pages 2..N
+- **T2** puts a shaded header back and expects T1's check to report ghosts,
+  proving the check is not blind. On a PyMuPDF without the bug it prints a
+  NOTE instead of failing
+- Verified the other way round: with the header background restored in a copy
+  of the script, T1 reports 4 ghost fills on pages 2-3 and the run exits 1
 
 ## Font Recommendation
 
