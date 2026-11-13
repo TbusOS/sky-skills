@@ -59,7 +59,7 @@ description: 做「照片级真实感」的硬件 / 芯片原理 3D 讲解页(�
 
 页面要自己提供:`cv` · `buildScene()` · `SCENE` · `cam` · `STATE` · `reset()` · `CHK()`。
 起步用 `templates/station-page.html`(完整站点页,三层都接好,五个检查全过);
-只要引擎不要外壳的话用 `templates/starter.html`。
+只要引擎不要外壳的话用 `templates/starter.html`(`hw3d.js` 和 `hw3d-flow.js` 两个都要贴进去,引擎的合成步骤离不开数据流层)。
 
 ## 页面外壳:`assets/hw3d-ui.css` + `hw3d-ui.js`
 
@@ -121,6 +121,16 @@ node $S/check_realism.mjs  <页面.html>     # 防霓虹回潮:高亮高饱和�
 node $S/check_perf.mjs     <页面.html>     # 单采样帧时间上限
 node $S/check_labels.mjs   <页面.html>     # 标签不重叠、不被面板挡、不伸出屏幕
 ```
+
+**改了引擎(不管改的是 `assets/` 还是页面里内联的那份)再跑这一条**,几秒钟,不开浏览器:
+
+```bash
+node $S/check_engine_sync.mjs              # 模板和 demo 里的引擎段与 assets/hw3d.js · hw3d-flow.js 逐行一致
+```
+
+引擎是复制进页面用的,一共三份。2026-11-13 查出 `assets/hw3d.js` 落后于模板和 demo 四处
+(视锥剔除、SSAO 先粗后细、泛光迭代次数、L2 切片底色),都是只改了页面里那份,没写回 `assets/`。
+这种落后不报错,只是照 `starter.html` 起步的人拿不到后来的改进。
 
 **macOS 和 Linux 都能直接跑**,差别只在 WebGL 后端(`scripts/_launch.mjs` 按系统选):
 

@@ -29,8 +29,11 @@
 <div id="err"></div>
 <script>
 'use strict';
-/* ===== 这里内联 assets/hw3d.js 的全部内容 ===== */
+/* ===== 这里依次内联 assets/hw3d.js 和 assets/hw3d-flow.js 的全部内容 =====
+   两个都要:引擎的 resize() / composite() 会用到数据流层的帧缓冲和合成程序,
+   只贴 hw3d.js 会在启动时报 mkFlowFBO is not defined */
 /* <<<  PASTE hw3d.js HERE  >>> */
+/* <<<  PASTE hw3d-flow.js HERE  >>> */
 
 //====== 场景:一块板 + 几颗芯片 ======
 const PROTO={}, SCENE=[], POS={};
@@ -75,7 +78,12 @@ function boot(){
   PR.light=prog(FS_VS,LIGHT_FS,'lighting'); PR.copy=prog(FS_VS,COPY_FS,'copy');
   PR.bright=prog(FS_VS,BRIGHT_FS,'bright'); PR.gauss=prog(FS_VS,GAUSS_FS,'gauss');
   PR.post=prog(FS_VS,POST_FS,'post');
+  PR.flow=prog(FLOW_VS,FLOW_FS,'flow'); PR.combine=prog(FS_VS,COMBINE_FS,'combine');
   ATLAS_TEX=buildAtlas(); bakeEnvironment(); buildScene();
+  // 不画数据流也要建:composite() 每帧都经过合成程序,FLOW.on=0 时只是加 0
+  FLOW.box=makeMesh(roundedBox(1,1,1,0.08,2),1600);
+  FLOW.orb=makeMesh(roundedBox(1,1,1,0.5,5),400);
+  FLOW.flat=makeMesh(roundedBox(1,1,1,0.002,1),9000);
   totalTris=SCENE.reduce((a,m)=>a+m.tris*m.count,0);
   shadow=mkShadow(); resize(); requestAnimationFrame(loop);
 }

@@ -309,6 +309,34 @@ function uploadInst(mesh, list){
   gl.bindBuffer(gl.ARRAY_BUFFER,mesh.inb);
   gl.bufferSubData(gl.ARRAY_BUFFER,0,a);
   mesh.count=list.length;
+  // 包围球:给视锥剔除用。几个"世界"离得很远,不剔除等于每帧白画几十万三角形
+  if(list.length){
+    let x0=1e9,y0=1e9,z0=1e9,x1=-1e9,y1=-1e9,z1=-1e9, ms=1;
+    for(const o of list){
+      x0=Math.min(x0,o.p[0]); y0=Math.min(y0,o.p[1]); z0=Math.min(z0,o.p[2]);
+      x1=Math.max(x1,o.p[0]); y1=Math.max(y1,o.p[1]); z1=Math.max(z1,o.p[2]);
+      if(o.s) ms=Math.max(ms,o.s[0],o.s[1],o.s[2]);
+    }
+    const h=mesh.half||[1,1,1];
+    const pad=Math.hypot(h[0],h[1],h[2])*ms+2;
+    mesh.bc=[(x0+x1)/2,(y0+y1)/2,(z0+z1)/2];
+    mesh.br=Math.hypot(x1-x0,y1-y0,z1-z0)/2+pad;
+  } else { mesh.bc=[0,0,0]; mesh.br=0; }
+}
+// 从 VP 里取 6 个视锥平面(Gribb-Hartmann)
+function frustum(vp){
+  const P=[];
+  for(let i=0;i<6;i++){
+    const r=i>>1, sgn=(i&1)?-1:1;
+    let a=vp[3]+sgn*vp[r], b=vp[7]+sgn*vp[4+r], c=vp[11]+sgn*vp[8+r], d=vp[15]+sgn*vp[12+r];
+    const l=Math.hypot(a,b,c)||1;
+    P.push([a/l,b/l,c/l,d/l]);
+  }
+  return P;
+}
+function sphereIn(P,c,r){
+  for(const q of P) if(q[0]*c[0]+q[1]*c[1]+q[2]*c[2]+q[3] < -r) return false;
+  return true;
 }
 
 //==============================================================
@@ -895,7 +923,7 @@ uniform sampler2D uNrm, uDep;
 uniform mat4 uVP, uInvVP;
 uniform vec3 uCam;
 uniform vec2 uRes;
-uniform float uRadius, uRot, uIntensity;
+uniform float uRadius, uRot, uIntensity, uSamples;
 vec3 wpos(vec2 uv, float d){
   vec4 c=vec4(uv*2.0-1.0, d*2.0-1.0, 1.0);
   vec4 w=uInvVP*c; return w.xyz/w.w;
@@ -911,7 +939,7 @@ void main(){
   vec3 U=abs(N.y)<0.95?vec3(0,1,0):vec3(1,0,0);
   vec3 T=normalize(cross(U,N)), B=cross(N,T);
   vec3 T2=T*ca+B*sa, B2=-T*sa+B*ca;
-  const int NS=14;
+  int NS=int(uSamples);
   float occ=0.0;
   for(int i=0;i<NS;i++){
     float fi=(float(i)+0.5)/float(NS);
@@ -1149,7 +1177,7 @@ const MAT = {
   // die 内部"城"
   siliconCity:{c:[0.0550,0.0600,0.0700], me:0.0, ro:0.300},
   blockSM  : {c:[0.1050,0.1250,0.1650], me:0.0,  ro:0.450},
-  blockL2  : {c:[0.2800,0.3000,0.3400], me:0.0,  ro:0.400},
+  blockL2  : {c:[0.2050,0.2250,0.2600], me:0.0,  ro:0.400},
   blockMC  : {c:[0.2200,0.1600,0.1000], me:0.0,  ro:0.450},
   blockIO  : {c:[0.0900,0.1000,0.1100], me:0.0,  ro:0.420},
   blockDisp: {c:[0.0800,0.1400,0.1100], me:0.0,  ro:0.420},
@@ -1299,9 +1327,13 @@ function camMats(i){
   }
   return {vp:M4.mul(P,Vj), eye:e};
 }
-function drawScene(program, isShadow){
+let culled=0, drawnTris=0;
+function drawScene(program, isShadow, vp){
+  const F=vp?frustum(vp):null;
   for(const m of SCENE){
     if(!m.count) continue;
+    if(F && m.br && !sphereIn(F,m.bc,m.br)){ culled++; continue; }
+    drawnTris+=m.tris*m.count;
     gl.bindVertexArray(m.vao);
     if(!isShadow) gl.uniform3fv(program.u.uHalf, m.half);
     gl.drawElementsInstanced(gl.TRIANGLES, m.n, m.type, 0, m.count);
@@ -1323,7 +1355,8 @@ function renderSample(i){
   gl.useProgram(PR.shadow);
   gl.uniformMatrix4fv(PR.shadow.u.uLVP,false,LVP);
   gl.uniform1f(PR.shadow.u.uLift,STATE.lift); gl.uniform1f(PR.shadow.u.uCutX,STATE.cutX);
-  drawScene(PR.shadow,true);
+  culled=0; drawnTris=0;
+  drawScene(PR.shadow,true,LVP);
   gl.disable(gl.CULL_FACE);        // G-buffer 不剔除背面:剖开后要看见内壁  CHK('pass.shadow');
 
   // 2) G-buffer
@@ -1337,7 +1370,7 @@ function renderSample(i){
   gl.uniform1f(PR.gb.u.uLift,STATE.lift); gl.uniform1f(PR.gb.u.uCutX,STATE.cutX);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, ATLAS_TEX);
   gl.uniform1i(PR.gb.u.uAtlas,0);
-  drawScene(PR.gb,false);
+  drawScene(PR.gb,false,VP);
   gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);  CHK('pass.gbuffer');
 
   // 3) SSAO + 双边模糊
@@ -1353,6 +1386,7 @@ function renderSample(i){
   gl.uniform1f(PR.ssao.u.uRadius,QUAL.aoRad);
   gl.uniform1f(PR.ssao.u.uIntensity,QUAL.aoInt);
   gl.uniform1f(PR.ssao.u.uRot, i*2.39996);
+  gl.uniform1f(PR.ssao.u.uSamples, (i<3?6.0:14.0));   // 头几帧先粗后细
   blit();
   // 累积够几帧后噪声自己收敛,不再模糊 → 接触阴影边缘保持锐利
   for(const [src,dst,dx,dy] of (i<6 ? [[aoA,aoB,1,0],[aoB,aoA,0,1]] : [])){
@@ -1415,7 +1449,8 @@ function composite(){
   gl.uniform1i(PR.bright.u.uSrc,0); gl.uniform1f(PR.bright.u.uThr,1.0);
   blit();
   let src=bright;
-  for(let k=0;k<2;k++){
+  const bloomIters=(spp<QUAL.maxSPP && spp>6)?1:2;
+  for(let k=0;k<bloomIters;k++){
     gl.bindFramebuffer(gl.FRAMEBUFFER,blurA.fb); gl.viewport(0,0,blurA.w,blurA.h);
     gl.useProgram(PR.gauss);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,src.t);
@@ -1443,5 +1478,3 @@ function composite(){
   blit();
   CHK('pass.post');
 }
-
-
